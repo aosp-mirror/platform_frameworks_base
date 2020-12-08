@@ -1,0 +1,25 @@
+diff --git a/services/accessibility/java/com/android/server/accessibility/AbstractAccessibilityServiceConnection.java b/services/accessibility/java/com/android/server/accessibility/AbstractAccessibilityServiceConnection.java
+index fc43882..832dc91 100644
+--- a/services/accessibility/java/com/android/server/accessibility/AbstractAccessibilityServiceConnection.java
++++ b/services/accessibility/java/com/android/server/accessibility/AbstractAccessibilityServiceConnection.java
+@@ -67,6 +67,7 @@ import java.util.Arrays;
+ import java.util.HashSet;
+ import java.util.List;
+ import java.util.Set;
++import java.util.NoSuchElementException;
+ 
+ /**
+  * This class represents an accessibility client - either an AccessibilityService or a UiAutomation.
+@@ -978,7 +979,11 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
+                 /* ignore */
+         }
+         if (mService != null) {
+-            mService.unlinkToDeath(this, 0);
++            try {
++                mService.unlinkToDeath(this, 0);
++            }catch(NoSuchElementException e) {
++                Slog.e(LOG_TAG, "Failed unregistering death link");
++            }
+             mService = null;
+         }
+ 

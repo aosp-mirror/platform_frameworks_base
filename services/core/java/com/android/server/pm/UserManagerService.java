@@ -114,7 +114,6 @@ import com.android.server.SystemService;
 import com.android.server.am.UserState;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 import com.android.server.utils.TimingsTraceAndSlog;
-import com.android.server.wm.ActivityTaskManagerInternal;
 
 import libcore.io.IoUtils;
 
@@ -134,6 +133,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -173,6 +173,7 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String ATTR_NEXT_SERIAL_NO = "nextSerialNumber";
     private static final String ATTR_PARTIAL = "partial";
     private static final String ATTR_PRE_CREATED = "preCreated";
+    private static final String ATTR_CONVERTED_FROM_PRE_CREATED = "convertedFromPreCreated";
     private static final String ATTR_GUEST_TO_REMOVE = "guestToRemove";
     private static final String ATTR_USER_VERSION = "version";
     private static final String ATTR_PROFILE_GROUP_ID = "profileGroupId";
@@ -406,6 +407,10 @@ public class UserManagerService extends IUserManager.Stub {
 
     @GuardedBy("mUsersLock")
     private int[] mUserIds;
+
+    @GuardedBy("mUsersLock")
+    private int[] mUserIdsIncludingPreCreated;
+
     @GuardedBy("mPackagesLock")
     private int mNextSerialNumber;
     private int mUserVersion = 0;
@@ -2480,13 +2485,32 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
-     * Returns an array of user ids. This array is cached here for quick access, so do not modify or
-     * cache it elsewhere.
+     * Returns an array of user ids.
+     *
+     * <p>This array is cached here for quick access, so do not modify or cache it elsewhere.
+     *
      * @return the array of user ids.
      */
-    public int[] getUserIds() {
+    public @NonNull int[] getUserIds() {
         synchronized (mUsersLock) {
             return mUserIds;
+        }
+    }
+
+    /**
+     * Returns an array of user ids, including pre-created users.
+     *
+     * <p>This method should only used for the specific cases that need to handle pre-created users;
+     * most callers should call {@link #getUserIds()} instead.
+     *
+     * <p>This array is cached here for quick access, so do not modify or
+     * cache it elsewhere.
+     *
+     * @return the array of user ids.
+     */
+    public @NonNull int[] getUserIdsIncludingPreCreated() {
+        synchronized (mUsersLock) {
+            return mUserIdsIncludingPreCreated;
         }
     }
 
@@ -2873,6 +2897,9 @@ public class UserManagerService extends IUserManager.Stub {
         if (userInfo.preCreated) {
             serializer.attribute(null, ATTR_PRE_CREATED, "true");
         }
+        if (userInfo.convertedFromPreCreated) {
+            serializer.attribute(null, ATTR_CONVERTED_FROM_PRE_CREATED, "true");
+        }
         if (userInfo.guestToRemove) {
             serializer.attribute(null, ATTR_GUEST_TO_REMOVE, "true");
         }
@@ -3030,6 +3057,7 @@ public class UserManagerService extends IUserManager.Stub {
         int restrictedProfileParentId = UserInfo.NO_PROFILE_GROUP_ID;
         boolean partial = false;
         boolean preCreated = false;
+        boolean converted = false;
         boolean guestToRemove = false;
         boolean persistSeedData = false;
         String seedAccountName = null;
@@ -3080,6 +3108,10 @@ public class UserManagerService extends IUserManager.Stub {
             valueString = parser.getAttributeValue(null, ATTR_PRE_CREATED);
             if ("true".equals(valueString)) {
                 preCreated = true;
+            }
+            valueString = parser.getAttributeValue(null, ATTR_CONVERTED_FROM_PRE_CREATED);
+            if ("true".equals(valueString)) {
+                converted = true;
             }
             valueString = parser.getAttributeValue(null, ATTR_GUEST_TO_REMOVE);
             if ("true".equals(valueString)) {
@@ -3138,6 +3170,7 @@ public class UserManagerService extends IUserManager.Stub {
         userInfo.lastLoggedInFingerprint = lastLoggedInFingerprint;
         userInfo.partial = partial;
         userInfo.preCreated = preCreated;
+        userInfo.convertedFromPreCreated = converted;
         userInfo.guestToRemove = guestToRemove;
         userInfo.profileGroupId = profileGroupId;
         userInfo.profileBadge = profileBadge;
@@ -3584,6 +3617,7 @@ public class UserManagerService extends IUserManager.Stub {
         preCreatedUser.name = name;
         preCreatedUser.flags = newFlags;
         preCreatedUser.preCreated = false;
+        preCreatedUser.convertedFromPreCreated = true;
         preCreatedUser.creationTime = getCreationTime();
 
         synchronized (mPackagesLock) {
@@ -4327,23 +4361,43 @@ public class UserManagerService extends IUserManager.Stub {
      */
     private void updateUserIds() {
         int num = 0;
+        int numIncludingPreCreated = 0;
         synchronized (mUsersLock) {
             final int userSize = mUsers.size();
             for (int i = 0; i < userSize; i++) {
-                UserInfo userInfo = mUsers.valueAt(i).info;
-                if (!userInfo.partial && !userInfo.preCreated) {
-                    num++;
+                final UserInfo userInfo = mUsers.valueAt(i).info;
+                if (!userInfo.partial) {
+                    numIncludingPreCreated++;
+                    if (!userInfo.preCreated) {
+                        num++;
+                    }
                 }
             }
+            if (DBG) {
+                Slog.d(LOG_TAG, "updateUserIds(): numberUsers= " + num
+                        + " includingPreCreated=" + numIncludingPreCreated);
+            }
             final int[] newUsers = new int[num];
+            final int[] newUsersIncludingPreCreated = new int[numIncludingPreCreated];
+
             int n = 0;
+            int nIncludingPreCreated = 0;
             for (int i = 0; i < userSize; i++) {
-                UserInfo userInfo = mUsers.valueAt(i).info;
-                if (!userInfo.partial && !userInfo.preCreated) {
-                    newUsers[n++] = mUsers.keyAt(i);
+                final UserInfo userInfo = mUsers.valueAt(i).info;
+                if (!userInfo.partial) {
+                    final int userId = mUsers.keyAt(i);
+                    newUsersIncludingPreCreated[nIncludingPreCreated++] = userId;
+                    if (!userInfo.preCreated) {
+                        newUsers[n++] = userId;
+                    }
                 }
             }
             mUserIds = newUsers;
+            mUserIdsIncludingPreCreated = newUsersIncludingPreCreated;
+            if (DBG) {
+                Slog.d(LOG_TAG, "updateUserIds(): userIds= " + Arrays.toString(mUserIds)
+                        + " includingPreCreated=" + Arrays.toString(mUserIdsIncludingPreCreated));
+            }
         }
     }
 
@@ -4626,6 +4680,7 @@ public class UserManagerService extends IUserManager.Stub {
                             running ? " (running)" : "",
                             user.partial ? " (partial)" : "",
                             user.preCreated ? " (pre-created)" : "",
+                            user.convertedFromPreCreated ? " (converted)" : "",
                             current ? " (current)" : "");
                 } else {
                     // NOTE: the standard "list users" command is used by integration tests and
@@ -4710,6 +4765,9 @@ public class UserManagerService extends IUserManager.Stub {
                     if (userInfo.preCreated) {
                         pw.print(" <pre-created>");
                     }
+                    if (userInfo.convertedFromPreCreated) {
+                        pw.print(" <converted>");
+                    }
                     pw.println();
                     pw.print("    Type: "); pw.println(userInfo.userType);
                     pw.print("    Flags: "); pw.print(userInfo.flags); pw.print(" (");
@@ -4791,6 +4849,13 @@ public class UserManagerService extends IUserManager.Stub {
             synchronized (mUserStates) {
                 pw.println("  Started users state: " + mUserStates);
             }
+            synchronized (mUsersLock) {
+                pw.print("  Cached user IDs: ");
+                pw.println(Arrays.toString(mUserIds));
+                pw.print("  Cached user IDs (including pre-created): ");
+                pw.println(Arrays.toString(mUserIdsIncludingPreCreated));
+            }
+
         } // synchronized (mPackagesLock)
 
         // Dump some capabilities
@@ -5052,8 +5117,14 @@ public class UserManagerService extends IUserManager.Stub {
 
         @Override
         public @NonNull List<UserInfo> getUsers(boolean excludeDying) {
-            return UserManagerService.this.getUsersInternal(/*excludePartial= */ true,
-                    excludeDying, /* excludePreCreated= */ true);
+            return getUsers(/*excludePartial= */ true, excludeDying, /* excludePreCreated= */ true);
+        }
+
+        @Override
+        public @NonNull List<UserInfo> getUsers(boolean excludePartial, boolean excludeDying,
+                boolean excludePreCreated) {
+            return UserManagerService.this.getUsersInternal(excludePartial, excludeDying,
+                    excludePreCreated);
         }
 
         @Override

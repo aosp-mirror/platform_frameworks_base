@@ -18,7 +18,9 @@ package com.android.server.location;
 
 import static android.app.AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION;
 import static android.app.AppOpsManager.OP_MONITOR_LOCATION;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
+import static com.android.server.location.CallerIdentity.PERMISSION_NONE;
 import static com.android.server.location.LocationManagerService.D;
 import static com.android.server.location.LocationManagerService.TAG;
 
@@ -122,8 +124,18 @@ public class AppOpsHelper {
             Preconditions.checkState(mAppOps != null);
         }
 
+        if (callerIdentity.permissionLevel == PERMISSION_NONE) {
+            return false;
+        }
+
         long identity = Binder.clearCallingIdentity();
         try {
+            if (mContext.checkPermission(
+                    CallerIdentity.asPermission(callerIdentity.permissionLevel), callerIdentity.pid,
+                    callerIdentity.uid) != PERMISSION_GRANTED) {
+                return false;
+            }
+
             return mAppOps.checkOpNoThrow(
                     CallerIdentity.asAppOp(callerIdentity.permissionLevel),
                     callerIdentity.uid,
@@ -138,8 +150,24 @@ public class AppOpsHelper {
      * called right before a location is delivered, and if it returns false, the location should not
      * be delivered.
      */
-    public boolean noteLocationAccess(CallerIdentity identity) {
-        return noteOpNoThrow(CallerIdentity.asAppOp(identity.permissionLevel), identity);
+    public boolean noteLocationAccess(CallerIdentity callerIdentity) {
+        if (callerIdentity.permissionLevel == PERMISSION_NONE) {
+            return false;
+        }
+
+        long identity = Binder.clearCallingIdentity();
+        try {
+            if (mContext.checkPermission(
+                    CallerIdentity.asPermission(callerIdentity.permissionLevel), callerIdentity.pid,
+                    callerIdentity.uid) != PERMISSION_GRANTED) {
+                return false;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+
+        return noteOpNoThrow(CallerIdentity.asAppOp(callerIdentity.permissionLevel),
+                callerIdentity);
     }
 
     /**

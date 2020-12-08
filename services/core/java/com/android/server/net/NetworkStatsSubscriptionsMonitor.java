@@ -99,11 +99,16 @@ public class NetworkStatsSubscriptionsMonitor extends
             if (match != null) continue;
 
             // Create listener for every newly added sub. Also store subscriberId into it to
-            // prevent binder call to telephony when querying RAT.
+            // prevent binder call to telephony when querying RAT. If the subscriberId is empty
+            // for any reason, such as SIM PIN locked, skip registration.
+            // SubscriberId will be unavailable again if 1. modem crashed 2. reboot
+            // 3. re-insert SIM. If that happens, the listeners will be eventually synchronized
+            // with active sub list once all subscriberIds are ready.
             final String subscriberId = mTeleManager.getSubscriberId(subId);
             if (TextUtils.isEmpty(subscriberId)) {
-                Log.wtf(NetworkStatsService.TAG,
-                        "Empty subscriberId for newly added sub: " + subId);
+                Log.d(NetworkStatsService.TAG, "Empty subscriberId for newly added sub "
+                        + subId + ", skip listener registration");
+                continue;
             }
             final RatTypeListener listener =
                     new RatTypeListener(mExecutor, this, subId, subscriberId);
@@ -112,6 +117,7 @@ public class NetworkStatsSubscriptionsMonitor extends
             // Register listener to the telephony manager that associated with specific sub.
             mTeleManager.createForSubscriptionId(subId)
                     .listen(listener, PhoneStateListener.LISTEN_SERVICE_STATE);
+            Log.d(NetworkStatsService.TAG, "RAT type listener registered for sub " + subId);
         }
 
         for (final RatTypeListener listener : new ArrayList<>(mRatListeners)) {
@@ -164,6 +170,7 @@ public class NetworkStatsSubscriptionsMonitor extends
     private void handleRemoveRatTypeListener(@NonNull RatTypeListener listener) {
         mTeleManager.createForSubscriptionId(listener.mSubId)
                 .listen(listener, PhoneStateListener.LISTEN_NONE);
+        Log.d(NetworkStatsService.TAG, "RAT type listener unregistered for sub " + listener.mSubId);
         mRatListeners.remove(listener);
 
         // Removal of subscriptions doesn't generate RAT changed event, fire it for every

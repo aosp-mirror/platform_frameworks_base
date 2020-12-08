@@ -1878,6 +1878,15 @@ class SettingsProtoDumpUtil {
                 SecureSettingsProto.Assist.GESTURE_SETUP_COMPLETE);
         p.end(assistToken);
 
+        final long assistHandlesToken = p.start(SecureSettingsProto.ASSIST_HANDLES);
+        dumpSetting(s, p,
+                Settings.Secure.ASSIST_HANDLES_LEARNING_TIME_ELAPSED_MILLIS,
+                SecureSettingsProto.AssistHandles.LEARNING_TIME_ELAPSED_MILLIS);
+        dumpSetting(s, p,
+                Settings.Secure.ASSIST_HANDLES_LEARNING_EVENT_COUNT,
+                SecureSettingsProto.AssistHandles.LEARNING_EVENT_COUNT);
+        p.end(assistHandlesToken);
+
         final long autofillToken = p.start(SecureSettingsProto.AUTOFILL);
         dumpSetting(s, p,
                 Settings.Secure.AUTOFILL_SERVICE,
@@ -1979,6 +1988,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS,
                 SecureSettingsProto.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS);
+        dumpSetting(s, p,
+                Settings.Secure.ADAPTIVE_CONNECTIVITY_ENABLED,
+                SecureSettingsProto.ADAPTIVE_CONNECTIVITY_ENABLED);
 
         final long controlsToken = p.start(SecureSettingsProto.CONTROLS);
         dumpSetting(s, p,

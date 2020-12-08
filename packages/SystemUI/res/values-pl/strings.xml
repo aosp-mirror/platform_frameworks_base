@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Wznów"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Anuluj"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Udostępnij"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"Usuń"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Anulowano nagrywanie zawartości ekranu"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Zapisano nagranie zawartości ekranu – kliknij, by je obejrzeć"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"Usunięto nagranie zawartości ekranu"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Błąd podczas usuwania nagrania zawartości ekranu"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Nie udało się uzyskać uprawnień"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Błąd podczas rozpoczynania rejestracji zawartości ekranu"</string>
@@ -894,12 +892,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"50% górnej części ekranu"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"30% górnej części ekranu"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Dolna część ekranu na pełnym ekranie"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"Położenie <xliff:g id="POSITION">%1$d</xliff:g>, kafelek <xliff:g id="TILE_NAME">%2$s</xliff:g>. Kliknij dwukrotnie, by edytować."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"Kafelek <xliff:g id="TILE_NAME">%1$s</xliff:g>. Kliknij dwukrotnie, by dodać."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"Przenieś kafelek <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"Usuń kafelek <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"Dodaj kafelek <xliff:g id="TILE_NAME">%1$s</xliff:g> w położeniu <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"Przenieś kafelek <xliff:g id="TILE_NAME">%1$s</xliff:g> w położenie <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"usunąć kartę"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"dodać kartę na końcu"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Przenieś kartę"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Dodaj kartę"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Przenieś do pozycji <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Dodaj w pozycji <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Pozycja <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Edytor szybkich ustawień."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Powiadomienie z aplikacji <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"Aplikacja może nie działać przy podzielonym ekranie."</string>
@@ -932,11 +931,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Wstecz"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Zmień rozmiar"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefon wyłączony: przegrzanie"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Telefon działa teraz normalnie"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Telefon działa teraz normalnie\nKliknij, by dowiedzieć się więcej"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefon był zbyt gorący i wyłączył się, by obniżyć temperaturę. Urządzenie działa teraz normalnie.\n\nTelefon może się przegrzać, gdy:\n	• Używasz aplikacji zużywających dużo zasobów (np. gier, nawigacji czy odtwarzaczy filmów)\n	• Pobierasz lub przesyłasz duże pliki\n	• Używasz telefonu w wysokiej temperaturze"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Zobacz instrukcję postępowania"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Telefon się nagrzewa"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Podczas obniżania temperatury telefonu niektóre funkcje są ograniczone"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Podczas obniżania temperatury telefonu niektóre funkcje są ograniczone\nKliknij, by dowiedzieć się więcej"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Telefon automatycznie podejmie próbę obniżenia temperatury. Możesz go wciąż używać, ale telefon może działać wolniej.\n\nGdy temperatura się obniży, telefon będzie działał normalnie."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Zobacz instrukcję postępowania"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Odłącz ładowarkę"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Podczas ładowania tego urządzenia wystąpił błąd. Odłącz zasilacz, zwracając uwagę na kabel, który może być gorący."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Zobacz instrukcję postępowania"</string>
@@ -998,6 +999,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Ustawienia"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"OK"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Zrzut stosu SysUI"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"Aplikacja <xliff:g id="APP">%1$s</xliff:g> używa: <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplikacje używają: <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" i "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"aparat"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"lokalizacja"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofon"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Wyłącz czujniki"</string>
     <string name="device_services" msgid="1549944177856658705">"Usługi urządzenia"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Bez tytułu"</string>
@@ -1014,7 +1022,7 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Przenieś w lewy dolny róg"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Przenieś w prawy dolny róg"</string>
     <string name="bubble_dismiss_text" msgid="1314082410868930066">"Zamknij dymek"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Nie wyświetlaj rozmowy jako dymku"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Nie wyświetlaj rozmowy jako dymka"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Czatuj, korzystając z dymków"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Nowe rozmowy będą wyświetlane jako pływające ikony lub dymki. Kliknij, by otworzyć dymek. Przeciągnij, by go przenieść."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Zarządzaj dymkami w dowolnym momencie"</string>
@@ -1078,7 +1086,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Wczytuję rekomendacje"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Multimedia"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Ukryj bieżącą sesję."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Ukryj"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Odrzuć"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Wznów"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Ustawienia"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Nieaktywny, sprawdź aplikację"</string>

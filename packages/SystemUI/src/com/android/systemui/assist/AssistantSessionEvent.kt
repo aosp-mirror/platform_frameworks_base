@@ -21,7 +21,7 @@ import com.android.internal.logging.UiEventLogger
 
 enum class AssistantSessionEvent(private val id: Int) : UiEventLogger.UiEventEnum {
     @UiEvent(doc = "Unknown assistant session event")
-    ASSISTANT_SESSION_UNKNOWN(523),
+    ASSISTANT_SESSION_UNKNOWN(0),
 
     @UiEvent(doc = "Assistant session dismissed due to timeout")
     ASSISTANT_SESSION_TIMEOUT_DISMISS(524),

@@ -16,6 +16,7 @@
 
 package com.android.systemui.util.sensors;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -79,13 +80,15 @@ public class ProximityCheckTest extends SysuiTestCase {
         mFakeExecutor.runAllReady();
 
         assertFalse(mFakeProximitySensor.isRegistered());
+        assertEquals(1, mTestableCallback.mNumCalls);
+        assertNull(mTestableCallback.mLastResult);
     }
 
     @Test
     public void testProxDoesntCancelOthers() {
         assertFalse(mFakeProximitySensor.isRegistered());
         // We don't need our "other" listener to do anything. Just ensure our sensor is registered.
-        ProximitySensor.ProximitySensorListener emptyListener = event -> { };
+        ThresholdSensor.Listener emptyListener = event -> { };
         mFakeProximitySensor.register(emptyListener);
         assertTrue(mFakeProximitySensor.isRegistered());
 
@@ -94,7 +97,8 @@ public class ProximityCheckTest extends SysuiTestCase {
 
         assertNull(mTestableCallback.mLastResult);
 
-        mFakeProximitySensor.setLastEvent(new ProximitySensor.ProximityEvent(true, 0));
+        mFakeProximitySensor.setLastEvent(new ProximitySensor.ThresholdSensorEvent(true, 0));
+
         mFakeProximitySensor.alertListeners();
 
         assertTrue(mTestableCallback.mLastResult);
@@ -109,9 +113,12 @@ public class ProximityCheckTest extends SysuiTestCase {
 
     private static class TestableCallback implements Consumer<Boolean> {
         Boolean mLastResult;
+        int mNumCalls = 0;
+
         @Override
         public void accept(Boolean result) {
             mLastResult = result;
+            mNumCalls++;
         }
     }
 }

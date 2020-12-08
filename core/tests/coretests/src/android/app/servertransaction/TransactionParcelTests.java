@@ -191,7 +191,7 @@ public class TransactionParcelTests {
         PersistableBundle persistableBundle = new PersistableBundle();
         persistableBundle.putInt("k", 4);
         FixedRotationAdjustments fixedRotationAdjustments = new FixedRotationAdjustments(
-                Surface.ROTATION_90, DisplayCutout.NO_CUTOUT);
+                Surface.ROTATION_90, 1920, 1080, DisplayCutout.NO_CUTOUT);
 
         LaunchActivityItem item = LaunchActivityItem.obtain(intent, ident, activityInfo,
                 config(), overrideConfig, compat, referrer, null /* voiceInteractor */,
@@ -351,7 +351,8 @@ public class TransactionParcelTests {
         ClientTransaction transaction = ClientTransaction.obtain(new StubAppThread(),
                 null /* activityToken */);
         transaction.addCallback(FixedRotationAdjustmentsItem.obtain(new Binder(),
-                new FixedRotationAdjustments(Surface.ROTATION_270, DisplayCutout.NO_CUTOUT)));
+                new FixedRotationAdjustments(Surface.ROTATION_270, 1920, 1080,
+                        DisplayCutout.NO_CUTOUT)));
 
         writeAndPrepareForReading(transaction);
 

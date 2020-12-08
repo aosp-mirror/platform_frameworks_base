@@ -40,8 +40,6 @@ import com.android.systemui.util.UserAwareController;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import javax.inject.Inject;
-
 /**
  * Manages which tiles should be automatically added to QS.
  */
@@ -57,11 +55,12 @@ public class AutoTileManager implements UserAwareController {
     static final String SETTING_SEPARATOR = ":";
 
     private UserHandle mCurrentUser;
+    private boolean mInitialized;
 
-    private final Context mContext;
-    private final QSTileHost mHost;
-    private final Handler mHandler;
-    private final AutoAddTracker mAutoTracker;
+    protected final Context mContext;
+    protected final QSTileHost mHost;
+    protected final Handler mHandler;
+    protected final AutoAddTracker mAutoTracker;
     private final HotspotController mHotspotController;
     private final DataSaverController mDataSaverController;
     private final ManagedProfileController mManagedProfileController;
@@ -69,7 +68,6 @@ public class AutoTileManager implements UserAwareController {
     private final CastController mCastController;
     private final ArrayList<AutoAddSetting> mAutoAddSettingList = new ArrayList<>();
 
-    @Inject
     public AutoTileManager(Context context, AutoAddTracker.Builder autoAddTrackerBuilder,
             QSTileHost host,
             @Background Handler handler,
@@ -88,9 +86,20 @@ public class AutoTileManager implements UserAwareController {
         mManagedProfileController = managedProfileController;
         mNightDisplayListener = nightDisplayListener;
         mCastController = castController;
+    }
 
+    /**
+     * Init method must be called after construction to start listening
+     */
+    public void init() {
+        if (mInitialized) {
+            Log.w(TAG, "Trying to re-initialize");
+            return;
+        }
+        mAutoTracker.initialize();
         populateSettingsList();
         startControllersAndSettingsListeners();
+        mInitialized = true;
     }
 
     protected void startControllersAndSettingsListeners() {
@@ -168,8 +177,14 @@ public class AutoTileManager implements UserAwareController {
         }
     }
 
+    /*
+     * This will be sent off the main thread if needed
+     */
     @Override
     public void changeUser(UserHandle newUser) {
+        if (!mInitialized) {
+            throw new IllegalStateException("AutoTileManager not initialized");
+        }
         if (!Thread.currentThread().equals(mHandler.getLooper().getThread())) {
             mHandler.post(() -> changeUser(newUser));
             return;

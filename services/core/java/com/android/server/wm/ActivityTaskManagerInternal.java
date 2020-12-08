@@ -125,20 +125,30 @@ public abstract class ActivityTaskManagerInternal {
      * Sleep tokens cause the activity manager to put the top activity to sleep.
      * They are used by components such as dreams that may hide and block interaction
      * with underlying activities.
+     * The Acquirer provides an interface that encapsulates the underlying work, so the user does
+     * not need to handle the token by him/herself.
      */
-    public static abstract class SleepToken {
+    public interface SleepTokenAcquirer {
 
-        /** Releases the sleep token. */
-        public abstract void release();
+        /**
+         * Acquires a sleep token.
+         * @param displayId The display to apply to.
+         */
+        void acquire(int displayId);
+
+        /**
+         * Releases the sleep token.
+         * @param displayId The display to apply to.
+         */
+        void release(int displayId);
     }
 
     /**
-     * Acquires a sleep token for the specified display with the specified tag.
+     * Creates a sleep token acquirer for the specified display with the specified tag.
      *
-     * @param tag A string identifying the purpose of the token (eg. "Dream").
-     * @param displayId The display to apply the sleep token to.
+     * @param tag A string identifying the purpose (eg. "Dream").
      */
-    public abstract SleepToken acquireSleepToken(@NonNull String tag, int displayId);
+    public abstract SleepTokenAcquirer createSleepTokenAcquirer(@NonNull String tag);
 
     /**
      * Returns home activity for the specified user.
@@ -510,8 +520,8 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void onActiveUidsCleared();
     public abstract void onUidProcStateChanged(int uid, int procState);
 
-    public abstract void onUidAddedToPendingTempWhitelist(int uid, String tag);
-    public abstract void onUidRemovedFromPendingTempWhitelist(int uid);
+    public abstract void onUidAddedToPendingTempAllowlist(int uid, String tag);
+    public abstract void onUidRemovedFromPendingTempAllowlist(int uid);
 
     /** Handle app crash event in {@link android.app.IActivityController} if there is one. */
     public abstract boolean handleAppCrashInActivityController(String processName, int pid,

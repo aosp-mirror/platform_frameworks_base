@@ -273,8 +273,6 @@ public class ChooserActivity extends ResolverActivity implements
     private int mLastNumberOfChildren = -1;
 
     private static final String TARGET_DETAILS_FRAGMENT_TAG = "targetDetailsFragment";
-    // TODO: Update to handle landscape instead of using static value
-    private static final int MAX_RANKED_TARGETS = 4;
 
     private final List<ChooserTargetServiceConnection> mServiceConnections = new ArrayList<>();
     private final Set<Pair<ComponentName, UserHandle>> mServicesRequested = new HashSet<>();
@@ -784,8 +782,8 @@ public class ChooserActivity extends ResolverActivity implements
                 FrameworkStatsLog.SHARESHEET_STARTED,
                 getReferrerPackageName(),
                 target.getType(),
-                initialIntents == null ? 0 : initialIntents.length,
                 mCallerChooserTargets == null ? 0 : mCallerChooserTargets.length,
+                initialIntents == null ? 0 : initialIntents.length,
                 isWorkProfile(),
                 findPreferredContentPreview(getTargetIntent(), getContentResolver()),
                 target.getAction()
@@ -951,7 +949,7 @@ public class ChooserActivity extends ResolverActivity implements
         updateStickyContentPreview();
         if (shouldShowStickyContentPreview()
                 || mChooserMultiProfilePagerAdapter
-                        .getCurrentRootAdapter().getContentPreviewRowCount() != 0) {
+                        .getCurrentRootAdapter().getSystemRowCount() != 0) {
             logActionShareWithPreview();
         }
         return postRebuildListInternal(rebuildCompleted);
@@ -1316,13 +1314,14 @@ public class ChooserActivity extends ResolverActivity implements
             ViewGroup parent) {
         ViewGroup contentPreviewLayout = (ViewGroup) layoutInflater.inflate(
                 R.layout.chooser_grid_preview_image, parent, false);
+        ViewGroup imagePreview = contentPreviewLayout.findViewById(R.id.content_preview_image_area);
 
         final ViewGroup actionRow =
                 (ViewGroup) contentPreviewLayout.findViewById(R.id.chooser_action_row);
         //TODO: addActionButton(actionRow, createCopyButton());
         addActionButton(actionRow, createNearbyButton(targetIntent));
 
-        mPreviewCoord = new ContentPreviewCoordinator(contentPreviewLayout, true);
+        mPreviewCoord = new ContentPreviewCoordinator(contentPreviewLayout, false);
 
         String action = targetIntent.getAction();
         if (Intent.ACTION_SEND.equals(action)) {
@@ -1342,7 +1341,7 @@ public class ChooserActivity extends ResolverActivity implements
             if (imageUris.size() == 0) {
                 Log.i(TAG, "Attempted to display image preview area with zero"
                         + " available images detected in EXTRA_STREAM list");
-                contentPreviewLayout.setVisibility(View.GONE);
+                imagePreview.setVisibility(View.GONE);
                 return contentPreviewLayout;
             }
 
@@ -2640,7 +2639,10 @@ public class ChooserActivity extends ResolverActivity implements
         }
         RecyclerView recyclerView = mChooserMultiProfilePagerAdapter.getActiveAdapterView();
         ChooserGridAdapter gridAdapter = mChooserMultiProfilePagerAdapter.getCurrentRootAdapter();
-        if (gridAdapter == null || recyclerView == null) {
+        // Skip height calculation if recycler view was scrolled to prevent it inaccurately
+        // calculating the height, as the logic below does not account for the scrolled offset.
+        if (gridAdapter == null || recyclerView == null
+                || recyclerView.computeVerticalScrollOffset() != 0) {
             return;
         }
 
@@ -2680,7 +2682,7 @@ public class ChooserActivity extends ResolverActivity implements
                 final int bottomInset = mSystemWindowInsets != null
                                             ? mSystemWindowInsets.bottom : 0;
                 int offset = bottomInset;
-                int rowsToShow = gridAdapter.getContentPreviewRowCount()
+                int rowsToShow = gridAdapter.getSystemRowCount()
                         + gridAdapter.getProfileRowCount()
                         + gridAdapter.getServiceTargetRowCount()
                         + gridAdapter.getCallerAndRankedTargetRowCount();
@@ -3127,6 +3129,13 @@ public class ChooserActivity extends ResolverActivity implements
         ChooserGridAdapter currentRootAdapter =
                 mChooserMultiProfilePagerAdapter.getCurrentRootAdapter();
         currentRootAdapter.updateDirectShareExpansion();
+        // This fixes an edge case where after performing a variety of gestures, vertical scrolling
+        // ends up disabled. That's because at some point the old tab's vertical scrolling is
+        // disabled and the new tab's is enabled. For context, see b/159997845
+        setVerticalScrollEnabled(true);
+        if (mResolverDrawerLayout != null) {
+            mResolverDrawerLayout.scrollNestedScrollableChildBackToTop();
+        }
     }
 
     @Override
@@ -3273,7 +3282,7 @@ public class ChooserActivity extends ResolverActivity implements
 
         public int getRowCount() {
             return (int) (
-                    getContentPreviewRowCount()
+                    getSystemRowCount()
                             + getProfileRowCount()
                             + getServiceTargetRowCount()
                             + getCallerAndRankedTargetRowCount()
@@ -3285,22 +3294,21 @@ public class ChooserActivity extends ResolverActivity implements
         }
 
         /**
-         * Returns either {@code 0} or {@code 1} depending on whether we want to show the list item
-         * content preview. Not to be confused with the sticky content preview which is above the
-         * personal and work tabs.
+         * Whether the "system" row of targets is displayed.
+         * This area includes the content preview (if present) and action row.
          */
-        public int getContentPreviewRowCount() {
+        public int getSystemRowCount() {
             // For the tabbed case we show the sticky content preview above the tabs,
             // please refer to shouldShowStickyContentPreview
             if (shouldShowTabs()) {
                 return 0;
             }
+
             if (!isSendAction(getTargetIntent())) {
                 return 0;
             }
 
-            if (mHideContentPreview || mChooserListAdapter == null
-                    || mChooserListAdapter.getCount() == 0) {
+            if (mChooserListAdapter == null || mChooserListAdapter.getCount() == 0) {
                 return 0;
             }
 
@@ -3342,7 +3350,7 @@ public class ChooserActivity extends ResolverActivity implements
         @Override
         public int getItemCount() {
             return (int) (
-                    getContentPreviewRowCount()
+                    getSystemRowCount()
                             + getProfileRowCount()
                             + getServiceTargetRowCount()
                             + getCallerAndRankedTargetRowCount()
@@ -3397,7 +3405,7 @@ public class ChooserActivity extends ResolverActivity implements
         public int getItemViewType(int position) {
             int count;
 
-            int countSum = (count = getContentPreviewRowCount());
+            int countSum = (count = getSystemRowCount());
             if (count > 0 && position < countSum) return VIEW_TYPE_CONTENT_PREVIEW;
 
             countSum += (count = getProfileRowCount());
@@ -3621,7 +3629,7 @@ public class ChooserActivity extends ResolverActivity implements
         }
 
         int getListPosition(int position) {
-            position -= getContentPreviewRowCount() + getProfileRowCount();
+            position -= getSystemRowCount() + getProfileRowCount();
 
             final int serviceCount = mChooserListAdapter.getServiceTargetCount();
             final int serviceRows = (int) Math.ceil((float) serviceCount

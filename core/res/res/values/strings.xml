@@ -2122,7 +2122,7 @@
     <!-- On the unlock pattern screen, shown at the top of the unlock screen to tell the user what to do. Below this text is the place for theu ser to draw the pattern. -->
     <string name="lockscreen_pattern_instructions">Draw pattern to unlock</string>
     <!-- Button at the bottom of the unlock screen to make an emergency call or access other emergency assistance functions. -->
-    <string name="lockscreen_emergency_call">Emergency</string>
+    <string name="lockscreen_emergency_call">Emergency call</string>
     <!-- Button at the bottom of the unlock screen that lets the user return to a call -->
     <string name="lockscreen_return_to_call">Return to call</string>
     <!-- Shown to confirm that the user entered their lock pattern correctly. -->
@@ -4835,10 +4835,10 @@
     <string name="confirm_battery_saver">OK</string>
 
     <!-- [CHAR_LIMIT=NONE] Battery saver: Feature description, with a "learn more" link. -->
-    <string name="battery_saver_description_with_learn_more">To extend battery life, Battery Saver:\n\n\u2022Turns on Dark theme\n\u2022Turns off or restricts background activity, some visual effects, and other features like \u201cHey Google\u201d\n\n<annotation id="url">Learn more</annotation></string>
+    <string name="battery_saver_description_with_learn_more">To extend battery life, Battery Saver:\n\n\u2022 Turns on Dark theme\n\u2022 Turns off or restricts background activity, some visual effects, and other features like \u201cHey Google\u201d\n\n<annotation id="url">Learn more</annotation></string>
 
     <!-- [CHAR_LIMIT=NONE] Battery saver: Feature description, without a "learn more" link. -->
-    <string name="battery_saver_description">To extend battery life, Battery Saver:\n\n\u2022Turns on Dark theme\n\u2022Turns off or restricts background activity, some visual effects, and other features like \u201cHey Google\u201d</string>
+    <string name="battery_saver_description">To extend battery life, Battery Saver:\n\n\u2022 Turns on Dark theme\n\u2022 Turns off or restricts background activity, some visual effects, and other features like \u201cHey Google\u201d</string>
 
     <!-- [CHAR_LIMIT=NONE] Data saver: Feature description -->
     <string name="data_saver_description">To help reduce data usage, Data Saver prevents some apps from sending or receiving data in the background. An app you’re currently using can access data, but may do so less frequently. This may mean, for example, that images don’t display until you tap them.</string>

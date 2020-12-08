@@ -835,7 +835,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Chcete-li odemknout telefon nebo provést tísňové volání, stiskněte Menu."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Telefon odemknete stisknutím tlačítka Menu."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Odblokujte pomocí gesta"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Stav nouze"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Tísňové volání"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Zavolat zpět"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Správně!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Zkusit znovu"</string>
@@ -1258,7 +1258,7 @@
     <string name="volume_ringtone" msgid="134784084629229029">"Hlasitost vyzvánění"</string>
     <string name="volume_music" msgid="7727274216734955095">"Hlasitost médií"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Přehrávání pomocí rozhraní Bluetooth"</string>
-    <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Je nastaven tichý vyzváněcí tón"</string>
+    <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Je nastaven tichý vyzvánění"</string>
     <string name="volume_call" msgid="7625321655265747433">"Hlasitost hovoru"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Hlasitost příchozích hovorů při připojení Bluetooth"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"Hlasitost budíku"</string>
@@ -1269,10 +1269,10 @@
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"Hlasitost hovoru"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"Hlasitost médií"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Hlasitost oznámení"</string>
-    <string name="ringtone_default" msgid="9118299121288174597">"Výchozí vyzváněcí tón"</string>
+    <string name="ringtone_default" msgid="9118299121288174597">"Výchozí vyzvánění"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Výchozí (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"Žádný"</string>
-    <string name="ringtone_picker_title" msgid="667342618626068253">"Vyzváněcí tóny"</string>
+    <string name="ringtone_picker_title" msgid="667342618626068253">"Vyzvánění"</string>
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Zvuky budíku"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Zvuky upozornění"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Neznámé"</string>
@@ -1838,8 +1838,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Aktualizováno administrátorem"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Smazáno administrátorem"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Spořič baterie za účelem úspory energie:\n\n• zapne tmavý motiv,\n• vypne nebo omezí aktivitu na pozadí, některé vizuální efekty a další funkce jako „Ok Google“\n\n"<annotation id="url">"Další informace"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"Spořič baterie za účelem úspory energie:\n\n• zapne tmavý motiv,\n• vypne nebo omezí aktivitu na pozadí, některé vizuální efekty a další funkce jako „Ok Google“"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Spořič baterie za účelem úspory energie:\n\n• Zapne tmavý motiv.\n• Vypne nebo omezí aktivitu na pozadí, některé vizuální efekty a další funkce jako „Ok Google“.\n\n"<annotation id="url">"Další informace"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Spořič baterie za účelem úspory energie:\n\n• Zapne tmavý motiv.\n• Vypne nebo omezí aktivitu na pozadí, některé vizuální efekty a další funkce jako „Ok Google“."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Spořič dat z důvodu snížení využití dat některým aplikacím brání v odesílání nebo příjmu dat na pozadí. Aplikace, kterou právě používáte, data přenášet může, ale může tak činit méně často. V důsledku toho se například obrázky nemusejí zobrazit, dokud na ně neklepnete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Chcete zapnout Spořič dat?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Zapnout"</string>

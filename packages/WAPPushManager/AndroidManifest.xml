@@ -23,6 +23,8 @@
     <permission android:name="com.android.smspush.WAPPUSH_MANAGER_BIND"
         android:protectionLevel="signatureOrSystem" />
 
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
+
     <original-package android:name="com.android.smspush" />
     <application
         android:allowClearUserData="false">

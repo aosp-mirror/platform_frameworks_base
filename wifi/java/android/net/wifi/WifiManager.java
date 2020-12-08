@@ -1054,8 +1054,8 @@ public class WifiManager {
     /**
      * Broadcast intent action indicating that the link configuration changed on wifi.
      * <br />Included Extras:
-     * <br />{@link #EXTRA_LINK_PROPERTIES}: {@link android.net.LinkProperties} object associated
-     * with the Wi-Fi network.
+     * <br />{@link #EXTRA_LINK_PROPERTIES}: may not be set starting in Android 11. Check for
+     * <br /> null before reading its value.
      * <br /> No permissions are required to listen to this broadcast.
      * @hide
      */
@@ -1071,6 +1071,10 @@ public class WifiManager {
      * Included in the {@link #ACTION_LINK_CONFIGURATION_CHANGED} broadcast.
      *
      * Retrieve with {@link android.content.Intent#getParcelableExtra(String)}.
+     *
+     * Note: this extra may not be set starting in Android 11. Check for null before reading its
+     * value.
+     *
      * @hide
      */
     @SystemApi

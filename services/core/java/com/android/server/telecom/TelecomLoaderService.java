@@ -35,7 +35,10 @@ import android.util.IntArray;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.telecom.ITelecomLoader;
+import com.android.internal.telecom.ITelecomService;
 import com.android.internal.telephony.SmsApplication;
+import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.UserManagerService;
@@ -53,16 +56,13 @@ public class TelecomLoaderService extends SystemService {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             // Normally, we would listen for death here, but since telecom runs in the same process
-            // as this loader (process="system") thats redundant here.
+            // as this loader (process="system") that's redundant here.
             try {
-                service.linkToDeath(new IBinder.DeathRecipient() {
-                    @Override
-                    public void binderDied() {
-                        connectToTelecom();
-                    }
-                }, 0);
+                ITelecomLoader telecomLoader = ITelecomLoader.Stub.asInterface(service);
+                ITelecomService telecomService = telecomLoader.createTelecomService(mServiceRepo);
+
                 SmsApplication.getDefaultMmsApplication(mContext, false);
-                ServiceManager.addService(Context.TELECOM_SERVICE, service);
+                ServiceManager.addService(Context.TELECOM_SERVICE, telecomService.asBinder());
 
                 synchronized (mLock) {
                     final PermissionManagerServiceInternal permissionManager =
@@ -114,6 +114,8 @@ public class TelecomLoaderService extends SystemService {
     @GuardedBy("mLock")
     private TelecomServiceConnection mServiceConnection;
 
+    private InternalServiceRepository mServiceRepo;
+
     public TelecomLoaderService(Context context) {
         super(context);
         mContext = context;
@@ -129,6 +131,8 @@ public class TelecomLoaderService extends SystemService {
         if (phase == PHASE_ACTIVITY_MANAGER_READY) {
             registerDefaultAppNotifier();
             registerCarrierConfigChangedReceiver();
+            // core services will have already been loaded.
+            setupServiceRepository();
             connectToTelecom();
         }
     }
@@ -152,6 +156,11 @@ public class TelecomLoaderService extends SystemService {
                 mServiceConnection = serviceConnection;
             }
         }
+    }
+
+    private void setupServiceRepository() {
+        DeviceIdleInternal deviceIdleInternal = getLocalService(DeviceIdleInternal.class);
+        mServiceRepo = new InternalServiceRepository(deviceIdleInternal);
     }
 
 

@@ -92,7 +92,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"กำลังประมวลผลการอัดหน้าจอ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"การแจ้งเตือนต่อเนื่องสำหรับเซสชันการบันทึกหน้าจอ"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"เริ่มบันทึกเลยไหม"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"ขณะบันทึก ระบบ Android อาจบันทึกข้อมูลที่ละเอียดอ่อนที่ปรากฏบนหน้าจอหรือเล่นในอุปกรณ์ได้ ซึ่งรวมถึงรหัสผ่าน ข้อมูลการชำระเงิน รูปภาพ ข้อความ และเสียง"</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"ขณะบันทึก ระบบ Android อาจบันทึกข้อมูลที่ละเอียดอ่อนซึ่งปรากฏบนหน้าจอหรือเล่นในอุปกรณ์ได้ ซึ่งรวมถึงรหัสผ่าน ข้อมูลการชำระเงิน รูปภาพ ข้อความ และเสียง"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"บันทึกเสียง"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"เสียงจากอุปกรณ์"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"เสียงจากอุปกรณ์ เช่น เพลง การโทร และเสียงเรียกเข้า"</string>
@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"ทำต่อ"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"ยกเลิก"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"แชร์"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"ลบ"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"ยกเลิกการบันทึกหน้าจอแล้ว"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"บันทึกการบันทึกหน้าจอแล้ว แตะเพื่อดู"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"ลบการบันทึกหน้าจอแล้ว"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"เกิดข้อผิดพลาดในการลบการบันทึกหน้าจอ"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"ขอสิทธิ์ไม่สำเร็จ"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"เกิดข้อผิดพลาดขณะเริ่มบันทึกหน้าจอ"</string>
@@ -339,7 +337,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="5785739044300729592">"ขณะนี้หน้าจอล็อกอยู่ในแนวนอน"</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="5580170829728987989">"ขณะนี้หน้าจอล็อกอยู่ในแนวตั้ง"</string>
     <string name="dessert_case" msgid="9104973640704357717">"ชั้นแสดงของหวาน"</string>
-    <string name="start_dreams" msgid="9131802557946276718">"โปรแกรมรักษาหน้าจอ"</string>
+    <string name="start_dreams" msgid="9131802557946276718">"โปรแกรมรักษาจอภาพ"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"อีเทอร์เน็ต"</string>
     <string name="quick_settings_header_onboarding_text" msgid="1918085351115504765">"แตะไอคอนค้างไว้เพื่อดูตัวเลือกอื่นๆ"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"ห้ามรบกวน"</string>
@@ -511,7 +509,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"จัดการ"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ประวัติ"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"ใหม่"</string>
-    <string name="notification_section_header_gentle" msgid="6804099527336337197">"เงียบ"</string>
+    <string name="notification_section_header_gentle" msgid="6804099527336337197">"ปิดเสียง"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"การแจ้งเตือน"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"การสนทนา"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"ล้างการแจ้งเตือนแบบไม่มีเสียงทั้งหมด"</string>
@@ -708,7 +706,7 @@
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"แจ้งเตือนต่อไป"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"ปิดการแจ้งเตือน"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"แสดงการแจ้งเตือนจากแอปนี้ต่อไปไหม"</string>
-    <string name="notification_silence_title" msgid="8608090968400832335">"เงียบ"</string>
+    <string name="notification_silence_title" msgid="8608090968400832335">"ปิดเสียง"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"ค่าเริ่มต้น"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"บับเบิล"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"ไม่มีเสียงหรือการสั่น"</string>
@@ -856,7 +854,7 @@
     <string name="left_icon" msgid="5036278531966897006">"ไอคอนทางซ้าย"</string>
     <string name="right_icon" msgid="1103955040645237425">"ไอคอนทางขวา"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"กดค้างแล้วลากเพื่อเพิ่มการ์ด"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"กดการ์ดค้างไว้แล้วลากเพื่อจัดเรียงใหม่"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"กดค้างแล้วลากเพื่อจัดเรียงการ์ดใหม่"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"ลากมาที่นี่เพื่อนำออก"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"คุณต้องมีการ์ดอย่างน้อย <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> รายการ"</string>
     <string name="qs_edit" msgid="5583565172803472437">"แก้ไข"</string>
@@ -884,12 +882,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"ด้านบน 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"ด้านบน 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"เต็มหน้าจอด้านล่าง"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"ตำแหน่ง <xliff:g id="POSITION">%1$d</xliff:g> <xliff:g id="TILE_NAME">%2$s</xliff:g> แตะ 2 ครั้งเพื่อแก้ไข"</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g> แตะ 2 ครั้งเพื่อเพิ่ม"</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"ย้าย <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"นำ <xliff:g id="TILE_NAME">%1$s</xliff:g> ออก"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"เพิ่ม <xliff:g id="TILE_NAME">%1$s</xliff:g> ไปยังตำแหน่ง <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"ย้าย <xliff:g id="TILE_NAME">%1$s</xliff:g> ไปยังตำแหน่ง <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"นำชิ้นส่วนออก"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"เพิ่มชิ้นส่วนต่อท้าย"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"ย้ายชิ้นส่วน"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"เพิ่มชิ้นส่วน"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"ย้ายไปที่ <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"เพิ่มไปยังตำแหน่ง <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"ตำแหน่ง <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"ตัวแก้ไขการตั้งค่าด่วน"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> การแจ้งเตือน: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"แอปอาจใช้ไม่ได้กับโหมดแยกหน้าจอ"</string>
@@ -922,11 +921,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"ข้ามไปรายการก่อนหน้า"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"ปรับขนาด"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"โทรศัพท์ปิดไปเพราะร้อนมาก"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"ขณะนี้โทรศัพท์ทำงานเป็นปกติ"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"ขณะนี้โทรศัพท์ทำงานเป็นปกติ\nแตะเพื่อดูข้อมูลเพิ่มเติม"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"โทรศัพท์ร้อนเกินไปจึงปิดเครื่องเพื่อให้เย็นลง ขณะนี้โทรศัพท์ทำงานเป็นปกติ\n\nโทรศัพท์อาจร้อนเกินไปหากคุณ\n	• ใช้แอปที่ใช้ทรัพยากรมาก (เช่น เกม วิดีโอ หรือแอปการนำทาง)\n	• ดาวน์โหลดหรืออัปโหลดไฟล์ขนาดใหญ่\n	• ใช้โทรศัพท์ในอุณหภูมิที่สูง"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"ดูขั้นตอนในการดูแลรักษา"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"โทรศัพท์เริ่มเครื่องร้อน"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"ฟีเจอร์บางอย่างจะใช้งานได้จำกัดขณะโทรศัพท์ลดอุณหภูมิลง"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"ฟีเจอร์บางอย่างจะใช้งานได้จำกัดขณะโทรศัพท์เย็นลง\nแตะเพื่อดูข้อมูลเพิ่มเติม"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"โทรศัพท์จะพยายามลดอุณหภูมิลงโดยอัตโนมัติ คุณยังสามารถใช้โทรศัพท์ได้ แต่โทรศัพท์อาจทำงานช้าลง\n\nโทรศัพท์จะทำงานตามปกติเมื่อเย็นลงแล้ว"</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"ดูขั้นตอนในการดูแลรักษา"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"ถอดปลั๊กที่ชาร์จ"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"พบปัญหาในการชาร์จอุปกรณ์นี้ ถอดปลั๊กอะแดปเตอร์ด้วยความระมัดระวังเพราะสายอาจร้อน"</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"ดูขั้นตอนในการดูแลรักษา"</string>
@@ -988,6 +989,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"การตั้งค่า"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"รับทราบ"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> ใช้<xliff:g id="TYPES_LIST">%2$s</xliff:g>ของคุณอยู่"</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"หลายแอปพลิเคชันใช้<xliff:g id="TYPES_LIST">%s</xliff:g>ของคุณอยู่"</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" และ "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"กล้องถ่ายรูป"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"ตำแหน่ง"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"ไมโครโฟน"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"ปิดเซ็นเซอร์"</string>
     <string name="device_services" msgid="1549944177856658705">"บริการของอุปกรณ์"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"ไม่มีชื่อ"</string>
@@ -1066,7 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"กำลังโหลดคำแนะนำ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"สื่อ"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"ซ่อนเซสชันปัจจุบัน"</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"ซ่อน"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"ปิด"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"เล่นต่อ"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"การตั้งค่า"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ไม่มีการใช้งาน โปรดตรวจสอบแอป"</string>

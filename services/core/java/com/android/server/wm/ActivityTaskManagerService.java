@@ -183,7 +183,6 @@ import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -239,12 +238,9 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ProcessMap;
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.TransferPipe;
-import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.KeyguardDismissCallback;
 import com.android.internal.util.ArrayUtils;
@@ -386,7 +382,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private AppOpsManager mAppOpsManager;
     /** All active uids in the system. */
     private final MirrorActiveUids mActiveUids = new MirrorActiveUids();
-    private final SparseArray<String> mPendingTempWhitelist = new SparseArray<>();
+    private final SparseArray<String> mPendingTempAllowlist = new SparseArray<>();
     /** All processes currently running that might have a window organized by name. */
     final ProcessMap<WindowProcessController> mProcessNames = new ProcessMap<>();
     /** All processes we currently have running mapped by pid and uid */
@@ -1103,7 +1099,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Override
     public int startActivityIntentSender(IApplicationThread caller, IIntentSender target,
-            IBinder whitelistToken, Intent fillInIntent, String resolvedType, IBinder resultTo,
+            IBinder allowlistToken, Intent fillInIntent, String resolvedType, IBinder resultTo,
             String resultWho, int requestCode, int flagsMask, int flagsValues, Bundle bOptions) {
         enforceNotIsolatedCaller("startActivityIntentSender");
         // Refuse possible leaked file descriptors
@@ -1126,7 +1122,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mAppSwitchesAllowedTime = 0;
             }
         }
-        return pir.sendInner(0, fillInIntent, resolvedType, whitelistToken, null, null,
+        return pir.sendInner(0, fillInIntent, resolvedType, allowlistToken, null, null,
                 resultTo, resultWho, requestCode, flagsMask, flagsValues, bOptions);
     }
 
@@ -3001,13 +2997,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Override
     public void stopLockTaskModeByToken(IBinder token) {
-        synchronized (mGlobalLock) {
-            final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-            if (r == null) {
-                return;
-            }
-            stopLockTaskModeInternal(r.getTask(), false /* isSystemCaller */);
-        }
+        stopLockTaskModeInternal(token, false /* isSystemCaller */);
     }
 
     /**
@@ -3035,7 +3025,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         // system or a specific app.
         // * System-initiated requests will only start the pinned mode (screen pinning)
         // * App-initiated requests
-        //   - will put the device in fully locked mode (LockTask), if the app is whitelisted
+        //   - will put the device in fully locked mode (LockTask), if the app is allowlisted
         //   - will start the pinned mode, otherwise
         final int callingUid = Binder.getCallingUid();
         long ident = Binder.clearCallingIdentity();
@@ -3049,11 +3039,19 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    private void stopLockTaskModeInternal(@Nullable Task task, boolean isSystemCaller) {
+    private void stopLockTaskModeInternal(@Nullable IBinder token, boolean isSystemCaller) {
         final int callingUid = Binder.getCallingUid();
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
+                Task task = null;
+                if (token != null) {
+                    final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+                    if (r == null) {
+                        return;
+                    }
+                    task = r.getTask();
+                }
                 getLockTaskController().stopLockTaskMode(task, isSystemCaller, callingUid);
             }
             // Launch in-call UI if a call is ongoing. This is necessary to allow stopping the lock
@@ -3075,7 +3073,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     "updateLockTaskPackages()");
         }
         synchronized (mGlobalLock) {
-            if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "Whitelisting " + userId + ":"
+            if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "Allowlisting " + userId + ":"
                     + Arrays.toString(packages));
             getLockTaskController().updateLockTaskPackages(userId, packages);
         }
@@ -4109,10 +4107,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         final ActivityStack stack = r.getRootTask();
                         stack.setPictureInPictureAspectRatio(aspectRatio);
                         stack.setPictureInPictureActions(actions);
-                        MetricsLoggerWrapper.logPictureInPictureEnter(mContext,
-                                r.info.applicationInfo.uid, r.shortComponentName,
-                                r.supportsEnterPipOnTaskSwitch);
-                        logPictureInPictureArgs(params);
                     }
                 };
 
@@ -4156,7 +4150,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                             r.pictureInPictureArgs.getAspectRatio());
                     stack.setPictureInPictureActions(r.pictureInPictureArgs.getActions());
                 }
-                logPictureInPictureArgs(params);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -4168,18 +4161,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         // Currently, this is a static constant, but later, we may change this to be dependent on
         // the context of the activity
         return 3;
-    }
-
-    private void logPictureInPictureArgs(PictureInPictureParams params) {
-        if (params.hasSetActions()) {
-            MetricsLogger.histogram(mContext, "tron_varz_picture_in_picture_actions_count",
-                    params.getActions().size());
-        }
-        if (params.hasSetAspectRatio()) {
-            LogMaker lm = new LogMaker(MetricsEvent.ACTION_PICTURE_IN_PICTURE_ASPECT_RATIO_CHANGED);
-            lm.addTaggedData(MetricsEvent.PICTURE_IN_PICTURE_ASPECT_RATIO, params.getAspectRatio());
-            MetricsLogger.action(lm);
-        }
     }
 
     /**
@@ -5087,7 +5068,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final long sleepToken = proto.start(ActivityManagerServiceDumpProcessesProto.SLEEP_STATUS);
         proto.write(ActivityManagerServiceDumpProcessesProto.SleepStatus.WAKEFULNESS,
                 PowerManagerInternal.wakefulnessToProtoEnum(wakeFullness));
-        for (ActivityTaskManagerInternal.SleepToken st : mRootWindowContainer.mSleepTokens) {
+        final int tokenSize = mRootWindowContainer.mSleepTokens.size();
+        for (int i = 0; i < tokenSize; i++) {
+            final RootWindowContainer.SleepToken st =
+                    mRootWindowContainer.mSleepTokens.valueAt(i);
             proto.write(ActivityManagerServiceDumpProcessesProto.SleepStatus.SLEEP_TOKENS,
                     st.toString());
         }
@@ -5377,15 +5361,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return mAmInternal.isBackgroundActivityStartsEnabled();
     }
 
-    void enableScreenAfterBoot(boolean booted) {
-        writeBootProgressEnableScreen(SystemClock.uptimeMillis());
-        mWindowManager.enableScreenAfterBoot();
-
-        synchronized (mGlobalLock) {
-            updateEventDispatchingLocked(booted);
-        }
-    }
-
     static long getInputDispatchingTimeoutLocked(ActivityRecord r) {
         if (r == null || !r.hasProcess()) {
             return KEY_DISPATCHING_TIMEOUT_MS;
@@ -5521,12 +5496,35 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 reason);
     }
 
-    ActivityTaskManagerInternal.SleepToken acquireSleepToken(String tag, int displayId) {
-        synchronized (mGlobalLock) {
-            final ActivityTaskManagerInternal.SleepToken token =
-                    mRootWindowContainer.createSleepToken(tag, displayId);
-            updateSleepIfNeededLocked();
-            return token;
+    final class SleepTokenAcquirerImpl implements ActivityTaskManagerInternal.SleepTokenAcquirer {
+        private final String mTag;
+        private final SparseArray<RootWindowContainer.SleepToken> mSleepTokens =
+                new SparseArray<>();
+
+        SleepTokenAcquirerImpl(@NonNull String tag) {
+            mTag = tag;
+        }
+
+        @Override
+        public void acquire(int displayId) {
+            synchronized (mGlobalLock) {
+                if (!mSleepTokens.contains(displayId)) {
+                    mSleepTokens.append(displayId,
+                            mRootWindowContainer.createSleepToken(mTag, displayId));
+                    updateSleepIfNeededLocked();
+                }
+            }
+        }
+
+        @Override
+        public void release(int displayId) {
+            synchronized (mGlobalLock) {
+                final RootWindowContainer.SleepToken token = mSleepTokens.get(displayId);
+                if (token != null) {
+                    mRootWindowContainer.removeSleepToken(token);
+                    mSleepTokens.remove(displayId);
+                }
+            }
         }
     }
 
@@ -5964,11 +5962,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     /**
-     * @return whitelist tag for a uid from mPendingTempWhitelist, null if not currently on
-     * the whitelist
+     * @return allowlist tag for a uid from mPendingTempAllowlist, null if not currently on
+     * the allowlist
      */
-    String getPendingTempWhitelistTagForUidLocked(int uid) {
-        return mPendingTempWhitelist.get(uid);
+    String getPendingTempAllowlistTagForUidLocked(int uid) {
+        return mPendingTempAllowlist.get(uid);
     }
 
     void logAppTooSlow(WindowProcessController app, long startTime, String msg) {
@@ -6085,9 +6083,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     final class LocalService extends ActivityTaskManagerInternal {
         @Override
-        public SleepToken acquireSleepToken(String tag, int displayId) {
+        public SleepTokenAcquirer createSleepTokenAcquirer(@NonNull String tag) {
             Objects.requireNonNull(tag);
-            return ActivityTaskManagerService.this.acquireSleepToken(tag, displayId);
+            return new SleepTokenAcquirerImpl(tag);
         }
 
         @Override
@@ -6448,9 +6446,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public void enableScreenAfterBoot(boolean booted) {
+            writeBootProgressEnableScreen(SystemClock.uptimeMillis());
+            mWindowManager.enableScreenAfterBoot();
             synchronized (mGlobalLock) {
-                writeBootProgressEnableScreen(SystemClock.uptimeMillis());
-                mWindowManager.enableScreenAfterBoot();
                 updateEventDispatchingLocked(booted);
             }
         }
@@ -7297,16 +7295,16 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void onUidAddedToPendingTempWhitelist(int uid, String tag) {
+        public void onUidAddedToPendingTempAllowlist(int uid, String tag) {
             synchronized (mGlobalLockWithoutBoost) {
-                mPendingTempWhitelist.put(uid, tag);
+                mPendingTempAllowlist.put(uid, tag);
             }
         }
 
         @Override
-        public void onUidRemovedFromPendingTempWhitelist(int uid) {
+        public void onUidRemovedFromPendingTempAllowlist(int uid) {
             synchronized (mGlobalLockWithoutBoost) {
-                mPendingTempWhitelist.remove(uid);
+                mPendingTempAllowlist.remove(uid);
             }
         }
 

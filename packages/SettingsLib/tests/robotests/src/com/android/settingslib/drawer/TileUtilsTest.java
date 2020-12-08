@@ -17,11 +17,14 @@
 package com.android.settingslib.drawer;
 
 import static com.android.settingslib.drawer.TileUtils.IA_SETTINGS_ACTION;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_PROFILE;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON_URI;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_KEYHINT;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SUMMARY;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SUMMARY_URI;
+import static com.android.settingslib.drawer.TileUtils.PROFILE_ALL;
+import static com.android.settingslib.drawer.TileUtils.PROFILE_PRIMARY;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -189,7 +192,7 @@ public class TileUtilsTest {
         List<Tile> outTiles = new ArrayList<>();
         List<ResolveInfo> info = new ArrayList<>();
         ResolveInfo resolveInfo = newInfo(true, null /* category */, null, URI_GET_ICON,
-                URI_GET_SUMMARY, "my title", 0);
+                URI_GET_SUMMARY, "my title", 0, PROFILE_ALL);
         info.add(resolveInfo);
 
         when(mPackageManager.queryIntentActivitiesAsUser(any(Intent.class), anyInt(), anyInt()))
@@ -211,7 +214,7 @@ public class TileUtilsTest {
         List<Tile> outTiles = new ArrayList<>();
         List<ResolveInfo> info = new ArrayList<>();
         ResolveInfo resolveInfo = newInfo(true, null /* category */, null, URI_GET_ICON,
-                URI_GET_SUMMARY, null, 123);
+                URI_GET_SUMMARY, null, 123, PROFILE_ALL);
         info.add(resolveInfo);
 
         when(mPackageManager.queryIntentActivitiesAsUser(any(Intent.class), anyInt(), anyInt()))
@@ -235,7 +238,7 @@ public class TileUtilsTest {
         List<Tile> outTiles = new ArrayList<>();
         List<ResolveInfo> info = new ArrayList<>();
         ResolveInfo resolveInfo = newInfo(true, null /* category */, null, URI_GET_ICON,
-                URI_GET_SUMMARY, null, 123);
+                URI_GET_SUMMARY, null, 123, PROFILE_ALL);
         resolveInfo.activityInfo.packageName = "com.android.settings";
         resolveInfo.activityInfo.applicationInfo.packageName = "com.android.settings";
         info.add(resolveInfo);
@@ -258,7 +261,7 @@ public class TileUtilsTest {
         final List<Tile> outTiles = new ArrayList<>();
         final List<ResolveInfo> info = new ArrayList<>();
         final ResolveInfo resolveInfo = newInfo(true, null /* category */, null, URI_GET_ICON,
-                URI_GET_SUMMARY, null, 123);
+                URI_GET_SUMMARY, null, 123, PROFILE_ALL);
         resolveInfo.activityInfo.packageName = "com.android.settings";
         resolveInfo.activityInfo.applicationInfo.packageName = "com.android.settings";
         info.add(resolveInfo);
@@ -290,7 +293,7 @@ public class TileUtilsTest {
         List<Tile> outTiles = new ArrayList<>();
         List<ResolveInfo> info = new ArrayList<>();
         ResolveInfo resolveInfo = newInfo(true, null /* category */, null, URI_GET_ICON,
-                URI_GET_SUMMARY, null, 123);
+                URI_GET_SUMMARY, null, 123, PROFILE_ALL);
         resolveInfo.activityInfo.metaData
                 .putBoolean(TileUtils.META_DATA_PREFERENCE_ICON_TINTABLE, true);
         info.add(resolveInfo);
@@ -327,6 +330,26 @@ public class TileUtilsTest {
         assertThat(outTiles).hasSize(2);
     }
 
+    @Test
+    public void loadTilesForAction_isPrimaryProfileOnly_shouldSkipNonPrimaryUserTiles() {
+        Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
+        List<Tile> outTiles = new ArrayList<>();
+        List<ResolveInfo> info = new ArrayList<>();
+        ResolveInfo resolveInfo = newInfo(true, null /* category */, null, URI_GET_ICON,
+                URI_GET_SUMMARY, null, 123, PROFILE_PRIMARY);
+        info.add(resolveInfo);
+
+        when(mPackageManager.queryIntentActivitiesAsUser(any(Intent.class), anyInt(), anyInt()))
+                .thenReturn(info);
+        when(mPackageManager.queryIntentContentProvidersAsUser(any(Intent.class), anyInt(),
+                anyInt())).thenReturn(info);
+
+        TileUtils.loadTilesForAction(mContext, new UserHandle(10), IA_SETTINGS_ACTION,
+                addedCache, null /* defaultCategory */, outTiles, false /* requiresSettings */);
+
+        assertThat(outTiles).isEmpty();
+    }
+
     public static ResolveInfo newInfo(boolean systemApp, String category) {
         return newInfo(systemApp, category, null);
     }
@@ -337,14 +360,14 @@ public class TileUtilsTest {
 
     private static ResolveInfo newInfo(boolean systemApp, String category, String keyHint,
             String iconUri, String summaryUri) {
-        return newInfo(systemApp, category, keyHint, iconUri, summaryUri, null, 0);
+        return newInfo(systemApp, category, keyHint, iconUri, summaryUri, null, 0, PROFILE_ALL);
     }
 
     private static ResolveInfo newInfo(boolean systemApp, String category, String keyHint,
-            String iconUri, String summaryUri, String title, int titleResId) {
+            String iconUri, String summaryUri, String title, int titleResId, String profile) {
 
         final Bundle metaData = newMetaData(category, keyHint, iconUri, summaryUri, title,
-                titleResId);
+                titleResId, profile);
         final ResolveInfo info = new ResolveInfo();
         info.system = systemApp;
 
@@ -358,6 +381,7 @@ public class TileUtilsTest {
         info.providerInfo.packageName = "abc";
         info.providerInfo.name = "456";
         info.providerInfo.authority = "auth";
+        info.providerInfo.metaData = metaData;
         ShadowTileUtils.setMetaData(metaData);
         info.providerInfo.applicationInfo = new ApplicationInfo();
 
@@ -369,7 +393,7 @@ public class TileUtilsTest {
     }
 
     private static Bundle newMetaData(String category, String keyHint, String iconUri,
-            String summaryUri, String title, int titleResId) {
+            String summaryUri, String title, int titleResId, String profile) {
         final Bundle metaData = new Bundle();
         metaData.putString("com.android.settings.category", category);
         metaData.putInt(META_DATA_PREFERENCE_ICON, 314159);
@@ -387,6 +411,9 @@ public class TileUtilsTest {
             metaData.putInt(TileUtils.META_DATA_PREFERENCE_TITLE, titleResId);
         } else if (title != null) {
             metaData.putString(TileUtils.META_DATA_PREFERENCE_TITLE, title);
+        }
+        if (profile != null) {
+            metaData.putString(META_DATA_KEY_PROFILE, profile);
         }
         return metaData;
     }

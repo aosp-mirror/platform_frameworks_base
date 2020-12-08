@@ -284,7 +284,7 @@
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"Demonstração para retalho"</string>
     <string name="notification_channel_usb" msgid="1528280969406244896">"Ligação USB"</string>
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Aplicação em execução"</string>
-    <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Aplicações que estão a consumir bateria"</string>
+    <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Apps que estão a consumir bateria"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"A app <xliff:g id="APP_NAME">%1$s</xliff:g> está a consumir bateria."</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> aplicações estão a consumir bateria."</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Toque para obter detalhes acerca da utilização da bateria e dos dados"</string>
@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Prima Menu para desbloquear ou efectuar uma chamada de emergência."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Prima Menu para desbloquear."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Desenhar padrão para desbloquear"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Emergência"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Chamada de emergência"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Regressar à chamada"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Correcto!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Tentar novamente"</string>
@@ -1150,7 +1150,7 @@
     <string name="whichImageCaptureApplicationLabel" msgid="6505433734824988277">"Capturar imagem"</string>
     <string name="alwaysUse" msgid="3153558199076112903">"Utilizar por predefinição para esta ação."</string>
     <string name="use_a_different_app" msgid="4987790276170972776">"Utilizar outra app"</string>
-    <string name="clearDefaultHintMsg" msgid="1325866337702524936">"Limpar a predefinição nas Definições do Sistema &gt; Aplicações &gt; Transferidas."</string>
+    <string name="clearDefaultHintMsg" msgid="1325866337702524936">"Limpar a predefinição nas Definições do Sistema &gt; Apps &gt; Transferidas."</string>
     <string name="chooseActivity" msgid="8563390197659779956">"Escolha uma ação"</string>
     <string name="chooseUsbActivity" msgid="2096269989990986612">"Escolher uma app para o dispositivo USB"</string>
     <string name="noApplications" msgid="1186909265235544019">"Nenhuma app pode efetuar esta ação."</string>
@@ -1178,7 +1178,7 @@
     <string name="launch_warning_original" msgid="3332206576800169626">"<xliff:g id="APP_NAME">%1$s</xliff:g> foi originalmente iniciado."</string>
     <string name="screen_compat_mode_scale" msgid="8627359598437527726">"Escala"</string>
     <string name="screen_compat_mode_show" msgid="5080361367584709857">"Mostrar sempre"</string>
-    <string name="screen_compat_mode_hint" msgid="4032272159093750908">"Reative este modo nas Definições do Sistema &gt; Aplicações &gt; Transferidas."</string>
+    <string name="screen_compat_mode_hint" msgid="4032272159093750908">"Reative este modo nas Definições do Sistema &gt; Apps &gt; Transferidas."</string>
     <string name="unsupported_display_size_message" msgid="7265211375269394699">"<xliff:g id="APP_NAME">%1$s</xliff:g> não suporta a definição de Tamanho do ecrã atual e pode ter um comportamento inesperado."</string>
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Mostrar sempre"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"A app <xliff:g id="APP_NAME">%1$s</xliff:g> foi concebida para uma versão incompatível do SO Android e pode ter um comportamento inesperado. Pode estar disponível uma versão atualizada da app."</string>
@@ -1271,7 +1271,7 @@
     <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"Enviar"</string>
     <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"Cancelar"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"Memorizar a minha escolha"</string>
-    <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Pode alterar mais tarde em Definições &gt; Aplicações"</string>
+    <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Pode alterar mais tarde em Definições &gt; Apps"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Permitir Sempre"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Nunca Permitir"</string>
     <string name="sim_removed_title" msgid="5387212933992546283">"Cartão SIM removido"</string>
@@ -1281,8 +1281,8 @@
     <string name="sim_added_message" msgid="6602906609509958680">"Reinicie o aparelho para aceder à rede de telemóvel."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Reiniciar"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Ativar o serviço móvel"</string>
-    <string name="install_carrier_app_notification_text" msgid="2781317581274192728">"Transfira a app do operador para ativar o seu novo SIM."</string>
-    <string name="install_carrier_app_notification_text_app_name" msgid="4086877327264106484">"Transfira a app <xliff:g id="APP_NAME">%1$s</xliff:g> para ativar o novo SIM."</string>
+    <string name="install_carrier_app_notification_text" msgid="2781317581274192728">"Descarregue a app do operador para ativar o seu novo SIM."</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="4086877327264106484">"Descarregue a app <xliff:g id="APP_NAME">%1$s</xliff:g> para ativar o novo SIM."</string>
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"Transferir app"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"Novo SIM inserido"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"Toque para configurar"</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Atualizado pelo seu gestor"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Eliminado pelo seu gestor"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Para prolongar a autonomia da bateria, a Poupança de bateria:\n\n•Ativa o tema escuro.\n•Desativa ou restringe a atividade em segundo plano, alguns efeitos visuais e outras funcionalidades como \"Ok Google\".\n\n"<annotation id="url">"Saber mais"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"Para prolongar a autonomia da bateria, a Poupança de bateria:\n\n•Ativa o tema escuro.\n•Desativa ou restringe a atividade em segundo plano, alguns efeitos visuais e outras funcionalidades como \"Ok Google\"."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Para prolongar a autonomia da bateria, a Poupança de bateria:\n\n•Ativa o tema escuro.\n•Desativa ou restringe a atividade em segundo plano, alguns efeitos visuais e outras funcionalidades como \"Ok Google\".\n\n"<annotation id="url">"Saiba mais"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Para prolongar a autonomia da bateria, a Poupança de bateria:\n\n• Ativa o tema escuro.\n•·Desativa ou restringe a atividade em segundo plano, alguns efeitos visuais e outras funcionalidades como \"Ok Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Para ajudar a reduzir a utilização de dados, a Poupança de dados impede que algumas aplicações enviem ou recebam dados em segundo plano. Uma determinada app que esteja a utilizar atualmente pode aceder aos dados, mas é possível que o faça com menos frequência. Isto pode significar, por exemplo, que as imagens não são apresentadas até que toque nas mesmas."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Pretende ativar a Poupança de dados?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ativar"</string>
@@ -2034,7 +2034,7 @@
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Esta app não recebeu autorização de gravação, mas pode capturar áudio através deste dispositivo USB."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Página inicial"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Anterior"</string>
-    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Aplicações recentes"</string>
+    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Apps recentes"</string>
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Notificações"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Definições rápidas"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Caixa de diálogo de energia"</string>

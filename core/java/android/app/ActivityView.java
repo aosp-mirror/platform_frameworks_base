@@ -105,7 +105,8 @@ public class ActivityView extends ViewGroup implements android.window.TaskEmbedd
     public ActivityView(
             @NonNull Context context, @NonNull AttributeSet attrs, int defStyle,
             boolean singleTaskInstance, boolean usePublicVirtualDisplay) {
-        this(context, attrs, defStyle, singleTaskInstance, usePublicVirtualDisplay, false);
+        this(context, attrs, defStyle, singleTaskInstance, usePublicVirtualDisplay,
+                false /* disableSurfaceViewBackgroundLayer */);
     }
 
     /** @hide */
@@ -113,12 +114,22 @@ public class ActivityView extends ViewGroup implements android.window.TaskEmbedd
             @NonNull Context context, @NonNull AttributeSet attrs, int defStyle,
             boolean singleTaskInstance, boolean usePublicVirtualDisplay,
             boolean disableSurfaceViewBackgroundLayer) {
+        this(context, attrs, defStyle, singleTaskInstance, usePublicVirtualDisplay,
+                disableSurfaceViewBackgroundLayer, false /* useTrustedDisplay */);
+    }
+
+    // TODO(b/162901735): Refactor ActivityView with Builder
+    /** @hide */
+    public ActivityView(
+            @NonNull Context context, @NonNull AttributeSet attrs, int defStyle,
+            boolean singleTaskInstance, boolean usePublicVirtualDisplay,
+            boolean disableSurfaceViewBackgroundLayer, boolean useTrustedDisplay) {
         super(context, attrs, defStyle);
         if (useTaskOrganizer()) {
             mTaskEmbedder = new TaskOrganizerTaskEmbedder(context, this);
         } else {
             mTaskEmbedder = new VirtualDisplayTaskEmbedder(context, this, singleTaskInstance,
-                    usePublicVirtualDisplay);
+                    usePublicVirtualDisplay, useTrustedDisplay);
         }
         mSurfaceView = new SurfaceView(context, null, 0, 0, disableSurfaceViewBackgroundLayer);
         // Since ActivityView#getAlpha has been overridden, we should use parent class's alpha

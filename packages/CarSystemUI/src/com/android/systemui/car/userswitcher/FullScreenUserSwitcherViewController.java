@@ -18,6 +18,8 @@ package com.android.systemui.car.userswitcher;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.car.Car;
+import android.car.user.CarUserManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.view.View;
@@ -25,6 +27,7 @@ import android.view.View;
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.android.systemui.R;
+import com.android.systemui.car.CarServiceProvider;
 import com.android.systemui.car.window.OverlayViewController;
 import com.android.systemui.car.window.OverlayViewGlobalStateController;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -39,7 +42,9 @@ import javax.inject.Singleton;
 public class FullScreenUserSwitcherViewController extends OverlayViewController {
     private final Context mContext;
     private final Resources mResources;
+    private final CarServiceProvider mCarServiceProvider;
     private final int mShortAnimationDuration;
+    private CarUserManager mCarUserManager;
     private UserGridRecyclerView mUserGridView;
     private UserGridRecyclerView.UserSelectionListener mUserSelectionListener;
 
@@ -47,10 +52,16 @@ public class FullScreenUserSwitcherViewController extends OverlayViewController 
     public FullScreenUserSwitcherViewController(
             Context context,
             @Main Resources resources,
+            CarServiceProvider carServiceProvider,
             OverlayViewGlobalStateController overlayViewGlobalStateController) {
         super(R.id.fullscreen_user_switcher_stub, overlayViewGlobalStateController);
         mContext = context;
         mResources = resources;
+        mCarServiceProvider = carServiceProvider;
+        mCarServiceProvider.addListener(car -> {
+            mCarUserManager = (CarUserManager) car.getCarManager(Car.CAR_USER_SERVICE);
+            registerCarUserManagerIfPossible();
+        });
         mShortAnimationDuration = mResources.getInteger(android.R.integer.config_shortAnimTime);
     }
 
@@ -63,6 +74,12 @@ public class FullScreenUserSwitcherViewController extends OverlayViewController 
         mUserGridView.setLayoutManager(layoutManager);
         mUserGridView.buildAdapter();
         mUserGridView.setUserSelectionListener(mUserSelectionListener);
+        registerCarUserManagerIfPossible();
+    }
+
+    @Override
+    protected boolean shouldFocusWindow() {
+        return false;
     }
 
     @Override
@@ -91,18 +108,6 @@ public class FullScreenUserSwitcherViewController extends OverlayViewController 
     }
 
     /**
-     * Invalidate underlying view.
-     */
-    void invalidate() {
-        if (getLayout() == null) {
-            // layout hasn't been inflated.
-            return;
-        }
-
-        getLayout().invalidate();
-    }
-
-    /**
      * Set {@link UserGridRecyclerView.UserSelectionListener}.
      */
     void setUserGridSelectionListener(
@@ -110,15 +115,9 @@ public class FullScreenUserSwitcherViewController extends OverlayViewController 
         mUserSelectionListener = userGridSelectionListener;
     }
 
-    /**
-     * Returns {@code true} when layout is visible.
-     */
-    boolean isVisible() {
-        if (getLayout() == null) {
-            // layout hasn't been inflated.
-            return false;
+    private void registerCarUserManagerIfPossible() {
+        if (mUserGridView != null && mCarUserManager != null) {
+            mUserGridView.setCarUserManager(mCarUserManager);
         }
-
-        return getLayout().getVisibility() == View.VISIBLE;
     }
 }
