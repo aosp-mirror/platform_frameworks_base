@@ -1,4 +1,7 @@
+include /ZYGOTE_OWNERS
+
 # compat-team@ for changes to hiddenapi files
+
 per-file hiddenapi-* = andreionea@google.com, mathewi@google.com, satayev@google.com
 
 # Escalations:
