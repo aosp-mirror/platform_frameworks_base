@@ -224,7 +224,11 @@ public class AppSearchManager {
         }
         AndroidFuture<AppSearchResult> future = new AndroidFuture<>();
         try {
-            mService.setSchema(DEFAULT_DATABASE_NAME, schemaBundles, request.isForceOverride(),
+            mService.setSchema(
+                    DEFAULT_DATABASE_NAME,
+                    schemaBundles,
+                    new ArrayList<>(request.getSchemasNotPlatformSurfaceable()),
+                    request.isForceOverride(),
                     new IAppSearchResultCallback.Stub() {
                         public void onResult(AppSearchResult result) {
                             future.complete(result);

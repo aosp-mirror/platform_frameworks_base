@@ -272,6 +272,7 @@ package android.app {
     method public void allowAssistantAdjustment(String);
     method public void disallowAssistantAdjustment(String);
     method public android.content.ComponentName getEffectsSuppressor();
+    method public boolean isNotificationPolicyAccessGrantedForPackage(@NonNull String);
     method public boolean matchesCallFilter(android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_NOTIFICATION_LISTENERS) public void setNotificationListenerAccessGranted(@NonNull android.content.ComponentName, boolean, boolean);
     method public void updateNotificationChannel(@NonNull String, int, @NonNull android.app.NotificationChannel);
@@ -372,8 +373,15 @@ package android.app.admin {
     method public java.util.List<java.lang.String> getOwnerInstalledCaCerts(@NonNull android.os.UserHandle);
     method public boolean isCurrentInputMethodSetByOwner();
     method public boolean isFactoryResetProtectionPolicySupported();
+    method @NonNull public static String operationToString(int);
+    method @RequiresPermission("android.permission.MANAGE_DEVICE_ADMINS") public void setNextOperationSafety(int, boolean);
     field public static final String ACTION_DATA_SHARING_RESTRICTION_APPLIED = "android.app.action.DATA_SHARING_RESTRICTION_APPLIED";
+    field public static final int OPERATION_CREATE_AND_MANAGE_USER = 5; // 0x5
     field public static final int OPERATION_LOCK_NOW = 1; // 0x1
+    field public static final int OPERATION_REMOVE_USER = 6; // 0x6
+    field public static final int OPERATION_START_USER_IN_BACKGROUND = 3; // 0x3
+    field public static final int OPERATION_STOP_USER = 4; // 0x4
+    field public static final int OPERATION_SWITCH_USER = 2; // 0x2
   }
 
   public static final class SecurityLog.SecurityEvent implements android.os.Parcelable {

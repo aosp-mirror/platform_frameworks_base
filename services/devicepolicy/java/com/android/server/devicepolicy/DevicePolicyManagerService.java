@@ -1017,10 +1017,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return mSafetyChecker == null || mSafetyChecker.isDevicePolicyOperationSafe(operation);
     }
 
-    /**
-     * Used by {@code cmd device_policy} to set the result of the next safety operation check.
-     */
-    void setNextOperationSafety(@DevicePolicyOperation int operation, boolean safe) {
+    @Override
+    public void setNextOperationSafety(@DevicePolicyOperation int operation, boolean safe) {
         Preconditions.checkCallAuthorization(
                 hasCallingOrSelfPermission(permission.MANAGE_DEVICE_ADMINS));
         Slog.i(LOG_TAG, "setNextOperationSafety(" + DevicePolicyManager.operationToString(operation)

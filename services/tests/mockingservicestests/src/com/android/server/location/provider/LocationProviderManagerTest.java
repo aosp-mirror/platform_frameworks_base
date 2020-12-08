@@ -60,6 +60,7 @@ import static org.testng.Assert.assertThrows;
 import android.content.Context;
 import android.location.ILocationCallback;
 import android.location.ILocationListener;
+import android.location.LastLocationRequest;
 import android.location.Location;
 import android.location.LocationManagerInternal;
 import android.location.LocationManagerInternal.ProviderEnabledListener;
@@ -260,55 +261,77 @@ public class LocationProviderManagerTest {
 
     @Test
     public void testGetLastLocation_Fine() {
-        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, false)).isNull();
+        assertThat(mManager.getLastLocation(new LastLocationRequest.Builder().build(), IDENTITY,
+                PERMISSION_FINE)).isNull();
 
         Location loc = createLocation(NAME, mRandom);
         mProvider.setProviderLocation(loc);
-        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, false)).isEqualTo(loc);
+        assertThat(mManager.getLastLocation(new LastLocationRequest.Builder().build(), IDENTITY,
+                PERMISSION_FINE)).isEqualTo(loc);
     }
 
     @Test
     public void testGetLastLocation_Coarse() {
-        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, false)).isNull();
+        assertThat(mManager.getLastLocation(new LastLocationRequest.Builder().build(), IDENTITY,
+                PERMISSION_FINE)).isNull();
 
         Location loc = createLocation(NAME, mRandom);
         mProvider.setProviderLocation(loc);
-        Location coarse = mManager.getLastLocation(IDENTITY, PERMISSION_COARSE, false);
+        Location coarse = mManager.getLastLocation(new LastLocationRequest.Builder().build(),
+                IDENTITY, PERMISSION_COARSE);
         assertThat(coarse).isNotEqualTo(loc);
         assertThat(coarse).isNearby(loc, 5000);
     }
 
     @Test
     public void testGetLastLocation_Bypass() {
-        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, false)).isNull();
-        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, true)).isNull();
+        assertThat(mManager.getLastLocation(new LastLocationRequest.Builder().build(), IDENTITY,
+                PERMISSION_FINE)).isNull();
+        assertThat(mManager.getLastLocation(
+                new LastLocationRequest.Builder().setLocationSettingsIgnored(true).build(),
+                IDENTITY, PERMISSION_FINE)).isNull();
 
         Location loc = createLocation(NAME, mRandom);
         mProvider.setProviderLocation(loc);
-        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, false)).isEqualTo(loc);
-        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, true)).isEqualTo(
+        assertThat(mManager.getLastLocation(new LastLocationRequest.Builder().build(), IDENTITY,
+                PERMISSION_FINE)).isEqualTo(loc);
+        assertThat(mManager.getLastLocation(
+                new LastLocationRequest.Builder().setLocationSettingsIgnored(true).build(),
+                IDENTITY, PERMISSION_FINE)).isEqualTo(
                 loc);
 
         mProvider.setProviderAllowed(false);
-        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, false)).isNull();
-        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, true)).isEqualTo(
+        assertThat(mManager.getLastLocation(new LastLocationRequest.Builder().build(), IDENTITY,
+                PERMISSION_FINE)).isNull();
+        assertThat(mManager.getLastLocation(
+                new LastLocationRequest.Builder().setLocationSettingsIgnored(true).build(),
+                IDENTITY, PERMISSION_FINE)).isEqualTo(
                 loc);
 
         loc = createLocation(NAME, mRandom);
         mProvider.setProviderLocation(loc);
-        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, false)).isNull();
-        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, true)).isEqualTo(
+        assertThat(mManager.getLastLocation(new LastLocationRequest.Builder().build(), IDENTITY,
+                PERMISSION_FINE)).isNull();
+        assertThat(mManager.getLastLocation(
+                new LastLocationRequest.Builder().setLocationSettingsIgnored(true).build(),
+                IDENTITY, PERMISSION_FINE)).isEqualTo(
                 loc);
 
         mProvider.setProviderAllowed(true);
-        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, false)).isNull();
-        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, true)).isEqualTo(
+        assertThat(mManager.getLastLocation(new LastLocationRequest.Builder().build(), IDENTITY,
+                PERMISSION_FINE)).isNull();
+        assertThat(mManager.getLastLocation(
+                new LastLocationRequest.Builder().setLocationSettingsIgnored(true).build(),
+                IDENTITY, PERMISSION_FINE)).isEqualTo(
                 loc);
 
         loc = createLocation(NAME, mRandom);
         mProvider.setProviderLocation(loc);
-        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, false)).isEqualTo(loc);
-        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, true)).isEqualTo(
+        assertThat(mManager.getLastLocation(new LastLocationRequest.Builder().build(), IDENTITY,
+                PERMISSION_FINE)).isEqualTo(loc);
+        assertThat(mManager.getLastLocation(
+                new LastLocationRequest.Builder().setLocationSettingsIgnored(true).build(),
+                IDENTITY, PERMISSION_FINE)).isEqualTo(
                 loc);
     }
 
@@ -320,10 +343,12 @@ public class LocationProviderManagerTest {
 
         Location loc = createLocation(NAME, mRandom);
         mockProvider.setProviderLocation(loc);
-        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, false)).isEqualTo(loc);
+        assertThat(mManager.getLastLocation(new LastLocationRequest.Builder().build(), IDENTITY,
+                PERMISSION_FINE)).isEqualTo(loc);
 
         mManager.setMockProvider(null);
-        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, false)).isNull();
+        assertThat(mManager.getLastLocation(new LastLocationRequest.Builder().build(), IDENTITY,
+                PERMISSION_FINE)).isNull();
     }
 
     @Test
@@ -331,12 +356,14 @@ public class LocationProviderManagerTest {
         Location loc1 = createLocation(NAME, mRandom);
         mManager.injectLastLocation(loc1, CURRENT_USER);
 
-        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, false)).isEqualTo(loc1);
+        assertThat(mManager.getLastLocation(new LastLocationRequest.Builder().build(), IDENTITY,
+                PERMISSION_FINE)).isEqualTo(loc1);
 
         Location loc2 = createLocation(NAME, mRandom);
         mManager.injectLastLocation(loc2, CURRENT_USER);
 
-        assertThat(mManager.getLastLocation(IDENTITY, PERMISSION_FINE, false)).isEqualTo(loc1);
+        assertThat(mManager.getLastLocation(new LastLocationRequest.Builder().build(), IDENTITY,
+                PERMISSION_FINE)).isEqualTo(loc1);
     }
 
     @Test
@@ -355,7 +382,8 @@ public class LocationProviderManagerTest {
         Location loc = createLocation(NAME, mRandom);
         mProvider.setProviderLocation(loc);
 
-        assertThat(mPassive.getLastLocation(IDENTITY, PERMISSION_FINE, false)).isEqualTo(loc);
+        assertThat(mPassive.getLastLocation(new LastLocationRequest.Builder().build(), IDENTITY,
+                PERMISSION_FINE)).isEqualTo(loc);
     }
 
     @Test

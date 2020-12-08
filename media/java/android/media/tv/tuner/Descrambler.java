@@ -110,14 +110,16 @@ public class Descrambler implements AutoCloseable {
     }
 
     /**
-     * Set a key token to link descrambler to a key slot
+     * Set a key token to link descrambler to a key slot. Use {@link isValidKeyToken(byte[])} to
+     * validate the key token format. Invalid key token would cause no-op and return
+     * {@link Tuner.RESULT_INVALID_ARGUMENT}.
      *
      * <p>A descrambler instance can have only one key slot to link, but a key slot can hold a few
-     * keys for different purposes.
+     * keys for different purposes. {@link Tuner.VOID_KEYTOKEN} is considered valid.
      *
-     * @param keyToken the token to be used to link the key slot. Use {@link Tuner.INVALID_KEYTOKEN}
+     * @param keyToken the token to be used to link the key slot. Use {@link Tuner.VOID_KEYTOKEN}
      *        to remove the current key from descrambler. If the current keyToken comes from a
-     *        MediaCas session, use {@link Tuner.INVALID_KEYTOKEN} to remove current key before
+     *        MediaCas session, use {@link Tuner.VOID_KEYTOKEN} to remove current key before
      *        closing the MediaCas session.
      * @return result status of the operation.
      */
@@ -131,6 +133,22 @@ public class Descrambler implements AutoCloseable {
             }
             return nativeSetKeyToken(keyToken);
         }
+    }
+
+    /**
+     * Validate the key token format as the parameter of {@link setKeyToken(byte[])}.
+     *
+     * <p>The key token is expected to be less than 128 bits.
+     *
+     * @param keyToken the token to be validated.
+     * @return true if the given key token is a valid one.
+     */
+    public static boolean isValidKeyToken(@NonNull byte[] keyToken) {
+        if (keyToken.length == 0 || keyToken.length > 16) {
+            Log.d(TAG, "Invalid key token size: " + (keyToken.length * 8) + " bit.");
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -149,19 +167,5 @@ public class Descrambler implements AutoCloseable {
                 mIsClosed = true;
             }
         }
-    }
-
-    private boolean isValidKeyToken(byte[] keyToken) {
-        if (keyToken.length == 0 || keyToken.length > 16) {
-            Log.d(TAG, "Invalid key token size: " + (keyToken.length * 8) + " bit.");
-            return false;
-        }
-        for (int i = 0; i < keyToken.length; i++) {
-            if (keyToken[i] < 0) {
-                Log.d(TAG, "Invalid key token.");
-                return false;
-            }
-        }
-        return true;
     }
 }

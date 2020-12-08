@@ -293,7 +293,9 @@ public class NotificationHistoryDatabase {
                                 .appendPath(file.getAbsolutePath()).build())
                         .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
                         .putExtra(EXTRA_KEY, file.getAbsolutePath()),
-                PendingIntent.FLAG_UPDATE_CURRENT);
+                // TODO(b/174161800) Please replace FLAG_MUTABLE_UNAUDITED below
+                // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
         mAlarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, deletionTime, pi);
     }
 

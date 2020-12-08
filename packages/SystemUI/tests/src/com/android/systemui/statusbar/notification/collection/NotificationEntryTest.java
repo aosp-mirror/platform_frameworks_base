@@ -233,7 +233,10 @@ public class NotificationEntryTest extends SysuiTestCase {
         return new Notification.Action.Builder(
                 Icon.createWithResource(getContext(), android.R.drawable.sym_def_app_icon),
                 title,
-                PendingIntent.getBroadcast(getContext(), 0, new Intent("Action"), 0))
+                // TODO(b/174965424) Please replace FLAG_MUTABLE_UNAUDITED below
+                // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
+                PendingIntent.getBroadcast(getContext(), 0, new Intent("Action"),
+                    PendingIntent.FLAG_MUTABLE_UNAUDITED))
                 .setContextual(true)
                 .build();
     }
@@ -242,7 +245,10 @@ public class NotificationEntryTest extends SysuiTestCase {
         return new Notification.Action.Builder(
                 Icon.createWithResource(getContext(), android.R.drawable.sym_def_app_icon),
                 title,
-                PendingIntent.getBroadcast(getContext(), 0, new Intent("Action"), 0)).build();
+                // TODO(b/174965424) Please replace FLAG_MUTABLE_UNAUDITED below
+                // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
+                PendingIntent.getBroadcast(getContext(), 0, new Intent("Action"),
+                    PendingIntent.FLAG_MUTABLE_UNAUDITED)).build();
     }
 
     private ArrayList<Notification.Action> createActions(String... titles) {

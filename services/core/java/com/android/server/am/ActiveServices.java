@@ -50,6 +50,7 @@ import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.ApplicationExitInfo;
+import android.app.BroadcastOptions;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.Notification;
@@ -3201,7 +3202,8 @@ public final class ActiveServices {
                         + " for fg-service launch");
             }
             mAm.tempWhitelistUidLocked(r.appInfo.uid,
-                    SERVICE_START_FOREGROUND_TIMEOUT, "fg-service-launch");
+                    SERVICE_START_FOREGROUND_TIMEOUT, "fg-service-launch",
+                    BroadcastOptions.TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED);
         }
 
         if (!mPendingServices.contains(r)) {
@@ -5284,8 +5286,9 @@ public final class ActiveServices {
 
         if (ret == FGS_FEATURE_DENIED) {
             if (mAm.mConstants.mFlagFgsStartTempAllowListEnabled
-                    && mAm.isOnDeviceIdleWhitelistLocked(r.appInfo.uid, false)) {
-                // uid is on DeviceIdleController's allowlist.
+                    && mAm.isWhitelistedForFgsStartLocked(r.appInfo.uid)) {
+                // uid is on DeviceIdleController's user/system allowlist
+                // or AMS's FgsStartTempAllowList.
                 ret = FGS_FEATURE_ALLOWED_BY_DEVICE_IDLE_ALLOW_LIST;
             }
         }

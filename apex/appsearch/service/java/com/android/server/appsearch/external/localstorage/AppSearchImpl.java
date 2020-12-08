@@ -60,6 +60,7 @@ import com.google.android.icing.proto.SetSchemaResultProto;
 import com.google.android.icing.proto.StatusProto;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -226,13 +227,16 @@ public final class AppSearchImpl {
      *
      * @param databaseName The name of the database where this schema lives.
      * @param schemas Schemas to set for this app.
+     * @param schemasNotPlatformSurfaceable Schema types that should not be surfaced on platform
+     *     surfaces.
      * @param forceOverride Whether to force-apply the schema even if it is incompatible. Documents
      *     which do not comply with the new schema will be deleted.
      * @throws AppSearchException on IcingSearchEngine error.
      */
     public void setSchema(
             @NonNull String databaseName,
-            @NonNull Set<AppSearchSchema> schemas,
+            @NonNull List<AppSearchSchema> schemas,
+            @NonNull List<String> schemasNotPlatformSurfaceable,
             boolean forceOverride)
             throws AppSearchException {
         mReadWriteLock.writeLock().lock();
@@ -240,8 +244,9 @@ public final class AppSearchImpl {
             SchemaProto.Builder existingSchemaBuilder = getSchemaProtoLocked().toBuilder();
 
             SchemaProto.Builder newSchemaBuilder = SchemaProto.newBuilder();
-            for (AppSearchSchema schema : schemas) {
-                SchemaTypeConfigProto schemaTypeProto = SchemaToProtoConverter.convert(schema);
+            for (int i = 0; i < schemas.size(); i++) {
+                SchemaTypeConfigProto schemaTypeProto =
+                        SchemaToProtoConverter.toSchemaTypeConfigProto(schemas.get(i));
                 newSchemaBuilder.addTypes(schemaTypeProto);
             }
 
@@ -276,8 +281,16 @@ public final class AppSearchImpl {
 
             // Update derived data structures.
             mSchemaMapLocked.put(databaseName, rewrittenSchemaResults.mRewrittenQualifiedTypes);
-            mVisibilityStoreLocked.updateSchemas(
-                    databaseName, rewrittenSchemaResults.mDeletedQualifiedTypes);
+
+            String databasePrefix = getDatabasePrefix(databaseName);
+            Set<String> qualifiedSchemasNotPlatformSurfaceable =
+                    new ArraySet<>(schemasNotPlatformSurfaceable.size());
+            for (int i = 0; i < schemasNotPlatformSurfaceable.size(); i++) {
+                qualifiedSchemasNotPlatformSurfaceable.add(
+                        databasePrefix + schemasNotPlatformSurfaceable.get(i));
+            }
+            mVisibilityStoreLocked.setVisibility(
+                    databaseName, qualifiedSchemasNotPlatformSurfaceable);
 
             // Determine whether to schedule an immediate optimize.
             if (setSchemaResultProto.getDeletedSchemaTypesCount() > 0
@@ -294,38 +307,55 @@ public final class AppSearchImpl {
     }
 
     /**
-     * Update the visibility settings for this app.
+     * Retrieves the AppSearch schema for this database.
      *
-     * <p>This method belongs to the mutate group
+     * <p>This method belongs to query group.
      *
-     * @param databaseName The name of the database where the visibility settings will apply.
-     * @param schemasHiddenFromPlatformSurfaces Schemas that should be hidden from platform surfaces
-     * @throws AppSearchException on IcingSearchEngine error
+     * @param databaseName The name of the database where this schema lives.
+     * @throws AppSearchException on IcingSearchEngine error.
      */
-    public void setVisibility(
-            @NonNull String databaseName, @NonNull Set<String> schemasHiddenFromPlatformSurfaces)
-            throws AppSearchException {
-        mReadWriteLock.writeLock().lock();
+    @NonNull
+    public List<AppSearchSchema> getSchema(@NonNull String databaseName) throws AppSearchException {
+        SchemaProto fullSchema;
+        mReadWriteLock.readLock().lock();
         try {
-            String databasePrefix = getDatabasePrefix(databaseName);
-            Set<String> qualifiedSchemasHiddenFromPlatformSurface =
-                    new ArraySet<>(schemasHiddenFromPlatformSurfaces.size());
-            for (String schema : schemasHiddenFromPlatformSurfaces) {
-                Set<String> existingSchemas = mSchemaMapLocked.get(databaseName);
-                if (existingSchemas == null || !existingSchemas.contains(databasePrefix + schema)) {
-                    throw new AppSearchException(
-                            AppSearchResult.RESULT_NOT_FOUND,
-                            "Unknown schema(s): "
-                                    + schemasHiddenFromPlatformSurfaces
-                                    + " provided during setVisibility.");
-                }
-                qualifiedSchemasHiddenFromPlatformSurface.add(databasePrefix + schema);
-            }
-            mVisibilityStoreLocked.setVisibility(
-                    databaseName, qualifiedSchemasHiddenFromPlatformSurface);
+            fullSchema = getSchemaProtoLocked();
         } finally {
-            mReadWriteLock.writeLock().lock();
+            mReadWriteLock.readLock().unlock();
         }
+
+        List<AppSearchSchema> result = new ArrayList<>();
+        for (int i = 0; i < fullSchema.getTypesCount(); i++) {
+            String typeDatabase = getDatabaseName(fullSchema.getTypes(i).getSchemaType());
+            if (!databaseName.equals(typeDatabase)) {
+                continue;
+            }
+            // Rewrite SchemaProto.types.schema_type
+            SchemaTypeConfigProto.Builder typeConfigBuilder = fullSchema.getTypes(i).toBuilder();
+            String newSchemaType =
+                    typeConfigBuilder.getSchemaType().substring(databaseName.length() + 1);
+            typeConfigBuilder.setSchemaType(newSchemaType);
+
+            // Rewrite SchemaProto.types.properties.schema_type
+            for (int propertyIdx = 0;
+                    propertyIdx < typeConfigBuilder.getPropertiesCount();
+                    propertyIdx++) {
+                PropertyConfigProto.Builder propertyConfigBuilder =
+                        typeConfigBuilder.getProperties(propertyIdx).toBuilder();
+                if (!propertyConfigBuilder.getSchemaType().isEmpty()) {
+                    String newPropertySchemaType =
+                            propertyConfigBuilder
+                                    .getSchemaType()
+                                    .substring(databaseName.length() + 1);
+                    propertyConfigBuilder.setSchemaType(newPropertySchemaType);
+                    typeConfigBuilder.setProperties(propertyIdx, propertyConfigBuilder);
+                }
+            }
+
+            AppSearchSchema schema = SchemaToProtoConverter.toAppSearchSchema(typeConfigBuilder);
+            result.add(schema);
+        }
+        return result;
     }
 
     /**
@@ -340,7 +370,7 @@ public final class AppSearchImpl {
     public void putDocument(@NonNull String databaseName, @NonNull GenericDocument document)
             throws AppSearchException {
         DocumentProto.Builder documentBuilder =
-                GenericDocumentToProtoConverter.convert(document).toBuilder();
+                GenericDocumentToProtoConverter.toDocumentProto(document).toBuilder();
         addPrefixToDocument(documentBuilder, getDatabasePrefix(databaseName));
 
         PutResultProto putResultProto;
@@ -384,7 +414,7 @@ public final class AppSearchImpl {
 
         DocumentProto.Builder documentBuilder = getResultProto.getDocument().toBuilder();
         removeDatabasesFromDocument(documentBuilder);
-        return GenericDocumentToProtoConverter.convert(documentBuilder.build());
+        return GenericDocumentToProtoConverter.toGenericDocument(documentBuilder.build());
     }
 
     /**
@@ -969,7 +999,7 @@ public final class AppSearchImpl {
                 resultsBuilder.setResults(i, resultBuilder);
             }
         }
-        return SearchResultToProtoConverter.convertToSearchResultPage(resultsBuilder);
+        return SearchResultToProtoConverter.toSearchResultPage(resultsBuilder);
     }
 
     @GuardedBy("mReadWriteLock")

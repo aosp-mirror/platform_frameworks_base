@@ -1094,6 +1094,11 @@ public class ActivityManagerService extends IActivityManager.Stub
     final PendingTempWhitelists mPendingTempWhitelist = new PendingTempWhitelists(this);
 
     /**
+     * The temp-allowlist that is allowed to start FGS from background.
+     */
+    final FgsStartTempAllowList mFgsStartTempAllowList = new FgsStartTempAllowList();
+
+    /**
      * Information about and control over application operations
      */
     final AppOpsService mAppOpsService;
@@ -5508,6 +5513,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         return Arrays.binarySearch(whitelist, appId) >= 0
                 || Arrays.binarySearch(mDeviceIdleTempWhitelist, appId) >= 0
                 || mPendingTempWhitelist.indexOfKey(uid) >= 0;
+    }
+
+    boolean isWhitelistedForFgsStartLocked(int uid) {
+        final int appId = UserHandle.getAppId(uid);
+        return Arrays.binarySearch(mDeviceIdleExceptIdleWhitelist, appId) >= 0
+                || mFgsStartTempAllowList.isAllowed(uid);
     }
 
     /**
@@ -15324,17 +15335,22 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        tempWhitelistUidLocked(targetUid, duration, tag);
+        tempWhitelistUidLocked(targetUid, duration, tag,
+                BroadcastOptions.TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED);
     }
 
     /**
      * Whitelists {@code targetUid} to temporarily bypass Power Save mode.
      */
     @GuardedBy("this")
-    void tempWhitelistUidLocked(int targetUid, long duration, String tag) {
+    void tempWhitelistUidLocked(int targetUid, long duration, String tag, int type) {
         mPendingTempWhitelist.put(targetUid, new PendingTempWhitelist(targetUid, duration, tag));
         setUidTempWhitelistStateLocked(targetUid, true);
         mUiHandler.obtainMessage(PUSH_TEMP_WHITELIST_UI_MSG).sendToTarget();
+
+        if (type == BroadcastOptions.TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED) {
+            mFgsStartTempAllowList.add(targetUid, duration);
+        }
     }
 
     void pushTempWhitelist() {
@@ -17273,10 +17289,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         public int checkOperation(int code, int uid, String packageName, boolean raw,
                 QuadFunction<Integer, Integer, String, Boolean, Integer> superImpl) {
             if (uid == mTargetUid && isTargetOp(code)) {
+                final int shellUid = UserHandle.getUid(UserHandle.getUserId(uid),
+                        Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    return superImpl.apply(code, Process.SHELL_UID,
-                            "com.android.shell", raw);
+                    return superImpl.apply(code, shellUid, "com.android.shell", raw);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
@@ -17288,10 +17305,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         public int checkAudioOperation(int code, int usage, int uid, String packageName,
                 QuadFunction<Integer, Integer, Integer, String, Integer> superImpl) {
             if (uid == mTargetUid && isTargetOp(code)) {
+                final int shellUid = UserHandle.getUid(UserHandle.getUserId(uid),
+                        Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    return superImpl.apply(code, usage, Process.SHELL_UID,
-                            "com.android.shell");
+                    return superImpl.apply(code, usage, shellUid, "com.android.shell");
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
@@ -17306,9 +17324,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 @NonNull HeptFunction<Integer, Integer, String, String, Boolean, String, Boolean,
                         Integer> superImpl) {
             if (uid == mTargetUid && isTargetOp(code)) {
+                final int shellUid = UserHandle.getUid(UserHandle.getUserId(uid),
+                        Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    return superImpl.apply(code, Process.SHELL_UID, "com.android.shell", featureId,
+                    return superImpl.apply(code, shellUid, "com.android.shell", featureId,
                             shouldCollectAsyncNotedOp, message, shouldCollectMessage);
                 } finally {
                     Binder.restoreCallingIdentity(identity);

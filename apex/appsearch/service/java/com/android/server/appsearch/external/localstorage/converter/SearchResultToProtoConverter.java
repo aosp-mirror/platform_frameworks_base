@@ -39,13 +39,12 @@ public class SearchResultToProtoConverter {
 
     /** Translate a {@link SearchResultProto} into {@link SearchResultPage}. */
     @NonNull
-    public static SearchResultPage convertToSearchResultPage(
-            @NonNull SearchResultProtoOrBuilder proto) {
+    public static SearchResultPage toSearchResultPage(@NonNull SearchResultProtoOrBuilder proto) {
         Bundle bundle = new Bundle();
         bundle.putLong(SearchResultPage.NEXT_PAGE_TOKEN_FIELD, proto.getNextPageToken());
         ArrayList<Bundle> resultBundles = new ArrayList<>(proto.getResultsCount());
         for (int i = 0; i < proto.getResultsCount(); i++) {
-            resultBundles.add(convertToSearchResultBundle(proto.getResults(i)));
+            resultBundles.add(toSearchResultBundle(proto.getResults(i)));
         }
         bundle.putParcelableArrayList(SearchResultPage.RESULTS_FIELD, resultBundles);
         return new SearchResultPage(bundle);
@@ -53,10 +52,11 @@ public class SearchResultToProtoConverter {
 
     /** Translate a {@link SearchResultProto.ResultProto} into {@link SearchResult}. */
     @NonNull
-    private static Bundle convertToSearchResultBundle(
+    private static Bundle toSearchResultBundle(
             @NonNull SearchResultProto.ResultProtoOrBuilder proto) {
         Bundle bundle = new Bundle();
-        GenericDocument document = GenericDocumentToProtoConverter.convert(proto.getDocument());
+        GenericDocument document =
+                GenericDocumentToProtoConverter.toGenericDocument(proto.getDocument());
         bundle.putBundle(SearchResult.DOCUMENT_FIELD, document.getBundle());
 
         ArrayList<Bundle> matchList = new ArrayList<>();

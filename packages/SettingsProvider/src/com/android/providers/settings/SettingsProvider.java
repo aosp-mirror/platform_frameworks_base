@@ -4777,6 +4777,15 @@ public class SettingsProvider extends ContentProvider {
                     currentVersion = 195;
                 }
 
+                if (currentVersion == 195) {
+                    // Version 195: delete obsolete manged services settings
+                    getSecureSettingsLocked(userId).deleteSettingLocked(
+                            Secure.ENABLED_NOTIFICATION_ASSISTANT);
+                    getSecureSettingsLocked(userId).deleteSettingLocked(
+                            Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES);
+                    currentVersion = 196;
+                }
+
                 // vXXX: Add new settings above this point.
 
                 if (currentVersion != newVersion) {

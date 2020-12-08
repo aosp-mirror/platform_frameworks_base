@@ -39,6 +39,7 @@ import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.app.IServiceConnection;
 import android.app.KeyguardManager;
+import android.app.admin.DevicePolicyManager.DevicePolicyOperation;
 import android.app.admin.SecurityLog.SecurityEvent;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -2591,27 +2592,27 @@ public class DevicePolicyManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface PersonalAppsSuspensionReason {}
 
-    // TODO(b/172376923) - make all (or none) @TestApi
-
     /** @hide */
     @TestApi
     public static final int OPERATION_LOCK_NOW = 1;
-
     /** @hide */
+    @TestApi
     public static final int OPERATION_SWITCH_USER = 2;
     /** @hide */
+    @TestApi
     public static final int OPERATION_START_USER_IN_BACKGROUND = 3;
     /** @hide */
+    @TestApi
     public static final int OPERATION_STOP_USER = 4;
     /** @hide */
+    @TestApi
     public static final int OPERATION_CREATE_AND_MANAGE_USER = 5;
     /** @hide */
+    @TestApi
     public static final int OPERATION_REMOVE_USER = 6;
 
     private static final String PREFIX_OPERATION = "OPERATION_";
 
-
-    // TODO(b/172376923) - add all operations
     /** @hide */
     @IntDef(prefix = PREFIX_OPERATION, value = {
             OPERATION_LOCK_NOW,
@@ -2626,6 +2627,8 @@ public class DevicePolicyManager {
     }
 
     /** @hide */
+    @TestApi
+    @NonNull
     public static String operationToString(@DevicePolicyOperation int operation) {
         return DebugUtils.constantToString(DevicePolicyManager.class, PREFIX_OPERATION, operation);
     }
@@ -12533,5 +12536,22 @@ public class DevicePolicyManager {
             }
         }
         return false;
+    }
+
+    /**
+     * Used by CTS to set the result of the next safety operation check.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_ADMINS)
+    public void setNextOperationSafety(@DevicePolicyOperation int operation, boolean safe) {
+        if (mService != null) {
+            try {
+                mService.setNextOperationSafety(operation, safe);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
     }
 }

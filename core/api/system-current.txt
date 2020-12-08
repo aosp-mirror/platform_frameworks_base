@@ -607,7 +607,10 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND) public void setBackgroundActivityStartsAllowed(boolean);
     method public void setDontSendToRestrictedApps(boolean);
     method @RequiresPermission(anyOf={android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST, android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND, android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND}) public void setTemporaryAppWhitelistDuration(long);
+    method @RequiresPermission(anyOf={android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST, android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND, android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND}) public void setTemporaryAppWhitelistDuration(int, long);
     method public android.os.Bundle toBundle();
+    field public static final int TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED = 0; // 0x0
+    field public static final int TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED = 1; // 0x1
   }
 
   public class DownloadManager {
@@ -4116,6 +4119,22 @@ package android.location {
     method @Deprecated public void onStatusChanged(int);
   }
 
+  public final class LastLocationRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method public boolean isHiddenFromAppOps();
+    method public boolean isLocationSettingsIgnored();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.LastLocationRequest> CREATOR;
+  }
+
+  public static final class LastLocationRequest.Builder {
+    ctor public LastLocationRequest.Builder();
+    ctor public LastLocationRequest.Builder(@NonNull android.location.LastLocationRequest);
+    method @NonNull public android.location.LastLocationRequest build();
+    method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_APP_OPS_STATS) public android.location.LastLocationRequest.Builder setHiddenFromAppOps(boolean);
+    method @NonNull @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public android.location.LastLocationRequest.Builder setLocationSettingsIgnored(boolean);
+  }
+
   public class Location implements android.os.Parcelable {
     method public boolean isComplete();
     method public void makeComplete();
@@ -4128,6 +4147,7 @@ package android.location {
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void getCurrentLocation(@NonNull android.location.LocationRequest, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.location.Location>);
     method @Nullable public String getExtraLocationControllerPackage();
     method @Deprecated public int getGnssBatchSize();
+    method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public android.location.Location getLastKnownLocation(@NonNull String, @NonNull android.location.LastLocationRequest);
     method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public void injectGnssMeasurementCorrections(@NonNull android.location.GnssMeasurementCorrections);
     method public boolean isExtraLocationControllerPackageEnabled();
     method public boolean isLocationEnabledForUser(@NonNull android.os.UserHandle);
@@ -4996,6 +5016,7 @@ package android.media.tv.tuner {
   public class Descrambler implements java.lang.AutoCloseable {
     method public int addPid(int, int, @Nullable android.media.tv.tuner.filter.Filter);
     method public void close();
+    method public static boolean isValidKeyToken(@NonNull byte[]);
     method public int removePid(int, int, @Nullable android.media.tv.tuner.filter.Filter);
     method public int setKeyToken(@NonNull byte[]);
     field public static final int PID_TYPE_MMTP = 2; // 0x2
@@ -5070,7 +5091,6 @@ package android.media.tv.tuner {
     field public static final int INVALID_FIRST_MACROBLOCK_IN_SLICE = -1; // 0xffffffff
     field public static final int INVALID_FRONTEND_ID = -1; // 0xffffffff
     field public static final int INVALID_FRONTEND_SETTING_FREQUENCY = -1; // 0xffffffff
-    field @NonNull public static final byte[] INVALID_KEYTOKEN;
     field public static final int INVALID_LTS_ID = -1; // 0xffffffff
     field public static final int INVALID_MMTP_RECORD_EVENT_MPT_SEQUENCE_NUM = -1; // 0xffffffff
     field public static final int INVALID_STREAM_ID = 65535; // 0xffff
@@ -5086,6 +5106,7 @@ package android.media.tv.tuner {
     field public static final int SCAN_TYPE_AUTO = 1; // 0x1
     field public static final int SCAN_TYPE_BLIND = 2; // 0x2
     field public static final int SCAN_TYPE_UNDEFINED = 0; // 0x0
+    field @NonNull public static final byte[] VOID_KEYTOKEN;
   }
 
   public static interface Tuner.OnResourceLostListener {
@@ -7818,7 +7839,7 @@ package android.os {
     method @Nullable public <T extends android.os.Parcelable> T getParcelable(@NonNull Class<T>);
     method public int getStability();
     method public void readFromParcel(@NonNull android.os.Parcel);
-    method public boolean setParcelable(@Nullable android.os.Parcelable);
+    method public void setParcelable(@Nullable android.os.Parcelable);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.ParcelableHolder> CREATOR;
   }

@@ -313,7 +313,7 @@ public class TaskInfo {
                 && isResizeable == that.isResizeable
                 && Objects.equals(positionInParent, that.positionInParent)
                 && equalsLetterboxParams(that)
-                && pictureInPictureParams == that.pictureInPictureParams
+                && Objects.equals(pictureInPictureParams, that.pictureInPictureParams)
                 && getWindowingMode() == that.getWindowingMode()
                 && Objects.equals(taskDescription, that.taskDescription)
                 && isFocused == that.isFocused

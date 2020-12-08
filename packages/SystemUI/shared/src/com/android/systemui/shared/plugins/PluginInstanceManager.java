@@ -386,7 +386,10 @@ public class PluginInstanceManager<T extends Plugin> {
                     }
                     Intent i = new Intent(PluginManagerImpl.DISABLE_PLUGIN).setData(
                             Uri.parse("package://" + component.flattenToString()));
-                    PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, i, 0);
+                    // TODO(b/174161910) Please replace FLAG_MUTABLE_UNAUDITED below
+                    // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
+                    PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, i,
+                            PendingIntent.FLAG_MUTABLE_UNAUDITED);
                     nb.addAction(new Action.Builder(null, "Disable plugin", pi).build());
                     mContext.getSystemService(NotificationManager.class)
                             .notify(SystemMessage.NOTE_PLUGIN, nb.build());

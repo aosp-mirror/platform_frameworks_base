@@ -1737,9 +1737,12 @@ final class UiModeManagerService extends SystemService {
                                 context.getString(R.string.car_mode_disable_notification_title))
                         .setContentText(
                                 context.getString(R.string.car_mode_disable_notification_message))
+
                         .setContentIntent(
+                                // TODO(b/173744200) Please replace FLAG_MUTABLE_UNAUDITED below
+                                // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
                                 PendingIntent.getActivityAsUser(context, 0,
-                                        carModeOffIntent, 0,
+                                        carModeOffIntent, PendingIntent.FLAG_MUTABLE_UNAUDITED,
                                         null, UserHandle.CURRENT));
                 mNotificationManager.notifyAsUser(null,
                         SystemMessage.NOTE_CAR_MODE_DISABLE, n.build(), UserHandle.ALL);
