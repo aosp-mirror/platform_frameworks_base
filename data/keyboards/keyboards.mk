@@ -14,13 +14,9 @@
 
 # Warning: this is actually a product definition, to be inherited from
 
-include $(LOCAL_PATH)/common.mk
+PRODUCT_COPY_FILES := \
+  $(call find-copy-subdir-files,*.kl,$(LOCAL_PATH),system/usr/keylayout) \
+  $(call find-copy-subdir-files,*.kcm,$(LOCAL_PATH),system/usr/keychars) \
+  $(call find-copy-subdir-files,*.idc,$(LOCAL_PATH),system/usr/idc)
 
-PRODUCT_COPY_FILES := $(foreach file,$(framework_keylayouts),\
-    $(file):system/usr/keylayout/$(notdir $(file)))
 
-PRODUCT_COPY_FILES += $(foreach file,$(framework_keycharmaps),\
-    $(file):system/usr/keychars/$(notdir $(file)))
-
-PRODUCT_COPY_FILES += $(foreach file,$(framework_keyconfigs),\
-    $(file):system/usr/idc/$(notdir $(file)))
