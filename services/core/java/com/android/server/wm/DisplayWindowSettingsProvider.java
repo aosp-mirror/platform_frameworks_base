@@ -403,6 +403,8 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
                     null /* defaultValue */);
             settingsEntry.mIgnoreOrientationRequest = getBooleanAttribute(parser,
                     "ignoreOrientationRequest", null /* defaultValue */);
+            settingsEntry.mIgnoreDisplayCutout = getBooleanAttribute(parser,
+                    "ignoreDisplayCutout", null /* defaultValue */);
             fileData.mSettings.put(name, settingsEntry);
         }
         XmlUtils.skipCurrentTag(parser);
@@ -489,6 +491,10 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
                 if (settingsEntry.mIgnoreOrientationRequest != null) {
                     out.attributeBoolean(null, "ignoreOrientationRequest",
                             settingsEntry.mIgnoreOrientationRequest);
+                }
+                if (settingsEntry.mIgnoreDisplayCutout != null) {
+                    out.attributeBoolean(null, "ignoreDisplayCutout",
+                            settingsEntry.mIgnoreDisplayCutout);
                 }
                 out.endTag(null, "display");
             }

@@ -261,6 +261,10 @@ class DisplayWindowSettings {
                 ? settings.mIgnoreOrientationRequest : false;
         dc.setIgnoreOrientationRequest(ignoreOrientationRequest);
 
+        final boolean ignoreDisplayCutout = settings.mIgnoreDisplayCutout != null
+                ? settings.mIgnoreDisplayCutout : false;
+        dc.mIgnoreDisplayCutout = ignoreDisplayCutout;
+
         final int width = hasSizeOverride ? settings.mForcedWidth : dc.mInitialDisplayWidth;
         final int height = hasSizeOverride ? settings.mForcedHeight : dc.mInitialDisplayHeight;
         final int density = hasDensityOverride ? settings.mForcedDensity
@@ -352,6 +356,8 @@ class DisplayWindowSettings {
             Integer mFixedToUserRotation;
             @Nullable
             Boolean mIgnoreOrientationRequest;
+            @Nullable
+            Boolean mIgnoreDisplayCutout;
 
             SettingsEntry() {}
 
@@ -420,6 +426,10 @@ class DisplayWindowSettings {
                 }
                 if (other.mIgnoreOrientationRequest != mIgnoreOrientationRequest) {
                     mIgnoreOrientationRequest = other.mIgnoreOrientationRequest;
+                    changed = true;
+                }
+                if (other.mIgnoreDisplayCutout != mIgnoreDisplayCutout) {
+                    mIgnoreDisplayCutout = other.mIgnoreDisplayCutout;
                     changed = true;
                 }
                 return changed;
@@ -500,6 +510,11 @@ class DisplayWindowSettings {
                     mIgnoreOrientationRequest = delta.mIgnoreOrientationRequest;
                     changed = true;
                 }
+                if (delta.mIgnoreDisplayCutout != null
+                        && delta.mIgnoreDisplayCutout != mIgnoreDisplayCutout) {
+                    mIgnoreDisplayCutout = delta.mIgnoreDisplayCutout;
+                    changed = true;
+                }
                 return changed;
             }
 
@@ -515,7 +530,8 @@ class DisplayWindowSettings {
                         && mShouldShowSystemDecors == null
                         && mImePolicy == null
                         && mFixedToUserRotation == null
-                        && mIgnoreOrientationRequest == null;
+                        && mIgnoreOrientationRequest == null
+                        && mIgnoreDisplayCutout == null;
             }
 
             @Override
@@ -536,8 +552,8 @@ class DisplayWindowSettings {
                         && Objects.equals(mShouldShowSystemDecors, that.mShouldShowSystemDecors)
                         && Objects.equals(mImePolicy, that.mImePolicy)
                         && Objects.equals(mFixedToUserRotation, that.mFixedToUserRotation)
-                        && Objects.equals(mIgnoreOrientationRequest,
-                                that.mIgnoreOrientationRequest);
+                        && Objects.equals(mIgnoreOrientationRequest, that.mIgnoreOrientationRequest)
+                        && Objects.equals(mIgnoreDisplayCutout, that.mIgnoreDisplayCutout);
             }
 
             @Override
@@ -545,7 +561,7 @@ class DisplayWindowSettings {
                 return Objects.hash(mWindowingMode, mUserRotationMode, mUserRotation, mForcedWidth,
                         mForcedHeight, mForcedDensity, mForcedScalingMode, mRemoveContentMode,
                         mShouldShowWithInsecureKeyguard, mShouldShowSystemDecors, mImePolicy,
-                        mFixedToUserRotation, mIgnoreOrientationRequest);
+                        mFixedToUserRotation, mIgnoreOrientationRequest, mIgnoreDisplayCutout);
             }
 
             @Override
@@ -564,6 +580,7 @@ class DisplayWindowSettings {
                         + ", mShouldShowIme=" + mImePolicy
                         + ", mFixedToUserRotation=" + mFixedToUserRotation
                         + ", mIgnoreOrientationRequest=" + mIgnoreOrientationRequest
+                        + ", mIgnoreDisplayCutout=" + mIgnoreDisplayCutout
                         + '}';
             }
         }
