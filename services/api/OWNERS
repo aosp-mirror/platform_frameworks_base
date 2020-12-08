@@ -1,0 +1,4 @@
+per-file Android.bp = file:platform/build/soong:/OWNERS
+
+# API changes are managed via Prolog rules, not OWNERS
+*

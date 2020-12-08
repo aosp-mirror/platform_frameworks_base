@@ -1,0 +1,24 @@
+# This top-level list should remain narrowly defined as team leads; individual
+# teams are strongly encouraged to define narrower OWNERS files at deeper
+# levels within the source tree; see OWNERS.md for more details
+dsandler@android.com
+dsandler@google.com
+hackbod@android.com
+hackbod@google.com
+jsharkey@android.com
+jsharkey@google.com
+michaelwr@google.com
+nandana@google.com
+narayan@google.com
+ogunwale@google.com
+svetoslavganov@android.com
+svetoslavganov@google.com
+yamasani@google.com
+
+# Support bulk translation updates
+per-file */res*/values*/*.xml = byi@google.com
+
+per-file Android.bp = file:platform/build/soong:/OWNERS
+per-file Android.mk = file:platform/build/soong:/OWNERS
+per-file ApiDocs.bp = file:platform/build/soong:/OWNERS
+per-file StubLibraries.bp = file:platform/build/soong:/OWNERS
