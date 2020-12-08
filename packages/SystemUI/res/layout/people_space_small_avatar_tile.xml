@@ -82,16 +82,25 @@
                     android:ellipsize="end" />
             </LinearLayout>
         </LinearLayout>
-        <TextView
-            android:id="@+id/content"
-            android:paddingVertical="3dp"
-            android:paddingHorizontal="12dp"
-            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+        <LinearLayout
             android:background="@drawable/people_space_content_background"
-            android:textSize="14sp"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:maxLines="2"
-            android:ellipsize="end" />
+            android:layout_height="match_parent">
+            <TextView
+                android:id="@+id/content"
+                android:paddingVertical="3dp"
+                android:paddingHorizontal="12dp"
+                android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+                android:textSize="14sp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:maxLines="2"
+                android:ellipsize="end" />
+            <ImageView
+                android:id="@+id/image"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"/>
+        </LinearLayout>
     </LinearLayout>
 </LinearLayout>

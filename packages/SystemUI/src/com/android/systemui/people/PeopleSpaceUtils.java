@@ -16,7 +16,10 @@
 
 package com.android.systemui.people;
 
+import static android.app.Notification.EXTRA_MESSAGES;
+
 import android.app.INotificationManager;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.people.ConversationChannel;
 import android.app.people.IPeopleManager;
@@ -26,7 +29,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.LauncherApps;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
@@ -34,20 +36,28 @@ import android.graphics.drawable.Drawable;
 import android.icu.text.MeasureFormat;
 import android.icu.util.Measure;
 import android.icu.util.MeasureUnit;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.service.notification.ConversationChannelWrapper;
+import android.service.notification.StatusBarNotification;
 import android.util.Log;
+import android.view.View;
 import android.widget.RemoteViews;
 
-import androidx.preference.PreferenceManager;
-
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import com.android.systemui.R;
 import com.android.systemui.people.widget.LaunchConversationActivity;
 import com.android.systemui.people.widget.PeopleSpaceWidgetProvider;
 
 import java.time.Duration;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -63,6 +73,13 @@ public class PeopleSpaceUtils {
     private static final int DAYS_IN_A_WEEK = 7;
     private static final int MIN_HOUR = 1;
     private static final int ONE_DAY = 1;
+    public static final String OPTIONS_PEOPLE_SPACE_TILE = "options_people_space_tile";
+
+    /** Represents whether {@link StatusBarNotification} was posted or removed. */
+    public enum NotificationAction {
+        POSTED,
+        REMOVED
+    }
 
     /** Returns a list of map entries corresponding to user's conversations. */
     public static List<Map.Entry<Long, PeopleSpaceTile>> getTiles(
@@ -93,73 +110,40 @@ public class PeopleSpaceUtils {
     /** Updates {@code appWidgetIds} with their associated conversation stored. */
     public static void updateSingleConversationWidgets(Context context, int[] appWidgetIds,
             AppWidgetManager appWidgetManager, INotificationManager notificationManager) {
-        PackageManager mPackageManager = context.getPackageManager();
-        IPeopleManager mPeopleManager = IPeopleManager.Stub.asInterface(
+        IPeopleManager peopleManager = IPeopleManager.Stub.asInterface(
                 ServiceManager.getService(Context.PEOPLE_SERVICE));
-        LauncherApps mLauncherApps = context.getSystemService(LauncherApps.class);
+        LauncherApps launcherApps = context.getSystemService(LauncherApps.class);
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        Intent activityIntent = new Intent(context, LaunchConversationActivity.class);
-        activityIntent.addFlags(
-                Intent.FLAG_ACTIVITY_NEW_TASK
-                        | Intent.FLAG_ACTIVITY_CLEAR_TASK
-                        | Intent.FLAG_ACTIVITY_NO_HISTORY
-                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
         try {
-            List<Map.Entry<Long, PeopleSpaceTile>> shortcutInfos =
-                    PeopleSpaceUtils.getTiles(
-                            context, notificationManager,
-                            mPeopleManager, mLauncherApps);
+            List<Map.Entry<Long, PeopleSpaceTile>> tiles =
+                    PeopleSpaceUtils.getTiles(context, notificationManager,
+                            peopleManager, launcherApps);
+
             for (int appWidgetId : appWidgetIds) {
                 String shortcutId = sp.getString(String.valueOf(appWidgetId), null);
                 if (DEBUG) {
                     Log.d(TAG, "Set widget: " + appWidgetId + " with shortcut ID: " + shortcutId);
                 }
-
-                Optional<Map.Entry<Long, PeopleSpaceTile>> entry = shortcutInfos.stream().filter(
+                Optional<Map.Entry<Long, PeopleSpaceTile>> entry = tiles.stream().filter(
                         e -> e.getValue().getId().equals(shortcutId)).findFirst();
                 if (!entry.isPresent() || shortcutId == null) {
                     if (DEBUG) Log.d(TAG, "Matching conversation not found for shortcut ID");
                     //TODO: Delete app widget id when crash is fixed (b/175486868)
                     continue;
                 }
-                PeopleSpaceTile tile = entry.get().getValue();
-                RemoteViews views = new RemoteViews(context.getPackageName(),
-                        getLayout(tile));
+                PeopleSpaceTile tile =
+                        augmentTileFromStorage(entry.get().getValue(), appWidgetManager,
+                                appWidgetId);
 
-                String status = PeopleSpaceUtils.getLastInteractionString(context,
-                        entry.get().getKey());
-                views.setTextViewText(R.id.status, status);
-                views.setTextViewText(R.id.name, tile.getUserName().toString());
+                RemoteViews views = createRemoteViews(context, tile, entry.get().getKey(),
+                        appWidgetId);
 
-                activityIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_TILE_ID, tile.getId());
-                activityIntent.putExtra(
-                        PeopleSpaceWidgetProvider.EXTRA_PACKAGE_NAME, tile.getPackageName());
-                activityIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_UID, tile.getUid());
-                views.setOnClickPendingIntent(R.id.item, PendingIntent.getActivity(
-                        context,
-                        appWidgetId,
-                        activityIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE));
-
-                views.setImageViewBitmap(
-                        R.id.package_icon,
-                        PeopleSpaceUtils.convertDrawableToBitmap(
-                                mPackageManager.getApplicationIcon(tile.getPackageName())
-                        )
-                );
-                views.setImageViewIcon(R.id.person_icon, tile.getUserIcon());
                 // Tell the AppWidgetManager to perform an update on the current app widget.
                 appWidgetManager.updateAppWidget(appWidgetId, views);
             }
         } catch (Exception e) {
-            Log.e(TAG, "Failed to retrieve conversations to set tiles");
+            Log.e(TAG, "Exception updating single conversation widgets: " + e);
         }
-    }
-
-    /** Returns the layout ID for the {@code tile}. */
-    private static int getLayout(PeopleSpaceTile tile) {
-        return tile.getNotification() == null ? R.layout.people_space_large_avatar_tile :
-                R.layout.people_space_small_avatar_tile;
     }
 
     /** Returns a list sorted by ascending last interaction time from {@code stream}. */
@@ -170,6 +154,152 @@ public class PeopleSpaceUtils {
                 .map(c -> Map.entry(getLastInteraction(peopleManager, c), c))
                 .sorted((c1, c2) -> (c2.getKey().compareTo(c1.getKey())))
                 .collect(Collectors.toList());
+    }
+
+    /** Augment {@link PeopleSpaceTile} with fields from stored tile. */
+    @VisibleForTesting
+    static PeopleSpaceTile augmentTileFromStorage(PeopleSpaceTile tile,
+            AppWidgetManager appWidgetManager, int appWidgetId) {
+        Bundle options = appWidgetManager.getAppWidgetOptions(appWidgetId);
+        PeopleSpaceTile storedTile = options.getParcelable(OPTIONS_PEOPLE_SPACE_TILE);
+        if (storedTile == null) {
+            return tile;
+        }
+        return tile.toBuilder()
+                .setNotificationKey(storedTile.getNotificationKey())
+                .setNotificationContent(storedTile.getNotificationContent())
+                .setNotificationDataUri(storedTile.getNotificationDataUri())
+                .build();
+    }
+
+    /** If incoming notification changed tile, store the changes in the tile options. */
+    public static void storeNotificationChange(StatusBarNotification sbn,
+            NotificationAction notificationAction, AppWidgetManager appWidgetManager,
+            int appWidgetId) {
+        Bundle options = appWidgetManager.getAppWidgetOptions(appWidgetId);
+        PeopleSpaceTile storedTile = options.getParcelable(OPTIONS_PEOPLE_SPACE_TILE);
+        if (notificationAction == PeopleSpaceUtils.NotificationAction.POSTED) {
+            if (DEBUG) Log.i(TAG, "Adding notification to storage, appWidgetId: " + appWidgetId);
+            Notification.MessagingStyle.Message message = getLastMessagingStyleMessage(sbn);
+            if (message == null) {
+                if (DEBUG) Log.i(TAG, "Notification doesn't have content, skipping.");
+                return;
+            }
+            storedTile = storedTile
+                    .toBuilder()
+                    .setNotificationKey(sbn.getKey())
+                    .setNotificationContent(message.getText())
+                    .setNotificationDataUri(message.getDataUri())
+                    .build();
+        } else {
+            if (DEBUG) {
+                Log.i(TAG, "Removing notification from storage, appWidgetId: " + appWidgetId);
+            }
+            storedTile = storedTile
+                    .toBuilder()
+                    .setNotificationKey(null)
+                    .setNotificationContent(null)
+                    .setNotificationDataUri(null)
+                    .build();
+        }
+        Bundle newOptions = new Bundle();
+        newOptions.putParcelable(OPTIONS_PEOPLE_SPACE_TILE, storedTile);
+        appWidgetManager.updateAppWidgetOptions(appWidgetId, newOptions);
+    }
+
+    private static RemoteViews createRemoteViews(Context context, PeopleSpaceTile tile,
+            long lastInteraction, int appWidgetId) throws Exception {
+        // TODO: If key is null or if text and data uri are null.
+        if (tile.getNotificationKey() == null) {
+            return createLastInteractionRemoteViews(context, tile, lastInteraction, appWidgetId);
+        }
+        return createNotificationRemoteViews(context, tile, lastInteraction, appWidgetId);
+    }
+
+    private static RemoteViews createLastInteractionRemoteViews(Context context,
+            PeopleSpaceTile tile, long lastInteraction, int appWidgetId)
+            throws Exception {
+        RemoteViews views = new RemoteViews(
+                    context.getPackageName(), R.layout.people_space_large_avatar_tile);
+        String status = PeopleSpaceUtils.getLastInteractionString(
+                context, lastInteraction);
+        views.setTextViewText(R.id.status, status);
+
+        views = setCommonRemoteViewsFields(context, views, tile, appWidgetId);
+        return views;
+    }
+
+    private static RemoteViews createNotificationRemoteViews(Context context,
+            PeopleSpaceTile tile, long lastInteraction, int appWidgetId)
+            throws Exception {
+
+        RemoteViews views = new RemoteViews(
+                context.getPackageName(), R.layout.people_space_small_avatar_tile);
+        Uri image = tile.getNotificationDataUri();
+        if (image != null) {
+            //TODO: Use NotificationInlineImageCache
+            views.setImageViewUri(R.id.image, image);
+            views.setViewVisibility(R.id.image, View.VISIBLE);
+            views.setViewVisibility(R.id.content, View.GONE);
+        } else {
+            views.setTextViewText(R.id.content, tile.getNotificationContent());
+            views.setViewVisibility(R.id.content, View.VISIBLE);
+            views.setViewVisibility(R.id.image, View.GONE);
+        }
+
+        views = setCommonRemoteViewsFields(context, views, tile, appWidgetId);
+        return views;
+    }
+
+    private static RemoteViews setCommonRemoteViewsFields(
+            Context context, RemoteViews views, PeopleSpaceTile tile, int appWidgetId)
+            throws Exception {
+        views.setTextViewText(R.id.name, tile.getUserName().toString());
+        views.setImageViewBitmap(
+                R.id.package_icon,
+                PeopleSpaceUtils.convertDrawableToBitmap(
+                        context.getPackageManager().getApplicationIcon(tile.getPackageName())
+                )
+        );
+        views.setImageViewIcon(R.id.person_icon, tile.getUserIcon());
+
+        Intent activityIntent = new Intent(context, LaunchConversationActivity.class);
+        activityIntent.addFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        | Intent.FLAG_ACTIVITY_NO_HISTORY
+                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        activityIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_TILE_ID, tile.getId());
+        activityIntent.putExtra(
+                PeopleSpaceWidgetProvider.EXTRA_PACKAGE_NAME, tile.getPackageName());
+        activityIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_UID, tile.getUid());
+        views.setOnClickPendingIntent(R.id.item, PendingIntent.getActivity(
+                context,
+                appWidgetId,
+                activityIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE));
+        return views;
+    }
+
+    /** Gets the most recent {@link Notification.MessagingStyle.Message} from the notification. */
+    public static Notification.MessagingStyle.Message getLastMessagingStyleMessage(
+            StatusBarNotification sbn) {
+        Notification notification = sbn.getNotification();
+        if (notification == null) {
+            return null;
+        }
+        if (Notification.MessagingStyle.class.equals(notification.getNotificationStyle())
+                && notification.extras != null) {
+            final Parcelable[] messages = notification.extras.getParcelableArray(EXTRA_MESSAGES);
+            if (!ArrayUtils.isEmpty(messages)) {
+                List<Notification.MessagingStyle.Message> sortedMessages =
+                        Notification.MessagingStyle.Message.getMessagesFromBundleArray(messages);
+                sortedMessages.sort(Collections.reverseOrder(
+                        Comparator.comparing(Notification.MessagingStyle.Message::getTimestamp)));
+                return sortedMessages.get(0);
+            }
+        }
+        return null;
     }
 
     /** Returns the last interaction time with the user specified by {@code PeopleSpaceTile}. */
