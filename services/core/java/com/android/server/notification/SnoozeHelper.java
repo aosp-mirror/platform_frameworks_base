@@ -462,8 +462,6 @@ public class SnoozeHelper {
     }
 
     private PendingIntent createPendingIntent(String pkg, String key, int userId) {
-        // TODO(b/174969959) Please replace FLAG_MUTABLE_UNAUDITED below
-        // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
         return PendingIntent.getBroadcast(mContext,
                 REQUEST_CODE_REPOST,
                 new Intent(REPOST_ACTION)
@@ -471,7 +469,7 @@ public class SnoozeHelper {
                         .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
                         .putExtra(EXTRA_KEY, key)
                         .putExtra(EXTRA_USER_ID, userId),
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
     public void scheduleRepostsForPersistedNotifications(long currentTime) {

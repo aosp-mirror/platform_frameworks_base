@@ -629,10 +629,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         return new Notification.Action.Builder(
                 Icon.createWithResource(getContext(), android.R.drawable.sym_def_app_icon),
                 "action",
-                // TODO(b/174935104) Please replace FLAG_MUTABLE_UNAUDITED below
-                // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
                 PendingIntent.getBroadcast(getContext(), 0, new Intent("Action"),
-                    PendingIntent.FLAG_MUTABLE_UNAUDITED)).build();
+                    PendingIntent.FLAG_IMMUTABLE)).build();
     }
 
     private static class FakeNotificationLifetimeExtender implements NotificationLifetimeExtender {
