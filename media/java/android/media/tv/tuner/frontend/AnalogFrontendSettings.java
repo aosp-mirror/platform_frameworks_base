@@ -264,7 +264,7 @@ public class AnalogFrontendSettings extends FrontendSettings {
          * Set Aft flag.
          *
          * <p>This API is only supported by Tuner HAL 1.1 or higher. Unsupported version would cause
-         * no-op. Use {@link TunerVersionChecker.getTunerVersion()} to check the version.
+         * no-op. Use {@link TunerVersionChecker#getTunerVersion()} to check the version.
          *
          * @param aftFlag the value to set the aft flag. The default value is
          * {@link #AFT_FLAG_UNDEFINED}.

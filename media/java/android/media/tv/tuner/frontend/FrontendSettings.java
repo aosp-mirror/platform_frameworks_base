@@ -321,7 +321,7 @@ public abstract class FrontendSettings {
      * Set Spectral Inversion.
      *
      * <p>This API is only supported by Tuner HAL 1.1 or higher. Unsupported version would cause
-     * no-op. Use {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     * no-op. Use {@link TunerVersionChecker#getTunerVersion()} to check the version.
      *
      * @param inversion the value to set as the spectral inversion. Default value is {@link
      * #FRONTEND_SPECTRAL_INVERSION_UNDEFINED}.
@@ -338,7 +338,7 @@ public abstract class FrontendSettings {
      * would be no-op.
      *
      * <p>This API is only supported by Tuner HAL 1.1 or higher. Unsupported version would cause
-     * no-op. Use {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     * no-op. Use {@link TunerVersionChecker#getTunerVersion()} to check the version.
      *
      * @param endFrequency the end frequency used during blind scan. The default value is
      * {@link android.media.tv.tuner.Tuner#INVALID_FRONTEND_SETTING_FREQUENCY}.

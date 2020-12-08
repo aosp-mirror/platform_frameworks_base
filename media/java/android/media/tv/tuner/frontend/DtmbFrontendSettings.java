@@ -29,7 +29,7 @@ import java.lang.annotation.RetentionPolicy;
  * Frontend settings for DTMB.
  *
  * <p>DTMB Frontend is only supported in Tuner HAL 1.1 or higher. Use {@link
- * android.media.tv.tuner.TunerVersionChecker.getTunerVersion()} to get the version information.
+ * android.media.tv.tuner.TunerVersionChecker#getTunerVersion()} to get the version information.
  *
  * @hide
  */

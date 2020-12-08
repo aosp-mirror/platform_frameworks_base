@@ -22,7 +22,7 @@ import android.annotation.SystemApi;
  * An Event that the client would reveice after stopping, reconfiguring and restarting a filter.
  *
  * <p>After stopping and restarting the filter, the client has to discard all coming events until
- * it receive {@link RestartedEvent} to avoid using the events from the previous configuration.
+ * it receives {@link RestartEvent} to avoid using the events from the previous configuration.
  *
  * <p>Recofiguring must happen after stopping the filter.
  *
