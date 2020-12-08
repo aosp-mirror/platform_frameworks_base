@@ -113,11 +113,6 @@ public class BatterySaverController implements BatterySaverPolicyListener {
     private boolean mIsInteractive;
 
     /**
-     * Read-only list of plugins. No need for synchronization.
-     */
-    private final Plugin[] mPlugins;
-
-    /**
      * Package name that will receive an explicit manifest broadcast for
      * {@link PowerManager#ACTION_POWER_SAVE_MODE_CHANGED}. It's {@code null} if it hasn't been
      * retrieved yet.
@@ -172,15 +167,6 @@ public class BatterySaverController implements BatterySaverPolicyListener {
         }
     }
 
-    /**
-     * Plugin interface. All methods are guaranteed to be called on the same (handler) thread.
-     */
-    public interface Plugin {
-        void onSystemReady(BatterySaverController caller);
-
-        void onBatterySaverChanged(BatterySaverController caller);
-    }
-
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -194,6 +180,7 @@ public class BatterySaverController implements BatterySaverPolicyListener {
                         updateBatterySavingStats();
                         return; // No need to send it if not enabled.
                     }
+                    // We currently evaluate state only for CPU frequency changes.
                     // Don't send the broadcast, because we never did so in this case.
                     mHandler.postStateChanged(/*sendBroadcast=*/ false,
                             REASON_INTERACTIVE_CHANGED);
@@ -224,9 +211,6 @@ public class BatterySaverController implements BatterySaverPolicyListener {
         mFileUpdater = new FileUpdater(context);
         mBatterySavingStats = batterySavingStats;
 
-        // TODO(79580230): remove plugin code and maybe screen on/off listeners?
-        // Initialize plugins.
-        mPlugins = new Plugin[0];
         PowerManager.invalidatePowerSaveModeCaches();
     }
 
@@ -299,12 +283,6 @@ public class BatterySaverController implements BatterySaverPolicyListener {
                     handleBatterySaverStateChanged(
                             msg.arg1 == ARG_SEND_BROADCAST,
                             msg.arg2);
-                    break;
-
-                case MSG_SYSTEM_READY:
-                    for (Plugin p : mPlugins) {
-                        p.onSystemReady(BatterySaverController.this);
-                    }
                     break;
             }
         }
@@ -477,10 +455,6 @@ public class BatterySaverController implements BatterySaverPolicyListener {
             mFileUpdater.restoreDefault();
         } else {
             mFileUpdater.writeFiles(fileValues);
-        }
-
-        for (Plugin p : mPlugins) {
-            p.onBatterySaverChanged(this);
         }
 
         if (sendBroadcast) {
