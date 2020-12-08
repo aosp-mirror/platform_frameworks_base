@@ -503,7 +503,9 @@ StorageId IncrementalService::createStorage(
         int cmd = controlParcel.cmd.release().release();
         int pendingReads = controlParcel.pendingReads.release().release();
         int logs = controlParcel.log.release().release();
-        control = mIncFs->createControl(cmd, pendingReads, logs);
+        int blocksWritten =
+                controlParcel.blocksWritten ? controlParcel.blocksWritten->release().release() : -1;
+        control = mIncFs->createControl(cmd, pendingReads, logs, blocksWritten);
     }
 
     std::unique_lock l(mLock);
@@ -1381,7 +1383,9 @@ bool IncrementalService::mountExistingImage(std::string_view root) {
     int cmd = controlParcel.cmd.release().release();
     int pendingReads = controlParcel.pendingReads.release().release();
     int logs = controlParcel.log.release().release();
-    IncFsMount::Control control = mIncFs->createControl(cmd, pendingReads, logs);
+    int blocksWritten =
+            controlParcel.blocksWritten ? controlParcel.blocksWritten->release().release() : -1;
+    IncFsMount::Control control = mIncFs->createControl(cmd, pendingReads, logs, blocksWritten);
 
     auto ifs = std::make_shared<IncFsMount>(std::string(root), -1, std::move(control), *this);
 
@@ -1516,6 +1520,9 @@ void IncrementalService::prepareDataLoaderLocked(IncFsMount& ifs, DataLoaderPara
     fsControlParcel.incremental->cmd.reset(dup(ifs.control.cmd()));
     fsControlParcel.incremental->pendingReads.reset(dup(ifs.control.pendingReads()));
     fsControlParcel.incremental->log.reset(dup(ifs.control.logs()));
+    if (ifs.control.blocksWritten() >= 0) {
+        fsControlParcel.incremental->blocksWritten.emplace(dup(ifs.control.blocksWritten()));
+    }
     fsControlParcel.service = new IncrementalServiceConnector(*this, ifs.mountId);
 
     ifs.dataLoaderStub =

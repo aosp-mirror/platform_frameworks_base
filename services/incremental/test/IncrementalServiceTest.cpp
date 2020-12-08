@@ -285,7 +285,9 @@ class MockIncFs : public IncFsWrapper {
 public:
     MOCK_CONST_METHOD1(listExistingMounts, void(const ExistingMountCallback& cb));
     MOCK_CONST_METHOD1(openMount, Control(std::string_view path));
-    MOCK_CONST_METHOD3(createControl, Control(IncFsFd cmd, IncFsFd pendingReads, IncFsFd logs));
+    MOCK_CONST_METHOD4(createControl,
+                       Control(IncFsFd cmd, IncFsFd pendingReads, IncFsFd logs,
+                               IncFsFd blocksWritten));
     MOCK_CONST_METHOD5(makeFile,
                        ErrorCode(const Control& control, std::string_view path, int mode, FileId id,
                                  NewFileParams params));
@@ -355,7 +357,7 @@ public:
 
     static constexpr auto kPendingReadsFd = 42;
     Control openMountForHealth(std::string_view) {
-        return UniqueControl(IncFs_CreateControl(-1, kPendingReadsFd, -1));
+        return UniqueControl(IncFs_CreateControl(-1, kPendingReadsFd, -1, -1));
     }
 
     RawMetadata getMountInfoMetadata(const Control& control, std::string_view path) {
