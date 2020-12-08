@@ -36,7 +36,7 @@ import java.util.Queue;
  * (new) system for storing the brightness. It has methods to convert between the two and also
  * observes for when one of the settings is changed and syncs this with the other.
  */
-public class BrightnessSynchronizer{
+public class BrightnessSynchronizer {
 
     private static final int MSG_UPDATE_FLOAT = 1;
     private static final int MSG_UPDATE_INT = 2;
@@ -78,6 +78,26 @@ public class BrightnessSynchronizer{
         mContext = context;
         mBrightnessSyncObserver = new BrightnessSyncObserver(mHandler);
         mBrightnessSyncObserver.startObserving();
+
+        // It is possible for the system to start up with the int and float values not
+        // synchronized. So we force an update to the int value, since float is the source
+        // of truth. Fallback to int value, if float is invalid. If both are invalid, use default
+        // float value from config.
+        final float currentFloatBrightness = getScreenBrightnessFloat(context);
+        final int currentIntBrightness = getScreenBrightnessInt(context);
+
+        if (!Float.isNaN(currentFloatBrightness)) {
+            updateBrightnessIntFromFloat(currentFloatBrightness);
+        } else if (currentIntBrightness != -1) {
+            updateBrightnessFloatFromInt(currentIntBrightness);
+        } else {
+            final float defaultBrightness = mContext.getResources().getFloat(
+                    com.android.internal.R.dimen.config_screenBrightnessSettingDefaultFloat);
+            Settings.System.putFloatForUser(mContext.getContentResolver(),
+                    Settings.System.SCREEN_BRIGHTNESS_FLOAT, defaultBrightness,
+                    UserHandle.USER_CURRENT);
+
+        }
     }
 
     /**
@@ -166,7 +186,8 @@ public class BrightnessSynchronizer{
 
     private static int getScreenBrightnessInt(Context context) {
         return Settings.System.getIntForUser(context.getContentResolver(),
-                Settings.System.SCREEN_BRIGHTNESS, 0, UserHandle.USER_CURRENT);
+                Settings.System.SCREEN_BRIGHTNESS, PowerManager.BRIGHTNESS_INVALID,
+                UserHandle.USER_CURRENT);
     }
 
     private float mPreferredSettingValue;
