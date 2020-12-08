@@ -306,7 +306,13 @@ public class DevicePolicyManager {
      * of the provisioning flow was successful, although this doesn't guarantee the full flow will
      * succeed. Conversely a result code of {@link android.app.Activity#RESULT_CANCELED} implies
      * that the user backed-out of provisioning, or some precondition for provisioning wasn't met.
+     *
+     * @deprecated admin apps must now implement activities with intent filters for the {@link
+     * #ACTION_GET_PROVISIONING_MODE} and {@link #ACTION_ADMIN_POLICY_COMPLIANCE} intent actions;
+     * using {@link #ACTION_PROVISION_MANAGED_DEVICE} to start provisioning will cause the
+     * provisioning to fail.
      */
+    @Deprecated
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_PROVISION_MANAGED_DEVICE
         = "android.app.action.PROVISION_MANAGED_DEVICE";
@@ -598,6 +604,12 @@ public class DevicePolicyManager {
      * properties will be converted into a {@link android.os.PersistableBundle} and passed to the
      * management application after provisioning.
      *
+     * <p>Admin apps will receive this extra in their {@link #ACTION_GET_PROVISIONING_MODE} and
+     * {@link #ACTION_ADMIN_POLICY_COMPLIANCE} intent handlers. Additionally, {@link
+     * #ACTION_GET_PROVISIONING_MODE} may also return this extra which will then be sent over to
+     * {@link #ACTION_ADMIN_POLICY_COMPLIANCE}, alongside the original values that were passed to
+     * {@link #ACTION_GET_PROVISIONING_MODE}.
+     *
      * <p>
      * In both cases the application receives the data in
      * {@link DeviceAdminReceiver#onProfileProvisioningComplete} via an intent with the action
@@ -655,7 +667,9 @@ public class DevicePolicyManager {
      * profile provisioning. If the account supplied is present in the primary user, it will be
      * copied, along with its credentials to the managed profile and removed from the primary user.
      *
-     * Use with {@link #ACTION_PROVISION_MANAGED_PROFILE}.
+     * Use with {@link #ACTION_PROVISION_MANAGED_PROFILE}, with managed account provisioning, or
+     * return as an extra to the intent result from the {@link #ACTION_GET_PROVISIONING_MODE}
+     * activity.
      */
 
     public static final String EXTRA_PROVISIONING_ACCOUNT_TO_MIGRATE
@@ -669,8 +683,10 @@ public class DevicePolicyManager {
      *
      * <p> Defaults to {@code false}
      *
-     * <p> Use with {@link #ACTION_PROVISION_MANAGED_PROFILE} and
-     * {@link #EXTRA_PROVISIONING_ACCOUNT_TO_MIGRATE}
+     * <p> Use with {@link #ACTION_PROVISION_MANAGED_PROFILE} or set as an extra to the
+     * intent result of the {@link #ACTION_GET_PROVISIONING_MODE} activity.
+     *
+     * @see #EXTRA_PROVISIONING_ACCOUNT_TO_MIGRATE
      */
     public static final String EXTRA_PROVISIONING_KEEP_ACCOUNT_ON_MIGRATION
             = "android.app.extra.PROVISIONING_KEEP_ACCOUNT_ON_MIGRATION";
@@ -697,8 +713,9 @@ public class DevicePolicyManager {
      * A Boolean extra that can be used by the mobile device management application to skip the
      * disabling of system apps during provisioning when set to {@code true}.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} or an intent with action
-     * {@link #ACTION_PROVISION_MANAGED_DEVICE} that starts device owner provisioning.
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC}, an intent with action
+     * {@link #ACTION_PROVISION_MANAGED_PROFILE} that starts profile owner provisioning or
+     * set as an extra to the intent result of the {@link #ACTION_GET_PROVISIONING_MODE} activity.
      */
     public static final String EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED =
             "android.app.extra.PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED";
@@ -1175,27 +1192,15 @@ public class DevicePolicyManager {
             "android.app.extra.PROVISIONING_DISCLAIMER_CONTENT";
 
     /**
-     * A boolean extra indicating if user setup should be skipped, for when provisioning is started
-     * during setup-wizard.
-     *
-     * <p>If unspecified, defaults to {@code true} to match the behavior in
-     * {@link android.os.Build.VERSION_CODES#M} and earlier.
-     *
-     * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_DEVICE} or
-     * {@link #ACTION_PROVISION_MANAGED_USER}.
-     *
-     * @hide
-     */
-    public static final String EXTRA_PROVISIONING_SKIP_USER_SETUP =
-            "android.app.extra.PROVISIONING_SKIP_USER_SETUP";
-
-    /**
      * A boolean extra indicating if the user consent steps from the provisioning flow should be
      * skipped. If unspecified, defaults to {@code false}.
      *
      * It can only be used by an existing device owner trying to create a managed profile via
      * {@link #ACTION_PROVISION_MANAGED_PROFILE}. Otherwise it is ignored.
+     *
+     * @deprecated this extra is no longer relevant as device owners cannot create managed profiles
      */
+    @Deprecated
     public static final String EXTRA_PROVISIONING_SKIP_USER_CONSENT =
             "android.app.extra.PROVISIONING_SKIP_USER_CONSENT";
 
@@ -2456,6 +2461,16 @@ public class DevicePolicyManager {
      * <p>The target activity may also return the account that needs to be migrated from primary
      * user to managed profile in case of a profile owner provisioning in
      * {@link #EXTRA_PROVISIONING_ACCOUNT_TO_MIGRATE} as result.
+     *
+     * <p>The target activity may also include the {@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}
+     * extra in the intent result. The values of this {@link android.os.PersistableBundle} will be
+     * sent as an intent extra of the same name to the {@link #ACTION_ADMIN_POLICY_COMPLIANCE}
+     * activity, along with the values of the {@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE} extra
+     * that are already supplied to this activity.
+     *
+     * @see #EXTRA_PROVISIONING_KEEP_ACCOUNT_ON_MIGRATION
+     * @see #EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED
+     * @see #ACTION_ADMIN_POLICY_COMPLIANCE
      */
     public static final String ACTION_GET_PROVISIONING_MODE =
             "android.app.action.GET_PROVISIONING_MODE";
@@ -2545,6 +2560,11 @@ public class DevicePolicyManager {
      * provisioning flow (in which case this gets sent after {@link #ACTION_GET_PROVISIONING_MODE}),
      * or it could happen during provisioning finalization if the administrator supports
      * finalization during setup wizard.
+     *
+     * <p>Intents with this action may also be supplied with the {@link
+     * #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE} extra.
+     *
+     * @see #ACTION_GET_PROVISIONING_MODE
      */
     public static final String ACTION_ADMIN_POLICY_COMPLIANCE =
             "android.app.action.ADMIN_POLICY_COMPLIANCE";
