@@ -6118,8 +6118,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         int userId = admin != null ? admin.getUserHandle().getIdentifier()
                 : caller.getUserId();
-        Slog.i(LOG_TAG, "wipeDataWithReason(" + wipeReasonForUser + "): admin=" + admin + ", user="
-                + userId);
+        Slog.i(LOG_TAG, String.format("wipeDataWithReason(%s): admin=%s, user=%d",
+                wipeReasonForUser, admin, userId));
         if (calledByProfileOwnerOnOrgOwnedDevice) {
             // When wipeData is called on the parent instance, it implies wiping the entire device.
             if (calledOnParentInstance) {
