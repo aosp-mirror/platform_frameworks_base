@@ -72,6 +72,12 @@ public class MediaOutputSliceConstants {
             "com.android.systemui.action.LAUNCH_MEDIA_OUTPUT_DIALOG";
 
     /**
+     * An intent action to dismiss media output dialog.
+     */
+    public static final String ACTION_DISMISS_MEDIA_OUTPUT_DIALOG =
+            "com.android.systemui.action.DISMISS_MEDIA_OUTPUT_DIALOG";
+
+    /**
      * Settings package name.
      */
     public static final String SETTINGS_PACKAGE_NAME = "com.android.settings";
