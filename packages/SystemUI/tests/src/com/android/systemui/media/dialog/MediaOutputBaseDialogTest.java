@@ -36,7 +36,6 @@ import androidx.core.graphics.drawable.IconCompat;
 import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
-import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
@@ -55,7 +54,6 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
 
     // Mock
     private MediaOutputBaseAdapter mMediaOutputBaseAdapter = mock(MediaOutputBaseAdapter.class);
-
     private MediaSessionManager mMediaSessionManager = mock(MediaSessionManager.class);
     private LocalBluetoothManager mLocalBluetoothManager = mock(LocalBluetoothManager.class);
     private ShadeController mShadeController = mock(ShadeController.class);
@@ -157,30 +155,6 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
         verify(mMediaOutputBaseAdapter).notifyDataSetChanged();
     }
 
-    @Test
-    public void refresh_with6Devices_checkBottomPaddingVisibility() {
-        for (int i = 0; i < 6; i++) {
-            mMediaOutputController.mMediaDevices.add(mock(MediaDevice.class));
-        }
-        mMediaOutputBaseDialogImpl.refresh();
-        final View view = mMediaOutputBaseDialogImpl.mDialogView.requireViewById(
-                R.id.list_bottom_padding);
-
-        assertThat(view.getVisibility()).isEqualTo(View.GONE);
-    }
-
-    @Test
-    public void refresh_with5Devices_checkBottomPaddingVisibility() {
-        for (int i = 0; i < 5; i++) {
-            mMediaOutputController.mMediaDevices.add(mock(MediaDevice.class));
-        }
-        mMediaOutputBaseDialogImpl.refresh();
-        final View view = mMediaOutputBaseDialogImpl.mDialogView.requireViewById(
-                R.id.list_bottom_padding);
-
-        assertThat(view.getVisibility()).isEqualTo(View.VISIBLE);
-    }
-
     class MediaOutputBaseDialogImpl extends MediaOutputBaseDialog {
 
         MediaOutputBaseDialogImpl(Context context, MediaOutputController mediaOutputController) {
@@ -189,24 +163,34 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
             mAdapter = mMediaOutputBaseAdapter;
         }
 
+        @Override
         int getHeaderIconRes() {
             return mHeaderIconRes;
         }
 
+        @Override
         IconCompat getHeaderIcon() {
             return mIconCompat;
         }
 
+        @Override
         int getHeaderIconSize() {
             return 10;
         }
 
+        @Override
         CharSequence getHeaderText() {
             return mHeaderTitle;
         }
 
+        @Override
         CharSequence getHeaderSubtitle() {
             return mHeaderSubtitle;
+        }
+
+        @Override
+        int getStopButtonVisibility() {
+            return 0;
         }
     }
 }

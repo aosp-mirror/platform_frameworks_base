@@ -44,9 +44,12 @@ public abstract class MediaOutputBaseAdapter extends
     private static final String FONT_SELECTED_TITLE = "sans-serif-medium";
     private static final String FONT_TITLE = "sans-serif";
 
+    static final int CUSTOMIZED_ITEM_PAIR_NEW = 1;
+
     final MediaOutputController mController;
 
     private boolean mIsDragging;
+    private int mMargin;
 
     Context mContext;
     View mHolderView;
@@ -60,6 +63,8 @@ public abstract class MediaOutputBaseAdapter extends
     public MediaDeviceBaseViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup,
             int viewType) {
         mContext = viewGroup.getContext();
+        mMargin = mContext.getResources().getDimensionPixelSize(
+                R.dimen.media_output_dialog_list_margin);
         mHolderView = LayoutInflater.from(mContext).inflate(R.layout.media_output_list_item,
                 viewGroup, false);
 
@@ -106,12 +111,26 @@ public abstract class MediaOutputBaseAdapter extends
             mSeekBar = view.requireViewById(R.id.volume_seekbar);
         }
 
-        void onBind(MediaDevice device) {
+        void onBind(MediaDevice device, boolean topMargin, boolean bottomMargin) {
             mTitleIcon.setImageIcon(mController.getDeviceIconCompat(device).toIcon(mContext));
+            setMargin(topMargin, bottomMargin);
         }
 
-        void onBind(int customizedItem) { }
+        void onBind(int customizedItem, boolean topMargin, boolean bottomMargin) {
+            setMargin(topMargin, bottomMargin);
+        }
 
+        private void setMargin(boolean topMargin, boolean bottomMargin) {
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) mFrameLayout
+                    .getLayoutParams();
+            if (topMargin) {
+                params.topMargin = mMargin;
+            }
+            if (bottomMargin) {
+                params.bottomMargin = mMargin;
+            }
+            mFrameLayout.setLayoutParams(params);
+        }
         void setSingleLineLayout(CharSequence title, boolean bFocused) {
             mTitleText.setVisibility(View.VISIBLE);
             mTwoLineLayout.setVisibility(View.GONE);
@@ -123,10 +142,19 @@ public abstract class MediaOutputBaseAdapter extends
             }
         }
 
-        void setTwoLineLayout(MediaDevice device, boolean bFocused) {
+        void setTwoLineLayout(MediaDevice device, CharSequence title, boolean bFocused,
+                boolean showSeekBar, boolean showProgressBar, boolean showSubtitle) {
             mTitleText.setVisibility(View.GONE);
             mTwoLineLayout.setVisibility(View.VISIBLE);
-            mTwoLineTitleText.setText(getItemTitle(device));
+            mSeekBar.setVisibility(showSeekBar ? View.VISIBLE : View.GONE);
+            mProgressBar.setVisibility(showProgressBar ? View.VISIBLE : View.GONE);
+            mSubTitleText.setVisibility(showSubtitle ? View.VISIBLE : View.GONE);
+            if (device == null) {
+                mTwoLineTitleText.setText(title);
+            } else {
+                mTwoLineTitleText.setText(getItemTitle(device));
+            }
+
             if (bFocused) {
                 mTwoLineTitleText.setTypeface(Typeface.create(FONT_SELECTED_TITLE,
                         Typeface.NORMAL));

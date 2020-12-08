@@ -46,8 +46,6 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mGroupItemController.setVisibility(View.GONE);
-        mGroupDivider.setVisibility(View.GONE);
     }
 
     @Override
@@ -74,5 +72,11 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
     @Override
     CharSequence getHeaderSubtitle() {
         return mMediaOutputController.getHeaderSubTitle();
+    }
+
+    @Override
+    int getStopButtonVisibility() {
+        return mMediaOutputController.isActiveRemoteDevice(
+                mMediaOutputController.getCurrentConnectedMediaDevice()) ? View.VISIBLE : View.GONE;
     }
 }

@@ -24,6 +24,7 @@ import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadata;
+import android.media.MediaRoute2Info;
 import android.media.RoutingSessionInfo;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
@@ -63,7 +64,7 @@ import javax.inject.Inject;
 public class MediaOutputController implements LocalMediaManager.DeviceCallback{
 
     private static final String TAG = "MediaOutputController";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final String mPackageName;
     private final Context mContext;
@@ -404,6 +405,14 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback{
             return true;
         };
         mActivityStarter.dismissKeyguardThenExecute(postKeyguardAction, null, true);
+    }
+
+    boolean isActiveRemoteDevice(@NonNull MediaDevice device) {
+        final List<String> features = device.getFeatures();
+        return (features.contains(MediaRoute2Info.FEATURE_REMOTE_PLAYBACK)
+                || features.contains(MediaRoute2Info.FEATURE_REMOTE_AUDIO_PLAYBACK)
+                || features.contains(MediaRoute2Info.FEATURE_REMOTE_VIDEO_PLAYBACK)
+                || features.contains(MediaRoute2Info.FEATURE_REMOTE_GROUP_PLAYBACK));
     }
 
     private final MediaController.Callback mCb = new MediaController.Callback() {
