@@ -19,9 +19,10 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.hardware.camera2.params.OutputConfiguration.ROTATION_90;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.Surface.ROTATION_0;
+import static android.view.Surface.ROTATION_270;
+import static android.view.Surface.ROTATION_90;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
@@ -480,33 +481,49 @@ public class WindowStateTests extends WindowTestsBase {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         final SurfaceControl.Transaction t = spy(StubTransaction.class);
 
-        app.mHasSurface = true;
+        makeWindowVisible(app);
         app.mSurfaceControl = mock(SurfaceControl.class);
-        try {
-            app.getFrame().set(10, 20, 60, 80);
-            app.updateSurfacePosition(t);
+        final Rect frame = app.getFrame();
+        frame.set(10, 20, 60, 80);
+        app.updateSurfacePosition(t);
+        assertTrue(app.mLastSurfacePosition.equals(frame.left, frame.top));
+        app.seamlesslyRotateIfAllowed(t, ROTATION_0, ROTATION_90, true /* requested */);
+        assertTrue(app.mSeamlesslyRotated);
 
-            app.seamlesslyRotateIfAllowed(t, ROTATION_0, ROTATION_90, true);
+        // Verify we un-rotate the window state surface.
+        final Matrix matrix = new Matrix();
+        // Un-rotate 90 deg.
+        matrix.setRotate(270);
+        // Translate it back to origin.
+        matrix.postTranslate(0, mDisplayInfo.logicalWidth);
+        verify(t).setMatrix(eq(app.mSurfaceControl), eq(matrix), any(float[].class));
 
-            assertTrue(app.mSeamlesslyRotated);
+        // Verify we update the position as well.
+        final float[] curSurfacePos = {app.mLastSurfacePosition.x, app.mLastSurfacePosition.y};
+        matrix.mapPoints(curSurfacePos);
+        verify(t).setPosition(eq(app.mSurfaceControl), eq(curSurfacePos[0]), eq(curSurfacePos[1]));
 
-            // Verify we un-rotate the window state surface.
-            Matrix matrix = new Matrix();
-            // Un-rotate 90 deg
-            matrix.setRotate(270);
-            // Translate it back to origin
-            matrix.postTranslate(0, mDisplayInfo.logicalWidth);
-            verify(t).setMatrix(eq(app.mSurfaceControl), eq(matrix), any(float[].class));
+        app.finishSeamlessRotation(false /* timeout */);
+        assertFalse(app.mSeamlesslyRotated);
+        assertNull(app.mPendingSeamlessRotate);
 
-            // Verify we update the position as well.
-            float[] currentSurfacePos = {app.mLastSurfacePosition.x, app.mLastSurfacePosition.y};
-            matrix.mapPoints(currentSurfacePos);
-            verify(t).setPosition(eq(app.mSurfaceControl), eq(currentSurfacePos[0]),
-                    eq(currentSurfacePos[1]));
-        } finally {
-            app.mSurfaceControl = null;
-            app.mHasSurface = false;
-        }
+        // Simulate the case with deferred layout and animation.
+        app.resetSurfacePositionForAnimationLeash(t);
+        clearInvocations(t);
+        mWm.mWindowPlacerLocked.deferLayout();
+        app.updateSurfacePosition(t);
+        // Because layout is deferred, the position should keep the reset value.
+        assertTrue(app.mLastSurfacePosition.equals(0, 0));
+
+        app.seamlesslyRotateIfAllowed(t, ROTATION_0, ROTATION_270, true /* requested */);
+        // The last position must be updated so the surface can be unrotated properly.
+        assertTrue(app.mLastSurfacePosition.equals(frame.left, frame.top));
+        matrix.setRotate(90);
+        matrix.postTranslate(mDisplayInfo.logicalHeight, 0);
+        curSurfacePos[0] = frame.left;
+        curSurfacePos[1] = frame.top;
+        matrix.mapPoints(curSurfacePos);
+        verify(t).setPosition(eq(app.mSurfaceControl), eq(curSurfacePos[0]), eq(curSurfacePos[1]));
     }
 
     @Test
