@@ -38,6 +38,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.LiveData
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.media.dialog.MediaOutputDialogFactory
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
 import com.android.systemui.util.animation.TransitionLayout
@@ -92,6 +93,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var mediaDataManager: MediaDataManager
     @Mock private lateinit var expandedSet: ConstraintSet
     @Mock private lateinit var collapsedSet: ConstraintSet
+    @Mock private lateinit var mediaOutputDialogFactory: MediaOutputDialogFactory
     private lateinit var appIcon: ImageView
     private lateinit var appName: TextView
     private lateinit var albumView: ImageView
@@ -128,7 +130,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(mediaViewController.collapsedLayout).thenReturn(collapsedSet)
 
         player = MediaControlPanel(context, bgExecutor, activityStarter, mediaViewController,
-                seekBarViewModel, Lazy { mediaDataManager }, keyguardDismissUtil)
+                seekBarViewModel, Lazy { mediaDataManager }, keyguardDismissUtil,
+                mediaOutputDialogFactory)
         whenever(seekBarViewModel.progress).thenReturn(seekBarData)
 
         // Mock out a view holder for the player to attach to.
