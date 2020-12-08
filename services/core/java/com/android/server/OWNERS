@@ -26,3 +26,4 @@ per-file NetIdManager.java = file:/services/core/java/com/android/server/net/OWN
 per-file PackageWatchdog.java = file:/services/core/java/com/android/server/rollback/OWNERS
 per-file TelephonyRegistry.java = file:/telephony/OWNERS
 per-file UiModeManagerService.java = file:/packages/SystemUI/OWNERS
+per-file VcnManagementService.java = file:/services/core/java/com/android/server/vcn/OWNERS
