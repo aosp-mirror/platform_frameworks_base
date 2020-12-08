@@ -148,10 +148,36 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onWallpaperColorsChanged_whiteTheme() {
+        WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.WHITE),
+                Color.valueOf(Color.BLUE), null);
+        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM);
+        ArgumentCaptor<Map<String, String>> themeOverlays = ArgumentCaptor.forClass(Map.class);
+
+        verify(mThemeOverlayApplier).applyCurrentUserOverlays(themeOverlays.capture(), any());
+
+        // Assert that we received the colors that we were expecting
+        assertThat(!themeOverlays.getValue().containsKey(OVERLAY_CATEGORY_SYSTEM_PALETTE));
+    }
+
+    @Test
+    public void onWallpaperColorsChanged_blackTheme() {
+        WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.BLACK),
+                Color.valueOf(Color.BLUE), null);
+        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM);
+        ArgumentCaptor<Map<String, String>> themeOverlays = ArgumentCaptor.forClass(Map.class);
+
+        verify(mThemeOverlayApplier).applyCurrentUserOverlays(themeOverlays.capture(), any());
+
+        // Assert that we received the colors that we were expecting
+        assertThat(!themeOverlays.getValue().containsKey(OVERLAY_CATEGORY_SYSTEM_PALETTE));
+    }
+
+    @Test
     public void onWallpaperColorsChanged_addsLeadingZerosToColors() {
         // Should ask for a new theme when wallpaper colors change
         WallpaperColors mainColors = new WallpaperColors(Color.valueOf(0x0CCCCC),
-                Color.valueOf(0x000111), null);
+                Color.valueOf(0x000CCC), null);
         mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM);
         ArgumentCaptor<Map<String, String>> themeOverlays = ArgumentCaptor.forClass(Map.class);
 
@@ -161,7 +187,7 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         assertThat(themeOverlays.getValue().get(OVERLAY_CATEGORY_SYSTEM_PALETTE))
                 .isEqualTo(MONET_SYSTEM_PALETTE_PACKAGE + "0CCCCC");
         assertThat(themeOverlays.getValue().get(OVERLAY_CATEGORY_ACCENT_COLOR))
-                .isEqualTo(MONET_ACCENT_COLOR_PACKAGE + "000111");
+                .isEqualTo(MONET_ACCENT_COLOR_PACKAGE + "000CCC");
     }
 
     @Test
