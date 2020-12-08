@@ -51,6 +51,7 @@ import android.hardware.input.TouchCalibration;
 import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.CombinedVibrationEffect;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -264,7 +265,11 @@ public class InputManagerService extends IInputManager.Stub
     private static native void nativeReloadCalibration(long ptr);
     private static native void nativeVibrate(long ptr, int deviceId, long[] pattern,
             int[] amplitudes, int repeat, int token);
+    private static native void nativeVibrateCombined(long ptr, int deviceId, long[] pattern,
+            SparseArray<int[]> amplitudes, int repeat, int token);
     private static native void nativeCancelVibrate(long ptr, int deviceId, int token);
+    private static native boolean nativeIsVibrating(long ptr, int deviceId);
+    private static native int[] nativeGetVibratorIds(long ptr, int deviceId);
     private static native void nativeReloadKeyboardLayouts(long ptr);
     private static native void nativeReloadDeviceAliases(long ptr);
     private static native String nativeDump(long ptr);
@@ -1801,43 +1806,57 @@ public class InputManagerService extends IInputManager.Stub
         return result;
     }
 
-    // Binder call
-    @Override
-    public void vibrate(int deviceId, VibrationEffect effect, IBinder token) {
-        long[] pattern;
-        int[] amplitudes;
-        int repeat;
-        if (effect instanceof VibrationEffect.OneShot) {
-            VibrationEffect.OneShot oneShot = (VibrationEffect.OneShot) effect;
-            pattern = new long[] { 0, oneShot.getDuration() };
-            int amplitude = oneShot.getAmplitude();
-            // android framework uses DEFAULT_AMPLITUDE to signal that the vibration
-            // should use some built-in default value, denoted here as DEFAULT_VIBRATION_MAGNITUDE
-            if (amplitude == VibrationEffect.DEFAULT_AMPLITUDE) {
-                amplitude = DEFAULT_VIBRATION_MAGNITUDE;
-            }
-            amplitudes = new int[] { 0, amplitude };
-            repeat = -1;
-        } else if (effect instanceof VibrationEffect.Waveform) {
-            VibrationEffect.Waveform waveform = (VibrationEffect.Waveform) effect;
-            pattern = waveform.getTimings();
-            amplitudes = waveform.getAmplitudes();
-            for (int i = 0; i < amplitudes.length; i++) {
-                if (amplitudes[i] == VibrationEffect.DEFAULT_AMPLITUDE) {
-                    amplitudes[i] = DEFAULT_VIBRATION_MAGNITUDE;
+    private static class VibrationInfo {
+        private long[] mPattern = new long[0];
+        private int[] mAmplitudes = new int[0];
+        private int mRepeat = -1;
+
+        public long[] getPattern() {
+            return mPattern;
+        }
+
+        public int[] getAmplitudes() {
+            return mAmplitudes;
+        }
+
+        public int getRepeatIndex() {
+            return mRepeat;
+        }
+
+        VibrationInfo(VibrationEffect effect) {
+            if (effect instanceof VibrationEffect.OneShot) {
+                VibrationEffect.OneShot oneShot = (VibrationEffect.OneShot) effect;
+                mPattern = new long[] { 0, oneShot.getDuration() };
+                int amplitude = oneShot.getAmplitude();
+                // android framework uses DEFAULT_AMPLITUDE to signal that the vibration
+                // should use some built-in default value, denoted here as
+                // DEFAULT_VIBRATION_MAGNITUDE
+                if (amplitude == VibrationEffect.DEFAULT_AMPLITUDE) {
+                    amplitude = DEFAULT_VIBRATION_MAGNITUDE;
                 }
+                mAmplitudes = new int[] { 0, amplitude };
+                mRepeat = -1;
+            } else if (effect instanceof VibrationEffect.Waveform) {
+                VibrationEffect.Waveform waveform = (VibrationEffect.Waveform) effect;
+                mPattern = waveform.getTimings();
+                mAmplitudes = waveform.getAmplitudes();
+                for (int i = 0; i < mAmplitudes.length; i++) {
+                    if (mAmplitudes[i] == VibrationEffect.DEFAULT_AMPLITUDE) {
+                        mAmplitudes[i] = DEFAULT_VIBRATION_MAGNITUDE;
+                    }
+                }
+                mRepeat = waveform.getRepeatIndex();
+                if (mRepeat >= mPattern.length) {
+                    throw new ArrayIndexOutOfBoundsException();
+                }
+            } else {
+                // TODO: Add support for prebaked effects
+                Slog.w(TAG, "Pre-baked effects aren't supported on input devices");
             }
-            repeat = waveform.getRepeatIndex();
-        } else {
-            // TODO: Add support for prebaked effects
-            Log.w(TAG, "Pre-baked effects aren't supported on input devices");
-            return;
         }
+    }
 
-        if (repeat >= pattern.length) {
-            throw new ArrayIndexOutOfBoundsException();
-        }
-
+    private VibratorToken getVibratorToken(int deviceId, IBinder token) {
         VibratorToken v;
         synchronized (mVibratorLock) {
             v = mVibratorTokens.get(token);
@@ -1852,9 +1871,70 @@ public class InputManagerService extends IInputManager.Stub
                 mVibratorTokens.put(token, v);
             }
         }
+        return v;
+    }
+
+    // Binder call
+    @Override
+    public void vibrate(int deviceId, VibrationEffect effect, IBinder token) {
+        VibrationInfo info = new VibrationInfo(effect);
+        VibratorToken v = getVibratorToken(deviceId, token);
         synchronized (v) {
             v.mVibrating = true;
-            nativeVibrate(mPtr, deviceId, pattern, amplitudes, repeat, v.mTokenValue);
+            nativeVibrate(mPtr, deviceId, info.getPattern(), info.getAmplitudes(),
+                    info.getRepeatIndex(), v.mTokenValue);
+        }
+    }
+
+    // Binder call
+    @Override
+    public int[] getVibratorIds(int deviceId) {
+        return nativeGetVibratorIds(mPtr, deviceId);
+    }
+
+    // Binder call
+    @Override
+    public boolean isVibrating(int deviceId) {
+        return nativeIsVibrating(mPtr, deviceId);
+    }
+
+    // Binder call
+    @Override
+    public void vibrateCombined(int deviceId, CombinedVibrationEffect effect, IBinder token) {
+        VibratorToken v = getVibratorToken(deviceId, token);
+        synchronized (v) {
+            if (!(effect instanceof CombinedVibrationEffect.Mono)
+                    && !(effect instanceof CombinedVibrationEffect.Stereo)) {
+                Slog.e(TAG, "Only Mono and Stereo effects are supported");
+                return;
+            }
+
+            v.mVibrating = true;
+            if (effect instanceof CombinedVibrationEffect.Mono) {
+                CombinedVibrationEffect.Mono mono = (CombinedVibrationEffect.Mono) effect;
+                VibrationInfo info = new VibrationInfo(mono.getEffect());
+                nativeVibrate(mPtr, deviceId, info.getPattern(), info.getAmplitudes(),
+                        info.getRepeatIndex(), v.mTokenValue);
+            } else if (effect instanceof CombinedVibrationEffect.Stereo) {
+                CombinedVibrationEffect.Stereo stereo = (CombinedVibrationEffect.Stereo) effect;
+                SparseArray<VibrationEffect> effects = stereo.getEffects();
+                long[] pattern = new long[0];
+                int repeat = Integer.MIN_VALUE;
+                SparseArray<int[]> amplitudes = new SparseArray<int[]>(effects.size());
+                for (int i = 0; i < effects.size(); i++) {
+                    VibrationInfo info = new VibrationInfo(effects.valueAt(i));
+                    // Pattern of all effects should be same
+                    if (pattern.length == 0) {
+                        pattern = info.getPattern();
+                    }
+                    if (repeat == Integer.MIN_VALUE) {
+                        repeat = info.getRepeatIndex();
+                    }
+                    amplitudes.put(effects.keyAt(i), info.getAmplitudes());
+                }
+                nativeVibrateCombined(mPtr, deviceId, pattern, amplitudes, repeat,
+                        v.mTokenValue);
+            }
         }
     }
 

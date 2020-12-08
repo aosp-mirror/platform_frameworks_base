@@ -30,8 +30,6 @@ import java.util.Objects;
  * Vibrator Vibrators}.
  *
  * These effects may be any number of things, from single shot vibrations to complex waveforms.
- *
- * @hide
  * @see VibrationEffect
  */
 @SuppressWarnings({"ParcelNotFinal", "ParcelCreator"}) // Parcel only extended here.
@@ -94,7 +92,6 @@ public abstract class CombinedVibrationEffect implements Parcelable {
     /**
      * A combination of haptic effects that should be played in multiple vibrators in sync.
      *
-     * @hide
      * @see CombinedVibrationEffect#startSynced()
      */
     public static final class SyncedCombination {
@@ -144,7 +141,6 @@ public abstract class CombinedVibrationEffect implements Parcelable {
     /**
      * A combination of haptic effects that should be played in multiple vibrators in sequence.
      *
-     * @hide
      * @see CombinedVibrationEffect#startSequential()
      */
     public static final class SequentialCombination {

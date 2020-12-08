@@ -17,7 +17,6 @@
 package android.hardware.input;
 
 import android.Manifest;
-import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -29,9 +28,9 @@ import android.annotation.TestApi;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.os.Binder;
 import android.os.BlockUntrustedTouchesMode;
 import android.os.Build;
+import android.os.CombinedVibrationEffect;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.InputEventInjectionSync;
@@ -41,9 +40,9 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.SystemClock;
-import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.os.VibratorManager;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
@@ -64,7 +63,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
 
 /**
  * Provides information about input devices and available key layouts.
@@ -1287,8 +1285,75 @@ public final class InputManager {
      * @return The vibrator, never null.
      * @hide
      */
-    public Vibrator getInputDeviceVibrator(int deviceId) {
-        return new InputDeviceVibrator(deviceId);
+    public Vibrator getInputDeviceVibrator(int deviceId, int vibratorId) {
+        return new InputDeviceVibrator(this, deviceId, vibratorId);
+    }
+
+    /**
+     * Gets a vibrator manager service associated with an input device, always create a new
+     * instance.
+     * @return The vibrator manager, never null.
+     * @hide
+     */
+    @NonNull
+    public VibratorManager getInputDeviceVibratorManager(int deviceId) {
+        return new InputDeviceVibratorManager(InputManager.this, deviceId);
+    }
+
+    /*
+     * Get the list of device vibrators
+     * @return The list of vibrators IDs
+     */
+    int[] getVibratorIds(int deviceId) {
+        try {
+            return mIm.getVibratorIds(deviceId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /*
+     * Perform vibration effect
+     */
+    void vibrate(int deviceId, VibrationEffect effect, IBinder token) {
+        try {
+            mIm.vibrate(deviceId, effect, token);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /*
+     * Perform combined vibration effect
+     */
+    void vibrate(int deviceId, CombinedVibrationEffect effect, IBinder token) {
+        try {
+            mIm.vibrateCombined(deviceId, effect, token);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /*
+     * Cancel an ongoing vibration
+     */
+    void cancelVibrate(int deviceId, IBinder token) {
+        try {
+            mIm.cancelVibrate(deviceId, token);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /*
+     * Check if input device is vibrating
+     */
+    boolean isVibrating(int deviceId)  {
+        try {
+            return mIm.isVibrating(deviceId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -1398,74 +1463,6 @@ public final class InputManager {
                     boolean inTabletMode = (boolean) args.arg1;
                     mListener.onTabletModeChanged(whenNanos, inTabletMode);
                     break;
-            }
-        }
-    }
-
-    private final class InputDeviceVibrator extends Vibrator {
-        private final int mDeviceId;
-        private final Binder mToken;
-
-        public InputDeviceVibrator(int deviceId) {
-            mDeviceId = deviceId;
-            mToken = new Binder();
-        }
-
-        @Override
-        public boolean hasVibrator() {
-            return true;
-        }
-
-        @Override
-        public boolean isVibrating() {
-            throw new UnsupportedOperationException(
-                "isVibrating not supported in InputDeviceVibrator");
-        }
-
-        @Override
-        public void addVibratorStateListener(@NonNull OnVibratorStateChangedListener listener) {
-            throw new UnsupportedOperationException(
-                "addVibratorStateListener not supported in InputDeviceVibrator");
-        }
-
-        @Override
-        public void addVibratorStateListener(
-                @NonNull @CallbackExecutor Executor executor,
-                @NonNull OnVibratorStateChangedListener listener) {
-            throw new UnsupportedOperationException(
-                "addVibratorStateListener not supported in InputDeviceVibrator");
-        }
-
-        @Override
-        public void removeVibratorStateListener(@NonNull OnVibratorStateChangedListener listener) {
-            throw new UnsupportedOperationException(
-                "removeVibratorStateListener not supported in InputDeviceVibrator");
-        }
-
-        @Override
-        public boolean hasAmplitudeControl() {
-            return true;
-        }
-
-        /**
-         * @hide
-         */
-        @Override
-        public void vibrate(int uid, String opPkg, @NonNull VibrationEffect effect,
-                String reason, @NonNull VibrationAttributes attributes) {
-            try {
-                mIm.vibrate(mDeviceId, effect, mToken);
-            } catch (RemoteException ex) {
-                throw ex.rethrowFromSystemServer();
-            }
-        }
-
-        @Override
-        public void cancel() {
-            try {
-                mIm.cancelVibrate(mDeviceId, mToken);
-            } catch (RemoteException ex) {
-                throw ex.rethrowFromSystemServer();
             }
         }
     }
