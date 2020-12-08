@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"അൺലോക്ക് ചെയ്യുന്നതിനായി മെനു അമർത്തുക അല്ലെങ്കിൽ അടിയന്തര കോൾ വിളിക്കുക."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"അൺലോക്കുചെയ്യാൻ മെനു അമർത്തുക."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"അൺലോക്ക് ചെയ്യാൻ പാറ്റേൺ വരയ്‌ക്കുക"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"എമർജൻസി"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"എമർജൻസി കോൾ"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"കോളിലേക്ക് മടങ്ങുക"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"ശരി!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"വീണ്ടും ശ്രമിക്കുക"</string>
@@ -980,9 +980,9 @@
     <string name="menu_space_shortcut_label" msgid="5949311515646872071">"space"</string>
     <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"delete"</string>
-    <string name="search_go" msgid="2141477624421347086">"തിരയൽ"</string>
+    <string name="search_go" msgid="2141477624421347086">"Search"</string>
     <string name="search_hint" msgid="455364685740251925">"തിരയുക…"</string>
-    <string name="searchview_description_search" msgid="1045552007537359343">"തിരയൽ"</string>
+    <string name="searchview_description_search" msgid="1045552007537359343">"Search"</string>
     <string name="searchview_description_query" msgid="7430242366971716338">"തിരയൽ അന്വേഷണം"</string>
     <string name="searchview_description_clear" msgid="1989371719192982900">"അന്വേഷണം മായ്‌ക്കുക"</string>
     <string name="searchview_description_submit" msgid="6771060386117334686">"ചോദ്യം സമർപ്പിക്കുക"</string>
@@ -1398,7 +1398,7 @@
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"സൂം നിയന്ത്രണം ലഭിക്കാൻ രണ്ടുതവണ ടാപ്പുചെയ്യുക"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"വിജറ്റ് ചേർക്കാനായില്ല."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"പോവുക"</string>
-    <string name="ime_action_search" msgid="4501435960587287668">"തിരയൽ"</string>
+    <string name="ime_action_search" msgid="4501435960587287668">"Search"</string>
     <string name="ime_action_send" msgid="8456843745664334138">"അയയ്‌ക്കുക"</string>
     <string name="ime_action_next" msgid="4169702997635728543">"അടുത്തത്"</string>
     <string name="ime_action_done" msgid="6299921014822891569">"പൂർത്തിയായി"</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"നിങ്ങളുടെ അഡ്‌മിൻ അപ്‌ഡേറ്റ് ചെയ്യുന്നത്"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"നിങ്ങളുടെ അഡ്‌മിൻ ഇല്ലാതാക്കുന്നത്"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ശരി"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"ബാറ്ററി ലെെഫ് വികസിപ്പിക്കാൻ, \'ബാറ്ററി ലാഭിക്കൽ\':\n\n•ഡാർക്ക് തീം ഓണാക്കും\n•പശ്ചാത്തല പ്രവർത്തനം, ചില വിഷ്വൽ ഇഫക്റ്റുകൾ, “ഹേയ് Google” പോലുള്ള മറ്റ് ഫീച്ചറുകൾ എന്നിവ ഓഫാക്കുകയോ നിയന്ത്രിക്കുകയോ ചെയ്യും\n\n"<annotation id="url">"കൂടുതലറിയുക"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"ബാറ്ററി ലെെഫ് വികസിപ്പിക്കാൻ, \'ബാറ്ററി ലാഭിക്കൽ\':\n\n•ഡാർക്ക് തീം ഓണാക്കും\n•പശ്ചാത്തല പ്രവർത്തനം, ചില വിഷ്വൽ ഇഫക്റ്റുകൾ, “ഹേയ് Google” പോലുള്ള മറ്റ് ഫീച്ചറുകൾ എന്നിവ ഓഫാക്കുകയോ നിയന്ത്രിക്കുകയോ ചെയ്യും"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"ബാറ്ററി ലെെഫ് വർദ്ധിപ്പിക്കാൻ, \'ബാറ്ററി ലാഭിക്കൽ\' ഇനിപ്പറയുന്നവ ചെയ്യുന്നു:\n\n•ഡാർക്ക് തീം ഓണാക്കുന്നു\n•പശ്ചാത്തല ആക്‌റ്റിവിറ്റി, ചില വിഷ്വൽ ഇഫക്റ്റുകൾ, “Ok Google” പോലുള്ള മറ്റ് ഫീച്ചറുകൾ എന്നിവ ഓഫാക്കുകയോ നിയന്ത്രിക്കുകയോ ചെയ്യന്നു\n\n"<annotation id="url">"കൂടുതലറിയുക"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"ബാറ്ററി ലെെഫ് വർദ്ധിപ്പിക്കാൻ, \'ബാറ്ററി ലാഭിക്കൽ\' ഇനിപ്പറയുന്നവ ചെയ്യുന്നു:\n\n• ഡാർക്ക് തീം ഓണാക്കുന്നു\n• പശ്ചാത്തല ആക്റ്റിവിറ്റി, ചില വിഷ്വൽ ഇഫക്റ്റുകൾ, “Ok Google” പോലുള്ള മറ്റ് ഫീച്ചറുകൾ എന്നിവ ഓഫാക്കുകയോ നിയന്ത്രിക്കുകയോ ചെയ്യുന്നു"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ഡാറ്റാ ഉപയോഗം കുറയ്ക്കാൻ സഹായിക്കുന്നതിനായി പശ്ചാത്തലത്തിൽ ഡാറ്റ അയയ്ക്കുകയോ സ്വീകരിക്കുകയോ ചെയ്യുന്നതിൽ നിന്ന് ചില ആപ്പുകളെ ഡാറ്റാ സേവർ തടയുന്നു. നിങ്ങൾ നിലവിൽ ഉപയോഗിക്കുന്ന ഒരു ആപ്പിന് ഡാറ്റ ആക്‌സസ് ചെയ്യാനാകും, എന്നാൽ വല്ലപ്പോഴും മാത്രമെ സംഭവിക്കുന്നുള്ളു. ഇതിനർത്ഥം, ഉദാഹരണമായി നിങ്ങൾ ടാപ്പ് ചെയ്യുന്നത് വരെ ചിത്രങ്ങൾ പ്രദ‍‍‍ർശിപ്പിക്കുകയില്ല എന്നാണ്."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ഡാറ്റ സേവർ ഓണാക്കണോ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ഓണാക്കുക"</string>
@@ -1881,7 +1881,7 @@
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"നിര്‍‌ദ്ദേശിച്ചത്"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"എല്ലാ ഭാഷകളും"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"എല്ലാ പ്രദേശങ്ങളും"</string>
-    <string name="locale_search_menu" msgid="6258090710176422934">"തിരയുക"</string>
+    <string name="locale_search_menu" msgid="6258090710176422934">"Search"</string>
     <string name="app_suspended_title" msgid="888873445010322650">"ആപ്പ് ലഭ്യമല്ല"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ഇപ്പോൾ ലഭ്യമല്ല. <xliff:g id="APP_NAME_1">%2$s</xliff:g> ആണ് ഇത് മാനേജ് ചെയ്യുന്നത്."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"കൂടുതലറിയുക"</string>

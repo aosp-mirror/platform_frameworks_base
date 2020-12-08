@@ -87,6 +87,10 @@ class ControlsFavoritePersistenceWrapper(
      * @param list a list of favorite controls. The list will be stored in the same order.
      */
     fun storeFavorites(structures: List<StructureInfo>) {
+        if (structures.isEmpty() && !file.exists()) {
+            // Do not create a new file to store nothing
+            return
+        }
         executor.execute {
             Log.d(TAG, "Saving data to file: $file")
             val atomicFile = AtomicFile(file)

@@ -95,7 +95,7 @@
     <string name="screenrecord_description" msgid="1123231719680353736">"Při nahrávání může systém Android zaznamenávat citlivé údaje, které jsou viditelné na obrazovce nebo které jsou přehrávány na zařízení. Týká se to hesel, údajů o platbě, fotek, zpráv a zvuků."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Nahrát zvuk"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Zvuk zařízení"</string>
-    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Zvuk ze zařízení, například hudba, hovory a vyzváněcí tóny"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Zvuk ze zařízení, například hudba, hovory a vyzvánění"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Zvuk a mikrofon zařízení"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"Spustit"</string>
@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Obnovit"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Zrušit"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Sdílet"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"Smazat"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Nahrávání obrazovky bylo zrušeno"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Záznam obrazovky byl uložen, zobrazíte jej klepnutím"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"Záznam obrazovky byl smazán"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Při mazání záznamu obrazovky došlo k chybě"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Nepodařilo se načíst oprávnění"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Při spouštění nahrávání obrazovky došlo k chybě"</string>
@@ -722,7 +720,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Může vyzvánět nebo vibrovat v závislosti na nastavení telefonu"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Může vyzvánět nebo vibrovat v závislosti na nastavení telefonu. Konverzace z aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> ve výchozím nastavení bublají."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Přitahuje pozornost pomocí plovoucí zkratky k tomuto obsahu."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Zobrazuje se v horní části sekce konverzace a má podobu plovoucí bubliny, zobrazuje profilovou fotku na obrazovce uzamčení"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Zobrazuje se v horní části sekce konverzací a má podobu plovoucí bubliny, zobrazuje profilovou fotku na obrazovce uzamčení"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nastavení"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorita"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> funkce konverzace nepodporuje"</string>
@@ -894,12 +892,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"50 % nahoře"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"30 % nahoře"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Dolní část na celou obrazovku"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"Pozice <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Dvojitým klepnutím ji upravíte."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Dlaždici přidáte dvojitým klepnutím."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"Přesunout dlaždici <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"Odstranit dlaždici <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"Přidat dlaždici <xliff:g id="TILE_NAME">%1$s</xliff:g> na pozici <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"Přesunout dlaždici <xliff:g id="TILE_NAME">%1$s</xliff:g> na pozici <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"odstranit dlaždici"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"přidat dlaždici na konec"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Přesunout dlaždici"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Přidat dlaždici"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Přesunout na pozici <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Přidat dlaždici na pozici <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Pozice <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Editor rychlého nastavení"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Oznámení aplikace <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"Aplikace v režimu rozdělené obrazovky nemusí fungovat."</string>
@@ -932,11 +931,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Přeskočit na předchozí"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Změnit velikost"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefon se vypnul z důvodu zahřátí"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Nyní telefon funguje jako obvykle."</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Nyní telefon funguje jako obvykle.\nKlepnutím zobrazíte další informace"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefon byl příliš zahřátý, proto se vypnul, aby vychladl. Nyní telefon funguje jako obvykle.\n\nTelefon se může příliš zahřát v těchto případech:\n	• používání náročných aplikací (např. her, videí nebo navigace),\n	• stahování nebo nahrávání velkých souborů,\n	• používání telefonu při vysokých teplotách."</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Zobrazit pokyny, co dělat"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Telefon se zahřívá"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Některé funkce jsou při chladnutí omezeny"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Některé funkce jsou při chladnutí telefonu omezeny.\nKlepnutím zobrazíte další informace"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Telefon se automaticky pokusí vychladnout. Lze jej nadále používat, ale může být pomalejší.\n\nAž telefon vychladne, bude fungovat normálně."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Zobrazit pokyny, co dělat"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Odpojte nabíječku"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Při nabíjení zařízení došlo k problému. Odpojte napájecí adaptér (dávejte pozor, kabel může být horký)."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Zobrazit pokyny, co dělat"</string>
@@ -998,6 +999,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Nastavení"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Rozumím"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Výpis haldy SysUI"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"Aplikace <xliff:g id="APP">%1$s</xliff:g> využívá tato oprávnění: <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplikace využívají tato oprávnění: <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" a "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"fotoaparát"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"poloha"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofon"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Senzory jsou vypnuty"</string>
     <string name="device_services" msgid="1549944177856658705">"Služby zařízení"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Bez názvu"</string>
@@ -1026,7 +1034,7 @@
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Pohotovostní režim"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Konverzace byla nastavena jako prioritní"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Chování prioritních konverzací:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Zobrazovat v horní části sekce konverzace"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Zobrazovat v horní části sekce konverzací"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Zobrazovat profilovou fotku na zámku obrazovky"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Zobrazuje se jako plovoucí bublina nad aplikacemi"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Přerušit režim Nerušit"</string>
@@ -1078,7 +1086,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Načítání doporučení"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Média"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Skrýt aktuální relaci."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Skrýt"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Zavřít"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Pokračovat"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Nastavení"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivní, zkontrolujte aplikaci"</string>

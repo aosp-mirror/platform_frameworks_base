@@ -826,10 +826,10 @@
     <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"شماره اضطراری"</string>
     <string name="lockscreen_carrier_default" msgid="6192313772955399160">"بدون سرویس"</string>
     <string name="lockscreen_screen_locked" msgid="7364905540516041817">"صفحه قفل شد."</string>
-    <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"برای بازگشایی قفل یا انجام تماس اضطراری روی منو فشار دهید."</string>
+    <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"برای بازکردن قفل یا انجام تماس اضطراری روی «منو» فشار دهید."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"برای بازگشایی قفل روی منو فشار دهید."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"الگو را بکشید تا قفل آن باز شود"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"اضطراری"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"تماس اضطراری"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"بازگشت به تماس"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"صحیح است!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"دوباره امتحان کنید"</string>
@@ -1122,8 +1122,8 @@
     <string name="capital_off" msgid="7443704171014626777">"خاموش"</string>
     <string name="checked" msgid="9179896827054513119">"علامت‌زده‌شده"</string>
     <string name="not_checked" msgid="7972320087569023342">"بدون علامت"</string>
-    <string name="whichApplication" msgid="5432266899591255759">"تکمیل عملکرد با استفاده از"</string>
-    <string name="whichApplicationNamed" msgid="6969946041713975681">"‏تکمیل عملکرد با استفاده از %1$s"</string>
+    <string name="whichApplication" msgid="5432266899591255759">"تکمیل کنش بااستفاده از"</string>
+    <string name="whichApplicationNamed" msgid="6969946041713975681">"‏تکمیل کنش بااستفاده از %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"تکمیل عملکرد"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"باز کردن با"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"‏باز کردن با %1$s"</string>
@@ -1264,7 +1264,7 @@
     <string name="sms_control_title" msgid="4748684259903148341">"درحال ارسال پیامک‌ها"</string>
     <string name="sms_control_message" msgid="6574313876316388239">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; درحال ارسال تعداد زیادی پیامک است. آیا اجازه می‌دهید این برنامه همچنان پیامک ارسال کند؟"</string>
     <string name="sms_control_yes" msgid="4858845109269524622">"مجاز است"</string>
-    <string name="sms_control_no" msgid="4845717880040355570">"اجازه ندارد"</string>
+    <string name="sms_control_no" msgid="4845717880040355570">"مجاز نبودن"</string>
     <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; مایل است پیامی به &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; ارسال کند."</string>
     <string name="sms_short_code_details" msgid="2723725738333388351">"این مورد "<b>"شاید هزینه‌ای"</b>" را به حساب دستگاه همراهتان بگذارد."</string>
     <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"این مورد هزینه‌ای را به حساب دستگاه همراهتان می‌گذارد."</b></string>
@@ -1410,7 +1410,7 @@
     <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"می‌خواهید به این درخواست اجازه دهید؟"</string>
     <string name="grant_permissions_header_text" msgid="3420736827804657201">"درخواست دسترسی"</string>
     <string name="allow" msgid="6195617008611933762">"ارزیابی‌شده"</string>
-    <string name="deny" msgid="6632259981847676572">"اجازه ندارد"</string>
+    <string name="deny" msgid="6632259981847676572">"مجاز نبودن"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"مجوز درخواست شد"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"مجوز\nبرای حساب <xliff:g id="ACCOUNT">%s</xliff:g> درخواست شد."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"شما از این برنامه در خارج از نمایه کاری‌تان استفاده می‌کنید"</string>
@@ -1639,7 +1639,7 @@
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"مشاهده و انجام کنش‌ها"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"این عملکرد می‌تواند با برنامه یا حسگری سخت‌افزاری تعاملاتتان را ردیابی کند و ازطرف شما با برنامه‌ها تعامل داشته باشد."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"مجاز"</string>
-    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"رد کردن"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"مجاز نبودن"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"برای استفاده از ویژگی، روی آن ضربه بزنید:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"انتخاب ویژگی‌های موردنظر برای استفاده با دکمه دسترس‌پذیری"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"انتخاب ویژگی‌های موردنظر برای استفاده با میان‌بر کلید میزان صدا"</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"توسط سرپرست سیستم به‌روزرسانی شد"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"توسط سرپرست سیستم حذف شد"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"تأیید"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"‏برای افزایش عمر باتری، «بهینه‌سازی باتری»:\n\n•«طرح زمینه تیره» را روشن می‌کند\n•فعالیت پس‌زمینه، برخی جلوه‌های بصری، و دیگر ویژگی‌ها مانند «Ok Google» را خاموش یا محدود می‌کند\n\n"<annotation id="url">"بیشتر بدانید"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"‏برای افزایش عمر باتری، «بهینه‌سازی باتری»:\n\n•«طرح زمینه تیره» را روشن می‌کند\n•فعالیت پس‌زمینه، برخی جلوه‌های بصری، و دیگر ویژگی‌ها مانند «Ok Google» را خاموش یا محدود می‌کند"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"‏برای افزایش عمر باتری، «بهینه‌سازی باتری»:\n\n• «طرح زمینه تیره» را روشن می‌کند\n• فعالیت پس‌زمینه، برخی جلوه‌های بصری، و دیگر ویژگی‌ها مانند «Ok Google» را خاموش یا محدود می‌کند\n\n"<annotation id="url">"بیشتر بدانید"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"‏برای افزایش عمر باتری، «بهینه‌سازی باتری»:\n\n• «طرح زمینه تیره» را روشن می‌کند\n• فعالیت پس‌زمینه، برخی جلوه‌های بصری، و دیگر ویژگی‌ها مثل «Ok Google» را خاموش یا محدود می‌کند"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"«صرفه‌جویی داده»، برای کمک به کاهش مصرف داده، از ارسال و دریافت داده در پس‌زمینه ازطرف بعضی برنامه‌ها جلوگیری می‌کند. برنامه‌ای که درحال‌حاضر استفاده می‌کنید می‌تواند به داده‌ها دسترسی داشته باشد اما دفعات دسترسی آن محدود است.این یعنی، برای مثال، تصاویر تازمانی‌که روی آن‌ها ضربه نزنید نشان داده نمی‌شوند."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"«صرفه‌جویی داده» روشن شود؟"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"روشن کردن"</string>
@@ -1926,7 +1926,7 @@
     <string name="time_picker_header_text" msgid="9073802285051516688">"تنظیم زمان"</string>
     <string name="time_picker_input_error" msgid="8386271930742451034">"زمان معتبری وارد کنید"</string>
     <string name="time_picker_prompt_label" msgid="303588544656363889">"زمان را تایپ کنید"</string>
-    <string name="time_picker_text_input_mode_description" msgid="4761160667516611576">"برای وارد کردن زمان، به حالت وارد کردن نوشتار تغییر وضعیت دهید."</string>
+    <string name="time_picker_text_input_mode_description" msgid="4761160667516611576">"برای وارد کردن زمان، به حالت ورودی نوشتاری تغییر وضعیت دهید."</string>
     <string name="time_picker_radial_mode_description" msgid="1222342577115016953">"برای وارد کردن زمان، به حالت ساعت تغییر وضعیت دهید."</string>
     <string name="autofill_picker_accessibility_title" msgid="4425806874792196599">"گزینه‌های تکمیل خودکار"</string>
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"ذخیره کردن برای تکمیل خودکار"</string>

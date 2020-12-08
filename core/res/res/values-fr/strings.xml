@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Appuyez sur \"Menu\" pour déverrouiller le téléphone ou appeler un numéro d\'urgence"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Appuyez sur \"Menu\" pour déverrouiller le téléphone."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Dessinez un schéma pour déverrouiller le téléphone"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Urgences"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Appel d\'urgence"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Retour à l\'appel"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Combinaison correcte !"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Veuillez réessayer."</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Mis à jour par votre administrateur"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Supprimé par votre administrateur"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Pour prolonger l\'autonomie de la batterie, l\'économiseur de batterie :\n\n·• active le thème sombre\n·• désactive ou restreint les activités en arrière-plan, certains effets visuels et d\'autres fonctionnalités, comme \"Ok Google\"\n\n"<annotation id="url">"En savoir plus"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"Pour prolonger l\'autonomie de la batterie, l\'économiseur de batterie :\n\n·• active le thème sombre\n • désactive ou restreint les activités en arrière-plan, certains effets visuels et d\'autres fonctionnalités, comme \"Ok Google\""</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Pour prolonger l\'autonomie de la batterie, l\'économiseur de batterie :\n\n·• active le thème sombre ;\n·• désactive ou restreint les activités en arrière-plan, certains effets visuels et d\'autres fonctionnalités, comme \"Hey Google\".\n\n"<annotation id="url">"En savoir plus"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Pour prolonger l\'autonomie de la batterie, l\'économiseur de batterie :\n\n• active le thème sombre ;\n • désactive ou restreint les activités en arrière-plan, certains effets visuels et d\'autres fonctionnalités, comme \"Hey Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Pour réduire la consommation de données, l\'économiseur de données empêche certaines applications d\'envoyer ou de recevoir des données en arrière-plan. Ainsi, les applications que vous utilisez peuvent toujours accéder aux données, mais pas en permanence. Par exemple, il se peut que les images ne s\'affichent pas tant que vous n\'appuyez pas dessus."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Activer l\'économiseur de données ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activer"</string>
@@ -1937,7 +1937,7 @@
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> suggestions de saisie automatique</item>
     </plurals>
     <string name="autofill_save_title" msgid="7719802414283739775">"Enregistrer dans "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" ?"</string>
-    <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Enregistrer <xliff:g id="TYPE">%1$s</xliff:g> dans "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" ?"</string>
+    <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Enregistrer la <xliff:g id="TYPE">%1$s</xliff:g> dans "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" ?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"Enregistrer <xliff:g id="TYPE_0">%1$s</xliff:g> et <xliff:g id="TYPE_1">%2$s</xliff:g> dans "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" ?"</string>
     <string name="autofill_save_title_with_3types" msgid="6598228952100102578">"Enregistrer <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> et <xliff:g id="TYPE_2">%3$s</xliff:g> dans "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" ?"</string>
     <string name="autofill_update_title" msgid="3630695947047069136">"Mettre à jour cet élément dans "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" ?"</string>

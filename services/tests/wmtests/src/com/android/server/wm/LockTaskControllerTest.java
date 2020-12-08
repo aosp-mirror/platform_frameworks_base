@@ -168,8 +168,8 @@ public class LockTaskControllerTest {
 
     @Test
     public void testStartLockTaskMode_once() throws Exception {
-        // GIVEN a task record with whitelisted auth
-        Task tr = getTask(Task.LOCK_TASK_AUTH_WHITELISTED);
+        // GIVEN a task record with allowlisted auth
+        Task tr = getTask(Task.LOCK_TASK_AUTH_ALLOWLISTED);
 
         // WHEN calling setLockTaskMode for LOCKED mode without resuming
         mLockTaskController.startLockTaskMode(tr, false, TEST_UID);
@@ -185,9 +185,9 @@ public class LockTaskControllerTest {
 
     @Test
     public void testStartLockTaskMode_twice() throws Exception {
-        // GIVEN two task records with whitelisted auth
-        Task tr1 = getTask(Task.LOCK_TASK_AUTH_WHITELISTED);
-        Task tr2 = getTask(Task.LOCK_TASK_AUTH_WHITELISTED);
+        // GIVEN two task records with allowlisted auth
+        Task tr1 = getTask(Task.LOCK_TASK_AUTH_ALLOWLISTED);
+        Task tr2 = getTask(Task.LOCK_TASK_AUTH_ALLOWLISTED);
 
         // WHEN calling setLockTaskMode for LOCKED mode on both tasks
         mLockTaskController.startLockTaskMode(tr1, false, TEST_UID);
@@ -205,7 +205,7 @@ public class LockTaskControllerTest {
 
     @Test
     public void testStartLockTaskMode_pinningRequest() {
-        // GIVEN a task record that is not whitelisted, i.e. with pinned auth
+        // GIVEN a task record that is not allowlisted, i.e. with pinned auth
         Task tr = getTask(Task.LOCK_TASK_AUTH_PINNABLE);
 
         // WHEN calling startLockTaskMode
@@ -236,23 +236,23 @@ public class LockTaskControllerTest {
 
     @Test
     public void testLockTaskViolation() {
-        // GIVEN one task record with whitelisted auth that is in lock task mode
-        Task tr = getTask(Task.LOCK_TASK_AUTH_WHITELISTED);
+        // GIVEN one task record with allowlisted auth that is in lock task mode
+        Task tr = getTask(Task.LOCK_TASK_AUTH_ALLOWLISTED);
         mLockTaskController.startLockTaskMode(tr, false, TEST_UID);
 
         // THEN it's not a lock task violation to try and launch this task without clearing
         assertFalse(mLockTaskController.isLockTaskModeViolation(tr, false));
 
-        // THEN it's a lock task violation to launch another task that is not whitelisted
+        // THEN it's a lock task violation to launch another task that is not allowlisted
         assertTrue(mLockTaskController.isLockTaskModeViolation(getTask(
                 Task.LOCK_TASK_AUTH_PINNABLE)));
         // THEN it's a lock task violation to launch another task that is disallowed from lock task
         assertTrue(mLockTaskController.isLockTaskModeViolation(getTask(
                 Task.LOCK_TASK_AUTH_DONT_LOCK)));
 
-        // THEN it's no a lock task violation to launch another task that is whitelisted
+        // THEN it's no a lock task violation to launch another task that is allowlisted
         assertFalse(mLockTaskController.isLockTaskModeViolation(getTask(
-                Task.LOCK_TASK_AUTH_WHITELISTED)));
+                Task.LOCK_TASK_AUTH_ALLOWLISTED)));
         assertFalse(mLockTaskController.isLockTaskModeViolation(getTask(
                 Task.LOCK_TASK_AUTH_LAUNCHABLE)));
         // THEN it's not a lock task violation to launch another task that is priv launchable
@@ -262,8 +262,8 @@ public class LockTaskControllerTest {
 
     @Test
     public void testLockTaskViolation_emergencyCall() {
-        // GIVEN one task record with whitelisted auth that is in lock task mode
-        Task tr = getTask(Task.LOCK_TASK_AUTH_WHITELISTED);
+        // GIVEN one task record with allowlisted auth that is in lock task mode
+        Task tr = getTask(Task.LOCK_TASK_AUTH_ALLOWLISTED);
         mLockTaskController.startLockTaskMode(tr, false, TEST_UID);
 
         // GIVEN tasks necessary for emergency calling
@@ -294,8 +294,8 @@ public class LockTaskControllerTest {
 
     @Test
     public void testStopLockTaskMode() throws Exception {
-        // GIVEN one task record with whitelisted auth that is in lock task mode
-        Task tr = getTask(Task.LOCK_TASK_AUTH_WHITELISTED);
+        // GIVEN one task record with allowlisted auth that is in lock task mode
+        Task tr = getTask(Task.LOCK_TASK_AUTH_ALLOWLISTED);
         mLockTaskController.startLockTaskMode(tr, false, TEST_UID);
 
         // WHEN the same caller calls stopLockTaskMode
@@ -311,8 +311,8 @@ public class LockTaskControllerTest {
 
     @Test(expected = SecurityException.class)
     public void testStopLockTaskMode_differentCaller() {
-        // GIVEN one task record with whitelisted auth that is in lock task mode
-        Task tr = getTask(Task.LOCK_TASK_AUTH_WHITELISTED);
+        // GIVEN one task record with allowlisted auth that is in lock task mode
+        Task tr = getTask(Task.LOCK_TASK_AUTH_ALLOWLISTED);
         mLockTaskController.startLockTaskMode(tr, false, TEST_UID);
 
         // WHEN a different caller calls stopLockTaskMode
@@ -323,8 +323,8 @@ public class LockTaskControllerTest {
 
     @Test
     public void testStopLockTaskMode_systemCaller() {
-        // GIVEN one task record with whitelisted auth that is in lock task mode
-        Task tr = getTask(Task.LOCK_TASK_AUTH_WHITELISTED);
+        // GIVEN one task record with allowlisted auth that is in lock task mode
+        Task tr = getTask(Task.LOCK_TASK_AUTH_ALLOWLISTED);
         mLockTaskController.startLockTaskMode(tr, false, TEST_UID);
 
         // WHEN system calls stopLockTaskMode
@@ -336,9 +336,9 @@ public class LockTaskControllerTest {
 
     @Test
     public void testStopLockTaskMode_twoTasks() throws Exception {
-        // GIVEN two task records with whitelisted auth that is in lock task mode
-        Task tr1 = getTask(Task.LOCK_TASK_AUTH_WHITELISTED);
-        Task tr2 = getTask(Task.LOCK_TASK_AUTH_WHITELISTED);
+        // GIVEN two task records with allowlisted auth that is in lock task mode
+        Task tr1 = getTask(Task.LOCK_TASK_AUTH_ALLOWLISTED);
+        Task tr2 = getTask(Task.LOCK_TASK_AUTH_ALLOWLISTED);
         mLockTaskController.startLockTaskMode(tr1, false, TEST_UID);
         mLockTaskController.startLockTaskMode(tr2, false, TEST_UID);
 
@@ -357,9 +357,9 @@ public class LockTaskControllerTest {
 
     @Test
     public void testStopLockTaskMode_rootTask() throws Exception {
-        // GIVEN two task records with whitelisted auth that is in lock task mode
-        Task tr1 = getTask(Task.LOCK_TASK_AUTH_WHITELISTED);
-        Task tr2 = getTask(Task.LOCK_TASK_AUTH_WHITELISTED);
+        // GIVEN two task records with allowlisted auth that is in lock task mode
+        Task tr1 = getTask(Task.LOCK_TASK_AUTH_ALLOWLISTED);
+        Task tr2 = getTask(Task.LOCK_TASK_AUTH_ALLOWLISTED);
         mLockTaskController.startLockTaskMode(tr1, false, TEST_UID);
         mLockTaskController.startLockTaskMode(tr2, false, TEST_UID);
 
@@ -405,9 +405,9 @@ public class LockTaskControllerTest {
 
     @Test
     public void testClearLockedTasks() throws Exception {
-        // GIVEN two task records with whitelisted auth that is in lock task mode
-        Task tr1 = getTask(Task.LOCK_TASK_AUTH_WHITELISTED);
-        Task tr2 = getTask(Task.LOCK_TASK_AUTH_WHITELISTED);
+        // GIVEN two task records with allowlisted auth that is in lock task mode
+        Task tr1 = getTask(Task.LOCK_TASK_AUTH_ALLOWLISTED);
+        Task tr2 = getTask(Task.LOCK_TASK_AUTH_ALLOWLISTED);
         mLockTaskController.startLockTaskMode(tr1, false, TEST_UID);
         mLockTaskController.startLockTaskMode(tr2, false, TEST_UID);
 
@@ -434,7 +434,7 @@ public class LockTaskControllerTest {
                 .thenReturn(DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
 
         // AND there is a task record
-        Task tr1 = getTask(Task.LOCK_TASK_AUTH_WHITELISTED);
+        Task tr1 = getTask(Task.LOCK_TASK_AUTH_ALLOWLISTED);
         mLockTaskController.startLockTaskMode(tr1, true, TEST_UID);
 
         // WHEN calling clearLockedTasks on the root task
@@ -454,7 +454,7 @@ public class LockTaskControllerTest {
                 .thenReturn(true);
 
         // AND there is a task record
-        Task tr1 = getTask(Task.LOCK_TASK_AUTH_WHITELISTED);
+        Task tr1 = getTask(Task.LOCK_TASK_AUTH_ALLOWLISTED);
         mLockTaskController.startLockTaskMode(tr1, true, TEST_UID);
 
         // WHEN calling clearLockedTasks on the root task
@@ -471,7 +471,7 @@ public class LockTaskControllerTest {
                 Settings.Secure.LOCK_TO_APP_EXIT_LOCKED, 1, mContext.getUserId());
 
         // AND there is a task record
-        Task tr1 = getTask(Task.LOCK_TASK_AUTH_WHITELISTED);
+        Task tr1 = getTask(Task.LOCK_TASK_AUTH_ALLOWLISTED);
         mLockTaskController.startLockTaskMode(tr1, true, TEST_UID);
 
         // WHEN calling clearLockedTasks on the root task
@@ -488,7 +488,7 @@ public class LockTaskControllerTest {
                 Settings.Secure.LOCK_TO_APP_EXIT_LOCKED, 0, mContext.getUserId());
 
         // AND there is a task record
-        Task tr1 = getTask(Task.LOCK_TASK_AUTH_WHITELISTED);
+        Task tr1 = getTask(Task.LOCK_TASK_AUTH_ALLOWLISTED);
         mLockTaskController.startLockTaskMode(tr1, true, TEST_UID);
 
         // WHEN calling clearLockedTasks on the root task
@@ -500,45 +500,45 @@ public class LockTaskControllerTest {
 
     @Test
     public void testUpdateLockTaskPackages() {
-        String[] whitelist1 = {TEST_PACKAGE_NAME, TEST_PACKAGE_NAME_2};
-        String[] whitelist2 = {TEST_PACKAGE_NAME};
+        String[] allowlist1 = {TEST_PACKAGE_NAME, TEST_PACKAGE_NAME_2};
+        String[] allowlist2 = {TEST_PACKAGE_NAME};
 
-        // No package is whitelisted initially
-        for (String pkg : whitelist1) {
-            assertFalse("Package shouldn't be whitelisted: " + pkg,
-                    mLockTaskController.isPackageWhitelisted(TEST_USER_ID, pkg));
-            assertFalse("Package shouldn't be whitelisted for user 0: " + pkg,
-                    mLockTaskController.isPackageWhitelisted(0, pkg));
+        // No package is allowlisted initially
+        for (String pkg : allowlist1) {
+            assertFalse("Package shouldn't be allowlisted: " + pkg,
+                    mLockTaskController.isPackageAllowlisted(TEST_USER_ID, pkg));
+            assertFalse("Package shouldn't be allowlisted for user 0: " + pkg,
+                    mLockTaskController.isPackageAllowlisted(0, pkg));
         }
 
-        // Apply whitelist
-        mLockTaskController.updateLockTaskPackages(TEST_USER_ID, whitelist1);
+        // Apply allowlist
+        mLockTaskController.updateLockTaskPackages(TEST_USER_ID, allowlist1);
 
-        // Assert the whitelist is applied to the correct user
-        for (String pkg : whitelist1) {
-            assertTrue("Package should be whitelisted: " + pkg,
-                    mLockTaskController.isPackageWhitelisted(TEST_USER_ID, pkg));
-            assertFalse("Package shouldn't be whitelisted for user 0: " + pkg,
-                    mLockTaskController.isPackageWhitelisted(0, pkg));
+        // Assert the allowlist is applied to the correct user
+        for (String pkg : allowlist1) {
+            assertTrue("Package should be allowlisted: " + pkg,
+                    mLockTaskController.isPackageAllowlisted(TEST_USER_ID, pkg));
+            assertFalse("Package shouldn't be allowlisted for user 0: " + pkg,
+                    mLockTaskController.isPackageAllowlisted(0, pkg));
         }
 
-        // Update whitelist
-        mLockTaskController.updateLockTaskPackages(TEST_USER_ID, whitelist2);
+        // Update allowlist
+        mLockTaskController.updateLockTaskPackages(TEST_USER_ID, allowlist2);
 
-        // Assert the new whitelist is applied
-        assertTrue("Package should remain whitelisted: " + TEST_PACKAGE_NAME,
-                mLockTaskController.isPackageWhitelisted(TEST_USER_ID, TEST_PACKAGE_NAME));
-        assertFalse("Package should no longer be whitelisted: " + TEST_PACKAGE_NAME_2,
-                mLockTaskController.isPackageWhitelisted(TEST_USER_ID, TEST_PACKAGE_NAME_2));
+        // Assert the new allowlist is applied
+        assertTrue("Package should remain allowlisted: " + TEST_PACKAGE_NAME,
+                mLockTaskController.isPackageAllowlisted(TEST_USER_ID, TEST_PACKAGE_NAME));
+        assertFalse("Package should no longer be allowlisted: " + TEST_PACKAGE_NAME_2,
+                mLockTaskController.isPackageAllowlisted(TEST_USER_ID, TEST_PACKAGE_NAME_2));
     }
 
     @Test
     public void testUpdateLockTaskPackages_taskRemoved() throws Exception {
-        // GIVEN two tasks which are whitelisted initially
+        // GIVEN two tasks which are allowlisted initially
         Task tr1 = getTaskForUpdate(TEST_PACKAGE_NAME, true);
         Task tr2 = getTaskForUpdate(TEST_PACKAGE_NAME_2, false);
-        String[] whitelist = {TEST_PACKAGE_NAME, TEST_PACKAGE_NAME_2};
-        mLockTaskController.updateLockTaskPackages(TEST_USER_ID, whitelist);
+        String[] allowlist = {TEST_PACKAGE_NAME, TEST_PACKAGE_NAME_2};
+        mLockTaskController.updateLockTaskPackages(TEST_USER_ID, allowlist);
 
         // GIVEN the tasks are launched into LockTask mode
         mLockTaskController.startLockTaskMode(tr1, false, TEST_UID);
@@ -548,9 +548,9 @@ public class LockTaskControllerTest {
         assertTrue(mLockTaskController.isTaskLocked(tr2));
         verifyLockTaskStarted(STATUS_BAR_MASK_LOCKED, DISABLE2_MASK);
 
-        // WHEN removing one package from whitelist
-        whitelist = new String[] {TEST_PACKAGE_NAME};
-        mLockTaskController.updateLockTaskPackages(TEST_USER_ID, whitelist);
+        // WHEN removing one package from allowlist
+        allowlist = new String[] {TEST_PACKAGE_NAME};
+        mLockTaskController.updateLockTaskPackages(TEST_USER_ID, allowlist);
 
         // THEN the task running that package should be stopped
         verify(tr2).performClearTaskLocked();
@@ -560,9 +560,9 @@ public class LockTaskControllerTest {
         assertTrue(mLockTaskController.isTaskLocked(tr1));
         verifyLockTaskStarted(STATUS_BAR_MASK_LOCKED, DISABLE2_MASK);
 
-        // WHEN removing the last package from whitelist
-        whitelist = new String[] {};
-        mLockTaskController.updateLockTaskPackages(TEST_USER_ID, whitelist);
+        // WHEN removing the last package from allowlist
+        allowlist = new String[] {};
+        mLockTaskController.updateLockTaskPackages(TEST_USER_ID, allowlist);
 
         // THEN the last task should be cleared, and the system should quit LockTask mode
         verify(tr1).performClearTaskLocked();
@@ -574,7 +574,7 @@ public class LockTaskControllerTest {
     @Test
     public void testUpdateLockTaskFeatures() throws Exception {
         // GIVEN a locked task
-        Task tr = getTask(Task.LOCK_TASK_AUTH_WHITELISTED);
+        Task tr = getTask(Task.LOCK_TASK_AUTH_ALLOWLISTED);
         mLockTaskController.startLockTaskMode(tr, false, TEST_UID);
 
         // THEN lock task mode should be started with default status bar masks
@@ -616,7 +616,7 @@ public class LockTaskControllerTest {
     @Test
     public void testUpdateLockTaskFeatures_differentUser() throws Exception {
         // GIVEN a locked task
-        Task tr = getTask(Task.LOCK_TASK_AUTH_WHITELISTED);
+        Task tr = getTask(Task.LOCK_TASK_AUTH_ALLOWLISTED);
         mLockTaskController.startLockTaskMode(tr, false, TEST_UID);
 
         // THEN lock task mode should be started with default status bar masks
@@ -638,7 +638,7 @@ public class LockTaskControllerTest {
     @Test
     public void testUpdateLockTaskFeatures_keyguard() {
         // GIVEN a locked task
-        Task tr = getTask(Task.LOCK_TASK_AUTH_WHITELISTED);
+        Task tr = getTask(Task.LOCK_TASK_AUTH_ALLOWLISTED);
         mLockTaskController.startLockTaskMode(tr, false, TEST_UID);
 
         // THEN keyguard should be disabled
@@ -704,7 +704,7 @@ public class LockTaskControllerTest {
                 TEST_USER_ID, TEST_PACKAGE_NAME, LOCK_TASK_LAUNCH_MODE_DEFAULT));
 
         // Start lock task mode
-        Task tr = getTask(Task.LOCK_TASK_AUTH_WHITELISTED);
+        Task tr = getTask(Task.LOCK_TASK_AUTH_ALLOWLISTED);
         mLockTaskController.startLockTaskMode(tr, false, TEST_UID);
 
         // WHEN LOCK_TASK_FEATURE_BLOCK_ACTIVITY_START_IN_TASK is not enabled
@@ -719,15 +719,15 @@ public class LockTaskControllerTest {
         assertTrue(mLockTaskController.isActivityAllowed(
                 TEST_USER_ID, TEST_PACKAGE_NAME, LOCK_TASK_LAUNCH_MODE_ALWAYS));
 
-        // unwhitelisted package should not be allowed
+        // unallowlisted package should not be allowed
         assertFalse(mLockTaskController.isActivityAllowed(
                 TEST_USER_ID, TEST_PACKAGE_NAME, LOCK_TASK_LAUNCH_MODE_DEFAULT));
 
-        // update the whitelist
-        String[] whitelist = new String[] { TEST_PACKAGE_NAME };
-        mLockTaskController.updateLockTaskPackages(TEST_USER_ID, whitelist);
+        // update the allowlist
+        String[] allowlist = new String[] { TEST_PACKAGE_NAME };
+        mLockTaskController.updateLockTaskPackages(TEST_USER_ID, allowlist);
 
-        // whitelisted package should be allowed
+        // allowlisted package should be allowed
         assertTrue(mLockTaskController.isActivityAllowed(
                 TEST_USER_ID, TEST_PACKAGE_NAME, LOCK_TASK_LAUNCH_MODE_DEFAULT));
 
@@ -755,17 +755,17 @@ public class LockTaskControllerTest {
     }
 
     /**
-     * @param isAppAware {@code true} if the app has marked if_whitelisted in its manifest
+     * @param isAppAware {@code true} if the app has marked if_allowlisted in its manifest
      */
     private Task getTaskForUpdate(String pkg, boolean isAppAware) {
-        final int authIfWhitelisted = isAppAware
+        final int authIfAllowlisted = isAppAware
                 ? Task.LOCK_TASK_AUTH_LAUNCHABLE
-                : Task.LOCK_TASK_AUTH_WHITELISTED;
-        Task tr = getTask(pkg, authIfWhitelisted);
+                : Task.LOCK_TASK_AUTH_ALLOWLISTED;
+        Task tr = getTask(pkg, authIfAllowlisted);
         doAnswer((invocation) -> {
-            boolean isWhitelisted =
-                    mLockTaskController.isPackageWhitelisted(TEST_USER_ID, pkg);
-            tr.mLockTaskAuth = isWhitelisted ? authIfWhitelisted : Task.LOCK_TASK_AUTH_PINNABLE;
+            boolean isAllowlisted =
+                    mLockTaskController.isPackageAllowlisted(TEST_USER_ID, pkg);
+            tr.mLockTaskAuth = isAllowlisted ? authIfAllowlisted : Task.LOCK_TASK_AUTH_PINNABLE;
             return null;
         }).when(tr).setLockTaskAuth();
         return tr;

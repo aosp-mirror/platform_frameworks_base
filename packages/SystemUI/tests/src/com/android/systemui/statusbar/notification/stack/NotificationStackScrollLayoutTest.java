@@ -52,6 +52,7 @@ import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -109,6 +110,8 @@ import org.mockito.junit.MockitoRule;
 import java.util.ArrayList;
 import java.util.List;
 
+import dagger.Lazy;
+
 /**
  * Tests for {@link NotificationStackScrollLayout}.
  */
@@ -140,6 +143,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private NotificationSection mNotificationSection;
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
     @Mock private FeatureFlags mFeatureFlags;
+    @Mock private Lazy<BubbleController> mBubbleControllerLazy;
     private UserChangedListener mUserChangedListener;
     private NotificationEntryManager mEntryManager;
     private int mOriginalInterruptionModelSetting;
@@ -190,6 +194,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 () -> mock(NotificationRowBinder.class),
                 () -> mRemoteInputManager,
                 mock(LeakDetector.class),
+                mBubbleControllerLazy,
                 mock(ForegroundServiceDismissalFeatureController.class)
         );
         mEntryManager.setUpWithPresenter(mock(NotificationPresenter.class));

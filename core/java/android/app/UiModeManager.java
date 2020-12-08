@@ -510,6 +510,9 @@ public class UiModeManager {
     }
 
     /**
+     * Activating night mode for the current user
+     *
+     * @return {@code true} if the change is successful
      * @hide
      */
     public boolean setNightModeActivated(boolean active) {

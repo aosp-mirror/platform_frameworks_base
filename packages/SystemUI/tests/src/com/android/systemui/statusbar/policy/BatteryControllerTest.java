@@ -59,11 +59,6 @@ public class BatteryControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testBatteryInitialized() {
-        Assert.assertTrue(mBatteryController.mHasReceivedBattery);
-    }
-
-    @Test
     public void testIndependentAODBatterySaver_true() {
         PowerSaveState state = new PowerSaveState.Builder()
                 .setBatterySaverEnabled(true)

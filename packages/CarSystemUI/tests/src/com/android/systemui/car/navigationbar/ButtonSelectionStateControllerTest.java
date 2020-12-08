@@ -28,6 +28,7 @@ import android.widget.LinearLayout;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.car.CarSystemUiTest;
 import com.android.systemui.tests.R;
 
 import org.junit.Before;
@@ -38,6 +39,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.List;
 
+@CarSystemUiTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 @SmallTest

@@ -585,6 +585,7 @@ public class LocalMediaManagerTest {
         when(device1.getId()).thenReturn(TEST_DEVICE_ID_1);
         when(device2.getId()).thenReturn(TEST_DEVICE_ID_2);
         when(device3.getId()).thenReturn(TEST_DEVICE_ID_3);
+        when(device1.getDeviceType()).thenReturn(MediaDevice.MediaDeviceType.TYPE_PHONE_DEVICE);
         when(mLocalMediaManager.mPhoneDevice.getId()).thenReturn("test_phone_id");
 
         assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
@@ -683,6 +684,7 @@ public class LocalMediaManagerTest {
         when(device1.getId()).thenReturn(TEST_DEVICE_ID_1);
         when(device2.getId()).thenReturn(TEST_DEVICE_ID_2);
         when(device3.getId()).thenReturn(TEST_DEVICE_ID_3);
+        when(device1.getDeviceType()).thenReturn(MediaDevice.MediaDeviceType.TYPE_PHONE_DEVICE);
         when(mLocalMediaManager.mPhoneDevice.getId()).thenReturn("test_phone_id");
 
         assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);

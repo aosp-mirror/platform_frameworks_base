@@ -655,7 +655,8 @@ class RecentTasks {
         }
         for (int i = mTasks.size() - 1; i >= 0; --i) {
             final Task task = mTasks.get(i);
-            if (task.mUserId == userId && !mService.getLockTaskController().isTaskWhitelisted(task)) {
+            if (task.mUserId == userId
+                    && !mService.getLockTaskController().isTaskAllowlisted(task)) {
                 remove(task);
             }
         }

@@ -307,7 +307,7 @@
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"hanganyag rögzítése"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Testmozgás"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"hozzáférés a testmozgási adatokhoz"</string>
-    <string name="permgrouplab_camera" msgid="9090413408963547706">"Fényképezőgép"</string>
+    <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"fotók és videók készítése"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Hívásnaplók"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"hívásnapló olvasása és írása"</string>
@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"A feloldáshoz vagy segélyhívás kezdeményezéséhez nyomja meg a Menü gombot."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"A feloldáshoz nyomja meg a Menü gombot."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Rajzolja le a mintát a feloldáshoz"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Segélyhívás"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Segélyhívás"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Hívás folytatása"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Helyes!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Próbálja újra"</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"A rendszergazda által frissítve"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"A rendszergazda által törölve"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Az Akkumulátorkímélő mód az akkumulátor üzemidejének növelése érdekében a következőket teszi:\n\n• Bekapcsolja a sötét témát.\n• Kikapcsolja vagy korlátozza a háttérben futó tevékenységeket, egyes vizuális effekteket, az „Ok Google” parancsot és egyéb funkciókat.\n\n"<annotation id="url">"További információ"</annotation>"."</string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"Az Akkumulátorkímélő mód az akkumulátor üzemidejének növelése érdekében a következőket teszi:\n\n• Bekapcsolja a sötét témát.\n• Kikapcsolja vagy korlátozza a háttérben futó tevékenységeket, egyes vizuális effekteket, az „Ok Google” parancsot és egyéb funkciókat."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Az Akkumulátorkímélő mód az akkumulátor üzemidejének növelése érdekében a következőket teszi:\n\n• Bekapcsolja a sötét témát.\n• Kikapcsolja vagy korlátozza a háttérben futó tevékenységeket, egyes vizuális effekteket, az „Ok Google” parancsot és egyéb funkciókat.\n\n"<annotation id="url">"További információ"</annotation>"."</string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Az Akkumulátorkímélő mód az akkumulátor üzemidejének növelése érdekében a következőket teszi:\n\n• Bekapcsolja a sötét témát.\n• Kikapcsolja vagy korlátozza a háttérben futó tevékenységeket, egyes vizuális effekteket, az „Ok Google” parancsot és egyéb funkciókat."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Az adatforgalom csökkentése érdekében az Adatforgalom-csökkentő megakadályozza, hogy egyes alkalmazások adatokat küldjenek vagy fogadjanak a háttérben. Az Ön által jelenleg használt alkalmazások hozzáférhetnek az adatokhoz, de csak ritkábban. Ez például azt jelentheti, hogy a képek csak rákoppintás után jelennek meg."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Bekapcsolja az Adatforgalom-csökkentőt?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Bekapcsolás"</string>
@@ -1900,8 +1900,8 @@
     <string name="profile_encrypted_message" msgid="1128512616293157802">"A feloldáshoz koppintson rá"</string>
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"Csatlakoztatva a(z) <xliff:g id="PRODUCT_NAME">%1$s</xliff:g> eszközhöz"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Koppintson ide a fájlok megtekintéséhez"</string>
-    <string name="pin_target" msgid="8036028973110156895">"Rögzítés"</string>
-    <string name="pin_specific_target" msgid="7824671240625957415">"<xliff:g id="LABEL">%1$s</xliff:g> rögzítése"</string>
+    <string name="pin_target" msgid="8036028973110156895">"Kitűzés"</string>
+    <string name="pin_specific_target" msgid="7824671240625957415">"<xliff:g id="LABEL">%1$s</xliff:g> kitűzése"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Feloldás"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"<xliff:g id="LABEL">%1$s</xliff:g> rögzítésének feloldása"</string>
     <string name="app_info" msgid="6113278084877079851">"Alkalmazásinformáció"</string>

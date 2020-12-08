@@ -28,15 +28,15 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"Atlikuši <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"Atlikušais laiks: <xliff:g id="PERCENTAGE">%1$s</xliff:g> — aptuveni <xliff:g id="TIME">%2$s</xliff:g> (ņemot vērā lietojumu)"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="5917433188456218857">"Atlikušais laiks: <xliff:g id="PERCENTAGE">%1$s</xliff:g> — aptuveni <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"Atlikuši <xliff:g id="PERCENTAGE">%s</xliff:g>. Ir ieslēgts akumulatora jaudas taupīšanas režīms."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"Atlikuši <xliff:g id="PERCENTAGE">%s</xliff:g>. Ir ieslēgts akumulatora enerģijas taupīšanas režīms."</string>
     <string name="invalid_charger" msgid="4370074072117767416">"Nevar veikt uzlādi, izmantojot USB. Izmantojiet ierīces komplektācijā iekļauto uzlādes ierīci."</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Nevar veikt uzlādi, izmantojot USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Izmantojiet ierīces komplektācijā iekļauto uzlādes ierīci"</string>
     <string name="battery_low_why" msgid="2056750982959359863">"Iestatījumi"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Vai ieslēgt akumulatora jaudas taupīšanas režīmu?"</string>
-    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Par akumulatora jaudas taupīšanas režīmu"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Vai ieslēgt akumulatora enerģijas taupīšanas režīmu?"</string>
+    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Par akumulatora enerģijas taupīšanas režīmu"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Ieslēgt"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"Ieslēgt akumulatora jaudas taupīšanas režīmu"</string>
+    <string name="battery_saver_start_action" msgid="4553256017945469937">"Ieslēgt akumulatora enerģijas taupīšanas režīmu"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Iestatījumi"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Automātiska ekrāna pagriešana"</string>
@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Atsākt"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Atcelt"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Kopīgot"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"Dzēst"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Ekrāna ierakstīšana ir atcelta."</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Ekrāna ieraksts ir saglabāts. Pieskarieties, lai to skatītu."</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"Ekrāna ieraksts ir izdzēsts."</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Dzēšot ekrāna ierakstu, radās kļūda."</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Neizdevās iegūt atļaujas."</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Sākot ierakstīt ekrāna saturu, radās kļūda."</string>
@@ -423,7 +421,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Plkst. <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Līdz <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Tumšais motīvs"</string>
-    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Jaudas taupīšana"</string>
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Enerģijas taupīšana"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Saulrietā"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Līdz saullēktam"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Plkst. <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -502,9 +500,9 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"Vai noņemt lietotāju?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Tiks dzēstas visas šī lietotāja lietotnes un dati."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Noņemt"</string>
-    <string name="battery_saver_notification_title" msgid="8419266546034372562">"Akumulatora jaudas taupīšanas režīms ir ieslēgts"</string>
+    <string name="battery_saver_notification_title" msgid="8419266546034372562">"Akumulatora enerģijas taupīšanas režīms ir ieslēgts"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Samazina veiktspēju un fona datus"</string>
-    <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Izslēgt akumulatora jaudas taupīšanas režīmu"</string>
+    <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Izslēgt akumulatora enerģijas taupīšanas režīmu"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> iegūs piekļuvi visai informācijai, kas ierakstīšanas vai apraides laikā tiks rādīta jūsu ekrānā vai atskaņota jūsu ierīcē. Atļauja attiecas uz tādu informāciju kā paroles, maksājumu informācija, fotoattēli, ziņojumi un jūsu atskaņotais audio saturs."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Pakalpojums, kas nodrošina šo funkciju, iegūs piekļuvi visai informācijai, kas ierakstīšanas vai apraides laikā tiks rādīta jūsu ekrānā vai atskaņota jūsu ierīcē. Atļauja attiecas uz tādu informāciju kā paroles, maksājumu informācija, fotoattēli, ziņojumi un jūsu atskaņotais audio saturs."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Vai vēlaties sākt ierakstīšanu/apraidi?"</string>
@@ -715,7 +713,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Noklusējums"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Burbulis"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Nav skaņas signāla vai vibrācijas"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Nav skaņas signāla vai vibrācijas, kā arī atrodas zemāk sarunu sadaļā"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Nav skaņas signāla vai vibrācijas, kā arī atrodas tālāk sarunu sadaļā"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Atkarībā no tālruņa iestatījumiem var zvanīt vai vibrēt"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Atkarībā no tālruņa iestatījumiem var zvanīt vai vibrēt. Sarunas no lietotnes <xliff:g id="APP_NAME">%1$s</xliff:g> pēc noklusējuma tiek parādītas burbulī."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Piesaista jūsu uzmanību, rādot peldošu saīsni uz šo saturu."</string>
@@ -772,8 +770,8 @@
       <item quantity="other">%d minūtes</item>
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"Akumulatora lietojums"</string>
-    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Akumulatora jaudas taupīšanas režīms uzlādes laikā nav pieejams."</string>
-    <string name="battery_detail_switch_title" msgid="6940976502957380405">"Akumulatora jaudas taupīšanas režīms"</string>
+    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Akumulatora enerģijas taupīšanas režīms uzlādes laikā nav pieejams."</string>
+    <string name="battery_detail_switch_title" msgid="6940976502957380405">"Akumulatora enerģijas taupīšanas režīms"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Samazina veiktspēju un fona datus."</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Poga <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Sākumvietas taustiņš"</string>
@@ -889,12 +887,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"Augšdaļa 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"Augšdaļa 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Apakšdaļu pa visu ekrānu"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"<xliff:g id="POSITION">%1$d</xliff:g>. pozīcija, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Lai rediģētu, veiciet dubultskārienu."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Lai pievienotu, veiciet dubultskārienu."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"Pārvietot elementu <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"Noņemt elementu <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"Pievienot elementu “<xliff:g id="TILE_NAME">%1$s</xliff:g>” <xliff:g id="POSITION">%2$d</xliff:g>. pozīcijā"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"Pārvietot elementu “<xliff:g id="TILE_NAME">%1$s</xliff:g>” uz <xliff:g id="POSITION">%2$d</xliff:g>. pozīciju"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"noņemt elementu"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"pievienot elementu beigās"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Pārvietot elementu"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Pievienot elementu"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Pārvietot uz pozīciju numur <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Pievienot elementu pozīcijā numur <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Pozīcija numur <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Ātro iestatījumu redaktors."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> paziņojums: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"Iespējams, lietotnē nedarbosies ekrāna sadalīšana."</string>
@@ -927,11 +926,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Pāriet uz iepriekšējo"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Mainīt lielumu"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Tālrunis izslēgts karstuma dēļ"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Tagad jūsu tālrunis darbojas normāli"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Tagad jūsu tālrunis darbojas normāli.\nPieskarieties, lai uzzinātu vairāk."</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Jūsu tālrunis bija pārkarsis un tika izslēgts. Tagad tas darbojas normāli.\n\nTālrunis var sakarst, ja:\n	• tiek izmantotas lietotnes, kas patērē daudz enerģijas (piem., spēles, video lietotnes vai navigācija);\n	• tiek lejupielādēti/augšupielādēti lieli faili;\n	• tālrunis tiek lietots augstā temperatūrā."</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Skatīt apkopes norādījumus"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Tālrunis kļūst silts"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Dažas funkcijas ir ierobežotas, kamēr tālrunis mēģina atdzist"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Dažas funkcijas ir ierobežotas, kamēr notiek tālruņa atdzišana.\nPieskarieties, lai uzzinātu vairāk."</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Jūsu tālrunis automātiski mēģinās atdzist. Jūs joprojām varat izmantot tālruni, taču tas, iespējams, darbosies lēnāk.\n\nTiklīdz tālrunis būs atdzisis, tas darbosies normāli."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Skatīt apkopes norādījumus"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Lādētāja atvienošana"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Uzlādējot šo ierīci, radās problēma. Atvienojiet strāvas adapteri. Esiet uzmanīgs — vads var būt uzsilis."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Skatīt apkopes norādījumus"</string>
@@ -985,14 +986,21 @@
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"Atļaut lietotnei <xliff:g id="APP">%1$s</xliff:g> rādīt sadaļas no jebkuras lietotnes"</string>
     <string name="slice_permission_allow" msgid="6340449521277951123">"Atļaut"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"Neatļaut"</string>
-    <string name="auto_saver_title" msgid="6873691178754086596">"Pieskarieties, lai iestatītu akumulatora jaudas taupīšanas režīma grafiku"</string>
+    <string name="auto_saver_title" msgid="6873691178754086596">"Pieskarieties, lai iestatītu akumulatora enerģijas taupīšanas režīma grafiku"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Ieslēgt, ja akumulators var izlādēties"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Nē, paldies"</string>
     <string name="auto_saver_enabled_title" msgid="4294726198280286333">"Ieslēgts akumulatora enerģijas taupīšanas režīma grafiks"</string>
-    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Tiklīdz akumulatora uzlādes līmenis būs zemāks nekā <xliff:g id="PERCENTAGE">%d</xliff:g>%%, tiks automātiski ieslēgts akumulatora jaudas taupīšanas režīms."</string>
+    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Tiklīdz akumulatora uzlādes līmenis būs zemāks nekā <xliff:g id="PERCENTAGE">%d</xliff:g>%%, tiks automātiski ieslēgts akumulatora enerģijas taupīšanas režīms."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Iestatījumi"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Labi"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"Lietotne <xliff:g id="APP">%1$s</xliff:g> izmanto funkcijas <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Lietojumprogrammas izmanto šādas funkcijas: <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" un "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"kamera"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"atrašanās vieta"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofons"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Sensori izslēgti"</string>
     <string name="device_services" msgid="1549944177856658705">"Ierīces pakalpojumi"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Nav nosaukuma"</string>
@@ -1072,7 +1080,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Notiek ieteikumu ielāde"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Multivide"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Paslēpiet pašreizējo sesiju."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Paslēpt"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Nerādīt"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Atsākt"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Iestatījumi"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktīva, pārbaudiet lietotni"</string>

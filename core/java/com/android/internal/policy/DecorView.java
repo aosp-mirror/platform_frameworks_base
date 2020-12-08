@@ -1094,13 +1094,15 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             mLastWindowFlags = attrs.flags;
 
             if (insets != null) {
-                final Insets systemBarInsets = insets.getInsets(WindowInsets.Type.systemBars());
                 final Insets stableBarInsets = insets.getInsetsIgnoringVisibility(
                         WindowInsets.Type.systemBars());
-                mLastTopInset = systemBarInsets.top;
-                mLastBottomInset = systemBarInsets.bottom;
-                mLastRightInset = systemBarInsets.right;
-                mLastLeftInset = systemBarInsets.left;
+                final Insets systemInsets = Insets.min(
+                        insets.getInsets(WindowInsets.Type.systemBars()
+                                | WindowInsets.Type.displayCutout()), stableBarInsets);
+                mLastTopInset = systemInsets.top;
+                mLastBottomInset = systemInsets.bottom;
+                mLastRightInset = systemInsets.right;
+                mLastLeftInset = systemInsets.left;
 
                 // Don't animate if the presence of stable insets has changed, because that
                 // indicates that the window was either just added and received them for the

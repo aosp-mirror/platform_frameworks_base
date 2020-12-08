@@ -22,9 +22,12 @@ import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
 
 import com.android.systemui.classifier.Classifier;
+import com.android.systemui.statusbar.policy.BatteryController;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Inject;
 
 /**
  * Acts as a cache and utility class for FalsingClassifiers.
@@ -36,6 +39,7 @@ public class FalsingDataProvider {
 
     private final int mWidthPixels;
     private final int mHeightPixels;
+    private final BatteryController mBatteryController;
     private final float mXdpi;
     private final float mYdpi;
 
@@ -50,11 +54,13 @@ public class FalsingDataProvider {
     private MotionEvent mFirstRecentMotionEvent;
     private MotionEvent mLastMotionEvent;
 
-    public FalsingDataProvider(DisplayMetrics displayMetrics) {
+    @Inject
+    public FalsingDataProvider(DisplayMetrics displayMetrics, BatteryController batteryController) {
         mXdpi = displayMetrics.xdpi;
         mYdpi = displayMetrics.ydpi;
         mWidthPixels = displayMetrics.widthPixels;
         mHeightPixels = displayMetrics.heightPixels;
+        mBatteryController = batteryController;
 
         FalsingClassifier.logInfo("xdpi, ydpi: " + getXdpi() + ", " + getYdpi());
         FalsingClassifier.logInfo("width, height: " + getWidthPixels() + ", " + getHeightPixels());
@@ -175,6 +181,11 @@ public class FalsingDataProvider {
         }
 
         return mLastMotionEvent.getY() < mFirstRecentMotionEvent.getY();
+    }
+
+    /** Returns true if phone is being charged without a cable. */
+    boolean isWirelessCharging() {
+        return mBatteryController.isWirelessCharging();
     }
 
     private void recalculateData() {

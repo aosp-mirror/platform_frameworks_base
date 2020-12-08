@@ -33,11 +33,11 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_LOCKTAS
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_LOCKTASK;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.Task.LOCK_TASK_AUTH_ALLOWLISTED;
 import static com.android.server.wm.Task.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.wm.Task.LOCK_TASK_AUTH_LAUNCHABLE;
 import static com.android.server.wm.Task.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.wm.Task.LOCK_TASK_AUTH_PINNABLE;
-import static com.android.server.wm.Task.LOCK_TASK_AUTH_WHITELISTED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -264,12 +264,12 @@ public class LockTaskController {
     }
 
     /**
-     * @return whether the requested task is allowed to be locked (either whitelisted, or declares
+     * @return whether the requested task is allowed to be locked (either allowlisted, or declares
      * lockTaskMode="always" in the manifest).
      */
-    boolean isTaskWhitelisted(Task task) {
+    boolean isTaskAllowlisted(Task task) {
         switch(task.mLockTaskAuth) {
-            case LOCK_TASK_AUTH_WHITELISTED:
+            case LOCK_TASK_AUTH_ALLOWLISTED:
             case LOCK_TASK_AUTH_LAUNCHABLE:
             case LOCK_TASK_AUTH_LAUNCHABLE_PRIV:
                 return true;
@@ -311,7 +311,7 @@ public class LockTaskController {
 
     private boolean isLockTaskModeViolationInternal(Task task, boolean isNewClearTask) {
         // TODO: Double check what's going on here. If the task is already in lock task mode, it's
-        // likely whitelisted, so will return false below.
+        // likely allowlisted, so will return false below.
         if (isTaskLocked(task) && !isNewClearTask) {
             // If the task is already at the top and won't be cleared, then allow the operation
             return false;
@@ -327,7 +327,7 @@ public class LockTaskController {
             return false;
         }
 
-        return !(isTaskWhitelisted(task) || mLockTaskModeTasks.isEmpty());
+        return !(isTaskAllowlisted(task) || mLockTaskModeTasks.isEmpty());
     }
 
     private boolean isRecentsAllowed(int userId) {
@@ -356,7 +356,7 @@ public class LockTaskController {
                 return false;
             default:
         }
-        return isPackageWhitelisted(userId, packageName);
+        return isPackageAllowlisted(userId, packageName);
     }
 
     private boolean isEmergencyCallTask(Task task) {
@@ -556,7 +556,7 @@ public class LockTaskController {
         if (!isSystemCaller) {
             task.mLockTaskUid = callingUid;
             if (task.mLockTaskAuth == LOCK_TASK_AUTH_PINNABLE) {
-                // startLockTask() called by app, but app is not part of lock task whitelist. Show
+                // startLockTask() called by app, but app is not part of lock task allowlist. Show
                 // app pinning request. We will come back here with isSystemCaller true.
                 if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "Mode default, asking user");
                 StatusBarManagerInternal statusBarManager = LocalServices.getService(
@@ -649,8 +649,8 @@ public class LockTaskController {
 
     /**
      * Update packages that are allowed to be launched in lock task mode.
-     * @param userId Which user this whitelist is associated with
-     * @param packages The whitelist of packages allowed in lock task mode
+     * @param userId Which user this allowlist is associated with
+     * @param packages The allowlist of packages allowed in lock task mode
      * @see #mLockTaskPackages
      */
     void updateLockTaskPackages(int userId, String[] packages) {
@@ -659,19 +659,19 @@ public class LockTaskController {
         boolean taskChanged = false;
         for (int taskNdx = mLockTaskModeTasks.size() - 1; taskNdx >= 0; --taskNdx) {
             final Task lockedTask = mLockTaskModeTasks.get(taskNdx);
-            final boolean wasWhitelisted = lockedTask.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE
-                    || lockedTask.mLockTaskAuth == LOCK_TASK_AUTH_WHITELISTED;
+            final boolean wasAllowlisted = lockedTask.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE
+                    || lockedTask.mLockTaskAuth == LOCK_TASK_AUTH_ALLOWLISTED;
             lockedTask.setLockTaskAuth();
-            final boolean isWhitelisted = lockedTask.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE
-                    || lockedTask.mLockTaskAuth == LOCK_TASK_AUTH_WHITELISTED;
+            final boolean isAllowlisted = lockedTask.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE
+                    || lockedTask.mLockTaskAuth == LOCK_TASK_AUTH_ALLOWLISTED;
 
             if (mLockTaskModeState != LOCK_TASK_MODE_LOCKED
                     || lockedTask.mUserId != userId
-                    || !wasWhitelisted || isWhitelisted) {
+                    || !wasAllowlisted || isAllowlisted) {
                 continue;
             }
 
-            // Terminate locked tasks that have recently lost whitelist authorization.
+            // Terminate locked tasks that have recently lost allowlist authorization.
             if (DEBUG_LOCKTASK) Slog.d(TAG_LOCKTASK, "onLockTaskPackagesUpdated: removing " +
                     lockedTask + " mLockTaskAuth()=" + lockedTask.lockTaskAuthToString());
             removeLockedTask(lockedTask);
@@ -697,17 +697,17 @@ public class LockTaskController {
         }
     }
 
-    boolean isPackageWhitelisted(int userId, String pkg) {
+    boolean isPackageAllowlisted(int userId, String pkg) {
         if (pkg == null) {
             return false;
         }
-        String[] whitelist;
-        whitelist = mLockTaskPackages.get(userId);
-        if (whitelist == null) {
+        String[] allowlist;
+        allowlist = mLockTaskPackages.get(userId);
+        if (allowlist == null) {
             return false;
         }
-        for (String whitelistedPkg : whitelist) {
-            if (pkg.equals(whitelistedPkg)) {
+        for (String allowlistedPkg : allowlist) {
+            if (pkg.equals(allowlistedPkg)) {
                 return true;
             }
         }

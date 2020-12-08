@@ -48,6 +48,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.net.ConnectivityManager;
+import android.net.DnsResolver;
 import android.net.INetworkManagementEventObserver;
 import android.net.Ikev2VpnProfile;
 import android.net.IpPrefix;
@@ -76,9 +77,11 @@ import android.net.ipsec.ike.ChildSessionParams;
 import android.net.ipsec.ike.IkeSession;
 import android.net.ipsec.ike.IkeSessionCallback;
 import android.net.ipsec.ike.IkeSessionParams;
+import android.net.ipsec.ike.exceptions.IkeProtocolException;
 import android.os.Binder;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
@@ -123,6 +126,7 @@ import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
@@ -134,9 +138,12 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -190,6 +197,7 @@ public class Vpn {
     // automated reconnection
 
     private final Context mContext;
+    @VisibleForTesting final Dependencies mDeps;
     private final NetworkInfo mNetworkInfo;
     @VisibleForTesting protected String mPackage;
     private int mOwnerUID;
@@ -252,17 +260,143 @@ public class Vpn {
     // Handle of the user initiating VPN.
     private final int mUserHandle;
 
+    interface RetryScheduler {
+        void checkInterruptAndDelay(boolean sleepLonger) throws InterruptedException;
+    }
+
+    static class Dependencies {
+        public void startService(final String serviceName) {
+            SystemService.start(serviceName);
+        }
+
+        public void stopService(final String serviceName) {
+            SystemService.stop(serviceName);
+        }
+
+        public boolean isServiceRunning(final String serviceName) {
+            return SystemService.isRunning(serviceName);
+        }
+
+        public boolean isServiceStopped(final String serviceName) {
+            return SystemService.isStopped(serviceName);
+        }
+
+        public File getStateFile() {
+            return new File("/data/misc/vpn/state");
+        }
+
+        public void sendArgumentsToDaemon(
+                final String daemon, final LocalSocket socket, final String[] arguments,
+                final RetryScheduler retryScheduler) throws IOException, InterruptedException {
+            final LocalSocketAddress address = new LocalSocketAddress(
+                    daemon, LocalSocketAddress.Namespace.RESERVED);
+
+            // Wait for the socket to connect.
+            while (true) {
+                try {
+                    socket.connect(address);
+                    break;
+                } catch (Exception e) {
+                    // ignore
+                }
+                retryScheduler.checkInterruptAndDelay(true /* sleepLonger */);
+            }
+            socket.setSoTimeout(500);
+
+            final OutputStream out = socket.getOutputStream();
+            for (String argument : arguments) {
+                byte[] bytes = argument.getBytes(StandardCharsets.UTF_8);
+                if (bytes.length >= 0xFFFF) {
+                    throw new IllegalArgumentException("Argument is too large");
+                }
+                out.write(bytes.length >> 8);
+                out.write(bytes.length);
+                out.write(bytes);
+                retryScheduler.checkInterruptAndDelay(false /* sleepLonger */);
+            }
+            out.write(0xFF);
+            out.write(0xFF);
+
+            // Wait for End-of-File.
+            final InputStream in = socket.getInputStream();
+            while (true) {
+                try {
+                    if (in.read() == -1) {
+                        break;
+                    }
+                } catch (Exception e) {
+                    // ignore
+                }
+                retryScheduler.checkInterruptAndDelay(true /* sleepLonger */);
+            }
+        }
+
+        @NonNull
+        public InetAddress resolve(final String endpoint)
+                throws ExecutionException, InterruptedException {
+            try {
+                return InetAddress.parseNumericAddress(endpoint);
+            } catch (IllegalArgumentException e) {
+                // Endpoint is not numeric : fall through and resolve
+            }
+
+            final CancellationSignal cancellationSignal = new CancellationSignal();
+            try {
+                final DnsResolver resolver = DnsResolver.getInstance();
+                final CompletableFuture<InetAddress> result = new CompletableFuture();
+                final DnsResolver.Callback<List<InetAddress>> cb =
+                        new DnsResolver.Callback<List<InetAddress>>() {
+                            @Override
+                            public void onAnswer(@NonNull final List<InetAddress> answer,
+                                    final int rcode) {
+                                if (answer.size() > 0) {
+                                    result.complete(answer.get(0));
+                                } else {
+                                    result.completeExceptionally(
+                                            new UnknownHostException(endpoint));
+                                }
+                            }
+
+                            @Override
+                            public void onError(@Nullable final DnsResolver.DnsException error) {
+                                // Unfortunately UnknownHostException doesn't accept a cause, so
+                                // print a message here instead. Only show the summary, not the
+                                // full stack trace.
+                                Log.e(TAG, "Async dns resolver error : " + error);
+                                result.completeExceptionally(new UnknownHostException(endpoint));
+                            }
+                        };
+                resolver.query(null /* network, null for default */, endpoint,
+                        DnsResolver.FLAG_EMPTY, r -> r.run(), cancellationSignal, cb);
+                return result.get();
+            } catch (final ExecutionException e) {
+                Log.e(TAG, "Cannot resolve VPN endpoint : " + endpoint + ".", e);
+                throw e;
+            } catch (final InterruptedException e) {
+                Log.e(TAG, "Legacy VPN was interrupted while resolving the endpoint", e);
+                cancellationSignal.cancel();
+                throw e;
+            }
+        }
+
+        public boolean checkInterfacePresent(final Vpn vpn, final String iface) {
+            return vpn.jniCheck(iface) == 0;
+        }
+    }
+
     public Vpn(Looper looper, Context context, INetworkManagementService netService,
             @UserIdInt int userHandle, @NonNull KeyStore keyStore) {
-        this(looper, context, netService, userHandle, keyStore,
+        this(looper, context, new Dependencies(), netService, userHandle, keyStore,
                 new SystemServices(context), new Ikev2SessionCreator());
     }
 
     @VisibleForTesting
-    protected Vpn(Looper looper, Context context, INetworkManagementService netService,
+    protected Vpn(Looper looper, Context context, Dependencies deps,
+            INetworkManagementService netService,
             int userHandle, @NonNull KeyStore keyStore, SystemServices systemServices,
             Ikev2SessionCreator ikev2SessionCreator) {
         mContext = context;
+        mDeps = deps;
         mNetd = netService;
         mUserHandle = userHandle;
         mLooper = looper;
@@ -1467,7 +1601,7 @@ public class Vpn {
      */
     public synchronized void onUserStopped() {
         // Switch off networking lockdown (if it was enabled)
-        setLockdown(false);
+        setVpnForcedLocked(false);
         mAlwaysOn = false;
 
         // Quit any active connections
@@ -2129,7 +2263,8 @@ public class Vpn {
     }
 
     /** This class represents the common interface for all VPN runners. */
-    private abstract class VpnRunner extends Thread {
+    @VisibleForTesting
+    abstract class VpnRunner extends Thread {
 
         protected VpnRunner(String name) {
             super(name);
@@ -2167,7 +2302,7 @@ public class Vpn {
         void onChildTransformCreated(
                 @NonNull Network network, @NonNull IpSecTransform transform, int direction);
 
-        void onSessionLost(@NonNull Network network);
+        void onSessionLost(@NonNull Network network, @Nullable Exception exception);
     }
 
     /**
@@ -2324,7 +2459,7 @@ public class Vpn {
                 networkAgent.sendLinkProperties(lp);
             } catch (Exception e) {
                 Log.d(TAG, "Error in ChildOpened for network " + network, e);
-                onSessionLost(network);
+                onSessionLost(network, e);
             }
         }
 
@@ -2354,7 +2489,7 @@ public class Vpn {
                 mIpSecManager.applyTunnelModeTransform(mTunnelIface, direction, transform);
             } catch (IOException e) {
                 Log.d(TAG, "Transform application failed for network " + network, e);
-                onSessionLost(network);
+                onSessionLost(network, e);
             }
         }
 
@@ -2412,9 +2547,18 @@ public class Vpn {
                     Log.d(TAG, "Ike Session started for network " + network);
                 } catch (Exception e) {
                     Log.i(TAG, "Setup failed for network " + network + ". Aborting", e);
-                    onSessionLost(network);
+                    onSessionLost(network, e);
                 }
             });
+        }
+
+        /** Marks the state as FAILED, and disconnects. */
+        private void markFailedAndDisconnect(Exception exception) {
+            synchronized (Vpn.this) {
+                updateState(DetailedState.FAILED, exception.getMessage());
+            }
+
+            disconnectVpnRunner();
         }
 
         /**
@@ -2426,7 +2570,7 @@ public class Vpn {
          * <p>This method MUST always be called on the mExecutor thread in order to ensure
          * consistency of the Ikev2VpnRunner fields.
          */
-        public void onSessionLost(@NonNull Network network) {
+        public void onSessionLost(@NonNull Network network, @Nullable Exception exception) {
             if (!isActiveNetwork(network)) {
                 Log.d(TAG, "onSessionLost() called for obsolete network " + network);
 
@@ -2435,6 +2579,27 @@ public class Vpn {
                 // IKE session was already shut down (exited, or an error was encountered somewhere
                 // else). In both cases, all resources and sessions are torn down via
                 // onSessionLost() and resetIkeState().
+                return;
+            }
+
+            if (exception instanceof IkeProtocolException) {
+                final IkeProtocolException ikeException = (IkeProtocolException) exception;
+
+                switch (ikeException.getErrorType()) {
+                    case IkeProtocolException.ERROR_TYPE_NO_PROPOSAL_CHOSEN: // Fallthrough
+                    case IkeProtocolException.ERROR_TYPE_INVALID_KE_PAYLOAD: // Fallthrough
+                    case IkeProtocolException.ERROR_TYPE_AUTHENTICATION_FAILED: // Fallthrough
+                    case IkeProtocolException.ERROR_TYPE_SINGLE_PAIR_REQUIRED: // Fallthrough
+                    case IkeProtocolException.ERROR_TYPE_FAILED_CP_REQUIRED: // Fallthrough
+                    case IkeProtocolException.ERROR_TYPE_TS_UNACCEPTABLE:
+                        // All the above failures are configuration errors, and are terminal
+                        markFailedAndDisconnect(exception);
+                        return;
+                    // All other cases possibly recoverable.
+                }
+            } else if (exception instanceof IllegalArgumentException) {
+                // Failed to build IKE/ChildSessionParams; fatal profile configuration error
+                markFailedAndDisconnect(exception);
                 return;
             }
 
@@ -2487,12 +2652,18 @@ public class Vpn {
         }
 
         /**
-         * Cleans up all Ikev2VpnRunner internal state
+         * Disconnects and shuts down this VPN.
+         *
+         * <p>This method resets all internal Ikev2VpnRunner state, but unless called via
+         * VpnRunner#exit(), this Ikev2VpnRunner will still be listed as the active VPN of record
+         * until the next VPN is started, or the Ikev2VpnRunner is explicitly exited. This is
+         * necessary to ensure that the detailed state is shown in the Settings VPN menus; if the
+         * active VPN is cleared, Settings VPNs will not show the resultant state or errors.
          *
          * <p>This method MUST always be called on the mExecutor thread in order to ensure
          * consistency of the Ikev2VpnRunner fields.
          */
-        private void shutdownVpnRunner() {
+        private void disconnectVpnRunner() {
             mActiveNetwork = null;
             mIsRunning = false;
 
@@ -2506,9 +2677,13 @@ public class Vpn {
 
         @Override
         public void exitVpnRunner() {
-            mExecutor.execute(() -> {
-                shutdownVpnRunner();
-            });
+            try {
+                mExecutor.execute(() -> {
+                    disconnectVpnRunner();
+                });
+            } catch (RejectedExecutionException ignored) {
+                // The Ikev2VpnRunner has already shut down.
+            }
         }
     }
 
@@ -2638,7 +2813,7 @@ public class Vpn {
                     } catch (InterruptedException e) {
                     }
                     for (String daemon : mDaemons) {
-                        SystemService.stop(daemon);
+                        mDeps.stopService(daemon);
                     }
                 }
                 agentDisconnect();
@@ -2655,21 +2830,55 @@ public class Vpn {
             }
         }
 
+        private void checkAndFixupArguments(@NonNull final InetAddress endpointAddress) {
+            final String endpointAddressString = endpointAddress.getHostAddress();
+            // Perform some safety checks before inserting the address in place.
+            // Position 0 in mDaemons and mArguments must be racoon, and position 1 must be mtpd.
+            if (!"racoon".equals(mDaemons[0]) || !"mtpd".equals(mDaemons[1])) {
+                throw new IllegalStateException("Unexpected daemons order");
+            }
+
+            // Respectively, the positions at which racoon and mtpd take the server address
+            // argument are 1 and 2. Not all types of VPN require both daemons however, and
+            // in that case the corresponding argument array is null.
+            if (mArguments[0] != null) {
+                if (!mProfile.server.equals(mArguments[0][1])) {
+                    throw new IllegalStateException("Invalid server argument for racoon");
+                }
+                mArguments[0][1] = endpointAddressString;
+            }
+
+            if (mArguments[1] != null) {
+                if (!mProfile.server.equals(mArguments[1][2])) {
+                    throw new IllegalStateException("Invalid server argument for mtpd");
+                }
+                mArguments[1][2] = endpointAddressString;
+            }
+        }
+
         private void bringup() {
             // Catch all exceptions so we can clean up a few things.
             try {
+                // resolve never returns null. If it does because of some bug, it will be
+                // caught by the catch() block below and cleanup gracefully.
+                final InetAddress endpointAddress = mDeps.resolve(mProfile.server);
+
+                // Big hack : dynamically replace the address of the server in the arguments
+                // with the resolved address.
+                checkAndFixupArguments(endpointAddress);
+
                 // Initialize the timer.
                 mBringupStartTime = SystemClock.elapsedRealtime();
 
                 // Wait for the daemons to stop.
                 for (String daemon : mDaemons) {
-                    while (!SystemService.isStopped(daemon)) {
+                    while (!mDeps.isServiceStopped(daemon)) {
                         checkInterruptAndDelay(true);
                     }
                 }
 
                 // Clear the previous state.
-                File state = new File("/data/misc/vpn/state");
+                final File state = mDeps.getStateFile();
                 state.delete();
                 if (state.exists()) {
                     throw new IllegalStateException("Cannot delete the state");
@@ -2696,57 +2905,19 @@ public class Vpn {
 
                     // Start the daemon.
                     String daemon = mDaemons[i];
-                    SystemService.start(daemon);
+                    mDeps.startService(daemon);
 
                     // Wait for the daemon to start.
-                    while (!SystemService.isRunning(daemon)) {
+                    while (!mDeps.isServiceRunning(daemon)) {
                         checkInterruptAndDelay(true);
                     }
 
                     // Create the control socket.
                     mSockets[i] = new LocalSocket();
-                    LocalSocketAddress address = new LocalSocketAddress(
-                            daemon, LocalSocketAddress.Namespace.RESERVED);
 
-                    // Wait for the socket to connect.
-                    while (true) {
-                        try {
-                            mSockets[i].connect(address);
-                            break;
-                        } catch (Exception e) {
-                            // ignore
-                        }
-                        checkInterruptAndDelay(true);
-                    }
-                    mSockets[i].setSoTimeout(500);
-
-                    // Send over the arguments.
-                    OutputStream out = mSockets[i].getOutputStream();
-                    for (String argument : arguments) {
-                        byte[] bytes = argument.getBytes(StandardCharsets.UTF_8);
-                        if (bytes.length >= 0xFFFF) {
-                            throw new IllegalArgumentException("Argument is too large");
-                        }
-                        out.write(bytes.length >> 8);
-                        out.write(bytes.length);
-                        out.write(bytes);
-                        checkInterruptAndDelay(false);
-                    }
-                    out.write(0xFF);
-                    out.write(0xFF);
-
-                    // Wait for End-of-File.
-                    InputStream in = mSockets[i].getInputStream();
-                    while (true) {
-                        try {
-                            if (in.read() == -1) {
-                                break;
-                            }
-                        } catch (Exception e) {
-                            // ignore
-                        }
-                        checkInterruptAndDelay(true);
-                    }
+                    // Wait for the socket to connect and send over the arguments.
+                    mDeps.sendArgumentsToDaemon(daemon, mSockets[i], arguments,
+                            this::checkInterruptAndDelay);
                 }
 
                 // Wait for the daemons to create the new state.
@@ -2754,7 +2925,7 @@ public class Vpn {
                     // Check if a running daemon is dead.
                     for (int i = 0; i < mDaemons.length; ++i) {
                         String daemon = mDaemons[i];
-                        if (mArguments[i] != null && !SystemService.isRunning(daemon)) {
+                        if (mArguments[i] != null && !mDeps.isServiceRunning(daemon)) {
                             throw new IllegalStateException(daemon + " is dead");
                         }
                     }
@@ -2764,7 +2935,8 @@ public class Vpn {
                 // Now we are connected. Read and parse the new state.
                 String[] parameters = FileUtils.readTextFile(state, 0, null).split("\n", -1);
                 if (parameters.length != 7) {
-                    throw new IllegalStateException("Cannot parse the state");
+                    throw new IllegalStateException("Cannot parse the state: '"
+                            + String.join("', '", parameters) + "'");
                 }
 
                 // Set the interface and the addresses in the config.
@@ -2793,20 +2965,15 @@ public class Vpn {
                 }
 
                 // Add a throw route for the VPN server endpoint, if one was specified.
-                String endpoint = parameters[5].isEmpty() ? mProfile.server : parameters[5];
-                if (!endpoint.isEmpty()) {
-                    try {
-                        InetAddress addr = InetAddress.parseNumericAddress(endpoint);
-                        if (addr instanceof Inet4Address) {
-                            mConfig.routes.add(new RouteInfo(new IpPrefix(addr, 32), RTN_THROW));
-                        } else if (addr instanceof Inet6Address) {
-                            mConfig.routes.add(new RouteInfo(new IpPrefix(addr, 128), RTN_THROW));
-                        } else {
-                            Log.e(TAG, "Unknown IP address family for VPN endpoint: " + endpoint);
-                        }
-                    } catch (IllegalArgumentException e) {
-                        Log.e(TAG, "Exception constructing throw route to " + endpoint + ": " + e);
-                    }
+                if (endpointAddress instanceof Inet4Address) {
+                    mConfig.routes.add(new RouteInfo(
+                            new IpPrefix(endpointAddress, 32), RTN_THROW));
+                } else if (endpointAddress instanceof Inet6Address) {
+                    mConfig.routes.add(new RouteInfo(
+                            new IpPrefix(endpointAddress, 128), RTN_THROW));
+                } else {
+                    Log.e(TAG, "Unknown IP address family for VPN endpoint: "
+                            + endpointAddress);
                 }
 
                 // Here is the last step and it must be done synchronously.
@@ -2818,7 +2985,7 @@ public class Vpn {
                     checkInterruptAndDelay(false);
 
                     // Check if the interface is gone while we are waiting.
-                    if (jniCheck(mConfig.interfaze) == 0) {
+                    if (mDeps.checkInterfacePresent(Vpn.this, mConfig.interfaze)) {
                         throw new IllegalStateException(mConfig.interfaze + " is gone");
                     }
 
@@ -2849,7 +3016,7 @@ public class Vpn {
             while (true) {
                 Thread.sleep(2000);
                 for (int i = 0; i < mDaemons.length; i++) {
-                    if (mArguments[i] != null && SystemService.isStopped(mDaemons[i])) {
+                    if (mArguments[i] != null && mDeps.isServiceStopped(mDaemons[i])) {
                         return;
                     }
                 }

@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Preme Menú para desbloquear ou realizar unha chamada de emerxencia."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Preme Menú para desbloquear."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Crea o padrón de desbloqueo"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Emerxencia"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Chamada de emerxencia"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Volver á chamada"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Correcto!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Téntao de novo"</string>
@@ -849,7 +849,7 @@
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Pausar"</string>
     <string name="lockscreen_transport_play_description" msgid="106868788691652733">"Reproducir"</string>
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"Deter"</string>
-    <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"Rebobinar"</string>
+    <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"Retroceder"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Avance rápido"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Só chamadas de emerxencia"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Bloqueada pola rede"</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Actualizado polo teu administrador"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Eliminado polo teu administrador"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Aceptar"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Para aumentar a duración da batería, a función Aforro de batería fai o seguinte:\n\n•Activa o tema escuro\n•Desactiva ou restrinxe a actividade en segundo plano, algúns efectos visuais e outras funcións, como \"Ok Google\"\n\n"<annotation id="url">"Máis información"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"Para aumentar a duración da batería, a función Aforro de batería fai o seguinte:\n\n•Activa o tema escuro\n•Desactiva ou restrinxe a actividade en segundo plano, algúns efectos visuais e outras funcións, como \"Ok Google\""</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Para aumentar a duración da batería, a función Aforro de batería fai o seguinte:\n\n• Activa o tema escuro.\n• Desactiva ou restrinxe a actividade en segundo plano, algúns efectos visuais e outras funcións, como \"Ok Google\".\n\n"<annotation id="url">"Máis información"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Para aumentar a duración da batería, a función Aforro de batería fai o seguinte:\n\n• Activa o tema escuro\n• Desactiva ou restrinxe a actividade en segundo plano, algúns efectos visuais e outras funcións, como \"Ok Google\""</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Para contribuír a reducir o uso de datos, o aforro de datos impide que algunhas aplicacións envíen ou reciban datos en segundo plano. Cando esteas utilizando unha aplicación, esta poderá acceder aos datos, pero é posible que o faga con menos frecuencia. Por exemplo, é posible que as imaxes non se mostren ata que as toques."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Queres activar o aforro de datos?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activar"</string>

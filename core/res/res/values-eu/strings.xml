@@ -348,11 +348,11 @@
     <string name="permlab_receiveMms" msgid="4000650116674380275">"jaso testu-mezuak (MMSak)"</string>
     <string name="permdesc_receiveMms" msgid="958102423732219710">"MMS mezuak jasotzeko eta prozesatzeko baimena ematen die aplikazioei. Horrela, aplikazioak gailura bidalitako mezuak kontrola eta ezaba ditzake zuri erakutsi gabe."</string>
     <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"desbideratu sare mugikor bidezko igorpen-mezuak"</string>
-    <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Sare mugikor bidezko igorpen-modulura lotzeko baimena ematen dio aplikazioari, sare mugikor bidezko igorpen-mezuak jaso ahala desbideratu ahal izateko. Sare mugikor bidezko igorpen-alertak kokapen batzuetan entregatzen dira larrialdi-egoeren berri emateko. Sare mugikor bidezko larrialdi-igorpenak jasotzean, aplikazio maltzurrek gailuaren errendimenduari edota funtzionamenduari eragin diezaiokete."</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Sare mugikor bidezko igorpen-modulura lotzeko baimena ematen dio aplikazioari, sare mugikor bidezko igorpen-mezuak jaso ahala desbideratu ahal izateko. Sare mugikor bidezko igorpen-alertak kokapen batzuetan entregatzen dira larrialdi-egoeren berri emateko. Sare mugikor bidezko larrialdi-igorpenak jasotzean, aplikazio gaiztoek gailuaren errendimenduari edota funtzionamenduari eragin diezaiokete."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"irakurri sare mugikor bidezko igorpen-mezuak"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Gailuak jasotako sare mugikor bidezko igorpenen mezuak irakurtzeko baimena ematen die aplikazioei. Sare mugikor bidezko igorpen-alertak kokapen batzuetan ematen dira larrialdi-egoeren berri emateko. Aplikazio gaiztoek gailuaren errendimendua edo funtzionamendua oztopa dezakete larrialdi-igorpen horietako bat jasotzen denean."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"irakurri harpidetutako jarioak"</string>
-    <string name="permdesc_subscribedFeedsRead" msgid="6911349196661811865">"Unean sinkronizatutako jarioei buruzko xehetasunak lortzeko baimena ematen die aplikazioei."</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="6911349196661811865">"Une horretan sinkronizatutako jarioei buruzko xehetasunak lortzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_sendSms" msgid="7757368721742014252">"bidali eta ikusi SMS mezuak"</string>
     <string name="permdesc_sendSms" msgid="6757089798435130769">"SMS mezuak bidaltzeko baimena ematen die aplikazioei. Horrela, ustekabeko gastuak eragin daitezke. Aplikazio gaiztoek erabil dezakete zuk berretsi gabeko mezuak bidalita gastuak eragiteko."</string>
     <string name="permlab_readSms" msgid="5164176626258800297">"irakurri testu-mezuak (SMSak edo MMSak)"</string>
@@ -362,7 +362,7 @@
     <string name="permlab_receiveWapPush" msgid="4223747702856929056">"jaso testu-mezuak (WAP bidezkoak)"</string>
     <string name="permdesc_receiveWapPush" msgid="1638677888301778457">"WAP mezuak jasotzeko eta prozesatzeko baimena ematen die aplikazioei. Horrela, aplikazioak, besteak beste, gailura bidalitako mezuak kontrola eta ezaba ditzake zuri erakutsi gabe."</string>
     <string name="permlab_getTasks" msgid="7460048811831750262">"eskuratu abian diren aplikazioak"</string>
-    <string name="permdesc_getTasks" msgid="7388138607018233726">"Unean edo duela gutxi exekutatutako zereginei buruzko informazioa lortzeko baimena ematen die aplikazioei. Horrela, aplikazioak gailuan erabiltzen ari diren aplikazioei buruzko informazioa ezagut dezake."</string>
+    <string name="permdesc_getTasks" msgid="7388138607018233726">"Une honetan edo duela gutxi exekutatutako zereginei buruzko informazioa lortzeko baimena ematen die aplikazioei. Horrela, aplikazioak gailuan erabiltzen ari diren aplikazioei buruzko informazioa ezagut dezake."</string>
     <string name="permlab_manageProfileAndDeviceOwners" msgid="639849495253987493">"kudeatu profilen eta gailuen jabeak"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="7304240671781989283">"Profilaren eta gailuaren jabeak zehazteko baimena ematen die aplikazioei."</string>
     <string name="permlab_reorderTasks" msgid="7598562301992923804">"ordenatu abian diren aplikazioak"</string>
@@ -482,8 +482,8 @@
     <string name="permdesc_setTimeZone" product="default" msgid="4611828585759488256">"Telefonoaren ordu-zona aldatzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_getAccounts" msgid="5304317160463582791">"bilatu gailuko kontuak"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="1784452755887604512">"Tabletak ezagutzen dituen kontuen zerrenda lortzeko baimena ematen die aplikazioei. Instalatuta dauzkazun aplikazioek sortutako kontuak har daitezke barnean."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="437604680436540822">"Android TV gailuak ezagutzen dituen kontuen zerrenda lortzeko baimena ematen die aplikazioei. Kontu horien artean, instalatuta dituzun aplikazioek sortutako kontuak egon litezke."</string>
-    <string name="permdesc_getAccounts" product="default" msgid="2491273043569751867">"Telefonoak ezagutzen dituen kontuen zerrenda lortzeko baimena ematen die aplikazioei. Instalatuta dituzun aplikazioek sortutako kontuak har daitezke barnean."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="437604680436540822">"Android TV gailuak ezagutzen dituen kontuen zerrenda lortzeko baimena ematen die aplikazioei. Kontu horien artean, instalatuta dauzkazun aplikazioek sortutako kontuak egon litezke."</string>
+    <string name="permdesc_getAccounts" product="default" msgid="2491273043569751867">"Telefonoak ezagutzen dituen kontuen zerrenda lortzeko baimena ematen die aplikazioei. Instalatuta dauzkazun aplikazioek sortutako kontuak har daitezke barnean."</string>
     <string name="permlab_accessNetworkState" msgid="2349126720783633918">"ikusi sareko konexioak"</string>
     <string name="permdesc_accessNetworkState" msgid="4394564702881662849">"Sareko konexioei buruzko informazioa ikusteko baimena ematen die aplikazioei; adibidez, zer sare dauden eta zeintzuk dauden konektatuta."</string>
     <string name="permlab_createNetworkSockets" msgid="3224420491603590541">"izan sarerako sarbide osoa"</string>
@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Desblokeatzeko edo larrialdi-deia egiteko, sakatu Menua."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Desblokeatzeko, sakatu Menua."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Desblokeatzeko, marraztu eredua"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Larrialdi-deiak"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Larrialdi-deia"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Itzuli deira"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Eredua zuzena da!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Saiatu berriro"</string>
@@ -843,7 +843,7 @@
     <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Sartu SIM txartela."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM txartela falta da edo ezin da irakurri. Sartu SIM txartel bat."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"SIM txartela hondatuta dago."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"SIM txartela behin betiko desgaitu zaizu.\n Beste SIM txartel bat lortzeko, jarri zerbitzu-hornitzailearekin harremanetan."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"SIM txartela betiko desgaitu zaizu.\n Beste SIM txartel bat lortzeko, jarri zerbitzu-hornitzailearekin harremanetan."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Aurreko pista"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Hurrengo pista"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Pausatu"</string>
@@ -878,7 +878,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="3031027901286812848">"Pasahitza"</string>
     <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"Hasi saioa"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="4369219936865697679">"Erabiltzaile-izen edo pasahitz baliogabea."</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="1683405808525090649">"Erabiltzaile-izena edo pasahitza ahaztu zaizu?\nZoaz "<b>"google.com/accounts/recovery"</b>" helbidera."</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1683405808525090649">"Erabiltzaile-izena edo pasahitza ahaztu zaizu?\nJoan "<b>"google.com/accounts/recovery"</b>" helbidera."</string>
     <string name="lockscreen_glogin_checking_password" msgid="2607271802803381645">"Egiaztatzen…"</string>
     <string name="lockscreen_unlock_label" msgid="4648257878373307582">"Desblokeatu"</string>
     <string name="lockscreen_sound_on_label" msgid="1660281470535492430">"Soinua aktibatuta"</string>
@@ -1603,7 +1603,7 @@
     <string name="kg_login_password_hint" msgid="3330530727273164402">"Pasahitza"</string>
     <string name="kg_login_submit_button" msgid="893611277617096870">"Hasi saioa"</string>
     <string name="kg_login_invalid_input" msgid="8292367491901220210">"Erabiltzaile-izen edo pasahitz baliogabea."</string>
-    <string name="kg_login_account_recovery_hint" msgid="4892466171043541248">"Erabiltzaile-izena edo pasahitza ahaztu zaizu?\nZoaz "<b>"google.com/accounts/recovery"</b>" helbidera."</string>
+    <string name="kg_login_account_recovery_hint" msgid="4892466171043541248">"Erabiltzaile-izena edo pasahitza ahaztu zaizu?\nJoan "<b>"google.com/accounts/recovery"</b>" helbidera."</string>
     <string name="kg_login_checking_password" msgid="4676010303243317253">"Kontua egiaztatzen…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"PINa oker idatzi duzu <xliff:g id="NUMBER_0">%1$d</xliff:g> aldiz. \n\nSaiatu berriro <xliff:g id="NUMBER_1">%2$d</xliff:g> segundo barru."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"Pasahitza oker idatzi duzu <xliff:g id="NUMBER_0">%1$d</xliff:g> aldiz. \n\nSaiatu berriro <xliff:g id="NUMBER_1">%2$d</xliff:g> segundo barru."</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Administratzaileak eguneratu du"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Administratzaileak ezabatu du"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Ados"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Bateriaren iraupena luzatzeko, erabili bateria-aurrezlea:\n\n• Gai iluna aktibatzen du.\n• Desaktibatu edo murriztu egiten ditu atzeko planoko jarduerak, zenbait efektu bisual eta beste eginbide batzuk, hala nola \"Ok Google\".\n\n"<annotation id="url">"Lortu informazio gehiago"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"Bateriaren iraupena luzatzeko, erabili bateria-aurrezlea:\n\n• Gai iluna aktibatzen du.\n• Desaktibatu edo murriztu egiten ditu atzeko planoko jarduerak, zenbait efektu bisual eta beste eginbide batzuk, hala nola \"Ok Google\"."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Bateriaren iraupena luzatzeko, erabili bateria-aurrezlea:\n\n• Gai iluna aktibatzen du.\n• Desaktibatu edo murriztu egiten ditu atzeko planoko jarduerak, zenbait efektu bisual eta beste eginbide batzuk, hala nola \"Ok Google\".\n\n"<annotation id="url">"Lortu informazio gehiago"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Bateriaren iraupena luzatzeko, erabili bateria-aurrezlea:\n\n• Gai iluna aktibatzen du.\n• Atzeko planoko jarduerak, zenbait efektu bisual eta beste eginbide batzuk desaktibatzen edo murrizten ditu, hala nola \"Ok Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Datuen erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Une honetan erabiltzen ari zaren aplikazioak atzitu egin ahal izango ditu datuak, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Datu-aurrezlea aktibatu nahi duzu?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktibatu"</string>

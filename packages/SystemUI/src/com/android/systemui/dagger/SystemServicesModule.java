@@ -37,10 +37,12 @@ import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
 import android.content.res.Resources;
+import android.hardware.SensorManager;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.display.DisplayManager;
 import android.media.AudioManager;
 import android.media.MediaRouter2Manager;
+import android.media.session.MediaSessionManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkScoreManager;
 import android.net.wifi.WifiManager;
@@ -218,6 +220,11 @@ public class SystemServicesModule {
     }
 
     @Provides
+    static MediaSessionManager provideMediaSessionManager(Context context) {
+        return context.getSystemService(MediaSessionManager.class);
+    }
+
+    @Provides
     @Singleton
     static NetworkScoreManager provideNetworkScoreManager(Context context) {
         return context.getSystemService(NetworkScoreManager.class);
@@ -252,6 +259,12 @@ public class SystemServicesModule {
     @Main
     static Resources provideResources(Context context) {
         return context.getResources();
+    }
+
+    @Provides
+    @Singleton
+    static SensorManager providesSensorManager(Context context) {
+        return context.getSystemService(SensorManager.class);
     }
 
     @Singleton

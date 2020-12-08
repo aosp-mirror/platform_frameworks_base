@@ -49,6 +49,13 @@ public interface WindowManagerPolicyConstants {
     int PRESENCE_INTERNAL = 1 << 0;
     int PRESENCE_EXTERNAL = 1 << 1;
 
+    // Alternate bars position values
+    int ALT_BAR_UNKNOWN = -1;
+    int ALT_BAR_LEFT = 1 << 0;
+    int ALT_BAR_RIGHT = 1 << 1;
+    int ALT_BAR_BOTTOM = 1 << 2;
+    int ALT_BAR_TOP = 1 << 3;
+
     // Navigation bar position values
     int NAV_BAR_INVALID = -1;
     int NAV_BAR_LEFT = 1 << 0;

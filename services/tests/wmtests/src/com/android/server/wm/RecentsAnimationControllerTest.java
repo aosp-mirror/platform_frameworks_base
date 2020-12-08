@@ -363,12 +363,14 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         assertFalse(homeActivity.hasFixedRotationTransform());
     }
 
-    @Test
-    public void testClearFixedRotationLaunchingAppAfterCleanupAnimation() {
+    private ActivityRecord prepareFixedRotationLaunchingAppWithRecentsAnim() {
         final ActivityRecord homeActivity = createHomeActivity();
         homeActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         final ActivityRecord activity = createActivityRecord(mDefaultDisplay,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        // Add a window so it can be animated by the recents.
+        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, activity, "win");
+        activity.addWindow(win);
         // Assume an activity is launching to different rotation.
         mDefaultDisplay.setFixedRotationLaunchingApp(activity,
                 (mDefaultDisplay.getRotation() + 1) % 4);
@@ -379,12 +381,35 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         // Before the transition is done, the recents animation is triggered.
         initializeRecentsAnimationController(mController, homeActivity);
         assertFalse(homeActivity.hasFixedRotationTransform());
+        assertTrue(mController.isAnimatingTask(activity.getTask()));
+
+        return activity;
+    }
+
+    @Test
+    public void testClearFixedRotationLaunchingAppAfterCleanupAnimation() {
+        final ActivityRecord activity = prepareFixedRotationLaunchingAppWithRecentsAnim();
 
         // Simulate giving up the swipe up gesture to keep the original activity as top.
         mController.cleanupAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION);
         // The rotation transform should be cleared after updating orientation with display.
         assertFalse(activity.hasFixedRotationTransform());
         assertFalse(mDefaultDisplay.hasTopFixedRotationLaunchingApp());
+    }
+
+    @Test
+    public void testKeepFixedRotationWhenMovingRecentsToTop() {
+        final ActivityRecord activity = prepareFixedRotationLaunchingAppWithRecentsAnim();
+        // Assume a transition animation has started running before recents animation. Then the
+        // activity will receive onAnimationFinished that notifies app transition finished when
+        // removing the recents animation of task.
+        activity.getTask().getAnimationSources().add(activity);
+
+        // Simulate swiping to home/recents before the transition is done.
+        mController.cleanupAnimation(REORDER_MOVE_TO_TOP);
+        // The rotation transform should be preserved. In real case, it will be cleared by the next
+        // move-to-top transition.
+        assertTrue(activity.hasFixedRotationTransform());
     }
 
     @Test

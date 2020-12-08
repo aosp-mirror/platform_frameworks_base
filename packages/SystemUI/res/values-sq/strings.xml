@@ -108,15 +108,13 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Vazhdo"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Anulo"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Ndaj"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"Fshi"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Regjistrimi i ekranit u anulua"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Regjistrimi i ekranit u ruajt, trokit për ta parë"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"Regjistrimi i ekranit u fshi"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Gabim gjatë fshirjes së regjistrimit të ekranit"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Marrja e lejeve dështoi"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Gabim gjatë nisjes së regjistrimit të ekranit"</string>
     <string name="usb_preference_title" msgid="1439924437558480718">"Opsionet e transferimit të dosjeve të USB-së"</string>
-    <string name="use_mtp_button_title" msgid="5036082897886518086">"Lidh si një lexues \"media\" (MTP)"</string>
+    <string name="use_mtp_button_title" msgid="5036082897886518086">"Lidh si një luajtës të medias (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7676427598943446826">"Montoje si kamerë (PTP)"</string>
     <string name="installer_cd_button_title" msgid="5499998592841984743">"Instalo \"Transferimi i skedarëve të Android\" për Mac"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Prapa"</string>
@@ -248,7 +246,7 @@
     <string name="accessibility_remove_notification" msgid="1641455251495815527">"Pastro njoftimin."</string>
     <string name="accessibility_gps_enabled" msgid="4061313248217660858">"GPS-ja është e aktivizuar."</string>
     <string name="accessibility_gps_acquiring" msgid="896207402196024040">"Po siguron GPS-në."</string>
-    <string name="accessibility_tty_enabled" msgid="1123180388823381118">"Teleprinteri është i aktivizuar."</string>
+    <string name="accessibility_tty_enabled" msgid="1123180388823381118">"Teletajpi është i aktivizuar."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Zile me dridhje."</string>
     <string name="accessibility_ringer_silent" msgid="8994620163934249882">"Zilja është heshtur."</string>
     <!-- no translation found for accessibility_casting (8708751252897282313) -->
@@ -482,7 +480,7 @@
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Mirë se erdhe, i ftuar!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Dëshiron ta vazhdosh sesionin tënd?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Fillo nga e para"</string>
-    <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Po, vazhdo!"</string>
+    <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Po, vazhdo"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"Përdorues vizitor"</string>
     <string name="guest_notification_text" msgid="4202692942089571351">"Për të fshirë aplikacionet dhe të dhënat, hiqe përdoruesin vizitor"</string>
     <string name="guest_notification_remove_action" msgid="4153019027696868099">"HIQ VIZITORIN"</string>
@@ -502,8 +500,8 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"\"Kursyesi i baterisë\" është i aktivizuar"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Pakëson veprimtarinë dhe të dhënat në sfond"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Çaktivizo \"Kursyesin e baterisë\""</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> do të ketë qasje te të gjitha informacionet që janë të dukshme në ekran ose që luhen nga pajisja jote gjatë regjistrimit ose transmetimit. Kjo përfshin informacione si p.sh. fjalëkalimet, detajet e pagesave, fotografitë, mesazhet dhe audion që luan ti."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Shërbimi që e ofron këtë funksion do të ketë qasje te të gjitha informacionet që janë të dukshme në ekran ose që luhen nga pajisja jote gjatë regjistrimit ose transmetimit. Kjo përfshin informacione si p.sh. fjalëkalimet, detajet e pagesave, fotografitë, mesazhet dhe audion që luan ti."</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> do të ketë qasje te të gjitha informacionet që janë të dukshme në ekran ose që luhen nga pajisja jote gjatë regjistrimit ose transmetimit. Kjo përfshin informacione, si p.sh.: fjalëkalimet, detajet e pagesave, fotografitë, mesazhet dhe audion që luan ti."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Shërbimi që e ofron këtë funksion do të ketë qasje te të gjitha informacionet që janë të dukshme në ekran ose që luhen nga pajisja jote gjatë regjistrimit ose transmetimit. Kjo përfshin informacione, si p.sh.: fjalëkalimet, detajet e pagesave, fotografitë, mesazhet dhe audion që luan ti."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Do të fillosh regjistrimin ose transmetimin?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Fillo regjistrimin ose transmetimin me <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Mos e shfaq sërish"</string>
@@ -884,12 +882,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"Lart 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"Lart 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Ekrani i plotë poshtë"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"Pozicioni <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Trokit dy herë për ta redaktuar."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Trokit dy herë për ta shtuar."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"Zhvendose <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"Hiqe <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"Shto <xliff:g id="TILE_NAME">%1$s</xliff:g> te pozicioni <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"Zhvendos <xliff:g id="TILE_NAME">%1$s</xliff:g> te pozicioni <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"hiq pllakëzën"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"shto pllakëzën në fund"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Zhvendos pllakëzën"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Shto pllakëzën"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Zhvendos te <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Shto te pozicioni <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Pozicioni <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Redaktori i cilësimeve të shpejta."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Njoftim nga <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"Aplikacioni mund të mos funksionojë me ekranin e ndarë."</string>
@@ -922,11 +921,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Kalo tek e mëparshmja"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Ndrysho përmasat"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefoni u fik për shkak të nxehtësisë"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Telefoni tani punon normalisht"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Telefoni tani punon normalisht.\nTrokit për më shumë informacione"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefoni yt ishte tepër i nxehtë, prandaj u fik për t\'u ftohur. Telefoni tani punon normalisht.\n\nTelefoni mund të nxehet së tepërmi nëse ti:\n	• Përdor aplikacione intensive për burimet (siç janë aplikacionet e lojërave, videove apo aplikacionet e navigimit)\n	• Shkarkon ose ngarkon skedarë të mëdhenj\n	• E përdor telefonin në temperatura të larta"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Shiko hapat për kujdesin"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Telefoni po bëhet i ngrohtë"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Disa funksione janë të kufizuara kur telefoni është duke u ftohur"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Disa veçori janë të kufizuara kur telefoni është duke u ftohur.\nTrokit për më shumë informacione"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Telefoni yt do të përpiqet automatikisht që të ftohet. Mund ta përdorësh përsëri telefonin, por ai mund të punojë më ngadalë.\n\nPasi telefoni të jetë ftohur, ai do të punojë si normalisht."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Shiko hapat për kujdesin"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Shkëput karikuesin"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Ka një problem me karikimin e kësaj pajisjeje. Hiqe spinën dhe trego kujdes pasi kablloja mund të jetë e ngrohtë."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Shiko hapat për kujdesin"</string>
@@ -988,6 +989,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Cilësimet"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"E kuptova"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Hidh grumbullin SysUI"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> po përdor <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplikacionet po përdorin <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" dhe "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"kamerën"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"vendndodhjen"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofonin"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Sensorët joaktivë"</string>
     <string name="device_services" msgid="1549944177856658705">"Shërbimet e pajisjes"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Pa titull"</string>
@@ -1066,7 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Po ngarkon rekomandimet"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Fshih sesionin aktual."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Fshih"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Hiq"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Vazhdo"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Cilësimet"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Joaktive, kontrollo aplikacionin"</string>

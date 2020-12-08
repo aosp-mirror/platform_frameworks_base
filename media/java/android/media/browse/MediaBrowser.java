@@ -185,7 +185,7 @@ public final class MediaBrowser {
                 boolean bound = false;
                 try {
                     bound = mContext.bindService(intent, mServiceConnection,
-                            Context.BIND_AUTO_CREATE);
+                            Context.BIND_AUTO_CREATE | Context.BIND_INCLUDE_CAPABILITIES);
                 } catch (Exception ex) {
                     Log.e(TAG, "Failed binding to service " + mServiceComponent);
                 }

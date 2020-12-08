@@ -70,6 +70,8 @@ public class UsbDebuggingActivity extends AlertActivity
 
         if (SystemProperties.getInt("service.adb.tcp.port", 0) == 0) {
             mDisconnectedReceiver = new UsbDisconnectedReceiver(this);
+            IntentFilter filter = new IntentFilter(UsbManager.ACTION_USB_STATE);
+            mBroadcastDispatcher.registerReceiver(mDisconnectedReceiver, filter);
         }
 
         Intent intent = getIntent();
@@ -119,6 +121,7 @@ public class UsbDebuggingActivity extends AlertActivity
             }
             boolean connected = intent.getBooleanExtra(UsbManager.USB_CONNECTED, false);
             if (!connected) {
+                Log.d(TAG, "USB disconnected, notifying service");
                 notifyService(false);
                 mActivity.finish();
             }
@@ -126,29 +129,20 @@ public class UsbDebuggingActivity extends AlertActivity
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        if (mDisconnectedReceiver != null) {
-            IntentFilter filter = new IntentFilter(UsbManager.ACTION_USB_STATE);
-            mBroadcastDispatcher.registerReceiver(mDisconnectedReceiver, filter);
-        }
-    }
-
-    @Override
-    protected void onStop() {
+    protected void onDestroy() {
         if (mDisconnectedReceiver != null) {
             mBroadcastDispatcher.unregisterReceiver(mDisconnectedReceiver);
         }
-        super.onStop();
-    }
-
-    @Override
-    protected void onDestroy() {
-        // If the ADB service has not yet been notified due to this dialog being closed in some
-        // other way then notify the service to deny the connection to ensure system_server sends
-        // a response to adbd.
-        if (!mServiceNotified) {
-            notifyService(false);
+        // Only notify the service if the activity is finishing; if onDestroy has been called due to
+        // a configuration change then allow the user to still authorize the connection the next
+        // time the activity is in the foreground.
+        if (isFinishing()) {
+            // If the ADB service has not yet been notified due to this dialog being closed in some
+            // other way then notify the service to deny the connection to ensure system_server
+            // sends a response to adbd.
+            if (!mServiceNotified) {
+                notifyService(false);
+            }
         }
         super.onDestroy();
     }

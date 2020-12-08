@@ -86,8 +86,8 @@ class ShareTargetPredictor extends AppTargetPredictor {
             return;
         }
         List<ShareTarget> shareTargets = getDirectShareTargets();
-        SharesheetModelScorer.computeScore(shareTargets, getShareEventType(mIntentFilter),
-                System.currentTimeMillis());
+        SharesheetModelScorer.computeScoreForDirectShare(shareTargets,
+                getShareEventType(mIntentFilter), System.currentTimeMillis());
         Collections.sort(shareTargets,
                 Comparator.comparing(ShareTarget::getScore, reverseOrder())
                         .thenComparing(t -> t.getAppTarget().getRank()));

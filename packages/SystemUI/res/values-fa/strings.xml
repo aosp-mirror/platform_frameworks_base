@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"ازسرگیری"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"لغو"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"هم‌رسانی"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"حذف"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"ضبط صفحه‌نمایش لغو شد"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"ضبط صفحه‌نمایش ذخیره شد، برای مشاهده ضربه بزنید"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"فایل ضبط صفحه‌نمایش حذف شد"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"خطا در حذف فایل ضبط صفحه‌نمایش"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"مجوزها دریافت نشدند"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"خطا هنگام شروع ضبط صفحه‌نمایش"</string>
@@ -248,7 +246,7 @@
     <string name="accessibility_remove_notification" msgid="1641455251495815527">"پاک کردن اعلان"</string>
     <string name="accessibility_gps_enabled" msgid="4061313248217660858">"‏GPS فعال شد."</string>
     <string name="accessibility_gps_acquiring" msgid="896207402196024040">"‏دستیابی به GPS."</string>
-    <string name="accessibility_tty_enabled" msgid="1123180388823381118">"‏TeleTypewriter فعال شد."</string>
+    <string name="accessibility_tty_enabled" msgid="1123180388823381118">"تله‌تایپ فعال شد."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"زنگ لرزشی."</string>
     <string name="accessibility_ringer_silent" msgid="8994620163934249882">"زنگ بی‌صدا."</string>
     <!-- no translation found for accessibility_casting (8708751252897282313) -->
@@ -802,7 +800,7 @@
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"برگشت"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"اعلان‌ها"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"میان‌برهای صفحه‌کلید"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"تغییر طرح‌بندی صفحه‌کلید"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"تغییر جانمایی صفحه‌کلید"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"برنامه‌ها"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"دستیار"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"مرورگر"</string>
@@ -884,12 +882,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"٪۵۰ بالا"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"٪۳۰ بالا"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"تمام‌صفحه پایین"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"موقعیت <xliff:g id="POSITION">%1$d</xliff:g>، <xliff:g id="TILE_NAME">%2$s</xliff:g>. برای ویرایش دو ضربه سریع بزنید."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. برای افزودن دو ضربه سریع بزنید."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"انتقال <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"حذف <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"افزودن <xliff:g id="TILE_NAME">%1$s</xliff:g> به موقعیت <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"انتقال <xliff:g id="TILE_NAME">%1$s</xliff:g> به موقعیت <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"برداشتن کاشی"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"افزودن کاشی به انتها"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"انتقال کاشی"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"افزودن کاشی"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"انتقال به <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"افزودن به موقعیت <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"موقعیت <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"ویرایشگر تنظیمات سریع."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"اعلان <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"ممکن است برنامه با تقسیم صفحه کار نکند."</string>
@@ -922,11 +921,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"رد شدن به قبلی"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"تغییر اندازه"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"تلفن به علت گرم شدن خاموش شد"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"اکنون تلفنتان عملکرد معمولش را دارد"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"اکنون عملکرد تلفنتان به حالت عادی برگشته است.\nبرای اطلاعات بیشتر ضربه بزنید"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"تلفنتان خیلی گرم شده بود، بنابراین خاموش شد تا خنک شود. اکنون تلفنتان عملکرد معمولش را دارد.\n\nتلفنتان خیلی گرم می‌شود، اگر:\n	• از برنامه‌های نیازمند پردازش زیاد (مانند بازی، برنامه‌های ویدیویی یا پیمایشی) استفاده کنید\n	• فایل‌های بزرگ بارگیری یا بارگذاری کنید\n	• در دماهای بالا از تلفنتان استفاده کنید"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"دیدن اقدامات محافظتی"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"تلفن درحال گرم شدن است"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"وقتی تلفن درحال خنک شدن است، بعضی از قابلیت‌ها محدود می‌شوند"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"وقتی تلفن درحال خنک شدن است، بعضی از ویژگی‌ها محدود می‌شوند.\nبرای اطلاعات بیشتر ضربه بزنید"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"تلفنتان به‌طور خودکار سعی می‌کند خنک شود. همچنان می‌توانید از تلفنتان استفاده کنید، اما ممکن است کندتر عمل کند.\n\nوقتی تلفن خنک شد، عملکرد عادی‌اش از سرگرفته می‌شود."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"دیدن اقدامات محافظتی"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"جدا کردن شارژر از برق"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"مشکلی در شارژ کردن این دستگاه وجود دارد. آداپتور برق را از برق جدا کنید و مراقب باشید زیرا ممکن است کابل گرم باشد."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"مشاهده مراحل احتیاط"</string>
@@ -979,7 +980,7 @@
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- می‌تواند در <xliff:g id="APP">%1$s</xliff:g> اقدام انجام دهد"</string>
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"به <xliff:g id="APP">%1$s</xliff:g> اجازه داده شود تکه‌هایی از برنامه‌ها نشان دهد"</string>
     <string name="slice_permission_allow" msgid="6340449521277951123">"مجاز"</string>
-    <string name="slice_permission_deny" msgid="6870256451658176895">"رد کردن"</string>
+    <string name="slice_permission_deny" msgid="6870256451658176895">"مجاز نبودن"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"برای زمان‌بندی «بهینه‌سازی باتری» ضربه بزنید"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"وقتی باتری روبه‌اتمام است، بهینه‌سازی باتری را روشن کنید"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"نه متشکرم"</string>
@@ -988,6 +989,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"تنظیمات"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"متوجه شدم"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> از <xliff:g id="TYPES_LIST">%2$s</xliff:g> شما استفاده می‌کند."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"برنامه‌ها از <xliff:g id="TYPES_LIST">%s</xliff:g> شما استفاده می‌‌کنند."</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">"، "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" و "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"دوربین"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"مکان"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"میکروفون"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"حسگرها خاموش است"</string>
     <string name="device_services" msgid="1549944177856658705">"سرویس‌های دستگاه"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"بدون عنوان"</string>
@@ -1066,7 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"درحال بار کردن توصیه‌ها"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"رسانه"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"جلسه فعلی پنهان شود."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"پنهان کردن"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"رد کردن"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ازسرگیری"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"تنظیمات"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"غیرفعال، برنامه را بررسی کنید"</string>

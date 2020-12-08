@@ -421,7 +421,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"Esta app puede agregar, quitar o cambiar eventos del calendario en tu teléfono. Puede enviar mensajes que parecen proceder de propietarios del calendario o cambiar eventos sin notificarlos."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"acceder a comandos adicionales del proveedor del lugar"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Permite que la aplicación acceda a comandos adicionales del proveedor de ubicación. Esto puede permitirle a la aplicación interferir con el funcionamiento del GPS o de otras fuentes de ubicación."</string>
-    <string name="permlab_accessFineLocation" msgid="6426318438195622966">"acceder a la ubicación exacta solo en primer plano"</string>
+    <string name="permlab_accessFineLocation" msgid="6426318438195622966">"acceder a la ubicación precisa solo en primer plano"</string>
     <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Mientras la usas, esta app puede obtener tu ubicación exacta mediante los Servicios de ubicación, siempre y cuando el dispositivo los tenga activados. Es posible que esto aumente el uso de batería."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"acceder a la ubicación aproximada solo en primer plano"</string>
     <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Mientras la usas, esta app puede obtener tu ubicación aproximada mediante los Servicios de ubicación, siempre y cuando el dispositivo los tenga activados."</string>
@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Presiona el Menú para desbloquear o realizar una llamada de emergencia."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Presionar Menú para desbloquear."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Dibujar el patrón de desbloqueo"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Emergencia"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Llamada de emergencia"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Regresar a llamada"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Correcto"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Vuelve a intentarlo."</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Tu administrador actualizó este paquete"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Tu administrador borró este paquete"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Aceptar"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Para extender la duración de la batería, el Ahorro de batería hace lo siguiente:\n\n•Activa el Tema oscuro.\n•Desactiva o restringe la actividad en segundo plano, algunos efectos visuales y otras funciones, como \"Hey Google\".\n\n"<annotation id="url">"Más información"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"Para extender la duración de batería, el Ahorro de batería hace lo siguiente:\n\n•Activa el Tema oscuro.\n•Desactiva o restringe la actividad en segundo plano, algunos efectos visuales y otras funciones, como \"Hey Google\"."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Para extender la duración de batería, el Ahorro de batería hace lo siguiente:\n\n• Activa el Tema oscuro.\n• Desactiva o restringe la actividad en segundo plano, algunos efectos visuales y otras funciones, como \"Hey Google\".\n\n"<annotation id="url">"Más información"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Para extender la duración de batería, el Ahorro de batería hace lo siguiente:\n\n• Activa el Tema oscuro.\n• Desactiva o restringe la actividad en segundo plano, algunos efectos visuales y otras funciones, como \"Hey Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Para reducir el uso de datos, el modo Ahorro de datos evita que algunas apps envíen y reciban datos en segundo plano. La app que estés usando podrá acceder a los datos, pero con menor frecuencia. De esta forma, por ejemplo, las imágenes no se mostrarán hasta que las presiones."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"¿Deseas activar Ahorro de datos?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activar"</string>
@@ -1937,7 +1937,7 @@
       <item quantity="one">Una sugerencia de Autocompletar</item>
     </plurals>
     <string name="autofill_save_title" msgid="7719802414283739775">"¿Quieres guardar en "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
-    <string name="autofill_save_title_with_type" msgid="3002460014579799605">"¿Quieres guardar <xliff:g id="TYPE">%1$s</xliff:g> en "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_type" msgid="3002460014579799605">"¿Quieres guardar la <xliff:g id="TYPE">%1$s</xliff:g> en "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"¿Quieres guardar <xliff:g id="TYPE_0">%1$s</xliff:g> y <xliff:g id="TYPE_1">%2$s</xliff:g> en "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_3types" msgid="6598228952100102578">"¿Quieres guardar <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> y <xliff:g id="TYPE_2">%3$s</xliff:g> en "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title" msgid="3630695947047069136">"¿Quieres actualizar en "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>

@@ -151,7 +151,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    static final int VERSION = 186 + (USE_OLD_HISTORY ? 1000 : 0);
+    static final int VERSION = 188 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
@@ -13596,6 +13596,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mDailyStartTime = in.readLong();
         mNextMinDailyDeadline = in.readLong();
         mNextMaxDailyDeadline = in.readLong();
+        mBatteryTimeToFullSeconds = in.readLong();
 
         mStartCount++;
 
@@ -14086,6 +14087,7 @@ public class BatteryStatsImpl extends BatteryStats {
         out.writeLong(mDailyStartTime);
         out.writeLong(mNextMinDailyDeadline);
         out.writeLong(mNextMaxDailyDeadline);
+        out.writeLong(mBatteryTimeToFullSeconds);
 
         mScreenOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         mScreenDozeTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
@@ -14669,6 +14671,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mDischargeLightDozeCounter = new LongSamplingCounter(mOnBatteryTimeBase, in);
         mDischargeDeepDozeCounter = new LongSamplingCounter(mOnBatteryTimeBase, in);
         mLastWriteTime = in.readLong();
+        mBatteryTimeToFullSeconds = in.readLong();
 
         mRpmStats.clear();
         int NRPMS = in.readInt();
@@ -14861,6 +14864,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mDischargeLightDozeCounter.writeToParcel(out);
         mDischargeDeepDozeCounter.writeToParcel(out);
         out.writeLong(mLastWriteTime);
+        out.writeLong(mBatteryTimeToFullSeconds);
 
         out.writeInt(mRpmStats.size());
         for (Map.Entry<String, SamplingTimer> ent : mRpmStats.entrySet()) {

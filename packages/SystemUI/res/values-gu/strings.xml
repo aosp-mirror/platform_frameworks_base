@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"ફરી શરૂ કરો"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"રદ કરો"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"શેર કરો"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"ડિલીટ કરો"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"સ્ક્રીન રેકોર્ડિંગ રદ કર્યું"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"સ્ક્રીન રેકોર્ડિંગ સાચવ્યું, જોવા માટે ટૅપ કરો"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"સ્ક્રીન રેકોર્ડિંગ ડિલીટ કર્યું"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"સ્ક્રીન રેકોર્ડિંગ ડિલીટ કરવામાં ભૂલ આવી"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"પરવાનગીઓ મેળવવામાં નિષ્ફળ રહ્યાં"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"સ્ક્રીનને રેકૉર્ડ કરવાનું શરૂ કરવામાં ભૂલ"</string>
@@ -125,7 +123,7 @@
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"ઍક્સેસિબિલિટી"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"સ્ક્રીન ફેરવો"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"ઝલક"</string>
-    <string name="accessibility_search_light" msgid="524741790416076988">"શોધો"</string>
+    <string name="accessibility_search_light" msgid="524741790416076988">"શોધ"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"કૅમેરો"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ફોન"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"વૉઇસ સહાય"</string>
@@ -859,7 +857,7 @@
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"ટાઇલને ફરીથી ગોઠવવા માટે આંગળી દબાવીને ખેંચો"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"દૂર કરવા માટે અહીં ખેંચો"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"તમને ઓછામાં ઓછી <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> ટાઇલની જરૂર છે"</string>
-    <string name="qs_edit" msgid="5583565172803472437">"સંપાદિત કરો"</string>
+    <string name="qs_edit" msgid="5583565172803472437">"ફેરફાર કરો"</string>
     <string name="tuner_time" msgid="2450785840990529997">"સમય"</string>
   <string-array name="clock_options">
     <item msgid="3986445361435142273">"કલાક, મિનિટ અને સેકન્ડ બતાવો"</item>
@@ -884,12 +882,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"શીર્ષ 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"શીર્ષ 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"તળિયાની પૂર્ણ સ્ક્રીન"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"સ્થિતિ <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. સંપાદિત કરવા માટે બે વાર ટૅપ કરો."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. ઉમેરવા માટે બે વાર ટૅપ કરો."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ખસેડો"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"<xliff:g id="TILE_NAME">%1$s</xliff:g> દૂર કરો"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"<xliff:g id="POSITION">%2$d</xliff:g> જગ્યા પર <xliff:g id="TILE_NAME">%1$s</xliff:g>ને ઉમેરો"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"<xliff:g id="POSITION">%2$d</xliff:g> જગ્યા પર <xliff:g id="TILE_NAME">%1$s</xliff:g>ને ખસેડો"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"ટાઇલ કાઢી નાખો"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"ટાઇલને અંતે ઉમેરો"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"ટાઇલ ખસેડો"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"ટાઇલ ઉમેરો"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g> પર ખસેડો"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"જગ્યા પર <xliff:g id="POSITION">%1$d</xliff:g> ઉમેરો"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"જગ્યા <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"ઝડપી સેટિંગ્સ સંપાદક."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> નોટિફિકેશન: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"વિભાજિત-સ્ક્રીન સાથે ઍપ્લિકેશન કદાચ કામ ન કરે."</string>
@@ -922,11 +921,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"પહેલાંના પર જાઓ"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"કદ બદલો"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"ફોન વધુ પડતી ગરમીને લીધે બંધ થઇ ગયો છે"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"તમારો ફોન હવે સામાન્યપણે કાર્ય કરી રહ્યો છે"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"તમારો ફોન હવે સામાન્યપણે કાર્ય કરી રહ્યો છે.\nવધુ માહિતી માટે ટૅપ કરો"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"તમારો ફોન અત્યંત ગરમ હતો, તેથી તે ઠંડો થવા આપમેળે બંધ થઇ ગયો છે. તમારો ફોન હવે સામાન્યપણે કાર્ય કરી રહ્યો છે.\n\nતમારો ફોન અત્યંત ગરમ થઇ શકે છે, જો તમે:\n • એવી ઍપ્લિકેશન વાપરતા હો જે સંસાધન સઘન રીતે વાપરતી હોય (જેમ કે ગેમિંગ, વીડિઓ, અથવા નેવિગેટ કરતી ઍપ્લિકેશનો)\n • મોટી ફાઇલો અપલોડ અથવા ડાઉનલોડ કરતા હો\n • તમારા ફોનનો ઉપયોગ ઉચ્ચ તાપમાનમાં કરતા હો"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"સારસંભાળના પગલાં જુઓ"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"ફોન ગરમ થઈ રહ્યો છે"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"ફોન ઠંડો થાય ત્યાં સુધી કેટલીક સુવિધાઓ મર્યાદિત હોય છે"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"ફોન ઠંડો થાય ત્યાં સુધી અમુક સુવિધાઓ મર્યાદિત હોય છે.\nવધુ માહિતી માટે ટૅપ કરો"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"તમારો ફોન આપમેળે ઠંડો થવાનો પ્રયાસ કરશે. તમે હજી પણ તમારા ફોનનો ઉપયોગ કરી શકો છો, પરંતુ તે કદાચ થોડો ધીમો ચાલે.\n\nતમારો ફોન ઠંડો થઈ જવા પર, તે સામાન્ય રીતે ચાલશે."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"સારસંભાળના પગલાં જુઓ"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"ચાર્જરને અનપ્લગ કરો"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"આ ડિવાઇસને ચાર્જ કરવામાં કોઈ સમસ્યા છે. પાવર અડૅપ્ટર અનપ્લગ કરો અને કાળજી લેજો કદાચ કેબલ થોડો ગરમ થયો હોઈ શકે છે."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"સારસંભાળના પગલાં જુઓ"</string>
@@ -988,6 +989,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"સેટિંગ"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"સમજાઈ ગયું"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> ઍપ તમારા <xliff:g id="TYPES_LIST">%2$s</xliff:g>નો ઉપયોગ કરી રહી છે."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"ઍપ્લિકેશન તમારા <xliff:g id="TYPES_LIST">%s</xliff:g>નો ઉપયોગ કરી રહી છે."</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" અને "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"કૅમેરા"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"સ્થાન"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"માઇક્રોફોન"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"સેન્સર બંધ છે"</string>
     <string name="device_services" msgid="1549944177856658705">"ડિવાઇસ સેવાઓ"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"કોઈ શીર્ષક નથી"</string>
@@ -1066,7 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"સુઝાવ લોડ કરી રહ્યાં છીએ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"મીડિયા"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"હાલનું સત્ર છુપાવો."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"છુપાવો"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"છોડી દો"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ફરી શરૂ કરો"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"સેટિંગ"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"નિષ્ક્રિય, ઍપને ચેક કરો"</string>

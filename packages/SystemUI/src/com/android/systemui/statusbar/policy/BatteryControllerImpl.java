@@ -58,7 +58,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final EnhancedEstimates mEstimates;
-    private final BroadcastDispatcher mBroadcastDispatcher;
+    protected final BroadcastDispatcher mBroadcastDispatcher;
     protected final ArrayList<BatteryController.BatteryStateChangeCallback>
             mChangeCallbacks = new ArrayList<>();
     private final ArrayList<EstimateFetchCompletion> mFetchCallbacks = new ArrayList<>();
@@ -73,6 +73,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     private boolean mCharged;
     protected boolean mPowerSave;
     private boolean mAodPowerSave;
+    protected boolean mWirelessCharging;
     private boolean mTestmode = false;
     @VisibleForTesting
     boolean mHasReceivedBattery = false;
@@ -103,16 +104,6 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     @Override
     public void init() {
         registerReceiver();
-        if (!mHasReceivedBattery) {
-            // Get initial state. Relying on Sticky behavior until API for getting info.
-            Intent intent = mContext.registerReceiver(
-                    null,
-                    new IntentFilter(Intent.ACTION_BATTERY_CHANGED)
-            );
-            if (intent != null && !mHasReceivedBattery) {
-                onReceive(mContext, intent);
-            }
-        }
         updatePowerSave();
         updateEstimate();
     }
@@ -164,6 +155,8 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
                     BatteryManager.BATTERY_STATUS_UNKNOWN);
             mCharged = status == BatteryManager.BATTERY_STATUS_FULL;
             mCharging = mCharged || status == BatteryManager.BATTERY_STATUS_CHARGING;
+            mWirelessCharging = mCharging && intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0)
+                    == BatteryManager.BATTERY_PLUGGED_WIRELESS;
 
             fireBatteryLevelChanged();
         } else if (action.equals(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)) {
@@ -216,6 +209,11 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     @Override
     public boolean isAodPowerSave() {
         return mAodPowerSave;
+    }
+
+    @Override
+    public boolean isWirelessCharging() {
+        return mWirelessCharging;
     }
 
     @Override

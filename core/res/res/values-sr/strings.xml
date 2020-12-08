@@ -241,7 +241,7 @@
     <string name="global_action_power_off" msgid="4404936470711393203">"Искључи"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Напајање"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Рестартуј"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"Хитни позив"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"Хитан позив"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Извештај о грешци"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Заврши сесију"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Снимак екрана"</string>
@@ -832,7 +832,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Притисните „Мени“ да бисте откључали телефон или упутите хитан позив."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Притисните „Мени“ за откључавање."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Унесите шаблон за откључавање"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Хитне службе"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Хитан позив"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Назад на позив"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Тачно!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Пробајте поново"</string>
@@ -1142,7 +1142,7 @@
     <string name="capital_off" msgid="7443704171014626777">"НЕ"</string>
     <string name="checked" msgid="9179896827054513119">"означено је"</string>
     <string name="not_checked" msgid="7972320087569023342">"није означено"</string>
-    <string name="whichApplication" msgid="5432266899591255759">"Довршавање радње помоћу"</string>
+    <string name="whichApplication" msgid="5432266899591255759">"Доврши радњу преко"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Завршите радњу помоћу апликације %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Заврши радњу"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"Отворите помоћу"</string>
@@ -1815,8 +1815,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Ажурирао је администратор"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Избрисао је администратор"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Потврди"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Да би се продужило трајање батерије, Уштеда батерије:\n\n•укључује тамну тему\n•искључује или ограничава активности у позадини, неке визуелне ефекте и друге функције, на пример, „Ок Google“\n\n"<annotation id="url">"Сазнајте више"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"Да би се продужило трајање батерије, Уштеда батерије:\n\n•укључује тамну тему\n•искључује или ограничава активности у позадини, неке визуелне ефекте и друге функције, на пример, „Ок Google“"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Да би се продужило трајање батерије, Уштеда батерије:\n\n• укључује тамну тему\n• искључује или ограничава активности у позадини, неке визуелне ефекте и друге функције, на пример „Ок Google“\n\n"<annotation id="url">"Сазнајте више"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Да би се продужило трајање батерије, Уштеда батерије:\n\n• укључује тамну тему\n• искључује или ограничава активности у позадини, неке визуелне ефекте и друге функције, на пример, „Ок Google“"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Да би се смањила потрошња података, Уштеда података спречава неке апликације да шаљу или примају податке у позадини. Апликација коју тренутно користите може да приступа подацима, али ће то чинити ређе. На пример, слике се неће приказивати док их не додирнете."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Желите да укључите Уштеду података?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Укључи"</string>

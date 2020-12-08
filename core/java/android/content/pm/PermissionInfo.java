@@ -525,6 +525,9 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         if ((level & PermissionInfo.PROTECTION_FLAG_APP_PREDICTOR) != 0) {
             protLevel += "|appPredictor";
         }
+        if ((level & PermissionInfo.PROTECTION_FLAG_COMPANION) != 0) {
+            protLevel += "|companion";
+        }
         if ((level & PermissionInfo.PROTECTION_FLAG_RETAIL_DEMO) != 0) {
             protLevel += "|retailDemo";
         }

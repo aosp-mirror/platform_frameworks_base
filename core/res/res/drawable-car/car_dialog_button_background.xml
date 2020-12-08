@@ -16,11 +16,18 @@
   -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_focused="true">
-        <ripple android:color="#4b9eff">
-            <item android:id="@android:id/mask">
-                <color android:color="@*android:color/car_white_1000"/>
+        <layer-list>
+            <item>
+                <shape android:shape="rectangle">
+                    <solid android:color="#3D94CBFF"/>
+                </shape>
             </item>
-        </ripple>
+            <item>
+                <shape android:shape="rectangle">
+                    <stroke android:width="8dp" android:color="#94CBFF"/>
+                </shape>
+            </item>
+        </layer-list>
     </item>
     <item>
         <ripple android:color="?android:attr/colorControlHighlight">

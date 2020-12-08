@@ -165,7 +165,7 @@
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"Langue non sélectionnée"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"Définir la langue utilisée par la synthèse vocale"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"Écouter un échantillon"</string>
-    <string name="tts_play_example_summary" msgid="634044730710636383">"Lire une courte démonstration de la synthèse vocale"</string>
+    <string name="tts_play_example_summary" msgid="634044730710636383">"Écoutez une courte démonstration de la synthèse vocale"</string>
     <string name="tts_install_data_title" msgid="1829942496472751703">"Installer les données vocales"</string>
     <string name="tts_install_data_summary" msgid="3608874324992243851">"Installer les données nécessaires à la synthèse vocale"</string>
     <string name="tts_engine_security_warning" msgid="3372432853837988146">"Ce moteur de synthèse vocale est susceptible de collecter tout ce qui sera lu, y compris les données personnelles comme les mots de passe et les numéros de carte de paiement. Il provient du moteur <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Voulez-vous activer son utilisation ?"</string>
@@ -189,8 +189,8 @@
     <item msgid="1158955023692670059">"Rapide"</item>
     <item msgid="5664310435707146591">"Plus rapide"</item>
     <item msgid="5491266922147715962">"Très rapide"</item>
-    <item msgid="7659240015901486196">"Rapide"</item>
-    <item msgid="7147051179282410945">"Très rapide"</item>
+    <item msgid="7659240015901486196">"Beaucoup plus rapide"</item>
+    <item msgid="7147051179282410945">"Extrêmement rapide"</item>
     <item msgid="581904787661470707">"La plus rapide"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Sélectionner un profil"</string>
@@ -251,13 +251,12 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certification affichage sans fil"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Autoriser l\'enregistrement d\'infos Wi-Fi détaillées"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Limiter la recherche Wi‑Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Chgt aléatoire d\'adresse MAC sur Wi-Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Chgt aléatoire d\'adresse MAC en Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Données mobiles toujours actives"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Accélération matérielle pour le partage de connexion"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Afficher les appareils Bluetooth sans nom"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Désactiver le volume absolu"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Activer Gabeldorsche"</string>
-    <string name="enhanced_connectivity" msgid="7201127377781666804">"Connectivité améliorée"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Version Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Sélectionner la version Bluetooth AVRCP"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Version Bluetooth MAP"</string>
@@ -284,7 +283,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Afficher les options pour la certification de l\'affichage sans fil"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Détailler les infos Wi-Fi, afficher par RSSI de SSID dans l\'outil de sélection Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Réduit la décharge de la batterie et améliore les performances du réseau"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Lorsque ce mode est activé, l\'adresse e-mail MAC de cet appareil peut changer lors de chaque connexion à un réseau pour lequel le changement aléatoire d\'adresse MAC est activé."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Lorsque ce mode est activé, l\'adresse MAC de cet appareil peut changer lors de chaque connexion à un réseau Wi-Fi pour lequel le changement aléatoire d\'adresse MAC est activé"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Facturé à l\'usage"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Non facturé à l\'usage"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Tailles des tampons de l\'enregistreur"</string>

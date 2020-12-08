@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Riprendi"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Annulla"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Condividi"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"CANC"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Registrazione dello schermo annullata"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Registrazione dello schermo salvata. Tocca per visualizzarla."</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"Registrazione dello schermo eliminata"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Errore durante l\'eliminazione della registrazione dello schermo"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Impossibile ottenere le autorizzazioni"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Errore durante l\'avvio della registrazione dello schermo"</string>
@@ -716,7 +714,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Può suonare o vibrare in base alle impostazioni del telefono"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Può suonare o vibrare in base alle impostazioni del telefono. Conversazioni dalla bolla <xliff:g id="APP_NAME">%1$s</xliff:g> per impostazione predefinita."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Mantiene la tua attenzione con una scorciatoia mobile a questi contenuti."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Viene mostrata in cima alla sezione delle conversazioni, appare sotto forma di bolla mobile, mostra l\'immagine del profilo nella schermata di blocco"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Appare in cima alla sezione delle conversazioni e sotto forma di bolla mobile, mostra l\'immagine del profilo nella schermata di blocco"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Impostazioni"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorità"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> non supporta le funzionalità delle conversazioni"</string>
@@ -884,12 +882,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"Schermata superiore al 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"Schermata superiore al 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Schermata inferiore a schermo intero"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"Posizione <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Tocca due volte per modificare."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Tocca due volte per aggiungere."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"Sposta <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"Rimuovi <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"Aggiungi il riquadro <xliff:g id="TILE_NAME">%1$s</xliff:g> alla posizione <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"Sposta il riquadro <xliff:g id="TILE_NAME">%1$s</xliff:g> nella posizione <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"rimuovere il riquadro"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"aggiungere il riquadro alla fine"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Sposta riquadro"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Aggiungi riquadro"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Sposta nella posizione <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Aggiungi alla posizione <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Posizione <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Editor di impostazioni rapide."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Notifica di <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"L\'app potrebbe non funzionare con lo schermo diviso."</string>
@@ -922,11 +921,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Passa ai contenuti precedenti"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Ridimensiona"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Il telefono si è spento perché surriscaldato"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Ora il telefono funziona normalmente"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Ora il telefono funziona normalmente.\nTocca per ulteriori informazioni"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Il telefono era surriscaldato e si è spento per raffreddarsi. Ora funziona normalmente.\n\nIl telefono può surriscaldarsi se:\n	• Utilizzi app che consumano molte risorse (ad esempio app di navigazione, giochi o video)\n	• Scarichi o carichi grandi file\n	• Lo utilizzi in presenza di alte temperature"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Leggi le misure da adottare"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Il telefono si sta scaldando"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Alcune funzioni limitate durante il raffreddamento del telefono"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Alcune funzionalità limitate durante il raffreddamento del telefono.\nTocca per ulteriori informazioni"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Il telefono cercherà automaticamente di raffreddarsi. Puoi comunque usarlo, ma potrebbe essere più lento.\n\nUna volta raffreddato, il telefono funzionerà normalmente."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Leggi le misure da adottare"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Scollega il caricabatterie"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Si è verificato un problema durante la ricarica del dispositivo. Scollega l\'alimentatore e presta attenzione perché il cavo potrebbe essere caldo."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Leggi le misure da adottare"</string>
@@ -987,7 +988,14 @@
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Il Risparmio energetico verrà attivato automaticamente quando la carica della batteria sarà inferiore a <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Impostazioni"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"OK"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Esegui dump heap SysUI"</string>
+    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump heap SysUI"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"L\'app <xliff:g id="APP">%1$s</xliff:g> sta usando <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Le app stanno usando <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" e "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"Fotocamera"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"luogo"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"un microfono"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Sensori disattivati"</string>
     <string name="device_services" msgid="1549944177856658705">"Servizi del dispositivo"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Senza titolo"</string>
@@ -1066,7 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Caricamento dei consigli"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Contenuti multimediali"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Nascondi la sessione attuale."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Nascondi"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Ignora"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Riprendi"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Impostazioni"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inattivo, controlla l\'app"</string>

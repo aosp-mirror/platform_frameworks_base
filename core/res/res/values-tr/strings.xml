@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Kilidi açmak veya acil çağrı yapmak için Menü\'ye basın."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Kilidi açmak için Menü\'ye basın."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Kilit açmak için deseni çizin"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Acil durum çağrısı"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Acil durum araması"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Çağrıya dön"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Doğru!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Tekrar deneyin"</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Yöneticiniz tarafından güncellendi"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Yöneticiniz tarafından silindi"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Tamam"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Pil ömrünü uzatmak için Pil Tasarrufu:\n\n•Koyu temayı açar\n•Arka plan etkinliğini, bazı görsel efektleri ve \"Ok Google\" gibi diğer özellikleri kapatır veya kısıtlar\n\n"<annotation id="url">"Daha fazla bilgi"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"Pil ömrünü uzatmak için Pil Tasarrufu:\n\n•Koyu temayı açar\n•Arka plan etkinliğini, bazı görsel efektleri ve \"Ok Google\" gibi diğer özellikleri kapatır veya kısıtlar"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Pil ömrünü uzatmak için Pil Tasarrufu:\n\n• Koyu temayı açar\n• Arka plan etkinliğini, bazı görsel efektleri ve \"Ok Google\" gibi diğer özellikleri kapatır veya kısıtlar\n\n"<annotation id="url">"Daha fazla bilgi"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Pil ömrünü uzatmak için Pil Tasarrufu:\n\n• Koyu temayı açar\n• Arka plan etkinliğini, bazı görsel efektleri ve \"Ok Google\" gibi diğer özellikleri kapatır veya kısıtlar"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Veri kullanımını azaltmaya yardımcı olması için Veri Tasarrufu, bazı uygulamaların arka planda veri göndermesini veya almasını engeller. Şu anda kullandığınız bir uygulama veri bağlantısına erişebilir, ancak bunu daha seyrek yapabilir. Bu durumda örneğin, siz resimlere dokunmadan resimler görüntülenmez."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Veri Tasarrufu açılsın mı?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aç"</string>
