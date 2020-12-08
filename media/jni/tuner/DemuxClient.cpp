@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "FrontendClient"
+#define LOG_TAG "DemuxClient"
 
 #include <android-base/logging.h>
 #include <utils/Log.h>
@@ -116,7 +116,21 @@ long DemuxClient::getAvSyncTime(int avSyncHwId) {
     return -1;
 }
 
-//DvrClient openDvr(int dvbType, int bufferSize, DvrClientCallback cb);
+sp<DvrClient> DemuxClient::openDvr(DvrType dvbType, int bufferSize, sp<DvrClientCallback> cb) {
+    // TODO: pending aidl interface
+
+    if (mDemux != NULL) {
+        sp<HidlDvrCallback> callback = new HidlDvrCallback(cb);
+        sp<IDvr> hidlDvr = openHidlDvr(dvbType, bufferSize, callback);
+        if (hidlDvr != NULL) {
+            sp<DvrClient> dvrClient = new DvrClient();
+            dvrClient->setHidlDvr(hidlDvr);
+            return dvrClient;
+        }
+    }
+
+    return NULL;
+}
 
 Result DemuxClient::connectCiCam(int ciCamId) {
     // pending aidl interface
@@ -172,5 +186,25 @@ sp<IFilter> DemuxClient::openHidlFilter(DemuxFilterType type, int bufferSize,
     }
 
     return hidlFilter;
+}
+
+sp<IDvr> DemuxClient::openHidlDvr(DvrType dvrType, int bufferSize,
+        sp<HidlDvrCallback> callback) {
+    if (mDemux == NULL) {
+        return NULL;
+    }
+
+    sp<IDvr> hidlDvr;
+    Result res;
+    mDemux->openDvr(dvrType, bufferSize, callback,
+            [&](Result r, const sp<IDvr>& dvr) {
+                hidlDvr = dvr;
+                res = r;
+            });
+    if (res != Result::SUCCESS || hidlDvr == NULL) {
+        return NULL;
+    }
+
+    return hidlDvr;
 }
 }  // namespace android

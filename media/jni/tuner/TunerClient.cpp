@@ -40,6 +40,8 @@ TunerClient::TunerClient() {
     // Connect with Tuner Service.
     ::ndk::SpAIBinder binder(AServiceManager_getService("media.tuner"));
     mTunerService = ITunerService::fromBinder(binder);
+    // TODO: Remove after JNI migration is done.
+    mTunerService = NULL;
     if (mTunerService == NULL) {
         ALOGE("Failed to get tuner service");
     }
