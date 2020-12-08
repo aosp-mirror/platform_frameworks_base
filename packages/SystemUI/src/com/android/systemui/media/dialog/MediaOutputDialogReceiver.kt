@@ -26,8 +26,8 @@ import javax.inject.Inject
 /**
  * BroadcastReceiver for handling media output intent
  */
-class MediaOutDialogReceiver @Inject constructor(
-    private var mediaOutputDialogFactory: MediaOutputDialogFactory
+class MediaOutputDialogReceiver @Inject constructor(
+    private val mediaOutputDialogFactory: MediaOutputDialogFactory
 ) : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (TextUtils.equals(MediaOutputSliceConstants.ACTION_LAUNCH_MEDIA_OUTPUT_DIALOG,
