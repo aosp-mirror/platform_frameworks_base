@@ -20,33 +20,44 @@ package android.uwb;
  * @hide
  */
 @Backing(type="int")
-enum StartFailureReason {
+enum RangingChangeReason {
   /**
-   * Unknown start failure reason
+   * Unknown reason
    */
   UNKNOWN,
 
   /**
-   * The provided parameters were invalid and ranging could not start
+   * A local API call triggered the change, such as a call to
+   * IUwbAdapter.closeRanging.
    */
-  BAD_PARAMETERS,
+  LOCAL_API,
 
   /**
-   * The maximum number of sessions has been reached. This error may be generated
-   * for an active session if a higher priority session begins.
+   * The maximum number of sessions has been reached. This may be generated for
+   * an active session if a higher priority session begins.
    */
   MAX_SESSIONS_REACHED,
 
   /**
-   * The system state has changed resulting in the session ending (e.g. the user
-   * disables UWB, or the user's locale changes and an active channel is no longer
-   * permitted to be used).
+   * The system state has changed resulting in the session changing (e.g. the
+   * user disables UWB, or the user's locale changes and an active channel is no
+   * longer permitted to be used).
    */
   SYSTEM_POLICY,
 
   /**
-   * The session could not start because of a protocol specific reason.
+   * The remote device has requested to change the session
+   */
+  REMOTE_REQUEST,
+
+  /**
+   * The session changed for a protocol specific reason
    */
   PROTOCOL_SPECIFIC,
+
+  /**
+   * The provided parameters were invalid
+   */
+  BAD_PARAMETERS,
 }
 
