@@ -39,6 +39,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.phone.ShadeController;
 
 import org.junit.Before;
@@ -58,6 +59,8 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
     private LocalBluetoothManager mLocalBluetoothManager = mock(LocalBluetoothManager.class);
     private ShadeController mShadeController = mock(ShadeController.class);
     private ActivityStarter mStarter = mock(ActivityStarter.class);
+    private NotificationEntryManager mNotificationEntryManager =
+            mock(NotificationEntryManager.class);
 
     private MediaOutputBaseDialogImpl mMediaOutputBaseDialogImpl;
     private MediaOutputController mMediaOutputController;
@@ -69,7 +72,8 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
     @Before
     public void setUp() {
         mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE, false,
-                mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter);
+                mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
+                mNotificationEntryManager);
         mMediaOutputBaseDialogImpl = new MediaOutputBaseDialogImpl(mContext,
                 mMediaOutputController);
         mMediaOutputBaseDialogImpl.onCreate(new Bundle());
