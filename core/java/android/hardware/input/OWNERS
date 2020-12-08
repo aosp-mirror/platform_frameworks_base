@@ -1,2 +1,6 @@
+# Bug component: 136048
+
+include /services/core/java/com/android/server/input/OWNERS
+
 michaelwr@google.com
 svv@google.com
