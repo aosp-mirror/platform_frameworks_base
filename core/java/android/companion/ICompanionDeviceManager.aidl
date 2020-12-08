@@ -45,4 +45,8 @@ interface ICompanionDeviceManager {
 
     boolean isDeviceAssociatedForWifiConnection(in String packageName, in String macAddress,
         int userId);
+
+    void registerDevicePresenceListenerService(in String packageName, in String deviceAddress);
+
+    void unregisterDevicePresenceListenerService(in String packageName, in String deviceAddress);
 }

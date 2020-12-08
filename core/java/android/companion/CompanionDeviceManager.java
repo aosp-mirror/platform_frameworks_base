@@ -34,6 +34,7 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
+import android.util.ExceptionUtils;
 import android.util.Log;
 
 import java.util.Collections;
@@ -317,6 +318,77 @@ public final class CompanionDeviceManager {
         try {
             return mService.getAssociationsForUser(mContext.getUser().getIdentifier());
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Register to receive callbacks whenever the associated device comes in and out of range.
+     *
+     * The provided device must be {@link #associate associated} with the calling app before
+     * calling this method.
+     *
+     * Caller must implement a single {@link CompanionDeviceService} which will be bound to and
+     * receive callbacks to {@link CompanionDeviceService#onDeviceAppeared} and
+     * {@link CompanionDeviceService#onDeviceDisappeared}.
+     * The app doesn't need to remain running in order to receive its callbacks.
+     *
+     * Calling app must declare uses-permission
+     * {@link android.Manifest.permission#REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE}.
+     *
+     * Calling app must check for feature presence of
+     * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} before calling this API.
+     *
+     * @param deviceAddress a previously-associated companion device's address
+     *
+     * @throws DeviceNotAssociatedException if the given device was not previously associated
+     * with this app.
+     */
+    @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE)
+    public void startObservingDevicePresence(@NonNull String deviceAddress)
+            throws DeviceNotAssociatedException {
+        if (!checkFeaturePresent()) {
+            return;
+        }
+        Objects.requireNonNull(deviceAddress, "address cannot be null");
+        try {
+            mService.registerDevicePresenceListenerService(
+                    mContext.getPackageName(), deviceAddress);
+        } catch (RemoteException e) {
+            ExceptionUtils.propagateIfInstanceOf(e.getCause(), DeviceNotAssociatedException.class);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregister for receiving callbacks whenever the associated device comes in and out of range.
+     *
+     * The provided device must be {@link #associate associated} with the calling app before
+     * calling this method.
+     *
+     * Calling app must declare uses-permission
+     * {@link android.Manifest.permission#REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE}.
+     *
+     * Calling app must check for feature presence of
+     * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} before calling this API.
+     *
+     * @param deviceAddress a previously-associated companion device's address
+     *
+     * @throws DeviceNotAssociatedException if the given device was not previously associated
+     * with this app.
+     */
+    @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE)
+    public void stopObservingDevicePresence(@NonNull String deviceAddress)
+            throws DeviceNotAssociatedException {
+        if (!checkFeaturePresent()) {
+            return;
+        }
+        Objects.requireNonNull(deviceAddress, "address cannot be null");
+        try {
+            mService.unregisterDevicePresenceListenerService(
+                    mContext.getPackageName(), deviceAddress);
+        } catch (RemoteException e) {
+            ExceptionUtils.propagateIfInstanceOf(e.getCause(), DeviceNotAssociatedException.class);
             throw e.rethrowFromSystemServer();
         }
     }
