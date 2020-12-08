@@ -192,6 +192,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     public void onItemClick_clickDevice_verifyConnectDevice() {
         assertThat(mMediaDevice2.getState()).isEqualTo(
                 LocalMediaManager.MediaDeviceState.STATE_DISCONNECTED);
+        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 1);
         mViewHolder.mFrameLayout.performClick();
 
