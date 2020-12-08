@@ -16,11 +16,14 @@
 
 package com.android.systemui.people.widget;
 
+import android.app.INotificationManager;
 import android.app.NotificationChannel;
+import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
@@ -42,13 +45,18 @@ public class PeopleSpaceWidgetManager {
     private static final boolean DEBUG = PeopleSpaceUtils.DEBUG;
 
     private final Context mContext;
-    private IAppWidgetService mAppWidgetManager;
+    private IAppWidgetService mAppWidgetService;
+    private AppWidgetManager mAppWidgetManager;
+    private INotificationManager mNotificationManager;
 
     @Inject
     public PeopleSpaceWidgetManager(Context context, IAppWidgetService appWidgetService) {
         if (DEBUG) Log.d(TAG, "constructor");
         mContext = context;
-        mAppWidgetManager = appWidgetService;
+        mAppWidgetService = appWidgetService;
+        mAppWidgetManager = AppWidgetManager.getInstance(context);
+        mNotificationManager = INotificationManager.Stub.asInterface(
+                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
     }
 
     /** Constructor used for testing. */
@@ -56,21 +64,24 @@ public class PeopleSpaceWidgetManager {
     protected PeopleSpaceWidgetManager(Context context) {
         if (DEBUG) Log.d(TAG, "constructor");
         mContext = context;
-        mAppWidgetManager = IAppWidgetService.Stub.asInterface(
+        mAppWidgetService = IAppWidgetService.Stub.asInterface(
                 ServiceManager.getService(Context.APPWIDGET_SERVICE));
     }
 
     /** AppWidgetManager setter used for testing. */
     @VisibleForTesting
-    protected void setAppWidgetManager(IAppWidgetService appWidgetService) {
-        mAppWidgetManager = appWidgetService;
+    protected void setAppWidgetManager(IAppWidgetService appWidgetService,
+            AppWidgetManager appWidgetManager, INotificationManager notificationManager) {
+        mAppWidgetService = appWidgetService;
+        mAppWidgetManager = appWidgetManager;
+        mNotificationManager = notificationManager;
     }
 
     /** Updates People Space widgets. */
     public void updateWidgets() {
         try {
             if (DEBUG) Log.d(TAG, "updateWidgets called");
-            int[] widgetIds = mAppWidgetManager.getAppWidgetIds(
+            int[] widgetIds = mAppWidgetService.getAppWidgetIds(
                     new ComponentName(mContext, PeopleSpaceWidgetProvider.class)
             );
 
@@ -80,9 +91,16 @@ public class PeopleSpaceWidgetManager {
             }
 
             if (DEBUG) Log.d(TAG, "updating " + widgetIds.length + " widgets");
-            mAppWidgetManager
-                    .notifyAppWidgetViewDataChanged(mContext.getOpPackageName(), widgetIds,
-                            R.id.widget_list_view);
+            boolean showSingleConversation = Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0) == 0;
+            if (showSingleConversation) {
+                PeopleSpaceUtils.updateSingleConversationWidgets(mContext, widgetIds,
+                        mAppWidgetManager, mNotificationManager);
+            } else {
+                mAppWidgetService
+                        .notifyAppWidgetViewDataChanged(mContext.getOpPackageName(), widgetIds,
+                                R.id.widget_list_view);
+            }
         } catch (Exception e) {
             Log.e(TAG, "Exception: " + e);
         }
@@ -125,7 +143,8 @@ public class PeopleSpaceWidgetManager {
 
         @Override
         public void onNotificationRankingUpdate(
-                NotificationListenerService.RankingMap rankingMap) { }
+                NotificationListenerService.RankingMap rankingMap) {
+        }
 
         @Override
         public void onNotificationsInitialized() {

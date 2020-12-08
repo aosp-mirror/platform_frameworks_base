@@ -13,13 +13,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:minWidth="180dp"
-    android:minHeight="40dp"
-    android:updatePeriodMillis="60000"
-    android:previewImage="@drawable/ic_android"
-    android:resizeMode="horizontal|vertical"
-    android:configure="com.android.systemui.people.PeopleSpaceActivity"
-    android:initialLayout="@layout/people_space_widget">
-</appwidget-provider>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="?android:attr/colorAccent" />
+    <corners android:radius="@dimen/people_space_widget_radius" />
+</shape>

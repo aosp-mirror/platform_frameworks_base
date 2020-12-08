@@ -20,46 +20,53 @@
     android:orientation="vertical">
 
     <LinearLayout
-        android:background="@drawable/people_space_tile_view_card"
         android:orientation="vertical"
-        android:padding="16dp"
-        android:layout_marginBottom="24dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:background="@drawable/people_space_activity_card"
+        android:padding="12dp"
         android:elevation="4dp"
-        android:gravity="start">
+        android:layout_marginBottom="12dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-        <ImageView
-            android:id="@+id/tile_view_package_icon"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_gravity="end" />
-
-        <ImageView
-            android:id="@+id/tile_view_person_icon"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_gravity="start" />
-
-        <TextView
-            android:id="@+id/tile_view_name"
-            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
-            android:paddingVertical="4dp"
-            android:textSize="22sp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="start" />
+            android:gravity="start">
 
-        <TextView
-            android:id="@+id/tile_view_status"
-            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
-            android:paddingVertical="4dp"
-            android:textSize="16sp"
-            android:textColor="?android:attr/textColorSecondary"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:layout_gravity="start" />
+            <ImageView
+                android:id="@+id/tile_view_person_icon"
+                android:layout_width="48dp"
+                android:layout_height="48dp" />
+
+            <ImageView
+                android:id="@+id/tile_view_package_icon"
+                android:layout_width="16dp"
+                android:layout_marginStart="-8dp"
+                android:layout_height="16dp" />
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/tile_view_name"
+                    android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+                    android:paddingHorizontal="16dp"
+                    android:textSize="22sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:id="@+id/tile_view_status"
+                    android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+                    android:paddingVertical="4dp"
+                    android:textSize="12sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end" />
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
 </LinearLayout>
