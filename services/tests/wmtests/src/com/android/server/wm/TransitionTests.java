@@ -74,21 +74,22 @@ public class TransitionTests extends WindowTestsBase {
         closing.mVisibleRequested = false;
         opening.mVisibleRequested = true;
 
-        int transitType = TRANSIT_OLD_TASK_OPEN;
+        int transit = TRANSIT_OLD_TASK_OPEN;
+        int flags = 0;
 
         // Check basic both tasks participating
         participants.add(oldTask);
         participants.add(newTask);
         ArraySet<WindowContainer> targets = Transition.calculateTargets(participants, changes);
-        TransitionInfo info = Transition.calculateTransitionInfo(transitType, targets, changes);
+        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes);
         assertEquals(2, info.getChanges().size());
-        assertEquals(transitType, info.getType());
+        assertEquals(transit, info.getType());
 
         // Check that children are pruned
         participants.add(opening);
         participants.add(closing);
         targets = Transition.calculateTargets(participants, changes);
-        info = Transition.calculateTransitionInfo(transitType, targets, changes);
+        info = Transition.calculateTransitionInfo(transit, flags, targets, changes);
         assertEquals(2, info.getChanges().size());
         assertNotNull(info.getChange(newTask.mRemoteToken.toWindowContainerToken()));
         assertNotNull(info.getChange(oldTask.mRemoteToken.toWindowContainerToken()));
@@ -96,7 +97,7 @@ public class TransitionTests extends WindowTestsBase {
         // Check combined prune and promote
         participants.remove(newTask);
         targets = Transition.calculateTargets(participants, changes);
-        info = Transition.calculateTransitionInfo(transitType, targets, changes);
+        info = Transition.calculateTransitionInfo(transit, flags, targets, changes);
         assertEquals(2, info.getChanges().size());
         assertNotNull(info.getChange(newTask.mRemoteToken.toWindowContainerToken()));
         assertNotNull(info.getChange(oldTask.mRemoteToken.toWindowContainerToken()));
@@ -104,7 +105,7 @@ public class TransitionTests extends WindowTestsBase {
         // Check multi promote
         participants.remove(oldTask);
         targets = Transition.calculateTargets(participants, changes);
-        info = Transition.calculateTransitionInfo(transitType, targets, changes);
+        info = Transition.calculateTransitionInfo(transit, flags, targets, changes);
         assertEquals(2, info.getChanges().size());
         assertNotNull(info.getChange(newTask.mRemoteToken.toWindowContainerToken()));
         assertNotNull(info.getChange(oldTask.mRemoteToken.toWindowContainerToken()));
@@ -138,23 +139,24 @@ public class TransitionTests extends WindowTestsBase {
         opening.mVisibleRequested = true;
         opening2.mVisibleRequested = true;
 
-        int transitType = TRANSIT_OLD_TASK_OPEN;
+        int transit = TRANSIT_OLD_TASK_OPEN;
+        int flags = 0;
 
         // Check full promotion from leaf
         participants.add(oldTask);
         participants.add(opening);
         participants.add(opening2);
         ArraySet<WindowContainer> targets = Transition.calculateTargets(participants, changes);
-        TransitionInfo info = Transition.calculateTransitionInfo(transitType, targets, changes);
+        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes);
         assertEquals(2, info.getChanges().size());
-        assertEquals(transitType, info.getType());
+        assertEquals(transit, info.getType());
         assertNotNull(info.getChange(newTask.mRemoteToken.toWindowContainerToken()));
         assertNotNull(info.getChange(oldTask.mRemoteToken.toWindowContainerToken()));
 
         // Check that unchanging but visible descendant of sibling prevents promotion
         participants.remove(opening2);
         targets = Transition.calculateTargets(participants, changes);
-        info = Transition.calculateTransitionInfo(transitType, targets, changes);
+        info = Transition.calculateTransitionInfo(transit, flags, targets, changes);
         assertEquals(2, info.getChanges().size());
         assertNotNull(info.getChange(newNestedTask.mRemoteToken.toWindowContainerToken()));
         assertNotNull(info.getChange(oldTask.mRemoteToken.toWindowContainerToken()));
@@ -184,29 +186,30 @@ public class TransitionTests extends WindowTestsBase {
         showing.mVisibleRequested = true;
         showing2.mVisibleRequested = true;
 
-        int transitType = TRANSIT_OLD_TASK_OPEN;
+        int transit = TRANSIT_OLD_TASK_OPEN;
+        int flags = 0;
 
         // Check promotion to DisplayArea
         participants.add(showing);
         participants.add(showing2);
         ArraySet<WindowContainer> targets = Transition.calculateTargets(participants, changes);
-        TransitionInfo info = Transition.calculateTransitionInfo(transitType, targets, changes);
+        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes);
         assertEquals(1, info.getChanges().size());
-        assertEquals(transitType, info.getType());
+        assertEquals(transit, info.getType());
         assertNotNull(info.getChange(tda.mRemoteToken.toWindowContainerToken()));
 
         ITaskOrganizer mockOrg = mock(ITaskOrganizer.class);
         // Check that organized tasks get reported even if not top
         showTask.mTaskOrganizer = mockOrg;
         targets = Transition.calculateTargets(participants, changes);
-        info = Transition.calculateTransitionInfo(transitType, targets, changes);
+        info = Transition.calculateTransitionInfo(transit, flags, targets, changes);
         assertEquals(2, info.getChanges().size());
         assertNotNull(info.getChange(tda.mRemoteToken.toWindowContainerToken()));
         assertNotNull(info.getChange(showTask.mRemoteToken.toWindowContainerToken()));
         // Even if DisplayArea explicitly participating
         participants.add(tda);
         targets = Transition.calculateTargets(participants, changes);
-        info = Transition.calculateTransitionInfo(transitType, targets, changes);
+        info = Transition.calculateTransitionInfo(transit, flags, targets, changes);
         assertEquals(2, info.getChanges().size());
     }
 
@@ -231,7 +234,8 @@ public class TransitionTests extends WindowTestsBase {
 
         ArraySet<WindowContainer> targets = Transition.calculateTargets(
                 transition.mParticipants, transition.mChanges);
-        TransitionInfo info = Transition.calculateTransitionInfo(0, targets, transition.mChanges);
+        TransitionInfo info = Transition.calculateTransitionInfo(
+                0, 0, targets, transition.mChanges);
         assertEquals(2, info.getChanges().size());
         // There was an existence change on open, so it should be OPEN rather than SHOW
         assertEquals(TRANSIT_OPEN,
@@ -267,7 +271,8 @@ public class TransitionTests extends WindowTestsBase {
 
         ArraySet<WindowContainer> targets = Transition.calculateTargets(
                 transition.mParticipants, transition.mChanges);
-        TransitionInfo info = Transition.calculateTransitionInfo(0, targets, transition.mChanges);
+        TransitionInfo info = Transition.calculateTransitionInfo(
+                0, 0, targets, transition.mChanges);
         assertEquals(taskCount, info.getChanges().size());
         // verify order is top-to-bottem
         for (int i = 0; i < taskCount; ++i) {

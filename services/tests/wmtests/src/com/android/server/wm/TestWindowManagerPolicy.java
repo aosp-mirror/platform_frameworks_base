@@ -372,6 +372,11 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
+    public int applyKeyguardOcclusionChange() {
+        return 0;
+    }
+
+    @Override
     public void setPipVisibilityLw(boolean visible) {
     }
 

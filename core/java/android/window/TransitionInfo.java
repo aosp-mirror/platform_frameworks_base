@@ -65,18 +65,22 @@ public final class TransitionInfo implements Parcelable {
     public @interface TransitionMode {}
 
     private final @WindowManager.TransitionOldType int mType;
+    private final @WindowManager.TransitionFlags int mFlags;
     private final ArrayList<Change> mChanges = new ArrayList<>();
 
     private SurfaceControl mRootLeash;
     private final Point mRootOffset = new Point();
 
     /** @hide */
-    public TransitionInfo(@WindowManager.TransitionOldType int type) {
+    public TransitionInfo(@WindowManager.TransitionOldType int type,
+            @WindowManager.TransitionFlags int flags) {
         mType = type;
+        mFlags = flags;
     }
 
     private TransitionInfo(Parcel in) {
         mType = in.readInt();
+        mFlags = in.readInt();
         in.readList(mChanges, null /* classLoader */);
         mRootLeash = new SurfaceControl();
         mRootLeash.readFromParcel(in);
@@ -87,6 +91,7 @@ public final class TransitionInfo implements Parcelable {
     /** @hide */
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mType);
+        dest.writeInt(mFlags);
         dest.writeList(mChanges);
         mRootLeash.writeToParcel(dest, flags);
         mRootOffset.writeToParcel(dest, flags);
@@ -120,6 +125,10 @@ public final class TransitionInfo implements Parcelable {
 
     public int getType() {
         return mType;
+    }
+
+    public int getFlags() {
+        return mFlags;
     }
 
     /**
@@ -170,7 +179,8 @@ public final class TransitionInfo implements Parcelable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("{t=" + mType + " ro=" + mRootOffset + " c=[");
+        sb.append("{t=" + mType + " f=" + Integer.toHexString(mFlags)
+                + " ro=" + mRootOffset + " c=[");
         for (int i = 0; i < mChanges.size(); ++i) {
             if (i > 0) {
                 sb.append(',');

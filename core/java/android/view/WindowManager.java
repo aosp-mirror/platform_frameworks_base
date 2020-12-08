@@ -418,6 +418,12 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_FLAG_OPEN_BEHIND = 0x20;
 
     /**
+     * Transition flag: The keyguard is locked throughout the whole transition.
+     * @hide
+     */
+    int TRANSIT_FLAG_KEYGUARD_LOCKED = 0x40;
+
+    /**
      * @hide
      */
     @IntDef(flag = true, prefix = { "TRANSIT_FLAG_" }, value = {
@@ -426,7 +432,8 @@ public interface WindowManager extends ViewManager {
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER,
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION,
             TRANSIT_FLAG_APP_CRASHED,
-            TRANSIT_FLAG_OPEN_BEHIND
+            TRANSIT_FLAG_OPEN_BEHIND,
+            TRANSIT_FLAG_KEYGUARD_LOCKED
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionFlags {}

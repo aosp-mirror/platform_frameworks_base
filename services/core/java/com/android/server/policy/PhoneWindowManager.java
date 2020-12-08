@@ -3193,7 +3193,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private int handleStartTransitionForKeyguardLw(boolean keyguardGoingAway, long duration) {
+    @Override
+    public int applyKeyguardOcclusionChange() {
         if (mKeyguardOccludedChanged) {
             if (DEBUG_KEYGUARD) Slog.d(TAG, "transition/occluded changed occluded="
                     + mPendingKeyguardOccluded);
@@ -3202,6 +3203,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return FINISH_LAYOUT_REDO_LAYOUT | FINISH_LAYOUT_REDO_WALLPAPER;
             }
         }
+        return 0;
+    }
+
+    private int handleStartTransitionForKeyguardLw(boolean keyguardGoingAway, long duration) {
+        final int res = applyKeyguardOcclusionChange();
+        if (res != 0) return res;
         if (keyguardGoingAway) {
             if (DEBUG_KEYGUARD) Slog.d(TAG, "Starting keyguard exit animation");
             startKeyguardExitAnimation(SystemClock.uptimeMillis(), duration);
