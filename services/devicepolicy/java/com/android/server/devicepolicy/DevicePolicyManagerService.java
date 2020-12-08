@@ -2328,7 +2328,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     + admin.info.getTagForPolicy(reqPolicy));
         } else {
             throw new SecurityException("No active admin owned by uid "
-                    + callingUid + " for policy #" + reqPolicy);
+                    + callingUid + " for policy #" + reqPolicy + (permission == null ? ""
+                    : ", which doesn't have " + permission));
         }
     }
 
@@ -2388,6 +2389,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * If not provided, iterate over all of the active admins in the DevicePolicyData for that user
      * and return the one with the uid specified as parameter, and has the policy specified.
      */
+    @Nullable
     private ActiveAdmin getActiveAdminWithPolicyForUidLocked(ComponentName who, int reqPolicy,
             int uid) {
         ensureLocked();
@@ -6096,10 +6098,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final ActiveAdmin admin;
         synchronized (getLockObject()) {
-            admin = getActiveAdminForCallerLocked(null, DeviceAdminInfo.USES_POLICY_WIPE_DATA);
+            admin = getActiveAdminWithPolicyForUidLocked(/* who= */ null,
+                    DeviceAdminInfo.USES_POLICY_WIPE_DATA, caller.getUid());
         }
-        Preconditions.checkCallAuthorization(admin != null,
-                "No active admin for user %d", caller.getUserId());
+
+        Preconditions.checkCallAuthorization(
+                (admin != null) || hasCallingOrSelfPermission(permission.MASTER_CLEAR),
+                "No active admin for user %d and caller %d does not hold MASTER_CLEAR permission",
+                caller.getUserId(), caller.getUid());
 
         if (TextUtils.isEmpty(wipeReasonForUser)) {
             if (calledByProfileOwnerOnOrgOwnedDevice && !calledOnParentInstance) {
@@ -6110,7 +6116,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         }
 
-        int userId = admin.getUserHandle().getIdentifier();
+        int userId = admin != null ? admin.getUserHandle().getIdentifier()
+                : caller.getUserId();
+        Slog.i(LOG_TAG, "wipeDataWithReason(" + wipeReasonForUser + "): admin=" + admin + ", user="
+                + userId);
         if (calledByProfileOwnerOnOrgOwnedDevice) {
             // When wipeData is called on the parent instance, it implies wiping the entire device.
             if (calledOnParentInstance) {
@@ -6133,20 +6142,35 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 });
             }
         }
-
-        DevicePolicyEventLogger
+        DevicePolicyEventLogger event = DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.WIPE_DATA_WITH_REASON)
-                .setAdmin(admin.info.getComponent())
                 .setInt(flags)
                 .setStrings(calledOnParentInstance ? CALLED_FROM_PARENT : NOT_CALLED_FROM_PARENT)
-                .write();
+                ;
+        final String adminName;
+        final ComponentName adminComp;
+        if (admin != null) {
+            adminComp = admin.info.getComponent();
+            adminName = adminComp.flattenToShortString();
+            event.setAdmin(adminComp);
+        } else {
+            adminComp = null;
+            adminName = mInjector.getPackageManager().getPackagesForUid(caller.getUid())[0];
+            Slog.i(LOG_TAG, "Logging wipeData() event admin as " + adminName);
+            event.setAdmin(adminName);
+            if (mInjector.userManagerIsHeadlessSystemUserMode()) {
+                // On headless system user mode, the call is meant to factory reset the whole
+                // device, otherwise the caller could simply remove the current user.
+                userId = UserHandle.USER_SYSTEM;
+            }
+        }
+        event.write();
+
         String internalReason = String.format(
                 "DevicePolicyManager.wipeDataWithReason() from %s, organization-owned? %s",
-                admin.info.getComponent().flattenToShortString(),
-                calledByProfileOwnerOnOrgOwnedDevice);
+                adminName, calledByProfileOwnerOnOrgOwnedDevice);
 
-        wipeDataNoLock(
-                admin.info.getComponent(), flags, internalReason, wipeReasonForUser, userId);
+        wipeDataNoLock(adminComp, flags, internalReason, wipeReasonForUser, userId);
     }
 
     private void wipeDataNoLock(ComponentName admin, int flags, String internalReason,
