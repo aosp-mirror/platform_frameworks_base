@@ -205,7 +205,7 @@ public final class Proxy {
                 if (host.equalsIgnoreCase("localhost")) {
                     return true;
                 }
-                if (NetworkUtils.numericToInetAddress(host).isLoopbackAddress()) {
+                if (InetAddresses.parseNumericAddress(host).isLoopbackAddress()) {
                     return true;
                 }
             }

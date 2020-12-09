@@ -16,11 +16,11 @@
 
 package com.android.server.net;
 
+import android.net.InetAddresses;
 import android.net.IpConfiguration;
 import android.net.IpConfiguration.IpAssignment;
 import android.net.IpConfiguration.ProxySettings;
 import android.net.LinkAddress;
-import android.net.NetworkUtils;
 import android.net.ProxyInfo;
 import android.net.RouteInfo;
 import android.net.StaticIpConfiguration;
@@ -284,8 +284,10 @@ public class IpConfigStore {
                         } else if (key.equals(IP_ASSIGNMENT_KEY)) {
                             ipAssignment = IpAssignment.valueOf(in.readUTF());
                         } else if (key.equals(LINK_ADDRESS_KEY)) {
-                            LinkAddress linkAddr = new LinkAddress(
-                                    NetworkUtils.numericToInetAddress(in.readUTF()), in.readInt());
+                            LinkAddress linkAddr =
+                                    new LinkAddress(
+                                            InetAddresses.parseNumericAddress(in.readUTF()),
+                                            in.readInt());
                             if (linkAddr.getAddress() instanceof Inet4Address &&
                                     staticIpConfiguration.ipAddress == null) {
                                 staticIpConfiguration.ipAddress = linkAddr;
@@ -297,7 +299,7 @@ public class IpConfigStore {
                             InetAddress gateway = null;
                             if (version == 1) {
                                 // only supported default gateways - leave the dest/prefix empty
-                                gateway = NetworkUtils.numericToInetAddress(in.readUTF());
+                                gateway = InetAddresses.parseNumericAddress(in.readUTF());
                                 if (staticIpConfiguration.gateway == null) {
                                     staticIpConfiguration.gateway = gateway;
                                 } else {
@@ -305,12 +307,13 @@ public class IpConfigStore {
                                 }
                             } else {
                                 if (in.readInt() == 1) {
-                                    dest = new LinkAddress(
-                                            NetworkUtils.numericToInetAddress(in.readUTF()),
-                                            in.readInt());
+                                    dest =
+                                            new LinkAddress(
+                                                    InetAddresses.parseNumericAddress(in.readUTF()),
+                                                    in.readInt());
                                 }
                                 if (in.readInt() == 1) {
-                                    gateway = NetworkUtils.numericToInetAddress(in.readUTF());
+                                    gateway = InetAddresses.parseNumericAddress(in.readUTF());
                                 }
                                 RouteInfo route = new RouteInfo(dest, gateway);
                                 if (route.isIPv4Default() &&
@@ -322,7 +325,7 @@ public class IpConfigStore {
                             }
                         } else if (key.equals(DNS_KEY)) {
                             staticIpConfiguration.dnsServers.add(
-                                    NetworkUtils.numericToInetAddress(in.readUTF()));
+                                    InetAddresses.parseNumericAddress(in.readUTF()));
                         } else if (key.equals(PROXY_SETTINGS_KEY)) {
                             proxySettings = ProxySettings.valueOf(in.readUTF());
                         } else if (key.equals(PROXY_HOST_KEY)) {

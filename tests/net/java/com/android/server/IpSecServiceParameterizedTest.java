@@ -34,6 +34,7 @@ import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.INetd;
+import android.net.InetAddresses;
 import android.net.IpSecAlgorithm;
 import android.net.IpSecConfig;
 import android.net.IpSecManager;
@@ -44,7 +45,6 @@ import android.net.IpSecTunnelInterfaceResponse;
 import android.net.IpSecUdpEncapResponse;
 import android.net.LinkAddress;
 import android.net.Network;
-import android.net.NetworkUtils;
 import android.os.Binder;
 import android.os.INetworkManagementService;
 import android.os.ParcelFileDescriptor;
@@ -272,7 +272,7 @@ public class IpSecServiceParameterizedTest {
 
         IpSecSpiResponse spi =
                 mIpSecService.allocateSecurityParameterIndex(
-                        NetworkUtils.numericToInetAddress(remoteAddress).getHostAddress(),
+                        InetAddresses.parseNumericAddress(remoteAddress).getHostAddress(),
                         IpSecManager.INVALID_SECURITY_PARAMETER_INDEX,
                         new Binder());
         return spi.resourceId;
