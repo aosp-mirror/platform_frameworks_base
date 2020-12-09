@@ -1638,6 +1638,11 @@ public class WifiConfiguration implements Parcelable {
         private String mConnectChoice;
 
         /**
+         * The RSSI when the user made the connectChoice.
+         */
+        private int mConnectChoiceRssi;
+
+        /**
          * Used to cache the temporary candidate during the network selection procedure. It will be
          * kept updating once a new scan result has a higher score than current one
          */
@@ -1746,6 +1751,23 @@ public class WifiConfiguration implements Parcelable {
          */
         public void setConnectChoice(String newConnectChoice) {
             mConnectChoice = newConnectChoice;
+        }
+
+        /**
+         * Associate a RSSI with the user connect choice network.
+         * @param rssi signal strength
+         * @hide
+         */
+        public void setConnectChoiceRssi(int rssi) {
+            mConnectChoiceRssi = rssi;
+        }
+
+        /**
+         * @return returns the RSSI of the last time the user made the connect choice.
+         * @hide
+         */
+        public int getConnectChoiceRssi() {
+            return mConnectChoiceRssi;
         }
 
         /** Get the current Quality network selection status as a String (for debugging). */
@@ -2051,6 +2073,7 @@ public class WifiConfiguration implements Parcelable {
             setCandidate(source.getCandidate());
             setCandidateScore(source.getCandidateScore());
             setConnectChoice(source.getConnectChoice());
+            setConnectChoiceRssi(source.getConnectChoiceRssi());
             setHasEverConnected(source.hasEverConnected());
             setHasNeverDetectedCaptivePortal(source.hasNeverDetectedCaptivePortal());
         }
@@ -2068,6 +2091,7 @@ public class WifiConfiguration implements Parcelable {
             if (getConnectChoice() != null) {
                 dest.writeInt(CONNECT_CHOICE_EXISTS);
                 dest.writeString(getConnectChoice());
+                dest.writeInt(getConnectChoiceRssi());
             } else {
                 dest.writeInt(CONNECT_CHOICE_NOT_EXISTS);
             }
@@ -2087,6 +2111,7 @@ public class WifiConfiguration implements Parcelable {
             setNetworkSelectionBSSID(in.readString());
             if (in.readInt() == CONNECT_CHOICE_EXISTS) {
                 setConnectChoice(in.readString());
+                setConnectChoiceRssi(in.readInt());
             } else {
                 setConnectChoice(null);
             }
@@ -2398,6 +2423,8 @@ public class WifiConfiguration implements Parcelable {
         }
         if (mNetworkSelectionStatus.getConnectChoice() != null) {
             sbuf.append(" connect choice: ").append(mNetworkSelectionStatus.getConnectChoice());
+            sbuf.append(" connect choice rssi: ")
+                    .append(mNetworkSelectionStatus.getConnectChoiceRssi());
         }
         sbuf.append(" hasEverConnected: ")
                 .append(mNetworkSelectionStatus.hasEverConnected()).append("\n");
