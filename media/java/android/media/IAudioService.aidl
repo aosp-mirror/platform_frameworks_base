@@ -334,4 +334,6 @@ interface IAudioService {
     oneway void setStreamVolumeForUid(int streamType, int direction, int flags,
             in String packageName, int uid, int pid, in UserHandle userHandle,
             int targetSdkVersion);
+
+    boolean isMusicActive();
 }

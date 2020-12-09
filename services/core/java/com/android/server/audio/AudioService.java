@@ -2108,6 +2108,12 @@ public class AudioService extends IAudioService.Stub
         return getDevicesForAttributesInt(attributes);
     }
 
+    /** @see AudioManager#isMusicActive() */
+    public boolean isMusicActive() {
+        // no permission required
+        return AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0);
+    }
+
     protected @NonNull ArrayList<AudioDeviceAttributes> getDevicesForAttributesInt(
             @NonNull AudioAttributes attributes) {
         Objects.requireNonNull(attributes);
