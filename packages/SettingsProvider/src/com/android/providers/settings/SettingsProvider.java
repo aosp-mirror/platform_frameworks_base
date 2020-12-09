@@ -3342,7 +3342,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 195;
+            private static final int SETTINGS_VERSION = 196;
 
             private final int mUserId;
 
