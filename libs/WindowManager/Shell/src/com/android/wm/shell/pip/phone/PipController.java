@@ -33,6 +33,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ParceledListSlice;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -104,6 +105,9 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             // Skip if we aren't in PIP or haven't actually entered PIP yet. We still need to update
             // the display layout in the bounds handler in this case.
             onDisplayRotationChangedNotInPip(mContext, toRotation);
+            // do not forget to update the movement bounds as well.
+            updateMovementBounds(mPipBoundsState.getNormalBounds(), true /* fromRotation */,
+                    false /* fromImeAdjustment */, false /* fromShelfAdjustment */, t);
             return;
         }
         // If there is an animation running (ie. from a shelf offset), then ensure that we calculate
@@ -136,7 +140,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         }
     };
 
-    private DisplayController.OnDisplaysChangedListener mFixedRotationListener =
+    private final DisplayController.OnDisplaysChangedListener mFixedRotationListener =
             new DisplayController.OnDisplaysChangedListener() {
                 @Override
                 public void onFixedRotationStarted(int displayId, int newRotation) {
@@ -185,18 +189,6 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
                 // saved for this component anymore.
                 mPipBoundsState.setLastPipComponentName(null);
             }
-        }
-
-        @Override
-        public void onDisplayInfoChanged(DisplayInfo displayInfo) {
-            mPipBoundsState.setDisplayInfo(displayInfo);
-        }
-
-        @Override
-        public void onConfigurationChanged() {
-            mPipBoundsAlgorithm.onConfigurationChanged(mContext);
-            mTouchHandler.onConfigurationChanged();
-            mPipBoundsState.onConfigurationChanged();
         }
 
         @Override
@@ -331,6 +323,15 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
                                 clearedTask /* skipAnimation */);
                     }
                 });
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        mMainExecutor.execute(() -> {
+            mPipBoundsAlgorithm.onConfigurationChanged(mContext);
+            mTouchHandler.onConfigurationChanged();
+            mPipBoundsState.onConfigurationChanged();
+        });
     }
 
     @Override
@@ -532,7 +533,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
      *
      * @return {@code true} if internal {@link DisplayInfo} is rotated, {@code false} otherwise.
      */
-    public boolean onDisplayRotationChanged(Context context, Rect outBounds, Rect oldBounds,
+    private boolean onDisplayRotationChanged(Context context, Rect outBounds, Rect oldBounds,
             Rect outInsetBounds,
             int displayId, int fromRotation, int toRotation, WindowContainerTransaction t) {
         // Bail early if the event is not sent to current {@link #mDisplayInfo}

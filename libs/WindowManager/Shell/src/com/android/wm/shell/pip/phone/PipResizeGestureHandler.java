@@ -93,6 +93,7 @@ public class PipResizeGestureHandler {
 
     private int mDelta;
     private float mTouchSlop;
+
     private boolean mAllowGesture;
     private boolean mIsAttached;
     private boolean mIsEnabled;

@@ -269,6 +269,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     /**
      * Updates the PIP per configuration changed.
      */
+    @Override
     public void onConfigurationChanged(Configuration newConfig) {
         loadConfigurationsAndApply(newConfig);
         mPipNotification.onConfigurationChanged(mContext);

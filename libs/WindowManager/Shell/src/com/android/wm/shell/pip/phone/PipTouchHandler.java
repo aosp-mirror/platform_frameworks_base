@@ -86,7 +86,7 @@ public class PipTouchHandler {
     private boolean mEnableStash = true;
 
     // The reference inset bounds, used to determine the dismiss fraction
-    private Rect mInsetBounds = new Rect();
+    private final Rect mInsetBounds = new Rect();
     private int mExpandedShortestEdgeSize;
 
     // Used to workaround an issue where the WM rotation happens before we are notified, allowing
@@ -94,7 +94,8 @@ public class PipTouchHandler {
     private int mDeferResizeToNormalBoundsUntilRotation = -1;
     private int mDisplayRotation;
 
-    private Handler mHandler = new Handler();
+    private final Handler mHandler = new Handler();
+    private final PipAccessibilityInteractionConnection mConnection;
 
     // Behaviour states
     private int mMenuState = MENU_STATE_NONE;
@@ -108,7 +109,6 @@ public class PipTouchHandler {
     private float mSavedSnapFraction = -1f;
     private boolean mSendingHoverAccessibilityEvents;
     private boolean mMovementWithinDismiss;
-    private PipAccessibilityInteractionConnection mConnection;
 
     // Touch state
     private final PipTouchState mTouchState;
