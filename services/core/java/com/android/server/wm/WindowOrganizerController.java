@@ -209,10 +209,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 if (t != null && callback != null) {
                     syncId = startSyncWithOrganizer(callback);
                 }
-                getTransitionController().finishTransition(transitionToken);
+                // apply the incoming transaction before finish in case it alters the visibility
+                // of the participants.
                 if (t != null) {
                     applyTransaction(t, syncId, null /*transition*/);
                 }
+                getTransitionController().finishTransition(transitionToken);
                 if (syncId >= 0) {
                     setSyncReady(syncId);
                 }

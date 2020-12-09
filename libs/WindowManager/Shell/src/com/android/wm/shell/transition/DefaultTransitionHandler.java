@@ -56,7 +56,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
     @Override
     public boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
-            @NonNull SurfaceControl.Transaction t, @NonNull Runnable finishCallback) {
+            @NonNull SurfaceControl.Transaction t,
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
         if (mAnimations.containsKey(transition)) {
             throw new IllegalStateException("Got a duplicate startAnimation call for "
                     + transition);
@@ -68,7 +69,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         final Runnable onAnimFinish = () -> {
             if (!animations.isEmpty()) return;
             mAnimations.remove(transition);
-            finishCallback.run();
+            finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
         };
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);

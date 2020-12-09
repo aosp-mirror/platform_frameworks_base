@@ -16,8 +16,8 @@
 
 package android.window;
 
-import android.view.IRemoteAnimationFinishedCallback;
 import android.view.SurfaceControl;
+import android.window.IRemoteTransitionFinishedCallback;
 import android.window.TransitionInfo;
 
 /**
@@ -42,5 +42,5 @@ oneway interface IRemoteTransition {
      * `finishCallback`.
      */
     void startAnimation(in TransitionInfo info, in SurfaceControl.Transaction t,
-            in IRemoteAnimationFinishedCallback finishCallback);
+            in IRemoteTransitionFinishedCallback finishCallback);
 }

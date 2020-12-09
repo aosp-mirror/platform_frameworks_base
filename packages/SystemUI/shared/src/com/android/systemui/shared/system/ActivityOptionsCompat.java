@@ -64,6 +64,14 @@ public abstract class ActivityOptionsCompat {
                 remoteAnimationAdapter.getRemoteTransition().getTransition());
     }
 
+    /**
+     * Constructs an ActivityOptions object that will delegate its transition handling to a
+     * `remoteTransition`.
+     */
+    public static ActivityOptions makeRemoteTransition(RemoteTransitionCompat remoteTransition) {
+        return ActivityOptions.makeRemoteTransition(remoteTransition.getTransition());
+    }
+
     public static ActivityOptions makeCustomAnimation(Context context, int enterResId,
             int exitResId, final Runnable callback, final Handler callbackHandler) {
         return ActivityOptions.makeCustomAnimation(context, enterResId, exitResId, callbackHandler,
