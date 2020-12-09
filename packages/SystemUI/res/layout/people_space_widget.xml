@@ -22,6 +22,6 @@
     android:background="@drawable/people_space_widget_background"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:padding="5dp"
+    android:padding="2dp"
     android:divider="@null"
     android:dividerHeight="0dp"/>

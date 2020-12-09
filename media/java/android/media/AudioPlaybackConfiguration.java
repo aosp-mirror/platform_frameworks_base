@@ -89,9 +89,8 @@ public final class AudioPlaybackConfiguration implements Parcelable {
     /**
      * @hide
      * Player backed an AAudio player.
-     * Note this type is not in System API so it will not be returned in public API calls
      */
-    // TODO unhide for SystemApi, update getPlayerType()
+    @SystemApi
     public static final int PLAYER_TYPE_AAUDIO = 13;
 
     /**
@@ -280,10 +279,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
 
     /**
      * @hide
-     * Return the type of player linked to this configuration. The return value is one of
-     * {@link #PLAYER_TYPE_JAM_AUDIOTRACK}, {@link #PLAYER_TYPE_JAM_MEDIAPLAYER},
-     * {@link #PLAYER_TYPE_JAM_SOUNDPOOL}, {@link #PLAYER_TYPE_SLES_AUDIOPLAYER_BUFFERQUEUE},
-     * {@link #PLAYER_TYPE_SLES_AUDIOPLAYER_URI_FD}, or {@link #PLAYER_TYPE_UNKNOWN}.
+     * Return the type of player linked to this configuration.
      * <br>Note that player types not exposed in the system API will be represented as
      * {@link #PLAYER_TYPE_UNKNOWN}.
      * @return the type of the player.
@@ -291,7 +287,6 @@ public final class AudioPlaybackConfiguration implements Parcelable {
     @SystemApi
     public @PlayerType int getPlayerType() {
         switch (mPlayerType) {
-            case PLAYER_TYPE_AAUDIO:
             case PLAYER_TYPE_HW_SOURCE:
             case PLAYER_TYPE_EXTERNAL_PROXY:
                 return PLAYER_TYPE_UNKNOWN;

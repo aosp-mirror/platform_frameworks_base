@@ -770,6 +770,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
             mPendingSeamlessRotate = new SeamlessRotator(oldRotation, rotation, getDisplayInfo(),
                     false /* applyFixedTransformationHint */);
+            // The surface position is going to be unrotated according to the last position.
+            // Make sure the source position is up-to-date.
+            mLastSurfacePosition.set(mSurfacePosition.x, mSurfacePosition.y);
             mPendingSeamlessRotate.unrotate(transaction, this);
             getDisplayContent().getDisplayRotation().markForSeamlessRotation(this,
                     true /* seamlesslyRotated */);

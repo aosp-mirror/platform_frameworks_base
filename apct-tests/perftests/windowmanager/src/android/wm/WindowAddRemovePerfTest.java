@@ -54,12 +54,12 @@ public class WindowAddRemovePerfTest extends WindowManagerPerfTestBase
     @BeforeClass
     public static void setUpClass() {
         // Get the permission to use most window types.
-        sUiAutomation.adoptShellPermissionIdentity();
+        getUiAutomation().adoptShellPermissionIdentity();
     }
 
     @AfterClass
     public static void tearDownClass() {
-        sUiAutomation.dropShellPermissionIdentity();
+        getUiAutomation().dropShellPermissionIdentity();
     }
 
     /** The last customized iterations will provide the information of method profiling. */

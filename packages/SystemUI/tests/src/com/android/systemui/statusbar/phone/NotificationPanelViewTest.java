@@ -199,6 +199,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private AuthController mAuthController;
     @Mock
+    private ScrimController mScrimController;
+    @Mock
     private MediaDataManager mMediaDataManager;
 
     private NotificationPanelViewController mNotificationPanelViewController;
@@ -279,6 +281,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mNotificationAreaController,
                 mAuthController,
                 new QSDetailDisplayer(),
+                mScrimController,
                 mMediaDataManager);
         mNotificationPanelViewController.initDependencies(
                 mStatusBar,

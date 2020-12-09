@@ -15,10 +15,11 @@
   -->
 
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:minWidth="72dp"
-    android:minHeight="150dp"
+    android:minWidth="180dp"
+    android:minHeight="40dp"
     android:updatePeriodMillis="60000"
-    android:previewImage="@drawable/cloud"
+    android:previewImage="@drawable/ic_android"
     android:resizeMode="horizontal|vertical"
+    android:configure="com.android.systemui.people.PeopleSpaceActivity"
     android:initialLayout="@layout/people_space_widget">
 </appwidget-provider>

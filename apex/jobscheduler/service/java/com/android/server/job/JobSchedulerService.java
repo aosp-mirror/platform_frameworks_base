@@ -2044,7 +2044,6 @@ public class JobSchedulerService extends com.android.server.SystemService
 
                 }
                 maybeRunPendingJobsLocked();
-                // Don't remove JOB_EXPIRED in case one came along while processing the queue.
             }
         }
     }
@@ -2110,6 +2109,15 @@ public class JobSchedulerService extends com.android.server.SystemService
      * as many as we can.
      */
     private void queueReadyJobsForExecutionLocked() {
+        // This method will check and capture all ready jobs, so we don't need to keep any messages
+        // in the queue.
+        mHandler.removeMessages(MSG_CHECK_JOB_GREEDY);
+        // MSG_CHECK_JOB is a weaker form of _GREEDY. Since we're checking and queueing all ready
+        // jobs, we don't need to keep any MSG_CHECK_JOB messages in the queue.
+        mHandler.removeMessages(MSG_CHECK_JOB);
+        // This method will capture all expired jobs that are ready, so there's no need to keep
+        // the _EXPIRED messages in the queue.
+        mHandler.removeMessages(MSG_JOB_EXPIRED);
         if (DEBUG) {
             Slog.d(TAG, "queuing all ready jobs for execution:");
         }

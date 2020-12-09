@@ -14484,10 +14484,11 @@ public final class Settings {
         public static final String SHOW_PEOPLE_SPACE = "show_people_space";
 
         /**
-         * Which types of conversations to show in People Space.
+         * Which types of conversation(s) to show in People Space.
          * Values are:
-         * 0: All conversations (default)
+         * 0: Single user-selected conversation (default)
          * 1: Priority conversations only
+         * 2: All conversations
          * @hide
          */
         public static final String PEOPLE_SPACE_CONVERSATION_TYPE =

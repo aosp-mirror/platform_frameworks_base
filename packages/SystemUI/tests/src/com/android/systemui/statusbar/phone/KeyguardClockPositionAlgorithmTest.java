@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.phone;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
@@ -31,7 +30,6 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
 public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
 
     private static final int SCREEN_HEIGHT = 2000;
@@ -53,6 +51,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     private int mPreferredClockY;
     private boolean mHasCustomClock;
     private boolean mHasVisibleNotifs;
+    private float mQsExpansion;
 
     @Before
     public void setUp() {
@@ -355,6 +354,17 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     }
 
     @Test
+    public void clockHiddenWhenQsIsExpanded() {
+        // GIVEN on the lock screen with a custom clock and visible notifications
+        givenLockScreen();
+        mQsExpansion = 1;
+        // WHEN the clock position algorithm is run
+        positionClock();
+        // THEN the clock Y position is the middle of the screen (SCREEN_HEIGHT / 2).
+        assertThat(mClockPosition.clockAlpha).isEqualTo(TRANSPARENT);
+    }
+
+    @Test
     public void preferredCustomClockPositionWithVisibleNotificationsOnAod() {
         // GIVEN on the lock screen with a custom clock and visible notifications
         givenAOD();
@@ -384,7 +394,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
         mClockPositionAlgorithm.setup(EMPTY_MARGIN, SCREEN_HEIGHT, mNotificationStackHeight,
                 mPanelExpansion, SCREEN_HEIGHT, mKeyguardStatusHeight, mPreferredClockY,
                 mHasCustomClock, mHasVisibleNotifs, mDark, ZERO_DRAG, false /* bypassEnabled */,
-                0 /* unlockedStackScrollerPadding */, false /* udfpsEnrolled */);
+                0 /* unlockedStackScrollerPadding */, false /* udfpsEnrolled */, mQsExpansion);
         mClockPositionAlgorithm.run(mClockPosition);
     }
 }

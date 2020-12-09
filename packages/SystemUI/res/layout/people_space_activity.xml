@@ -17,8 +17,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/scroll"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@android:color/holo_blue_light">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:id="@+id/people_space_layout"
@@ -30,16 +29,15 @@
         android:clipChildren="false"
         android:clipToPadding="false">
 
-        <ImageView
-            android:id="@+id/people_space_cloud"
-            android:layout_width="67dp"
-            android:layout_height="67dp"
+        <TextView
+            android:id="@+id/select_conversation"
+            android:text="@string/select_conversation_text"
+            android:layout_width="match_parent"
+            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+            android:textSize="24sp"
+            android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:scaleType="fitCenter"
-            android:focusable="false"
-            android:paddingBottom="16dp"
-            android:tint="?android:attr/colorControlNormal"
-            android:src="@drawable/cloud" />
+            android:paddingBottom="16dp" />
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

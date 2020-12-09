@@ -18,7 +18,6 @@ package android.wm;
 
 import static android.perftests.utils.ManualBenchmarkState.StatsReport;
 
-import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.perftests.utils.ManualBenchmarkState;
 import android.perftests.utils.ManualBenchmarkState.ManualBenchmarkTest;
@@ -37,7 +36,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.concurrent.TimeUnit;
 
 /** Measure the performance of internal methods in window manager service by trace tag. */
 @LargeTest
@@ -85,7 +83,7 @@ public class InternalWindowOperationPerfTest extends WindowManagerPerfTestBase
 
         while (state.keepRunning(measuredTimeNs)) {
             if (!mIsTraceStarted && !mIsProfiling && !state.isWarmingUp()) {
-                startAsyncAtrace();
+                startAsyncAtrace("wm");
                 mIsTraceStarted = true;
             }
             final long startTime = SystemClock.elapsedRealtimeNanos();
@@ -108,15 +106,8 @@ public class InternalWindowOperationPerfTest extends WindowManagerPerfTestBase
         Log.i(TAG, String.valueOf(mTraceMarkParser));
     }
 
-    private void startAsyncAtrace() throws IOException {
-        sUiAutomation.executeShellCommand("atrace -b 32768 --async_start wm");
-        // Avoid atrace isn't ready immediately.
-        SystemClock.sleep(TimeUnit.NANOSECONDS.toMillis(TIME_1_S_IN_NS));
-    }
-
     private void stopAsyncAtrace() {
-        final ParcelFileDescriptor pfd = sUiAutomation.executeShellCommand("atrace --async_stop");
-        final InputStream inputStream = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
+        final InputStream inputStream = stopAsyncAtraceWithStream();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             String line;
             while ((line = reader.readLine()) != null) {
