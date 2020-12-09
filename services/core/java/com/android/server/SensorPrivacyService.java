@@ -20,12 +20,14 @@ import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.UserHandle.USER_SYSTEM;
 import static android.service.SensorPrivacyIndividualEnabledSensorProto.CAMERA;
 import static android.service.SensorPrivacyIndividualEnabledSensorProto.MICROPHONE;
 import static android.service.SensorPrivacyIndividualEnabledSensorProto.UNKNOWN;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -49,12 +51,15 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
+import android.os.UserHandle;
 import android.service.SensorPrivacyIndividualEnabledSensorProto;
 import android.service.SensorPrivacyServiceDumpProto;
+import android.service.SensorPrivacyUserProto;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
+import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
@@ -63,9 +68,11 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FunctionalUtils;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.server.pm.UserManagerInternal;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -84,9 +91,19 @@ public final class SensorPrivacyService extends SystemService {
 
     private static final String TAG = "SensorPrivacyService";
 
+    /** Version number indicating compatibility parsing the persisted file */
+    private static final int CURRENT_PERSISTENCE_VERSION = 1;
+    /** Version number indicating the persisted data needs upgraded to match new internal data
+     *  structures and features */
+    private static final int CURRENT_VERSION = 1;
+
     private static final String SENSOR_PRIVACY_XML_FILE = "sensor_privacy.xml";
     private static final String XML_TAG_SENSOR_PRIVACY = "sensor-privacy";
+    private static final String XML_TAG_USER = "user";
     private static final String XML_TAG_INDIVIDUAL_SENSOR_PRIVACY = "individual-sensor-privacy";
+    private static final String XML_ATTRIBUTE_ID = "id";
+    private static final String XML_ATTRIBUTE_PERSISTENCE_VERSION = "persistence-version";
+    private static final String XML_ATTRIBUTE_VERSION = "version";
     private static final String XML_ATTRIBUTE_ENABLED = "enabled";
     private static final String XML_ATTRIBUTE_SENSOR = "sensor";
 
@@ -96,10 +113,18 @@ public final class SensorPrivacyService extends SystemService {
     private static final String EXTRA_SENSOR = SensorPrivacyService.class.getName()
             + ".extra.sensor";
 
+    // These are associated with fields that existed for older persisted versions of files
+    private static final int VER0_ENABLED = 0;
+    private static final int VER0_INDIVIDUAL_ENABLED = 1;
+    private static final int VER1_ENABLED = 0;
+    private static final int VER1_INDIVIDUAL_ENABLED = 1;
+
     private final SensorPrivacyServiceImpl mSensorPrivacyServiceImpl;
+    private final UserManagerInternal mUserManagerInternal;
 
     public SensorPrivacyService(Context context) {
         super(context);
+        mUserManagerInternal = getLocalService(UserManagerInternal.class);
         mSensorPrivacyServiceImpl = new SensorPrivacyServiceImpl(context);
     }
 
@@ -117,8 +142,9 @@ public final class SensorPrivacyService extends SystemService {
         @GuardedBy("mLock")
         private final AtomicFile mAtomicFile;
         @GuardedBy("mLock")
-        private boolean mEnabled;
-        private SparseBooleanArray mIndividualEnabled = new SparseBooleanArray();
+        private SparseBooleanArray mEnabled = new SparseBooleanArray();
+        @GuardedBy("mLock")
+        private SparseArray<SparseBooleanArray> mIndividualEnabled = new SparseArray<>();
 
         SensorPrivacyServiceImpl(Context context) {
             mContext = context;
@@ -127,7 +153,9 @@ public final class SensorPrivacyService extends SystemService {
                     SENSOR_PRIVACY_XML_FILE);
             mAtomicFile = new AtomicFile(sensorPrivacyFile);
             synchronized (mLock) {
-                readPersistedSensorPrivacyStateLocked();
+                if (readPersistedSensorPrivacyStateLocked()) {
+                    persistSensorPrivacyStateLocked();
+                }
             }
 
             int[] micAndCameraOps = new int[]{OP_RECORD_AUDIO, OP_CAMERA};
@@ -138,7 +166,8 @@ public final class SensorPrivacyService extends SystemService {
             mContext.registerReceiver(new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    setIndividualSensorPrivacy(intent.getIntExtra(EXTRA_SENSOR, UNKNOWN), false);
+                    setIndividualSensorPrivacy(intent.getIntExtra(Intent.EXTRA_USER_ID, -1),
+                            intent.getIntExtra(EXTRA_SENSOR, UNKNOWN), false);
                 }
             }, new IntentFilter(ACTION_DISABLE_INDIVIDUAL_SENSOR_PRIVACY));
         }
@@ -174,7 +203,8 @@ public final class SensorPrivacyService extends SystemService {
          * @param sensor The sensor that is attempting to be used
          */
         private void onSensorUseStarted(int uid, String packageName, int sensor) {
-            if (!isIndividualSensorPrivacyEnabled(sensor)) {
+            int userId = UserHandle.getUserId(uid);
+            if (!isIndividualSensorPrivacyEnabled(userId, sensor)) {
                 return;
             }
 
@@ -216,7 +246,8 @@ public final class SensorPrivacyService extends SystemService {
                                     PendingIntent.getBroadcast(mContext, sensor,
                                             new Intent(ACTION_DISABLE_INDIVIDUAL_SENSOR_PRIVACY)
                                                     .setPackage(mContext.getPackageName())
-                                                    .putExtra(EXTRA_SENSOR, sensor),
+                                                    .putExtra(EXTRA_SENSOR, sensor)
+                                                    .putExtra(Intent.EXTRA_USER_ID, userId),
                                             PendingIntent.FLAG_IMMUTABLE
                                                     | PendingIntent.FLAG_UPDATE_CURRENT))
                                     .build())
@@ -229,18 +260,27 @@ public final class SensorPrivacyService extends SystemService {
          */
         @Override
         public void setSensorPrivacy(boolean enable) {
+            // Keep the state consistent between all users to make it a single global state
+            forAllUsers(userId -> setSensorPrivacy(userId, enable));
+        }
+
+        private void setSensorPrivacy(@UserIdInt int userId, boolean enable) {
             enforceSensorPrivacyPermission();
             synchronized (mLock) {
-                mEnabled = enable;
+                mEnabled.put(userId, enable);
                 persistSensorPrivacyStateLocked();
             }
             mHandler.onSensorPrivacyChanged(enable);
         }
 
-        public void setIndividualSensorPrivacy(int sensor, boolean enable) {
+        @Override
+        public void setIndividualSensorPrivacy(@UserIdInt int userId, int sensor, boolean enable) {
             enforceSensorPrivacyPermission();
             synchronized (mLock) {
-                mIndividualEnabled.put(sensor, enable);
+                SparseBooleanArray userIndividualEnabled = mIndividualEnabled.get(userId,
+                        new SparseBooleanArray());
+                userIndividualEnabled.put(sensor, enable);
+                mIndividualEnabled.put(userId, userIndividualEnabled);
 
                 if (!enable) {
                     // Remove any notifications prompting the user to disable sensory privacy
@@ -249,9 +289,19 @@ public final class SensorPrivacyService extends SystemService {
 
                     notificationManager.cancel(sensor);
                 }
-
                 persistSensorPrivacyState();
             }
+        }
+
+        @Override
+        public void setIndividualSensorPrivacyForProfileGroup(@UserIdInt int userId, int sensor,
+                boolean enable) {
+            int parentId = mUserManagerInternal.getProfileParentId(userId);
+            forAllUsers(userId2 -> {
+                if (parentId == mUserManagerInternal.getProfileParentId(userId2)) {
+                    setIndividualSensorPrivacy(userId2, sensor, enable);
+                }
+            });
         }
 
         /**
@@ -273,53 +323,179 @@ public final class SensorPrivacyService extends SystemService {
          */
         @Override
         public boolean isSensorPrivacyEnabled() {
+            return isSensorPrivacyEnabled(USER_SYSTEM);
+        }
+
+        private boolean isSensorPrivacyEnabled(@UserIdInt int userId) {
             synchronized (mLock) {
-                return mEnabled;
+                return mEnabled.get(userId, false);
             }
         }
 
         @Override
-        public boolean isIndividualSensorPrivacyEnabled(int sensor) {
+        public boolean isIndividualSensorPrivacyEnabled(@UserIdInt int userId, int sensor) {
             synchronized (mLock) {
-                return mIndividualEnabled.get(sensor, false);
+                SparseBooleanArray states = mIndividualEnabled.get(userId);
+                if (states == null) {
+                    return false;
+                }
+                return states.get(sensor, false);
             }
         }
 
         /**
          * Returns the state of sensor privacy from persistent storage.
          */
-        private void readPersistedSensorPrivacyStateLocked() {
+        private boolean readPersistedSensorPrivacyStateLocked() {
             // if the file does not exist then sensor privacy has not yet been enabled on
             // the device.
-            if (!mAtomicFile.exists()) {
-                return;
-            }
-            try (FileInputStream inputStream = mAtomicFile.openRead()) {
-                TypedXmlPullParser parser = Xml.resolvePullParser(inputStream);
-                XmlUtils.beginDocument(parser, XML_TAG_SENSOR_PRIVACY);
-                parser.next();
-                mEnabled = parser.getAttributeBoolean(null, XML_ATTRIBUTE_ENABLED, false);
 
-                XmlUtils.nextElement(parser);
-                while (parser.getEventType() != XmlPullParser.END_DOCUMENT) {
-                    String tagName = parser.getName();
-                    if (XML_TAG_INDIVIDUAL_SENSOR_PRIVACY.equals(tagName)) {
-                        int sensor = XmlUtils.readIntAttribute(parser, XML_ATTRIBUTE_SENSOR);
-                        boolean enabled = XmlUtils.readBooleanAttribute(parser,
-                                XML_ATTRIBUTE_ENABLED);
-                        mIndividualEnabled.put(sensor, enabled);
-                        XmlUtils.skipCurrentTag(parser);
-                    } else {
+            SparseArray<Object> map = new SparseArray<>();
+            int version = -1;
+
+            if (mAtomicFile.exists()) {
+                try (FileInputStream inputStream = mAtomicFile.openRead()) {
+                    TypedXmlPullParser parser = Xml.resolvePullParser(inputStream);
+                    XmlUtils.beginDocument(parser, XML_TAG_SENSOR_PRIVACY);
+                    final int persistenceVersion = parser.getAttributeInt(null,
+                            XML_ATTRIBUTE_PERSISTENCE_VERSION, 0);
+
+                    // Use inline string literals for xml tags/attrs when parsing old versions since
+                    // these should never be changed even with refactorings.
+                    if (persistenceVersion == 0) {
+                        boolean enabled = parser.getAttributeBoolean(null, "enabled", false);
+                        SparseBooleanArray individualEnabled = new SparseBooleanArray();
+                        version = 0;
+
                         XmlUtils.nextElement(parser);
+                        while (parser.getEventType() != XmlPullParser.END_DOCUMENT) {
+                            String tagName = parser.getName();
+                            if ("individual-sensor-privacy".equals(tagName)) {
+                                int sensor = XmlUtils.readIntAttribute(parser, "sensor");
+                                boolean indEnabled = XmlUtils.readBooleanAttribute(parser,
+                                        "enabled");
+                                individualEnabled.put(sensor, indEnabled);
+                                XmlUtils.skipCurrentTag(parser);
+                            } else {
+                                XmlUtils.nextElement(parser);
+                            }
+                        }
+                        map.put(VER0_ENABLED, enabled);
+                        map.put(VER0_INDIVIDUAL_ENABLED, individualEnabled);
+                    } else if (persistenceVersion == CURRENT_PERSISTENCE_VERSION) {
+                        SparseBooleanArray enabled = new SparseBooleanArray();
+                        SparseArray<SparseBooleanArray> individualEnabled = new SparseArray<>();
+                        version = parser.getAttributeInt(null,
+                                XML_ATTRIBUTE_VERSION, 1);
+
+                        int currentUserId = -1;
+                        while (parser.getEventType() != XmlPullParser.END_DOCUMENT) {
+                            XmlUtils.nextElement(parser);
+                            String tagName = parser.getName();
+                            if (XML_TAG_USER.equals(tagName)) {
+                                currentUserId = parser.getAttributeInt(null, XML_ATTRIBUTE_ID);
+                                boolean isEnabled = parser.getAttributeBoolean(null,
+                                        XML_ATTRIBUTE_ENABLED);
+                                if (enabled.indexOfKey(currentUserId) >= 0) {
+                                    Log.e(TAG, "User listed multiple times in file.",
+                                            new RuntimeException());
+                                    mAtomicFile.delete();
+                                    version = -1;
+                                    break;
+                                }
+
+                                if (mUserManagerInternal.getUserInfo(currentUserId) == null) {
+                                    // User may no longer exist, skip this user
+                                    currentUserId = -1;
+                                    continue;
+                                }
+
+                                enabled.put(currentUserId, isEnabled);
+                            }
+                            if (XML_TAG_INDIVIDUAL_SENSOR_PRIVACY.equals(tagName)) {
+                                if (mUserManagerInternal.getUserInfo(currentUserId) == null) {
+                                    // User may no longer exist or isn't set
+                                    continue;
+                                }
+                                int sensor = parser.getAttributeIndex(null, XML_ATTRIBUTE_SENSOR);
+                                boolean isEnabled = parser.getAttributeBoolean(null,
+                                        XML_ATTRIBUTE_ENABLED);
+                                SparseBooleanArray userIndividualEnabled = individualEnabled.get(
+                                        currentUserId, new SparseBooleanArray());
+
+                                userIndividualEnabled.put(sensor, isEnabled);
+                                individualEnabled.put(currentUserId, userIndividualEnabled);
+                            }
+                        }
+
+                        map.put(VER1_ENABLED, enabled);
+                        map.put(VER1_INDIVIDUAL_ENABLED, individualEnabled);
+                    } else {
+                        Log.e(TAG, "Unknown persistence version: " + persistenceVersion
+                                        + ". Deleting.",
+                                new RuntimeException());
+                        mAtomicFile.delete();
+                        version = -1;
+                    }
+
+                } catch (IOException | XmlPullParserException e) {
+                    Log.e(TAG, "Caught an exception reading the state from storage: ", e);
+                    // Delete the file to prevent the same error on subsequent calls and assume
+                    // sensor privacy is not enabled.
+                    mAtomicFile.delete();
+                    version = -1;
+                }
+            }
+
+            return upgradeAndInit(version, map);
+        }
+
+        private boolean upgradeAndInit(int version, SparseArray map) {
+            if (version == -1) {
+                // New file, default state for current version goes here.
+                mEnabled = new SparseBooleanArray();
+                mIndividualEnabled = new SparseArray<>();
+                forAllUsers(userId -> mEnabled.put(userId, false));
+                forAllUsers(userId -> mIndividualEnabled.put(userId, new SparseBooleanArray()));
+                return true;
+            }
+            boolean upgraded = false;
+            final int[] users = getLocalService(UserManagerInternal.class).getUserIds();
+            if (version == 0) {
+                final boolean enabled = (boolean) map.get(VER0_ENABLED);
+                final SparseBooleanArray individualEnabled =
+                        (SparseBooleanArray) map.get(VER0_INDIVIDUAL_ENABLED);
+
+                final SparseBooleanArray perUserEnabled = new SparseBooleanArray();
+                final SparseArray<SparseBooleanArray> perUserIndividualEnabled =
+                        new SparseArray<>();
+
+                // Copy global state to each user
+                for (int i = 0; i < users.length; i++) {
+                    int user = users[i];
+                    perUserEnabled.put(user, enabled);
+                    SparseBooleanArray userIndividualSensorEnabled = new SparseBooleanArray();
+                    perUserIndividualEnabled.put(user, userIndividualSensorEnabled);
+                    for (int j = 0; j < individualEnabled.size(); j++) {
+                        final int sensor = individualEnabled.keyAt(j);
+                        final boolean isSensorEnabled = individualEnabled.valueAt(j);
+                        userIndividualSensorEnabled.put(sensor, isSensorEnabled);
                     }
                 }
 
-            } catch (IOException | XmlPullParserException e) {
-                Log.e(TAG, "Caught an exception reading the state from storage: ", e);
-                // Delete the file to prevent the same error on subsequent calls and assume sensor
-                // privacy is not enabled.
-                mAtomicFile.delete();
+                map.clear();
+                map.put(VER1_ENABLED, perUserEnabled);
+                map.put(VER1_INDIVIDUAL_ENABLED, perUserIndividualEnabled);
+
+                version = 1;
+                upgraded = true;
             }
+            if (version == CURRENT_VERSION) {
+                mEnabled = (SparseBooleanArray) map.get(VER1_ENABLED);
+                mIndividualEnabled =
+                        (SparseArray<SparseBooleanArray>) map.get(VER1_INDIVIDUAL_ENABLED);
+            }
+            return upgraded;
         }
 
         /**
@@ -338,16 +514,29 @@ public final class SensorPrivacyService extends SystemService {
                 TypedXmlSerializer serializer = Xml.resolveSerializer(outputStream);
                 serializer.startDocument(null, true);
                 serializer.startTag(null, XML_TAG_SENSOR_PRIVACY);
-                serializer.attributeBoolean(null, XML_ATTRIBUTE_ENABLED, mEnabled);
-                int numIndividual = mIndividualEnabled.size();
-                for (int i = 0; i < numIndividual; i++) {
-                    serializer.startTag(null, XML_TAG_INDIVIDUAL_SENSOR_PRIVACY);
-                    int sensor = mIndividualEnabled.keyAt(i);
-                    boolean enabled = mIndividualEnabled.valueAt(i);
-                    serializer.attributeInt(null, XML_ATTRIBUTE_SENSOR, sensor);
-                    serializer.attributeBoolean(null, XML_ATTRIBUTE_ENABLED, enabled);
-                    serializer.endTag(null, XML_TAG_INDIVIDUAL_SENSOR_PRIVACY);
-                }
+                serializer.attributeInt(
+                        null, XML_ATTRIBUTE_PERSISTENCE_VERSION, CURRENT_PERSISTENCE_VERSION);
+                serializer.attributeInt(null, XML_ATTRIBUTE_VERSION, CURRENT_VERSION);
+                forAllUsers(userId -> {
+                    serializer.startTag(null, XML_TAG_USER);
+                    serializer.attributeInt(null, XML_ATTRIBUTE_ID, userId);
+                    serializer.attributeBoolean(
+                            null, XML_ATTRIBUTE_ENABLED, isSensorPrivacyEnabled(userId));
+
+                    SparseBooleanArray individualEnabled =
+                            mIndividualEnabled.get(userId, new SparseBooleanArray());
+                    int numIndividual = individualEnabled.size();
+                    for (int i = 0; i < numIndividual; i++) {
+                        serializer.startTag(null, XML_TAG_INDIVIDUAL_SENSOR_PRIVACY);
+                        int sensor = individualEnabled.keyAt(i);
+                        boolean enabled = individualEnabled.valueAt(i);
+                        serializer.attributeInt(null, XML_ATTRIBUTE_SENSOR, sensor);
+                        serializer.attributeBoolean(null, XML_ATTRIBUTE_ENABLED, enabled);
+                        serializer.endTag(null, XML_TAG_INDIVIDUAL_SENSOR_PRIVACY);
+                    }
+                    serializer.endTag(null, XML_TAG_USER);
+
+                });
                 serializer.endTag(null, XML_TAG_SENSOR_PRIVACY);
                 serializer.endDocument();
                 mAtomicFile.finishWrite(outputStream);
@@ -422,22 +611,32 @@ public final class SensorPrivacyService extends SystemService {
          */
         private void dump(@NonNull DualDumpOutputStream dumpStream) {
             synchronized (mLock) {
-                dumpStream.write("is_enabled", SensorPrivacyServiceDumpProto.IS_ENABLED, mEnabled);
 
-                int numIndividualEnabled = mIndividualEnabled.size();
-                for (int i = 0; i < numIndividualEnabled; i++) {
-                    long token = dumpStream.start("individual_enabled_sensor",
-                            SensorPrivacyServiceDumpProto.INDIVIDUAL_ENABLED_SENSOR);
+                forAllUsers(userId -> {
+                    long userToken = dumpStream.start("users", SensorPrivacyServiceDumpProto.USER);
+                    dumpStream.write("user_id", SensorPrivacyUserProto.USER_ID, userId);
+                    dumpStream.write("is_enabled", SensorPrivacyUserProto.IS_ENABLED,
+                            mEnabled.get(userId, false));
 
-                    dumpStream.write("sensor",
-                            SensorPrivacyIndividualEnabledSensorProto.SENSOR,
-                            mIndividualEnabled.keyAt(i));
-                    dumpStream.write("is_enabled",
-                            SensorPrivacyIndividualEnabledSensorProto.IS_ENABLED,
-                            mIndividualEnabled.valueAt(i));
+                    SparseBooleanArray individualEnabled = mIndividualEnabled.get(userId);
+                    if (individualEnabled != null) {
+                        int numIndividualEnabled = individualEnabled.size();
+                        for (int i = 0; i < numIndividualEnabled; i++) {
+                            long individualToken = dumpStream.start("individual_enabled_sensor",
+                                    SensorPrivacyUserProto.INDIVIDUAL_ENABLED_SENSOR);
 
-                    dumpStream.end(token);
-                }
+                            dumpStream.write("sensor",
+                                    SensorPrivacyIndividualEnabledSensorProto.SENSOR,
+                                    individualEnabled.keyAt(i));
+                            dumpStream.write("is_enabled",
+                                    SensorPrivacyIndividualEnabledSensorProto.IS_ENABLED,
+                                    individualEnabled.valueAt(i));
+
+                            dumpStream.end(individualToken);
+                        }
+                    }
+                    dumpStream.end(userToken);
+                });
             }
 
             dumpStream.flush();
@@ -477,30 +676,32 @@ public final class SensorPrivacyService extends SystemService {
                         return handleDefaultCommands(cmd);
                     }
 
+                    int userId = Integer.parseInt(getNextArgRequired());
+
                     final PrintWriter pw = getOutPrintWriter();
                     switch (cmd) {
                         case "enable" : {
-                            int sensor = sensorStrToId(getNextArg());
+                            int sensor = sensorStrToId(getNextArgRequired());
                             if (sensor == UNKNOWN) {
                                 pw.println("Invalid sensor");
                                 return -1;
                             }
 
-                            setIndividualSensorPrivacy(sensor, true);
+                            setIndividualSensorPrivacy(userId, sensor, true);
                         }
                         break;
                         case "disable" : {
-                            int sensor = sensorStrToId(getNextArg());
+                            int sensor = sensorStrToId(getNextArgRequired());
                             if (sensor == UNKNOWN) {
                                 pw.println("Invalid sensor");
                                 return -1;
                             }
 
-                            setIndividualSensorPrivacy(sensor, false);
+                            setIndividualSensorPrivacy(userId, sensor, false);
                         }
                         break;
                         case "reset": {
-                            int sensor = sensorStrToId(getNextArg());
+                            int sensor = sensorStrToId(getNextArgRequired());
                             if (sensor == UNKNOWN) {
                                 pw.println("Invalid sensor");
                                 return -1;
@@ -509,7 +710,11 @@ public final class SensorPrivacyService extends SystemService {
                             enforceSensorPrivacyPermission();
 
                             synchronized (mLock) {
-                                mIndividualEnabled.delete(sensor);
+                                SparseBooleanArray individualEnabled =
+                                        mIndividualEnabled.get(userId);
+                                if (individualEnabled != null) {
+                                    individualEnabled.delete(sensor);
+                                }
                                 persistSensorPrivacyState();
                             }
                         }
@@ -530,13 +735,13 @@ public final class SensorPrivacyService extends SystemService {
                     pw.println("  help");
                     pw.println("    Print this help text.");
                     pw.println("");
-                    pw.println("  enable SENSOR");
+                    pw.println("  enable USER_ID SENSOR");
                     pw.println("    Enable privacy for a certain sensor.");
                     pw.println("");
-                    pw.println("  disable SENSOR");
+                    pw.println("  disable USER_ID SENSOR");
                     pw.println("    Disable privacy for a certain sensor.");
                     pw.println("");
-                    pw.println("  reset SENSOR");
+                    pw.println("  reset USER_ID SENSOR");
                     pw.println("    Reset privacy state for a certain sensor.");
                     pw.println("");
                 }
@@ -626,6 +831,13 @@ public final class SensorPrivacyService extends SystemService {
                 mListener.asBinder().unlinkToDeath(this, 0);
             } catch (NoSuchElementException e) {
             }
+        }
+    }
+
+    private void forAllUsers(FunctionalUtils.ThrowingConsumer<Integer> c) {
+        int[] userIds = mUserManagerInternal.getUserIds();
+        for (int i = 0; i < userIds.length; i++) {
+            c.accept(userIds[i]);
         }
     }
 }

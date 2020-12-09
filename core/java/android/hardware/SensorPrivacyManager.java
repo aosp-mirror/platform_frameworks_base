@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
+import android.annotation.UserIdInt;
 import android.content.Context;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -198,9 +199,10 @@ public final class SensorPrivacyManager {
      *
      * @return true if sensor privacy is currently enabled, false otherwise.
      */
-    public boolean isIndividualSensorPrivacyEnabled(@IndividualSensor int sensor) {
+    public boolean isIndividualSensorPrivacyEnabled(@UserIdInt int userId,
+            @IndividualSensor int sensor) {
         try {
-            return mService.isIndividualSensorPrivacyEnabled(sensor);
+            return mService.isIndividualSensorPrivacyEnabled(userId, sensor);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -212,9 +214,26 @@ public final class SensorPrivacyManager {
      * @param enable the state to which sensor privacy should be set.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY)
-    public void setIndividualSensorPrivacy(@IndividualSensor int sensor, boolean enable) {
+    public void setIndividualSensorPrivacy(@UserIdInt int userId, @IndividualSensor int sensor,
+            boolean enable) {
         try {
-            mService.setIndividualSensorPrivacy(sensor, enable);
+            mService.setIndividualSensorPrivacy(userId, sensor, enable);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets sensor privacy to the specified state for an individual sensor for the profile group of
+     * the given user.
+     *
+     * @param enable the state to which sensor privacy should be set.
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY)
+    public void setIndividualSensorPrivacyForProfileGroup(@UserIdInt int userId,
+            @IndividualSensor int sensor, boolean enable) {
+        try {
+            mService.setIndividualSensorPrivacyForProfileGroup(userId, sensor, enable);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
