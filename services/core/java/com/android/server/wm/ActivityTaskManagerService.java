@@ -4708,8 +4708,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                             .setContentTitle(text)
                             .setContentText(
                                     mContext.getText(R.string.heavy_weight_notification_detail))
+                            // TODO(b/175194709) Please replace FLAG_MUTABLE_UNAUDITED below
+                            // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
                             .setContentIntent(PendingIntent.getActivityAsUser(mContext, 0,
-                                    intent, PendingIntent.FLAG_CANCEL_CURRENT, null,
+                                    intent, PendingIntent.FLAG_CANCEL_CURRENT
+                                    | PendingIntent.FLAG_MUTABLE_UNAUDITED, null,
                                     new UserHandle(userId)))
                             .build();
             try {
