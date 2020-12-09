@@ -964,11 +964,19 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * <p>Closing a session frees up the target output Surfaces of the session for reuse with either
      * a new session, or to other APIs that can draw to Surfaces.</p>
      *
-     * <p>Note that creating a new capture session with {@link CameraDevice#createCaptureSession}
+     * <p>Note that for common usage scenarios like creating a new session or closing the camera
+     * device, it is faster to call respective APIs directly (see below for more details) without
+     * calling into this method. This API is only useful when application wants to uncofigure the
+     * camera but keep the device open for later use.</p>
+     *
+     * <p>Creating a new capture session with {@link CameraDevice#createCaptureSession}
      * will close any existing capture session automatically, and call the older session listener's
      * {@link StateCallback#onClosed} callback. Using {@link CameraDevice#createCaptureSession}
      * directly without closing is the recommended approach for quickly switching to a new session,
      * since unchanged target outputs can be reused more efficiently.</p>
+     *
+     * <p>Closing the device with {@link CameraDevice#close} directly without calling this API is
+     * also recommended for quickly closing the camera.</p>
      *
      * <p>Once a session is closed, all methods on it will throw an IllegalStateException, and any
      * repeating requests or bursts are stopped (as if {@link #stopRepeating()} was called).
