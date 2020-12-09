@@ -139,6 +139,7 @@ public class SettingsBackupTest {
                     Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS,
                     Settings.Global.AUTOMATIC_POWER_SAVE_MODE,
                     Settings.Global.AVERAGE_TIME_TO_DISCHARGE,
+                    Settings.Global.BACKPORT_S_NOTIF_RULES,
                     Settings.Global.BATTERY_CHARGING_STATE_UPDATE_DELAY,
                     Settings.Global.BATTERY_ESTIMATES_LAST_UPDATE_TIME,
                     Settings.Global.BROADCAST_BG_CONSTANTS,

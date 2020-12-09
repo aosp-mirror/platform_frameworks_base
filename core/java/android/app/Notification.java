@@ -37,6 +37,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.LocusId;
@@ -11196,6 +11197,35 @@ public class Notification implements Parcelable
         public StandardTemplateParams setMaxRemoteInputHistory(int maxRemoteInputHistory) {
             this.maxRemoteInputHistory = maxRemoteInputHistory;
             return this;
+        }
+    }
+
+    /**
+     * A class to centrally access various developer flags related to notifications.
+     * This class is a non-final wrapper around Settings.Global which allows mocking for unit tests.
+     * TODO(b/176239013): Try to remove this before shipping S
+     * @hide
+     */
+    public static class DevFlags {
+        private static final boolean DEFAULT_BACKPORT_S_NOTIF_RULES = false;
+
+        /**
+         * Used by unit tests to force that this class returns its default values, which is required
+         * in cases where the ContentResolver instance is a mock.
+         * @hide
+         */
+        public static boolean sForceDefaults;
+
+        /**
+         * @return if the S notification rules should be backported to apps not yet targeting S
+         * @hide
+         */
+        public static boolean shouldBackportSNotifRules(@NonNull ContentResolver contentResolver) {
+            if (sForceDefaults) {
+                return DEFAULT_BACKPORT_S_NOTIF_RULES;
+            }
+            return Settings.Global.getInt(contentResolver, Settings.Global.BACKPORT_S_NOTIF_RULES,
+                        DEFAULT_BACKPORT_S_NOTIF_RULES ? 1 : 0) == 1;
         }
     }
 }

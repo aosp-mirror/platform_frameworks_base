@@ -14541,6 +14541,20 @@ public final class Settings {
         public static final String SHOW_NEW_NOTIF_DISMISS = "show_new_notif_dismiss";
 
         /**
+         * Whether to enforce the new notification rules (aka rules that are only applied to
+         * notifications from apps targeting S) on all notifications.
+         * - Collapsed custom view notifications will get the new 76dp height instead of 106dp.
+         * - Custom view notifications will be partially decorated.
+         * - Large icons will be given an aspect ratio of up to 16:9.
+         *
+         * Values are:
+         * 0: Disabled (Only apps targeting S will receive the new rules)
+         * 1: Enabled (All apps will receive the new rules)
+         * @hide
+         */
+        public static final String BACKPORT_S_NOTIF_RULES = "backport_s_notif_rules";
+
+        /**
          * Block untrusted touches mode.
          *
          * Can be one of:
