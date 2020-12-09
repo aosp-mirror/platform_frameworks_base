@@ -1922,11 +1922,13 @@
     <string name="notification_appops_ok">OK</string>
 
     <!-- Notification Inline controls: describes how the notification was adjusted [CHAR_LIMIT=NONE] -->
-    <string name="feedback_silenced">This notification was silenced by the system.</string>
+    <string name="feedback_alerted">This notification was automatically &lt;b>promoted to Default&lt;/b> by the system.</string>
     <!-- Notification Inline controls: describes how the notification was adjusted [CHAR_LIMIT=NONE] -->
-    <string name="feedback_promoted">This notification was promoted by the system.</string>
+    <string name="feedback_silenced">This notification was automatically &lt;b>demoted to Silent&lt;/b> by the system.</string>
     <!-- Notification Inline controls: describes how the notification was adjusted [CHAR_LIMIT=NONE] -->
-    <string name="feedback_demoted">This notification was demoted by the system.</string>
+    <string name="feedback_promoted">This notification was automatically &lt;b>ranked higher&lt;/b> in your shade.</string>
+    <!-- Notification Inline controls: describes how the notification was adjusted [CHAR_LIMIT=NONE] -->
+    <string name="feedback_demoted">This notification was automatically &lt;b>ranked lower&lt;/b> in your shade.</string>
     <!-- Notification Inline controls: prompts the user for feedback [CHAR_LIMIT=NONE] -->
     <string name="feedback_prompt">Was this correct?</string>
     <!-- Notification Inline controls: responds to user provided feedback [CHAR_LIMIT=NONE] -->

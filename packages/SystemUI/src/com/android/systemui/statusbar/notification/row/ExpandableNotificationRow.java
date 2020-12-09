@@ -1672,12 +1672,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         requestLayout();
     }
 
-    public void showFeedbackIcon(boolean show) {
+    public void showFeedbackIcon(boolean show, int resId) {
         if (mIsSummaryWithChildren) {
-            mChildrenContainer.showFeedbackIcon(show);
+            mChildrenContainer.showFeedbackIcon(show, resId);
         }
-        mPrivateLayout.showFeedbackIcon(show);
-        mPublicLayout.showFeedbackIcon(show);
+        mPrivateLayout.showFeedbackIcon(show, resId);
+        mPublicLayout.showFeedbackIcon(show, resId);
     }
 
     /** Sets the last time the notification being displayed audibly alerted the user. */

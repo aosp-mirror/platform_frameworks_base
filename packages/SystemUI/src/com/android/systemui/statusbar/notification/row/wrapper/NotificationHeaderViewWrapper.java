@@ -29,6 +29,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -131,8 +132,11 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
 
     /** Shows or hides feedback indicator */
     @Override
-    public void showFeedbackIcon(boolean show) {
+    public void showFeedbackIcon(boolean show, int resId) {
         mFeedbackIcon.setVisibility(show ? View.VISIBLE : View.GONE);
+        if (show && mFeedbackIcon instanceof ImageButton) {
+            ((ImageButton) mFeedbackIcon).setImageResource(resId);
+        }
     }
 
     @Override
