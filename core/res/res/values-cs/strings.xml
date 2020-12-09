@@ -203,6 +203,7 @@
     <string name="gnss_service" msgid="8907781262179951385">"Služba GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Služba oznámení ze senzoru"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Služba detekce soumraku"</string>
+    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Detektor časového pásma (bez připojení)"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Zařízení bude vymazáno"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Aplikaci pro správu nelze použít. Zařízení teď bude vymazáno.\n\nV případě dotazů vám pomůže administrátor organizace."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Aplikace <xliff:g id="OWNER_APP">%s</xliff:g> tisk zakazuje."</string>
@@ -293,8 +294,7 @@
     <string name="notification_channel_usb" msgid="1528280969406244896">"Připojení USB"</string>
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Aplikace je spuštěna"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Aplikace spotřebovávají baterii"</string>
-    <!-- no translation found for notification_channel_accessibility_magnification (1707913872219798098) -->
-    <skip />
+    <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Zvětšení"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> využívá baterii"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"Aplikace (<xliff:g id="NUMBER">%1$d</xliff:g>) využívají baterii"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Klepnutím zobrazíte podrobnosti o využití baterie a dat"</string>
@@ -1282,7 +1282,7 @@
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Hlasitost oznámení"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Výchozí vyzvánění"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Výchozí (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="397111123930141876">"Žádný"</string>
+    <string name="ringtone_silent" msgid="397111123930141876">"Žádné"</string>
     <string name="ringtone_picker_title" msgid="667342618626068253">"Vyzvánění"</string>
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Zvuky budíku"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Zvuky upozornění"</string>
@@ -2258,12 +2258,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <!-- no translation found for window_magnification_prompt_title (8197528399699536320) -->
-    <skip />
-    <!-- no translation found for window_magnification_prompt_content (4166711383253283838) -->
-    <skip />
-    <!-- no translation found for turn_on_magnification_settings_action (8521433346684847700) -->
-    <skip />
-    <!-- no translation found for dismiss_action (1728820550388704784) -->
-    <skip />
+    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"Novinka: Zvětšení oken"</string>
+    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"Nyní můžete zvětšit celou obrazovku nebo její část"</string>
+    <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Zapnout v Nastavení"</string>
+    <string name="dismiss_action" msgid="1728820550388704784">"Zavřít"</string>
 </resources>

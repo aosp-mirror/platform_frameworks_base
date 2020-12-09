@@ -199,6 +199,7 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS-tjeneste"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Sensor Notification Service"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight Service"</string>
+    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Tidssoneoppdagelse (ingen tilkobling)"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Enheten blir slettet"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Administratorappen kan ikke brukes. Enheten din blir nå tømt.\n\nTa kontakt med administratoren for organisasjonen din hvis du har spørsmål."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> har slått av utskrift."</string>
@@ -287,8 +288,7 @@
     <string name="notification_channel_usb" msgid="1528280969406244896">"USB-tilkobling"</string>
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"App kjører"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Apper bruker batteri"</string>
-    <!-- no translation found for notification_channel_accessibility_magnification (1707913872219798098) -->
-    <skip />
+    <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Forstørring"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> bruker batteri"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> apper bruker batteri"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Trykk for detaljer om batteri- og databruk"</string>
@@ -1800,8 +1800,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Oppdatert av administratoren din"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Slettet av administratoren din"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"For å forlenge batterilevetiden gjør Batterisparing dette:\n\n• Slår på mørkt tema\n• Slår av eller begrenser bakgrunnsaktivitet, enkelte visuelle effekter og andre funksjoner, for eksempel «Hey Google»\n\n"<annotation id="url">"Finn ut mer"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"For å forlenge batterilevetiden gjør Batterisparing dette:\n\n• Slår på mørkt tema\n• Slår av eller begrenser bakgrunnsaktivitet, enkelte visuelle effekter og andre funksjoner, for eksempel «Hey Google»"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"For å forlenge batterilevetiden gjør Batterisparing dette:\n\n• slår på mørkt tema\n• slår av eller begrenser bakgrunnsaktivitet, enkelte visuelle effekter og andre funksjoner, for eksempel «Hey Google»\n\n"<annotation id="url">"Finn ut mer"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"For å forlenge batterilevetiden gjør Batterisparing dette:\n\n• slår på mørkt tema\n• slår av eller begrenser bakgrunnsaktivitet, enkelte visuelle effekter og andre funksjoner, for eksempel «Hey Google»"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Datasparing hindrer noen apper fra å sende og motta data i bakgrunnen, for å redusere dataforbruket. Aktive apper kan bruke data, men kanskje ikke så mye som ellers – for eksempel vises ikke bilder før du trykker på dem."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vil du slå på Datasparing?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Slå på"</string>
@@ -2190,12 +2190,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <!-- no translation found for window_magnification_prompt_title (8197528399699536320) -->
-    <skip />
-    <!-- no translation found for window_magnification_prompt_content (4166711383253283838) -->
-    <skip />
-    <!-- no translation found for turn_on_magnification_settings_action (8521433346684847700) -->
-    <skip />
-    <!-- no translation found for dismiss_action (1728820550388704784) -->
-    <skip />
+    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"Nytt: vindusforstørrer"</string>
+    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"Nå kan du forstørre deler av eller hele skjermen"</string>
+    <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Slå på i innstillingene"</string>
+    <string name="dismiss_action" msgid="1728820550388704784">"Avvis"</string>
 </resources>

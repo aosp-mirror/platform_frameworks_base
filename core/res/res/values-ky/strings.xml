@@ -199,6 +199,7 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS кызматы"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Сенсордун билдирмелеринин кызматы"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight кызматы"</string>
+    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Убакыт алкагын аныктагыч (байланыш жок)"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Түзмөгүңүз тазаланат"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Түзмөктү башкаруучу колдонмо жараксыз. Түзмөгүңүз азыр тазаланат.\n\nСуроолоруңуз болсо, ишканаңыздын администраторуна кайрылыңыз."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Басып чыгаруу <xliff:g id="OWNER_APP">%s</xliff:g> тарабынан өчүрүлдү."</string>
@@ -287,8 +288,7 @@
     <string name="notification_channel_usb" msgid="1528280969406244896">"USB аркылуу туташуу"</string>
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Колдонмо иштеп жатат"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Колдонмолор батареяңызды коротууда"</string>
-    <!-- no translation found for notification_channel_accessibility_magnification (1707913872219798098) -->
-    <skip />
+    <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Чоңойтуу"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосу батареяны пайдаланып жатат"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> колдонмо батареяны пайдаланып жатат"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Батареянын кубаты жана трафиктин көлөмү жөнүндө билүү үчүн таптап коюңуз"</string>
@@ -1800,8 +1800,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Администраторуңуз жаңыртып койгон"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Администраторуңуз жок кылып салган"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ЖАРАЙТ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Батареянын мөөнөтүн узартуу үчүн Батареяны үнөмдөгүч режими төмөнкүлөрдү аткарат:\n\n• Караңгы теманы күйгүзөт\n• Фондогу аракеттерди, айрым визуалдык эффекттерди жана \"Окей Google\" сыяктуу башка функцияларды өчүрөт же чектейт\n\n"<annotation id="url">"Кеңири маалымат"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Батареянын мөөнөтүн узартуу үчүн Батареяны үнөмдөгүч режими:\n\n• Караңгы теманы күйгүзөт\n• Фондогу аракеттерди, айрым визуалдык эффекттерди жана \"Окей Google\" сыяктуу башка функцияларды өчүрөт же чектейт"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Батареяны көбүрөөк убакытка жеткирүү үчүн Батареяны үнөмдөгүч режиминде:\n\n• Караңгы тема күйгүзүлөт\n• Фондогу аракеттерди, айрым визуалдык эффекттерди жана \"Окей Google\" сыяктуу башка функцияларды өчүрөт же чектейт\n\n"<annotation id="url">"Кеңири маалымат"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Батареяны көбүрөөк убакытка жеткирүү үчүн Батареяны үнөмдөгүч режими:\n\n• Караңгы тема күйгүзүлөт\n• Фондогу аракеттерди, айрым визуалдык эффекттерди жана \"Окей Google\" сыяктуу башка функцияларды өчүрөт же чектейт"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Трафикти үнөмдөө режиминде айрым колдонмолор дайын-даректерди фондо өткөрө алышпайт. Учурда сиз пайдаланып жаткан колдонмо дайын-даректерди жөнөтүп/ала алат, бирок адаттагыдан азыраак өткөргөндүктөн, анын айрым функциялары талаптагыдай иштебей коюшу мүмкүн. Мисалы, сүрөттөр басылмайынча жүктөлбөйт."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Трафикти үнөмдөө режимин иштетесизби?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Күйгүзүү"</string>
@@ -2190,12 +2190,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <!-- no translation found for window_magnification_prompt_title (8197528399699536320) -->
-    <skip />
-    <!-- no translation found for window_magnification_prompt_content (4166711383253283838) -->
-    <skip />
-    <!-- no translation found for turn_on_magnification_settings_action (8521433346684847700) -->
-    <skip />
-    <!-- no translation found for dismiss_action (1728820550388704784) -->
-    <skip />
+    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"Жаңы функция: Терезе чоңойткуч"</string>
+    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"Эми толук экранды же анын бөлүгүн чоңойто аласыз"</string>
+    <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Жөндөөлөрдөн күйгүзүү"</string>
+    <string name="dismiss_action" msgid="1728820550388704784">"Жабуу"</string>
 </resources>
