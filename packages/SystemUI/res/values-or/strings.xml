@@ -83,6 +83,7 @@
     <string name="screenshot_saved_title" msgid="8893267638659083153">"ସ୍କ୍ରୀନଶଟ୍ ସେଭ୍ ହୋଇଛି"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"ସ୍କ୍ରୀନଶଟ୍‍ ଦେଖିବା ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"ସ୍କ୍ରୀନ୍‍ଶଟ୍ ସେଭ୍ କରିହେବ ନାହିଁ"</string>
+    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"ସ୍କ୍ରିନସଟ୍ ସେଭ୍ କରିବା ପୂର୍ବରୁ ଡିଭାଇସକୁ ଅନଲକ୍ କରାଯିବା ଆବଶ୍ୟକ"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"ପୁଣିଥରେ ସ୍କ୍ରୀନ୍‌ଶଟ୍ ନେବାକୁ ଚେଷ୍ଟା କରନ୍ତୁ"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"ସୀମିତ ଷ୍ଟୋରେଜ୍‍ ସ୍ପେସ୍‍ ହେତୁ ସ୍କ୍ରୀନଶଟ୍‍ ସେଭ୍‍ ହୋଇପାରିବ ନାହିଁ"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ଆପ୍‍ କିମ୍ବା ସଂସ୍ଥା ଦ୍ୱାରା ସ୍କ୍ରୀନଶଟ୍‍ ନେବାକୁ ଅନୁମତି ଦିଆଯାଇ ନାହିଁ"</string>
@@ -935,7 +936,7 @@
     <string name="notification_channel_general" msgid="4384774889645929705">"ସାଧାରଣ ମେସେଜ୍"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"ଷ୍ଟୋରେଜ୍‌"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"ହିଣ୍ଟ"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"ଇନଷ୍ଟାଣ୍ଟ ଆପ୍‌"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> ଚାଲୁଛି"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ଇନ୍‍ଷ୍ଟଲ୍‍ ନହୋଇ ଆପ୍‍ ଖୋଲିଛି।"</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"ଇନ୍‍ଷ୍ଟଲ୍‍ ନହୋଇ ଆପ୍‍ ଖୋଲିଛି। ଅଧିକ ଜାଣିବା ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ।"</string>

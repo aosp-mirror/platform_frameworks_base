@@ -83,6 +83,7 @@
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Το στιγμιότυπο οθόνης αποθηκεύτηκε"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"Πατήστε για να δείτε το στιγμιότυπο οθόνης που δημιουργήσατε"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Μη δυνατή αποθήκευση του στιγμιότυπου οθόνης"</string>
+    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Η συσκευή πρέπει να ξεκλειδωθεί για να αποθηκευτεί το στιγμιότυπο οθόνης."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Δοκιμάστε να κάνετε ξανά λήψη του στιγμιότυπου οθόνης"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Αδύνατη η αποθήκευση του στιγμιότυπου οθόνης λόγω περιορισμένου αποθηκευτικού χώρου"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Η λήψη στιγμιότυπων οθόνης δεν επιτρέπεται από την εφαρμογή ή τον οργανισμό σας"</string>

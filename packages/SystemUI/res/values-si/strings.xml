@@ -83,6 +83,7 @@
     <string name="screenshot_saved_title" msgid="8893267638659083153">"තිර රුව සුරකින ලදී"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"ඔබගේ තිර රුව බැලීමට තට්ටු කරන්න"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"තිර රුව සුරැකිය නොහැකි විය"</string>
+    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"තිර රුව සුරැකීමට පෙර උපාංගය අගුලු හැරිය යුතුය"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"තිර රුව නැවත ගැනීමට උත්සාහ කරන්න"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"සීමිත ගබඩා ඉඩ නිසා තිර රුව සුරැකිය නොහැකිය"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"තිර රූ ගැනීමට යෙදුම හෝ ඔබගේ සංවිධානය ඉඩ නොදේ"</string>

@@ -83,6 +83,7 @@
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Skrinshot saqlandi"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"Skrinshotni ochish uchun bosing"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Skrinshot saqlanmadi"</string>
+    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Skrinshotni saqlashdan oldin qurilma qulflanmagan boʻlishi lozim"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Qayta skrinshot olib ko‘ring"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Xotirada joy kamligi uchun skrinshot saqlanmadi"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Ilova yoki tashkilotingiz skrinshot olishni taqiqlagan"</string>
@@ -778,7 +779,7 @@
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"Batareya sarfi"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Quvvat tejash rejimidan quvvatlash vaqtida foydalanib bo‘lmaydi"</string>
-    <string name="battery_detail_switch_title" msgid="6940976502957380405">"Quvvat tejash rejimi"</string>
+    <string name="battery_detail_switch_title" msgid="6940976502957380405">"Quvvat tejash"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Unumdorlik pasayadi va fonda internetdan foydalanish cheklanadi"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g> tugmasi"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Bosh ekran"</string>

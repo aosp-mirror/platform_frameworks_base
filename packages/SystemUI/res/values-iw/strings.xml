@@ -83,6 +83,7 @@
     <string name="screenshot_saved_title" msgid="8893267638659083153">"צילום המסך נשמר"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"אפשר להקיש כדי להציג את צילום המסך"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"לא ניתן היה לשמור צילום מסך"</string>
+    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"כדי שצילום המסך יישמר, צריך לבטל את הנעילה של המכשיר"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"יש לנסות שוב לבצע צילום מסך"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"לא היה מספיק מקום לשמור את צילום המסך"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"האפליקציה או הארגון שלך אינם מתירים ליצור צילומי מסך"</string>
