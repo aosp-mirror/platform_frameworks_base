@@ -54,6 +54,7 @@ java_defaults {
         "SettingsLibEmergencyNumber",
         "SettingsLibTopIntroPreference",
         "SettingsLibBannerMessagePreference",
+        "SettingsLibFooterPreference",
     ],
 }
 

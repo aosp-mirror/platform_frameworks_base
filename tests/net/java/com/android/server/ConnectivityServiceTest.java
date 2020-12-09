@@ -1958,6 +1958,57 @@ public class ConnectivityServiceTest {
     }
 
     @Test
+    public void testOwnerUidChangeBug() throws Exception {
+        // Owner UIDs are not visible without location permission.
+        setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_FINE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION);
+
+        final NetworkCapabilities ncTemplate = new NetworkCapabilities();
+        final int originalOwnerUid = Process.myUid();
+        ncTemplate.setOwnerUid(originalOwnerUid);
+
+        mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI, new LinkProperties(),
+                ncTemplate);
+        mWiFiNetworkAgent.connect(false);
+        waitForIdle();
+
+        // Send ConnectivityService an update to the mWiFiNetworkAgent's capabilities that changes
+        // its owner UID.
+        NetworkCapabilities agentCapabilities = mWiFiNetworkAgent.getNetworkCapabilities();
+        assertEquals(originalOwnerUid, agentCapabilities.getOwnerUid());
+        agentCapabilities.setOwnerUid(42);
+        mWiFiNetworkAgent.setNetworkCapabilities(agentCapabilities, true);
+        waitForIdle();
+
+        // Check that the owner UID is not updated.
+        NetworkCapabilities nc = mCm.getNetworkCapabilities(mWiFiNetworkAgent.getNetwork());
+        assertEquals(originalOwnerUid, nc.getOwnerUid());
+
+        // Make an unrelated change to the capabilities.
+        assertFalse(agentCapabilities.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
+        agentCapabilities.addCapability(NET_CAPABILITY_NOT_CONGESTED);
+        mWiFiNetworkAgent.setNetworkCapabilities(agentCapabilities, true);
+        waitForIdle();
+
+        // Check that both the capability change and the owner UID have been modified.
+        // The owner UID is -1 because it is visible only to the UID that owns the network.
+        nc = mCm.getNetworkCapabilities(mWiFiNetworkAgent.getNetwork());
+        assertEquals(-1, nc.getOwnerUid());
+        assertTrue(nc.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
+
+        // Set the owner back to originalOwnerUid, update the capabilities, and check that it is
+        // visible again.
+        // TODO: should this even be possible?
+        agentCapabilities.setOwnerUid(originalOwnerUid);
+        agentCapabilities.removeCapability(NET_CAPABILITY_NOT_CONGESTED);
+        mWiFiNetworkAgent.setNetworkCapabilities(agentCapabilities, true);
+        waitForIdle();
+
+        nc = mCm.getNetworkCapabilities(mWiFiNetworkAgent.getNetwork());
+        assertEquals(originalOwnerUid, nc.getOwnerUid());
+    }
+
+    @Test
     public void testMultipleLingering() throws Exception {
         // This test would be flaky with the default 120ms timer: that is short enough that
         // lingered networks are torn down before assertions can be run. We don't want to mock the

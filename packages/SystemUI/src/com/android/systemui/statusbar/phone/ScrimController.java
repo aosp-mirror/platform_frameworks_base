@@ -125,11 +125,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
      */
     public static final float BUSY_SCRIM_ALPHA = 1f;
 
-    /**
-     * Same as above, but when blur is supported.
-     */
-    public static final float BLUR_SCRIM_ALPHA = 0.80f;
-
     static final int TAG_KEY_ANIM = R.id.scrim;
     private static final int TAG_START_ALPHA = R.id.scrim_alpha_start;
     private static final int TAG_END_ALPHA = R.id.scrim_alpha_end;
@@ -161,6 +156,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
     // Assuming the shade is expanded during initialization
     private float mExpansionFraction = 1f;
+    private float mQsExpansion;
 
     private boolean mDarkenWhileDragging;
     private boolean mExpansionAffectsAlpha = true;
@@ -206,8 +202,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             BlurUtils blurUtils, ConfigurationController configurationController) {
 
         mScrimStateListener = lightBarController::setScrimState;
-        mDefaultScrimAlpha = blurUtils.supportsBlursOnWindows()
-                ? BLUR_SCRIM_ALPHA : BUSY_SCRIM_ALPHA;
+        mDefaultScrimAlpha = BUSY_SCRIM_ALPHA;
         mBlurUtils = blurUtils;
 
         mKeyguardStateController = keyguardStateController;
@@ -464,6 +459,31 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
             boolean relevantState = (mState == ScrimState.UNLOCKED
                     || mState == ScrimState.KEYGUARD
+                    || mState == ScrimState.SHADE_LOCKED
+                    || mState == ScrimState.PULSING
+                    || mState == ScrimState.BUBBLE_EXPANDED);
+            if (!(relevantState && mExpansionAffectsAlpha)) {
+                return;
+            }
+            applyAndDispatchExpansion();
+        }
+    }
+
+    /**
+     * Current state of the QuickSettings expansion when pulling it from the top.
+     *
+     * @param fraction From 0 to 1 where 0 means collapsed and 1 expanded.
+     */
+    public void setQsExpansion(float fraction) {
+        if (isNaN(fraction)) {
+            return;
+        }
+        if (mQsExpansion != fraction) {
+            mQsExpansion = fraction;
+            Log.d(TAG, "set qs fraction");
+
+            boolean relevantState = (mState == ScrimState.SHADE_LOCKED
+                    || mState == ScrimState.KEYGUARD
                     || mState == ScrimState.PULSING
                     || mState == ScrimState.BUBBLE_EXPANDED);
             if (!(relevantState && mExpansionAffectsAlpha)) {
@@ -506,7 +526,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             behindFraction = (float) Math.pow(behindFraction, 0.8f);
             mBehindAlpha = behindFraction * mDefaultScrimAlpha;
             mInFrontAlpha = 0;
-        } else if (mState == ScrimState.KEYGUARD || mState == ScrimState.PULSING) {
+        } else if (mState == ScrimState.KEYGUARD || mState == ScrimState.SHADE_LOCKED
+                || mState == ScrimState.PULSING) {
             // Either darken of make the scrim transparent when you
             // pull down the shade
             float interpolatedFract = getInterpolatedFraction();
@@ -522,6 +543,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             }
             mBehindTint = ColorUtils.blendARGB(ScrimState.BOUNCER.getBehindTint(),
                     mState.getBehindTint(), interpolatedFract);
+            if (mQsExpansion > 0) {
+                mBehindAlpha = MathUtils.lerp(mBehindAlpha, mDefaultScrimAlpha, mQsExpansion);
+                mBehindTint = ColorUtils.blendARGB(mBehindTint,
+                        ScrimState.SHADE_LOCKED.getBehindTint(), mQsExpansion);
+            }
         }
         if (isNaN(mBehindAlpha) || isNaN(mInFrontAlpha)) {
             throw new IllegalStateException("Scrim opacity is NaN for state: " + mState

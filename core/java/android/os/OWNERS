@@ -16,7 +16,7 @@ per-file IPowerManager.aidl = michaelwr@google.com, santoscordon@google.com
 per-file PowerManager.java = michaelwr@google.com, santoscordon@google.com
 per-file PowerManagerInternal.java = michaelwr@google.com, santoscordon@google.com
 
-# Zygote
-per-file ZygoteProcess.java = calin@google.com, chriswailes@google.com, maco@google.com, narayan@google.com, ngeoffray@google.com
 
 per-file GraphicsEnvironment.java = chrisforbes@google.com, cnorthrop@google.com, lpy@google.com, timvp@google.com, zzyiwei@google.com
+
+per-file *Zygote* = file:/ZYGOTE_OWNERS

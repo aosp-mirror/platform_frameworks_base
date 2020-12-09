@@ -143,8 +143,6 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
     }
 
     public void showDeviceMonitoringDialog() {
-        mHost.collapsePanels();
-        // TODO: Delay dialog creation until after panels are collapsed.
         createDialog();
     }
 
@@ -291,6 +289,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         if (which == DialogInterface.BUTTON_NEGATIVE) {
             final Intent intent = new Intent(Settings.ACTION_ENTERPRISE_PRIVACY_SETTINGS);
             mDialog.dismiss();
+            // This dismisses the shade on opening the activity
             mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
         }
     }
@@ -605,6 +604,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         public void onClick(View widget) {
             final Intent intent = new Intent(Settings.ACTION_VPN_SETTINGS);
             mDialog.dismiss();
+            // This dismisses the shade on opening the activity
             mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
         }
 

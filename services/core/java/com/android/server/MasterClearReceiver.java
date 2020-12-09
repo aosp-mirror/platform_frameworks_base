@@ -25,7 +25,6 @@ import android.os.RecoverySystem;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Slog;
 import android.view.WindowManager;
 
@@ -59,6 +58,7 @@ public class MasterClearReceiver extends BroadcastReceiver {
                 .getString(com.android.internal.R.string.config_factoryResetPackage);
         if (Intent.ACTION_FACTORY_RESET.equals(intent.getAction())
                 && !TextUtils.isEmpty(factoryResetPackage)) {
+            Slog.i(TAG, "Re-directing intent to " + factoryResetPackage);
             intent.setPackage(factoryResetPackage).setComponent(null);
             context.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
             return;
@@ -77,9 +77,12 @@ public class MasterClearReceiver extends BroadcastReceiver {
             @Override
             public void run() {
                 try {
+                    Slog.i(TAG, "Calling RecoverySystem.rebootWipeUserData(context, "
+                            + "shutdown=" + shutdown + ", reason=" + reason
+                            + ", forceWipe=" + forceWipe + ", wipeEsims=" + mWipeEsims + ")");
                     RecoverySystem
                             .rebootWipeUserData(context, shutdown, reason, forceWipe, mWipeEsims);
-                    Log.wtf(TAG, "Still running after master clear?!");
+                    Slog.wtf(TAG, "Still running after master clear?!");
                 } catch (IOException e) {
                     Slog.e(TAG, "Can't perform master clear/factory reset", e);
                 } catch (SecurityException e) {
@@ -90,8 +93,10 @@ public class MasterClearReceiver extends BroadcastReceiver {
 
         if (mWipeExternalStorage) {
             // thr will be started at the end of this task.
+            Slog.i(TAG, "Wiping external storage on async task");
             new WipeDataTask(context, thr).execute();
         } else {
+            Slog.i(TAG, "NOT wiping external storage; starting thread " + thr.getName());
             thr.start();
         }
     }

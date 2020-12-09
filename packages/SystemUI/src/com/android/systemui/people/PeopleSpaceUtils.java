@@ -17,11 +17,17 @@
 package com.android.systemui.people;
 
 import android.app.INotificationManager;
+import android.app.PendingIntent;
 import android.app.people.ConversationChannel;
 import android.app.people.IPeopleManager;
 import android.app.people.PeopleSpaceTile;
+import android.appwidget.AppWidgetHost;
+import android.appwidget.AppWidgetManager;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.LauncherApps;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
@@ -29,17 +35,24 @@ import android.graphics.drawable.Drawable;
 import android.icu.text.MeasureFormat;
 import android.icu.util.Measure;
 import android.icu.util.MeasureUnit;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.ConversationChannelWrapper;
 import android.util.Log;
+import android.widget.RemoteViews;
+
+import androidx.preference.PreferenceManager;
 
 import com.android.systemui.R;
+import com.android.systemui.people.widget.LaunchConversationActivity;
+import com.android.systemui.people.widget.PeopleSpaceWidgetProvider;
 
 import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -57,14 +70,15 @@ public class PeopleSpaceUtils {
             Context context, INotificationManager notificationManager, IPeopleManager peopleManager,
             LauncherApps launcherApps)
             throws Exception {
-        boolean showAllConversations = Settings.Global.getInt(context.getContentResolver(),
-                Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0) == 0;
+        boolean showOnlyPriority = Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0) == 1;
         List<ConversationChannelWrapper> conversations = notificationManager.getConversations(
                 true).getList();
         List<Map.Entry<Long, PeopleSpaceTile>> tiles = getSortedTiles(peopleManager,
                 conversations.stream().map(c ->
                         new PeopleSpaceTile.Builder(c.getShortcutInfo(), launcherApps).build()));
-        if (showAllConversations) {
+        if (!showOnlyPriority) {
+            if (DEBUG) Log.d(TAG, "Add recent conversations");
             List<ConversationChannel> recentConversations =
                     peopleManager.getRecentConversations().getList();
             List<Map.Entry<Long, PeopleSpaceTile>> recentTiles =
@@ -75,6 +89,73 @@ public class PeopleSpaceUtils {
             tiles.addAll(recentTiles);
         }
         return tiles;
+    }
+
+    /** Updates {@code appWidgetIds} with their associated conversation stored. */
+    public static void updateSingleConversationWidgets(Context context, int[] appWidgetIds,
+            AppWidgetManager appWidgetManager, INotificationManager notificationManager) {
+        PackageManager mPackageManager = context.getPackageManager();
+        IPeopleManager mPeopleManager = IPeopleManager.Stub.asInterface(
+                ServiceManager.getService(Context.PEOPLE_SERVICE));
+        LauncherApps mLauncherApps = context.getSystemService(LauncherApps.class);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        Intent activityIntent = new Intent(context, LaunchConversationActivity.class);
+        activityIntent.addFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        | Intent.FLAG_ACTIVITY_NO_HISTORY
+                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        try {
+            List<Map.Entry<Long, PeopleSpaceTile>> shortcutInfos =
+                    PeopleSpaceUtils.getTiles(
+                            context, notificationManager,
+                            mPeopleManager, mLauncherApps);
+            for (int appWidgetId : appWidgetIds) {
+                RemoteViews views = new RemoteViews(context.getPackageName(),
+                        R.layout.people_space_widget_item);
+                String shortcutId = sp.getString(String.valueOf(appWidgetId), null);
+                if (DEBUG) {
+                    Log.d(TAG, "Set widget: " + appWidgetId + " with shortcut ID: " + shortcutId);
+                }
+
+                Optional<Map.Entry<Long, PeopleSpaceTile>> entry = shortcutInfos.stream().filter(
+                        e -> e.getValue().getId().equals(shortcutId)).findFirst();
+                if (!entry.isPresent() || shortcutId == null) {
+                    if (DEBUG) Log.d(TAG, "Matching conversation not found for shortcut ID");
+                    AppWidgetHost host = new AppWidgetHost(context, 0);
+                    host.deleteAppWidgetId(appWidgetId);
+                    continue;
+                }
+                PeopleSpaceTile tile = entry.get().getValue();
+
+                String status = PeopleSpaceUtils.getLastInteractionString(context,
+                        entry.get().getKey());
+                views.setTextViewText(R.id.status, status);
+                views.setTextViewText(R.id.name, tile.getUserName().toString());
+
+                activityIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_TILE_ID, tile.getId());
+                activityIntent.putExtra(
+                        PeopleSpaceWidgetProvider.EXTRA_PACKAGE_NAME, tile.getPackageName());
+                activityIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_UID, tile.getUid());
+                views.setOnClickPendingIntent(R.id.item, PendingIntent.getActivity(
+                        context,
+                        appWidgetId,
+                        activityIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE));
+
+                views.setImageViewBitmap(
+                        R.id.package_icon,
+                        PeopleSpaceUtils.convertDrawableToBitmap(
+                                mPackageManager.getApplicationIcon(tile.getPackageName())
+                        )
+                );
+                views.setImageViewIcon(R.id.person_icon, tile.getUserIcon());
+                // Tell the AppWidgetManager to perform an update on the current app widget.
+                appWidgetManager.updateAppWidget(appWidgetId, views);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to retrieve conversations to set tiles");
+        }
     }
 
     /** Returns a list sorted by ascending last interaction time from {@code stream}. */

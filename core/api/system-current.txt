@@ -4370,6 +4370,7 @@ package android.media {
     field public static final int PLAYER_STATE_STARTED = 2; // 0x2
     field public static final int PLAYER_STATE_STOPPED = 4; // 0x4
     field public static final int PLAYER_STATE_UNKNOWN = -1; // 0xffffffff
+    field public static final int PLAYER_TYPE_AAUDIO = 13; // 0xd
     field public static final int PLAYER_TYPE_JAM_AUDIOTRACK = 1; // 0x1
     field public static final int PLAYER_TYPE_JAM_MEDIAPLAYER = 2; // 0x2
     field public static final int PLAYER_TYPE_JAM_SOUNDPOOL = 3; // 0x3
@@ -5911,8 +5912,8 @@ package android.media.tv.tuner.frontend {
 
   public class DvbsFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
     method @NonNull public static android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder builder();
+    method public boolean canHandleDiseqcRxMessage();
     method @Nullable public android.media.tv.tuner.frontend.DvbsCodeRate getCodeRate();
-    method public boolean getCouldHandleDiseqcRxMessage();
     method public int getInputStreamId();
     method public int getModulation();
     method public int getPilot();
@@ -5964,8 +5965,8 @@ package android.media.tv.tuner.frontend {
 
   public static class DvbsFrontendSettings.Builder {
     method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings build();
+    method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setCanHandleDiseqcRxMessage(boolean);
     method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setCodeRate(@Nullable android.media.tv.tuner.frontend.DvbsCodeRate);
-    method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setCouldHandleDiseqcRxMessage(boolean);
     method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setFrequency(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setInputStreamId(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setModulation(int);

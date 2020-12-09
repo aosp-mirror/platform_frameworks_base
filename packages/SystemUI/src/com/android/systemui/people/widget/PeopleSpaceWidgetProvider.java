@@ -16,11 +16,14 @@
 
 package com.android.systemui.people.widget;
 
+import android.app.INotificationManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.os.ServiceManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -41,6 +44,14 @@ public class PeopleSpaceWidgetProvider extends AppWidgetProvider {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
 
         if (DEBUG) Log.d(TAG, "onUpdate called");
+        boolean showSingleConversation = Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0) == 0;
+        if (showSingleConversation) {
+            PeopleSpaceUtils.updateSingleConversationWidgets(context, appWidgetIds,
+                    appWidgetManager, INotificationManager.Stub.asInterface(
+                            ServiceManager.getService(Context.NOTIFICATION_SERVICE)));
+            return;
+        }
         // Perform this loop procedure for each App Widget that belongs to this provider
         for (int appWidgetId : appWidgetIds) {
             RemoteViews views =

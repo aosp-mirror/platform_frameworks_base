@@ -465,4 +465,12 @@ public class MediaDeviceTest {
         assertThat(mInfoMediaDevice1.getState()).isEqualTo(
                 LocalMediaManager.MediaDeviceState.STATE_CONNECTING_FAILED);
     }
+
+    @Test
+    public void getFeatures_noRouteInfo_returnEmptyList() {
+        mBluetoothMediaDevice1 = new BluetoothMediaDevice(mContext, mCachedDevice1,
+                mMediaRouter2Manager, null /* MediaRoute2Info */, TEST_PACKAGE_NAME);
+
+        assertThat(mBluetoothMediaDevice1.getFeatures().size()).isEqualTo(0);
+    }
 }
