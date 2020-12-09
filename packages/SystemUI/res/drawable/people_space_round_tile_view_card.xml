@@ -15,5 +15,5 @@
   -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <solid android:color="?android:attr/colorBackground" />
-    <corners android:radius="@dimen/people_space_widget_radius" />
+    <corners android:radius="@dimen/people_space_widget_round_radius" />
 </shape>

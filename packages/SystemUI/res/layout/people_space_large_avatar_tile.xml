@@ -16,48 +16,45 @@
   -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:padding="4dp"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="vertical">
     <LinearLayout
-        android:background="@drawable/people_space_tile_view_card"
+        android:background="@drawable/people_space_round_tile_view_card"
         android:id="@+id/item"
+        android:paddingVertical="6dp"
         android:orientation="vertical"
-        android:padding="4dp"
-        android:layout_marginBottom="2dp"
-        android:elevation="4dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:paddingStart="12dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <ImageView
-                android:id="@+id/person_icon"
-                android:layout_width="60dp"
-                android:layout_height="60dp" />
-
-            <LinearLayout
-                android:background="@drawable/people_space_rounded_border"
-                android:layout_marginStart="-12dp"
-                android:layout_marginTop="28dp"
-                android:layout_marginBottom="14dp"
-                android:layout_width="16dp"
-                android:layout_height="16dp">
+            android:layout_height="match_parent">
 
                 <ImageView
-                    android:id="@+id/package_icon"
-                    android:layout_width="12dp"
-                    android:layout_marginStart="2dp"
-                    android:layout_marginEnd="2dp"
-                    android:layout_marginBottom="2dp"
-                    android:layout_marginTop="2dp"
-                    android:layout_height="12dp" />
-            </LinearLayout>
+                    android:id="@+id/person_icon"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp" />
+
+                <LinearLayout
+                    android:background="@drawable/people_space_rounded_border"
+                    android:layout_marginStart="-12dp"
+                    android:layout_marginTop="28dp"
+                    android:layout_marginBottom="14dp"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp">
+
+                    <ImageView
+                        android:id="@+id/package_icon"
+                        android:layout_width="12dp"
+                        android:layout_marginStart="2dp"
+                        android:layout_marginEnd="2dp"
+                        android:layout_marginBottom="2dp"
+                        android:layout_marginTop="2dp"
+                        android:layout_height="12dp" />
+                </LinearLayout>
 
             <LinearLayout
                 android:orientation="vertical"
@@ -80,7 +77,7 @@
                     android:id="@+id/status"
                     android:textColor="?android:attr/textColorSecondary"
                     android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
-                    android:paddingVertical="2dp"
+                    android:paddingVertical="3dp"
                     android:textSize="12sp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
