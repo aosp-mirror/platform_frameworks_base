@@ -1156,7 +1156,11 @@ package android.net.wifi.rtt {
 
   public final class RangingRequest implements android.os.Parcelable {
     method public int describeContents();
+    method public static int getDefaultRttBurstSize();
     method public static int getMaxPeers();
+    method public static int getMaxRttBurstSize();
+    method public static int getMinRttBurstSize();
+    method public int getRttBurstSize();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.rtt.RangingRequest> CREATOR;
   }
@@ -1168,6 +1172,7 @@ package android.net.wifi.rtt {
     method public android.net.wifi.rtt.RangingRequest.Builder addWifiAwarePeer(@NonNull android.net.MacAddress);
     method public android.net.wifi.rtt.RangingRequest.Builder addWifiAwarePeer(@NonNull android.net.wifi.aware.PeerHandle);
     method public android.net.wifi.rtt.RangingRequest build();
+    method @NonNull public android.net.wifi.rtt.RangingRequest.Builder setRttBurstSize(int);
   }
 
   public final class RangingResult implements android.os.Parcelable {
