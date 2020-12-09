@@ -277,7 +277,7 @@ struct CanvasOp<CanvasOpType::DrawVertices> {
 template<>
 struct CanvasOp<CanvasOpType::DrawImage> {
 
-    CanvasOp<CanvasOpType::DrawImageRect>(
+    CanvasOp(
         const sk_sp<Bitmap>& bitmap,
         float left,
         float top,
@@ -303,7 +303,7 @@ struct CanvasOp<CanvasOpType::DrawImage> {
 template<>
 struct CanvasOp<CanvasOpType::DrawImageRect> {
 
-    CanvasOp<CanvasOpType::DrawImageRect>(
+    CanvasOp(
         const sk_sp<Bitmap>& bitmap,
         SkRect src,
         SkRect dst,
@@ -334,7 +334,7 @@ struct CanvasOp<CanvasOpType::DrawImageRect> {
 template<>
 struct CanvasOp<CanvasOpType::DrawImageLattice> {
 
-    CanvasOp<CanvasOpType::DrawImageLattice>(
+    CanvasOp(
         const sk_sp<Bitmap>& bitmap,
         SkRect dst,
         SkCanvas::Lattice lattice,

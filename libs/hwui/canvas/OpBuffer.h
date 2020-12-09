@@ -60,9 +60,8 @@ class OpBuffer {
         return (size + (Alignment - 1)) & -Alignment;
     }
 
-    static constexpr auto STARTING_SIZE = PadAlign(sizeof(BufferHeader));
-
 public:
+    static constexpr auto STARTING_SIZE = PadAlign(sizeof(BufferHeader));
     using ItemHeader = OpBufferItemHeader<ItemTypes>;
 
     OpBuffer() = default;
