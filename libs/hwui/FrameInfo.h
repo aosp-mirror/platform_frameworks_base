@@ -159,7 +159,7 @@ public:
         // GPU start time is approximated to the moment before swapBuffer is invoked.
         // We could add an EGLSyncKHR fence at the beginning of the frame, but that is an overhead.
         int64_t endTime = get(FrameInfoIndex::GpuCompleted);
-        return endTime > 0 ? endTime - get(FrameInfoIndex::SwapBuffers) : 0;
+        return endTime > 0 ? endTime - get(FrameInfoIndex::SwapBuffers) : -1;
     }
 
     inline int64_t& set(FrameInfoIndex index) { return mFrameInfo[static_cast<int>(index)]; }
