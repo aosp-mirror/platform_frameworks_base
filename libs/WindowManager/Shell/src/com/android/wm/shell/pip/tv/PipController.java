@@ -37,7 +37,6 @@ import android.content.IntentFilter;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.os.Debug;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -56,8 +55,6 @@ import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -87,42 +84,21 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     private static final int TASK_ID_NO_PIP = -1;
     private static final int INVALID_RESOURCE_TYPE = -1;
 
-    public static final int SUSPEND_PIP_RESIZE_REASON_WAITING_FOR_MENU_ACTIVITY_FINISH = 0x1;
-
-    /**
-     * PIPed activity is playing a media and it can be paused.
-     */
-    static final int PLAYBACK_STATE_PLAYING = 0;
-    /**
-     * PIPed activity has a paused media and it can be played.
-     */
-    static final int PLAYBACK_STATE_PAUSED = 1;
-    /**
-     * Users are unable to control PIPed activity's media playback.
-     */
-    static final int PLAYBACK_STATE_UNAVAILABLE = 2;
-
-    private static final int CLOSE_PIP_WHEN_MEDIA_SESSION_GONE_TIMEOUT_MS = 3000;
-
-    private int mSuspendPipResizingReason;
-
     private final Context mContext;
     private final PipBoundsState mPipBoundsState;
     private final PipBoundsAlgorithm mPipBoundsAlgorithm;
     private final PipTaskOrganizer mPipTaskOrganizer;
     private final PipMediaController mPipMediaController;
     private final TvPipMenuController mTvPipMenuController;
+    private final PipNotification mPipNotification;
 
     private IActivityTaskManager mActivityTaskManager;
     private int mState = STATE_NO_PIP;
-    private int mResumeResizePinnedStackRunnableState = STATE_NO_PIP;
     private final Handler mHandler = new Handler();
-    private List<Listener> mListeners = new ArrayList<>();
     private int mLastOrientation = Configuration.ORIENTATION_UNDEFINED;
     private int mPipTaskId = TASK_ID_NO_PIP;
     private int mPinnedStackId = INVALID_STACK_ID;
     private String[] mLastPackagesResourceGranted;
-    private PipNotification mPipNotification;
     private ParceledListSlice<RemoteAction> mCustomActions;
     private WindowManagerShellWrapper mWindowManagerShellWrapper;
     private int mResizeAnimationDuration;
@@ -135,9 +111,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     private boolean mImeVisible;
     private int mImeHeightAdjustment;
 
-    private final Runnable mResizePinnedStackRunnable =
-            () -> resizePinnedStack(mResumeResizePinnedStackRunnableState);
-    private final Runnable mClosePipRunnable = () -> closePip();
+    private final Runnable mClosePipRunnable = this::closePip;
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -236,8 +210,6 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         mPipTaskOrganizer = pipTaskOrganizer;
         mPipTaskOrganizer.registerPipTransitionCallback(this);
         mActivityTaskManager = ActivityTaskManager.getService();
-
-        addListener(mPipNotification);
 
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ACTION_CLOSE);
@@ -340,9 +312,8 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
                 mPinnedStackId = INVALID_STACK_ID;
             }
         }
-        for (int i = mListeners.size() - 1; i >= 0; --i) {
-            mListeners.get(i).onPipActivityClosed();
-        }
+        mPipNotification.dismiss();
+        mTvPipMenuController.hideMenu();
         mHandler.removeCallbacks(mClosePipRunnable);
     }
 
@@ -353,9 +324,9 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         if (DEBUG) Log.d(TAG, "movePipToFullscreen(), current state=" + getStateDescription());
 
         mPipTaskId = TASK_ID_NO_PIP;
-        for (int i = mListeners.size() - 1; i >= 0; --i) {
-            mListeners.get(i).onMoveToFullscreen();
-        }
+        mTvPipMenuController.hideMenu();
+        mPipNotification.dismiss();
+
         resizePinnedStack(STATE_NO_PIP);
     }
 
@@ -379,9 +350,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         // Set state to STATE_PIP so we show it when the pinned stack animation ends.
         mState = STATE_PIP;
         mPipMediaController.onActivityPinned();
-        for (int i = mListeners.size() - 1; i >= 0; i--) {
-            mListeners.get(i).onPipEntered(packageName);
-        }
+        mPipNotification.show(packageName);
     }
 
     private void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
@@ -428,61 +397,17 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     }
 
     /**
-     * Suspends resizing operation on the Pip until {@link #resumePipResizing} is called
-     *
-     * @param reason The reason for suspending resizing operations on the Pip.
-     */
-    public void suspendPipResizing(int reason) {
-        if (DEBUG) {
-            Log.d(TAG,
-                    "suspendPipResizing() reason=" + reason + " callers=" + Debug.getCallers(2));
-        }
-        mSuspendPipResizingReason |= reason;
-    }
-
-    /**
-     * Resumes resizing operation on the Pip that was previously suspended.
-     *
-     * @param reason The reason resizing operations on the Pip was suspended.
-     */
-    public void resumePipResizing(int reason) {
-        if ((mSuspendPipResizingReason & reason) == 0) {
-            return;
-        }
-        if (DEBUG) {
-            Log.d(TAG,
-                    "resumePipResizing() reason=" + reason + " callers=" + Debug.getCallers(2));
-        }
-        mSuspendPipResizingReason &= ~reason;
-        mHandler.post(mResizePinnedStackRunnable);
-    }
-
-    /**
      * Resize the Pip to the appropriate size for the input state.
      *
      * @param state In Pip state also used to determine the new size for the Pip.
      */
     public void resizePinnedStack(int state) {
-
         if (DEBUG) {
             Log.d(TAG, "resizePinnedStack() state=" + stateToName(state) + ", current state="
                     + getStateDescription(), new Exception());
         }
-
-        boolean wasStateNoPip = (mState == STATE_NO_PIP);
-        for (int i = mListeners.size() - 1; i >= 0; --i) {
-            mListeners.get(i).onPipResizeAboutToStart();
-        }
-        if (mSuspendPipResizingReason != 0) {
-            mResumeResizePinnedStackRunnableState = state;
-            if (DEBUG) {
-                Log.d(TAG, "resizePinnedStack() deferring"
-                        + " mSuspendPipResizingReason=" + mSuspendPipResizingReason
-                        + " mResumeResizePinnedStackRunnableState="
-                        + stateToName(mResumeResizePinnedStackRunnableState));
-            }
-            return;
-        }
+        final boolean wasStateNoPip = (mState == STATE_NO_PIP);
+        mTvPipMenuController.hideMenu();
         mState = state;
         final Rect newBounds;
         switch (mState) {
@@ -510,42 +435,17 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     }
 
     /**
-     * @return the current state, or the pending state if the state change was previously suspended.
+     * @return the current state.
      */
     private int getState() {
-        if (mSuspendPipResizingReason != 0) {
-            return mResumeResizePinnedStackRunnableState;
-        }
         return mState;
     }
 
-    /**
-     * Shows PIP menu UI by launching {@link PipMenuActivity}. It also locates the pinned
-     * stack to the centered PIP bound {@link R.config_centeredPictureInPictureBounds}.
-     */
     private void showPipMenu() {
         if (DEBUG) Log.d(TAG, "showPipMenu(), current state=" + getStateDescription());
 
         mState = STATE_PIP_MENU;
-        for (int i = mListeners.size() - 1; i >= 0; --i) {
-            mListeners.get(i).onShowPipMenu();
-        }
-
         mTvPipMenuController.showMenu();
-    }
-
-    /**
-     * Adds a {@link Listener} to PipController.
-     */
-    void addListener(Listener listener) {
-        mListeners.add(listener);
-    }
-
-    /**
-     * Removes a {@link Listener} from PipController.
-     */
-    void removeListener(Listener listener) {
-        mListeners.remove(listener);
     }
 
     /**
@@ -619,33 +519,8 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         }
     }
 
-    /**
-     * A listener interface to receive notification on changes in PIP.
-     */
-    public interface Listener {
-        /**
-         * Invoked when an activity is pinned and PIP manager is set corresponding information.
-         * Classes must use this instead of {@link android.app.ITaskStackListener.onActivityPinned}
-         * because there's no guarantee for the PIP manager be return relavent information
-         * correctly. (e.g. {@link Pip.isPipShown}).
-         */
-        void onPipEntered(String packageName);
-        /** Invoked when a PIPed activity is closed. */
-        void onPipActivityClosed();
-        /** Invoked when the PIP menu gets shown. */
-        void onShowPipMenu();
-        /** Invoked when the PIPed activity is about to return back to the fullscreen. */
-        void onMoveToFullscreen();
-        /** Invoked when we are above to start resizing the Pip. */
-        void onPipResizeAboutToStart();
-    }
-
     private String getStateDescription() {
-        if (mSuspendPipResizingReason == 0) {
-            return stateToName(mState);
-        }
-        return stateToName(mResumeResizePinnedStackRunnableState) + " (while " + stateToName(mState)
-                + " is suspended)";
+        return stateToName(mState);
     }
 
     private static String stateToName(int state) {
