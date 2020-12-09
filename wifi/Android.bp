@@ -43,6 +43,7 @@ filegroup {
     srcs: [
         ":framework-wifi-updatable-java-sources",
         ":framework-wifi-updatable-exported-aidl-sources",
+        ":module-utils-os-aidls",
     ],
 }
 
@@ -85,13 +86,14 @@ java_defaults {
         "framework-wifi-util-lib",
         "android.hardware.wifi-V1.0-java-constants",
         "modules-utils-build",
+        "modules-utils-os",
     ],
     libs: [
         "unsupportedappusage", // for android.compat.annotation.UnsupportedAppUsage
     ],
     srcs: [
         ":framework-wifi-updatable-sources",
-        ":framework-wifi-util-lib-aidls",
+        ":module-utils-os-aidls",
     ],
 }
 
