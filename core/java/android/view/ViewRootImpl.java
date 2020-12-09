@@ -581,9 +581,6 @@ public final class ViewRootImpl implements ViewParent,
             = new ViewTreeObserver.InternalInsetsInfo();
 
     private WindowInsets mLastWindowInsets;
-    private final Rect mSystemInsetsCache = new Rect();
-    private final Rect mVisibleInsetsCache = new Rect();
-    private final Rect mStableInsetsCache = new Rect();
 
     // Insets types hidden by legacy window flags or system UI flags.
     private @InsetsType int mTypesHiddenByFlags = 0;
@@ -2340,9 +2337,9 @@ public final class ViewRootImpl implements ViewParent,
                     (mWindowAttributes.systemUiVisibility
                             | mWindowAttributes.subtreeSystemUiVisibility));
 
-            mSystemInsetsCache.set(mLastWindowInsets.getSystemWindowInsets().toRect());
-            mStableInsetsCache.set(mLastWindowInsets.getStableInsets().toRect());
-            mVisibleInsetsCache.set(mInsetsController.calculateVisibleInsets(
+            mAttachInfo.mContentInsets.set(mLastWindowInsets.getSystemWindowInsets().toRect());
+            mAttachInfo.mStableInsets.set(mLastWindowInsets.getStableInsets().toRect());
+            mAttachInfo.mVisibleInsets.set(mInsetsController.calculateVisibleInsets(
                     mWindowAttributes.softInputMode));
         }
         return mLastWindowInsets;
@@ -2845,7 +2842,7 @@ public final class ViewRootImpl implements ViewParent,
                                         && mWinFrame.height() == mPendingBackDropFrame.height();
                         // TODO: Need cutout?
                         startDragResizing(mPendingBackDropFrame, !backdropSizeMatchesFrame,
-                                mSystemInsetsCache, mStableInsetsCache, mResizeMode);
+                                mAttachInfo.mContentInsets, mAttachInfo.mStableInsets, mResizeMode);
                     } else {
                         // We shouldn't come here, but if we come we should end the resize.
                         endDragResizing();
@@ -4469,8 +4466,8 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     boolean scrollToRectOrFocus(Rect rectangle, boolean immediate) {
-        final Rect ci = mSystemInsetsCache;
-        final Rect vi = mVisibleInsetsCache;
+        final Rect ci = mAttachInfo.mContentInsets;
+        final Rect vi = mAttachInfo.mVisibleInsets;
         int scrollY = 0;
         boolean handled = false;
 
@@ -7566,7 +7563,7 @@ public final class ViewRootImpl implements ViewParent,
         // XXX This is really broken, and probably all needs to be done
         // in the window manager, and we need to know more about whether
         // we want the area behind or in front of the IME.
-        final Rect insets = mVisibleInsetsCache;
+        final Rect insets = mAttachInfo.mVisibleInsets;
         outFrame.left += insets.left;
         outFrame.top += insets.top;
         outFrame.right -= insets.right;
@@ -7904,7 +7901,7 @@ public final class ViewRootImpl implements ViewParent,
             synchronized (mWindowCallbacks) {
                 for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
                     mWindowCallbacks.get(i).onWindowSizeIsChanging(backDropFrame, fullscreen,
-                            mVisibleInsetsCache, mStableInsetsCache);
+                            mAttachInfo.mVisibleInsets, mAttachInfo.mStableInsets);
                 }
             }
         }
