@@ -17225,8 +17225,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     throw new SecurityException("Shell can delegate permissions only "
                             + "to one instrumentation at a time");
                 }
-                delegate.setPermissions(permissions);
-                return;
             }
 
             final int instrCount = mActiveInstrumentation.size();
@@ -17269,7 +17267,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private class ShellDelegate implements CheckOpsDelegate {
         private final int mTargetUid;
-        private @Nullable String[] mPermissions;
+        @Nullable
+        private final String[] mPermissions;
 
         ShellDelegate(int targetUid, @Nullable String[] permissions) {
             mTargetUid = targetUid;
@@ -17278,11 +17277,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         int getDelegateUid() {
             return mTargetUid;
-        }
-
-        void setPermissions(@Nullable String[] permissions) {
-            mPermissions = permissions;
-            PackageManager.invalidatePackageInfoCache();
         }
 
         @Override
