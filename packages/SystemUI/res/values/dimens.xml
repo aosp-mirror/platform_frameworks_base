@@ -1356,6 +1356,16 @@
     <dimen name="people_space_image_radius">20dp</dimen>
     <dimen name="people_space_widget_background_padding">6dp</dimen>
 
+    <!-- Accessibility floating menu -->
+    <dimen name="accessibility_floating_menu_elevation">5dp</dimen>
+    <dimen name="accessibility_floating_menu_stroke_width">1dp</dimen>
+    <dimen name="accessibility_floating_menu_stroke_inset">-2dp</dimen>
+    <dimen name="accessibility_floating_menu_margin">16dp</dimen>
+    <dimen name="accessibility_floating_menu_padding">6dp</dimen>
+    <dimen name="accessibility_floating_menu_width_height">36dp</dimen>
+    <dimen name="accessibility_floating_menu_single_radius">25dp</dimen>
+    <dimen name="accessibility_floating_menu_multiple_radius">20dp</dimen>
+
     <dimen name="rounded_slider_height">44dp</dimen>
     <!-- rounded_slider_height / 2 -->
     <dimen name="rounded_slider_corner_radius">22dp</dimen>
