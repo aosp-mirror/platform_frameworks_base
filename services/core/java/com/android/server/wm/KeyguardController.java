@@ -594,16 +594,8 @@ class KeyguardController {
          */
         @Nullable
         private Task getRootTaskForControllingOccluding(DisplayContent display) {
-            return display.getItemFromTaskDisplayAreas(taskDisplayArea -> {
-                for (int sNdx = taskDisplayArea.getRootTaskCount() - 1; sNdx >= 0; --sNdx) {
-                    final Task task = taskDisplayArea.getRootTaskAt(sNdx);
-                    if (task != null && task.isFocusableAndVisible()
-                            && !task.inPinnedWindowingMode()) {
-                        return task;
-                    }
-                }
-                return null;
-            });
+            return display.getRootTask(task ->
+                    task != null && task.isFocusableAndVisible() && !task.inPinnedWindowingMode());
         }
 
         void dumpStatus(PrintWriter pw, String prefix) {

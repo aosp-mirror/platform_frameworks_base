@@ -512,11 +512,8 @@ public class ActivityStarterTests extends WindowTestsBase {
     }
 
     private void assertNoTasks(DisplayContent display) {
-        display.forAllTaskDisplayAreas(taskDisplayArea -> {
-            for (int sNdx = taskDisplayArea.getRootTaskCount() - 1; sNdx >= 0; --sNdx) {
-                final Task stack = taskDisplayArea.getRootTaskAt(sNdx);
-                assertFalse(stack.hasChild());
-            }
+        display.forAllRootTasks(stack -> {
+            assertFalse(stack.hasChild());
         });
     }
 
