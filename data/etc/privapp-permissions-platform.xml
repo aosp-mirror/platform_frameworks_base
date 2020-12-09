@@ -210,6 +210,7 @@ applications that come with the platform
 
     <privapp-permissions package="com.android.providers.contacts">
         <permission name="android.permission.BIND_DIRECTORY_SEARCH"/>
+        <permission name="android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST"/>
         <permission name="android.permission.GET_ACCOUNTS_PRIVILEGED"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.MANAGE_USERS"/>
