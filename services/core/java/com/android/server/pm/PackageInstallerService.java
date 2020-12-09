@@ -532,6 +532,20 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                     + "to use a data loader");
         }
 
+        // INSTALL_REASON_ROLLBACK allows an app to be rolled back without requiring the ROLLBACK
+        // capability; ensure if this is set as the install reason the app has one of the necessary
+        // signature permissions to perform the rollback.
+        if (params.installReason == PackageManager.INSTALL_REASON_ROLLBACK) {
+            if (mContext.checkCallingOrSelfPermission(Manifest.permission.MANAGE_ROLLBACKS)
+                    != PackageManager.PERMISSION_GRANTED &&
+                    mContext.checkCallingOrSelfPermission(Manifest.permission.TEST_MANAGE_ROLLBACKS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException(
+                        "INSTALL_REASON_ROLLBACK requires the MANAGE_ROLLBACKS permission or the "
+                                + "TEST_MANAGE_ROLLBACKS permission");
+            }
+        }
+
         // App package name and label length is restricted so that really long strings aren't
         // written to disk.
         if (params.appPackageName != null
