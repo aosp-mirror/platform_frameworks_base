@@ -34,7 +34,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
@@ -753,18 +752,6 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             }
 
             dumpOutputStream.flush();
-        }
-
-        private int getUidForPackage(String packageName) {
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                return getContext().getPackageManager().getApplicationInfo(packageName,
-                        PackageManager.MATCH_ANY_USER).uid;
-            } catch (NameNotFoundException nnfe) {
-                return -1;
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
         }
     }
 

@@ -27,7 +27,6 @@ import android.accounts.IAccountManager;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.role.IRoleManager;
 import android.app.role.RoleManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -80,7 +79,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.AutoCloseInputStream;
 import android.os.PersistableBundle;
 import android.os.Process;
-import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
@@ -106,6 +104,7 @@ import com.android.internal.content.PackageHelper;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
+import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.pm.PackageManagerShellCommandDataLoader.Metadata;
@@ -2971,12 +2970,10 @@ class PackageManagerShellCommand extends ShellCommand {
         final int translatedUserId =
                 translateUserId(userId, UserHandle.USER_NULL, "runSetHomeActivity");
         final CompletableFuture<Boolean> future = new CompletableFuture<>();
-        final RemoteCallback callback = new RemoteCallback(res -> future.complete(res != null));
         try {
-            IRoleManager roleManager = android.app.role.IRoleManager.Stub.asInterface(
-                    ServiceManager.getServiceOrThrow(Context.ROLE_SERVICE));
-            roleManager.addRoleHolderAsUser(RoleManager.ROLE_HOME, pkgName,
-                    0, translatedUserId, callback);
+            RoleManager roleManager = mContext.getSystemService(RoleManager.class);
+            roleManager.addRoleHolderAsUser(RoleManager.ROLE_HOME, pkgName, 0,
+                    UserHandle.of(translatedUserId), FgThread.getExecutor(), future::complete);
             boolean success = future.get();
             if (success) {
                 pw.println("Success");
