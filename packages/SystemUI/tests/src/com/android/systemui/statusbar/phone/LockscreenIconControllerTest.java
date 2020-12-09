@@ -30,6 +30,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.KeyguardSecurityModel;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
@@ -80,6 +81,8 @@ public class LockscreenIconControllerTest extends SysuiTestCase {
     private Resources mResources;
     @Mock
     private HeadsUpManagerPhone mHeadsUpManagerPhone;
+    @Mock
+    private KeyguardSecurityModel mKeyguardSecurityModel;
 
     private LockscreenLockIconController mLockIconController;
     private OnAttachStateChangeListener mOnAttachStateChangeListener;
@@ -94,7 +97,7 @@ public class LockscreenIconControllerTest extends SysuiTestCase {
                 mShadeController, mAccessibilityController, mKeyguardIndicationController,
                 mStatusBarStateController, mConfigurationController, mNotificationWakeUpCoordinator,
                 mKeyguardBypassController, mDockManager, mKeyguardStateController, mResources,
-                mHeadsUpManagerPhone);
+                mHeadsUpManagerPhone, mKeyguardSecurityModel);
 
         ArgumentCaptor<OnAttachStateChangeListener> onAttachStateChangeListenerArgumentCaptor =
                 ArgumentCaptor.forClass(OnAttachStateChangeListener.class);
@@ -139,6 +142,15 @@ public class LockscreenIconControllerTest extends SysuiTestCase {
         sBStateListenerCaptor.getValue().onDozingChanged(true);
 
         verify(mLockIcon).updateIconVisibility(false);
+    }
 
+    @Test
+    public void testVisibility_noBouncer() {
+        // no security (ie: no lock screen OR swipe to unlock)
+        when(mKeyguardSecurityModel.getSecurityMode(anyInt())).thenReturn(
+                KeyguardSecurityModel.SecurityMode.None);
+
+        mOnAttachStateChangeListener.onViewAttachedToWindow(mLockIcon);
+        verify(mLockIcon).updateIconVisibility(false);
     }
 }

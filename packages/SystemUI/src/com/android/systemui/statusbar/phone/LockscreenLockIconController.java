@@ -37,6 +37,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.KeyguardSecurityModel;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.settingslib.Utils;
@@ -78,6 +79,7 @@ public class LockscreenLockIconController {
     private final KeyguardStateController mKeyguardStateController;
     private final Resources mResources;
     private final HeadsUpManagerPhone mHeadsUpManagerPhone;
+    private final KeyguardSecurityModel mKeyguardSecurityModel;
     private boolean mKeyguardShowing;
     private boolean mKeyguardJustShown;
     private boolean mBlockUpdates;
@@ -326,7 +328,8 @@ public class LockscreenLockIconController {
             @Nullable DockManager dockManager,
             KeyguardStateController keyguardStateController,
             @Main Resources resources,
-            HeadsUpManagerPhone headsUpManagerPhone) {
+            HeadsUpManagerPhone headsUpManagerPhone,
+            KeyguardSecurityModel keyguardSecurityModel) {
         mLockscreenGestureLogger = lockscreenGestureLogger;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
@@ -341,6 +344,7 @@ public class LockscreenLockIconController {
         mKeyguardStateController = keyguardStateController;
         mResources = resources;
         mHeadsUpManagerPhone = headsUpManagerPhone;
+        mKeyguardSecurityModel = keyguardSecurityModel;
 
         mKeyguardIndicationController.setLockIconController(this);
     }
@@ -541,13 +545,20 @@ public class LockscreenLockIconController {
      * @return true if the visibility changed
      */
     private boolean updateIconVisibility() {
+        if (mLockIcon == null) {
+            return false;
+        }
+
         if (mKeyguardUpdateMonitor.isUdfpsEnrolled()) {
             boolean changed = mLockIcon.getVisibility() == GONE;
             mLockIcon.setVisibility(GONE);
             return changed;
         }
+
         boolean onAodOrDocked = mStatusBarStateController.isDozing() || mDocked;
-        boolean invisible = onAodOrDocked || mWakeAndUnlockRunning || mShowingLaunchAffordance;
+        boolean invisible = onAodOrDocked || mWakeAndUnlockRunning || mShowingLaunchAffordance
+                || (mKeyguardSecurityModel.getSecurityMode(KeyguardUpdateMonitor.getCurrentUser())
+                == KeyguardSecurityModel.SecurityMode.None);
         boolean fingerprintOrBypass = mFingerprintUnlock
                 || mKeyguardBypassController.getBypassEnabled();
         if (fingerprintOrBypass && !mBouncerShowingScrimmed) {
@@ -559,11 +570,6 @@ public class LockscreenLockIconController {
                 invisible = true;
             }
         }
-
-        if (mLockIcon == null) {
-            return false;
-        }
-
         return mLockIcon.updateIconVisibility(!invisible);
     }
 
