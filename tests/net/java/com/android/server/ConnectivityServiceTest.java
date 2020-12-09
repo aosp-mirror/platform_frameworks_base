@@ -1958,7 +1958,7 @@ public class ConnectivityServiceTest {
     }
 
     @Test
-    public void testOwnerUidChangeBug() throws Exception {
+    public void testOwnerUidCannotChange() throws Exception {
         // Owner UIDs are not visible without location permission.
         setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_FINE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION);
@@ -1973,37 +1973,19 @@ public class ConnectivityServiceTest {
         waitForIdle();
 
         // Send ConnectivityService an update to the mWiFiNetworkAgent's capabilities that changes
-        // its owner UID.
+        // the owner UID and an unrelated capability.
         NetworkCapabilities agentCapabilities = mWiFiNetworkAgent.getNetworkCapabilities();
         assertEquals(originalOwnerUid, agentCapabilities.getOwnerUid());
         agentCapabilities.setOwnerUid(42);
-        mWiFiNetworkAgent.setNetworkCapabilities(agentCapabilities, true);
-        waitForIdle();
-
-        // Check that the owner UID is updated.
-        // The owner UID is -1 because it is visible only to the UID that owns the network.
-        NetworkCapabilities nc = mCm.getNetworkCapabilities(mWiFiNetworkAgent.getNetwork());
-        assertEquals(-1, nc.getOwnerUid());
-
-        // Make an unrelated change to the capabilities and check it. The owner UID remains -1.
         assertFalse(agentCapabilities.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
         agentCapabilities.addCapability(NET_CAPABILITY_NOT_CONGESTED);
         mWiFiNetworkAgent.setNetworkCapabilities(agentCapabilities, true);
         waitForIdle();
-        nc = mCm.getNetworkCapabilities(mWiFiNetworkAgent.getNetwork());
-        assertEquals(-1, nc.getOwnerUid());
-        assertTrue(nc.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
 
-        // Set the owner back to originalOwnerUid, update the capabilities, and check that it is
-        // visible again.
-        // TODO: should this even be possible?
-        agentCapabilities.setOwnerUid(originalOwnerUid);
-        agentCapabilities.removeCapability(NET_CAPABILITY_NOT_CONGESTED);
-        mWiFiNetworkAgent.setNetworkCapabilities(agentCapabilities, true);
-        waitForIdle();
-
-        nc = mCm.getNetworkCapabilities(mWiFiNetworkAgent.getNetwork());
+        // Check that the capability change has been applied but the owner UID is not modified.
+        NetworkCapabilities nc = mCm.getNetworkCapabilities(mWiFiNetworkAgent.getNetwork());
         assertEquals(originalOwnerUid, nc.getOwnerUid());
+        assertTrue(nc.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
     }
 
     @Test
