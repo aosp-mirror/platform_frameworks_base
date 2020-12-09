@@ -1049,11 +1049,7 @@ public class Location implements Parcelable {
      * <ul>
      * <li> satellites - the number of satellites used to derive the fix
      * </ul>
-     *
-     * @deprecated Do not use. For GNSS related information, prefer listening for GNSS status
-     *             information via {@link LocationManager}.
      */
-    @Deprecated
     public Bundle getExtras() {
         return mExtras;
     }
@@ -1063,10 +1059,7 @@ public class Location implements Parcelable {
      *
      * <p>Note this stores a copy of the given extras, so any changes to extras after calling this
      * method won't be reflected in the location bundle.
-     *
-     * @deprecated Do not use.
      */
-    @Deprecated
     public void setExtras(@Nullable Bundle extras) {
         mExtras = (extras == null) ? null : new Bundle(extras);
     }
