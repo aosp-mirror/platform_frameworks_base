@@ -2832,7 +2832,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                             log(nai.toShortString() + " changed underlying networks to "
                                     + Arrays.toString(nai.declaredUnderlyingNetworks));
                         }
-                        updateCapabilities(nai.getCurrentScore(), nai, nai.networkCapabilities);
+                        updateCapabilitiesForNetwork(nai);
                         notifyIfacesChangedForNetworkStats();
                     }
                 }
@@ -2856,8 +2856,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     if (probePrivateDnsCompleted) {
                         if (nai.networkCapabilities.isPrivateDnsBroken() != privateDnsBroken) {
                             nai.networkCapabilities.setPrivateDnsBroken(privateDnsBroken);
-                            final int oldScore = nai.getCurrentScore();
-                            updateCapabilities(oldScore, nai, nai.networkCapabilities);
+                            updateCapabilitiesForNetwork(nai);
                         }
                         // Only show the notification when the private DNS is broken and the
                         // PRIVATE_DNS_BROKEN notification hasn't shown since last valid.
@@ -2872,8 +2871,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         // done yet. In either case, the networkCapabilities should be updated to
                         // reflect the new status.
                         nai.networkCapabilities.setPrivateDnsBroken(false);
-                        final int oldScore = nai.getCurrentScore();
-                        updateCapabilities(oldScore, nai, nai.networkCapabilities);
+                        updateCapabilitiesForNetwork(nai);
                         nai.networkAgentConfig.hasShownBroken = false;
                     }
                     break;
@@ -2894,7 +2892,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     final NetworkAgentInfo nai = getNetworkAgentInfoForNetId(netId);
                     // If captive portal status has changed, update capabilities or disconnect.
                     if (nai != null && (visible != nai.lastCaptivePortalDetected)) {
-                        final int oldScore = nai.getCurrentScore();
                         nai.lastCaptivePortalDetected = visible;
                         nai.everCaptivePortalDetected |= visible;
                         if (nai.lastCaptivePortalDetected &&
@@ -2905,7 +2902,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                             teardownUnneededNetwork(nai);
                             break;
                         }
-                        updateCapabilities(oldScore, nai, nai.networkCapabilities);
+                        updateCapabilitiesForNetwork(nai);
                     }
                     if (!visible) {
                         // Only clear SIGN_IN and NETWORK_SWITCH notifications here, or else other
@@ -2989,7 +2986,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     nai.networkAgentConfig.hasShownBroken = false;
                 }
             } else if (partialConnectivityChanged) {
-                updateCapabilities(nai.getCurrentScore(), nai, nai.networkCapabilities);
+                updateCapabilitiesForNetwork(nai);
             }
             updateInetCondition(nai);
             // Let the NetworkAgent know the state of its network
@@ -3657,7 +3654,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 nri.mSatisfier = null;
                 if (!wasBackgroundNetwork && nai.isBackgroundNetwork()) {
                     // Went from foreground to background.
-                    updateCapabilities(nai.getCurrentScore(), nai, nai.networkCapabilities);
+                    updateCapabilitiesForNetwork(nai);
                 }
             }
 
@@ -4817,7 +4814,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         ensureRunningOnConnectivityServiceThread();
         for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
             if (nai.supportsUnderlyingNetworks()) {
-                updateCapabilities(nai.getCurrentScore(), nai, nai.networkCapabilities);
+                updateCapabilitiesForNetwork(nai);
             }
         }
     }
@@ -6573,6 +6570,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    /** Convenience method to update the capabilities for a given network. */
+    private void updateCapabilitiesForNetwork(NetworkAgentInfo nai) {
+        updateCapabilities(nai.getCurrentScore(), nai, nai.networkCapabilities);
+    }
+
     /**
      * Returns whether VPN isolation (ingress interface filtering) should be applied on the given
      * network.
@@ -6858,8 +6860,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             teardownUnneededNetwork(oldNetwork);
         } else {
             // Put the network in the background.
-            updateCapabilities(oldNetwork.getCurrentScore(), oldNetwork,
-                    oldNetwork.networkCapabilities);
+            updateCapabilitiesForNetwork(oldNetwork);
         }
     }
 
