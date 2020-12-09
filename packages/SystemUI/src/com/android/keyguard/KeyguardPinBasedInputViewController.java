@@ -25,12 +25,15 @@ import android.view.View.OnTouchListener;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
+import com.android.systemui.classifier.FalsingCollector;
 
 public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinBasedInputView>
         extends KeyguardAbsKeyInputViewController<T> {
 
     private final LiftToActivateListener mLiftToActivateListener;
+    private final FalsingCollector mFalsingCollector;
     protected PasswordTextView mPasswordEntry;
 
     private final OnKeyListener mOnKeyListener = (v, keyCode, event) -> {
@@ -40,11 +43,24 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
         return false;
     };
 
-    private final OnTouchListener mOnTouchListener = (v, event) -> {
+    private final OnTouchListener mActionButtonTouchListener = (v, event) -> {
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
             mView.doHapticKeyClick();
         }
         return false;
+    };
+
+    private final Gefingerpoken mGlobalTouchListener = new Gefingerpoken() {
+        @Override
+        public boolean onInterceptTouchEvent(MotionEvent ev) {
+            mFalsingCollector.avoidGesture();
+            return false;
+        }
+
+        @Override
+        public boolean onTouchEvent(MotionEvent ev) {
+            return false;
+        }
     };
 
     protected KeyguardPinBasedInputViewController(T view,
@@ -54,10 +70,12 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
             KeyguardSecurityCallback keyguardSecurityCallback,
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
             LatencyTracker latencyTracker,
-            LiftToActivateListener liftToActivateListener) {
+            LiftToActivateListener liftToActivateListener,
+            FalsingCollector falsingCollector) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker);
         mLiftToActivateListener = liftToActivateListener;
+        mFalsingCollector = falsingCollector;
         mPasswordEntry = mView.findViewById(mView.getPasswordTextViewId());
     }
 
@@ -65,11 +83,13 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
     protected void onViewAttached() {
         super.onViewAttached();
 
+        mView.addMotionEventListener(mGlobalTouchListener);
+
         mPasswordEntry.setOnKeyListener(mOnKeyListener);
         mPasswordEntry.setUserActivityListener(this::onUserInput);
 
         View deleteButton = mView.findViewById(R.id.delete_button);
-        deleteButton.setOnTouchListener(mOnTouchListener);
+        deleteButton.setOnTouchListener(mActionButtonTouchListener);
         deleteButton.setOnClickListener(v -> {
             // check for time-based lockouts
             if (mPasswordEntry.isEnabled()) {
@@ -87,7 +107,7 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
 
         View okButton = mView.findViewById(R.id.key_enter);
         if (okButton != null) {
-            okButton.setOnTouchListener(mOnTouchListener);
+            okButton.setOnTouchListener(mActionButtonTouchListener);
             okButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

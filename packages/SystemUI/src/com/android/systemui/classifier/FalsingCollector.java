@@ -116,6 +116,9 @@ public interface FalsingCollector {
     void onTouchEvent(MotionEvent ev);
 
     /** */
+    void avoidGesture();
+
+    /** */
     void cleanup();
 }
 
