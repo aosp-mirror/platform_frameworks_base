@@ -20,7 +20,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.app.ActivityManager;
-import android.app.ActivityManager.TaskSnapshot;
+import android.window.TaskSnapshot;
 import android.content.ComponentName;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;

@@ -156,7 +156,7 @@ import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
-import android.app.ActivityManager.TaskSnapshot;
+import android.window.TaskSnapshot;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
@@ -3812,7 +3812,7 @@ class Task extends WindowContainer<WindowContainer> {
         mTaskDescription = taskDescription;
     }
 
-    void onSnapshotChanged(ActivityManager.TaskSnapshot snapshot) {
+    void onSnapshotChanged(TaskSnapshot snapshot) {
         mAtmService.getTaskChangeNotificationController().notifyTaskSnapshotChanged(
                 mTaskId, snapshot);
     }

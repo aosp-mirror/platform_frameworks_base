@@ -308,7 +308,7 @@ interface IActivityTaskManager {
      *                          a reduced resolution of it, which is much faster
      * @return a graphic buffer representing a screenshot of a task
      */
-    ActivityManager.TaskSnapshot getTaskSnapshot(int taskId, boolean isLowResolution);
+    android.window.TaskSnapshot getTaskSnapshot(int taskId, boolean isLowResolution);
 
     /**
      * It should only be called from home activity to remove its outdated snapshot. The home

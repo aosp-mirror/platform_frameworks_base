@@ -16,7 +16,7 @@
 
 package com.android.systemui.shared.system;
 
-import android.app.ActivityManager.TaskSnapshot;
+import android.window.TaskSnapshot;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.util.Log;

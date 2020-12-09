@@ -5674,11 +5674,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public ActivityManager.TaskSnapshot getTaskSnapshot(int taskId, boolean isLowResolution) {
-        return mActivityTaskManager.getTaskSnapshot(taskId, isLowResolution);
-    }
-
-    @Override
     public void resizeTask(int taskId, Rect bounds, int resizeMode) {
         mActivityTaskManager.resizeTask(taskId, bounds, resizeMode);
     }

@@ -33,7 +33,7 @@ import static com.android.server.wm.WindowManagerInternal.AppTransitionListener;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.app.ActivityManager.TaskSnapshot;
+import android.window.TaskSnapshot;
 import android.app.WindowConfiguration;
 import android.graphics.Point;
 import android.graphics.Rect;

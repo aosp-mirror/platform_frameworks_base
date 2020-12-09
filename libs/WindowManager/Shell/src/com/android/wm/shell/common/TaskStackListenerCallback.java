@@ -16,11 +16,11 @@
 
 package com.android.wm.shell.common;
 
-import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ITaskStackListener;
 import android.content.ComponentName;
 import android.os.IBinder;
+import android.window.TaskSnapshot;
 
 import androidx.annotation.BinderThread;
 
@@ -55,7 +55,7 @@ public interface TaskStackListenerCallback {
 
     default void onTaskDescriptionChanged(RunningTaskInfo taskInfo) { }
 
-    default void onTaskSnapshotChanged(int taskId, ActivityManager.TaskSnapshot snapshot) { }
+    default void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) { }
 
     default void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) { }
 

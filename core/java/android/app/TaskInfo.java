@@ -33,6 +33,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.Log;
+import android.window.TaskSnapshot;
 import android.window.WindowContainerToken;
 
 import java.util.ArrayList;
@@ -253,9 +254,9 @@ public class TaskInfo {
      * @return
      * @hide
      */
-    public ActivityManager.TaskSnapshot getTaskSnapshot(boolean isLowResolution) {
+    public TaskSnapshot getTaskSnapshot(boolean isLowResolution) {
         try {
-            return ActivityManager.getService().getTaskSnapshot(taskId, isLowResolution);
+            return ActivityTaskManager.getService().getTaskSnapshot(taskId, isLowResolution);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to get task snapshot, taskId=" + taskId, e);
             return null;

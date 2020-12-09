@@ -220,6 +220,7 @@ import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager;
 import android.window.IWindowOrganizerController;
+import android.window.TaskSnapshot;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.R;
@@ -3464,7 +3465,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public ActivityManager.TaskSnapshot getTaskSnapshot(int taskId, boolean isLowResolution) {
+    public TaskSnapshot getTaskSnapshot(int taskId, boolean isLowResolution) {
         enforceCallerIsRecentsOrHasPermission(READ_FRAME_BUFFER, "getTaskSnapshot()");
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -3474,7 +3475,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    private ActivityManager.TaskSnapshot getTaskSnapshot(int taskId, boolean isLowResolution,
+    private TaskSnapshot getTaskSnapshot(int taskId, boolean isLowResolution,
             boolean restoreFromDisk) {
         final Task task;
         synchronized (mGlobalLock) {
@@ -6342,7 +6343,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public ActivityManager.TaskSnapshot getTaskSnapshotBlocking(
+        public TaskSnapshot getTaskSnapshotBlocking(
                 int taskId, boolean isLowResolution) {
             return ActivityTaskManagerService.this.getTaskSnapshot(taskId, isLowResolution,
                     true /* restoreFromDisk */);

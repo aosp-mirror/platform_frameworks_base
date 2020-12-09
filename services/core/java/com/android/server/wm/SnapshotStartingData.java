@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import android.app.ActivityManager.TaskSnapshot;
+import android.window.TaskSnapshot;
 
 import com.android.server.policy.WindowManagerPolicy.StartingSurface;
 
