@@ -182,9 +182,8 @@ public class ScrollCaptureTargetResolver {
         }
         mResult = chooseTarget(mResult, target);
         boolean finish = mPendingBoundsRequests == 0
-                || SystemClock.elapsedRealtime() >= mDeadlineMillis;
+                || SystemClock.uptimeMillis() >= mDeadlineMillis;
         if (finish) {
-            System.err.println("We think we're done, or timed out");
             mPendingBoundsRequests = 0;
             mWhenComplete.accept(mResult);
             synchronized (mLock) {
@@ -233,7 +232,7 @@ public class ScrollCaptureTargetResolver {
         for (ScrollCaptureTarget target : mTargets) {
             queryTarget(target);
         }
-        mDeadlineMillis = SystemClock.elapsedRealtime() + mTimeLimitMillis;
+        mDeadlineMillis = SystemClock.uptimeMillis() + mTimeLimitMillis;
         mHandler.postAtTime(mTimeoutRunnable, mDeadlineMillis);
     }
 
@@ -275,7 +274,7 @@ public class ScrollCaptureTargetResolver {
         mHandler.removeCallbacks(mTimeoutRunnable);
 
         boolean doneOrTimedOut = mPendingBoundsRequests == 0
-                || SystemClock.elapsedRealtime() >= mDeadlineMillis;
+                || SystemClock.uptimeMillis() >= mDeadlineMillis;
 
         final View containingView = target.getContainingView();
         if (!nullOrEmpty(scrollBounds) && containingView.isAggregatedVisible()) {
