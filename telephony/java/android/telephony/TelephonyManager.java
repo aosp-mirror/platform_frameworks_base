@@ -5594,57 +5594,6 @@ public class TelephonyManager {
         }
     }
 
-    /**
-     * Registers a listener object to receive notification of changes
-     * in specified telephony states.
-     * <p>
-     * To register a listener, pass a {@link PhoneStateListener} and specify at least one telephony
-     * state of interest in the events argument.
-     *
-     * At registration, and when a specified telephony state changes, the telephony manager invokes
-     * the appropriate callback method on the listener object and passes the current (updated)
-     * values.
-     * <p>
-     * To un-register a listener, pass the listener object and set the events argument to
-     * {@link PhoneStateListener#LISTEN_NONE LISTEN_NONE} (0).
-     *
-     * If this TelephonyManager object has been created with {@link #createForSubscriptionId},
-     * applies to the given subId. Otherwise, applies to
-     * {@link SubscriptionManager#getDefaultSubscriptionId()}. To listen events for multiple subIds,
-     * pass a separate listener object to each TelephonyManager object created with
-     * {@link #createForSubscriptionId}.
-     *
-     * Note: if you call this method while in the middle of a binder transaction, you <b>must</b>
-     * call {@link android.os.Binder#clearCallingIdentity()} before calling this method. A
-     * {@link SecurityException} will be thrown otherwise.
-     *
-     * This API should be used sparingly -- large numbers of listeners will cause system
-     * instability. If a process has registered too many listeners without unregistering them, it
-     * may encounter an {@link IllegalStateException} when trying to register more listeners.
-     *
-     * @param events The telephony state(s) of interest to the listener,
-     *               as a bitwise-OR combination of {@link PhoneStateListener}
-     *               LISTEN_ flags.
-     * @param listener The {@link PhoneStateListener} object to register
-     *                 (or unregister)
-     * @deprecated Use {@link #registerPhoneStateListener(Executor, PhoneStateListener)}.
-     */
-    @Deprecated
-    public void listen(long events, @NonNull PhoneStateListener listener) {
-        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
-        if (mTelephonyRegistryMgr != null) {
-            if (events != PhoneStateListener.LISTEN_NONE) {
-                mTelephonyRegistryMgr.registerPhoneStateListenerWithEvents(mSubId,
-                        getOpPackageName(), getAttributionTag(), listener,
-                        Long.valueOf(events).intValue(), getITelephony() != null);
-            } else {
-                unregisterPhoneStateListener(listener);
-            }
-        } else {
-            throw new IllegalStateException("telephony service is null.");
-        }
-    }
-
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"ERI_"}, value = {
