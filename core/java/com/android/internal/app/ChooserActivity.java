@@ -827,8 +827,6 @@ public class ChooserActivity extends ResolverActivity implements
                 queryDirectShareTargets(chooserListAdapter, true);
                 return;
             }
-            final List<DisplayResolveInfo> driList =
-                    getDisplayResolveInfos(chooserListAdapter);
             final List<ShortcutManager.ShareShortcutInfo> shareShortcutInfos =
                     new ArrayList<>();
 
@@ -856,7 +854,7 @@ public class ChooserActivity extends ResolverActivity implements
                         new ComponentName(
                                 appTarget.getPackageName(), appTarget.getClassName())));
             }
-            sendShareShortcutInfoList(shareShortcutInfos, driList, resultList,
+            sendShareShortcutInfoList(shareShortcutInfos, chooserListAdapter, resultList,
                     chooserListAdapter.getUserHandle());
         };
     }
@@ -1995,32 +1993,6 @@ public class ChooserActivity extends ResolverActivity implements
         }
     }
 
-    private List<DisplayResolveInfo> getDisplayResolveInfos(ChooserListAdapter adapter) {
-        // Need to keep the original DisplayResolveInfos to be able to reconstruct ServiceResultInfo
-        // and use the old code path. This Ugliness should go away when Sharesheet is refactored.
-        List<DisplayResolveInfo> driList = new ArrayList<>();
-        int targetsToQuery = 0;
-        for (int i = 0, n = adapter.getDisplayResolveInfoCount(); i < n; i++) {
-            final DisplayResolveInfo dri = adapter.getDisplayResolveInfo(i);
-            if (adapter.getScore(dri) == 0) {
-                // A score of 0 means the app hasn't been used in some time;
-                // don't query it as it's not likely to be relevant.
-                continue;
-            }
-            driList.add(dri);
-            targetsToQuery++;
-            // TODO(b/121287224): Do we need this here? (similar to queryTargetServices)
-            if (targetsToQuery >= SHARE_TARGET_QUERY_PACKAGE_LIMIT) {
-                if (DEBUG) {
-                    Log.d(TAG, "queryTargets hit query target limit "
-                            + SHARE_TARGET_QUERY_PACKAGE_LIMIT);
-                }
-                break;
-            }
-        }
-        return driList;
-    }
-
     @VisibleForTesting
     protected void queryDirectShareTargets(
                 ChooserListAdapter adapter, boolean skipAppPredictionService) {
@@ -2038,14 +2010,13 @@ public class ChooserActivity extends ResolverActivity implements
         if (filter == null) {
             return;
         }
-        final List<DisplayResolveInfo> driList = getDisplayResolveInfos(adapter);
 
         AsyncTask.execute(() -> {
             Context selectedProfileContext = createContextAsUser(userHandle, 0 /* flags */);
             ShortcutManager sm = (ShortcutManager) selectedProfileContext
                     .getSystemService(Context.SHORTCUT_SERVICE);
             List<ShortcutManager.ShareShortcutInfo> resultList = sm.getShareTargets(filter);
-            sendShareShortcutInfoList(resultList, driList, null, userHandle);
+            sendShareShortcutInfoList(resultList, adapter, null, userHandle);
         });
     }
 
@@ -2082,7 +2053,7 @@ public class ChooserActivity extends ResolverActivity implements
 
     private void sendShareShortcutInfoList(
                 List<ShortcutManager.ShareShortcutInfo> resultList,
-                List<DisplayResolveInfo> driList,
+                ChooserListAdapter chooserListAdapter,
                 @Nullable List<AppTarget> appTargets, UserHandle userHandle) {
         if (appTargets != null && appTargets.size() != resultList.size()) {
             throw new RuntimeException("resultList and appTargets must have the same size."
@@ -2108,10 +2079,10 @@ public class ChooserActivity extends ResolverActivity implements
         // for direct share targets. After ShareSheet is refactored we should use the
         // ShareShortcutInfos directly.
         boolean resultMessageSent = false;
-        for (int i = 0; i < driList.size(); i++) {
+        for (int i = 0; i < chooserListAdapter.getDisplayResolveInfoCount(); i++) {
             List<ShortcutManager.ShareShortcutInfo> matchingShortcuts = new ArrayList<>();
             for (int j = 0; j < resultList.size(); j++) {
-                if (driList.get(i).getResolvedComponentName().equals(
+                if (chooserListAdapter.getDisplayResolveInfo(i).getResolvedComponentName().equals(
                             resultList.get(j).getTargetComponent())) {
                     matchingShortcuts.add(resultList.get(j));
                 }
@@ -2126,7 +2097,8 @@ public class ChooserActivity extends ResolverActivity implements
 
             final Message msg = Message.obtain();
             msg.what = ChooserHandler.SHORTCUT_MANAGER_SHARE_TARGET_RESULT;
-            msg.obj = new ServiceResultInfo(driList.get(i), chooserTargets, null, userHandle);
+            msg.obj = new ServiceResultInfo(chooserListAdapter.getDisplayResolveInfo(i),
+                    chooserTargets, null, userHandle);
             msg.arg1 = shortcutType;
             mChooserHandler.sendMessage(msg);
             resultMessageSent = true;
