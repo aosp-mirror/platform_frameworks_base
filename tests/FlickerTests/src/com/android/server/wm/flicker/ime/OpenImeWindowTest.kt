@@ -33,6 +33,8 @@ import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
 import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
 import com.android.server.wm.flicker.noUncoveredRegions
+import com.android.server.wm.flicker.appWindowAlwaysVisibleOnTop
+import com.android.server.wm.flicker.layerAlwaysVisible
 import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
@@ -56,8 +58,6 @@ class OpenImeWindowTest(
     flickerSpec: Flicker
 ) : FlickerTestRunner(testName, flickerSpec) {
     companion object {
-        private const val IME_WINDOW_TITLE = "InputMethod"
-
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): List<Array<Any>> {
@@ -93,12 +93,8 @@ class OpenImeWindowTest(
                             statusBarWindowIsAlwaysVisible()
                             visibleWindowsShownMoreThanOneConsecutiveEntry()
 
-                            all("imeWindowBecomesVisible") {
-                                this.skipUntilFirstAssertion()
-                                    .hidesNonAppWindow(IME_WINDOW_TITLE)
-                                    .then()
-                                    .showsNonAppWindow(IME_WINDOW_TITLE)
-                            }
+                            imeWindowBecomesVisible()
+                            appWindowAlwaysVisibleOnTop(testApp.`package`)
                         }
 
                         layersTrace {
@@ -110,6 +106,7 @@ class OpenImeWindowTest(
                             visibleLayersShownMoreThanOneConsecutiveEntry()
 
                             imeLayerBecomesVisible()
+                            layerAlwaysVisible(testApp.`package`)
                         }
                     }
                 }

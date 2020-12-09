@@ -29,7 +29,6 @@ import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEnt
 import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
 import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
-import com.android.server.wm.flicker.helpers.hasWindow
 import com.android.server.wm.flicker.helpers.buildTestTag
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
@@ -42,6 +41,10 @@ import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.wallpaperWindowBecomesInvisible
+import com.android.server.wm.flicker.appLayerReplacesWallpaperLayer
+import com.android.server.wm.flicker.testapp.ActivityOptions
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.FixMethodOrder
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -83,7 +86,9 @@ class OpenAppFromOverviewTest(
                         }
                         transitions {
                             device.reopenAppFromOverview()
-                            device.hasWindow(testApp.getPackage())
+                            WindowManagerStateHelper().waitForFullScreenApp(
+                                    ActivityOptions.SIMPLE_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME
+                            )
                         }
                         teardown {
                             test {
@@ -115,7 +120,7 @@ class OpenAppFromOverviewTest(
                                 visibleLayersShownMoreThanOneConsecutiveEntry(
                                         enabled = Surface.ROTATION_0 == configuration.endRotation)
 
-                                appLayerReplacesWallpaperLayer(testApp)
+                                appLayerReplacesWallpaperLayer(testApp.`package`)
                             }
 
                             eventLog {

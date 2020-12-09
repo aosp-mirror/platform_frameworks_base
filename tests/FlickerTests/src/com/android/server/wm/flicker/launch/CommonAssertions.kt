@@ -17,19 +17,7 @@
 package com.android.server.wm.flicker.launch
 
 import android.platform.helpers.IAppHelper
-import com.android.server.wm.flicker.dsl.LayersAssertion
 import com.android.server.wm.flicker.dsl.WmAssertion
-
-fun WmAssertion.wallpaperWindowBecomesInvisible(
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("wallpaperWindowBecomesInvisible", bugId, enabled) {
-        this.showsBelowAppWindow("Wallpaper")
-                .then()
-                .hidesBelowAppWindow("Wallpaper")
-    }
-}
 
 fun WmAssertion.appWindowReplacesLauncherAsTopWindow(
     testApp: IAppHelper,
@@ -40,17 +28,5 @@ fun WmAssertion.appWindowReplacesLauncherAsTopWindow(
         this.showsAppWindowOnTop("Launcher")
                 .then()
                 .showsAppWindowOnTop("Snapshot", testApp.getPackage())
-    }
-}
-
-fun LayersAssertion.appLayerReplacesWallpaperLayer(
-    testApp: IAppHelper,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("appLayerReplacesWallpaperLayer", bugId, enabled) {
-        this.showsLayer("Wallpaper")
-                .then()
-                .replaceVisibleLayer("Wallpaper", testApp.getPackage())
     }
 }

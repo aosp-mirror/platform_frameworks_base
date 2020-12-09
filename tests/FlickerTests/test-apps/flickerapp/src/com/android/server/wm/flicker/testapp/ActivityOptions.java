@@ -23,4 +23,10 @@ public class ActivityOptions {
     public static final ComponentName SEAMLESS_ACTIVITY_COMPONENT_NAME =
             new ComponentName("com.android.server.wm.flicker.testapp",
                     "com.android.server.wm.flicker.testapp.SeamlessRotationActivity");
+    public static final ComponentName IME_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME =
+            new ComponentName("com.android.server.wm.flicker.testapp",
+                    "com.android.server.wm.flicker.testapp.ImeActivityAutoFocus");
+    public static final ComponentName SIMPLE_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME =
+            new ComponentName("com.android.server.wm.flicker.testapp",
+                    "com.android.server.wm.flicker.testapp.SimpleActivity");
 }

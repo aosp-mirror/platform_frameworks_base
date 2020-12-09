@@ -40,6 +40,8 @@ import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
 import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
+import com.android.server.wm.flicker.wallpaperWindowBecomesInvisible
+import com.android.server.wm.flicker.appLayerReplacesWallpaperLayer
 import org.junit.FixMethodOrder
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -107,7 +109,7 @@ class OpenAppColdTest(
                             statusBarLayerIsAlwaysVisible(enabled = false)
                             visibleLayersShownMoreThanOneConsecutiveEntry(bugId = 174541970)
 
-                            appLayerReplacesWallpaperLayer(testApp)
+                            appLayerReplacesWallpaperLayer(testApp.`package`)
                         }
 
                         eventLog {

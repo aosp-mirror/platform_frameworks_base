@@ -65,6 +65,17 @@ fun WmAssertion.imeAppWindowIsAlwaysVisible(
     }
 }
 
+fun WmAssertion.imeWindowBecomesVisible(
+    bugId: Int = 0,
+    enabled: Boolean = bugId == 0
+) {
+    all("imeWindowBecomesVisible", bugId, enabled) {
+        this.hidesNonAppWindow(IME_WINDOW_TITLE)
+                .then()
+                .showsNonAppWindow(IME_WINDOW_TITLE)
+    }
+}
+
 fun WmAssertion.imeWindowBecomesInvisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -73,6 +84,18 @@ fun WmAssertion.imeWindowBecomesInvisible(
         this.showsNonAppWindow(IME_WINDOW_TITLE)
                 .then()
                 .hidesNonAppWindow(IME_WINDOW_TITLE)
+    }
+}
+
+fun WmAssertion.imeAppWindowBecomesVisible(
+    windowName: String,
+    bugId: Int = 0,
+    enabled: Boolean = bugId == 0
+) {
+    all("imeAppWindowBecomesVisible", bugId, enabled) {
+        this.hidesAppWindow(windowName)
+                .then()
+                .showsAppWindow(windowName)
     }
 }
 
