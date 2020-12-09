@@ -18,6 +18,7 @@ import android.util.Log;
 import android.util.Pair;
 
 import androidx.annotation.DrawableRes;
+import androidx.core.graphics.drawable.IconCompat;
 
 import com.android.settingslib.R;
 import com.android.settingslib.widget.AdaptiveIcon;
@@ -213,6 +214,23 @@ public class BluetoothUtils {
         }
 
         return new Pair<>(pair.first, pair.second);
+    }
+
+    /**
+     * Create an Icon pointing to a drawable.
+     */
+    public static IconCompat createIconWithDrawable(Drawable drawable) {
+        Bitmap bitmap;
+        if (drawable instanceof BitmapDrawable) {
+            bitmap = ((BitmapDrawable) drawable).getBitmap();
+        } else {
+            final int width = drawable.getIntrinsicWidth();
+            final int height = drawable.getIntrinsicHeight();
+            bitmap = createBitmap(drawable,
+                    width > 0 ? width : 1,
+                    height > 0 ? height : 1);
+        }
+        return IconCompat.createWithBitmap(bitmap);
     }
 
     /**

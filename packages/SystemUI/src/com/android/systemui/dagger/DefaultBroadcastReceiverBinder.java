@@ -18,6 +18,7 @@ package com.android.systemui.dagger;
 
 import android.content.BroadcastReceiver;
 
+import com.android.systemui.media.dialog.MediaOutputDialogReceiver;
 import com.android.systemui.screenshot.ActionProxyReceiver;
 import com.android.systemui.screenshot.DeleteScreenshotReceiver;
 import com.android.systemui.screenshot.SmartActionsReceiver;
@@ -58,5 +59,14 @@ public abstract class DefaultBroadcastReceiverBinder {
     @ClassKey(SmartActionsReceiver.class)
     public abstract BroadcastReceiver bindSmartActionsReceiver(
             SmartActionsReceiver broadcastReceiver);
+
+    /**
+     *
+     */
+    @Binds
+    @IntoMap
+    @ClassKey(MediaOutputDialogReceiver.class)
+    public abstract BroadcastReceiver bindMediaOutputDialogReceiver(
+            MediaOutputDialogReceiver broadcastReceiver);
 
 }
