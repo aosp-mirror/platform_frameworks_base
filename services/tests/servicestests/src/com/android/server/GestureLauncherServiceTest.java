@@ -163,16 +163,26 @@ public class GestureLauncherServiceTest {
     }
 
     @Test
-    public void testIsEmergencyGestureEnabled_settingDisabled() {
+    public void testIsEmergencyGestureSettingEnabled_settingDisabled() {
+        withEmergencyGestureEnabledConfigValue(true);
         withEmergencyGestureEnabledSettingValue(false);
-        assertFalse(mGestureLauncherService.isEmergencyGestureEnabled(
+        assertFalse(mGestureLauncherService.isEmergencyGestureSettingEnabled(
                 mContext, FAKE_USER_ID));
     }
 
     @Test
-    public void testIsEmergencyGestureEnabled_settingEnabled() {
+    public void testIsEmergencyGestureSettingEnabled_settingEnabled() {
+        withEmergencyGestureEnabledConfigValue(true);
         withEmergencyGestureEnabledSettingValue(true);
-        assertTrue(mGestureLauncherService.isEmergencyGestureEnabled(
+        assertTrue(mGestureLauncherService.isEmergencyGestureSettingEnabled(
+                mContext, FAKE_USER_ID));
+    }
+
+    @Test
+    public void testIsEmergencyGestureSettingEnabled_supportDisabled() {
+        withEmergencyGestureEnabledConfigValue(false);
+        withEmergencyGestureEnabledSettingValue(true);
+        assertFalse(mGestureLauncherService.isEmergencyGestureSettingEnabled(
                 mContext, FAKE_USER_ID));
     }
 
@@ -438,6 +448,7 @@ public class GestureLauncherServiceTest {
             testInterceptPowerKeyDown_fiveInboundPresses_cameraAndEmergencyEnabled_bothLaunch() {
         withCameraDoubleTapPowerEnableConfigValue(true);
         withCameraDoubleTapPowerDisableSettingValue(0);
+        withEmergencyGestureEnabledConfigValue(true);
         withEmergencyGestureEnabledSettingValue(true);
         mGestureLauncherService.updateCameraDoubleTapPowerEnabled();
         mGestureLauncherService.updateEmergencyGestureEnabled();
@@ -527,6 +538,7 @@ public class GestureLauncherServiceTest {
     @Test
     public void
             testInterceptPowerKeyDown_fiveInboundPresses_emergencyGestureEnabled_launchesFlow() {
+        withEmergencyGestureEnabledConfigValue(true);
         withEmergencyGestureEnabledSettingValue(true);
         mGestureLauncherService.updateEmergencyGestureEnabled();
         withUserSetupCompleteValue(true);
@@ -580,6 +592,7 @@ public class GestureLauncherServiceTest {
     @Test
     public void
             testInterceptPowerKeyDown_tenInboundPresses_emergencyGestureEnabled_keyIntercepted() {
+        withEmergencyGestureEnabledConfigValue(true);
         withEmergencyGestureEnabledSettingValue(true);
         mGestureLauncherService.updateEmergencyGestureEnabled();
         withUserSetupCompleteValue(true);
@@ -1143,6 +1156,12 @@ public class GestureLauncherServiceTest {
     private void withCameraDoubleTapPowerEnableConfigValue(boolean enableConfigValue) {
         when(mResources.getBoolean(
                 com.android.internal.R.bool.config_cameraDoubleTapPowerGestureEnabled))
+                .thenReturn(enableConfigValue);
+    }
+
+    private void withEmergencyGestureEnabledConfigValue(boolean enableConfigValue) {
+        when(mResources.getBoolean(
+                com.android.internal.R.bool.config_emergencyGestureEnabled))
                 .thenReturn(enableConfigValue);
     }
 
