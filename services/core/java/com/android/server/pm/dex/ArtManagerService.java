@@ -579,6 +579,8 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     // Constants used for logging compilation reason to TRON.
     // DO NOT CHANGE existing values.
     //
+    // In the below constants, the abbreviation DM stands for "DEX metadata".
+    //
     // NOTE: '-1' value is reserved for the case where we cannot produce a valid
     // PackageOptimizationInfo because the ArtManagerInternal is not ready to be used by the
     // ActivityMetricsLoggers.
@@ -591,7 +593,18 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     private static final int TRON_COMPILATION_REASON_AB_OTA = 6;
     private static final int TRON_COMPILATION_REASON_INACTIVE = 7;
     private static final int TRON_COMPILATION_REASON_SHARED = 8;
-    private static final int TRON_COMPILATION_REASON_INSTALL_WITH_DEX_METADATA = 9;
+    private static final int TRON_COMPILATION_REASON_INSTALL_WITH_DM = 9;
+    private static final int TRON_COMPILATION_REASON_INSTALL_FAST = 10;
+    private static final int TRON_COMPILATION_REASON_INSTALL_BULK = 11;
+    private static final int TRON_COMPILATION_REASON_INSTALL_BULK_SECONDARY = 12;
+    private static final int TRON_COMPILATION_REASON_INSTALL_BULK_DOWNGRADED = 13;
+    private static final int TRON_COMPILATION_REASON_INSTALL_BULK_SECONDARY_DOWNGRADED = 14;
+    private static final int TRON_COMPILATION_REASON_INSTALL_FAST_WITH_DM = 15;
+    private static final int TRON_COMPILATION_REASON_INSTALL_BULK_WITH_DM = 16;
+    private static final int TRON_COMPILATION_REASON_INSTALL_BULK_SECONDARY_WITH_DM = 17;
+    private static final int TRON_COMPILATION_REASON_INSTALL_BULK_DOWNGRADED_WITH_DM = 18;
+    private static final int
+            TRON_COMPILATION_REASON_INSTALL_BULK_SECONDARY_DOWNGRADED_WITH_DM = 19;
 
     // The annotation to add as a suffix to the compilation reason when dexopt was
     // performed with dex metadata.
@@ -611,10 +624,30 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
             case "ab-ota" : return TRON_COMPILATION_REASON_AB_OTA;
             case "inactive" : return TRON_COMPILATION_REASON_INACTIVE;
             case "shared" : return TRON_COMPILATION_REASON_SHARED;
-            // This is a special marker for dex metadata installation that does not
+            case "install-fast" :
+                return TRON_COMPILATION_REASON_INSTALL_FAST;
+            case "install-bulk" :
+                return TRON_COMPILATION_REASON_INSTALL_BULK;
+            case "install-bulk-secondary" :
+                return TRON_COMPILATION_REASON_INSTALL_BULK_SECONDARY;
+            case "install-bulk-downgraded" :
+                return TRON_COMPILATION_REASON_INSTALL_BULK_DOWNGRADED;
+            case "install-bulk-secondary-downgraded" :
+                return TRON_COMPILATION_REASON_INSTALL_BULK_SECONDARY_DOWNGRADED;
+            // These are special markers for dex metadata installation that do not
             // have an equivalent as a system property.
             case "install" + DEXOPT_REASON_WITH_DEX_METADATA_ANNOTATION :
-                return TRON_COMPILATION_REASON_INSTALL_WITH_DEX_METADATA;
+                return TRON_COMPILATION_REASON_INSTALL_WITH_DM;
+            case "install-fast" + DEXOPT_REASON_WITH_DEX_METADATA_ANNOTATION :
+                return TRON_COMPILATION_REASON_INSTALL_FAST_WITH_DM;
+            case "install-bulk" + DEXOPT_REASON_WITH_DEX_METADATA_ANNOTATION :
+                return TRON_COMPILATION_REASON_INSTALL_BULK_WITH_DM;
+            case "install-bulk-secondary" + DEXOPT_REASON_WITH_DEX_METADATA_ANNOTATION :
+                return TRON_COMPILATION_REASON_INSTALL_BULK_SECONDARY_WITH_DM;
+            case "install-bulk-downgraded" + DEXOPT_REASON_WITH_DEX_METADATA_ANNOTATION :
+                return TRON_COMPILATION_REASON_INSTALL_BULK_DOWNGRADED_WITH_DM;
+            case "install-bulk-secondary-downgraded" + DEXOPT_REASON_WITH_DEX_METADATA_ANNOTATION :
+                return TRON_COMPILATION_REASON_INSTALL_BULK_SECONDARY_DOWNGRADED_WITH_DM;
             default: return TRON_COMPILATION_REASON_UNKNOWN;
         }
     }
