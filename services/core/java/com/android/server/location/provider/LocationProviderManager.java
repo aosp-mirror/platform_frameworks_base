@@ -1357,6 +1357,8 @@ public class LocationProviderManager extends
     public boolean isEnabled(int userId) {
         if (userId == UserHandle.USER_NULL) {
             return false;
+        } else if (userId == UserHandle.USER_CURRENT) {
+            return isEnabled(mUserHelper.getCurrentUserId());
         }
 
         Preconditions.checkArgument(userId >= 0);
@@ -1518,6 +1520,9 @@ public class LocationProviderManager extends
                 }
             }
             return lastLocation;
+        } else if (userId == UserHandle.USER_CURRENT) {
+            return getLastLocationUnsafe(mUserHelper.getCurrentUserId(), permissionLevel,
+                    ignoreLocationSettings, maximumAgeMs);
         }
 
         Preconditions.checkArgument(userId >= 0);
@@ -1559,6 +1564,9 @@ public class LocationProviderManager extends
             for (int i = 0; i < runningUserIds.length; i++) {
                 setLastLocation(location, runningUserIds[i]);
             }
+            return;
+        } else if (userId == UserHandle.USER_CURRENT) {
+            setLastLocation(location, mUserHelper.getCurrentUserId());
             return;
         }
 

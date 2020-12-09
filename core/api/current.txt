@@ -18966,8 +18966,23 @@ package android.location {
     field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssAntennaInfo.SphericalCorrections> CREATOR;
   }
 
-  public final class GnssCapabilities {
-    method public boolean hasGnssAntennaInfo();
+  public final class GnssCapabilities implements android.os.Parcelable {
+    method public int describeContents();
+    method public boolean hasAntennaInfo();
+    method @Deprecated public boolean hasGnssAntennaInfo();
+    method public boolean hasMeasurements();
+    method public boolean hasNavigationMessages();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssCapabilities> CREATOR;
+  }
+
+  public static final class GnssCapabilities.Builder {
+    ctor public GnssCapabilities.Builder();
+    ctor public GnssCapabilities.Builder(@NonNull android.location.GnssCapabilities);
+    method @NonNull public android.location.GnssCapabilities build();
+    method @NonNull public android.location.GnssCapabilities.Builder setHasAntennaInfo(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurements(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasNavigationMessages(boolean);
   }
 
   public final class GnssClock implements android.os.Parcelable {

@@ -20,12 +20,12 @@ import static com.android.server.location.gnss.GnssManagerService.D;
 import static com.android.server.location.gnss.GnssManagerService.TAG;
 
 import android.location.GnssAntennaInfo;
+import android.location.GnssCapabilities;
 import android.location.IGnssAntennaInfoListener;
 import android.location.util.identity.CallerIdentity;
 import android.util.Log;
 
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Preconditions;
+import com.android.server.location.gnss.hal.GnssNative;
 import com.android.server.location.injector.Injector;
 
 import java.util.Collection;
@@ -35,23 +35,22 @@ import java.util.List;
  * Provides GNSS antenna information to clients.
  */
 public class GnssAntennaInfoProvider extends
-        GnssListenerMultiplexer<Void, IGnssAntennaInfoListener, Void> {
+        GnssListenerMultiplexer<Void, IGnssAntennaInfoListener, Void> implements
+        GnssNative.BaseCallbacks, GnssNative.AntennaInfoCallbacks {
 
-    private final GnssAntennaInfoProviderNative mNative;
+    private final GnssNative mGnssNative;
 
-    public GnssAntennaInfoProvider(Injector injector) {
-        this(injector, new GnssAntennaInfoProviderNative());
-    }
-
-    @VisibleForTesting
-    public GnssAntennaInfoProvider(Injector injector, GnssAntennaInfoProviderNative aNative) {
+    public GnssAntennaInfoProvider(Injector injector, GnssNative gnssNative) {
         super(injector);
-        mNative = aNative;
+        mGnssNative = gnssNative;
+
+        mGnssNative.addBaseCallbacks(this);
+        mGnssNative.addAntennaInfoCallbacks(this);
     }
 
     @Override
     protected boolean isServiceSupported() {
-        return mNative.isAntennaInfoSupported();
+        return mGnssNative.isAntennaInfoListeningSupported();
     }
 
     @Override
@@ -62,9 +61,7 @@ public class GnssAntennaInfoProvider extends
     @Override
     protected boolean registerWithService(Void ignored,
             Collection<GnssListenerRegistration> registrations) {
-        Preconditions.checkState(mNative.isAntennaInfoSupported());
-
-        if (mNative.startAntennaInfoListening()) {
+        if (mGnssNative.startAntennaInfoListening()) {
             if (D) {
                 Log.d(TAG, "starting gnss antenna info");
             }
@@ -77,7 +74,7 @@ public class GnssAntennaInfoProvider extends
 
     @Override
     protected void unregisterWithService() {
-        if (mNative.stopAntennaInfoListening()) {
+        if (mGnssNative.stopAntennaInfoListening()) {
             if (D) {
                 Log.d(TAG, "stopping gnss antenna info");
             }
@@ -86,39 +83,19 @@ public class GnssAntennaInfoProvider extends
         }
     }
 
-    /**
-     * Called by GnssLocationProvider.
-     */
-    public void onGnssAntennaInfoAvailable(List<GnssAntennaInfo> gnssAntennaInfos) {
-        deliverToListeners((listener) -> {
-            listener.onGnssAntennaInfoReceived(gnssAntennaInfos);
+    @Override
+    public void onHalRestarted() {
+        resetService();
+    }
+
+    @Override
+    public void onCapabilitiesChanged(GnssCapabilities oldCapabilities,
+            GnssCapabilities newCapabilities) {}
+
+    @Override
+    public void onReportAntennaInfo(List<GnssAntennaInfo> antennaInfos) {
+        deliverToListeners(listener -> {
+            listener.onGnssAntennaInfoReceived(antennaInfos);
         });
     }
-
-    /**
-     * Wrapper class for native methods. This is mocked for testing.
-     */
-    @VisibleForTesting
-    public static class GnssAntennaInfoProviderNative {
-
-        public boolean isAntennaInfoSupported() {
-            return native_is_antenna_info_supported();
-        }
-
-        /** Start antenna info listening. */
-        public boolean startAntennaInfoListening() {
-            return native_start_antenna_info_listening();
-        }
-
-        /** Stop antenna info listening. */
-        public boolean stopAntennaInfoListening() {
-            return native_stop_antenna_info_listening();
-        }
-    }
-
-    static native boolean native_is_antenna_info_supported();
-
-    static native boolean native_start_antenna_info_listening();
-
-    static native boolean native_stop_antenna_info_listening();
 }
