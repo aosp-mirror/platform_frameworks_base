@@ -5192,6 +5192,44 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return false;
     }
 
+    @Override
+    public List<String> getKeyPairGrants(String callerPackage, String alias) {
+        final CallerIdentity caller = getCallerIdentity(callerPackage);
+        Preconditions.checkCallAuthorization(canManageCertificates(caller));
+
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            try (KeyChainConnection keyChainConnection =
+                         KeyChain.bindAsUser(mContext, caller.getUserHandle())) {
+                final List<String> result = new ArrayList<>();
+                final int[] granteeUids = keyChainConnection.getService().getGrants(alias);
+                final PackageManager pm = mInjector.getPackageManager(caller.getUserId());
+
+                // TODO: Return Set<Set<String>> when AIDL supports it: b/136048684
+                // Public API returns a set of sets, where each internal set contains all package
+                // names corresponding to the same UID. For now a set of sets is marshalled as a
+                // null-separated list.
+                for (final int uid : granteeUids) {
+                    final String[] packages = pm.getPackagesForUid(uid);
+                    if (packages == null) {
+                        Slog.wtf(LOG_TAG, "No packages found for uid " + uid);
+                        continue;
+                    }
+                    if (!result.isEmpty()) {
+                        result.add(null);
+                    }
+                    result.addAll(Arrays.asList(packages));
+                }
+                return result;
+            } catch (RemoteException e) {
+                Log.e(LOG_TAG, "Querying keypair grants", e);
+            } catch (InterruptedException e) {
+                Log.w(LOG_TAG, "Interrupted while querying keypair grants", e);
+                Thread.currentThread().interrupt();
+            }
+            return Collections.emptyList();
+        });
+    }
+
     /**
      * Enforce one the following conditions are met:
      * (1) The device has a Device Owner, and one of the following holds:

@@ -22,6 +22,8 @@ import android.util.Slog;
 
 import com.android.server.SystemService;
 
+import java.util.List;
+
 /**
  * Defines the required interface for IDevicePolicyManager implemenation.
  *
@@ -100,5 +102,10 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
 
     public boolean canProfileOwnerResetPasswordWhenLocked(int userId) {
         return false;
+    }
+
+    public List<String> getKeyPairGrants(String callerPackage, String alias) {
+        // STOPSHIP: implement delegation code in ArcDevicePolicyManagerWrapperService & nuke this.
+        return null;
     }
 }
