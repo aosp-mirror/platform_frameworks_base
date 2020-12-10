@@ -124,7 +124,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -5580,6 +5579,10 @@ public class TelephonyManager {
      */
     @Deprecated
     public void listen(PhoneStateListener listener, int events) {
+        if (!listener.isExecutorSet()) {
+            throw new IllegalStateException("PhoneStateListener should be created on a thread "
+                    + "with Looper.myLooper() != null");
+        }
         boolean notifyNow = getITelephony() != null;
         mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
         if (mTelephonyRegistryMgr != null) {
