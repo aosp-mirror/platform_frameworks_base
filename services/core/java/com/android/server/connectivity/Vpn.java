@@ -1253,7 +1253,7 @@ public class Vpn {
 
             final PackageManager packageManager = mUserIdContext.getPackageManager();
             if (packageManager == null) {
-                throw new UnsupportedOperationException("Cannot get PackageManager.");
+                throw new IllegalStateException("Cannot get PackageManager.");
             }
             final ResolveInfo info = packageManager.resolveService(intent, 0 /* flags */);
             if (info == null) {
