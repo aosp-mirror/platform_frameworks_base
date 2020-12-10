@@ -29,6 +29,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -36,7 +37,6 @@ import android.media.AudioManager;
 import android.os.Handler;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
@@ -229,8 +229,22 @@ public class VibrationSettingsTest {
     }
 
     @Test
-    public void shouldVibrateForUid_withBackgroundAllowedUsage_returnTrue() throws RemoteException {
+    public void shouldVibrateForUid_withForegroundOnlyUsage_returnsTrueWhInForeground() {
+        assertTrue(mVibrationSettings.shouldVibrateForUid(UID, VibrationAttributes.USAGE_TOUCH));
+
+        mVibrationSettings.mUidObserver.onUidStateChanged(
+                UID, ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND, 0, 0);
+        assertFalse(mVibrationSettings.shouldVibrateForUid(UID, VibrationAttributes.USAGE_TOUCH));
+    }
+
+    @Test
+    public void shouldVibrateForUid_withBackgroundAllowedUsage_returnTrue() {
+        mVibrationSettings.mUidObserver.onUidStateChanged(
+                UID, ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND, 0, 0);
+
         assertTrue(mVibrationSettings.shouldVibrateForUid(UID, VibrationAttributes.USAGE_ALARM));
+        assertTrue(mVibrationSettings.shouldVibrateForUid(UID,
+                VibrationAttributes.USAGE_COMMUNICATION_REQUEST));
         assertTrue(mVibrationSettings.shouldVibrateForUid(UID,
                 VibrationAttributes.USAGE_NOTIFICATION));
         assertTrue(mVibrationSettings.shouldVibrateForUid(UID, VibrationAttributes.USAGE_RINGTONE));
@@ -377,5 +391,4 @@ public class VibrationSettingsTest {
         mAudioManager.setRingerModeInternal(ringerMode);
         assertEquals(ringerMode, mAudioManager.getRingerModeInternal());
     }
-
 }
