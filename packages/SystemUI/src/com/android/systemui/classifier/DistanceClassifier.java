@@ -123,7 +123,6 @@ class DistanceClassifier extends FalsingClassifier {
         }
 
         VelocityTracker velocityTracker = VelocityTracker.obtain();
-
         for (MotionEvent motionEvent : motionEvents) {
             velocityTracker.addMovement(motionEvent);
         }
@@ -148,8 +147,8 @@ class DistanceClassifier extends FalsingClassifier {
     }
 
     @Override
-    public boolean isFalseTouch() {
-        return !getPassedFlingThreshold();
+    Result calculateFalsingResult(double historyPenalty, double historyConfidence) {
+        return new Result(!getPassedFlingThreshold(), 0.5);
     }
 
     @Override

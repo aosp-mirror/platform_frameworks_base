@@ -40,8 +40,8 @@ public class SingleTapClassifier extends FalsingClassifier {
     }
 
     @Override
-    boolean isFalseTouch() {
-        return !isTap(getRecentMotionEvents());
+    Result calculateFalsingResult(double historyPenalty, double historyConfidence) {
+        return new Result(!isTap(getRecentMotionEvents()), 0.5);
     }
 
     /** Given a list of {@link android.view.MotionEvent}'s, returns true if the look like a tap. */

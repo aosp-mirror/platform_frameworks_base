@@ -61,10 +61,10 @@ public class TypeClassifierTest extends ClassifierTest {
         when(mDataProvider.isUp()).thenReturn(false);
 
         when(mDataProvider.isRight()).thenReturn(false);  // right should cause no effect.
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         when(mDataProvider.isRight()).thenReturn(true);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
     }
 
     @Test
@@ -73,11 +73,11 @@ public class TypeClassifierTest extends ClassifierTest {
 
         when(mDataProvider.isVertical()).thenReturn(false);
         when(mDataProvider.isUp()).thenReturn(false);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
 
         when(mDataProvider.isVertical()).thenReturn(true);
         when(mDataProvider.isUp()).thenReturn(true);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
     }
 
     @Test
@@ -87,10 +87,10 @@ public class TypeClassifierTest extends ClassifierTest {
         when(mDataProvider.isUp()).thenReturn(false);
 
         when(mDataProvider.isRight()).thenReturn(false);  // right should cause no effect.
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         when(mDataProvider.isRight()).thenReturn(true);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
     }
 
     @Test
@@ -99,11 +99,11 @@ public class TypeClassifierTest extends ClassifierTest {
 
         when(mDataProvider.isVertical()).thenReturn(false);
         when(mDataProvider.isUp()).thenReturn(false);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
 
         when(mDataProvider.isVertical()).thenReturn(true);
         when(mDataProvider.isUp()).thenReturn(true);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
     }
 
     @Test
@@ -113,10 +113,10 @@ public class TypeClassifierTest extends ClassifierTest {
         when(mDataProvider.isUp()).thenReturn(false);
 
         when(mDataProvider.isRight()).thenReturn(false);  // right should cause no effect.
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         when(mDataProvider.isRight()).thenReturn(true);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
     }
 
     @Test
@@ -125,11 +125,11 @@ public class TypeClassifierTest extends ClassifierTest {
 
         when(mDataProvider.isVertical()).thenReturn(false);
         when(mDataProvider.isUp()).thenReturn(false);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
 
         when(mDataProvider.isVertical()).thenReturn(true);
         when(mDataProvider.isUp()).thenReturn(true);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
     }
 
     @Test
@@ -139,19 +139,19 @@ public class TypeClassifierTest extends ClassifierTest {
 
         when(mDataProvider.isUp()).thenReturn(false);  // up and right should cause no effect.
         when(mDataProvider.isRight()).thenReturn(false);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         when(mDataProvider.isUp()).thenReturn(true);
         when(mDataProvider.isRight()).thenReturn(false);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         when(mDataProvider.isUp()).thenReturn(false);
         when(mDataProvider.isRight()).thenReturn(true);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         when(mDataProvider.isUp()).thenReturn(true);
         when(mDataProvider.isRight()).thenReturn(true);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
     }
 
     @Test
@@ -161,19 +161,19 @@ public class TypeClassifierTest extends ClassifierTest {
 
         when(mDataProvider.isUp()).thenReturn(false);  // up and right should cause no effect.
         when(mDataProvider.isRight()).thenReturn(false);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
 
         when(mDataProvider.isUp()).thenReturn(true);
         when(mDataProvider.isRight()).thenReturn(false);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
 
         when(mDataProvider.isUp()).thenReturn(false);
         when(mDataProvider.isRight()).thenReturn(true);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
 
         when(mDataProvider.isUp()).thenReturn(true);
         when(mDataProvider.isRight()).thenReturn(true);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
     }
 
 
@@ -185,10 +185,10 @@ public class TypeClassifierTest extends ClassifierTest {
 
 
         when(mDataProvider.isRight()).thenReturn(false);  // right should cause no effect.
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         when(mDataProvider.isRight()).thenReturn(true);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
     }
 
     @Test
@@ -197,15 +197,15 @@ public class TypeClassifierTest extends ClassifierTest {
 
         when(mDataProvider.isVertical()).thenReturn(false);
         when(mDataProvider.isUp()).thenReturn(true);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
 
         when(mDataProvider.isVertical()).thenReturn(true);
         when(mDataProvider.isUp()).thenReturn(false);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
 
         when(mDataProvider.isVertical()).thenReturn(false);
         when(mDataProvider.isUp()).thenReturn(false);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
     }
 
     @Test
@@ -216,10 +216,10 @@ public class TypeClassifierTest extends ClassifierTest {
 
 
         when(mDataProvider.isRight()).thenReturn(false);  // right should cause no effect.
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         when(mDataProvider.isRight()).thenReturn(true);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
     }
 
     @Test
@@ -228,15 +228,15 @@ public class TypeClassifierTest extends ClassifierTest {
 
         when(mDataProvider.isVertical()).thenReturn(false);
         when(mDataProvider.isUp()).thenReturn(true);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
 
         when(mDataProvider.isVertical()).thenReturn(true);
         when(mDataProvider.isUp()).thenReturn(false);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
 
         when(mDataProvider.isVertical()).thenReturn(false);
         when(mDataProvider.isUp()).thenReturn(false);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
     }
 
     @Test
@@ -247,10 +247,10 @@ public class TypeClassifierTest extends ClassifierTest {
 
 
         when(mDataProvider.isVertical()).thenReturn(false);  // vertical should cause no effect.
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         when(mDataProvider.isVertical()).thenReturn(true);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
     }
 
     @Test
@@ -259,15 +259,15 @@ public class TypeClassifierTest extends ClassifierTest {
 
         when(mDataProvider.isRight()).thenReturn(false);
         when(mDataProvider.isUp()).thenReturn(true);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
 
         when(mDataProvider.isRight()).thenReturn(true);
         when(mDataProvider.isUp()).thenReturn(false);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
 
         when(mDataProvider.isRight()).thenReturn(false);
         when(mDataProvider.isUp()).thenReturn(false);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
     }
 
     @Test
@@ -278,10 +278,10 @@ public class TypeClassifierTest extends ClassifierTest {
 
 
         when(mDataProvider.isVertical()).thenReturn(false);  // vertical should cause no effect.
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         when(mDataProvider.isVertical()).thenReturn(true);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
     }
 
     @Test
@@ -290,14 +290,14 @@ public class TypeClassifierTest extends ClassifierTest {
 
         when(mDataProvider.isUp()).thenReturn(true);
         when(mDataProvider.isRight()).thenReturn(true);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
 
         when(mDataProvider.isUp()).thenReturn(false);
         when(mDataProvider.isRight()).thenReturn(true);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
 
         when(mDataProvider.isUp()).thenReturn(false);
         when(mDataProvider.isRight()).thenReturn(true);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
     }
 }

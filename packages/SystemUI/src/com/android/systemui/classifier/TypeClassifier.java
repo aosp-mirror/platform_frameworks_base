@@ -38,7 +38,7 @@ public class TypeClassifier extends FalsingClassifier {
     }
 
     @Override
-    public boolean isFalseTouch() {
+    Result calculateFalsingResult(double historyPenalty, double historyConfidence) {
         boolean vertical = isVertical();
         boolean up = isUp();
         boolean right = isRight();
@@ -47,18 +47,18 @@ public class TypeClassifier extends FalsingClassifier {
             case QUICK_SETTINGS:
             case PULSE_EXPAND:
             case NOTIFICATION_DRAG_DOWN:
-                return !vertical || up;
+                return new Result(!vertical || up, 0.5);
             case NOTIFICATION_DISMISS:
-                return vertical;
+                return new Result(vertical, 0.5);
             case UNLOCK:
             case BOUNCER_UNLOCK:
-                return !vertical || !up;
+                return new Result(!vertical || !up, 0.5);
             case LEFT_AFFORDANCE:  // Swiping from the bottom left corner for camera or similar.
-                return !right || !up;
+                return new Result(!right || !up, 0.5);
             case RIGHT_AFFORDANCE:  // Swiping from the bottom right corner for camera or similar.
-                return right || !up;
+                return new Result(right || !up, 0.5);
             default:
-                return true;
+                return new Result(true, 1);
         }
     }
 

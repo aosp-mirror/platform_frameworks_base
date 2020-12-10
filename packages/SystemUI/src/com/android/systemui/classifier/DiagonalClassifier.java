@@ -62,17 +62,16 @@ class DiagonalClassifier extends FalsingClassifier {
                 VERTICAL_ANGLE_RANGE);
     }
 
-    @Override
-    boolean isFalseTouch() {
+    Result calculateFalsingResult(double historyPenalty, double historyConfidence) {
         float angle = getAngle();
 
         if (angle == Float.MAX_VALUE) {  // Unknown angle
-            return false;
+            return new Result(false, 0);
         }
 
         if (getInteractionType() == LEFT_AFFORDANCE
                 || getInteractionType() == RIGHT_AFFORDANCE) {
-            return false;
+            return new Result(false, 0);
         }
 
         float minAngle = DIAGONAL - mHorizontalAngleRange;
@@ -82,11 +81,11 @@ class DiagonalClassifier extends FalsingClassifier {
             maxAngle = DIAGONAL + mVerticalAngleRange;
         }
 
-        return angleBetween(angle, minAngle, maxAngle)
+        return new Result(angleBetween(angle, minAngle, maxAngle)
                 || angleBetween(angle, minAngle + NINETY_DEG, maxAngle + NINETY_DEG)
                 || angleBetween(angle, minAngle - NINETY_DEG, maxAngle - NINETY_DEG)
                 || angleBetween(angle, minAngle + ONE_HUNDRED_EIGHTY_DEG,
-                maxAngle + ONE_HUNDRED_EIGHTY_DEG);
+                maxAngle + ONE_HUNDRED_EIGHTY_DEG), 0.5f);
     }
 
     @Override

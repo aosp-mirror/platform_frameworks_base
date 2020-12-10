@@ -23,7 +23,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
-import android.view.MotionEvent;
 
 import androidx.annotation.NonNull;
 
@@ -33,10 +32,12 @@ import com.android.systemui.dagger.qualifiers.TestHarness;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.util.sensors.ThresholdSensor;
+import com.android.systemui.util.time.SystemClock;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -63,6 +64,8 @@ public class BrightLineFalsingManager implements FalsingManager {
     private final DockManager mDockManager;
     private final SingleTapClassifier mSingleTapClassifier;
     private final DoubleTapClassifier mDoubleTapClassifier;
+    private final HistoryTracker mHistoryTracker;
+    private final SystemClock mSystemClock;
     private final boolean mTestHarness;
     private final MetricsLogger mMetricsLogger;
     private int mIsFalseTouchCalls;
@@ -85,6 +88,17 @@ public class BrightLineFalsingManager implements FalsingManager {
         }
     };
 
+    private final FalsingDataProvider.GestureCompleteListener mGestureCompleteListener =
+            new FalsingDataProvider.GestureCompleteListener() {
+        @Override
+        public void onGestureComplete() {
+            mHistoryTracker.addResults(
+                    mClassifiers.stream().map(FalsingClassifier::classifyGesture)
+                            .collect(Collectors.toCollection(ArrayList::new)),
+                    mSystemClock.uptimeMillis());
+        }
+    };
+
     private boolean mPreviousResult = false;
 
     @Inject
@@ -92,6 +106,7 @@ public class BrightLineFalsingManager implements FalsingManager {
             DockManager dockManager, MetricsLogger metricsLogger,
             @Named(BRIGHT_LINE_GESTURE_CLASSIFERS) Set<FalsingClassifier> classifiers,
             SingleTapClassifier singleTapClassifier, DoubleTapClassifier doubleTapClassifier,
+            HistoryTracker historyTracker, SystemClock systemClock,
             @TestHarness boolean testHarness) {
         mDataProvider = falsingDataProvider;
         mDockManager = dockManager;
@@ -99,9 +114,12 @@ public class BrightLineFalsingManager implements FalsingManager {
         mClassifiers = classifiers;
         mSingleTapClassifier = singleTapClassifier;
         mDoubleTapClassifier = doubleTapClassifier;
+        mHistoryTracker = historyTracker;
+        mSystemClock = systemClock;
         mTestHarness = testHarness;
 
         mDataProvider.addSessionListener(mSessionListener);
+        mDataProvider.addGestureCompleteListener(mGestureCompleteListener);
     }
 
     @Override
@@ -119,7 +137,8 @@ public class BrightLineFalsingManager implements FalsingManager {
         mPreviousResult = !mTestHarness
                 && !mDataProvider.isJustUnlockedWithFace() && !mDockManager.isDocked()
                 && mClassifiers.stream().anyMatch(falsingClassifier -> {
-                    boolean result = falsingClassifier.isFalseTouch();
+                    boolean result = falsingClassifier.classifyGesture(
+                            mHistoryTracker.falsePenalty(), mHistoryTracker.falseConfidence());
                     if (result) {
                         logInfo(String.format(
                                 (Locale) null,
@@ -179,7 +198,7 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     @Override
     public boolean isFalseDoubleTap() {
-        boolean result = mDoubleTapClassifier.isFalseTouch();
+        boolean result = mDoubleTapClassifier.classifyGesture().isFalse();
         if (result) {
             logInfo(String.format(
                     (Locale) null, "{classifier=%s}", mDoubleTapClassifier.getClass().getName()));
@@ -189,13 +208,6 @@ public class BrightLineFalsingManager implements FalsingManager {
             }
         }
         return result;
-    }
-
-    @Override
-    public void onTouchEvent(MotionEvent motionEvent, int width, int height) {
-        // TODO: some of these classifiers might allow us to abort early, meaning we don't have to
-        // make these calls.
-        mClassifiers.forEach((classifier) -> classifier.onTouchEvent(motionEvent));
     }
 
     @Override
@@ -271,6 +283,8 @@ public class BrightLineFalsingManager implements FalsingManager {
     @Override
     public void cleanup() {
         mDataProvider.removeSessionListener(mSessionListener);
+        mDataProvider.removeGestureCompleteListener(mGestureCompleteListener);
+        mClassifiers.forEach(FalsingClassifier::cleanup);
     }
 
     static void logDebug(String msg) {
