@@ -20,8 +20,8 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
-import static android.window.TransitionInfo.TRANSIT_HIDE;
-import static android.window.TransitionInfo.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_TO_BACK;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -241,7 +241,7 @@ public class TransitionTests extends WindowTestsBase {
         assertEquals(TRANSIT_OPEN,
                 info.getChange(openTask.mRemoteToken.toWindowContainerToken()).getMode());
         // No exestence change on closing, so HIDE rather than CLOSE
-        assertEquals(TRANSIT_HIDE,
+        assertEquals(TRANSIT_TO_BACK,
                 info.getChange(closeTask.mRemoteToken.toWindowContainerToken()).getMode());
     }
 

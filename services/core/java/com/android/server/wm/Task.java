@@ -59,7 +59,7 @@ import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.SurfaceControl.METADATA_TASK_ID;
-import static android.view.WindowManager.TRANSIT_CHANGE_WINDOWING_MODE;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
 import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
@@ -2356,7 +2356,7 @@ class Task extends WindowContainer<WindowContainer> {
      * Initializes a change transition. See {@link SurfaceFreezer} for more information.
      */
     private void initializeChangeTransition(Rect startBounds) {
-        mDisplayContent.prepareAppTransition(TRANSIT_CHANGE_WINDOWING_MODE);
+        mDisplayContent.prepareAppTransition(TRANSIT_CHANGE);
         mDisplayContent.mChangingContainers.add(this);
 
         mSurfaceFreezer.freeze(getPendingTransaction(), startBounds);
@@ -2440,8 +2440,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     @Override
     public SurfaceControl getFreezeSnapshotTarget() {
-        if (!mDisplayContent.mAppTransition.containsTransitRequest(
-                TRANSIT_CHANGE_WINDOWING_MODE)) {
+        if (!mDisplayContent.mAppTransition.containsTransitRequest(TRANSIT_CHANGE)) {
             return null;
         }
         // Skip creating snapshot if this transition is controlled by a remote animator which

@@ -18,12 +18,18 @@ package com.android.server.wm;
 
 
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.TRANSIT_CHANGE;
+import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_NONE;
+import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_TO_BACK;
+import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -397,7 +403,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                     parent == null ? "no parent" : ("parent can't be target " + parent));
             return false;
         }
-        @TransitionInfo.TransitionMode int mode = TransitionInfo.TRANSIT_NONE;
+        @TransitionInfo.TransitionMode int mode = TRANSIT_NONE;
         // Go through all siblings of this target to see if any of them would prevent
         // the target from promoting.
         siblingLoop:
@@ -411,11 +417,11 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 if (depth < 0) continue;
                 if (depth == 0) {
                     final int siblingMode = sibling.isVisibleRequested()
-                            ? TransitionInfo.TRANSIT_OPEN : TransitionInfo.TRANSIT_CLOSE;
+                            ? TRANSIT_OPEN : TRANSIT_CLOSE;
                     ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                             "        sibling is a top target with mode %s",
                             TransitionInfo.modeToString(siblingMode));
-                    if (mode == TransitionInfo.TRANSIT_NONE) {
+                    if (mode == TRANSIT_NONE) {
                         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                                 "          no common mode yet, so set it");
                         mode = siblingMode;
@@ -701,12 +707,12 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         int getTransitMode(@NonNull WindowContainer wc) {
             final boolean nowVisible = wc.isVisibleRequested();
             if (nowVisible == mVisible) {
-                return TransitionInfo.TRANSIT_CHANGE;
+                return TRANSIT_CHANGE;
             }
             if (mExistenceChanged) {
-                return nowVisible ? TransitionInfo.TRANSIT_OPEN : TransitionInfo.TRANSIT_CLOSE;
+                return nowVisible ? TRANSIT_OPEN : TRANSIT_CLOSE;
             } else {
-                return nowVisible ? TransitionInfo.TRANSIT_SHOW : TransitionInfo.TRANSIT_HIDE;
+                return nowVisible ? TRANSIT_TO_FRONT : TRANSIT_TO_BACK;
             }
         }
 

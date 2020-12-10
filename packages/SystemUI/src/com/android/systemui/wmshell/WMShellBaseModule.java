@@ -37,6 +37,7 @@ import com.android.wm.shell.FullscreenTaskListener;
 import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.ShellInit;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.Transitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.bubbles.BubbleController;
@@ -173,14 +174,16 @@ public abstract class WMShellBaseModule {
             Optional<SplitScreen> splitScreenOptional,
             Optional<AppPairs> appPairsOptional,
             LetterboxTaskListener letterboxTaskListener,
-            FullscreenTaskListener fullscreenTaskListener) {
+            FullscreenTaskListener fullscreenTaskListener,
+            Transitions transitions) {
         return new ShellInit(displayImeController,
                 dragAndDropController,
                 shellTaskOrganizer,
                 splitScreenOptional,
                 appPairsOptional,
                 letterboxTaskListener,
-                fullscreenTaskListener);
+                fullscreenTaskListener,
+                transitions);
     }
 
     /**
@@ -278,12 +281,9 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static ShellTaskOrganizer provideShellTaskOrganizer(SyncTransactionQueue syncQueue,
-            @ShellMainThread ShellExecutor shellMainExecutor,
-            @ShellAnimationThread ShellExecutor shellAnimationExecutor,
-            TransactionPool transactionPool, Context context) {
-        return new ShellTaskOrganizer(syncQueue, transactionPool, shellMainExecutor,
-                shellAnimationExecutor, context);
+    static ShellTaskOrganizer provideShellTaskOrganizer(@ShellMainThread ShellExecutor mainExecutor,
+            Context context) {
+        return new ShellTaskOrganizer(mainExecutor, context);
     }
 
     @WMSingleton
@@ -349,5 +349,13 @@ public abstract class WMShellBaseModule {
     @Provides
     static LetterboxConfigController provideLetterboxConfigController(Context context) {
         return new LetterboxConfigController(context);
+    }
+
+    @WMSingleton
+    @Provides
+    static Transitions provideTransitions(ShellTaskOrganizer organizer, TransactionPool pool,
+            @ShellMainThread ShellExecutor mainExecutor,
+            @ShellAnimationThread ShellExecutor animExecutor) {
+        return new Transitions(organizer, pool, mainExecutor, animExecutor);
     }
 }

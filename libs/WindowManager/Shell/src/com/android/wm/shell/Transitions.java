@@ -16,10 +16,10 @@
 
 package com.android.wm.shell;
 
-import static android.window.TransitionInfo.TRANSIT_CLOSE;
-import static android.window.TransitionInfo.TRANSIT_HIDE;
-import static android.window.TransitionInfo.TRANSIT_OPEN;
-import static android.window.TransitionInfo.TRANSIT_SHOW;
+import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_TO_BACK;
+import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
@@ -40,7 +40,6 @@ import androidx.annotation.BinderThread;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
-import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.util.ArrayList;
@@ -62,7 +61,7 @@ public class Transitions {
     /** Keeps track of currently tracked transitions and all the animations associated with each */
     private final ArrayMap<IBinder, ArrayList<Animator>> mActiveTransitions = new ArrayMap<>();
 
-    Transitions(@NonNull WindowOrganizer organizer, @NonNull TransactionPool pool,
+    public Transitions(@NonNull WindowOrganizer organizer, @NonNull TransactionPool pool,
             @NonNull ShellExecutor mainExecutor, @NonNull ShellExecutor animExecutor) {
         mOrganizer = organizer;
         mTransactionPool = pool;
@@ -119,8 +118,8 @@ public class Transitions {
     }
 
     private static boolean isOpeningType(@WindowManager.TransitionType int type) {
-        return type == WindowManager.TRANSIT_OPEN
-                || type == WindowManager.TRANSIT_TO_FRONT
+        return type == TRANSIT_OPEN
+                || type == TRANSIT_TO_FRONT
                 || type == WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
     }
 
@@ -150,7 +149,7 @@ public class Transitions {
 
             // Don't animate anything with an animating parent
             if (change.getParent() != null) {
-                if (mode == TRANSIT_OPEN || mode == TRANSIT_SHOW) {
+                if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT) {
                     t.show(leash);
                     t.setMatrix(leash, 1, 0, 0, 1);
                 }
@@ -161,7 +160,7 @@ public class Transitions {
             t.setPosition(leash, change.getEndAbsBounds().left - info.getRootOffset().x,
                     change.getEndAbsBounds().top - info.getRootOffset().y);
             // Put all the OPEN/SHOW on top
-            if (mode == TRANSIT_OPEN || mode == TRANSIT_SHOW) {
+            if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT) {
                 t.show(leash);
                 t.setMatrix(leash, 1, 0, 0, 1);
                 if (isOpening) {
@@ -174,7 +173,7 @@ public class Transitions {
                     t.setLayer(leash, -i);
                     t.setAlpha(leash, 1.f);
                 }
-            } else if (mode == TRANSIT_CLOSE || mode == TRANSIT_HIDE) {
+            } else if (mode == TRANSIT_CLOSE || mode == TRANSIT_TO_BACK) {
                 if (isOpening) {
                     // put on bottom and leave visible without fade
                     t.setLayer(leash, -i);
