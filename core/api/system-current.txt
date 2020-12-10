@@ -11153,7 +11153,6 @@ package android.telephony.data {
     method @NonNull public android.telephony.data.ApnThrottleStatus.Builder setSlotIndex(int);
     method @NonNull public android.telephony.data.ApnThrottleStatus.Builder setThrottleExpiryTimeMillis(long);
     method @NonNull public android.telephony.data.ApnThrottleStatus.Builder setTransportType(int);
-    field public static final long NO_THROTTLE_EXPIRY_TIME = -1L; // 0xffffffffffffffffL
   }
 
   public final class DataCallResponse implements android.os.Parcelable {
