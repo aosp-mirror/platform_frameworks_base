@@ -205,12 +205,9 @@ class SplitScreenTaskListener implements ShellTaskOrganizer.TaskListener {
 
     private void updateChildTaskSurface(
             RunningTaskInfo taskInfo, SurfaceControl leash, boolean firstAppeared) {
-        final Rect taskBounds = taskInfo.getConfiguration().windowConfiguration.getBounds();
         final Point taskPositionInParent = taskInfo.positionInParent;
-        final Rect corp =  new Rect(taskBounds);
-        corp.offset(-taskBounds.left, -taskBounds.top);
         mSyncQueue.runInSync(t -> {
-            t.setWindowCrop(leash, corp);
+            t.setWindowCrop(leash, null);
             t.setPosition(leash, taskPositionInParent.x, taskPositionInParent.y);
             if (firstAppeared && !Transitions.ENABLE_SHELL_TRANSITIONS) {
                 t.setAlpha(leash, 1f);
