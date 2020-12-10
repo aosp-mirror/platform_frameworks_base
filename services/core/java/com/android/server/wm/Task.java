@@ -4092,7 +4092,7 @@ class Task extends WindowContainer<WindowContainer> {
         info.positionInParent = getRelativePosition();
         info.parentBounds = getParentBounds();
 
-        info.pictureInPictureParams = getPictureInPictureParams();
+        info.pictureInPictureParams = getPictureInPictureParams(top);
         info.topActivityInfo = mReuseActivitiesReport.top != null
                 ? mReuseActivitiesReport.top.info
                 : null;
@@ -4109,7 +4109,10 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     @Nullable PictureInPictureParams getPictureInPictureParams() {
-        final Task top = getTopMostTask();
+        return getPictureInPictureParams(getTopMostTask());
+    }
+
+    private @Nullable PictureInPictureParams getPictureInPictureParams(Task top) {
         if (top == null) return null;
         final ActivityRecord rootActivity = top.getRootActivity();
         return (rootActivity == null || rootActivity.pictureInPictureArgs.empty())
