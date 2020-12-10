@@ -296,6 +296,16 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.Wearable.OEM_SETUP_VERSION, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.Wearable.MASTER_GESTURES_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.UNGAZE_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(
+                Global.Wearable.BATTERY_SAVER_MODE,
+                new DiscreteValueValidator(
+                        new String[] {
+                                String.valueOf(Global.Wearable.BATTERY_SAVER_MODE_NONE),
+                                String.valueOf(Global.Wearable.BATTERY_SAVER_MODE_LIGHT),
+                                String.valueOf(Global.Wearable.BATTERY_SAVER_MODE_TRADITIONAL_WATCH),
+                                String.valueOf(Global.Wearable.BATTERY_SAVER_MODE_TIME_ONLY),
+                                String.valueOf(Global.Wearable.BATTERY_SAVER_MODE_CUSTOM)
+                        }));
     }
 }
 
