@@ -221,14 +221,6 @@ package android.hardware {
 
 }
 
-package android.icu.util {
-
-  public class JapaneseCalendar extends android.icu.util.GregorianCalendar {
-    field @Deprecated public static final int CURRENT_ERA;
-  }
-
-}
-
 package android.location {
 
   public class Location implements android.os.Parcelable {
