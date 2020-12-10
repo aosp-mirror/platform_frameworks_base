@@ -78,12 +78,14 @@ import android.telephony.Annotation.RadioPowerState;
 import android.telephony.Annotation.SimActivationState;
 import android.telephony.Annotation.ThermalMitigationResult;
 import android.telephony.Annotation.UiccAppType;
+import android.telephony.Annotation.UiccAppTypeExt;
 import android.telephony.CallForwardingInfo.CallForwardingReason;
 import android.telephony.VisualVoicemailService.VisualVoicemailTask;
 import android.telephony.data.ApnSetting;
 import android.telephony.data.ApnSetting.MvnoType;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.emergency.EmergencyNumber.EmergencyServiceCategories;
+import android.telephony.gba.UaSecurityProtocolIdentifier;
 import android.telephony.ims.ImsMmTelManager;
 import android.telephony.ims.aidl.IImsConfig;
 import android.telephony.ims.aidl.IImsRegistration;
@@ -7163,6 +7165,8 @@ public class TelephonyManager {
         }
     }
 
+    /** UICC application type is unknown or not specified */
+    public static final int APPTYPE_UNKNOWN = PhoneConstants.APPTYPE_UNKNOWN;
     /** UICC application type is SIM */
     public static final int APPTYPE_SIM = PhoneConstants.APPTYPE_SIM;
     /** UICC application type is USIM */
@@ -14280,5 +14284,174 @@ public class TelephonyManager {
             ex.rethrowFromSystemServer();
         }
         return THERMAL_MITIGATION_RESULT_UNKNOWN_ERROR;
+    }
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"GBA_FAILURE_REASON_"}, value = {
+            GBA_FAILURE_REASON_UNKNOWN,
+            GBA_FAILURE_REASON_FEATURE_NOT_SUPPORTED,
+            GBA_FAILURE_REASON_FEATURE_NOT_READY,
+            GBA_FAILURE_REASON_NETWORK_FAILURE,
+            GBA_FAILURE_REASON_INCORRECT_NAF_ID,
+            GBA_FAILURE_REASON_SECURITY_PROTOCOL_NOT_SUPPORTED})
+    public @interface AuthenticationFailureReason {}
+
+    /**
+     * GBA Authentication has failed for an unknown reason.
+     *
+     * <p>The caller should retry a message that failed with this response.
+     * @hide
+     */
+    @SystemApi
+    public static final int GBA_FAILURE_REASON_UNKNOWN = 0;
+
+    /**
+     * GBA Authentication is not supported by the carrier, SIM or android.
+     *
+     * <p>Application should use other authentication mechanisms if possible.
+     * @hide
+     */
+    @SystemApi
+    public static final int GBA_FAILURE_REASON_FEATURE_NOT_SUPPORTED = 1;
+
+    /**
+     * GBA Authentication service is not ready for use.
+     *
+     * <p>Application could try again at a later time.
+     * @hide
+     */
+    @SystemApi
+    public static final int GBA_FAILURE_REASON_FEATURE_NOT_READY = 2;
+
+    /**
+     * GBA Authentication has been failed by the network.
+     * @hide
+     */
+    @SystemApi
+    public static final int GBA_FAILURE_REASON_NETWORK_FAILURE = 3;
+
+    /**
+     * GBA Authentication has failed due to incorrect NAF URL.
+     * @hide
+     */
+    @SystemApi
+    public static final int GBA_FAILURE_REASON_INCORRECT_NAF_ID = 4;
+
+    /**
+     * GBA Authentication has failed due to unsupported security protocol
+     * @hide
+     */
+    @SystemApi
+    public static final int GBA_FAILURE_REASON_SECURITY_PROTOCOL_NOT_SUPPORTED = 5;
+
+    /**
+     * The callback associated with a {@link #bootstrapAuthenticationRequest()}.
+     * @hide
+     */
+    @SystemApi
+    public static class BootstrapAuthenticationCallback {
+
+        /**
+         * Invoked when the previously requested GBA keys are available (@see
+         * bootstrapAuthenticationRequest()).
+         * @param gbaKey Ks_NAF/Ks_ext_NAF Response
+         * @param transactionId Bootstrapping Transaction Identifier
+         */
+        public void onKeysAvailable(@NonNull byte[] gbaKey, @NonNull String transactionId) {}
+
+        /**
+         * @param reason The reason for the authentication failure.
+         */
+        public void onAuthenticationFailure(@AuthenticationFailureReason int reason) {}
+    }
+
+    /**
+     * Used to get the Generic Bootstrapping Architecture authentication keys
+     * KsNAF/Ks_ext_NAF for a particular NAF as defined in 3GPP spec TS 33.220 for
+     * the specified sub id.
+     *
+     * <p>Application must be prepared to wait for receiving the Gba keys through the
+     * registered callback and not invoke the API on the main application thread.
+     * Application also must call the api to get the fresh key every time instead
+     * of caching the key.
+     *
+     * Following steps may be invoked on the API call depending on the state of the
+     * underlying GBA implementation:
+     * <ol>
+     *     <li>Resolve and bind to a Gba implementation.</li>
+     *     <li>Run bootstrapping if no valid keys are available or bootstrapping is forced.</li>
+     *     <li>Generate the ks_NAF/ ks_Ext_NAF to be returned via the callback.</li>
+     * </ol>
+     *
+     * <p> Requires Permission: MODIFY_PHONE_STATE or that the calling app has carrier
+     * privileges (see {@link #hasCarrierPrivileges}).
+     * @param appType icc application type, like {@link #APPTYPE_USIM} or {@link
+     * #APPTYPE_ISIM} or {@link#APPTYPE_UNKNOWN}
+     * @param nafId Network Application Function(NAF) fully qualified domain name and
+     * the selected GBA mode. It shall contain two parts delimited by "@" sign. The first
+     * part is the constant string "3GPP-bootstrapping" (GBA_ME),
+     * "3GPP-bootstrapping-uicc" (GBA_ U), or "3GPP-bootstrapping-digest" (GBA_Digest),
+     * and the latter part shall be the FQDN of the NAF (e.g.
+     * "3GPP-bootstrapping@naf1.operator.com" or "3GPP-bootstrapping-uicc@naf1.operator.com",
+     * or "3GPP-bootstrapping-digest@naf1.operator.com").
+     * @param securityProtocol Security protocol identifier between UE and NAF.  See
+     * 3GPP TS 33.220 Annex H. Application can use
+     * {@link UaSecurityProtocolIdentifier#createDefaultUaSpId},
+     * {@link UaSecurityProtocolIdentifier#create3GppUaSpId},
+     * to create the ua security protocol identifier as needed
+     * @param forceBootStrapping true=force bootstrapping, false=do not force
+     * bootstrapping. Bootstrapping shouldn't be forced unless the application sees
+     * authentication errors from the server.
+     * @param e The {@link Executor} that will be used to call the Gba callback.
+     * @param callback A callback called on the supplied {@link Executor} that will
+     * contain the GBA Ks_NAF/Ks_ext_NAF when available. If the NAF keys are
+     * available and valid at the time of call and bootstrapping is not requested,
+     * then the callback shall be invoked with the available keys.
+     * @hide
+     */
+    @SystemApi
+    @WorkerThread
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void bootstrapAuthenticationRequest(
+            @UiccAppTypeExt int appType, @NonNull Uri nafId,
+            @NonNull UaSecurityProtocolIdentifier securityProtocol,
+            boolean forceBootStrapping, @NonNull Executor e,
+            @NonNull BootstrapAuthenticationCallback callback) {
+        try {
+            ITelephony service = getITelephony();
+            if (service == null) {
+                e.execute(() -> callback.onAuthenticationFailure(
+                        GBA_FAILURE_REASON_FEATURE_NOT_READY));
+                return;
+            }
+            service.bootstrapAuthenticationRequest(
+                    getSubId(), appType, nafId, securityProtocol, forceBootStrapping,
+                    new IBootstrapAuthenticationCallback.Stub() {
+                        @Override
+                        public void onKeysAvailable(int token, byte[] gbaKey,
+                                String transactionId) {
+                            final long identity = Binder.clearCallingIdentity();
+                            try {
+                                e.execute(() -> callback.onKeysAvailable(gbaKey, transactionId));
+                            } finally {
+                                Binder.restoreCallingIdentity(identity);
+                            }
+                        }
+
+                        @Override
+                        public void onAuthenticationFailure(int token, int reason) {
+                            final long identity = Binder.clearCallingIdentity();
+                            try {
+                                e.execute(() -> callback.onAuthenticationFailure(reason));
+                            } finally {
+                                Binder.restoreCallingIdentity(identity);
+                            }
+                        }
+                    });
+        } catch (RemoteException exception) {
+            Log.e(TAG, "Error calling ITelephony#bootstrapAuthenticationRequest", exception);
+            e.execute(() -> callback.onAuthenticationFailure(GBA_FAILURE_REASON_FEATURE_NOT_READY));
+        }
     }
 }

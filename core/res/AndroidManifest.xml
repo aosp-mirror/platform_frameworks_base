@@ -2323,6 +2323,14 @@
     <permission android:name="android.permission.READ_CARRIER_APP_INFO"
         android:protectionLevel="signature" />
 
+    <!-- Required by a GbaService to ensure that only the system can bind to it.
+         <p>Protection level: signature
+         @SystemApi
+         @hide
+    -->
+    <permission android:name="android.permission.BIND_GBA_SERVICE"
+        android:protectionLevel="signature" />
+
     <!-- ================================== -->
     <!-- Permissions for sdcard interaction -->
     <!-- ================================== -->
