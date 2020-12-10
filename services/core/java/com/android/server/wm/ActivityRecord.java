@@ -95,18 +95,18 @@ import static android.view.Display.COLOR_MODE_DEFAULT;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
-import static android.view.WindowManager.TRANSIT_CLOSE;
-import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_CLOSE;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN_BEHIND;
-import static android.view.WindowManager.TRANSIT_OLD_UNSET;
+import static android.view.SurfaceControl.getGlobalTransaction;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
+import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_UNSET;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
@@ -182,7 +182,6 @@ import static com.android.server.wm.IdentifierProto.USER_ID;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
-import static com.android.server.wm.Task.TASK_VISIBILITY_VISIBLE;
 import static com.android.server.wm.Task.ActivityState.DESTROYED;
 import static com.android.server.wm.Task.ActivityState.DESTROYING;
 import static com.android.server.wm.Task.ActivityState.FINISHING;
@@ -194,6 +193,7 @@ import static com.android.server.wm.Task.ActivityState.RESUMED;
 import static com.android.server.wm.Task.ActivityState.STARTED;
 import static com.android.server.wm.Task.ActivityState.STOPPED;
 import static com.android.server.wm.Task.ActivityState.STOPPING;
+import static com.android.server.wm.Task.TASK_VISIBILITY_VISIBLE;
 import static com.android.server.wm.TaskPersister.DEBUG;
 import static com.android.server.wm.TaskPersister.IMAGE_EXTENSION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
@@ -3137,7 +3137,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         SurfaceControl.openTransaction();
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             final WindowState w = mChildren.get(i);
-            w.mWinAnimator.detachChildren();
+            w.mWinAnimator.detachChildren(getGlobalTransaction());
         }
         SurfaceControl.closeTransaction();
     }
@@ -4449,7 +4449,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             SurfaceControl.openTransaction();
             try {
                 forAllWindows(win -> {
-                    win.mWinAnimator.hide("immediately hidden"); }, true);
+                    win.mWinAnimator.hide(getGlobalTransaction(), "immediately hidden");
+                }, true);
             } finally {
                 SurfaceControl.closeTransaction();
             }

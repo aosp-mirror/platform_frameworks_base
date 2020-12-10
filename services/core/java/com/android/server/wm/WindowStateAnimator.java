@@ -57,7 +57,6 @@ import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_C
 import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Debug;
@@ -130,10 +129,6 @@ class WindowStateAnimator {
     float mAlpha = 0;
     float mLastAlpha = 0;
 
-    Rect mTmpStackBounds = new Rect();
-    private Rect mTmpAnimatingBounds = new Rect();
-    private Rect mTmpSourceBounds = new Rect();
-
     /**
      * This is rectangle of the window's surface that is not covered by
      * system decorations.
@@ -153,8 +148,6 @@ class WindowStateAnimator {
      * windows to make the callback to View.dispatchOnWindowShownCallback(). Set when the
      * window is first added or shown, cleared when the callback has been made. */
     boolean mEnteringAnimation;
-
-    private final SurfaceControl.Transaction mTmpTransaction;
 
     /** The pixel format of the underlying SurfaceControl */
     int mSurfaceFormat;
@@ -201,12 +194,6 @@ class WindowStateAnimator {
     // region.
     float mWallpaperScale = 1f;
 
-    /**
-     * A flag to determine if the WSA needs to offset its position to compensate for the stack's
-     * position update before the WSA surface has resized.
-     */
-    private boolean mOffsetPositionForStackResize;
-
     private final Rect mTmpSize = new Rect();
 
     /**
@@ -220,13 +207,10 @@ class WindowStateAnimator {
     private final SurfaceControl.Transaction mPostDrawTransaction =
             new SurfaceControl.Transaction();
 
-    private final Point mTmpPos = new Point();
-
     WindowStateAnimator(final WindowState win) {
         final WindowManagerService service = win.mWmService;
 
         mService = service;
-        mTmpTransaction = service.mTransactionFactory.get();
         mAnimator = service.mAnimator;
         mPolicy = service.mPolicy;
         mContext = service.mContext;
@@ -243,7 +227,7 @@ class WindowStateAnimator {
         if (DEBUG_ANIM) Slog.v(
                 TAG, "Animation done in " + this + ": exiting=" + mWin.mAnimatingExit
                         + ", reportedVisible="
-                        + (mWin.mActivityRecord != null ? mWin.mActivityRecord.reportedVisible : false));
+                        + (mWin.mActivityRecord != null && mWin.mActivityRecord.reportedVisible));
 
         mWin.checkPolicyVisibilityChange();
         final DisplayContent displayContent = mWin.getDisplayContent();
@@ -282,11 +266,6 @@ class WindowStateAnimator {
                 mSurfaceController.hide(transaction, reason);
             }
         }
-    }
-
-    void hide(String reason) {
-        hide(mTmpTransaction, reason);
-        SurfaceControl.mergeToGlobalTransaction(mTmpTransaction);
     }
 
     boolean finishDrawingLocked(SurfaceControl.Transaction postDrawTransaction) {
@@ -362,7 +341,7 @@ class WindowStateAnimator {
                     mSurfaceController.mSurfaceControl,
                     mPendingDestroySurface.mSurfaceControl).apply();
             }
-            destroySurfaceLocked();
+            destroySurfaceLocked(t);
             mSurfaceDestroyDeferred = true;
             return;
         }
@@ -375,10 +354,10 @@ class WindowStateAnimator {
         }
         mDestroyPreservedSurfaceUponRedraw = true;
         mSurfaceDestroyDeferred = true;
-        destroySurfaceLocked();
+        destroySurfaceLocked(t);
     }
 
-    void destroyPreservedSurfaceLocked() {
+    void destroyPreservedSurfaceLocked(SurfaceControl.Transaction t) {
         if (!mDestroyPreservedSurfaceUponRedraw) {
             return;
         }
@@ -397,7 +376,7 @@ class WindowStateAnimator {
                     mSurfaceController.mSurfaceControl).apply();
         }
 
-        destroyDeferredSurfaceLocked();
+        destroyDeferredSurfaceLocked(t);
         mDestroyPreservedSurfaceUponRedraw = false;
     }
 
@@ -484,7 +463,6 @@ class WindowStateAnimator {
             mSurfaceController.setColorSpaceAgnostic((attrs.privateFlags
                     & WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC) != 0);
 
-            setOffsetPositionForStackResize(false);
             mSurfaceFormat = format;
 
             w.setHasSurface(true);
@@ -529,7 +507,7 @@ class WindowStateAnimator {
         return mSurfaceController != null && mSurfaceController.hasSurface();
     }
 
-    void destroySurfaceLocked() {
+    void destroySurfaceLocked(SurfaceControl.Transaction t) {
         final ActivityRecord activity = mWin.mActivityRecord;
         if (activity != null) {
             if (mWin == activity.mStartingWindow) {
@@ -557,14 +535,14 @@ class WindowStateAnimator {
                     if (mPendingDestroySurface != null) {
                         ProtoLog.i(WM_SHOW_SURFACE_ALLOC, "SURFACE DESTROY PENDING: %s. %s",
                                 mWin, new RuntimeException().fillInStackTrace());
-                        mPendingDestroySurface.destroyNotInTransaction();
+                        mPendingDestroySurface.destroy(t);
                     }
                     mPendingDestroySurface = mSurfaceController;
                 }
             } else {
                 ProtoLog.i(WM_SHOW_SURFACE_ALLOC, "SURFACE DESTROY: %s. %s",
                         mWin, new RuntimeException().fillInStackTrace());
-                destroySurface();
+                destroySurface(t);
             }
             // Don't hide wallpaper if we're deferring the surface destroy
             // because of a surface change.
@@ -587,12 +565,12 @@ class WindowStateAnimator {
         mDrawState = NO_SURFACE;
     }
 
-    void destroyDeferredSurfaceLocked() {
+    void destroyDeferredSurfaceLocked(SurfaceControl.Transaction t) {
         try {
             if (mPendingDestroySurface != null) {
                 ProtoLog.i(WM_SHOW_SURFACE_ALLOC, "SURFACE DESTROY PENDING: %s. %s",
                         mWin, new RuntimeException().fillInStackTrace());
-                mPendingDestroySurface.destroyNotInTransaction();
+                mPendingDestroySurface.destroy(t);
                 // Don't hide wallpaper if we're destroying a deferred surface
                 // after a surface mode change.
                 if (!mDestroyPreservedSurfaceUponRedraw) {
@@ -655,93 +633,49 @@ class WindowStateAnimator {
         return true;
     }
 
-    void setSurfaceBoundariesLocked(SurfaceControl.Transaction t, final boolean recoveringMemory) {
+    void setSurfaceBoundariesLocked(SurfaceControl.Transaction t) {
         if (mSurfaceController == null) {
             return;
         }
 
         final WindowState w = mWin;
-        final LayoutParams attrs = mWin.getAttrs();
         final Task task = w.getTask();
 
         if (shouldConsumeMainWindowSizeTransaction()) {
-            t.deferTransactionUntil(task.getMainWindowSizeChangeTask().getSurfaceControl(),
-                mWin.getClientViewRootSurface(), mWin.getFrameNumber());
-            t.deferTransactionUntil(mSurfaceController.mSurfaceControl,
-                mWin.getClientViewRootSurface(), mWin.getFrameNumber());
-            t.merge(task.getMainWindowSizeChangeTransaction());
+            // Use pending transaction here instead of the transaction passed in because we want to
+            // ensure the defer transaction is applied on the main transaction and not on the sync
+            // transaction. This is because the sync transaction could contain the buffer and we'd
+            // defer the transaction that contains the buffer we're deferring on.
+            SurfaceControl.Transaction pendingTransaction = mWin.getPendingTransaction();
+            pendingTransaction.deferTransactionUntil(
+                    task.getMainWindowSizeChangeTask().getSurfaceControl(),
+                    mWin.getClientViewRootSurface(), mWin.getFrameNumber());
+            pendingTransaction.deferTransactionUntil(mSurfaceController.mSurfaceControl,
+                    mWin.getClientViewRootSurface(), mWin.getFrameNumber());
+            pendingTransaction.merge(task.getMainWindowSizeChangeTransaction());
             task.setMainWindowSizeChangeTransaction(null);
         }
-
-        float surfaceWidth = mSurfaceController.getWidth();
-        float surfaceHeight = mSurfaceController.getHeight();
-
-        final Rect insets = attrs.surfaceInsets;
-
-        // getFrameNumber is only valid in the call-stack of relayoutWindow
-        // as this is the only-time we know the client renderer
-        // is paused.
-        final boolean relayout = !w.mRelayoutCalled || w.mInRelayout;
 
         if (!w.mSeamlesslyRotated) {
             // Used to offset the WSA when stack position changes before a resize.
             int xOffset = mXOffset;
             int yOffset = mYOffset;
-            if (mOffsetPositionForStackResize) {
-                if (relayout) {
-                    // Once a relayout is called, reset the offset back to 0 and defer
-                    // setting it until a new frame with the updated size. This ensures that
-                    // the WS position is reset (so the stack position is shown) at the same
-                    // time that the buffer size changes.
-                    setOffsetPositionForStackResize(false);
-                    t.deferTransactionUntil(mSurfaceController.mSurfaceControl,
-                        mWin.getClientViewRootSurface(), mWin.getFrameNumber());
-                } else {
-                    final Task stack = mWin.getRootTask();
-                    mTmpPos.x = 0;
-                    mTmpPos.y = 0;
-                    if (stack != null) {
-                        stack.getRelativePosition(mTmpPos);
-                    }
-                     xOffset = -mTmpPos.x;
-                    yOffset = -mTmpPos.y;
-                }
-            }
             if (!mIsWallpaper) {
-                mSurfaceController.setPosition(t, xOffset, yOffset, recoveringMemory);
-            } else {
-                setWallpaperPositionAndScale(t,
-                        xOffset, yOffset, mWallpaperScale, recoveringMemory);
-            }
-        }
-
-        if (!w.mSeamlesslyRotated) {
-            // Wallpaper is already updated above when calling setWallpaperPositionAndScale so
-            // we only need to consider the non-wallpaper case here.
-            if (!mIsWallpaper) {
+                mSurfaceController.setPosition(t, xOffset, yOffset);
+                // Wallpaper is already updated above when calling setWallpaperPositionAndScale so
+                // we only need to consider the non-wallpaper case here.
                 mSurfaceController.setMatrix(t,
-                    mDsDx * w.mHScale,
-                    mDtDx * w.mVScale,
-                    mDtDy * w.mHScale,
-                    mDsDy * w.mVScale, recoveringMemory);
+                        mDsDx * w.mHScale,
+                        mDtDx * w.mVScale,
+                        mDtDy * w.mHScale,
+                        mDsDy * w.mVScale);
+            } else {
+                setWallpaperPositionAndScale(t, xOffset, yOffset, mWallpaperScale);
             }
         }
     }
 
-    /**
-     * Get rect of the task this window is currently in. If there is no task, rect will be set to
-     * empty.
-     */
-    void getContainerRect(Rect rect) {
-        final Task task = mWin.getTask();
-        if (task != null) {
-            task.getDimBounds(rect);
-        } else {
-            rect.left = rect.top = rect.right = rect.bottom = 0;
-        }
-    }
-
-    void prepareSurfaceLocked(SurfaceControl.Transaction t, final boolean recoveringMemory) {
+    void prepareSurfaceLocked(SurfaceControl.Transaction t) {
         final WindowState w = mWin;
         if (!hasSurface()) {
 
@@ -758,13 +692,13 @@ class WindowStateAnimator {
 
         computeShownFrameLocked();
 
-        setSurfaceBoundariesLocked(t, recoveringMemory);
+        setSurfaceBoundariesLocked(t);
 
         if (mIsWallpaper && !w.mWallpaperVisible) {
             // Wallpaper is no longer visible and there is no wp target => hide it.
-            hide("prepareSurfaceLocked");
+            hide(t, "prepareSurfaceLocked");
         } else if (w.isParentWindowHidden() || !w.isOnScreen()) {
-            hide("prepareSurfaceLocked");
+            hide(t, "prepareSurfaceLocked");
             mWallpaperControllerLocked.hideWallpapers(w);
 
             // If we are waiting for this window to handle an orientation change. If this window is
@@ -800,21 +734,20 @@ class WindowStateAnimator {
             boolean prepared = true;
 
             if (mIsWallpaper) {
-                setWallpaperPositionAndScale(t,
-                        mXOffset, mYOffset, mWallpaperScale, recoveringMemory);
+                setWallpaperPositionAndScale(t, mXOffset, mYOffset, mWallpaperScale);
             } else {
                 prepared =
-                    mSurfaceController.prepareToShowInTransaction(mShownAlpha,
+                    mSurfaceController.prepareToShowInTransaction(t, mShownAlpha,
                         mDsDx * w.mHScale,
                         mDtDx * w.mVScale,
                         mDtDy * w.mHScale,
-                        mDsDy * w.mVScale,
-                        recoveringMemory);
+                        mDsDy * w.mVScale
+                    );
             }
 
             if (prepared && mDrawState == HAS_DRAWN) {
                 if (mLastHidden) {
-                    if (showSurfaceRobustlyLocked()) {
+                    if (showSurfaceRobustlyLocked(t)) {
                         markPreservedSurfaceForDestroy();
                         mAnimator.requestRemovalOfReplacedWindows(w);
                         mLastHidden = false;
@@ -888,8 +821,7 @@ class WindowStateAnimator {
                     Slog.i(TAG, ">>> OPEN TRANSACTION setWallpaperOffset");
                 }
                 mService.openSurfaceTransaction();
-                setWallpaperPositionAndScale(SurfaceControl.getGlobalTransaction(),
-                    dx, dy, scale, false);
+                setWallpaperPositionAndScale(SurfaceControl.getGlobalTransaction(), dx, dy, scale);
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Error positioning surface of " + mWin
                         + " pos=(" + dx + "," + dy + ")", e);
@@ -904,8 +836,8 @@ class WindowStateAnimator {
         return true;
     }
 
-    private void setWallpaperPositionAndScale(SurfaceControl.Transaction t,
-        int dx, int dy, float scale, boolean recoveringMemory) {
+    private void setWallpaperPositionAndScale(SurfaceControl.Transaction t, int dx, int dy,
+            float scale) {
         DisplayInfo displayInfo = mWin.getDisplayInfo();
         Matrix matrix = mWin.mTmpMatrix;
         matrix.setTranslate(dx, dy);
@@ -915,13 +847,12 @@ class WindowStateAnimator {
         matrix.reset();
 
         mSurfaceController.setPosition(t,mWin.mTmpMatrixArray[MTRANS_X],
-                mWin.mTmpMatrixArray[MTRANS_Y], recoveringMemory);
+                mWin.mTmpMatrixArray[MTRANS_Y]);
         mSurfaceController.setMatrix(t,
                 mDsDx * mWin.mTmpMatrixArray[MSCALE_X] * mWin.mHScale,
                 mDtDx * mWin.mTmpMatrixArray[MSKEW_Y] * mWin.mVScale,
                 mDtDy * mWin.mTmpMatrixArray[MSKEW_X] * mWin.mHScale,
-                mDsDy * mWin.mTmpMatrixArray[MSCALE_Y] * mWin.mVScale,
-                recoveringMemory);
+                mDsDy * mWin.mTmpMatrixArray[MSCALE_Y] * mWin.mVScale);
     }
 
     /**
@@ -974,8 +905,8 @@ class WindowStateAnimator {
      *
      * @return Returns true if the surface was successfully shown.
      */
-    private boolean showSurfaceRobustlyLocked() {
-        boolean shown = mSurfaceController.showRobustlyInTransaction();
+    private boolean showSurfaceRobustlyLocked(SurfaceControl.Transaction t) {
+        boolean shown = mSurfaceController.showRobustly(t);
         if (!shown)
             return false;
 
@@ -993,7 +924,7 @@ class WindowStateAnimator {
             }
         }
 
-        SurfaceControl.mergeToGlobalTransaction(mPostDrawTransaction);
+        t.merge(mPostDrawTransaction);
         return true;
     }
 
@@ -1163,10 +1094,6 @@ class WindowStateAnimator {
         return sb.toString();
     }
 
-    void reclaimSomeSurfaceMemory(String operation, boolean secure) {
-        mService.mRoot.reclaimSomeSurfaceMemory(this, operation, secure);
-    }
-
     boolean getShown() {
         if (mSurfaceController != null) {
             return mSurfaceController.getShown();
@@ -1174,10 +1101,10 @@ class WindowStateAnimator {
         return false;
     }
 
-    void destroySurface() {
+    void destroySurface(SurfaceControl.Transaction t) {
         try {
             if (mSurfaceController != null) {
-                mSurfaceController.destroyNotInTransaction();
+                mSurfaceController.destroy(t);
             }
         } catch (RuntimeException e) {
             Slog.w(TAG, "Exception thrown when destroying surface " + this
@@ -1189,7 +1116,7 @@ class WindowStateAnimator {
         }
     }
 
-    void detachChildren() {
+    void detachChildren(SurfaceControl.Transaction t) {
 
         // Do not detach children of starting windows, as their lifecycle is well under control and
         // it may lead to issues in case we relaunch when we just added the starting window.
@@ -1197,12 +1124,8 @@ class WindowStateAnimator {
             return;
         }
         if (mSurfaceController != null) {
-            mSurfaceController.detachChildren();
+            mSurfaceController.detachChildren(t);
         }
-    }
-
-    void setOffsetPositionForStackResize(boolean offsetPositionForStackResize) {
-        mOffsetPositionForStackResize = offsetPositionForStackResize;
     }
 
     SurfaceControl getSurfaceControl() {
