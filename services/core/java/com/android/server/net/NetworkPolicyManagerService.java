@@ -230,7 +230,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.StatLogger;
 import com.android.internal.util.XmlUtils;
@@ -243,9 +242,7 @@ import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
 import libcore.io.IoUtils;
 
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -256,7 +253,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -271,6 +267,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.function.IntConsumer;
 
 /**
  * Service that maintains low-level network policy rules, using
@@ -4034,7 +4031,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         try {
             updateRulesForDeviceIdleUL();
             updateRulesForPowerSaveUL();
-            updateRulesForAllAppsUL(TYPE_RESTRICT_POWER);
+            forEachUid("updateRulesForRestrictPower",
+                    uid -> updateRulesForPowerRestrictionsUL(uid));
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
         }
@@ -4044,31 +4042,19 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private void updateRulesForRestrictBackgroundUL() {
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "updateRulesForRestrictBackgroundUL");
         try {
-            updateRulesForAllAppsUL(TYPE_RESTRICT_BACKGROUND);
+            forEachUid("updateRulesForRestrictBackground",
+                    uid -> updateRulesForDataUsageRestrictionsUL(uid));
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
         }
     }
 
-    private static final int TYPE_RESTRICT_BACKGROUND = 1;
-    private static final int TYPE_RESTRICT_POWER = 2;
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = false, value = {
-            TYPE_RESTRICT_BACKGROUND,
-            TYPE_RESTRICT_POWER,
-    })
-    public @interface RestrictType {
-    }
-
-    // TODO: refactor / consolidate all those updateXyz methods, there are way too many of them...
-    @GuardedBy("mUidRulesFirstLock")
-    private void updateRulesForAllAppsUL(@RestrictType int type) {
+    private void forEachUid(String tag, IntConsumer consumer) {
         if (Trace.isTagEnabled(Trace.TRACE_TAG_NETWORK)) {
-            Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "updateRulesForRestrictPowerUL-" + type);
+            Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "forEachUid-" + tag);
         }
         try {
             // update rules for all installed applications
-
             final PackageManager pm = mContext.getPackageManager();
             final List<UserInfo> users;
             final List<ApplicationInfo> apps;
@@ -4096,16 +4082,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 for (int j = 0; j < appsSize; j++) {
                     final ApplicationInfo app = apps.get(j);
                     final int uid = UserHandle.getUid(user.id, app.uid);
-                    switch (type) {
-                        case TYPE_RESTRICT_BACKGROUND:
-                            updateRulesForDataUsageRestrictionsUL(uid);
-                            break;
-                        case TYPE_RESTRICT_POWER:
-                            updateRulesForPowerRestrictionsUL(uid);
-                            break;
-                        default:
-                            Slog.w(TAG, "Invalid type for updateRulesForAllApps: " + type);
-                    }
+                    consumer.accept(uid);
                 }
             }
         } finally {
