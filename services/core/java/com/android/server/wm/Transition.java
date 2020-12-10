@@ -22,6 +22,7 @@ import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANI
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 
 import android.annotation.IntDef;
@@ -282,9 +283,13 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         mState = STATE_PLAYING;
         mController.moveToPlaying(this);
 
+        if (mController.mAtm.mTaskSupervisor.getKeyguardController().isKeyguardLocked()) {
+            mFlags |= TRANSIT_FLAG_KEYGUARD_LOCKED;
+        }
+
         // Resolve the animating targets from the participants
         mTargets = calculateTargets(mParticipants, mChanges);
-        final TransitionInfo info = calculateTransitionInfo(mType, mTargets, mChanges);
+        final TransitionInfo info = calculateTransitionInfo(mType, mFlags, mTargets, mChanges);
         mRootLeash = info.getRootLeash();
 
         handleNonAppWindowsInTransition(displayId, mType, mFlags);
@@ -336,6 +341,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                     (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION) != 0);
             mController.mAtm.mWindowManager.mPolicy.startKeyguardExitAnimation(
                     SystemClock.uptimeMillis(), 0 /* duration */);
+        }
+        if ((flags & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0) {
+            mController.mAtm.mWindowManager.mPolicy.applyKeyguardOcclusionChange();
         }
     }
 
@@ -587,9 +595,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
      */
     @VisibleForTesting
     @NonNull
-    static TransitionInfo calculateTransitionInfo(int type, ArraySet<WindowContainer> targets,
-            ArrayMap<WindowContainer, ChangeInfo> changes) {
-        final TransitionInfo out = new TransitionInfo(type);
+    static TransitionInfo calculateTransitionInfo(int type, int flags,
+            ArraySet<WindowContainer> targets, ArrayMap<WindowContainer, ChangeInfo> changes) {
+        final TransitionInfo out = new TransitionInfo(type, flags);
         if (targets.isEmpty()) {
             out.setRootLeash(new SurfaceControl(), 0, 0);
             return out;
