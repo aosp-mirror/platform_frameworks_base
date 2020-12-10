@@ -47,7 +47,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * Tests for the {@link ActivityStack} class.
+ * Tests for the {@link Task} class.
  *
  * Build/Install/Run:
  *  atest WmTests:TaskStackTests
@@ -82,36 +82,29 @@ public class TaskStackTests extends WindowTestsBase {
     }
 
     @Test
-    public void testClosingAppDifferentStackOrientation() {
-        final Task stack = createTaskStackOnDisplay(mDisplayContent);
-        final Task task1 = createTaskInStack(stack, 0 /* userId */);
-        ActivityRecord activity1 = createNonAttachedActivityRecord(mDisplayContent);
-        task1.addChild(activity1, 0);
+    public void testClosingAppDifferentTaskOrientation() {
+        final ActivityRecord activity1 = createActivityRecord(mDisplayContent);
         activity1.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
-        final Task task2 = createTaskInStack(stack, 1 /* userId */);
-        ActivityRecord activity2 = createNonAttachedActivityRecord(mDisplayContent);
-        task2.addChild(activity2, 0);
+        final ActivityRecord activity2 = createActivityRecord(mDisplayContent);
         activity2.setOrientation(SCREEN_ORIENTATION_PORTRAIT);
 
-        assertEquals(SCREEN_ORIENTATION_PORTRAIT, stack.getOrientation());
+        final WindowContainer parent = activity1.getTask().getParent();
+        assertEquals(SCREEN_ORIENTATION_PORTRAIT, parent.getOrientation());
         mDisplayContent.mClosingApps.add(activity2);
-        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, stack.getOrientation());
+        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, parent.getOrientation());
     }
 
     @Test
-    public void testMoveTaskToBackDifferentStackOrientation() {
-        final Task stack = createTaskStackOnDisplay(mDisplayContent);
-        final Task task1 = createTaskInStack(stack, 0 /* userId */);
-        ActivityRecord activity1 = createNonAttachedActivityRecord(mDisplayContent);
-        task1.addChild(activity1, 0);
+    public void testMoveTaskToBackDifferentTaskOrientation() {
+        final ActivityRecord activity1 = createActivityRecord(mDisplayContent);
         activity1.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
-        final Task task2 = createTaskInStack(stack, 1 /* userId */);
-        ActivityRecord activity2 = createNonAttachedActivityRecord(mDisplayContent);
-        task2.addChild(activity2, 0);
+        final ActivityRecord activity2 = createActivityRecord(mDisplayContent);
         activity2.setOrientation(SCREEN_ORIENTATION_PORTRAIT);
-        assertEquals(SCREEN_ORIENTATION_PORTRAIT, stack.getOrientation());
+
+        final WindowContainer parent = activity1.getTask().getParent();
+        assertEquals(SCREEN_ORIENTATION_PORTRAIT, parent.getOrientation());
     }
 
     @Test
@@ -215,8 +208,7 @@ public class TaskStackTests extends WindowTestsBase {
 
     @Test
     public void testActivityAndTaskGetsProperType() {
-        final Task stack = createTaskStackOnDisplay(mDisplayContent);
-        final Task task1 = createTaskInStack(stack, 0 /* userId */);
+        final Task task1 = new TaskBuilder(mSupervisor).build();
         ActivityRecord activity1 = createNonAttachedActivityRecord(mDisplayContent);
 
         // First activity should become standard
