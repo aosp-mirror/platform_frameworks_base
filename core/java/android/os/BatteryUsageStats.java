@@ -35,7 +35,11 @@ public final class BatteryUsageStats implements Parcelable {
     private BatteryUsageStats(@NonNull Builder builder) {
         mConsumedPower = builder.mConsumedPower;
         mDischargePercentage = builder.mDischargePercentage;
-        mUidBatteryConsumers = builder.mUidBatteryConsumers;
+        final int uidBatteryConsumerCount = builder.mUidBatteryConsumerBuilders.size();
+        mUidBatteryConsumers = new ArrayList<>(uidBatteryConsumerCount);
+        for (int i = 0; i < uidBatteryConsumerCount; i++) {
+            mUidBatteryConsumers.add(builder.mUidBatteryConsumerBuilders.get(i).build());
+        }
     }
 
     /**
@@ -95,7 +99,8 @@ public final class BatteryUsageStats implements Parcelable {
     public static final class Builder {
         private double mConsumedPower;
         private int mDischargePercentage;
-        private final ArrayList<UidBatteryConsumer> mUidBatteryConsumers = new ArrayList<>();
+        private final ArrayList<UidBatteryConsumer.Builder> mUidBatteryConsumerBuilders =
+                new ArrayList<>();
 
         /**
          * Constructs a read-only object using the Builder values.
@@ -130,9 +135,15 @@ public final class BatteryUsageStats implements Parcelable {
          * individual UID.
          */
         @NonNull
-        public Builder addUidBatteryConsumer(@NonNull UidBatteryConsumer uidBatteryConsumer) {
-            mUidBatteryConsumers.add(uidBatteryConsumer);
+        public Builder addUidBatteryConsumerBuilder(
+                @NonNull UidBatteryConsumer.Builder uidBatteryConsumer) {
+            mUidBatteryConsumerBuilders.add(uidBatteryConsumer);
             return this;
+        }
+
+        @NonNull
+        public List<UidBatteryConsumer.Builder> getUidBatteryConsumerBuilders() {
+            return mUidBatteryConsumerBuilders;
         }
     }
 }

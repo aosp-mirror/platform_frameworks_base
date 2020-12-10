@@ -17,13 +17,18 @@
 package com.android.internal.os;
 
 import android.content.Context;
-import android.os.BatteryConsumer;
+import android.hardware.SensorManager;
+import android.net.ConnectivityManager;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.os.UidBatteryConsumer;
+import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.SparseArray;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,10 +38,53 @@ import java.util.List;
 public class BatteryUsageStatsProvider {
     private final Context mContext;
     private final BatteryStatsImpl mStats;
+    private final PowerProfile mPowerProfile;
+    private final Object mLock = new Object();
+    private List<PowerCalculator> mPowerCalculators;
 
     public BatteryUsageStatsProvider(Context context, BatteryStatsImpl stats) {
         mContext = context;
         mStats = stats;
+        mPowerProfile = new PowerProfile(mContext);
+    }
+
+    private List<PowerCalculator> getPowerCalculators() {
+        synchronized (mLock) {
+            if (mPowerCalculators == null) {
+                mPowerCalculators = new ArrayList<>();
+
+                // Power calculators are applied in the order of registration
+                mPowerCalculators.add(new CpuPowerCalculator(mPowerProfile));
+                mPowerCalculators.add(new MemoryPowerCalculator(mPowerProfile));
+                mPowerCalculators.add(new WakelockPowerCalculator(mPowerProfile));
+                if (!isWifiOnlyDevice(mContext)) {
+                    mPowerCalculators.add(new MobileRadioPowerCalculator(mPowerProfile));
+                }
+                mPowerCalculators.add(new WifiPowerCalculator(mPowerProfile));
+                mPowerCalculators.add(new BluetoothPowerCalculator(mPowerProfile));
+                mPowerCalculators.add(new SensorPowerCalculator(mPowerProfile,
+                        mContext.getSystemService(SensorManager.class)));
+                mPowerCalculators.add(new CameraPowerCalculator(mPowerProfile));
+                mPowerCalculators.add(new FlashlightPowerCalculator(mPowerProfile));
+                mPowerCalculators.add(new MediaPowerCalculator(mPowerProfile));
+                mPowerCalculators.add(new PhonePowerCalculator(mPowerProfile));
+                mPowerCalculators.add(new ScreenPowerCalculator(mPowerProfile));
+                mPowerCalculators.add(new AmbientDisplayPowerCalculator(mPowerProfile));
+                mPowerCalculators.add(new SystemServicePowerCalculator(mPowerProfile));
+                mPowerCalculators.add(new IdlePowerCalculator(mPowerProfile));
+
+                mPowerCalculators.add(new UserPowerCalculator());
+            }
+        }
+        return mPowerCalculators;
+    }
+
+    private static boolean isWifiOnlyDevice(Context context) {
+        ConnectivityManager cm = context.getSystemService(ConnectivityManager.class);
+        if (cm == null) {
+            return false;
+        }
+        return !cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
     }
 
     /**
@@ -49,11 +97,19 @@ public class BatteryUsageStatsProvider {
                 false /* collectBatteryBroadcast */);
         batteryStatsHelper.create((Bundle) null);
         final UserManager userManager = mContext.getSystemService(UserManager.class);
-        batteryStatsHelper.refreshStats(BatteryStats.STATS_SINCE_CHARGED,
-                userManager.getUserProfiles());
+        final List<UserHandle> asUsers = userManager.getUserProfiles();
+        final int n = asUsers.size();
+        SparseArray<UserHandle> users = new SparseArray<>(n);
+        for (int i = 0; i < n; ++i) {
+            UserHandle userHandle = asUsers.get(i);
+            users.put(userHandle.getIdentifier(), userHandle);
+        }
+
+        batteryStatsHelper.refreshStats(BatteryStats.STATS_SINCE_CHARGED, users);
 
         // TODO(b/174186358): read extra power component number from configuration
         final int customPowerComponentCount = 0;
+        final int customTimeComponentCount = 0;
         final BatteryUsageStats.Builder batteryUsageStatsBuilder = new BatteryUsageStats.Builder()
                 .setDischargePercentage(batteryStatsHelper.getStats().getDischargeAmount(0))
                 .setConsumedPower(batteryStatsHelper.getTotalPower());
@@ -62,15 +118,23 @@ public class BatteryUsageStatsProvider {
         for (int i = 0; i < usageList.size(); i++) {
             final BatterySipper sipper = usageList.get(i);
             if (sipper.drainType == BatterySipper.DrainType.APP) {
-                batteryUsageStatsBuilder.addUidBatteryConsumer(
-                        new UidBatteryConsumer.Builder(customPowerComponentCount, sipper.getUid())
+                batteryUsageStatsBuilder.addUidBatteryConsumerBuilder(
+                        new UidBatteryConsumer.Builder(customPowerComponentCount,
+                                customTimeComponentCount, sipper.uidObj)
                                 .setPackageWithHighestDrain(sipper.packageWithHighestDrain)
-                                .setConsumedPower(sipper.sumPower())
-                                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU,
-                                        sipper.cpuPowerMah)
-                                .build());
+                                .setConsumedPower(sipper.sumPower()));
             }
         }
+
+        final long realtimeUs = SystemClock.elapsedRealtime() * 1000;
+        final long uptimeUs = SystemClock.uptimeMillis() * 1000;
+
+        final List<PowerCalculator> powerCalculators = getPowerCalculators();
+        for (PowerCalculator powerCalculator : powerCalculators) {
+            powerCalculator.calculate(batteryUsageStatsBuilder, mStats, realtimeUs, uptimeUs,
+                    BatteryStats.STATS_SINCE_CHARGED, users);
+        }
+
         return batteryUsageStatsBuilder.build();
     }
 }
