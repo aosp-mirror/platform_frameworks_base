@@ -16,7 +16,16 @@
 
 package com.android.server.am;
 
+import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
+import static android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND;
+import static android.Manifest.permission.SYSTEM_ALERT_WINDOW;
+import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.Process.NFC_UID;
+import static android.os.Process.ROOT_UID;
+import static android.os.Process.SHELL_UID;
+import static android.os.Process.SYSTEM_UID;
 
 import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ANR;
@@ -361,6 +370,17 @@ class ProcessRecord implements WindowProcessListener {
 
     private final ArraySet<Binder> mBackgroundFgsStartTokens = new ArraySet<>();
 
+    // The list of permissions that can start FGS from background.
+    private static String[] ALLOW_BG_START_FGS_PERMISSIONS =
+            {START_ACTIVITIES_FROM_BACKGROUND, START_FOREGROUND_SERVICES_FROM_BACKGROUND,
+                    SYSTEM_ALERT_WINDOW};
+    // Does the process has permission to start FGS from background.
+    boolean mAllowStartFgsByPermission;
+    // Can this process start FGS from background?
+    // If this process has the ability to start FGS from background, this ability can be passed to
+    // another process through service binding.
+    boolean mAllowStartFgs;
+
     void setStartParams(int startUid, HostingRecord hostingRecord, String seInfo,
             long startTime) {
         this.startUid = startUid;
@@ -476,6 +496,9 @@ class ProcessRecord implements WindowProcessListener {
                 pw.println();
         pw.print(prefix); pw.print("allowStartFgsState=");
                 pw.println(mAllowStartFgsState);
+        if (mAllowStartFgs) {
+            pw.print(prefix); pw.print("allowStartFgs="); pw.println(mAllowStartFgs);
+        }
         if (hasShownUi || mPendingUiClean || hasAboveClient || treatLikeActivity) {
             pw.print(prefix); pw.print("hasShownUi="); pw.print(hasShownUi);
                     pw.print(" pendingUiClean="); pw.print(mPendingUiClean);
@@ -672,6 +695,7 @@ class ProcessRecord implements WindowProcessListener {
         mWindowProcessController = new WindowProcessController(
                 mService.mActivityTaskManager, info, processName, uid, userId, this, this);
         pkgList.put(_info.packageName, new ProcessStats.ProcessStateHolder(_info.longVersionCode));
+        setAllowStartFgsByPermission();
     }
 
     public void setPid(int _pid) {
@@ -1983,9 +2007,75 @@ class ProcessRecord implements WindowProcessListener {
         return mDialogController;
     }
 
+    void resetAllowStartFgs() {
+        mAllowStartFgsState = PROCESS_STATE_NONEXISTENT;
+        mAllowStartFgs = mAllowStartFgsByPermission;
+    }
+
     void bumpAllowStartFgsState(int newProcState) {
         if (newProcState < mAllowStartFgsState) {
             mAllowStartFgsState = newProcState;
+        }
+    }
+
+    void setAllowStartFgsByPermission() {
+        boolean ret = false;
+        if (!ret) {
+            boolean isSystem = false;
+            final int uid = UserHandle.getAppId(info.uid);
+            switch (uid) {
+                case ROOT_UID:
+                case SYSTEM_UID:
+                case NFC_UID:
+                case SHELL_UID:
+                    isSystem = true;
+                    break;
+                default:
+                    isSystem = false;
+                    break;
+            }
+
+            if (isSystem) {
+                ret = true;
+            }
+        }
+
+        if (!ret) {
+            for (int i = 0; i < ALLOW_BG_START_FGS_PERMISSIONS.length; ++i) {
+                if (ActivityManager.checkComponentPermission(ALLOW_BG_START_FGS_PERMISSIONS[i],
+                        info.uid, -1, true)
+                        == PERMISSION_GRANTED) {
+                    ret = true;
+                    break;
+                }
+            }
+        }
+        mAllowStartFgs = mAllowStartFgsByPermission = ret;
+    }
+
+    boolean isAllowedStartFgsState() {
+        return mAllowStartFgsState <= PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+    }
+
+    void setAllowStartFgs() {
+        if (mAllowStartFgs) {
+            return;
+        }
+        if (!mAllowStartFgs) {
+            mAllowStartFgs = isAllowedStartFgsState();
+        }
+
+        if (!mAllowStartFgs) {
+            // Is the calling UID a device owner app?
+            if (mService.mInternal != null) {
+                mAllowStartFgs = mService.mInternal.isDeviceOwner(info.uid);
+            }
+        }
+
+        if (!mAllowStartFgs) {
+            // uid is on DeviceIdleController's user/system allowlist
+            // or AMS's FgsStartTempAllowList.
+            mAllowStartFgs = mService.isWhitelistedForFgsStartLocked(info.uid);
         }
     }
 
