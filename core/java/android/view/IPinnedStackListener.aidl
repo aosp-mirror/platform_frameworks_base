@@ -58,19 +58,6 @@ oneway interface IPinnedStackListener {
     void onActivityHidden(in ComponentName componentName);
 
     /**
-     * Called when the window manager has detected change on DisplayInfo,  or
-     * when the listener is first registered to allow the listener to synchronized its state with
-     * the controller.
-     */
-    void onDisplayInfoChanged(in DisplayInfo displayInfo);
-
-    /**
-     * Called by the window manager at the beginning of a configuration update cascade
-     * since the metrics from these resources are used for bounds calculations.
-     */
-    void onConfigurationChanged();
-
-    /**
      * Called by the window manager when the aspect ratio is reset.
      */
     void onAspectRatioChanged(float aspectRatio);

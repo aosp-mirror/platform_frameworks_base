@@ -168,6 +168,11 @@ public final class WMShell extends SystemUI
 
         mConfigurationController.addCallback(new ConfigurationController.ConfigurationListener() {
             @Override
+            public void onConfigChanged(Configuration newConfig) {
+                pip.onConfigurationChanged(newConfig);
+            }
+
+            @Override
             public void onDensityOrFontScaleChanged() {
                 pip.onDensityOrFontScaleChanged();
             }

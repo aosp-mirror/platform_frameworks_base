@@ -102,9 +102,7 @@ public class PipBoundsAlgorithm {
         return mSnapAlgorithm;
     }
 
-    /**
-     * Responds to IPinnedStackListener on configuration change.
-     */
+    /** Responds to configuration change. */
     public void onConfigurationChanged(Context context) {
         reloadResources(context);
     }

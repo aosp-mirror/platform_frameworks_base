@@ -21,6 +21,7 @@ import static android.view.WindowManager.SHELL_ROOT_LAYER_PIP;
 import android.app.RemoteAction;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
+import android.util.Log;
 import android.view.SurfaceControl;
 
 import com.android.wm.shell.common.SystemWindows;
@@ -31,6 +32,8 @@ import com.android.wm.shell.pip.PipMenuController;
  * Manages the visibility of the PiP Menu as user interacts with PiP.
  */
 public class TvPipMenuController implements PipMenuController {
+    private static final String TAG = "TvPipMenuController";
+    private static final boolean DEBUG = PipController.DEBUG;
 
     private final Context mContext;
     private final SystemWindows mSystemWindows;
@@ -52,6 +55,8 @@ public class TvPipMenuController implements PipMenuController {
 
     @Override
     public void showMenu() {
+        if (DEBUG) Log.d(TAG, "showMenu()");
+
         if (mMenuView != null) {
             mSystemWindows.updateViewLayout(mMenuView, getPipMenuLayoutParams(MENU_WINDOW_TITLE,
                     mPipBoundsState.getDisplayBounds().width(),
@@ -68,27 +73,62 @@ public class TvPipMenuController implements PipMenuController {
         }
     }
 
-    @Override
-    public void attach(SurfaceControl leash) {
-        if (mMenuView == null) {
-            mMenuView = new PipMenuView(mContext, mPipController);
-            mSystemWindows.addView(mMenuView,
-                    getPipMenuLayoutParams(MENU_WINDOW_TITLE, 0 /* width */, 0 /* height */),
-                    0, SHELL_ROOT_LAYER_PIP);
-            mLeash = leash;
+    void hideMenu() {
+        if (DEBUG) Log.d(TAG, "hideMenu()");
+
+        if (isMenuVisible()) {
+            mMenuView.hideMenu();
+            mPipController.resizePinnedStack(PipController.STATE_PIP);
         }
     }
 
     @Override
+    public void attach(SurfaceControl leash) {
+        mLeash = leash;
+        attachPipMenuView();
+    }
+
+    @Override
     public void detach() {
+        hideMenu();
+        detachPipMenuView();
+        mLeash = null;
+    }
+
+    private void attachPipMenuView() {
+        if (DEBUG) Log.d(TAG, "attachPipMenuView()");
+
+        if (mMenuView != null) {
+            detachPipMenuView();
+        }
+
+        mMenuView = new PipMenuView(mContext, mPipController);
+        mMenuView.setOnBackPressListener(this::hideMenu);
+        mSystemWindows.addView(mMenuView,
+                getPipMenuLayoutParams(MENU_WINDOW_TITLE, 0 /* width */, 0 /* height */),
+                0, SHELL_ROOT_LAYER_PIP);
+    }
+
+    private void detachPipMenuView() {
+        if (DEBUG) Log.d(TAG, "detachPipMenuView()");
+
+        if (mMenuView == null) {
+            return;
+        }
+
         mSystemWindows.removeView(mMenuView);
         mMenuView = null;
-        mLeash = null;
     }
 
     @Override
     public void setAppActions(ParceledListSlice<RemoteAction> appActions) {
-        mMenuView.setAppActions(appActions);
+        if (DEBUG) Log.d(TAG, "setAppActions(), actions=" + appActions);
+
+        if (mMenuView != null) {
+            mMenuView.setAppActions(appActions);
+        } else {
+            Log.w(TAG, "Cannot set remote actions, there is no View");
+        }
     }
 
     @Override

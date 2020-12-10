@@ -127,7 +127,6 @@ class PinnedStackController {
         try {
             listener.asBinder().linkToDeath(mPinnedStackListenerDeathHandler, 0);
             mPinnedStackListener = listener;
-            notifyDisplayInfoChanged(mDisplayInfo);
             notifyImeVisibilityChanged(mIsImeShowing, mImeHeight);
             notifyMovementBoundsChanged(false /* fromImeAdjustment */);
             notifyActionsChanged(mActions);
@@ -168,23 +167,6 @@ class PinnedStackController {
             mPinnedStackListener.onActivityHidden(componentName);
         } catch (RemoteException e) {
             Slog.e(TAG_WM, "Error delivering reset reentry fraction event.", e);
-        }
-    }
-
-    private void setDisplayInfo(DisplayInfo displayInfo) {
-        mDisplayInfo.copyFrom(displayInfo);
-        notifyDisplayInfoChanged(mDisplayInfo);
-    }
-
-    /**
-     * In the case where the display rotation is changed but there is no stack, we can't depend on
-     * onTaskStackBoundsChanged() to be called.  But we still should update our known display info
-     * with the new state so that we can update SystemUI.
-     */
-    void onDisplayInfoChanged(DisplayInfo displayInfo) {
-        synchronized (mService.mGlobalLock) {
-            setDisplayInfo(displayInfo);
-            notifyMovementBoundsChanged(false /* fromImeAdjustment */);
         }
     }
 
@@ -285,18 +267,6 @@ class PinnedStackController {
             } catch (RemoteException e) {
                 Slog.e(TAG_WM, "Error delivering actions changed event.", e);
             }
-        }
-    }
-
-    /**
-     * Notifies listeners that the PIP animation is about to happen.
-     */
-    private void notifyDisplayInfoChanged(DisplayInfo displayInfo) {
-        if (mPinnedStackListener == null) return;
-        try {
-            mPinnedStackListener.onDisplayInfoChanged(displayInfo);
-        } catch (RemoteException e) {
-            Slog.e(TAG_WM, "Error delivering DisplayInfo changed event.", e);
         }
     }
 

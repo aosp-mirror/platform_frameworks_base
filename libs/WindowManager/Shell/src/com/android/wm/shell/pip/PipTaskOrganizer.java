@@ -502,7 +502,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
         mPipMenuController.attach(leash);
 
-
         if (mShouldIgnoreEnteringPipTransition) {
             final Rect destinationBounds = mPipBoundsState.getBounds();
             // animation is finished in the Launcher and here we directly apply the final touch.

@@ -20,7 +20,6 @@ import android.app.RemoteAction;
 import android.content.ComponentName;
 import android.content.pm.ParceledListSlice;
 import android.os.RemoteException;
-import android.view.DisplayInfo;
 import android.view.IPinnedStackListener;
 import android.view.WindowManagerGlobal;
 
@@ -85,18 +84,6 @@ public class PinnedStackListenerForwarder {
         }
     }
 
-    private void onDisplayInfoChanged(DisplayInfo displayInfo) {
-        for (PinnedStackListener listener : mListeners) {
-            listener.onDisplayInfoChanged(displayInfo);
-        }
-    }
-
-    private void onConfigurationChanged() {
-        for (PinnedStackListener listener : mListeners) {
-            listener.onConfigurationChanged();
-        }
-    }
-
     private void onAspectRatioChanged(float aspectRatio) {
         for (PinnedStackListener listener : mListeners) {
             listener.onAspectRatioChanged(aspectRatio);
@@ -134,20 +121,6 @@ public class PinnedStackListenerForwarder {
         }
 
         @Override
-        public void onDisplayInfoChanged(DisplayInfo displayInfo) {
-            mShellMainExecutor.execute(() -> {
-                PinnedStackListenerForwarder.this.onDisplayInfoChanged(displayInfo);
-            });
-        }
-
-        @Override
-        public void onConfigurationChanged() {
-            mShellMainExecutor.execute(() -> {
-                PinnedStackListenerForwarder.this.onConfigurationChanged();
-            });
-        }
-
-        @Override
         public void onAspectRatioChanged(float aspectRatio) {
             mShellMainExecutor.execute(() -> {
                 PinnedStackListenerForwarder.this.onAspectRatioChanged(aspectRatio);
@@ -167,10 +140,6 @@ public class PinnedStackListenerForwarder {
         public void onActionsChanged(ParceledListSlice<RemoteAction> actions) {}
 
         public void onActivityHidden(ComponentName componentName) {}
-
-        public void onDisplayInfoChanged(DisplayInfo displayInfo) {}
-
-        public void onConfigurationChanged() {}
 
         public void onAspectRatioChanged(float aspectRatio) {}
     }

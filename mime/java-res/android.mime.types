@@ -63,6 +63,7 @@
 ?application/x-android-drm-fl fl
 ?application/x-flac flac
 ?application/x-font pcf
+?application/x-mobipocket-ebook prc mobi
 ?application/x-mpegurl m3u m3u8
 ?application/x-pem-file pem
 ?application/x-pkcs12 p12 pfx

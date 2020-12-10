@@ -22,6 +22,7 @@ import android.hardware.input.KeyboardLayout;
 import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.TouchCalibration;
+import android.os.CombinedVibrationEffect;
 import android.os.IBinder;
 import android.os.VibrationEffect;
 import android.view.InputDevice;
@@ -85,7 +86,10 @@ interface IInputManager {
 
     // Input device vibrator control.
     void vibrate(int deviceId, in VibrationEffect effect, IBinder token);
+    void vibrateCombined(int deviceId, in CombinedVibrationEffect effect, IBinder token);
     void cancelVibrate(int deviceId, IBinder token);
+    int[] getVibratorIds(int deviceId);
+    boolean isVibrating(int deviceId);
 
     void setPointerIconType(int typeId);
     void setCustomPointerIcon(in PointerIcon icon);
