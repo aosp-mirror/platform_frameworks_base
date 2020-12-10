@@ -34,7 +34,7 @@ import java.util.List;
  * network during a SUBSCRIBE request. See RFC3863 for more information.
  * @hide
  */
-public class RcsContactPresenceTuple implements Parcelable {
+public final class RcsContactPresenceTuple implements Parcelable {
 
     /** The service id of the MMTEL */
     public static final String SERVICE_ID_MMTEL = "org.3gpp.urn:urn-7:3gpp-service.ims.icsi.mmtel";
@@ -57,7 +57,7 @@ public class RcsContactPresenceTuple implements Parcelable {
      * An optional addition to the PIDF Presence Tuple containing service capabilities, which is
      * defined in the servcaps element. See RFC5196, section 3.2.1.
      */
-    public static class ServiceCapabilities implements Parcelable {
+    public static final class ServiceCapabilities implements Parcelable {
 
         /** The service can simultaneously send and receive data. */
         public static final String DUPLEX_MODE_FULL = "full";
@@ -84,7 +84,7 @@ public class RcsContactPresenceTuple implements Parcelable {
         /**
          * Builder to help construct {@link ServiceCapabilities} instances.
          */
-        public static class Builder {
+        public static final class Builder {
 
             private ServiceCapabilities mCapabilities;
 
@@ -102,7 +102,7 @@ public class RcsContactPresenceTuple implements Parcelable {
              * Add the supported duplex mode.
              * @param mode The supported duplex mode
              */
-            public Builder addSupportedDuplexMode(@NonNull @DuplexMode String mode) {
+            public @NonNull Builder addSupportedDuplexMode(@NonNull @DuplexMode String mode) {
                 mCapabilities.mSupportedDuplexModeList.add(mode);
                 return this;
             }
@@ -111,7 +111,7 @@ public class RcsContactPresenceTuple implements Parcelable {
              * Add the unsupported duplex mode.
              * @param mode The unsupported duplex mode
              */
-            public Builder addUnsupportedDuplexMode(@NonNull @DuplexMode String mode) {
+            public @NonNull Builder addUnsupportedDuplexMode(@NonNull @DuplexMode String mode) {
                 mCapabilities.mUnsupportedDuplexModeList.add(mode);
                 return this;
             }
@@ -119,7 +119,7 @@ public class RcsContactPresenceTuple implements Parcelable {
             /**
              * @return the ServiceCapabilities instance.
              */
-            public ServiceCapabilities build() {
+            public @NonNull ServiceCapabilities build() {
                 return mCapabilities;
             }
         }
@@ -207,9 +207,9 @@ public class RcsContactPresenceTuple implements Parcelable {
     /**
      * Builder to help construct {@link RcsContactPresenceTuple} instances.
      */
-    public static class Builder {
+    public static final class Builder {
 
-        private RcsContactPresenceTuple mPresenceTuple;
+        private final RcsContactPresenceTuple mPresenceTuple;
 
         /**
          * Builds a RcsContactPresenceTuple instance.
@@ -226,7 +226,7 @@ public class RcsContactPresenceTuple implements Parcelable {
         /**
          * The optional SIP Contact URI associated with the PIDF tuple element.
          */
-        public Builder addContactUri(@NonNull Uri contactUri) {
+        public @NonNull Builder addContactUri(@NonNull Uri contactUri) {
             mPresenceTuple.mContactUri = contactUri;
             return this;
         }
@@ -235,7 +235,7 @@ public class RcsContactPresenceTuple implements Parcelable {
          * The optional timestamp indicating the data and time of the status change of this tuple.
          * See RFC3863, section 4.1.7 for more information on the expected format.
          */
-        public Builder addTimeStamp(@NonNull String timestamp) {
+        public @NonNull Builder addTimeStamp(@NonNull String timestamp) {
             mPresenceTuple.mTimestamp = timestamp;
             return this;
         }
@@ -244,7 +244,7 @@ public class RcsContactPresenceTuple implements Parcelable {
          * An optional parameter containing the description element of the service-description. See
          * OMA Presence SIMPLE specification v1.1
          */
-        public Builder addDescription(@NonNull String description) {
+        public @NonNull Builder addDescription(@NonNull String description) {
             mPresenceTuple.mServiceDescription = description;
             return this;
         }
@@ -253,7 +253,7 @@ public class RcsContactPresenceTuple implements Parcelable {
          * An optional parameter containing the service capabilities of the presence tuple if they
          * are present in the servcaps element.
          */
-        public Builder addServiceCapabilities(@NonNull ServiceCapabilities caps) {
+        public @NonNull Builder addServiceCapabilities(@NonNull ServiceCapabilities caps) {
             mPresenceTuple.mServiceCapabilities = caps;
             return this;
         }
@@ -261,7 +261,7 @@ public class RcsContactPresenceTuple implements Parcelable {
         /**
          * @return the constructed instance.
          */
-        public RcsContactPresenceTuple build() {
+        public @NonNull RcsContactPresenceTuple build() {
             return mPresenceTuple;
         }
     }

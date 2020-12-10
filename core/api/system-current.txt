@@ -11522,7 +11522,32 @@ package android.telephony.ims {
   }
 
   public class RcsUceAdapter {
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void addOnPublishStateChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.RcsUceAdapter.OnPublishStateChangedListener) throws android.telephony.ims.ImsException;
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getUcePublishState() throws android.telephony.ims.ImsException;
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void removeOnPublishStateChangedListener(@NonNull android.telephony.ims.RcsUceAdapter.OnPublishStateChangedListener) throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setUceSettingEnabled(boolean) throws android.telephony.ims.ImsException;
+    field public static final int CAPABILITY_UPDATE_TRIGGER_ETAG_EXPIRED = 1; // 0x1
+    field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_2G = 7; // 0x7
+    field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_3G = 6; // 0x6
+    field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_EHRPD = 4; // 0x4
+    field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_HSPAPLUS = 5; // 0x5
+    field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_IWLAN = 9; // 0x9
+    field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_LTE_VOPS_DISABLED = 2; // 0x2
+    field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_LTE_VOPS_ENABLED = 3; // 0x3
+    field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_NR5G_VOPS_DISABLED = 10; // 0xa
+    field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_NR5G_VOPS_ENABLED = 11; // 0xb
+    field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_WLAN = 8; // 0x8
+    field public static final int CAPABILITY_UPDATE_TRIGGER_UNKNOWN = 0; // 0x0
+    field public static final int PUBLISH_STATE_NOT_PUBLISHED = 2; // 0x2
+    field public static final int PUBLISH_STATE_OK = 1; // 0x1
+    field public static final int PUBLISH_STATE_OTHER_ERROR = 6; // 0x6
+    field public static final int PUBLISH_STATE_RCS_PROVISION_ERROR = 4; // 0x4
+    field public static final int PUBLISH_STATE_REQUEST_TIMEOUT = 5; // 0x5
+    field public static final int PUBLISH_STATE_VOICE_PROVISION_ERROR = 3; // 0x3
+  }
+
+  public static interface RcsUceAdapter.OnPublishStateChangedListener {
+    method public void onPublishStateChange(int);
   }
 
   public final class RtpHeaderExtension implements android.os.Parcelable {
@@ -11729,15 +11754,23 @@ package android.telephony.ims.feature {
   }
 
   public class RcsFeature extends android.telephony.ims.feature.ImsFeature {
-    ctor public RcsFeature();
+    ctor @Deprecated public RcsFeature();
+    ctor public RcsFeature(@NonNull java.util.concurrent.Executor);
     method public void changeEnabledCapabilities(@NonNull android.telephony.ims.feature.CapabilityChangeRequest, @NonNull android.telephony.ims.feature.ImsFeature.CapabilityCallbackProxy);
+    method @NonNull public android.telephony.ims.stub.RcsCapabilityExchangeImplBase createCapabilityExchangeImpl(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.stub.CapabilityExchangeEventListener);
     method public void onFeatureReady();
     method public void onFeatureRemoved();
+    method public void removeCapabilityExchangeImpl(@NonNull android.telephony.ims.stub.RcsCapabilityExchangeImplBase);
   }
 
 }
 
 package android.telephony.ims.stub {
+
+  public interface CapabilityExchangeEventListener {
+    method public void onRequestPublishCapabilities(int) throws android.telephony.ims.ImsException;
+    method public void onUnpublish() throws android.telephony.ims.ImsException;
+  }
 
   public interface DelegateConnectionMessageCallback {
     method public void onMessageReceived(@NonNull android.telephony.ims.SipMessage);
@@ -11917,6 +11950,27 @@ package android.telephony.ims.stub {
     method public int updateClir(int);
     method public int updateColp(boolean);
     method public int updateColr(int);
+  }
+
+  public class RcsCapabilityExchangeImplBase {
+    ctor public RcsCapabilityExchangeImplBase(@NonNull java.util.concurrent.Executor);
+    method public void publishCapabilities(@NonNull String, @NonNull android.telephony.ims.stub.RcsCapabilityExchangeImplBase.PublishResponseCallback);
+    field public static final int COMMAND_CODE_FETCH_ERROR = 3; // 0x3
+    field public static final int COMMAND_CODE_GENERIC_FAILURE = 1; // 0x1
+    field public static final int COMMAND_CODE_INSUFFICIENT_MEMORY = 5; // 0x5
+    field public static final int COMMAND_CODE_INVALID_PARAM = 2; // 0x2
+    field public static final int COMMAND_CODE_LOST_NETWORK_CONNECTION = 6; // 0x6
+    field public static final int COMMAND_CODE_NOT_FOUND = 8; // 0x8
+    field public static final int COMMAND_CODE_NOT_SUPPORTED = 7; // 0x7
+    field public static final int COMMAND_CODE_NO_CHANGE = 10; // 0xa
+    field public static final int COMMAND_CODE_REQUEST_TIMEOUT = 4; // 0x4
+    field public static final int COMMAND_CODE_SERVICE_UNAVAILABLE = 9; // 0x9
+    field public static final int COMMAND_CODE_SERVICE_UNKNOWN = 0; // 0x0
+  }
+
+  public static interface RcsCapabilityExchangeImplBase.PublishResponseCallback {
+    method public void onCommandError(int) throws android.telephony.ims.ImsException;
+    method public void onNetworkResponse(@IntRange(from=100, to=699) int, @NonNull String) throws android.telephony.ims.ImsException;
   }
 
   public interface SipDelegate {
