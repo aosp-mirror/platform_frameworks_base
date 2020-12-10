@@ -137,6 +137,7 @@ public class WifiManagerTest {
     private static final int TEST_AP_FREQUENCY = 2412;
     private static final int TEST_AP_BANDWIDTH = SoftApInfo.CHANNEL_WIDTH_20MHZ;
     private static final int TEST_SUB_ID = 3;
+    private static final String TEST_AP_INSTANCE = "wlan1";
 
     @Mock Context mContext;
     @Mock android.net.wifi.IWifiManager mWifiService;
@@ -1111,6 +1112,27 @@ public class WifiManagerTest {
         verify(mSoftApCallback).onInfoChanged(testSoftApInfo);
     }
 
+    /*
+     * Verify client-provided callback is being called through callback proxy
+     */
+    @Test
+    public void softApCallbackProxyCallsOnSoftApInfoListChanged() throws Exception {
+        SoftApInfo testSoftApInfo = new SoftApInfo();
+        testSoftApInfo.setFrequency(TEST_AP_FREQUENCY);
+        testSoftApInfo.setBandwidth(TEST_AP_BANDWIDTH);
+        List<SoftApInfo> infoList = new ArrayList<>();
+        infoList.add(testSoftApInfo);
+        ArgumentCaptor<ISoftApCallback.Stub> callbackCaptor =
+                ArgumentCaptor.forClass(ISoftApCallback.Stub.class);
+        mWifiManager.registerSoftApCallback(new HandlerExecutor(mHandler), mSoftApCallback);
+        verify(mWifiService).registerSoftApCallback(any(IBinder.class), callbackCaptor.capture(),
+                anyInt());
+
+        callbackCaptor.getValue().onInfoListChanged(infoList);
+        mLooper.dispatchAll();
+        verify(mSoftApCallback).onInfoListChanged(infoList);
+    }
+
 
     /*
      * Verify client-provided callback is being called through callback proxy
@@ -1135,7 +1157,8 @@ public class WifiManagerTest {
      */
     @Test
     public void softApCallbackProxyCallsOnBlockedClientConnecting() throws Exception {
-        WifiClient testWifiClient = new WifiClient(MacAddress.fromString("22:33:44:55:66:77"));
+        WifiClient testWifiClient = new WifiClient(MacAddress.fromString("22:33:44:55:66:77"),
+                TEST_AP_INSTANCE);
         ArgumentCaptor<ISoftApCallback.Stub> callbackCaptor =
                 ArgumentCaptor.forClass(ISoftApCallback.Stub.class);
         mWifiManager.registerSoftApCallback(new HandlerExecutor(mHandler), mSoftApCallback);
@@ -1157,6 +1180,8 @@ public class WifiManagerTest {
         SoftApInfo testSoftApInfo = new SoftApInfo();
         testSoftApInfo.setFrequency(TEST_AP_FREQUENCY);
         testSoftApInfo.setBandwidth(TEST_AP_BANDWIDTH);
+        List<SoftApInfo> infoList = new ArrayList<>();
+        infoList.add(testSoftApInfo);
         SoftApCapability testSoftApCapability = new SoftApCapability(0);
         testSoftApCapability.setMaxSupportedClients(10);
         ArgumentCaptor<ISoftApCallback.Stub> callbackCaptor =
@@ -1169,6 +1194,7 @@ public class WifiManagerTest {
         callbackCaptor.getValue().onStateChanged(WIFI_AP_STATE_ENABLING, 0);
         callbackCaptor.getValue().onConnectedClientsChanged(testClients);
         callbackCaptor.getValue().onInfoChanged(testSoftApInfo);
+        callbackCaptor.getValue().onInfoListChanged(infoList);
         callbackCaptor.getValue().onStateChanged(WIFI_AP_STATE_FAILED, SAP_START_FAILURE_GENERAL);
         callbackCaptor.getValue().onCapabilityChanged(testSoftApCapability);
 
@@ -1177,6 +1203,7 @@ public class WifiManagerTest {
         verify(mSoftApCallback).onStateChanged(WIFI_AP_STATE_ENABLING, 0);
         verify(mSoftApCallback).onConnectedClientsChanged(testClients);
         verify(mSoftApCallback).onInfoChanged(testSoftApInfo);
+        verify(mSoftApCallback).onInfoListChanged(infoList);
         verify(mSoftApCallback).onStateChanged(WIFI_AP_STATE_FAILED, SAP_START_FAILURE_GENERAL);
         verify(mSoftApCallback).onCapabilityChanged(testSoftApCapability);
     }

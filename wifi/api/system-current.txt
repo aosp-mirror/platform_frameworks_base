@@ -633,6 +633,7 @@ package android.net.wifi {
     method public default void onCapabilityChanged(@NonNull android.net.wifi.SoftApCapability);
     method public default void onConnectedClientsChanged(@NonNull java.util.List<android.net.wifi.WifiClient>);
     method public default void onInfoChanged(@NonNull android.net.wifi.SoftApInfo);
+    method public default void onInfoListChanged(@NonNull java.util.List<android.net.wifi.SoftApInfo>);
     method public default void onStateChanged(int, int);
   }
 

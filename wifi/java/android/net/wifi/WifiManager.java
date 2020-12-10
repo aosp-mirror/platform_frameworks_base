@@ -4016,9 +4016,32 @@ public class WifiManager {
         /**
          * Called when information of softap changes.
          *
+         * Note: this API is only valid when the Soft AP is configured as a single AP
+         * - not as a bridged AP (2 Soft APs). When the Soft AP is configured as bridged AP
+         * this callback will not be triggered -  use the
+         * {@link #onInfoListChanged(List<SoftApInfo>)} callback in bridged AP mode.
+         *
          * @param softApInfo is the softap information. {@link SoftApInfo}
          */
         default void onInfoChanged(@NonNull SoftApInfo softApInfo) {
+            // Do nothing: can be updated to add SoftApInfo details (e.g. channel) to the UI.
+        }
+
+        /**
+         * Called when information of softap changes.
+         *
+         * The number of the information elements in the list depends on Soft AP configuration
+         * and state.
+         * For instance, an empty list will be returned when the Soft AP is disabled.
+         * One information element will be returned in the list when the Soft AP is configured
+         * as a single AP, and two information elements will be returned in the list
+         * when the Soft AP is configured in bridged mode.
+         *
+         * See {@link #isBridgedApConcurrencySupported()} for the detail of the bridged AP.
+         *
+         * @param softApInfoList is the list of the softap information elements. {@link SoftApInfo}
+         */
+        default void onInfoListChanged(@NonNull List<SoftApInfo> softApInfoList) {
             // Do nothing: can be updated to add SoftApInfo details (e.g. channel) to the UI.
         }
 
@@ -4098,6 +4121,19 @@ public class WifiManager {
             Binder.clearCallingIdentity();
             mExecutor.execute(() -> {
                 mCallback.onInfoChanged(softApInfo);
+            });
+        }
+
+        @Override
+        public void onInfoListChanged(List<SoftApInfo> softApInfoList) {
+            if (mVerboseLoggingEnabled) {
+                Log.v(TAG, "SoftApCallbackProxy: onInfoListChange: softApInfoList="
+                        + softApInfoList);
+            }
+
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> {
+                mCallback.onInfoListChanged(softApInfoList);
             });
         }
 
