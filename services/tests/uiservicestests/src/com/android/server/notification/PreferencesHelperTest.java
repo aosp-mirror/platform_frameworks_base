@@ -28,8 +28,8 @@ import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MAX;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
+import static android.util.StatsLog.ANNOTATION_ID_IS_UID;
 
-import static com.android.internal.util.FrameworkStatsLog.ANNOTATION_ID_IS_UID;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES;
 import static com.android.os.AtomsProto.PackageNotificationChannelPreferences.CHANNEL_ID_FIELD_NUMBER;
 import static com.android.os.AtomsProto.PackageNotificationChannelPreferences.CHANNEL_NAME_FIELD_NUMBER;
