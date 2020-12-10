@@ -23,6 +23,7 @@ import android.util.SparseIntArray;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.TreeSet;
 
@@ -495,6 +496,13 @@ public final class AudioDeviceInfo {
             return encodingsPlusFloat;
         }
         return encodings;
+    }
+
+    /**
+     * @return A list of {@link AudioProfile} supported by the audio devices.
+     */
+    public @NonNull List<AudioProfile> getAudioProfiles() {
+        return mPort.profiles();
     }
 
     /**
