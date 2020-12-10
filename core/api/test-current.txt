@@ -380,6 +380,7 @@ package android.app.admin {
     field public static final String ACTION_DATA_SHARING_RESTRICTION_APPLIED = "android.app.action.DATA_SHARING_RESTRICTION_APPLIED";
     field public static final int OPERATION_CREATE_AND_MANAGE_USER = 5; // 0x5
     field public static final int OPERATION_LOCK_NOW = 1; // 0x1
+    field public static final int OPERATION_REBOOT = 7; // 0x7
     field public static final int OPERATION_REMOVE_USER = 6; // 0x6
     field public static final int OPERATION_START_USER_IN_BACKGROUND = 3; // 0x3
     field public static final int OPERATION_STOP_USER = 4; // 0x4

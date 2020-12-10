@@ -12564,7 +12564,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Objects.requireNonNull(admin, "ComponentName is null");
         final CallerIdentity caller = getCallerIdentity(admin);
         Preconditions.checkCallAuthorization(isDeviceOwner(caller));
-
+        checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_REBOOT);
         mInjector.binderWithCleanCallingIdentity(() -> {
             // Make sure there are no ongoing calls on the device.
             if (mTelephonyManager.getCallState() != TelephonyManager.CALL_STATE_IDLE) {
