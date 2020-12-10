@@ -28,7 +28,7 @@
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"Zlyhanie konfigurácie adresy IP"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Nepripojené z dôvodu siete nízkej kvality"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Zlyhanie pripojenia Wi‑Fi"</string>
-    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Problém s overením totožnosti"</string>
+    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Problém s overením"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Nedá sa pripojiť"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"K sieti <xliff:g id="AP_NAME">%1$s</xliff:g> sa nedá pripojiť"</string>
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Skontrolujte heslo a skúste to znova"</string>
@@ -446,7 +446,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Zostávajúci čas do úplného nabitia: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> do úplného nabitia"</string>
-    <string name="power_charging_limited" msgid="5902301801611726210">"<xliff:g id="LEVEL">%1$s</xliff:g> – Batéria je dočasne obmedzená"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – Optimalizácia stavu batérie"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Neznáme"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Nabíja sa"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Rýchle nabíjanie"</string>
