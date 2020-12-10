@@ -27,9 +27,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IVibratorManagerService;
 import android.os.Looper;
-import android.os.PowerManager;
-import android.os.PowerManagerInternal;
-import android.os.PowerSaveState;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
@@ -98,8 +95,6 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
     private VibrationSettings mVibrationSettings;
     private VibrationScaler mVibrationScaler;
-    @GuardedBy("mLock")
-    private boolean mLowPowerMode;
 
     static native long nativeInit();
 
@@ -141,23 +136,6 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             mVibrationScaler = new VibrationScaler(mContext, mVibrationSettings);
 
             mVibrationSettings.addListener(this::updateServiceState);
-
-            PowerManagerInternal pm = LocalServices.getService(PowerManagerInternal.class);
-            pm.registerLowPowerModeObserver(
-                    new PowerManagerInternal.LowPowerModeListener() {
-                        @Override
-                        public int getServiceType() {
-                            return PowerManager.ServiceType.VIBRATION;
-                        }
-
-                        @Override
-                        public void onLowPowerModeChanged(PowerSaveState result) {
-                            synchronized (mLock) {
-                                mLowPowerMode = result.batterySaverEnabled;
-                            }
-                            updateServiceState();
-                        }
-                    });
 
             updateServiceState();
         } finally {
@@ -277,7 +255,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     @Nullable
     private Vibration.Status shouldIgnoreVibrationLocked(int uid, String opPkg,
             VibrationAttributes attrs) {
-        if (!shouldVibrateForPowerModeLocked(attrs)) {
+        if (!mVibrationSettings.shouldVibrateForPowerMode(attrs.getUsage())) {
             return Vibration.Status.IGNORED_FOR_POWER;
         }
 
@@ -286,8 +264,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             return Vibration.Status.IGNORED_FOR_SETTINGS;
         }
 
-        if (attrs.getUsage() == VibrationAttributes.USAGE_RINGTONE
-                && !mVibrationSettings.shouldVibrateForRingtone()) {
+        if (!mVibrationSettings.shouldVibrateForRingerMode(attrs.getUsage())) {
             if (DEBUG) {
                 Slog.e(TAG, "Vibrate ignored, not vibrating for ringtones");
             }
@@ -307,18 +284,6 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         }
 
         return null;
-    }
-
-    /** Return true is current power mode allows this vibration to happen. */
-    @GuardedBy("mLock")
-    private boolean shouldVibrateForPowerModeLocked(VibrationAttributes attrs) {
-        if (!mLowPowerMode) {
-            return true;
-        }
-        int usage = attrs.getUsage();
-        return usage == VibrationAttributes.USAGE_RINGTONE
-                || usage == VibrationAttributes.USAGE_ALARM
-                || usage == VibrationAttributes.USAGE_COMMUNICATION_REQUEST;
     }
 
     /**

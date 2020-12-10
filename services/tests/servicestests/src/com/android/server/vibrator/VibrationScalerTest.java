@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.os.Handler;
 import android.os.IExternalVibratorService;
+import android.os.PowerManagerInternal;
 import android.os.UserHandle;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
@@ -40,7 +41,9 @@ import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.FakeSettingsProviderRule;
+import com.android.server.LocalServices;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -62,6 +65,7 @@ public class VibrationScalerTest {
 
     // TODO(b/131311651): replace with a FakeVibrator instead.
     @Mock private Vibrator mVibratorMock;
+    @Mock private PowerManagerInternal mPowerManagerInternalMock;
 
     private TestLooper mTestLooper;
     private ContextWrapper mContextSpy;
@@ -77,9 +81,17 @@ public class VibrationScalerTest {
         when(mContextSpy.getContentResolver()).thenReturn(contentResolver);
         when(mContextSpy.getSystemService(eq(Context.VIBRATOR_SERVICE))).thenReturn(mVibratorMock);
 
+        LocalServices.removeServiceForTest(PowerManagerInternal.class);
+        LocalServices.addService(PowerManagerInternal.class, mPowerManagerInternalMock);
+
         mVibrationSettings = new VibrationSettings(
                 mContextSpy, new Handler(mTestLooper.getLooper()));
         mVibrationScaler = new VibrationScaler(mContextSpy, mVibrationSettings);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        LocalServices.removeServiceForTest(PowerManagerInternal.class);
     }
 
     @Test
