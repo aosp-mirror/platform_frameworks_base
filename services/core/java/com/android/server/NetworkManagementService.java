@@ -91,7 +91,6 @@ import android.util.SparseIntArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.Preconditions;
 
@@ -420,8 +419,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                     getBatteryStats().noteMobileRadioPowerState(powerState, tsNanos, uid);
                 } catch (RemoteException e) {
                 }
-                FrameworkStatsLog.write_non_chained(
-                        FrameworkStatsLog.MOBILE_RADIO_POWER_STATE_CHANGED, uid, null, powerState);
             }
         }
 
@@ -432,8 +429,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                     getBatteryStats().noteWifiRadioPowerState(powerState, tsNanos, uid);
                 } catch (RemoteException e) {
                 }
-                FrameworkStatsLog.write_non_chained(
-                        FrameworkStatsLog.WIFI_RADIO_POWER_STATE_CHANGED, uid, null, powerState);
             }
         }
 
