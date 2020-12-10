@@ -11314,6 +11314,7 @@ package android.telephony.ims {
   }
 
   public interface SipDelegateConnection {
+    method public void closeDialog(@NonNull String);
     method public void notifyMessageReceiveError(@NonNull String, int);
     method public void notifyMessageReceived(@NonNull String);
     method public void sendMessage(@NonNull android.telephony.ims.SipMessage, long);
