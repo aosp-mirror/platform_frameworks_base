@@ -162,6 +162,9 @@ public class ChooserActivity extends ResolverActivity implements
     private AppPredictor mWorkAppPredictor;
     private boolean mShouldDisplayLandscape;
 
+    private static final int MAX_TARGETS_PER_ROW_PORTRAIT = 4;
+    private static final int MAX_TARGETS_PER_ROW_LANDSCAPE = 8;
+
     @UnsupportedAppUsage
     public ChooserActivity() {
     }
@@ -904,7 +907,7 @@ public class ChooserActivity extends ResolverActivity implements
                 adapter,
                 getPersonalProfileUserHandle(),
                 /* workProfileUserHandle= */ null,
-                isSendAction(getTargetIntent()));
+                isSendAction(getTargetIntent()), getMaxTargetsPerRow());
     }
 
     private ChooserMultiProfilePagerAdapter createChooserMultiProfilePagerAdapterForTwoProfiles(
@@ -933,7 +936,7 @@ public class ChooserActivity extends ResolverActivity implements
                 selectedProfile,
                 getPersonalProfileUserHandle(),
                 getWorkProfileUserHandle(),
-                isSendAction(getTargetIntent()));
+                isSendAction(getTargetIntent()), getMaxTargetsPerRow());
     }
 
     private int findSelectedProfile() {
@@ -2660,7 +2663,7 @@ public class ChooserActivity extends ResolverActivity implements
                 // and b/150936654
                 recyclerView.setAdapter(gridAdapter);
                 ((GridLayoutManager) recyclerView.getLayoutManager()).setSpanCount(
-                        gridAdapter.getMaxTargetsPerRow());
+                        getMaxTargetsPerRow());
             }
 
             UserHandle currentUserHandle = mChooserMultiProfilePagerAdapter.getCurrentUserHandle();
@@ -2825,9 +2828,7 @@ public class ChooserActivity extends ResolverActivity implements
 
     @Override // ChooserListCommunicator
     public int getMaxRankedTargets() {
-        return mChooserMultiProfilePagerAdapter.getCurrentRootAdapter() == null
-                ? ChooserGridAdapter.MAX_TARGETS_PER_ROW_PORTRAIT
-                : mChooserMultiProfilePagerAdapter.getCurrentRootAdapter().getMaxTargetsPerRow();
+        return getMaxTargetsPerRow();
     }
 
     @Override // ChooserListCommunicator
@@ -3176,6 +3177,13 @@ public class ChooserActivity extends ResolverActivity implements
         }
     }
 
+    int getMaxTargetsPerRow() {
+        int maxTargets = MAX_TARGETS_PER_ROW_PORTRAIT;
+        if (mShouldDisplayLandscape) {
+            maxTargets = MAX_TARGETS_PER_ROW_LANDSCAPE;
+        }
+        return maxTargets;
+    }
     /**
      * Adapter for all types of items and targets in ShareSheet.
      * Note that ranked sections like Direct Share - while appearing grid-like - are handled on the
@@ -3203,9 +3211,6 @@ public class ChooserActivity extends ResolverActivity implements
         private static final int VIEW_TYPE_AZ_LABEL = 4;
         private static final int VIEW_TYPE_CALLER_AND_RANK = 5;
         private static final int VIEW_TYPE_FOOTER = 6;
-
-        private static final int MAX_TARGETS_PER_ROW_PORTRAIT = 4;
-        private static final int MAX_TARGETS_PER_ROW_LANDSCAPE = 8;
 
         private static final int NUM_EXPANSIONS_TO_HIDE_AZ_LABEL = 20;
 
@@ -3253,14 +3258,6 @@ public class ChooserActivity extends ResolverActivity implements
             }
 
             return false;
-        }
-
-        int getMaxTargetsPerRow() {
-            int maxTargets = MAX_TARGETS_PER_ROW_PORTRAIT;
-            if (mShouldDisplayLandscape) {
-                maxTargets = MAX_TARGETS_PER_ROW_LANDSCAPE;
-            }
-            return maxTargets;
         }
 
         /**
@@ -3632,8 +3629,7 @@ public class ChooserActivity extends ResolverActivity implements
             position -= getSystemRowCount() + getProfileRowCount();
 
             final int serviceCount = mChooserListAdapter.getServiceTargetCount();
-            final int serviceRows = (int) Math.ceil((float) serviceCount
-                    / ChooserListAdapter.MAX_SERVICE_TARGETS);
+            final int serviceRows = (int) Math.ceil((float) serviceCount / getMaxRankedTargets());
             if (position < serviceRows) {
                 return position * getMaxTargetsPerRow();
             }
