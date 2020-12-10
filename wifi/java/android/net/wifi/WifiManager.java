@@ -4013,6 +4013,26 @@ public class WifiManager {
          */
         default void onConnectedClientsChanged(@NonNull List<WifiClient> clients) {}
 
+
+        /**
+         * Called when the connected clients for a soft AP instance change.
+         *
+         * When the Soft AP is configured in single AP mode, this callback is invoked
+         * with the same {@link SoftApInfo} for all connected clients changes.
+         * When the Soft AP is configured in bridged mode, this callback is invoked with
+         * the corresponding {@link SoftApInfo} for the instance in which the connected clients
+         * changed.
+         *
+         * Use {@link #onConnectedClientsChanged(List<WifiClient>)} if you don't care about
+         * the mapping from SoftApInfo instance to connected clients.
+         *
+         * @param info The {@link SoftApInfo} of the AP.
+         * @param clients The currently connected clients on the AP instance specified by
+         *                {@code info}.
+         */
+        default void onConnectedClientsChanged(@NonNull SoftApInfo info,
+                @NonNull List<WifiClient> clients) {}
+
         /**
          * Called when information of softap changes.
          *
@@ -4037,11 +4057,15 @@ public class WifiManager {
          * as a single AP, and two information elements will be returned in the list
          * when the Soft AP is configured in bridged mode.
          *
+         * Note: One of the Soft APs may be shut down independently of the other by the framework,
+         * for instance if no devices are connected to it for some duration.
+         * In that case, one information element will be returned in the list in bridged mode.
+         *
          * See {@link #isBridgedApConcurrencySupported()} for the detail of the bridged AP.
          *
          * @param softApInfoList is the list of the softap information elements. {@link SoftApInfo}
          */
-        default void onInfoListChanged(@NonNull List<SoftApInfo> softApInfoList) {
+        default void onInfoChanged(@NonNull List<SoftApInfo> softApInfoList) {
             // Do nothing: can be updated to add SoftApInfo details (e.g. channel) to the UI.
         }
 
@@ -4080,6 +4104,15 @@ public class WifiManager {
     private class SoftApCallbackProxy extends ISoftApCallback.Stub {
         private final Executor mExecutor;
         private final SoftApCallback mCallback;
+        private Map<String, List<WifiClient>> mCurrentClients = new HashMap<>();
+
+        private List<WifiClient> getConnectedClientList(Map<String, List<WifiClient>> clientsMap) {
+            List<WifiClient> connectedClientList = new ArrayList<>();
+            for (List<WifiClient> it : clientsMap.values()) {
+                connectedClientList.addAll(it);
+            }
+            return connectedClientList;
+        }
 
         SoftApCallbackProxy(Executor executor, SoftApCallback callback) {
             mExecutor = executor;
@@ -4099,42 +4132,26 @@ public class WifiManager {
             });
         }
 
+        // TODO: b/175351193, integrate callbacks to simplify the logic.
         @Override
-        public void onConnectedClientsChanged(List<WifiClient> clients) {
+        public void onConnectedClientsOrInfoChanged(Map<String, SoftApInfo> infos,
+                Map<String, List<WifiClient>> clients, boolean isBridged, boolean isRegistration) {
             if (mVerboseLoggingEnabled) {
                 Log.v(TAG, "SoftApCallbackProxy: onConnectedClientsChanged: clients="
-                        + clients.size() + " clients");
+                        + clients + " infos" + infos + "isBridged is " + isBridged
+                        + "isRegistration is " + isRegistration);
             }
-
+            // TODO: b/175351193 Now handle onConnectedClientsChanged in single AP mode first
+            boolean shouldSendOnConnectedClientsChanged = isRegistration
+                    || (getConnectedClientList(mCurrentClients).size()
+                    != getConnectedClientList(clients).size());
+            mCurrentClients = clients;
             Binder.clearCallingIdentity();
-            mExecutor.execute(() -> {
-                mCallback.onConnectedClientsChanged(clients);
-            });
-        }
-
-        @Override
-        public void onInfoChanged(SoftApInfo softApInfo) {
-            if (mVerboseLoggingEnabled) {
-                Log.v(TAG, "SoftApCallbackProxy: onInfoChange: softApInfo=" + softApInfo);
+            if (shouldSendOnConnectedClientsChanged) {
+                mExecutor.execute(() -> {
+                    mCallback.onConnectedClientsChanged(getConnectedClientList(clients));
+                });
             }
-
-            Binder.clearCallingIdentity();
-            mExecutor.execute(() -> {
-                mCallback.onInfoChanged(softApInfo);
-            });
-        }
-
-        @Override
-        public void onInfoListChanged(List<SoftApInfo> softApInfoList) {
-            if (mVerboseLoggingEnabled) {
-                Log.v(TAG, "SoftApCallbackProxy: onInfoListChange: softApInfoList="
-                        + softApInfoList);
-            }
-
-            Binder.clearCallingIdentity();
-            mExecutor.execute(() -> {
-                mCallback.onInfoListChanged(softApInfoList);
-            });
         }
 
         @Override
@@ -4171,8 +4188,20 @@ public class WifiManager {
      * <li> {@link SoftApCallback#onStateChanged(int, int)}</li>
      * <li> {@link SoftApCallback#onConnectedClientsChanged(List<WifiClient>)}</li>
      * <li> {@link SoftApCallback#onInfoChanged(SoftApInfo)}</li>
+     * <li> {@link SoftApCallback#onInfoChanged(List<SoftApInfo>)}</li>
      * <li> {@link SoftApCallback#onCapabilityChanged(SoftApCapability)}</li>
      * </ul>
+     *
+     * Use {@link SoftApCallback#onConnectedClientsChanged(List<WifiClient>)} to know if there are
+     * any clients connected to any of the bridged instances of this AP (if bridged AP is enabled).
+     * Use {@link SoftApCallback#onConnectedClientsChanged(SoftApInfo, List<WifiClient>)} to know
+     * if there are any clients connected to a specific bridged instance of this AP
+     * (if bridged AP is enabled).
+     *
+     * Note: Caller will receive the callback
+     * {@link SoftApCallback#onConnectedClientsChangedWithApInfo(SoftApInfo, List<WifiClient>)}
+     * on registration when there are clients connected to AP.
+     *
      * These will be dispatched on registration to provide the caller with the current state
      * (and are not an indication of any current change). Note that receiving an immediate
      * WIFI_AP_STATE_FAILED value for soft AP state indicates that the latest attempt to start
