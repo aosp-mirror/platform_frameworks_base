@@ -14454,15 +14454,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         enforceProfileOrDeviceOwner(admin);
-        synchronized (getLockObject()) {
-            try {
-                IBackupManager ibm = mInjector.getIBackupManager();
-                return ibm != null && ibm.isBackupServiceActive(
-                    mInjector.userHandleGetCallingUserId());
-            } catch (RemoteException e) {
-                throw new IllegalStateException("Failed requesting backup service state.", e);
+        final int userId = mInjector.userHandleGetCallingUserId();
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            synchronized (getLockObject()) {
+                try {
+                    IBackupManager ibm = mInjector.getIBackupManager();
+                    return ibm != null && ibm.isBackupServiceActive(userId);
+                } catch (RemoteException e) {
+                    throw new IllegalStateException("Failed requesting backup service state.", e);
+                }
             }
-        }
+        });
     }
 
     @Override
