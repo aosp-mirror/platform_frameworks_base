@@ -1805,7 +1805,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @Override
     public void transfer(String packageName) {
-        Objects.requireNonNull(packageName);
+        Preconditions.checkArgument(!TextUtils.isEmpty(packageName));
 
         ApplicationInfo newOwnerAppInfo = mPm.getApplicationInfo(packageName, 0, userId);
         if (newOwnerAppInfo == null) {
@@ -1831,7 +1831,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             try {
                 sealLocked();
             } catch (PackageManagerException e) {
-                throw new IllegalArgumentException("Package is not valid", e);
+                throw new IllegalStateException("Package is not valid", e);
             }
 
             mInstallerUid = newOwnerAppInfo.uid;
