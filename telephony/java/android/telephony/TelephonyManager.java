@@ -2009,6 +2009,8 @@ public class TelephonyManager {
      *     active subscription.
      *     <li>If the calling app is the default SMS role holder (see {@link
      *     RoleManager#isRoleHeld(String)}).
+     *     <li>If the calling app has been granted the
+     *      {@link Manifest.permission#USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER} permission.
      * </ul>
      *
      * <p>If the calling app does not meet one of these requirements then this method will behave
@@ -4019,6 +4021,8 @@ public class TelephonyManager {
      *     <li>If the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *     <li>If the calling app is the default SMS role holder (see {@link
      *     RoleManager#isRoleHeld(String)}).
+     *     <li>If the calling app has been granted the
+     *     {@link Manifest.permission#USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER} permission.
      * </ul>
      *
      * <p>If the calling app does not meet one of these requirements then this method will behave
@@ -4043,33 +4047,8 @@ public class TelephonyManager {
      * for a subscription.
      * Return null if it is unavailable.
      *
-     * <p>Starting with API level 29, persistent device identifiers are guarded behind additional
-     * restrictions, and apps are recommended to use resettable identifiers (see <a
-     * href="/training/articles/user-data-ids">Best practices for unique identifiers</a>). This
-     * method can be invoked if one of the following requirements is met:
-     * <ul>
-     *     <li>If the calling app has been granted the READ_PRIVILEGED_PHONE_STATE permission; this
-     *     is a privileged permission that can only be granted to apps preloaded on the device.
-     *     <li>If the calling app is the device or profile owner and has been granted the
-     *     {@link Manifest.permission#READ_PHONE_STATE} permission. The profile owner is an app that
-     *     owns a managed profile on the device; for more details see <a
-     *     href="https://developer.android.com/work/managed-profiles">Work profiles</a>.
-     *     Profile owner access is deprecated and will be removed in a future release.
-     *     <li>If the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
-     *     <li>If the calling app is the default SMS role holder (see {@link
-     *     RoleManager#isRoleHeld(String)}).
-     * </ul>
-     *
-     * <p>If the calling app does not meet one of these requirements then this method will behave
-     * as follows:
-     *
-     * <ul>
-     *     <li>If the calling app's target SDK is API level 28 or lower and the app has the
-     *     READ_PHONE_STATE permission then null is returned.</li>
-     *     <li>If the calling app's target SDK is API level 28 or lower and the app does not have
-     *     the READ_PHONE_STATE permission, or if the calling app is targeting API level 29 or
-     *     higher, then a SecurityException is thrown.</li>
-     * </ul>
+     * See {@link #getSubscriberId()} for details on the required permissions and behavior
+     * when the caller does not hold sufficient permissions.
      *
      * @param subId whose subscriber id is returned
      * @hide
@@ -7175,8 +7154,13 @@ public class TelephonyManager {
      * Returns the response of authentication for the default subscription.
      * Returns null if the authentication hasn't been successful
      *
-     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE or that the calling
-     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * <p>Requires one of the following permissions:
+     * <ul>
+     *     <li>READ_PRIVILEGED_PHONE_STATE
+     *     <li>the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *     <li>the calling app has been granted the
+     *     {@link Manifest.permission#USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER} permission.
+     * </ul>
      *
      * @param appType the icc application type, like {@link #APPTYPE_USIM}
      * @param authType the authentication type, {@link #AUTHTYPE_EAP_AKA} or
@@ -7201,7 +7185,8 @@ public class TelephonyManager {
      * Returns the response of USIM Authentication for specified subId.
      * Returns null if the authentication hasn't been successful
      *
-     * <p>Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * <p>See {@link #getIccAuthentication(int, int, String)} for details on the required
+     * permissions.
      *
      * @param subId subscription ID used for authentication
      * @param appType the icc application type, like {@link #APPTYPE_USIM}
@@ -7224,7 +7209,8 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfoService();
             if (info == null)
                 return null;
-            return info.getIccSimChallengeResponse(subId, appType, authType, data);
+            return info.getIccSimChallengeResponse(subId, appType, authType, data,
+                    getOpPackageName(), getAttributionTag());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
