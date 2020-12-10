@@ -24,4 +24,6 @@
     <string name="notification_vpn_connected" msgid="3891023882833274730">"VPN కనెక్ట్ చేయబడింది"</string>
     <string name="notification_vpn_disconnected" msgid="7150747626448044843">"VPN డిస్‌కనెక్ట్ చేయబడింది"</string>
     <string name="notification_disclosure_vpn_text" msgid="3873532735584866236">"<xliff:g id="VPN_APP">%1$s</xliff:g> ద్వారా"</string>
+    <string name="tv_notification_panel_title" msgid="5311050946506276154">"నోటిఫికేషన్‌లు"</string>
+    <string name="tv_notification_panel_no_notifications" msgid="9115191912267270678">"నోటిఫికేషన్‌లు లేవు"</string>
 </resources>
