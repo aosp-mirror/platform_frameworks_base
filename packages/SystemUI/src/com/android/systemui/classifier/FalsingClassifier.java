@@ -120,25 +120,32 @@ public abstract class FalsingClassifier {
     void onSessionEnded() {};
 
     /**
-     * Returns true if the data captured so far looks like a false touch.
+     * Returns whether a gesture looks like a false touch.
+     *
+     * See also {@link #classifyGesture(double, double)}.
      */
     Result classifyGesture() {
         return calculateFalsingResult(0, 0);
     }
 
-    boolean classifyGesture(double historyPenalty, double historyConfidence) {
-        return calculateFalsingResult(historyPenalty, historyConfidence).isFalse();
+    /**
+     * Returns whether a gesture looks like a false touch, with the option to consider history.
+     *
+     * Unlike the parameter-less version of this method, this method allows the classifier to take
+     * history into account, penalizing or boosting confidence in a gesture based on recent results.
+     *
+     * See also {@link #classifyGesture()}.
+     */
+    Result classifyGesture(double historyPenalty, double historyConfidence) {
+        return calculateFalsingResult(historyPenalty, historyConfidence);
     }
 
-    abstract Result calculateFalsingResult(double historyPenalty, double historyConfidence);
-
     /**
-     * Give the classifier a chance to log more details about why it triggered.
+     * Calculate a result based on available data.
      *
-     * This should only be called after a call to {@link #classifyGesture()}, and only if
-     * {@link #classifyGesture()} returns true;
+     * When passed a historyConfidence of 0, the history penalty should be wholly ignored.
      */
-    abstract String getReason();
+    abstract Result calculateFalsingResult(double historyPenalty, double historyConfidence);
 
     /** */
     public static void logDebug(String msg) {
@@ -155,13 +162,21 @@ public abstract class FalsingClassifier {
         BrightLineFalsingManager.logError(msg);
     }
 
+    /**
+     * A Falsing result that encapsulates the boolean result along with confidence and a reason.
+     */
     static class Result {
         private final boolean mFalsed;
         private final double mConfidence;
+        private final String mReason;
 
-        Result(boolean falsed, double confidence) {
+        /**
+         * See {@link #falsed(double, String)} abd {@link #passed(double)}.
+         */
+        private Result(boolean falsed, double confidence, String reason) {
             mFalsed = falsed;
             mConfidence = confidence;
+            mReason = reason;
         }
 
         public boolean isFalse() {
@@ -170,6 +185,24 @@ public abstract class FalsingClassifier {
 
         public double getConfidence() {
             return mConfidence;
+        }
+
+        public String getReason() {
+            return mReason;
+        }
+
+        /**
+         * Construct a "falsed" result indicating that a gesture should be treated as accidental.
+         */
+        static Result falsed(double confidence, String reason) {
+            return new Result(true, confidence, reason);
+        }
+
+        /**
+         * Construct a "passed" result indicating that a gesture should be allowed.
+         */
+        static Result passed(double confidence) {
+            return new Result(false, confidence, null);
         }
     }
 }

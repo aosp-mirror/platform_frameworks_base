@@ -95,7 +95,7 @@ class ZigZagClassifier extends FalsingClassifier {
         // For vertical lines, the difference in the y direction should be small.
 
         if (motionEvents.size() < 3) {
-            return new Result(false, 0);
+            return Result.passed(0);
         }
 
         List<Point> rotatedPoints;
@@ -155,11 +155,11 @@ class ZigZagClassifier extends FalsingClassifier {
 
         logDebug("Straightness Deviance: (" + devianceX + "," + devianceY + ") vs "
                 + "(" + maxXDeviance + "," + maxYDeviance + ")");
-        return new Result(devianceX > maxXDeviance || devianceY > maxYDeviance, 0.5);
+        return devianceX > maxXDeviance || devianceY > maxYDeviance
+            ? Result.falsed(0.5, getReason()) : Result.passed(0.5);
     }
 
-    @Override
-    String getReason() {
+    private String getReason() {
         return String.format(
                 (Locale) null,
                 "{devianceX=%f, maxDevianceX=%s, devianceY=%s, maxDevianceY=%s}",

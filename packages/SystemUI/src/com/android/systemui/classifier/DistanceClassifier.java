@@ -148,10 +148,10 @@ class DistanceClassifier extends FalsingClassifier {
 
     @Override
     Result calculateFalsingResult(double historyPenalty, double historyConfidence) {
-        return new Result(!getPassedFlingThreshold(), 0.5);
+        return !getPassedFlingThreshold()
+                ? Result.falsed(0.5, getReason()) : Result.passed(0.5);
     }
 
-    @Override
     String getReason() {
         DistanceVectors distanceVectors = getDistances();
 
@@ -169,10 +169,10 @@ class DistanceClassifier extends FalsingClassifier {
                 mVerticalSwipeThresholdPx);
     }
 
-    boolean isLongSwipe() {
+    Result isLongSwipe() {
         boolean longSwipe = getPassedDistanceThreshold();
         logDebug("Is longSwipe? " + longSwipe);
-        return longSwipe;
+        return longSwipe ? Result.passed(0.5) : Result.falsed(0.5, getReason());
     }
 
     private boolean getPassedDistanceThreshold() {

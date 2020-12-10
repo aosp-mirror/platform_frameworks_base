@@ -30,7 +30,6 @@ import javax.inject.Named;
  */
 public class SingleTapClassifier extends FalsingClassifier {
     private final float mTouchSlop;
-    private String mReason;
 
     @Inject
     SingleTapClassifier(FalsingDataProvider dataProvider,
@@ -41,35 +40,30 @@ public class SingleTapClassifier extends FalsingClassifier {
 
     @Override
     Result calculateFalsingResult(double historyPenalty, double historyConfidence) {
-        return new Result(!isTap(getRecentMotionEvents()), 0.5);
+        return isTap(getRecentMotionEvents());
     }
 
     /** Given a list of {@link android.view.MotionEvent}'s, returns true if the look like a tap. */
-    public boolean isTap(List<MotionEvent> motionEvents) {
+    public Result isTap(List<MotionEvent> motionEvents) {
         float downX = motionEvents.get(0).getX();
         float downY = motionEvents.get(0).getY();
 
         for (MotionEvent event : motionEvents) {
+            String reason;
             if (Math.abs(event.getX() - downX) >= mTouchSlop) {
-                mReason = "dX too big for a tap: "
+                reason = "dX too big for a tap: "
                         + Math.abs(event.getX() - downX)
                         + "vs "
                         + mTouchSlop;
-                return false;
+                return Result.falsed(0.5, reason);
             } else if (Math.abs(event.getY() - downY) >= mTouchSlop) {
-                mReason = "dY too big for a tap: "
+                reason = "dY too big for a tap: "
                         + Math.abs(event.getY() - downY)
                         + "vs "
                         + mTouchSlop;
-                return false;
+                return Result.falsed(0.5, reason);
             }
         }
-        mReason = "";
-        return true;
-    }
-
-    @Override
-    String getReason() {
-        return mReason;
+        return Result.passed(0);
     }
 }
