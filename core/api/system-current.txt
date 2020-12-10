@@ -58,6 +58,7 @@ package android {
     field public static final String CAMERA_DISABLE_TRANSMIT_LED = "android.permission.CAMERA_DISABLE_TRANSMIT_LED";
     field public static final String CAPTURE_AUDIO_HOTWORD = "android.permission.CAPTURE_AUDIO_HOTWORD";
     field public static final String CAPTURE_MEDIA_OUTPUT = "android.permission.CAPTURE_MEDIA_OUTPUT";
+    field public static final String CAPTURE_TUNER_AUDIO_INPUT = "android.permission.CAPTURE_TUNER_AUDIO_INPUT";
     field public static final String CAPTURE_TV_INPUT = "android.permission.CAPTURE_TV_INPUT";
     field public static final String CAPTURE_VOICE_COMMUNICATION_OUTPUT = "android.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT";
     field public static final String CHANGE_APP_IDLE_STATE = "android.permission.CHANGE_APP_IDLE_STATE";
