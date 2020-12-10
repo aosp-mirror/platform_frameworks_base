@@ -1085,7 +1085,7 @@ public class ResolverActivity extends Activity implements
         }
     }
 
-    protected boolean onTargetSelected(TargetInfo target, boolean alwaysCheck) {
+    protected boolean onTargetSelected(TargetInfo target, boolean always) {
         final ResolveInfo ri = target.getResolveInfo();
         final Intent intent = target != null ? target.getResolvedIntent() : null;
 
@@ -1207,7 +1207,7 @@ public class ResolverActivity extends Activity implements
                     if (otherProfileMatch > bestMatch) bestMatch = otherProfileMatch;
                 }
 
-                if (alwaysCheck) {
+                if (always) {
                     final int userId = getUserId();
                     final PackageManager pm = getPackageManager();
 
