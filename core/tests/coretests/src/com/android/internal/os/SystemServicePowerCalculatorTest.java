@@ -66,7 +66,6 @@ public class SystemServicePowerCalculatorTest {
     public void testCalculateApp() {
         // Test Power Profile has two CPU clusters with 3 and 4 speeds, thus 7 freq times total
         mMockSystemServerCpuThreadReader.setCpuTimes(
-                new long[] {10000, 15000, 20000, 25000, 30000, 35000, 40000},
                 new long[] {30000, 40000, 50000, 60000, 70000, 80000, 90000},
                 new long[] {20000, 30000, 40000, 50000, 60000, 70000, 80000});
 
@@ -146,9 +145,7 @@ public class SystemServicePowerCalculatorTest {
             super(null);
         }
 
-        public void setCpuTimes(long[] processCpuTimesUs, long[] threadCpuTimesUs,
-                long[] binderThreadCpuTimesUs) {
-            mThreadTimes.processCpuTimesUs = processCpuTimesUs;
+        public void setCpuTimes(long[] threadCpuTimesUs, long[] binderThreadCpuTimesUs) {
             mThreadTimes.threadCpuTimesUs = threadCpuTimesUs;
             mThreadTimes.binderThreadCpuTimesUs = binderThreadCpuTimesUs;
         }
