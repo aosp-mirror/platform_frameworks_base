@@ -195,6 +195,14 @@ public class TaskInfo {
     public Rect letterboxActivityBounds;
 
     /**
+     * Activity insets if this task or its top activity is presented in letterbox mode and
+     * {@code null} otherwise.
+     * @hide
+     */
+    @Nullable
+    public Rect letterboxActivityInsets;
+
+    /**
      * Relative position of the task's top left corner in the parent container.
      * @hide
      */
@@ -328,7 +336,8 @@ public class TaskInfo {
                 && Objects.equals(
                         getConfiguration().windowConfiguration.getMaxBounds(),
                         that.getConfiguration().windowConfiguration.getMaxBounds())
-                && Objects.equals(parentBounds, that.parentBounds);
+                && Objects.equals(parentBounds, that.parentBounds)
+                && Objects.equals(letterboxActivityInsets, that.letterboxActivityInsets);
     }
 
     /**
@@ -365,6 +374,7 @@ public class TaskInfo {
         parentBounds = source.readTypedObject(Rect.CREATOR);
         isFocused = source.readBoolean();
         isVisible = source.readBoolean();
+        letterboxActivityInsets = source.readTypedObject(Rect.CREATOR);
     }
 
     /**
@@ -402,6 +412,7 @@ public class TaskInfo {
         dest.writeTypedObject(parentBounds, flags);
         dest.writeBoolean(isFocused);
         dest.writeBoolean(isVisible);
+        dest.writeTypedObject(letterboxActivityInsets, flags);
     }
 
     @Override
@@ -428,6 +439,7 @@ public class TaskInfo {
                 + " parentBounds=" + parentBounds
                 + " isFocused=" + isFocused
                 + " isVisible=" + isVisible
+                + " letterboxActivityInsets=" + letterboxActivityInsets
                 + "}";
     }
 }
