@@ -34,6 +34,7 @@ using ::android::hardware::Return;
 using ::android::hardware::Void;
 using ::android::hardware::hidl_handle;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterSettings;
+using ::android::hardware::tv::tuner::V1_0::DemuxFilterType;
 using ::android::hardware::tv::tuner::V1_0::IFilter;
 using ::android::hardware::tv::tuner::V1_0::Result;
 using ::android::hardware::tv::tuner::V1_1::AvStreamType;
@@ -44,6 +45,11 @@ using namespace std;
 using MQ = MessageQueue<uint8_t, kSynchronizedReadWrite>;
 
 namespace android {
+
+struct SharedHandleInfo {
+    native_handle_t* sharedHandle;
+    uint64_t size;
+};
 
 // TODO: pending aidl interface
 /*class TunerFilterCallback : public BnTunerFilterCallback {
@@ -75,7 +81,7 @@ struct FilterClient : public RefBase {
 
 public:
     // TODO: pending aidl interface
-    FilterClient();
+    FilterClient(DemuxFilterType type);
     ~FilterClient();
 
     // TODO: remove after migration to Tuner Service is done.
@@ -87,6 +93,11 @@ public:
      * @return the actual reading size. -1 if failed to read.
      */
     int read(uint8_t* buffer, int size);
+
+    /**
+     * Get the a/v shared memory handle information
+     */
+    SharedHandleInfo getAvSharedHandleInfo();
 
     /**
      * Configure the filter.
@@ -161,6 +172,8 @@ public:
 private:
     Result getFilterMq();
     int copyData(uint8_t* buffer, int size);
+    void checkIsMediaFilter(DemuxFilterType type);
+    void handleAvShareMemory();
 
     /**
      * An AIDL Tuner Filter Singleton assigned at the first time when the Tuner Client
@@ -189,6 +202,10 @@ private:
     sp<FilterClientCallback> mCallback;
     //shared_ptr<TunerFilterCallback> mAidlCallback;
     sp<HidlFilterCallback> mHidlCallback;
+
+    native_handle_t* mAvSharedHandle;
+    uint64_t mAvSharedMemSize;
+    bool mIsMediaFilter;
 };
 }  // namespace android
 

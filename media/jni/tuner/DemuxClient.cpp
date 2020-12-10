@@ -68,13 +68,11 @@ sp<FilterClient> DemuxClient::openFilter(DemuxFilterType type, int bufferSize,
         sp<HidlFilterCallback> callback = new HidlFilterCallback(cb);
         sp<IFilter> hidlFilter = openHidlFilter(type, bufferSize, callback);
         if (hidlFilter != NULL) {
-            sp<FilterClient> filterClient = new FilterClient();
+            sp<FilterClient> filterClient = new FilterClient(type);
             filterClient->setHidlFilter(hidlFilter);
             return filterClient;
         }
     }
-
-    // TODO: handle share av memory handle
 
     return NULL;
 }
@@ -141,7 +139,7 @@ Result DemuxClient::disconnectCiCam() {
 }
 
 Result DemuxClient::close() {
-    // pending aidl interface
+    // TODO: pending aidl interface
 
     if (mDemux != NULL) {
         Result res = mDemux->close();
