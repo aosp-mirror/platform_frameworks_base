@@ -975,6 +975,10 @@ public final class NetworkCapabilities implements Parcelable {
         return mOwnerUid;
     }
 
+    private boolean equalsOwnerUid(@NonNull final NetworkCapabilities nc) {
+        return mOwnerUid == nc.mOwnerUid;
+    }
+
     /**
      * UIDs of packages that are administrators of this network, or empty if none.
      *
@@ -1684,6 +1688,7 @@ public final class NetworkCapabilities implements Parcelable {
                 && equalsTransportInfo(that)
                 && equalsUids(that)
                 && equalsSSID(that)
+                && equalsOwnerUid(that)
                 && equalsPrivateDnsBroken(that)
                 && equalsRequestor(that)
                 && equalsAdministratorUids(that);
@@ -1697,17 +1702,18 @@ public final class NetworkCapabilities implements Parcelable {
                 + ((int) (mUnwantedNetworkCapabilities >> 32) * 7)
                 + ((int) (mTransportTypes & 0xFFFFFFFF) * 11)
                 + ((int) (mTransportTypes >> 32) * 13)
-                + (mLinkUpBandwidthKbps * 17)
-                + (mLinkDownBandwidthKbps * 19)
+                + mLinkUpBandwidthKbps * 17
+                + mLinkDownBandwidthKbps * 19
                 + Objects.hashCode(mNetworkSpecifier) * 23
-                + (mSignalStrength * 29)
-                + Objects.hashCode(mUids) * 31
-                + Objects.hashCode(mSSID) * 37
-                + Objects.hashCode(mTransportInfo) * 41
-                + Objects.hashCode(mPrivateDnsBroken) * 43
-                + Objects.hashCode(mRequestorUid) * 47
-                + Objects.hashCode(mRequestorPackageName) * 53
-                + Arrays.hashCode(mAdministratorUids) * 59;
+                + mSignalStrength * 29
+                + mOwnerUid * 31
+                + Objects.hashCode(mUids) * 37
+                + Objects.hashCode(mSSID) * 41
+                + Objects.hashCode(mTransportInfo) * 43
+                + Objects.hashCode(mPrivateDnsBroken) * 47
+                + Objects.hashCode(mRequestorUid) * 53
+                + Objects.hashCode(mRequestorPackageName) * 59
+                + Arrays.hashCode(mAdministratorUids) * 61;
     }
 
     @Override
