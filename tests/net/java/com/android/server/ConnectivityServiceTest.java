@@ -187,6 +187,7 @@ import android.net.RouteInfo;
 import android.net.RouteInfoParcel;
 import android.net.SocketKeepalive;
 import android.net.UidRange;
+import android.net.UidRangeParcel;
 import android.net.Uri;
 import android.net.VpnManager;
 import android.net.metrics.IpConnectivityLog;
@@ -1053,7 +1054,7 @@ public class ConnectivityServiceTest {
 
         public MockVpn(int userId) {
             super(startHandlerThreadAndReturnLooper(), mServiceContext, mNetworkManagementService,
-                    userId, mock(KeyStore.class));
+                    mMockNetd, userId, mock(KeyStore.class));
             mConfig = new VpnConfig();
         }
 
@@ -1092,10 +1093,11 @@ public class ConnectivityServiceTest {
             mMockNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_VPN, lp,
                     mNetworkCapabilities);
             mMockNetworkAgent.waitForIdle(TIMEOUT_MS);
-            verify(mNetworkManagementService, times(1))
-                    .addVpnUidRanges(eq(mMockVpn.getNetId()), eq(uids.toArray(new UidRange[0])));
-            verify(mNetworkManagementService, never())
-                    .removeVpnUidRanges(eq(mMockVpn.getNetId()), any());
+
+            verify(mMockNetd, times(1)).networkAddUidRanges(eq(mMockVpn.getNetId()),
+                    eq(toUidRangeStableParcels(uids)));
+            verify(mMockNetd, never())
+                    .networkRemoveUidRanges(eq(mMockVpn.getNetId()), any());
             mAgentRegistered = true;
             mNetworkCapabilities.set(mMockNetworkAgent.getNetworkCapabilities());
             mNetworkAgent = mMockNetworkAgent.getNetworkAgent();
@@ -1165,6 +1167,11 @@ public class ConnectivityServiceTest {
         private synchronized void setVpnInfo(VpnInfo vpnInfo) {
             mVpnInfo = vpnInfo;
         }
+    }
+
+    private UidRangeParcel[] toUidRangeStableParcels(final @NonNull Set<UidRange> ranges) {
+        return ranges.stream().map(
+                r -> new UidRangeParcel(r.start, r.stop)).toArray(UidRangeParcel[]::new);
     }
 
     private void mockVpn(int uid) {

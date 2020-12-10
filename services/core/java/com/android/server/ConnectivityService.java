@@ -129,6 +129,7 @@ import android.net.RouteInfoParcel;
 import android.net.SocketKeepalive;
 import android.net.TetheringManager;
 import android.net.UidRange;
+import android.net.UidRangeParcel;
 import android.net.Uri;
 import android.net.VpnManager;
 import android.net.VpnService;
@@ -5152,7 +5153,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 loge("Starting user already has a VPN");
                 return;
             }
-            userVpn = new Vpn(mHandler.getLooper(), mContext, mNMS, userId, mKeyStore);
+            userVpn = new Vpn(mHandler.getLooper(), mContext, mNMS, mNetd, userId, mKeyStore);
             mVpns.put(userId, userVpn);
             if (mUserManager.getUserInfo(userId).isPrimary() && LockdownVpnTracker.isEnabled()) {
                 updateLockdownVpn();
@@ -6621,6 +6622,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 && (lp.hasIpv6DefaultRoute() || lp.hasIpv6UnreachableDefaultRoute());
     }
 
+    private static UidRangeParcel[] toUidRangeStableParcels(final @NonNull Set<UidRange> ranges) {
+        final UidRangeParcel[] stableRanges = new UidRangeParcel[ranges.size()];
+        int index = 0;
+        for (UidRange range : ranges) {
+            stableRanges[index] = new UidRangeParcel(range.start, range.stop);
+            index++;
+        }
+        return stableRanges;
+    }
+
     private void updateUids(NetworkAgentInfo nai, NetworkCapabilities prevNc,
             NetworkCapabilities newNc) {
         Set<UidRange> prevRanges = null == prevNc ? null : prevNc.getUids();
@@ -6640,14 +6651,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // removing old range works because, unlike the filtering rules below, it's possible to
             // add duplicate UID routing rules.
             if (!newRanges.isEmpty()) {
-                final UidRange[] addedRangesArray = new UidRange[newRanges.size()];
-                newRanges.toArray(addedRangesArray);
-                mNMS.addVpnUidRanges(nai.network.getNetId(), addedRangesArray);
+                mNetd.networkAddUidRanges(nai.network.netId, toUidRangeStableParcels(newRanges));
             }
             if (!prevRanges.isEmpty()) {
-                final UidRange[] removedRangesArray = new UidRange[prevRanges.size()];
-                prevRanges.toArray(removedRangesArray);
-                mNMS.removeVpnUidRanges(nai.network.getNetId(), removedRangesArray);
+                mNetd.networkRemoveUidRanges(
+                        nai.network.netId, toUidRangeStableParcels(prevRanges));
             }
             final boolean wasFiltering = requiresVpnIsolation(nai, prevNc, nai.linkProperties);
             final boolean shouldFilter = requiresVpnIsolation(nai, newNc, nai.linkProperties);
