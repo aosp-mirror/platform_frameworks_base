@@ -4980,6 +4980,40 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testCustomToastPostedWhileInForeground_blockedIfAppGoesToBackground()
+            throws Exception {
+        final String testPackage = "testPackageName";
+        assertEquals(0, mService.mToastQueue.size());
+        mService.isSystemUid = false;
+        setToastRateIsWithinQuota(true);
+
+        // package is not suspended
+        when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
+                .thenReturn(false);
+
+        setAppInForegroundForToasts(mUid, true);
+
+        Binder token1 = new Binder();
+        Binder token2 = new Binder();
+        ITransientNotification callback1 = mock(ITransientNotification.class);
+        ITransientNotification callback2 = mock(ITransientNotification.class);
+        INotificationManager nmService = (INotificationManager) mService.mService;
+
+        nmService.enqueueToast(testPackage, token1, callback1, 2000, 0);
+        nmService.enqueueToast(testPackage, token2, callback2, 2000, 0);
+
+        assertEquals(2, mService.mToastQueue.size()); // Both toasts enqueued.
+        verify(callback1, times(1)).show(any()); // First toast shown.
+
+        setAppInForegroundForToasts(mUid, false);
+
+        mService.cancelToastLocked(0); // Remove the first toast, and show next.
+
+        assertEquals(0, mService.mToastQueue.size()); // Both toasts processed.
+        verify(callback2, never()).show(any()); // Second toast was never shown.
+    }
+
+    @Test
     public void testAllowForegroundTextToasts() throws Exception {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
