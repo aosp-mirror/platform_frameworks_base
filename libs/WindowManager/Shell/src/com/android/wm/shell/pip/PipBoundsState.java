@@ -76,6 +76,8 @@ public final class PipBoundsState {
     private int mImeHeight;
     private boolean mIsShelfShowing;
     private int mShelfHeight;
+    /** Whether the user has resized the PIP manually. */
+    private boolean mHasUserResizedPip;
 
     private @Nullable Runnable mOnMinimalSizeChangeCallback;
     private @Nullable BiConsumer<Boolean, Integer> mOnShelfVisibilityChangeCallback;
@@ -189,8 +191,8 @@ public final class PipBoundsState {
     }
 
     /** Save the reentry state to restore to when re-entering PIP mode. */
-    public void saveReentryState(@NonNull Rect bounds, float fraction) {
-        mPipReentryState = new PipReentryState(new Size(bounds.width(), bounds.height()), fraction);
+    public void saveReentryState(Size size, float fraction) {
+        mPipReentryState = new PipReentryState(size, fraction);
     }
 
     /** Returns the saved reentry state. */
@@ -205,6 +207,7 @@ public final class PipBoundsState {
         mLastPipComponentName = lastPipComponentName;
         if (changed) {
             clearReentryState();
+            setHasUserResizedPip(false);
         }
     }
 
@@ -329,6 +332,16 @@ public final class PipBoundsState {
         return mShelfHeight;
     }
 
+    /** Returns whether the user has resized the PIP. */
+    public boolean hasUserResizedPip() {
+        return mHasUserResizedPip;
+    }
+
+    /** Set whether the user has resized the PIP. */
+    public void setHasUserResizedPip(boolean hasUserResizedPip) {
+        mHasUserResizedPip = hasUserResizedPip;
+    }
+
     /**
      * Registers a callback when the minimal size of PIP that is set by the app changes.
      */
@@ -397,15 +410,15 @@ public final class PipBoundsState {
     static final class PipReentryState {
         private static final String TAG = PipReentryState.class.getSimpleName();
 
-        private final @NonNull Size mSize;
+        private final @Nullable Size mSize;
         private final float mSnapFraction;
 
-        PipReentryState(@NonNull Size size, float snapFraction) {
+        PipReentryState(@Nullable Size size, float snapFraction) {
             mSize = size;
             mSnapFraction = snapFraction;
         }
 
-        @NonNull
+        @Nullable
         Size getSize() {
             return mSize;
         }

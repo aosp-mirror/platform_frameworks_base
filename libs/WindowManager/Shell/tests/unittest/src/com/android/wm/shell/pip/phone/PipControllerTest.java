@@ -30,10 +30,12 @@ import static org.mockito.Mockito.when;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Rect;
 import android.os.RemoteException;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.util.Size;
 
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.WindowManagerShellWrapper;
@@ -134,5 +136,29 @@ public class PipControllerTest extends ShellTestCase {
         mPipController.mPinnedStackListener.onActivityHidden(component2);
 
         verify(mMockPipBoundsState, never()).setLastPipComponentName(null);
+    }
+
+    @Test
+    public void saveReentryState_noUserResize_doesNotSaveSize() {
+        final Rect bounds = new Rect(0, 0, 10, 10);
+        when(mMockPipBoundsAlgorithm.getSnapFraction(bounds)).thenReturn(1.0f);
+        when(mMockPipBoundsState.hasUserResizedPip()).thenReturn(false);
+
+        mPipController.saveReentryState(bounds);
+
+        verify(mMockPipBoundsState).saveReentryState(null, 1.0f);
+    }
+
+    @Test
+    public void saveReentryState_userHasResized_savesSize() {
+        final Rect bounds = new Rect(0, 0, 10, 10);
+        final Rect resizedBounds = new Rect(0, 0, 30, 30);
+        when(mMockPipBoundsAlgorithm.getSnapFraction(bounds)).thenReturn(1.0f);
+        when(mMockPipTouchHandler.getUserResizeBounds()).thenReturn(resizedBounds);
+        when(mMockPipBoundsState.hasUserResizedPip()).thenReturn(true);
+
+        mPipController.saveReentryState(bounds);
+
+        verify(mMockPipBoundsState).saveReentryState(new Size(30, 30), 1.0f);
     }
 }
