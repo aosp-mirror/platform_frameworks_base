@@ -24,6 +24,7 @@ import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.content.Intent.ACTION_MAIN;
+import static android.content.Intent.CATEGORY_BROWSABLE;
 import static android.content.Intent.CATEGORY_DEFAULT;
 import static android.content.Intent.CATEGORY_HOME;
 import static android.content.Intent.EXTRA_LONG_VERSION_CODE;
@@ -8006,6 +8007,13 @@ public class PackageManagerService extends IPackageManager.Stub
                             Slog.i(TAG, "  + always: " + info.activityInfo.packageName
                                     + " : linkgen=" + linkGeneration);
                         }
+
+                        if (!intent.hasCategory(CATEGORY_BROWSABLE)
+                                || !intent.hasCategory(CATEGORY_DEFAULT)) {
+                            undefinedList.add(info);
+                            continue;
+                        }
+
                         // Use link-enabled generation as preferredOrder, i.e.
                         // prefer newly-enabled over earlier-enabled.
                         info.preferredOrder = linkGeneration;
