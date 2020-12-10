@@ -636,13 +636,13 @@ public final class DisplayManagerGlobal {
      * Requires the {@link android.Manifest.permission#CONTROL_DISPLAY_BRIGHTNESS} permission.
      * </p>
      *
-     * @param brightness The brightness value from 0 to 255.
+     * @param brightness The brightness value from 0.0f to 1.0f.
      *
      * @hide Requires signature permission.
      */
-    public void setTemporaryBrightness(float brightness) {
+    public void setTemporaryBrightness(int displayId, float brightness) {
         try {
-            mDm.setTemporaryBrightness(brightness);
+            mDm.setTemporaryBrightness(displayId, brightness);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

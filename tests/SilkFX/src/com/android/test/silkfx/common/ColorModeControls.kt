@@ -34,12 +34,14 @@ class ColorModeControls : LinearLayout, WindowObserver {
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
         displayManager = context.getSystemService(DisplayManager::class.java)!!
+        displayId = context.getDisplayId()
     }
 
     private var window: Window? = null
     private var currentModeDisplay: TextView? = null
     private val displayManager: DisplayManager
     private var targetSdrWhitePointIndex = 0
+    private var displayId: Int
 
     private val whitePoint get() = SDR_WHITE_POINTS[targetSdrWhitePointIndex]
 
@@ -107,7 +109,7 @@ class ColorModeControls : LinearLayout, WindowObserver {
         // Imperfect, but close enough, synchronization by waiting for frame commit to set the value
         viewTreeObserver.registerFrameCommitCallback {
             try {
-                displayManager.setTemporaryBrightness(level)
+                displayManager.setTemporaryBrightness(displayId, level)
             } catch (ex: Exception) {
                 // Ignore a permission denied rejection - it doesn't meaningfully change much
             }
