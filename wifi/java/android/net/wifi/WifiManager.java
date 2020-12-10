@@ -3041,6 +3041,37 @@ public class WifiManager {
     }
 
     /**
+     * Restart the Wi-Fi subsystem.
+     *
+     * Restarts the Wi-Fi subsystem - effectively disabling it and re-enabling it. All existing
+     * Access Point (AP) associations are torn down, all Soft APs are disabled, Wi-Fi Direct and
+     * Wi-Fi Aware are disabled.
+     *
+     * The state of the system after restart is not guaranteed to match its state before the API is
+     * called - for instance the device may associate to a different Access Point (AP), and tethered
+     * hotspots may or may not be restored.
+     *
+     * @param reason If non-null, requests a bug report and attaches the reason string to it. A bug
+     *               report may still not be generated based on framework criteria - for instance,
+     *               build type or throttling. The WiFi subsystem is restarted whether or not a bug
+     *               report is requested or generated.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_AIRPLANE_MODE)
+    public void restartWifiSubsystem(@Nullable String reason) {
+        if (!SdkLevel.isAtLeastS()) {
+            throw new UnsupportedOperationException();
+        }
+        try {
+            mService.restartWifiSubsystem(reason);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Gets the Wi-Fi enabled state.
      * @return One of {@link #WIFI_STATE_DISABLED},
      *         {@link #WIFI_STATE_DISABLING}, {@link #WIFI_STATE_ENABLED},
