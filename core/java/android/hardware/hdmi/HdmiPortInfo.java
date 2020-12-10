@@ -192,6 +192,7 @@ public final class HdmiPortInfo implements Parcelable {
 
     @Override
     public int hashCode() {
-        return mId;
+        return java.util.Objects.hash(
+                mId, mType, mAddress, mCecSupported, mArcSupported, mMhlSupported);
     }
 }
