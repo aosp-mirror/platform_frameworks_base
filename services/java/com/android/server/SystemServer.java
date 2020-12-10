@@ -678,7 +678,9 @@ public final class SystemServer implements Dumpable {
             // Load preinstalled system fonts for system server, so that WindowManagerService, etc
             // can start using Typeface. Note that fonts are required not only for text rendering,
             // but also for some text operations (e.g. TextUtils.makeSafeForPresentation()).
-            Typeface.loadPreinstalledSystemFontMap();
+            if (Typeface.ENABLE_LAZY_TYPEFACE_INITIALIZATION) {
+                Typeface.loadPreinstalledSystemFontMap();
+            }
 
             // Attach JVMTI agent if this is a debuggable build and the system property is set.
             if (Build.IS_DEBUGGABLE) {
