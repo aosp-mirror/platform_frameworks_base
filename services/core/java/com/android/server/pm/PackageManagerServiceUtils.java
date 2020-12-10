@@ -822,7 +822,7 @@ public class PackageManagerServiceUtils {
     public static PackageInfoLite getMinimalPackageInfo(Context context,
             PackageParser.PackageLite pkg, String packagePath, int flags, String abiOverride) {
         final PackageInfoLite ret = new PackageInfoLite();
-        if (packagePath == null) {
+        if (packagePath == null || pkg == null) {
             Slog.i(TAG, "Invalid package file " + packagePath);
             ret.recommendedInstallLocation = PackageHelper.RECOMMEND_FAILED_INVALID_APK;
             return ret;
