@@ -528,6 +528,6 @@ public class Nat464Xlat extends BaseNetworkObserver {
 
     @VisibleForTesting
     protected int getNetId() {
-        return mNetwork.network.netId;
+        return mNetwork.network.getNetId();
     }
 }
