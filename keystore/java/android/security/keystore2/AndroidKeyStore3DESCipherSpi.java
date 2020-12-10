@@ -17,7 +17,7 @@
 package android.security.keystore2;
 
 import android.annotation.NonNull;
-import android.hardware.keymint.KeyParameter;
+import android.hardware.security.keymint.KeyParameter;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keystore.ArrayUtils;
 import android.security.keystore.KeyProperties;
