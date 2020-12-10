@@ -25,7 +25,7 @@ fun LayersAssertion.appPairsDividerIsVisible(
     enabled: Boolean = bugId == 0
 ) {
     end("appPairsDividerIsVisible", bugId, enabled) {
-        this.showsLayer(FlickerTestBase.APP_PAIRS_DIVIDER)
+        this.showsLayer(FlickerTestBase.SPLIT_DIVIDER)
     }
 }
 
@@ -35,7 +35,7 @@ fun LayersAssertion.appPairsDividerIsInvisible(
     enabled: Boolean = bugId == 0
 ) {
     end("appPairsDividerIsInVisible", bugId, enabled) {
-        this.hasNotLayer(FlickerTestBase.APP_PAIRS_DIVIDER)
+        this.hasNotLayer(FlickerTestBase.SPLIT_DIVIDER)
     }
 }
 
