@@ -1,3 +1,4 @@
+per-file *Power* = file:/services/core/java/com/android/server/power/OWNERS
 per-file *Zygote* = file:/ZYGOTE_OWNERS
 
 # BatteryStats
