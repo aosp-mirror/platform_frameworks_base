@@ -380,15 +380,6 @@ public abstract class ActivityTaskManagerInternal {
         }
     }
 
-    /**
-     * Set the corresponding display information for the process global configuration. To be called
-     * when we need to show IME on a different display.
-     *
-     * @param pid The process id associated with the IME window.
-     * @param displayId The ID of the display showing the IME.
-     */
-    public abstract void onImeWindowSetOnDisplay(int pid, int displayId);
-
     public abstract void sendActivityResult(int callingUid, IBinder activityToken,
             String resultWho, int requestCode, int resultCode, Intent data);
     public abstract void clearPendingResultForActivity(
