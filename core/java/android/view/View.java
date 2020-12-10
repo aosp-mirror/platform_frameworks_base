@@ -29023,6 +29023,33 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         boolean mUse32BitDrawingCache;
 
         /**
+         * For windows that are full-screen but using insets to layout inside
+         * of the screen decorations, these are the current insets for the
+         * content of the window.
+         */
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q,
+                publicAlternatives = "Use {@link WindowInsets#getInsets(int)}")
+        final Rect mContentInsets = new Rect();
+
+        /**
+         * For windows that are full-screen but using insets to layout inside
+         * of the screen decorations, these are the current insets for the
+         * actual visible parts of the window.
+         */
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q,
+                publicAlternatives = "Use {@link WindowInsets#getInsets(int)}")
+        final Rect mVisibleInsets = new Rect();
+
+        /**
+         * For windows that are full-screen but using insets to layout inside
+         * of the screen decorations, these are the current insets for the
+         * stable system windows.
+         */
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q,
+                publicAlternatives = "Use {@link WindowInsets#getInsets(int)}")
+        final Rect mStableInsets = new Rect();
+
+        /**
          * Current caption insets to the display coordinate.
          */
         final Rect mCaptionInsets = new Rect();
