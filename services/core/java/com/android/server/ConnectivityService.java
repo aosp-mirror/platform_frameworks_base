@@ -8042,8 +8042,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         final NetworkRequestInfo nri = cbInfo.mRequestInfo;
 
-        if (uid != nri.mUid) {
-            if (VDBG) loge("Different uid than registrant attempting to unregister cb");
+        // Caller's UID must either be the registrants (if they are unregistering) or the System's
+        // (if the Binder died)
+        if (uid != nri.mUid && uid != Process.SYSTEM_UID) {
+            if (DBG) loge("Uid(" + uid + ") not registrant's (" + nri.mUid + ") or System's");
             return;
         }
 
