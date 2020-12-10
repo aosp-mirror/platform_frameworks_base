@@ -58,7 +58,6 @@ import android.net.Network;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkStack;
 import android.net.NetworkStats;
-import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.net.TetherStatsParcel;
 import android.net.UidRange;
@@ -803,7 +802,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         InterfaceConfiguration cfg = new InterfaceConfiguration();
         cfg.setHardwareAddress(p.hwAddr);
 
-        final InetAddress addr = NetworkUtils.numericToInetAddress(p.ipv4Addr);
+        final InetAddress addr = InetAddresses.parseNumericAddress(p.ipv4Addr);
         cfg.setLinkAddress(new LinkAddress(addr, p.prefixLength));
         for (String flag : p.flags) {
             cfg.setFlag(flag);
