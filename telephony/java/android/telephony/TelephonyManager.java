@@ -9981,6 +9981,16 @@ public class TelephonyManager {
      */
     public static final int CARD_POWER_UP_PASS_THROUGH = 2;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"CARD_POWER"},
+            value = {
+                    CARD_POWER_DOWN,
+                    CARD_POWER_UP,
+                    CARD_POWER_UP_PASS_THROUGH,
+            })
+    public @interface SimPowerState {}
+
     /**
      * Set SIM card power state.
      *
@@ -9991,12 +10001,17 @@ public class TelephonyManager {
      * Callers should monitor for {@link TelephonyIntents#ACTION_SIM_STATE_CHANGED}
      * broadcasts to determine success or failure and timeout if needed.
      *
+     * @deprecated prefer {@link setSimPowerState(int, Executor, Consumer<Integer>)}.
+     * There is no guarantee that SIM power changes will trigger ACTION_SIM_STATE_CHANGED on new
+     * devices.
+     *
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
      *
      * {@hide}
      **/
     @SystemApi
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setSimPowerState(int state) {
         setSimPowerStateForSlot(getSlotIndex(), state);
@@ -10013,12 +10028,16 @@ public class TelephonyManager {
      * Callers should monitor for {@link TelephonyIntents#ACTION_SIM_STATE_CHANGED}
      * broadcasts to determine success or failure and timeout if needed.
      *
+     * @deprecated prefer {@link setSimPowerStateForSlot(int, int, Executor, Consumer<Integer>)}.
+     * changes will trigger ACTION_SIM_STATE_CHANGED on new devices.
+     *
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
      *
      * {@hide}
      **/
     @SystemApi
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setSimPowerStateForSlot(int slotIndex, int state) {
         try {
@@ -10030,6 +10049,85 @@ public class TelephonyManager {
             Log.e(TAG, "Error calling ITelephony#setSimPowerStateForSlot", e);
         } catch (SecurityException e) {
             Log.e(TAG, "Permission error calling ITelephony#setSimPowerStateForSlot", e);
+        }
+    }
+
+    /**
+     * Set SIM card power state.
+     *
+     * @param state  State of SIM (power down, power up, pass through)
+     * @see #CARD_POWER_DOWN
+     * @see #CARD_POWER_UP
+     * @see #CARD_POWER_UP_PASS_THROUGH
+     * @param executor The executor of where the callback will execute.
+     * @param callback Callback will be triggered once it succeeds or failed.
+     * @see #SET_SIM_POWER_STATE_SUCCESS
+     * @see #SET_SIM_POWER_STATE_ALREADY_IN_STATE
+     * @see #SET_SIM_POWER_STATE_MODEM_ERROR
+     * @see #SET_SIM_POWER_STATE_SIM_ERROR
+     * @see #SET_SIM_POWER_STATE_NOT_SUPPORTED
+     * @throws IllegalArgumentException if requested SIM state is invalid
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     *
+     * {@hide}
+     **/
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setSimPowerState(@SimPowerState int state, @NonNull Executor executor,
+            @NonNull @SetSimPowerStateResult Consumer<Integer> callback) {
+        setSimPowerStateForSlot(getSlotIndex(), state, executor, callback);
+    }
+
+    /**
+     * Set SIM card power state.
+     *
+     * @param slotIndex SIM slot id
+     * @param state  State of SIM (power down, power up, pass through)
+     * @see #CARD_POWER_DOWN
+     * @see #CARD_POWER_UP
+     * @see #CARD_POWER_UP_PASS_THROUGH
+     * @param executor The executor of where the callback will execute.
+     * @param callback Callback will be triggered once it succeeds or failed.
+     * @see #SET_SIM_POWER_STATE_SUCCESS
+     * @see #SET_SIM_POWER_STATE_ALREADY_IN_STATE
+     * @see #SET_SIM_POWER_STATE_MODEM_ERROR
+     * @see #SET_SIM_POWER_STATE_SIM_ERROR
+     * @see #SET_SIM_POWER_STATE_NOT_SUPPORTED
+     * @throws IllegalArgumentException if requested SIM state is invalid
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     *
+     * {@hide}
+     **/
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setSimPowerStateForSlot(int slotIndex, @SimPowerState int state,
+            @NonNull Executor executor,
+            @NonNull @SetSimPowerStateResult Consumer<Integer> callback) {
+        if (state != CARD_POWER_DOWN && state != CARD_POWER_UP
+                && state != CARD_POWER_UP_PASS_THROUGH) {
+            throw new IllegalArgumentException("requested SIM state is invalid");
+        }
+        try {
+            ITelephony telephony = getITelephony();
+            IIntegerConsumer internalCallback = new IIntegerConsumer.Stub() {
+                @Override
+                public void accept(int result) {
+                    executor.execute(() ->
+                            Binder.withCleanCallingIdentity(() -> callback.accept(result)));
+                }
+            };
+            if (telephony != null) {
+                telephony.setSimPowerStateForSlotWithCallback(slotIndex, state, internalCallback);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#setSimPowerStateForSlot", e);
+        } catch (SecurityException e) {
+            Log.e(TAG, "Permission error calling ITelephony#setSimPowerStateForSlot",
+                    e);
         }
     }
 
@@ -11027,6 +11125,55 @@ public class TelephonyManager {
                     SET_CARRIER_RESTRICTION_ERROR
             })
     public @interface SetCarrierRestrictionResult {}
+
+    /**
+     * The SIM power state was successfully set.
+     * @hide
+     */
+    @SystemApi
+    public static final int SET_SIM_POWER_STATE_SUCCESS = 0;
+
+    /**
+     * The SIM is already in the requested power state.
+     * @hide
+     */
+    @SystemApi
+    public static final int SET_SIM_POWER_STATE_ALREADY_IN_STATE = 1;
+
+    /**
+     * Failed to connect to the modem to make the power state request. This may happen if the
+     * modem has an error. The user may want to make the request again later.
+     * @hide
+     */
+    @SystemApi
+    public static final int SET_SIM_POWER_STATE_MODEM_ERROR = 2;
+
+    /**
+     * Failed to connect to the SIM to make the power state request. This may happen if the
+     * SIM has been removed. The user may want to make the request again later.
+     * @hide
+     */
+    @SystemApi
+    public static final int SET_SIM_POWER_STATE_SIM_ERROR = 3;
+
+    /**
+     * The modem version does not support synchronous power.
+     * @hide
+     */
+    @SystemApi
+    public static final int SET_SIM_POWER_STATE_NOT_SUPPORTED = 4;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"SET_SIM_POWER_STATE_"},
+            value = {
+                    SET_SIM_POWER_STATE_SUCCESS,
+                    SET_SIM_POWER_STATE_ALREADY_IN_STATE,
+                    SET_SIM_POWER_STATE_MODEM_ERROR,
+                    SET_SIM_POWER_STATE_SIM_ERROR,
+                    SET_SIM_POWER_STATE_NOT_SUPPORTED
+            })
+    public @interface SetSimPowerStateResult {}
 
     /**
      * Set the allowed carrier list and the excluded carrier list indicating the priority between
