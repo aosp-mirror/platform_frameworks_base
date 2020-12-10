@@ -570,4 +570,7 @@
     <bool name="config_showNotificationForUnknownBatteryState">false</bool>
     <!-- content URL in a notification when ACTION_BATTERY_CHANGED.EXTRA_PRESENT field is false -->
     <string translatable="false" name="config_batteryStateUnknownUrl"></string>
+
+    <!-- Whether wallet view is shown in landscape / seascape orientations -->
+    <bool name="global_actions_show_landscape_wallet_view">false</bool>
 </resources>

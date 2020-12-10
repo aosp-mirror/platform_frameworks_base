@@ -58,11 +58,5 @@
         android:background="?android:attr/selectableItemBackgroundBorderless" />
   </LinearLayout>
 
-  <LinearLayout
-      android:id="@+id/global_actions_controls_list"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:orientation="vertical"
-      android:layout_marginLeft="@dimen/global_actions_side_margin"
-      android:layout_marginRight="@dimen/global_actions_side_margin" />
+  <include layout="@layout/global_actions_controls_list_view" />
 </merge>
