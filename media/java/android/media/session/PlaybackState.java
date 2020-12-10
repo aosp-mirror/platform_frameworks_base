@@ -46,7 +46,8 @@ public final class PlaybackState implements Parcelable {
             ACTION_SKIP_TO_PREVIOUS, ACTION_SKIP_TO_NEXT, ACTION_FAST_FORWARD, ACTION_SET_RATING,
             ACTION_SEEK_TO, ACTION_PLAY_PAUSE, ACTION_PLAY_FROM_MEDIA_ID, ACTION_PLAY_FROM_SEARCH,
             ACTION_SKIP_TO_QUEUE_ITEM, ACTION_PLAY_FROM_URI, ACTION_PREPARE,
-            ACTION_PREPARE_FROM_MEDIA_ID, ACTION_PREPARE_FROM_SEARCH, ACTION_PREPARE_FROM_URI})
+            ACTION_PREPARE_FROM_MEDIA_ID, ACTION_PREPARE_FROM_SEARCH, ACTION_PREPARE_FROM_URI,
+            ACTION_SET_PLAYBACK_SPEED})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Actions {}
 
@@ -175,6 +176,14 @@ public final class PlaybackState implements Parcelable {
      * @see Builder#setActions(long)
      */
     public static final long ACTION_PREPARE_FROM_URI = 1 << 17;
+
+    // Note: The value jumps from 1 << 17 to 1 << 22 for matching same value with AndroidX.
+    /**
+     * Indicates this session supports the set playback speed command.
+     *
+     * @see Builder#setActions(long)
+     */
+    public static final long ACTION_SET_PLAYBACK_SPEED = 1 << 22;
 
     /**
      * @hide
@@ -428,6 +437,7 @@ public final class PlaybackState implements Parcelable {
      * <li> {@link PlaybackState#ACTION_PREPARE_FROM_MEDIA_ID}</li>
      * <li> {@link PlaybackState#ACTION_PREPARE_FROM_SEARCH}</li>
      * <li> {@link PlaybackState#ACTION_PREPARE_FROM_URI}</li>
+     * <li> {@link PlaybackState#ACTION_SET_PLAYBACK_SPEED}</li>
      * </ul>
      */
     @Actions
@@ -823,6 +833,7 @@ public final class PlaybackState implements Parcelable {
          * <li> {@link PlaybackState#ACTION_PREPARE_FROM_MEDIA_ID}</li>
          * <li> {@link PlaybackState#ACTION_PREPARE_FROM_SEARCH}</li>
          * <li> {@link PlaybackState#ACTION_PREPARE_FROM_URI}</li>
+         * <li> {@link PlaybackState#ACTION_SET_PLAYBACK_SPEED}</li>
          * </ul>
          *
          * @param actions The set of actions allowed.
