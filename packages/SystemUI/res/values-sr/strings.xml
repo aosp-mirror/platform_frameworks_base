@@ -83,6 +83,7 @@
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Снимак екрана је сачуван"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"Додирните да бисте видели снимак екрана"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Чување снимка екрана није успело"</string>
+    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Уређај мора да буде откључан да би снимак екрана могао да се сачува"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Пробајте да поново направите снимак екрана"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Чување снимка екрана није успело због ограниченог меморијског простора"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Апликација или организација не дозвољавају прављење снимака екрана"</string>

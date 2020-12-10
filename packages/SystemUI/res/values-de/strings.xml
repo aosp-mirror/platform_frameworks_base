@@ -83,6 +83,7 @@
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Screenshot gespeichert"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"Tippe, um deinen Screenshot anzusehen"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Screenshot konnte nicht gespeichert werden"</string>
+    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Damit Screenshots gespeichert werden können, muss das Gerät entsperrt sein"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Versuche noch einmal, den Screenshot zu erstellen"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Speichern des Screenshots aufgrund von zu wenig Speicher nicht möglich"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Die App oder deine Organisation lässt das Erstellen von Screenshots nicht zu"</string>

@@ -83,6 +83,7 @@
     <string name="screenshot_saved_title" msgid="8893267638659083153">"ቅጽበታዊ ገጽ እይታ ተቀምጧል"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"የእርስዎን ቅጽበታዊ ገጽ እይታ ለማየት መታ ያድርጉ"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"ቅጽበታዊ ገጽ ዕይታን ማስቀመጥ አልተቻለም"</string>
+    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"ቅጽበታዊ ገጽ እይታ ከመቀመጡ በፊት መሳሪያ መከፈት አለበት"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"ቅጽበታዊ ገጽ ዕይታን እንደገና ማንሳት ይሞክሩ"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"ባለው ውሱን የማከማቻ ቦታ ምክንያት ቅጽበታዊ ገጽ ዕይታን ማስቀመጥ አይችልም"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ቅጽበታዊ ገጽ እይታዎችን ማንሳት በመተግበሪያው ወይም በእርስዎ ድርጅት አይፈቀድም"</string>

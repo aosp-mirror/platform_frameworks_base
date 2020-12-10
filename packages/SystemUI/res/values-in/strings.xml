@@ -83,6 +83,7 @@
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Screenshot disimpan"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"Ketuk untuk melihat screenshot"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Tidak dapat menyimpan screenshot"</string>
+    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Perangkat harus dibuka kuncinya agar screenshot dapat disimpan"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Coba ambil screenshot lagi"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Tidak dapat menyimpan screenshot karena ruang penyimpanan terbatas"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Mengambil screenshot tidak diizinkan oleh aplikasi atau organisasi"</string>

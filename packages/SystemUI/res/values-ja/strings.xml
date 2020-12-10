@@ -83,6 +83,7 @@
     <string name="screenshot_saved_title" msgid="8893267638659083153">"スクリーンショットを保存しました"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"タップしてスクリーンショットを表示します"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"スクリーンショット保存エラー"</string>
+    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"スクリーンショットを保存するには、デバイスのロックを解除する必要があります"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"スクリーンショットを撮り直してください"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"空き容量が足りないため、スクリーンショットを保存できません"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"スクリーンショットの作成はアプリまたは組織で許可されていません"</string>

@@ -83,6 +83,7 @@
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Skärmdumpen har sparats"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"Visa skärmdumpen genom att trycka här"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Det gick inte att spara skärmdumpen"</string>
+    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Skärmdumpen kan bara sparas om enheten är upplåst"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Testa att ta en skärmdump igen"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Det går inte att spara skärmdumpen eftersom lagringsutrymmet inte räcker"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Appen eller organisationen tillåter inte att du tar skärmdumpar"</string>

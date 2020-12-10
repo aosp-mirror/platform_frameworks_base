@@ -83,6 +83,7 @@
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Екранната снимка е запазена"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"Докоснете, за да видите екранната снимка"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Не можа да се запази екранна снимка"</string>
+    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"За да бъде запазена екранната снимка, устройството трябва да бъде отключено"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Опитайте да направите екранна снимка отново"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Екранната снимка не може да се запази поради ограничено място в хранилището"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Правенето на екранни снимки не е разрешено от приложението или организацията ви"</string>
