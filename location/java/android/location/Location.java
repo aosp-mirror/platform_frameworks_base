@@ -19,6 +19,7 @@ package android.location;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
@@ -1066,7 +1067,7 @@ public class Location implements Parcelable {
      * @deprecated Do not use.
      */
     @Deprecated
-    public void setExtras(Bundle extras) {
+    public void setExtras(@Nullable Bundle extras) {
         mExtras = (extras == null) ? null : new Bundle(extras);
     }
 
