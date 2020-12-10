@@ -13478,14 +13478,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final CallerIdentity caller = getCallerIdentity(admin);
         Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller));
 
-        synchronized (getLockObject()) {
-            try {
-                IBackupManager ibm = mInjector.getIBackupManager();
-                return ibm != null && ibm.isBackupServiceActive(caller.getUserId());
-            } catch (RemoteException e) {
-                throw new IllegalStateException("Failed requesting backup service state.", e);
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            synchronized (getLockObject()) {
+                try {
+                    IBackupManager ibm = mInjector.getIBackupManager();
+                    return ibm != null && ibm.isBackupServiceActive(caller.getUserId());
+                } catch (RemoteException e) {
+                    throw new IllegalStateException("Failed requesting backup service state.", e);
+                }
             }
-        }
+        });
     }
 
     @Override
