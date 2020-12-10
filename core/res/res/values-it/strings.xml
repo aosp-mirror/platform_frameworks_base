@@ -199,6 +199,7 @@
     <string name="gnss_service" msgid="8907781262179951385">"Servizio GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Servizio di notifica dei sensori"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Servizio Twilight"</string>
+    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Rilevatore di fuso orario (connessione a Internet non necessaria)"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Il dispositivo verrà resettato"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Impossibile usare l\'app di amministrazione. Il dispositivo verrà resettato.\n\nPer eventuali domande, contatta l\'amministratore della tua organizzazione."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Stampa disattivata da <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
@@ -1451,7 +1452,7 @@
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Tocca per uscire dall\'app di guida."</string>
     <string name="back_button_label" msgid="4078224038025043387">"Indietro"</string>
     <string name="next_button_label" msgid="6040209156399907780">"Avanti"</string>
-    <string name="skip_button_label" msgid="3566599811326688389">"Ignora"</string>
+    <string name="skip_button_label" msgid="3566599811326688389">"Salta"</string>
     <string name="no_matches" msgid="6472699895759164599">"Nessuna corrispondenza"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Trova nella pagina"</string>
     <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
@@ -1799,8 +1800,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Aggiornato dall\'amministratore"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Eliminato dall\'amministratore"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Per estendere la durata della batteria, la funzionalità di risparmio energetico:\n\n• Attiva il tema scuro\n• Disattiva o limita le attività in background, alcuni effetti visivi e altre funzionalità come \"Ok Google\"\n\n"<annotation id="url">"Ulteriori informazioni"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Per estendere la durata della batteria, la funzionalità di risparmio energetico:\n\n• Attiva il tema scuro\n• Disattiva o limita le attività in background, alcuni effetti visivi e altre funzionalità come \"Ok Google\""</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Per estendere la durata della batteria, la funzionalità di risparmio energetico:\n\n• Attiva il tema scuro\n• Disattiva o limita le attività in background, alcuni effetti visivi e altre funzionalità come \"Hey Google\"\n\n"<annotation id="url">"Scopri di più"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Per estendere la durata della batteria, la funzionalità di risparmio energetico:\n\n• Attiva il tema scuro\n• Disattiva o limita le attività in background, alcuni effetti visivi e altre funzionalità come \"Hey Google\""</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Per contribuire a ridurre l\'utilizzo dei dati, la funzione Risparmio dati impedisce ad alcune app di inviare o ricevere dati in background. Un\'app in uso può accedere ai dati, ma potrebbe farlo con meno frequenza. Esempio: le immagini non vengono visualizzate finché non le tocchi."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Attivare Risparmio dati?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Attiva"</string>

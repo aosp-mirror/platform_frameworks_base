@@ -201,6 +201,7 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS usluga"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Usluga obaveštenja senzora"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Usluga Sumrak"</string>
+    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Detektor vremenske zone (nema internet veze)"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Uređaj će biti obrisan"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Ne možete da koristite ovu aplikaciju za administratore. Uređaj će sada biti obrisan.\n\nAko imate pitanja, kontaktirajte administratora organizacije."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Štampanje je onemogućila aplikacija <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
@@ -290,8 +291,7 @@
     <string name="notification_channel_usb" msgid="1528280969406244896">"USB veza"</string>
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Aktivna aplikacija"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Aplikacije koje troše bateriju"</string>
-    <!-- no translation found for notification_channel_accessibility_magnification (1707913872219798098) -->
-    <skip />
+    <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Uvećanje"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> koristi bateriju"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"Aplikacije (<xliff:g id="NUMBER">%1$d</xliff:g>) koriste bateriju"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Dodirnite za detalje o bateriji i potrošnji podataka"</string>
@@ -932,7 +932,7 @@
     <string name="granularity_label_link" msgid="9007852307112046526">"link"</string>
     <string name="granularity_label_line" msgid="376204904280620221">"red"</string>
     <string name="factorytest_failed" msgid="3190979160945298006">"Fabričko testiranje nije uspelo"</string>
-    <string name="factorytest_not_system" msgid="5658160199925519869">"Radnja FACTORY_TEST je podržana samo za pakete instalirane u direktorijumu /system/app."</string>
+    <string name="factorytest_not_system" msgid="5658160199925519869">"Radnja FACTORY_TEST je podržana samo za pakete instalirane u folderu /system/app."</string>
     <string name="factorytest_no_action" msgid="339252838115675515">"Nije pronađen nijedan paket koji obezbeđuje radnju FACTORY_TEST."</string>
     <string name="factorytest_reboot" msgid="2050147445567257365">"Restartuj"</string>
     <string name="js_dialog_title" msgid="7464775045615023241">"Na stranici na adresi „<xliff:g id="TITLE">%s</xliff:g>“ piše:"</string>
@@ -2048,7 +2048,7 @@
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Baterija telefona je dovoljno napunjena. Funkcije više nisu ograničene."</string>
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Baterija tableta je dovoljno napunjena. Funkcije više nisu ograničene."</string>
     <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Baterija uređaja je dovoljno napunjena. Funkcije više nisu ograničene."</string>
-    <string name="mime_type_folder" msgid="2203536499348787650">"Direktorijum"</string>
+    <string name="mime_type_folder" msgid="2203536499348787650">"Folder"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android aplikacija"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Datoteka"</string>
     <string name="mime_type_generic_ext" msgid="9220220924380909486">"<xliff:g id="EXTENSION">%1$s</xliff:g> datoteka"</string>
@@ -2224,12 +2224,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <!-- no translation found for window_magnification_prompt_title (8197528399699536320) -->
-    <skip />
-    <!-- no translation found for window_magnification_prompt_content (4166711383253283838) -->
-    <skip />
-    <!-- no translation found for turn_on_magnification_settings_action (8521433346684847700) -->
-    <skip />
-    <!-- no translation found for dismiss_action (1728820550388704784) -->
-    <skip />
+    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"Novo: Lupa za prozor"</string>
+    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"Možete da uvećate deo ekrana ili ceo ekran"</string>
+    <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Uključite u Podešavanjima"</string>
+    <string name="dismiss_action" msgid="1728820550388704784">"Odbaci"</string>
 </resources>

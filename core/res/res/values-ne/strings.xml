@@ -199,6 +199,7 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS सेवा"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"सेन्सरको सूचनासम्बन्धी सेवा"</string>
     <string name="twilight_service" msgid="8964898045693187224">"ट्वाइलाइट सेवा"</string>
+    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"समय क्षेत्र पत्ता लगाउने सुविधा (नेटवर्क कनेक्सन नहुँदा)"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"तपाईंको यन्त्र मेटिनेछ"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"प्रशासकको एप प्रयोग गर्न मिल्दैन। तपाईंको यन्त्रको डेटा अब मेटाइने छ।\n\nतपाईंसँग प्रश्नहरू भएका खण्डमा आफ्नो संगठनका प्रशासकसँग सम्पर्क गर्नुहोस्।"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> ले छाप्ने कार्यलाई असक्षम पार्यो।"</string>
@@ -287,8 +288,7 @@
     <string name="notification_channel_usb" msgid="1528280969406244896">"USB जडान"</string>
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"एप चलिरहेको छ"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"एपहरूले ब्याट्री खपत गर्दै छन्"</string>
-    <!-- no translation found for notification_channel_accessibility_magnification (1707913872219798098) -->
-    <skip />
+    <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"जुम इन गर्ने सुविधा"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> ले ब्याट्री प्रयोग गर्दै छ"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> एपहरूले ब्याट्री प्रयोग गर्दै छन्"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"ब्याट्री र डेटाका प्रयोग सम्बन्धी विवरणहरूका लागि ट्याप गर्नुहोस्"</string>
@@ -1965,7 +1965,7 @@
     <string name="autofill_save_type_debit_card" msgid="3169397504133097468">"डेबिट कार्ड"</string>
     <string name="autofill_save_type_payment_card" msgid="6555012156728690856">"भुक्तानी कार्ड"</string>
     <string name="autofill_save_type_generic_card" msgid="1019367283921448608">"कार्ड"</string>
-    <string name="autofill_save_type_username" msgid="1018816929884640882">"प्रयोगकर्ताको नाम"</string>
+    <string name="autofill_save_type_username" msgid="1018816929884640882">"युजरनेम"</string>
     <string name="autofill_save_type_email_address" msgid="1303262336895591924">"इमेल ठेगाना"</string>
     <string name="etws_primary_default_message_earthquake" msgid="8401079517718280669">"शान्त रहनुहोस् र नजिकै आश्रयस्थल खोज्नुहोस्।"</string>
     <string name="etws_primary_default_message_tsunami" msgid="5828171463387976279">"तटीय क्षेत्र र नदीछेउका ठाउँहरू छाडी उच्च सतहमा अवस्थित कुनै अझ सुरक्षित ठाउँमा जानुहोस्।"</string>
@@ -2190,12 +2190,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <!-- no translation found for window_magnification_prompt_title (8197528399699536320) -->
-    <skip />
-    <!-- no translation found for window_magnification_prompt_content (4166711383253283838) -->
-    <skip />
-    <!-- no translation found for turn_on_magnification_settings_action (8521433346684847700) -->
-    <skip />
-    <!-- no translation found for dismiss_action (1728820550388704784) -->
-    <skip />
+    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"नयाँ सुविधा: विन्डो म्याग्निफायर"</string>
+    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"तपाईं अब स्क्रिनको केही वा सबै भाग जुम इन गर्न सक्नुहुन्छ"</string>
+    <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"सेटिङमा गई यो सुविधा अन गर्नुहोस्"</string>
+    <string name="dismiss_action" msgid="1728820550388704784">"हटाउनुहोस्"</string>
 </resources>
