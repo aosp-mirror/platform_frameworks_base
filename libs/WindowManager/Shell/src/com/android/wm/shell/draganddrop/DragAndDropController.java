@@ -54,7 +54,6 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -108,16 +107,22 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
         DragLayout dragLayout = new DragLayout(context, mSplitScreen);
         rootView.addView(dragLayout,
                 new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
-        wm.addView(rootView, layoutParams);
-
-        mDisplayDropTargets.put(displayId,
-                new PerDisplay(displayId, context, wm, rootView, dragLayout));
+        try {
+            wm.addView(rootView, layoutParams);
+            mDisplayDropTargets.put(displayId,
+                    new PerDisplay(displayId, context, wm, rootView, dragLayout));
+        } catch (WindowManager.InvalidDisplayException e) {
+            Slog.w(TAG, "Unable to add view for display id: " + displayId);
+        }
     }
 
     @Override
     public void onDisplayConfigurationChanged(int displayId, Configuration newConfig) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP, "Display changed: %d", displayId);
         final PerDisplay pd = mDisplayDropTargets.get(displayId);
+        if (pd == null) {
+            return;
+        }
         pd.rootView.requestApplyInsets();
     }
 
@@ -125,6 +130,9 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
     public void onDisplayRemoved(int displayId) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP, "Display removed: %d", displayId);
         final PerDisplay pd = mDisplayDropTargets.get(displayId);
+        if (pd == null) {
+            return;
+        }
         pd.wm.removeViewImmediate(pd.rootView);
         mDisplayDropTargets.remove(displayId);
     }
@@ -138,6 +146,10 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
         final int displayId = target.getDisplay().getDisplayId();
         final PerDisplay pd = mDisplayDropTargets.get(displayId);
         final ClipDescription description = event.getClipDescription();
+
+        if (pd == null) {
+            return false;
+        }
 
         if (event.getAction() == ACTION_DRAG_STARTED) {
             final boolean hasValidClipData = event.getClipData().getItemCount() > 0

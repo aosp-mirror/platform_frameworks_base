@@ -81,12 +81,15 @@ public class NotificationContentViewTest extends SysuiTestCase {
         View mockContracted = mock(NotificationHeaderView.class);
         when(mockContracted.findViewById(com.android.internal.R.id.feedback))
                 .thenReturn(mockContracted);
+        when(mockContracted.getContext()).thenReturn(mContext);
         View mockExpanded = mock(NotificationHeaderView.class);
         when(mockExpanded.findViewById(com.android.internal.R.id.feedback))
                 .thenReturn(mockExpanded);
+        when(mockExpanded.getContext()).thenReturn(mContext);
         View mockHeadsUp = mock(NotificationHeaderView.class);
         when(mockHeadsUp.findViewById(com.android.internal.R.id.feedback))
                 .thenReturn(mockHeadsUp);
+        when(mockHeadsUp.getContext()).thenReturn(mContext);
 
         mView.setContractedChild(mockContracted);
         mView.setExpandedChild(mockExpanded);
@@ -107,18 +110,21 @@ public class NotificationContentViewTest extends SysuiTestCase {
         when(mockContracted.animate()).thenReturn(mock(ViewPropertyAnimator.class));
         when(mockContracted.findViewById(com.android.internal.R.id.expand_button)).thenReturn(
                 mockContractedEB);
+        when(mockContracted.getContext()).thenReturn(mContext);
 
         View mockExpandedEB = mock(NotificationExpandButton.class);
         View mockExpanded = mock(NotificationHeaderView.class);
         when(mockExpanded.animate()).thenReturn(mock(ViewPropertyAnimator.class));
         when(mockExpanded.findViewById(com.android.internal.R.id.expand_button)).thenReturn(
                 mockExpandedEB);
+        when(mockExpanded.getContext()).thenReturn(mContext);
 
         View mockHeadsUpEB = mock(NotificationExpandButton.class);
         View mockHeadsUp = mock(NotificationHeaderView.class);
         when(mockHeadsUp.animate()).thenReturn(mock(ViewPropertyAnimator.class));
         when(mockHeadsUp.findViewById(com.android.internal.R.id.expand_button)).thenReturn(
                 mockHeadsUpEB);
+        when(mockHeadsUp.getContext()).thenReturn(mContext);
 
         // Set up all 3 child forms
         mView.setContractedChild(mockContracted);

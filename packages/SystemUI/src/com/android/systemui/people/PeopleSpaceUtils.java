@@ -111,8 +111,6 @@ public class PeopleSpaceUtils {
                             context, notificationManager,
                             mPeopleManager, mLauncherApps);
             for (int appWidgetId : appWidgetIds) {
-                RemoteViews views = new RemoteViews(context.getPackageName(),
-                        R.layout.people_space_widget_item);
                 String shortcutId = sp.getString(String.valueOf(appWidgetId), null);
                 if (DEBUG) {
                     Log.d(TAG, "Set widget: " + appWidgetId + " with shortcut ID: " + shortcutId);
@@ -127,6 +125,8 @@ public class PeopleSpaceUtils {
                     continue;
                 }
                 PeopleSpaceTile tile = entry.get().getValue();
+                RemoteViews views = new RemoteViews(context.getPackageName(),
+                        getLayout(tile));
 
                 String status = PeopleSpaceUtils.getLastInteractionString(context,
                         entry.get().getKey());
@@ -156,6 +156,12 @@ public class PeopleSpaceUtils {
         } catch (Exception e) {
             Log.e(TAG, "Failed to retrieve conversations to set tiles");
         }
+    }
+
+    /** Returns the layout ID for the {@code tile}. */
+    private static int getLayout(PeopleSpaceTile tile) {
+        return tile.getNotification() == null ? R.layout.people_space_large_avatar_tile :
+                R.layout.people_space_small_avatar_tile;
     }
 
     /** Returns a list sorted by ascending last interaction time from {@code stream}. */

@@ -30,6 +30,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.app.WindowConfiguration;
@@ -180,6 +182,24 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
             if (buffer != null) {
                 buffer.close();
             }
+        }
+    }
+
+    @UseTestDisplay(addWindows = {W_ACTIVITY, W_INPUT_METHOD})
+    @Test
+    public void testCreateTaskSnapshotWithExcludingIme() {
+        Task task = mAppWindow.mActivityRecord.getTask();
+        spyOn(task);
+        spyOn(mDisplayContent);
+        when(task.getDisplayContent().isImeAttachedToApp()).thenReturn(false);
+        // Intentionally set the SurfaceControl of input method window as null.
+        mDisplayContent.mInputMethodWindow.setSurfaceControl(null);
+        // Verify no NPE happens when calling createTaskSnapshot.
+        try {
+            mWm.mTaskSnapshotController.createTaskSnapshot(mAppWindow.mActivityRecord.getTask(),
+                    1f /* scaleFraction */, PixelFormat.UNKNOWN, null /* outTaskSize */);
+        } catch (NullPointerException e) {
+            fail("There should be no exception when calling createTaskSnapshot");
         }
     }
 

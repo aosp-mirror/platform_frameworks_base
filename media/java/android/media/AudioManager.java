@@ -2881,7 +2881,12 @@ public class AudioManager {
      * @return true if any music tracks are active.
      */
     public boolean isMusicActive() {
-        return AudioSystem.isStreamActive(STREAM_MUSIC, 0);
+        final IAudioService service = getService();
+        try {
+            return service.isMusicActive();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
