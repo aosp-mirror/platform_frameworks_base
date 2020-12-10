@@ -84,7 +84,7 @@ TEST(SkiaDisplayList, reuseDisplayList) {
 
     // attach a displayList for reuse
     SkiaDisplayList skiaDL;
-    ASSERT_TRUE(skiaDL.reuseDisplayList(renderNode.get(), nullptr));
+    ASSERT_TRUE(skiaDL.reuseDisplayList(renderNode.get()));
 
     // detach the list that you just attempted to reuse
     availableList = renderNode->detachAvailableList();

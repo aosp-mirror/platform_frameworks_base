@@ -672,6 +672,7 @@ cc_benchmark {
 
     srcs: [
         "tests/microbench/main.cpp",
+        "tests/microbench/CanvasOpBench.cpp",
         "tests/microbench/DisplayListCanvasBench.cpp",
         "tests/microbench/LinearAllocatorBench.cpp",
         "tests/microbench/PathParserBench.cpp",
