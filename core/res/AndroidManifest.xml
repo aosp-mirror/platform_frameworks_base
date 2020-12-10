@@ -1361,7 +1361,7 @@
         android:description="@string/permdesc_systemCamera"
         android:protectionLevel="system|signature" />
 
-    <!-- Allows receiving the camera service notifications when a camera is opened
+    <!-- @SystemApi Allows receiving the camera service notifications when a camera is opened
             (by a certain application package) or closed.
         @hide -->
     <permission android:name="android.permission.CAMERA_OPEN_CLOSE_LISTENER"

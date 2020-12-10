@@ -743,6 +743,11 @@ package android.hardware.camera2 {
     method public String[] getCameraIdListNoLazy() throws android.hardware.camera2.CameraAccessException;
   }
 
+  public abstract static class CameraManager.AvailabilityCallback {
+    method @RequiresPermission(android.Manifest.permission.CAMERA_OPEN_CLOSE_LISTENER) public void onCameraClosed(@NonNull String);
+    method @RequiresPermission(android.Manifest.permission.CAMERA_OPEN_CLOSE_LISTENER) public void onCameraOpened(@NonNull String, @NonNull String);
+  }
+
 }
 
 package android.hardware.display {
