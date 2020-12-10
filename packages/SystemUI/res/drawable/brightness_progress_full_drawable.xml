@@ -15,10 +15,21 @@
   ~ limitations under the License.
   -->
 
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-       android:shape="rectangle"
-       android:tint="?android:attr/colorControlActivated">
-    <size android:height="48dp" />
-    <solid android:color="@android:color/white" />
-    <corners android:radius="24dp"/>
-</shape>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/slider_foreground">
+        <shape>
+            <size android:height="48dp" />
+            <solid android:color="?android:attr/colorControlActivated" />
+            <corners android:radius="24dp"/>
+        </shape>
+    </item>
+    <item
+        android:id="@+id/slider_icon"
+        android:gravity="center_vertical|start"
+        android:start="32dp">
+        <com.android.systemui.util.AlphaTintDrawableWrapper
+            android:drawable="@drawable/ic_brightness"
+            android:tint="?android:attr/colorBackground"
+            android:alpha="0.8"/>
+    </item>
+</layer-list>

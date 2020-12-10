@@ -14,10 +14,10 @@
      limitations under the License.
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_height="wrap_content"
-             android:layout_width="match_parent"
-             android:layout_gravity="center"
-             style="@style/BrightnessDialogContainer">
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:layout_gravity="center"
+    style="@style/BrightnessDialogContainer">
 
     <com.android.systemui.settings.brightness.BrightnessSliderView
         android:id="@+id/brightness_slider"
@@ -37,17 +37,6 @@
             android:background="@null"
             android:progressDrawable="@drawable/brightness_progress_drawable_thick"
             android:splitTrack="false"
-        />
-
-        <ImageView
-            android:id="@+id/image"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginLeft="48dp"
-            android:layout_gravity="center_vertical"
-            android:src="@drawable/ic_brightness"
-            android:tint="?android:attr/textColorTertiary"
-            android:visibility="visible"
         />
     </com.android.systemui.settings.brightness.BrightnessSliderView>
 </FrameLayout>

@@ -16,6 +16,27 @@
   -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android"
             android:paddingMode="stack">
+    <item android:id="@android:id/background"
+        android:gravity="center_vertical|fill_horizontal">
+        <layer-list >
+            <item>
+                <shape
+                    android:tint="?android:attr/colorControlActivated"
+                    android:alpha="?android:attr/disabledAlpha">
+                    <size android:height="48dp" />
+                    <solid android:color="@color/white_disabled" />
+                    <corners android:radius="24dp" />
+                </shape>
+            </item>
+            <item
+                android:gravity="center_vertical|start"
+                android:start="32dp">
+                <com.android.systemui.util.AlphaTintDrawableWrapper
+                    android:drawable="@drawable/ic_brightness"
+                    android:tint="?android:attr/colorControlActivated" />
+            </item>
+        </layer-list>
+    </item>
     <item android:id="@android:id/progress"
           android:gravity="center_vertical|fill_horizontal">
         <clip
@@ -23,14 +44,5 @@
             android:clipOrientation="horizontal"
             android:gravity="left"
         />
-    </item>
-    <item android:id="@android:id/background"
-          android:gravity="center_vertical|fill_horizontal">
-        <shape android:shape="rectangle"
-               android:tint="?android:attr/colorControlNormal">
-            <size android:height="48dp" />
-            <solid android:color="@color/white_disabled" />
-            <corners android:radius="24dp" />
-        </shape>
     </item>
 </layer-list>
