@@ -23,6 +23,7 @@ import static android.provider.Telephony.Carriers.INVALID_APN_ID;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.Manifest;
+import android.annotation.BytesLong;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.LongDef;
@@ -126,7 +127,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -549,6 +549,21 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public boolean isMultiSimEnabled() {
         return getPhoneCount() > 1;
+    }
+
+    private static final int MAXIMUM_CALL_COMPOSER_PICTURE_SIZE = 80000;
+
+    // TODO(hallliu): link to upload method in docs
+    /**
+     * Indicates the maximum size of the call composure picture.
+     *
+     * Pictures sent via uploadCallComposerPicture must not exceed this size, or an
+     * {@link IllegalArgumentException} will be thrown.
+     *
+     * @return Maximum file size in bytes.
+     */
+    public static @BytesLong long getMaximumCallComposerPictureSize() {
+        return MAXIMUM_CALL_COMPOSER_PICTURE_SIZE;
     }
 
     //

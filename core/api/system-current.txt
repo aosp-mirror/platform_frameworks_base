@@ -8389,6 +8389,18 @@ package android.printservice.recommendation {
 
 package android.provider {
 
+  public class CallLog {
+    method @RequiresPermission(android.Manifest.permission.WRITE_CALL_LOG) public static void storeCallComposerPictureAsUser(@NonNull android.content.Context, @Nullable android.os.UserHandle, @NonNull java.io.InputStream, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.net.Uri,android.provider.CallLog.CallComposerLoggingException>);
+  }
+
+  public static class CallLog.CallComposerLoggingException extends java.lang.Throwable {
+    method public int getErrorCode();
+    field public static final int ERROR_INPUT_CLOSED = 3; // 0x3
+    field public static final int ERROR_REMOTE_END_CLOSED = 1; // 0x1
+    field public static final int ERROR_STORAGE_FULL = 2; // 0x2
+    field public static final int ERROR_UNKNOWN = 0; // 0x0
+  }
+
   @Deprecated public static final class ContactsContract.MetadataSync implements android.provider.BaseColumns android.provider.ContactsContract.MetadataSyncColumns {
     field @Deprecated public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_metadata";
     field @Deprecated public static final String CONTENT_TYPE = "vnd.android.cursor.dir/contact_metadata";

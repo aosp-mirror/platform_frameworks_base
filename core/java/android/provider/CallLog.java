@@ -17,7 +17,14 @@
 
 package android.provider;
 
+import android.Manifest;
+import android.annotation.CallbackExecutor;
+import android.annotation.IntDef;
 import android.annotation.LongDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -30,6 +37,9 @@ import android.location.Country;
 import android.location.CountryDetector;
 import android.net.Uri;
 import android.os.Build;
+import android.os.OutcomeReceiver;
+import android.os.ParcelFileDescriptor;
+import android.os.ParcelableException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.ContactsContract.CommonDataKinds.Callable;
@@ -44,9 +54,15 @@ import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * The CallLog provider contains information about placed and received calls.
@@ -63,6 +79,12 @@ public class CallLog {
     public static final Uri CONTENT_URI =
         Uri.parse("content://" + AUTHORITY);
 
+    /** @hide */
+    public static final String CALL_COMPOSER_SEGMENT = "call_composer";
+
+    /** @hide */
+    public static final Uri CALL_COMPOSER_PICTURE_URI =
+            CONTENT_URI.buildUpon().appendPath(CALL_COMPOSER_SEGMENT).build();
 
     /**
      * The "shadow" provider stores calllog when the real calllog provider is encrypted.  The
@@ -73,6 +95,172 @@ public class CallLog {
      * @hide
      */
     public static final String SHADOW_AUTHORITY = "call_log_shadow";
+
+    /**
+     * Describes an error encountered while storing a call composer picture in the call log.
+     * @hide
+     */
+    @SystemApi
+    public static class CallComposerLoggingException extends Throwable {
+        /**
+         * Indicates an unknown error.
+         */
+        public static final int ERROR_UNKNOWN = 0;
+
+        /**
+         * Indicates that the process hosting the call log died or otherwise encountered an
+         * unrecoverable error while storing the picture.
+         *
+         * The caller should retry if this error is encountered.
+         */
+        public static final int ERROR_REMOTE_END_CLOSED = 1;
+
+        /**
+         * Indicates that the device has insufficient space to store this picture.
+         *
+         * The caller should not retry if this error is encountered.
+         */
+        public static final int ERROR_STORAGE_FULL = 2;
+
+        /**
+         * Indicates that the {@link InputStream} passed to {@link #storeCallComposerPictureAsUser}
+         * was closed.
+         *
+         * The caller should retry if this error is encountered, and be sure to not close the stream
+         * before the callback is called this time.
+         */
+        public static final int ERROR_INPUT_CLOSED = 3;
+
+        /** @hide */
+        @IntDef(prefix = {"ERROR_"}, value = {
+                ERROR_UNKNOWN,
+                ERROR_REMOTE_END_CLOSED,
+                ERROR_STORAGE_FULL,
+                ERROR_INPUT_CLOSED,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface CallComposerLoggingError { }
+
+        private final int mErrorCode;
+
+        /** @hide */
+        public CallComposerLoggingException(@CallComposerLoggingError int errorCode) {
+            mErrorCode = errorCode;
+        }
+
+        /**
+         * @return The error code for this exception.
+         */
+        public @CallComposerLoggingError int getErrorCode() {
+            return mErrorCode;
+        }
+    }
+
+    /**
+     * Supplies a call composer picture to the call log for persistent storage.
+     *
+     * This method is used by Telephony to store pictures selected by the user or sent from the
+     * remote party as part of a voice call with call composer. The {@link Uri} supplied in the
+     * callback can be used to retrieve the image via {@link ContentResolver#openFile} or stored in
+     * the {@link Calls} table in the TODO: link column name.
+     *
+     * The caller is responsible for closing the {@link InputStream} after the callback indicating
+     * success or failure.
+     *
+     * @param context An instance of {@link Context}.
+     * @param user The user for whom the picture is stored. If {@code null}, the picture will be
+     *             stored for all users.
+     * @param input An input stream from which the picture to store should be read. The input data
+     *              must be decodeable as either a JPEG, PNG, or GIF image.
+     * @param executor The {@link Executor} on which to perform the file transfer operation and
+     *                 call the supplied callback.
+     * @param callback Callback that's called after the picture is successfully stored or when an
+     *                 error occurs.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.WRITE_CALL_LOG)
+    public static void storeCallComposerPictureAsUser(@NonNull Context context,
+            @Nullable UserHandle user,
+            @NonNull InputStream input,
+            @CallbackExecutor @NonNull Executor executor,
+            @NonNull OutcomeReceiver<Uri, CallComposerLoggingException> callback) {
+        Objects.requireNonNull(context);
+        Objects.requireNonNull(input);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        executor.execute(() -> {
+            Uri pictureFileUri;
+            Uri pictureInsertionUri = context.getSystemService(UserManager.class)
+                    .isUserUnlocked() ? CALL_COMPOSER_PICTURE_URI
+                    : CALL_COMPOSER_PICTURE_URI.buildUpon().authority(SHADOW_AUTHORITY).build();
+            try {
+                // ContentResolver#insert says that the second argument is nullable. It is in fact
+                // not nullable.
+                ContentValues cv = new ContentValues();
+                pictureFileUri = context.getContentResolver().insert(pictureInsertionUri, cv);
+            } catch (ParcelableException e) {
+                // Most likely an IOException. We don't have a good way of distinguishing them so
+                // just return an unknown error.
+                sendCallComposerError(callback, CallComposerLoggingException.ERROR_UNKNOWN);
+                return;
+            }
+            if (pictureFileUri == null) {
+                // If the call log provider returns null, it means that there's not enough space
+                // left to store the maximum-sized call composer image.
+                sendCallComposerError(callback, CallComposerLoggingException.ERROR_STORAGE_FULL);
+                return;
+            }
+
+            boolean wroteSuccessfully = false;
+            try (ParcelFileDescriptor pfd =
+                         context.getContentResolver().openFileDescriptor(pictureFileUri, "w")) {
+                FileOutputStream output = new FileOutputStream(pfd.getFileDescriptor());
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+                while (true) {
+                    try {
+                        bytesRead = input.read(buffer);
+                    } catch (IOException e) {
+                        sendCallComposerError(callback,
+                                CallComposerLoggingException.ERROR_INPUT_CLOSED);
+                        throw e;
+                    }
+                    if (bytesRead < 0) {
+                        break;
+                    }
+                    try {
+                        output.write(buffer, 0, bytesRead);
+                    } catch (IOException e) {
+                        sendCallComposerError(callback,
+                                CallComposerLoggingException.ERROR_REMOTE_END_CLOSED);
+                        throw e;
+                    }
+                }
+                wroteSuccessfully = true;
+            } catch (FileNotFoundException e) {
+                callback.onError(new CallComposerLoggingException(
+                        CallComposerLoggingException.ERROR_UNKNOWN));
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "IOException while writing call composer pic to call log: "
+                        + e);
+            }
+
+            if (wroteSuccessfully) {
+                callback.onResult(pictureFileUri);
+            } else {
+                // Clean up our mess if we didn't successfully write the file.
+                context.getContentResolver().delete(pictureFileUri, null);
+            }
+        });
+    }
+
+    // Only call on the correct executor.
+    private static void sendCallComposerError(OutcomeReceiver<?, CallComposerLoggingException> cb,
+            int error) {
+        cb.onError(new CallComposerLoggingException(error));
+    }
 
     /**
      * Contains the recent calls.
