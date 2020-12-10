@@ -790,10 +790,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setName("bubblebot")
                 .build();
         RemoteInput remoteInput = new RemoteInput.Builder("reply_key").setLabel("reply").build();
-        // TODO(b/174965245) Please replace FLAG_MUTABLE_UNAUDITED below
-        // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
         PendingIntent inputIntent = PendingIntent.getActivity(mContext, 0, new Intent(),
-                PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                PendingIntent.FLAG_MUTABLE);
         Icon icon = Icon.createWithResource(mContext, android.R.drawable.sym_def_app_icon);
         Notification.Action replyAction = new Notification.Action.Builder(icon, "Reply",
                 inputIntent).addRemoteInput(remoteInput)
@@ -7403,10 +7401,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         ArrayList<Notification.Action> extraAction = new ArrayList<>();
         RemoteInput remoteInput = new RemoteInput.Builder("reply_key").setLabel("reply").build();
-        // TODO(b/174965245) Please replace FLAG_MUTABLE_UNAUDITED below
-        // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
         PendingIntent inputIntent = PendingIntent.getActivity(mContext, 0, new Intent(),
-                PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                PendingIntent.FLAG_IMMUTABLE);
         Icon icon = Icon.createWithResource(mContext, android.R.drawable.sym_def_app_icon);
         Notification.Action replyAction = new Notification.Action.Builder(icon, "Reply",
                 inputIntent).addRemoteInput(remoteInput)
@@ -7436,10 +7432,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         ArrayList<Notification.Action> extraAction = new ArrayList<>();
         RemoteInput remoteInput = new RemoteInput.Builder("reply_key").setLabel("reply").build();
-        // TODO(b/174965245) Please replace FLAG_MUTABLE_UNAUDITED below
-        // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
         PendingIntent inputIntent = PendingIntent.getActivity(mContext, 0, new Intent(),
-                PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                PendingIntent.FLAG_MUTABLE);
         Icon icon = Icon.createWithResource(mContext, android.R.drawable.sym_def_app_icon);
         Notification.Action replyAction = new Notification.Action.Builder(icon, "Reply",
                 inputIntent).addRemoteInput(remoteInput)

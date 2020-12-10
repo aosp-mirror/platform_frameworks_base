@@ -127,6 +127,6 @@ public class NotificationAdjustmentExtractorTest extends UiServiceTestCase {
                 Icon.createWithResource(getContext(), android.R.drawable.sym_def_app_icon),
                 "action",
                 PendingIntent.getBroadcast(getContext(), 0, new Intent("Action"),
-                    PendingIntent.FLAG_MUTABLE_UNAUDITED)).build();
+                    PendingIntent.FLAG_IMMUTABLE)).build();
     }
 }
