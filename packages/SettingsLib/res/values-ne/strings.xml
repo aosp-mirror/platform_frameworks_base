@@ -400,7 +400,12 @@
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"सक्रिय। टगल गर्न ट्याप गर्नुहोस्।"</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"एपको स्ट्यान्डबाई अवस्था:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="transcode_settings_title" msgid="2581975870429850549">"मिडिया ट्रान्सकोडिङ सेटिङ"</string>
-    <string name="transcode_enable_all" msgid="9102460144086871903">"ट्रान्सकोडिङ अफ गर्नुहोस्"</string>
+    <!-- no translation found for transcode_user_control (6176368544817731314) -->
+    <skip />
+    <!-- no translation found for transcode_enable_all (2411165920039166710) -->
+    <skip />
+    <!-- no translation found for transcode_default (3784803084573509491) -->
+    <skip />
     <string name="transcode_skip_apps" msgid="8249721984597390142">"एपहरूमा ट्रान्सकोडिङ अन गर्नुहोस्"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"चलिरहेका सेवाहरू"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"हाल चालु भइरहेका सेवाहरू हेर्नुहोस् र नियन्त्रण गर्नुहोस्"</string>
@@ -449,7 +454,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"पूर्ण चार्ज हुन <xliff:g id="TIME">%1$s</xliff:g> बाँकी"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"पूर्ण चार्ज हुन <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> लाग्छ"</string>
-    <string name="power_charging_limited" msgid="5902301801611726210">"<xliff:g id="LEVEL">%1$s</xliff:g> - केही समयका लागि ब्याट्री प्रयोग सीमित गरिएको छ"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - ब्याट्री लामो समयसम्म टिक्ने बनाउन अप्टिमाइज गरिँदै छ"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"चार्ज हुँदै"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"द्रुत गतिमा चार्ज गरिँदै"</string>
