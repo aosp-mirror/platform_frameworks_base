@@ -5182,10 +5182,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void activityStopped(Bundle newIcicle, PersistableBundle newPersistentState,
             CharSequence description) {
-        final Task stack = getRootTask();
         final boolean isStopping = mState == STOPPING;
         if (!isStopping && mState != RESTARTING_PROCESS) {
-            Slog.i(TAG, "Activity reported stop, but no longer stopping: " + this);
+            Slog.i(TAG, "Activity reported stop, but no longer stopping: " + this + " " + mState);
             removeStopTimeout();
             return;
         }
@@ -5222,6 +5221,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     mRootWindowContainer.updatePreviousProcess(this);
                 }
             }
+            mTaskSupervisor.checkReadyForSleepLocked(true /* allowDelay */);
         }
     }
 
