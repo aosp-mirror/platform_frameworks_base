@@ -1269,6 +1269,10 @@
     <dimen name="controls_app_divider_height">2dp</dimen>
     <dimen name="controls_app_divider_side_margin">32dp</dimen>
 
+    <item name="controls_thumbnail_shadow_x" type="dimen" format="float">2.0</item>
+    <item name="controls_thumbnail_shadow_y" type="dimen" format="float">2.0</item>
+    <item name="controls_thumbnail_shadow_radius" type="dimen" format="float">2.0</item>
+
     <dimen name="controls_card_margin">@dimen/control_base_item_margin</dimen>
     <item name="control_card_elevation" type="dimen" format="float">15</item>
 

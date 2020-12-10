@@ -37,6 +37,7 @@ import android.service.controls.templates.ControlTemplate
 import android.service.controls.templates.RangeTemplate
 import android.service.controls.templates.StatelessTemplate
 import android.service.controls.templates.TemperatureControlTemplate
+import android.service.controls.templates.ThumbnailTemplate
 import android.service.controls.templates.ToggleRangeTemplate
 import android.service.controls.templates.ToggleTemplate
 import android.util.MathUtils
@@ -87,8 +88,11 @@ class ControlViewHolder(
         ): KClass<out Behavior> {
             return when {
                 status != Control.STATUS_OK -> StatusBehavior::class
-                deviceType == DeviceTypes.TYPE_CAMERA -> TouchBehavior::class
                 template == ControlTemplate.NO_TEMPLATE -> TouchBehavior::class
+                template is ThumbnailTemplate -> ThumbnailBehavior::class
+
+                // Required for legacy support, or where cameras do not use the new template
+                deviceType == DeviceTypes.TYPE_CAMERA -> TouchBehavior::class
                 template is ToggleTemplate -> ToggleBehavior::class
                 template is StatelessTemplate -> TouchBehavior::class
                 template is ToggleRangeTemplate -> ToggleRangeBehavior::class
@@ -105,7 +109,7 @@ class ControlViewHolder(
     private var statusAnimator: Animator? = null
     private val baseLayer: GradientDrawable
     val icon: ImageView = layout.requireViewById(R.id.icon)
-    private val status: TextView = layout.requireViewById(R.id.status)
+    val status: TextView = layout.requireViewById(R.id.status)
     private var nextStatusText: CharSequence = ""
     val title: TextView = layout.requireViewById(R.id.title)
     val subtitle: TextView = layout.requireViewById(R.id.subtitle)
@@ -132,7 +136,6 @@ class ControlViewHolder(
         val ld = layout.getBackground() as LayerDrawable
         ld.mutate()
         clipLayer = ld.findDrawableByLayerId(R.id.clip_layer) as ClipDrawable
-        clipLayer.alpha = ALPHA_DISABLED
         baseLayer = ld.findDrawableByLayerId(R.id.background) as GradientDrawable
         // needed for marquee to start
         status.setSelected(true)
@@ -315,7 +318,9 @@ class ControlViewHolder(
             )
         }
 
-        (clipLayer.getDrawable() as GradientDrawable).apply {
+        clipLayer.getDrawable().apply {
+            clipLayer.alpha = ALPHA_DISABLED
+
             val newBaseColor = if (behavior is ToggleRangeBehavior) {
                 ColorUtils.blendARGB(bg, newClipColor, toggleBackgroundIntensity)
             } else {
@@ -323,15 +328,25 @@ class ControlViewHolder(
             }
             stateAnimator?.cancel()
             if (animated) {
-                val oldColor = color?.defaultColor ?: newClipColor
+                val oldColor = if (this is GradientDrawable) {
+                    this.color?.defaultColor ?: newClipColor
+                } else {
+                    newClipColor
+                }
                 val oldBaseColor = baseLayer.color?.defaultColor ?: newBaseColor
                 val oldAlpha = layout.alpha
+
+                // Animate both alpha and background colors. Only animate colors for
+                // GradientDrawables and not static images as used for the ThumbnailTemplate.
                 stateAnimator = ValueAnimator.ofInt(clipLayer.alpha, newAlpha).apply {
                     addUpdateListener {
                         alpha = it.animatedValue as Int
-                        setColor(ColorUtils.blendARGB(oldColor, newClipColor, it.animatedFraction))
-                        baseLayer.setColor(ColorUtils.blendARGB(oldBaseColor,
-                                newBaseColor, it.animatedFraction))
+                        if (this is GradientDrawable) {
+                            this.setColor(ColorUtils.blendARGB(oldColor, newClipColor,
+                                it.animatedFraction))
+                        }
+                        baseLayer.setColor(ColorUtils.blendARGB(oldBaseColor, newBaseColor,
+                                it.animatedFraction))
                         layout.alpha = MathUtils.lerp(oldAlpha, 1f, it.animatedFraction)
                     }
                     addListener(object : AnimatorListenerAdapter() {
@@ -345,7 +360,9 @@ class ControlViewHolder(
                 }
             } else {
                 alpha = newAlpha
-                setColor(newClipColor)
+                if (this is GradientDrawable) {
+                    this.setColor(newClipColor)
+                }
                 baseLayer.setColor(newBaseColor)
                 layout.alpha = 1f
             }
