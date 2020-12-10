@@ -1169,9 +1169,18 @@ public class AppOpsManager {
     public static final int OP_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER =
             AppProtoEnums.APP_OP_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER;
 
+    /**
+     * App output audio is being recorded
+     *
+     * @hide
+     */
+    // TODO: Add as AppProtoEnums
+    public static final int OP_RECORD_AUDIO_OUTPUT = 106;
+
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 106;
+    public static final int _NUM_OP = 107;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1537,6 +1546,12 @@ public class AppOpsManager {
     @TestApi
     public static final String OPSTR_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER =
             "android:use_icc_auth_with_device_identifier";
+    /**
+     * App output audio is being recorded
+     *
+     * @hide
+     */
+    public static final String OPSTR_RECORD_AUDIO_OUTPUT = "android:record_audio_output";
 
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
@@ -1735,6 +1750,7 @@ public class AppOpsManager {
             OP_MANAGE_ONGOING_CALLS,            // MANAGE_ONGOING_CALLS
             OP_MANAGE_CREDENTIALS,              // MANAGE_CREDENTIALS
             OP_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER, // USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER
+            OP_RECORD_AUDIO_OUTPUT,             // RECORD_AUDIO_OUTPUT
     };
 
     /**
@@ -1847,6 +1863,7 @@ public class AppOpsManager {
             OPSTR_MANAGE_ONGOING_CALLS,
             OPSTR_MANAGE_CREDENTIALS,
             OPSTR_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER,
+            OPSTR_RECORD_AUDIO_OUTPUT,
     };
 
     /**
@@ -1960,6 +1977,7 @@ public class AppOpsManager {
             "MANAGE_ONGOING_CALLS",
             "MANAGE_CREDENTIALS",
             "USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER",
+            "RECORD_AUDIO_OUTPUT",
     };
 
     /**
@@ -2074,6 +2092,7 @@ public class AppOpsManager {
             Manifest.permission.MANAGE_ONGOING_CALLS,
             null, // no permission for OP_MANAGE_CREDENTIALS
             Manifest.permission.USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER,
+            null, // no permission for OP_RECORD_AUDIO_OUTPUT
     };
 
     /**
@@ -2188,6 +2207,7 @@ public class AppOpsManager {
             null, // MANAGE_ONGOING_CALLS
             null, // MANAGE_CREDENTIALS
             null, // USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER
+            null, // RECORD_AUDIO_OUTPUT
     };
 
     /**
@@ -2301,6 +2321,7 @@ public class AppOpsManager {
             null, // MANAGE_ONGOING_CALLS
             null, // MANAGE_CREDENTIALS
             null, // USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER
+            null, // RECORD_AUDIO_OUTPUT
     };
 
     /**
@@ -2413,6 +2434,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_DEFAULT, // MANAGE_ONGOING_CALLS
             AppOpsManager.MODE_DEFAULT, // MANAGE_CREDENTIALS
             AppOpsManager.MODE_DEFAULT, // USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER
+            AppOpsManager.MODE_ALLOWED, // RECORD_AUDIO_OUTPUT
     };
 
     /**
@@ -2529,6 +2551,7 @@ public class AppOpsManager {
             true, // MANAGE_ONGOING_CALLS
             false, // MANAGE_CREDENTIALS
             true, // USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER
+            false, // RECORD_AUDIO_OUTPUT
     };
 
     /**
