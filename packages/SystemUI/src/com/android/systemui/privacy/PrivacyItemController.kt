@@ -262,8 +262,11 @@ class PrivacyItemController @Inject constructor(
             privacyList = emptyList()
             return
         }
-        val list = currentUserIds.flatMap { appOpsController.getActiveAppOpsForUser(it) }
-                .mapNotNull { toPrivacyItem(it) }.distinct()
+        val list = appOpsController.getActiveAppOpsForUser(UserHandle.USER_ALL).filter {
+            UserHandle.getUserId(it.uid) in currentUserIds ||
+                    it.code == AppOpsManager.OP_PHONE_CALL_MICROPHONE ||
+                    it.code == AppOpsManager.OP_PHONE_CALL_CAMERA
+        }.mapNotNull { toPrivacyItem(it) }.distinct()
         logger.logUpdatedPrivacyItemsList(
                 list.joinToString(separator = ", ", transform = PrivacyItem::toLog))
         privacyList = list
