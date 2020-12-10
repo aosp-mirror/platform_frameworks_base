@@ -15704,6 +15704,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         return mUserController.getCurrentUser();
     }
 
+    @Override
+    public @UserIdInt int getCurrentUserId() {
+        return mUserController.getCurrentUserIdChecked();
+    }
+
     String getStartedUserState(int userId) {
         final UserState userState = mUserController.getStartedUserState(userId);
         return UserState.stateToString(userState.state);

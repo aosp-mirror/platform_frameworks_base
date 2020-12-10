@@ -2173,7 +2173,7 @@ class UserController implements Handler.Callback {
         }
     }
 
-    UserInfo getCurrentUser() {
+    private void checkGetCurrentUserPermissions() {
         if ((mInjector.checkCallingPermission(INTERACT_ACROSS_USERS)
                 != PackageManager.PERMISSION_GRANTED) && (
                 mInjector.checkCallingPermission(INTERACT_ACROSS_USERS_FULL)
@@ -2185,8 +2185,12 @@ class UserController implements Handler.Callback {
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
+    }
 
-        // Optimization - if there is no pending user switch, return current id
+    UserInfo getCurrentUser() {
+        checkGetCurrentUserPermissions();
+
+        // Optimization - if there is no pending user switch, return user for current id
         // (no need to acquire lock because mTargetUserId and mCurrentUserId are volatile)
         if (mTargetUserId == UserHandle.USER_NULL) {
             return getUserInfo(mCurrentUserId);
@@ -2196,9 +2200,23 @@ class UserController implements Handler.Callback {
         }
     }
 
+    /**
+     * Gets the current user id, but checking that caller has the proper permissions.
+     */
+    int getCurrentUserIdChecked() {
+        checkGetCurrentUserPermissions();
+
+        // Optimization - if there is no pending user switch, return current id
+        // (no need to acquire lock because mTargetUserId and mCurrentUserId are volatile)
+        if (mTargetUserId == UserHandle.USER_NULL) {
+            return mCurrentUserId;
+        }
+        return getCurrentOrTargetUserId();
+    }
+
     @GuardedBy("mLock")
     UserInfo getCurrentUserLU() {
-        int userId = mTargetUserId != UserHandle.USER_NULL ? mTargetUserId : mCurrentUserId;
+        int userId = getCurrentOrTargetUserIdLU();
         return getUserInfo(userId);
     }
 
@@ -2212,7 +2230,6 @@ class UserController implements Handler.Callback {
     int getCurrentOrTargetUserIdLU() {
         return mTargetUserId != UserHandle.USER_NULL ? mTargetUserId : mCurrentUserId;
     }
-
 
     @GuardedBy("mLock")
     int getCurrentUserIdLU() {
