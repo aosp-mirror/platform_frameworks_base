@@ -35,6 +35,7 @@ import android.net.wifi.IOnWifiUsabilityStatsListener;
 import android.net.wifi.IScanResultsCallback;
 import android.net.wifi.ISoftApCallback;
 import android.net.wifi.ISuggestionConnectionStatusListener;
+import android.net.wifi.ISuggestionUserApprovalStatusListener;
 import android.net.wifi.ITrafficStateCallback;
 import android.net.wifi.IWifiConnectedNetworkScorer;
 import android.net.wifi.ScanResult;
@@ -302,4 +303,8 @@ interface IWifiManager
     boolean isCarrierNetworkOffloadEnabled(int subscriptionId, boolean merged);
 
     void restartWifiSubsystem(String reason);
+
+    boolean addSuggestionUserApprovalStatusListener(in IBinder binder, in ISuggestionUserApprovalStatusListener listener, int listenerIdentifier, String packageName, String featureId);
+
+    void removeSuggestionUserApprovalStatusListener(int listenerIdentifier, String packageName);
 }
