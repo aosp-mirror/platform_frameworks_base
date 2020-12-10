@@ -835,7 +835,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Naciśnij Menu, aby odblokować lub wykonać połączenie alarmowe."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Naciśnij Menu, aby odblokować."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Narysuj wzór, aby odblokować"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Alarmowe"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Połączenie alarmowe"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Powrót do połączenia"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Poprawnie!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Spróbuj ponownie."</string>

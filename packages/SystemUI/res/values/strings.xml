@@ -278,14 +278,10 @@
     <string name="screenrecord_cancel_label">Cancel</string>
     <!-- Label for notification action to share screen recording [CHAR LIMIT=35] -->
     <string name="screenrecord_share_label">Share</string>
-    <!-- Label for notification action to delete a screen recording file [CHAR LIMIT=35] -->
-    <string name="screenrecord_delete_label">Delete</string>
     <!-- A toast message shown after successfully canceling a screen recording [CHAR LIMIT=NONE] -->
     <string name="screenrecord_cancel_success">Screen recording canceled</string>
     <!-- Notification text shown after saving a screen recording to prompt the user to view it [CHAR LIMIT=100] -->
     <string name="screenrecord_save_message">Screen recording saved, tap to view</string>
-    <!-- A toast message shown after successfully deleting a screen recording [CHAR LIMIT=NONE] -->
-    <string name="screenrecord_delete_description">Screen recording deleted</string>
     <!-- A toast message shown when there is an error deleting a screen recording [CHAR LIMIT=NONE] -->
     <string name="screenrecord_delete_error">Error deleting screen recording</string>
     <!-- A toast message shown when the screen recording cannot be started due to insufficient permissions [CHAR LIMIT=NONE] -->
@@ -2271,23 +2267,26 @@
     <!-- Accessibility action for moving docked stack divider to make the bottom screen full screen [CHAR LIMIT=NONE] -->
     <string name="accessibility_action_divider_bottom_full">Bottom full screen</string>
 
-    <!-- Accessibility description of a QS tile while editing positions [CHAR LIMIT=NONE] -->
-    <string name="accessibility_qs_edit_tile_label">Position <xliff:g id="position" example="2">%1$d</xliff:g>, <xliff:g id="tile_name" example="Wi-Fi">%2$s</xliff:g>. Double tap to edit.</string>
+    <!-- Accessibility description of action to remove QS tile on click. It will read as "Double-tap to remove tile" in screen readers [CHAR LIMIT=NONE] -->
+    <string name="accessibility_qs_edit_remove_tile_action">remove tile</string>
 
-    <!-- Accessibility description of a QS tile while editing positions [CHAR LIMIT=NONE] -->
-    <string name="accessibility_qs_edit_add_tile_label"><xliff:g id="tile_name" example="Wi-Fi">%1$s</xliff:g>. Double tap to add.</string>
+    <!-- Accessibility action of action to add QS tile to end. It will read as "Double-tap to add tile to end" in screen readers [CHAR LIMIT=NONE] -->
+    <string name="accessibility_qs_edit_tile_add_action">add tile to end</string>
 
-    <!-- Accessibility description of option to move QS tile [CHAR LIMIT=NONE] -->
-    <string name="accessibility_qs_edit_move_tile">Move <xliff:g id="tile_name" example="Wi-Fi">%1$s</xliff:g></string>
+    <!-- Accessibility action for context menu to move QS tile [CHAR LIMIT=NONE] -->
+    <string name="accessibility_qs_edit_tile_start_move">Move tile</string>
 
-    <!-- Accessibility description of option to remove QS tile [CHAR LIMIT=NONE] -->
-    <string name="accessibility_qs_edit_remove_tile">Remove <xliff:g id="tile_name" example="Wi-Fi">%1$s</xliff:g></string>
+    <!-- Accessibility action for context menu to add QS tile [CHAR LIMIT=NONE] -->
+    <string name="accessibility_qs_edit_tile_start_add">Add tile</string>
 
-    <!-- Accessibility action when QS tile is to be added [CHAR LIMIT=NONE] -->
-    <string name="accessibility_qs_edit_tile_add">Add <xliff:g id="tile_name" example="Wi-Fi">%1$s</xliff:g> to position <xliff:g id="position" example="5">%2$d</xliff:g></string>
+    <!-- Accessibility description when QS tile is to be moved, indicating the destination position [CHAR LIMIT=NONE] -->
+    <string name="accessibility_qs_edit_tile_move_to_position">Move to <xliff:g id="position" example="5">%1$d</xliff:g></string>
 
-    <!-- Accessibility action when QS tile is to be moved [CHAR LIMIT=NONE] -->
-    <string name="accessibility_qs_edit_tile_move">Move <xliff:g id="tile_name" example="Wi-Fi">%1$s</xliff:g> to position <xliff:g id="position" example="5">%2$d</xliff:g></string>
+    <!-- Accessibility description when QS tile is to be added, indicating the destination position [CHAR LIMIT=NONE] -->
+    <string name="accessibility_qs_edit_tile_add_to_position">Add to position <xliff:g id="position" example="5">%1$d</xliff:g></string>
+
+    <!-- Accessibility description indicating the currently selected tile's position. Only used for tiles that are currently in use [CHAR LIMIT=NONE] -->
+    <string name="accessibility_qs_edit_position">Position <xliff:g id="position" example="5">%1$d</xliff:g></string>
 
     <!-- Accessibility label for window when QS editing is happening [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_quick_settings_edit">Quick settings editor.</string>
@@ -2404,17 +2403,26 @@
 
     <!-- Title for notification & dialog that the user's phone last shut down because it got too hot. [CHAR LIMIT=40] -->
     <string name="thermal_shutdown_title">Phone turned off due to heat</string>
-    <!-- Message body for notification that user's phone last shut down because it got too hot. [CHAR LIMIT=100] -->
-    <string name="thermal_shutdown_message">Your phone is now running normally</string>
-    <!-- Text body for dialog alerting user that their phone last shut down because it got too hot. [CHAR LIMIT=450] -->
+    <!-- Message body for notification that user's phone last shut down because it got too hot. [CHAR LIMIT=120] -->
+    <string name="thermal_shutdown_message">Your phone is now running normally.\nTap for more info</string>
+    <!-- Text body for dialog alerting user that their phone last shut down because it got too hot. [CHAR LIMIT=500] -->
     <string name="thermal_shutdown_dialog_message">Your phone was too hot, so it turned off to cool down. Your phone is now running normally.\n\nYour phone may get too hot if you:\n\t&#8226; Use resource-intensive apps (such as gaming, video, or navigation apps)\n\t&#8226; Download or upload large files\n\t&#8226; Use your phone in high temperatures</string>
+    <!-- Text help link for care instructions for overheating devices [CHAR LIMIT=40] -->
+    <string name="thermal_shutdown_dialog_help_text">See care steps</string>
+    <!-- URL for care instructions for overheating devices -->
+    <string name="thermal_shutdown_dialog_help_url" translatable="false"></string>
 
     <!-- Title for notification (and dialog) that user's phone has reached a certain temperature and may start to slow down in order to cool down. [CHAR LIMIT=30] -->
     <string name="high_temp_title">Phone is getting warm</string>
-    <!-- Message body for notification that user's phone has reached a certain temperature and may start to slow down in order to cool down. [CHAR LIMIT=100] -->
-    <string name="high_temp_notif_message">Some features limited while phone cools down</string>
-    <!-- Text body for dialog alerting user that their phone has reached a certain temperature and may start to slow down in order to cool down. [CHAR LIMIT=300] -->
+    <!-- Message body for notification that user's phone has reached a certain temperature and may start to slow down in order to cool down. [CHAR LIMIT=120] -->
+    <string name="high_temp_notif_message">Some features limited while phone cools down.\nTap for more info</string>
+    <!-- Text body for dialog alerting user that their phone has reached a certain temperature and may start to slow down in order to cool down. [CHAR LIMIT=350] -->
     <string name="high_temp_dialog_message">Your phone will automatically try to cool down. You can still use your phone, but it may run slower.\n\nOnce your phone has cooled down, it will run normally.</string>
+    <!-- Text help link for care instructions for overheating devices [CHAR LIMIT=40] -->
+    <string name="high_temp_dialog_help_text">See care steps</string>
+    <!-- URL for care instructions for overheating devices -->
+    <string name="high_temp_dialog_help_url" translatable="false"></string>
+
     <!-- Title for alarm dialog alerting user the usb adapter has reached a certain temperature that should disconnect charging cable immediately. [CHAR LIMIT=30] -->
     <string name="high_temp_alarm_title">Unplug charger</string>
     <!-- Text body for dialog alerting user the usb adapter has reached a certain temperature that should disconnect charging cable immediately. [CHAR LIMIT=300] -->
@@ -2608,6 +2616,27 @@
          app for debugging. Will not be seen by users. [CHAR LIMIT=20] -->
     <string name="heap_dump_tile_name">Dump SysUI Heap</string>
 
+    <!-- Content description for ongoing privacy chip. Use with a single app [CHAR LIMIT=NONE]-->
+    <string name="ongoing_privacy_chip_content_single_app"><xliff:g id="app" example="Example App">%1$s</xliff:g> is using your <xliff:g id="types_list" example="camera, location">%2$s</xliff:g>.</string>
+
+    <!-- Content description for ongoing privacy chip. Use with multiple apps [CHAR LIMIT=NONE]-->
+    <string name="ongoing_privacy_chip_content_multiple_apps">Applications are using your <xliff:g id="types_list" example="camera, location">%s</xliff:g>.</string>
+
+    <!-- Separator for types. Include spaces before and after if needed [CHAR LIMIT=10] -->
+    <string name="ongoing_privacy_dialog_separator">,\u0020</string>
+
+    <!-- Separator for types, before last type. Include spaces before and after if needed [CHAR LIMIT=10] -->
+    <string name="ongoing_privacy_dialog_last_separator">\u0020and\u0020</string>
+
+    <!-- Text for camera app op [CHAR LIMIT=20]-->
+    <string name="privacy_type_camera">camera</string>
+
+    <!-- Text for location app op [CHAR LIMIT=20]-->
+    <string name="privacy_type_location">location</string>
+
+    <!-- Text for microphone app op [CHAR LIMIT=20]-->
+    <string name="privacy_type_microphone">microphone</string>
+
     <!-- Text for the quick setting tile for sensor privacy [CHAR LIMIT=30] -->
     <string name="sensor_privacy_mode">Sensors off</string>
 
@@ -2792,7 +2821,7 @@
     <!-- Explanation for closing controls associated with a specific media session [CHAR_LIMIT=NONE] -->
     <string name="controls_media_close_session">Hide the current session.</string>
     <!-- Label for a button that will hide media controls [CHAR_LIMIT=30] -->
-    <string name="controls_media_dismiss_button">Hide</string>
+    <string name="controls_media_dismiss_button">Dismiss</string>
     <!-- Label for button to resume media playback [CHAR_LIMIT=NONE] -->
     <string name="controls_media_resume">Resume</string>
     <!-- Label for button to go to media control settings screen [CHAR_LIMIT=30] -->

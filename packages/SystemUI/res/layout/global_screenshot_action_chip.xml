@@ -32,6 +32,7 @@
         android:gravity="center">
         <ImageView
             android:id="@+id/screenshot_action_chip_icon"
+            android:tint="@*android:color/accent_device_default"
             android:layout_width="@dimen/screenshot_action_chip_icon_size"
             android:layout_height="@dimen/screenshot_action_chip_icon_size"
             android:layout_marginStart="@dimen/screenshot_action_chip_padding_start"

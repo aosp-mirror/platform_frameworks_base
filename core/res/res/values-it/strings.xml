@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Premi Menu per sbloccare o effettuare chiamate di emergenza."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Premi Menu per sbloccare."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Traccia la sequenza di sblocco"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Emergenza"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Chiamata di emergenza"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Torna a chiamata"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Corretta."</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Riprova"</string>

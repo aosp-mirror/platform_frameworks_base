@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"लॉक खोलने के लिए मेन्यू दबाएं या आपातलकालीन कॉल करें."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"लॉक खोलने के लिए मेन्यू दबाएं."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"अनलॉक करने के लिए आकार आरेखित करें"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"आपातकाल"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"आपातकालीन कॉल"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"कॉल पर वापस लौटें"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"सही!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"फिर से कोशिश करें"</string>

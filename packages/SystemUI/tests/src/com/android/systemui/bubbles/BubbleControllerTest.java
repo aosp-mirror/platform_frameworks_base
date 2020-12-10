@@ -999,6 +999,29 @@ public class BubbleControllerTest extends SysuiTestCase {
         verify(mNotificationGroupManager, times(1)).onEntryRemoved(groupSummary.getEntry());
     }
 
+
+    /**
+     * Verifies that when a non visually interruptive update occurs for a bubble in the overflow,
+     * the that bubble does not get promoted from the overflow.
+     */
+    @Test
+    public void test_notVisuallyInterruptive_updateOverflowBubble_notAdded() {
+        // Setup
+        mBubbleController.updateBubble(mRow.getEntry());
+        mBubbleController.updateBubble(mRow2.getEntry());
+        assertTrue(mBubbleController.hasBubbles());
+
+        // Overflow it
+        mBubbleData.dismissBubbleWithKey(mRow.getEntry().getKey(),
+                BubbleController.DISMISS_USER_GESTURE);
+        assertThat(mBubbleData.hasBubbleInStackWithKey(mRow.getEntry().getKey())).isFalse();
+        assertThat(mBubbleData.hasOverflowBubbleWithKey(mRow.getEntry().getKey())).isTrue();
+
+        // Test
+        mBubbleController.updateBubble(mRow.getEntry());
+        assertThat(mBubbleData.hasBubbleInStackWithKey(mRow.getEntry().getKey())).isFalse();
+    }
+
     /**
      * Sets the bubble metadata flags for this entry. These ]flags are normally set by
      * NotificationManagerService when the notification is sent, however, these tests do not

@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"ਮੁੜ-ਚਾਲੂ ਕਰੋ"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"ਰੱਦ ਕਰੋ"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"ਸਾਂਝਾ ਕਰੋ"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"ਮਿਟਾਓ"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"ਸਕ੍ਰੀਨ ਦੀ ਰਿਕਾਰਡਿੰਗ ਰੱਦ ਕੀਤੀ ਗਈ"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"ਸਕ੍ਰੀਨ ਰਿਕਾਰਡਿੰਗ ਰੱਖਿਅਤ ਕੀਤੀ ਗਈ, ਦੇਖਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"ਸਕ੍ਰੀਨ ਰਿਕਾਰਡਿੰਗ ਨੂੰ ਮਿਟਾਇਆ ਗਿਆ"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"ਸਕ੍ਰੀਨ ਰਿਕਾਰਡਿੰਗ ਨੂੰ ਮਿਟਾਉਣ ਦੌਰਾਨ ਗੜਬੜ ਹੋਈ"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"ਇਜਾਜ਼ਤਾਂ ਪ੍ਰਾਪਤ ਕਰਨਾ ਅਸਫਲ ਰਿਹਾ"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"ਸਕ੍ਰੀਨ ਰਿਕਾਰਡਿੰਗ ਨੂੰ ਸ਼ੁਰੂ ਕਰਨ ਵੇਲੇ ਗੜਬੜ ਹੋਈ"</string>
@@ -884,12 +882,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"ਉੱਪਰ 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"ਉੱਪਰ 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"ਹੇਠਾਂ ਪੂਰੀ ਸਕ੍ਰੀਨ"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"ਸਥਿਤੀ <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>। ਸੰਪਾਦਨ ਲਈ ਦੋ ਵਾਰ ਟੈਪ ਕਰੋ।"</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>। ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਦੋ ਵਾਰ ਟੈਪ ਕਰੋ।"</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ਨੂੰ ਤਬਦੀਲ ਕਰੋ"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ਹਟਾਓ"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ਨੂੰ <xliff:g id="POSITION">%2$d</xliff:g> ਸਥਾਨ \'ਤੇ ਸ਼ਾਮਲ ਕਰੋ"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ਨੂੰ <xliff:g id="POSITION">%2$d</xliff:g> ਸਥਾਨ \'ਤੇ ਲਿਜਾਓ"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"ਟਾਇਲ ਹਟਾਓ"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"ਟਾਇਲ ਨੂੰ ਅੰਤ ਵਿੱਚ ਸ਼ਾਮਲ ਕਰੋ"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"ਟਾਇਲ ਨੂੰ ਲਿਜਾਓ"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"ਟਾਇਲ ਸ਼ਾਮਲ ਕਰੋ"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g> \'ਤੇ ਲਿਜਾਓ"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> ਸਥਾਨ \'ਤੇ ਸ਼ਾਮਲ ਕਰੋ"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"ਸਥਾਨ <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ ਸੰਪਾਦਕ।"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> ਸੂਚਨਾ: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਐਪ ਸਪਲਿਟ-ਸਕ੍ਰੀਨ ਨਾਲ ਕੰਮ ਨਾ ਕਰੇ।"</string>
@@ -922,11 +921,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"ਪਿਛਲੇ \'ਤੇ ਜਾਓ"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"ਆਕਾਰ ਬਦਲੋ"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"ਗਰਮ ਹੋਣ ਕਾਰਨ ਫ਼ੋਨ ਬੰਦ ਹੋ ਗਿਆ"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"ਤੁਹਾਡਾ ਫ਼ੋਨ ਹੁਣ ਸਹੀ ਚੱਲ ਰਿਹਾ ਹੈ"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"ਤੁਹਾਡਾ ਫ਼ੋਨ ਹੁਣ ਸਹੀ ਚੱਲ ਰਿਹਾ ਹੈ।\nਵਧੇਰੇ ਜਾਣਕਾਰੀ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">\n"ਤੁਹਾਡਾ ਫ਼ੋਨ ਬਹੁਤ ਗਰਮ ਸੀ, ਇਸ ਲਈ ਇਹ ਠੰਡਾ ਹੋਣ ਵਾਸਤੇ ਬੰਦ ਹੋ ਗਿਆ ਸੀ। ਤੁਹਾਡਾ ਫ਼ੋਨ ਹੁਣ ਸਹੀ ਚੱਲ ਰਿਹਾ ਹੈ।\n\nਤੁਹਾਡਾ ਫ਼ੋਨ ਬਹੁਤ ਗਰਮ ਹੋ ਸਕਦਾ ਹੈ ਜੇ:\n	• ਤੁਸੀਂ ਸਰੋਤਾਂ ਦੀ ਵੱਧ ਵਰਤੋਂ ਵਾਲੀਆਂ ਐਪਾਂ (ਜਿਵੇਂ ਗੇਮਿੰਗ, ਵੀਡੀਓ, ਜਾਂ ਦਿਸ਼ਾ-ਨਿਰਦੇਸ਼ ਐਪਾਂ) ਵਰਤਦੇ ਹੋ 	• ਵੱਡੀਆਂ ਫ਼ਾਈਲਾਂ ਡਾਊਨਲੋਡ ਜਾਂ ਅੱਪਲੋਡ ਕਰਦੇ ਹੋ\n	• ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਉੱਚ ਤਾਪਮਾਨਾਂ ਵਿੱਚ ਵਰਤਦੇ ਹੋ"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"ਦੇਖਭਾਲ ਦੇ ਪੜਾਅ ਦੇਖੋ"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"ਫ਼ੋਨ ਗਰਮ ਹੋ ਰਿਹਾ ਹੈ"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"ਫ਼ੋਨ ਦੇ ਠੰਡਾ ਹੋਣ ਦੇ ਦੌਰਾਨ ਕੁਝ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਸੀਮਿਤ ਹੁੰਦੀਆਂ ਹਨ"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"ਫ਼ੋਨ ਦੇ ਠੰਡਾ ਹੋਣ ਦੇ ਦੌਰਾਨ ਕੁਝ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਸੀਮਤ ਹੁੰਦੀਆਂ ਹਨ।\nਵਧੇਰੇ ਜਾਣਕਾਰੀ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"ਤੁਹਾਡਾ ਫ਼ੋਨ ਸਵੈਚਲਿਤ ਰੂਪ ਵਿੱਚ ਠੰਡਾ ਹੋਣ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰੇਗਾ। ਤੁਸੀਂ ਹਾਲੇ ਵੀ ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਵਰਤ ਸਕਦੇ ਹੋ, ਪਰੰਤੂ ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਇਹ ਵਧੇਰੇ ਹੌਲੀ ਚੱਲੇ।\n\nਇੱਕ ਵਾਰ ਠੰਡਾ ਹੋਣ ਤੋਂ ਬਾਅਦ ਤੁਹਾਡਾ ਫ਼ੋਨ ਸਧਾਰਨ ਤੌਰ \'ਤੇ ਚੱਲੇਗਾ।"</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"ਦੇਖਭਾਲ ਦੇ ਪੜਾਅ ਦੇਖੋ"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"ਚਾਰਜਰ ਨੂੰ ਕੱਢੋ"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"ਇਸ ਡੀਵਾਈਸ ਨੂੰ ਚਾਰਜ ਕਰਨ ਵਿੱਚ ਕੋਈ ਸਮੱਸਿਆ ਆ ਗਈ ਹੈ। ਪਾਵਰ ਅਡਾਪਟਰ ਨੂੰ ਕੱਢੋ ਅਤੇ ਧਿਆਨ ਰੱਖੋ ਸ਼ਾਇਦ ਕੇਬਲ ਗਰਮ ਹੋਵੇ।"</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"ਦੇਖਭਾਲ ਦੇ ਪੜਾਅ ਦੇਖੋ"</string>
@@ -988,6 +989,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"ਸਮਝ ਲਿਆ"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"SysUI ਹੀਪ ਡੰਪ ਕਰੋ"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> ਤੁਹਾਡੇ <xliff:g id="TYPES_LIST">%2$s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀ ਹੈ।"</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"ਐਪਲੀਕੇਸ਼ਨਾਂ ਤੁਹਾਡੇ <xliff:g id="TYPES_LIST">%s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀਆਂ ਹਨ।"</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" ਅਤੇ "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"ਕੈਮਰਾ"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"ਟਿਕਾਣਾ"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"ਮਾਈਕ੍ਰੋਫ਼ੋਨ"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"ਸੈਂਸਰ ਬੰਦ ਕਰੋ"</string>
     <string name="device_services" msgid="1549944177856658705">"ਡੀਵਾਈਸ ਸੇਵਾਵਾਂ"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"ਕੋਈ ਸਿਰਲੇਖ ਨਹੀਂ"</string>
@@ -1066,7 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"ਸਿਫ਼ਾਰਸ਼ਾਂ ਲੋਡ ਹੋ ਰਹੀਆਂ ਹਨ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"ਮੀਡੀਆ"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"ਮੌਜੂਦਾ ਸੈਸ਼ਨ ਨੂੰ ਲੁਕਾਓ।"</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"ਲੁਕਾਓ"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"ਖਾਰਜ ਕਰੋ"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ਮੁੜ-ਚਾਲੂ ਕਰੋ"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ਅਕਿਰਿਆਸ਼ੀਲ, ਐਪ ਦੀ ਜਾਂਚ ਕਰੋ"</string>

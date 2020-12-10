@@ -2321,7 +2321,8 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private boolean isVendorApp(String pkg) {
         try {
-            final PackageInfo info = mInterface.getPackageInfo(pkg, 0, UserHandle.USER_SYSTEM);
+            final PackageInfo info = mInterface.getPackageInfo(
+                     pkg, PackageManager.MATCH_ANY_USER, UserHandle.USER_SYSTEM);
             return info != null && info.applicationInfo.isVendor();
         } catch (RemoteException e) {
             return false;
@@ -2330,7 +2331,8 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private boolean isProductApp(String pkg) {
         try {
-            final PackageInfo info = mInterface.getPackageInfo(pkg, 0, UserHandle.USER_SYSTEM);
+            final PackageInfo info = mInterface.getPackageInfo(
+                    pkg, PackageManager.MATCH_ANY_USER, UserHandle.USER_SYSTEM);
             return info != null && info.applicationInfo.isProduct();
         } catch (RemoteException e) {
             return false;
@@ -2339,7 +2341,8 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private boolean isSystemExtApp(String pkg) {
         try {
-            final PackageInfo info = mInterface.getPackageInfo(pkg, 0, UserHandle.USER_SYSTEM);
+            final PackageInfo info = mInterface.getPackageInfo(
+                    pkg, PackageManager.MATCH_ANY_USER, UserHandle.USER_SYSTEM);
             return info != null && info.applicationInfo.isSystemExt();
         } catch (RemoteException e) {
             return false;

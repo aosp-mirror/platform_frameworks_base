@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"غیر مقفل کرنے کیلئے مینو دبائیں یا ہنگامی کال کریں۔"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"غیر مقفل کرنے کیلئے مینو دبائیں۔"</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"غیر مقفل کرنے کیلئے پیٹرن کو ڈرا کریں"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"ہنگامی"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"ہنگامی کال"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"کال پر واپس جائیں"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"صحیح!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"دوبارہ کوشش کریں"</string>

@@ -295,6 +295,7 @@ class Vr2dDisplay {
             flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
             flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL;
             flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
+            flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUSTED;
 
             final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
                     DISPLAY_NAME, mVirtualDisplayWidth, mVirtualDisplayHeight, mVirtualDisplayDpi);

@@ -1528,14 +1528,25 @@ class Task extends WindowContainer<WindowContainer> {
      */
     void performClearTaskLocked() {
         mReuseTask = true;
-        performClearTask("clear-task-all");
-        mReuseTask = false;
+        mStackSupervisor.beginDeferResume();
+        try {
+            performClearTask("clear-task-all");
+        } finally {
+            mStackSupervisor.endDeferResume();
+            mReuseTask = false;
+        }
     }
 
     ActivityRecord performClearTaskForReuseLocked(ActivityRecord newR, int launchFlags) {
         mReuseTask = true;
-        final ActivityRecord result = performClearTaskLocked(newR, launchFlags);
-        mReuseTask = false;
+        mStackSupervisor.beginDeferResume();
+        final ActivityRecord result;
+        try {
+            result = performClearTaskLocked(newR, launchFlags);
+        } finally {
+            mStackSupervisor.endDeferResume();
+            mReuseTask = false;
+        }
         return result;
     }
 
@@ -2371,8 +2382,16 @@ class Task extends WindowContainer<WindowContainer> {
             // For calculating screen layout, we need to use the non-decor inset screen area for the
             // calculation for compatibility reasons, i.e. screen area without system bars that
             // could never go away in Honeycomb.
-            final int compatScreenWidthDp = (int) (mTmpNonDecorBounds.width() / density);
-            final int compatScreenHeightDp = (int) (mTmpNonDecorBounds.height() / density);
+            int compatScreenWidthDp = (int) (mTmpNonDecorBounds.width() / density);
+            int compatScreenHeightDp = (int) (mTmpNonDecorBounds.height() / density);
+            // Use overrides if provided. If both overrides are provided, mTmpNonDecorBounds is
+            // undefined so it can't be used.
+            if (inOutConfig.screenWidthDp != Configuration.SCREEN_WIDTH_DP_UNDEFINED) {
+                compatScreenWidthDp = inOutConfig.screenWidthDp;
+            }
+            if (inOutConfig.screenHeightDp != Configuration.SCREEN_HEIGHT_DP_UNDEFINED) {
+                compatScreenHeightDp = inOutConfig.screenHeightDp;
+            }
             // Reducing the screen layout starting from its parent config.
             inOutConfig.screenLayout = computeScreenLayoutOverride(parentConfig.screenLayout,
                     compatScreenWidthDp, compatScreenHeightDp);
@@ -3608,6 +3627,9 @@ class Task extends WindowContainer<WindowContainer> {
         info.topActivityInfo = mReuseActivitiesReport.top != null
                 ? mReuseActivitiesReport.top.info
                 : null;
+        info.requestedOrientation = mReuseActivitiesReport.base != null
+                ? mReuseActivitiesReport.base.getRequestedOrientation()
+                : SCREEN_ORIENTATION_UNSET;
     }
 
     /**
@@ -3647,6 +3669,10 @@ class Task extends WindowContainer<WindowContainer> {
     int getVisibility(ActivityRecord starting) {
         if (!isAttached() || isForceHidden()) {
             return STACK_VISIBILITY_INVISIBLE;
+        }
+
+        if (isTopActivityLaunchedBehind()) {
+            return STACK_VISIBILITY_VISIBLE;
         }
 
         boolean gotSplitScreenStack = false;
@@ -3764,6 +3790,14 @@ class Task extends WindowContainer<WindowContainer> {
         // Lastly - check if there is a translucent fullscreen stack on top.
         return gotTranslucentFullscreen ? STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT
                 : STACK_VISIBILITY_VISIBLE;
+    }
+
+    private boolean isTopActivityLaunchedBehind() {
+        final ActivityRecord top = topRunningActivity();
+        if (top != null && top.mLaunchTaskBehind) {
+            return true;
+        }
+        return false;
     }
 
     ActivityRecord isInTask(ActivityRecord r) {

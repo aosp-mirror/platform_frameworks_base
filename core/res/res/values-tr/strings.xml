@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Kilidi açmak veya acil çağrı yapmak için Menü\'ye basın."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Kilidi açmak için Menü\'ye basın."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Kilit açmak için deseni çizin"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Acil durum çağrısı"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Acil durum araması"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Çağrıya dön"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Doğru!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Tekrar deneyin"</string>

@@ -57,10 +57,10 @@ public class AutoTileManager implements UserAwareController {
     private UserHandle mCurrentUser;
     private boolean mInitialized;
 
-    private final Context mContext;
-    private final QSTileHost mHost;
-    private final Handler mHandler;
-    private final AutoAddTracker mAutoTracker;
+    protected final Context mContext;
+    protected final QSTileHost mHost;
+    protected final Handler mHandler;
+    protected final AutoAddTracker mAutoTracker;
     private final HotspotController mHotspotController;
     private final DataSaverController mDataSaverController;
     private final ManagedProfileController mManagedProfileController;

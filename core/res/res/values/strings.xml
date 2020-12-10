@@ -2122,7 +2122,7 @@
     <!-- On the unlock pattern screen, shown at the top of the unlock screen to tell the user what to do. Below this text is the place for theu ser to draw the pattern. -->
     <string name="lockscreen_pattern_instructions">Draw pattern to unlock</string>
     <!-- Button at the bottom of the unlock screen to make an emergency call or access other emergency assistance functions. -->
-    <string name="lockscreen_emergency_call">Emergency</string>
+    <string name="lockscreen_emergency_call">Emergency call</string>
     <!-- Button at the bottom of the unlock screen that lets the user return to a call -->
     <string name="lockscreen_return_to_call">Return to call</string>
     <!-- Shown to confirm that the user entered their lock pattern correctly. -->

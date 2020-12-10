@@ -60,24 +60,6 @@ public class WindowManagerServiceTests extends WindowTestsBase {
     @Rule
     public ExpectedException mExpectedException = ExpectedException.none();
 
-    @Test
-    public void testForceShowSystemBarsThrowsExceptionForNonAutomotive() {
-        if (!isAutomotive()) {
-            mExpectedException.expect(UnsupportedOperationException.class);
-
-            mWm.setForceShowSystemBars(true);
-        }
-    }
-
-    @Test
-    public void testForceShowSystemBarsDoesNotThrowExceptionForAutomotiveWithStatusBarPermission() {
-        if (isAutomotive()) {
-            mExpectedException.none();
-
-            mWm.setForceShowSystemBars(true);
-        }
-    }
-
     private boolean isAutomotive() {
         return getInstrumentation().getTargetContext().getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_AUTOMOTIVE);

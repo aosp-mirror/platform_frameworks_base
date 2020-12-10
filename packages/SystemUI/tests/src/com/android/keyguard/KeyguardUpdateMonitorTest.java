@@ -174,6 +174,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mFaceManager.isHardwareDetected()).thenReturn(true);
         when(mFaceManager.hasEnrolledTemplates()).thenReturn(true);
         when(mFaceManager.hasEnrolledTemplates(anyInt())).thenReturn(true);
+        when(mFingerprintManager.isHardwareDetected()).thenReturn(true);
+        when(mFingerprintManager.hasEnrolledTemplates(anyInt())).thenReturn(true);
         when(mUserManager.isUserUnlocked(anyInt())).thenReturn(true);
         when(mUserManager.isPrimaryUser()).thenReturn(true);
         when(mStrongAuthTracker.getStub()).thenReturn(mock(IStrongAuthTracker.Stub.class));
@@ -416,6 +418,43 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                 , putPhoneInfo(intentServiceState, data, true));
         mTestableLooper.processAllMessages();
         assertThat(mKeyguardUpdateMonitor.mTelephonyCapable).isTrue();
+    }
+
+    @Test
+    public void testTriesToAuthenticateFingerprint_whenKeyguard() {
+        mKeyguardUpdateMonitor.dispatchStartedGoingToSleep(0 /* why */);
+        mTestableLooper.processAllMessages();
+
+        verify(mFingerprintManager).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+        verify(mFingerprintManager, never()).detectFingerprint(any(), any(), anyInt());
+    }
+
+    @Test
+    public void testFingerprintDoesNotAuth_whenEncrypted() {
+        testFingerprintWhenStrongAuth(
+                KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT);
+    }
+
+    @Test
+    public void testFingerprintDoesNotAuth_whenDpmLocked() {
+        testFingerprintWhenStrongAuth(
+                KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW);
+    }
+
+    @Test
+    public void testFingerprintDoesNotAuth_whenUserLockdown() {
+        testFingerprintWhenStrongAuth(
+                KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
+    }
+
+    private void testFingerprintWhenStrongAuth(int strongAuth) {
+        when(mStrongAuthTracker.getStrongAuthForUser(anyInt())).thenReturn(strongAuth);
+        mKeyguardUpdateMonitor.dispatchStartedGoingToSleep(0 /* why */);
+        mTestableLooper.processAllMessages();
+
+        verify(mFingerprintManager, never())
+                .authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+        verify(mFingerprintManager).detectFingerprint(any(), any(), anyInt());
     }
 
     @Test

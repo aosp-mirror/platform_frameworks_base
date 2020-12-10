@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Prima Menu para desbloquear ou efectuar uma chamada de emergência."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Prima Menu para desbloquear."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Desenhar padrão para desbloquear"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Emergência"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Chamada de emergência"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Regressar à chamada"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Correcto!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Tentar novamente"</string>

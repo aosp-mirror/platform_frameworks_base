@@ -712,10 +712,17 @@
           case, this can be disabled (set to false). -->
     <bool name="config_enableCarDockHomeLaunch">true</bool>
 
-    <!-- Control whether to force the display of System UI Bars at all times regardless of
-         System Ui Flags. This can be useful in the Automotive case if there's a requirement for
-         a UI element to be on screen at all times. -->
-    <bool name="config_forceShowSystemBars">false</bool>
+    <!-- Control whether to force apps to give up control over the display of system bars at all
+         times regardless of System Ui Flags.
+         In the Automotive case, this is helpful if there's a requirement for an UI element to be on
+         screen at all times. Setting this to true also gives System UI the ability to override the
+         visibility controls for the system through the usage of the
+         "SYSTEM_BAR_VISIBILITY_OVERRIDE" setting.
+         Ex: Only setting the config to true will force show system bars for the entire system.
+         Ex: Setting the config to true and the "SYSTEM_BAR_VISIBILITY_OVERRIDE" setting to
+         "immersive.status=apps" will force show navigation bar for all apps and force hide status
+         bar for all apps. -->
+    <bool name="config_remoteInsetsControllerControlsSystemBars">false</bool>
 
     <!-- HDMI behavior -->
 
@@ -2275,7 +2282,7 @@
 
     <!-- Amount of time in ms the user needs to press the relevant keys to trigger the
          screenshot chord -->
-    <integer name="config_screenshotChordKeyTimeout">500</integer>
+    <integer name="config_screenshotChordKeyTimeout">0</integer>
 
     <!-- Default width of a vertical scrollbar and height of a horizontal scrollbar.
          Takes effect only if the scrollbar drawables have no intrinsic size. -->
@@ -2305,7 +2312,7 @@
     </integer-array>
 
     <!-- Set to true to add links to Cell Broadcast app from Settings and MMS app. -->
-    <bool name="config_cellBroadcastAppLinks">false</bool>
+    <bool name="config_cellBroadcastAppLinks">true</bool>
 
     <!-- The default value if the SyncStorageEngine should sync automatically or not -->
     <bool name="config_syncstorageengine_masterSyncAutomatically">true</bool>

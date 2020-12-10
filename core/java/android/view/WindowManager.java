@@ -2034,6 +2034,12 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_FIT_INSETS_CONTROLLED = 0x10000000;
 
         /**
+         * Flag to indicate that the parent frame of a window should be inset by IME.
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME = 0x40000000;
+
+        /**
          * An internal annotation for flags that can be specified to {@link #softInputMode}.
          *
          * @hide

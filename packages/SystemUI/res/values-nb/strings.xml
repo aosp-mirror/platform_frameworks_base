@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Gjenoppta"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Avbryt"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Del"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"Slett"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Skjermopptak er avbrutt"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Skjermopptaket er lagret. Trykk for å se det"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"Skjermopptaket er slettet"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Feil ved sletting av skjermopptaket"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Kunne ikke få tillatelser"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Feil ved start av skjermopptaket"</string>
@@ -884,12 +882,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"Sett størrelsen på den øverste delen av skjermen til 50 %"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"Sett størrelsen på den øverste delen av skjermen til 30 %"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Utvid den nederste delen av skjermen til hele skjermen"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"Plassering <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Dobbelttrykk for å endre."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Dobbelttrykk for å legge til."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"Flytt <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"Fjern <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"Legg til <xliff:g id="TILE_NAME">%1$s</xliff:g> i posisjon <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"Flytt <xliff:g id="TILE_NAME">%1$s</xliff:g> til posisjon <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"fjerne infobrikken"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"legge til en infobrikke på slutten"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Flytt infobrikken"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Legg til en infobrikke"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Flytt til <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Legg til posisjonen <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Posisjon <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Redigeringsvindu for hurtiginnstillinger."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g>-varsel: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"Det kan hende at appen ikke fungerer med delt skjerm."</string>
@@ -922,11 +921,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Hopp til forrige"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Endre størrelse"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefon ble slått av pga varme"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Telefonen din kjører nå som normalt"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Telefonen kjører nå som normalt.\nTrykk for å se mer informasjon"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefonen din var for varm, så den ble slått av for å kjøles ned. Telefonen din kjører nå som normalt.\n\nTelefonen kan blir for varm hvis du:\n	• bruker ressurskrevende apper (for eksempel spill-, video- eller navigeringsapper)\n	• laster store filer opp eller ned\n	• bruker telefonen ved høy temperatur"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Se vedlikeholdstrinnene"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Telefonen begynner å bli varm"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Enkelte funksjoner er begrenset mens telefonen kjøles ned"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Enkelte funksjoner er begrenset mens telefonen kjøles ned.\nTrykk for å se mer informasjon"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Telefonen din kommer til å prøve å kjøle seg ned automatisk. Du kan fremdeles bruke telefonen, men den kjører muligens saktere.\n\nTelefonen kommer til å kjøre som normalt, når den har kjølt seg ned."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Se vedlikeholdstrinnene"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Koble fra laderen"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Det oppsto et problem med lading av enheten. Koble fra strømadapteren, og vær forsiktig, kabelen kan være varm."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Se vedlikeholdstrinnene"</string>
@@ -988,6 +989,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Innstillinger"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Greit"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI-heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> bruker <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Apper bruker <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" og "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"kamera"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"posisjon"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofon"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Sensorer er av"</string>
     <string name="device_services" msgid="1549944177856658705">"Enhetstjenester"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Ingen tittel"</string>
@@ -1066,7 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Laster inn anbefalinger"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Medier"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Skjul den nåværende økten."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Skjul"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Lukk"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Gjenoppta"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Innstillinger"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktiv. Sjekk appen"</string>

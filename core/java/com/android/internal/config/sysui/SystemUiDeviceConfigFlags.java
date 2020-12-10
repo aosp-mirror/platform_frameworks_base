@@ -120,6 +120,18 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String HASH_SALT_MAX_DAYS = "hash_salt_max_days";
 
+    // Flag related to Privacy Indicators
+
+    /**
+     * Whether to show the complete ongoing app ops chip.
+     */
+    public static final String PROPERTY_PERMISSIONS_HUB_ENABLED = "permissions_hub_2_enabled";
+
+    /**
+     * Whether to show app ops chip for just microphone + camera.
+     */
+    public static final String PROPERTY_MIC_CAMERA_ENABLED = "camera_mic_icons_enabled";
+
     // Flags related to Assistant
 
     /**
@@ -378,6 +390,20 @@ public final class SystemUiDeviceConfigFlags {
     public static final String CHOOSER_TARGET_RANKING_ENABLED = "chooser_target_ranking_enabled";
 
     /**
+     * (float) Weight bonus applied on top sharing shortcuts as per native ranking provided by apps.
+     * Its range need to be 0 ~ 1.
+     */
+    public static final String TOP_NATIVE_RANKED_SHARING_SHORTCUTS_BOOSTER =
+            "top_native_ranked_sharing_shortcut_booster";
+
+    /**
+     * (float) Weight bonus applied on 2nd top sharing shortcuts as per native ranking provided by
+     * apps. Its range need to be 0 ~ 1.
+     */
+    public static final String NON_TOP_NATIVE_RANKED_SHARING_SHORTCUTS_BOOSTER =
+            "non_top_native_ranked_sharing_shortcut_booster";
+
+    /**
      * (boolean) Whether to enable user-drag resizing for PIP.
      */
     public static final String PIP_USER_RESIZE = "pip_user_resize";
@@ -396,6 +422,11 @@ public final class SystemUiDeviceConfigFlags {
      * (float) Slop multiplier for Back Gesture.
      */
     public static final String BACK_GESTURE_SLOP_MULTIPLIER = "back_gesture_slop_multiplier";
+
+    /**
+     * (long) Screenshot keychord delay (how long the buttons must be pressed), in ms
+     */
+    public static final String SCREENSHOT_KEYCHORD_DELAY = "screenshot_keychord_delay";
 
     private SystemUiDeviceConfigFlags() {
     }

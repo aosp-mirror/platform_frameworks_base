@@ -20,7 +20,6 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowInsets;
 import android.widget.LinearLayout;
 
 import com.android.systemui.Dependency;
@@ -75,11 +74,6 @@ public class CarNavigationBarView extends LinearLayout {
         setClickable(true);
         // Needs to not be focusable so rotary won't highlight the entire nav bar.
         setFocusable(false);
-    }
-
-    @Override
-    public WindowInsets onApplyWindowInsets(WindowInsets windowInsets) {
-        return windowInsets;
     }
 
     // Used to forward touch events even if the touch was initiated from a child component
