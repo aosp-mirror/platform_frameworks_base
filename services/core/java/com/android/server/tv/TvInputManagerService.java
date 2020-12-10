@@ -77,6 +77,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -100,6 +101,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -329,18 +331,27 @@ public final class TvInputManagerService extends SystemService {
             userState.packageSet.add(si.packageName);
         }
 
+        // sort the input list by input id so that TvInputState.inputNumber is stable.
+        Collections.sort(inputList, Comparator.comparing(TvInputInfo::getId));
         Map<String, TvInputState> inputMap = new HashMap<>();
+        ArrayMap<String, Integer> tisInputCount = new ArrayMap<>(inputMap.size());
         for (TvInputInfo info : inputList) {
+            String inputId = info.getId();
             if (DEBUG) {
-                Slog.d(TAG, "add " + info.getId());
+                Slog.d(TAG, "add " + inputId);
             }
-            TvInputState inputState = userState.inputMap.get(info.getId());
+            // Running count of input for each input service
+            Integer count = tisInputCount.get(inputId);
+            count = count == null ? Integer.valueOf(1) : count + 1;
+            tisInputCount.put(inputId, count);
+            TvInputState inputState = userState.inputMap.get(inputId);
             if (inputState == null) {
                 inputState = new TvInputState();
             }
             inputState.info = info;
             inputState.uid = getInputUid(info);
-            inputMap.put(info.getId(), inputState);
+            inputMap.put(inputId, inputState);
+            inputState.inputNumber = count;
         }
 
         for (String inputId : inputMap.keySet()) {
@@ -2452,11 +2463,31 @@ public final class TvInputManagerService extends SystemService {
      */
     private void logTuneStateChanged(int state, SessionState sessionState,
             @Nullable TvInputState inputState) {
-        // TODO(b/173536904): log input type and id
+        int tisUid = Process.INVALID_UID;
+        int inputType = FrameworkStatsLog.TIF_TUNE_STATE_CHANGED__TYPE__TIF_INPUT_TYPE_UNKNOWN;
+        int inputId = 0;
+        int hdmiPort = 0;
+        if (inputState != null) {
+            tisUid = inputState.uid;
+            inputType = inputState.info.getType();
+            if (inputType == TvInputInfo.TYPE_TUNER) {
+                inputType = FrameworkStatsLog.TIF_TUNE_STATE_CHANGED__TYPE__TUNER;
+            }
+            inputId = inputState.inputNumber;
+            HdmiDeviceInfo hdmiDeviceInfo = inputState.info.getHdmiDeviceInfo();
+            if (hdmiDeviceInfo != null) {
+                hdmiPort = hdmiDeviceInfo.getPortId();
+            }
+        }
         FrameworkStatsLog.write(FrameworkStatsLog.TIF_TUNE_CHANGED,
                 new int[]{sessionState.callingUid,
-                        inputState == null ? Process.INVALID_UID : inputState.uid},
-                new String[]{"tif_player", "tv_input_service"}, state, sessionState.sessionId);
+                        tisUid},
+                new String[]{"tif_player", "tv_input_service"},
+                state,
+                sessionState.sessionId,
+                inputType,
+                inputId,
+                hdmiPort);
     }
 
     private static final class UserState {
@@ -2567,6 +2598,11 @@ public final class TvInputManagerService extends SystemService {
 
         /** A TvInputInfo object which represents the TV input. */
         private TvInputInfo info;
+
+        /**
+         * ID unique to a specific TvInputService.
+         */
+        private int inputNumber;
 
         /**
          * The kernel user-ID that has been assigned to the application the TvInput is a part of.
