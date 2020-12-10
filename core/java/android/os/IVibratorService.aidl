@@ -18,6 +18,7 @@ package android.os;
 
 import android.os.VibrationEffect;
 import android.os.VibrationAttributes;
+import android.os.VibratorInfo;
 import android.os.IVibratorStateListener;
 
 /** {@hide} */
@@ -25,11 +26,10 @@ interface IVibratorService
 {
     boolean hasVibrator();
     boolean isVibrating();
+    VibratorInfo getVibratorInfo();
     boolean registerVibratorStateListener(in IVibratorStateListener listener);
     boolean unregisterVibratorStateListener(in IVibratorStateListener listener);
     boolean hasAmplitudeControl();
-    int[] areEffectsSupported(in int[] effectIds);
-    boolean[] arePrimitivesSupported(in int[] primitiveIds);
     void vibrate(int uid, String opPkg, in VibrationEffect effect,
             in VibrationAttributes attributes, String reason, IBinder token);
     void cancelVibrate(IBinder token);

@@ -37,6 +37,7 @@ import android.os.Trace;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.os.VibratorInfo;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -163,6 +164,13 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             Slog.v(TAG, "VibratorManager service initialized");
             Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
+    }
+
+    @Override // Binder call
+    @Nullable
+    public VibratorInfo getVibratorInfo(int vibratorId) {
+        VibratorController controller = mVibrators.get(vibratorId);
+        return controller == null ? null : controller.getVibratorInfo();
     }
 
     @Override // Binder call
