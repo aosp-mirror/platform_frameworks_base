@@ -48,7 +48,6 @@ stubs_defaults {
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
         ":art.module.public.api{.public.stubs.source}",
-        ":android_icu4j_public_api_files",
         "**/package.html",
     ],
     sdk_version: "core_platform",
@@ -246,6 +245,7 @@ java_library_static {
         "framework-statsd.stubs",
         "framework-tethering.stubs",
         "framework-wifi.stubs",
+        "i18n.module.public.api.stubs",
         "private-stub-annotations-jar",
     ],
     defaults: ["android_defaults_stubs_current"],
@@ -263,6 +263,7 @@ java_library_static {
         "framework-statsd.stubs.system",
         "framework-tethering.stubs.system",
         "framework-wifi.stubs.system",
+        "i18n.module.public.api.stubs",
         "private-stub-annotations-jar",
     ],
     defaults: [
@@ -296,6 +297,7 @@ java_library_static {
         "framework-statsd.stubs.system",
         "framework-tethering.stubs.system",
         "framework-wifi.stubs.system",
+        "i18n.module.public.api.stubs",
         "private-stub-annotations-jar",
     ],
     defaults: [
