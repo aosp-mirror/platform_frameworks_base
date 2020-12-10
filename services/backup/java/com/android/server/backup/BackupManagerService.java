@@ -512,7 +512,7 @@ public class BackupManagerService extends IBackupManager.Stub {
         int callingUid = Binder.getCallingUid();
         if (CompatChanges.isChangeEnabled(
                 BackupManager.IS_BACKUP_SERVICE_ACTIVE_ENFORCE_PERMISSION_IN_SERVICE, callingUid)) {
-            mContext.enforceCallingPermission(android.Manifest.permission.BACKUP,
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                     "isBackupServiceActive");
         }
         synchronized (mStateLock) {
