@@ -115,7 +115,7 @@ public class GlobalSearchSession {
      * @return The search result of performing this operation.
      */
     @NonNull
-    public SearchResults globalQuery(
+    public SearchResults query(
             @NonNull String queryExpression,
             @NonNull SearchSpec searchSpec,
             @NonNull @CallbackExecutor Executor executor) {

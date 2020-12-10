@@ -77,7 +77,7 @@ public class SearchResults implements Closeable {
      * <p>Re-call this method to get next page of {@link SearchResult}, until it returns an
      * empty list.
      *
-     * <p>The page size is set by {@link SearchSpec.Builder#setNumPerPage}.
+     * <p>The page size is set by {@link SearchSpec.Builder#setResultCountPerPage}.
      *
      * @param callback Callback to receive the pending result of performing this operation.
      */
