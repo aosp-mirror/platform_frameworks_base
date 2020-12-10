@@ -1102,4 +1102,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Утримуйте кнопку живлення, щоб переглянути нові елементи керування"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Додати елементи керування"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Змінити елементи керування"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Додати пристрої виводу"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"Група"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Вибрано 1 пристрій"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"Вибрано пристроїв: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (відключено)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Не вдалося підключитися. Повторіть спробу."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Підключити новий пристрій"</string>
 </resources>

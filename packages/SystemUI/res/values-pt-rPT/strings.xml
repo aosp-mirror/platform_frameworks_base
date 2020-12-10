@@ -1090,4 +1090,11 @@
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Mantenha premido o botão ligar/desligar para ver os novos controlos."</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Adicionar controlos"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Editar controlos"</string>
+    <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Adicione saídas"</string>
+    <string name="media_output_dialog_group" msgid="5571251347877452212">"Grupo"</string>
+    <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 dispositivo selecionado"</string>
+    <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> dispositivos selecionados"</string>
+    <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (desligado)"</string>
+    <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Não foi possível ligar. Tente novamente."</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Sincronize o novo dispositivo"</string>
 </resources>
