@@ -226,6 +226,22 @@ class DozeLogger @Inject constructor(
             "Doze state suppressed, state=$str1"
         })
     }
+
+    fun logDozeScreenBrightness(brightness: Int) {
+        buffer.log(TAG, INFO, {
+            int1 = brightness
+        }, {
+            "Doze screen brightness set, brightness=$int1"
+        })
+    }
+
+    fun logSetAodDimmingScrim(scrimOpacity: Long) {
+        buffer.log(TAG, INFO, {
+            long1 = scrimOpacity
+        }, {
+            "Doze aod dimming scrim opacity set, opacity=$long1"
+        })
+    }
 }
 
 private const val TAG = "DozeLog"

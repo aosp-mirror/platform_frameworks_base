@@ -298,6 +298,22 @@ public class DozeLog implements Dumpable {
         mLogger.logDozeSuppressed(suppressedState);
     }
 
+    /**
+     * Appends new AOD sreen brightness to logs
+     * @param brightness display brightness setting
+     */
+    public void traceDozeScreenBrightness(int brightness) {
+        mLogger.logDozeScreenBrightness(brightness);
+    }
+
+    /**
+    * Appends new AOD dimming scrim opacity to logs
+    * @param scrimOpacity
+     */
+    public void traceSetAodDimmingScrim(float scrimOpacity) {
+        mLogger.logSetAodDimmingScrim((long) scrimOpacity);
+    }
+
     private class SummaryStats {
         private int mCount;
 
