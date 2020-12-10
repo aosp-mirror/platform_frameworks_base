@@ -29,6 +29,8 @@
 
 #include <vibratorservice/VibratorHalController.h>
 
+#include "com_android_server_VibratorManagerService.h"
+
 namespace V1_0 = android::hardware::vibrator::V1_0;
 namespace V1_1 = android::hardware::vibrator::V1_1;
 namespace V1_2 = android::hardware::vibrator::V1_2;
@@ -70,13 +72,26 @@ static_assert(static_cast<uint8_t>(V1_3::Effect::RINGTONE_15) ==
 static_assert(static_cast<uint8_t>(V1_3::Effect::TEXTURE_TICK) ==
               static_cast<uint8_t>(aidl::Effect::TEXTURE_TICK));
 
+static std::shared_ptr<vibrator::HalController> findVibrator(int32_t vibratorId) {
+    // TODO(b/167946816): remove this once VibratorService is removed.
+    if (vibratorId < 0) {
+        return std::move(std::make_unique<vibrator::HalController>());
+    }
+    vibrator::ManagerHalWrapper* manager = android_server_VibratorManagerService_getManager();
+    if (manager == nullptr) {
+        return nullptr;
+    }
+    auto result = manager->getVibrator(vibratorId);
+    return result.isOk() ? std::move(result.value()) : nullptr;
+}
+
 class VibratorControllerWrapper {
 public:
     VibratorControllerWrapper(JNIEnv* env, int32_t vibratorId, jobject callbackListener)
-          // TODO(b/167946816): use ManagerHalController to get vibrator by id
-          : mHal(std::make_unique<vibrator::HalController>()),
+          : mHal(std::move(findVibrator(vibratorId))),
             mVibratorId(vibratorId),
             mCallbackListener(env->NewGlobalRef(callbackListener)) {
+        LOG_ALWAYS_FATAL_IF(mHal == nullptr, "Unable to find reference to vibrator hal");
         LOG_ALWAYS_FATAL_IF(mCallbackListener == nullptr,
                             "Unable to create global reference to vibration callback handler");
     }
@@ -97,7 +112,7 @@ public:
     }
 
 private:
-    const std::unique_ptr<vibrator::HalController> mHal;
+    const std::shared_ptr<vibrator::HalController> mHal;
     const int32_t mVibratorId;
     const jobject mCallbackListener;
 };

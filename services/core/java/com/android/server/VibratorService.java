@@ -73,7 +73,6 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /** System implementation of {@link IVibratorService}. */
@@ -120,7 +119,6 @@ public class VibratorService extends IVibratorService.Stub {
     private int mCurVibUid = -1;
     private ExternalVibrationHolder mCurrentExternalVibration;
     private boolean mLowPowerMode;
-    private SparseArray<Vibration> mAlwaysOnEffects = new SparseArray<>();
 
     private final IUidObserver mUidObserver = new IUidObserver.Stub() {
         @Override public void onUidStateChanged(int uid, int procState, long procStateSeq,
@@ -377,51 +375,6 @@ public class VibratorService extends IVibratorService.Stub {
     @Override // Binder call
     public boolean[] arePrimitivesSupported(int[] primitiveIds) {
         return mVibratorController.arePrimitivesSupported(primitiveIds);
-    }
-
-    private static List<Integer> asList(int... vals) {
-        if (vals == null) {
-            return null;
-        }
-        List<Integer> l = new ArrayList<>(vals.length);
-        for (int val : vals) {
-            l.add(val);
-        }
-        return l;
-    }
-
-    @Override // Binder call
-    public boolean setAlwaysOnEffect(int uid, String opPkg, int alwaysOnId, VibrationEffect effect,
-            VibrationAttributes attrs) {
-        if (!hasPermission(android.Manifest.permission.VIBRATE_ALWAYS_ON)) {
-            throw new SecurityException("Requires VIBRATE_ALWAYS_ON permission");
-        }
-        if (!mVibratorController.hasCapability(IVibrator.CAP_ALWAYS_ON_CONTROL)) {
-            Slog.e(TAG, "Always-on effects not supported.");
-            return false;
-        }
-        if (effect == null) {
-            synchronized (mLock) {
-                mAlwaysOnEffects.delete(alwaysOnId);
-                mVibratorController.updateAlwaysOn(alwaysOnId, /* effect= */ null);
-            }
-        } else {
-            if (!verifyVibrationEffect(effect)) {
-                return false;
-            }
-            if (!(effect instanceof VibrationEffect.Prebaked)) {
-                Slog.e(TAG, "Only prebaked effects supported for always-on.");
-                return false;
-            }
-            attrs = fixupVibrationAttributes(attrs);
-            synchronized (mLock) {
-                Vibration vib = new Vibration(null, mNextVibrationId.getAndIncrement(), effect,
-                        attrs, uid, opPkg, null);
-                mAlwaysOnEffects.put(alwaysOnId, vib);
-                updateAlwaysOnLocked(alwaysOnId, vib);
-            }
-        }
-        return true;
     }
 
     private void verifyIncomingUid(int uid) {
@@ -769,7 +722,7 @@ public class VibratorService extends IVibratorService.Stub {
                 // We might be getting calls from within system_server, so we don't actually
                 // want to throw a SecurityException here.
                 Slog.w(TAG, "Would be an error: vibrate from uid " + vib.uid);
-                endVibrationLocked(vib, Vibration.Status.ERROR_APP_OPS);
+                endVibrationLocked(vib, Vibration.Status.IGNORED_ERROR_APP_OPS);
             } else {
                 endVibrationLocked(vib, Vibration.Status.IGNORED_APP_OPS);
             }
@@ -829,8 +782,6 @@ public class VibratorService extends IVibratorService.Stub {
                 // If the state changes out from under us then just reset.
                 doCancelVibrateLocked(Vibration.Status.CANCELLED);
             }
-
-            updateAlwaysOnLocked();
         }
     }
 
@@ -842,24 +793,6 @@ public class VibratorService extends IVibratorService.Stub {
             return true;
         }
         return false;
-    }
-
-    private void updateAlwaysOnLocked(int id, Vibration vib) {
-        VibrationEffect.Prebaked effect;
-        if (!shouldVibrate(vib)) {
-            effect = null;
-        } else {
-            effect = mVibrationScaler.scale(vib.getEffect(), vib.attrs.getUsage());
-        }
-        mVibratorController.updateAlwaysOn(id, effect);
-    }
-
-    private void updateAlwaysOnLocked() {
-        for (int i = 0; i < mAlwaysOnEffects.size(); i++) {
-            int id = mAlwaysOnEffects.keyAt(i);
-            Vibration vib = mAlwaysOnEffects.valueAt(i);
-            updateAlwaysOnLocked(id, vib);
-        }
     }
 
     private void doVibratorOn(Vibration vib) {
@@ -1289,7 +1222,7 @@ public class VibratorService extends IVibratorService.Stub {
     static class Injector {
 
         VibratorController createVibratorController(OnVibrationCompleteListener listener) {
-            return new VibratorController(/* vibratorId= */ 0, listener);
+            return new VibratorController(/* vibratorId= */ -1, listener);
         }
 
         Handler createHandler(Looper looper) {
@@ -1373,7 +1306,7 @@ public class VibratorService extends IVibratorService.Stub {
                 vibHolder.scale = SCALE_MUTE;
                 if (mode == AppOpsManager.MODE_ERRORED) {
                     Slog.w(TAG, "Would be an error: external vibrate from uid " + vib.getUid());
-                    endVibrationLocked(vibHolder, Vibration.Status.ERROR_APP_OPS);
+                    endVibrationLocked(vibHolder, Vibration.Status.IGNORED_ERROR_APP_OPS);
                 } else {
                     endVibrationLocked(vibHolder, Vibration.Status.IGNORED_APP_OPS);
                 }
