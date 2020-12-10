@@ -1062,7 +1062,7 @@ public class Vpn {
         if (null == agent) return NETID_UNSET;
         final Network network = agent.getNetwork();
         if (null == network) return NETID_UNSET;
-        return network.netId;
+        return network.getNetId();
     }
 
     private LinkProperties makeLinkProperties() {
@@ -1778,7 +1778,7 @@ public class Vpn {
                 if (networks[i] == null) {
                     mConfig.underlyingNetworks[i] = null;
                 } else {
-                    mConfig.underlyingNetworks[i] = new Network(networks[i].netId);
+                    mConfig.underlyingNetworks[i] = new Network(networks[i].getNetId());
                 }
             }
         }

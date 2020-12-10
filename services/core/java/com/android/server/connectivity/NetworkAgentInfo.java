@@ -610,7 +610,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         if (newExpiry > 0) {
             mLingerMessage = new WakeupMessage(
                     mContext, mHandler,
-                    "NETWORK_LINGER_COMPLETE." + network.netId /* cmdName */,
+                    "NETWORK_LINGER_COMPLETE." + network.getNetId() /* cmdName */,
                     EVENT_NETWORK_LINGER_COMPLETE /* cmd */,
                     0 /* arg1 (unused) */, 0 /* arg2 (unused) */,
                     this /* obj (NetworkAgentInfo) */);
@@ -701,7 +701,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
      * This represents the network with something like "[100 WIFI|VPN]" or "[108 MOBILE]".
      */
     public String toShortString() {
-        return "[" + network.netId + " "
+        return "[" + network.getNetId() + " "
                 + transportNamesOf(networkCapabilities.getTransportTypes()) + "]";
     }
 
