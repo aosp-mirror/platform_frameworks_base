@@ -9180,7 +9180,16 @@ public class NotificationManagerService extends SystemService {
         @Override
         protected void readExtraAttributes(String tag, TypedXmlPullParser parser, int userId)
                 throws IOException {
-            boolean userSet = parser.getAttributeBoolean(null, ATT_USER_SET, false);
+            // TODO: this logic looks broken, since it's trying to convert a
+            // list into a boolean; for now we preserve the old parsing behavior
+            // to avoid a performance regression, but someone should investigate
+            final String value = parser.getAttributeValue(null, ATT_USER_SET);
+            final boolean userSet;
+            if (TextUtils.isEmpty(value)) {
+                userSet = false;
+            } else {
+                userSet = Boolean.parseBoolean(value);
+            }
             setUserSet(userId, userSet);
         }
 
