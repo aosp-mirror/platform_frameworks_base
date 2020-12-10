@@ -1,1 +1,4 @@
+per-file *Alarm* = file:/apex/jobscheduler/OWNERS
+per-file *AppOp* = file:/core/java/android/permission/OWNERS
+per-file *Notification* = file:/packages/SystemUI/OWNERS
 per-file *Zygote* = file:/ZYGOTE_OWNERS

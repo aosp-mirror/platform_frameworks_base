@@ -16,7 +16,7 @@ svetoslavganov@google.com
 yamasani@google.com
 
 # Support bulk translation updates
-per-file */res*/values*/*.xml = byi@google.com
+per-file */res*/values*/*.xml = byi@google.com, delphij@google.com
 
 per-file Android.bp = file:platform/build/soong:/OWNERS
 per-file Android.mk = file:platform/build/soong:/OWNERS
