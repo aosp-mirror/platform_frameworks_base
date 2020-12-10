@@ -272,7 +272,9 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
         void removeTask(Task t) {
             if (t.mTaskAppearedSent) {
-                t.migrateToNewSurfaceControl();
+                if (t.getSurfaceControl() != null) {
+                    t.migrateToNewSurfaceControl();
+                }
                 t.mTaskAppearedSent = false;
                 mOrganizer.onTaskVanished(t);
             }
@@ -288,8 +290,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             // possible.
             while (!mOrganizedTasks.isEmpty()) {
                 final Task t = mOrganizedTasks.get(0);
-                t.updateTaskOrganizerState(true /* forceUpdate */);
-                if (mOrganizedTasks.contains(t)) {
+                if (!t.updateTaskOrganizerState(true /* forceUpdate */)) {
                     removeTask(t);
                 }
             }

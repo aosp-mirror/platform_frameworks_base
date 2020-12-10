@@ -31,14 +31,12 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.ArrayMap;
 import android.util.Log;
-import android.util.Slog;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
 import android.window.ITaskOrganizerController;
 import android.window.TaskAppearedInfo;
 import android.window.TaskOrganizer;
 
-import androidx.annotation.BinderThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -47,7 +45,6 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
-import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.startingsurface.StartingSurfaceDrawer;
 
 import java.io.PrintWriter;
@@ -275,6 +272,12 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         synchronized (mLock) {
             ProtoLog.v(WM_SHELL_TASK_ORG, "Task info changed taskId=%d", taskInfo.taskId);
             final TaskAppearedInfo data = mTasks.get(taskInfo.taskId);
+            if (data == null) {
+                // TODO(b/171749427): It means onTaskInfoChanged send before onTaskAppeared or
+                //  after onTaskVanished, it should be fixed in controller side.
+                return;
+            }
+
             final TaskListener oldListener = getTaskListener(data.getTaskInfo());
             final TaskListener newListener = getTaskListener(taskInfo);
             mTasks.put(taskInfo.taskId, new TaskAppearedInfo(taskInfo, data.getLeash()));
