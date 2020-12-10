@@ -2547,10 +2547,7 @@ public class ConnectivityServiceTest {
 
     @Test
     public void testNoMutableNetworkRequests() throws Exception {
-        // TODO(b/173157160) Please replace FLAG_MUTABLE_UNAUDITED below
-        // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0, new Intent("a"),
-                PendingIntent.FLAG_MUTABLE_UNAUDITED);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0, new Intent("a"), 0);
         NetworkRequest request1 = new NetworkRequest.Builder()
                 .addCapability(NET_CAPABILITY_VALIDATED)
                 .build();
@@ -3210,21 +3207,17 @@ public class ConnectivityServiceTest {
         assertThrows(SecurityException.class, () ->
                 mCm.registerNetworkCallback(r, new NetworkCallback()));
 
-        // TODO(b/173157160) Please replace FLAG_MUTABLE_UNAUDITED below
-        // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
         assertThrows(SecurityException.class, () ->
                 mCm.registerNetworkCallback(r, PendingIntent.getService(
-                        mServiceContext, 0, new Intent(), PendingIntent.FLAG_MUTABLE_UNAUDITED)));
+                        mServiceContext, 0, new Intent(), 0)));
 
         // Requesting a Network with signal strength should get IllegalArgumentException.
         assertThrows(IllegalArgumentException.class, () ->
                 mCm.requestNetwork(r, new NetworkCallback()));
 
-        // TODO(b/173157160) Please replace FLAG_MUTABLE_UNAUDITED below
-        // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
         assertThrows(IllegalArgumentException.class, () ->
                 mCm.requestNetwork(r, PendingIntent.getService(
-                        mServiceContext, 0, new Intent(), PendingIntent.FLAG_MUTABLE_UNAUDITED)));
+                        mServiceContext, 0, new Intent(), 0)));
     }
 
     @Test
@@ -4688,16 +4681,12 @@ public class ConnectivityServiceTest {
         }
         j = 0;
         while (j++ < INTENTS / 2) {
-            // TODO(b/173157160) Please replace FLAG_MUTABLE_UNAUDITED below
-            // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
-            PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, new Intent("a" + j), PendingIntent.FLAG_MUTABLE_UNAUDITED);
+            PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, new Intent("a" + j), 0);
             mCm.requestNetwork(networkRequest, pi);
             registered.add(pi);
         }
         while (j++ < INTENTS) {
-            // TODO(b/173157160) Please replace FLAG_MUTABLE_UNAUDITED below
-            // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
-            PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, new Intent("b" + j), PendingIntent.FLAG_MUTABLE_UNAUDITED);
+            PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, new Intent("b" + j), 0);
             mCm.registerNetworkCallback(networkRequest, pi);
             registered.add(pi);
         }
@@ -4711,15 +4700,11 @@ public class ConnectivityServiceTest {
         );
         assertThrows(TooManyRequestsException.class, () ->
                 mCm.requestNetwork(networkRequest,
-                        // TODO(b/173157160) Please replace FLAG_MUTABLE_UNAUDITED below
-                        // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
-                        PendingIntent.getBroadcast(mContext, 0, new Intent("c"), PendingIntent.FLAG_MUTABLE_UNAUDITED))
+                        PendingIntent.getBroadcast(mContext, 0, new Intent("c"), 0))
         );
         assertThrows(TooManyRequestsException.class, () ->
                 mCm.registerNetworkCallback(networkRequest,
-                        // TODO(b/173157160) Please replace FLAG_MUTABLE_UNAUDITED below
-                        // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
-                        PendingIntent.getBroadcast(mContext, 0, new Intent("d"), PendingIntent.FLAG_MUTABLE_UNAUDITED))
+                        PendingIntent.getBroadcast(mContext, 0, new Intent("d"), 0))
         );
 
         for (Object o : registered) {
@@ -4748,20 +4733,16 @@ public class ConnectivityServiceTest {
         waitForIdle();
 
         for (int i = 0; i < MAX_REQUESTS; i++) {
-            // TODO(b/173157160) Please replace FLAG_MUTABLE_UNAUDITED below
-            // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
             PendingIntent pendingIntent =
-                    PendingIntent.getBroadcast(mContext, 0, new Intent("e" + i), PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                    PendingIntent.getBroadcast(mContext, 0, new Intent("e" + i), 0);
             mCm.requestNetwork(networkRequest, pendingIntent);
             mCm.unregisterNetworkCallback(pendingIntent);
         }
         waitForIdle();
 
         for (int i = 0; i < MAX_REQUESTS; i++) {
-            // TODO(b/173157160) Please replace FLAG_MUTABLE_UNAUDITED below
-            // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
             PendingIntent pendingIntent =
-                    PendingIntent.getBroadcast(mContext, 0, new Intent("f" + i), PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                    PendingIntent.getBroadcast(mContext, 0, new Intent("f" + i), 0);
             mCm.registerNetworkCallback(networkRequest, pendingIntent);
             mCm.unregisterNetworkCallback(pendingIntent);
         }
