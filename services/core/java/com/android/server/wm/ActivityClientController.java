@@ -538,6 +538,22 @@ class ActivityClientController extends IActivityClientController.Stub {
     }
 
     @Override
+    public int getLaunchedFromUid(IBinder token) {
+        synchronized (mGlobalLock) {
+            final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+            return r != null ? r.launchedFromUid : android.os.Process.INVALID_UID;
+        }
+    }
+
+    @Override
+    public String getLaunchedFromPackage(IBinder token) {
+        synchronized (mGlobalLock) {
+            final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+            return r != null ? r.launchedFromPackage : null;
+        }
+    }
+
+    @Override
     public Bundle getActivityOptions(IBinder token) {
         final long origId = Binder.clearCallingIdentity();
         try {

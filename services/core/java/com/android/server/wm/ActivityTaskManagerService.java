@@ -1743,29 +1743,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    @Override
-    public int getLaunchedFromUid(IBinder activityToken) {
-        ActivityRecord srec;
-        synchronized (mGlobalLock) {
-            srec = ActivityRecord.forTokenLocked(activityToken);
-        }
-        if (srec == null) {
-            return -1;
-        }
-        return srec.launchedFromUid;
-    }
-
-    @Override
-    public String getLaunchedFromPackage(IBinder activityToken) {
-        ActivityRecord srec;
-        synchronized (mGlobalLock) {
-            srec = ActivityRecord.forTokenLocked(activityToken);
-        }
-        if (srec == null) {
-            return null;
-        }
-        return srec.launchedFromPackage;
-    }
 
     @Override
     public RootTaskInfo getFocusedRootTaskInfo() throws RemoteException {
@@ -3224,28 +3201,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     mVoiceWakeLock.release();
                 }
             }
-        }
-    }
-
-    @Override
-    public ComponentName getActivityClassForToken(IBinder token) {
-        synchronized (mGlobalLock) {
-            ActivityRecord r = ActivityRecord.isInStackLocked(token);
-            if (r == null) {
-                return null;
-            }
-            return r.intent.getComponent();
-        }
-    }
-
-    @Override
-    public String getPackageForToken(IBinder token) {
-        synchronized (mGlobalLock) {
-            ActivityRecord r = ActivityRecord.isInStackLocked(token);
-            if (r == null) {
-                return null;
-            }
-            return r.packageName;
         }
     }
 
@@ -5595,6 +5550,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (r != null && r.pendingResults != null) {
                     r.pendingResults.remove(pir);
                 }
+            }
+        }
+
+        @Override
+        public ComponentName getActivityName(IBinder activityToken) {
+            synchronized (mGlobalLock) {
+                final ActivityRecord r = ActivityRecord.isInStackLocked(activityToken);
+                return r != null ? r.intent.getComponent() : null;
             }
         }
 

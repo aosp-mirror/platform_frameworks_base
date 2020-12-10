@@ -14610,11 +14610,11 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public int getLaunchedFromUid(IBinder activityToken) {
-        return mActivityTaskManager.getLaunchedFromUid(activityToken);
+        return ActivityClient.getInstance().getLaunchedFromUid(activityToken);
     }
 
     public String getLaunchedFromPackage(IBinder activityToken) {
-        return mActivityTaskManager.getLaunchedFromPackage(activityToken);
+        return ActivityClient.getInstance().getLaunchedFromPackage(activityToken);
     }
 
     // =========================================================
@@ -16322,7 +16322,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             final ActivityClient ac = ActivityClient.getInstance();
             return new ActivityPresentationInfo(ac.getTaskForActivity(token,
                     /*onlyRoot=*/ false), ac.getDisplayId(token),
-                    mActivityTaskManager.getActivityClassForToken(token));
+                    mAtmInternal.getActivityName(token));
         }
 
         @Override

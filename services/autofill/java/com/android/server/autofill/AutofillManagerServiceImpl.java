@@ -29,8 +29,6 @@ import static com.android.server.autofill.Helper.sVerbose;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
-import android.app.ActivityTaskManager;
-import android.app.IActivityTaskManager;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -86,6 +84,7 @@ import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.infra.AbstractPerUserSystemService;
 import com.android.server.inputmethod.InputMethodManagerInternal;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -1638,19 +1637,16 @@ final class AutofillManagerServiceImpl
                 }
             }
 
-            final IActivityTaskManager atm = ActivityTaskManager.getService();
+            final ActivityTaskManagerInternal atmInternal = LocalServices.getService(
+                    ActivityTaskManagerInternal.class);
 
             // Only remove sessions which's activities are not known to the activity manager anymore
             for (int i = 0; i < numSessionsToRemove; i++) {
-                try {
-                    // The activity manager cannot resolve activities that have been removed
-                    if (atm.getActivityClassForToken(sessionsToRemove.valueAt(i)) != null) {
-                        sessionsToRemove.removeAt(i);
-                        i--;
-                        numSessionsToRemove--;
-                    }
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "Cannot figure out if activity is finished", e);
+                // The activity task manager cannot resolve activities that have been removed.
+                if (atmInternal.getActivityName(sessionsToRemove.valueAt(i)) != null) {
+                    sessionsToRemove.removeAt(i);
+                    i--;
+                    numSessionsToRemove--;
                 }
             }
 
