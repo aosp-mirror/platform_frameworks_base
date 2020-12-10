@@ -562,8 +562,10 @@ public class PipMenuActivity extends Activity {
 
                     // TODO: Check if the action drawable has changed before we reload it
                     action.getIcon().loadDrawableAsync(this, d -> {
-                        d.setTint(Color.WHITE);
-                        actionView.setImageDrawable(d);
+                        if (d != null) {
+                            d.setTint(Color.WHITE);
+                            actionView.setImageDrawable(d);
+                        }
                     }, mHandler);
                     actionView.setContentDescription(action.getContentDescription());
                     if (action.isEnabled()) {

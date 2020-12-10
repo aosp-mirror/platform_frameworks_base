@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"மீண்டும் தொடங்கு"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"ரத்துசெய்"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"பகிர்"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"நீக்கு"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"திரை ரெக்கார்டிங் ரத்துசெய்யப்பட்டது"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"திரை ரெக்கார்டிங் சேமிக்கப்பட்டது, பார்க்கத் தட்டவும்"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"திரை ரெக்கார்டிங் நீக்கப்பட்டது"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"திரை ரெக்கார்டிங்கை நீக்குவதில் பிழை"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"அனுமதிகளைப் பெற இயலவில்லை"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"ஸ்கிரீன் ரெக்கார்டிங்கைத் தொடங்குவதில் பிழை"</string>
@@ -884,12 +882,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"மேலே 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"மேலே 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"கீழ்ப்புறம் முழுத் திரை"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"நிலை <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. திருத்த, இருமுறை தட்டவும்."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. சேர்க்க, இருமுறை தட்டவும்."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"<xliff:g id="TILE_NAME">%1$s</xliff:g>ஐ நகர்த்தவும்"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"<xliff:g id="TILE_NAME">%1$s</xliff:g>ஐ அகற்றவும்"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"நிலைப்பாடு <xliff:g id="POSITION">%2$d</xliff:g> இல் <xliff:g id="TILE_NAME">%1$s</xliff:g>ஐச் சேர்க்கும்"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"நிலைப்பாடு <xliff:g id="POSITION">%2$d</xliff:g>க்கு <xliff:g id="TILE_NAME">%1$s</xliff:g>ஐ நகர்த்தும்"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"கட்டத்தை அகற்றும்"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"கடைசியில் கட்டத்தைச் சேர்க்கும்"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"கட்டத்தை நகர்த்து"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"கட்டத்தைச் சேர்"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g>க்கு நகர்த்தும்"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g>ல் சேர்க்கும்"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"இடம்: <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"விரைவு அமைப்புகள் திருத்தி."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> அறிவிப்பு: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"திரைப் பிரிப்பில் ஆப்ஸ் வேலைசெய்யாமல் போகக்கூடும்."</string>
@@ -922,11 +921,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"முந்தையதற்குச் செல்"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"அளவு மாற்று"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"வெப்பத்தினால் ஃபோன் ஆஃப் செய்யப்பட்டது"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"இப்போது உங்கள் ஃபோன் இயல்புநிலையில் இயங்குகிறது"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"இப்போது உங்கள் மொபைல் இயல்புநிலையில் இயங்குகிறது.\nமேலும் தகவலுக்கு தட்டவும்"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"உங்கள் ஃபோன் அதிகமாகச் சூடானதால், அதன் சூட்டைக் குறைக்க, ஆஃப் செய்யப்பட்டது. இப்போது உங்கள் ஃபோன் இயல்புநிலையில் இயங்குகிறது.\n\nபின்வருவனவற்றைச் செய்தால், ஃபோன் சூடாகலாம்:\n	• அதிகளவு தரவைப் பயன்படுத்தும் ஆப்ஸை (எ.கா: கேமிங், வீடியோ (அ) வழிகாட்டுதல் ஆப்ஸ்) பயன்படுத்துவது\n	• பெரிய கோப்புகளைப் பதிவிறக்குவது/பதிவேற்றுவது\n	• அதிக வெப்பநிலையில் ஃபோனைப் பயன்படுத்துவது"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"மேலும் விவரங்களுக்கு இதைப் பார்க்கவும்"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"மொபைல் சூடாகிறது"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"மொபைலின் வெப்ப அளவு குறையும் போது, சில அம்சங்களைப் பயன்படுத்த முடியாது"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"மொபைலின் வெப்ப அளவு குறையும் வரை சில அம்சங்களைப் பயன்படுத்த முடியாது.\nமேலும் தகவலுக்கு தட்டவும்"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"உங்கள் மொபைலின் வெப்ப அளவு தானாகவே குறையும். தொடர்ந்து நீங்கள் மொபைலைப் பயன்படுத்தலாம், ஆனால் அதன் வேகம் குறைவாக இருக்கக்கூடும்.\n\nமொபைலின் வெப்ப அளவு குறைந்தவுடன், அது இயல்பு நிலையில் இயங்கும்."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"மேலும் விவரங்களுக்கு இதைப் பார்க்கவும்"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"சார்ஜரைத் துண்டிக்கவும்"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"இந்தச் சாதனத்தைச் சார்ஜ் செய்வதில் சிக்கல் உள்ளது. பவர் அடாப்டரைத் துண்டிக்கவும், கேபிள் சூடாக இருக்கக்கூடும் என்பதால் கவனமாகக் கையாளவும்."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"மேலும் விவரங்களுக்கு இதைப் பார்க்கவும்"</string>
@@ -988,6 +989,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"அமைப்புகள்"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"சரி"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"உங்கள் <xliff:g id="TYPES_LIST">%2$s</xliff:g>ஐ <xliff:g id="APP">%1$s</xliff:g> ஆப்ஸ் பயன்படுத்துகிறது."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"உங்கள் <xliff:g id="TYPES_LIST">%s</xliff:g> ஆகியவற்றை ஆப்ஸ் பயன்படுத்துகின்றன."</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" மற்றும் "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"கேமரா"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"இருப்பிடம்"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"மைக்ரோஃபோன்"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"சென்சார்களை ஆஃப் செய்தல்"</string>
     <string name="device_services" msgid="1549944177856658705">"சாதன சேவைகள்"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"தலைப்பு இல்லை"</string>
@@ -1066,7 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"பரிந்துரைகளை ஏற்றுகிறது"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"மீடியா"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"இந்த அமர்வை மறையுங்கள்."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"மறை"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"மூடுக"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"தொடர்க"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"அமைப்புகள்"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"செயலில் இல்லை , சரிபார்க்கவும்"</string>

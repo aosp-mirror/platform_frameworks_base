@@ -53,6 +53,9 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_APPEARANCE_CO
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FIT_INSETS_CONTROLLED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
@@ -1449,14 +1452,13 @@ public final class ViewRootImpl implements ViewParent,
             }
 
             // Don't lose the mode we last auto-computed.
-            if ((attrs.softInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST)
+            if ((attrs.softInputMode & SOFT_INPUT_MASK_ADJUST)
                     == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_UNSPECIFIED) {
                 mWindowAttributes.softInputMode = (mWindowAttributes.softInputMode
-                        & ~WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST)
-                        | (oldSoftInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST);
+                        & ~SOFT_INPUT_MASK_ADJUST) | (oldSoftInputMode & SOFT_INPUT_MASK_ADJUST);
             }
 
-            if ((changes & LayoutParams.SOFT_INPUT_MODE_CHANGED) != 0) {
+            if (mWindowAttributes.softInputMode != oldSoftInputMode) {
                 requestFitSystemWindows();
             }
 
@@ -1979,11 +1981,7 @@ public final class ViewRootImpl implements ViewParent,
             mCompatibleVisibilityInfo.globalVisibility =
                     (mCompatibleVisibilityInfo.globalVisibility & ~View.SYSTEM_UI_FLAG_LOW_PROFILE)
                             | (mAttachInfo.mSystemUiVisibility & View.SYSTEM_UI_FLAG_LOW_PROFILE);
-            if (mDispatchedSystemUiVisibility != mCompatibleVisibilityInfo.globalVisibility) {
-                mHandler.removeMessages(MSG_DISPATCH_SYSTEM_UI_VISIBILITY);
-                mHandler.sendMessage(mHandler.obtainMessage(
-                        MSG_DISPATCH_SYSTEM_UI_VISIBILITY, mCompatibleVisibilityInfo));
-            }
+            dispatchDispatchSystemUiVisibilityChanged(mCompatibleVisibilityInfo);
             if (mAttachInfo.mKeepScreenOn != oldScreenOn
                     || mAttachInfo.mSystemUiVisibility != params.subtreeSystemUiVisibility
                     || mAttachInfo.mHasSystemUiListeners != params.hasSystemUiListeners) {
@@ -2037,9 +2035,30 @@ public final class ViewRootImpl implements ViewParent,
             info.globalVisibility |= systemUiFlag;
             info.localChanges &= ~systemUiFlag;
         }
-        if (mDispatchedSystemUiVisibility != info.globalVisibility) {
+        dispatchDispatchSystemUiVisibilityChanged(info);
+    }
+
+    /**
+     * If the system is forcing showing any system bar, the legacy low profile flag should be
+     * cleared for compatibility.
+     *
+     * @param showTypes {@link InsetsType types} shown by the system.
+     * @param fromIme {@code true} if the invocation is from IME.
+     */
+    private void clearLowProfileModeIfNeeded(@InsetsType int showTypes, boolean fromIme) {
+        final SystemUiVisibilityInfo info = mCompatibleVisibilityInfo;
+        if ((showTypes & Type.systemBars()) != 0 && !fromIme
+                && (info.globalVisibility & SYSTEM_UI_FLAG_LOW_PROFILE) != 0) {
+            info.globalVisibility &= ~SYSTEM_UI_FLAG_LOW_PROFILE;
+            info.localChanges |= SYSTEM_UI_FLAG_LOW_PROFILE;
+            dispatchDispatchSystemUiVisibilityChanged(info);
+        }
+    }
+
+    private void dispatchDispatchSystemUiVisibilityChanged(SystemUiVisibilityInfo args) {
+        if (mDispatchedSystemUiVisibility != args.globalVisibility) {
             mHandler.removeMessages(MSG_DISPATCH_SYSTEM_UI_VISIBILITY);
-            mHandler.sendMessage(mHandler.obtainMessage(MSG_DISPATCH_SYSTEM_UI_VISIBILITY, info));
+            mHandler.sendMessage(mHandler.obtainMessage(MSG_DISPATCH_SYSTEM_UI_VISIBILITY, args));
         }
     }
 
@@ -2073,6 +2092,7 @@ public final class ViewRootImpl implements ViewParent,
         final int sysUiVis = inOutParams.systemUiVisibility | inOutParams.subtreeSystemUiVisibility;
         final int flags = inOutParams.flags;
         final int type = inOutParams.type;
+        final int adjust = inOutParams.softInputMode & SOFT_INPUT_MASK_ADJUST;
 
         if ((inOutParams.privateFlags & PRIVATE_FLAG_APPEARANCE_CONTROLLED) == 0) {
             inOutParams.insetsFlags.appearance = 0;
@@ -2098,12 +2118,13 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
+        inOutParams.privateFlags &= ~PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME;
+
         if ((inOutParams.privateFlags & PRIVATE_FLAG_FIT_INSETS_CONTROLLED) != 0) {
             return;
         }
 
         int types = inOutParams.getFitInsetsTypes();
-        int sides = inOutParams.getFitInsetsSides();
         boolean ignoreVis = inOutParams.isFitInsetsIgnoringVisibility();
 
         if (((sysUiVis & SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN) != 0
@@ -2118,10 +2139,13 @@ public final class ViewRootImpl implements ViewParent,
         if (type == TYPE_TOAST || type == TYPE_SYSTEM_ALERT) {
             ignoreVis = true;
         } else if ((types & Type.systemBars()) == Type.systemBars()) {
-            types |= Type.ime();
+            if (adjust == SOFT_INPUT_ADJUST_RESIZE) {
+                types |= Type.ime();
+            } else {
+                inOutParams.privateFlags |= PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME;
+            }
         }
         inOutParams.setFitInsetsTypes(types);
-        inOutParams.setFitInsetsSides(sides);
         inOutParams.setFitInsetsIgnoringVisibility(ignoreVis);
 
         // The fitting of insets are not really controlled by the clients, so we remove the flag.
@@ -2491,8 +2515,7 @@ public final class ViewRootImpl implements ViewParent,
 
         if (mFirst || mAttachInfo.mViewVisibilityChanged) {
             mAttachInfo.mViewVisibilityChanged = false;
-            int resizeMode = mSoftInputMode &
-                    WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
+            int resizeMode = mSoftInputMode & SOFT_INPUT_MASK_ADJUST;
             // If we are in auto resize mode, then we need to determine
             // what mode to use now.
             if (resizeMode == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_UNSPECIFIED) {
@@ -2505,11 +2528,8 @@ public final class ViewRootImpl implements ViewParent,
                 if (resizeMode == 0) {
                     resizeMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN;
                 }
-                if ((lp.softInputMode &
-                        WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST) != resizeMode) {
-                    lp.softInputMode = (lp.softInputMode &
-                            ~WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST) |
-                            resizeMode;
+                if ((lp.softInputMode & SOFT_INPUT_MASK_ADJUST) != resizeMode) {
+                    lp.softInputMode = (lp.softInputMode & ~SOFT_INPUT_MASK_ADJUST) | resizeMode;
                     params = lp;
                 }
             }
@@ -5005,6 +5025,7 @@ public final class ViewRootImpl implements ViewParent,
                                 String.format("Calling showInsets(%d,%b) on window that no longer"
                                         + " has views.", msg.arg1, msg.arg2 == 1));
                     }
+                    clearLowProfileModeIfNeeded(msg.arg1, msg.arg2 == 1);
                     mInsetsController.show(msg.arg1, msg.arg2 == 1);
                     break;
                 }

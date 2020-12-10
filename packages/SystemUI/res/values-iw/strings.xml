@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"המשך"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"ביטול"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"שיתוף"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"מחיקה"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"הקלטת המסך בוטלה"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"הקלטת המסך נשמרה, יש להקיש כדי להציג"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"הקלטת המסך נמחקה"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"שגיאה במחיקת הקלטת המסך"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"קבלת ההרשאות נכשלה"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"שגיאה בהפעלה של הקלטת המסך"</string>
@@ -894,12 +892,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"עליון 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"עליון 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"מסך תחתון מלא"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"מיקום <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. הקש פעמיים כדי לערוך."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. הקש פעמיים כדי להוסיף."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"הזזת <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"הסרת <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"הוספת <xliff:g id="TILE_NAME">%1$s</xliff:g> למיקום <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"העברת <xliff:g id="TILE_NAME">%1$s</xliff:g> למיקום <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"הסרת האריח"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"הוספת האריח בסוף הרשימה"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"העברת האריח"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"הוספת אריח"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"העברה למיקום <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"הוספה למיקום <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"מיקום <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"עורך הגדרות מהירות."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"התראות <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"ייתכן שהיישום לא יפעל עם מסך מפוצל."</string>
@@ -932,11 +931,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"אפשר לדלג אל הקודם"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"שינוי גודל"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"הטלפון כבה עקב התחממות"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"הטלפון פועל כרגיל עכשיו"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"הטלפון פועל כרגיל עכשיו.\nיש להקיש כדי להציג מידע נוסף"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"הטלפון שלך התחמם יותר מדי וכבה כדי להתקרר. הטלפון פועל כרגיל עכשיו.\n\nייתכן שהטלפון יתחמם יותר מדי אם:\n	• תשתמש באפליקציות עתירות משאבים (כגון משחקים, אפליקציות וידאו או אפליקציות ניווט)\n	• תוריד או תעלה קבצים גדולים\n	• תשתמש בטלפון בטמפרטורות גבוהות"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"לצפייה בשלבי הטיפול"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"הטלפון מתחמם"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"חלק מהתכונות מוגבלות כל עוד הטלפון מתקרר"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"חלק מהתכונות מוגבלות כל עוד הטלפון מתקרר.\nיש להקיש כדי להציג מידע נוסף"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"קירור הטלפון ייעשה באופן אוטומטי. תוכל עדיין להשתמש בטלפון, אבל ייתכן שהוא יפעל לאט יותר.\n\nהטלפון יחזור לפעול כרגיל לאחר שיתקרר."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"לצפייה בשלבי הטיפול"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"יש לנתק את המטען"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"יש בעיה עם טעינת מכשיר זה. יש לנתק את מתאם המתח בזהירות כיוון שייתכן שהכבל חם."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"לצפייה בשלבי הטיפול"</string>
@@ -998,6 +999,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"הגדרות"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"הבנתי"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"‏ערימת Dump SysUI"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> משתמשת ב<xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"אפליקציות משתמשות ב<xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" וגם "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"מצלמה"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"מיקום"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"מיקרופון"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"החיישנים כבויים"</string>
     <string name="device_services" msgid="1549944177856658705">"שירותים למכשיר"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"ללא שם"</string>
@@ -1078,7 +1086,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"בטעינת המלצות"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"מדיה"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"הסתרת הסשן הנוכחי."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"הסתרה"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"סגירה"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"המשך"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"הגדרות"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"לא פעיל, יש לבדוק את האפליקציה"</string>

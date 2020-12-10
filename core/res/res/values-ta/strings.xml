@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"தடைநீக்க மெனுவை அழுத்தவும் அல்லது அவசர அழைப்பை மேற்கொள்ளவும்."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"திறக்க, மெனுவை அழுத்தவும்."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"திறக்க வடிவத்தை வரையவும்"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"அவசர அழைப்பு"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"அவசர அழைப்பு"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"அழைப்பிற்குத் திரும்பு"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"சரி!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"மீண்டும் முயற்சிக்கவும்"</string>

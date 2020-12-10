@@ -16,14 +16,13 @@
 
 package com.android.server.am;
 
-import static android.os.Process.THREAD_PRIORITY_FOREGROUND;
-
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_COMPACTION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FREEZER;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 
 import android.app.ActivityManager;
 import android.app.ActivityThread;
+import android.app.ApplicationExitInfo;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.Message;
@@ -134,10 +133,14 @@ public final class CachedAppOptimizer {
     static final int REPORT_UNFREEZE_MSG = 4;
 
     //TODO:change this static definition into a configurable flag.
-    static final int FREEZE_TIMEOUT_MS = 500;
+    static final int FREEZE_TIMEOUT_MS = 10000;
 
     static final int DO_FREEZE = 1;
     static final int REPORT_UNFREEZE = 2;
+
+    // Bitfield values for sync/async transactions reveived by frozen processes
+    static final int SYNC_RECEIVED_WHILE_FROZEN = 1;
+    static final int ASYNC_RECEIVED_WHILE_FROZEN = 2;
 
     /**
      * This thread must be moved to the system background cpuset.
@@ -210,6 +213,8 @@ public final class CachedAppOptimizer {
     @GuardedBy("mPhenotypeFlagLock")
     private volatile boolean mUseCompaction = DEFAULT_USE_COMPACTION;
     private volatile boolean mUseFreezer = DEFAULT_USE_FREEZER;
+    @GuardedBy("this")
+    private int mFreezerDisableCount = 1; // Freezer is initially disabled, until enabled
     private final Random mRandom = new Random();
     @GuardedBy("mPhenotypeFlagLock")
     @VisibleForTesting volatile float mCompactStatsdSampleRate = DEFAULT_STATSD_SAMPLE_RATE;
@@ -256,7 +261,7 @@ public final class CachedAppOptimizer {
             ProcessDependencies processDependencies) {
         mAm = am;
         mCachedAppOptimizerThread = new ServiceThread("CachedAppOptimizerThread",
-            THREAD_PRIORITY_FOREGROUND, true);
+            Process.THREAD_GROUP_SYSTEM, true);
         mProcStateThrottle = new HashSet<>();
         mProcessDependencies = processDependencies;
         mTestCallback = callback;
@@ -280,8 +285,6 @@ public final class CachedAppOptimizer {
             updateProcStateThrottle();
             updateUseFreezer();
         }
-        Process.setThreadGroupAndCpuset(mCachedAppOptimizerThread.getThreadId(),
-                Process.THREAD_GROUP_SYSTEM);
     }
 
     /**
@@ -411,35 +414,119 @@ public final class CachedAppOptimizer {
         mUseCompaction = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_USE_COMPACTION, DEFAULT_USE_COMPACTION);
 
-        if (mUseCompaction) {
+        if (mUseCompaction && mCompactionHandler == null) {
             if (!mCachedAppOptimizerThread.isAlive()) {
                 mCachedAppOptimizerThread.start();
             }
 
             mCompactionHandler = new MemCompactionHandler();
+
+            Process.setThreadGroupAndCpuset(mCachedAppOptimizerThread.getThreadId(),
+                    Process.THREAD_GROUP_SYSTEM);
         }
     }
 
     /**
-     * Determines whether the freezer is correctly supported by this system
+     * Enables or disabled the app freezer.
+     * @param enable Enables the freezer if true, disables it if false.
+     * @return true if the operation completed successfully, false otherwise.
+     */
+    public synchronized boolean enableFreezer(boolean enable) {
+        if (!mUseFreezer) {
+            return false;
+        }
+
+        if (enable) {
+            mFreezerDisableCount--;
+
+            if (mFreezerDisableCount > 0) {
+                return true;
+            } else if (mFreezerDisableCount < 0) {
+                Slog.e(TAG_AM, "unbalanced call to enableFreezer, ignoring");
+                mFreezerDisableCount = 0;
+                return false;
+            }
+        } else {
+            mFreezerDisableCount++;
+
+            if (mFreezerDisableCount > 1) {
+                return true;
+            }
+        }
+
+        try {
+            enableFreezerInternal(enable);
+            return true;
+        } catch (java.lang.RuntimeException e) {
+            if (enable) {
+                mFreezerDisableCount = 0;
+            } else {
+                mFreezerDisableCount = 1;
+            }
+
+            Slog.e(TAG_AM, "Exception handling freezer state (enable: " + enable + "): "
+                    + e.toString());
+        }
+
+        return false;
+    }
+
+    /**
+     * Enable or disable the freezer. When enable == false all frozen processes are unfrozen,
+     * but aren't removed from the freezer. While in this state, processes can be added or removed
+     * by using Process.setProcessFrozen(), but they wouldn't be actually frozen until the freezer
+     * is enabled. If enable == true all processes in the freezer are frozen.
+     *
+     * @param enable Specify whether to enable (true) or disable (false) the freezer.
+     *
+     * @hide
+     */
+    private static native void enableFreezerInternal(boolean enable);
+
+    /**
+     * Informs binder that a process is about to be frozen. If freezer is enabled on a process via
+     * this method, this method will synchronously dispatch all pending transactions to the
+     * specified pid. This method will not add significant latencies when unfreezing.
+     * After freezing binder calls, binder will block all transaction to the frozen pid, and return
+     * an error to the sending process.
+     *
+     * @param pid the target pid for which binder transactions are to be frozen
+     * @param freeze specifies whether to flush transactions and then freeze (true) or unfreeze
+     * binder for the specificed pid.
+     *
+     * @throws RuntimeException in case a flush/freeze operation could not complete successfully.
+     */
+    private static native void freezeBinder(int pid, boolean freeze);
+
+    /**
+     * Retrieves binder freeze info about a process.
+     * @param pid the pid for which binder freeze info is to be retrieved.
+     *
+     * @throws RuntimeException if the operation could not complete successfully.
+     * @return a bit field reporting the binder freeze info for the process.
+     */
+    private static native int getBinderFreezeInfo(int pid);
+
+    /**
+     * Determines whether the freezer is supported by this system
      */
     public static boolean isFreezerSupported() {
         boolean supported = false;
         FileReader fr = null;
 
         try {
-            fr = new FileReader("/dev/freezer/frozen/freezer.killable");
-            int i = fr.read();
+            fr = new FileReader("/sys/fs/cgroup/freezer/cgroup.freeze");
+            char state = (char) fr.read();
 
-            if ((char) i == '1') {
+            if (state == '1' || state == '0') {
                 supported = true;
             } else {
-                Slog.w(TAG_AM, "Freezer killability is turned off, disabling freezer");
+                Slog.e(TAG_AM, "unexpected value in cgroup.freeze");
             }
         } catch (java.io.FileNotFoundException e) {
-            Slog.d(TAG_AM, "Freezer.killable not present, disabling freezer");
+            Slog.d(TAG_AM, "cgroup.freeze not present");
         } catch (Exception e) {
-            Slog.d(TAG_AM, "Unable to read freezer.killable, disabling freezer: " + e.toString());
+            Slog.d(TAG_AM, "unable to read cgroup.freeze: " + e.toString());
         }
 
         if (fr != null) {
@@ -470,13 +557,20 @@ public final class CachedAppOptimizer {
             mUseFreezer = isFreezerSupported();
         }
 
-        if (mUseFreezer) {
+        if (mUseFreezer && mFreezeHandler == null) {
             Slog.d(TAG_AM, "Freezer enabled");
+            enableFreezer(true);
+
             if (!mCachedAppOptimizerThread.isAlive()) {
                 mCachedAppOptimizerThread.start();
             }
 
             mFreezeHandler = new FreezeHandler();
+
+            Process.setThreadGroupAndCpuset(mCachedAppOptimizerThread.getThreadId(),
+                    Process.THREAD_GROUP_SYSTEM);
+        } else {
+            enableFreezer(false);
         }
     }
 
@@ -649,6 +743,37 @@ public final class CachedAppOptimizer {
             return;
         }
 
+        boolean processKilled = false;
+
+        try {
+            int freezeInfo = getBinderFreezeInfo(app.pid);
+
+            if ((freezeInfo & SYNC_RECEIVED_WHILE_FROZEN) != 0) {
+                Slog.d(TAG_AM, "pid " + app.pid + " " + app.processName + " "
+                        + " received sync transactions while frozen, killing");
+                app.kill("Sync transaction while in frozen state",
+                        ApplicationExitInfo.REASON_OTHER,
+                        ApplicationExitInfo.SUBREASON_INVALID_STATE, true);
+                processKilled = true;
+            }
+
+            if ((freezeInfo & ASYNC_RECEIVED_WHILE_FROZEN) != 0) {
+                Slog.d(TAG_AM, "pid " + app.pid + " " + app.processName + " "
+                        + " received async transactions while frozen");
+            }
+        } catch (Exception e) {
+            Slog.d(TAG_AM, "Unable to query binder frozen info for pid " + app.pid + " "
+                    + app.processName + ". Killing it. Exception: " + e);
+            app.kill("Unable to query binder frozen stats",
+                    ApplicationExitInfo.REASON_OTHER,
+                    ApplicationExitInfo.SUBREASON_INVALID_STATE, true);
+            processKilled = true;
+        }
+
+        if (processKilled) {
+            return;
+        }
+
         long freezeTime = app.freezeUnfreezeTime;
 
         try {
@@ -662,6 +787,17 @@ public final class CachedAppOptimizer {
         }
 
         if (!app.frozen) {
+            try {
+                freezeBinder(app.pid, false);
+            } catch (RuntimeException e) {
+                Slog.e(TAG_AM, "Unable to unfreeze binder for " + app.pid + " " + app.processName
+                        + ". Killing it");
+                app.kill("Unable to unfreeze",
+                        ApplicationExitInfo.REASON_OTHER,
+                        ApplicationExitInfo.SUBREASON_INVALID_STATE, true);
+                return;
+            }
+
             if (DEBUG_FREEZER) {
                 Slog.d(TAG_AM, "sync unfroze " + app.pid + " " + app.processName);
             }
@@ -971,6 +1107,14 @@ public final class CachedAppOptimizer {
                                 + " " + name + " curAdj = " + proc.curAdj
                                 + ", shouldNotFreeze = " + proc.shouldNotFreeze);
                     }
+                    return;
+                }
+
+                try {
+                    freezeBinder(pid, true);
+                } catch (RuntimeException e) {
+                    // TODO: it might be preferable to kill the target pid in this case
+                    Slog.e(TAG_AM, "Unable to freeze binder for " + pid + " " + name);
                     return;
                 }
 

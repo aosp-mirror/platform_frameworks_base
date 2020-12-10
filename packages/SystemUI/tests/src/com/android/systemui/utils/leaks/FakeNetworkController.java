@@ -95,6 +95,11 @@ public class FakeNetworkController extends BaseLeakChecker<SignalCallback>
     }
 
     @Override
+    public boolean isMobileDataNetworkInService() {
+        return false;
+    }
+
+    @Override
     public int getNumberSubscriptions() {
         return 0;
     }

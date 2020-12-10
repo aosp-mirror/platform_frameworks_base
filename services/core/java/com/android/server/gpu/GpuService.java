@@ -65,7 +65,7 @@ public class GpuService extends SystemService {
 
     private static final String PROD_DRIVER_PROPERTY = "ro.gfx.driver.0";
     private static final String DEV_DRIVER_PROPERTY = "ro.gfx.driver.1";
-    private static final String GAME_DRIVER_ALLOWLIST_FILENAME = "allowlist.txt";
+    private static final String UPDATABLE_DRIVER_PRODUCTION_ALLOWLIST_FILENAME = "allowlist.txt";
     private static final int BASE64_FLAGS = Base64.NO_PADDING | Base64.NO_WRAP;
 
     private final Context mContext;
@@ -77,7 +77,7 @@ public class GpuService extends SystemService {
     private final boolean mHasProdDriver;
     private final boolean mHasDevDriver;
     private ContentResolver mContentResolver;
-    private long mGameDriverVersionCode;
+    private long mProdDriverVersionCode;
     private SettingsObserver mSettingsObserver;
     private DeviceConfigListener mDeviceConfigListener;
     @GuardedBy("mLock")
@@ -88,7 +88,7 @@ public class GpuService extends SystemService {
 
         mContext = context;
         mProdDriverPackageName = SystemProperties.get(PROD_DRIVER_PROPERTY);
-        mGameDriverVersionCode = -1;
+        mProdDriverVersionCode = -1;
         mDevDriverPackageName = SystemProperties.get(DEV_DRIVER_PROPERTY);
         mPackageManager = context.getPackageManager();
         mHasProdDriver = !TextUtils.isEmpty(mProdDriverPackageName);
@@ -117,20 +117,20 @@ public class GpuService extends SystemService {
             }
             mSettingsObserver = new SettingsObserver();
             mDeviceConfigListener = new DeviceConfigListener();
-            fetchGameDriverPackageProperties();
+            fetchProductionDriverPackageProperties();
             processDenylists();
             setDenylist();
-            fetchDeveloperDriverPackageProperties();
+            fetchPrereleaseDriverPackageProperties();
         }
     }
 
     private final class SettingsObserver extends ContentObserver {
-        private final Uri mGameDriverDenylistsUri =
-                Settings.Global.getUriFor(Settings.Global.GAME_DRIVER_DENYLISTS);
+        private final Uri mProdDriverDenylistsUri =
+                Settings.Global.getUriFor(Settings.Global.UPDATABLE_DRIVER_PRODUCTION_DENYLISTS);
 
         SettingsObserver() {
             super(new Handler());
-            mContentResolver.registerContentObserver(mGameDriverDenylistsUri, false, this,
+            mContentResolver.registerContentObserver(mProdDriverDenylistsUri, false, this,
                     UserHandle.USER_ALL);
         }
 
@@ -140,7 +140,7 @@ public class GpuService extends SystemService {
                 return;
             }
 
-            if (mGameDriverDenylistsUri.equals(uri)) {
+            if (mProdDriverDenylistsUri.equals(uri)) {
                 processDenylists();
                 setDenylist();
             }
@@ -157,9 +157,11 @@ public class GpuService extends SystemService {
         @Override
         public void onPropertiesChanged(Properties properties) {
             synchronized (mDeviceConfigLock) {
-                if (properties.getKeyset().contains(Settings.Global.GAME_DRIVER_DENYLISTS)) {
+                if (properties.getKeyset().contains(
+                            Settings.Global.UPDATABLE_DRIVER_PRODUCTION_DENYLISTS)) {
                     parseDenylists(
-                            properties.getString(Settings.Global.GAME_DRIVER_DENYLISTS, ""));
+                            properties.getString(
+                                    Settings.Global.UPDATABLE_DRIVER_PRODUCTION_DENYLISTS, ""));
                     setDenylist();
                 }
             }
@@ -186,10 +188,10 @@ public class GpuService extends SystemService {
                 case ACTION_PACKAGE_CHANGED:
                 case ACTION_PACKAGE_REMOVED:
                     if (isProdDriver) {
-                        fetchGameDriverPackageProperties();
+                        fetchProductionDriverPackageProperties();
                         setDenylist();
                     } else if (isDevDriver) {
-                        fetchDeveloperDriverPackageProperties();
+                        fetchPrereleaseDriverPackageProperties();
                     }
                     break;
                 default:
@@ -218,7 +220,7 @@ public class GpuService extends SystemService {
         }
     }
 
-    private void fetchGameDriverPackageProperties() {
+    private void fetchProductionDriverPackageProperties() {
         final ApplicationInfo driverInfo;
         try {
             driverInfo = mPackageManager.getApplicationInfo(mProdDriverPackageName,
@@ -241,15 +243,16 @@ public class GpuService extends SystemService {
 
         // Reset the allowlist.
         Settings.Global.putString(mContentResolver,
-                                  Settings.Global.GAME_DRIVER_ALLOWLIST, "");
-        mGameDriverVersionCode = driverInfo.longVersionCode;
+                                  Settings.Global.UPDATABLE_DRIVER_PRODUCTION_ALLOWLIST, "");
+        mProdDriverVersionCode = driverInfo.longVersionCode;
 
         try {
             final Context driverContext = mContext.createPackageContext(mProdDriverPackageName,
                                                                         Context.CONTEXT_RESTRICTED);
 
-            assetToSettingsGlobal(mContext, driverContext, GAME_DRIVER_ALLOWLIST_FILENAME,
-                    Settings.Global.GAME_DRIVER_ALLOWLIST, ",");
+            assetToSettingsGlobal(mContext, driverContext,
+                    UPDATABLE_DRIVER_PRODUCTION_ALLOWLIST_FILENAME,
+                    Settings.Global.UPDATABLE_DRIVER_PRODUCTION_ALLOWLIST, ",");
         } catch (PackageManager.NameNotFoundException e) {
             if (DEBUG) {
                 Slog.w(TAG, "driver package '" + mProdDriverPackageName + "' not installed");
@@ -259,11 +262,11 @@ public class GpuService extends SystemService {
 
     private void processDenylists() {
         String base64String = DeviceConfig.getProperty(DeviceConfig.NAMESPACE_GAME_DRIVER,
-                Settings.Global.GAME_DRIVER_DENYLISTS);
+                Settings.Global.UPDATABLE_DRIVER_PRODUCTION_DENYLISTS);
         if (base64String == null) {
             base64String =
                     Settings.Global.getString(mContentResolver,
-                                              Settings.Global.GAME_DRIVER_DENYLISTS);
+                            Settings.Global.UPDATABLE_DRIVER_PRODUCTION_DENYLISTS);
         }
         parseDenylists(base64String != null ? base64String : "");
     }
@@ -288,16 +291,16 @@ public class GpuService extends SystemService {
 
     private void setDenylist() {
         Settings.Global.putString(mContentResolver,
-                                  Settings.Global.GAME_DRIVER_DENYLIST, "");
+                                  Settings.Global.UPDATABLE_DRIVER_PRODUCTION_DENYLIST, "");
         synchronized (mLock) {
             if (mDenylists == null) {
                 return;
             }
             List<Denylist> denylists = mDenylists.getDenylistsList();
             for (Denylist denylist : denylists) {
-                if (denylist.getVersionCode() == mGameDriverVersionCode) {
+                if (denylist.getVersionCode() == mProdDriverVersionCode) {
                     Settings.Global.putString(mContentResolver,
-                            Settings.Global.GAME_DRIVER_DENYLIST,
+                            Settings.Global.UPDATABLE_DRIVER_PRODUCTION_DENYLIST,
                             String.join(",", denylist.getPackageNamesList()));
                     return;
                 }
@@ -305,7 +308,7 @@ public class GpuService extends SystemService {
         }
     }
 
-    private void fetchDeveloperDriverPackageProperties() {
+    private void fetchPrereleaseDriverPackageProperties() {
         final ApplicationInfo driverInfo;
         try {
             driverInfo = mPackageManager.getApplicationInfo(mDevDriverPackageName,

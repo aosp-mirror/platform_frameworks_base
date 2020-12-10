@@ -47,6 +47,9 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
+import com.android.systemui.privacy.PrivacyItem;
+import com.android.systemui.privacy.PrivacyItemController;
+import com.android.systemui.privacy.PrivacyType;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
 import com.android.systemui.screenrecord.RecordingController;
@@ -70,6 +73,9 @@ import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.RingerModeTracker;
 import com.android.systemui.util.time.DateFormatUtil;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executor;
 
@@ -87,13 +93,13 @@ public class PhoneStatusBarPolicy
                 ZenModeController.Callback,
                 DeviceProvisionedListener,
                 KeyguardStateController.Callback,
+                PrivacyItemController.Callback,
                 LocationController.LocationChangeCallback,
                 RecordingController.RecordingStateChangeCallback {
     private static final String TAG = "PhoneStatusBarPolicy";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    static final int LOCATION_STATUS_ICON_ID =
-            com.android.internal.R.drawable.perm_group_location;
+    static final int LOCATION_STATUS_ICON_ID = PrivacyType.TYPE_LOCATION.getIconId();
 
     private final String mSlotCast;
     private final String mSlotHotspot;
@@ -107,6 +113,8 @@ public class PhoneStatusBarPolicy
     private final String mSlotHeadset;
     private final String mSlotDataSaver;
     private final String mSlotLocation;
+    private final String mSlotMicrophone;
+    private final String mSlotCamera;
     private final String mSlotSensorsOff;
     private final String mSlotScreenRecord;
     private final int mDisplayId;
@@ -132,6 +140,7 @@ public class PhoneStatusBarPolicy
     private final DeviceProvisionedController mProvisionedController;
     private final KeyguardStateController mKeyguardStateController;
     private final LocationController mLocationController;
+    private final PrivacyItemController mPrivacyItemController;
     private final Executor mUiBgExecutor;
     private final SensorPrivacyController mSensorPrivacyController;
     private final RecordingController mRecordingController;
@@ -162,7 +171,8 @@ public class PhoneStatusBarPolicy
             RecordingController recordingController,
             @Nullable TelecomManager telecomManager, @DisplayId int displayId,
             @Main SharedPreferences sharedPreferences, DateFormatUtil dateFormatUtil,
-            RingerModeTracker ringerModeTracker) {
+            RingerModeTracker ringerModeTracker,
+            PrivacyItemController privacyItemController) {
         mIconController = iconController;
         mCommandQueue = commandQueue;
         mBroadcastDispatcher = broadcastDispatcher;
@@ -181,6 +191,7 @@ public class PhoneStatusBarPolicy
         mProvisionedController = deviceProvisionedController;
         mKeyguardStateController = keyguardStateController;
         mLocationController = locationController;
+        mPrivacyItemController = privacyItemController;
         mSensorPrivacyController = sensorPrivacyController;
         mRecordingController = recordingController;
         mUiBgExecutor = uiBgExecutor;
@@ -200,6 +211,8 @@ public class PhoneStatusBarPolicy
         mSlotHeadset = resources.getString(com.android.internal.R.string.status_bar_headset);
         mSlotDataSaver = resources.getString(com.android.internal.R.string.status_bar_data_saver);
         mSlotLocation = resources.getString(com.android.internal.R.string.status_bar_location);
+        mSlotMicrophone = resources.getString(com.android.internal.R.string.status_bar_microphone);
+        mSlotCamera = resources.getString(com.android.internal.R.string.status_bar_camera);
         mSlotSensorsOff = resources.getString(com.android.internal.R.string.status_bar_sensors_off);
         mSlotScreenRecord = resources.getString(
                 com.android.internal.R.string.status_bar_screen_record);
@@ -271,6 +284,22 @@ public class PhoneStatusBarPolicy
                 mResources.getString(R.string.accessibility_data_saver_on));
         mIconController.setIconVisibility(mSlotDataSaver, false);
 
+
+        // privacy items
+        String microphoneString = mResources.getString(PrivacyType.TYPE_MICROPHONE.getNameId());
+        String microphoneDesc = mResources.getString(
+                R.string.ongoing_privacy_chip_content_multiple_apps, microphoneString);
+        mIconController.setIcon(mSlotMicrophone, PrivacyType.TYPE_MICROPHONE.getIconId(),
+                microphoneDesc);
+        mIconController.setIconVisibility(mSlotMicrophone, false);
+
+        String cameraString = mResources.getString(PrivacyType.TYPE_CAMERA.getNameId());
+        String cameraDesc = mResources.getString(
+                R.string.ongoing_privacy_chip_content_multiple_apps, cameraString);
+        mIconController.setIcon(mSlotCamera, PrivacyType.TYPE_CAMERA.getIconId(),
+                cameraDesc);
+        mIconController.setIconVisibility(mSlotCamera, false);
+
         mIconController.setIcon(mSlotLocation, LOCATION_STATUS_ICON_ID,
                 mResources.getString(R.string.accessibility_location_active));
         mIconController.setIconVisibility(mSlotLocation, false);
@@ -294,6 +323,7 @@ public class PhoneStatusBarPolicy
         mNextAlarmController.addCallback(mNextAlarmCallback);
         mDataSaver.addCallback(this);
         mKeyguardStateController.addCallback(this);
+        mPrivacyItemController.addCallback(this);
         mSensorPrivacyController.addCallback(mSensorPrivacyListener);
         mLocationController.addCallback(this);
         mRecordingController.addCallback(this);
@@ -609,13 +639,52 @@ public class PhoneStatusBarPolicy
         mIconController.setIconVisibility(mSlotDataSaver, isDataSaving);
     }
 
+    @Override  // PrivacyItemController.Callback
+    public void onPrivacyItemsChanged(List<PrivacyItem> privacyItems) {
+        updatePrivacyItems(privacyItems);
+    }
+
+    private void updatePrivacyItems(List<PrivacyItem> items) {
+        boolean showCamera = false;
+        boolean showMicrophone = false;
+        boolean showLocation = false;
+        for (PrivacyItem item : items) {
+            if (item == null /* b/124234367 */) {
+                if (DEBUG) {
+                    Log.e(TAG, "updatePrivacyItems - null item found");
+                    StringWriter out = new StringWriter();
+                    mPrivacyItemController.dump(null, new PrintWriter(out), null);
+                    Log.e(TAG, out.toString());
+                }
+                continue;
+            }
+            switch (item.getPrivacyType()) {
+                case TYPE_CAMERA:
+                    showCamera = true;
+                    break;
+                case TYPE_LOCATION:
+                    showLocation = true;
+                    break;
+                case TYPE_MICROPHONE:
+                    showMicrophone = true;
+                    break;
+            }
+        }
+
+        mIconController.setIconVisibility(mSlotCamera, showCamera);
+        mIconController.setIconVisibility(mSlotMicrophone, showMicrophone);
+        if (mPrivacyItemController.getAllIndicatorsAvailable()) {
+            mIconController.setIconVisibility(mSlotLocation, showLocation);
+        }
+    }
+
     @Override
     public void onLocationActiveChanged(boolean active) {
-        updateLocation();
+        if (!mPrivacyItemController.getAllIndicatorsAvailable()) updateLocationFromController();
     }
 
     // Updates the status view based on the current state of location requests.
-    private void updateLocation() {
+    private void updateLocationFromController() {
         if (mLocationController.isLocationActive()) {
             mIconController.setIconVisibility(mSlotLocation, true);
         } else {

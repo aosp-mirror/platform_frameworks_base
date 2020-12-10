@@ -21,10 +21,13 @@ import android.car.user.CarUserManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -61,7 +64,7 @@ import dagger.Lazy;
 public class CarKeyguardViewController extends OverlayViewController implements
         KeyguardViewController {
     private static final String TAG = "CarKeyguardViewController";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private final Context mContext;
     private final Handler mHandler;
@@ -75,9 +78,10 @@ public class CarKeyguardViewController extends OverlayViewController implements
     private final DismissCallbackRegistry mDismissCallbackRegistry;
     private final ViewMediatorCallback mViewMediatorCallback;
     private final CarNavigationBarController mCarNavigationBarController;
+    private final InputMethodManager mInputMethodManager;
     // Needed to instantiate mBouncer.
-    private final KeyguardBouncer.BouncerExpansionCallback
-            mExpansionCallback = new KeyguardBouncer.BouncerExpansionCallback() {
+    private final KeyguardBouncer.BouncerExpansionCallback mExpansionCallback =
+            new KeyguardBouncer.BouncerExpansionCallback() {
                 @Override
                 public void onFullyShown() {
                 }
@@ -96,7 +100,8 @@ public class CarKeyguardViewController extends OverlayViewController implements
             };
     private final CarUserManager.UserLifecycleListener mUserLifecycleListener = (e) -> {
         if (e.getEventType() == CarUserManager.USER_LIFECYCLE_EVENT_TYPE_SWITCHING) {
-            revealKeyguardIfBouncerPrepared();
+            UserHandle currentUser = e.getUserHandle();
+            revealKeyguardIfBouncerPrepared(currentUser);
         }
     };
 
@@ -136,8 +141,15 @@ public class CarKeyguardViewController extends OverlayViewController implements
         mDismissCallbackRegistry = dismissCallbackRegistry;
         mViewMediatorCallback = viewMediatorCallback;
         mCarNavigationBarController = carNavigationBarController;
+        // TODO(b/169280588): Inject InputMethodManager instead.
+        mInputMethodManager = mContext.getSystemService(InputMethodManager.class);
 
         registerUserSwitchedListener();
+    }
+
+    @Override
+    protected boolean shouldShowNavigationBarInsets() {
+        return true;
     }
 
     @Override
@@ -172,7 +184,6 @@ public class CarKeyguardViewController extends OverlayViewController implements
         mKeyguardStateController.notifyKeyguardState(mShowing, /* occluded= */ false);
         mCarNavigationBarController.showAllKeyguardButtons(/* isSetUp= */ true);
         start();
-        getOverlayViewGlobalStateController().setWindowFocusable(/* focusable= */ true);
         reset(/* hideBouncerWhenShowing= */ false);
         notifyKeyguardUpdateMonitor();
     }
@@ -187,7 +198,6 @@ public class CarKeyguardViewController extends OverlayViewController implements
         mBouncer.hide(/* destroyView= */ true);
         mCarNavigationBarController.hideAllKeyguardButtons(/* isSetUp= */ true);
         stop();
-        getOverlayViewGlobalStateController().setWindowFocusable(/* focusable= */ false);
         mKeyguardStateController.notifyKeyguardDoneFading();
         mHandler.post(mViewMediatorCallback::keyguardGone);
         notifyKeyguardUpdateMonitor();
@@ -232,7 +242,6 @@ public class CarKeyguardViewController extends OverlayViewController implements
     public void onCancelClicked() {
         if (mBouncer == null) return;
 
-        getOverlayViewGlobalStateController().setWindowFocusable(/* focusable= */ false);
         getOverlayViewGlobalStateController().setWindowNeedsInput(/* needsInput= */ false);
 
         mBouncer.hide(/* destroyView= */ true);
@@ -361,9 +370,9 @@ public class CarKeyguardViewController extends OverlayViewController implements
     }
 
     /**
-     *  Hides Keyguard so that the transitioning Bouncer can be hidden until it is prepared. To be
-     *  called by {@link com.android.systemui.car.userswitcher.FullscreenUserSwitcherViewMediator}
-     *  when a new user is selected.
+     * Hides Keyguard so that the transitioning Bouncer can be hidden until it is prepared. To be
+     * called by {@link com.android.systemui.car.userswitcher.FullscreenUserSwitcherViewMediator}
+     * when a new user is selected.
      */
     public void hideKeyguardToPrepareBouncer() {
         getLayout().setVisibility(View.INVISIBLE);
@@ -374,27 +383,39 @@ public class CarKeyguardViewController extends OverlayViewController implements
         mBouncer = keyguardBouncer;
     }
 
-    private void revealKeyguardIfBouncerPrepared() {
+    private void revealKeyguardIfBouncerPrepared(UserHandle currentUser) {
         int reattemptDelayMillis = 50;
         Runnable revealKeyguard = () -> {
             if (mBouncer == null) {
                 if (DEBUG) {
                     Log.d(TAG, "revealKeyguardIfBouncerPrepared: revealKeyguard request is ignored "
-                                    + "since the Bouncer has not been initialized yet.");
+                            + "since the Bouncer has not been initialized yet.");
                 }
                 return;
             }
             if (!mBouncer.inTransit() || !mBouncer.isSecure()) {
                 getLayout().setVisibility(View.VISIBLE);
+                updateCurrentUserForPasswordEntry(currentUser);
             } else {
                 if (DEBUG) {
                     Log.d(TAG, "revealKeyguardIfBouncerPrepared: Bouncer is not prepared "
                             + "yet so reattempting after " + reattemptDelayMillis + "ms.");
                 }
-                mHandler.postDelayed(this::revealKeyguardIfBouncerPrepared, reattemptDelayMillis);
+                mHandler.postDelayed(() -> revealKeyguardIfBouncerPrepared(currentUser),
+                        reattemptDelayMillis);
             }
         };
         mHandler.post(revealKeyguard);
+    }
+
+    private void updateCurrentUserForPasswordEntry(UserHandle currentUser) {
+        EditText passwordEntry = getLayout().findViewById(R.id.passwordEntry);
+        if (passwordEntry != null) {
+            mHandler.post(() -> {
+                mInputMethodManager.restartInput(passwordEntry);
+                passwordEntry.setTextOperationUser(currentUser);
+            });
+        }
     }
 
     private void notifyKeyguardUpdateMonitor() {

@@ -22,12 +22,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- TODO(b/151617493): replace marginBottom with insets. -->
     <ViewStub android:id="@+id/notification_panel_stub"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:layout="@layout/notification_panel_container"
-              android:layout_marginBottom="@dimen/navigation_bar_height"/>
+              android:layout_marginBottom="@dimen/car_bottom_navigation_bar_height"/>
 
     <ViewStub android:id="@+id/keyguard_stub"
               android:layout_width="match_parent"

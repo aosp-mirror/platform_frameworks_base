@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"ဆက်လုပ်ရန်"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"မလုပ်တော့"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"မျှဝေရန်"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"ဖျက်ရန်"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"ဖန်သားပြင် ရိုက်ကူးမှု ပယ်ဖျက်လိုက်ပါပြီ"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"ဖန်သားပြင် ရိုက်ကူးမှု သိမ်းထားသည်၊ ကြည့်ရန် တို့ပါ"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"ဖန်သားပြင် ရိုက်ကူးမှု ဖျက်ပြီးပါပြီ"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"ဖန်သားပြင် ရိုက်ကူးမှု ဖျက်ရာတွင် အမှားအယွင်းရှိနေသည်"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"ခွင့်ပြုချက် မရယူနိုင်ပါ"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"ဖန်သားပြင် ရိုက်ကူးမှု စတင်ရာတွင် အမှားအယွင်းရှိနေသည်"</string>
@@ -884,12 +882,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"အပေါ်ဘက် မျက်နှာပြင် ၅၀%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"အပေါ်ဘက် မျက်နှာပြင် ၃၀%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"အောက်ခြေ မျက်နှာပြင်အပြည့်"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"<xliff:g id="POSITION">%1$d</xliff:g>၊ <xliff:g id="TILE_NAME">%2$s</xliff:g> နေရာ။ တည်းဖြတ်ရန် နှစ်ချက်တို့ပါ။"</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>။ ပေါင်းထည့်ရန် နှစ်ချက်တို့ပါ။"</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ကိုရွှေ့ပါ"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ကိုဖယ်ရှားပါ"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ကို အနေအထား <xliff:g id="POSITION">%2$d</xliff:g> သို့ ပေါင်းထည့်ရန်"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ကို အနေအထား <xliff:g id="POSITION">%2$d</xliff:g> သို့ ရွှေ့ရန်"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"အကွက်ငယ်ကို ဖယ်ရှားရန်"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"အဆုံးတွင် အကွက်ငယ်ထည့်ရန်"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"အကွက်ငယ်ကို ရွှေ့ရန်"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"အကွက်ငယ်ကို ထည့်ရန်"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g> သို့ ရွှေ့ရန်"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> အနေအထားသို့ ပေါင်းထည့်ရန်"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"<xliff:g id="POSITION">%1$d</xliff:g> အနေအထား"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"မြန်ဆန်သည့် ဆက်တင်တည်းဖြတ်စနစ်"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> အကြောင်းကြားချက် − <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"မျက်နှာပြင် ခွဲခြမ်းပြသမှုဖြင့် အက်ပ်သည် အလုပ်လုပ်မည် မဟုတ်ပါ။"</string>
@@ -922,11 +921,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"ယခင်တစ်ခုသို့ ပြန်သွားရန်"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"အရွယ်အစားပြောင်းရန်"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"အပူရှိန်ကြောင့်ဖုန်းပိတ်ထားသည်"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"သင်၏ဖုန်းသည် ပုံမှန် အလုပ်လုပ်နေပါသည်"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"သင့်ဖုန်းသည် ယခု ပုံမှန်အလုပ်လုပ်နေပါပြီ။\nနောက်ထပ်အချက်အလက်များအတွက် တို့ပါ"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"သင့်ဖုန်းအလွန်ပူနေသည့်အတွက် အေးသွားစေရန် ပိတ်ထားပါသည်။ ယခုပုံမှန် အလုပ်လုပ်ပါပြီ။\n\nအောက်ပါတို့ကိုသုံးလျှင် ပူလာပါမည်-\n	• အရင်းအမြစ်များသောအက်ပ်ကို သုံးခြင်း (ဥပမာ ဂိမ်းကစားခြင်း၊ ဗီဒီယိုကြည့်ခြင်း (သို့) လမ်းညွှန်အက်ပ်)\n	• ကြီးမားသောဖိုင်များ ဒေါင်းလုဒ် (သို့) အပ်လုဒ်လုပ်ခြင်း\n	• အပူရှိန်မြင့်သောနေရာတွင် သုံးခြင်း"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"ဂရုပြုစရာ အဆင့်များ ကြည့်ရန်"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"ဖုန်း ပူနွေးလာပါပြီ"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"ဖုန်းကို အေးအောင်ပြုလုပ်နေစဉ်တွင် အချို့ဝန်ဆောင်မှုများကို ကန့်သတ်ထားပါသည်"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"ဖုန်းကို အေးအောင်ပြုလုပ်နေစဉ်တွင် အချို့ဝန်ဆောင်မှုများကို ကန့်သတ်ထားပါသည်။\nနောက်ထပ်အချက်အလက်များအတွက် တို့ပါ"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"သင့်ဖုန်းသည် အလိုအလျောက် ပြန်အေးသွားပါလိမ့်မည်။ ဖုန်းကို အသုံးပြုနိုင်ပါသေးသည် သို့သော် ပိုနှေးနိုင်ပါသည်။\n\nသင့်ဖုန်း အေးသွားသည်နှင့် ပုံမှန်အတိုင်း ပြန်အလုပ်လုပ်ပါလိမ့်မည်။"</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"ဂရုပြုစရာ အဆင့်များ ကြည့်ရန်"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"အားသွင်းကိရိယာ ပလပ်ဖြုတ်ပါ"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"ဤစက်ပစ္စည်းကို အားသွင်းရာတွင် ပြဿနာရှိနေသည်။ ပါဝါ ကြားခံကိရိယာကို ပလပ်ဖြုတ်ပါ။ ကေဘယ်ကြိုး ပူနွေးနေနိုင်သဖြင့် သတိထားပါ။"</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"ဂရုပြုစရာ အဆင့်များ ကြည့်ရန်"</string>
@@ -988,6 +989,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"ဆက်တင်များ"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"ရပါပြီ"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> က သင်၏ <xliff:g id="TYPES_LIST">%2$s</xliff:g> ကို အသုံးပြုနေသည်။"</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"အပလီကေးရှင်းများက သင်၏ <xliff:g id="TYPES_LIST">%s</xliff:g> ကို အသုံးပြုနေသည်။"</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">"၊ "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" နှင့် "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"ကင်မရာ"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"တည်နေရာ"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"မိုက်ခရိုဖုန်း"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"အာရုံခံကိရိယာများ ပိတ်ထားသည်"</string>
     <string name="device_services" msgid="1549944177856658705">"စက်ပစ္စည်းဝန်ဆောင်မှုများ"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"ခေါင်းစဉ် မရှိပါ"</string>
@@ -1066,7 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"အကြံပြုချက်များ ဖွင့်နေသည်"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"မီဒီယာ"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"လက်ရှိ စက်ရှင်ကို ဖျောက်ထားမည်။"</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"ဖျောက်ထားမည်"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"ပယ်ရန်"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ဆက်လုပ်ရန်"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ဆက်တင်များ"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ရပ်နေသည်၊ အက်ပ်ကို စစ်ဆေးပါ"</string>

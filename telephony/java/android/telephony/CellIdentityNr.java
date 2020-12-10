@@ -217,7 +217,7 @@ public final class CellIdentityNr extends CellIdentity {
      * Get the tracking area code.
      * @return a 24 bit integer or {@link CellInfo#UNAVAILABLE} if unknown.
      */
-    @IntRange(from = 0, to = 16777215)
+    @IntRange(from = 0, to = 65535)
     public int getTac() {
         return mTac;
     }

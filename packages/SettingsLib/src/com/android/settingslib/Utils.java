@@ -49,11 +49,19 @@ public class Utils {
     private static String sSharedSystemSharedLibPackageName;
 
     static final int[] WIFI_PIE = {
-            com.android.internal.R.drawable.ic_wifi_signal_0,
-            com.android.internal.R.drawable.ic_wifi_signal_1,
-            com.android.internal.R.drawable.ic_wifi_signal_2,
-            com.android.internal.R.drawable.ic_wifi_signal_3,
-            com.android.internal.R.drawable.ic_wifi_signal_4
+        com.android.internal.R.drawable.ic_wifi_signal_0,
+        com.android.internal.R.drawable.ic_wifi_signal_1,
+        com.android.internal.R.drawable.ic_wifi_signal_2,
+        com.android.internal.R.drawable.ic_wifi_signal_3,
+        com.android.internal.R.drawable.ic_wifi_signal_4
+    };
+
+    static final int[] SHOW_X_WIFI_PIE = {
+        R.drawable.ic_show_x_wifi_signal_0,
+        R.drawable.ic_show_x_wifi_signal_1,
+        R.drawable.ic_show_x_wifi_signal_2,
+        R.drawable.ic_show_x_wifi_signal_3,
+        R.drawable.ic_show_x_wifi_signal_4
     };
 
     public static void updateLocationEnabled(Context context, boolean enabled, int userId,
@@ -353,10 +361,22 @@ public class Utils {
      * @throws IllegalArgumentException if an invalid RSSI level is given.
      */
     public static int getWifiIconResource(int level) {
+        return getWifiIconResource(false /* showX */, level);
+    }
+
+    /**
+     * Returns the Wifi icon resource for a given RSSI level.
+     *
+     * @param showX True if a connected Wi-Fi network has the problem which should show Pie+x
+     *              signal icon to users.
+     * @param level The number of bars to show (0-4)
+     * @throws IllegalArgumentException if an invalid RSSI level is given.
+     */
+    public static int getWifiIconResource(boolean showX, int level) {
         if (level < 0 || level >= WIFI_PIE.length) {
             throw new IllegalArgumentException("No Wifi icon found for level: " + level);
         }
-        return WIFI_PIE[level];
+        return showX ? SHOW_X_WIFI_PIE[level] : WIFI_PIE[level];
     }
 
     public static int getDefaultStorageManagerDaysToRetain(Resources resources) {

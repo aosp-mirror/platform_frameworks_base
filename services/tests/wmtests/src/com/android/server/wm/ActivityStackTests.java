@@ -1206,19 +1206,22 @@ public class ActivityStackTests extends ActivityTestsBase {
     @Test
     public void testShouldSleepActivities() {
         // When focused activity and keyguard is going away, we should not sleep regardless
-        // of the display state
+        // of the display state, but keyguard-going-away should only take effects on default
+        // display since there is no keyguard on secondary displays (yet).
         verifyShouldSleepActivities(true /* focusedStack */, true /*keyguardGoingAway*/,
-                true /* displaySleeping */, false /* expected*/);
+                true /* displaySleeping */, true /* isDefaultDisplay */, false /* expected */);
+        verifyShouldSleepActivities(true /* focusedStack */, true /*keyguardGoingAway*/,
+                true /* displaySleeping */, false /* isDefaultDisplay */, true /* expected */);
 
         // When not the focused stack, defer to display sleeping state.
         verifyShouldSleepActivities(false /* focusedStack */, true /*keyguardGoingAway*/,
-                true /* displaySleeping */, true /* expected*/);
+                true /* displaySleeping */, true /* isDefaultDisplay */, true /* expected */);
 
         // If keyguard is going away, defer to the display sleeping state.
         verifyShouldSleepActivities(true /* focusedStack */, false /*keyguardGoingAway*/,
-                true /* displaySleeping */, true /* expected*/);
+                true /* displaySleeping */, true /* isDefaultDisplay */, true /* expected */);
         verifyShouldSleepActivities(true /* focusedStack */, false /*keyguardGoingAway*/,
-                false /* displaySleeping */, false /* expected*/);
+                false /* displaySleeping */, true /* isDefaultDisplay */, false /* expected */);
     }
 
     @Test
@@ -1428,9 +1431,11 @@ public class ActivityStackTests extends ActivityTestsBase {
     }
 
     private void verifyShouldSleepActivities(boolean focusedStack,
-            boolean keyguardGoingAway, boolean displaySleeping, boolean expected) {
+            boolean keyguardGoingAway, boolean displaySleeping, boolean isDefaultDisplay,
+            boolean expected) {
         final DisplayContent display = mock(DisplayContent.class);
         final KeyguardController keyguardController = mSupervisor.getKeyguardController();
+        display.isDefaultDisplay = isDefaultDisplay;
 
         doReturn(display).when(mStack).getDisplay();
         doReturn(keyguardGoingAway).when(keyguardController).isKeyguardGoingAway();

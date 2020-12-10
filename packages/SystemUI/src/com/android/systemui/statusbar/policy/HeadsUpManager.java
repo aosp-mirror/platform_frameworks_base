@@ -20,6 +20,7 @@ import static com.android.systemui.statusbar.notification.row.NotificationRowCon
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Notification;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -106,9 +107,9 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
 
     public void updateNotification(@NonNull String key, boolean alert) {
         super.updateNotification(key, alert);
-        AlertEntry alertEntry = getHeadsUpEntry(key);
-        if (alert && alertEntry != null) {
-            setEntryPinned((HeadsUpEntry) alertEntry, shouldHeadsUpBecomePinned(alertEntry.mEntry));
+        HeadsUpEntry headsUpEntry = getHeadsUpEntry(key);
+        if (alert && headsUpEntry != null) {
+            setEntryPinned(headsUpEntry, shouldHeadsUpBecomePinned(headsUpEntry.mEntry));
         }
     }
 
@@ -359,6 +360,11 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         return false;
     }
 
+    private static boolean isOngoingCallNotif(NotificationEntry entry) {
+        return entry.getSbn().isOngoing() && Notification.CATEGORY_CALL.equals(
+                entry.getSbn().getNotification().category);
+    }
+
     /**
      * This represents a notification and how long it is in a heads up mode. It also manages its
      * lifecycle automatically when created.
@@ -388,6 +394,15 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
             if (selfFullscreen && !otherFullscreen) {
                 return -1;
             } else if (!selfFullscreen && otherFullscreen) {
+                return 1;
+            }
+
+            boolean selfCall = isOngoingCallNotif(mEntry);
+            boolean otherCall = isOngoingCallNotif(headsUpEntry.mEntry);
+
+            if (selfCall && !otherCall) {
+                return -1;
+            } else if (!selfCall && otherCall) {
                 return 1;
             }
 

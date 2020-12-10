@@ -61,7 +61,7 @@ public class TakeScreenshotService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction()) && mScreenshot != null) {
-                mScreenshot.dismissScreenshot("close system dialogs", true);
+                mScreenshot.dismissScreenshot("close system dialogs", false);
             }
         }
     };
@@ -102,7 +102,7 @@ public class TakeScreenshotService extends Service {
 
             switch (msg.what) {
                 case WindowManager.TAKE_SCREENSHOT_FULLSCREEN:
-                    mScreenshot.takeScreenshot(uriConsumer, onComplete);
+                    mScreenshot.takeScreenshotFullscreen(uriConsumer, onComplete);
                     break;
                 case WindowManager.TAKE_SCREENSHOT_SELECTED_REGION:
                     mScreenshot.takeScreenshotPartial(uriConsumer, onComplete);

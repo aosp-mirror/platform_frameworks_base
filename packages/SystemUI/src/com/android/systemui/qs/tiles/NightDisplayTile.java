@@ -60,7 +60,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState> implements
     private static final String PATTERN_HOUR_MINUTE = "h:mm a";
     private static final String PATTERN_HOUR_NINUTE_24 = "HH:mm";
 
-    private final ColorDisplayManager mManager;
+    private ColorDisplayManager mManager;
     private final LocationController mLocationController;
     private NightDisplayListener mListener;
     private boolean mIsListening;
@@ -104,6 +104,8 @@ public class NightDisplayTile extends QSTileImpl<BooleanState> implements
         if (mIsListening) {
             mListener.setCallback(null);
         }
+
+        mManager = getHost().getUserContext().getSystemService(ColorDisplayManager.class);
 
         // Make a new controller for the new user.
         mListener = new NightDisplayListener(mContext, newUserId, new Handler(Looper.myLooper()));

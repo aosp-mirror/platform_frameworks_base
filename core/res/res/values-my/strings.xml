@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"ဖွင့်ရန်သို့မဟုတ်အရေးပေါ်ခေါ်ဆိုခြင်းပြုလုပ်ရန် မီနူးကိုနှိပ်ပါ"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"မီးနူးကို နှိပ်ခြင်းဖြင့် သော့ဖွင့်ပါ"</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"ဖွင့်ရန်ပုံစံဆွဲပါ"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"အရေးပေါ်"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"အရေးပေါ် ခေါ်ဆိုမှု"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"ခေါ်ဆိုမှုထံပြန်သွားရန်"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"မှန်ပါသည်"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"ထပ် စမ်းပါ"</string>

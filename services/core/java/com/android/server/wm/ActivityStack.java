@@ -146,7 +146,6 @@ import android.view.DisplayInfo;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
-import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -928,12 +927,9 @@ class ActivityStack extends Task {
         mCurrentUser = userId;
 
         super.switchUser(userId);
-        forAllLeafTasks((t) -> {
-            if (t.showToCurrentUser() && t != this) {
-                mChildren.remove(t);
-                mChildren.add(t);
-            }
-        }, true /* traverseTopToBottom */);
+        if (isLeafTask() && showToCurrentUser()) {
+            getParent().positionChildAt(POSITION_TOP, this, false /*includeParents*/);
+        }
     }
 
     void minimalResumeActivityLocked(ActivityRecord r) {
@@ -1995,7 +1991,7 @@ class ActivityStack extends Task {
         return mRootWindowContainer.resumeHomeActivity(prev, reason, getDisplayArea());
     }
 
-    void startActivityLocked(ActivityRecord r, ActivityRecord focusedTopActivity,
+    void startActivityLocked(ActivityRecord r, @Nullable ActivityRecord focusedTopActivity,
             boolean newTask, boolean keepCurTransition, ActivityOptions options) {
         Task rTask = r.getTask();
         final boolean allowMoveToFront = options == null || !options.getAvoidMoveToFront();
@@ -2727,13 +2723,15 @@ class ActivityStack extends Task {
     /**
      * Reset local parameters because an app's activity died.
      * @param app The app of the activity that died.
-     * @return result from removeHistoryRecordsForAppLocked.
+     * @return {@code true} if the process has any visible activity.
      */
     boolean handleAppDied(WindowProcessController app) {
+        boolean isPausingDied = false;
         if (mPausingActivity != null && mPausingActivity.app == app) {
             if (DEBUG_PAUSE || DEBUG_CLEANUP) Slog.v(TAG_PAUSE,
                     "App died while pausing: " + mPausingActivity);
             mPausingActivity = null;
+            isPausingDied = true;
         }
         if (mLastPausedActivity != null && mLastPausedActivity.app == app) {
             mLastPausedActivity = null;
@@ -2741,7 +2739,8 @@ class ActivityStack extends Task {
         }
 
         mStackSupervisor.removeHistoryRecords(app);
-        return mRemoveHistoryRecordsForApp.process(app);
+        final boolean hadVisibleActivities = mRemoveHistoryRecordsForApp.process(app);
+        return hadVisibleActivities || isPausingDied;
     }
 
     boolean dump(FileDescriptor fd, PrintWriter pw, boolean dumpAll, boolean dumpClient,
@@ -3044,8 +3043,6 @@ class ActivityStack extends Task {
             getDisplayArea().positionStackAtTop(this, false /* includingParents */);
 
             mStackSupervisor.scheduleUpdatePictureInPictureModeIfNeeded(task, this);
-            MetricsLoggerWrapper.logPictureInPictureFullScreen(mAtmService.mContext,
-                    task.effectiveUid, task.realActivity.flattenToString());
         });
     }
 
@@ -3340,7 +3337,11 @@ class ActivityStack extends Task {
         // Do not sleep activities in this stack if we're marked as focused and the keyguard
         // is in the process of going away.
         if (isFocusedStackOnDisplay()
-                && mStackSupervisor.getKeyguardController().isKeyguardGoingAway()) {
+                && mStackSupervisor.getKeyguardController().isKeyguardGoingAway()
+                // Avoid resuming activities on secondary displays since we don't want bubble
+                // activities to be resumed while bubble is still collapsed.
+                // TODO(b/113840485): Having keyguard going away state for secondary displays.
+                && display.isDefaultDisplay) {
             return false;
         }
 
