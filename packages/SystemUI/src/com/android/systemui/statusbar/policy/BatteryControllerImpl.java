@@ -150,8 +150,11 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
             mChangeCallbacks.add(cb);
         }
         if (!mHasReceivedBattery) return;
+
+        // Make sure new callbacks get the correct initial state
         cb.onBatteryLevelChanged(mLevel, mPluggedIn, mCharging);
         cb.onPowerSaveChanged(mPowerSave);
+        cb.onBatteryUnknownStateChanged(mStateUnknown);
     }
 
     @Override
