@@ -41,6 +41,7 @@ import android.app.Activity;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.app.servertransaction.ActivityLifecycleItem.LifecycleState;
+import android.app.servertransaction.TestUtils.LaunchActivityItemBuilder;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -263,13 +264,7 @@ public class TransactionExecutorTests {
         // A previous queued launch transaction runs on main thread (execute).
         final ClientTransaction launchTransaction = ClientTransaction.obtain(null /* client */,
                 token /* activityToken */);
-        final LaunchActivityItem launchItem = spy(LaunchActivityItem.obtain(
-                null /* intent */, 0 /* ident */, null /* info */, null /* curConfig */,
-                null, /* overrideConfig */ null /* compatInfo */, null /* referrer */ ,
-                null /* voiceInteractor */, 0 /* procState */, null /* state */,
-                null /* persistentState */, null /* pendingResults */,
-                null /* pendingNewIntents */, false /* isForward */, null /* profilerInfo */,
-                null /* assistToken */, null /* fixedRotationAdjustments */));
+        final LaunchActivityItem launchItem = spy(new LaunchActivityItemBuilder().build());
         launchTransaction.addCallback(launchItem);
         mExecutor.execute(launchTransaction);
 

@@ -20,8 +20,10 @@ import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityClient;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
+import android.app.IActivityClientController;
 import android.app.ProfilerInfo;
 import android.app.ResultInfo;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -67,6 +69,11 @@ public class LaunchActivityItem extends ClientTransactionItem {
     private boolean mIsForward;
     private ProfilerInfo mProfilerInfo;
     private IBinder mAssistToken;
+    /**
+     * It is only non-null if the process is the first time to launch activity. It is only an
+     * optimization for quick look up of the interface so the field is ignored for comparison.
+     */
+    private IActivityClientController mActivityClientController;
     private FixedRotationAdjustments mFixedRotationAdjustments;
 
     @Override
@@ -74,6 +81,9 @@ public class LaunchActivityItem extends ClientTransactionItem {
         client.countLaunchingActivities(1);
         client.updateProcessState(mProcState, false);
         client.updatePendingConfiguration(mCurConfig);
+        if (mActivityClientController != null) {
+            ActivityClient.setActivityClientController(mActivityClientController);
+        }
     }
 
     @Override
@@ -105,14 +115,16 @@ public class LaunchActivityItem extends ClientTransactionItem {
             String referrer, IVoiceInteractor voiceInteractor, int procState, Bundle state,
             PersistableBundle persistentState, List<ResultInfo> pendingResults,
             List<ReferrerIntent> pendingNewIntents, boolean isForward, ProfilerInfo profilerInfo,
-            IBinder assistToken, FixedRotationAdjustments fixedRotationAdjustments) {
+            IBinder assistToken, IActivityClientController activityClientController,
+            FixedRotationAdjustments fixedRotationAdjustments) {
         LaunchActivityItem instance = ObjectPool.obtain(LaunchActivityItem.class);
         if (instance == null) {
             instance = new LaunchActivityItem();
         }
         setValues(instance, intent, ident, info, curConfig, overrideConfig, compatInfo, referrer,
                 voiceInteractor, procState, state, persistentState, pendingResults,
-                pendingNewIntents, isForward, profilerInfo, assistToken, fixedRotationAdjustments);
+                pendingNewIntents, isForward, profilerInfo, assistToken, activityClientController,
+                fixedRotationAdjustments);
 
         return instance;
     }
@@ -120,7 +132,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
     @Override
     public void recycle() {
         setValues(this, null, 0, null, null, null, null, null, null, 0, null, null, null, null,
-                false, null, null, null);
+                false, null, null, null, null);
         ObjectPool.recycle(this);
     }
 
@@ -146,6 +158,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
         dest.writeBoolean(mIsForward);
         dest.writeTypedObject(mProfilerInfo, flags);
         dest.writeStrongBinder(mAssistToken);
+        dest.writeStrongInterface(mActivityClientController);
         dest.writeTypedObject(mFixedRotationAdjustments, flags);
     }
 
@@ -162,6 +175,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 in.createTypedArrayList(ReferrerIntent.CREATOR), in.readBoolean(),
                 in.readTypedObject(ProfilerInfo.CREATOR),
                 in.readStrongBinder(),
+                IActivityClientController.Stub.asInterface(in.readStrongBinder()),
                 in.readTypedObject(FixedRotationAdjustments.CREATOR));
     }
 
@@ -266,6 +280,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
             int procState, Bundle state, PersistableBundle persistentState,
             List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
             boolean isForward, ProfilerInfo profilerInfo, IBinder assistToken,
+            IActivityClientController activityClientController,
             FixedRotationAdjustments fixedRotationAdjustments) {
         instance.mIntent = intent;
         instance.mIdent = ident;
@@ -283,6 +298,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
         instance.mIsForward = isForward;
         instance.mProfilerInfo = profilerInfo;
         instance.mAssistToken = assistToken;
+        instance.mActivityClientController = activityClientController;
         instance.mFixedRotationAdjustments = fixedRotationAdjustments;
     }
 }

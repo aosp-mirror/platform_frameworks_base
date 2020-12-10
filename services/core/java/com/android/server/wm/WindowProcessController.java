@@ -463,6 +463,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return mUsingWrapper;
     }
 
+    boolean hasEverLaunchedActivity() {
+        return mLastActivityLaunchTime > 0;
+    }
+
     void setLastActivityLaunchTime(long launchTime) {
         if (launchTime <= mLastActivityLaunchTime) {
             if (launchTime < mLastActivityLaunchTime) {
