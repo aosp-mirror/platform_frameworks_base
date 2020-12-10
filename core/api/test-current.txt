@@ -283,6 +283,7 @@ package android.app {
     method public java.util.List<android.app.RemoteAction> getActions();
     method public float getAspectRatio();
     method public android.graphics.Rect getSourceRectHint();
+    method public boolean isSeamlessResizeEnabled();
   }
 
   public class StatusBarManager {
