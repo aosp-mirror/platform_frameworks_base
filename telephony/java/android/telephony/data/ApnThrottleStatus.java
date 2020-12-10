@@ -261,6 +261,10 @@ public final class ApnThrottleStatus implements Parcelable {
         private long mThrottleExpiryTimeMillis;
         private @RetryType int mRetryType;
         private @ThrottleType int mThrottleType;
+
+        /**
+         * @hide
+         */
         public static final long NO_THROTTLE_EXPIRY_TIME =
                 DataCallResponse.RETRY_DURATION_UNDEFINED;
 
