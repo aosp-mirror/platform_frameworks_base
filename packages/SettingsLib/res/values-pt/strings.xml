@@ -400,7 +400,9 @@
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"Ativo. Tocar para alternar."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Estado em espera do app:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="transcode_settings_title" msgid="2581975870429850549">"Configurações de transcodificação de mídia"</string>
-    <string name="transcode_enable_all" msgid="9102460144086871903">"Desativar transcodificação"</string>
+    <string name="transcode_user_control" msgid="6176368544817731314">"Substituir os padrões de transcodificação"</string>
+    <string name="transcode_enable_all" msgid="2411165920039166710">"Ativar transcodificação"</string>
+    <string name="transcode_default" msgid="3784803084573509491">"Considerar que os apps são compatíveis com formatos modernos"</string>
     <string name="transcode_skip_apps" msgid="8249721984597390142">"Ativar transcodificação para apps"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Serviços em execução"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Visualizar e controlar os serviços em execução no momento"</string>
@@ -449,7 +451,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Tempo restante até a carga completa: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g>: <xliff:g id="TIME">%2$s</xliff:g> até a carga completa"</string>
-    <string name="power_charging_limited" msgid="5902301801611726210">"<xliff:g id="LEVEL">%1$s</xliff:g>: bateria limitada temporariamente"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g>: otimizando para integridade da bateria"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Desconhecido"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Carregando"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Carregando rápido"</string>

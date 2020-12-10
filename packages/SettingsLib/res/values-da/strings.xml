@@ -400,7 +400,9 @@
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"Aktiv. Tryk for at skifte."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Standbystatus for appen:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="transcode_settings_title" msgid="2581975870429850549">"Indstillinger for omkodning af medier"</string>
-    <string name="transcode_enable_all" msgid="9102460144086871903">"Deaktiver omkodning"</string>
+    <string name="transcode_user_control" msgid="6176368544817731314">"Tilsidesæt standardindstillingerne for omkodning"</string>
+    <string name="transcode_enable_all" msgid="2411165920039166710">"Aktivér omkodning"</string>
+    <string name="transcode_default" msgid="3784803084573509491">"Gå ud fra, at apps understøtter moderne formater"</string>
     <string name="transcode_skip_apps" msgid="8249721984597390142">"Aktivér omkodning for apps"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Kørende tjenester"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Vis og administrer kørende tjenester"</string>
@@ -449,7 +451,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Opladet om <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – opladet om <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_limited" msgid="5902301801611726210">"<xliff:g id="LEVEL">%1$s</xliff:g> – Batteriet er midlertidigt begrænset"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – Optimerer batteritilstanden"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Ukendt"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Oplader"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Oplader hurtigt"</string>

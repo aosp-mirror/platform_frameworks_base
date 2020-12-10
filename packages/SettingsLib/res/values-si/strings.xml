@@ -400,7 +400,9 @@
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"සක්‍රියයි. ටොගල කිරීමට තට්ටු කරන්න."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"යෙදුම් පොරොත්තු තත්ත්වය:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="transcode_settings_title" msgid="2581975870429850549">"මාධ්‍ය ට්‍රාන්ස්කෝඩින් සැකසීම්"</string>
-    <string name="transcode_enable_all" msgid="9102460144086871903">"ට්‍රාන්ස්කෝඩින් අබල කරන්න"</string>
+    <string name="transcode_user_control" msgid="6176368544817731314">"ට්‍රාන්ස්කෝඩින් පෙරනිමි ප්‍රතික්ෂේප කරන්න"</string>
+    <string name="transcode_enable_all" msgid="2411165920039166710">"ට්‍රාන්ස්කෝඩින් සබල කරන්න"</string>
+    <string name="transcode_default" msgid="3784803084573509491">"යෙදුම් නවීන ආකෘති සඳහා සහාය දක්වයි යැයි උපකල්පනය කරමු"</string>
     <string name="transcode_skip_apps" msgid="8249721984597390142">"යෙදුම් සඳහා ට්‍රාන්ස්කෝඩින් සබල කරන්න"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"ධාවනය වන සේවා"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"දැනට ධාවනය වන සේවා බලන්න සහ පාලනය කරන්න"</string>
@@ -449,7 +451,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"ආරෝපණය වන තෙක් <xliff:g id="TIME">%1$s</xliff:g> ඇත"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - ආරෝපණය වන තෙක් <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_limited" msgid="5902301801611726210">"<xliff:g id="LEVEL">%1$s</xliff:g> - බැටරිය තාවකාලිකව සීමිතයි"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - බැටරි සෞඛ්‍යය සඳහා ප්‍රශස්ත කරමින්"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"නොදනී"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ආරෝපණය වෙමින්"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"ශීඝ්‍ර ආරෝපණය"</string>

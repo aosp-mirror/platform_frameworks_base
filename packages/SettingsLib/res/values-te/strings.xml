@@ -400,7 +400,12 @@
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"సక్రియంగా ఉంది. టోగుల్ చేయడానికి నొక్కండి."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"యాప్ స్టాండ్‌బై స్థితి:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="transcode_settings_title" msgid="2581975870429850549">"మీడియా ట్రాన్స్‌కోడింగ్ సెట్టింగ్‌లు"</string>
-    <string name="transcode_enable_all" msgid="9102460144086871903">"ట్రాన్స్‌కోడింగ్‌ను డిజేబుల్ చేయండి"</string>
+    <!-- no translation found for transcode_user_control (6176368544817731314) -->
+    <skip />
+    <!-- no translation found for transcode_enable_all (2411165920039166710) -->
+    <skip />
+    <!-- no translation found for transcode_default (3784803084573509491) -->
+    <skip />
     <string name="transcode_skip_apps" msgid="8249721984597390142">"యాప్‌ల కోసం ట్రాన్స్‌కోడింగ్‌ను ఎనేబుల్ చేయండి"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"అమలులో ఉన్న సేవలు"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"ప్రస్తుతం అమలులో ఉన్న సేవలను వీక్షించండి మరియు నియంత్రించండి"</string>
@@ -449,7 +454,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"ఛార్జ్ అవ్వడానికి <xliff:g id="TIME">%1$s</xliff:g> సమయం మిగిలి ఉంది"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - ఛార్జ్ అవ్వడానికి <xliff:g id="TIME">%2$s</xliff:g> పడుతుంది"</string>
-    <string name="power_charging_limited" msgid="5902301801611726210">"<xliff:g id="LEVEL">%1$s</xliff:g> -బ్యాటరీ తాత్కాలికంగా పరిమితం చేయబడింది"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - బ్యాటరీ స్థితిని ఆప్టిమైజ్ చేయడం కోసం"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"తెలియదు"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ఛార్జ్ అవుతోంది"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"వేగవంతమైన ఛార్జింగ్"</string>

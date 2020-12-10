@@ -28,7 +28,7 @@
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP manzilini sozlab bo‘lmadi"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Sifatsiz tarmoq sababli ulanib bo‘lmadi"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Wi-Fi ulanishini o‘rnatib bo‘lmadi"</string>
-    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Tasdiqdan o‘tishda muammo"</string>
+    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Tekshiruvda muammo"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Tarmoqqa ulanilmadi"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"“<xliff:g id="AP_NAME">%1$s</xliff:g>” nomli tarmoqqa ulanilmadi"</string>
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Parolni tekshirib, qaytadan urining"</string>
@@ -400,7 +400,9 @@
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"Faol. O‘zgartirish uchun bu yerga bosing."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Kutish rejimi holati: <xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="transcode_settings_title" msgid="2581975870429850549">"Media transkripsiyasi sozlamalari"</string>
-    <string name="transcode_enable_all" msgid="9102460144086871903">"Transkripsiyani faolsizlantirish"</string>
+    <string name="transcode_user_control" msgid="6176368544817731314">"Transkripsiya parametrlarini almashtirish"</string>
+    <string name="transcode_enable_all" msgid="2411165920039166710">"Transkripsiyasini yoqish"</string>
+    <string name="transcode_default" msgid="3784803084573509491">"Ilovalar zamonaviy kodlash formatlarini qoʻllab-quvvatlaydi deb hisoblash"</string>
     <string name="transcode_skip_apps" msgid="8249721984597390142">"Ilovalar uchun transkripsiyani yoqish"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Ishlab turgan ilovalar"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Ishlab turgan ilovalarni ko‘rish va boshqarish"</string>
@@ -432,8 +434,8 @@
     <skip />
     <string name="power_discharge_by_enhanced" msgid="563438403581662942">"Joriy holatda taxminan <xliff:g id="TIME">%1$s</xliff:g> gacha davom etadi (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"Joriy holatda taxminan <xliff:g id="TIME">%1$s</xliff:g> gacha davom etadi"</string>
-    <string name="power_discharge_by" msgid="4113180890060388350">"Taxminan <xliff:g id="TIME">%1$s</xliff:g> gacha davom etadi (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="92545648425937000">"Taxminan <xliff:g id="TIME">%1$s</xliff:g> gacha davom etadi"</string>
+    <string name="power_discharge_by" msgid="4113180890060388350">"Taxminan <xliff:g id="TIME">%1$s</xliff:g> gacha yetadi (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="92545648425937000">"Taxminan <xliff:g id="TIME">%1$s</xliff:g> gacha yetadi"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> gacha"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Batareya quvvati tugash vaqti: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"<xliff:g id="THRESHOLD">%1$s</xliff:g>dan kam qoldi"</string>
@@ -449,7 +451,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> ichida toʻladi"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> ichida toʻladi"</string>
-    <string name="power_charging_limited" msgid="5902301801611726210">"<xliff:g id="LEVEL">%1$s</xliff:g> – Quvvat darajasi vaqtincha cheklangan"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – Batareya quvvati muvozanatlanmoqda"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Noma’lum"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Quvvat olmoqda"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Tezkor quvvat olmoqda"</string>
