@@ -20,11 +20,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import android.net.InetAddresses;
 import android.net.IpConfiguration;
 import android.net.IpConfiguration.IpAssignment;
 import android.net.IpConfiguration.ProxySettings;
 import android.net.LinkAddress;
-import android.net.NetworkUtils;
 import android.net.ProxyInfo;
 import android.net.StaticIpConfiguration;
 import android.util.ArrayMap;
@@ -79,8 +79,8 @@ public class IpConfigStoreTest {
 
         StaticIpConfiguration staticIpConfiguration = new StaticIpConfiguration();
         staticIpConfiguration.ipAddress = new LinkAddress(IP_ADDR_1);
-        staticIpConfiguration.dnsServers.add(NetworkUtils.numericToInetAddress(DNS_IP_ADDR_1));
-        staticIpConfiguration.dnsServers.add(NetworkUtils.numericToInetAddress(DNS_IP_ADDR_2));
+        staticIpConfiguration.dnsServers.add(InetAddresses.parseNumericAddress(DNS_IP_ADDR_1));
+        staticIpConfiguration.dnsServers.add(InetAddresses.parseNumericAddress(DNS_IP_ADDR_2));
 
         ProxyInfo proxyInfo = new ProxyInfo("10.10.10.10", 88, "host1,host2");
 
