@@ -741,11 +741,10 @@ public class WindowOrganizerTests extends WindowTestsBase {
     }
 
     private List<Task> getTasksCreatedByOrganizer(DisplayContent dc) {
-        ArrayList<Task> out = new ArrayList<>();
-        dc.forAllTaskDisplayAreas(taskDisplayArea -> {
-            for (int sNdx = taskDisplayArea.getRootTaskCount() - 1; sNdx >= 0; --sNdx) {
-                final Task t = taskDisplayArea.getRootTaskAt(sNdx);
-                if (t.mCreatedByOrganizer) out.add(t);
+        final ArrayList<Task> out = new ArrayList<>();
+        dc.forAllRootTasks(task -> {
+            if (task.mCreatedByOrganizer) {
+                out.add(task);
             }
         });
         return out;

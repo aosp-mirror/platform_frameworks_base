@@ -1121,12 +1121,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
             mService.mTaskOrganizerController.setLaunchRoot(mDisplayId,
                     mSecondary.mRemoteToken.toWindowContainerToken());
             DisplayContent dc = mService.mRootWindowContainer.getDisplayContent(mDisplayId);
-            dc.forAllTaskDisplayAreas(taskDisplayArea -> {
-                for (int sNdx = taskDisplayArea.getRootTaskCount() - 1; sNdx >= 0; --sNdx) {
-                    final Task stack = taskDisplayArea.getRootTaskAt(sNdx);
-                    if (!WindowConfiguration.isSplitScreenWindowingMode(stack.getWindowingMode())) {
-                        stack.reparent(mSecondary, POSITION_BOTTOM);
-                    }
+            dc.forAllRootTasks(stack -> {
+                if (!WindowConfiguration.isSplitScreenWindowingMode(stack.getWindowingMode())) {
+                    stack.reparent(mSecondary, POSITION_BOTTOM);
                 }
             });
         }

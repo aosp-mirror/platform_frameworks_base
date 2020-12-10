@@ -3878,6 +3878,13 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     @Override
+    void forAllRootTasks(Consumer<Task> callback, boolean traverseTopToBottom) {
+        if (isRootTask()) {
+            callback.accept(this);
+        }
+    }
+
+    @Override
     boolean forAllTasks(Function<Task, Boolean> callback) {
         if (super.forAllTasks(callback)) return true;
         return callback.apply(this);
@@ -3902,10 +3909,27 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     @Override
+    boolean forAllRootTasks(Function<Task, Boolean> callback, boolean traverseTopToBottom) {
+        return isRootTask() ? callback.apply(this) : false;
+    }
+
+    @Override
     Task getTask(Predicate<Task> callback, boolean traverseTopToBottom) {
         final Task t = super.getTask(callback, traverseTopToBottom);
         if (t != null) return t;
         return callback.test(this) ? this : null;
+    }
+
+    @Nullable
+    @Override
+    Task getRootTask(Predicate<Task> callback, boolean traverseTopToBottom) {
+        return isRootTask() && callback.test(this) ? this : null;
+    }
+
+    @Nullable
+    @Override
+    <R> R getItemFromRootTasks(Function<Task, R> callback, boolean traverseTopToBottom) {
+        return isRootTask() ? callback.apply(this) : null;
     }
 
     /**

@@ -34,6 +34,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Build/Install/Run:
@@ -70,9 +71,12 @@ public class RunningTasksTest extends WindowTestsBase {
 
         final int numTasks = 10;
         int activeTime = 0;
+        final List<Task> rootTasks = new ArrayList<>();
+        display.getDefaultTaskDisplayArea().forAllRootTasks(task -> {
+            rootTasks.add(task);
+        }, false /* traverseTopToBottom */);
         for (int i = 0; i < numTasks; i++) {
-            createTask(display.getDefaultTaskDisplayArea().getRootTaskAt(i % numStacks),
-                    ".Task" + i, i, activeTime++, null);
+            createTask(rootTasks.get(i % numStacks), ".Task" + i, i, activeTime++, null);
         }
 
         // Ensure that the latest tasks were returned in order of decreasing last active time,
