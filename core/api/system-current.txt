@@ -10237,8 +10237,10 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setRadio(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setRadioEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setRadioPower(boolean);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setSimPowerState(int);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setSimPowerStateForSlot(int, int);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setSimPowerState(int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setSimPowerState(int, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setSimPowerStateForSlot(int, int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setSimPowerStateForSlot(int, int, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setSystemSelectionChannels(@NonNull java.util.List<android.telephony.RadioAccessSpecifier>, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setSystemSelectionChannels(@NonNull java.util.List<android.telephony.RadioAccessSpecifier>);
     method @Deprecated public void setVisualVoicemailEnabled(android.telecom.PhoneAccountHandle, boolean);
@@ -10322,6 +10324,11 @@ package android.telephony {
     field public static final int SET_CARRIER_RESTRICTION_ERROR = 2; // 0x2
     field public static final int SET_CARRIER_RESTRICTION_NOT_SUPPORTED = 1; // 0x1
     field public static final int SET_CARRIER_RESTRICTION_SUCCESS = 0; // 0x0
+    field public static final int SET_SIM_POWER_STATE_ALREADY_IN_STATE = 1; // 0x1
+    field public static final int SET_SIM_POWER_STATE_MODEM_ERROR = 2; // 0x2
+    field public static final int SET_SIM_POWER_STATE_NOT_SUPPORTED = 4; // 0x4
+    field public static final int SET_SIM_POWER_STATE_SIM_ERROR = 3; // 0x3
+    field public static final int SET_SIM_POWER_STATE_SUCCESS = 0; // 0x0
     field public static final int SIM_ACTIVATION_STATE_ACTIVATED = 2; // 0x2
     field public static final int SIM_ACTIVATION_STATE_ACTIVATING = 1; // 0x1
     field public static final int SIM_ACTIVATION_STATE_DEACTIVATED = 3; // 0x3

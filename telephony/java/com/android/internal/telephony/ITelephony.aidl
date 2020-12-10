@@ -1674,8 +1674,17 @@ interface ITelephony {
      * @param slotIndex SIM slot id
      * @param state  State of SIM (power down, power up, pass through)
      * @hide
-     * */
+     */
     void setSimPowerStateForSlot(int slotIndex, int state);
+
+    /**
+     * Set SIM card power state.
+     * @param slotIndex SIM slot id
+     * @param state  State of SIM (power down, power up, pass through)
+     * @param callback callback to receive result info
+     * @hide
+     */
+    void setSimPowerStateForSlotWithCallback(int slotIndex, int state, IIntegerConsumer callback);
 
     /**
      * Returns a list of Forbidden PLMNs from the specified SIM App
