@@ -3060,6 +3060,7 @@ public final class Settings {
         // com.android.providers.settings.SettingsProtoDumpUtil#dumpProtoSystemSettingsLocked.
 
         private static final float DEFAULT_FONT_SCALE = 1.0f;
+        private static final int DEFAULT_FONT_WEIGHT = 0;
 
         /**
          * The content:// style URL for this table
@@ -3581,9 +3582,7 @@ public final class Settings {
                 outConfig.fontScale = DEFAULT_FONT_SCALE;
             }
             outConfig.fontWeightAdjustment = Settings.Secure.getIntForUser(
-                    cr, Settings.Secure.FONT_WEIGHT_ADJUSTMENT,
-                    Configuration.FONT_WEIGHT_ADJUSTMENT_UNDEFINED,
-                    userHandle);
+                    cr, Settings.Secure.FONT_WEIGHT_ADJUSTMENT, DEFAULT_FONT_WEIGHT, userHandle);
 
             final String localeValue =
                     Settings.System.getStringForUser(cr, SYSTEM_LOCALES, userHandle);
