@@ -186,7 +186,6 @@ import com.android.internal.net.VpnInfo;
 import com.android.internal.net.VpnProfile;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.AsyncChannel;
-import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.LocationPermissionChecker;
 import com.android.internal.util.MessageUtils;
@@ -2525,9 +2524,21 @@ public class ConnectivityService extends IConnectivityManager.Stub
         PriorityDump.dump(mPriorityDumper, fd, writer, args);
     }
 
+    private boolean checkDumpPermission(Context context, String tag, PrintWriter pw) {
+        if (context.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
+                != PackageManager.PERMISSION_GRANTED) {
+            pw.println("Permission Denial: can't dump " + tag + " from from pid="
+                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
+                    + " due to missing android.permission.DUMP permission");
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     private void doDump(FileDescriptor fd, PrintWriter writer, String[] args, boolean asProto) {
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
-        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
+        if (!checkDumpPermission(mContext, TAG, pw)) return;
         if (asProto) return;
 
         if (ArrayUtils.contains(args, DIAG_ARG)) {
