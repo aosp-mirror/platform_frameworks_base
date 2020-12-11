@@ -52,7 +52,6 @@ import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
@@ -106,12 +105,18 @@ class AppErrors {
      * later restarted (hopefully due to some user action).  The value is the
      * time it was added to the list.
      *
-     * Access is synchronized on the container object itself, and no other
-     * locks may be acquired while holding that one.
+     * Read access is UNLOCKED, and must either be based on a single lookup
+     * call on the current mBadProcesses instance, or a local copy of that
+     * reference must be made and the local copy treated as the source of
+     * truth.  Mutations are performed by synchronizing on mBadProcessLock,
+     * cloning the existing mBadProcesses instance, performing the mutation,
+     * then changing the volatile "live" mBadProcesses reference to point to the
+     * mutated version.  These operations are very rare compared to lookups:
+     * we intentionally trade additional cost for mutations for eliminating
+     * lock operations from the simple lookup cases.
      */
-    @GuardedBy("mBadProcesses")
-    private final ProcessMap<BadProcessInfo> mBadProcesses = new ProcessMap<>();
-
+    private volatile ProcessMap<BadProcessInfo> mBadProcesses = new ProcessMap<>();
+    private final Object mBadProcessLock = new Object();
 
     AppErrors(Context context, ActivityManagerService service, PackageWatchdog watchdog) {
         context.assertRuntimeOverlayThemable();
@@ -128,81 +133,80 @@ class AppErrors {
         mProcessCrashTimesPersistent.clear();
         mProcessCrashShowDialogTimes.clear();
         mProcessCrashCounts.clear();
-        synchronized (mBadProcesses) {
-            mBadProcesses.clear();
+        synchronized (mBadProcessLock) {
+            mBadProcesses = new ProcessMap<>();
         }
     }
 
     void dumpDebug(ProtoOutputStream proto, long fieldId, String dumpPackage) {
-        synchronized (mBadProcesses) {
-            if (mProcessCrashTimes.getMap().isEmpty() && mBadProcesses.getMap().isEmpty()) {
-                return;
-            }
-
-            final long token = proto.start(fieldId);
-            final long now = SystemClock.uptimeMillis();
-            proto.write(AppErrorsProto.NOW_UPTIME_MS, now);
-
-            if (!mProcessCrashTimes.getMap().isEmpty()) {
-                final ArrayMap<String, SparseArray<Long>> pmap = mProcessCrashTimes.getMap();
-                final int procCount = pmap.size();
-                for (int ip = 0; ip < procCount; ip++) {
-                    final long ctoken = proto.start(AppErrorsProto.PROCESS_CRASH_TIMES);
-                    final String pname = pmap.keyAt(ip);
-                    final SparseArray<Long> uids = pmap.valueAt(ip);
-                    final int uidCount = uids.size();
-
-                    proto.write(AppErrorsProto.ProcessCrashTime.PROCESS_NAME, pname);
-                    for (int i = 0; i < uidCount; i++) {
-                        final int puid = uids.keyAt(i);
-                        final ProcessRecord r = mService.getProcessNames().get(pname, puid);
-                        if (dumpPackage != null
-                                && (r == null || !r.pkgList.containsKey(dumpPackage))) {
-                            continue;
-                        }
-                        final long etoken = proto.start(AppErrorsProto.ProcessCrashTime.ENTRIES);
-                        proto.write(AppErrorsProto.ProcessCrashTime.Entry.UID, puid);
-                        proto.write(AppErrorsProto.ProcessCrashTime.Entry.LAST_CRASHED_AT_MS,
-                                uids.valueAt(i));
-                        proto.end(etoken);
-                    }
-                    proto.end(ctoken);
-                }
-
-            }
-
-            if (!mBadProcesses.getMap().isEmpty()) {
-                final ArrayMap<String, SparseArray<BadProcessInfo>> pmap = mBadProcesses.getMap();
-                final int processCount = pmap.size();
-                for (int ip = 0; ip < processCount; ip++) {
-                    final long btoken = proto.start(AppErrorsProto.BAD_PROCESSES);
-                    final String pname = pmap.keyAt(ip);
-                    final SparseArray<BadProcessInfo> uids = pmap.valueAt(ip);
-                    final int uidCount = uids.size();
-
-                    proto.write(AppErrorsProto.BadProcess.PROCESS_NAME, pname);
-                    for (int i = 0; i < uidCount; i++) {
-                        final int puid = uids.keyAt(i);
-                        final ProcessRecord r = mService.getProcessNames().get(pname, puid);
-                        if (dumpPackage != null && (r == null
-                                || !r.pkgList.containsKey(dumpPackage))) {
-                            continue;
-                        }
-                        final BadProcessInfo info = uids.valueAt(i);
-                        final long etoken = proto.start(AppErrorsProto.BadProcess.ENTRIES);
-                        proto.write(AppErrorsProto.BadProcess.Entry.UID, puid);
-                        proto.write(AppErrorsProto.BadProcess.Entry.CRASHED_AT_MS, info.time);
-                        proto.write(AppErrorsProto.BadProcess.Entry.SHORT_MSG, info.shortMsg);
-                        proto.write(AppErrorsProto.BadProcess.Entry.LONG_MSG, info.longMsg);
-                        proto.write(AppErrorsProto.BadProcess.Entry.STACK, info.stack);
-                        proto.end(etoken);
-                    }
-                    proto.end(btoken);
-                }
-            }
-
-            proto.end(token);
+        final ProcessMap<BadProcessInfo> badProcesses = mBadProcesses;
+        if (mProcessCrashTimes.getMap().isEmpty() && badProcesses.getMap().isEmpty()) {
+            return;
         }
+
+        final long token = proto.start(fieldId);
+        final long now = SystemClock.uptimeMillis();
+        proto.write(AppErrorsProto.NOW_UPTIME_MS, now);
+
+        if (!mProcessCrashTimes.getMap().isEmpty()) {
+            final ArrayMap<String, SparseArray<Long>> pmap = mProcessCrashTimes.getMap();
+            final int procCount = pmap.size();
+            for (int ip = 0; ip < procCount; ip++) {
+                final long ctoken = proto.start(AppErrorsProto.PROCESS_CRASH_TIMES);
+                final String pname = pmap.keyAt(ip);
+                final SparseArray<Long> uids = pmap.valueAt(ip);
+                final int uidCount = uids.size();
+
+                proto.write(AppErrorsProto.ProcessCrashTime.PROCESS_NAME, pname);
+                for (int i = 0; i < uidCount; i++) {
+                    final int puid = uids.keyAt(i);
+                    final ProcessRecord r = mService.getProcessNames().get(pname, puid);
+                    if (dumpPackage != null
+                            && (r == null || !r.pkgList.containsKey(dumpPackage))) {
+                        continue;
+                    }
+                    final long etoken = proto.start(AppErrorsProto.ProcessCrashTime.ENTRIES);
+                    proto.write(AppErrorsProto.ProcessCrashTime.Entry.UID, puid);
+                    proto.write(AppErrorsProto.ProcessCrashTime.Entry.LAST_CRASHED_AT_MS,
+                            uids.valueAt(i));
+                    proto.end(etoken);
+                }
+                proto.end(ctoken);
+            }
+
+        }
+
+        if (!badProcesses.getMap().isEmpty()) {
+            final ArrayMap<String, SparseArray<BadProcessInfo>> pmap = badProcesses.getMap();
+            final int processCount = pmap.size();
+            for (int ip = 0; ip < processCount; ip++) {
+                final long btoken = proto.start(AppErrorsProto.BAD_PROCESSES);
+                final String pname = pmap.keyAt(ip);
+                final SparseArray<BadProcessInfo> uids = pmap.valueAt(ip);
+                final int uidCount = uids.size();
+
+                proto.write(AppErrorsProto.BadProcess.PROCESS_NAME, pname);
+                for (int i = 0; i < uidCount; i++) {
+                    final int puid = uids.keyAt(i);
+                    final ProcessRecord r = mService.getProcessNames().get(pname, puid);
+                    if (dumpPackage != null && (r == null
+                            || !r.pkgList.containsKey(dumpPackage))) {
+                        continue;
+                    }
+                    final BadProcessInfo info = uids.valueAt(i);
+                    final long etoken = proto.start(AppErrorsProto.BadProcess.ENTRIES);
+                    proto.write(AppErrorsProto.BadProcess.Entry.UID, puid);
+                    proto.write(AppErrorsProto.BadProcess.Entry.CRASHED_AT_MS, info.time);
+                    proto.write(AppErrorsProto.BadProcess.Entry.SHORT_MSG, info.shortMsg);
+                    proto.write(AppErrorsProto.BadProcess.Entry.LONG_MSG, info.longMsg);
+                    proto.write(AppErrorsProto.BadProcess.Entry.STACK, info.stack);
+                    proto.end(etoken);
+                }
+                proto.end(btoken);
+            }
+        }
+
+        proto.end(token);
     }
 
     boolean dumpLocked(FileDescriptor fd, PrintWriter pw, boolean needSep, String dumpPackage) {
@@ -267,9 +271,10 @@ class AppErrors {
             }
         }
 
-        if (!mBadProcesses.getMap().isEmpty()) {
+        final ProcessMap<BadProcessInfo> badProcesses = mBadProcesses;
+        if (!badProcesses.getMap().isEmpty()) {
             boolean printed = false;
-            final ArrayMap<String, SparseArray<BadProcessInfo>> pmap = mBadProcesses.getMap();
+            final ArrayMap<String, SparseArray<BadProcessInfo>> pmap = badProcesses.getMap();
             final int processCount = pmap.size();
             for (int ip = 0; ip < processCount; ip++) {
                 final String pname = pmap.keyAt(ip);
@@ -322,14 +327,25 @@ class AppErrors {
     }
 
     boolean isBadProcess(final String processName, final int uid) {
-        synchronized (mBadProcesses) {
-            return mBadProcesses.get(processName, uid) != null;
-        }
+        // NO LOCKING for the simple lookup
+        return mBadProcesses.get(processName, uid) != null;
     }
 
     void clearBadProcess(final String processName, final int uid) {
-        synchronized (mBadProcesses) {
-            mBadProcesses.remove(processName, uid);
+        synchronized (mBadProcessLock) {
+            final ProcessMap<BadProcessInfo> badProcesses = new ProcessMap<>();
+            badProcesses.putAll(mBadProcesses);
+            badProcesses.remove(processName, uid);
+            mBadProcesses = badProcesses;
+        }
+    }
+
+    void markBadProcess(final String processName, final int uid, BadProcessInfo info) {
+        synchronized (mBadProcessLock) {
+            final ProcessMap<BadProcessInfo> badProcesses = new ProcessMap<>();
+            badProcesses.putAll(mBadProcesses);
+            badProcesses.put(processName, uid, info);
+            mBadProcesses = badProcesses;
         }
     }
 
@@ -812,11 +828,9 @@ class AppErrors {
                         app.processName);
                 if (!app.isolated) {
                     // XXX We don't have a way to mark isolated processes
-                    // as bad, since they don't have a peristent identity.
-                    synchronized (mBadProcesses) {
-                        mBadProcesses.put(app.processName, app.uid,
-                                new BadProcessInfo(now, shortMsg, longMsg, stackTrace));
-                    }
+                    // as bad, since they don't have a persistent identity.
+                    markBadProcess(app.processName, app.uid,
+                            new BadProcessInfo(now, shortMsg, longMsg, stackTrace));
                     mProcessCrashTimes.remove(app.processName, app.uid);
                     mProcessCrashCounts.remove(app.processName, app.uid);
                 }
