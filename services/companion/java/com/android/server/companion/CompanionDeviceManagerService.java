@@ -40,6 +40,7 @@ import android.bluetooth.BluetoothDevice;
 import android.companion.Association;
 import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
+import android.companion.DeviceNotAssociatedException;
 import android.companion.ICompanionDeviceDiscoveryService;
 import android.companion.ICompanionDeviceManager;
 import android.companion.IFindDeviceCallback;
@@ -484,6 +485,43 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             return CollectionUtils.any(
                     getAllAssociations(userId, packageName),
                     a -> Objects.equals(a.getDeviceMacAddress(), macAddress));
+        }
+
+        @Override
+        public void registerDevicePresenceListenerService(
+                String packageName, String deviceAddress)
+                throws RemoteException {
+            checkCanRegisterObserverService(packageName, deviceAddress);
+
+            //TODO(eugenesusla) implement
+        }
+
+        @Override
+        public void unregisterDevicePresenceListenerService(
+                String packageName, String deviceAddress)
+                throws RemoteException {
+            checkCanRegisterObserverService(packageName, deviceAddress);
+
+            //TODO(eugenesusla) implement
+        }
+
+        private void checkCanRegisterObserverService(String packageName, String deviceAddress)
+                throws RemoteException {
+            getContext().enforceCallingOrSelfPermission(
+                    android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE,
+                    "[un]registerDevicePresenceListenerService");
+            checkCallerIsSystemOr(packageName);
+
+            int userId = getCallingUserId();
+            Set<Association> deviceAssociations = CollectionUtils.filter(
+                    getAllAssociations(userId, packageName),
+                    association -> deviceAddress.equals(association.getDeviceMacAddress()));
+
+            if (deviceAssociations.isEmpty()) {
+                throw new RemoteException(new DeviceNotAssociatedException("App " + packageName
+                        + " is not associated with device " + deviceAddress
+                        + " for user " + userId));
+            }
         }
 
         private void checkCanCallNotificationApi(String callingPackage) throws RemoteException {
