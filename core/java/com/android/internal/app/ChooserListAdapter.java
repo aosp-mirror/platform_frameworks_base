@@ -82,8 +82,6 @@ public class ChooserListAdapter extends ResolverListAdapter {
     private static final int MAX_SERVICE_TARGET_APP = 8;
     private static final int DEFAULT_DIRECT_SHARE_RANKING_SCORE = 1000;
 
-    static final int MAX_SERVICE_TARGETS = 8;
-
     /** {@link #getBaseScore} */
     public static final float CALLER_TARGET_SCORE_BOOST = 900.f;
     /** {@link #getBaseScore} */
@@ -130,10 +128,10 @@ public class ChooserListAdapter extends ResolverListAdapter {
         super(context, payloadIntents, null, rList, filterLastUsed,
                 resolverListController, chooserListCommunicator, false);
 
-        createPlaceHolders();
         mMaxShortcutTargetsPerApp =
                 context.getResources().getInteger(R.integer.config_maxShortcutTargetsPerApp);
         mChooserListCommunicator = chooserListCommunicator;
+        createPlaceHolders();
         mSelectableTargetInfoCommunicator = selectableTargetInfoCommunicator;
 
         if (initialIntents != null) {
@@ -227,7 +225,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
         mParkingDirectShareTargets.clear();
         mPendingChooserTargetService.clear();
         mShortcutComponents.clear();
-        for (int i = 0; i < MAX_SERVICE_TARGETS; i++) {
+        for (int i = 0; i < mChooserListCommunicator.getMaxRankedTargets(); i++) {
             mServiceTargets.add(mPlaceHolderTargetInfo);
         }
     }
@@ -382,7 +380,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
     public int getServiceTargetCount() {
         if (mChooserListCommunicator.isSendAction(mChooserListCommunicator.getTargetIntent())
                 && !ActivityManager.isLowRamDeviceStatic()) {
-            return Math.min(mServiceTargets.size(), MAX_SERVICE_TARGETS);
+            return Math.min(mServiceTargets.size(), mChooserListCommunicator.getMaxRankedTargets());
         }
 
         return 0;
@@ -847,7 +845,8 @@ public class ChooserListAdapter extends ResolverListAdapter {
 
         int currentSize = mServiceTargets.size();
         final float newScore = chooserTargetInfo.getModifiedScore();
-        for (int i = 0; i < Math.min(currentSize, MAX_SERVICE_TARGETS); i++) {
+        for (int i = 0; i < Math.min(currentSize, mChooserListCommunicator.getMaxRankedTargets());
+                i++) {
             final ChooserTargetInfo serviceTarget = mServiceTargets.get(i);
             if (serviceTarget == null) {
                 mServiceTargets.set(i, chooserTargetInfo);
@@ -858,7 +857,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
             }
         }
 
-        if (currentSize < MAX_SERVICE_TARGETS) {
+        if (currentSize < mChooserListCommunicator.getMaxRankedTargets()) {
             mServiceTargets.add(chooserTargetInfo);
             return true;
         }
