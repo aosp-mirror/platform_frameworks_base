@@ -1265,7 +1265,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     @Override
     public boolean bindBluetoothProfileService(int bluetoothProfile,
             IBluetoothProfileServiceConnection proxy) {
-        if (!mEnable) {
+        if (mState != BluetoothAdapter.STATE_ON) {
             if (DBG) {
                 Slog.d(TAG, "Trying to bind to profile: " + bluetoothProfile
                         + ", while Bluetooth was disabled");
@@ -1431,7 +1431,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 mBluetoothLock.readLock().unlock();
             }
 
-            if (!mEnable || state != BluetoothAdapter.STATE_ON) {
+            if (state != BluetoothAdapter.STATE_ON) {
                 if (DBG) {
                     Slog.d(TAG, "Unable to bindService while Bluetooth is disabled");
                 }
