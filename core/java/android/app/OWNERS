@@ -1,4 +1,38 @@
+
+# Remain no owner because multiple modules may touch this file.
+per-file ContextImpl.java = *
+
+# ActivityThread
+per-file ActivityThread.java = file:/services/core/java/com/android/server/am/OWNERS
+per-file ActivityThread.java = file:/services/core/java/com/android/server/wm/OWNERS
+
+# Alarm
 per-file *Alarm* = file:/apex/jobscheduler/OWNERS
+
+# AppOps
 per-file *AppOp* = file:/core/java/android/permission/OWNERS
+
+# Notification
 per-file *Notification* = file:/packages/SystemUI/OWNERS
+
+#Wallpaper
+per-file Wallpaper*.java = file:/core/java/android/service/wallpaper/OWNERS
+per-file IWallpaper*.aidl = file:/core/java/android/service/wallpaper/OWNERS
+
+# WindowManager
+per-file Activity*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
+per-file Activity*.java = file:/services/core/java/com/android/server/wm/OWNERS
+per-file ClientTransactionHandler.java = file:/services/core/java/com/android/server/wm/OWNERS
+per-file Fragment.java = file:/services/core/java/com/android/server/wm/OWNERS
+per-file IActivity*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
+per-file IAppTask.aidl = file:/services/core/java/com/android/server/wm/OWNERS
+per-file ITaskStackListener.aidl = file:/services/core/java/com/android/server/wm/OWNERS
+per-file LocalActivityManager.java = file:/services/core/java/com/android/server/wm/OWNERS
+per-file Task*.java = file:/services/core/java/com/android/server/wm/OWNERS
+per-file Window*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
+per-file Window*.java = file:/services/core/java/com/android/server/wm/OWNERS
+
+# TODO(b/174932174): determine the ownership of KeyguardManager.java
+
+# Zygote
 per-file *Zygote* = file:/ZYGOTE_OWNERS
