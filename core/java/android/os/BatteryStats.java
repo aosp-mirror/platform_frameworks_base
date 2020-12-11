@@ -27,6 +27,7 @@ import android.app.job.JobParameters;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.location.GnssSignalQuality;
 import android.os.BatteryStatsManager.WifiState;
 import android.os.BatteryStatsManager.WifiSupplState;
 import android.server.ServerProtoEnums;
@@ -47,7 +48,6 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.location.gnssmetrics.GnssMetrics;
 import com.android.internal.os.BatterySipper;
 import com.android.internal.os.BatteryStatsHelper;
 
@@ -5087,8 +5087,9 @@ public abstract class BatteryStats implements Parcelable {
         final String[] gpsSignalQualityDescription = new String[]{
             "poor (less than 20 dBHz): ",
             "good (greater than 20 dBHz): "};
-        final int numGpsSignalQualityBins = Math.min(GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS,
-            gpsSignalQualityDescription.length);
+        final int numGpsSignalQualityBins = Math.min(
+                GnssSignalQuality.NUM_GNSS_SIGNAL_QUALITY_LEVELS,
+                gpsSignalQualityDescription.length);
         for (int i=0; i<numGpsSignalQualityBins; i++) {
             final long time = getGpsSignalQualityTime(i, rawRealtime, which);
             sb.append("\n    ");
