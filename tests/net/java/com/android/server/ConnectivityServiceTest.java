@@ -646,8 +646,8 @@ public class ConnectivityServiceTest {
         }
 
         @Override
-        protected InstrumentedNetworkAgent makeNetworkAgent(LinkProperties linkProperties)
-                throws Exception {
+        protected InstrumentedNetworkAgent makeNetworkAgent(LinkProperties linkProperties,
+                final int type, final String typeName) throws Exception {
             mNetworkMonitor = mock(INetworkMonitor.class);
 
             final Answer validateAnswer = inv -> {
@@ -666,7 +666,8 @@ public class ConnectivityServiceTest {
                     any() /* name */,
                     nmCbCaptor.capture());
 
-            final InstrumentedNetworkAgent na = new InstrumentedNetworkAgent(this, linkProperties) {
+            final InstrumentedNetworkAgent na = new InstrumentedNetworkAgent(this, linkProperties,
+                    type, typeName) {
                 @Override
                 public void networkStatus(int status, String redirectUrl) {
                     mRedirectUrl = redirectUrl;
