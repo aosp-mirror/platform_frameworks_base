@@ -24,6 +24,7 @@ import android.content.Context;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.service.SensorPrivacyIndividualEnabledSensorProto;
 import android.util.ArrayMap;
 
 import com.android.internal.annotations.GuardedBy;
@@ -43,18 +44,23 @@ import java.lang.annotation.RetentionPolicy;
 public final class SensorPrivacyManager {
 
     /** Microphone */
-    public static final int INDIVIDUAL_SENSOR_MICROPHONE = 1;
+    public static final int INDIVIDUAL_SENSOR_MICROPHONE =
+            SensorPrivacyIndividualEnabledSensorProto.MICROPHONE;
 
     /** Camera */
-    public static final int INDIVIDUAL_SENSOR_CAMERA = 2;
+    public static final int INDIVIDUAL_SENSOR_CAMERA =
+            SensorPrivacyIndividualEnabledSensorProto.CAMERA;
 
+    /**
+     * Individual sensors not listed in {@link Sensor}
+     * @hide
+     */
     @IntDef(prefix = "INDIVIDUAL_SENSOR_", value = {
             INDIVIDUAL_SENSOR_MICROPHONE,
             INDIVIDUAL_SENSOR_CAMERA
     })
     @Retention(RetentionPolicy.SOURCE)
-    /** Individual sensors not listed in {@link Sensor} */
-    @interface IndividualSensor {}
+    public @interface IndividualSensor {}
 
     /**
      * A class implementing this interface can register with the {@link

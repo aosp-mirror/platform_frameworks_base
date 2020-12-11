@@ -17,36 +17,55 @@
 package com.android.server;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.service.SensorPrivacyIndividualEnabledSensorProto.CAMERA;
+import static android.service.SensorPrivacyIndividualEnabledSensorProto.MICROPHONE;
+import static android.service.SensorPrivacyIndividualEnabledSensorProto.UNKNOWN;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.ISensorPrivacyListener;
 import android.hardware.ISensorPrivacyManager;
+import android.hardware.SensorPrivacyManager;
+import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
+import android.os.ShellCommand;
+import android.service.SensorPrivacyIndividualEnabledSensorProto;
+import android.service.SensorPrivacyServiceDumpProto;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.XmlUtils;
+import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 /** @hide */
 public final class SensorPrivacyService extends SystemService {
@@ -238,6 +257,170 @@ public final class SensorPrivacyService extends SystemService {
                 throw new NullPointerException("listener cannot be null");
             }
             mHandler.removeListener(listener);
+        }
+
+        @Override
+        public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            Objects.requireNonNull(fd);
+
+            if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
+
+            int opti = 0;
+            boolean dumpAsProto = false;
+            while (opti < args.length) {
+                String opt = args[opti];
+                if (opt == null || opt.length() <= 0 || opt.charAt(0) != '-') {
+                    break;
+                }
+                opti++;
+                if ("--proto".equals(opt)) {
+                    dumpAsProto = true;
+                } else {
+                    pw.println("Unknown argument: " + opt + "; use -h for help");
+                }
+            }
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                if (dumpAsProto) {
+                    dump(new DualDumpOutputStream(new ProtoOutputStream(fd)));
+                } else {
+                    pw.println("SENSOR PRIVACY MANAGER STATE (dumpsys "
+                            + Context.SENSOR_PRIVACY_SERVICE + ")");
+
+                    dump(new DualDumpOutputStream(new IndentingPrintWriter(pw, "  ")));
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        /**
+         * Dump state to {@link DualDumpOutputStream}.
+         *
+         * @param dumpStream The destination to dump to
+         */
+        private void dump(@NonNull DualDumpOutputStream dumpStream) {
+            synchronized (mLock) {
+                dumpStream.write("is_enabled", SensorPrivacyServiceDumpProto.IS_ENABLED, mEnabled);
+
+                int numIndividualEnabled = mIndividualEnabled.size();
+                for (int i = 0; i < numIndividualEnabled; i++) {
+                    long token = dumpStream.start("individual_enabled_sensor",
+                            SensorPrivacyServiceDumpProto.INDIVIDUAL_ENABLED_SENSOR);
+
+                    dumpStream.write("sensor",
+                            SensorPrivacyIndividualEnabledSensorProto.SENSOR,
+                            mIndividualEnabled.keyAt(i));
+                    dumpStream.write("is_enabled",
+                            SensorPrivacyIndividualEnabledSensorProto.IS_ENABLED,
+                            mIndividualEnabled.valueAt(i));
+
+                    dumpStream.end(token);
+                }
+            }
+
+            dumpStream.flush();
+        }
+
+        /**
+         * Convert a string into a {@link SensorPrivacyManager.IndividualSensor id}.
+         *
+         * @param sensor The name to convert
+         *
+         * @return The id corresponding to the name
+         */
+        private @SensorPrivacyManager.IndividualSensor int sensorStrToId(@Nullable String sensor) {
+            if (sensor == null) {
+                return UNKNOWN;
+            }
+
+            switch (sensor) {
+                case "microphone":
+                    return MICROPHONE;
+                case "camera":
+                    return CAMERA;
+                default: {
+                    return UNKNOWN;
+                }
+            }
+        }
+
+        @Override
+        public void onShellCommand(FileDescriptor in, FileDescriptor out,
+                FileDescriptor err, String[] args, ShellCallback callback,
+                ResultReceiver resultReceiver) {
+            (new ShellCommand() {
+                @Override
+                public int onCommand(String cmd) {
+                    if (cmd == null) {
+                        return handleDefaultCommands(cmd);
+                    }
+
+                    final PrintWriter pw = getOutPrintWriter();
+                    switch (cmd) {
+                        case "enable" : {
+                            int sensor = sensorStrToId(getNextArg());
+                            if (sensor == UNKNOWN) {
+                                pw.println("Invalid sensor");
+                                return -1;
+                            }
+
+                            setIndividualSensorPrivacy(sensor, true);
+                        }
+                        break;
+                        case "disable" : {
+                            int sensor = sensorStrToId(getNextArg());
+                            if (sensor == UNKNOWN) {
+                                pw.println("Invalid sensor");
+                                return -1;
+                            }
+
+                            setIndividualSensorPrivacy(sensor, false);
+                        }
+                        break;
+                        case "reset": {
+                            int sensor = sensorStrToId(getNextArg());
+                            if (sensor == UNKNOWN) {
+                                pw.println("Invalid sensor");
+                                return -1;
+                            }
+
+                            enforceSensorPrivacyPermission();
+
+                            synchronized (mLock) {
+                                mIndividualEnabled.delete(sensor);
+                                persistSensorPrivacyState();
+                            }
+                        }
+                        break;
+                        default:
+                            return handleDefaultCommands(cmd);
+                    }
+
+                    return 0;
+                }
+
+                @Override
+                public void onHelp() {
+                    final PrintWriter pw = getOutPrintWriter();
+
+                    pw.println("Sensor privacy manager (" + Context.SENSOR_PRIVACY_SERVICE
+                            + ") commands:");
+                    pw.println("  help");
+                    pw.println("    Print this help text.");
+                    pw.println("");
+                    pw.println("  enable SENSOR");
+                    pw.println("    Enable privacy for a certain sensor.");
+                    pw.println("");
+                    pw.println("  disable SENSOR");
+                    pw.println("    Disable privacy for a certain sensor.");
+                    pw.println("");
+                    pw.println("  reset SENSOR");
+                    pw.println("    Reset privacy state for a certain sensor.");
+                    pw.println("");
+                }
+            }).exec(this, in, out, err, args, callback, resultReceiver);
         }
     }
 
