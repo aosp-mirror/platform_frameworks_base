@@ -6213,7 +6213,7 @@ public class ConnectivityServiceTest {
 
         // Create a fake restricted profile whose parent is our user ID.
         final int userId = UserHandle.getUserId(uid);
-        when(mUserManager.canHaveRestrictedProfile(userId)).thenReturn(true);
+        when(mUserManager.canHaveRestrictedProfile()).thenReturn(true);
         final int restrictedUserId = userId + 1;
         final UserInfo info = new UserInfo(restrictedUserId, "user", UserInfo.FLAG_RESTRICTED);
         info.restrictedProfileParentId = userId;
