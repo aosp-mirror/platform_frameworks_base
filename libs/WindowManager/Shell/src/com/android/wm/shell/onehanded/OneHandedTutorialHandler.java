@@ -63,6 +63,16 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
     private String mStartOneHandedDescription;
     private String mStopOneHandedDescription;
 
+    private enum ONE_HANDED_TRIGGER_STATE {
+        UNSET, ENTERING, EXITING
+    }
+    /**
+     * Current One-Handed trigger state.
+     * Note: This is a dynamic state, whenever last state has been confirmed
+     * (i.e. onStartFinished() or onStopFinished()), the state should be set "UNSET" at final.
+     */
+    private ONE_HANDED_TRIGGER_STATE mTriggerState = ONE_HANDED_TRIGGER_STATE.UNSET;
+
     /**
      * Container of the tutorial panel showing at outside region when one handed starting
      */
@@ -73,6 +83,21 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
         @Override
         public void onTutorialAnimationUpdate(int offset) {
             mUpdateHandler.post(() -> onAnimationUpdate(offset));
+        }
+
+        @Override
+        public void onOneHandedAnimationStart(
+                OneHandedAnimationController.OneHandedTransitionAnimator animator) {
+            mUpdateHandler.post(() -> {
+                final Rect startValue = (Rect) animator.getStartValue();
+                if (mTriggerState == ONE_HANDED_TRIGGER_STATE.UNSET) {
+                    mTriggerState = (startValue.top == 0)
+                            ? ONE_HANDED_TRIGGER_STATE.ENTERING : ONE_HANDED_TRIGGER_STATE.EXITING;
+                    if (mCanShowTutorial && mTriggerState == ONE_HANDED_TRIGGER_STATE.ENTERING) {
+                        createTutorialTarget();
+                    }
+                }
+            });
         }
     };
 
@@ -100,9 +125,6 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
                 R.string.accessibility_action_start_one_handed);
         mStopOneHandedDescription = context.getResources().getString(
                 R.string.accessibility_action_stop_one_handed);
-        if (mCanShowTutorial) {
-            createOrUpdateTutorialTarget();
-        }
     }
 
     @Override
@@ -111,6 +133,7 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
             updateFinished(View.VISIBLE, 0f);
             updateTutorialCount();
             announcementForScreenReader(true);
+            mTriggerState = ONE_HANDED_TRIGGER_STATE.UNSET;
         });
     }
 
@@ -119,6 +142,8 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
         mUpdateHandler.post(() -> {
             updateFinished(View.INVISIBLE, -mTargetViewContainer.getHeight());
             announcementForScreenReader(false);
+            removeTutorialFromWindowManager();
+            mTriggerState = ONE_HANDED_TRIGGER_STATE.UNSET;
         });
     }
 
@@ -126,7 +151,6 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
         if (!canShowTutorial()) {
             return;
         }
-
         mTargetViewContainer.setVisibility(visible);
         mTargetViewContainer.setTranslationY(finalPosition);
     }
@@ -155,24 +179,23 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
      * Adds the tutorial target view to the WindowManager and update its layout, so it's ready
      * to be animated in.
      */
-    private void createOrUpdateTutorialTarget() {
-        mUpdateHandler.post(() -> {
-            if (!mTargetViewContainer.isAttachedToWindow()) {
-                mTargetViewContainer.setVisibility(View.INVISIBLE);
-
-                try {
-                    mWindowManager.addView(mTargetViewContainer, getTutorialTargetLayoutParams());
-                } catch (IllegalStateException e) {
-                    // This shouldn't happen, but if the target is already added, just update its
-                    // layout params.
-                    mWindowManager.updateViewLayout(
-                            mTargetViewContainer, getTutorialTargetLayoutParams());
-                }
-            } else {
-                mWindowManager.updateViewLayout(mTargetViewContainer,
-                        getTutorialTargetLayoutParams());
+    private void createTutorialTarget() {
+        if (!mTargetViewContainer.isAttachedToWindow()) {
+            try {
+                mWindowManager.addView(mTargetViewContainer, getTutorialTargetLayoutParams());
+            } catch (IllegalStateException e) {
+                // This shouldn't happen, but if the target is already added, just update its
+                // layout params.
+                mWindowManager.updateViewLayout(
+                        mTargetViewContainer, getTutorialTargetLayoutParams());
             }
-        });
+        }
+    }
+
+    private void removeTutorialFromWindowManager() {
+        if (mTargetViewContainer.isAttachedToWindow()) {
+            mWindowManager.removeViewImmediate(mTargetViewContainer);
+        }
     }
 
     OneHandedAnimationCallback getAnimationCallback() {
@@ -193,7 +216,6 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
         lp.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
         lp.setFitInsetsTypes(0 /* types */);
         lp.setTitle("one-handed-tutorial-overlay");
-
         return lp;
     }
 
@@ -206,10 +228,12 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
 
     private boolean canShowTutorial() {
         if (!mCanShowTutorial) {
+            // Since canSHowTutorial() will be called in onAnimationUpdate() and we still need to
+            // hide Tutorial text in the period of continuously onAnimationUpdate() API call,
+            // so we have to hide mTargetViewContainer here.
             mTargetViewContainer.setVisibility(View.GONE);
             return false;
         }
-
         return true;
     }
 
