@@ -1014,7 +1014,7 @@ public class ActivityStackTests extends WindowTestsBase {
         final ActivityRecord secondActivity = new ActivityBuilder(mAtm).setTask(task).build();
         firstActivity.setState(STOPPED, "testFinishDisabledPackageActivities");
         secondActivity.setState(RESUMED, "testFinishDisabledPackageActivities");
-        task.mResumedActivity = secondActivity;
+        task.setResumedActivity(secondActivity, "test");
 
         // Note the activities have non-null ActivityRecord.app, so it won't remove directly.
         mRootWindowContainer.mFinishDisabledPackageActivitiesHelper.process(
@@ -1140,8 +1140,8 @@ public class ActivityStackTests extends WindowTestsBase {
         final Task task = new TaskBuilder(mSupervisor).build();
         final ActivityRecord bottomActivity = new ActivityBuilder(mAtm).setTask(task).build();
         doReturn(true).when(bottomActivity).attachedToProcess();
-        task.mPausingActivity = null;
-        task.mResumedActivity = bottomActivity;
+        task.setPausingActivity(null);
+        task.setResumedActivity(bottomActivity, "test");
         final ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(task).build();
         topActivity.info.flags |= FLAG_RESUME_WHILE_PAUSING;
 

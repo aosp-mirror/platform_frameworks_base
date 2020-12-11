@@ -247,7 +247,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         activity.finishing = true;
         activity.mVisibleRequested = false;
         activity.setVisible(false);
-        activity.getRootTask().mPausingActivity = activity;
+        activity.getTask().setPausingActivity(activity);
         homeActivity.setState(Task.ActivityState.PAUSED, "test");
 
         // Even the visibility states are invisible, the next activity should be resumed because

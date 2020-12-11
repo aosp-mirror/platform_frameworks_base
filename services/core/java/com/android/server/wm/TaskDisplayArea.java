@@ -1179,7 +1179,7 @@ final class TaskDisplayArea extends DisplayArea<Task> {
         if (resumedActivity == null || resumedActivity.app == null) {
             // If there is no registered resumed activity in the stack or it is not running -
             // try to use previously resumed one.
-            resumedActivity = focusedStack.mPausingActivity;
+            resumedActivity = focusedStack.getPausingActivity();
             if (resumedActivity == null || resumedActivity.app == null) {
                 // If previously resumed activity doesn't work either - find the topmost running
                 // activity that can be focused.
@@ -1245,20 +1245,21 @@ final class TaskDisplayArea extends DisplayArea<Task> {
      * @return {@code true} if any activity was paused as a result of this call.
      */
     boolean pauseBackTasks(boolean userLeaving, ActivityRecord resuming) {
-        boolean someActivityPaused = false;
-        for (int stackNdx = mChildren.size() - 1; stackNdx >= 0; --stackNdx) {
-            final Task stack = mChildren.get(stackNdx);
-            final ActivityRecord resumedActivity = stack.getResumedActivity();
+        final int[] someActivityPaused = {0};
+        forAllLeafTasks((task) -> {
+            final ActivityRecord resumedActivity = task.getResumedActivity();
             if (resumedActivity != null
-                    && (stack.getVisibility(resuming) != TASK_VISIBILITY_VISIBLE
-                    || !stack.isTopActivityFocusable())) {
-                ProtoLog.d(WM_DEBUG_STATES, "pauseBackStacks: stack=%s "
-                        + "mResumedActivity=%s", stack, resumedActivity);
-                someActivityPaused |= stack.startPausingLocked(userLeaving, false /* uiSleeping*/,
-                        resuming, "pauseBackStacks");
+                    && (task.getVisibility(resuming) != TASK_VISIBILITY_VISIBLE
+                    || !task.isTopActivityFocusable())) {
+                ProtoLog.d(WM_DEBUG_STATES, "pauseBackStacks: task=%s "
+                        + "mResumedActivity=%s", task, resumedActivity);
+                if (task.startPausingLocked(userLeaving, false /* uiSleeping*/,
+                        resuming, "pauseBackStacks")) {
+                    someActivityPaused[0]++;
+                }
             }
-        }
-        return someActivityPaused;
+        }, true /* traverseTopToBottom */);
+        return someActivityPaused[0] > 0;
     }
 
     /**

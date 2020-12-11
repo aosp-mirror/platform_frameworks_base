@@ -553,8 +553,11 @@ class Task extends WindowContainer<WindowContainer> {
     /**
      * When we are in the process of pausing an activity, before starting the
      * next one, this variable holds the activity that is currently being paused.
+     *
+     * Only set at leaf tasks.
      */
-    ActivityRecord mPausingActivity = null;
+    @Nullable
+    private ActivityRecord mPausingActivity = null;
 
     /**
      * This is the last activity that we put into the paused state.  This is
@@ -570,8 +573,12 @@ class Task extends WindowContainer<WindowContainer> {
      */
     ActivityRecord mLastNoHistoryActivity = null;
 
-    /** Current activity that is resumed, or null if there is none. */
-    ActivityRecord mResumedActivity = null;
+    /**
+     * Current activity that is resumed, or null if there is none.
+     * Only set at leaf tasks.
+     */
+    @Nullable
+    private ActivityRecord mResumedActivity = null;
 
     /** Last activity that is used to compute the Task bounds. */
     @Nullable
@@ -1111,14 +1118,6 @@ class Task extends WindowContainer<WindowContainer> {
             return false;
         }
 
-        final boolean toTopOfStack = position == MAX_VALUE;
-        if (toTopOfStack && toStack.getResumedActivity() != null
-                && toStack.topRunningActivity() != null) {
-            // Pause the resumed activity on the target stack while re-parenting task on top of it.
-            toStack.startPausingLocked(false /* userLeaving */, false /* uiSleeping */,
-                    null /* resuming */, "reparent");
-        }
-
         final int toStackWindowingMode = toStack.getWindowingMode();
         final ActivityRecord topActivity = getTopNonFinishingActivity();
 
@@ -1142,8 +1141,6 @@ class Task extends WindowContainer<WindowContainer> {
             final ActivityRecord r = topRunningActivityLocked();
             final boolean wasFocused = r != null && root.isTopDisplayFocusedRootTask(sourceStack)
                     && (topRunningActivityLocked() == r);
-            final boolean wasResumed = r != null && sourceStack.getResumedActivity() == r;
-            final boolean wasPaused = r != null && sourceStack.mPausingActivity == r;
 
             // In some cases the focused stack isn't the front stack. E.g. pinned stack.
             // Whenever we are moving the top activity from the front stack we want to make sure to
@@ -1164,9 +1161,15 @@ class Task extends WindowContainer<WindowContainer> {
 
             // If the task had focus before (or we're requested to move focus), move focus to the
             // new stack by moving the stack to the front.
-            if (r != null) {
-                toStack.moveToFrontAndResumeStateIfNeeded(r, moveStackToFront, wasResumed,
-                        wasPaused, reason);
+            if (r != null && moveStackToFront) {
+                // Move the stack in which we are placing the activity to the front.
+                toStack.moveToFront(reason);
+
+                // If the original state is resumed, there is no state change to update focused app.
+                // So here makes sure the activity focus is set if it is the top.
+                if (r.isState(RESUMED) && r == mRootWindowContainer.getTopResumedActivity()) {
+                    mAtmService.setResumedActivityUncheckLocked(r, reason);
+                }
             }
             if (!animate) {
                 mTaskSupervisor.mNoAnimActivities.add(topActivity);
@@ -1462,15 +1465,6 @@ class Task extends WindowContainer<WindowContainer> {
         }
 
         if (newParent != null) {
-            final Task newParentTask = ((WindowContainer) newParent).asTask();
-            if (newParentTask != null) {
-                final ActivityRecord top = newParentTask.getTopNonFinishingActivity(
-                        false /* includeOverlays */);
-                if (top != null && top.isState(RESUMED)) {
-                    newParentTask.setResumedActivity(top, "addedToTask");
-                }
-            }
-
             // TODO: Ensure that this is actually necessary here
             // Notify the voice session if required
             if (voiceSession != null) {
@@ -1507,6 +1501,15 @@ class Task extends WindowContainer<WindowContainer> {
             mLastTaskBoundsComputeActivity = null;
         }
 
+        // mPausingActivity is set at leaf task
+        if (mPausingActivity != null && mPausingActivity == r) {
+            mPausingActivity = null;
+        }
+
+        if (mResumedActivity != null && mResumedActivity == r) {
+            setResumedActivity(null, "cleanUpActivityReferences");
+        }
+
         final WindowContainer parent = getParent();
         if (parent != null && parent.asTask() != null) {
             parent.asTask().cleanUpActivityReferences(r);
@@ -1514,21 +1517,38 @@ class Task extends WindowContainer<WindowContainer> {
         }
         r.removeTimeouts();
         mExitingActivities.remove(r);
-
-        if (mResumedActivity != null && mResumedActivity == r) {
-            setResumedActivity(null, "cleanUpActivityReferences");
-        }
-        if (mPausingActivity != null && mPausingActivity == r) {
-            mPausingActivity = null;
-        }
     }
 
     /** @return the currently resumed activity. */
     ActivityRecord getResumedActivity() {
-        return mResumedActivity;
+        if (isLeafTask()) {
+            return mResumedActivity;
+        }
+
+        final Task task = getTask(t -> t.mResumedActivity != null, true /* traverseTopToBottom */);
+        return task != null ? task.mResumedActivity : null;
+    }
+
+    @VisibleForTesting
+    void setPausingActivity(ActivityRecord pausing) {
+        mPausingActivity = pausing;
+    }
+
+    /**
+     * @return the currently pausing activity of this task or the topmost pausing activity of the
+     * child tasks
+     */
+    ActivityRecord getPausingActivity() {
+        if (isLeafTask()) {
+            return mPausingActivity;
+        }
+
+        final Task task = getTask(t -> t.mPausingActivity != null, true /* traverseTopToBottom */);
+        return task != null ? task.mPausingActivity : null;
     }
 
     void setResumedActivity(ActivityRecord r, String reason) {
+        warnForNonLeafTask("setResumedActivity");
         if (mResumedActivity == r) {
             return;
         }
@@ -2168,17 +2188,7 @@ class Task extends WindowContainer<WindowContainer> {
      * @param reason The reason for the change.
      */
     void onActivityStateChanged(ActivityRecord record, ActivityState state, String reason) {
-        final Task parentTask = getParent().asTask();
-        if (parentTask != null) {
-            parentTask.onActivityStateChanged(record, state, reason);
-            // We still want to update the resumed activity if the parent task is created by
-            // organizer in order to keep the information synced once got reparented out from the
-            // organized task.
-            if (!parentTask.mCreatedByOrganizer) {
-                return;
-            }
-        }
-
+        warnForNonLeafTask("onActivityStateChanged");
         if (record == mResumedActivity && state != RESUMED) {
             setResumedActivity(null, reason + " - onActivityStateChanged");
         }
@@ -3134,12 +3144,12 @@ class Task extends WindowContainer<WindowContainer> {
         // and focused application if needed.
         focusableTask.moveToFront(myReason);
         // Top display focused stack is changed, update top resumed activity if needed.
-        if (rootTask.mResumedActivity != null) {
+        if (rootTask.getResumedActivity() != null) {
             mTaskSupervisor.updateTopResumedActivityIfNeeded();
             // Set focused app directly because if the next focused activity is already resumed
             // (e.g. the next top activity is on a different display), there won't have activity
             // state change to update it.
-            mAtmService.setResumedActivityUncheckLocked(rootTask.mResumedActivity, reason);
+            mAtmService.setResumedActivityUncheckLocked(rootTask.getResumedActivity(), reason);
         }
         return rootTask;
     }
@@ -5445,6 +5455,12 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     void awakeFromSleepingLocked() {
+        if (!isLeafTask()) {
+            forAllLeafTasks((task) -> task.awakeFromSleepingLocked(),
+                    true /* traverseTopToBottom */);
+            return;
+        }
+
         if (mPausingActivity != null) {
             Slog.d(TAG, "awakeFromSleepingLocked: previously pausing activity didn't pause");
             mPausingActivity.activityPaused(true);
@@ -5469,8 +5485,17 @@ class Task extends WindowContainer<WindowContainer> {
      * process of going to sleep (checkReadyForSleep will be called when that process finishes).
      */
     boolean goToSleepIfPossible(boolean shuttingDown) {
-        boolean shouldSleep = true;
+        if (!isLeafTask()) {
+            final int[] sleepInProgress = {0};
+            forAllLeafTasks((t) -> {
+                if (!t.goToSleepIfPossible(shuttingDown)) {
+                    sleepInProgress[0]++;
+                }
+            }, true);
+            return sleepInProgress[0] == 0;
+        }
 
+        boolean shouldSleep = true;
         if (mResumedActivity != null) {
             // Still have something resumed; can't sleep until it is paused.
             ProtoLog.v(WM_DEBUG_STATES, "Sleep needs to pause %s", mResumedActivity);
@@ -5530,6 +5555,16 @@ class Task extends WindowContainer<WindowContainer> {
      */
     final boolean startPausingLocked(boolean userLeaving, boolean uiSleeping,
             ActivityRecord resuming, String reason) {
+        if (!isLeafTask()) {
+            final int[] pausing = {0};
+            forAllLeafTasks((t) -> {
+                if (t.startPausingLocked(userLeaving, uiSleeping, resuming, reason)) {
+                    pausing[0]++;
+                }
+            }, true /* traverseTopToBottom */);
+            return pausing[0] > 0;
+        }
+
         if (mPausingActivity != null) {
             Slog.wtf(TAG, "Going to pause when pause is already pending for " + mPausingActivity
                     + " state=" + mPausingActivity.getState());
@@ -5660,6 +5695,10 @@ class Task extends WindowContainer<WindowContainer> {
 
     @VisibleForTesting
     void completePauseLocked(boolean resumeNext, ActivityRecord resuming) {
+        // Complete the pausing process of a pausing activity, so it doesn't make sense to
+        // operate on non-leaf tasks.
+        warnForNonLeafTask("completePauseLocked");
+
         ActivityRecord prev = mPausingActivity;
         ProtoLog.v(WM_DEBUG_STATES, "Complete pause: %s", prev);
 
@@ -5919,24 +5958,34 @@ class Task extends WindowContainer<WindowContainer> {
             return false;
         }
 
-        boolean result = false;
+        boolean someActivityResumed = false;
         try {
             // Protect against recursion.
             mInResumeTopActivity = true;
 
-            // TODO(b/172885410): Allow the top activities of all visible leaf tasks to be resumed
-            if (mCreatedByOrganizer && !isLeafTask()
-                    && getConfiguration().windowConfiguration.getWindowingMode()
-                            == WINDOWING_MODE_FULLSCREEN) {
-                for (int i = mChildren.size() - 1; i >= 0; i--) {
-                    final Task child = (Task) getChildAt(i);
-                    if (!child.shouldBeVisible(null /* starting */)) {
+            if (isLeafTask()) {
+                someActivityResumed = resumeTopActivityInnerLocked(prev, options);
+            } else {
+                int idx = mChildren.size() - 1;
+                while (idx >= 0) {
+                    final Task child = (Task) getChildAt(idx--);
+                    if (!child.isFocusableAndVisible()) {
                         break;
                     }
-                    result |= child.resumeTopActivityUncheckedLocked(prev, options);
+
+                    // Only allow one activity to be resumed among sibling tasks in split-screen.
+                    if (inSplitScreenWindowingMode() && someActivityResumed) {
+                        break;
+                    }
+
+                    someActivityResumed |= child.resumeTopActivityUncheckedLocked(prev, options);
+                    // Doing so in order to prevent IndexOOB since hierarchy might changes while
+                    // resuming activities, for example dismissing split-screen while starting
+                    // non-resizeable activity.
+                    if (idx >= mChildren.size()) {
+                        idx = mChildren.size() - 1;
+                    }
                 }
-            } else {
-                result = resumeTopActivityInnerLocked(prev, options);
             }
 
             // When resuming the top activity, it may be necessary to pause the top activity (for
@@ -5954,7 +6003,7 @@ class Task extends WindowContainer<WindowContainer> {
             mInResumeTopActivity = false;
         }
 
-        return result;
+        return someActivityResumed;
     }
 
     @GuardedBy("mService")
@@ -6068,7 +6117,7 @@ class Task extends WindowContainer<WindowContainer> {
             // So, why aren't we using prev here??? See the param comment on the method. prev
             // doesn't represent the last resumed activity. However, the last focus stack does if
             // it isn't null.
-            lastResumed = lastFocusedStack.mResumedActivity;
+            lastResumed = lastFocusedStack.getResumedActivity();
             if (userLeaving && inMultiWindowMode() && lastFocusedStack.shouldBeVisible(next)) {
                 // The user isn't leaving if this stack is the multi-window mode and the last
                 // focused stack should still be visible.
@@ -6237,7 +6286,7 @@ class Task extends WindowContainer<WindowContainer> {
             next.startLaunchTickingLocked();
 
             ActivityRecord lastResumedActivity =
-                    lastFocusedStack == null ? null : lastFocusedStack.mResumedActivity;
+                    lastFocusedStack == null ? null : lastFocusedStack.getResumedActivity();
             final ActivityState lastState = next.getState();
 
             mAtmService.updateCpuStats();
@@ -7091,6 +7140,7 @@ class Task extends WindowContainer<WindowContainer> {
      * @return {@code true} if the process of the pausing activity is died.
      */
     boolean handleAppDied(WindowProcessController app) {
+        warnForNonLeafTask("handleAppDied");
         boolean isPausingDied = false;
         if (mPausingActivity != null && mPausingActivity.app == app) {
             ProtoLog.v(WM_DEBUG_STATES, "App died while pausing: %s",
@@ -7128,7 +7178,7 @@ class Task extends WindowContainer<WindowContainer> {
             printed = true;
         }
 
-        printed |= printThisActivity(pw, mPausingActivity, dumpPackage, false,
+        printed |= printThisActivity(pw, getPausingActivity(), dumpPackage, false,
                 "    mPausingActivity: ", null);
         printed |= printThisActivity(pw, getResumedActivity(), dumpPackage, false,
                 "    mResumedActivity: ", null);
@@ -7307,7 +7357,7 @@ class Task extends WindowContainer<WindowContainer> {
         task.updateOverrideConfigurationForStack(this);
 
         final ActivityRecord topRunningActivity = task.topRunningActivityLocked();
-        final boolean wasResumed = topRunningActivity == task.getRootTask().mResumedActivity;
+        final boolean wasResumed = topRunningActivity == task.mResumedActivity;
 
         boolean toTop = position >= getChildCount();
         boolean includingParents = toTop || getDisplayArea().getNextFocusableRootTask(this,
@@ -7330,7 +7380,7 @@ class Task extends WindowContainer<WindowContainer> {
         if (wasResumed) {
             if (mResumedActivity != null) {
                 Log.wtf(TAG, "mResumedActivity was already set when moving mResumedActivity from"
-                        + " other stack to this stack mResumedActivity=" + mResumedActivity
+                        + " other stack to this task mResumedActivity=" + mResumedActivity
                         + " other mResumedActivity=" + topRunningActivity);
             }
             topRunningActivity.setState(RESUMED, "positionChildAt");
@@ -7354,34 +7404,6 @@ class Task extends WindowContainer<WindowContainer> {
         // properly in {@link DisplayContent#getTopInsertPosition()} in both cases, we can just
         // request that the stack is put at top here.
         taskDisplayArea.positionChildAt(POSITION_TOP, this, false /* includingParents */);
-    }
-
-    /** NOTE: Should only be called from {@link Task#reparent}. */
-    void moveToFrontAndResumeStateIfNeeded(ActivityRecord r, boolean moveToFront, boolean setResume,
-            boolean setPause, String reason) {
-        if (!moveToFront) {
-            return;
-        }
-
-        final ActivityState origState = r.getState();
-        // If the activity owns the last resumed activity, transfer that together,
-        // so that we don't resume the same activity again in the new stack.
-        // Apps may depend on onResume()/onPause() being called in pairs.
-        if (setResume) {
-            r.setState(RESUMED, "moveToFrontAndResumeStateIfNeeded");
-        }
-        // If the activity was previously pausing, then ensure we transfer that as well
-        if (setPause) {
-            mPausingActivity = r;
-            r.schedulePauseTimeout();
-        }
-        // Move the stack in which we are placing the activity to the front.
-        moveToFront(reason);
-        // If the original state is resumed, there is no state change to update focused app.
-        // So here makes sure the activity focus is set if it is the top.
-        if (origState == RESUMED && r == mRootWindowContainer.getTopResumedActivity()) {
-            mAtmService.setResumedActivityUncheckLocked(r, reason);
-        }
     }
 
     void dismissPip() {
@@ -7530,6 +7552,15 @@ class Task extends WindowContainer<WindowContainer> {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Simply check and give warning logs if this is not operated on leaf task.
+     */
+    private void warnForNonLeafTask(String func) {
+        if (!isLeafTask()) {
+            Slog.w(TAG, func + " on non-leaf task " + this);
+        }
     }
 
     /**

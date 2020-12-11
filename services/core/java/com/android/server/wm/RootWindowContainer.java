@@ -1888,13 +1888,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // First, found out what is currently the foreground app, so that we don't blow away the
         // previous app if this activity is being hosted by the process that is actually still the
         // foreground.
-        WindowProcessController fgApp = getItemFromRootTasks(stack -> {
-            if (isTopDisplayFocusedRootTask(stack)) {
-                final ActivityRecord resumedActivity = stack.getResumedActivity();
+        WindowProcessController fgApp = getItemFromRootTasks(rootTask -> {
+            if (isTopDisplayFocusedRootTask(rootTask)) {
+                final ActivityRecord resumedActivity = rootTask.getResumedActivity();
                 if (resumedActivity != null) {
                     return resumedActivity.app;
-                } else if (stack.mPausingActivity != null) {
-                    return stack.mPausingActivity.app;
+                } else if (rootTask.getPausingActivity() != null) {
+                    return rootTask.getPausingActivity().app;
                 }
             }
             return null;
@@ -2709,8 +2709,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         if (DEBUG_SWITCH) {
             Slog.v(TAG_SWITCH, "Destroying " + r + " in state " + r.getState()
-                    + " resumed=" + r.getStack().mResumedActivity + " pausing="
-                    + r.getStack().mPausingActivity + " for reason " + mDestroyAllActivitiesReason);
+                    + " resumed=" + r.getTask().getResumedActivity() + " pausing="
+                    + r.getTask().getPausingActivity() + " for reason "
+                    + mDestroyAllActivitiesReason);
         }
 
         r.destroyImmediately(mDestroyAllActivitiesReason);
@@ -3301,8 +3302,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     boolean allPausedActivitiesComplete() {
         boolean[] pausing = {true};
-        final boolean hasActivityNotCompleted = forAllRootTasks(stack -> {
-            final ActivityRecord r = stack.mPausingActivity;
+        final boolean hasActivityNotCompleted = forAllLeafTasks(task -> {
+            final ActivityRecord r = task.getPausingActivity();
             if (r != null && !r.isState(PAUSED, STOPPED, STOPPING, FINISHING)) {
                 ProtoLog.d(WM_DEBUG_STATES, "allPausedActivitiesComplete: "
                         + "r=%s state=%s", r, r.getState());

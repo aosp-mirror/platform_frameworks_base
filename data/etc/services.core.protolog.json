@@ -1021,12 +1021,6 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "-903853754": {
-      "message": "pauseBackStacks: stack=%s mResumedActivity=%s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_STATES",
-      "at": "com\/android\/server\/wm\/TaskDisplayArea.java"
-    },
     "-883738232": {
       "message": "Adding more than one toast window for UID at a time.",
       "level": "WARN",
@@ -2124,6 +2118,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/AppTransition.java"
+    },
+    "349443311": {
+      "message": "pauseBackStacks: task=%s mResumedActivity=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_STATES",
+      "at": "com\/android\/server\/wm\/TaskDisplayArea.java"
     },
     "355720268": {
       "message": "stopFreezingDisplayLocked: Unfreezing now",
