@@ -67,7 +67,7 @@ public class NotificationRoundnessManager {
         }
     }
 
-    private boolean updateViewWithoutCallback(ExpandableView view,
+    boolean updateViewWithoutCallback(ExpandableView view,
             boolean animate) {
         float topRoundness = getRoundness(view, true /* top */);
         float bottomRoundness = getRoundness(view, false /* top */);
@@ -107,7 +107,9 @@ public class NotificationRoundnessManager {
     }
 
     private float getRoundness(ExpandableView view, boolean top) {
-        if ((view.isPinned() || view.isHeadsUpAnimatingAway()) && !mExpanded) {
+        if ((view.isPinned()
+                || view.isBeingSwiped()
+                || (view.isHeadsUpAnimatingAway()) && !mExpanded)) {
             return 1.0f;
         }
         if (isFirstInSection(view, true /* include first section */) && top) {
