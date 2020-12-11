@@ -440,6 +440,153 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private String mStagedSessionErrorMessage;
 
+    @Nullable
+    final StagedSession mStagedSession;
+
+    @VisibleForTesting
+    public class StagedSession implements StagingManager.StagedSession {
+        @Override
+        public List<StagingManager.StagedSession> getChildSessions() {
+            if (!params.isMultiPackage) {
+                return Collections.EMPTY_LIST;
+            }
+            synchronized (mLock) {
+                int size = mChildSessions.size();
+                List<StagingManager.StagedSession> childSessions = new ArrayList<>(size);
+                for (int i = 0; i < size; ++i) {
+                    childSessions.add(mChildSessions.valueAt(i).mStagedSession);
+                }
+                return childSessions;
+            }
+        }
+
+        @Override
+        public SessionParams sessionParams() {
+            return params;
+        }
+
+        @Override
+        public boolean isMultiPackage() {
+            return params.isMultiPackage;
+        }
+
+        @Override
+        public boolean isApexSession() {
+            return (params.installFlags & PackageManager.INSTALL_APEX) != 0;
+        }
+
+        @Override
+        public int sessionId() {
+            return sessionId;
+        }
+
+        @Override
+        public boolean containsApexSession() {
+            return PackageInstallerSession.this.containsApexSession();
+        }
+
+        @Override
+        public String getPackageName() {
+            return PackageInstallerSession.this.getPackageName();
+        }
+
+        @Override
+        public void setSessionReady() {
+            setStagedSessionReady();
+        }
+
+        @Override
+        public void setSessionFailed(int errorCode, String errorMessage) {
+            setStagedSessionFailed(errorCode, errorMessage);
+        }
+
+        @Override
+        public void setSessionApplied() {
+            setStagedSessionApplied();
+        }
+
+        @Override
+        public boolean containsApkSession() {
+            return PackageInstallerSession.this.containsApkSession();
+        }
+
+        @Override
+        public void installSession(IntentSender statusReceiver) {
+            installStagedSession(statusReceiver);
+
+        }
+
+        @Override
+        public boolean hasParentSessionId() {
+            return PackageInstallerSession.this.hasParentSessionId();
+        }
+
+        @Override
+        public int getParentSessionId() {
+            return PackageInstallerSession.this.getParentSessionId();
+        }
+
+        @Override
+        public boolean isCommitted() {
+            return PackageInstallerSession.this.isCommitted();
+        }
+
+        @Override
+        public boolean isInTerminalState() {
+            return isStagedAndInTerminalState();
+        }
+
+        @Override
+        public boolean isDestroyed() {
+            return PackageInstallerSession.this.isDestroyed();
+        }
+
+        @Override
+        public long getCommittedMillis() {
+            return PackageInstallerSession.this.getCommittedMillis();
+        }
+
+        @Override
+        public boolean sessionContains(Predicate<StagingManager.StagedSession> filter) {
+            return PackageInstallerSession.this.sessionContains(s -> filter.test(s.mStagedSession));
+        }
+
+        @Override
+        public boolean isSessionReady() {
+            return isStagedSessionReady();
+        }
+
+        @Override
+        public boolean isSessionApplied() {
+            return isStagedSessionApplied();
+        }
+
+        @Override
+        public boolean isSessionFailed() {
+            return isStagedSessionFailed();
+        }
+
+        @Override
+        public void abandon() {
+            PackageInstallerSession.this.abandon();
+        }
+
+        @Override
+        public boolean notifyStartPreRebootVerification() {
+            return notifyStagedStartPreRebootVerification();
+        }
+
+        @Override
+        public void notifyEndPreRebootVerification() {
+            notifyStagedEndPreRebootVerification();
+        }
+
+        @Override
+        public void verifySession() {
+            verifyStagedSession();
+        }
+    }
+
     /**
      * The callback to run when pre-reboot verification has ended. Used by {@link #abandonStaged()}
      * to delay session clean-up until it is safe to do so.
@@ -697,6 +844,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mStagedSessionErrorCode = stagedSessionErrorCode;
         mStagedSessionErrorMessage =
                 stagedSessionErrorMessage != null ? stagedSessionErrorMessage : "";
+        mStagedSession = params.isStaged ? new StagedSession() : null;
 
         if (isDataLoaderInstallation()) {
             if (isApexSession()) {
@@ -1728,7 +1876,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     SessionInfo.STAGED_SESSION_VERIFICATION_FAILED, msgWithErrorCode);
             // TODO(b/136257624): Remove this once all verification logic has been transferred out
             //  of StagingManager.
-            mStagingManager.notifyVerificationComplete(this);
+            mStagingManager.notifyVerificationComplete(mStagedSession);
         } else {
             // Dispatch message to remove session from PackageInstallerService.
             dispatchSessionFinished(error, msg, null);
@@ -1847,7 +1995,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     .write();
         }
         if (params.isStaged) {
-            mStagingManager.commitSession(this);
+            mStagingManager.commitSession(mStagedSession);
             // TODO(b/136257624): CTS test fails if we don't send session finished broadcast, even
             //  though ideally, we just need to send session committed broadcast.
             dispatchSessionFinished(INSTALL_SUCCEEDED, "Session staged", null);
@@ -2188,7 +2336,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (isStaged()) {
             // TODO(b/136257624): Remove this once all verification logic has been transferred out
             //  of StagingManager.
-            mStagingManager.notifyPreRebootVerification_Apk_Complete(this);
+            mStagingManager.notifyPreRebootVerification_Apk_Complete(mStagedSession);
             // TODO(b/136257624): We also need to destroy internals for verified staged session,
             //  otherwise file descriptors are never closed for verified staged session until reboot
             return;
@@ -3223,7 +3371,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             r = () -> {
                 assertNotLocked("abandonStaged");
                 if (isCommitted) {
-                    mStagingManager.abortCommittedSession(this);
+                    mStagingManager.abortCommittedSession(mStagedSession);
                 }
                 cleanStageDir(childSessions);
                 destroyInternal();

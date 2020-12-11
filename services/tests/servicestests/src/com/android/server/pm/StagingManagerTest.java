@@ -33,8 +33,11 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.io.File;
+import java.util.function.Predicate;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -70,8 +73,8 @@ public class StagingManagerTest {
     public void checkNonOverlappingWithStagedSessions_laterSessionShouldNotFailEarlierOnes()
             throws Exception {
         // Create 2 sessions with overlapping packages
-        PackageInstallerSession session1 = createSession(111, "com.foo", 1);
-        PackageInstallerSession session2 = createSession(222, "com.foo", 2);
+        StagingManager.StagedSession session1 = createSession(111, "com.foo", 1);
+        StagingManager.StagedSession session2 = createSession(222, "com.foo", 2);
 
         mStagingManager.createSession(session1);
         mStagingManager.createSession(session2);
@@ -82,7 +85,7 @@ public class StagingManagerTest {
                 () -> mStagingManager.checkNonOverlappingWithStagedSessions(session2));
     }
 
-    private PackageInstallerSession createSession(int sessionId, String packageName,
+    private StagingManager.StagedSession createSession(int sessionId, String packageName,
             long committedMillis) {
         PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
                 PackageInstaller.SessionParams.MODE_FULL_INSTALL);
@@ -121,8 +124,12 @@ public class StagingManagerTest {
                 /* stagedSessionErrorCode */ PackageInstaller.SessionInfo.STAGED_SESSION_NO_ERROR,
                 /* stagedSessionErrorMessage */ "no error");
 
-        session = spy(session);
-        doReturn(packageName).when(session).getPackageName();
-        return session;
+        StagingManager.StagedSession stagedSession = spy(session.mStagedSession);
+        doReturn(packageName).when(stagedSession).getPackageName();
+        doAnswer(invocation -> {
+            Predicate<StagingManager.StagedSession> filter = invocation.getArgument(0);
+            return filter.test(stagedSession);
+        }).when(stagedSession).sessionContains(any());
+        return stagedSession;
     }
 }

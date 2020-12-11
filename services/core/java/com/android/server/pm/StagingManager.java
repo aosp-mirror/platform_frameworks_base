@@ -32,6 +32,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
+import android.content.pm.PackageInstaller.SessionInfo.StagedSessionErrorCode;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser.PackageParserException;
@@ -82,6 +83,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -102,7 +104,7 @@ public class StagingManager {
     private String mFailureReason;
 
     @GuardedBy("mStagedSessions")
-    private final SparseArray<PackageInstallerSession> mStagedSessions = new SparseArray<>();
+    private final SparseArray<StagedSession> mStagedSessions = new SparseArray<>();
 
     @GuardedBy("mFailedPackageNames")
     private final List<String> mFailedPackageNames = new ArrayList<>();
@@ -110,6 +112,35 @@ public class StagingManager {
 
     @GuardedBy("mSuccessfulStagedSessionIds")
     private final List<Integer> mSuccessfulStagedSessionIds = new ArrayList<>();
+
+    interface StagedSession {
+        boolean isMultiPackage();
+        boolean isApexSession();
+        boolean isCommitted();
+        boolean isInTerminalState();
+        boolean isDestroyed();
+        boolean isSessionReady();
+        boolean isSessionApplied();
+        boolean isSessionFailed();
+        List<StagedSession> getChildSessions();
+        String getPackageName();
+        int getParentSessionId();
+        int sessionId();
+        PackageInstaller.SessionParams sessionParams();
+        boolean sessionContains(Predicate<StagedSession> filter);
+        boolean containsApkSession();
+        boolean containsApexSession();
+        void setSessionReady();
+        void setSessionFailed(@StagedSessionErrorCode int errorCode, String errorMessage);
+        void setSessionApplied();
+        void installSession(IntentSender statusReceiver);
+        boolean hasParentSessionId();
+        long getCommittedMillis();
+        void abandon();
+        boolean notifyStartPreRebootVerification();
+        void notifyEndPreRebootVerification();
+        void verifySession();
+    }
 
     StagingManager(Context context, Supplier<PackageParser2> packageParserSupplier) {
         mContext = context;
@@ -213,20 +244,20 @@ public class StagingManager {
                         + " compatible with the one currently installed on device");
     }
 
-    private List<PackageInfo> submitSessionToApexService(@NonNull PackageInstallerSession session,
+    private List<PackageInfo> submitSessionToApexService(@NonNull StagedSession session,
             int rollbackId) throws PackageManagerException {
         final IntArray childSessionIds = new IntArray();
         if (session.isMultiPackage()) {
-            for (PackageInstallerSession s : session.getChildSessions()) {
+            for (StagedSession s : session.getChildSessions()) {
                 if (s.isApexSession()) {
-                    childSessionIds.add(s.sessionId);
+                    childSessionIds.add(s.sessionId());
                 }
             }
         }
         ApexSessionParams apexSessionParams = new ApexSessionParams();
-        apexSessionParams.sessionId = session.sessionId;
+        apexSessionParams.sessionId = session.sessionId();
         apexSessionParams.childSessionIds = childSessionIds.toArray();
-        if (session.params.installReason == PackageManager.INSTALL_REASON_ROLLBACK) {
+        if (session.sessionParams().installReason == PackageManager.INSTALL_REASON_ROLLBACK) {
             apexSessionParams.isRollback = true;
             apexSessionParams.rollbackId = rollbackId;
         } else {
@@ -269,7 +300,7 @@ public class StagingManager {
             result.add(packageInfo);
             apexPackageNames.add(packageInfo.packageName);
         }
-        Slog.d(TAG, "Session " + session.sessionId + " has following APEX packages: "
+        Slog.d(TAG, "Session " + session.sessionId() + " has following APEX packages: "
                 + apexPackageNames);
         return result;
     }
@@ -288,22 +319,23 @@ public class StagingManager {
                 "Could not find rollback id for commit session: " + sessionId);
     }
 
-    private void checkRequiredVersionCode(final PackageInstallerSession session,
+    private void checkRequiredVersionCode(final StagedSession session,
             final PackageInfo activePackage) throws PackageManagerException {
-        if (session.params.requiredInstalledVersionCode == PackageManager.VERSION_CODE_HIGHEST) {
+        if (session.sessionParams().requiredInstalledVersionCode
+                == PackageManager.VERSION_CODE_HIGHEST) {
             return;
         }
         final long activeVersion = activePackage.applicationInfo.longVersionCode;
-        if (activeVersion != session.params.requiredInstalledVersionCode) {
+        if (activeVersion != session.sessionParams().requiredInstalledVersionCode) {
             throw new PackageManagerException(
                     SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                     "Installed version of APEX package " + activePackage.packageName
                             + " does not match required. Active version: " + activeVersion
-                            + " required: " + session.params.requiredInstalledVersionCode);
+                            + " required: " + session.sessionParams().requiredInstalledVersionCode);
         }
     }
 
-    private void checkDowngrade(final PackageInstallerSession session,
+    private void checkDowngrade(final StagedSession session,
             final PackageInfo activePackage, final PackageInfo newPackage)
             throws PackageManagerException {
         final long activeVersion = activePackage.applicationInfo.longVersionCode;
@@ -311,7 +343,7 @@ public class StagingManager {
         final boolean isAppDebuggable = (activePackage.applicationInfo.flags
                 & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
         final boolean allowsDowngrade = PackageManagerServiceUtils.isDowngradePermitted(
-                session.params.installFlags, isAppDebuggable);
+                session.sessionParams().installFlags, isAppDebuggable);
         if (activeVersion > newVersionCode && !allowsDowngrade) {
             throw new PackageManagerException(
                     SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
@@ -363,10 +395,10 @@ public class StagingManager {
     /**
      * Utility function for extracting apex sessions out of multi-package/single session.
      */
-    private List<PackageInstallerSession> extractApexSessions(PackageInstallerSession session) {
-        List<PackageInstallerSession> apexSessions = new ArrayList<>();
+    private List<StagedSession> extractApexSessions(StagedSession session) {
+        List<StagedSession> apexSessions = new ArrayList<>();
         if (session.isMultiPackage()) {
-            for (PackageInstallerSession s : session.getChildSessions()) {
+            for (StagedSession s : session.getChildSessions()) {
                 if (s.containsApexSession()) {
                     apexSessions.add(s);
                 }
@@ -383,14 +415,14 @@ public class StagingManager {
      *
      * @throws PackageManagerException if any apk-in-apex failed to install
      */
-    private void checkInstallationOfApkInApexSuccessful(PackageInstallerSession session)
+    private void checkInstallationOfApkInApexSuccessful(StagedSession session)
             throws PackageManagerException {
-        final List<PackageInstallerSession> apexSessions = extractApexSessions(session);
+        final List<StagedSession> apexSessions = extractApexSessions(session);
         if (apexSessions.isEmpty()) {
             return;
         }
 
-        for (PackageInstallerSession apexSession : apexSessions) {
+        for (StagedSession apexSession : apexSessions) {
             String packageName = apexSession.getPackageName();
             if (!mApexManager.isApkInApexInstallSuccess(packageName)) {
                 throw new PackageManagerException(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
@@ -405,16 +437,16 @@ public class StagingManager {
      * directory directly by PackageManager, as such, RollbackManager need to handle their data
      * separately here.
      */
-    private void snapshotAndRestoreForApexSession(PackageInstallerSession session) {
+    private void snapshotAndRestoreForApexSession(StagedSession session) {
         boolean doSnapshotOrRestore =
-                (session.params.installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0
-                || session.params.installReason == PackageManager.INSTALL_REASON_ROLLBACK;
+                (session.sessionParams().installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0
+                || session.sessionParams().installReason == PackageManager.INSTALL_REASON_ROLLBACK;
         if (!doSnapshotOrRestore) {
             return;
         }
 
         // Find all the apex sessions that needs processing
-        final List<PackageInstallerSession> apexSessions = extractApexSessions(session);
+        final List<StagedSession> apexSessions = extractApexSessions(session);
         if (apexSessions.isEmpty()) {
             return;
         }
@@ -475,7 +507,7 @@ public class StagingManager {
      *  session package names.
      *  Logging needs to wait until the ACTION_BOOT_COMPLETED broadcast is sent.
      */
-    private void prepareForLoggingApexdRevert(@NonNull PackageInstallerSession session,
+    private void prepareForLoggingApexdRevert(@NonNull StagedSession session,
             @NonNull String nativeFailureReason) {
         synchronized (mFailedPackageNames) {
             mNativeFailureReason = nativeFailureReason;
@@ -485,15 +517,15 @@ public class StagingManager {
         }
     }
 
-    private void resumeSession(@NonNull PackageInstallerSession session)
+    private void resumeSession(@NonNull StagedSession session)
             throws PackageManagerException {
-        Slog.d(TAG, "Resuming session " + session.sessionId);
+        Slog.d(TAG, "Resuming session " + session.sessionId());
 
         final boolean hasApex = session.containsApexSession();
         ApexSessionInfo apexSessionInfo = null;
         if (hasApex) {
             // Check with apexservice whether the apex packages have been activated.
-            apexSessionInfo = mApexManager.getStagedSessionInfo(session.sessionId);
+            apexSessionInfo = mApexManager.getStagedSessionInfo(session.sessionId());
 
             // Prepare for logging a native crash during boot, if one occurred.
             if (apexSessionInfo != null && !TextUtils.isEmpty(
@@ -506,7 +538,7 @@ public class StagingManager {
                 // pre-reboot verification, perhaps because the device rebooted in the meantime.
                 // Greedily re-trigger the pre-reboot verification. We want to avoid marking it as
                 // failed when not in checkpoint mode, hence it is being processed separately.
-                Slog.d(TAG, "Found pending staged session " + session.sessionId + " still to "
+                Slog.d(TAG, "Found pending staged session " + session.sessionId() + " still to "
                         + "be verified, resuming pre-reboot verification");
                 mPreRebootVerificationHandler.startPreRebootVerification(session);
                 return;
@@ -523,21 +555,21 @@ public class StagingManager {
             // mode. If not, we fail all sessions.
             if (supportsCheckpoint() && !needsCheckpoint()) {
                 String revertMsg = "Reverting back to safe state. Marking "
-                        + session.sessionId + " as failed.";
+                        + session.sessionId() + " as failed.";
                 final String reasonForRevert = getReasonForRevert();
                 if (!TextUtils.isEmpty(reasonForRevert)) {
                     revertMsg += " Reason for revert: " + reasonForRevert;
                 }
                 Slog.d(TAG, revertMsg);
-                session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_UNKNOWN, revertMsg);
+                session.setSessionFailed(SessionInfo.STAGED_SESSION_UNKNOWN, revertMsg);
                 return;
             }
         } catch (RemoteException e) {
             // Cannot continue staged install without knowing if fs-checkpoint is supported
             Slog.e(TAG, "Checkpoint support unknown. Aborting staged install for session "
-                    + session.sessionId, e);
+                    + session.sessionId(), e);
             // TODO: Mark all staged sessions together and reboot only once
-            session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_UNKNOWN,
+            session.setSessionFailed(SessionInfo.STAGED_SESSION_UNKNOWN,
                     "Checkpoint support unknown. Aborting staged install.");
             if (hasApex) {
                 mApexManager.revertActiveSessions();
@@ -568,7 +600,7 @@ public class StagingManager {
                 // Apexd did not apply the session for some unknown reason. There is no
                 // guarantee that apexd will install it next time. Safer to proactively mark
                 // it as failed.
-                final String errorMsg = "Staged session " + session.sessionId + "at boot "
+                final String errorMsg = "Staged session " + session.sessionId() + "at boot "
                         + "didn't activate nor fail. Marking it as failed anyway.";
                 throw new PackageManagerException(
                         SessionInfo.STAGED_SESSION_ACTIVATION_FAILED, errorMsg);
@@ -580,38 +612,38 @@ public class StagingManager {
             checkInstallationOfApkInApexSuccessful(session);
             checkDuplicateApkInApex(session);
             snapshotAndRestoreForApexSession(session);
-            Slog.i(TAG, "APEX packages in session " + session.sessionId
+            Slog.i(TAG, "APEX packages in session " + session.sessionId()
                     + " were successfully activated. Proceeding with APK packages, if any");
         }
         // The APEX part of the session is activated, proceed with the installation of APKs.
-        Slog.d(TAG, "Installing APK packages in session " + session.sessionId);
+        Slog.d(TAG, "Installing APK packages in session " + session.sessionId());
         installApksInSession(session);
 
-        Slog.d(TAG, "Marking session " + session.sessionId + " as applied");
-        session.setStagedSessionApplied();
+        Slog.d(TAG, "Marking session " + session.sessionId() + " as applied");
+        session.setSessionApplied();
         if (hasApex) {
             try {
                 if (supportsCheckpoint()) {
                     // Store the session ID, which will be marked as successful by ApexManager
                     // upon boot completion.
                     synchronized (mSuccessfulStagedSessionIds) {
-                        mSuccessfulStagedSessionIds.add(session.sessionId);
+                        mSuccessfulStagedSessionIds.add(session.sessionId());
                     }
                 } else {
                     // Mark sessions as successful immediately on non-checkpointing devices.
-                    mApexManager.markStagedSessionSuccessful(session.sessionId);
+                    mApexManager.markStagedSessionSuccessful(session.sessionId());
                 }
             } catch (RemoteException e) {
                 Slog.w(TAG, "Checkpoint support unknown, marking session as successful "
                         + "immediately.");
-                mApexManager.markStagedSessionSuccessful(session.sessionId);
+                mApexManager.markStagedSessionSuccessful(session.sessionId());
             }
         }
     }
 
-    void onInstallationFailure(PackageInstallerSession session, PackageManagerException e) {
-        session.setStagedSessionFailed(e.error, e.getMessage());
-        abortCheckpoint(session.sessionId, e.getMessage());
+    void onInstallationFailure(StagedSession session, PackageManagerException e) {
+        session.setSessionFailed(e.error, e.getMessage());
+        abortCheckpoint(session.sessionId(), e.getMessage());
 
         // If checkpoint is not supported, we have to handle failure for one staged session.
         if (!session.containsApexSession()) {
@@ -641,26 +673,26 @@ public class StagingManager {
     /**
      * Throws a PackageManagerException if there are duplicate packages in apk and apk-in-apex.
      */
-    private void checkDuplicateApkInApex(@NonNull PackageInstallerSession session)
+    private void checkDuplicateApkInApex(@NonNull StagedSession session)
             throws PackageManagerException {
         if (!session.isMultiPackage()) {
             return;
         }
         final Set<String> apkNames = new ArraySet<>();
-        for (PackageInstallerSession s : session.getChildSessions()) {
+        for (StagedSession s : session.getChildSessions()) {
             if (!s.isApexSession()) {
                 apkNames.add(s.getPackageName());
             }
         }
-        final List<PackageInstallerSession> apexSessions = extractApexSessions(session);
-        for (PackageInstallerSession apexSession : apexSessions) {
+        final List<StagedSession> apexSessions = extractApexSessions(session);
+        for (StagedSession apexSession : apexSessions) {
             String packageName = apexSession.getPackageName();
             for (String apkInApex : mApexManager.getApksInApex(packageName)) {
                 if (!apkNames.add(apkInApex)) {
                     throw new PackageManagerException(
                             SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
                             "Package: " + packageName + " in session: "
-                                    + apexSession.sessionId + " has duplicate apk-in-apex: "
+                                    + apexSession.sessionId() + " has duplicate apk-in-apex: "
                                     + apkInApex, null);
 
                 }
@@ -668,14 +700,14 @@ public class StagingManager {
         }
     }
 
-    private void installApksInSession(PackageInstallerSession session)
+    private void installApksInSession(StagedSession session)
             throws PackageManagerException {
         if (!session.containsApkSession()) {
             return;
         }
 
         final LocalIntentReceiverSync receiver = new LocalIntentReceiverSync();
-        session.installStagedSession(receiver.getIntentSender());
+        session.installSession(receiver.getIntentSender());
         final Intent result = receiver.getResult();
         final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
                 PackageInstaller.STATUS_FAILURE);
@@ -683,31 +715,31 @@ public class StagingManager {
             final String errorMessage = result.getStringExtra(
                     PackageInstaller.EXTRA_STATUS_MESSAGE);
             Slog.e(TAG, "Failure to install APK staged session "
-                    + session.sessionId + " [" + errorMessage + "]");
+                    + session.sessionId() + " [" + errorMessage + "]");
             throw new PackageManagerException(
                     SessionInfo.STAGED_SESSION_ACTIVATION_FAILED, errorMessage);
         }
     }
 
-    void commitSession(@NonNull PackageInstallerSession session) {
+    void commitSession(@NonNull StagedSession session) {
         // Store this parent session which will be used to check overlapping later
         createSession(session);
         mPreRebootVerificationHandler.startPreRebootVerification(session);
     }
 
-    private int getSessionIdForParentOrSelf(PackageInstallerSession session) {
-        return session.hasParentSessionId() ? session.getParentSessionId() : session.sessionId;
+    private int getSessionIdForParentOrSelf(StagedSession session) {
+        return session.hasParentSessionId() ? session.getParentSessionId() : session.sessionId();
     }
 
-    private PackageInstallerSession getParentSessionOrSelf(PackageInstallerSession session) {
+    private StagedSession getParentSessionOrSelf(StagedSession session) {
         return session.hasParentSessionId()
                 ? getStagedSession(session.getParentSessionId())
                 : session;
     }
 
-    private boolean isRollback(PackageInstallerSession session) {
-        final PackageInstallerSession root = getParentSessionOrSelf(session);
-        return root.params.installReason == PackageManager.INSTALL_REASON_ROLLBACK;
+    private boolean isRollback(StagedSession session) {
+        final StagedSession root = getParentSessionOrSelf(session);
+        return root.sessionParams().installReason == PackageManager.INSTALL_REASON_ROLLBACK;
     }
 
     /**
@@ -722,7 +754,7 @@ public class StagingManager {
      * @throws PackageManagerException if session fails the check
      */
     @VisibleForTesting
-    void checkNonOverlappingWithStagedSessions(@NonNull PackageInstallerSession session)
+    void checkNonOverlappingWithStagedSessions(@NonNull StagedSession session)
             throws PackageManagerException {
         if (session.isMultiPackage()) {
             // We cannot say a parent session overlaps until we process its children
@@ -732,7 +764,7 @@ public class StagingManager {
         String packageName = session.getPackageName();
         if (packageName == null) {
             throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                    "Cannot stage session " + session.sessionId + " with package name null");
+                    "Cannot stage session " + session.sessionId() + " with package name null");
         }
 
         boolean supportsCheckpoint = ((StorageManager) mContext.getSystemService(
@@ -742,9 +774,9 @@ public class StagingManager {
 
         synchronized (mStagedSessions) {
             for (int i = 0; i < mStagedSessions.size(); i++) {
-                final PackageInstallerSession stagedSession = mStagedSessions.valueAt(i);
+                final StagedSession stagedSession = mStagedSessions.valueAt(i);
                 if (stagedSession.hasParentSessionId() || !stagedSession.isCommitted()
-                        || stagedSession.isStagedAndInTerminalState()
+                        || stagedSession.isInTerminalState()
                         || stagedSession.isDestroyed()) {
                     continue;
                 }
@@ -759,8 +791,8 @@ public class StagingManager {
                 // From here on, stagedSession is a parent active staged session
 
                 // Check if session is one of the active sessions
-                if (getSessionIdForParentOrSelf(session) == stagedSession.sessionId) {
-                    Slog.w(TAG, "Session " + session.sessionId + " is already staged");
+                if (getSessionIdForParentOrSelf(session) == stagedSession.sessionId()) {
+                    Slog.w(TAG, "Session " + session.sessionId() + " is already staged");
                     continue;
                 }
 
@@ -769,24 +801,25 @@ public class StagingManager {
                     if (isRollback) {
                         // If the new session is a rollback, then it gets priority. The existing
                         // session is failed to unblock rollback.
-                        final PackageInstallerSession root = stagedSession;
+                        final StagedSession root = stagedSession;
                         if (!ensureActiveApexSessionIsAborted(root)) {
-                            Slog.e(TAG, "Failed to abort apex session " + root.sessionId);
+                            Slog.e(TAG, "Failed to abort apex session " + root.sessionId());
                             // Safe to ignore active apex session abort failure since session
                             // will be marked failed on next step and staging directory for session
                             // will be deleted.
                         }
-                        root.setStagedSessionFailed(
+                        root.setSessionFailed(
                                 SessionInfo.STAGED_SESSION_CONFLICT,
-                                "Session was blocking rollback session: " + session.sessionId);
-                        Slog.i(TAG, "Session " + root.sessionId + " is marked failed due to "
-                                + "blocking rollback session: " + session.sessionId);
+                                "Session was blocking rollback session: " + session.sessionId());
+                        Slog.i(TAG, "Session " + root.sessionId() + " is marked failed due to "
+                                + "blocking rollback session: " + session.sessionId());
                     } else {
                         throw new PackageManagerException(
                                 SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                                 "Package: " + session.getPackageName() + " in session: "
-                                        + session.sessionId + " has been staged already by session:"
-                                        + " " + stagedSession.sessionId, null);
+                                        + session.sessionId()
+                                        + " has been staged already by session: "
+                                        + stagedSession.sessionId(), null);
                     }
                 }
 
@@ -803,24 +836,24 @@ public class StagingManager {
     }
 
     @VisibleForTesting
-    void createSession(@NonNull PackageInstallerSession sessionInfo) {
+    void createSession(@NonNull StagedSession sessionInfo) {
         synchronized (mStagedSessions) {
-            mStagedSessions.append(sessionInfo.sessionId, sessionInfo);
+            mStagedSessions.append(sessionInfo.sessionId(), sessionInfo);
         }
     }
 
-    void abortSession(@NonNull PackageInstallerSession session) {
+    void abortSession(@NonNull StagedSession session) {
         synchronized (mStagedSessions) {
-            mStagedSessions.remove(session.sessionId);
+            mStagedSessions.remove(session.sessionId());
         }
     }
 
     /**
      * <p>Abort committed staged session
      */
-    void abortCommittedSession(@NonNull PackageInstallerSession session) {
-        int sessionId = session.sessionId;
-        if (session.isStagedAndInTerminalState()) {
+    void abortCommittedSession(@NonNull StagedSession session) {
+        int sessionId = session.sessionId();
+        if (session.isInTerminalState()) {
             Slog.w(TAG, "Cannot abort session in final state: " + sessionId);
             return;
         }
@@ -834,12 +867,12 @@ public class StagingManager {
         }
 
         // A session could be marked ready once its pre-reboot verification ends
-        if (session.isStagedSessionReady()) {
+        if (session.isSessionReady()) {
             if (!ensureActiveApexSessionIsAborted(session)) {
                 // Failed to ensure apex session is aborted, so it can still be staged. We can still
                 // safely cleanup the staged session since pre-reboot verification is complete.
                 // Also, cleaning up the stageDir prevents the apex from being activated.
-                Slog.e(TAG, "Failed to abort apex session " + session.sessionId);
+                Slog.e(TAG, "Failed to abort apex session " + session.sessionId());
             }
         }
 
@@ -853,15 +886,15 @@ public class StagingManager {
      *
      * @return returns true if it is ensured that there is no active apex session, otherwise false
      */
-    private boolean ensureActiveApexSessionIsAborted(PackageInstallerSession session) {
+    private boolean ensureActiveApexSessionIsAborted(StagedSession session) {
         if (!session.containsApexSession()) {
             return true;
         }
-        final ApexSessionInfo apexSession = mApexManager.getStagedSessionInfo(session.sessionId);
+        final ApexSessionInfo apexSession = mApexManager.getStagedSessionInfo(session.sessionId());
         if (apexSession == null || isApexSessionFinalized(apexSession)) {
             return true;
         }
-        return mApexManager.abortStagedSession(session.sessionId);
+        return mApexManager.abortStagedSession(session.sessionId());
     }
 
     private boolean isApexSessionFinalized(ApexSessionInfo session) {
@@ -878,7 +911,7 @@ public class StagingManager {
                 || apexSessionInfo.isRevertFailed;
     }
 
-    void restoreSession(@NonNull PackageInstallerSession session, boolean isDeviceUpgrading) {
+    void restoreSession(@NonNull StagedSession session, boolean isDeviceUpgrading) {
         if (session.hasParentSessionId()) {
             // Only parent sessions can be restored
             return;
@@ -887,16 +920,16 @@ public class StagingManager {
         createSession(session);
         // The preconditions used during pre-reboot verification might have changed when device
         // is upgrading. Updated staged sessions to activation failed before we resume the session.
-        PackageInstallerSession sessionToResume = session;
-        if (isDeviceUpgrading && !sessionToResume.isStagedAndInTerminalState()) {
-            sessionToResume.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
+        StagedSession sessionToResume = session;
+        if (isDeviceUpgrading && !sessionToResume.isInTerminalState()) {
+            sessionToResume.setSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
                         "Build fingerprint has changed");
             return;
         }
         checkStateAndResume(sessionToResume);
     }
 
-    private void checkStateAndResume(@NonNull PackageInstallerSession session) {
+    private void checkStateAndResume(@NonNull StagedSession session) {
         // Do not resume session if boot completed already
         if (SystemProperties.getBoolean("sys.boot_completed", false)) {
             return;
@@ -907,7 +940,7 @@ public class StagingManager {
             return;
         }
         // Check the state of the session and decide what to do next.
-        if (session.isStagedSessionFailed() || session.isStagedSessionApplied()) {
+        if (session.isSessionFailed() || session.isSessionApplied()) {
             // Final states, nothing to do.
             return;
         }
@@ -916,7 +949,7 @@ public class StagingManager {
             session.abandon();
             return;
         }
-        if (!session.isStagedSessionReady()) {
+        if (!session.isSessionReady()) {
             // The framework got restarted before the pre-reboot verification could complete,
             // restart the verification.
             mPreRebootVerificationHandler.startPreRebootVerification(session);
@@ -998,8 +1031,8 @@ public class StagingManager {
         }
     }
 
-    private PackageInstallerSession getStagedSession(int sessionId) {
-        PackageInstallerSession session;
+    private StagedSession getStagedSession(int sessionId) {
+        StagedSession session;
         synchronized (mStagedSessions) {
             session = mStagedSessions.get(sessionId);
         }
@@ -1009,20 +1042,20 @@ public class StagingManager {
     // TODO(b/136257624): Temporary API to let PMS communicate with StagingManager. When all
     //  verification logic is extracted out of StagingManager into PMS, we can remove
     //  this.
-    void notifyVerificationComplete(PackageInstallerSession session) {
+    void notifyVerificationComplete(StagedSession session) {
         mPreRebootVerificationHandler.onPreRebootVerificationComplete(session);
     }
 
     // TODO(b/136257624): Temporary API to let PMS communicate with StagingManager. When all
     //  verification logic is extracted out of StagingManager into PMS, we can remove
     //  this.
-    void notifyPreRebootVerification_Apk_Complete(@NonNull PackageInstallerSession session) {
+    void notifyPreRebootVerification_Apk_Complete(@NonNull StagedSession session) {
         mPreRebootVerificationHandler.notifyPreRebootVerification_Apk_Complete(session);
     }
 
     private final class PreRebootVerificationHandler extends Handler {
         // Hold sessions before handler gets ready to do the verification.
-        private List<PackageInstallerSession> mPendingSessions;
+        private List<StagedSession> mPendingSessions;
         private boolean mIsReady;
 
         PreRebootVerificationHandler(Looper looper) {
@@ -1052,8 +1085,8 @@ public class StagingManager {
         public void handleMessage(Message msg) {
             final int sessionId = msg.arg1;
             final int rollbackId = msg.arg2;
-            final PackageInstallerSession session = (PackageInstallerSession) msg.obj;
-            if (session.isDestroyed() || session.isStagedSessionFailed()) {
+            final StagedSession session = (StagedSession) msg.obj;
+            if (session.isDestroyed() || session.isSessionFailed()) {
                 // No point in running verification on a destroyed/failed session
                 onPreRebootVerificationComplete(session);
                 return;
@@ -1086,7 +1119,7 @@ public class StagingManager {
             mIsReady = true;
             if (mPendingSessions != null) {
                 for (int i = 0; i < mPendingSessions.size(); i++) {
-                    PackageInstallerSession session = mPendingSessions.get(i);
+                    StagedSession session = mPendingSessions.get(i);
                     startPreRebootVerification(session);
                 }
                 mPendingSessions = null;
@@ -1095,7 +1128,7 @@ public class StagingManager {
 
         // Method for starting the pre-reboot verification
         private synchronized void startPreRebootVerification(
-                @NonNull PackageInstallerSession session) {
+                @NonNull StagedSession session) {
             if (!mIsReady) {
                 if (mPendingSessions == null) {
                     mPendingSessions = new ArrayList<>();
@@ -1104,47 +1137,47 @@ public class StagingManager {
                 return;
             }
 
-            if (session.notifyStagedStartPreRebootVerification()) {
-                int sessionId = session.sessionId;
+            if (session.notifyStartPreRebootVerification()) {
+                int sessionId = session.sessionId();
                 Slog.d(TAG, "Starting preRebootVerification for session " + sessionId);
                 obtainMessage(MSG_PRE_REBOOT_VERIFICATION_START, sessionId, -1, session)
                         .sendToTarget();
             }
         }
 
-        private void onPreRebootVerificationFailure(PackageInstallerSession session,
+        private void onPreRebootVerificationFailure(StagedSession session,
                 @SessionInfo.StagedSessionErrorCode int errorCode, String errorMessage) {
             if (!ensureActiveApexSessionIsAborted(session)) {
-                Slog.e(TAG, "Failed to abort apex session " + session.sessionId);
+                Slog.e(TAG, "Failed to abort apex session " + session.sessionId());
                 // Safe to ignore active apex session abortion failure since session will be marked
                 // failed on next step and staging directory for session will be deleted.
             }
-            session.setStagedSessionFailed(errorCode, errorMessage);
+            session.setSessionFailed(errorCode, errorMessage);
             onPreRebootVerificationComplete(session);
         }
 
         // Things to do when pre-reboot verification completes for a particular sessionId
-        private void onPreRebootVerificationComplete(PackageInstallerSession session) {
-            int sessionId = session.sessionId;
+        private void onPreRebootVerificationComplete(StagedSession session) {
+            int sessionId = session.sessionId();
             Slog.d(TAG, "Stopping preRebootVerification for session " + sessionId);
-            session.notifyStagedEndPreRebootVerification();
+            session.notifyEndPreRebootVerification();
         }
 
         private void notifyPreRebootVerification_Start_Complete(
-                @NonNull PackageInstallerSession session, int rollbackId) {
-            obtainMessage(MSG_PRE_REBOOT_VERIFICATION_APEX, session.sessionId, rollbackId, session)
-                    .sendToTarget();
+                @NonNull StagedSession session, int rollbackId) {
+            obtainMessage(MSG_PRE_REBOOT_VERIFICATION_APEX, session.sessionId(), rollbackId,
+                    session).sendToTarget();
         }
 
         private void notifyPreRebootVerification_Apex_Complete(
-                @NonNull PackageInstallerSession session) {
-            obtainMessage(MSG_PRE_REBOOT_VERIFICATION_APK, session.sessionId, -1, session)
+                @NonNull StagedSession session) {
+            obtainMessage(MSG_PRE_REBOOT_VERIFICATION_APK, session.sessionId(), -1, session)
                     .sendToTarget();
         }
 
         private void notifyPreRebootVerification_Apk_Complete(
-                @NonNull PackageInstallerSession session) {
-            obtainMessage(MSG_PRE_REBOOT_VERIFICATION_END, session.sessionId, -1, session)
+                @NonNull StagedSession session) {
+            obtainMessage(MSG_PRE_REBOOT_VERIFICATION_END, session.sessionId(), -1, session)
                     .sendToTarget();
         }
 
@@ -1153,10 +1186,10 @@ public class StagingManager {
          *
          * See {@link PreRebootVerificationHandler} to see all nodes of pre reboot verification
          */
-        private void handlePreRebootVerification_Start(@NonNull PackageInstallerSession session) {
+        private void handlePreRebootVerification_Start(@NonNull StagedSession session) {
             try {
                 if (session.isMultiPackage()) {
-                    for (PackageInstallerSession s : session.getChildSessions()) {
+                    for (StagedSession s : session.getChildSessions()) {
                         checkNonOverlappingWithStagedSessions(s);
                     }
                 } else {
@@ -1168,7 +1201,8 @@ public class StagingManager {
             }
 
             int rollbackId = -1;
-            if ((session.params.installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0) {
+            if ((session.sessionParams().installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK)
+                    != 0) {
                 // If rollback is enabled for this session, we call through to the RollbackManager
                 // with the list of sessions it must enable rollback for. Note that
                 // notifyStagedSession is a synchronous operation.
@@ -1177,14 +1211,15 @@ public class StagingManager {
                 try {
                     // NOTE: To stay consistent with the non-staged install flow, we don't fail the
                     // entire install if rollbacks can't be enabled.
-                    rollbackId = rm.notifyStagedSession(session.sessionId);
+                    rollbackId = rm.notifyStagedSession(session.sessionId());
                 } catch (RuntimeException re) {
                     Slog.e(TAG, "Failed to notifyStagedSession for session: "
-                            + session.sessionId, re);
+                            + session.sessionId(), re);
                 }
-            } else if (session.params.installReason == PackageManager.INSTALL_REASON_ROLLBACK) {
+            } else if (session.sessionParams().installReason
+                    == PackageManager.INSTALL_REASON_ROLLBACK) {
                 try {
-                    rollbackId = retrieveRollbackIdForCommitSession(session.sessionId);
+                    rollbackId = retrieveRollbackIdForCommitSession(session.sessionId());
                 } catch (PackageManagerException e) {
                     onPreRebootVerificationFailure(session, e.error, e.getMessage());
                     return;
@@ -1203,7 +1238,7 @@ public class StagingManager {
          * </ul></p>
          */
         private void handlePreRebootVerification_Apex(
-                @NonNull PackageInstallerSession session, int rollbackId) {
+                @NonNull StagedSession session, int rollbackId) {
             final boolean hasApex = session.containsApexSession();
 
             // APEX checks. For single-package sessions, check if they contain an APEX. For
@@ -1233,12 +1268,12 @@ public class StagingManager {
          * {@link PackageManagerService} for verification and it notifies back the result via
          * {@link #notifyPreRebootVerification_Apk_Complete}
          */
-        private void handlePreRebootVerification_Apk(@NonNull PackageInstallerSession session) {
+        private void handlePreRebootVerification_Apk(@NonNull StagedSession session) {
             if (!session.containsApkSession()) {
                 notifyPreRebootVerification_Apk_Complete(session);
                 return;
             }
-            session.verifyStagedSession();
+            session.verifySession();
         }
 
         /**
@@ -1248,7 +1283,7 @@ public class StagingManager {
          *     <li>marks session as ready</li>
          * </ul></p>
          */
-        private void handlePreRebootVerification_End(@NonNull PackageInstallerSession session) {
+        private void handlePreRebootVerification_End(@NonNull StagedSession session) {
             // Before marking the session as ready, start checkpoint service if available
             try {
                 IStorageManager storageManager = PackageHelper.getStorageManager();
@@ -1280,15 +1315,15 @@ public class StagingManager {
             // On the other hand, if the order of the calls was inverted (first call apexd, then
             // mark session as ready), then if a device gets rebooted right after the call to apexd,
             // only apex part of the train will be applied, leaving device in an inconsistent state.
-            Slog.d(TAG, "Marking session " + session.sessionId + " as ready");
-            session.setStagedSessionReady();
-            if (session.isStagedSessionReady()) {
+            Slog.d(TAG, "Marking session " + session.sessionId() + " as ready");
+            session.setSessionReady();
+            if (session.isSessionReady()) {
                 final boolean hasApex = session.containsApexSession();
                 if (hasApex) {
                     try {
-                        mApexManager.markStagedSessionReady(session.sessionId);
+                        mApexManager.markStagedSessionReady(session.sessionId());
                     } catch (PackageManagerException e) {
-                        session.setStagedSessionFailed(e.error, e.getMessage());
+                        session.setSessionFailed(e.error, e.getMessage());
                         return;
                     }
                 }
