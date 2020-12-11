@@ -42,6 +42,7 @@ import android.text.TextUtils;
 import androidx.core.graphics.drawable.IconCompat;
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.media.LocalMediaManager;
@@ -89,6 +90,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     private ActivityStarter mStarter = mock(ActivityStarter.class);
     private NotificationEntryManager mNotificationEntryManager =
             mock(NotificationEntryManager.class);
+    private final UiEventLogger mUiEventLogger = mock(UiEventLogger.class);
 
     private Context mSpyContext;
     private MediaOutputController mMediaOutputController;
@@ -111,7 +113,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
         mMediaOutputController = new MediaOutputController(mSpyContext, TEST_PACKAGE_NAME, false,
                 mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
-                mNotificationEntryManager);
+                mNotificationEntryManager, mUiEventLogger);
         mLocalMediaManager = spy(mMediaOutputController.mLocalMediaManager);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
         MediaDescription.Builder builder = new MediaDescription.Builder();
@@ -155,7 +157,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     public void start_withoutPackageName_verifyMediaControllerInit() {
         mMediaOutputController = new MediaOutputController(mSpyContext, null, false,
                 mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
-                mNotificationEntryManager);
+                mNotificationEntryManager, mUiEventLogger);
 
         mMediaOutputController.start(mCb);
 
@@ -176,7 +178,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     public void stop_withoutPackageName_verifyMediaControllerDeinit() {
         mMediaOutputController = new MediaOutputController(mSpyContext, null, false,
                 mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
-                mNotificationEntryManager);
+                mNotificationEntryManager, mUiEventLogger);
 
         mMediaOutputController.start(mCb);
 
@@ -200,8 +202,10 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
     @Test
     public void onSelectedDeviceStateChanged_verifyCallback() {
+        when(mLocalMediaManager.getCurrentConnectedDevice()).thenReturn(mMediaDevice2);
         mMediaOutputController.start(mCb);
         reset(mCb);
+        mMediaOutputController.connectDevice(mMediaDevice1);
 
         mMediaOutputController.onSelectedDeviceStateChanged(mMediaDevice1,
                 LocalMediaManager.MediaDeviceState.STATE_CONNECTED);
@@ -221,8 +225,10 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
     @Test
     public void onRequestFailed_verifyCallback() {
+        when(mLocalMediaManager.getCurrentConnectedDevice()).thenReturn(mMediaDevice1);
         mMediaOutputController.start(mCb);
         reset(mCb);
+        mMediaOutputController.connectDevice(mMediaDevice2);
 
         mMediaOutputController.onRequestFailed(0 /* reason */);
 
@@ -268,6 +274,8 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
     @Test
     public void connectDevice_verifyConnect() {
+        when(mLocalMediaManager.getCurrentConnectedDevice()).thenReturn(mMediaDevice2);
+
         mMediaOutputController.connectDevice(mMediaDevice1);
 
         // Wait for background thread execution
@@ -441,7 +449,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     public void getNotificationLargeIcon_withoutPackageName_returnsNull() {
         mMediaOutputController = new MediaOutputController(mSpyContext, null, false,
                 mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
-                mNotificationEntryManager);
+                mNotificationEntryManager, mUiEventLogger);
 
         assertThat(mMediaOutputController.getNotificationIcon()).isNull();
     }
