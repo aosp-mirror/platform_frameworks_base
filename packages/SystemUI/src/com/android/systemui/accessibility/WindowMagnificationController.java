@@ -20,6 +20,8 @@ import static android.view.WindowManager.LayoutParams;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -28,7 +30,6 @@ import android.content.res.Resources;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
-import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
@@ -66,7 +67,7 @@ import java.util.Locale;
  * Class to handle adding and removing a window magnification.
  */
 class WindowMagnificationController implements View.OnTouchListener, SurfaceHolder.Callback,
-        MirrorWindowControl.MirrorWindowDelegate {
+        MirrorWindowControl.MirrorWindowDelegate, MagnificationGestureDetector.OnGestureListener {
 
     private static final String TAG = "WindowMagnificationController";
     // Delay to avoid updating state description too frequently.
@@ -74,6 +75,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     // It should be consistent with the value defined in WindowMagnificationGestureHandler.
     private static final Range<Float> A11Y_ACTION_SCALE_RANGE = new Range<>(2.0f, 8.0f);
     private static final float A11Y_CHANGE_SCALE_DIFFERENCE = 1.0f;
+    private static final float ANIMATION_BOUNCE_EFFECT_SCALE = 1.05f;
     private final Context mContext;
     private final Resources mResources;
     private final Handler mHandler;
@@ -102,7 +104,6 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private View mRightDrag;
     private View mBottomDrag;
 
-    private final PointF mLastDrag = new PointF();
     @NonNull
     private final WindowMagnifierCallback mWindowMagnifierCallback;
 
@@ -123,9 +124,12 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private int mNavGestureHeight;
 
     private final SfVsyncFrameCallbackProvider mSfVsyncFrameProvider;
+    private final MagnificationGestureDetector mGestureDetector;
+    private final int mBounceEffectDuration;
     private Choreographer.FrameCallback mMirrorViewGeometryVsyncCallback;
     private Locale mLocale;
     private NumberFormat mPercentFormat;
+    private float mBounceEffectAnimationScale;
 
     @Nullable
     private MirrorWindowControl mMirrorWindowControl;
@@ -147,14 +151,19 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
 
         mResources = mContext.getResources();
         mScale = mResources.getInteger(R.integer.magnification_default_scale);
+        mBounceEffectDuration = mResources.getInteger(
+                com.android.internal.R.integer.config_shortAnimTime);
         updateDimensions();
+        setInitialStartBounds();
+        computeBounceAnimationScale();
 
         mMirrorWindowControl = mirrorWindowControl;
         if (mMirrorWindowControl != null) {
             mMirrorWindowControl.setWindowDelegate(this);
         }
         mTransaction = transaction;
-        setInitialStartBounds();
+        mGestureDetector =
+                new MagnificationGestureDetector(mContext, handler, this);
 
         // Initialize listeners.
         mMirrorViewRunnable = () -> {
@@ -203,6 +212,13 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         updateNavigationBarDimensions();
     }
 
+    private void computeBounceAnimationScale() {
+        final float windowWidth = mMagnificationFrame.width() + 2 * mMirrorSurfaceMargin;
+        final float visibleWindowWidth = windowWidth - 2 * mOuterBorderSize;
+        final float animationScaleMax = windowWidth / visibleWindowWidth;
+        mBounceEffectAnimationScale = Math.min(animationScaleMax, ANIMATION_BOUNCE_EFFECT_SCALE);
+    }
+
     private void updateNavigationBarDimensions() {
         if (!supportsSwipeUpGesture()) {
             mNavGestureHeight = 0;
@@ -248,6 +264,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     void onConfigurationChanged(int configDiff) {
         if ((configDiff & ActivityInfo.CONFIG_DENSITY) != 0) {
             updateDimensions();
+            computeBounceAnimationScale();
             if (isWindowVisible()) {
                 deleteWindowMagnification();
                 enableWindowMagnification(Float.NaN, Float.NaN, Float.NaN);
@@ -483,20 +500,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     public boolean onTouch(View v, MotionEvent event) {
         if (v == mDragView || v == mLeftDrag || v == mTopDrag || v == mRightDrag
                 || v == mBottomDrag) {
-            return handleDragTouchEvent(event);
-        }
-        return false;
-    }
-
-    private boolean handleDragTouchEvent(MotionEvent event) {
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                mLastDrag.set(event.getRawX(), event.getRawY());
-                return true;
-            case MotionEvent.ACTION_MOVE:
-                moveWindowMagnifier(event.getRawX() - mLastDrag.x, event.getRawY() - mLastDrag.y);
-                mLastDrag.set(event.getRawX(), event.getRawY());
-                return true;
+            return mGestureDetector.onTouch(event);
         }
         return false;
     }
@@ -683,6 +687,36 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             mPercentFormat = NumberFormat.getPercentInstance(curLocale);
         }
         return mPercentFormat.format(scale);
+    }
+
+    @Override
+    public boolean onSingleTap() {
+        animateBounceEffect();
+        return true;
+    }
+
+    @Override
+    public boolean onDrag(float offsetX, float offsetY) {
+        moveWindowMagnifier(offsetX, offsetY);
+        return true;
+    }
+
+    @Override
+    public boolean onStart(float x, float y) {
+        return true;
+    }
+
+    @Override
+    public boolean onFinish(float x, float y) {
+        return false;
+    }
+
+    private void animateBounceEffect() {
+        final ObjectAnimator scaleAnimator = ObjectAnimator.ofPropertyValuesHolder(mMirrorView,
+                PropertyValuesHolder.ofFloat(View.SCALE_X, 1, mBounceEffectAnimationScale, 1),
+                PropertyValuesHolder.ofFloat(View.SCALE_Y, 1, mBounceEffectAnimationScale, 1));
+        scaleAnimator.setDuration(mBounceEffectDuration);
+        scaleAnimator.start();
     }
 
     private class MirrorWindowA11yDelegate extends View.AccessibilityDelegate {

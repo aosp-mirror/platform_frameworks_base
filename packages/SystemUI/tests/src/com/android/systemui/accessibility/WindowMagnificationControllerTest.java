@@ -26,6 +26,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -40,6 +41,7 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableResources;
 import android.view.Display;
@@ -346,5 +348,27 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
                 WindowManager.LayoutParams.class);
         verify(mWindowManager).updateViewLayout(eq(mMirrorView), paramsArgumentCaptor.capture());
         assertEquals(newA11yWindowTitle, paramsArgumentCaptor.getValue().accessibilityTitle);
+    }
+
+    @Test
+    public void onSingleTap_enabled_scaleIsChanged() {
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
+                    Float.NaN);
+        });
+
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.onSingleTap();
+        });
+
+        final long timeout = SystemClock.uptimeMillis() + 1000;
+        while (SystemClock.uptimeMillis() < timeout) {
+            SystemClock.sleep(10);
+
+            if (Float.compare(1.0f, mMirrorView.getScaleX()) < 0) {
+                return;
+            }
+        }
+        fail("mMirrorView scale is not changed");
     }
 }
