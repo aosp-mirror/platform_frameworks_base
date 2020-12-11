@@ -305,6 +305,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Mock
     StatusBarManagerInternal mStatusBar;
 
+    private NotificationManagerService.WorkerHandler mWorkerHandler;
+
     // Use a Testable subclass so we can simulate calls from the system without failing.
     private static class TestableNotificationManagerService extends NotificationManagerService {
         int countSystemChecks = 0;
@@ -482,14 +484,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         when(mAssistants.isAdjustmentAllowed(anyString())).thenReturn(true);
 
-        mService.init(mService.new WorkerHandler(mTestableLooper.getLooper()),
-                mRankingHandler, mPackageManager, mPackageManagerClient, mockLightsManager,
-                mListeners, mAssistants, mConditionProviders,
-                mCompanionMgr, mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager,
-                mGroupHelper, mAm, mAtm, mAppUsageStats,
-                mock(DevicePolicyManagerInternal.class), mUgm, mUgmInternal,
-                mAppOpsManager, mUm, mHistoryManager, mStatsManager,
-                mock(TelephonyManager.class), mAmi, mToastRateLimiter);
+        mWorkerHandler = mService.new WorkerHandler(mTestableLooper.getLooper());
+        mService.init(mWorkerHandler, mRankingHandler, mPackageManager, mPackageManagerClient,
+                mockLightsManager, mListeners, mAssistants, mConditionProviders, mCompanionMgr,
+                mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager, mGroupHelper, mAm, mAtm,
+                mAppUsageStats, mock(DevicePolicyManagerInternal.class), mUgm, mUgmInternal,
+                mAppOpsManager, mUm, mHistoryManager, mStatsManager, mock(TelephonyManager.class),
+                mAmi, mToastRateLimiter);
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
 
         mService.setAudioManager(mAudioManager);
@@ -575,6 +576,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         InstrumentationRegistry.getInstrumentation()
                 .getUiAutomation().dropShellPermissionIdentity();
+        // Remove scheduled messages that would be processed when the test is already done, and
+        // could cause issues, for example, messages that remove/cancel shown toasts (this causes
+        // problematic interactions with mocks when they're no longer working as expected).
+        mWorkerHandler.removeCallbacksAndMessages(null);
     }
 
     private void simulatePackageSuspendBroadcast(boolean suspend, String pkg,
