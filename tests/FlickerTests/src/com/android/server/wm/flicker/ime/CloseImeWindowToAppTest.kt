@@ -31,6 +31,8 @@ import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.noUncoveredRegions
+import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
+import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
 import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
@@ -65,8 +67,10 @@ class CloseImeWindowToAppTest(
                     withTestName { buildTestTag("imeToApp", testApp, configuration) }
                     repeat { configuration.repetitions }
                     setup {
-                        eachRun {
+                        test {
                             device.wakeUpAndGoToHomeScreen()
+                        }
+                        eachRun {
                             this.setRotation(configuration.startRotation)
                             testApp.open()
                             testApp.openIME(device)
@@ -79,13 +83,14 @@ class CloseImeWindowToAppTest(
                         }
                     }
                     transitions {
-                        device.pressBack()
-                        device.waitForIdle()
+                        testApp.closeIME(device)
                     }
                     assertions {
                         windowManagerTrace {
                             navBarWindowIsAlwaysVisible()
                             statusBarWindowIsAlwaysVisible()
+                            visibleWindowsShownMoreThanOneConsecutiveEntry(listOf("InputMethod"))
+
                             imeAppWindowIsAlwaysVisible(testApp)
                         }
 
@@ -95,6 +100,8 @@ class CloseImeWindowToAppTest(
                             noUncoveredRegions(configuration.startRotation)
                             navBarLayerRotatesAndScales(configuration.startRotation)
                             statusBarLayerRotatesScales(configuration.startRotation)
+                            visibleLayersShownMoreThanOneConsecutiveEntry()
+
                             imeLayerBecomesInvisible(enabled = false)
                             imeAppLayerIsAlwaysVisible(testApp)
                         }

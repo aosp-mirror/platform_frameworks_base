@@ -30,6 +30,8 @@ import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
+import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
 import com.android.server.wm.flicker.noUncoveredRegions
 import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.startRotation
@@ -89,6 +91,7 @@ class OpenImeWindowTest(
                         windowManagerTrace {
                             navBarWindowIsAlwaysVisible()
                             statusBarWindowIsAlwaysVisible()
+                            visibleWindowsShownMoreThanOneConsecutiveEntry()
 
                             all("imeWindowBecomesVisible") {
                                 this.skipUntilFirstAssertion()
@@ -104,6 +107,7 @@ class OpenImeWindowTest(
                             noUncoveredRegions(configuration.startRotation)
                             navBarLayerRotatesAndScales(configuration.startRotation)
                             statusBarLayerRotatesScales(configuration.startRotation)
+                            visibleLayersShownMoreThanOneConsecutiveEntry()
 
                             imeLayerBecomesVisible()
                         }
