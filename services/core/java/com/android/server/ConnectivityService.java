@@ -5579,11 +5579,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private boolean checkUnsupportedStartingFrom(int version, String callingPackageName) {
-        final PackageManager pm = mContext.getPackageManager();
-        final int userId = UserHandle.getCallingUserId();
+        final UserHandle user = UserHandle.getUserHandleForUid(Binder.getCallingUid());
+        final PackageManager pm =
+                mContext.createContextAsUser(user, 0 /* flags */).getPackageManager();
         try {
-            final int callingVersion = pm.getApplicationInfoAsUser(
-                    callingPackageName, 0 /* flags */, userId).targetSdkVersion;
+            final int callingVersion = pm.getApplicationInfo(
+                    callingPackageName, 0 /* flags */).targetSdkVersion;
             if (callingVersion < version) return false;
         } catch (PackageManager.NameNotFoundException e) { }
         return true;
