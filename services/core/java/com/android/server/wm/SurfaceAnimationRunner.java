@@ -259,6 +259,7 @@ class SurfaceAnimationRunner {
 
     private void applyTransaction() {
         mFrameTransaction.setAnimationTransaction();
+        mFrameTransaction.setFrameTimelineVsync(mChoreographer.getVsyncId());
         mFrameTransaction.apply();
         mApplyScheduled = false;
     }
