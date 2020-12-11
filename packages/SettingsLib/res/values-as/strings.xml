@@ -446,7 +446,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"চাৰ্জ হ’বলৈ <xliff:g id="TIME">%1$s</xliff:g> বাকী আছে"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> চাৰ্জ হ\'বলৈ"</string>
-    <string name="power_charging_limited" msgid="5902301801611726210">"<xliff:g id="LEVEL">%1$s</xliff:g> - বেটাৰী সাময়িকভাৱে সীমিত কৰা হৈছে"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - বেটাৰীৰ অৱস্থা অপ্টিমাইজ কৰি থকা হৈছে"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"অজ্ঞাত"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"চাৰ্জ কৰি থকা হৈছে"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"দ্ৰুততাৰে চাৰ্জ হৈছে"</string>

@@ -28,7 +28,7 @@
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"Pagkabigo ng Configuration ng IP"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Hindi nakakonekta dahil mababa ang kalidad ng network"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Pagkabigo ng Koneksyon sa WiFi"</string>
-    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Problema sa pagpapatotoo"</string>
+    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Problema sa pag-authenticate"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Hindi makakonekta"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"Hindi makakonekta sa \'<xliff:g id="AP_NAME">%1$s</xliff:g>\'"</string>
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Suriin ang password at subukang muli"</string>
@@ -446,7 +446,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> ang natitira bago matapos mag-charge"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> hanggang matapos mag-charge"</string>
-    <string name="power_charging_limited" msgid="5902301801611726210">"<xliff:g id="LEVEL">%1$s</xliff:g> - Pansamantalang limitado ang baterya"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - Ino-optimize para sa tagal ng baterya"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Hindi Kilala"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Nagcha-charge"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Mabilis na charge"</string>
