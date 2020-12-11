@@ -1,16 +1,19 @@
 # This top-level list should remain narrowly defined as team leads; individual
 # teams are strongly encouraged to define narrower OWNERS files at deeper
 # levels within the source tree; see OWNERS.md for more details
+akulian@google.com
 dsandler@android.com
 dsandler@google.com
 hackbod@android.com
 hackbod@google.com
+jjaggi@google.com
 jsharkey@android.com
 jsharkey@google.com
 michaelwr@google.com
 nandana@google.com
 narayan@google.com
 ogunwale@google.com
+roosa@google.com
 svetoslavganov@android.com
 svetoslavganov@google.com
 yamasani@google.com
