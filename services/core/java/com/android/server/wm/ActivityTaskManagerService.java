@@ -1133,9 +1133,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             // If this is coming from the currently resumed activity, it is
             // effectively saying that app switches are allowed at this point.
-            final Task stack = getTopDisplayFocusedRootTask();
-            if (stack != null && stack.mResumedActivity != null
-                    && stack.mResumedActivity.info.applicationInfo.uid == Binder.getCallingUid()) {
+            final Task topFocusedRootTask = getTopDisplayFocusedRootTask();
+            if (topFocusedRootTask != null && topFocusedRootTask.getResumedActivity() != null
+                    && topFocusedRootTask.getResumedActivity().info.applicationInfo.uid
+                    == Binder.getCallingUid()) {
                 mAppSwitchesAllowedTime = 0;
             }
         }
