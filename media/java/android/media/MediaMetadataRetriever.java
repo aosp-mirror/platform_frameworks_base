@@ -1313,14 +1313,14 @@ public class MediaMetadataRetriever implements AutoCloseable {
     public static final int METADATA_KEY_VIDEO_FRAME_COUNT = 32;
 
     /**
-     * If the media contains EXIF data, this key retrieves the offset value
+     * If the media contains EXIF data, this key retrieves the offset (in bytes)
      * of the data.
      */
     public static final int METADATA_KEY_EXIF_OFFSET = 33;
 
     /**
-     * If the media contains EXIF data, this key retrieves the length of the
-     * data.
+     * If the media contains EXIF data, this key retrieves the length (in bytes)
+     * of the data.
      */
     public static final int METADATA_KEY_EXIF_LENGTH = 34;
 
@@ -1370,6 +1370,22 @@ public class MediaMetadataRetriever implements AutoCloseable {
      */
     @SystemApi(client = MODULE_LIBRARIES)
     public static final int METADATA_KEY_VIDEO_CODEC_MIME_TYPE = 40;
+
+    /**
+     * If the media contains XMP data, this key retrieves the offset (in bytes)
+     * of the data.
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static final int METADATA_KEY_XMP_OFFSET = 41;
+
+    /**
+     * If the media contains XMP data, this key retrieves the length (in bytes)
+     * of the data.
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static final int METADATA_KEY_XMP_LENGTH = 42;
 
     // Add more here...
 }
