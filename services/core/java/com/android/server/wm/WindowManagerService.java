@@ -1348,8 +1348,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 return res;
             }
 
-            final boolean openInputChannels = (outInputChannel != null
-                    && (attrs.inputFeatures & INPUT_FEATURE_NO_INPUT_CHANNEL) == 0);
+            boolean openInputChannels = (outInputChannel != null
+                && (attrs.inputFeatures & INPUT_FEATURE_NO_INPUT_CHANNEL) == 0);
+            if (callingUid != SYSTEM_UID) {
+                Slog.e(TAG_WM,
+                    "App trying to use insecure INPUT_FEATURE_NO_INPUT_CHANNEL flag. Ignoring");
+                openInputChannels = true;
+            }
             if  (openInputChannels) {
                 win.openInputChannel(outInputChannel);
             }
