@@ -4637,10 +4637,13 @@ class StorageManagerService extends IStorageManager.Stub
                 // When using FUSE, we may need to kill the app if the op changes
                 switch(code) {
                     case OP_REQUEST_INSTALL_PACKAGES:
-                        if (previousMode == MODE_ALLOWED || mode == MODE_ALLOWED) {
-                            // If we transition to/from MODE_ALLOWED, kill the app to make
-                            // sure it has the correct view of /storage. Changing between
-                            // MODE_DEFAULT / MODE_ERRORED is a no-op
+                        // In R, we used to kill the app here if it transitioned to/from
+                        // MODE_ALLOWED, to make sure the app had the correct (writable) OBB
+                        // view. But the majority of apps don't handle OBBs anyway, and for those
+                        // that do, they can restart themselves. Therefore, starting from S,
+                        // only kill the app when it transitions away from MODE_ALLOWED (eg,
+                        // when the permission is taken away).
+                        if (previousMode == MODE_ALLOWED && mode != MODE_ALLOWED) {
                             killAppForOpChange(code, uid);
                         }
                         return;
