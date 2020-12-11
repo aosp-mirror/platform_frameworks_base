@@ -22,6 +22,9 @@ import static android.view.WindowManager.DOCKED_TOP;
 import static com.android.internal.policy.DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_END;
 import static com.android.internal.policy.DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_START;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -31,6 +34,7 @@ import android.view.SurfaceControl;
 import androidx.annotation.Nullable;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
+import com.android.wm.shell.animation.Interpolators;
 
 /**
  * Records and handles layout of splits. Helps to calculate proper bounds when configuration or
@@ -145,17 +149,23 @@ public class SplitLayout {
      * Updates bounds with the passing position. Usually used to update recording bounds while
      * performing animation or dragging divider bar to resize the splits.
      */
-    public void updateDividePosition(int position) {
+    void updateDivideBounds(int position) {
         updateBounds(position);
         mLayoutChangeListener.onBoundsChanging(this);
+    }
+
+    void setDividePosition(int position) {
+        mDividePosition = position;
+        updateBounds(mDividePosition);
+        mLayoutChangeListener.onBoundsChanged(this);
     }
 
     /**
      * Sets new divide position and updates bounds correspondingly. Notifies listener if the new
      * target indicates dismissing split.
      */
-    public void setSnapTarget(DividerSnapAlgorithm.SnapTarget snapTarget) {
-        switch(snapTarget.flag) {
+    public void snapToTarget(int currentPosition, DividerSnapAlgorithm.SnapTarget snapTarget) {
+        switch (snapTarget.flag) {
             case FLAG_DISMISS_START:
                 mLayoutChangeListener.onSnappedToDismiss(false /* snappedToEnd */);
                 break;
@@ -163,9 +173,7 @@ public class SplitLayout {
                 mLayoutChangeListener.onSnappedToDismiss(true /* snappedToEnd */);
                 break;
             default:
-                mDividePosition = snapTarget.position;
-                updateBounds(mDividePosition);
-                mLayoutChangeListener.onBoundsChanged(this);
+                flingDividePosition(currentPosition, snapTarget.position);
                 break;
         }
     }
@@ -187,6 +195,27 @@ public class SplitLayout {
                 !isLandscape,
                 new Rect() /* insets */,
                 isLandscape ? DOCKED_LEFT : DOCKED_TOP /* dockSide */);
+    }
+
+    private void flingDividePosition(int from, int to) {
+        ValueAnimator animator = ValueAnimator
+                .ofInt(from, to)
+                .setDuration(250);
+        animator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
+        animator.addUpdateListener(
+                animation -> updateDivideBounds((int) animation.getAnimatedValue()));
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                setDividePosition(to);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                setDividePosition(to);
+            }
+        });
+        animator.start();
     }
 
     private static boolean isLandscape(Rect bounds) {

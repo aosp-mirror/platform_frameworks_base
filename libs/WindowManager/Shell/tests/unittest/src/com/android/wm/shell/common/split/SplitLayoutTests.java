@@ -69,24 +69,27 @@ public class SplitLayoutTests extends ShellTestCase {
     }
 
     @Test
-    public void testUpdateDividePosition() {
-        mSplitLayout.updateDividePosition(anyInt());
+    public void testUpdateDivideBounds() {
+        mSplitLayout.updateDivideBounds(anyInt());
         verify(mLayoutChangeListener).onBoundsChanging(any(SplitLayout.class));
     }
 
     @Test
-    public void testSetSnapTarget() {
-        DividerSnapAlgorithm.SnapTarget snapTarget = getSnapTarget(0,
+    @UiThreadTest
+    public void testSnapToTarget() {
+        DividerSnapAlgorithm.SnapTarget snapTarget = getSnapTarget(0 /* position */,
                 DividerSnapAlgorithm.SnapTarget.FLAG_NONE);
-        mSplitLayout.setSnapTarget(snapTarget);
-        verify(mLayoutChangeListener).onBoundsChanged(any(SplitLayout.class));
+        mSplitLayout.snapToTarget(0 /* currentPosition */, snapTarget);
+        verify(mLayoutChangeListener).onBoundsChanging(any(SplitLayout.class));
 
         // verify it callbacks properly when the snap target indicates dismissing split.
-        snapTarget = getSnapTarget(0, DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_START);
-        mSplitLayout.setSnapTarget(snapTarget);
+        snapTarget = getSnapTarget(0 /* position */,
+                DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_START);
+        mSplitLayout.snapToTarget(0 /* currentPosition */, snapTarget);
         verify(mLayoutChangeListener).onSnappedToDismiss(eq(false));
-        snapTarget = getSnapTarget(0, DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_END);
-        mSplitLayout.setSnapTarget(snapTarget);
+        snapTarget = getSnapTarget(0 /* position */,
+                DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_END);
+        mSplitLayout.snapToTarget(0 /* currentPosition */, snapTarget);
         verify(mLayoutChangeListener).onSnappedToDismiss(eq(true));
     }
 

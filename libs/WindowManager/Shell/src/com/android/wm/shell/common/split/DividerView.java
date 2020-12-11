@@ -112,7 +112,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
                 }
                 if (mMoving) {
                     final int position = mSplitLayout.getDividePosition() + touchPos - mStartPos;
-                    mSplitLayout.updateDividePosition(position);
+                    mSplitLayout.updateDivideBounds(position);
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -131,7 +131,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
                 final int position = mSplitLayout.getDividePosition() + touchPos - mStartPos;
                 final DividerSnapAlgorithm.SnapTarget snapTarget =
                         mSplitLayout.findSnapTarget(position, velocity);
-                mSplitLayout.setSnapTarget(snapTarget);
+                mSplitLayout.snapToTarget(position, snapTarget);
                 break;
         }
         return true;
