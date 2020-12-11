@@ -494,6 +494,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private TextUtils.TruncateAt mEllipsize;
 
+    // A flag to indicate the cursor was hidden by IME.
+    private boolean mImeTemporarilyConsumesInput;
+
+    // Whether cursor is visible without regard to {@link mImeTemporarilyConsumesInput}.
+    // {code true} is the default value.
+    private boolean mCursorVisibleFromAttr = true;
+
     static class Drawables {
         static final int LEFT = 0;
         static final int TOP = 1;
@@ -10496,7 +10503,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * Set whether the cursor is visible. The default is true. Note that this property only
-     * makes sense for editable TextView.
+     * makes sense for editable TextView. If IME is temporarily consuming the input, the cursor will
+     * be always invisible, visibility will be updated as the last state when IME does not consume
+     * the input anymore.
      *
      * @see #isCursorVisible()
      *
@@ -10504,6 +10513,25 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @android.view.RemotableViewMethod
     public void setCursorVisible(boolean visible) {
+        mCursorVisibleFromAttr = visible;
+        updateCursorVisibleInternal();
+    }
+
+    /**
+     * Sets the IME is temporarily consuming the input and make the cursor invisible if
+     * {@code imeTemporarilyConsumesInput} is {@code true}. Otherwise, make the cursor visible.
+     *
+     * @param imeTemporarilyConsumesInput {@code true} if IME is temporarily consuming the input
+     *
+     * @hide
+     */
+    public void setImeTemporarilyConsumesInput(boolean imeTemporarilyConsumesInput) {
+        mImeTemporarilyConsumesInput = imeTemporarilyConsumesInput;
+        updateCursorVisibleInternal();
+    }
+
+    private void updateCursorVisibleInternal()  {
+        boolean visible = mCursorVisibleFromAttr && !mImeTemporarilyConsumesInput;
         if (visible && mEditor == null) return; // visible is the default value with no edit data
         createEditorIfNeeded();
         if (mEditor.mCursorVisible != visible) {
@@ -10518,7 +10546,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * @return whether or not the cursor is visible (assuming this TextView is editable)
+     * @return whether or not the cursor is visible (assuming this TextView is editable). This
+     * method may return {@code false} when the IME is temporarily consuming the input even if the
+     * {@code mEditor.mCursorVisible} attribute is {@code true} or {@code #setCursorVisible(true)}
+     * is called.
      *
      * @see #setCursorVisible(boolean)
      *

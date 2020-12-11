@@ -245,6 +245,15 @@ public class EditableInputConnection extends BaseInputConnection
     }
 
     @Override
+    public boolean setImeTemporarilyConsumesInput(boolean imeTemporarilyConsumesInput) {
+        if (mTextView == null) {
+            return super.setImeTemporarilyConsumesInput(imeTemporarilyConsumesInput);
+        }
+        mTextView.setImeTemporarilyConsumesInput(imeTemporarilyConsumesInput);
+        return true;
+    }
+
+    @Override
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         CharSequence editableText = mTextView.getText();
