@@ -30,6 +30,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
@@ -96,8 +97,8 @@ public class TaskViewTest extends ShellTestCase {
             return null;
         }).when(mExecutor).execute(any());
 
+        when(mOrganizer.getExecutor()).thenReturn(mExecutor);
         mTaskView = new TaskView(mContext, mOrganizer);
-        mTaskView.setExecutor(mExecutor);
         mTaskView.setListener(mViewListener);
     }
 
@@ -111,7 +112,6 @@ public class TaskViewTest extends ShellTestCase {
     @Test
     public void testSetPendingListener_throwsException() {
         TaskView taskView = new TaskView(mContext, mOrganizer);
-        mTaskView.setExecutor(mExecutor);
         taskView.setListener(mViewListener);
         try {
             taskView.setListener(mViewListener);

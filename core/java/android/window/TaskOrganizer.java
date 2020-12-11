@@ -210,6 +210,15 @@ public class TaskOrganizer extends WindowOrganizer {
         }
     }
 
+    /**
+     * Gets the executor to run callbacks on.
+     * @hide
+     */
+    @NonNull
+    public Executor getExecutor() {
+        return mExecutor;
+    }
+
     private final ITaskOrganizer mInterface = new ITaskOrganizer.Stub() {
         @Override
         public void addStartingWindow(ActivityManager.RunningTaskInfo taskInfo, IBinder appToken) {
