@@ -1,0 +1,13 @@
+android_test {
+    name: "BatteryStatsLoadTests",
+    srcs: ["src/**/*.java"],
+    static_libs: [
+        "androidx.test.rules",
+        "androidx.test.ext.junit",
+        "compatibility-device-util-axt",
+        "junit",
+    ],
+    libs: ["android.test.runner"],
+    platform_apis: true,
+    certificate: "platform",
+}
