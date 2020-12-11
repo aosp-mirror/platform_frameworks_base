@@ -10424,6 +10424,7 @@ package android.content {
     field public static final String USAGE_STATS_SERVICE = "usagestats";
     field public static final String USB_SERVICE = "usb";
     field public static final String USER_SERVICE = "user";
+    field public static final String VIBRATOR_MANAGER_SERVICE = "vibrator_manager";
     field public static final String VIBRATOR_SERVICE = "vibrator";
     field public static final String VPN_MANAGEMENT_SERVICE = "vpn_management";
     field public static final String WALLPAPER_SERVICE = "wallpaper";
@@ -31608,6 +31609,7 @@ package android.os {
     method @NonNull public int[] areEffectsSupported(@NonNull int...);
     method @NonNull public boolean[] arePrimitivesSupported(@NonNull int...);
     method @RequiresPermission(android.Manifest.permission.VIBRATE) public abstract void cancel();
+    method public int getId();
     method public abstract boolean hasAmplitudeControl();
     method public abstract boolean hasVibrator();
     method @Deprecated @RequiresPermission(android.Manifest.permission.VIBRATE) public void vibrate(long);
@@ -31622,10 +31624,12 @@ package android.os {
   }
 
   public abstract class VibratorManager {
+    method @RequiresPermission(android.Manifest.permission.VIBRATE) public abstract void cancel();
     method @NonNull public abstract android.os.Vibrator getDefaultVibrator();
     method @NonNull public abstract android.os.Vibrator getVibrator(int);
     method @NonNull public abstract int[] getVibratorIds();
-    method public abstract void vibrate(@NonNull android.os.CombinedVibrationEffect);
+    method @RequiresPermission(android.Manifest.permission.VIBRATE) public final void vibrate(@NonNull android.os.CombinedVibrationEffect);
+    method @RequiresPermission(android.Manifest.permission.VIBRATE) public final void vibrate(@NonNull android.os.CombinedVibrationEffect, @Nullable android.os.VibrationAttributes);
   }
 
   public class WorkSource implements android.os.Parcelable {

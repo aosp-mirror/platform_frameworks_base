@@ -1369,6 +1369,32 @@ package android.os {
     field public static final int RESOURCES_SDK_INT;
   }
 
+  public abstract class CombinedVibrationEffect implements android.os.Parcelable {
+    method public abstract long getDuration();
+  }
+
+  public static final class CombinedVibrationEffect.Mono extends android.os.CombinedVibrationEffect {
+    method public long getDuration();
+    method @NonNull public android.os.VibrationEffect getEffect();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.CombinedVibrationEffect.Mono> CREATOR;
+  }
+
+  public static final class CombinedVibrationEffect.Sequential extends android.os.CombinedVibrationEffect {
+    method @NonNull public java.util.List<java.lang.Integer> getDelays();
+    method public long getDuration();
+    method @NonNull public java.util.List<android.os.CombinedVibrationEffect> getEffects();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.CombinedVibrationEffect.Sequential> CREATOR;
+  }
+
+  public static final class CombinedVibrationEffect.Stereo extends android.os.CombinedVibrationEffect {
+    method public long getDuration();
+    method @NonNull public android.util.SparseArray<android.os.VibrationEffect> getEffects();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.CombinedVibrationEffect.Stereo> CREATOR;
+  }
+
   public class DeviceIdleManager {
     method @NonNull public String[] getSystemPowerWhitelist();
     method @NonNull public String[] getSystemPowerWhitelistExceptIdle();

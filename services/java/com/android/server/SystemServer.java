@@ -1292,7 +1292,6 @@ public final class SystemServer implements Dumpable {
         t.traceBegin("startOtherServices");
 
         final Context context = mSystemContext;
-        VibratorService vibrator = null;
         DynamicSystemService dynamicSystem = null;
         IStorageManager storageManager = null;
         NetworkManagementService networkManagement = null;
@@ -1416,11 +1415,6 @@ public final class SystemServer implements Dumpable {
 
             t.traceBegin("StartVibratorManagerService");
             mSystemServiceManager.startService(VibratorManagerService.Lifecycle.class);
-            t.traceEnd();
-
-            t.traceBegin("StartVibratorService");
-            vibrator = new VibratorService(context);
-            ServiceManager.addService("vibrator", vibrator);
             t.traceEnd();
 
             t.traceBegin("StartDynamicSystemService");
@@ -2490,14 +2484,6 @@ public final class SystemServer implements Dumpable {
         t.traceEnd();
 
         // It is now time to start up the app processes...
-
-        t.traceBegin("MakeVibratorServiceReady");
-        try {
-            vibrator.systemReady();
-        } catch (Throwable e) {
-            reportWtf("making Vibrator Service ready", e);
-        }
-        t.traceEnd();
 
         t.traceBegin("MakeLockSettingsServiceReady");
         if (lockSettings != null) {

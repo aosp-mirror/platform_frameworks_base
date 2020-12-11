@@ -167,9 +167,11 @@ import android.os.StatsFrameworkInitializer;
 import android.os.SystemConfigManager;
 import android.os.SystemUpdateManager;
 import android.os.SystemVibrator;
+import android.os.SystemVibratorManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.Vibrator;
+import android.os.VibratorManager;
 import android.os.health.SystemHealthManager;
 import android.os.image.DynamicSystemManager;
 import android.os.image.IDynamicSystemService;
@@ -698,6 +700,13 @@ public final class SystemServiceRegistry {
                         return UwbManager.getInstance();
                     }
                 });
+
+        registerService(Context.VIBRATOR_MANAGER_SERVICE, VibratorManager.class,
+                new CachedServiceFetcher<VibratorManager>() {
+                    @Override
+                    public VibratorManager createService(ContextImpl ctx) {
+                        return new SystemVibratorManager(ctx);
+                    }});
 
         registerService(Context.VIBRATOR_SERVICE, Vibrator.class,
                 new CachedServiceFetcher<Vibrator>() {

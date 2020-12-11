@@ -17,45 +17,123 @@
 package android.os;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemService;
+import android.app.ActivityThread;
+import android.content.Context;
+import android.util.Log;
 
 /**
- * VibratorManager provides access to multiple vibrators, as well as the ability to run them in
- * a synchronized fashion.
+ * Class that provides access to all vibrators from the device, as well as the ability to run them
+ * in a synchronized fashion.
+ * <p>
+ * If your process exits, any vibration you started will stop.
+ * </p>
  */
+@SystemService(Context.VIBRATOR_MANAGER_SERVICE)
 public abstract class VibratorManager {
-    /** @hide */
-    protected static final String TAG = "VibratorManager";
+    private static final String TAG = "VibratorManager";
+
+    private final String mPackageName;
 
     /**
-     * {@hide}
+     * @hide to prevent subclassing from outside of the framework
      */
     public VibratorManager() {
+        mPackageName = ActivityThread.currentPackageName();
     }
 
     /**
-     * This method lists all available actuator ids, returning a possible empty list.
-     * If the device has only a single actuator, this should return a single entry with a
-     * default id.
+     * @hide to prevent subclassing from outside of the framework
+     */
+    protected VibratorManager(Context context) {
+        mPackageName = context.getOpPackageName();
+    }
+
+    /**
+     * List all available vibrator ids, returning a possible empty list.
+     *
+     * @return An array containing the ids of the vibrators available on the device.
      */
     @NonNull
     public abstract int[] getVibratorIds();
 
     /**
-    * Returns a Vibrator service for given id.
-    * This allows users to perform a vibration effect on a single actuator.
-    */
+     * Retrieve a single vibrator by id.
+     *
+     * @param vibratorId The id of the vibrator to be retrieved.
+     * @return The vibrator with given {@code vibratorId}, never null.
+     */
     @NonNull
     public abstract Vibrator getVibrator(int vibratorId);
 
     /**
-    * Returns the system default Vibrator service.
-    */
+     * Returns the system default Vibrator service.
+     */
     @NonNull
     public abstract Vibrator getDefaultVibrator();
 
     /**
-     * Vibrates all actuators by passing each VibrationEffect within CombinedVibrationEffect
-     * to the respective actuator, in sync.
+     * Configure an always-on haptics effect.
+     *
+     * @hide
      */
-    public abstract void vibrate(@NonNull CombinedVibrationEffect effect);
+    @RequiresPermission(android.Manifest.permission.VIBRATE_ALWAYS_ON)
+    public boolean setAlwaysOnEffect(int uid, String opPkg, int alwaysOnId,
+            @Nullable CombinedVibrationEffect effect, @Nullable VibrationAttributes attributes) {
+        Log.w(TAG, "Always-on effects aren't supported");
+        return false;
+    }
+
+    /**
+     * Vibrate with a given combination of effects.
+     *
+     * <p>
+     * Pass in a {@link CombinedVibrationEffect} representing a combination of {@link
+     * VibrationEffect} to be played on one or more vibrators.
+     * </p>
+     *
+     * @param effect an array of longs of times for which to turn the vibrator on or off.
+     */
+    @RequiresPermission(android.Manifest.permission.VIBRATE)
+    public final void vibrate(@NonNull CombinedVibrationEffect effect) {
+        vibrate(effect, null);
+    }
+
+    /**
+     * Vibrate with a given combination of effects.
+     *
+     * <p>
+     * Pass in a {@link CombinedVibrationEffect} representing a combination of {@link
+     * VibrationEffect} to be played on one or more vibrators.
+     * </p>
+     *
+     * @param effect     an array of longs of times for which to turn the vibrator on or off.
+     * @param attributes {@link VibrationAttributes} corresponding to the vibration. For example,
+     *                   specify {@link VibrationAttributes#USAGE_ALARM} for alarm vibrations or
+     *                   {@link VibrationAttributes#USAGE_RINGTONE} for vibrations associated with
+     *                   incoming calls.
+     */
+    @RequiresPermission(android.Manifest.permission.VIBRATE)
+    public final void vibrate(@NonNull CombinedVibrationEffect effect,
+            @Nullable VibrationAttributes attributes) {
+        vibrate(Process.myUid(), mPackageName, effect, null, attributes);
+    }
+
+    /**
+     * Like {@link #vibrate(CombinedVibrationEffect, VibrationAttributes)}, but allows the
+     * caller to specify the vibration is owned by someone else and set reason for vibration.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.VIBRATE)
+    public abstract void vibrate(int uid, String opPkg, @NonNull CombinedVibrationEffect effect,
+            String reason, @Nullable VibrationAttributes attributes);
+
+    /**
+     * Turn all the vibrators off.
+     */
+    @RequiresPermission(android.Manifest.permission.VIBRATE)
+    public abstract void cancel();
 }
