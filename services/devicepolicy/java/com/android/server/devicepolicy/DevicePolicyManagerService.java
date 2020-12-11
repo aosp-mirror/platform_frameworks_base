@@ -3368,7 +3368,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final boolean qualityMayApplyToParent =
                 canSetPasswordQualityOnParent(who.getPackageName(), caller.getUserId());
         if (!qualityMayApplyToParent) {
-            Preconditions.checkArgument(!parent,
+            Preconditions.checkCallAuthorization(!parent,
                     "Profile Owner may not apply password quality requirements device-wide");
         }
 
