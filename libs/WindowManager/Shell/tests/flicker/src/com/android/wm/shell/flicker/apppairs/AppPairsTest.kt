@@ -16,29 +16,26 @@
 
 package com.android.wm.shell.flicker.apppairs
 
-import android.platform.test.annotations.Presubmit
 import android.os.SystemClock
-import android.util.Log
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
-import com.android.compatibility.common.util.SystemUtil
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.dsl.runWithFlicker
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
-import com.android.wm.shell.flicker.helpers.AppPairsHelper
-import com.android.wm.shell.flicker.helpers.AppPairsHelper.Companion.TEST_REPETITIONS
-import com.android.wm.shell.flicker.appPairsDividerIsInvisible
-import com.android.wm.shell.flicker.appPairsDividerIsVisible
+import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
-import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
+import com.android.wm.shell.flicker.appPairsDividerIsInvisible
+import com.android.wm.shell.flicker.appPairsDividerIsVisible
+import com.android.wm.shell.flicker.helpers.AppPairsHelper
+import com.android.wm.shell.flicker.helpers.AppPairsHelper.Companion.TEST_REPETITIONS
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
-import java.io.IOException
 
 /**
  * Test AppPairs launch.
@@ -64,15 +61,18 @@ class AppPairsTest(
                     primaryApp.launchViaIntent()
                     secondaryApp.launchViaIntent()
                     nonResizeableApp.launchViaIntent()
-                    updateTaskId()
+                    updateTasksId()
                 }
             }
             teardown {
                 eachRun {
                     executeShellCommand(composePairsCommand(
                             primaryTaskId, secondaryTaskId, false /* pair */))
+                    executeShellCommand(composePairsCommand(
+                            primaryTaskId, nonResizeableTaskId, false /* pair */))
                     primaryApp.exit()
                     secondaryApp.exit()
+                    nonResizeableApp.exit()
                 }
             }
             assertions {
@@ -184,12 +184,12 @@ class AppPairsTest(
                 TEST_REPETITIONS
             }
             transitions {
-                nonResizeableApp.launchViaIntent()
                 // TODO pair apps through normal UX flow
                 executeShellCommand(composePairsCommand(
                     primaryTaskId, nonResizeableTaskId, true /* pair */))
                 SystemClock.sleep(AppPairsHelper.TIMEOUT_MS)
             }
+
             assertions {
                 layersTrace {
                     appPairsDividerIsInvisible()
@@ -205,52 +205,23 @@ class AppPairsTest(
         }
     }
 
-    private fun composePairsCommand(
-        primaryApp: String,
-        secondaryApp: String,
-        pair: Boolean
-    ): String = buildString {
-        // dumpsys activity service SystemUIService WMShell {pair|unpair} ${TASK_ID_1} ${TASK_ID_2}
-        append("dumpsys activity service SystemUIService WMShell ")
-        if (pair) {
-            append("pair ")
-        } else {
-            append("unpair ")
-        }
-        append(primaryApp + " " + secondaryApp)
-    }
-
-    private fun executeShellCommand(cmd: String) {
-        try {
-            SystemUtil.runShellCommand(instrumentation, cmd)
-        } catch (e: IOException) {
-            Log.d("AppPairsTest", "executeShellCommand error!" + e)
-        }
-    }
-
-    private fun updateTaskId() {
-        val primaryAppComponent = primaryApp.openAppIntent.component
-        val secondaryAppComponent = secondaryApp.openAppIntent.component
-        val nonResizeableAppComponent = nonResizeableApp.openAppIntent.component
+    fun updateTasksId() {
         if (primaryAppComponent != null) {
-            primaryTaskId = appPairsHelper.getTaskIdForActivity(
+            primaryTaskId = getTaskIdForActivity(
                     primaryAppComponent.packageName, primaryAppComponent.className).toString()
         }
         if (secondaryAppComponent != null) {
-            secondaryTaskId = appPairsHelper.getTaskIdForActivity(
+            secondaryTaskId = getTaskIdForActivity(
                     secondaryAppComponent.packageName, secondaryAppComponent.className).toString()
         }
         if (nonResizeableAppComponent != null) {
-            nonResizeableTaskId = appPairsHelper.getTaskIdForActivity(
-                nonResizeableAppComponent.packageName,
-                nonResizeableAppComponent.className).toString()
+            nonResizeableTaskId = getTaskIdForActivity(
+                    nonResizeableAppComponent.packageName,
+                    nonResizeableAppComponent.className).toString()
         }
     }
 
     companion object {
-        var primaryTaskId = ""
-        var secondaryTaskId = ""
-        var nonResizeableTaskId = ""
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<Array<Any>> {
