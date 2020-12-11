@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#define ATRACE_TAG ATRACE_TAG_VIEW
 #include "FontUtils.h"
 #include "GraphicsJNI.h"
 #include "fonts/Font.h"
@@ -25,8 +26,13 @@
 #include <minikin/FontCollection.h>
 #include <minikin/FontFamily.h>
 #include <minikin/SystemFonts.h>
+#include <utils/TraceUtils.h>
+
+#include <mutex>
+#include <unordered_map>
 
 using namespace android;
+using android::uirenderer::TraceUtils;
 
 static inline Typeface* toTypeface(jlong ptr) {
     return reinterpret_cast<Typeface*>(ptr);
@@ -149,6 +155,20 @@ static void Typeface_registerGenericFamily(JNIEnv *env, jobject, jstring familyN
                                            toTypeface(ptr)->fFontCollection);
 }
 
+static sk_sp<SkData> makeSkDataCached(const std::string& path) {
+    // We don't clear cache as Typeface objects created by Typeface_readTypefaces() will be stored
+    // in a static field and will not be garbage collected.
+    static std::unordered_map<std::string, sk_sp<SkData>> cache;
+    static std::mutex mutex;
+    ALOG_ASSERT(!path.empty());
+    std::lock_guard lock{mutex};
+    sk_sp<SkData>& entry = cache[path];
+    if (entry.get() == nullptr) {
+        entry = SkData::MakeFromFileName(path.c_str());
+    }
+    return entry;
+}
+
 static std::function<std::shared_ptr<minikin::MinikinFont>()> readMinikinFontSkia(
         minikin::BufferReader* reader) {
     std::string_view fontPath = reader->readString();
@@ -158,8 +178,9 @@ static std::function<std::shared_ptr<minikin::MinikinFont>()> readMinikinFontSki
     std::tie(axesPtr, axesCount) = reader->readArray<minikin::FontVariation>();
     return [fontPath, fontIndex, axesPtr, axesCount]() -> std::shared_ptr<minikin::MinikinFont> {
         std::string path(fontPath.data(), fontPath.size());
-        sk_sp<SkData> data = SkData::MakeFromFileName(path.c_str());
-        if (data == nullptr) {
+        ATRACE_FORMAT("Loading font %s", path.c_str());
+        sk_sp<SkData> data = makeSkDataCached(path);
+        if (data.get() == nullptr) {
             // This may happen if:
             // 1. When the process failed to open the file (e.g. invalid path or permission).
             // 2. When the process failed to map the file (e.g. hitting max_map_count limit).
