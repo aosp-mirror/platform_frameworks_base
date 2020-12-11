@@ -42,8 +42,6 @@ public class AmbientState {
 
     private final SectionProvider mSectionProvider;
     private int mScrollY;
-    private int mAnchorViewIndex;
-    private int mAnchorViewY;
     private boolean mDimmed;
     private ActivatableNotificationView mActivatedChild;
     private float mOverScrollTopAmount;
@@ -137,27 +135,6 @@ public class AmbientState {
 
     public void setScrollY(int scrollY) {
         this.mScrollY = scrollY;
-    }
-
-    /**
-     * Index of the child view whose Y position on screen is returned by {@link #getAnchorViewY()}.
-     * Other views are laid out outwards from this view in both directions.
-     */
-    public int getAnchorViewIndex() {
-        return mAnchorViewIndex;
-    }
-
-    public void setAnchorViewIndex(int anchorViewIndex) {
-        mAnchorViewIndex = anchorViewIndex;
-    }
-
-    /** Current Y position of the view at {@link #getAnchorViewIndex()}. */
-    public int getAnchorViewY() {
-        return mAnchorViewY;
-    }
-
-    public void setAnchorViewY(int anchorViewY) {
-        mAnchorViewY = anchorViewY;
     }
 
     /**

@@ -45,8 +45,6 @@ import java.util.List;
  */
 public class StackScrollAlgorithm {
 
-    static final boolean ANCHOR_SCROLLING = false;
-
     private static final String LOG_TAG = "StackScrollAlgorithm";
     private final ViewGroup mHostView;
 
@@ -229,10 +227,6 @@ public class StackScrollAlgorithm {
         scrollY = Math.max(0, scrollY);
         state.scrollY = (int) (scrollY + bottomOverScroll);
 
-        if (ANCHOR_SCROLLING) {
-            state.anchorViewY = (int) (ambientState.getAnchorViewY() - bottomOverScroll);
-        }
-
         //now init the visible children and update paddings
         int childCount = hostView.getChildCount();
         state.visibleChildren.clear();
@@ -240,11 +234,6 @@ public class StackScrollAlgorithm {
         int notGoneIndex = 0;
         ExpandableView lastView = null;
         for (int i = 0; i < childCount; i++) {
-            if (ANCHOR_SCROLLING) {
-                if (i == ambientState.getAnchorViewIndex()) {
-                    state.anchorViewIndex = state.visibleChildren.size();
-                }
-            }
             ExpandableView v = (ExpandableView) hostView.getChildAt(i);
             if (v.getVisibility() != View.GONE) {
                 if (v == ambientState.getShelf()) {
@@ -293,26 +282,12 @@ public class StackScrollAlgorithm {
      */
     private void updatePositionsForState(StackScrollAlgorithmState algorithmState,
             AmbientState ambientState) {
-        if (ANCHOR_SCROLLING) {
-            float currentYPosition = algorithmState.anchorViewY;
-            int childCount = algorithmState.visibleChildren.size();
-            for (int i = algorithmState.anchorViewIndex; i < childCount; i++) {
-                currentYPosition = updateChild(i, algorithmState, ambientState, currentYPosition,
-                        false /* reverse */);
-            }
-            currentYPosition = algorithmState.anchorViewY;
-            for (int i = algorithmState.anchorViewIndex - 1; i >= 0; i--) {
-                currentYPosition = updateChild(i, algorithmState, ambientState, currentYPosition,
-                        true /* reverse */);
-            }
-        } else {
-            // The y coordinate of the current child.
-            float currentYPosition = -algorithmState.scrollY;
-            int childCount = algorithmState.visibleChildren.size();
-            for (int i = 0; i < childCount; i++) {
-                currentYPosition = updateChild(i, algorithmState, ambientState, currentYPosition,
-                        false /* reverse */);
-            }
+        // The y coordinate of the current child.
+        float currentYPosition = -algorithmState.scrollY;
+        int childCount = algorithmState.visibleChildren.size();
+        for (int i = 0; i < childCount; i++) {
+            currentYPosition = updateChild(i, algorithmState, ambientState, currentYPosition,
+                    false /* reverse */);
         }
     }
 
@@ -343,7 +318,7 @@ public class StackScrollAlgorithm {
         ExpandableView previousChild = i > 0 ? algorithmState.visibleChildren.get(i - 1) : null;
         final boolean applyGapHeight =
                 childNeedsGapHeight(
-                        ambientState.getSectionProvider(), algorithmState.anchorViewIndex, i,
+                        ambientState.getSectionProvider(), i,
                         child, previousChild);
         ExpandableViewState childViewState = child.getViewState();
         childViewState.location = ExpandableViewState.LOCATION_UNKNOWN;
@@ -409,7 +384,6 @@ public class StackScrollAlgorithm {
      * Get the gap height needed for before a view
      *
      * @param sectionProvider the sectionProvider used to understand the sections
-     * @param anchorViewIndex the anchorView index when anchor scrolling, can be 0 if not
      * @param visibleIndex the visible index of this view in the list
      * @param child the child asked about
      * @param previousChild the child right before it or null if none
@@ -417,12 +391,11 @@ public class StackScrollAlgorithm {
      */
     public float getGapHeightForChild(
             SectionProvider sectionProvider,
-            int anchorViewIndex,
             int visibleIndex,
             View child,
             View previousChild) {
 
-        if (childNeedsGapHeight(sectionProvider, anchorViewIndex, visibleIndex, child,
+        if (childNeedsGapHeight(sectionProvider, visibleIndex, child,
                 previousChild)) {
             return mGapHeight;
         } else {
@@ -434,7 +407,6 @@ public class StackScrollAlgorithm {
      * Does a given child need a gap, i.e spacing before a view?
      *
      * @param sectionProvider the sectionProvider used to understand the sections
-     * @param anchorViewIndex the anchorView index when anchor scrolling, can be 0 if not
      * @param visibleIndex the visible index of this view in the list
      * @param child the child asked about
      * @param previousChild the child right before it or null if none
@@ -442,16 +414,12 @@ public class StackScrollAlgorithm {
      */
     private boolean childNeedsGapHeight(
             SectionProvider sectionProvider,
-            int anchorViewIndex,
             int visibleIndex,
             View child,
             View previousChild) {
 
         boolean needsGapHeight = sectionProvider.beginsSection(child, previousChild)
                 && visibleIndex > 0;
-        if (ANCHOR_SCROLLING) {
-            needsGapHeight &= visibleIndex != anchorViewIndex;
-        }
         return needsGapHeight;
     }
 
@@ -537,7 +505,6 @@ public class StackScrollAlgorithm {
                 // To check if the row need to do translation according to scroll Y
                 // heads up show full of row's content and any scroll y indicate that the
                 // translationY need to move up the HUN.
-                // TODO: fix this check for anchor scrolling.
                 if (!mIsExpanded && isTopEntry && ambientState.getScrollY() > 0) {
                     childState.yTranslation -= ambientState.getScrollY();
                 }
@@ -700,14 +667,6 @@ public class StackScrollAlgorithm {
          * The scroll position of the algorithm (absolute scrolling).
          */
         public int scrollY;
-
-        /** The index of the anchor view (anchor scrolling). */
-        public int anchorViewIndex;
-
-        /**
-         * The Y position, relative to the top of the screen, of the anchor view (anchor scrolling).
-         */
-        public int anchorViewY;
 
         /**
          * The children from the host view which are not gone.
