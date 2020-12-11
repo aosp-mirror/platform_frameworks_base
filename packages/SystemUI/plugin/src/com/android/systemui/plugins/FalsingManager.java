@@ -60,8 +60,8 @@ public interface FalsingManager {
      * Returns true if the last two gestures do not look like a double tap.
      *
      * Only works on data that has already been reported to the FalsingManager. Be sure that
-     * {@link #onTouchEvent(MotionEvent, int, int)} has already been called for all of the
-     * taps you want considered.
+     * {@link com.android.systemui.classifier.FalsingCollector#onTouchEvent(MotionEvent)}
+     * has already been called for all of the taps you want considered.
      *
      * This looks at the last two gestures on the screen, ensuring that they meet the following
      * criteria:
@@ -84,8 +84,6 @@ public interface FalsingManager {
     Uri reportRejectedTouch();
 
     boolean isReportingEnabled();
-
-    void onTouchEvent(MotionEvent ev, int width, int height);
 
     /** From com.android.systemui.Dumpable. */
     void dump(FileDescriptor fd, PrintWriter pw, String[] args);

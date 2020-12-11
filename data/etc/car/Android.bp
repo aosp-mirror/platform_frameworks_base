@@ -159,6 +159,13 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
+    name: "privapp_allowlist_com.google.android.car.networking.preferenceupdater",
+    sub_dir: "permissions",
+    src: "com.google.android.car.networking.preferenceupdater.xml",
+    filename_from_src: true,
+}
+
+prebuilt_etc {
     name: "allowed_privapp_com.android.carshell",
     sub_dir: "permissions",
     src: "com.android.car.shell.xml",

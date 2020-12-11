@@ -21,7 +21,14 @@
 namespace android::uirenderer {
 
 CanvasStateHelper::CanvasStateHelper(int width, int height) {
+    resetState(width, height);
+}
+
+void CanvasStateHelper::resetState(int width, int height) {
     mInitialBounds = SkIRect::MakeWH(width, height);
+    mSaveStack.clear();
+    mClipStack.clear();
+    mTransformStack.clear();
     mSaveStack.emplace_back();
     mClipStack.emplace_back().setRect(mInitialBounds);
     mTransformStack.emplace_back();

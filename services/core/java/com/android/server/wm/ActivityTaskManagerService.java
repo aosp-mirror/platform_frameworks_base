@@ -1743,29 +1743,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    @Override
-    public int getLaunchedFromUid(IBinder activityToken) {
-        ActivityRecord srec;
-        synchronized (mGlobalLock) {
-            srec = ActivityRecord.forTokenLocked(activityToken);
-        }
-        if (srec == null) {
-            return -1;
-        }
-        return srec.launchedFromUid;
-    }
-
-    @Override
-    public String getLaunchedFromPackage(IBinder activityToken) {
-        ActivityRecord srec;
-        synchronized (mGlobalLock) {
-            srec = ActivityRecord.forTokenLocked(activityToken);
-        }
-        if (srec == null) {
-            return null;
-        }
-        return srec.launchedFromPackage;
-    }
 
     @Override
     public RootTaskInfo getFocusedRootTaskInfo() throws RemoteException {
@@ -3228,28 +3205,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public ComponentName getActivityClassForToken(IBinder token) {
-        synchronized (mGlobalLock) {
-            ActivityRecord r = ActivityRecord.isInStackLocked(token);
-            if (r == null) {
-                return null;
-            }
-            return r.intent.getComponent();
-        }
-    }
-
-    @Override
-    public String getPackageForToken(IBinder token) {
-        synchronized (mGlobalLock) {
-            ActivityRecord r = ActivityRecord.isInStackLocked(token);
-            if (r == null) {
-                return null;
-            }
-            return r.packageName;
-        }
-    }
-
-    @Override
     public void keyguardGoingAway(int flags) {
         enforceNotIsolatedCaller("keyguardGoingAway");
         final long token = Binder.clearCallingIdentity();
@@ -4708,8 +4663,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                             .setContentTitle(text)
                             .setContentText(
                                     mContext.getText(R.string.heavy_weight_notification_detail))
+                            // TODO(b/175194709) Please replace FLAG_MUTABLE_UNAUDITED below
+                            // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
                             .setContentIntent(PendingIntent.getActivityAsUser(mContext, 0,
-                                    intent, PendingIntent.FLAG_CANCEL_CURRENT, null,
+                                    intent, PendingIntent.FLAG_CANCEL_CURRENT
+                                    | PendingIntent.FLAG_MUTABLE_UNAUDITED, null,
                                     new UserHandle(userId)))
                             .build();
             try {
@@ -5592,6 +5550,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (r != null && r.pendingResults != null) {
                     r.pendingResults.remove(pir);
                 }
+            }
+        }
+
+        @Override
+        public ComponentName getActivityName(IBinder activityToken) {
+            synchronized (mGlobalLock) {
+                final ActivityRecord r = ActivityRecord.isInStackLocked(activityToken);
+                return r != null ? r.intent.getComponent() : null;
             }
         }
 

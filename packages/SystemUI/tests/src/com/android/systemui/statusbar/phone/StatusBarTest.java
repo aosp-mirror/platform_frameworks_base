@@ -151,6 +151,7 @@ import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -886,6 +887,7 @@ public class StatusBarTest extends SysuiTestCase {
         verify(mDozeServiceHost).setDozeSuppressed(false);
     }
 
+    @Ignore // TODO (b/175240607) - Figure out if the device will actually dial 911.
     @Test
     public void onEmergencyActionLaunchGesture_launchesEmergencyIntent() {
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
@@ -896,7 +898,6 @@ public class StatusBarTest extends SysuiTestCase {
         verify(statusBarSpy).startActivity(intentCaptor.capture(), eq(true));
         Intent sentIntent = intentCaptor.getValue();
         assertEquals(sentIntent.getAction(), EmergencyGesture.ACTION_LAUNCH_EMERGENCY);
-
     }
 
     public static class TestableNotificationInterruptStateProviderImpl extends

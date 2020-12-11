@@ -181,6 +181,8 @@
     <!-- Permissions needed to test system only camera devices -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.SYSTEM_CAMERA" />
+      <!-- Permissions needed to test onCameraOpened/Closed callbacks -->
+    <uses-permission android:name="android.permission.CAMERA_OPEN_CLOSE_LISTENER" />
     <!-- Permissions needed for CTS camera test: RecordingTest.java when assuming shell id -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <!-- Permission needed to enable/disable Bluetooth/Wifi -->

@@ -123,15 +123,16 @@ public class PipBoundsAlgorithm {
     /** Returns the destination bounds to place the PIP window on entry. */
     public Rect getEntryDestinationBounds() {
         final PipBoundsState.PipReentryState reentryState = mPipBoundsState.getReentryState();
-        final boolean shouldRestoreReentryBounds = reentryState != null;
 
-        final Rect destinationBounds = shouldRestoreReentryBounds
+        final Rect destinationBounds = reentryState != null
                 ? getDefaultBounds(reentryState.getSnapFraction(), reentryState.getSize())
                 : getDefaultBounds();
 
-        return transformBoundsToAspectRatioIfValid(destinationBounds,
+        final boolean useCurrentSize = reentryState != null && reentryState.getSize() != null;
+        final Rect r = transformBoundsToAspectRatioIfValid(destinationBounds,
                 mPipBoundsState.getAspectRatio(), false /* useCurrentMinEdgeSize */,
-                shouldRestoreReentryBounds);
+                useCurrentSize);
+        return r;
     }
 
     /** Returns the current bounds adjusted to the new aspect ratio, if valid. */
@@ -221,24 +222,36 @@ public class PipBoundsAlgorithm {
     private Rect getDefaultBounds(float snapFraction, Size size) {
         final Rect defaultBounds = new Rect();
         if (snapFraction != INVALID_SNAP_FRACTION && size != null) {
+            // The default bounds are the given size positioned at the given snap fraction.
             defaultBounds.set(0, 0, size.getWidth(), size.getHeight());
             final Rect movementBounds = getMovementBounds(defaultBounds);
             mSnapAlgorithm.applySnapFraction(defaultBounds, movementBounds, snapFraction);
+            return defaultBounds;
+        }
+
+        // Calculate the default size.
+        final Size defaultSize;
+        final Rect insetBounds = new Rect();
+        getInsetBounds(insetBounds);
+        final DisplayInfo displayInfo = mPipBoundsState.getDisplayInfo();
+        final Size overrideMinSize = mPipBoundsState.getOverrideMinSize();
+        if (overrideMinSize != null) {
+            // The override minimal size is set, use that as the default size making sure it's
+            // adjusted to the aspect ratio.
+            defaultSize = adjustSizeToAspectRatio(overrideMinSize, mDefaultAspectRatio);
         } else {
-            final Rect insetBounds = new Rect();
-            getInsetBounds(insetBounds);
-            final DisplayInfo displayInfo = mPipBoundsState.getDisplayInfo();
-            final Size defaultSize;
-            final Size overrideMinSize = mPipBoundsState.getOverrideMinSize();
-            if (overrideMinSize != null) {
-                // The override minimal size is set, use that as the default size making sure it's
-                // adjusted to the aspect ratio.
-                defaultSize = adjustSizeToAspectRatio(overrideMinSize, mDefaultAspectRatio);
-            } else {
-                // Calculate the default size using the display size and default min edge size.
-                defaultSize = getSizeForAspectRatio(mDefaultAspectRatio,
-                        mDefaultMinSize, displayInfo.logicalWidth, displayInfo.logicalHeight);
-            }
+            // Calculate the default size using the display size and default min edge size.
+            defaultSize = getSizeForAspectRatio(mDefaultAspectRatio,
+                    mDefaultMinSize, displayInfo.logicalWidth, displayInfo.logicalHeight);
+        }
+
+        // Now that we have the default size, apply the snap fraction if valid or position the
+        // bounds using the default gravity.
+        if (snapFraction != INVALID_SNAP_FRACTION) {
+            defaultBounds.set(0, 0, defaultSize.getWidth(), defaultSize.getHeight());
+            final Rect movementBounds = getMovementBounds(defaultBounds);
+            mSnapAlgorithm.applySnapFraction(defaultBounds, movementBounds, snapFraction);
+        } else {
             Gravity.apply(mDefaultStackGravity, defaultSize.getWidth(), defaultSize.getHeight(),
                     insetBounds, 0, Math.max(
                             mPipBoundsState.isImeShowing() ? mPipBoundsState.getImeHeight() : 0,

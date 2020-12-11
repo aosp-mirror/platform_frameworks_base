@@ -468,14 +468,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
      * @return The top stack that is not always-on-top.
      */
     private Task getTopNonAlwaysOnTopStack() {
-        for (int i = mDefaultTaskDisplayArea.getRootTaskCount() - 1; i >= 0; i--) {
-            final Task s = mDefaultTaskDisplayArea.getRootTaskAt(i);
-            if (s.getWindowConfiguration().isAlwaysOnTop()) {
-                continue;
-            }
-            return s;
-        }
-        return null;
+        return mDefaultTaskDisplayArea.getRootTask(task ->
+                !task.getWindowConfiguration().isAlwaysOnTop());
     }
 
     /**

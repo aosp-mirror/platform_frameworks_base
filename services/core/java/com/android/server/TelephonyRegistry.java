@@ -2361,6 +2361,40 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
+    /**
+     * Notify that the data enabled has changed.
+     *
+     * @param enabled True if data is enabled, otherwise disabled.
+     * @param reason  Reason for data enabled/disabled. See {@code DATA_*} in
+     *                {@link TelephonyManager}.
+     */
+    public void notifyDataEnabled(boolean enabled,
+                                  @TelephonyManager.DataEnabledReason int reason) {
+        if (!checkNotifyPermission("notifyDataEnabled()")) {
+            return;
+        }
+
+        if (VDBG) {
+            log("notifyDataEnabled: enabled=" + enabled + " reason=" + reason);
+        }
+
+        mIsDataEnabled = enabled;
+        mDataEnabledReason = reason;
+        synchronized (mRecords) {
+            for (Record r : mRecords) {
+                if (r.matchPhoneStateListenerEvent(
+                        PhoneStateListener.EVENT_DATA_ENABLED_CHANGED)) {
+                    try {
+                        r.callback.onDataEnabledChanged(enabled, reason);
+                    } catch (RemoteException ex) {
+                        mRemoveList.add(r.binder);
+                    }
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
+
     @Override
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
@@ -2413,6 +2447,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             pw.println("mDefaultPhoneId=" + mDefaultPhoneId);
             pw.println("mDefaultSubId=" + mDefaultSubId);
             pw.println("mPhysicalChannelConfigs=" + mPhysicalChannelConfigs);
+            pw.println("mIsDataEnabled=" + mIsDataEnabled);
+            pw.println("mDataEnabledReason=" + mDataEnabledReason);
 
             pw.decreaseIndent();
 

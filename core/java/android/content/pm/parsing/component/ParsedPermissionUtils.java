@@ -112,10 +112,12 @@ public class ParsedPermissionUtils {
             if ((permission.protectionLevel & PermissionInfo.PROTECTION_FLAG_INSTANT) == 0
                     && (permission.protectionLevel & PermissionInfo.PROTECTION_FLAG_RUNTIME_ONLY)
                     == 0
-                    && (permission.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE) !=
-                    PermissionInfo.PROTECTION_SIGNATURE) {
+                    && (permission.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE)
+                    != PermissionInfo.PROTECTION_SIGNATURE
+                    && (permission.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE)
+                    != PermissionInfo.PROTECTION_INTERNAL) {
                 return input.error("<permission>  protectionLevel specifies a non-instant flag "
-                        + "but is not based on signature type");
+                        + "but is not based on signature or internal type");
             }
         }
 

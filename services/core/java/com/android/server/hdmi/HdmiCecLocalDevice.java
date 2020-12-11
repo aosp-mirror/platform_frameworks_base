@@ -282,6 +282,8 @@ abstract class HdmiCecLocalDevice {
                 return handleGiveOsdName(message);
             case Constants.MESSAGE_GIVE_DEVICE_VENDOR_ID:
                 return handleGiveDeviceVendorId(null);
+            case Constants.MESSAGE_CEC_VERSION:
+                return handleCecVersion();
             case Constants.MESSAGE_GET_CEC_VERSION:
                 return handleGetCecVersion(message);
             case Constants.MESSAGE_REPORT_PHYSICAL_ADDRESS:
@@ -402,6 +404,14 @@ abstract class HdmiCecLocalDevice {
                 HdmiCecMessageBuilder.buildCecVersion(
                         message.getDestination(), message.getSource(), version);
         mService.sendCecCommand(cecMessage);
+        return true;
+    }
+
+    @ServiceThreadOnly
+    private boolean handleCecVersion() {
+        assertRunOnServiceThread();
+
+        // Return true to avoid <Feature Abort> responses. Cec Version is tracked in HdmiCecNetwork.
         return true;
     }
 

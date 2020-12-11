@@ -109,24 +109,4 @@
             style="@style/TextAppearance.NotificationInfo.Button"/>
     </LinearLayout>
 
-    <!-- Done button -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/notification_guts_button_spacing"
-        android:layout_marginBottom="@dimen/notification_guts_button_spacing"
-        android:gravity="end"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/ok"
-            android:text="@string/feedback_ok"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:background="@drawable/ripple_drawable"
-            android:minWidth="48dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="-8dp"
-            style="@style/TextAppearance.NotificationInfo.Button"/>
-    </LinearLayout>
 </com.android.systemui.statusbar.notification.row.FeedbackInfo>

@@ -32,6 +32,7 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.SurfaceControl.Transaction;
+import static android.view.SurfaceControl.getGlobalTransaction;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
@@ -617,6 +618,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private final Rect mTmpRect = new Rect();
     private final Point mTmpPoint = new Point();
 
+    private final Transaction mTmpTransaction;
+
     /**
      * If a window is on a display which has been re-parented to a view in another window,
      * use this offset to indicate the correct location.
@@ -861,6 +864,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             int ownerId, int showUserId, boolean ownerCanAddInternalSystemWindow,
             PowerManagerWrapper powerManagerWrapper) {
         super(service);
+        mTmpTransaction = service.mTransactionFactory.get();
         mSession = s;
         mClient = c;
         mAppOp = appOp;
@@ -2176,8 +2180,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         disposeInputChannel();
 
-        mWinAnimator.destroyDeferredSurfaceLocked();
-        mWinAnimator.destroySurfaceLocked();
+        mWinAnimator.destroyDeferredSurfaceLocked(mTmpTransaction);
+        mWinAnimator.destroySurfaceLocked(mTmpTransaction);
+        mTmpTransaction.apply();
         mSession.windowRemovedLocked();
         try {
             mClient.asBinder().unlinkToDeath(mDeathRecipient, 0);
@@ -2645,7 +2650,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 clearPolicyVisibilityFlag(LEGACY_POLICY_VISIBILITY);
             }
             if (!isVisibleByPolicy()) {
-                mWinAnimator.hide("checkPolicyVisibilityChange");
+                mWinAnimator.hide(getGlobalTransaction(), "checkPolicyVisibilityChange");
                 if (isFocused()) {
                     ProtoLog.i(WM_DEBUG_FOCUS_LIGHT,
                             "setAnimationLocked: setting mFocusMayChange true");
@@ -3176,10 +3181,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // detaching any surface control the client added from the client.
             for (int i = mChildren.size() - 1; i >= 0; --i) {
                 final WindowState c = mChildren.get(i);
-                c.mWinAnimator.detachChildren();
+                c.mWinAnimator.detachChildren(getGlobalTransaction());
             }
 
-            mWinAnimator.detachChildren();
+            mWinAnimator.detachChildren(getGlobalTransaction());
         }
 
         try {
@@ -3238,7 +3243,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         if (appStopped || mWindowRemovalAllowed) {
-            mWinAnimator.destroyPreservedSurfaceLocked();
+            mWinAnimator.destroyPreservedSurfaceLocked(mTmpTransaction);
+            mTmpTransaction.apply();
         }
 
         if (mDestroying) {
@@ -3274,7 +3280,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     // various indicators of whether the client has released the surface.
     // This is in general unsafe, and most callers should use {@link #destroySurface}
     void destroySurfaceUnchecked() {
-        mWinAnimator.destroySurfaceLocked();
+        mWinAnimator.destroySurfaceLocked(mTmpTransaction);
+        mTmpTransaction.apply();
 
         // Clear animating flags now, since the surface is now gone. (Note this is true even
         // if the surface is saved, to outside world the surface is still NO_SURFACE.)
@@ -4800,7 +4807,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             c.hideWallpaperWindow(wasDeferred, reason);
         }
         if (!mWinAnimator.mLastHidden || wasDeferred) {
-            mWinAnimator.hide(reason);
+            mWinAnimator.hide(getGlobalTransaction(), reason);
             getDisplayContent().mWallpaperController.mDeferredHideWallpaper = null;
             dispatchWallpaperVisibility(false);
             final DisplayContent displayContent = getDisplayContent();
@@ -4942,7 +4949,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // on the new one. This prevents blinking when we change elevation of freeform and
             // pinned windows.
             if (!mWinAnimator.tryChangeFormatInPlaceLocked()) {
-                mWinAnimator.preserveSurfaceLocked(getPendingTransaction());
+                mWinAnimator.preserveSurfaceLocked(getSyncTransaction());
                 result |= RELAYOUT_RES_SURFACE_CHANGED
                         | RELAYOUT_RES_FIRST_TIME;
                 scheduleAnimation();
@@ -4961,7 +4968,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // to preserve and destroy windows which are attached to another, they
             // will keep their surface and its size may change over time.
             if (mHasSurface && !isChildWindow()) {
-                mWinAnimator.preserveSurfaceLocked(getPendingTransaction());
+                mWinAnimator.preserveSurfaceLocked(getSyncTransaction());
                 result |= RELAYOUT_RES_SURFACE_CHANGED |
                     RELAYOUT_RES_FIRST_TIME;
                 scheduleAnimation();
@@ -5264,7 +5271,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         updateFrameRateSelectionPriorityIfNeeded();
         updateGlobalScaleIfNeeded();
 
-        mWinAnimator.prepareSurfaceLocked(SurfaceControl.getGlobalTransaction(), true);
+        mWinAnimator.prepareSurfaceLocked(getSyncTransaction());
         super.prepareSurfaces();
     }
 

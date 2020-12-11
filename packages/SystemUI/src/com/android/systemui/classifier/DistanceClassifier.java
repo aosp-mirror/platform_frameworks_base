@@ -123,7 +123,6 @@ class DistanceClassifier extends FalsingClassifier {
         }
 
         VelocityTracker velocityTracker = VelocityTracker.obtain();
-
         for (MotionEvent motionEvent : motionEvents) {
             velocityTracker.addMovement(motionEvent);
         }
@@ -148,11 +147,11 @@ class DistanceClassifier extends FalsingClassifier {
     }
 
     @Override
-    public boolean isFalseTouch() {
-        return !getPassedFlingThreshold();
+    Result calculateFalsingResult(double historyPenalty, double historyConfidence) {
+        return !getPassedFlingThreshold()
+                ? Result.falsed(0.5, getReason()) : Result.passed(0.5);
     }
 
-    @Override
     String getReason() {
         DistanceVectors distanceVectors = getDistances();
 
@@ -170,10 +169,10 @@ class DistanceClassifier extends FalsingClassifier {
                 mVerticalSwipeThresholdPx);
     }
 
-    boolean isLongSwipe() {
+    Result isLongSwipe() {
         boolean longSwipe = getPassedDistanceThreshold();
         logDebug("Is longSwipe? " + longSwipe);
-        return longSwipe;
+        return longSwipe ? Result.passed(0.5) : Result.falsed(0.5, getReason());
     }
 
     private boolean getPassedDistanceThreshold() {

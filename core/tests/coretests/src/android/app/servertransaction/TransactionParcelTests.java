@@ -29,6 +29,7 @@ import android.app.IApplicationThread;
 import android.app.IInstrumentationWatcher;
 import android.app.IUiAutomationConnection;
 import android.app.ProfilerInfo;
+import android.app.servertransaction.TestUtils.LaunchActivityItemBuilder;
 import android.content.AutofillOptions;
 import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
@@ -195,11 +196,14 @@ public class TransactionParcelTests {
         FixedRotationAdjustments fixedRotationAdjustments = new FixedRotationAdjustments(
                 Surface.ROTATION_90, 1920, 1080, DisplayCutout.NO_CUTOUT);
 
-        LaunchActivityItem item = LaunchActivityItem.obtain(intent, ident, activityInfo,
-                config(), overrideConfig, compat, referrer, null /* voiceInteractor */,
-                procState, bundle, persistableBundle, resultInfoList(), referrerIntentList(),
-                true /* isForward */, null /* profilerInfo */, new Binder(),
-                fixedRotationAdjustments);
+        LaunchActivityItem item = new LaunchActivityItemBuilder()
+                .setIntent(intent).setIdent(ident).setInfo(activityInfo).setCurConfig(config())
+                .setOverrideConfig(overrideConfig).setCompatInfo(compat).setReferrer(referrer)
+                .setProcState(procState).setState(bundle).setPersistentState(persistableBundle)
+                .setPendingResults(resultInfoList()).setPendingNewIntents(referrerIntentList())
+                .setIsForward(true).setAssistToken(new Binder())
+                .setFixedRotationAdjustments(fixedRotationAdjustments).build();
+
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert

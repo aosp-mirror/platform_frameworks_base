@@ -166,7 +166,7 @@ public class DefaultNetworkMetrics {
 
     private static void fillLinkInfo(DefaultNetworkEvent ev, NetworkAgentInfo nai) {
         LinkProperties lp = nai.linkProperties;
-        ev.netId = nai.network().netId;
+        ev.netId = nai.network().getNetId();
         ev.transports |= BitUtils.packBits(nai.networkCapabilities.getTransportTypes());
         ev.ipv4 |= lp.hasIpv4Address() && lp.hasIpv4DefaultRoute();
         ev.ipv6 |= lp.hasGlobalIpv6Address() && lp.hasIpv6DefaultRoute();

@@ -47,7 +47,7 @@ import java.util.function.BiConsumer;
 @SmallTest
 public class PipBoundsStateTest extends ShellTestCase {
 
-    private static final Rect DEFAULT_BOUNDS = new Rect(0, 0, 10, 10);
+    private static final Size DEFAULT_SIZE = new Size(10, 10);
     private static final float DEFAULT_SNAP_FRACTION = 1.0f;
 
     private PipBoundsState mPipBoundsState;
@@ -71,22 +71,22 @@ public class PipBoundsStateTest extends ShellTestCase {
 
     @Test
     public void testSetReentryState() {
-        final Rect bounds = new Rect(0, 0, 100, 100);
+        final Size size = new Size(100, 100);
         final float snapFraction = 0.5f;
 
-        mPipBoundsState.saveReentryState(bounds, snapFraction);
+        mPipBoundsState.saveReentryState(size, snapFraction);
 
         final PipBoundsState.PipReentryState state = mPipBoundsState.getReentryState();
-        assertEquals(new Size(100, 100), state.getSize());
+        assertEquals(size, state.getSize());
         assertEquals(snapFraction, state.getSnapFraction(), 0.01);
     }
 
     @Test
     public void testClearReentryState() {
-        final Rect bounds = new Rect(0, 0, 100, 100);
+        final Size size = new Size(100, 100);
         final float snapFraction = 0.5f;
 
-        mPipBoundsState.saveReentryState(bounds, snapFraction);
+        mPipBoundsState.saveReentryState(size, snapFraction);
         mPipBoundsState.clearReentryState();
 
         assertNull(mPipBoundsState.getReentryState());
@@ -95,20 +95,20 @@ public class PipBoundsStateTest extends ShellTestCase {
     @Test
     public void testSetLastPipComponentName_notChanged_doesNotClearReentryState() {
         mPipBoundsState.setLastPipComponentName(mTestComponentName1);
-        mPipBoundsState.saveReentryState(DEFAULT_BOUNDS, DEFAULT_SNAP_FRACTION);
+        mPipBoundsState.saveReentryState(DEFAULT_SIZE, DEFAULT_SNAP_FRACTION);
 
         mPipBoundsState.setLastPipComponentName(mTestComponentName1);
 
         final PipBoundsState.PipReentryState state = mPipBoundsState.getReentryState();
         assertNotNull(state);
-        assertEquals(new Size(DEFAULT_BOUNDS.width(), DEFAULT_BOUNDS.height()), state.getSize());
+        assertEquals(DEFAULT_SIZE, state.getSize());
         assertEquals(DEFAULT_SNAP_FRACTION, state.getSnapFraction(), 0.01);
     }
 
     @Test
     public void testSetLastPipComponentName_changed_clearReentryState() {
         mPipBoundsState.setLastPipComponentName(mTestComponentName1);
-        mPipBoundsState.saveReentryState(DEFAULT_BOUNDS, DEFAULT_SNAP_FRACTION);
+        mPipBoundsState.saveReentryState(DEFAULT_SIZE, DEFAULT_SNAP_FRACTION);
 
         mPipBoundsState.setLastPipComponentName(mTestComponentName2);
 

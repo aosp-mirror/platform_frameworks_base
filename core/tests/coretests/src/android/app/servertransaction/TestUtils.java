@@ -18,11 +18,19 @@ package android.app.servertransaction;
 
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 
+import android.app.ProfilerInfo;
 import android.app.ResultInfo;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.os.PersistableBundle;
 import android.util.MergedConfiguration;
+import android.view.DisplayAdjustments.FixedRotationAdjustments;
 
+import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
 
 import java.util.ArrayList;
@@ -80,5 +88,118 @@ class TestUtils {
         referrerIntents.add(referrerIntent2);
 
         return referrerIntents;
+    }
+
+    static class LaunchActivityItemBuilder {
+        private Intent mIntent;
+        private int mIdent;
+        private ActivityInfo mInfo;
+        private Configuration mCurConfig;
+        private Configuration mOverrideConfig;
+        private CompatibilityInfo mCompatInfo;
+        private String mReferrer;
+        private IVoiceInteractor mVoiceInteractor;
+        private int mProcState;
+        private Bundle mState;
+        private PersistableBundle mPersistentState;
+        private List<ResultInfo> mPendingResults;
+        private List<ReferrerIntent> mPendingNewIntents;
+        private boolean mIsForward;
+        private ProfilerInfo mProfilerInfo;
+        private IBinder mAssistToken;
+        private FixedRotationAdjustments mFixedRotationAdjustments;
+
+        LaunchActivityItemBuilder setIntent(Intent intent) {
+            mIntent = intent;
+            return this;
+        }
+
+        LaunchActivityItemBuilder setIdent(int ident) {
+            mIdent = ident;
+            return this;
+        }
+
+        LaunchActivityItemBuilder setInfo(ActivityInfo info) {
+            mInfo = info;
+            return this;
+        }
+
+        LaunchActivityItemBuilder setCurConfig(Configuration curConfig) {
+            mCurConfig = curConfig;
+            return this;
+        }
+
+        LaunchActivityItemBuilder setOverrideConfig(Configuration overrideConfig) {
+            mOverrideConfig = overrideConfig;
+            return this;
+        }
+
+        LaunchActivityItemBuilder setCompatInfo(CompatibilityInfo compatInfo) {
+            mCompatInfo = compatInfo;
+            return this;
+        }
+
+        LaunchActivityItemBuilder setReferrer(String referrer) {
+            mReferrer = referrer;
+            return this;
+        }
+
+        LaunchActivityItemBuilder setVoiceInteractor(IVoiceInteractor voiceInteractor) {
+            mVoiceInteractor = voiceInteractor;
+            return this;
+        }
+
+        LaunchActivityItemBuilder setProcState(int procState) {
+            mProcState = procState;
+            return this;
+        }
+
+        LaunchActivityItemBuilder setState(Bundle state) {
+            mState = state;
+            return this;
+        }
+
+        LaunchActivityItemBuilder setPersistentState(PersistableBundle persistentState) {
+            mPersistentState = persistentState;
+            return this;
+        }
+
+        LaunchActivityItemBuilder setPendingResults(List<ResultInfo> pendingResults) {
+            mPendingResults = pendingResults;
+            return this;
+        }
+
+        LaunchActivityItemBuilder setPendingNewIntents(List<ReferrerIntent> pendingNewIntents) {
+            mPendingNewIntents = pendingNewIntents;
+            return this;
+        }
+
+        LaunchActivityItemBuilder setIsForward(boolean isForward) {
+            mIsForward = isForward;
+            return this;
+        }
+
+        LaunchActivityItemBuilder setProfilerInfo(ProfilerInfo profilerInfo) {
+            mProfilerInfo = profilerInfo;
+            return this;
+        }
+
+        LaunchActivityItemBuilder setAssistToken(IBinder assistToken) {
+            mAssistToken = assistToken;
+            return this;
+        }
+
+        LaunchActivityItemBuilder setFixedRotationAdjustments(FixedRotationAdjustments fra) {
+            mFixedRotationAdjustments = fra;
+            return this;
+        }
+
+        LaunchActivityItem build() {
+            return LaunchActivityItem.obtain(mIntent, mIdent, mInfo,
+                    mCurConfig, mOverrideConfig, mCompatInfo, mReferrer, mVoiceInteractor,
+                    mProcState, mState, mPersistentState, mPendingResults, mPendingNewIntents,
+                    mIsForward, mProfilerInfo, mAssistToken, null /* activityClientController */,
+                    mFixedRotationAdjustments);
+        }
     }
 }

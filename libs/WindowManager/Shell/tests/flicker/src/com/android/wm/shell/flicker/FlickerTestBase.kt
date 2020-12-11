@@ -130,7 +130,7 @@ abstract class FlickerTestBase {
         const val NAVIGATION_BAR_WINDOW_TITLE = "NavigationBar"
         const val STATUS_BAR_WINDOW_TITLE = "StatusBar"
         const val DOCKED_STACK_DIVIDER = "DockedStackDivider"
-        const val APP_PAIRS_DIVIDER = "AppPairDivider"
+        const val SPLIT_DIVIDER = "SplitDivider"
         const val IMAGE_WALLPAPER = "ImageWallpaper"
     }
 }

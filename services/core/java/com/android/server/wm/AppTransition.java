@@ -17,7 +17,7 @@
 package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams;
-import static android.view.WindowManager.TRANSIT_CHANGE_WINDOWING_MODE;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
@@ -2092,8 +2092,8 @@ public class AppTransition implements Dump {
             case TRANSIT_RELAUNCH: {
                 return "TRANSIT_RELAUNCH";
             }
-            case TRANSIT_CHANGE_WINDOWING_MODE: {
-                return "TRANSIT_CHANGE_WINDOWING_MODE";
+            case TRANSIT_CHANGE: {
+                return "TRANSIT_CHANGE";
             }
             case TRANSIT_KEYGUARD_GOING_AWAY: {
                 return "TRANSIT_KEYGUARD_GOING_AWAY";

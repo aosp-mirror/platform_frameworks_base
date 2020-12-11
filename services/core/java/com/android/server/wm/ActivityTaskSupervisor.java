@@ -88,6 +88,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.AppOpsManager;
+import android.app.IActivityClientController;
 import android.app.ProfilerInfo;
 import android.app.ResultInfo;
 import android.app.WaitResult;
@@ -795,6 +796,11 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                                 + " old=" + r.app + " new=" + proc);
             }
 
+            // Send the controller to client if the process is the first time to launch activity.
+            // So the client can save binder transactions of getting the controller from activity
+            // task manager service.
+            final IActivityClientController activityClientController =
+                    proc.hasEverLaunchedActivity() ? null : mService.mActivityClientController;
             r.launchCount++;
             r.lastLaunchTime = SystemClock.uptimeMillis();
             proc.setLastActivityLaunchTime(r.lastLaunchTime);
@@ -863,7 +869,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                         r.launchedFromPackage, task.voiceInteractor, proc.getReportedProcState(),
                         r.getSavedState(), r.getPersistentSavedState(), results, newIntents,
                         dc.isNextTransitionForward(), proc.createProfilerInfoIfNeeded(),
-                        r.assistToken, r.createFixedRotationAdjustmentsIfNeeded()));
+                        r.assistToken, activityClientController,
+                        r.createFixedRotationAdjustmentsIfNeeded()));
 
                 // Set desired final state.
                 final ActivityLifecycleItem lifecycleItem;

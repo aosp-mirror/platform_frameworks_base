@@ -42,9 +42,9 @@ public class WifiClientTest {
      */
     @Test
     public void testWifiClientParcelWriteRead() throws Exception {
-        WifiClient writeWifiClient = new WifiClient(MAC_ADDRESS);
+        WifiClient writeWifiClient = new WifiClient(MAC_ADDRESS, INTERFACE_NAME);
 
-        assertParcelSane(writeWifiClient, 1);
+        assertParcelSane(writeWifiClient, 2);
     }
 
     /**
@@ -52,12 +52,12 @@ public class WifiClientTest {
      */
     @Test
     public void testWifiClientEquals() throws Exception {
-        WifiClient writeWifiClient = new WifiClient(MAC_ADDRESS);
-        WifiClient writeWifiClientEquals = new WifiClient(MAC_ADDRESS);
+        WifiClient writeWifiClient = new WifiClient(MAC_ADDRESS, INTERFACE_NAME);
+        WifiClient writeWifiClientEquals = new WifiClient(MAC_ADDRESS, INTERFACE_NAME);
 
         assertEquals(writeWifiClient, writeWifiClientEquals);
         assertEquals(writeWifiClient.hashCode(), writeWifiClientEquals.hashCode());
-        assertFieldCountEquals(1, WifiClient.class);
+        assertFieldCountEquals(2, WifiClient.class);
     }
 
     /**
@@ -66,8 +66,8 @@ public class WifiClientTest {
     @Test
     public void testWifiClientNotEquals() throws Exception {
         final MacAddress macAddressNotEquals = MacAddress.fromString("00:00:00:00:00:00");
-        WifiClient writeWifiClient = new WifiClient(MAC_ADDRESS);
-        WifiClient writeWifiClientNotEquals = new WifiClient(macAddressNotEquals);
+        WifiClient writeWifiClient = new WifiClient(MAC_ADDRESS, INTERFACE_NAME);
+        WifiClient writeWifiClientNotEquals = new WifiClient(macAddressNotEquals, INTERFACE_NAME);
 
         assertNotEquals(writeWifiClient, writeWifiClientNotEquals);
         assertNotEquals(writeWifiClient.hashCode(), writeWifiClientNotEquals.hashCode());

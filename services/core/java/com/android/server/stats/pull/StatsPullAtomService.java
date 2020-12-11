@@ -31,6 +31,7 @@ import static android.net.NetworkTemplate.buildTemplateMobileWithRatType;
 import static android.net.NetworkTemplate.buildTemplateWifiWildcard;
 import static android.net.NetworkTemplate.getAllCollapsedRatTypes;
 import static android.os.Debug.getIonHeapsSizeKb;
+import static android.os.Process.LAST_SHARED_APPLICATION_GID;
 import static android.os.Process.getUidForPid;
 import static android.os.storage.VolumeInfo.TYPE_PRIVATE;
 import static android.os.storage.VolumeInfo.TYPE_PUBLIC;
@@ -168,7 +169,6 @@ import com.android.server.stats.pull.netstats.SubInfo;
 import com.android.server.storage.DiskStatsFileLogger;
 import com.android.server.storage.DiskStatsLoggingService;
 
-import java.util.concurrent.ExecutionException;
 import libcore.io.IoUtils;
 
 import org.json.JSONArray;
@@ -191,6 +191,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -1517,14 +1518,53 @@ public class StatsPullAtomService extends SystemService {
     }
 
     int pullCpuTimePerUidFreqLocked(int atomTag, List<StatsEvent> pulledData) {
+        // Aggregate times for the same uids.
+        SparseArray<long[]> aggregated = new SparseArray<>();
         mCpuUidFreqTimeReader.readAbsolute((uid, cpuFreqTimeMs) -> {
-            for (int freqIndex = 0; freqIndex < cpuFreqTimeMs.length; ++freqIndex) {
-                if (cpuFreqTimeMs[freqIndex] >= MIN_CPU_TIME_PER_UID_FREQ) {
-                    pulledData.add(FrameworkStatsLog.buildStatsEvent(
-                            atomTag, uid, freqIndex, cpuFreqTimeMs[freqIndex]));
+            // For uids known to be aggregated from many entries allow mutating in place to avoid
+            // many copies. Otherwise, copy before aggregating.
+            boolean mutateInPlace = false;
+            if (UserHandle.isIsolated(uid)) {
+                // Skip individual isolated uids because they are recycled and quickly removed from
+                // the underlying data source.
+                return;
+            } else if (UserHandle.isSharedAppGid(uid)) {
+                // All shared app gids are accounted together.
+                uid = LAST_SHARED_APPLICATION_GID;
+                mutateInPlace = true;
+            } else if (UserHandle.isApp(uid)) {
+                // Apps are accounted under their app id.
+                uid = UserHandle.getAppId(uid);
+            }
+
+            long[] aggCpuFreqTimeMs = aggregated.get(uid);
+            if (aggCpuFreqTimeMs != null) {
+                if (!mutateInPlace) {
+                    aggCpuFreqTimeMs = Arrays.copyOf(aggCpuFreqTimeMs, cpuFreqTimeMs.length);
+                    aggregated.put(uid, aggCpuFreqTimeMs);
                 }
+                for (int freqIndex = 0; freqIndex < cpuFreqTimeMs.length; ++freqIndex) {
+                    aggCpuFreqTimeMs[freqIndex] += cpuFreqTimeMs[freqIndex];
+                }
+            } else {
+                if (mutateInPlace) {
+                    cpuFreqTimeMs = Arrays.copyOf(cpuFreqTimeMs, cpuFreqTimeMs.length);
+                }
+                aggregated.put(uid, cpuFreqTimeMs);
             }
         });
+
+        int size = aggregated.size();
+        for (int i = 0; i < size; ++i) {
+            int uid = aggregated.keyAt(i);
+            long[] aggCpuFreqTimeMs = aggregated.valueAt(i);
+            for (int freqIndex = 0; freqIndex < aggCpuFreqTimeMs.length; ++freqIndex) {
+                if (aggCpuFreqTimeMs[freqIndex] >= MIN_CPU_TIME_PER_UID_FREQ) {
+                    pulledData.add(FrameworkStatsLog.buildStatsEvent(
+                            atomTag, uid, freqIndex, aggCpuFreqTimeMs[freqIndex]));
+                }
+            }
+        }
         return StatsManager.PULL_SUCCESS;
     }
 

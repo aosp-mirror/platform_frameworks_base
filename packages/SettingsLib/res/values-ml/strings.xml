@@ -400,7 +400,12 @@
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"സജീവം. മാറ്റുന്നതിന് ടാപ്പുചെയ്യുക."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"ആപ്പ് സ്‌റ്റാൻഡ്‌ബൈ നില:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="transcode_settings_title" msgid="2581975870429850549">"മീഡിയ ട്രാൻസ്കോഡ് ചെയ്യൽ ക്രമീകരണം"</string>
-    <string name="transcode_enable_all" msgid="9102460144086871903">"ട്രാൻസ്കോഡ് ചെയ്യൽ പ്രവർത്തനരഹിതമാക്കുക"</string>
+    <!-- no translation found for transcode_user_control (6176368544817731314) -->
+    <skip />
+    <!-- no translation found for transcode_enable_all (2411165920039166710) -->
+    <skip />
+    <!-- no translation found for transcode_default (3784803084573509491) -->
+    <skip />
     <string name="transcode_skip_apps" msgid="8249721984597390142">"ആപ്പുകൾക്കായി ട്രാൻസ്കോഡ് ചെയ്യുന്നത് പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"പ്രവർത്തിക്കുന്ന സേവനങ്ങൾ"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"നിലവിൽ പ്രവർത്തിക്കുന്ന സേവനങ്ങൾ കാണുക, നിയന്ത്രിക്കുക"</string>
@@ -449,7 +454,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"പൂർണ്ണമായി ചാർജാവാൻ <xliff:g id="TIME">%1$s</xliff:g> ശേഷിക്കുന്നു"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - പൂർണ്ണമായി ചാർജാവാൻ <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_limited" msgid="5902301801611726210">"<xliff:g id="LEVEL">%1$s</xliff:g> - ബാറ്ററി താൽക്കാലം പരിമിതപ്പെടുത്തി"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - ബാറ്ററി നില ഒപ്റ്റിമൈസ് ചെയ്യുന്നു"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"അജ്ഞാതം"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ചാർജ് ചെയ്യുന്നു"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"അതിവേഗ ചാർജിംഗ്"</string>

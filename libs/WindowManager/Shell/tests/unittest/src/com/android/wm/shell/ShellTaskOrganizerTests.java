@@ -108,8 +108,7 @@ public class ShellTaskOrganizerTests {
             doReturn(ParceledListSlice.<TaskAppearedInfo>emptyList())
                     .when(mTaskOrganizerController).registerTaskOrganizer(any());
         } catch (RemoteException e) {}
-        mOrganizer = spy(new ShellTaskOrganizer(mTaskOrganizerController, mSyncTransactionQueue,
-                mTransactionPool, mTestExecutor, mTestExecutor, mContext));
+        mOrganizer = spy(new ShellTaskOrganizer(mTaskOrganizerController, mTestExecutor, mContext));
     }
 
     @Test

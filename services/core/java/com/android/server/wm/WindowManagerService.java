@@ -48,6 +48,7 @@ import static android.provider.Settings.Global.DEVELOPMENT_RENDER_SHADOWS_IN_COM
 import static android.provider.Settings.Global.DEVELOPMENT_WM_DISPLAY_SETTINGS_PATH;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.SurfaceControl.getGlobalTransaction;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
@@ -2557,7 +2558,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // side child surfaces, so they will remain preserved in their current state
         // (rather than be cleaned up immediately by the app code).
         SurfaceControl.openTransaction();
-        winAnimator.detachChildren();
+        winAnimator.detachChildren(getGlobalTransaction());
         SurfaceControl.closeTransaction();
 
         return focusMayChange;
@@ -5349,7 +5350,7 @@ public class WindowManagerService extends IWindowManager.Stub
     void destroyPreservedSurfaceLocked() {
         for (int i = mDestroyPreservedSurface.size() - 1; i >= 0 ; i--) {
             final WindowState w = mDestroyPreservedSurface.get(i);
-            w.mWinAnimator.destroyPreservedSurfaceLocked();
+            w.mWinAnimator.destroyPreservedSurfaceLocked(w.getSyncTransaction());
         }
         mDestroyPreservedSurface.clear();
     }

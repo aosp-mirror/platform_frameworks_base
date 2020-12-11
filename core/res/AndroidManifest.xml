@@ -1361,7 +1361,7 @@
         android:description="@string/permdesc_systemCamera"
         android:protectionLevel="system|signature" />
 
-    <!-- Allows receiving the camera service notifications when a camera is opened
+    <!-- @SystemApi Allows receiving the camera service notifications when a camera is opened
             (by a certain application package) or closed.
         @hide -->
     <permission android:name="android.permission.CAMERA_OPEN_CLOSE_LISTENER"
@@ -2212,6 +2212,13 @@
     <permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Allows to read device identifiers and use ICC based authentication like EAP-AKA.
+         Often required in authentication to access the carrier's server and manage services
+         of the subscriber.
+         <p>Protection level: signature|appop -->
+    <permission android:name="android.permission.USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER"
+        android:protectionLevel="signature|appop" />
+
     <!-- @SystemApi Allows read access to emergency number information for ongoing calls or SMS
          sessions.
          @hide Used internally. -->
@@ -2377,6 +2384,15 @@
          @hide
     -->
     <permission android:name="android.permission.READ_CARRIER_APP_INFO"
+        android:protectionLevel="signature" />
+
+    <!-- Must be required by an GbaService to ensure that only the
+         system can bind to it.
+         <p>Protection level: signature
+         @SystemApi
+         @hide
+    -->
+    <permission android:name="android.permission.BIND_GBA_SERVICE"
         android:protectionLevel="signature" />
 
     <!-- ================================== -->
@@ -3953,6 +3969,14 @@
     <permission android:name="android.permission.ACCESS_SURFACE_FLINGER"
         android:protectionLevel="signature" />
 
+    <!-- @SystemApi Allows an application to rotate a surface by arbitrary degree.
+         This is a sub-feature of ACCESS_SURFACE_FLINGER and can be granted in a more concrete way.
+         <p>Not for use by third-party applications.
+         @hide
+    -->
+    <permission android:name="android.permission.ROTATE_SURFACE_FLINGER"
+        android:protectionLevel="signature|recents" />
+
     <!-- Allows an application to take screen shots and more generally
          get access to the frame buffer data.
          <p>Not for use by third-party applications.
@@ -4615,7 +4639,7 @@
     <!-- Allows access to keyguard secure storage.  Only allowed for system processes.
         @hide -->
     <permission android:name="android.permission.ACCESS_KEYGUARD_SECURE_STORAGE"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|setup" />
 
     <!-- Allows applications to set the initial lockscreen state.
          <p>Not for use by third-party applications. @hide -->

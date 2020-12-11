@@ -343,23 +343,48 @@ public interface WindowManager extends ViewManager {
 
     /** @hide */
     int TRANSIT_NONE = 0;
-    /** @hide */
+    /**
+     * A window that didn't exist before has been created and made visible.
+     * @hide
+     */
     int TRANSIT_OPEN = 1;
-    /** @hide */
+    /**
+     * A window that was visible no-longer exists (was finished or destroyed).
+     * @hide
+     */
     int TRANSIT_CLOSE = 2;
-    /** @hide */
+    /**
+     * A window that already existed but was not visible is made visible.
+     * @hide
+     */
     int TRANSIT_TO_FRONT = 3;
-    /** @hide */
+    /**
+     * A window that was visible is made invisible but still exists.
+     * @hide
+     */
     int TRANSIT_TO_BACK = 4;
     /** @hide */
     int TRANSIT_RELAUNCH = 5;
-    /** @hide */
-    int TRANSIT_CHANGE_WINDOWING_MODE = 6;
-    /** @hide */
+    /**
+     * A window is visible before and after but changes in some way (eg. it resizes or changes
+     * windowing-mode).
+     * @hide
+     */
+    int TRANSIT_CHANGE = 6;
+    /**
+     * The keyguard was visible and has been dismissed.
+     * @hide
+     */
     int TRANSIT_KEYGUARD_GOING_AWAY = 7;
-    /** @hide */
+    /**
+     * A window is appearing above a locked keyguard.
+     * @hide
+     */
     int TRANSIT_KEYGUARD_OCCLUDE = 8;
-    /** @hide */
+    /**
+     * A window is made invisible revealing a locked keyguard.
+     * @hide
+     */
     int TRANSIT_KEYGUARD_UNOCCLUDE = 9;
 
     /**
@@ -372,7 +397,7 @@ public interface WindowManager extends ViewManager {
             TRANSIT_TO_FRONT,
             TRANSIT_TO_BACK,
             TRANSIT_RELAUNCH,
-            TRANSIT_CHANGE_WINDOWING_MODE,
+            TRANSIT_CHANGE,
             TRANSIT_KEYGUARD_GOING_AWAY,
             TRANSIT_KEYGUARD_OCCLUDE,
             TRANSIT_KEYGUARD_UNOCCLUDE,
@@ -418,6 +443,12 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_FLAG_OPEN_BEHIND = 0x20;
 
     /**
+     * Transition flag: The keyguard is locked throughout the whole transition.
+     * @hide
+     */
+    int TRANSIT_FLAG_KEYGUARD_LOCKED = 0x40;
+
+    /**
      * @hide
      */
     @IntDef(flag = true, prefix = { "TRANSIT_FLAG_" }, value = {
@@ -426,7 +457,8 @@ public interface WindowManager extends ViewManager {
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER,
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION,
             TRANSIT_FLAG_APP_CRASHED,
-            TRANSIT_FLAG_OPEN_BEHIND
+            TRANSIT_FLAG_OPEN_BEHIND,
+            TRANSIT_FLAG_KEYGUARD_LOCKED
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionFlags {}

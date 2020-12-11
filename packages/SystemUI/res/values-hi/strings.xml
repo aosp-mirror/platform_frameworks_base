@@ -83,6 +83,7 @@
     <string name="screenshot_saved_title" msgid="8893267638659083153">"स्क्रीनशॉट सेव किया गया"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"अपना स्क्रीनशॉट देखने के लिए टैप करें"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"स्क्रीनशॉट सेव नहीं किया जा सका"</string>
+    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"स्क्रीनशॉट सेव करने के लिए डिवाइस का अनलॉक होना ज़रूरी है"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"स्क्रीनशॉट दोबारा लेने की कोशिश करें"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"मेमोरी कम होने की वजह से स्क्रीनशॉट सेव नहीं किया जा सका"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ऐप्लिकेशन या आपका संगठन स्क्रीनशॉट लेने की अनुमति नहीं देता"</string>
@@ -937,7 +938,7 @@
     <string name="notification_channel_general" msgid="4384774889645929705">"सामान्य संदेश"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"जगह"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"संकेत"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"झटपट ऐप्लिकेशन"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> चल रहा है"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ऐप्लिकेशन इंस्टॉल किए बिना ही खुल गया है."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"ऐप्लिकेशन इंस्टॉल किए बिना ही खुल गया है. ज़्यादा जानने के लिए टैप करें."</string>

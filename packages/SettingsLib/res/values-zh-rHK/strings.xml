@@ -400,7 +400,9 @@
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"已啟用。輕按即可切換。"</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"備用應用程式狀態：<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="transcode_settings_title" msgid="2581975870429850549">"媒體轉碼設定"</string>
-    <string name="transcode_enable_all" msgid="9102460144086871903">"停用轉碼功能"</string>
+    <string name="transcode_user_control" msgid="6176368544817731314">"覆寫轉碼預設設定"</string>
+    <string name="transcode_enable_all" msgid="2411165920039166710">"啟用轉碼功能"</string>
+    <string name="transcode_default" msgid="3784803084573509491">"假設應用程式支援新型格式"</string>
     <string name="transcode_skip_apps" msgid="8249721984597390142">"為應用程式啟用轉碼功能"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"執行中的服務"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"查看並控制目前正在執行中的服務"</string>
@@ -449,7 +451,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"還需 <xliff:g id="TIME">%1$s</xliff:g>才能充滿電"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - 還需 <xliff:g id="TIME">%2$s</xliff:g>才能充滿電"</string>
-    <string name="power_charging_limited" msgid="5902301801611726210">"<xliff:g id="LEVEL">%1$s</xliff:g> - 暫時限制電池充電"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - 正在優化電池狀態"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"未知"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"充電中"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"正在快速充電"</string>

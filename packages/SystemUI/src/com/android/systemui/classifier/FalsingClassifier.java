@@ -29,8 +29,11 @@ import java.util.Queue;
 public abstract class FalsingClassifier {
     private final FalsingDataProvider mDataProvider;
 
+    private final FalsingDataProvider.MotionEventListener mMotionEventListener = this::onTouchEvent;
+
     FalsingClassifier(FalsingDataProvider dataProvider) {
         mDataProvider = dataProvider;
+        mDataProvider.addMotionEventListener(mMotionEventListener);
     }
 
     List<MotionEvent> getRecentMotionEvents() {
@@ -89,6 +92,10 @@ public abstract class FalsingClassifier {
         return mDataProvider.getInteractionType();
     }
 
+    void cleanup() {
+        mDataProvider.removeMotionEventListener(mMotionEventListener);
+    }
+
     /**
      * Called whenever a MotionEvent occurs.
      *
@@ -113,17 +120,32 @@ public abstract class FalsingClassifier {
     void onSessionEnded() {};
 
     /**
-     * Returns true if the data captured so far looks like a false touch.
+     * Returns whether a gesture looks like a false touch.
+     *
+     * See also {@link #classifyGesture(double, double)}.
      */
-    abstract boolean isFalseTouch();
+    Result classifyGesture() {
+        return calculateFalsingResult(0, 0);
+    }
 
     /**
-     * Give the classifier a chance to log more details about why it triggered.
+     * Returns whether a gesture looks like a false touch, with the option to consider history.
      *
-     * This should only be called after a call to {@link #isFalseTouch()}, and only if
-     * {@link #isFalseTouch()} returns true;
+     * Unlike the parameter-less version of this method, this method allows the classifier to take
+     * history into account, penalizing or boosting confidence in a gesture based on recent results.
+     *
+     * See also {@link #classifyGesture()}.
      */
-    abstract String getReason();
+    Result classifyGesture(double historyPenalty, double historyConfidence) {
+        return calculateFalsingResult(historyPenalty, historyConfidence);
+    }
+
+    /**
+     * Calculate a result based on available data.
+     *
+     * When passed a historyConfidence of 0, the history penalty should be wholly ignored.
+     */
+    abstract Result calculateFalsingResult(double historyPenalty, double historyConfidence);
 
     /** */
     public static void logDebug(String msg) {
@@ -138,5 +160,49 @@ public abstract class FalsingClassifier {
     /** */
     public static void logError(String msg) {
         BrightLineFalsingManager.logError(msg);
+    }
+
+    /**
+     * A Falsing result that encapsulates the boolean result along with confidence and a reason.
+     */
+    static class Result {
+        private final boolean mFalsed;
+        private final double mConfidence;
+        private final String mReason;
+
+        /**
+         * See {@link #falsed(double, String)} abd {@link #passed(double)}.
+         */
+        private Result(boolean falsed, double confidence, String reason) {
+            mFalsed = falsed;
+            mConfidence = confidence;
+            mReason = reason;
+        }
+
+        public boolean isFalse() {
+            return mFalsed;
+        }
+
+        public double getConfidence() {
+            return mConfidence;
+        }
+
+        public String getReason() {
+            return mReason;
+        }
+
+        /**
+         * Construct a "falsed" result indicating that a gesture should be treated as accidental.
+         */
+        static Result falsed(double confidence, String reason) {
+            return new Result(true, confidence, reason);
+        }
+
+        /**
+         * Construct a "passed" result indicating that a gesture should be allowed.
+         */
+        static Result passed(double confidence) {
+            return new Result(false, confidence, null);
+        }
     }
 }

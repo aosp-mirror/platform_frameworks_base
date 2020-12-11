@@ -203,6 +203,7 @@
     <string name="gnss_service" msgid="8907781262179951385">"Usługa GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Usługa powiadomień czujnika"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Usługa Zmierzch"</string>
+    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Wykrywanie strefy czasowej (brak połączenia)"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Twoje urządzenie zostanie wyczyszczone"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Nie można użyć aplikacji administratora. Dane z urządzenia zostaną wykasowane.\n\nJeśli masz pytania, skontaktuj się z administratorem organizacji."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Drukowanie wyłączone przez: <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
@@ -293,8 +294,7 @@
     <string name="notification_channel_usb" msgid="1528280969406244896">"Połączenie USB"</string>
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Działa aplikacja"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Aplikacje zużywające baterię"</string>
-    <!-- no translation found for notification_channel_accessibility_magnification (1707913872219798098) -->
-    <skip />
+    <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Powiększenie"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> zużywa baterię"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"Liczba aplikacji zużywających baterię: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Kliknij, by wyświetlić szczegóły wykorzystania baterii i użycia danych"</string>
@@ -1846,7 +1846,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Zaktualizowany przez administratora"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Usunięty przez administratora"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Aby wydłużyć czas pracy na baterii, funkcja Oszczędzanie baterii:\n\n•włącza tryb ciemny,\n• wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje, np. „OK Google”.\n\n"<annotation id="url">"Więcej informacji"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Aby wydłużyć czas pracy na baterii, funkcja Oszczędzanie baterii:\n\n• włącza tryb ciemny,\n• wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje, np. „OK Google”.\n\n"<annotation id="url">"Więcej informacji"</annotation></string>
     <string name="battery_saver_description" msgid="6794188153647295212">"Aby wydłużyć czas pracy na baterii, Oszczędzanie baterii:\n\n• włącza tryb ciemny,\n• wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje, np. „OK Google”."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Oszczędzanie danych uniemożliwia niektórym aplikacjom wysyłanie i odbieranie danych w tle, zmniejszając w ten sposób ich użycie. Aplikacja, z której w tej chwili korzystasz, może uzyskiwać dostęp do danych, ale rzadziej. Może to powodować, że obrazy będą się wyświetlać dopiero po kliknięciu."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Włączyć Oszczędzanie danych?"</string>
@@ -2258,12 +2258,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <!-- no translation found for window_magnification_prompt_title (8197528399699536320) -->
-    <skip />
-    <!-- no translation found for window_magnification_prompt_content (4166711383253283838) -->
-    <skip />
-    <!-- no translation found for turn_on_magnification_settings_action (8521433346684847700) -->
-    <skip />
-    <!-- no translation found for dismiss_action (1728820550388704784) -->
-    <skip />
+    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"Nowość: powiększanie okna"</string>
+    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"Możesz teraz powiększyć część lub całość ekranu"</string>
+    <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Włącz w Ustawieniach"</string>
+    <string name="dismiss_action" msgid="1728820550388704784">"Odrzuć"</string>
 </resources>

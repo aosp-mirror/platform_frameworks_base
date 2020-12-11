@@ -386,6 +386,10 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void clearPendingResultForActivity(
             IBinder activityToken, WeakReference<PendingIntentRecord> pir);
 
+    /** Returns the component name of the activity token. */
+    @Nullable
+    public abstract ComponentName getActivityName(IBinder activityToken);
+
     /**
      * @return the activity token and IApplicationThread for the top activity in the task or null
      * if there isn't a top activity with a valid process.

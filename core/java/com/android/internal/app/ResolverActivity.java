@@ -350,13 +350,7 @@ public class ResolverActivity extends Activity implements
         // from managed profile to owner or other way around.
         setProfileSwitchMessageId(intent.getContentUserHint());
 
-        try {
-            mLaunchedFromUid = ActivityTaskManager.getService().getLaunchedFromUid(
-                    getActivityToken());
-        } catch (RemoteException e) {
-            mLaunchedFromUid = -1;
-        }
-
+        mLaunchedFromUid = getLaunchedFromUid();
         if (mLaunchedFromUid < 0 || UserHandle.isIsolated(mLaunchedFromUid)) {
             // Gulp!
             finish();
@@ -1085,7 +1079,7 @@ public class ResolverActivity extends Activity implements
         }
     }
 
-    protected boolean onTargetSelected(TargetInfo target, boolean alwaysCheck) {
+    protected boolean onTargetSelected(TargetInfo target, boolean always) {
         final ResolveInfo ri = target.getResolveInfo();
         final Intent intent = target != null ? target.getResolvedIntent() : null;
 
@@ -1207,7 +1201,7 @@ public class ResolverActivity extends Activity implements
                     if (otherProfileMatch > bestMatch) bestMatch = otherProfileMatch;
                 }
 
-                if (alwaysCheck) {
+                if (always) {
                     final int userId = getUserId();
                     final PackageManager pm = getPackageManager();
 
@@ -1300,15 +1294,8 @@ public class ResolverActivity extends Activity implements
                 maybeLogCrossProfileTargetLaunch(cti, currentUserHandle);
             }
         } catch (RuntimeException e) {
-            String launchedFromPackage;
-            try {
-                launchedFromPackage = ActivityTaskManager.getService().getLaunchedFromPackage(
-                        getActivityToken());
-            } catch (RemoteException e2) {
-                launchedFromPackage = "??";
-            }
             Slog.wtf(TAG, "Unable to launch as uid " + mLaunchedFromUid
-                    + " package " + launchedFromPackage + ", while running in "
+                    + " package " + getLaunchedFromPackage() + ", while running in "
                     + ActivityThread.currentProcessName(), e);
         }
     }

@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.media.AudioAttributes;
@@ -38,8 +39,12 @@ public class SystemVibrator extends Vibrator {
     private static final String TAG = "Vibrator";
 
     private final IVibratorService mService;
+    private final IVibratorManagerService mManagerService;
+    private final Object mLock = new Object();
     private final Binder mToken = new Binder();
     private final Context mContext;
+    @GuardedBy("mLock")
+    private VibratorInfo mVibratorInfo;
 
     @GuardedBy("mDelegates")
     private final ArrayMap<OnVibratorStateChangedListener,
@@ -49,6 +54,8 @@ public class SystemVibrator extends Vibrator {
     public SystemVibrator() {
         mContext = null;
         mService = IVibratorService.Stub.asInterface(ServiceManager.getService("vibrator"));
+        mManagerService = IVibratorManagerService.Stub.asInterface(
+                ServiceManager.getService("vibrator_manager"));
     }
 
     @UnsupportedAppUsage
@@ -56,6 +63,8 @@ public class SystemVibrator extends Vibrator {
         super(context);
         mContext = context;
         mService = IVibratorService.Stub.asInterface(ServiceManager.getService("vibrator"));
+        mManagerService = IVibratorManagerService.Stub.asInterface(
+                ServiceManager.getService("vibrator_manager"));
     }
 
     @Override
@@ -207,13 +216,14 @@ public class SystemVibrator extends Vibrator {
     @Override
     public boolean setAlwaysOnEffect(int uid, String opPkg, int alwaysOnId, VibrationEffect effect,
             AudioAttributes attributes) {
-        if (mService == null) {
+        if (mManagerService == null) {
             Log.w(TAG, "Failed to set always-on effect; no vibrator service.");
             return false;
         }
         try {
             VibrationAttributes atr = new VibrationAttributes.Builder(attributes, effect).build();
-            return mService.setAlwaysOnEffect(uid, opPkg, alwaysOnId, effect, atr);
+            CombinedVibrationEffect combinedEffect = CombinedVibrationEffect.createSynced(effect);
+            return mManagerService.setAlwaysOnEffect(uid, opPkg, alwaysOnId, combinedEffect, atr);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to set always-on effect.", e);
         }
@@ -236,25 +246,27 @@ public class SystemVibrator extends Vibrator {
 
     @Override
     public int[] areEffectsSupported(@VibrationEffect.EffectType int... effectIds) {
-        try {
-            return mService.areEffectsSupported(effectIds);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed to query effect support");
-            throw e.rethrowAsRuntimeException();
+        VibratorInfo vibratorInfo = getVibratorInfo();
+        int[] supported = new int[effectIds.length];
+        for (int i = 0; i < effectIds.length; i++) {
+            supported[i] = vibratorInfo == null
+                    ? Vibrator.VIBRATION_EFFECT_SUPPORT_UNKNOWN
+                    : vibratorInfo.isEffectSupported(effectIds[i]);
         }
+        return supported;
     }
 
     @Override
     public boolean[] arePrimitivesSupported(
             @NonNull @VibrationEffect.Composition.Primitive int... primitiveIds) {
-        try {
-            return mService.arePrimitivesSupported(primitiveIds);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed to query effect support");
-            throw e.rethrowAsRuntimeException();
+        VibratorInfo vibratorInfo = getVibratorInfo();
+        boolean[] supported = new boolean[primitiveIds.length];
+        for (int i = 0; i < primitiveIds.length; i++) {
+            supported[i] = vibratorInfo == null
+                    ? false : vibratorInfo.isPrimitiveSupported(primitiveIds[i]);
         }
+        return supported;
     }
-
 
     @Override
     public void cancel() {
@@ -265,6 +277,24 @@ public class SystemVibrator extends Vibrator {
             mService.cancelVibrate(mToken);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to cancel vibration.", e);
+        }
+    }
+
+    @Nullable
+    private VibratorInfo getVibratorInfo() {
+        try {
+            synchronized (mLock) {
+                if (mVibratorInfo != null) {
+                    return mVibratorInfo;
+                }
+                if (mService == null) {
+                    return null;
+                }
+                return mVibratorInfo = mService.getVibratorInfo();
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to query vibrator info");
+            throw e.rethrowFromSystemServer();
         }
     }
 }

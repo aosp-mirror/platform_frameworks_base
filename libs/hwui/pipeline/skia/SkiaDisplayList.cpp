@@ -47,7 +47,7 @@ void SkiaDisplayList::syncContents(const WebViewSyncData& data) {
     }
 }
 
-bool SkiaDisplayList::reuseDisplayList(RenderNode* node, renderthread::CanvasContext* context) {
+bool SkiaDisplayList::reuseDisplayList(RenderNode* node) {
     reset();
     node->attachAvailableList(this);
     return true;

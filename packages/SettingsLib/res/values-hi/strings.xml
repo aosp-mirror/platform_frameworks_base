@@ -28,7 +28,7 @@
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP कॉन्‍फ़िगरेशन की विफलता"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"खराब नेटवर्क होने के कारण कनेक्ट नहीं हुआ"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"वाईफ़ाई कनेक्‍शन विफलता"</string>
-    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"प्रमाणीकरण समस्या"</string>
+    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"पुष्टि नहीं हो सकी"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"कनेक्ट नहीं हो पा रहा है"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\' से कनेक्ट नहीं हो पा रहा है"</string>
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"पासवर्ड जाँचें और दोबारा कोशिश करें"</string>
@@ -400,7 +400,9 @@
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"सक्रिय. टॉगल करने के लिए टैप करें."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"ऐप्लिकेशन स्टैंडबाय की स्थिति:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="transcode_settings_title" msgid="2581975870429850549">"मीडिया ट्रांसकोडिंग सेटिंग"</string>
-    <string name="transcode_enable_all" msgid="9102460144086871903">"ट्रांसकोडिंग को बंद करें"</string>
+    <string name="transcode_user_control" msgid="6176368544817731314">"ट्रांसकोडिंग की डिफ़ॉल्ट सेटिंग बदलें"</string>
+    <string name="transcode_enable_all" msgid="2411165920039166710">"ट्रांसकोडिंग चालू करें"</string>
+    <string name="transcode_default" msgid="3784803084573509491">"मानकर चलें कि ऐप्लिकेशन, मॉडर्न फ़ॉर्मैट के साथ काम करेंगे"</string>
     <string name="transcode_skip_apps" msgid="8249721984597390142">"ऐप्लिकेशन के लिए ट्रांसकोडिंग चालू करें"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"चल रही सेवाएं"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"इस समय चल रही सेवाओं को देखें और नियंत्रित करें"</string>
@@ -449,7 +451,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"चार्ज पूरा होने में <xliff:g id="TIME">%1$s</xliff:g> बचा है"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> में पूरा चार्ज हो जाएगा"</string>
-    <string name="power_charging_limited" msgid="5902301801611726210">"<xliff:g id="LEVEL">%1$s</xliff:g> - कुछ समय के लिए, बैटरी का सीमित इस्तेमाल होगा"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - बैटरी की परफ़ॉर्मेंस बेहतर करने के लिए, ऑप्टिमाइज़ किया जा रहा है"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"चार्ज हो रही है"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"तेज़ चार्ज हो रही है"</string>

@@ -21,6 +21,7 @@
 #include <SaveFlags.h>
 
 #include <androidfw/ResourceTypes.h>
+#include "DisplayList.h"
 #include "Properties.h"
 #include "utils/Macros.h"
 
@@ -47,18 +48,6 @@ class CanvasPropertyPaint;
 class CanvasPropertyPrimitive;
 class DeferredLayerUpdater;
 class RenderNode;
-
-namespace skiapipeline {
-class SkiaDisplayList;
-}
-
-/**
- * Data structure that holds the list of commands used in display list stream
- */
-using DisplayList = skiapipeline::SkiaDisplayList;
-}
-
-namespace uirenderer {
 namespace VectorDrawable {
 class Tree;
 }

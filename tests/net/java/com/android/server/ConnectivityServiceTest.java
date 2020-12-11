@@ -181,7 +181,6 @@ import android.net.NetworkStack;
 import android.net.NetworkStackClient;
 import android.net.NetworkState;
 import android.net.NetworkTestResultParcelable;
-import android.net.NetworkUtils;
 import android.net.ProxyInfo;
 import android.net.ResolverParamsParcel;
 import android.net.RouteInfo;
@@ -1958,7 +1957,7 @@ public class ConnectivityServiceTest {
     }
 
     @Test
-    public void testOwnerUidChangeBug() throws Exception {
+    public void testOwnerUidCannotChange() throws Exception {
         // Owner UIDs are not visible without location permission.
         setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_FINE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION);
@@ -1973,39 +1972,19 @@ public class ConnectivityServiceTest {
         waitForIdle();
 
         // Send ConnectivityService an update to the mWiFiNetworkAgent's capabilities that changes
-        // its owner UID.
+        // the owner UID and an unrelated capability.
         NetworkCapabilities agentCapabilities = mWiFiNetworkAgent.getNetworkCapabilities();
         assertEquals(originalOwnerUid, agentCapabilities.getOwnerUid());
         agentCapabilities.setOwnerUid(42);
-        mWiFiNetworkAgent.setNetworkCapabilities(agentCapabilities, true);
-        waitForIdle();
-
-        // Check that the owner UID is not updated.
-        NetworkCapabilities nc = mCm.getNetworkCapabilities(mWiFiNetworkAgent.getNetwork());
-        assertEquals(originalOwnerUid, nc.getOwnerUid());
-
-        // Make an unrelated change to the capabilities.
         assertFalse(agentCapabilities.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
         agentCapabilities.addCapability(NET_CAPABILITY_NOT_CONGESTED);
         mWiFiNetworkAgent.setNetworkCapabilities(agentCapabilities, true);
         waitForIdle();
 
-        // Check that both the capability change and the owner UID have been modified.
-        // The owner UID is -1 because it is visible only to the UID that owns the network.
-        nc = mCm.getNetworkCapabilities(mWiFiNetworkAgent.getNetwork());
-        assertEquals(-1, nc.getOwnerUid());
-        assertTrue(nc.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
-
-        // Set the owner back to originalOwnerUid, update the capabilities, and check that it is
-        // visible again.
-        // TODO: should this even be possible?
-        agentCapabilities.setOwnerUid(originalOwnerUid);
-        agentCapabilities.removeCapability(NET_CAPABILITY_NOT_CONGESTED);
-        mWiFiNetworkAgent.setNetworkCapabilities(agentCapabilities, true);
-        waitForIdle();
-
-        nc = mCm.getNetworkCapabilities(mWiFiNetworkAgent.getNetwork());
+        // Check that the capability change has been applied but the owner UID is not modified.
+        NetworkCapabilities nc = mCm.getNetworkCapabilities(mWiFiNetworkAgent.getNetwork());
         assertEquals(originalOwnerUid, nc.getOwnerUid());
+        assertTrue(nc.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
     }
 
     @Test
@@ -2568,10 +2547,7 @@ public class ConnectivityServiceTest {
 
     @Test
     public void testNoMutableNetworkRequests() throws Exception {
-        // TODO(b/173157160) Please replace FLAG_MUTABLE_UNAUDITED below
-        // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0, new Intent("a"),
-                PendingIntent.FLAG_MUTABLE_UNAUDITED);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0, new Intent("a"), 0);
         NetworkRequest request1 = new NetworkRequest.Builder()
                 .addCapability(NET_CAPABILITY_VALIDATED)
                 .build();
@@ -3231,21 +3207,17 @@ public class ConnectivityServiceTest {
         assertThrows(SecurityException.class, () ->
                 mCm.registerNetworkCallback(r, new NetworkCallback()));
 
-        // TODO(b/173157160) Please replace FLAG_MUTABLE_UNAUDITED below
-        // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
         assertThrows(SecurityException.class, () ->
                 mCm.registerNetworkCallback(r, PendingIntent.getService(
-                        mServiceContext, 0, new Intent(), PendingIntent.FLAG_MUTABLE_UNAUDITED)));
+                        mServiceContext, 0, new Intent(), 0)));
 
         // Requesting a Network with signal strength should get IllegalArgumentException.
         assertThrows(IllegalArgumentException.class, () ->
                 mCm.requestNetwork(r, new NetworkCallback()));
 
-        // TODO(b/173157160) Please replace FLAG_MUTABLE_UNAUDITED below
-        // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
         assertThrows(IllegalArgumentException.class, () ->
                 mCm.requestNetwork(r, PendingIntent.getService(
-                        mServiceContext, 0, new Intent(), PendingIntent.FLAG_MUTABLE_UNAUDITED)));
+                        mServiceContext, 0, new Intent(), 0)));
     }
 
     @Test
@@ -4709,16 +4681,12 @@ public class ConnectivityServiceTest {
         }
         j = 0;
         while (j++ < INTENTS / 2) {
-            // TODO(b/173157160) Please replace FLAG_MUTABLE_UNAUDITED below
-            // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
-            PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, new Intent("a" + j), PendingIntent.FLAG_MUTABLE_UNAUDITED);
+            PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, new Intent("a" + j), 0);
             mCm.requestNetwork(networkRequest, pi);
             registered.add(pi);
         }
         while (j++ < INTENTS) {
-            // TODO(b/173157160) Please replace FLAG_MUTABLE_UNAUDITED below
-            // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
-            PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, new Intent("b" + j), PendingIntent.FLAG_MUTABLE_UNAUDITED);
+            PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, new Intent("b" + j), 0);
             mCm.registerNetworkCallback(networkRequest, pi);
             registered.add(pi);
         }
@@ -4732,15 +4700,11 @@ public class ConnectivityServiceTest {
         );
         assertThrows(TooManyRequestsException.class, () ->
                 mCm.requestNetwork(networkRequest,
-                        // TODO(b/173157160) Please replace FLAG_MUTABLE_UNAUDITED below
-                        // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
-                        PendingIntent.getBroadcast(mContext, 0, new Intent("c"), PendingIntent.FLAG_MUTABLE_UNAUDITED))
+                        PendingIntent.getBroadcast(mContext, 0, new Intent("c"), 0))
         );
         assertThrows(TooManyRequestsException.class, () ->
                 mCm.registerNetworkCallback(networkRequest,
-                        // TODO(b/173157160) Please replace FLAG_MUTABLE_UNAUDITED below
-                        // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
-                        PendingIntent.getBroadcast(mContext, 0, new Intent("d"), PendingIntent.FLAG_MUTABLE_UNAUDITED))
+                        PendingIntent.getBroadcast(mContext, 0, new Intent("d"), 0))
         );
 
         for (Object o : registered) {
@@ -4769,20 +4733,16 @@ public class ConnectivityServiceTest {
         waitForIdle();
 
         for (int i = 0; i < MAX_REQUESTS; i++) {
-            // TODO(b/173157160) Please replace FLAG_MUTABLE_UNAUDITED below
-            // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
             PendingIntent pendingIntent =
-                    PendingIntent.getBroadcast(mContext, 0, new Intent("e" + i), PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                    PendingIntent.getBroadcast(mContext, 0, new Intent("e" + i), 0);
             mCm.requestNetwork(networkRequest, pendingIntent);
             mCm.unregisterNetworkCallback(pendingIntent);
         }
         waitForIdle();
 
         for (int i = 0; i < MAX_REQUESTS; i++) {
-            // TODO(b/173157160) Please replace FLAG_MUTABLE_UNAUDITED below
-            // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
             PendingIntent pendingIntent =
-                    PendingIntent.getBroadcast(mContext, 0, new Intent("f" + i), PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                    PendingIntent.getBroadcast(mContext, 0, new Intent("f" + i), 0);
             mCm.registerNetworkCallback(networkRequest, pendingIntent);
             mCm.unregisterNetworkCallback(pendingIntent);
         }
@@ -4860,7 +4820,7 @@ public class ConnectivityServiceTest {
         lp.setInterfaceName(WIFI_IFNAME);
         LinkAddress myIpv4Address = new LinkAddress("192.168.12.3/24");
         RouteInfo myIpv4DefaultRoute = new RouteInfo((IpPrefix) null,
-                NetworkUtils.numericToInetAddress("192.168.12.1"), lp.getInterfaceName());
+                InetAddresses.parseNumericAddress("192.168.12.1"), lp.getInterfaceName());
         lp.addLinkAddress(myIpv4Address);
         lp.addRoute(myIpv4DefaultRoute);
 

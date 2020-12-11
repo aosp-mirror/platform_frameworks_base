@@ -324,7 +324,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 userHandle.getIdentifier());
 
         if (mAssistantFeedbackController.showFeedbackIndicator(row.getEntry())) {
-            feedbackInfo.bindGuts(pmUser, sbn, row.getEntry(), mAssistantFeedbackController);
+            feedbackInfo.bindGuts(pmUser, sbn, row.getEntry(), row, mAssistantFeedbackController);
         }
     }
 

@@ -50,13 +50,13 @@ public class PointerCountClassifierTest extends ClassifierTest {
 
     @Test
     public void testPass_noPointer() {
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
     }
 
     @Test
     public void testPass_singlePointer() {
         mClassifier.onTouchEvent(appendDownEvent(1, 1));
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
     }
 
     @Test
@@ -72,7 +72,7 @@ public class PointerCountClassifierTest extends ClassifierTest {
                 0, 0);
         mClassifier.onTouchEvent(motionEvent);
         motionEvent.recycle();
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
     }
 
     @Test
@@ -89,6 +89,6 @@ public class PointerCountClassifierTest extends ClassifierTest {
         mClassifier.onTouchEvent(motionEvent);
         motionEvent.recycle();
         getDataProvider().setInteractionType(QUICK_SETTINGS);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
     }
 }

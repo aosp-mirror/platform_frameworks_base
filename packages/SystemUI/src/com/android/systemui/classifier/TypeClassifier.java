@@ -38,32 +38,40 @@ public class TypeClassifier extends FalsingClassifier {
     }
 
     @Override
-    public boolean isFalseTouch() {
+    Result calculateFalsingResult(double historyPenalty, double historyConfidence) {
         boolean vertical = isVertical();
         boolean up = isUp();
         boolean right = isRight();
 
+        boolean wrongDirection = true;
         switch (getInteractionType()) {
             case QUICK_SETTINGS:
             case PULSE_EXPAND:
             case NOTIFICATION_DRAG_DOWN:
-                return !vertical || up;
+                wrongDirection = !vertical || up;
+                break;
             case NOTIFICATION_DISMISS:
-                return vertical;
+                wrongDirection = vertical;
+                break;
             case UNLOCK:
             case BOUNCER_UNLOCK:
-                return !vertical || !up;
+                wrongDirection = !vertical || !up;
+                break;
             case LEFT_AFFORDANCE:  // Swiping from the bottom left corner for camera or similar.
-                return !right || !up;
+                wrongDirection = !right || !up;
+                break;
             case RIGHT_AFFORDANCE:  // Swiping from the bottom right corner for camera or similar.
-                return right || !up;
+                wrongDirection = right || !up;
+                break;
             default:
-                return true;
+                wrongDirection = true;
+                break;
         }
+
+        return wrongDirection ? Result.falsed(1, getReason()) : Result.passed(0.5);
     }
 
-    @Override
-    String getReason() {
+    private String getReason() {
         return String.format("{vertical=%s, up=%s, right=%s}", isVertical(), isUp(), isRight());
     }
 }

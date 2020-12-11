@@ -26,6 +26,7 @@ import static android.view.SurfaceControlProto.HASH_CODE;
 import static android.view.SurfaceControlProto.NAME;
 
 import android.annotation.FloatRange;
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -54,12 +55,15 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Surface.OutOfResourcesException;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.VirtualRefBasePtr;
 
 import dalvik.system.CloseGuard;
 
 import libcore.util.NativeAllocationRegistry;
 
 import java.io.Closeable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -224,6 +228,10 @@ public final class SurfaceControl implements Parcelable {
                                                       IBinder focusedToken, int displayId);
     private static native void nativeSetFrameTimelineVsync(long transactionObj,
             long frameTimelineVsyncId);
+    private static native void nativeAddJankDataListener(long nativeListener,
+            long nativeSurfaceControl);
+    private static native void nativeRemoveJankDataListener(long nativeListener);
+    private static native long nativeCreateJankDataListenerWrapper(OnJankDataListener listener);
 
     @Nullable
     @GuardedBy("mLock")
@@ -247,6 +255,73 @@ public final class SurfaceControl implements Parcelable {
          * @param parent The future parent surface.
          */
         void onReparent(@NonNull Transaction transaction, @Nullable SurfaceControl parent);
+    }
+
+    /**
+     * Jank information to be fed back via {@link OnJankDataListener}.
+     * @hide
+     */
+    public static class JankData {
+
+        /** @hide */
+        @IntDef(flag = true, value = {JANK_NONE,
+                JANK_DISPLAY,
+                JANK_SURFACEFLINGER_DEADLINE_MISSED,
+                JANK_SURFACEFLINGER_GPU_DEADLINE_MISSED,
+                JANK_APP_DEADLINE_MISSED,
+                JANK_PREDICTION_EXPIRED,
+                JANK_SURFACEFLINGER_EARLY_LATCH})
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface JankType {}
+
+        // Needs to be kept in sync with frameworks/native/libs/gui/include/gui/JankInfo.h
+
+        // No Jank
+        public static final int JANK_NONE = 0x0;
+
+        // Jank not related to SurfaceFlinger or the App
+        public static final int JANK_DISPLAY = 0x1;
+        // SF took too long on the CPU
+        public static final int JANK_SURFACEFLINGER_DEADLINE_MISSED = 0x2;
+        // SF took too long on the GPU
+        public static final int JANK_SURFACEFLINGER_GPU_DEADLINE_MISSED = 0x4;
+        // Either App or GPU took too long on the frame
+        public static final int JANK_APP_DEADLINE_MISSED = 0x8;
+        // Predictions live for 120ms, if prediction is expired for a frame, there is definitely a
+        // jank
+        // associated with the App if this is for a SurfaceFrame, and SF for a DisplayFrame.
+        public static final int JANK_PREDICTION_EXPIRED = 0x10;
+        // Latching a buffer early might cause an early present of the frame
+        public static final int JANK_SURFACEFLINGER_EARLY_LATCH = 0x20;
+
+        public JankData(long frameVsyncId, @JankType int jankType) {
+            this.frameVsyncId = frameVsyncId;
+            this.jankType = jankType;
+        }
+
+        public final long frameVsyncId;
+        public final @JankType int jankType;
+    }
+
+    /**
+     * Listener interface to be informed about SurfaceFlinger's jank classification for a specific
+     * surface.
+     *
+     * @see JankData
+     * @see #addJankDataListener
+     * @hide
+     */
+    public static abstract class OnJankDataListener {
+        private final VirtualRefBasePtr mNativePtr;
+
+        public OnJankDataListener() {
+            mNativePtr = new VirtualRefBasePtr(nativeCreateJankDataListenerWrapper(this));
+        }
+
+        /**
+         * Called when new jank classifications are available.
+         */
+        public abstract void onJankDataAvailable(JankData[] jankStats);
     }
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
@@ -1526,97 +1601,6 @@ public final class SurfaceControl implements Parcelable {
     /**
      * @hide
      */
-    public void deferTransactionUntil(SurfaceControl barrier, long frame) {
-        synchronized(SurfaceControl.class) {
-            sGlobalTransaction.deferTransactionUntil(this, barrier, frame);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void reparentChildren(SurfaceControl newParent) {
-        synchronized(SurfaceControl.class) {
-            sGlobalTransaction.reparentChildren(this, newParent);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void detachChildren() {
-        synchronized(SurfaceControl.class) {
-            sGlobalTransaction.detachChildren(this);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public void setLayer(int zorder) {
-        checkNotReleased();
-        synchronized(SurfaceControl.class) {
-            sGlobalTransaction.setLayer(this, zorder);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public void setPosition(float x, float y) {
-        checkNotReleased();
-        synchronized(SurfaceControl.class) {
-            sGlobalTransaction.setPosition(this, x, y);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void setBufferSize(int w, int h) {
-        checkNotReleased();
-        synchronized(SurfaceControl.class) {
-            sGlobalTransaction.setBufferSize(this, w, h);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public void hide() {
-        checkNotReleased();
-        synchronized(SurfaceControl.class) {
-            sGlobalTransaction.hide(this);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public void show() {
-        checkNotReleased();
-        synchronized(SurfaceControl.class) {
-            sGlobalTransaction.show(this);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void setTransparentRegionHint(Region region) {
-        checkNotReleased();
-        synchronized(SurfaceControl.class) {
-            sGlobalTransaction.setTransparentRegionHint(this, region);
-        }
-    }
-
-    /**
-     * @hide
-     */
     public boolean clearContentFrameStats() {
         checkNotReleased();
         return nativeClearContentFrameStats(mNativeObject);
@@ -1642,87 +1626,6 @@ public final class SurfaceControl implements Parcelable {
      */
     public static boolean getAnimationFrameStats(WindowAnimationFrameStats outStats) {
         return nativeGetAnimationFrameStats(outStats);
-    }
-
-    /**
-     * @hide
-     */
-    public void setAlpha(float alpha) {
-        checkNotReleased();
-        synchronized(SurfaceControl.class) {
-            sGlobalTransaction.setAlpha(this, alpha);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void setBackgroundBlurRadius(int blur) {
-        checkNotReleased();
-        synchronized (SurfaceControl.class) {
-            sGlobalTransaction.setBackgroundBlurRadius(this, blur);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void setMatrix(float dsdx, float dtdx, float dtdy, float dsdy) {
-        checkNotReleased();
-        synchronized(SurfaceControl.class) {
-            sGlobalTransaction.setMatrix(this, dsdx, dtdx, dtdy, dsdy);
-        }
-    }
-
-    /**
-     * Sets the Surface to be color space agnostic. If a surface is color space agnostic,
-     * the color can be interpreted in any color space.
-     * @param agnostic A boolean to indicate whether the surface is color space agnostic
-     * @hide
-     */
-    public void setColorSpaceAgnostic(boolean agnostic) {
-        checkNotReleased();
-        synchronized (SurfaceControl.class) {
-            sGlobalTransaction.setColorSpaceAgnostic(this, agnostic);
-        }
-    }
-
-    /**
-     * Bounds the surface and its children to the bounds specified. Size of the surface will be
-     * ignored and only the crop and buffer size will be used to determine the bounds of the
-     * surface. If no crop is specified and the surface has no buffer, the surface bounds is only
-     * constrained by the size of its parent bounds.
-     *
-     * @param crop Bounds of the crop to apply.
-     * @hide
-     */
-    public void setWindowCrop(Rect crop) {
-        checkNotReleased();
-        synchronized (SurfaceControl.class) {
-            sGlobalTransaction.setWindowCrop(this, crop);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void setOpaque(boolean isOpaque) {
-        checkNotReleased();
-
-        synchronized (SurfaceControl.class) {
-            sGlobalTransaction.setOpaque(this, isOpaque);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void setSecure(boolean isSecure) {
-        checkNotReleased();
-
-        synchronized (SurfaceControl.class) {
-            sGlobalTransaction.setSecure(this, isSecure);
-        }
     }
 
     /**
@@ -2517,6 +2420,22 @@ public final class SurfaceControl implements Parcelable {
         validateColorArg(ambientColor);
         validateColorArg(spotColor);
         nativeSetGlobalShadowSettings(ambientColor, spotColor, lightPosY, lightPosZ, lightRadius);
+    }
+
+    /**
+     * Adds a callback to be informed about SF's jank classification for a specific surface.
+     * @hide
+     */
+    public static void addJankDataListener(OnJankDataListener listener, SurfaceControl surface) {
+        nativeAddJankDataListener(listener.mNativePtr.get(), surface.mNativeObject);
+    }
+
+    /**
+     * Removes a jank callback previously added with {@link #addJankDataListener}
+     * @hide
+     */
+    public static void removeJankDataListener(OnJankDataListener listener) {
+        nativeRemoveJankDataListener(listener.mNativePtr.get());
     }
 
      /**

@@ -49,6 +49,28 @@ public abstract class BatteryConsumer {
     public static final int FIRST_CUSTOM_POWER_COMPONENT_ID = 1000;
     public static final int LAST_CUSTOM_POWER_COMPONENT_ID = 9999;
 
+    /**
+     * Time usage component, describing the particular part of the system
+     * that was used for the corresponding amount of time.
+     *
+     * @hide
+     */
+    @IntDef(prefix = {"TIME_COMPONENT_"}, value = {
+            TIME_COMPONENT_CPU,
+            TIME_COMPONENT_CPU_FOREGROUND,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public static @interface TimeComponent {
+    }
+
+    public static final int TIME_COMPONENT_CPU = 0;
+    public static final int TIME_COMPONENT_CPU_FOREGROUND = 1;
+
+    public static final int TIME_COMPONENT_COUNT = 2;
+
+    public static final int FIRST_CUSTOM_TIME_COMPONENT_ID = 1000;
+    public static final int LAST_CUSTOM_TIME_COMPONENT_ID = 9999;
+
     private final PowerComponents mPowerComponents;
 
     protected BatteryConsumer(@NonNull PowerComponents powerComponents) {
@@ -81,6 +103,29 @@ public abstract class BatteryConsumer {
      */
     public double getConsumedPowerForCustomComponent(int componentId) {
         return mPowerComponents.getConsumedPowerForCustomComponent(componentId);
+    }
+
+    /**
+     * Returns the amount of time since BatteryStats reset used by the specified component, e.g.
+     * CPU, WiFi etc.
+     *
+     * @param componentId The ID of the time component, e.g.
+     *                    {@link UidBatteryConsumer#TIME_COMPONENT_CPU}.
+     * @return Amount of time in milliseconds.
+     */
+    public long getUsageDurationMillis(@TimeComponent int componentId) {
+        return mPowerComponents.getUsageDurationMillis(componentId);
+    }
+
+    /**
+     * Returns the amount of usage time attributed to the specified custom component
+     * since BatteryStats reset.
+     *
+     * @param componentId The ID of the custom power component.
+     * @return Amount of time in milliseconds.
+     */
+    public long getUsageDurationForCustomComponentMillis(int componentId) {
+        return mPowerComponents.getUsageDurationForCustomComponentMillis(componentId);
     }
 
     protected void writeToParcel(Parcel dest, int flags) {

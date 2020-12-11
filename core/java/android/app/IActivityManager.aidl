@@ -363,6 +363,7 @@ interface IActivityManager {
     boolean killProcessesBelowForeground(in String reason);
     @UnsupportedAppUsage
     UserInfo getCurrentUser();
+    int getCurrentUserId();
     // This is not public because you need to be very careful in how you
     // manage your activity to make sure it is always the uid you expect.
     @UnsupportedAppUsage

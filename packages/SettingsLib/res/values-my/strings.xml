@@ -28,7 +28,7 @@
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP ပြုပြင်ခြင်း မအောင်မြင်ပါ"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"ကွန်ရက်ချိတ်ဆက်မှု အားနည်းသည့်အတွက် ချိတ်ဆက်ထားခြင်း မရှိပါ"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"WiFi ချိတ်ဆက်မှု မအောင်မြင်ပါ"</string>
-    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"စစ်မှန်ကြောင်းအတည်ပြုရန်၌ ပြသနာရှိခြင်း"</string>
+    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"အထောက်အထားစိစစ်မှု ပြဿနာ"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"ချိတ်ဆက်၍ မရပါ"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\' နှင့် ချိတ်ဆက်၍ မရပါ"</string>
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"စကားဝှက်ကို စစ်ဆေးပြီး ထပ်လုပ်ကြည့်ပါ"</string>
@@ -400,7 +400,9 @@
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"ပွင့်နေသည်။ ပြောင်းရန်တို့ပါ။"</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"အက်ပ်ကို အရန်သင့်ထားရှိခြင်း အခြေအနေ-<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="transcode_settings_title" msgid="2581975870429850549">"မီဒီယာအမျိုးအစားပြောင်းခြင်း ဆက်တင်များ"</string>
-    <string name="transcode_enable_all" msgid="9102460144086871903">"အမျိုးအစားပြောင်းခြင်းကို ပိတ်ရန်"</string>
+    <string name="transcode_user_control" msgid="6176368544817731314">"အမျိုးအစားပြောင်းခြင်း၏ မူရင်းဆက်တင်များကို အစားထိုးရန်"</string>
+    <string name="transcode_enable_all" msgid="2411165920039166710">"အမျိုးအစားပြောင်းခြင်းကို ဖွင့်ရန်"</string>
+    <string name="transcode_default" msgid="3784803084573509491">"ဤအက်ပ်များက ဖော်မက်အသစ်များကို ပံ့ပိုးသည်"</string>
     <string name="transcode_skip_apps" msgid="8249721984597390142">"အက်ပ်များအတွက် အမျိုးအစားပြောင်းခြင်းကို ဖွင့်ရန်"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"အလုပ်လုပ်နေသောဝန်ဆောင်မှုများ"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"လက်ရှိ ဝန်ဆောင်မှုများကို ကြည့်ရှု ထိန်းသိမ်းသည်"</string>
@@ -449,7 +451,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"အားပြည့်ရန် <xliff:g id="TIME">%1$s</xliff:g> ကျန်သည်"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - အားပြည့်ရန် <xliff:g id="TIME">%2$s</xliff:g> ကျန်သည်"</string>
-    <string name="power_charging_limited" msgid="5902301801611726210">"<xliff:g id="LEVEL">%1$s</xliff:g> - ဘက်ထရီ ယာယီကန့်သတ်ထားသည်"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - ဘက်ထရီအခြေအနေကို အကောင်းဆုံးဖြစ်အောင် လုပ်နေသည်"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"မသိ"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"အားသွင်းနေပါသည်"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"အမြန် အားသွင်းနေသည်"</string>

@@ -143,7 +143,7 @@ public class FalsingCollectorFake implements FalsingCollector {
     }
 
     @Override
-    public void onTouchEvent(MotionEvent ev, int width, int height) {
+    public void onTouchEvent(MotionEvent ev) {
     }
 
     @Override

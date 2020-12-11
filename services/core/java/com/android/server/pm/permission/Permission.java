@@ -61,6 +61,7 @@ public final class Permission {
             PermissionInfo.PROTECTION_NORMAL,
             PermissionInfo.PROTECTION_SIGNATURE,
             PermissionInfo.PROTECTION_SIGNATURE_OR_SYSTEM,
+            PermissionInfo.PROTECTION_INTERNAL,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProtectionLevel {}
@@ -246,6 +247,11 @@ public final class Permission {
                 == PermissionInfo.PROTECTION_SIGNATURE;
     }
 
+    public boolean isInternal() {
+        return (mPermissionInfo.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE)
+                == PermissionInfo.PROTECTION_INTERNAL;
+    }
+
     public boolean isAppOp() {
         return (mPermissionInfo.protectionLevel & PermissionInfo.PROTECTION_FLAG_APPOP) != 0;
     }
@@ -333,6 +339,10 @@ public final class Permission {
 
     public boolean isRecents() {
         return (mPermissionInfo.protectionLevel & PermissionInfo.PROTECTION_FLAG_RECENTS) != 0;
+    }
+
+    public boolean isRole() {
+        return (mPermissionInfo.protectionLevel & PermissionInfo.PROTECTION_FLAG_ROLE) != 0;
     }
 
     public void transfer(@NonNull String oldPackageName, @NonNull String newPackageName) {

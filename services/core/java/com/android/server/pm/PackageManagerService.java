@@ -24,6 +24,7 @@ import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.content.Intent.ACTION_MAIN;
+import static android.content.Intent.CATEGORY_BROWSABLE;
 import static android.content.Intent.CATEGORY_DEFAULT;
 import static android.content.Intent.CATEGORY_HOME;
 import static android.content.Intent.EXTRA_LONG_VERSION_CODE;
@@ -238,6 +239,7 @@ import android.content.pm.VersionedPackage;
 import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.IArtManager;
+import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedInstrumentation;
@@ -248,6 +250,8 @@ import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.parsing.component.ParsedProcess;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
+import android.content.pm.parsing.result.ParseResult;
+import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
@@ -8003,6 +8007,13 @@ public class PackageManagerService extends IPackageManager.Stub
                             Slog.i(TAG, "  + always: " + info.activityInfo.packageName
                                     + " : linkgen=" + linkGeneration);
                         }
+
+                        if (!intent.hasCategory(CATEGORY_BROWSABLE)
+                                || !intent.hasCategory(CATEGORY_DEFAULT)) {
+                            undefinedList.add(info);
+                            continue;
+                        }
+
                         // Use link-enabled generation as preferredOrder, i.e.
                         // prefer newly-enabled over earlier-enabled.
                         info.preferredOrder = linkGeneration;
@@ -15322,7 +15333,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         InstallParams(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 observer,
                 int installFlags, InstallSource installSource, String volumeUuid,
-                UserHandle user, String packageAbiOverride) {
+                UserHandle user, String packageAbiOverride, PackageLite packageLite) {
             super(user);
             this.origin = origin;
             this.move = move;
@@ -15341,7 +15352,7 @@ public class PackageManagerService extends IPackageManager.Stub
             this.forceQueryableOverride = false;
             this.mDataLoaderType = DataLoaderType.NONE;
             this.requiredInstalledVersionCode = PackageManager.VERSION_CODE_HIGHEST;
-            this.mPackageLite = null;
+            this.mPackageLite = packageLite;
         }
 
         InstallParams(File stagedDir, IPackageInstallObserver2 observer,
@@ -24182,8 +24193,12 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final Message msg = mHandler.obtainMessage(INIT_COPY);
         final OriginInfo origin = OriginInfo.fromExistingFile(codeFile);
+        final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+        final ParseResult<PackageLite> ret = ApkLiteParseUtils.parsePackageLite(input,
+                new File(origin.resolvedPath), /* flags */ 0);
+        final PackageLite lite = ret.isSuccess() ? ret.getResult() : null;
         final InstallParams params = new InstallParams(origin, move, installObserver, installFlags,
-                installSource, volumeUuid, user, packageAbiOverride);
+                installSource, volumeUuid, user, packageAbiOverride, lite);
         params.setTraceMethod("movePackage").setTraceCookie(System.identityHashCode(params));
         msg.obj = params;
 

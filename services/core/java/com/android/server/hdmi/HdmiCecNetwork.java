@@ -166,7 +166,6 @@ public class HdmiCecNetwork {
         }
         return false;
     }
-
     /**
      * Clear all logical addresses registered in the device.
      *
@@ -523,8 +522,29 @@ public class HdmiCecNetwork {
             case Constants.MESSAGE_DEVICE_VENDOR_ID:
                 handleDeviceVendorId(message);
                 break;
-
+            case Constants.MESSAGE_CEC_VERSION:
+                handleCecVersion(message);
+                break;
+            case Constants.MESSAGE_REPORT_FEATURES:
+                handleReportFeatures(message);
+                break;
         }
+    }
+
+    @ServiceThreadOnly
+    private void handleReportFeatures(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+
+        int version = Byte.toUnsignedInt(message.getParams()[0]);
+        updateDeviceCecVersion(message.getSource(), version);
+    }
+
+    @ServiceThreadOnly
+    private void handleCecVersion(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+
+        int version = Byte.toUnsignedInt(message.getParams()[0]);
+        updateDeviceCecVersion(message.getSource(), version);
     }
 
     @ServiceThreadOnly
@@ -543,7 +563,8 @@ public class HdmiCecNetwork {
             HdmiDeviceInfo updatedDeviceInfo = new HdmiDeviceInfo(deviceInfo.getLogicalAddress(),
                     physicalAddress,
                     physicalAddressToPortId(physicalAddress), type, deviceInfo.getVendorId(),
-                    deviceInfo.getDisplayName(), deviceInfo.getDevicePowerStatus());
+                    deviceInfo.getDisplayName(), deviceInfo.getDevicePowerStatus(),
+                    deviceInfo.getCecVersion());
             updateCecDevice(updatedDeviceInfo);
         }
     }
@@ -554,6 +575,31 @@ public class HdmiCecNetwork {
         // Update power status of device
         int newStatus = message.getParams()[0] & 0xFF;
         updateDevicePowerStatus(message.getSource(), newStatus);
+
+        if (message.getDestination() == Constants.ADDR_BROADCAST) {
+            updateDeviceCecVersion(message.getSource(), HdmiControlManager.HDMI_CEC_VERSION_2_0);
+        }
+    }
+
+    @ServiceThreadOnly
+    private void updateDeviceCecVersion(int logicalAddress, int hdmiCecVersion) {
+        assertRunOnServiceThread();
+        HdmiDeviceInfo deviceInfo = getCecDeviceInfo(logicalAddress);
+        if (deviceInfo == null) {
+            Slog.w(TAG, "Can not update CEC version of non-existing device:" + logicalAddress);
+            return;
+        }
+
+        if (deviceInfo.getCecVersion() == hdmiCecVersion) {
+            return;
+        }
+
+        HdmiDeviceInfo updatedDeviceInfo = new HdmiDeviceInfo(deviceInfo.getLogicalAddress(),
+                deviceInfo.getPhysicalAddress(), deviceInfo.getPortId(), deviceInfo.getDeviceType(),
+                deviceInfo.getVendorId(),
+                deviceInfo.getDisplayName(), deviceInfo.getDevicePowerStatus(),
+                hdmiCecVersion);
+        updateCecDevice(updatedDeviceInfo);
     }
 
     @ServiceThreadOnly
@@ -586,7 +632,7 @@ public class HdmiCecNetwork {
         updateCecDevice(new HdmiDeviceInfo(deviceInfo.getLogicalAddress(),
                 deviceInfo.getPhysicalAddress(), deviceInfo.getPortId(),
                 deviceInfo.getDeviceType(), deviceInfo.getVendorId(), osdName,
-                deviceInfo.getDevicePowerStatus()));
+                deviceInfo.getDevicePowerStatus(), deviceInfo.getCecVersion()));
     }
 
     @ServiceThreadOnly
@@ -602,7 +648,8 @@ public class HdmiCecNetwork {
             HdmiDeviceInfo updatedDeviceInfo = new HdmiDeviceInfo(deviceInfo.getLogicalAddress(),
                     deviceInfo.getPhysicalAddress(),
                     deviceInfo.getPortId(), deviceInfo.getDeviceType(), vendorId,
-                    deviceInfo.getDisplayName(), deviceInfo.getDevicePowerStatus());
+                    deviceInfo.getDisplayName(), deviceInfo.getDevicePowerStatus(),
+                    deviceInfo.getCecVersion());
             updateCecDevice(updatedDeviceInfo);
         }
     }

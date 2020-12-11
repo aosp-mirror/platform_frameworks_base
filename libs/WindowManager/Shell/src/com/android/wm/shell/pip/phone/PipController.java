@@ -40,6 +40,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Size;
 import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.WindowManagerGlobal;
@@ -86,7 +87,6 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
 
     private final DisplayInfo mTmpDisplayInfo = new DisplayInfo();
     private final Rect mTmpInsetBounds = new Rect();
-    protected final Rect mReentryBounds = new Rect();
 
     private boolean mIsInFixedRotation;
     private Consumer<Boolean> mPinnedStackAnimationRecentsCallback;
@@ -438,10 +438,8 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     @Override
     public void onPipTransitionStarted(ComponentName activity, int direction, Rect pipBounds) {
         if (isOutPipDirection(direction)) {
-            // Exiting PIP, save the reentry bounds to restore to when re-entering.
-            updateReentryBounds(pipBounds);
-            final float snapFraction = mPipBoundsAlgorithm.getSnapFraction(mReentryBounds);
-            mPipBoundsState.saveReentryState(mReentryBounds, snapFraction);
+            // Exiting PIP, save the reentry state to restore to when re-entering.
+            saveReentryState(pipBounds);
         }
         // Disable touches while the animation is running
         mTouchHandler.setTouchEnabled(false);
@@ -450,14 +448,16 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         }
     }
 
-    /**
-     * Update the bounds used to save the re-entry size and snap fraction when exiting PIP.
-     */
-    public void updateReentryBounds(Rect bounds) {
-        final Rect reentryBounds = mTouchHandler.getUserResizeBounds();
-        float snapFraction = mPipBoundsAlgorithm.getSnapFraction(bounds);
-        mPipBoundsAlgorithm.applySnapFraction(reentryBounds, snapFraction);
-        mReentryBounds.set(reentryBounds);
+    /** Save the state to restore to on re-entry. */
+    public void saveReentryState(Rect pipBounds) {
+        float snapFraction = mPipBoundsAlgorithm.getSnapFraction(pipBounds);
+        if (mPipBoundsState.hasUserResizedPip()) {
+            final Rect reentryBounds = mTouchHandler.getUserResizeBounds();
+            final Size reentrySize = new Size(reentryBounds.width(), reentryBounds.height());
+            mPipBoundsState.saveReentryState(reentrySize, snapFraction);
+        } else {
+            mPipBoundsState.saveReentryState(null /* bounds */, snapFraction);
+        }
     }
 
     /**

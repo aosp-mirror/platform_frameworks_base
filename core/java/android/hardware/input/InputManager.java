@@ -208,6 +208,14 @@ public final class InputManager {
     public static final long BLOCK_UNTRUSTED_TOUCHES = 158002302L;
 
     /**
+     * Check whether apps are using FLAG_SLIPPERY for their windows. We expect that this flag is
+     * only used by the system components. If so, we can lock it down.
+     * @hide
+     */
+    @ChangeId
+    public static final long BLOCK_FLAG_SLIPPERY = android.os.IInputConstants.BLOCK_FLAG_SLIPPERY;
+
+    /**
      * Input Event Injection Synchronization Mode: None.
      * Never blocks.  Injection is asynchronous and is assumed always to be successful.
      * @hide

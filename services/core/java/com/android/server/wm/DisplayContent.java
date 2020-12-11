@@ -2260,9 +2260,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                         taskDisplayArea.getRootTask(rootTaskId));
     }
 
-    protected int getRootTaskCount() {
-        return reduceOnAllTaskDisplayAreas((taskDisplayArea, count) ->
-                count + taskDisplayArea.getRootTaskCount(), 0 /* initValue */);
+    int getRootTaskCount() {
+        final int[] count = new int[1];
+        forAllRootTasks(task -> {
+            count[0]++;
+        });
+        return count[0];
     }
 
     @VisibleForTesting
@@ -3401,6 +3404,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     boolean destroyLeakedSurfaces() {
         // Used to indicate that a surface was leaked.
         mTmpWindow = null;
+        final Transaction t = mWmService.mTransactionFactory.get();
         forAllWindows(w -> {
             final WindowStateAnimator wsa = w.mWinAnimator;
             if (wsa.mSurfaceController == null) {
@@ -3412,7 +3416,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                         + " token=" + w.mToken
                         + " pid=" + w.mSession.mPid
                         + " uid=" + w.mSession.mUid);
-                wsa.destroySurface();
+                wsa.destroySurface(t);
                 mWmService.mForceRemoves.add(w);
                 mTmpWindow = w;
             } else if (w.mActivityRecord != null && !w.mActivityRecord.isClientVisible()) {
@@ -3420,10 +3424,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                         + w + " surface=" + wsa.mSurfaceController
                         + " token=" + w.mActivityRecord);
                 ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE LEAK DESTROY: %s", w);
-                wsa.destroySurface();
+                wsa.destroySurface(t);
                 mTmpWindow = w;
             }
         }, false /* traverseTopToBottom */);
+        t.apply();
 
         return mTmpWindow != null;
     }
@@ -5351,19 +5356,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         // Check if all task display areas have only the empty home stacks left.
-        boolean hasNonEmptyHomeStack = forAllTaskDisplayAreas(taskDisplayArea -> {
-            if (taskDisplayArea.getRootTaskCount() != 1) {
-                return true;
-            }
-            final Task stack = taskDisplayArea.getRootTaskAt(0);
-            return !stack.isActivityTypeHome() || stack.hasChild();
-        });
-        if (!hasNonEmptyHomeStack) {
+        boolean hasNonEmptyHomeStack = forAllRootTasks(stack ->
+                !stack.isActivityTypeHome() || stack.hasChild());
+        if (!hasNonEmptyHomeStack && getRootTaskCount() > 0) {
             // Release this display if only empty home stack(s) are left. This display will be
             // released along with the stack(s) removal.
-            forAllTaskDisplayAreas(taskDisplayArea -> {
-                taskDisplayArea.getRootTaskAt(0).removeIfPossible();
-            });
+            forAllRootTasks(Task::removeIfPossible);
         } else if (getTopRootTask() == null) {
             removeIfPossible();
             mRootWindowContainer.mTaskSupervisor

@@ -357,13 +357,11 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
     private ArrayList<Notification.Action> getSmartActions(String key, int index) {
         ArrayList<Notification.Action> actions = new ArrayList<>();
         for (int i = 0; i < index; i++) {
-            // TODO(b/174935955) Please replace FLAG_MUTABLE_UNAUDITED below
-            // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
             PendingIntent intent = PendingIntent.getBroadcast(
                     getContext(),
                     index /*requestCode*/,
                     new Intent("ACTION_" + key),
-                    PendingIntent.FLAG_MUTABLE_UNAUDITED /*flags*/);
+                    PendingIntent.FLAG_IMMUTABLE /*flags*/);
             actions.add(new Notification.Action.Builder(null /*icon*/, key, intent).build());
         }
         return actions;

@@ -59,6 +59,7 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.settingslib.mobile.MobileStatusTracker.SubscriptionDefaults;
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
@@ -391,7 +392,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 }
             }
         });
-
         updateMobileControllers();
 
         // Initial setup of emergency information. Handled as if we had received a sticky broadcast
@@ -1201,20 +1201,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
             registerListeners();
         }
     };
-
-    public static class SubscriptionDefaults {
-        public int getDefaultVoiceSubId() {
-            return SubscriptionManager.getDefaultVoiceSubscriptionId();
-        }
-
-        public int getDefaultDataSubId() {
-            return SubscriptionManager.getDefaultDataSubscriptionId();
-        }
-
-        public int getActiveDataSubId() {
-            return SubscriptionManager.getActiveDataSubscriptionId();
-        }
-    }
 
     @VisibleForTesting
     static class Config {

@@ -18,10 +18,14 @@ package android.os;
 
 import android.os.CombinedVibrationEffect;
 import android.os.VibrationAttributes;
+import android.os.VibratorInfo;
 
 /** {@hide} */
 interface IVibratorManagerService {
     int[] getVibratorIds();
+    VibratorInfo getVibratorInfo(int vibratorId);
+    boolean setAlwaysOnEffect(int uid, String opPkg, int alwaysOnId,
+            in CombinedVibrationEffect effect, in VibrationAttributes attributes);
     void vibrate(int uid, String opPkg, in CombinedVibrationEffect effect,
             in VibrationAttributes attributes, String reason, IBinder token);
     void cancelVibrate(IBinder token);

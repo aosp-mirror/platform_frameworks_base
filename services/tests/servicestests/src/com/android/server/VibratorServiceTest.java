@@ -16,7 +16,6 @@
 
 package com.android.server;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -52,7 +51,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IVibratorStateListener;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.Process;
@@ -62,6 +60,7 @@ import android.os.UserHandle;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.os.VibratorInfo;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
@@ -101,6 +100,9 @@ public class VibratorServiceTest {
 
     private static final int UID = Process.ROOT_UID;
     private static final String PACKAGE_NAME = "package";
+    private static final PowerSaveState NORMAL_POWER_STATE = new PowerSaveState.Builder().build();
+    private static final PowerSaveState LOW_POWER_STATE = new PowerSaveState.Builder()
+            .setBatterySaverEnabled(true).build();
     private static final VibrationAttributes ALARM_ATTRS =
             new VibrationAttributes.Builder().setUsage(VibrationAttributes.USAGE_ALARM).build();
     private static final VibrationAttributes HAPTIC_FEEDBACK_ATTRS =
@@ -118,7 +120,6 @@ public class VibratorServiceTest {
 
     @Mock private PackageManagerInternal mPackageManagerInternalMock;
     @Mock private PowerManagerInternal mPowerManagerInternalMock;
-    @Mock private PowerSaveState mPowerSaveStateMock;
     // TODO(b/131311651): replace with a FakeVibrator instead.
     @Mock private Vibrator mVibratorMock;
     @Mock private AppOpsManager mAppOpsManagerMock;
@@ -129,6 +130,7 @@ public class VibratorServiceTest {
 
     private TestLooper mTestLooper;
     private ContextWrapper mContextSpy;
+    private PowerManagerInternal.LowPowerModeListener mRegisteredPowerModeListener;
 
     @Before
     public void setUp() throws Exception {
@@ -150,8 +152,10 @@ public class VibratorServiceTest {
         when(mVibratorStateListenerMock.asBinder()).thenReturn(mVibratorStateListenerBinderMock);
         when(mPackageManagerInternalMock.getSystemUiServiceComponent())
                 .thenReturn(new ComponentName("", ""));
-        when(mPowerManagerInternalMock.getLowPowerState(PowerManager.ServiceType.VIBRATION))
-                .thenReturn(mPowerSaveStateMock);
+        doAnswer(invocation -> {
+            mRegisteredPowerModeListener = invocation.getArgument(0);
+            return null;
+        }).when(mPowerManagerInternalMock).registerLowPowerModeObserver(any());
         when(mIInputManagerMock.getInputDeviceIds()).thenReturn(new int[0]);
 
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 1);
@@ -199,7 +203,7 @@ public class VibratorServiceTest {
     public void createService_initializesNativeService() {
         createService();
         verify(mNativeWrapperMock).init(eq(0), notNull());
-        verify(mNativeWrapperMock).off();
+        verify(mNativeWrapperMock, times(2)).off(); // Called from constructor and onSystemReady
     }
 
     @Test
@@ -235,93 +239,21 @@ public class VibratorServiceTest {
     }
 
     @Test
-    public void areEffectsSupported_withNullResultFromNative_returnsSupportUnknown() {
-        when(mNativeWrapperMock.getSupportedEffects()).thenReturn(null);
-        assertArrayEquals(new int[]{Vibrator.VIBRATION_EFFECT_SUPPORT_UNKNOWN},
-                createService().areEffectsSupported(new int[]{VibrationEffect.EFFECT_CLICK}));
-    }
-
-    @Test
-    public void areEffectsSupported_withSomeEffectsSupported_returnsSupportYesAndNoForEffects() {
-        int[] effects = new int[]{VibrationEffect.EFFECT_CLICK, VibrationEffect.EFFECT_TICK};
-
+    public void getVibratorInfo_returnsSameInfoFromNative() {
+        mockVibratorCapabilities(IVibrator.CAP_COMPOSE_EFFECTS | IVibrator.CAP_AMPLITUDE_CONTROL);
         when(mNativeWrapperMock.getSupportedEffects())
                 .thenReturn(new int[]{VibrationEffect.EFFECT_CLICK});
-        assertArrayEquals(
-                new int[]{Vibrator.VIBRATION_EFFECT_SUPPORT_YES,
-                        Vibrator.VIBRATION_EFFECT_SUPPORT_NO},
-                createService().areEffectsSupported(effects));
-    }
-
-    @Test
-    public void arePrimitivesSupported_withoutComposeCapability_returnsAlwaysFalse() {
-        assertArrayEquals(new boolean[]{false, false},
-                createService().arePrimitivesSupported(new int[]{
-                        VibrationEffect.Composition.PRIMITIVE_CLICK,
-                        VibrationEffect.Composition.PRIMITIVE_TICK
-                }));
-    }
-
-    @Test
-    public void arePrimitivesSupported_withNullResultFromNative_returnsAlwaysFalse() {
-        mockVibratorCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
-        when(mNativeWrapperMock.getSupportedPrimitives()).thenReturn(null);
-
-        assertArrayEquals(new boolean[]{false, false},
-                createService().arePrimitivesSupported(new int[]{
-                        VibrationEffect.Composition.PRIMITIVE_CLICK,
-                        VibrationEffect.Composition.PRIMITIVE_QUICK_RISE
-                }));
-    }
-
-    @Test
-    public void arePrimitivesSupported_withSomeSupportedPrimitives_returnsBasedOnNativeResult() {
-        mockVibratorCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
         when(mNativeWrapperMock.getSupportedPrimitives())
                 .thenReturn(new int[]{VibrationEffect.Composition.PRIMITIVE_CLICK});
 
-        assertArrayEquals(new boolean[]{true, false},
-                createService().arePrimitivesSupported(new int[]{
-                        VibrationEffect.Composition.PRIMITIVE_CLICK,
-                        VibrationEffect.Composition.PRIMITIVE_QUICK_RISE
-                }));
-    }
-
-    @Test
-    public void setAlwaysOnEffect_withCapabilityAndValidEffect_enablesAlwaysOnEffect() {
-        mockVibratorCapabilities(IVibrator.CAP_ALWAYS_ON_CONTROL);
-
-        assertTrue(createService().setAlwaysOnEffect(UID, PACKAGE_NAME, 1,
-                VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK), ALARM_ATTRS));
-        verify(mNativeWrapperMock).alwaysOnEnable(
-                eq(1L), eq((long) VibrationEffect.EFFECT_CLICK),
-                eq((long) VibrationEffect.EFFECT_STRENGTH_STRONG));
-    }
-
-    @Test
-    public void setAlwaysOnEffect_withNonPrebakedEffect_ignoresEffect() {
-        mockVibratorCapabilities(IVibrator.CAP_ALWAYS_ON_CONTROL);
-
-        assertFalse(createService().setAlwaysOnEffect(UID, PACKAGE_NAME, 1,
-                VibrationEffect.createOneShot(100, 255), ALARM_ATTRS));
-        verify(mNativeWrapperMock, never()).alwaysOnDisable(anyLong());
-        verify(mNativeWrapperMock, never()).alwaysOnEnable(anyLong(), anyLong(), anyLong());
-    }
-
-    @Test
-    public void setAlwaysOnEffect_withNullEffect_disablesAlwaysOnEffect() {
-        mockVibratorCapabilities(IVibrator.CAP_ALWAYS_ON_CONTROL);
-
-        assertTrue(createService().setAlwaysOnEffect(UID, PACKAGE_NAME, 1, null, ALARM_ATTRS));
-        verify(mNativeWrapperMock).alwaysOnDisable(eq(1L));
-    }
-
-    @Test
-    public void setAlwaysOnEffect_withoutCapability_ignoresEffect() {
-        assertFalse(createService().setAlwaysOnEffect(UID, PACKAGE_NAME, 1,
-                VibrationEffect.get(VibrationEffect.EFFECT_CLICK), ALARM_ATTRS));
-        verify(mNativeWrapperMock, never()).alwaysOnDisable(anyLong());
-        verify(mNativeWrapperMock, never()).alwaysOnEnable(anyLong(), anyLong(), anyLong());
+        VibratorInfo info = createService().getVibratorInfo();
+        assertTrue(info.hasAmplitudeControl());
+        assertEquals(Vibrator.VIBRATION_EFFECT_SUPPORT_YES,
+                info.isEffectSupported(VibrationEffect.EFFECT_CLICK));
+        assertEquals(Vibrator.VIBRATION_EFFECT_SUPPORT_NO,
+                info.isEffectSupported(VibrationEffect.EFFECT_TICK));
+        assertTrue(info.isPrimitiveSupported(VibrationEffect.Composition.PRIMITIVE_CLICK));
+        assertFalse(info.isPrimitiveSupported(VibrationEffect.Composition.PRIMITIVE_TICK));
     }
 
     @Test
@@ -343,6 +275,24 @@ public class VibratorServiceTest {
         inOrderVerifier.verify(mNativeWrapperMock, never()).on(eq(1L), anyLong());
         inOrderVerifier.verify(mNativeWrapperMock).on(eq(10L), anyLong());
         inOrderVerifier.verify(mNativeWrapperMock).on(eq(100L), anyLong());
+    }
+
+    @Test
+    public void vibrate_withPowerModeChange_usesLowPowerModeState() {
+        VibratorService service = createService();
+        mRegisteredPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
+        vibrate(service, VibrationEffect.createOneShot(1, 1), HAPTIC_FEEDBACK_ATTRS);
+        vibrate(service, VibrationEffect.createOneShot(2, 2), RINGTONE_ATTRS);
+
+        mRegisteredPowerModeListener.onLowPowerModeChanged(NORMAL_POWER_STATE);
+        vibrate(service, VibrationEffect.createOneShot(3, 3), /* attributes= */ null);
+        vibrate(service, VibrationEffect.createOneShot(4, 4), NOTIFICATION_ATTRS);
+
+        InOrder inOrderVerifier = inOrder(mNativeWrapperMock);
+        inOrderVerifier.verify(mNativeWrapperMock, never()).on(eq(1L), anyLong());
+        inOrderVerifier.verify(mNativeWrapperMock).on(eq(2L), anyLong());
+        inOrderVerifier.verify(mNativeWrapperMock).on(eq(3L), anyLong());
+        inOrderVerifier.verify(mNativeWrapperMock).on(eq(4L), anyLong());
     }
 
     @Test

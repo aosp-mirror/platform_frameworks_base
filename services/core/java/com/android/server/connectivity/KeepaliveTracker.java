@@ -40,11 +40,11 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.net.ISocketKeepaliveCallback;
+import android.net.InetAddresses;
 import android.net.InvalidPacketException;
 import android.net.KeepalivePacketData;
 import android.net.NattKeepalivePacketData;
 import android.net.NetworkAgent;
-import android.net.NetworkUtils;
 import android.net.SocketKeepalive.InvalidSocketException;
 import android.net.TcpKeepalivePacketData;
 import android.net.util.KeepaliveUtils;
@@ -625,8 +625,8 @@ public class KeepaliveTracker {
 
         InetAddress srcAddress, dstAddress;
         try {
-            srcAddress = NetworkUtils.numericToInetAddress(srcAddrString);
-            dstAddress = NetworkUtils.numericToInetAddress(dstAddrString);
+            srcAddress = InetAddresses.parseNumericAddress(srcAddrString);
+            dstAddress = InetAddresses.parseNumericAddress(dstAddrString);
         } catch (IllegalArgumentException e) {
             notifyErrorCallback(cb, ERROR_INVALID_IP_ADDRESS);
             return;

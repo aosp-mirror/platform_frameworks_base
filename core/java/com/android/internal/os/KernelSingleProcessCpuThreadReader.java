@@ -16,23 +16,12 @@
 
 package com.android.internal.os;
 
-import static android.os.Process.PROC_OUT_LONG;
-import static android.os.Process.PROC_SPACE_TERM;
-
 import android.annotation.Nullable;
-import android.os.Process;
-import android.system.Os;
-import android.system.OsConstants;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.IOException;
-import java.nio.file.DirectoryIteratorException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 
 /**
@@ -45,93 +34,65 @@ public class KernelSingleProcessCpuThreadReader {
     private static final String TAG = "KernelSingleProcCpuThreadRdr";
 
     private static final boolean DEBUG = false;
-    private static final boolean NATIVE_ENABLED = true;
-
-    /**
-     * The name of the file to read CPU statistics from, must be found in {@code
-     * /proc/$PID/task/$TID}
-     */
-    private static final String CPU_STATISTICS_FILENAME = "time_in_state";
-
-    private static final String PROC_STAT_FILENAME = "stat";
-
-    /** Directory under /proc/$PID containing CPU stats files for threads */
-    public static final String THREAD_CPU_STATS_DIRECTORY = "task";
-
-    /** Default mount location of the {@code proc} filesystem */
-    private static final Path DEFAULT_PROC_PATH = Paths.get("/proc");
-
-    /** The initial {@code time_in_state} file for {@link ProcTimeInStateReader} */
-    private static final Path INITIAL_TIME_IN_STATE_PATH = Paths.get("self/time_in_state");
-
-    /** See https://man7.org/linux/man-pages/man5/proc.5.html */
-    private static final int[] PROCESS_FULL_STATS_FORMAT = new int[] {
-            PROC_SPACE_TERM,
-            PROC_SPACE_TERM,
-            PROC_SPACE_TERM,
-            PROC_SPACE_TERM,
-            PROC_SPACE_TERM,
-            PROC_SPACE_TERM,
-            PROC_SPACE_TERM,
-            PROC_SPACE_TERM,
-            PROC_SPACE_TERM,
-            PROC_SPACE_TERM,
-            PROC_SPACE_TERM,
-            PROC_SPACE_TERM,
-            PROC_SPACE_TERM,
-            PROC_SPACE_TERM | PROC_OUT_LONG,                  // 14: utime
-            PROC_SPACE_TERM | PROC_OUT_LONG,                  // 15: stime
-            // Ignore remaining fields
-    };
-
-    private final long[] mProcessFullStatsData = new long[2];
-
-    private static final int PROCESS_FULL_STAT_UTIME = 0;
-    private static final int PROCESS_FULL_STAT_STIME = 1;
-
-    /** Used to read and parse {@code time_in_state} files */
-    private final ProcTimeInStateReader mProcTimeInStateReader;
 
     private final int mPid;
 
-    /** Where the proc filesystem is mounted */
-    private final Path mProcPath;
+    private final CpuTimeInStateReader mCpuTimeInStateReader;
 
-    // How long a CPU jiffy is in milliseconds.
-    private final long mJiffyMillis;
-
-    // Path: /proc/<pid>/stat
-    private final String mProcessStatFilePath;
-
-    // Path: /proc/<pid>/task
-    private final Path mThreadsDirectoryPath;
+    private int[] mSelectedThreadNativeTids = new int[0];  // Sorted
 
     /**
-     * Count of frequencies read from the {@code time_in_state} file. Read from {@link
-     * #mProcTimeInStateReader#getCpuFrequenciesKhz()}.
+     * Count of frequencies read from the {@code time_in_state} file.
      */
     private int mFrequencyCount;
+
+    private boolean mIsTracking;
+
+    /**
+     * A CPU time-in-state provider for testing.  Imitates the behavior of the corresponding
+     * methods in frameworks/native/libs/cputimeinstate/cputimeinstate.c
+     */
+    @VisibleForTesting
+    public interface CpuTimeInStateReader {
+        /**
+         * Returns the overall number of cluster-frequency combinations.
+         */
+        int getCpuFrequencyCount();
+
+        /**
+         * Returns true to indicate success.
+         *
+         * Called from native.
+         */
+        boolean startTrackingProcessCpuTimes(int tgid);
+
+        /**
+         * Returns true to indicate success.
+         *
+         * Called from native.
+         */
+        boolean startAggregatingTaskCpuTimes(int pid, int aggregationKey);
+
+        /**
+         * Must return an array of strings formatted like this:
+         * "aggKey:t0_0 t0_1...:t1_0 t1_1..."
+         * Times should be provided in nanoseconds.
+         *
+         * Called from native.
+         */
+        String[] getAggregatedTaskCpuFreqTimes(int pid);
+    }
 
     /**
      * Create with a path where `proc` is mounted. Used primarily for testing
      *
      * @param pid      PID of the process whose threads are to be read.
-     * @param procPath where `proc` is mounted (to find, see {@code mount | grep ^proc})
      */
     @VisibleForTesting
-    public KernelSingleProcessCpuThreadReader(
-            int pid,
-            Path procPath) throws IOException {
+    public KernelSingleProcessCpuThreadReader(int pid,
+            @Nullable CpuTimeInStateReader cpuTimeInStateReader) throws IOException {
         mPid = pid;
-        mProcPath = procPath;
-        mProcTimeInStateReader = new ProcTimeInStateReader(
-                mProcPath.resolve(INITIAL_TIME_IN_STATE_PATH));
-        long jiffyHz = Os.sysconf(OsConstants._SC_CLK_TCK);
-        mJiffyMillis = 1000 / jiffyHz;
-        mProcessStatFilePath =
-                mProcPath.resolve(String.valueOf(mPid)).resolve(PROC_STAT_FILENAME).toString();
-        mThreadsDirectoryPath =
-                mProcPath.resolve(String.valueOf(mPid)).resolve(THREAD_CPU_STATS_DIRECTORY);
+        mCpuTimeInStateReader = cpuTimeInStateReader;
     }
 
     /**
@@ -142,7 +103,7 @@ public class KernelSingleProcessCpuThreadReader {
     @Nullable
     public static KernelSingleProcessCpuThreadReader create(int pid) {
         try {
-            return new KernelSingleProcessCpuThreadReader(pid, DEFAULT_PROC_PATH);
+            return new KernelSingleProcessCpuThreadReader(pid, null);
         } catch (IOException e) {
             Slog.e(TAG, "Failed to initialize KernelSingleProcessCpuThreadReader", e);
             return null;
@@ -150,146 +111,98 @@ public class KernelSingleProcessCpuThreadReader {
     }
 
     /**
-     * Get the CPU frequencies that correspond to the times reported in {@link
-     * ProcessCpuUsage#processCpuTimesMillis} etc.
+     * Starts tracking aggregated CPU time-in-state of all threads of the process with the PID
+     * supplied in the constructor.
+     */
+    public void startTrackingThreadCpuTimes() {
+        if (!mIsTracking) {
+            if (!startTrackingProcessCpuTimes(mPid, mCpuTimeInStateReader)) {
+                Slog.e(TAG, "Failed to start tracking process CPU times for " + mPid);
+            }
+            if (mSelectedThreadNativeTids.length > 0) {
+                if (!startAggregatingThreadCpuTimes(mSelectedThreadNativeTids,
+                        mCpuTimeInStateReader)) {
+                    Slog.e(TAG, "Failed to start tracking aggregated thread CPU times for "
+                            + Arrays.toString(mSelectedThreadNativeTids));
+                }
+            }
+            mIsTracking = true;
+        }
+    }
+
+    /**
+     * @param nativeTids an array of native Thread IDs whose CPU times should
+     *                   be aggregated as a group.  This is expected to be a subset
+     *                   of all thread IDs owned by the process.
+     */
+    public void setSelectedThreadIds(int[] nativeTids) {
+        mSelectedThreadNativeTids = nativeTids.clone();
+        if (mIsTracking) {
+            startAggregatingThreadCpuTimes(mSelectedThreadNativeTids, mCpuTimeInStateReader);
+        }
+    }
+
+    /**
+     * Get the CPU frequencies that correspond to the times reported in {@link ProcessCpuUsage}.
      */
     public int getCpuFrequencyCount() {
         if (mFrequencyCount == 0) {
-            mFrequencyCount = mProcTimeInStateReader.getFrequenciesKhz().length;
+            mFrequencyCount = getCpuFrequencyCount(mCpuTimeInStateReader);
         }
         return mFrequencyCount;
     }
 
     /**
-     * Get the total and per-thread CPU usage of the process with the PID specified in the
-     * constructor.
-     *
-     * @param selectedThreadIds a SORTED array of native Thread IDs whose CPU times should
-     *                          be aggregated as a group.  This is expected to be a subset
-     *                          of all thread IDs owned by the process.
+     * Get the total CPU usage of the process with the PID specified in the
+     * constructor. The CPU usage time is aggregated across all threads and may
+     * exceed the time the entire process has been running.
      */
     @Nullable
-    public ProcessCpuUsage getProcessCpuUsage(int[] selectedThreadIds) {
+    public ProcessCpuUsage getProcessCpuUsage() {
         if (DEBUG) {
-            Slog.d(TAG, "Reading CPU thread usages with directory " + mProcPath + " process ID "
-                    + mPid);
+            Slog.d(TAG, "Reading CPU thread usages for PID " + mPid);
         }
 
-        int cpuFrequencyCount = getCpuFrequencyCount();
-        ProcessCpuUsage processCpuUsage = new ProcessCpuUsage(cpuFrequencyCount);
+        ProcessCpuUsage processCpuUsage = new ProcessCpuUsage(getCpuFrequencyCount());
 
-        if (NATIVE_ENABLED) {
-            boolean result = readProcessCpuUsage(mProcPath.toString(), mPid,
-                    selectedThreadIds, processCpuUsage.processCpuTimesMillis,
-                    processCpuUsage.threadCpuTimesMillis,
-                    processCpuUsage.selectedThreadCpuTimesMillis);
-            if (!result) {
-                return null;
-            }
-            return processCpuUsage;
-        }
-
-        if (!isSorted(selectedThreadIds)) {
-            throw new IllegalArgumentException("selectedThreadIds is not sorted: "
-                    + Arrays.toString(selectedThreadIds));
-        }
-
-        if (!Process.readProcFile(mProcessStatFilePath, PROCESS_FULL_STATS_FORMAT, null,
-                mProcessFullStatsData, null)) {
-            Slog.e(TAG, "Failed to read process stat file " + mProcessStatFilePath);
+        boolean result = readProcessCpuUsage(mPid,
+                processCpuUsage.threadCpuTimesMillis,
+                processCpuUsage.selectedThreadCpuTimesMillis,
+                mCpuTimeInStateReader);
+        if (!result) {
             return null;
         }
 
-        long utime = mProcessFullStatsData[PROCESS_FULL_STAT_UTIME];
-        long stime = mProcessFullStatsData[PROCESS_FULL_STAT_STIME];
-
-        long processCpuTimeMillis = (utime + stime) * mJiffyMillis;
-
-        try (DirectoryStream<Path> threadPaths = Files.newDirectoryStream(mThreadsDirectoryPath)) {
-            for (Path threadDirectory : threadPaths) {
-                readThreadCpuUsage(processCpuUsage, selectedThreadIds, threadDirectory);
-            }
-        } catch (IOException | DirectoryIteratorException e) {
-            // Expected when a process finishes
-            return null;
-        }
-
-        // Estimate per cluster per frequency CPU time for the entire process
-        // by distributing the total process CPU time proportionately to how much
-        // CPU time its threads took on those clusters/frequencies.  This algorithm
-        // works more accurately when when we have equally distributed concurrency.
-        // TODO(b/169279846): obtain actual process CPU times from the kernel
-        long totalCpuTimeAllThreads = 0;
-        for (int i = cpuFrequencyCount - 1; i >= 0; i--) {
-            totalCpuTimeAllThreads += processCpuUsage.threadCpuTimesMillis[i];
-        }
-
-        for (int i = cpuFrequencyCount - 1; i >= 0; i--) {
-            processCpuUsage.processCpuTimesMillis[i] =
-                    processCpuTimeMillis * processCpuUsage.threadCpuTimesMillis[i]
-                            / totalCpuTimeAllThreads;
+        if (DEBUG) {
+            Slog.d(TAG, "threadCpuTimesMillis = "
+                    + Arrays.toString(processCpuUsage.threadCpuTimesMillis));
+            Slog.d(TAG, "selectedThreadCpuTimesMillis = "
+                    + Arrays.toString(processCpuUsage.selectedThreadCpuTimesMillis));
         }
 
         return processCpuUsage;
     }
 
-    /**
-     * Reads a thread's CPU usage and aggregates the per-cluster per-frequency CPU times.
-     *
-     * @param threadDirectory the {@code /proc} directory of the thread
-     */
-    private void readThreadCpuUsage(ProcessCpuUsage processCpuUsage, int[] selectedThreadIds,
-            Path threadDirectory) {
-        // Get the thread ID from the directory name
-        final int threadId;
-        try {
-            final String directoryName = threadDirectory.getFileName().toString();
-            threadId = Integer.parseInt(directoryName);
-        } catch (NumberFormatException e) {
-            Slog.w(TAG, "Failed to parse thread ID when iterating over /proc/*/task", e);
-            return;
-        }
-
-        // Get the CPU statistics from the directory
-        final Path threadCpuStatPath = threadDirectory.resolve(CPU_STATISTICS_FILENAME);
-        final long[] cpuUsages = mProcTimeInStateReader.getUsageTimesMillis(threadCpuStatPath);
-        if (cpuUsages == null) {
-            return;
-        }
-
-        final int cpuFrequencyCount = getCpuFrequencyCount();
-        final boolean isSelectedThread = Arrays.binarySearch(selectedThreadIds, threadId) >= 0;
-        for (int i = cpuFrequencyCount - 1; i >= 0; i--) {
-            processCpuUsage.threadCpuTimesMillis[i] += cpuUsages[i];
-            if (isSelectedThread) {
-                processCpuUsage.selectedThreadCpuTimesMillis[i] += cpuUsages[i];
-            }
-        }
-    }
-
     /** CPU usage of a process, all of its threads and a selected subset of its threads */
     public static class ProcessCpuUsage {
-        public long[] processCpuTimesMillis;
         public long[] threadCpuTimesMillis;
         public long[] selectedThreadCpuTimesMillis;
 
         public ProcessCpuUsage(int cpuFrequencyCount) {
-            processCpuTimesMillis = new long[cpuFrequencyCount];
             threadCpuTimesMillis = new long[cpuFrequencyCount];
             selectedThreadCpuTimesMillis = new long[cpuFrequencyCount];
         }
     }
 
-    private static boolean isSorted(int[] array) {
-        for (int i = 0; i < array.length - 1; i++) {
-            if (array[i] > array[i + 1]) {
-                return false;
-            }
-        }
-        return true;
-    }
+    private native int getCpuFrequencyCount(CpuTimeInStateReader reader);
 
-    private native boolean readProcessCpuUsage(String procPath, int pid, int[] selectedThreadIds,
-            long[] processCpuTimesMillis, long[] threadCpuTimesMillis,
-            long[] selectedThreadCpuTimesMillis);
+    private native boolean startTrackingProcessCpuTimes(int pid, CpuTimeInStateReader reader);
+
+    private native boolean startAggregatingThreadCpuTimes(int[] selectedThreadIds,
+            CpuTimeInStateReader reader);
+
+    private native boolean readProcessCpuUsage(int pid,
+            long[] threadCpuTimesMillis,
+            long[] selectedThreadCpuTimesMillis,
+            CpuTimeInStateReader reader);
 }

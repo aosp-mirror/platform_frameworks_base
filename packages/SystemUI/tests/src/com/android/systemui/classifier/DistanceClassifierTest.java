@@ -51,32 +51,32 @@ public class DistanceClassifierTest extends ClassifierTest {
 
     @Test
     public void testPass_noPointer() {
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
     }
 
     @Test
     public void testPass_fling() {
 
         mClassifier.onTouchEvent(appendDownEvent(1, 1));
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
 
         mClassifier.onTouchEvent(appendMoveEvent(1, 40));
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
 
         mClassifier.onTouchEvent(appendUpEvent(1, 80));
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
     }
 
     @Test
     public void testFail_flingShort() {
         mClassifier.onTouchEvent(appendDownEvent(1, 1));
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
 
         mClassifier.onTouchEvent(appendMoveEvent(1, 2));
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
 
         mClassifier.onTouchEvent(appendUpEvent(1, 10));
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
     }
 
     @Test
@@ -84,26 +84,26 @@ public class DistanceClassifierTest extends ClassifierTest {
         // These events, in testing, result in a fling that falls just short of the threshold.
 
         mClassifier.onTouchEvent(appendDownEvent(1, 1, 1));
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
 
         mClassifier.onTouchEvent(appendMoveEvent(1, 15, 2));
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
 
         mClassifier.onTouchEvent(appendMoveEvent(1, 16, 3));
         mClassifier.onTouchEvent(appendMoveEvent(1, 17, 300));
         mClassifier.onTouchEvent(appendMoveEvent(1, 18, 301));
         mClassifier.onTouchEvent(appendUpEvent(1, 19, 501));
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
     }
 
     @Test
     public void testPass_swipe() {
 
         mClassifier.onTouchEvent(appendDownEvent(1, 1));
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
 
         mClassifier.onTouchEvent(appendMoveEvent(1, mDataProvider.getYdpi() * 3, 3));
         mClassifier.onTouchEvent(appendUpEvent(1, mDataProvider.getYdpi() * 3, 300));
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
     }
 }

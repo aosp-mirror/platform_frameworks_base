@@ -380,7 +380,7 @@ void RenderNode::deleteDisplayList(TreeObserver& observer, TreeInfo* info) {
     if (mDisplayList) {
         mDisplayList->updateChildren(
                 [&observer, info](RenderNode* child) { child->decParentRefCount(observer, info); });
-        if (!mDisplayList->reuseDisplayList(this, info ? &info->canvasContext : nullptr)) {
+        if (!mDisplayList->reuseDisplayList(this)) {
             delete mDisplayList;
         }
     }

@@ -226,6 +226,9 @@
              to share specific features explicitly because they are being built
              together. -->
         <flag name="signatureOrSystem" value="3" />
+        <!-- <strong>Base permission type</strong>: a permission that is managed internally by the
+             system and only granted according to the protection flags. -->
+        <flag name="internal" value="4" />
         <!-- Additional flag from base permission type: this permission can also
              be granted to any applications installed as privileged apps on the system image.
              Please avoid using this option, as the
@@ -306,6 +309,8 @@
         <!-- Additional flag from base permission type: this permission will be granted to the
              recents app. -->
         <flag name="recents" value="0x2000000" />
+        <!-- Additional flag from base permission type: this permission is managed by role. -->
+        <flag name="role" value="0x4000000" />
     </attr>
 
     <!-- Flags indicating more context for a permission group. -->

@@ -16,6 +16,13 @@
 
 package android.window;
 
+import static android.view.WindowManager.TRANSIT_CHANGE;
+import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_NONE;
+import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_TO_BACK;
+import static android.view.WindowManager.TRANSIT_TO_FRONT;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -35,48 +42,38 @@ import java.util.List;
  */
 public final class TransitionInfo implements Parcelable {
 
-    /** No transition mode. This is a placeholder, don't use this as an actual mode. */
-    public static final int TRANSIT_NONE = 0;
-
-    /** The container didn't exist before but will exist and be visible after. */
-    public static final int TRANSIT_OPEN = 1;
-
-    /** The container existed and was visible before but won't exist after. */
-    public static final int TRANSIT_CLOSE = 2;
-
-    /** The container existed before but was invisible and will be visible after. */
-    public static final int TRANSIT_SHOW = 3;
-
-    /** The container is going from visible to invisible but it will still exist after. */
-    public static final int TRANSIT_HIDE = 4;
-
-    /** The container exists and is visible before and after but it changes. */
-    public static final int TRANSIT_CHANGE = 5;
-
-    /** @hide */
+    /**
+     * Modes are only a sub-set of all the transit-types since they are per-container
+     * @hide
+     */
     @IntDef(prefix = { "TRANSIT_" }, value = {
             TRANSIT_NONE,
             TRANSIT_OPEN,
             TRANSIT_CLOSE,
-            TRANSIT_SHOW,
-            TRANSIT_HIDE,
+            // Note: to_front/to_back really mean show/hide respectively at the container level.
+            TRANSIT_TO_FRONT,
+            TRANSIT_TO_BACK,
             TRANSIT_CHANGE
     })
     public @interface TransitionMode {}
 
     private final @WindowManager.TransitionOldType int mType;
+    private final @WindowManager.TransitionFlags int mFlags;
     private final ArrayList<Change> mChanges = new ArrayList<>();
 
     private SurfaceControl mRootLeash;
     private final Point mRootOffset = new Point();
 
     /** @hide */
-    public TransitionInfo(@WindowManager.TransitionOldType int type) {
+    public TransitionInfo(@WindowManager.TransitionOldType int type,
+            @WindowManager.TransitionFlags int flags) {
         mType = type;
+        mFlags = flags;
     }
 
     private TransitionInfo(Parcel in) {
         mType = in.readInt();
+        mFlags = in.readInt();
         in.readList(mChanges, null /* classLoader */);
         mRootLeash = new SurfaceControl();
         mRootLeash.readFromParcel(in);
@@ -87,6 +84,7 @@ public final class TransitionInfo implements Parcelable {
     /** @hide */
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mType);
+        dest.writeInt(mFlags);
         dest.writeList(mChanges);
         mRootLeash.writeToParcel(dest, flags);
         mRootOffset.writeToParcel(dest, flags);
@@ -120,6 +118,10 @@ public final class TransitionInfo implements Parcelable {
 
     public int getType() {
         return mType;
+    }
+
+    public int getFlags() {
+        return mFlags;
     }
 
     /**
@@ -170,7 +172,8 @@ public final class TransitionInfo implements Parcelable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("{t=" + mType + " ro=" + mRootOffset + " c=[");
+        sb.append("{t=" + mType + " f=" + Integer.toHexString(mFlags)
+                + " ro=" + mRootOffset + " c=[");
         for (int i = 0; i < mChanges.size(); ++i) {
             if (i > 0) {
                 sb.append(',');
@@ -188,8 +191,8 @@ public final class TransitionInfo implements Parcelable {
             case TRANSIT_NONE: return "NONE";
             case TRANSIT_OPEN: return "OPEN";
             case TRANSIT_CLOSE: return "CLOSE";
-            case TRANSIT_SHOW: return "SHOW";
-            case TRANSIT_HIDE: return "HIDE";
+            case TRANSIT_TO_FRONT: return "SHOW";
+            case TRANSIT_TO_BACK: return "HIDE";
             case TRANSIT_CHANGE: return "CHANGE";
             default: return "<unknown:" + mode + ">";
         }
@@ -200,7 +203,7 @@ public final class TransitionInfo implements Parcelable {
         private final WindowContainerToken mContainer;
         private WindowContainerToken mParent;
         private final SurfaceControl mLeash;
-        private int mMode = TRANSIT_NONE;
+        private @TransitionMode int mMode = TRANSIT_NONE;
         private final Rect mStartAbsBounds = new Rect();
         private final Rect mEndAbsBounds = new Rect();
         private final Point mEndRelOffset = new Point();

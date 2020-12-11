@@ -51,11 +51,11 @@ public class ZigZagClassifierTest extends ClassifierTest {
 
     @Test
     public void testPass_fewTouchesVertical() {
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
         appendMoveEvent(0, 0);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
         appendMoveEvent(0, 100);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
     }
 
     @Test
@@ -63,16 +63,16 @@ public class ZigZagClassifierTest extends ClassifierTest {
         appendMoveEvent(0, 0);
         appendMoveEvent(0, 100);
         appendMoveEvent(0, 200);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
     }
 
     @Test
     public void testPass_fewTouchesHorizontal() {
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
         appendMoveEvent(0, 0);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
         appendMoveEvent(100, 0);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
     }
 
     @Test
@@ -80,7 +80,7 @@ public class ZigZagClassifierTest extends ClassifierTest {
         appendMoveEvent(0, 0);
         appendMoveEvent(100, 0);
         appendMoveEvent(200, 0);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
     }
 
 
@@ -89,7 +89,7 @@ public class ZigZagClassifierTest extends ClassifierTest {
         appendMoveEvent(0, 0);
         appendMoveEvent(0, 100);
         appendMoveEvent(0, 1);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
     }
 
     @Test
@@ -97,7 +97,7 @@ public class ZigZagClassifierTest extends ClassifierTest {
         appendMoveEvent(0, 0);
         appendMoveEvent(100, 0);
         appendMoveEvent(1, 0);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
     }
 
     @Test
@@ -105,7 +105,7 @@ public class ZigZagClassifierTest extends ClassifierTest {
         appendMoveEvent(0, 0);
         appendMoveEvent(10, 10);
         appendMoveEvent(20, 20);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
     }
 
     @Test
@@ -115,7 +115,7 @@ public class ZigZagClassifierTest extends ClassifierTest {
         appendMoveEvent(0, 0);
         appendMoveEvent(5, 100);
         appendMoveEvent(-5, 200);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
     }
 
     @Test
@@ -125,7 +125,7 @@ public class ZigZagClassifierTest extends ClassifierTest {
         appendMoveEvent(0, 0);
         appendMoveEvent(100, 5);
         appendMoveEvent(200, -5);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
     }
 
     @Test
@@ -135,7 +135,7 @@ public class ZigZagClassifierTest extends ClassifierTest {
         appendMoveEvent(0, 0);
         appendMoveEvent(6, 10);
         appendMoveEvent(-6, 20);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
     }
 
     @Test
@@ -145,7 +145,7 @@ public class ZigZagClassifierTest extends ClassifierTest {
         appendMoveEvent(0, 0);
         appendMoveEvent(10, 5);
         appendMoveEvent(20, -5);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
     }
 
     @Test
@@ -153,25 +153,25 @@ public class ZigZagClassifierTest extends ClassifierTest {
         appendMoveEvent(0, 0);
         appendMoveEvent(100, 5);
         appendMoveEvent(200, 10);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         resetDataProvider();
         appendMoveEvent(0, 0);
         appendMoveEvent(100, 0);
         appendMoveEvent(200, 10);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         resetDataProvider();
         appendMoveEvent(0, 0);
         appendMoveEvent(100, -10);
         appendMoveEvent(200, 10);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         resetDataProvider();
         appendMoveEvent(0, 0);
         appendMoveEvent(100, -10);
         appendMoveEvent(200, 50);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
     }
 
     @Test
@@ -179,25 +179,25 @@ public class ZigZagClassifierTest extends ClassifierTest {
         appendMoveEvent(0, 0);
         appendMoveEvent(10, 50);
         appendMoveEvent(8, 100);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         resetDataProvider();
         appendMoveEvent(0, 0);
         appendMoveEvent(1, 800);
         appendMoveEvent(2, 900);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         resetDataProvider();
         appendMoveEvent(0, 0);
         appendMoveEvent(-10, 600);
         appendMoveEvent(30, 700);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         resetDataProvider();
         appendMoveEvent(0, 0);
         appendMoveEvent(40, 100);
         appendMoveEvent(0, 101);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
     }
 
     @Test
@@ -205,25 +205,25 @@ public class ZigZagClassifierTest extends ClassifierTest {
         appendMoveEvent(0, 0);
         appendMoveEvent(-10, 50);
         appendMoveEvent(-24, 100);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         resetDataProvider();
         appendMoveEvent(0, 0);
         appendMoveEvent(-20, 800);
         appendMoveEvent(-20, 900);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         resetDataProvider();
         appendMoveEvent(0, 0);
         appendMoveEvent(30, 600);
         appendMoveEvent(-10, 700);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         resetDataProvider();
         appendMoveEvent(0, 0);
         appendMoveEvent(-80, 100);
         appendMoveEvent(-10, 101);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
     }
 
     @Test
@@ -231,25 +231,25 @@ public class ZigZagClassifierTest extends ClassifierTest {
         appendMoveEvent(0, 0);
         appendMoveEvent(-120, 10);
         appendMoveEvent(-200, 20);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         resetDataProvider();
         appendMoveEvent(0, 0);
         appendMoveEvent(-20, 8);
         appendMoveEvent(-40, 2);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         resetDataProvider();
         appendMoveEvent(0, 0);
         appendMoveEvent(-500, -2);
         appendMoveEvent(-600, 70);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         resetDataProvider();
         appendMoveEvent(0, 0);
         appendMoveEvent(-80, 100);
         appendMoveEvent(-100, 1);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
     }
 
     @Test
@@ -257,25 +257,25 @@ public class ZigZagClassifierTest extends ClassifierTest {
         appendMoveEvent(0, 0);
         appendMoveEvent(-120, -10);
         appendMoveEvent(-200, -20);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         resetDataProvider();
         appendMoveEvent(0, 0);
         appendMoveEvent(-20, -8);
         appendMoveEvent(-40, -2);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         resetDataProvider();
         appendMoveEvent(0, 0);
         appendMoveEvent(-500, 2);
         appendMoveEvent(-600, -70);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         resetDataProvider();
         appendMoveEvent(0, 0);
         appendMoveEvent(-80, -100);
         appendMoveEvent(-100, -1);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
     }
 
     @Test
@@ -283,25 +283,25 @@ public class ZigZagClassifierTest extends ClassifierTest {
         appendMoveEvent(0, 0);
         appendMoveEvent(-12, -20);
         appendMoveEvent(-20, -40);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         resetDataProvider();
         appendMoveEvent(0, 0);
         appendMoveEvent(-20, -130);
         appendMoveEvent(-40, -260);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         resetDataProvider();
         appendMoveEvent(0, 0);
         appendMoveEvent(1, -100);
         appendMoveEvent(-6, -200);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         resetDataProvider();
         appendMoveEvent(0, 0);
         appendMoveEvent(-80, -100);
         appendMoveEvent(-10, -110);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
     }
 
     @Test
@@ -309,25 +309,25 @@ public class ZigZagClassifierTest extends ClassifierTest {
         appendMoveEvent(0, 0);
         appendMoveEvent(12, -20);
         appendMoveEvent(20, -40);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         resetDataProvider();
         appendMoveEvent(0, 0);
         appendMoveEvent(20, -130);
         appendMoveEvent(40, -260);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         resetDataProvider();
         appendMoveEvent(0, 0);
         appendMoveEvent(-1, -100);
         appendMoveEvent(6, -200);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         resetDataProvider();
         appendMoveEvent(0, 0);
         appendMoveEvent(80, -100);
         appendMoveEvent(10, -110);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
     }
 
     @Test
@@ -335,25 +335,25 @@ public class ZigZagClassifierTest extends ClassifierTest {
         appendMoveEvent(0, 0);
         appendMoveEvent(120, -20);
         appendMoveEvent(200, -40);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         resetDataProvider();
         appendMoveEvent(0, 0);
         appendMoveEvent(200, -13);
         appendMoveEvent(400, -30);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         resetDataProvider();
         appendMoveEvent(0, 0);
         appendMoveEvent(100, 10);
         appendMoveEvent(600, -20);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         resetDataProvider();
         appendMoveEvent(0, 0);
         appendMoveEvent(80, -100);
         appendMoveEvent(100, -1);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
     }
 
     @Test

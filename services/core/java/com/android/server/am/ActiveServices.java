@@ -5285,8 +5285,7 @@ public final class ActiveServices {
         }
 
         if (ret == FGS_FEATURE_DENIED) {
-            if (mAm.mConstants.mFlagFgsStartTempAllowListEnabled
-                    && mAm.isWhitelistedForFgsStartLocked(r.appInfo.uid)) {
+            if (mAm.isWhitelistedForFgsStartLocked(r.appInfo.uid)) {
                 // uid is on DeviceIdleController's user/system allowlist
                 // or AMS's FgsStartTempAllowList.
                 ret = FGS_FEATURE_ALLOWED_BY_DEVICE_IDLE_ALLOW_LIST;

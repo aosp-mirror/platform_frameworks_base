@@ -474,7 +474,7 @@ final class TaskDisplayArea extends DisplayArea<Task> {
     private int findMinPositionForRootTask(Task rootTask) {
         int minPosition = POSITION_BOTTOM;
         for (int i = 0; i < mChildren.size(); ++i) {
-            if (getPriority(getRootTaskAt(i)) < getPriority(rootTask)) {
+            if (getPriority(mChildren.get(i)) < getPriority(rootTask)) {
                 minPosition = i;
             } else {
                 break;
@@ -495,7 +495,7 @@ final class TaskDisplayArea extends DisplayArea<Task> {
 
     private int findMaxPositionForRootTask(Task rootTask) {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final Task curr = getRootTaskAt(i);
+            final Task curr = mChildren.get(i);
             // Since a stack could be repositioned while still being one of the children, we check
             // if 'curr' is the same stack and skip it if so
             final boolean sameRootTask = curr == rootTask;
@@ -894,14 +894,9 @@ final class TaskDisplayArea extends DisplayArea<Task> {
         }
     }
 
+    @Nullable
     Task getRootTask(int rootTaskId) {
-        for (int i = getRootTaskCount() - 1; i >= 0; --i) {
-            final Task stack = getRootTaskAt(i);
-            if (stack.getRootTaskId() == rootTaskId) {
-                return stack;
-            }
-        }
-        return null;
+        return getRootTask(stack -> stack.getRootTaskId() == rootTaskId);
     }
 
     /**
@@ -1065,15 +1060,15 @@ final class TaskDisplayArea extends DisplayArea<Task> {
             // Only split-screen windowing modes can do this currently...
             return null;
         }
-        for (int i = getRootTaskCount() - 1; i >= 0; --i) {
-            final Task t = getRootTaskAt(i);
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final Task t = mChildren.get(i);
             if (!t.mCreatedByOrganizer || t.getRequestedOverrideWindowingMode() != windowingMode) {
                 continue;
             }
             // If not already set, pick a launch root which is not the one we are launching into.
             if (mLaunchRootTask == null) {
-                for (int j = 0, n = getRootTaskCount(); j < n; ++j) {
-                    final Task tt = getRootTaskAt(j);
+                for (int j = 0, n = mChildren.size(); j < n; ++j) {
+                    final Task tt = mChildren.get(j);
                     if (tt.mCreatedByOrganizer && tt != t) {
                         mLaunchRootTask = tt;
                         break;
@@ -1128,8 +1123,8 @@ final class TaskDisplayArea extends DisplayArea<Task> {
             return mPreferredTopFocusableRootTask;
         }
 
-        for (int i = getRootTaskCount() - 1; i >= 0; --i) {
-            final Task stack = getRootTaskAt(i);
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final Task stack = mChildren.get(i);
             if (stack.isFocusableAndVisible()) {
                 return stack;
             }
@@ -1143,8 +1138,8 @@ final class TaskDisplayArea extends DisplayArea<Task> {
                 ? currentFocus.getWindowingMode() : WINDOWING_MODE_UNDEFINED;
 
         Task candidate = null;
-        for (int i = getRootTaskCount() - 1; i >= 0; --i) {
-            final Task rootTask = getRootTaskAt(i);
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final Task rootTask = mChildren.get(i);
             if (ignoreCurrent && rootTask == currentFocus) {
                 continue;
             }
@@ -1223,8 +1218,8 @@ final class TaskDisplayArea extends DisplayArea<Task> {
     }
 
     boolean allResumedActivitiesComplete() {
-        for (int stackNdx = getRootTaskCount() - 1; stackNdx >= 0; --stackNdx) {
-            final ActivityRecord r = getRootTaskAt(stackNdx).getResumedActivity();
+        for (int stackNdx = mChildren.size() - 1; stackNdx >= 0; --stackNdx) {
+            final ActivityRecord r = mChildren.get(stackNdx).getResumedActivity();
             if (r != null && !r.isState(RESUMED)) {
                 return false;
             }
@@ -1251,8 +1246,8 @@ final class TaskDisplayArea extends DisplayArea<Task> {
      */
     boolean pauseBackTasks(boolean userLeaving, ActivityRecord resuming) {
         boolean someActivityPaused = false;
-        for (int stackNdx = getRootTaskCount() - 1; stackNdx >= 0; --stackNdx) {
-            final Task stack = getRootTaskAt(stackNdx);
+        for (int stackNdx = mChildren.size() - 1; stackNdx >= 0; --stackNdx) {
+            final Task stack = mChildren.get(stackNdx);
             final ActivityRecord resumedActivity = stack.getResumedActivity();
             if (resumedActivity != null
                     && (stack.getVisibility(resuming) != TASK_VISIBILITY_VISIBLE
@@ -1272,8 +1267,8 @@ final class TaskDisplayArea extends DisplayArea<Task> {
     void findTaskLocked(final ActivityRecord r, final boolean isPreferredDisplayArea,
             RootWindowContainer.FindTaskResult result) {
         mTmpFindTaskResult.clear();
-        for (int stackNdx = getRootTaskCount() - 1; stackNdx >= 0; --stackNdx) {
-            final Task stack = getRootTaskAt(stackNdx);
+        for (int stackNdx = mChildren.size() - 1; stackNdx >= 0; --stackNdx) {
+            final Task stack = mChildren.get(stackNdx);
             if (!r.hasCompatibleActivityType(stack) && stack.isLeafTask()) {
                 ProtoLog.d(WM_DEBUG_TASKS, "Skipping stack: (mismatch activity/stack) "
                         + "%s", stack);
@@ -1582,8 +1577,8 @@ final class TaskDisplayArea extends DisplayArea<Task> {
 
         // Look in other focusable stacks.
         if (topRunning == null) {
-            for (int i = getRootTaskCount() - 1; i >= 0; --i) {
-                final Task stack = getRootTaskAt(i);
+            for (int i = mChildren.size() - 1; i >= 0; --i) {
+                final Task stack = mChildren.get(i);
                 // Only consider focusable stacks other than the current focused one.
                 if (stack == focusedStack || !stack.isTopActivityFocusable()) {
                     continue;
@@ -1608,11 +1603,11 @@ final class TaskDisplayArea extends DisplayArea<Task> {
     }
 
     protected int getRootTaskCount() {
-        return mChildren.size();
-    }
-
-    protected Task getRootTaskAt(int index) {
-        return mChildren.get(index);
+        final int[] count = new int[1];
+        forAllRootTasks(task -> {
+            count[0]++;
+        });
+        return count[0];
     }
 
     @Nullable
@@ -1711,9 +1706,9 @@ final class TaskDisplayArea extends DisplayArea<Task> {
         // Find the next position where the stack should be placed
         final boolean isRootTask = rootTask.isRootTask();
         final int numRootTasks =
-                isRootTask ? getRootTaskCount() : rootTask.getParent().getChildCount();
+                isRootTask ? mChildren.size() : rootTask.getParent().getChildCount();
         for (int rootTaskNdx = 0; rootTaskNdx < numRootTasks; rootTaskNdx++) {
-            final Task s = isRootTask ? getRootTaskAt(rootTaskNdx)
+            final Task s = isRootTask ? mChildren.get(rootTaskNdx)
                     : (Task) rootTask.getParent().getChildAt(rootTaskNdx);
             if (s == rootTask) {
                 continue;
@@ -1836,8 +1831,8 @@ final class TaskDisplayArea extends DisplayArea<Task> {
             boolean preserveWindows, boolean notifyClients, boolean userLeaving) {
         mAtmService.mTaskSupervisor.beginActivityVisibilityUpdate();
         try {
-            for (int stackNdx = getRootTaskCount() - 1; stackNdx >= 0; --stackNdx) {
-                final Task stack = getRootTaskAt(stackNdx);
+            for (int stackNdx = mChildren.size() - 1; stackNdx >= 0; --stackNdx) {
+                final Task stack = mChildren.get(stackNdx);
                 stack.ensureActivitiesVisible(starting, configChanges, preserveWindows,
                         notifyClients, userLeaving);
             }
@@ -1871,13 +1866,13 @@ final class TaskDisplayArea extends DisplayArea<Task> {
         // related WindowContainer will also be removed. So, we set display area as removed after
         // reparenting stack finished.
         // Keep the order from bottom to top.
-        int numStacks = getRootTaskCount();
+        int numStacks = mChildren.size();
 
         final boolean splitScreenActivated = toDisplayArea.isSplitScreenModeActivated();
         final Task rootStack = splitScreenActivated ? toDisplayArea
                 .getTopRootTaskInWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) : null;
         for (int stackNdx = 0; stackNdx < numStacks; stackNdx++) {
-            final Task stack = getRootTaskAt(stackNdx);
+            final Task stack = mChildren.get(stackNdx);
             // Always finish non-standard type stacks and stacks created by a organizer.
             // TODO: For stacks created by organizer, consider reparenting children tasks if the use
             //       case arises in the future.
@@ -1897,8 +1892,8 @@ final class TaskDisplayArea extends DisplayArea<Task> {
             }
             // Stacks may be removed from this display. Ensure each stack will be processed
             // and the loop will end.
-            stackNdx -= numStacks - getRootTaskCount();
-            numStacks = getRootTaskCount();
+            stackNdx -= numStacks - mChildren.size();
+            numStacks = mChildren.size();
         }
         if (lastReparentedStack != null && splitScreenActivated) {
             if (!lastReparentedStack.supportsSplitScreenWindowingMode()) {

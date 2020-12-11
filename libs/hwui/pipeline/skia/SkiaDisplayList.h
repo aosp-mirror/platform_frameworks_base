@@ -98,7 +98,7 @@ public:
      *
      * @return true if the displayList will be reused and therefore should not be deleted
      */
-    bool reuseDisplayList(RenderNode* node, renderthread::CanvasContext* context);
+    bool reuseDisplayList(RenderNode* node);
 
     /**
      * ONLY to be called by RenderNode::syncDisplayList so that we can notify any
