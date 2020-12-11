@@ -10,6 +10,9 @@ per-file ZramWriteback.java = minchan@google.com, rajekumar@google.com, srnvs@go
 # Userspace reboot
 per-file UserspaceRebootLogger.java = ioffe@google.com, tomcherry@google.com
 
+# Sensor Privacy
+per-file SensorPrivacyService.java = file:platform/frameworks/native:/libs/sensorprivacy/OWNERS
+
 per-file *Alarm* = file:/apex/jobscheduler/OWNERS
 per-file *AppOp* = file:/core/java/android/permission/OWNERS
 per-file *Bluetooth* = file:/core/java/android/bluetooth/OWNERS
