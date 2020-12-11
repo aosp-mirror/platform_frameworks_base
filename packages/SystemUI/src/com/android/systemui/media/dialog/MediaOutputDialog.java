@@ -23,6 +23,9 @@ import android.view.WindowManager;
 
 import androidx.core.graphics.drawable.IconCompat;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.UiEvent;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 
 import javax.inject.Singleton;
@@ -32,10 +35,12 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class MediaOutputDialog extends MediaOutputBaseDialog {
+    final UiEventLogger mUiEventLogger;
 
     MediaOutputDialog(Context context, boolean aboveStatusbar, MediaOutputController
-            mediaOutputController) {
+            mediaOutputController, UiEventLogger uiEventLogger) {
         super(context, mediaOutputController);
+        mUiEventLogger = uiEventLogger;
         mAdapter = new MediaOutputAdapter(mMediaOutputController);
         if (!aboveStatusbar) {
             getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
@@ -46,6 +51,7 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mUiEventLogger.log(MediaOutputEvent.MEDIA_OUTPUT_DIALOG_SHOW);
     }
 
     @Override
@@ -78,5 +84,22 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
     int getStopButtonVisibility() {
         return mMediaOutputController.isActiveRemoteDevice(
                 mMediaOutputController.getCurrentConnectedMediaDevice()) ? View.VISIBLE : View.GONE;
+    }
+
+    @VisibleForTesting
+    public enum MediaOutputEvent implements UiEventLogger.UiEventEnum {
+        @UiEvent(doc = "The MediaOutput dialog became visible on the screen.")
+        MEDIA_OUTPUT_DIALOG_SHOW(655);
+
+        private final int mId;
+
+        MediaOutputEvent(int id) {
+            mId = id;
+        }
+
+        @Override
+        public int getId() {
+            return mId;
+        }
     }
 }
