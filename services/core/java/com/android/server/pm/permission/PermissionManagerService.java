@@ -68,7 +68,6 @@ import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.ApplicationPackageManager;
 import android.app.IActivityManager;
-import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.role.RoleManager;
 import android.compat.annotation.ChangeId;
@@ -126,7 +125,6 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -264,9 +262,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     @NonNull
     private final PermissionRegistry mRegistry = new PermissionRegistry();
 
-    /** Injector that can be used to facilitate testing. */
-    private final Injector mInjector;
-
     @GuardedBy("mLock")
     @Nullable
     private ArraySet<String> mPrivappPermissionsViolations;
@@ -364,17 +359,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     };
 
     PermissionManagerService(@NonNull Context context) {
-        this(context, new Injector(context));
-    }
-
-    @VisibleForTesting
-    PermissionManagerService(@NonNull Context context, @NonNull Injector injector) {
-        mInjector = injector;
         // The package info cache is the cache for package and permission information.
         // Disable the package info and package permission caches locally but leave the
         // checkPermission cache active.
-        mInjector.invalidatePackageInfoCache();
-        mInjector.disablePackageNamePermissionCache();
+        PackageManager.invalidatePackageInfoCache();
+        PermissionManager.disablePackageNamePermissionCache();
 
         mContext = context;
         mPackageManagerInt = LocalServices.getService(PackageManagerInternal.class);
@@ -1110,59 +1099,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             @NonNull String permissionName) {
         ArraySet<String> permissions = mSystemPermissions.get(uid);
         return permissions != null && permissions.contains(permissionName);
-    }
-
-    @Override
-    public int checkDeviceIdentifierAccess(@Nullable String packageName, @Nullable String message,
-            @Nullable String callingFeatureId, int pid, int uid) {
-        // If the check is being requested by an app then only allow the app to query its own
-        // access status.
-        int callingUid = mInjector.getCallingUid();
-        int callingPid = mInjector.getCallingPid();
-        if (UserHandle.getAppId(callingUid) >= Process.FIRST_APPLICATION_UID && (callingUid != uid
-                || callingPid != pid)) {
-            String response = String.format(
-                    "Calling uid %d, pid %d cannot check device identifier access for package %s "
-                            + "(uid=%d, pid=%d)",
-                    callingUid, callingPid, packageName, uid, pid);
-            Log.w(TAG, response);
-            throw new SecurityException(response);
-        }
-        // Allow system and root access to the device identifiers.
-        final int appId = UserHandle.getAppId(uid);
-        if (appId == Process.SYSTEM_UID || appId == Process.ROOT_UID) {
-            return PackageManager.PERMISSION_GRANTED;
-        }
-        // Allow access to packages that have the READ_PRIVILEGED_PHONE_STATE permission.
-        if (mInjector.checkPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, pid,
-                uid) == PackageManager.PERMISSION_GRANTED) {
-            return PackageManager.PERMISSION_GRANTED;
-        }
-        // If the calling package is not null then perform the appop and device / profile owner
-        // check.
-        if (packageName != null) {
-            // Allow access to a package that has been granted the READ_DEVICE_IDENTIFIERS appop.
-            final long token = mInjector.clearCallingIdentity();
-            AppOpsManager appOpsManager = (AppOpsManager) mInjector.getSystemService(
-                    Context.APP_OPS_SERVICE);
-            try {
-                if (appOpsManager.noteOpNoThrow(AppOpsManager.OPSTR_READ_DEVICE_IDENTIFIERS, uid,
-                        packageName, callingFeatureId, message) == AppOpsManager.MODE_ALLOWED) {
-                    return PackageManager.PERMISSION_GRANTED;
-                }
-            } finally {
-                mInjector.restoreCallingIdentity(token);
-            }
-            // Check if the calling packages meets the device / profile owner requirements for
-            // identifier access.
-            DevicePolicyManager devicePolicyManager =
-                    (DevicePolicyManager) mInjector.getSystemService(Context.DEVICE_POLICY_SERVICE);
-            if (devicePolicyManager != null && devicePolicyManager.hasDeviceIdentifierAccess(
-                    packageName, pid, uid)) {
-                return PackageManager.PERMISSION_GRANTED;
-            }
-        }
-        return PackageManager.PERMISSION_DENIED;
     }
 
     @Override
@@ -2037,44 +1973,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         mPackageManagerInt.writePermissionSettings(asyncUpdatedUsers.toArray(), true);
     }
 
-    @Override
-    public void grantDefaultPermissionsToEnabledCarrierApps(String[] packageNames, int userId) {
-        LocalServices.getService(LegacyPermissionManagerInternal.class)
-                .grantDefaultPermissionsToEnabledCarrierApps(packageNames, userId);
-    }
-
-    @Override
-    public void grantDefaultPermissionsToEnabledImsServices(String[] packageNames, int userId) {
-        LocalServices.getService(LegacyPermissionManagerInternal.class)
-                .grantDefaultPermissionsToEnabledImsServices(packageNames, userId);
-    }
-
-    @Override
-    public void grantDefaultPermissionsToEnabledTelephonyDataServices(
-            String[] packageNames, int userId) {
-        LocalServices.getService(LegacyPermissionManagerInternal.class)
-                .grantDefaultPermissionsToEnabledTelephonyDataServices(packageNames, userId);
-    }
-
-    @Override
-    public void revokeDefaultPermissionsFromDisabledTelephonyDataServices(
-            String[] packageNames, int userId) {
-        LocalServices.getService(LegacyPermissionManagerInternal.class)
-                .revokeDefaultPermissionsFromDisabledTelephonyDataServices(packageNames, userId);
-    }
-
-    @Override
-    public void grantDefaultPermissionsToActiveLuiApp(String packageName, int userId) {
-        LocalServices.getService(LegacyPermissionManagerInternal.class)
-                .grantDefaultPermissionsToActiveLuiApp(packageName, userId);
-    }
-
-    @Override
-    public void revokeDefaultPermissionsFromLuiApps(String[] packageNames, int userId) {
-        LocalServices.getService(LegacyPermissionManagerInternal.class)
-                .revokeDefaultPermissionsFromLuiApps(packageNames, userId);
-    }
-
     /**
      * This change makes it so that apps are told to show rationale for asking for background
      * location access every time they request.
@@ -2885,12 +2783,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                             // TODO(zhanghai): This calls into SystemConfig, which generally
                             //  shouldn't  cause deadlock, but maybe we should keep a cache of the
                             //  split permission  list and just eliminate the possibility.
-                            final List<SplitPermissionInfoParcelable> permissionList =
-                                    getSplitPermissions();
+                            final List<PermissionManager.SplitPermissionInfo> permissionList =
+                                    getSplitPermissionInfos();
                             int numSplitPerms = permissionList.size();
                             for (int splitPermNum = 0; splitPermNum < numSplitPerms;
                                     splitPermNum++) {
-                                SplitPermissionInfoParcelable sp = permissionList.get(splitPermNum);
+                                PermissionManager.SplitPermissionInfo sp = permissionList.get(
+                                        splitPermNum);
                                 String splitPermName = sp.getSplitPermission();
                                 if (sp.getNewPermissions().contains(permName)
                                         && origState.isPermissionGranted(splitPermName)) {
@@ -3287,10 +3186,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         String pkgName = pkg.getPackageName();
         ArrayMap<String, ArraySet<String>> newToSplitPerms = new ArrayMap<>();
 
-        final List<SplitPermissionInfoParcelable> permissionList = getSplitPermissions();
+        final List<PermissionManager.SplitPermissionInfo> permissionList =
+                getSplitPermissionInfos();
         int numSplitPerms = permissionList.size();
         for (int splitPermNum = 0; splitPermNum < numSplitPerms; splitPermNum++) {
-            SplitPermissionInfoParcelable spi = permissionList.get(splitPermNum);
+            PermissionManager.SplitPermissionInfo spi = permissionList.get(splitPermNum);
 
             List<String> newPerms = spi.getNewPermissions();
             int numNewPerms = newPerms.size();
@@ -3356,10 +3256,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         return updatedUserIds;
     }
 
+    @NonNull
     @Override
     public List<SplitPermissionInfoParcelable> getSplitPermissions() {
-        return PermissionManager.splitPermissionInfoListToParcelableList(
-                SystemConfig.getInstance().getSplitPermissions());
+        return PermissionManager.splitPermissionInfoListToParcelableList(getSplitPermissionInfos());
+    }
+
+    @NonNull
+    private List<PermissionManager.SplitPermissionInfo> getSplitPermissionInfos() {
+        return SystemConfig.getInstance().getSplitPermissions();
     }
 
     @NonNull
@@ -5454,96 +5359,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             // null permissions means all permissions are targeted
             return mDelegatedPermissionNames == null
                     || mDelegatedPermissionNames.contains(permissionName);
-        }
-    }
-
-    /**
-     * Allows injection of services and method responses to facilitate testing.
-     *
-     * <p>Test classes can create a mock of this class and pass it to the PermissionManagerService
-     * constructor to control behavior of services and external methods during execution.
-     * @hide
-     */
-    @VisibleForTesting
-    public static class Injector {
-        private final Context mContext;
-
-        /**
-         * Public constructor that accepts a {@code context} within which to operate.
-         */
-        public Injector(@NonNull Context context) {
-            mContext = context;
-        }
-
-        /**
-         * Returns the UID of the calling package.
-         */
-        public int getCallingUid() {
-            return Binder.getCallingUid();
-        }
-
-        /**
-         * Returns the process ID of the calling package.
-         */
-        public int getCallingPid() {
-            return Binder.getCallingPid();
-        }
-
-        /**
-         * Invalidates the package info cache.
-         */
-        public void invalidatePackageInfoCache() {
-            PackageManager.invalidatePackageInfoCache();
-        }
-
-        /**
-         * Disables the permission cache.
-         */
-        public void disablePermissionCache() {
-            PermissionManager.disablePermissionCache();
-        }
-
-        /**
-         * Disables the package name permission cache.
-         */
-        public void disablePackageNamePermissionCache() {
-            PermissionManager.disablePackageNamePermissionCache();
-        }
-
-        /**
-         * Checks if the package running under the specified {@code pid} and {@code uid} has been
-         * granted the provided {@code permission}.
-         *
-         * @return {@link PackageManager#PERMISSION_GRANTED} if the package has been granted the
-         * permission, {@link PackageManager#PERMISSION_DENIED} otherwise
-         */
-        public int checkPermission(@NonNull String permission, int pid, int uid) {
-            return mContext.checkPermission(permission, pid, uid);
-        }
-
-        /**
-         * Clears the calling identity to allow subsequent calls to be treated as coming from this
-         * package.
-         *
-         * @return a token that can be used to restore the calling identity
-         */
-        public long clearCallingIdentity() {
-            return Binder.clearCallingIdentity();
-        }
-
-        /**
-         * Restores the calling identity to that of the calling package based on the provided
-         * {@code token}.
-         */
-        public void restoreCallingIdentity(long token) {
-            Binder.restoreCallingIdentity(token);
-        }
-
-        /**
-         * Returns the system service with the provided {@code name}.
-         */
-        public Object getSystemService(@NonNull String name) {
-            return mContext.getSystemService(name);
         }
     }
 }

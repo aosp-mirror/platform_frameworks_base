@@ -27,7 +27,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Process;
 import android.os.UserHandle;
-import android.permission.PermissionManager;
+import android.permission.LegacyPermissionManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -327,8 +327,8 @@ public final class TelephonyPermissions {
             return true;
         }
 
-        PermissionManager permissionManager = (PermissionManager) context.getSystemService(
-                Context.PERMISSION_SERVICE);
+        LegacyPermissionManager permissionManager = (LegacyPermissionManager)
+                context.getSystemService(Context.LEGACY_PERMISSION_SERVICE);
         if (permissionManager.checkDeviceIdentifierAccess(callingPackage, message, callingFeatureId,
                 pid, uid) == PackageManager.PERMISSION_GRANTED) {
             return true;

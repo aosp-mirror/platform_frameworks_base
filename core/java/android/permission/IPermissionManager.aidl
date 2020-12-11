@@ -52,8 +52,6 @@ interface IPermissionManager {
 
     int checkUidPermission(String permName, int uid);
 
-    int checkDeviceIdentifierAccess(String packageName, String callingFeatureId, String message, int pid, int uid);
-
     void addOnPermissionsChangeListener(in IOnPermissionsChangeListener listener);
 
     void removeOnPermissionsChangeListener(in IOnPermissionsChangeListener listener);
@@ -72,20 +70,6 @@ interface IPermissionManager {
     void revokeRuntimePermission(String packageName, String permName, int userId, String reason);
 
     void resetRuntimePermissions();
-
-    void grantDefaultPermissionsToEnabledCarrierApps(in String[] packageNames, int userId);
-
-    void grantDefaultPermissionsToEnabledImsServices(in String[] packageNames, int userId);
-
-    void grantDefaultPermissionsToEnabledTelephonyDataServices(
-            in String[] packageNames, int userId);
-
-    void revokeDefaultPermissionsFromDisabledTelephonyDataServices(
-            in String[] packageNames, int userId);
-
-    void grantDefaultPermissionsToActiveLuiApp(in String packageName, int userId);
-
-    void revokeDefaultPermissionsFromLuiApps(in String[] packageNames, int userId);
 
     boolean shouldShowRequestPermissionRationale(String permName,
             String packageName, int userId);
