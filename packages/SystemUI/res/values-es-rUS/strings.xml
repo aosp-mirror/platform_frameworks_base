@@ -83,6 +83,7 @@
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Se guardó la captura de pantalla"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"Presiona para ver la captura de pantalla"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"No se pudo guardar la captura de pantalla"</string>
+    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"El dispositivo debe estar desbloqueado para poder guardar la captura de pantalla"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Vuelve a hacer una captura de pantalla"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"No se puede guardar la captura de pantalla debido a que no hay suficiente espacio de almacenamiento"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"La app o tu organización no permiten las capturas de pantalla"</string>

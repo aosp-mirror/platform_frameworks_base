@@ -1770,9 +1770,18 @@ public class AppStandbyController
             final int userId = getSendingUserId();
             if (Intent.ACTION_PACKAGE_ADDED.equals(action)
                     || Intent.ACTION_PACKAGE_CHANGED.equals(action)) {
-                clearCarrierPrivilegedApps();
-                // ACTION_PACKAGE_ADDED is called even for system app downgrades.
-                evaluateSystemAppException(pkgName, userId);
+                final String[] cmpList = intent.getStringArrayExtra(
+                        Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST);
+                // If this is PACKAGE_ADDED (cmpList == null), or if it's a whole-package
+                // enable/disable event (cmpList is just the package name itself), drop
+                // our carrier privileged app & system-app caches and let them refresh
+                if (cmpList == null
+                        || (cmpList.length == 1 && pkgName.equals(cmpList[0]))) {
+                    clearCarrierPrivilegedApps();
+                    evaluateSystemAppException(pkgName, userId);
+                }
+                // component-level enable/disable can affect bucketing, so we always
+                // reevaluate that for any PACKAGE_CHANGED
                 mHandler.obtainMessage(MSG_CHECK_PACKAGE_IDLE_STATE, userId, -1, pkgName)
                     .sendToTarget();
             }

@@ -113,12 +113,13 @@ public class EmergencyNumberUtilsTest {
     private void addEmergencyNumberToTelephony() {
         final int subId = SubscriptionManager.getDefaultSubscriptionId();
         EmergencyNumber emergencyNumber = mock(EmergencyNumber.class);
+        when(emergencyNumber.isInEmergencyServiceCategories(EMERGENCY_SERVICE_CATEGORY_POLICE))
+                .thenReturn(true);
         Map<Integer, List<EmergencyNumber>> numbers = new ArrayMap<>();
         List<EmergencyNumber> numbersForSubId = new ArrayList<>();
         numbersForSubId.add(emergencyNumber);
         numbers.put(subId, numbersForSubId);
-        when(mTelephonyManager.getEmergencyNumberList(
-                EMERGENCY_SERVICE_CATEGORY_POLICE)).thenReturn(numbers);
+        when(mTelephonyManager.getEmergencyNumberList()).thenReturn(numbers);
         when(emergencyNumber.getNumber()).thenReturn(TELEPHONY_EMERGENCY_NUMBER);
     }
 }

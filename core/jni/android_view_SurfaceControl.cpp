@@ -52,6 +52,7 @@
 #include <ui/Rect.h>
 #include <ui/Region.h>
 #include <utils/Log.h>
+#include <utils/LightRefBase.h>
 
 // ----------------------------------------------------------------------------
 
@@ -205,6 +206,16 @@ static struct {
     jfieldID appRequestRefreshRateMin;
     jfieldID appRequestRefreshRateMax;
 } gDesiredDisplayConfigSpecsClassInfo;
+
+static struct {
+    jclass clazz;
+    jmethodID onJankDataAvailable;
+} gJankDataListenerClassInfo;
+
+static struct {
+    jclass clazz;
+    jmethodID ctor;
+} gJankDataClassInfo;
 
 class JNamedColorSpace {
 public:
@@ -1601,6 +1612,73 @@ static void nativeSetFrameTimelineVsync(JNIEnv* env, jclass clazz, jlong transac
     transaction->setFrameTimelineVsync(frameTimelineVsyncId);
 }
 
+class JankDataListenerWrapper : public JankDataListener {
+public:
+    JankDataListenerWrapper(JNIEnv* env, jobject onJankDataListenerObject) {
+        mOnJankDataListenerWeak = env->NewWeakGlobalRef(onJankDataListenerObject);
+        env->GetJavaVM(&mVm);
+    }
+
+    ~JankDataListenerWrapper() {
+        JNIEnv* env = getEnv();
+        env->DeleteWeakGlobalRef(mOnJankDataListenerWeak);
+    }
+
+    void onJankDataAvailable(const std::vector<JankData>& jankData) {
+        JNIEnv* env = getEnv();
+
+        jobject target = env->NewLocalRef(mOnJankDataListenerWeak);
+        if (target == nullptr) return;
+
+        jobjectArray jJankDataArray = env->NewObjectArray(jankData.size(),
+                gJankDataClassInfo.clazz, nullptr);
+        for (int i = 0; i < jankData.size(); i++) {
+            jobject jJankData = env->NewObject(gJankDataClassInfo.clazz,
+                    gJankDataClassInfo.ctor, jankData[i].frameVsyncId, jankData[i].jankType);
+            env->SetObjectArrayElement(jJankDataArray, i, jJankData);
+        }
+        env->CallVoidMethod(target,
+                gJankDataListenerClassInfo.onJankDataAvailable,
+                jJankDataArray);
+        env->DeleteLocalRef(target);
+    }
+
+private:
+
+    JNIEnv* getEnv() {
+        JNIEnv* env;
+        mVm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6);
+        return env;
+    }
+
+    JavaVM* mVm;
+    jobject mOnJankDataListenerWeak;
+};
+
+static void nativeAddJankDataListener(JNIEnv* env, jclass clazz,
+                                       jlong jankDataCallbackListenerPtr,
+                                       jlong nativeSurfaceControl) {
+    sp<SurfaceControl> surface(reinterpret_cast<SurfaceControl *>(nativeSurfaceControl));
+    if (surface == nullptr) {
+        return;
+    }
+    JankDataListenerWrapper* wrapper =
+            reinterpret_cast<JankDataListenerWrapper*>(jankDataCallbackListenerPtr);
+    TransactionCompletedListener::getInstance()->addJankListener(wrapper, surface);
+}
+
+static void nativeRemoveJankDataListener(JNIEnv* env, jclass clazz,
+                                          jlong jankDataCallbackListenerPtr) {
+    JankDataListenerWrapper* wrapper =
+            reinterpret_cast<JankDataListenerWrapper*>(jankDataCallbackListenerPtr);
+    TransactionCompletedListener::getInstance()->removeJankListener(wrapper);
+}
+
+static jlong nativeCreateJankDataListenerWrapper(JNIEnv* env, jclass clazz,
+                                                 jobject jankDataListenerObject) {
+    return reinterpret_cast<jlong>(new JankDataListenerWrapper(env, jankDataListenerObject));
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod sSurfaceControlMethods[] = {
@@ -1785,6 +1863,12 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetFocusedWindow},
     {"nativeSetFrameTimelineVsync", "(JJ)V",
             (void*)nativeSetFrameTimelineVsync },
+    {"nativeAddJankDataListener", "(JJ)V",
+            (void*)nativeAddJankDataListener },
+    {"nativeRemoveJankDataListener", "(J)V",
+            (void*)nativeRemoveJankDataListener },
+    {"nativeCreateJankDataListenerWrapper", "(Landroid/view/SurfaceControl$OnJankDataListener;)J",
+            (void*)nativeCreateJankDataListenerWrapper },
         // clang-format on
 };
 
@@ -1966,6 +2050,18 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gScreenCaptureListenerClassInfo.onScreenCaptureComplete =
             GetMethodIDOrDie(env, screenCaptureListenerClazz, "onScreenCaptureComplete",
                              "(Landroid/view/SurfaceControl$ScreenshotHardwareBuffer;)V");
+
+    jclass jankDataClazz =
+                FindClassOrDie(env, "android/view/SurfaceControl$JankData");
+    gJankDataClassInfo.clazz = MakeGlobalRefOrDie(env, jankDataClazz);
+    gJankDataClassInfo.ctor =
+            GetMethodIDOrDie(env, gJankDataClassInfo.clazz, "<init>", "(JI)V");
+    jclass onJankDataListenerClazz =
+            FindClassOrDie(env, "android/view/SurfaceControl$OnJankDataListener");
+    gJankDataListenerClassInfo.clazz = MakeGlobalRefOrDie(env, onJankDataListenerClazz);
+    gJankDataListenerClassInfo.onJankDataAvailable =
+            GetMethodIDOrDie(env, onJankDataListenerClazz, "onJankDataAvailable",
+                             "([Landroid/view/SurfaceControl$JankData;)V");
     return err;
 }
 

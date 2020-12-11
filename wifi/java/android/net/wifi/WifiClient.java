@@ -30,6 +30,9 @@ public final class WifiClient implements Parcelable {
 
     private final MacAddress mMacAddress;
 
+    /** The identifier of the AP instance which the client connected. */
+    private final String mApInstanceIdentifier;
+
     /**
      * The mac address of this client.
      */
@@ -38,15 +41,30 @@ public final class WifiClient implements Parcelable {
         return mMacAddress;
     }
 
+    /**
+     * Get AP instance identifier.
+     *
+     * The AP instance identifier is a unique identity which can be used to
+     * associate the {@link SoftApInfo} to a specific {@link WifiClient}
+     * - see {@link SoftApInfo#getApInstanceIdentifier()}
+     * @hide
+     */
+    @NonNull
+    public String getApInstanceIdentifier() {
+        return mApInstanceIdentifier;
+    }
+
     private WifiClient(Parcel in) {
         mMacAddress = in.readParcelable(null);
+        mApInstanceIdentifier = in.readString();
     }
 
     /** @hide */
-    public WifiClient(@NonNull MacAddress macAddress) {
+    public WifiClient(@NonNull MacAddress macAddress, @NonNull String apInstanceIdentifier) {
         Objects.requireNonNull(macAddress, "mMacAddress must not be null.");
 
         this.mMacAddress = macAddress;
+        this.mApInstanceIdentifier = apInstanceIdentifier;
     }
 
     @Override
@@ -57,6 +75,7 @@ public final class WifiClient implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeParcelable(mMacAddress, flags);
+        dest.writeString(mApInstanceIdentifier);
     }
 
     @NonNull
@@ -75,6 +94,7 @@ public final class WifiClient implements Parcelable {
     public String toString() {
         return "WifiClient{"
                 + "mMacAddress=" + mMacAddress
+                + "mApInstanceIdentifier=" + mApInstanceIdentifier
                 + '}';
     }
 
@@ -83,13 +103,12 @@ public final class WifiClient implements Parcelable {
         if (this == o) return true;
         if (!(o instanceof WifiClient)) return false;
         WifiClient client = (WifiClient) o;
-        return mMacAddress.equals(client.mMacAddress);
+        return Objects.equals(mMacAddress, client.mMacAddress)
+                && mApInstanceIdentifier.equals(client.mApInstanceIdentifier);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mMacAddress);
+        return Objects.hash(mMacAddress, mApInstanceIdentifier);
     }
 }
-
-

@@ -83,6 +83,7 @@
     <string name="screenshot_saved_title" msgid="8893267638659083153">"स्क्रीनशॉट सेव्ह केला"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"तुमचा स्क्रीनशॉट पाहण्यासाठी टॅप करा"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"स्क्रीनशॉट सेव्ह करू शकलो नाही"</string>
+    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"स्क्रीनशॉट सेव्ह करण्याआधी डिव्हाइस अनलॉक करणे आवश्यक आहे"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"स्क्रीनशॉट पुन्हा घेण्याचा प्रयत्न करा"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"मर्यादित स्टोरेज जागेमुळे स्क्रीनशॉट सेव्ह करू शकत नाही"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"अ‍ॅप किंवा आपल्या संस्थेद्वारे स्क्रीनशॉट घेण्याची अनुमती नाही"</string>
@@ -935,7 +936,7 @@
     <string name="notification_channel_general" msgid="4384774889645929705">"सर्वसाधारण मेसेज"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"स्टोरेज"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"सूचना"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"इन्सटंट अ‍ॅप्स"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> रन होत आहे"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"इंस्टॉल केल्याशिवाय अ‍ॅप उघडले."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"इंस्टॉल केल्याशिवाय अ‍ॅप उघडले. अधिक जाणून घेण्यासाठी टॅप करा."</string>

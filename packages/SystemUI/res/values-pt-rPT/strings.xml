@@ -83,6 +83,7 @@
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Captura de ecrã guardada"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"Toque para ver a captura de ecrã."</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Não foi possível guardar a captura de ecrã"</string>
+    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"É necessário desbloquear o dispositivo para guardar a captura de ecrã"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Experimente voltar a efetuar a captura de ecrã."</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Não é possível guardar a captura de ecrã devido a espaço de armazenamento limitado."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"A app ou a sua entidade não permitem tirar capturas de ecrã"</string>

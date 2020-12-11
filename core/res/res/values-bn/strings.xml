@@ -199,6 +199,7 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS পরিষেবা"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"সেন্সর বিজ্ঞপ্তি পরিষেবা"</string>
     <string name="twilight_service" msgid="8964898045693187224">"গোধূলি পরিষেবা"</string>
+    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"টাইম জোন ডিটেক্টর (কানেকশন নেই)"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"আপনার ডিভাইসটি মুছে ফেলা হবে"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"অ্যাডমিন অ্যাপটি ব্যবহার করা যাবে না। আপনার ডিভাইসে থাকা সবকিছু এখন মুছে ফেলা হবে।\n\nকোনও প্রশ্ন থাকলে আপনার প্রতিষ্ঠানের অ্যাডমিনের সাথে যোগাযোগ করুন।"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> প্রিন্টিং বন্ধ রেখেছে।"</string>
@@ -287,8 +288,7 @@
     <string name="notification_channel_usb" msgid="1528280969406244896">"USB সংযোগ"</string>
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"অ্যাপ চলছে"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"কিছু অ্যাপ ব্যাটারি ব্যবহার করছে"</string>
-    <!-- no translation found for notification_channel_accessibility_magnification (1707913872219798098) -->
-    <skip />
+    <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"বড় করে দেখুন"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> অ্যাপটি ব্যাটারি ব্যবহার করছে"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g>টি অ্যাপ ব্যাটারি ব্যবহার করছে"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"ব্যাটারি এবং ডেটার ব্যবহারের বিশদ বিবরণের জন্য ট্যাপ করুন"</string>
@@ -2190,12 +2190,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <!-- no translation found for window_magnification_prompt_title (8197528399699536320) -->
-    <skip />
-    <!-- no translation found for window_magnification_prompt_content (4166711383253283838) -->
-    <skip />
-    <!-- no translation found for turn_on_magnification_settings_action (8521433346684847700) -->
-    <skip />
-    <!-- no translation found for dismiss_action (1728820550388704784) -->
-    <skip />
+    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"নতুন: উইন্ডো ম্যাগনিফায়ার"</string>
+    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"এখন আপনি কিছু বা সবকটি স্ক্রিন বড় করে দেখতে পারেন"</string>
+    <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"সেটিংস থেকে চালু করুন"</string>
+    <string name="dismiss_action" msgid="1728820550388704784">"বাতিল করুন"</string>
 </resources>

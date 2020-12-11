@@ -83,6 +83,7 @@
     <string name="screenshot_saved_title" msgid="8893267638659083153">"ဖန်သားပြင်ဓာတ်ပုံကို သိမ်းပြီးပါပြီ"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"ဖန်သားပြင်ဓာတ်ပုံကို ကြည့်ရန် တို့ပါ"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"မျက်နှာပြင်ပုံကို သိမ်း၍မရပါ"</string>
+    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"ဖန်သားပြင်ဓာတ်ပုံကို မသိမ်းမီ စက်ပစ္စည်းကို လော့ခ်ဖွင့်ထားရမည်"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"မျက်နှာပြင်ပုံကို ထပ်ရိုက်ကြည့်ပါ"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"သိုလှောင်ခန်းနေရာ အကန့်အသတ်ရှိသောကြောင့် ဖန်သားပြင်ဓာတ်ပုံကို သိမ်းဆည်း၍မရပါ"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ဖန်သားပြင်ဓာတ်ပုံရိုက်ကူးခြင်းကို ဤအက်ပ် သို့မဟုတ် သင်၏အဖွဲ့အစည်းက ခွင့်မပြုပါ"</string>

@@ -50,6 +50,8 @@ public class FalsingDataProvider {
     private final float mXdpi;
     private final float mYdpi;
     private final List<SessionListener> mSessionListeners = new ArrayList<>();
+    private final List<MotionEventListener> mMotionEventListeners = new ArrayList<>();
+    private final List<GestureCompleteListener> mGestuerCompleteListeners = new ArrayList<>();
 
     private @Classifier.InteractionType int mInteractionType;
     private final Deque<TimeLimitedMotionEventBuffer> mExtendedMotionEvents = new LinkedList<>();
@@ -96,6 +98,8 @@ public class FalsingDataProvider {
         mRecentMotionEvents.addAll(motionEvents);
 
         FalsingClassifier.logDebug("Size: " + mRecentMotionEvents.size());
+
+        mMotionEventListeners.forEach(listener -> listener.onMotionEvent(motionEvent));
 
         mDirty = true;
     }
@@ -321,6 +325,26 @@ public class FalsingDataProvider {
         mSessionListeners.remove(listener);
     }
 
+    /** Register a {@link MotionEventListener}. */
+    public void addMotionEventListener(MotionEventListener listener) {
+        mMotionEventListeners.add(listener);
+    }
+
+    /** Unegister a {@link MotionEventListener}. */
+    public void removeMotionEventListener(MotionEventListener listener) {
+        mMotionEventListeners.remove(listener);
+    }
+
+    /** Register a {@link GestureCompleteListener}. */
+    public void addGestureCompleteListener(GestureCompleteListener listener) {
+        mGestuerCompleteListeners.add(listener);
+    }
+
+    /** Unregister a {@link GestureCompleteListener}. */
+    public void removeGestureCompleteListener(GestureCompleteListener listener) {
+        mGestuerCompleteListeners.remove(listener);
+    }
+
     void onSessionStarted() {
         mSessionListeners.forEach(SessionListener::onSessionStarted);
     }
@@ -352,5 +376,17 @@ public class FalsingDataProvider {
 
         /** Called when the lock screen exits and falsing-tracking ends. */
         void onSessionEnded();
+    }
+
+    /** Callback for receiving {@link android.view.MotionEvent}s as they are reported. */
+    public interface MotionEventListener {
+        /** */
+        void onMotionEvent(MotionEvent ev);
+    }
+
+    /** Callback to be alerted when the current gesture ends. */
+    public interface GestureCompleteListener {
+        /** */
+        void onGestureComplete();
     }
 }

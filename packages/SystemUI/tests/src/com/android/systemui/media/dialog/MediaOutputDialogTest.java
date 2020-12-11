@@ -19,6 +19,8 @@ package com.android.systemui.media.dialog;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.media.MediaRoute2Info;
@@ -29,6 +31,7 @@ import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
@@ -53,26 +56,28 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     private static final String TEST_PACKAGE = "test_package";
 
     // Mock
-    private MediaSessionManager mMediaSessionManager = mock(MediaSessionManager.class);
-    private LocalBluetoothManager mLocalBluetoothManager = mock(LocalBluetoothManager.class);
-    private ShadeController mShadeController = mock(ShadeController.class);
-    private ActivityStarter mStarter = mock(ActivityStarter.class);
-    private LocalMediaManager mLocalMediaManager = mock(LocalMediaManager.class);
-    private MediaDevice mMediaDevice = mock(MediaDevice.class);
-    private NotificationEntryManager mNotificationEntryManager =
+    private final MediaSessionManager mMediaSessionManager = mock(MediaSessionManager.class);
+    private final LocalBluetoothManager mLocalBluetoothManager = mock(LocalBluetoothManager.class);
+    private final ShadeController mShadeController = mock(ShadeController.class);
+    private final ActivityStarter mStarter = mock(ActivityStarter.class);
+    private final LocalMediaManager mLocalMediaManager = mock(LocalMediaManager.class);
+    private final MediaDevice mMediaDevice = mock(MediaDevice.class);
+    private final NotificationEntryManager mNotificationEntryManager =
             mock(NotificationEntryManager.class);
+    private final UiEventLogger mUiEventLogger = mock(UiEventLogger.class);
 
     private MediaOutputDialog mMediaOutputDialog;
     private MediaOutputController mMediaOutputController;
-    private List<String> mFeatures = new ArrayList<>();
+    private final List<String> mFeatures = new ArrayList<>();
 
     @Before
     public void setUp() {
         mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE, false,
                 mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
-                mNotificationEntryManager);
+                mNotificationEntryManager, mUiEventLogger);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
-        mMediaOutputDialog = new MediaOutputDialog(mContext, false, mMediaOutputController);
+        mMediaOutputDialog = new MediaOutputDialog(mContext, false,
+                mMediaOutputController, mUiEventLogger);
 
         when(mLocalMediaManager.getCurrentConnectedDevice()).thenReturn(mMediaDevice);
         when(mMediaDevice.getFeatures()).thenReturn(mFeatures);
@@ -112,4 +117,16 @@ public class MediaOutputDialogTest extends SysuiTestCase {
         assertThat(mMediaOutputDialog.getStopButtonVisibility()).isEqualTo(View.GONE);
     }
 
+    @Test
+    // Check the visibility metric logging by creating a new MediaOutput dialog,
+    // and verify if the calling times increases.
+    public void onCreate_ShouldLogVisibility() {
+        MediaOutputDialog testDialog = new MediaOutputDialog(mContext, false,
+                mMediaOutputController, mUiEventLogger);
+
+        testDialog.dismissDialog();
+
+        verify(mUiEventLogger, times(2))
+                .log(MediaOutputDialog.MediaOutputEvent.MEDIA_OUTPUT_DIALOG_SHOW);
+    }
 }

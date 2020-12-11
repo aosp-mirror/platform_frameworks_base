@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.PixelFormat;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -41,6 +42,8 @@ import android.widget.ImageView;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 
+import java.util.Collections;
+
 /**
  * Shows/hides a {@link android.widget.ImageView} on the screen and changes the values of
  * {@link Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE} when the UI is toggled.
@@ -52,7 +55,7 @@ class MagnificationModeSwitch {
     @VisibleForTesting
     static final long FADING_ANIMATION_DURATION_MS = 300;
     @VisibleForTesting
-    static final int DEFAULT_FADE_OUT_ANIMATION_DELAY_MS = 3000;
+    static final int DEFAULT_FADE_OUT_ANIMATION_DELAY_MS = 5000;
     private int mUiTimeout;
     private final Runnable mFadeInAnimationTask;
     private final Runnable mFadeOutAnimationTask;
@@ -85,7 +88,6 @@ class MagnificationModeSwitch {
         mImageView = imageView;
         mTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
         applyResourcesValues();
-        mImageView.setImageResource(getIconResId(mMagnificationMode));
         mImageView.setOnTouchListener(this::onTouch);
         mImageView.setAccessibilityDelegate(new View.AccessibilityDelegate() {
             @Override
@@ -138,6 +140,7 @@ class MagnificationModeSwitch {
         final int padding = mContext.getResources().getDimensionPixelSize(
                 R.dimen.magnification_switch_button_padding);
         mImageView.setPadding(padding, padding, padding, padding);
+        mImageView.setImageResource(getIconResId(mMagnificationMode));
     }
 
     private boolean onTouch(View v, MotionEvent event) {
@@ -205,6 +208,8 @@ class MagnificationModeSwitch {
         }
         if (!mIsVisible) {
             mWindowManager.addView(mImageView, mParams);
+            // Exclude magnification switch button from system gesture area.
+            setSystemGestureExclusion();
             mIsVisible = true;
             mImageView.postOnAnimation(mFadeInAnimationTask);
             mUiTimeout = mAccessibilityManager.getRecommendedTimeoutMillis(
@@ -224,7 +229,11 @@ class MagnificationModeSwitch {
     void onConfigurationChanged(int configDiff) {
         if ((configDiff & ActivityInfo.CONFIG_DENSITY) != 0) {
             applyResourcesValues();
-            mImageView.setImageResource(getIconResId(mMagnificationMode));
+            if (mIsVisible) {
+                mWindowManager.updateViewLayout(mImageView, mParams);
+                // Exclude magnification switch button from system gesture area.
+                setSystemGestureExclusion();
+            }
             return;
         }
         if ((configDiff & ActivityInfo.CONFIG_LOCALE) != 0) {
@@ -261,7 +270,6 @@ class MagnificationModeSwitch {
         ImageView imageView = new ImageView(context);
         imageView.setClickable(true);
         imageView.setFocusable(true);
-        imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
         imageView.setAlpha(0f);
         return imageView;
     }
@@ -288,4 +296,13 @@ class MagnificationModeSwitch {
     private static String getAccessibilityWindowTitle(Context context) {
         return context.getString(com.android.internal.R.string.android_system_label);
     }
+
+    private void setSystemGestureExclusion() {
+        mImageView.post(() -> {
+            mImageView.setSystemGestureExclusionRects(
+                    Collections.singletonList(
+                            new Rect(0, 0, mImageView.getWidth(), mImageView.getHeight())));
+        });
+    }
+
 }

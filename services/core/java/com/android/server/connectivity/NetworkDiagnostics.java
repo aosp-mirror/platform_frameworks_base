@@ -20,10 +20,10 @@ import static android.system.OsConstants.*;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.net.InetAddresses;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
-import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.net.TrafficStats;
 import android.net.shared.PrivateDnsConfig;
@@ -97,8 +97,8 @@ import javax.net.ssl.SSLSocketFactory;
 public class NetworkDiagnostics {
     private static final String TAG = "NetworkDiagnostics";
 
-    private static final InetAddress TEST_DNS4 = NetworkUtils.numericToInetAddress("8.8.8.8");
-    private static final InetAddress TEST_DNS6 = NetworkUtils.numericToInetAddress(
+    private static final InetAddress TEST_DNS4 = InetAddresses.parseNumericAddress("8.8.8.8");
+    private static final InetAddress TEST_DNS6 = InetAddresses.parseNumericAddress(
             "2001:4860:4860::8888");
 
     // For brevity elsewhere.

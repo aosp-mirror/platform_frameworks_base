@@ -65,12 +65,20 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     @Deprecated
     public static final int PROTECTION_SIGNATURE_OR_SYSTEM = 3;
 
+    /**
+     * System-level value for {@link #protectionLevel}, corresponding
+     * to the <code>internal</code> value of
+     * {@link android.R.attr#protectionLevel}.
+     */
+    public static final int PROTECTION_INTERNAL = 4;
+
     /** @hide */
     @IntDef(flag = false, prefix = { "PROTECTION_" }, value = {
             PROTECTION_NORMAL,
             PROTECTION_DANGEROUS,
             PROTECTION_SIGNATURE,
             PROTECTION_SIGNATURE_OR_SYSTEM,
+            PROTECTION_INTERNAL,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Protection {}
@@ -261,6 +269,15 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     @SystemApi
     public static final int PROTECTION_FLAG_RECENTS = 0x2000000;
 
+    /**
+     * Additional flag for {@link #protectionLevel}, corresponding to the <code>role</code> value of
+     * {@link android.R.attr#protectionLevel}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int PROTECTION_FLAG_ROLE = 0x4000000;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "PROTECTION_FLAG_" }, value = {
             PROTECTION_FLAG_PRIVILEGED,
@@ -285,6 +302,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
             PROTECTION_FLAG_COMPANION,
             PROTECTION_FLAG_RETAIL_DEMO,
             PROTECTION_FLAG_RECENTS,
+            PROTECTION_FLAG_ROLE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProtectionFlags {}
@@ -317,7 +335,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      * </pre>
      *
      * <p></p>Base permission types are {@link #PROTECTION_NORMAL},
-     * {@link #PROTECTION_DANGEROUS}, {@link #PROTECTION_SIGNATURE}
+     * {@link #PROTECTION_DANGEROUS}, {@link #PROTECTION_SIGNATURE}, {@link #PROTECTION_INTERNAL}
      * and the deprecated {@link #PROTECTION_SIGNATURE_OR_SYSTEM}.
      * Flags are listed under {@link android.R.attr#protectionLevel}.
      *
@@ -479,6 +497,9 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
             case PermissionInfo.PROTECTION_SIGNATURE_OR_SYSTEM:
                 protLevel.append("signatureOrSystem");
                 break;
+            case PermissionInfo.PROTECTION_INTERNAL:
+                protLevel.append("internal");
+                break;
             default:
                 protLevel.append("????");
                 break;
@@ -545,6 +566,9 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         }
         if ((level & PermissionInfo.PROTECTION_FLAG_RECENTS) != 0) {
             protLevel.append("|recents");
+        }
+        if ((level & PermissionInfo.PROTECTION_FLAG_ROLE) != 0) {
+            protLevel.append("|role");
         }
         return protLevel.toString();
     }

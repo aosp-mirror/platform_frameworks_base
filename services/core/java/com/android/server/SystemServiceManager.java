@@ -60,12 +60,12 @@ public final class SystemServiceManager implements Dumpable {
     // Constants used on onUser(...)
     // NOTE: do not change their values, as they're used on Trace calls and changes might break
     // performance tests that rely on them.
-    private static final String USER_STARTING = "Start";
-    private static final String USER_UNLOCKING = "Unlocking";
-    private static final String USER_UNLOCKED = "Unlocked";
-    private static final String USER_SWITCHING = "Switch";
-    private static final String USER_STOPPING = "Stop";
-    private static final String USER_STOPPED = "Cleanup";
+    private static final String USER_STARTING = "Start"; // Logged as onStartUser
+    private static final String USER_UNLOCKING = "Unlocking"; // Logged as onUnlockingUser
+    private static final String USER_UNLOCKED = "Unlocked"; // Logged as onUnlockedUser
+    private static final String USER_SWITCHING = "Switch"; // Logged as onSwitchUser
+    private static final String USER_STOPPING = "Stop"; // Logged as onStopUser
+    private static final String USER_STOPPED = "Cleanup"; // Logged as onCleanupUser
 
     private static File sSystemDir;
     private final Context mContext;

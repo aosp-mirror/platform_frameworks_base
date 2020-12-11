@@ -31,6 +31,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.IIpSecService;
 import android.net.INetd;
+import android.net.InetAddresses;
 import android.net.IpSecAlgorithm;
 import android.net.IpSecConfig;
 import android.net.IpSecManager;
@@ -41,7 +42,6 @@ import android.net.IpSecTunnelInterfaceResponse;
 import android.net.IpSecUdpEncapResponse;
 import android.net.LinkAddress;
 import android.net.Network;
-import android.net.NetworkUtils;
 import android.net.TrafficStats;
 import android.net.util.NetdService;
 import android.os.Binder;
@@ -1083,7 +1083,7 @@ public class IpSecService extends IIpSecService.Stub {
             throw new IllegalArgumentException("Unspecified address");
         }
 
-        InetAddress checkAddr = NetworkUtils.numericToInetAddress(inetAddress);
+        InetAddress checkAddr = InetAddresses.parseNumericAddress(inetAddress);
 
         if (checkAddr.isAnyLocalAddress()) {
             throw new IllegalArgumentException("Inappropriate wildcard address: " + inetAddress);
@@ -1467,7 +1467,7 @@ public class IpSecService extends IIpSecService.Stub {
 
     private int getFamily(String inetAddress) {
         int family = AF_UNSPEC;
-        InetAddress checkAddress = NetworkUtils.numericToInetAddress(inetAddress);
+        InetAddress checkAddress = InetAddresses.parseNumericAddress(inetAddress);
         if (checkAddress instanceof Inet4Address) {
             family = AF_INET;
         } else if (checkAddress instanceof Inet6Address) {

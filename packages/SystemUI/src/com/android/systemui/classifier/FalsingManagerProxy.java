@@ -19,7 +19,6 @@ package com.android.systemui.classifier;
 import android.content.Context;
 import android.net.Uri;
 import android.provider.DeviceConfig;
-import android.view.MotionEvent;
 
 import androidx.annotation.NonNull;
 
@@ -159,11 +158,6 @@ public class FalsingManagerProxy implements FalsingManager, Dumpable {
     @Override
     public boolean isReportingEnabled() {
         return mInternalFalsingManager.isReportingEnabled();
-    }
-
-    @Override
-    public void onTouchEvent(MotionEvent ev, int width, int height) {
-        mInternalFalsingManager.onTouchEvent(ev, width, height);
     }
 
     @Override

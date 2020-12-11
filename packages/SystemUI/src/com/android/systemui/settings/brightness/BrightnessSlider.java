@@ -17,6 +17,9 @@
 package com.android.systemui.settings.brightness;
 
 import android.content.Context;
+import android.graphics.drawable.ClipDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -27,6 +30,7 @@ import android.widget.SeekBar;
 import androidx.annotation.Nullable;
 
 import com.android.settingslib.RestrictedLockUtils;
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.util.ViewController;
@@ -269,14 +273,45 @@ public class BrightnessSlider
 
         private BrightnessSlider fromTree(ViewGroup root, boolean useMirror) {
             BrightnessSliderView v = root.requireViewById(R.id.brightness_slider);
+
+            // TODO(175026098) Workaround. Remove when b/175026098 is fixed
+            applyTheme(v);
+
             return new BrightnessSlider(root, v, useMirror);
         }
 
         /** Get the layout to inflate based on what slider to use */
-        public int getLayout() {
+        private int getLayout() {
             return mSettings.useThickSlider()
                     ? R.layout.quick_settings_brightness_dialog_thick
                     : R.layout.quick_settings_brightness_dialog;
+        }
+
+        private LayerDrawable findProgressClippableDrawable(BrightnessSliderView v) {
+            SeekBar b = v.requireViewById(R.id.slider);
+            if (b.getProgressDrawable() instanceof LayerDrawable) {
+                Drawable progress = ((LayerDrawable) b.getProgressDrawable())
+                        .findDrawableByLayerId(com.android.internal.R.id.progress);
+                if (progress instanceof ClipDrawable) {
+                    Drawable inner = ((ClipDrawable) progress).getDrawable();
+                    if (inner instanceof LayerDrawable) {
+                        return (LayerDrawable) inner;
+                    }
+                }
+            }
+            return null;
+        }
+
+        private void applyTheme(BrightnessSliderView v) {
+            LayerDrawable layer = findProgressClippableDrawable(v);
+            if (layer != null) {
+                layer.findDrawableByLayerId(R.id.slider_foreground).setTintList(
+                        Utils.getColorAttr(v.getContext(),
+                                com.android.internal.R.attr.colorControlActivated));
+                layer.findDrawableByLayerId(R.id.slider_icon).setTintList(
+                        Utils.getColorAttr(v.getContext(),
+                                com.android.internal.R.attr.colorBackground));
+            }
         }
     }
 }

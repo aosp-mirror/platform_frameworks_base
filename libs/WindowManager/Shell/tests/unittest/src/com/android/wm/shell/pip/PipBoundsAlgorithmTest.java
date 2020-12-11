@@ -337,7 +337,8 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
         reentryBounds.scale(1.25f);
         final float reentrySnapFraction = mPipBoundsAlgorithm.getSnapFraction(reentryBounds);
 
-        mPipBoundsState.saveReentryState(reentryBounds, reentrySnapFraction);
+        mPipBoundsState.saveReentryState(
+                new Size(reentryBounds.width(), reentryBounds.height()), reentrySnapFraction);
         final Rect destinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
 
         assertEquals(reentryBounds.width(), destinationBounds.width());
@@ -351,7 +352,8 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
         reentryBounds.offset(0, -100);
         final float reentrySnapFraction = mPipBoundsAlgorithm.getSnapFraction(reentryBounds);
 
-        mPipBoundsState.saveReentryState(reentryBounds, reentrySnapFraction);
+        mPipBoundsState.saveReentryState(
+                new Size(reentryBounds.width(), reentryBounds.height()), reentrySnapFraction);
 
         final Rect destinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
 

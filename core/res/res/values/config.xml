@@ -3303,6 +3303,10 @@
          is non-interactive. -->
     <bool name="config_cameraDoubleTapPowerGestureEnabled">true</bool>
 
+    <!-- Allow the gesture to quick tap the power button multiple times to start the emergency sos
+         experience while the device is non-interactive. -->
+    <bool name="config_emergencyGestureEnabled">true</bool>
+
     <!-- Allow the gesture power + volume up to change the ringer mode while the device
          is interactive. -->
     <bool name="config_volumeHushGestureEnabled">true</bool>

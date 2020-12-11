@@ -272,7 +272,9 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
         void removeTask(Task t) {
             if (t.mTaskAppearedSent) {
-                t.migrateToNewSurfaceControl();
+                if (t.getSurfaceControl() != null) {
+                    t.migrateToNewSurfaceControl();
+                }
                 t.mTaskAppearedSent = false;
                 mOrganizer.onTaskVanished(t);
             }
@@ -288,8 +290,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             // possible.
             while (!mOrganizedTasks.isEmpty()) {
                 final Task t = mOrganizedTasks.get(0);
-                t.updateTaskOrganizerState(true /* forceUpdate */);
-                if (mOrganizedTasks.contains(t)) {
+                if (!t.updateTaskOrganizerState(true /* forceUpdate */)) {
                     removeTask(t);
                 }
             }
@@ -686,16 +687,13 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 if (dc == null) {
                     throw new IllegalArgumentException("Display " + displayId + " doesn't exist");
                 }
-                ArrayList<RunningTaskInfo> out = new ArrayList<>();
-                dc.forAllTaskDisplayAreas(taskDisplayArea -> {
-                    for (int sNdx = taskDisplayArea.getRootTaskCount() - 1; sNdx >= 0; --sNdx) {
-                        final Task task = taskDisplayArea.getRootTaskAt(sNdx);
-                        if (activityTypes != null
-                                && !ArrayUtils.contains(activityTypes, task.getActivityType())) {
-                            continue;
-                        }
-                        out.add(task.getTaskInfo());
+                final ArrayList<RunningTaskInfo> out = new ArrayList<>();
+                dc.forAllRootTasks(task -> {
+                    if (activityTypes != null
+                            && !ArrayUtils.contains(activityTypes, task.getActivityType())) {
+                        return;
                     }
+                    out.add(task.getTaskInfo());
                 });
                 return out;
             }

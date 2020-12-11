@@ -83,6 +83,7 @@
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Imehifadhi picha ya skrini"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"Gusa ili utazame picha ya skrini uliyohifadhi"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Imeshindwa kuhifadhi picha ya skrini"</string>
+    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Ni sharti ufungue kifaa kabla ya kuhifadhi picha ya skrini"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Jaribu kupiga picha ya skrini tena"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Imeshindwa kuhifadhi picha ya skrini kwa sababu nafasi haitoshi"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Programu au shirika lako halikuruhusu kupiga picha za skrini"</string>

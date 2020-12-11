@@ -159,8 +159,6 @@ interface IActivityTaskManager {
             int userId);
     boolean isTopActivityImmersive();
     ActivityManager.TaskDescription getTaskDescription(int taskId);
-    int getLaunchedFromUid(in IBinder activityToken);
-    String getLaunchedFromPackage(in IBinder activityToken);
     void reportAssistContextExtras(in IBinder assistToken, in Bundle extras,
             in AssistStructure structure, in AssistContent content, in Uri referrer);
 
@@ -257,8 +255,6 @@ interface IActivityTaskManager {
      *              etc.
      */
     void keyguardGoingAway(int flags);
-    ComponentName getActivityClassForToken(in IBinder token);
-    String getPackageForToken(in IBinder token);
 
     void suppressResizeConfigChanges(boolean suppress);
     boolean moveTopActivityToPinnedRootTask(int rootTaskId, in Rect bounds);

@@ -400,7 +400,9 @@
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"Ενεργό. Πατήστε για εναλλαγή."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Κατάσταση αναμονής εφαρμογής:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="transcode_settings_title" msgid="2581975870429850549">"Ρυθμίσεις διακωδικοποίησης μέσων"</string>
-    <string name="transcode_enable_all" msgid="9102460144086871903">"Απενεργοποίηση διακωδικοποίησης"</string>
+    <string name="transcode_user_control" msgid="6176368544817731314">"Παράκαμψη προεπιλογών διακωδικοποίησης"</string>
+    <string name="transcode_enable_all" msgid="2411165920039166710">"Ενεργοποίηση διακωδικοποίησης"</string>
+    <string name="transcode_default" msgid="3784803084573509491">"Να θεωρείται ότι οι εφαρμογές χρησιμοποιούν σύγχρονες μορφές"</string>
     <string name="transcode_skip_apps" msgid="8249721984597390142">"Ενεργοποίηση διακωδικοποίησης για εφαρμογές"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Υπηρεσίες που εκτελούνται"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Προβολή και έλεγχος των εφαρμογών που εκτελούνται αυτή τη στιγμή"</string>
@@ -449,7 +451,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Απομένουν <xliff:g id="TIME">%1$s</xliff:g> για ολοκλήρωση της φόρτισης"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> για την ολοκλήρωση της φόρτισης"</string>
-    <string name="power_charging_limited" msgid="5902301801611726210">"<xliff:g id="LEVEL">%1$s</xliff:g> - Η μπαταρία περιορίστηκε προσωρινά."</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - Βελτιστοποίηση κατάστασης μπαταρίας"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Άγνωστο"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Φόρτιση"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Ταχεία φόρτιση"</string>

@@ -477,6 +477,28 @@ public abstract class VibrationEffect implements Parcelable {
     }
 
     /** @hide */
+    public static String effectIdToString(int effectId) {
+        switch (effectId) {
+            case EFFECT_CLICK:
+                return "CLICK";
+            case EFFECT_TICK:
+                return "TICK";
+            case EFFECT_HEAVY_CLICK:
+                return "HEAVY_CLICK";
+            case EFFECT_DOUBLE_CLICK:
+                return "DOUBLE_CLICK";
+            case EFFECT_POP:
+                return "POP";
+            case EFFECT_THUD:
+                return "THUD";
+            case EFFECT_TEXTURE_TICK:
+                return "TEXTURE_TICK";
+            default:
+                return Integer.toString(effectId);
+        }
+    }
+
+    /** @hide */
     @TestApi
     public static class OneShot extends VibrationEffect implements Parcelable {
         private final long mDuration;
@@ -1201,10 +1223,8 @@ public abstract class VibrationEffect implements Parcelable {
                     return "PRIMITIVE_QUICK_FALL";
                 case PRIMITIVE_TICK:
                     return "PRIMITIVE_TICK";
-
                 default:
                     return Integer.toString(id);
-
             }
         }
 

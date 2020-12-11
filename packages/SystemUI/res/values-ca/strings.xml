@@ -83,6 +83,7 @@
     <string name="screenshot_saved_title" msgid="8893267638659083153">"S\'ha desat la captura de pantalla"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"Toca per veure la captura de pantalla"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"No s\'ha pogut desar la captura de pantalla"</string>
+    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"El dispositiu ha d\'estar desbloquejat abans que la captura de pantalla es pugui desar"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Prova de tornar a fer una captura de pantalla"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"La captura de pantalla no es pot desar perquè no hi ha prou espai d\'emmagatzematge"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"L\'aplicació o la teva organització no permeten fer captures de pantalla"</string>

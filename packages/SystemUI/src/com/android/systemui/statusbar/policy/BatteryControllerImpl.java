@@ -37,7 +37,6 @@ import com.android.settingslib.fuelgauge.BatterySaverUtils;
 import com.android.settingslib.fuelgauge.Estimate;
 import com.android.settingslib.utils.PowerUtil;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.demomode.DemoMode;
@@ -49,13 +48,10 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-
 /**
  * Default implementation of a {@link BatteryController}. This controller monitors for battery
  * level change events that are broadcasted by the system.
  */
-@SysUISingleton
 public class BatteryControllerImpl extends BroadcastReceiver implements BatteryController {
     private static final String TAG = "BatteryController";
 
@@ -89,7 +85,6 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     private boolean mFetchingEstimate = false;
 
     @VisibleForTesting
-    @Inject
     public BatteryControllerImpl(
             Context context,
             EnhancedEstimates enhancedEstimates,
@@ -155,8 +150,11 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
             mChangeCallbacks.add(cb);
         }
         if (!mHasReceivedBattery) return;
+
+        // Make sure new callbacks get the correct initial state
         cb.onBatteryLevelChanged(mLevel, mPluggedIn, mCharging);
         cb.onPowerSaveChanged(mPowerSave);
+        cb.onBatteryUnknownStateChanged(mStateUnknown);
     }
 
     @Override

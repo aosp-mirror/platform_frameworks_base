@@ -20,6 +20,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
@@ -850,13 +851,17 @@ public final class CameraManager {
          * A camera device has been opened by an application.
          *
          * <p>The default implementation of this method does nothing.</p>
-         *
-         * @param cameraId The unique identifier of the new camera.
+         *    android.Manifest.permission.CAMERA_OPEN_CLOSE_LISTENER is required to receive this
+         *    callback
+         * @param cameraId The unique identifier of the camera opened.
          * @param packageId The package Id of the application opening the camera.
          *
          * @see #onCameraClosed
+         * @hide
          */
-        /** @hide */
+        @SystemApi
+        @TestApi
+        @RequiresPermission(android.Manifest.permission.CAMERA_OPEN_CLOSE_LISTENER)
         public void onCameraOpened(@NonNull String cameraId, @NonNull String packageId) {
             // default empty implementation
         }
@@ -865,10 +870,14 @@ public final class CameraManager {
          * A previously-opened camera has been closed.
          *
          * <p>The default implementation of this method does nothing.</p>
-         *
+         *    android.Manifest.permission.CAMERA_OPEN_CLOSE_LISTENER is required to receive this
+         *    callback.
          * @param cameraId The unique identifier of the closed camera.
+         * @hide
          */
-        /** @hide */
+        @SystemApi
+        @TestApi
+        @RequiresPermission(android.Manifest.permission.CAMERA_OPEN_CLOSE_LISTENER)
         public void onCameraClosed(@NonNull String cameraId) {
             // default empty implementation
         }

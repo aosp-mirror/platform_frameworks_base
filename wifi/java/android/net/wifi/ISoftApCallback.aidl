@@ -53,6 +53,12 @@ oneway interface ISoftApCallback
      */
     void onInfoChanged(in SoftApInfo softApInfo);
 
+    /**
+     * Service to manager callback providing informations of softap.
+     *
+     * @param softApInfoList is the list of the softap informations. {@link SoftApInfo}
+     */
+    void onInfoListChanged(in List<SoftApInfo> softApInfoList);
 
     /**
      * Service to manager callback providing capability of softap.

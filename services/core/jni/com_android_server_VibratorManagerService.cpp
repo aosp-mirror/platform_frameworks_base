@@ -26,7 +26,12 @@
 
 #include <vibratorservice/VibratorManagerHalWrapper.h>
 
+#include "com_android_server_VibratorManagerService.h"
+
 namespace android {
+
+static std::mutex gManagerMutex;
+static vibrator::ManagerHalWrapper* gManager GUARDED_BY(gManagerMutex) = nullptr;
 
 class NativeVibratorManagerService {
 public:
@@ -39,9 +44,16 @@ private:
     const std::unique_ptr<vibrator::ManagerHalWrapper> mHal;
 };
 
+vibrator::ManagerHalWrapper* android_server_VibratorManagerService_getManager() {
+    std::lock_guard<std::mutex> lock(gManagerMutex);
+    return gManager;
+}
+
 static void destroyNativeService(void* ptr) {
     NativeVibratorManagerService* service = reinterpret_cast<NativeVibratorManagerService*>(ptr);
     if (service) {
+        std::lock_guard<std::mutex> lock(gManagerMutex);
+        gManager = nullptr;
         delete service;
     }
 }
@@ -49,6 +61,10 @@ static void destroyNativeService(void* ptr) {
 static jlong nativeInit(JNIEnv* /* env */, jclass /* clazz */) {
     std::unique_ptr<NativeVibratorManagerService> service =
             std::make_unique<NativeVibratorManagerService>();
+    {
+        std::lock_guard<std::mutex> lock(gManagerMutex);
+        gManager = service->hal();
+    }
     return reinterpret_cast<jlong>(service.release());
 }
 

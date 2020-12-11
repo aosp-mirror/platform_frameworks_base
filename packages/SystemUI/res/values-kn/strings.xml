@@ -83,6 +83,7 @@
     <string name="screenshot_saved_title" msgid="8893267638659083153">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ ಅನ್ನು ಉಳಿಸಲಾಗಿದೆ"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ ವೀಕ್ಷಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಅನ್ನು ಉಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ"</string>
+    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸುವ ಮೊದಲು ಸಾಧನವನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಬೇಕು"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಅನ್ನು ಪುನಃ ತೆಗೆದುಕೊಳ್ಳಲು ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"ಪರಿಮಿತ ಸಂಗ್ರಹಣೆ ಸ್ಥಳದ ಕಾರಣದಿಂದಾಗಿ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ಅಪ್ಲಿಕೇಶನ್ ಅಥವಾ ಸಂಸ್ಥೆಯು ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳನ್ನು ತೆಗೆಯುವುದನ್ನು ಅನುಮತಿಸುವುದಿಲ್ಲ"</string>
@@ -935,7 +936,7 @@
     <string name="notification_channel_general" msgid="4384774889645929705">"ಸಾಮಾನ್ಯ ಸಂದೇಶಗಳು"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"ಸಂಗ್ರಹಣೆ"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"ಸುಳಿವುಗಳು"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"ಇನ್‌ಸ್ಟಂಟ್ ಆ್ಯಪ್‌ಗಳು"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> ರನ್ ಆಗುತ್ತಿದೆ"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡದೆ ಆ್ಯಪ್‌ ತೆರೆಯಲಾಗಿದೆ."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡದೆ ಆ್ಯಪ್‌ ತೆರೆಯಲಾಗಿದೆ. ಇನ್ನಷ್ಟು ತಿಳಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>

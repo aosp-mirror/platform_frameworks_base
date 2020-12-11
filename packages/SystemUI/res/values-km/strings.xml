@@ -83,6 +83,7 @@
     <string name="screenshot_saved_title" msgid="8893267638659083153">"បានរក្សាទុក​រូបថតអេក្រង់"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"ចុច​ដើម្បីមើល​រូបថតអេក្រង់​របស់អ្នក"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"មិន​អាច​រក្សាទុក​រូបថត​អេក្រង់បានទេ"</string>
+    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"ត្រូវតែ​ដោះសោ​ឧបករណ៍​ជាមុនសិន ទើបអាច​រក្សាទុក​រូបថតអេក្រង់​បាន"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"សាកល្បង​ថតរូបថត​អេក្រង់​ម្តងទៀត"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"មិនអាច​រក្សាទុក​រូបថតអេក្រង់​បានទេ ​ដោយសារ​ទំហំផ្ទុក​មានកម្រិតទាប"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ការថត​រូបអេក្រង់​មិនត្រូវ​បាន​អនុញ្ញាត​ដោយ​កម្មវិធី​នេះ ឬ​ស្ថាប័ន​របស់អ្នក"</string>

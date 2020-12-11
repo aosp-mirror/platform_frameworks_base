@@ -248,7 +248,7 @@ public class ActivityDisplayTests extends WindowTestsBase {
         int topPosition = taskDisplayArea.getRootTaskCount() - 1;
         // Ensure the new alwaysOnTop stack is put below the pinned stack, but on top of the
         // existing alwaysOnTop stack.
-        assertEquals(anotherAlwaysOnTopStack, taskDisplayArea.getRootTaskAt(topPosition - 1));
+        assertEquals(topPosition - 1, taskDisplayArea.getIndexOf(anotherAlwaysOnTopStack));
 
         final Task nonAlwaysOnTopStack = taskDisplayArea.createRootTask(
                 WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD, true /* onTop */);
@@ -256,7 +256,7 @@ public class ActivityDisplayTests extends WindowTestsBase {
         topPosition = taskDisplayArea.getRootTaskCount() - 1;
         // Ensure the non-alwaysOnTop stack is put below the three alwaysOnTop stacks, but above the
         // existing other non-alwaysOnTop stacks.
-        assertEquals(nonAlwaysOnTopStack, taskDisplayArea.getRootTaskAt(topPosition - 3));
+        assertEquals(topPosition - 3, taskDisplayArea.getIndexOf(nonAlwaysOnTopStack));
 
         anotherAlwaysOnTopStack.setAlwaysOnTop(false);
         taskDisplayArea.positionChildAt(POSITION_TOP, anotherAlwaysOnTopStack,
@@ -264,16 +264,16 @@ public class ActivityDisplayTests extends WindowTestsBase {
         assertFalse(anotherAlwaysOnTopStack.isAlwaysOnTop());
         // Ensure, when always on top is turned off for a stack, the stack is put just below all
         // other always on top stacks.
-        assertEquals(anotherAlwaysOnTopStack, taskDisplayArea.getRootTaskAt(topPosition - 2));
+        assertEquals(topPosition - 2, taskDisplayArea.getIndexOf(anotherAlwaysOnTopStack));
         anotherAlwaysOnTopStack.setAlwaysOnTop(true);
 
         // Ensure always on top state changes properly when windowing mode changes.
         anotherAlwaysOnTopStack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         assertFalse(anotherAlwaysOnTopStack.isAlwaysOnTop());
-        assertEquals(anotherAlwaysOnTopStack, taskDisplayArea.getRootTaskAt(topPosition - 2));
+        assertEquals(topPosition - 2, taskDisplayArea.getIndexOf(anotherAlwaysOnTopStack));
         anotherAlwaysOnTopStack.setWindowingMode(WINDOWING_MODE_FREEFORM);
         assertTrue(anotherAlwaysOnTopStack.isAlwaysOnTop());
-        assertEquals(anotherAlwaysOnTopStack, taskDisplayArea.getRootTaskAt(topPosition - 1));
+        assertEquals(topPosition - 1, taskDisplayArea.getIndexOf(anotherAlwaysOnTopStack));
 
         final Task dreamStack = taskDisplayArea.createRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_DREAM, true /* onTop */);
@@ -282,7 +282,7 @@ public class ActivityDisplayTests extends WindowTestsBase {
         topPosition = taskDisplayArea.getRootTaskCount() - 1;
         // Ensure dream shows above all activities, including PiP
         assertEquals(dreamStack, taskDisplayArea.getTopRootTask());
-        assertEquals(pinnedStack, taskDisplayArea.getRootTaskAt(topPosition - 1));
+        assertEquals(topPosition - 1, taskDisplayArea.getIndexOf(pinnedStack));
 
         final Task assistStack = taskDisplayArea.createRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_ASSISTANT, true /* onTop */);
@@ -294,8 +294,8 @@ public class ActivityDisplayTests extends WindowTestsBase {
         // is false and on top of everything when true.
         final boolean isAssistantOnTop = mContext.getResources()
                 .getBoolean(com.android.internal.R.bool.config_assistantOnTopOfDream);
-        assertEquals(assistStack, taskDisplayArea.getRootTaskAt(
-                    isAssistantOnTop ? topPosition : topPosition - 4));
+        assertEquals(isAssistantOnTop ? topPosition : topPosition - 4,
+                taskDisplayArea.getIndexOf(assistStack));
     }
 
     @Test

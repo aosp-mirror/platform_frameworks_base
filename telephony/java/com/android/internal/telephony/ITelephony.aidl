@@ -37,6 +37,8 @@ import android.telephony.CellIdentity;
 import android.telephony.CellInfo;
 import android.telephony.ClientRequestStats;
 import android.telephony.ThermalMitigationRequest;
+import android.telephony.gba.UaSecurityProtocolIdentifier;
+import android.telephony.IBootstrapAuthenticationCallback;
 import android.telephony.IccOpenLogicalChannelResponse;
 import android.telephony.ICellInfoCallback;
 import android.telephony.ModemActivityInfo;
@@ -2282,4 +2284,31 @@ interface ITelephony {
      */
     int sendThermalMitigationRequest(int subId,
             in ThermalMitigationRequest thermalMitigationRequest);
+
+    /**
+     * get the Generic Bootstrapping Architecture authentication keys
+     */
+    void bootstrapAuthenticationRequest(int subId, int appType, in Uri nafUrl,
+            in UaSecurityProtocolIdentifier securityProtocol,
+            boolean forceBootStrapping, IBootstrapAuthenticationCallback callback);
+
+    /**
+     * Set the GbaService Package Name that Telephony will bind to.
+     */
+    boolean setBoundGbaServiceOverride(int subId, String packageName);
+
+    /**
+     * Return the package name of the currently bound GbaService.
+     */
+    String getBoundGbaService(int subId);
+
+    /**
+     * Set the release time for telephony to unbind GbaService.
+     */
+    boolean setGbaReleaseTimeOverride(int subId, int interval);
+
+    /**
+     * Return the release time for telephony to unbind GbaService.
+     */
+    int getGbaReleaseTime(int subId);
 }

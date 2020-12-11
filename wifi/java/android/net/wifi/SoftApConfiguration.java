@@ -538,15 +538,6 @@ public final class SoftApConfiguration implements Parcelable {
         if (!SdkLevel.isAtLeastS()) {
             throw new UnsupportedOperationException();
         }
-        return getChannelsInternal();
-    }
-
-    /**
-     * Internal version bypassing SdkLevel checks
-     * TODO(b/173791707): find a better way to allow Wifi to call its own new S APIs.
-     * @hide
-     */
-    public @NonNull SparseIntArray getChannelsInternal() {
         return mChannels.clone();
     }
 
@@ -945,6 +936,9 @@ public final class SoftApConfiguration implements Parcelable {
          */
         @NonNull
         public Builder setBands(@NonNull int[] bands) {
+            if (!SdkLevel.isAtLeastS()) {
+                throw new UnsupportedOperationException();
+            }
             if (bands.length == 0 || bands.length > 2) {
                 throw new IllegalArgumentException("Unsupported number of bands("
                         + bands.length + ") configured");
@@ -1036,6 +1030,9 @@ public final class SoftApConfiguration implements Parcelable {
          */
         @NonNull
         public Builder setChannels(@NonNull SparseIntArray channels) {
+            if (!SdkLevel.isAtLeastS()) {
+                throw new UnsupportedOperationException();
+            }
             if (channels.size() == 0 || channels.size() > 2) {
                 throw new IllegalArgumentException("Unsupported number of channels("
                         + channels.size() + ") configured");

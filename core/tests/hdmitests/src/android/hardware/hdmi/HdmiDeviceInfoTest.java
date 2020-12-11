@@ -37,6 +37,7 @@ public class HdmiDeviceInfoTest {
         int deviceType = 0;
         int vendorId = 0x123456;
         String displayName = "test device";
+        int cecVersion = HdmiControlManager.HDMI_CEC_VERSION_2_0;
         int powerStatus = HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY;
         int deviceId = 3;
         int adopterId = 2;
@@ -70,6 +71,16 @@ public class HdmiDeviceInfoTest {
                                 vendorId,
                                 displayName,
                                 powerStatus))
+                .addEqualityGroup(
+                        new HdmiDeviceInfo(
+                                logicalAddr,
+                                phyAddr,
+                                portId,
+                                deviceType,
+                                vendorId,
+                                displayName,
+                                powerStatus,
+                                cecVersion))
                 .testEquals();
     }
 }

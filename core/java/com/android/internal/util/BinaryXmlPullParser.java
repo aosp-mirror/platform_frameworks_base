@@ -414,29 +414,21 @@ public final class BinaryXmlPullParser implements TypedXmlPullParser {
         mAttributeCount = 0;
     }
 
-    /**
-     * Search through the pool of currently allocated {@link Attribute}
-     * instances for one that matches the given name.
-     */
-    private @NonNull Attribute findAttribute(@NonNull String name)
-            throws XmlPullParserException {
+    @Override
+    public int getAttributeIndex(String namespace, String name) {
+        if (namespace != null && !namespace.isEmpty()) throw illegalNamespace();
         for (int i = 0; i < mAttributeCount; i++) {
             if (Objects.equals(mAttributes[i].name, name)) {
-                return mAttributes[i];
+                return i;
             }
         }
-        throw new XmlPullParserException("Missing attribute " + name);
+        return -1;
     }
 
     @Override
     public String getAttributeValue(String namespace, String name) {
-        if (namespace != null && !namespace.isEmpty()) throw illegalNamespace();
-        try {
-            return findAttribute(name).getValueString();
-        } catch (XmlPullParserException e) {
-            // Missing attributes default to null
-            return null;
-        }
+        final int index = getAttributeIndex(namespace, name);
+        return mAttributes[index].getValueString();
     }
 
     @Override
@@ -445,66 +437,48 @@ public final class BinaryXmlPullParser implements TypedXmlPullParser {
     }
 
     @Override
-    public byte[] getAttributeBytesHex(String namespace, String name)
-            throws XmlPullParserException {
-        if (namespace != null && !namespace.isEmpty()) throw illegalNamespace();
-        return findAttribute(name).getValueBytesHex();
+    public byte[] getAttributeBytesHex(int index) throws XmlPullParserException {
+        return mAttributes[index].getValueBytesHex();
     }
 
     @Override
-    public byte[] getAttributeBytesBase64(String namespace, String name)
-            throws XmlPullParserException {
-        if (namespace != null && !namespace.isEmpty()) throw illegalNamespace();
-        return findAttribute(name).getValueBytesBase64();
+    public byte[] getAttributeBytesBase64(int index) throws XmlPullParserException {
+        return mAttributes[index].getValueBytesBase64();
     }
 
     @Override
-    public int getAttributeInt(String namespace, String name)
-            throws XmlPullParserException {
-        if (namespace != null && !namespace.isEmpty()) throw illegalNamespace();
-        return findAttribute(name).getValueInt();
+    public int getAttributeInt(int index) throws XmlPullParserException {
+        return mAttributes[index].getValueInt();
     }
 
     @Override
-    public int getAttributeIntHex(String namespace, String name)
-            throws XmlPullParserException {
-        if (namespace != null && !namespace.isEmpty()) throw illegalNamespace();
-        return findAttribute(name).getValueIntHex();
+    public int getAttributeIntHex(int index) throws XmlPullParserException {
+        return mAttributes[index].getValueIntHex();
     }
 
     @Override
-    public long getAttributeLong(String namespace, String name)
-            throws XmlPullParserException {
-        if (namespace != null && !namespace.isEmpty()) throw illegalNamespace();
-        return findAttribute(name).getValueLong();
+    public long getAttributeLong(int index) throws XmlPullParserException {
+        return mAttributes[index].getValueLong();
     }
 
     @Override
-    public long getAttributeLongHex(String namespace, String name)
-            throws XmlPullParserException {
-        if (namespace != null && !namespace.isEmpty()) throw illegalNamespace();
-        return findAttribute(name).getValueLongHex();
+    public long getAttributeLongHex(int index) throws XmlPullParserException {
+        return mAttributes[index].getValueLongHex();
     }
 
     @Override
-    public float getAttributeFloat(String namespace, String name)
-            throws XmlPullParserException {
-        if (namespace != null && !namespace.isEmpty()) throw illegalNamespace();
-        return findAttribute(name).getValueFloat();
+    public float getAttributeFloat(int index) throws XmlPullParserException {
+        return mAttributes[index].getValueFloat();
     }
 
     @Override
-    public double getAttributeDouble(String namespace, String name)
-            throws XmlPullParserException {
-        if (namespace != null && !namespace.isEmpty()) throw illegalNamespace();
-        return findAttribute(name).getValueDouble();
+    public double getAttributeDouble(int index) throws XmlPullParserException {
+        return mAttributes[index].getValueDouble();
     }
 
     @Override
-    public boolean getAttributeBoolean(String namespace, String name)
-            throws XmlPullParserException {
-        if (namespace != null && !namespace.isEmpty()) throw illegalNamespace();
-        return findAttribute(name).getValueBoolean();
+    public boolean getAttributeBoolean(int index) throws XmlPullParserException {
+        return mAttributes[index].getValueBoolean();
     }
 
     @Override

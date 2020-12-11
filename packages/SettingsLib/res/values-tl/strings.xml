@@ -28,7 +28,7 @@
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"Pagkabigo ng Configuration ng IP"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Hindi nakakonekta dahil mababa ang kalidad ng network"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Pagkabigo ng Koneksyon sa WiFi"</string>
-    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Problema sa pagpapatotoo"</string>
+    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Problema sa pag-authenticate"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Hindi makakonekta"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"Hindi makakonekta sa \'<xliff:g id="AP_NAME">%1$s</xliff:g>\'"</string>
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Suriin ang password at subukang muli"</string>
@@ -400,7 +400,9 @@
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"Aktibo. I-tap upang i-toggle."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Status ng app standby:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="transcode_settings_title" msgid="2581975870429850549">"Mga setting ng pag-transcode ng media"</string>
-    <string name="transcode_enable_all" msgid="9102460144086871903">"I-disable ang pag-transcode"</string>
+    <string name="transcode_user_control" msgid="6176368544817731314">"I-override ang mga default ng pagta-transcode"</string>
+    <string name="transcode_enable_all" msgid="2411165920039166710">"I-enable ang pagta-transcode"</string>
+    <string name="transcode_default" msgid="3784803084573509491">"Ipagpalagay na sinusuportahan ng mga app ang mga modernong format"</string>
     <string name="transcode_skip_apps" msgid="8249721984597390142">"I-enable ang pag-transcode para sa mga app"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Mga tumatakbong serbisyo"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Tingnan at kontrolin ang mga kasalukuyang tumatakbong serbisyo"</string>
@@ -449,7 +451,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> ang natitira bago matapos mag-charge"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> hanggang matapos mag-charge"</string>
-    <string name="power_charging_limited" msgid="5902301801611726210">"<xliff:g id="LEVEL">%1$s</xliff:g> - Pansamantalang limitado ang baterya"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - Ino-optimize para sa tagal ng baterya"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Hindi Kilala"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Nagcha-charge"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Mabilis na charge"</string>

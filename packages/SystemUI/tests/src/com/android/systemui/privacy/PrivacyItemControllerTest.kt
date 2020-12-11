@@ -343,6 +343,83 @@ class PrivacyItemControllerTest : SysuiTestCase() {
         assertTrue(values[values.size - 1].contains(expected.toLog()))
     }
 
+    @Test
+    fun testListRequestedForAllUsers() {
+        privacyItemController.addCallback(callback)
+        executor.runAllReady()
+        verify(appOpsController).getActiveAppOpsForUser(UserHandle.USER_ALL)
+    }
+
+    @Test
+    fun testListFilterCurrentUser() {
+        val otherUser = CURRENT_USER_ID + 1
+        val otherUserUid = otherUser * UserHandle.PER_USER_RANGE
+        `when`(userTracker.userProfiles).thenReturn(listOf(UserInfo(otherUser, "", 0)))
+
+        doReturn(listOf(
+                AppOpItem(AppOpsManager.OP_COARSE_LOCATION, TEST_UID, TEST_PACKAGE_NAME, 0),
+                AppOpItem(AppOpsManager.OP_CAMERA, otherUserUid, TEST_PACKAGE_NAME, 0))
+        ).`when`(appOpsController).getActiveAppOpsForUser(anyInt())
+
+        privacyItemController.userTrackerCallback.onUserChanged(otherUser, mContext)
+        executor.runAllReady()
+
+        privacyItemController.addCallback(callback)
+        executor.runAllReady()
+
+        verify(callback).onPrivacyItemsChanged(capture(argCaptor))
+
+        assertEquals(1, argCaptor.value.size)
+        assertEquals(PrivacyType.TYPE_CAMERA, argCaptor.value[0].privacyType)
+        assertEquals(otherUserUid, argCaptor.value[0].application.uid)
+    }
+
+    @Test
+    fun testAlwaysGetPhoneCameraOps() {
+        val otherUser = CURRENT_USER_ID + 1
+        `when`(userTracker.userProfiles).thenReturn(listOf(UserInfo(otherUser, "", 0)))
+
+        doReturn(listOf(
+                AppOpItem(AppOpsManager.OP_COARSE_LOCATION, TEST_UID, TEST_PACKAGE_NAME, 0),
+                AppOpItem(AppOpsManager.OP_RECORD_AUDIO, TEST_UID, TEST_PACKAGE_NAME, 0),
+                AppOpItem(AppOpsManager.OP_PHONE_CALL_CAMERA, TEST_UID, TEST_PACKAGE_NAME, 0))
+        ).`when`(appOpsController).getActiveAppOpsForUser(anyInt())
+
+        privacyItemController.userTrackerCallback.onUserChanged(otherUser, mContext)
+        executor.runAllReady()
+
+        privacyItemController.addCallback(callback)
+        executor.runAllReady()
+
+        verify(callback).onPrivacyItemsChanged(capture(argCaptor))
+
+        assertEquals(1, argCaptor.value.size)
+        assertEquals(PrivacyType.TYPE_CAMERA, argCaptor.value[0].privacyType)
+    }
+
+    @Test
+    fun testAlwaysGetPhoneMicOps() {
+        val otherUser = CURRENT_USER_ID + 1
+        `when`(userTracker.userProfiles).thenReturn(listOf(UserInfo(otherUser, "", 0)))
+
+        doReturn(listOf(
+                AppOpItem(AppOpsManager.OP_COARSE_LOCATION, TEST_UID, TEST_PACKAGE_NAME, 0),
+                AppOpItem(AppOpsManager.OP_CAMERA, TEST_UID, TEST_PACKAGE_NAME, 0),
+                AppOpItem(AppOpsManager.OP_PHONE_CALL_MICROPHONE, TEST_UID, TEST_PACKAGE_NAME, 0))
+        ).`when`(appOpsController).getActiveAppOpsForUser(anyInt())
+
+        privacyItemController.userTrackerCallback.onUserChanged(otherUser, mContext)
+        executor.runAllReady()
+
+        privacyItemController.addCallback(callback)
+        executor.runAllReady()
+
+        verify(callback).onPrivacyItemsChanged(capture(argCaptor))
+
+        assertEquals(1, argCaptor.value.size)
+        assertEquals(PrivacyType.TYPE_MICROPHONE, argCaptor.value[0].privacyType)
+    }
+
     private fun changeMicCamera(value: Boolean?) = changeProperty(MIC_CAMERA, value)
     private fun changeAll(value: Boolean?) = changeProperty(ALL_INDICATORS, value)
 

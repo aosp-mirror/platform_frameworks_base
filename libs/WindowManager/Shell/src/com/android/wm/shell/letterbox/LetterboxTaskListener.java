@@ -164,8 +164,6 @@ public class LetterboxTaskListener implements ShellTaskOrganizer.TaskListener {
             switch (gravity) {
                 case Gravity.TOP:
                     positionInParent.y += taskBoundsWithInsets.top - activityBoundsWithInsets.top;
-                    // Showing status bar decor view.
-                    crop.top -= activityBoundsWithInsets.top - activityBounds.top;
                     break;
                 case Gravity.CENTER:
                     positionInParent.y +=
@@ -187,8 +185,6 @@ public class LetterboxTaskListener implements ShellTaskOrganizer.TaskListener {
             final int gravity = mLetterboxConfigController.getLandscapeGravity();
             // Align activity to the top.
             positionInParent.y += taskBoundsWithInsets.top - activityBoundsWithInsets.top;
-            // Showing status bar decor view.
-            crop.top -= activityBoundsWithInsets.top - activityBounds.top;
             switch (gravity) {
                 case Gravity.LEFT:
                     positionInParent.x += taskBoundsWithInsets.left - activityBoundsWithInsets.left;
@@ -208,6 +204,53 @@ public class LetterboxTaskListener implements ShellTaskOrganizer.TaskListener {
                             "Unexpected landscape gravity " + gravity
                             + " for task: #" + taskInfo.taskId);
             }
+        }
+
+        // New bounds of the activity after it's repositioned with required gravity.
+        Rect newActivityBounds = new Rect(activityBounds);
+        // Task's surfce will be repositioned to positionInParent together with the activity
+        // inside it so the new activity bounds are the original activity bounds offset by
+        // the task's offset.
+        newActivityBounds.offset(
+                positionInParent.x - taskBounds.left, positionInParent.y - taskBounds.top);
+        Rect newActivityBoundsWithInsets = new Rect(newActivityBounds);
+        newActivityBoundsWithInsets.intersect(displayBoundsWithInsets);
+        // Activity handles insets on its own (e.g. under status bar or navigation bar).
+        // crop that is calculated above crops all insets from an activity and below insets that
+        // can be shown are added back to the crop bounds  (e.g. if activity is still shown at the
+        // top of the display then the top inset won't be cropped).
+        // After task's surface is repositioned, intersection between an activity and insets can
+        // change but if it doesn't, the activity should be shown under insets to maximize visible
+        // area.
+        // Also, an activity can use area under insets and insets shouldn't be cropped in this case
+        // regardless of a position on the screen.
+        final Rect activityInsetsFromCore = taskInfo.letterboxActivityInsets;
+        if (newActivityBounds.top - newActivityBoundsWithInsets.top
+                == activityBounds.top - activityBoundsWithInsets.top
+                // Check whether an activity is shown under inset. If it is, then the inset from
+                // WM Core and the inset computed here will be different because local insets
+                // doesn't take into account visibility of insets requested by the activity.
+                ||  activityBoundsWithInsets.top - activityBounds.top
+                        != activityInsetsFromCore.top) {
+            crop.top -= activityBoundsWithInsets.top - activityBounds.top;
+        }
+        if (newActivityBounds.bottom - newActivityBoundsWithInsets.bottom
+                == activityBounds.bottom - activityBoundsWithInsets.bottom
+                || activityBounds.bottom - activityBoundsWithInsets.bottom
+                        != activityInsetsFromCore.bottom) {
+            crop.bottom += activityBounds.bottom - activityBoundsWithInsets.bottom;
+        }
+        if (newActivityBounds.left - newActivityBoundsWithInsets.left
+                == activityBounds.left - activityBoundsWithInsets.left
+                || activityBoundsWithInsets.left - activityBounds.left
+                        != activityInsetsFromCore.left) {
+            crop.left -= activityBoundsWithInsets.left - activityBounds.left;
+        }
+        if (newActivityBounds.right - newActivityBoundsWithInsets.right
+                == activityBounds.right - activityBoundsWithInsets.right
+                || activityBounds.right - activityBoundsWithInsets.right
+                        != activityInsetsFromCore.right) {
+            crop.right += activityBounds.right - activityBoundsWithInsets.right;
         }
     }
 

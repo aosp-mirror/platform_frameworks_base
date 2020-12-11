@@ -624,6 +624,20 @@ public class Annotation {
     public @interface UiccAppType{}
 
     /**
+     * UICC SIM Application Types including UNKNOWN
+     */
+    @IntDef(prefix = { "APPTYPE_" }, value = {
+            TelephonyManager.APPTYPE_UNKNOWN,
+            TelephonyManager.APPTYPE_SIM,
+            TelephonyManager.APPTYPE_USIM,
+            TelephonyManager.APPTYPE_RUIM,
+            TelephonyManager.APPTYPE_CSIM,
+            TelephonyManager.APPTYPE_ISIM
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface UiccAppTypeExt{}
+
+    /**
      * Override network type
      */
     @Retention(RetentionPolicy.SOURCE)

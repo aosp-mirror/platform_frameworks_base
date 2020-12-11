@@ -50,6 +50,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.UserInfo;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Color;
@@ -256,6 +257,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private UserContextProvider mUserContextProvider;
     @VisibleForTesting
     boolean mShowLockScreenCardsAndControls = false;
+    private int mSmallestScreenWidthDp;
 
     @VisibleForTesting
     public enum GlobalActionsEvent implements UiEventLogger.UiEventEnum {
@@ -344,6 +346,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mSysUiState = sysUiState;
         mMainHandler = handler;
         mUserContextProvider = userContextProvider;
+        mSmallestScreenWidthDp = mContext.getResources().getConfiguration().smallestScreenWidthDp;
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -756,6 +759,15 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     public void onUiModeChanged() {
         mContext.getTheme().applyStyle(mContext.getThemeResId(), true);
         if (mDialog != null && mDialog.isShowing()) {
+            mDialog.refreshDialog();
+        }
+    }
+
+    @Override
+    public void onConfigChanged(Configuration newConfig) {
+        if (mDialog != null && mDialog.isShowing()
+                && (newConfig.smallestScreenWidthDp != mSmallestScreenWidthDp)) {
+            mSmallestScreenWidthDp = newConfig.smallestScreenWidthDp;
             mDialog.refreshDialog();
         }
     }
@@ -2230,6 +2242,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 return;
             }
 
+            boolean isLandscapeWalletViewShown = mContext.getResources().getBoolean(
+                    com.android.systemui.R.bool.global_actions_show_landscape_wallet_view);
+
             int rotation = RotationUtils.getRotation(mContext);
             boolean rotationLocked = RotationPolicy.isRotationLocked(mContext);
             if (rotation != RotationUtils.ROTATION_NONE) {
@@ -2246,6 +2261,10 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     mGlobalActionsLayout.post(() ->
                             RotationPolicy.setRotationLockAtAngle(
                                     mContext, false, RotationUtils.ROTATION_NONE));
+
+                    if (!isLandscapeWalletViewShown) {
+                        return;
+                    }
                 }
             } else {
                 if (!rotationLocked) {
@@ -2253,44 +2272,48 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                         mResetOrientationData = new ResetOrientationData();
                         mResetOrientationData.locked = false;
                     }
+                }
 
-                    // Lock to portrait, so the user doesn't accidentally hide the panel.
+                boolean shouldLockRotation = !isLandscapeWalletViewShown;
+                if (rotationLocked != shouldLockRotation) {
+                    // Locks the screen to portrait if the landscape / seascape orientation does not
+                    // show the wallet view, so the user doesn't accidentally hide the panel.
                     // This call is posted so that the rotation does not change until post-layout,
                     // otherwise onConfigurationChanged() may not get invoked.
                     mGlobalActionsLayout.post(() ->
                             RotationPolicy.setRotationLockAtAngle(
-                                    mContext, true, RotationUtils.ROTATION_NONE));
+                            mContext, shouldLockRotation, RotationUtils.ROTATION_NONE));
                 }
+            }
 
-                // Disable rotation suggestions, if enabled
-                setRotationSuggestionsEnabled(false);
+            // Disable rotation suggestions, if enabled
+            setRotationSuggestionsEnabled(false);
 
-                FrameLayout panelContainer =
-                        findViewById(com.android.systemui.R.id.global_actions_wallet);
-                FrameLayout.LayoutParams panelParams =
-                        new FrameLayout.LayoutParams(
-                                FrameLayout.LayoutParams.MATCH_PARENT,
-                                FrameLayout.LayoutParams.MATCH_PARENT);
-                if (!mControlsAvailable) {
-                    panelParams.topMargin = mContext.getResources().getDimensionPixelSize(
-                            com.android.systemui.R.dimen.global_actions_wallet_top_margin);
-                }
-                View walletView = mWalletViewController.getPanelContent();
-                panelContainer.addView(walletView, panelParams);
-                // Smooth transitions when wallet is resized, which can happen when a card is added
-                ViewGroup root = findViewById(com.android.systemui.R.id.global_actions_grid_root);
-                if (root != null) {
-                    walletView.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
-                        int oldHeight = ob - ot;
-                        int newHeight = b - t;
-                        if (oldHeight > 0 && oldHeight != newHeight) {
-                            TransitionSet transition = new AutoTransition()
-                                    .setDuration(250)
-                                    .setOrdering(TransitionSet.ORDERING_TOGETHER);
-                            TransitionManager.beginDelayedTransition(root, transition);
-                        }
-                    });
-                }
+            FrameLayout panelContainer =
+                    findViewById(com.android.systemui.R.id.global_actions_wallet);
+            FrameLayout.LayoutParams panelParams =
+                    new FrameLayout.LayoutParams(
+                            FrameLayout.LayoutParams.MATCH_PARENT,
+                            FrameLayout.LayoutParams.MATCH_PARENT);
+            if (!mControlsAvailable) {
+                panelParams.topMargin = mContext.getResources().getDimensionPixelSize(
+                        com.android.systemui.R.dimen.global_actions_wallet_top_margin);
+            }
+            View walletView = mWalletViewController.getPanelContent();
+            panelContainer.addView(walletView, panelParams);
+            // Smooth transitions when wallet is resized, which can happen when a card is added
+            ViewGroup root = findViewById(com.android.systemui.R.id.global_actions_grid_root);
+            if (root != null) {
+                walletView.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
+                    int oldHeight = ob - ot;
+                    int newHeight = b - t;
+                    if (oldHeight > 0 && oldHeight != newHeight) {
+                        TransitionSet transition = new AutoTransition()
+                                .setDuration(250)
+                                .setOrdering(TransitionSet.ORDERING_TOGETHER);
+                        TransitionManager.beginDelayedTransition(root, transition);
+                    }
+                });
             }
         }
 

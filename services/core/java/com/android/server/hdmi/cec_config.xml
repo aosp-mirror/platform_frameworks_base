@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<cec-settings>
+  <setting name="hdmi_cec_enabled"
+           value-type="int"
+           user-configurable="true">
+    <allowed-values>
+      <value int-value="0" />
+      <value int-value="1" />
+    </allowed-values>
+    <default-value int-value="1" />
+  </setting>
+  <setting name="hdmi_cec_version"
+           value-type="int"
+           user-configurable="true">
+    <allowed-values>
+      <value int-value="0x05" />
+      <value int-value="0x06" />
+    </allowed-values>
+    <default-value int-value="0x05" />
+  </setting>
+  <setting name="send_standby_on_sleep"
+           value-type="string"
+           user-configurable="true">
+    <allowed-values>
+      <value string-value="to_tv" />
+      <value string-value="broadcast" />
+      <value string-value="none" />
+    </allowed-values>
+    <default-value string-value="to_tv" />
+  </setting>
+  <setting name="power_state_change_on_active_source_lost"
+           value-type="string"
+           user-configurable="true">
+    <allowed-values>
+      <value string-value="none" />
+      <value string-value="standby_now" />
+    </allowed-values>
+    <default-value string-value="none" />
+  </setting>
+  <setting name="system_audio_mode_muting"
+           value-type="int"
+           user-configurable="true">
+    <allowed-values>
+      <value int-value="0" />
+      <value int-value="1" />
+    </allowed-values>
+    <default-value int-value="1" />
+  </setting>
+</cec-settings>

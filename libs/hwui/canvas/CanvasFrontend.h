@@ -57,9 +57,7 @@ protected:
     }
 
     bool internalSave(SaveEntry saveEntry);
-    bool internalSave(SaveFlags::Flags flags) {
-        return internalSave(flagsToSaveEntry(flags));
-    }
+
     void internalSaveLayer(const SkCanvas::SaveLayerRec& layerRec) {
         internalSave({
             .clip = true,
@@ -89,6 +87,8 @@ protected:
     SkConservativeClip& clip() {
         return mClipStack[mCurrentClipIndex];
     }
+
+    void resetState(int width, int height);
 
 public:
     int saveCount() const { return mSaveStack.size(); }
@@ -186,14 +186,26 @@ public:
         submit(std::move(op));
     }
 
-    const CanvasOpReceiver& receiver() const { return mReceiver; }
+    const CanvasOpReceiver& receiver() const { return *mReceiver; }
+
+    CanvasOpReceiver finish() {
+        auto ret = std::move(mReceiver.value());
+        mReceiver.reset();
+        return std::move(ret);
+    }
+
+    template<class... Args>
+    void reset(int newWidth, int newHeight, Args&&... args) {
+        resetState(newWidth, newHeight);
+        mReceiver.emplace(std::forward<Args>(args)...);
+    }
 
 private:
-    CanvasOpReceiver mReceiver;
+    std::optional<CanvasOpReceiver> mReceiver;
 
     template <CanvasOpType T>
     void submit(CanvasOp<T>&& op) {
-        mReceiver.push_container(CanvasOpContainer(std::move(op), transform()));
+        mReceiver->push_container(CanvasOpContainer(std::move(op), transform()));
     }
 };
 

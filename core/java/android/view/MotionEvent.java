@@ -477,6 +477,14 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public static final int FLAG_IS_GENERATED_GESTURE = 0x8;
 
     /**
+     * This flag associated with {@link #ACTION_POINTER_UP}, this indicates that the pointer
+     * has been canceled. Typically this is used for palm event when the user has accidental
+     * touches.
+     * @hide
+     */
+    public static final int FLAG_CANCELED = 0x20;
+
+    /**
      * Private flag that indicates when the system has detected that this motion event
      * may be inconsistent with respect to the sequence of previously delivered motion events,
      * such as when a pointer move event is sent but the pointer is not down.
@@ -3477,7 +3485,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
                 } else if (newPointerCount == 1) {
                     // The first/last pointer went down/up.
                     newAction = oldActionMasked == ACTION_POINTER_DOWN
-                            ? ACTION_DOWN : ACTION_UP;
+                            ? ACTION_DOWN
+                            : (getFlags() & FLAG_CANCELED) == 0 ? ACTION_UP : ACTION_CANCEL;
                 } else {
                     // A secondary pointer went down/up.
                     newAction = oldActionMasked

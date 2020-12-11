@@ -108,7 +108,6 @@ import android.os.storage.StorageManagerInternal;
 import android.os.storage.StorageVolume;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
-import android.provider.DeviceConfig;
 import android.provider.DocumentsContract;
 import android.provider.Downloads;
 import android.provider.MediaStore;
@@ -205,27 +204,6 @@ class StorageManagerService extends IStorageManager.Stub
     // A system property to control if obb app data isolation is enabled in vold.
     private static final String ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY =
             "persist.sys.vold_app_data_isolation_enabled";
-
-    // TODO(b/169327180): Will be fetched from the server, but for now, we emulate this in
-    // the system_server since it can write to DeviceConfig and MediaProvider can read it
-    private static final String PROP_TRANSCODE_ENABLED = "transcode_enabled";
-    private static final String PROP_TRANSCODE_DEFAULT = "transcode_default";
-    private static final String PROP_TRANSCODE_COMPAT_MANIFEST = "transcode_compat_manifest";
-    private static final boolean TRANSCODE_ENABLED_VALUE = false;
-    // Determines the default behavior of apps when transcode is enabled, AKA, Option A/Option B.
-    // If true, transcode by default (Option B). If false, don't transcode by default (Option A)
-    // For dogfood, we go with Option B
-    private static final boolean TRANSCODE_DEFAULT_VALUE = true;
-    // Format is <package_name>,<media_capability_bit_mask>,...
-    // media_capability_bit_mask is defined in MediaProvider/../TranscodeHelper.java:
-    // FLAG_HEVC = 1 << 0;
-    // FLAG_SLOW_MOTION = 1 << 1;
-    // FLAG_HDR_10 = 1 << 2;
-    // FLAG_HDR_10_PLUS = 1 << 3;
-    // FLAG_HDR_HLG = 1 << 4;
-    // FLAG_HDR_DOLBY_VISION = 1 << 5;
-    private static final String TRANSCODE_COMPAT_MANIFEST_VALUE =
-            "com.google.android.apps.photos,1";
 
     // How long we wait to reset storage, if we failed to call onMount on the
     // external storage service.
@@ -901,18 +879,6 @@ class StorageManagerService extends IStorageManager.Stub
                     com.android.internal.R.bool.config_zramWriteback)) {
             ZramWriteback.scheduleZramWriteback(mContext);
         }
-
-        // TODO(b/169327180): Remove after setting up server-side DeviceConfig flags
-        // Set DeviceConfig values for transcoding that will be read by MediaProvider
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
-                PROP_TRANSCODE_ENABLED, String.valueOf(TRANSCODE_ENABLED_VALUE),
-                false /* makeDefault */);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
-                PROP_TRANSCODE_DEFAULT, String.valueOf(TRANSCODE_DEFAULT_VALUE),
-                false /* makeDefault */);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
-                PROP_TRANSCODE_COMPAT_MANIFEST, TRANSCODE_COMPAT_MANIFEST_VALUE,
-                false /* makeDefault */);
     }
 
     /**

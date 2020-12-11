@@ -3041,6 +3041,37 @@ public class WifiManager {
     }
 
     /**
+     * Restart the Wi-Fi subsystem.
+     *
+     * Restarts the Wi-Fi subsystem - effectively disabling it and re-enabling it. All existing
+     * Access Point (AP) associations are torn down, all Soft APs are disabled, Wi-Fi Direct and
+     * Wi-Fi Aware are disabled.
+     *
+     * The state of the system after restart is not guaranteed to match its state before the API is
+     * called - for instance the device may associate to a different Access Point (AP), and tethered
+     * hotspots may or may not be restored.
+     *
+     * @param reason If non-null, requests a bug report and attaches the reason string to it. A bug
+     *               report may still not be generated based on framework criteria - for instance,
+     *               build type or throttling. The WiFi subsystem is restarted whether or not a bug
+     *               report is requested or generated.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_AIRPLANE_MODE)
+    public void restartWifiSubsystem(@Nullable String reason) {
+        if (!SdkLevel.isAtLeastS()) {
+            throw new UnsupportedOperationException();
+        }
+        try {
+            mService.restartWifiSubsystem(reason);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Gets the Wi-Fi enabled state.
      * @return One of {@link #WIFI_STATE_DISABLED},
      *         {@link #WIFI_STATE_DISABLING}, {@link #WIFI_STATE_ENABLED},
@@ -3985,9 +4016,32 @@ public class WifiManager {
         /**
          * Called when information of softap changes.
          *
+         * Note: this API is only valid when the Soft AP is configured as a single AP
+         * - not as a bridged AP (2 Soft APs). When the Soft AP is configured as bridged AP
+         * this callback will not be triggered -  use the
+         * {@link #onInfoListChanged(List<SoftApInfo>)} callback in bridged AP mode.
+         *
          * @param softApInfo is the softap information. {@link SoftApInfo}
          */
         default void onInfoChanged(@NonNull SoftApInfo softApInfo) {
+            // Do nothing: can be updated to add SoftApInfo details (e.g. channel) to the UI.
+        }
+
+        /**
+         * Called when information of softap changes.
+         *
+         * The number of the information elements in the list depends on Soft AP configuration
+         * and state.
+         * For instance, an empty list will be returned when the Soft AP is disabled.
+         * One information element will be returned in the list when the Soft AP is configured
+         * as a single AP, and two information elements will be returned in the list
+         * when the Soft AP is configured in bridged mode.
+         *
+         * See {@link #isBridgedApConcurrencySupported()} for the detail of the bridged AP.
+         *
+         * @param softApInfoList is the list of the softap information elements. {@link SoftApInfo}
+         */
+        default void onInfoListChanged(@NonNull List<SoftApInfo> softApInfoList) {
             // Do nothing: can be updated to add SoftApInfo details (e.g. channel) to the UI.
         }
 
@@ -4067,6 +4121,19 @@ public class WifiManager {
             Binder.clearCallingIdentity();
             mExecutor.execute(() -> {
                 mCallback.onInfoChanged(softApInfo);
+            });
+        }
+
+        @Override
+        public void onInfoListChanged(List<SoftApInfo> softApInfoList) {
+            if (mVerboseLoggingEnabled) {
+                Log.v(TAG, "SoftApCallbackProxy: onInfoListChange: softApInfoList="
+                        + softApInfoList);
+            }
+
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> {
+                mCallback.onInfoListChanged(softApInfoList);
             });
         }
 

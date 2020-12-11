@@ -55,6 +55,9 @@ public class DoubleTapClassifierTest extends ClassifierTest {
     private SingleTapClassifier mSingleTapClassifier;
     private DoubleTapClassifier mClassifier;
 
+    private final FalsingClassifier.Result mFalsedResult = FalsingClassifier.Result.falsed(1, "");
+    private final FalsingClassifier.Result mPassedResult = FalsingClassifier.Result.passed(1);
+
     @Before
     public void setup() {
         super.setup();
@@ -77,17 +80,17 @@ public class DoubleTapClassifierTest extends ClassifierTest {
 
     @Test
     public void testSingleTap() {
-        when(mSingleTapClassifier.isTap(anyList())).thenReturn(true);
+        when(mSingleTapClassifier.isTap(anyList())).thenReturn(mFalsedResult);
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, TOUCH_SLOP, 1);
 
-        boolean result = mClassifier.isFalseTouch();
+        boolean result = mClassifier.classifyGesture().isFalse();
         assertThat("Single tap recognized as a valid double tap", result,  is(true));
     }
 
     @Test
     public void testDoubleTap() {
-        when(mSingleTapClassifier.isTap(anyList())).thenReturn(true);
+        when(mSingleTapClassifier.isTap(anyList())).thenReturn(mPassedResult);
 
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, 1, 1);
@@ -97,13 +100,13 @@ public class DoubleTapClassifierTest extends ClassifierTest {
         addMotionEvent(2, 2, MotionEvent.ACTION_DOWN, TOUCH_SLOP, TOUCH_SLOP);
         addMotionEvent(2, 3, MotionEvent.ACTION_UP, TOUCH_SLOP, TOUCH_SLOP);
 
-        boolean result = mClassifier.isFalseTouch();
-        assertThat(mClassifier.getReason(), result, is(false));
+        FalsingClassifier.Result result = mClassifier.classifyGesture();
+        assertThat(result.getReason(), result.isFalse(), is(false));
     }
 
     @Test
     public void testBadFirstTap() {
-        when(mSingleTapClassifier.isTap(anyList())).thenReturn(false, true);
+        when(mSingleTapClassifier.isTap(anyList())).thenReturn(mPassedResult, mFalsedResult);
 
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, 1, 1);
@@ -113,13 +116,13 @@ public class DoubleTapClassifierTest extends ClassifierTest {
         addMotionEvent(2, 2, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(2, 3, MotionEvent.ACTION_UP, 1, 1);
 
-        boolean result = mClassifier.isFalseTouch();
+        boolean result = mClassifier.classifyGesture().isFalse();
         assertThat("Bad first touch allowed", result, is(true));
     }
 
     @Test
     public void testBadSecondTap() {
-        when(mSingleTapClassifier.isTap(anyList())).thenReturn(true, false);
+        when(mSingleTapClassifier.isTap(anyList())).thenReturn(mFalsedResult, mPassedResult);
 
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, 1, 1);
@@ -129,13 +132,13 @@ public class DoubleTapClassifierTest extends ClassifierTest {
         addMotionEvent(2, 2, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(2, 3, MotionEvent.ACTION_UP, 1, 1);
 
-        boolean result = mClassifier.isFalseTouch();
+        boolean result = mClassifier.classifyGesture().isFalse();
         assertThat("Bad second touch allowed", result, is(true));
     }
 
     @Test
     public void testBadTouchSlop() {
-        when(mSingleTapClassifier.isTap(anyList())).thenReturn(true);
+        when(mSingleTapClassifier.isTap(anyList())).thenReturn(mFalsedResult);
 
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, 1, 1);
@@ -145,13 +148,13 @@ public class DoubleTapClassifierTest extends ClassifierTest {
         addMotionEvent(2, 2, MotionEvent.ACTION_DOWN, TOUCH_SLOP + 1, TOUCH_SLOP);
         addMotionEvent(2, 3, MotionEvent.ACTION_UP, TOUCH_SLOP, TOUCH_SLOP + 1);
 
-        boolean result = mClassifier.isFalseTouch();
+        boolean result = mClassifier.classifyGesture().isFalse();
         assertThat("Sloppy second touch allowed", result, is(true));
     }
 
     @Test
     public void testBadTouchSlow() {
-        when(mSingleTapClassifier.isTap(anyList())).thenReturn(true);
+        when(mSingleTapClassifier.isTap(anyList())).thenReturn(mFalsedResult);
 
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, 1, 1);
@@ -163,7 +166,7 @@ public class DoubleTapClassifierTest extends ClassifierTest {
         addMotionEvent(DOUBLE_TAP_TIMEOUT_MS + 1, DOUBLE_TAP_TIMEOUT_MS + 2,
                 MotionEvent.ACTION_UP, 1, 1);
 
-        boolean result = mClassifier.isFalseTouch();
+        boolean result = mClassifier.classifyGesture().isFalse();
         assertThat("Slow second tap allowed", result, is(true));
     }
 

@@ -83,6 +83,7 @@
     <string name="screenshot_saved_title" msgid="8893267638659083153">"স্ক্ৰীণশ্বট ছেভ কৰা হ’ল"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"আপোনাৰ স্ক্ৰীণশ্বট চাবলৈ টিপক"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"স্ক্ৰীণশ্বট ছেভ কৰিব পৰা নগ\'ল"</string>
+    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"স্ক্ৰীনশ্বট ছেভ কৰিবলৈ ডিভাইচটো আনলক কৰিবই লাগিব"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"স্ক্ৰীণশ্বট আকৌ ল\'বলৈ চেষ্টা কৰক"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"সঞ্চয়াগাৰত সীমিত খালী ঠাই থকাৰ বাবে স্ক্ৰীণশ্বট ছেভ কৰিব পৰা নগ\'ল"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"এপটোৱে বা আপোনাৰ প্ৰতিষ্ঠানে স্ক্ৰীণশ্বট ল\'বলৈ অনুমতি নিদিয়ে"</string>
@@ -935,7 +936,7 @@
     <string name="notification_channel_general" msgid="4384774889645929705">"সাধাৰণ বার্তাসমূহ"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"সঞ্চয়াগাৰ"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"ইংগিতবোৰ"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"তাৎক্ষণিক এপসমূহ"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> চলি আছে"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ইনষ্ট\'ল নকৰাকৈয়েই এপটো খোলা হৈছে।"</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"ইনষ্ট\'ল নকৰাকৈয়েই এপটো খোলা হৈছে। অধিক জানিবলৈ টিপক।"</string>

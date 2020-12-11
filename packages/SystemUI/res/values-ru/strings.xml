@@ -83,6 +83,7 @@
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Скриншот сохранен"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"Нажмите, чтобы увидеть скриншот."</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Не удалось сохранить скриншот"</string>
+    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Чтобы сохранить скриншот, разблокируйте устройство."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Попробуйте сделать скриншот снова."</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Не удалось сохранить скриншот: недостаточно места."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Не удалось сделать скриншот: нет разрешения от приложения или организации."</string>

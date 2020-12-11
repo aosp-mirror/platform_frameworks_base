@@ -790,10 +790,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setName("bubblebot")
                 .build();
         RemoteInput remoteInput = new RemoteInput.Builder("reply_key").setLabel("reply").build();
-        // TODO(b/174965245) Please replace FLAG_MUTABLE_UNAUDITED below
-        // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
         PendingIntent inputIntent = PendingIntent.getActivity(mContext, 0, new Intent(),
-                PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                PendingIntent.FLAG_MUTABLE);
         Icon icon = Icon.createWithResource(mContext, android.R.drawable.sym_def_app_icon);
         Notification.Action replyAction = new Notification.Action.Builder(icon, "Reply",
                 inputIntent).addRemoteInput(remoteInput)
@@ -4980,6 +4978,40 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testCustomToastPostedWhileInForeground_blockedIfAppGoesToBackground()
+            throws Exception {
+        final String testPackage = "testPackageName";
+        assertEquals(0, mService.mToastQueue.size());
+        mService.isSystemUid = false;
+        setToastRateIsWithinQuota(true);
+
+        // package is not suspended
+        when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
+                .thenReturn(false);
+
+        setAppInForegroundForToasts(mUid, true);
+
+        Binder token1 = new Binder();
+        Binder token2 = new Binder();
+        ITransientNotification callback1 = mock(ITransientNotification.class);
+        ITransientNotification callback2 = mock(ITransientNotification.class);
+        INotificationManager nmService = (INotificationManager) mService.mService;
+
+        nmService.enqueueToast(testPackage, token1, callback1, 2000, 0);
+        nmService.enqueueToast(testPackage, token2, callback2, 2000, 0);
+
+        assertEquals(2, mService.mToastQueue.size()); // Both toasts enqueued.
+        verify(callback1, times(1)).show(any()); // First toast shown.
+
+        setAppInForegroundForToasts(mUid, false);
+
+        mService.cancelToastLocked(0); // Remove the first toast, and show next.
+
+        assertEquals(0, mService.mToastQueue.size()); // Both toasts processed.
+        verify(callback2, never()).show(any()); // Second toast was never shown.
+    }
+
+    @Test
     public void testAllowForegroundTextToasts() throws Exception {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
@@ -7369,10 +7401,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         ArrayList<Notification.Action> extraAction = new ArrayList<>();
         RemoteInput remoteInput = new RemoteInput.Builder("reply_key").setLabel("reply").build();
-        // TODO(b/174965245) Please replace FLAG_MUTABLE_UNAUDITED below
-        // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
         PendingIntent inputIntent = PendingIntent.getActivity(mContext, 0, new Intent(),
-                PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                PendingIntent.FLAG_IMMUTABLE);
         Icon icon = Icon.createWithResource(mContext, android.R.drawable.sym_def_app_icon);
         Notification.Action replyAction = new Notification.Action.Builder(icon, "Reply",
                 inputIntent).addRemoteInput(remoteInput)
@@ -7402,10 +7432,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         ArrayList<Notification.Action> extraAction = new ArrayList<>();
         RemoteInput remoteInput = new RemoteInput.Builder("reply_key").setLabel("reply").build();
-        // TODO(b/174965245) Please replace FLAG_MUTABLE_UNAUDITED below
-        // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
         PendingIntent inputIntent = PendingIntent.getActivity(mContext, 0, new Intent(),
-                PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                PendingIntent.FLAG_MUTABLE);
         Icon icon = Icon.createWithResource(mContext, android.R.drawable.sym_def_app_icon);
         Notification.Action replyAction = new Notification.Action.Builder(icon, "Reply",
                 inputIntent).addRemoteInput(remoteInput)

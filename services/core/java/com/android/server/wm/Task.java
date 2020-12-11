@@ -59,7 +59,7 @@ import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.SurfaceControl.METADATA_TASK_ID;
-import static android.view.WindowManager.TRANSIT_CHANGE_WINDOWING_MODE;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
 import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
@@ -518,6 +518,11 @@ class Task extends WindowContainer<WindowContainer> {
     // {@code null} otherwise.
     @Nullable
     private Rect mLetterboxActivityBounds;
+
+    // Activity insets if this task or its top activity is presented in letterbox mode and
+    // {@code null} otherwise.
+    @Nullable
+    private Rect mLetterboxActivityInsets;
 
     // Whether the task is currently being drag-resized
     private boolean mDragResizing;
@@ -2351,7 +2356,7 @@ class Task extends WindowContainer<WindowContainer> {
      * Initializes a change transition. See {@link SurfaceFreezer} for more information.
      */
     private void initializeChangeTransition(Rect startBounds) {
-        mDisplayContent.prepareAppTransition(TRANSIT_CHANGE_WINDOWING_MODE);
+        mDisplayContent.prepareAppTransition(TRANSIT_CHANGE);
         mDisplayContent.mChangingContainers.add(this);
 
         mSurfaceFreezer.freeze(getPendingTransaction(), startBounds);
@@ -2435,8 +2440,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     @Override
     public SurfaceControl getFreezeSnapshotTarget() {
-        if (!mDisplayContent.mAppTransition.containsTransitRequest(
-                TRANSIT_CHANGE_WINDOWING_MODE)) {
+        if (!mDisplayContent.mAppTransition.containsTransitRequest(TRANSIT_CHANGE)) {
             return null;
         }
         // Skip creating snapshot if this transition is controlled by a remote animator which
@@ -3874,6 +3878,13 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     @Override
+    void forAllRootTasks(Consumer<Task> callback, boolean traverseTopToBottom) {
+        if (isRootTask()) {
+            callback.accept(this);
+        }
+    }
+
+    @Override
     boolean forAllTasks(Function<Task, Boolean> callback) {
         if (super.forAllTasks(callback)) return true;
         return callback.apply(this);
@@ -3898,10 +3909,27 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     @Override
+    boolean forAllRootTasks(Function<Task, Boolean> callback, boolean traverseTopToBottom) {
+        return isRootTask() ? callback.apply(this) : false;
+    }
+
+    @Override
     Task getTask(Predicate<Task> callback, boolean traverseTopToBottom) {
         final Task t = super.getTask(callback, traverseTopToBottom);
         if (t != null) return t;
         return callback.test(this) ? this : null;
+    }
+
+    @Nullable
+    @Override
+    Task getRootTask(Predicate<Task> callback, boolean traverseTopToBottom) {
+        return isRootTask() && callback.test(this) ? this : null;
+    }
+
+    @Nullable
+    @Override
+    <R> R getItemFromRootTasks(Function<Task, R> callback, boolean traverseTopToBottom) {
+        return isRootTask() ? callback.apply(this) : null;
     }
 
     /**
@@ -4083,6 +4111,7 @@ class Task extends WindowContainer<WindowContainer> {
         // bounds, e.g. fullscreen bounds instead of letterboxed bounds. To work around this,
         // assigning bounds from ActivityRecord#layoutLetterbox when they are ready.
         info.letterboxActivityBounds = Rect.copyOrNull(mLetterboxActivityBounds);
+        info.letterboxActivityInsets = Rect.copyOrNull(mLetterboxActivityInsets);
         info.positionInParent = getRelativePosition();
         info.parentBounds = getParentBounds();
 
@@ -4110,15 +4139,17 @@ class Task extends WindowContainer<WindowContainer> {
                 ? null : new PictureInPictureParams(rootActivity.pictureInPictureArgs);
     }
 
-    void maybeUpdateLetterboxBounds(
-                ActivityRecord activityRecord, @Nullable Rect letterboxActivityBounds) {
+    void maybeUpdateLetterboxInTaskOrganizer(
+                ActivityRecord activityRecord,
+                @Nullable Rect activityBounds,
+                @Nullable Rect activityInsets) {
         if (isOrganized()
                 && mReuseActivitiesReport.top == activityRecord
                 // Want to force update only if letterbox bounds have changed.
-                && !Objects.equals(
-                    mLetterboxActivityBounds,
-                    letterboxActivityBounds)) {
-            mLetterboxActivityBounds = Rect.copyOrNull(letterboxActivityBounds);
+                && (!Objects.equals(mLetterboxActivityBounds, activityBounds)
+                        || !Objects.equals(mLetterboxActivityInsets, activityInsets))) {
+            mLetterboxActivityBounds = Rect.copyOrNull(activityBounds);
+            mLetterboxActivityInsets = Rect.copyOrNull(activityInsets);
             // Forcing update to reduce visual jank during the transition.
             dispatchTaskInfoChangedIfNeeded(true /* force */);
         }

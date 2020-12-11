@@ -199,6 +199,7 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS サービス"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"センサー通知サービス"</string>
     <string name="twilight_service" msgid="8964898045693187224">"トワイライト サービス"</string>
+    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Time Zone Detector（未接続）"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"デバイスのデータが消去されます"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"管理アプリを使用できません。デバイスのデータはこれから消去されます。\n\nご不明な点がある場合は、組織の管理者にお問い合わせください。"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"「<xliff:g id="OWNER_APP">%s</xliff:g>」により印刷は無効にされています。"</string>
@@ -287,8 +288,7 @@
     <string name="notification_channel_usb" msgid="1528280969406244896">"USB 接続"</string>
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"実行中のアプリ"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"電池を消費しているアプリ"</string>
-    <!-- no translation found for notification_channel_accessibility_magnification (1707913872219798098) -->
-    <skip />
+    <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"拡大"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」が電池を使用しています"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> 個のアプリが電池を使用しています"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"タップして電池やデータの使用量を確認"</string>
@@ -2190,12 +2190,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <!-- no translation found for window_magnification_prompt_title (8197528399699536320) -->
-    <skip />
-    <!-- no translation found for window_magnification_prompt_content (4166711383253283838) -->
-    <skip />
-    <!-- no translation found for turn_on_magnification_settings_action (8521433346684847700) -->
-    <skip />
-    <!-- no translation found for dismiss_action (1728820550388704784) -->
-    <skip />
+    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"新機能: Window Magnifier"</string>
+    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"画面の一部または全体を拡大できるようになりました"</string>
+    <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"[設定] で ON にする"</string>
+    <string name="dismiss_action" msgid="1728820550388704784">"閉じる"</string>
 </resources>

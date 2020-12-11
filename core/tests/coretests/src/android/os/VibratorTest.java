@@ -55,6 +55,26 @@ public class VibratorTest {
     }
 
     @Test
+    public void areEffectsSupported_returnsArrayOfSameSize() {
+        assertEquals(0, mVibratorSpy.areEffectsSupported(new int[0]).length);
+        assertEquals(1,
+                mVibratorSpy.areEffectsSupported(new int[]{VibrationEffect.EFFECT_CLICK}).length);
+        assertEquals(2,
+                mVibratorSpy.areEffectsSupported(new int[]{VibrationEffect.EFFECT_CLICK,
+                        VibrationEffect.EFFECT_TICK}).length);
+    }
+
+    @Test
+    public void arePrimitivesSupported_returnsArrayOfSameSize() {
+        assertEquals(0, mVibratorSpy.arePrimitivesSupported(new int[0]).length);
+        assertEquals(1, mVibratorSpy.arePrimitivesSupported(
+                new int[]{VibrationEffect.Composition.PRIMITIVE_CLICK}).length);
+        assertEquals(2, mVibratorSpy.arePrimitivesSupported(
+                new int[]{VibrationEffect.Composition.PRIMITIVE_CLICK,
+                        VibrationEffect.Composition.PRIMITIVE_QUICK_RISE}).length);
+    }
+
+    @Test
     public void vibrate_withAudioAttributes_createsVibrationAttributesWithSameUsage() {
         VibrationEffect effect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
         AudioAttributes audioAttributes = new AudioAttributes.Builder().setUsage(

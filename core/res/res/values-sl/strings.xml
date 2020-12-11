@@ -203,6 +203,7 @@
     <string name="gnss_service" msgid="8907781262179951385">"Storitev GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Storitev obvestil tipal"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Storitev Somrak"</string>
+    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Zaznavanje časovnega pasu (brez povezave)"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Podatki v napravi bodo izbrisani"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Skrbniške aplikacije ni mogoče uporabljati. Podatki v napravi bodo izbrisani.\n\nČe imate vprašanja, se obrnite na skrbnika organizacije."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Tiskanje je onemogočil pravilnik <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
@@ -293,8 +294,7 @@
     <string name="notification_channel_usb" msgid="1528280969406244896">"Povezava USB"</string>
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Aplikacija se izvaja"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Aplikacije, ki porabljajo energijo baterije"</string>
-    <!-- no translation found for notification_channel_accessibility_magnification (1707913872219798098) -->
-    <skip />
+    <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Povečava"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> porablja energijo baterije"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"Toliko aplikacij porablja energijo baterije: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Dotaknite se za prikaz podrobnosti porabe baterije in prenosa podatkov"</string>
@@ -1846,7 +1846,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Posodobil skrbnik"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Izbrisal skrbnik"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"V redu"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Funkcija varčevanja z energijo baterije podaljša čas delovanja baterije tako:\n\n•vklopi temno temo,\n•izklopi ali omeji dejavnost v ozadju, nekatere vizualne učinke in druge funkcije, kot je »Hey Google«.\n\n"<annotation id="url">"Več o tem"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Funkcija varčevanja z energijo baterije podaljša čas delovanja baterije tako:\n\n• vklopi temno temo,\n• izklopi ali omeji dejavnost v ozadju, nekatere vizualne učinke in druge funkcije, kot je »Hey Google«.\n\n"<annotation id="url">"Več o tem"</annotation></string>
     <string name="battery_saver_description" msgid="6794188153647295212">"Funkcija varčevanja z energijo baterije podaljša čas delovanja baterije tako:\n\n• vklopi temno temo;\n• izklopi ali omeji dejavnost v ozadju, nekatere vizualne učinke in druge funkcije, kot je »Hey Google«."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Zaradi zmanjševanja prenesene količine podatkov funkcija varčevanja s podatki nekaterim aplikacijam preprečuje, da bi v ozadju pošiljale ali prejemale podatke. Aplikacija, ki jo trenutno uporabljate, lahko prenaša podatke, vendar to morda počne manj pogosto. To na primer pomeni, da se slike ne prikažejo, dokler se jih ne dotaknete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vklop varčevanja s podatki?"</string>
@@ -2258,12 +2258,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
-    <!-- no translation found for window_magnification_prompt_title (8197528399699536320) -->
-    <skip />
-    <!-- no translation found for window_magnification_prompt_content (4166711383253283838) -->
-    <skip />
-    <!-- no translation found for turn_on_magnification_settings_action (8521433346684847700) -->
-    <skip />
-    <!-- no translation found for dismiss_action (1728820550388704784) -->
-    <skip />
+    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"Novo: Lupa v oknu"</string>
+    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"Zdaj lahko povečate del zaslona ali celotni zaslon"</string>
+    <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Vklopite v nastavitvah"</string>
+    <string name="dismiss_action" msgid="1728820550388704784">"Opusti"</string>
 </resources>

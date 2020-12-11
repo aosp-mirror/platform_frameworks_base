@@ -34,6 +34,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.view.Display;
 
@@ -79,6 +80,7 @@ public class DozeSensors {
     private long mDebounceFrom;
     private boolean mSettingRegistered;
     private boolean mListening;
+    private boolean mListeningTouchScreenSensors;
 
     @VisibleForTesting
     public enum DozeSensorsUiEvent implements UiEventLogger.UiEventEnum {
@@ -232,22 +234,25 @@ public class DozeSensors {
     /**
      * If sensors should be registered and sending signals.
      */
-    public void setListening(boolean listen) {
-        if (mListening == listen) {
+    public void setListening(boolean listen, boolean includeTouchScreenSensors) {
+        if (mListening == listen && mListeningTouchScreenSensors == includeTouchScreenSensors) {
             return;
         }
         mListening = listen;
+        mListeningTouchScreenSensors = includeTouchScreenSensors;
         updateListening();
     }
 
     /**
      * Registers/unregisters sensors based on internal state.
      */
-    public void updateListening() {
+    private void updateListening() {
         boolean anyListening = false;
         for (TriggerSensor s : mSensors) {
-            s.setListening(mListening);
-            if (mListening) {
+            boolean listen = mListening
+                    && (!s.mRequiresTouchscreen || mListeningTouchScreenSensors);
+            s.setListening(listen);
+            if (listen) {
                 anyListening = true;
             }
         }
@@ -319,10 +324,14 @@ public class DozeSensors {
 
     /** Dump current state */
     public void dump(PrintWriter pw) {
+        pw.println("mListening=" + mListening);
+        pw.println("mListeningTouchScreenSensors=" + mListeningTouchScreenSensors);
+        IndentingPrintWriter idpw = new IndentingPrintWriter(pw);
+        idpw.increaseIndent();
         for (TriggerSensor s : mSensors) {
-            pw.println("  Sensor: " + s.toString());
+            idpw.println("Sensor: " + s.toString());
         }
-        pw.println("  ProxSensor: " + mProximitySensor.toString());
+        idpw.println("ProxSensor: " + mProximitySensor.toString());
     }
 
     /**

@@ -1005,6 +1005,7 @@
     <dimen name="global_actions_grid_vertical_padding">3dp</dimen>
     <dimen name="global_actions_grid_horizontal_padding">3dp</dimen>
 
+    <dimen name="global_actions_grid_item_layout_height">98dp</dimen>
     <dimen name="global_actions_grid_item_side_margin">5dp</dimen>
     <dimen name="global_actions_grid_item_vertical_margin">4dp</dimen>
     <dimen name="global_actions_grid_item_width">64dp</dimen>
@@ -1194,8 +1195,8 @@
     <dimen name="magnification_frame_move_long">25dp</dimen>
     <dimen name="magnification_drag_view_size">38dp</dimen>
     <dimen name="magnification_controls_size">90dp</dimen>
-    <dimen name="magnification_switch_button_size">32dp</dimen>
-    <dimen name="magnification_switch_button_padding">8dp</dimen>
+    <dimen name="magnification_switch_button_size">60dp</dimen>
+    <dimen name="magnification_switch_button_padding">12dp</dimen>
     <dimen name="magnifier_left_right_controls_width">35dp</dimen>
     <dimen name="magnifier_left_right_controls_height">45dp</dimen>
     <dimen name="magnifier_up_down_controls_width">45dp</dimen>
@@ -1268,6 +1269,10 @@
     <dimen name="controls_app_text_padding">8dp</dimen>
     <dimen name="controls_app_divider_height">2dp</dimen>
     <dimen name="controls_app_divider_side_margin">32dp</dimen>
+
+    <item name="controls_thumbnail_shadow_x" type="dimen" format="float">2.0</item>
+    <item name="controls_thumbnail_shadow_y" type="dimen" format="float">2.0</item>
+    <item name="controls_thumbnail_shadow_radius" type="dimen" format="float">2.0</item>
 
     <dimen name="controls_card_margin">@dimen/control_base_item_margin</dimen>
     <item name="control_card_elevation" type="dimen" format="float">15</item>

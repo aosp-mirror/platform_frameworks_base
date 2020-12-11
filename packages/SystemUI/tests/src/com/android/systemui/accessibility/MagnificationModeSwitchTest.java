@@ -143,6 +143,13 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     }
 
     @Test
+    public void showButton_excludeSystemGestureArea() {
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+
+        verify(mSpyImageView).setSystemGestureExclusionRects(any(List.class));
+    }
+
+    @Test
     public void showMagnificationButton_setA11yTimeout_postDelayedAnimationWithA11yTimeout() {
         final int a11yTimeout = 12345;
         when(mAccessibilityManager.getRecommendedTimeoutMillis(anyInt(), anyInt())).thenReturn(
@@ -178,14 +185,17 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     }
 
     @Test
-    public void onConfigurationChanged_buttonIsShowing_setImageResource() {
+    public void onConfigurationChanged_buttonIsShowing_updateResourcesAndLayout() {
         mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
         resetAndStubMockImageViewAndAnimator();
 
         mMagnificationModeSwitch.onConfigurationChanged(ActivityInfo.CONFIG_DENSITY);
 
+        verify(mSpyImageView).setPadding(anyInt(), anyInt(), anyInt(), anyInt());
         verify(mSpyImageView).setImageResource(
                 getIconResId(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN));
+        verify(mWindowManager).updateViewLayout(eq(mSpyImageView), any());
+        verify(mSpyImageView).setSystemGestureExclusionRects(any(List.class));
     }
 
     @Test
@@ -368,6 +378,11 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     private void resetAndStubMockImageViewAndAnimator() {
         resetAndStubMockAnimator();
         Mockito.reset(mSpyImageView);
+        doAnswer(invocation -> {
+            final Runnable runnable = invocation.getArgument(0);
+            runnable.run();
+            return null;
+        }).when(mSpyImageView).post(any(Runnable.class));
         doReturn(mViewPropertyAnimator).when(mSpyImageView).animate();
     }
 

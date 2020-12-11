@@ -400,7 +400,9 @@
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"활성화되었습니다. 전환하려면 탭하세요."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"앱 대기 상태:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="transcode_settings_title" msgid="2581975870429850549">"미디어 트랜스코딩 설정"</string>
-    <string name="transcode_enable_all" msgid="9102460144086871903">"트랜스코딩 사용 중지"</string>
+    <string name="transcode_user_control" msgid="6176368544817731314">"트랜스코딩 기본값 재정의"</string>
+    <string name="transcode_enable_all" msgid="2411165920039166710">"트랜스코딩 사용"</string>
+    <string name="transcode_default" msgid="3784803084573509491">"앱이 최신 형식을 지원하는 것으로 가정"</string>
     <string name="transcode_skip_apps" msgid="8249721984597390142">"앱 트랜스코딩 사용 설정"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"실행 중인 서비스"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"현재 실행 중인 서비스 보기 및 제어"</string>
@@ -449,7 +451,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"충전 완료까지 <xliff:g id="TIME">%1$s</xliff:g> 남음"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - 충전 완료까지 <xliff:g id="TIME">%2$s</xliff:g> 남음"</string>
-    <string name="power_charging_limited" msgid="5902301801611726210">"<xliff:g id="LEVEL">%1$s</xliff:g> - 일시적으로 배터리 사용 제한"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - 배터리 상태 최적화 중"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"알 수 없음"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"충전 중"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"고속 충전 중"</string>

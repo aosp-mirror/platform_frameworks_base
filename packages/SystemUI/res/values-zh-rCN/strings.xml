@@ -83,6 +83,7 @@
     <string name="screenshot_saved_title" msgid="8893267638659083153">"已保存屏幕截图"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"点按即可查看您的屏幕截图"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"无法保存屏幕截图"</string>
+    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"必须先解锁设备，然后才能保存屏幕截图"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"请再次尝试截屏"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"由于存储空间有限，无法保存屏幕截图"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"此应用或您所在的单位不允许进行屏幕截图"</string>

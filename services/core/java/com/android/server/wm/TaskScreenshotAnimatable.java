@@ -60,7 +60,7 @@ class TaskScreenshotAnimatable implements SurfaceAnimator.Animatable {
             surface.attachAndQueueBufferWithColorSpace(buffer, screenshotBuffer.getColorSpace());
             surface.release();
             final float scale = 1.0f * mTask.getBounds().width() / mWidth;
-            mSurfaceControl.setMatrix(scale, 0, 0, scale);
+            getPendingTransaction().setMatrix(mSurfaceControl, scale, 0, 0, scale);
         }
         getPendingTransaction().show(mSurfaceControl);
     }
