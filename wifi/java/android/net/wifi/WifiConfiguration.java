@@ -605,55 +605,7 @@ public class WifiConfiguration implements Parcelable {
         if (mSecurityParamsList.stream().anyMatch(params -> params.isSecurityType(securityType))) {
             throw new IllegalArgumentException("duplicate security type " + securityType);
         }
-        SecurityParams params = null;
-        switch (securityType) {
-            case SECURITY_TYPE_OPEN:
-                params = SecurityParams.createOpenParams();
-                break;
-            case SECURITY_TYPE_WEP:
-                params = SecurityParams.createWepParams();
-                break;
-            case SECURITY_TYPE_PSK:
-                params = SecurityParams.createWpaWpa2PersonalParams();
-                break;
-            case SECURITY_TYPE_EAP:
-                params = SecurityParams.createWpaWpa2EnterpriseParams();
-                break;
-            case SECURITY_TYPE_SAE:
-                params = SecurityParams.createWpa3PersonalParams();
-                break;
-            // The value of {@link SECURITY_TYPE_EAP_SUITE_B} is the same as
-            // {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT}, remove it to avoid
-            // duplicate case label errors.
-            case SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT:
-                params = SecurityParams.createWpa3Enterprise192BitParams();
-                break;
-            case SECURITY_TYPE_OWE:
-                params = SecurityParams.createEnhancedOpenParams();
-                break;
-            case SECURITY_TYPE_WAPI_PSK:
-                params = SecurityParams.createWapiPskParams();
-                break;
-            case SECURITY_TYPE_WAPI_CERT:
-                params = SecurityParams.createWapiCertParams();
-                break;
-            case SECURITY_TYPE_EAP_WPA3_ENTERPRISE:
-                params = SecurityParams.createWpa3EnterpriseParams();
-                break;
-            case SECURITY_TYPE_OSEN:
-                params = SecurityParams.createOsenParams();
-                break;
-            case SECURITY_TYPE_PASSPOINT_R1_R2:
-                params = SecurityParams.createPasspointParams(SecurityParams.PASSPOINT_R2);
-                break;
-            case SECURITY_TYPE_PASSPOINT_R3:
-                params = SecurityParams.createPasspointParams(SecurityParams.PASSPOINT_R3);
-                break;
-            default:
-                throw new IllegalArgumentException("unknown security type " + securityType);
-        }
-
-        addSecurityParams(params);
+        addSecurityParams(SecurityParams.createSecurityParamsBySecurityType(securityType));
     }
 
     /** @hide */
