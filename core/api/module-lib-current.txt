@@ -122,6 +122,20 @@ package android.media.session {
 
 }
 
+package android.net {
+
+  public final class TcpRepairWindow {
+    ctor public TcpRepairWindow(int, int, int, int, int, int);
+    field public final int maxWindow;
+    field public final int rcvWnd;
+    field public final int rcvWndScale;
+    field public final int rcvWup;
+    field public final int sndWl1;
+    field public final int sndWnd;
+  }
+
+}
+
 package android.os {
 
   public class Binder implements android.os.IBinder {
