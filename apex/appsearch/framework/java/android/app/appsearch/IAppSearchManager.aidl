@@ -28,10 +28,10 @@ parcelable SearchResults;
 /** {@hide} */
 interface IAppSearchManager {
     /**
-     * Updates the AppSearch schema for this database.
+     * Sets the schema.
      *
-     * @param databaseName  The name of the database where this schema lives.
-     * @param schemaBundles List of {@link AppSearchSchema} bundles.
+     * @param databaseName  The databaseName this document resides in.
+     * @param schemaBundles List of AppSearchSchema bundles.
      * @param schemasNotPlatformSurfaceable Schema types that should not be surfaced on platform
      *     surfaces.
      * @param forceOverride Whether to apply the new schema even if it is incompatible. All
@@ -45,17 +45,6 @@ interface IAppSearchManager {
         in List<String> schemasNotPlatformSurfaceable,
         boolean forceOverride,
         in IAppSearchResultCallback callback);
-
-
-    /**
-     * Retrieves the AppSearch schema for this database.
-     *
-     * @param databaseName  The name of the database to retrieve.
-     * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
-     *     {@link AppSearchResult}&lt;{@link List}&lt;{@link Bundle}&gt;&gt;, where the value are
-     *     AppSearchSchema bundle.
-     */
-    void getSchema(in String databaseName, in IAppSearchResultCallback callback);
 
     /**
      * Inserts documents into the index.

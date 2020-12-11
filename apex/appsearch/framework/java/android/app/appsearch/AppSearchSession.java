@@ -22,7 +22,6 @@ import android.app.appsearch.exceptions.AppSearchException;
 import android.os.Bundle;
 import android.os.ParcelableException;
 import android.os.RemoteException;
-import android.util.ArraySet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,8 +34,6 @@ import java.util.function.Consumer;
 /**
  * Represents a connection to an AppSearch storage system where {@link GenericDocument}s can be
  * placed and queried.
- *
- * This class is thread safe.
  * @hide
  */
 public final class AppSearchSession {
@@ -82,7 +79,7 @@ public final class AppSearchSession {
     }
 
     /**
-     * Sets the schema that will be used by documents provided to the {@link #putDocuments} method.
+     * Sets the schema will be used by documents provided to the {@link #putDocuments} method.
      *
      * <p>The schema provided here is compared to the stored copy of the schema previously supplied
      * to {@link #setSchema}, if any, to determine how to treat existing documents. The following
@@ -126,19 +123,11 @@ public final class AppSearchSession {
      * <p>It is a no-op to set the same schema as has been previously set; this is handled
      * efficiently.
      *
-     * <p>By default, documents are visible on platform surfaces. To opt out, call {@code
-     * SetSchemaRequest.Builder#setPlatformSurfaceable} with {@code surfaceable} as false. Any
-     * visibility settings apply only to the schemas that are included in the {@code request}.
-     * Visibility settings for a schema type do not apply or persist across
-     * {@link SetSchemaRequest}s.
-     *
      * @param request The schema update request.
      * @param executor Executor on which to invoke the callback.
      * @param callback Callback to receive errors resulting from setting the schema. If the
      *                 operation succeeds, the callback will be invoked with {@code null}.
      */
-    // TODO(b/169883602): Change @code references to @link when setPlatformSurfaceable APIs are
-    //  exposed.
     public void setSchema(
             @NonNull SetSchemaRequest request,
             @NonNull @CallbackExecutor Executor executor,
@@ -159,39 +148,6 @@ public final class AppSearchSession {
                     new IAppSearchResultCallback.Stub() {
                         public void onResult(AppSearchResult result) {
                             executor.execute(() -> callback.accept(result));
-                        }
-                    });
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Retrieves the schema most recently successfully provided to {@link #setSchema}.
-     *
-     * @param executor Executor on which to invoke the callback.
-     * @param callback Callback to receive the pending results of schema. If the operation succeeds,
-     *                 the callback will be invoked with a {@link Set}<{@link AppSearchSchema}>
-     */
-    @NonNull
-    public void getSchema(
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull Consumer<Set<AppSearchSchema>> callback) {
-        Objects.requireNonNull(executor);
-        Objects.requireNonNull(callback);
-        try {
-            mService.getSchema(
-                    mDatabaseName,
-                    new IAppSearchResultCallback.Stub() {
-                        public void onResult(AppSearchResult result) {
-                            executor.execute(() -> {
-                                List<Bundle> schemaBundles = (List<Bundle>) result.getResultValue();
-                                Set<AppSearchSchema> schemas = new ArraySet<>(schemaBundles.size());
-                                for (int i = 0; i < schemaBundles.size(); i++) {
-                                    schemas.add(new AppSearchSchema(schemaBundles.get(i)));
-                                }
-                                callback.accept(schemas);
-                            });
                         }
                     });
         } catch (RemoteException e) {
@@ -413,7 +369,7 @@ public final class AppSearchSession {
     /**
      * Removes {@link GenericDocument}s from the index by Query. Documents will be removed if they
      * match the {@code queryExpression} in given namespaces and schemaTypes which is set via
-     * {@link SearchSpec.Builder#addNamespace} and {@link SearchSpec.Builder#addSchemaType}.
+     * {@link SearchSpec.Builder#addNamespace} and {@link SearchSpec.Builder#addSchema}.
      *
      * <p> An empty {@code queryExpression} matches all documents.
      *
@@ -421,13 +377,10 @@ public final class AppSearchSession {
      * the current database.
      *
      * @param queryExpression Query String to search.
-     * @param searchSpec      Spec containing schemaTypes, namespaces and query expression indicates
-     *                        how document will be removed. All specific about how to scoring,
-     *                        ordering, snippeting and resulting will be ignored.
-     * @param executor        Executor on which to invoke the callback.
-     * @param callback        Callback to receive errors resulting from removing the documents. If
-     *                        the operation succeeds, the callback will be invoked with
-     *                        {@code null}.
+     * @param searchSpec Defines what and how to remove
+     * @param executor Executor on which to invoke the callback.
+     * @param callback Callback to receive errors resulting from removing the documents. If the
+     *                 operation succeeds, the callback will be invoked with {@code null}.
      */
     public void removeByQuery(@NonNull String queryExpression,
             @NonNull SearchSpec searchSpec,
