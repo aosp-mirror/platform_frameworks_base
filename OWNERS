@@ -18,6 +18,10 @@ svetoslavganov@android.com
 svetoslavganov@google.com
 yamasani@google.com
 
+# API changes are already covered by API-Review+1 (http://mdb/android-api-council)
+# via https://android.git.corp.google.com/All-Projects/+/refs/meta/config/rules.pl.
+per-file */api/*current.txt = *
+
 # Support bulk translation updates
 per-file */res*/values*/*.xml = byi@google.com, delphij@google.com
 
