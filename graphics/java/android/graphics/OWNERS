@@ -4,3 +4,5 @@ romainguy@google.com
 jreck@google.com
 njawad@google.com
 sumir@google.com
+
+per-file BLASTBufferQueue.java = file:/services/core/java/com/android/server/wm/OWNERS
