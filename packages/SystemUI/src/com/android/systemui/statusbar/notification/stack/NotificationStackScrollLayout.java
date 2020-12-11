@@ -387,7 +387,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             }
         }
     };
-    private PorterDuffXfermode mSrcMode = new PorterDuffXfermode(PorterDuff.Mode.SRC);
     private boolean mPulsing;
     private boolean mScrollable;
     private View mForcedScroll;
@@ -1425,12 +1424,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @ShadeViewRefactor(RefactorComponent.ADAPTER)
-    public int getFirstItemMinHeight() {
-        final ExpandableView firstChild = getFirstChildNotGone();
-        return firstChild != null ? firstChild.getMinHeight() : mCollapsedSize;
-    }
-
-    @ShadeViewRefactor(RefactorComponent.ADAPTER)
     public void setQsContainer(ViewGroup qsContainer) {
         mQsContainer = qsContainer;
     }
@@ -1451,36 +1444,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             return row.isHeadsUp();
         }
         return false;
-    }
-
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
-    public ExpandableView getClosestChildAtRawPosition(float touchX, float touchY) {
-        getLocationOnScreen(mTempInt2);
-        float localTouchY = touchY - mTempInt2[1];
-
-        ExpandableView closestChild = null;
-        float minDist = Float.MAX_VALUE;
-
-        // find the view closest to the location, accounting for GONE views
-        final int count = getChildCount();
-        for (int childIdx = 0; childIdx < count; childIdx++) {
-            ExpandableView slidingChild = (ExpandableView) getChildAt(childIdx);
-            if (slidingChild.getVisibility() == GONE
-                    || slidingChild instanceof StackScrollerDecorView) {
-                continue;
-            }
-            float childTop = slidingChild.getTranslationY();
-            float top = childTop + slidingChild.getClipTopAmount();
-            float bottom = childTop + slidingChild.getActualHeight()
-                    - slidingChild.getClipBottomAmount();
-
-            float dist = Math.min(Math.abs(top - localTouchY), Math.abs(bottom - localTouchY));
-            if (dist < minDist) {
-                closestChild = slidingChild;
-                minDist = dist;
-            }
-        }
-        return closestChild;
     }
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
@@ -2177,25 +2140,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             View child = getChildAt(i);
             if (child.getVisibility() != View.GONE && child != mShelf) {
                 return (ExpandableView) child;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * @return the child before the given view which has visibility unequal to GONE
-     */
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public ExpandableView getViewBeforeView(ExpandableView view) {
-        ExpandableView previousView = null;
-        int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            View child = getChildAt(i);
-            if (child == view) {
-                return previousView;
-            }
-            if (child.getVisibility() != View.GONE) {
-                previousView = (ExpandableView) child;
             }
         }
         return null;
