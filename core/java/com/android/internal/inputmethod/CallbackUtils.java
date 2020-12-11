@@ -45,8 +45,21 @@ public final class CallbackUtils {
     @AnyThread
     public static void onResult(@NonNull IInputBindResultResultCallback callback,
             @NonNull Supplier<InputBindResult> resultSupplier) {
+        InputBindResult result = null;
+        Throwable exception = null;
+
         try {
-            callback.onResult(resultSupplier.get());
+            result = resultSupplier.get();
+        } catch (Throwable throwable) {
+            exception = throwable;
+        }
+
+        try {
+            if (exception != null) {
+                callback.onError(ThrowableHolder.of(exception));
+                return;
+            }
+            callback.onResult(result);
         } catch (RemoteException ignored) { }
     }
 }
