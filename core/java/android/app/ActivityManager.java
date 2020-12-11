@@ -31,6 +31,8 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -90,9 +92,6 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
@@ -869,6 +868,39 @@ public class ActivityManager {
 
     private static final boolean DEVELOPMENT_FORCE_LOW_RAM =
             SystemProperties.getBoolean("debug.force_low_ram", false);
+
+    /**
+     * Intent {@link Intent#ACTION_CLOSE_SYSTEM_DIALOGS} is too powerful to be unrestricted. We
+     * restrict its usage for a few legitimate use-cases only, regardless of targetSdk. For the
+     * other use-cases we drop the intent with a log message.
+     *
+     * Note that this is the lighter version of {@link ActivityManager
+     * #LOCK_DOWN_CLOSE_SYSTEM_DIALOGS} which is not gated on targetSdk in order to eliminate the
+     * abuse vector.
+     *
+     * @hide
+     */
+    @TestApi
+    @ChangeId
+    @Disabled
+    public static final long DROP_CLOSE_SYSTEM_DIALOGS = 174664120L;
+
+    /**
+     * Intent {@link Intent#ACTION_CLOSE_SYSTEM_DIALOGS} is too powerful to be unrestricted. So,
+     * apps targeting {@link Build.VERSION_CODES#S} or higher will crash if they try to send such
+     * intent and don't have permission {@code android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS}.
+     *
+     * Note that this is the more restrict version of {@link ActivityManager
+     * #DROP_CLOSE_SYSTEM_DIALOGS} that expects the app to stop sending aforementioned intent once
+     * it bumps its targetSdk to {@link Build.VERSION_CODES#S} or higher.
+     *
+     * @hide
+     */
+    @TestApi
+    @ChangeId
+    @Disabled
+    // @EnabledSince(targetSdkVersion = VERSION_CODES.S)
+    public static final long LOCK_DOWN_CLOSE_SYSTEM_DIALOGS = 174664365L;
 
     /** @hide */
     public int getFrontActivityScreenCompatMode() {
