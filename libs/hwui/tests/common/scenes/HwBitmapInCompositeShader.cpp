@@ -74,6 +74,6 @@ public:
 
     sk_sp<SkShader> createBitmapShader(Bitmap& bitmap) {
         sk_sp<SkImage> image = bitmap.makeImage();
-        return image->makeShader();
+        return image->makeShader(SkSamplingOptions());
     }
 };

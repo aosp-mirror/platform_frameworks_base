@@ -61,7 +61,7 @@ static jlong Shader_getNativeFinalizer(JNIEnv*, jobject) {
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 static jlong BitmapShader_constructor(JNIEnv* env, jobject o, jlong matrixPtr, jlong bitmapHandle,
-        jint tileModeX, jint tileModeY) {
+        jint tileModeX, jint tileModeY, bool filter) {
     const SkMatrix* matrix = reinterpret_cast<const SkMatrix*>(matrixPtr);
     sk_sp<SkImage> image;
     if (bitmapHandle) {
@@ -74,8 +74,10 @@ static jlong BitmapShader_constructor(JNIEnv* env, jobject o, jlong matrixPtr, j
         SkBitmap bitmap;
         image = SkMakeImageFromRasterBitmap(bitmap, kNever_SkCopyPixelsMode);
     }
+    SkSamplingOptions sampling(filter ? SkFilterMode::kLinear : SkFilterMode::kNearest,
+                               SkMipmapMode::kNone);
     sk_sp<SkShader> shader = image->makeShader(
-            (SkTileMode)tileModeX, (SkTileMode)tileModeY);
+            (SkTileMode)tileModeX, (SkTileMode)tileModeY, sampling);
     ThrowIAE_IfNull(env, shader.get());
 
     if (matrix) {
@@ -291,7 +293,7 @@ static const JNINativeMethod gShaderMethods[] = {
 };
 
 static const JNINativeMethod gBitmapShaderMethods[] = {
-    { "nativeCreate",      "(JJII)J",  (void*)BitmapShader_constructor },
+    { "nativeCreate",      "(JJIIZ)J",  (void*)BitmapShader_constructor },
 };
 
 static const JNINativeMethod gLinearGradientMethods[] = {
