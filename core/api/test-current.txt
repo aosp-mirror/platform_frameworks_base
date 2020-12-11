@@ -1009,6 +1009,8 @@ package android.media {
     field public static final int DEVICE_ROLE_DISABLED = 2; // 0x2
     field public static final int DEVICE_ROLE_NONE = 0; // 0x0
     field public static final int DEVICE_ROLE_PREFERRED = 1; // 0x1
+    field public static final int OFFLOAD_GAPLESS_SUPPORTED = 2; // 0x2
+    field public static final int OFFLOAD_SUPPORTED = 1; // 0x1
     field public static final int STREAM_DEFAULT = -1; // 0xffffffff
   }
 

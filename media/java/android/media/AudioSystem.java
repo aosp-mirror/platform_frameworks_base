@@ -1639,13 +1639,22 @@ public class AudioSystem
      */
     public static native int setAllowedCapturePolicy(int uid, int flags);
 
-    static boolean isOffloadSupported(@NonNull AudioFormat format, @NonNull AudioAttributes attr) {
-        return native_is_offload_supported(format.getEncoding(), format.getSampleRate(),
+    /**
+     * @hide
+     * Compressed audio offload decoding modes supported by audio HAL implementation.
+     * Keep in sync with system/media/include/media/audio.h.
+     */
+    public static final int OFFLOAD_NOT_SUPPORTED = 0;
+    public static final int OFFLOAD_SUPPORTED = 1;
+    public static final int OFFLOAD_GAPLESS_SUPPORTED = 2;
+
+    static int getOffloadSupport(@NonNull AudioFormat format, @NonNull AudioAttributes attr) {
+        return native_get_offload_support(format.getEncoding(), format.getSampleRate(),
                 format.getChannelMask(), format.getChannelIndexMask(),
                 attr.getVolumeControlStream());
     }
 
-    private static native boolean native_is_offload_supported(int encoding, int sampleRate,
+    private static native int native_get_offload_support(int encoding, int sampleRate,
             int channelMask, int channelIndexMask, int streamType);
 
     /** @hide */

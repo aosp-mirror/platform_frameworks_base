@@ -2319,7 +2319,55 @@ public class AudioManager {
         if (attributes == null) {
             throw new NullPointerException("Illegal null AudioAttributes");
         }
-        return AudioSystem.isOffloadSupported(format, attributes);
+        return AudioSystem.getOffloadSupport(format, attributes) != PLAYBACK_OFFLOAD_NOT_SUPPORTED;
+    }
+
+    /** Return value for {@link #getPlaybackOffloadSupport(AudioFormat, AudioAttributes)}:
+        offload playback not supported */
+    public static final int PLAYBACK_OFFLOAD_NOT_SUPPORTED = AudioSystem.OFFLOAD_NOT_SUPPORTED;
+    /** Return value for {@link #getPlaybackOffloadSupport(AudioFormat, AudioAttributes)}:
+        offload playback supported */
+    public static final int PLAYBACK_OFFLOAD_SUPPORTED = AudioSystem.OFFLOAD_SUPPORTED;
+    /** Return value for {@link #getPlaybackOffloadSupport(AudioFormat, AudioAttributes)}:
+        offload playback supported with gapless transitions */
+    public static final int PLAYBACK_OFFLOAD_GAPLESS_SUPPORTED =
+            AudioSystem.OFFLOAD_GAPLESS_SUPPORTED;
+
+    /** @hide */
+    @IntDef(flag = false, prefix = "PLAYBACK_OFFLOAD_", value = {
+            PLAYBACK_OFFLOAD_NOT_SUPPORTED,
+            PLAYBACK_OFFLOAD_SUPPORTED,
+            PLAYBACK_OFFLOAD_GAPLESS_SUPPORTED }
+    )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AudioOffloadMode {}
+
+    /**
+     * Returns whether offloaded playback of an audio format is supported on the device or not and
+     * when supported whether gapless transitions are possible or not.
+     * <p>Offloaded playback is the feature where the decoding and playback of an audio stream
+     * is not competing with other software resources. In general, it is supported by dedicated
+     * hardware, such as audio DSPs.
+     * <p>Note that this query only provides information about the support of an audio format,
+     * it does not indicate whether the resources necessary for the offloaded playback are
+     * available at that instant.
+     * @param format the audio format (codec, sample rate, channels) being checked.
+     * @param attributes the {@link AudioAttributes} to be used for playback
+     * @return {@link #PLAYBACK_OFFLOAD_NOT_SUPPORTED} if offload playback if not supported,
+     *         {@link #PLAYBACK_OFFLOAD_SUPPORTED} if offload playback is supported or
+     *         {@link #PLAYBACK_OFFLOAD_GAPLESS_SUPPORTED} if gapless transitions are
+     *         also supported.
+     */
+    @AudioOffloadMode
+    public static int getPlaybackOffloadSupport(@NonNull AudioFormat format,
+            @NonNull AudioAttributes attributes) {
+        if (format == null) {
+            throw new NullPointerException("Illegal null AudioFormat");
+        }
+        if (attributes == null) {
+            throw new NullPointerException("Illegal null AudioAttributes");
+        }
+        return AudioSystem.getOffloadSupport(format, attributes);
     }
 
     //====================================================================
