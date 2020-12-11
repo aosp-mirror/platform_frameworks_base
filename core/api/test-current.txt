@@ -377,6 +377,7 @@ package android.app {
 package android.app.admin {
 
   public class DevicePolicyManager {
+    method public int checkProvisioningPreCondition(@Nullable String, @NonNull String);
     method @Nullable public android.os.UserHandle createAndProvisionManagedProfile(@NonNull android.app.admin.ManagedProfileProvisioningParams) throws android.app.admin.ProvisioningException;
     method public void forceUpdateUserSetupComplete();
     method public long getLastBugReportRequestTime();
@@ -386,9 +387,27 @@ package android.app.admin {
     method public boolean isCurrentInputMethodSetByOwner();
     method public boolean isFactoryResetProtectionPolicySupported();
     method @NonNull public static String operationToString(int);
+    method @RequiresPermission("android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS") public void provisionFullyManagedDevice(@NonNull android.app.admin.FullyManagedDeviceProvisioningParams) throws android.app.admin.ProvisioningException;
     method @RequiresPermission("android.permission.MANAGE_DEVICE_ADMINS") public void setNextOperationSafety(int, boolean);
     field public static final String ACTION_DATA_SHARING_RESTRICTION_APPLIED = "android.app.action.DATA_SHARING_RESTRICTION_APPLIED";
     field public static final String ACTION_MANAGED_PROFILE_CREATED = "android.app.action.MANAGED_PROFILE_CREATED";
+    field public static final String ACTION_PROVISIONED_MANAGED_DEVICE = "android.app.action.PROVISIONED_MANAGED_DEVICE";
+    field public static final int CODE_ACCOUNTS_NOT_EMPTY = 6; // 0x6
+    field public static final int CODE_CANNOT_ADD_MANAGED_PROFILE = 11; // 0xb
+    field public static final int CODE_DEVICE_ADMIN_NOT_SUPPORTED = 13; // 0xd
+    field public static final int CODE_HAS_DEVICE_OWNER = 1; // 0x1
+    field public static final int CODE_HAS_PAIRED = 8; // 0x8
+    field public static final int CODE_MANAGED_USERS_NOT_SUPPORTED = 9; // 0x9
+    field public static final int CODE_NONSYSTEM_USER_EXISTS = 5; // 0x5
+    field public static final int CODE_NOT_SYSTEM_USER = 7; // 0x7
+    field public static final int CODE_NOT_SYSTEM_USER_SPLIT = 12; // 0xc
+    field public static final int CODE_OK = 0; // 0x0
+    field public static final int CODE_PROVISIONING_NOT_ALLOWED_FOR_NON_DEVELOPER_USERS = 15; // 0xf
+    field public static final int CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER = 14; // 0xe
+    field public static final int CODE_SYSTEM_USER = 10; // 0xa
+    field public static final int CODE_USER_HAS_PROFILE_OWNER = 2; // 0x2
+    field public static final int CODE_USER_NOT_RUNNING = 3; // 0x3
+    field public static final int CODE_USER_SETUP_COMPLETED = 4; // 0x4
     field public static final int OPERATION_CLEAR_APPLICATION_USER_DATA = 23; // 0x17
     field public static final int OPERATION_CREATE_AND_MANAGE_USER = 5; // 0x5
     field public static final int OPERATION_INSTALL_CA_CERT = 24; // 0x18
@@ -432,8 +451,31 @@ package android.app.admin {
     field public static final int PROVISIONING_RESULT_ADMIN_PACKAGE_INSTALLATION_FAILED = 3; // 0x3
     field public static final int PROVISIONING_RESULT_PRE_CONDITION_FAILED = 1; // 0x1
     field public static final int PROVISIONING_RESULT_PROFILE_CREATION_FAILED = 2; // 0x2
+    field public static final int PROVISIONING_RESULT_REMOVE_NON_REQUIRED_APPS_FAILED = 6; // 0x6
     field public static final int PROVISIONING_RESULT_SETTING_PROFILE_OWNER_FAILED = 4; // 0x4
+    field public static final int PROVISIONING_RESULT_SET_DEVICE_OWNER_FAILED = 7; // 0x7
     field public static final int PROVISIONING_RESULT_STARTING_PROFILE_FAILED = 5; // 0x5
+  }
+
+  public final class FullyManagedDeviceProvisioningParams implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.content.ComponentName getDeviceAdminComponentName();
+    method public long getLocalTime();
+    method @Nullable public java.util.Locale getLocale();
+    method @NonNull public String getOwnerName();
+    method @Nullable public String getTimeZone();
+    method public boolean isLeaveAllSystemAppsEnabled();
+    method public void writeToParcel(@NonNull android.os.Parcel, @Nullable int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.FullyManagedDeviceProvisioningParams> CREATOR;
+  }
+
+  public static final class FullyManagedDeviceProvisioningParams.Builder {
+    ctor public FullyManagedDeviceProvisioningParams.Builder(@NonNull android.content.ComponentName, @NonNull String);
+    method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams build();
+    method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setLeaveAllSystemAppsEnabled(boolean);
+    method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setLocalTime(long);
+    method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setLocale(@Nullable java.util.Locale);
+    method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setTimeZone(@Nullable String);
   }
 
   public final class ManagedProfileProvisioningParams implements android.os.Parcelable {
