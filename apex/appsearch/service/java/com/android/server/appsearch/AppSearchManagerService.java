@@ -90,32 +90,6 @@ public class AppSearchManagerService extends SystemService {
         }
 
         @Override
-        public void getSchema(
-                @NonNull String databaseName,
-                @NonNull IAppSearchResultCallback callback) {
-            Preconditions.checkNotNull(databaseName);
-            Preconditions.checkNotNull(callback);
-            int callingUid = Binder.getCallingUidOrThrow();
-            int callingUserId = UserHandle.getUserId(callingUid);
-            final long callingIdentity = Binder.clearCallingIdentity();
-            try {
-                AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
-                databaseName = rewriteDatabaseNameWithUid(databaseName, callingUid);
-                List<AppSearchSchema> schemas = impl.getSchema(databaseName);
-                List<Bundle> schemaBundles = new ArrayList<>(schemas.size());
-                for (int i = 0; i < schemas.size(); i++) {
-                    schemaBundles.add(schemas.get(i).getBundle());
-                }
-                invokeCallbackOnResult(callback,
-                        AppSearchResult.newSuccessfulResult(schemaBundles));
-            } catch (Throwable t) {
-                invokeCallbackOnError(callback, t);
-            } finally {
-                Binder.restoreCallingIdentity(callingIdentity);
-            }
-        }
-
-        @Override
         public void putDocuments(
                 @NonNull String databaseName,
                 @NonNull List<Bundle> documentBundles,
