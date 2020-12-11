@@ -60,12 +60,12 @@ import android.net.ipsec.ike.IkeTrafficSelector;
 import android.net.ipsec.ike.TunnelModeChildSessionParams;
 import android.net.ipsec.ike.exceptions.IkeException;
 import android.net.ipsec.ike.exceptions.IkeProtocolException;
-import android.net.util.IpRange;
 import android.system.OsConstants;
 import android.util.Log;
 
 import com.android.internal.net.VpnProfile;
 import com.android.internal.util.HexDump;
+import com.android.net.module.util.IpRange;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
