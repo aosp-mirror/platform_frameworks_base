@@ -33,7 +33,6 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
@@ -610,34 +609,6 @@ final class TaskDisplayArea extends DisplayArea<Task> {
         return false;
     }
 
-    void setExitingTokensHasVisible(boolean hasVisible) {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final ArrayList<ActivityRecord> activities = mChildren.get(i).mExitingActivities;
-            for (int j = activities.size() - 1; j >= 0; --j) {
-                activities.get(j).hasVisible = hasVisible;
-            }
-        }
-    }
-
-    void removeExistingAppTokensIfPossible() {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final ArrayList<ActivityRecord> activities = mChildren.get(i).mExitingActivities;
-            for (int j = activities.size() - 1; j >= 0; --j) {
-                final ActivityRecord activity = activities.get(j);
-                if (!activity.hasVisible && !mDisplayContent.mClosingApps.contains(activity)
-                        && (!activity.mIsExiting || activity.isEmpty())) {
-                    // Make sure there is no animation running on this activity, so any windows
-                    // associated with it will be removed as soon as their animations are
-                    // complete.
-                    cancelAnimation();
-                    ProtoLog.v(WM_DEBUG_ADD_REMOVE,
-                            "performLayout: Activity exiting now removed %s", activity);
-                    activity.removeIfPossible();
-                }
-            }
-        }
-    }
-
     @Override
     int getOrientation(int candidate) {
         mLastOrientationSource = null;
@@ -892,11 +863,6 @@ final class TaskDisplayArea extends DisplayArea<Task> {
                     Task.REPARENT_LEAVE_ROOT_TASK_IN_PLACE, false /* animate */,
                     false /* deferResume */, "positionTaskBehindHome");
         }
-    }
-
-    @Nullable
-    Task getRootTask(int rootTaskId) {
-        return getRootTask(stack -> stack.getRootTaskId() == rootTaskId);
     }
 
     /**
@@ -1292,69 +1258,6 @@ final class TaskDisplayArea extends DisplayArea<Task> {
                     result.setTo(mTmpFindTaskResult);
                 }
             }
-        }
-    }
-
-    /**
-     * Removes root tasks in the input windowing modes from the system if they are of activity type
-     * ACTIVITY_TYPE_STANDARD or ACTIVITY_TYPE_UNDEFINED
-     */
-    void removeRootTasksInWindowingModes(int... windowingModes) {
-        if (windowingModes == null || windowingModes.length == 0) {
-            return;
-        }
-
-        // Collect the root tasks that are necessary to be removed instead of performing the removal
-        // by looping the children, so that we don't miss any root tasks after the children size
-        // changed or reordered.
-        final ArrayList<Task> rootTasks = new ArrayList<>();
-        for (int j = windowingModes.length - 1; j >= 0; --j) {
-            final int windowingMode = windowingModes[j];
-            for (int i = mChildren.size() - 1; i >= 0; --i) {
-                final Task rootTask = mChildren.get(i);
-                if (rootTask.mCreatedByOrganizer
-                        || !rootTask.isActivityTypeStandardOrUndefined()
-                        || rootTask.getWindowingMode() != windowingMode) {
-                    continue;
-                }
-                rootTasks.add(rootTask);
-            }
-        }
-
-        for (int i = rootTasks.size() - 1; i >= 0; --i) {
-            mRootWindowContainer.mTaskSupervisor.removeRootTask(rootTasks.get(i));
-        }
-    }
-
-    void removeRootTasksWithActivityTypes(int... activityTypes) {
-        if (activityTypes == null || activityTypes.length == 0) {
-            return;
-        }
-
-        // Collect the root tasks that are necessary to be removed instead of performing the removal
-        // by looping the children, so that we don't miss any root tasks after the children size
-        // changed or reordered.
-        final ArrayList<Task> rootTasks = new ArrayList<>();
-        for (int j = activityTypes.length - 1; j >= 0; --j) {
-            final int activityType = activityTypes[j];
-            for (int i = mChildren.size() - 1; i >= 0; --i) {
-                final Task rootTask = mChildren.get(i);
-                // Collect the root tasks that are currently being organized.
-                if (rootTask.mCreatedByOrganizer) {
-                    for (int k = rootTask.getChildCount() - 1; k >= 0; --k) {
-                        final Task task = (Task) rootTask.getChildAt(k);
-                        if (task.getActivityType() == activityType) {
-                            rootTasks.add(task);
-                        }
-                    }
-                } else if (rootTask.getActivityType() == activityType) {
-                    rootTasks.add(rootTask);
-                }
-            }
-        }
-
-        for (int i = rootTasks.size() - 1; i >= 0; --i) {
-            mRootWindowContainer.mTaskSupervisor.removeRootTask(rootTasks.get(i));
         }
     }
 
@@ -1838,13 +1741,6 @@ final class TaskDisplayArea extends DisplayArea<Task> {
             }
         } finally {
             mAtmService.mTaskSupervisor.endActivityVisibilityUpdate();
-        }
-    }
-
-    void prepareFreezingTaskBounds() {
-        for (int stackNdx = getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-            final Task stack = getChildAt(stackNdx);
-            stack.prepareFreezingTaskBounds();
         }
     }
 
