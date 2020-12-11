@@ -17,7 +17,7 @@
 package android.security;
 
 import android.annotation.NonNull;
-import android.hardware.keymint.KeyParameter;
+import android.hardware.security.keymint.KeyParameter;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.security.keymaster.KeymasterDefs;
