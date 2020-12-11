@@ -16,6 +16,7 @@
 
 package android.hardware;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
@@ -27,6 +28,9 @@ import android.util.ArrayMap;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * This class provides access to the sensor privacy services; sensor privacy allows the
  * user to disable access to all sensors on the device. This class provides methods to query the
@@ -37,6 +41,20 @@ import com.android.internal.annotations.GuardedBy;
  */
 @SystemService(Context.SENSOR_PRIVACY_SERVICE)
 public final class SensorPrivacyManager {
+
+    /** Microphone */
+    public static final int INDIVIDUAL_SENSOR_MICROPHONE = 1;
+
+    /** Camera */
+    public static final int INDIVIDUAL_SENSOR_CAMERA = 2;
+
+    @IntDef(prefix = "INDIVIDUAL_SENSOR_", value = {
+            INDIVIDUAL_SENSOR_MICROPHONE,
+            INDIVIDUAL_SENSOR_CAMERA
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    /** Individual sensors not listed in {@link Sensor} */
+    @interface IndividualSensor {}
 
     /**
      * A class implementing this interface can register with the {@link
@@ -164,6 +182,33 @@ public final class SensorPrivacyManager {
     public boolean isSensorPrivacyEnabled() {
         try {
             return mService.isSensorPrivacyEnabled();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns whether sensor privacy is currently enabled for a specific sensor.
+     *
+     * @return true if sensor privacy is currently enabled, false otherwise.
+     */
+    public boolean isIndividualSensorPrivacyEnabled(@IndividualSensor int sensor) {
+        try {
+            return mService.isIndividualSensorPrivacyEnabled(sensor);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets sensor privacy to the specified state for an individual sensor.
+     *
+     * @param enable the state to which sensor privacy should be set.
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY)
+    public void setIndividualSensorPrivacy(@IndividualSensor int sensor, boolean enable) {
+        try {
+            mService.setIndividualSensorPrivacy(sensor, enable);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
