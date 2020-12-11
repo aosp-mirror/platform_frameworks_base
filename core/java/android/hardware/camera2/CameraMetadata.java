@@ -2856,10 +2856,10 @@ public abstract class CameraMetadata<TKey> {
      * respective color channel provided in
      * {@link CaptureRequest#SENSOR_TEST_PATTERN_DATA android.sensor.testPatternData}.</p>
      * <p>For example:</p>
-     * <pre><code>android.testPatternData = [0, 0xFFFFFFFF, 0xFFFFFFFF, 0]
+     * <pre><code>android.control.testPatternData = [0, 0xFFFFFFFF, 0xFFFFFFFF, 0]
      * </code></pre>
      * <p>All green pixels are 100% green. All red/blue pixels are black.</p>
-     * <pre><code>android.testPatternData = [0xFFFFFFFF, 0, 0xFFFFFFFF, 0]
+     * <pre><code>android.control.testPatternData = [0xFFFFFFFF, 0, 0xFFFFFFFF, 0]
      * </code></pre>
      * <p>All red pixels are 100% red. Only the odd green pixels
      * are 100% green. All blue pixels are 100% black.</p>
