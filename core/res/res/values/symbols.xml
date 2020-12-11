@@ -4116,8 +4116,8 @@
 
   <java-symbol type="bool" name="config_trackerAppNeedsPermissions"/>
 
-  <!-- Component with platform query permissions for AppSearch -->
-  <java-symbol type="string" name="config_defaultAppSearchPlatformQuerierComponent" />
+  <!-- Package with global data query permissions for AppSearch -->
+  <java-symbol type="string" name="config_globalAppSearchDataQuerierPackage" />
 
   <!-- Color used by the accessibility focus rectangle -->
   <java-symbol type="color" name="accessibility_focus_highlight_color" />
