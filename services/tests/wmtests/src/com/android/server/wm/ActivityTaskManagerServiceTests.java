@@ -262,8 +262,8 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
     public void testUpdateSleep() {
         doCallRealMethod().when(mWm.mRoot).hasAwakeDisplay();
         mSupervisor.mGoingToSleepWakeLock = mock(PowerManager.WakeLock.class);
-        final ActivityRecord homeActivity = new ActivityBuilder(mAtm)
-                .setTask(mWm.mRoot.getDefaultTaskDisplayArea().getOrCreateRootHomeTask()).build();
+        final Task rootHomeTask = mWm.mRoot.getDefaultTaskDisplayArea().getOrCreateRootHomeTask();
+        final ActivityRecord homeActivity = new ActivityBuilder(mAtm).setTask(rootHomeTask).build();
         final ActivityRecord topActivity = new ActivityBuilder(mAtm).setCreateTask(true).build();
         topActivity.setState(Task.ActivityState.RESUMED, "test");
 
@@ -277,6 +277,9 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         // Sleep all displays.
         mWm.mRoot.forAllDisplays(display -> doReturn(true).when(display).shouldSleep());
         mAtm.updateSleepIfNeededLocked();
+        // Simulate holding sleep wake lock if it is acquired.
+        verify(mSupervisor.mGoingToSleepWakeLock).acquire();
+        doReturn(true).when(mSupervisor.mGoingToSleepWakeLock).isHeld();
 
         assertEquals(Task.ActivityState.PAUSING, topActivity.getState());
         assertTrue(mAtm.mInternal.isSleeping());
@@ -285,8 +288,17 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         // The top app should not change while sleeping.
         assertEquals(topActivity.app, mAtm.mInternal.getTopApp());
 
+        // If all activities are stopped, the sleep wake lock must be released.
+        final Task topRootTask = topActivity.getRootTask();
+        doReturn(true).when(rootHomeTask).goToSleepIfPossible(anyBoolean());
+        doReturn(true).when(topRootTask).goToSleepIfPossible(anyBoolean());
+        topActivity.setState(Task.ActivityState.STOPPING, "test");
+        topActivity.activityStopped(null /* newIcicle */, null /* newPersistentState */,
+                null /* description */);
+        verify(mSupervisor.mGoingToSleepWakeLock).release();
+
         // Move the current top to back, the top app should update to the next activity.
-        topActivity.getRootTask().moveToBack("test", null /* self */);
+        topRootTask.moveToBack("test", null /* self */);
         assertEquals(homeActivity.app, mAtm.mInternal.getTopApp());
 
         // Wake all displays.
