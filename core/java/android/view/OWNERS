@@ -10,17 +10,64 @@ ogunwale@google.com
 jjaggi@google.com
 
 # Display
-per-file Display.java = michaelwr@google.com, santoscordon@google.com
-per-file DisplayInfo.java = michaelwr@google.com, santoscordon@google.com
+per-file Display*.java = file:/services/core/java/com/android/server/display/OWNERS
+per-file Display*.aidl = file:/services/core/java/com/android/server/display/OWNERS
 
 # Haptics
-per-file HapticFeedbackConstants.java = michaelwr@google.com, santoscordon@google.com
+per-file HapticFeedbackConstants.java = file:/services/core/java/com/android/server/input/OWNERS
+
+# Ime
+per-file Ime*.java = file:/core/java/android/view/inputmethod/OWNERS
 
 # Input
-per-file IInputMonitorHost.aidl = michaelwr@google.com, svv@google.com
-per-file Input*.java = michaelwr@google.com, svv@google.com
-per-file Input*.aidl = michaelwr@google.com, svv@google.com
-per-file KeyEvent.java = michaelwr@google.com, svv@google.com
-per-file MotionEvent.java = michaelwr@google.com, svv@google.com
-per-file PointerIcon.java = michaelwr@google.com, svv@google.com
-per-file SimulatedDpad.java = michaelwr@google.com, svv@google.com
+per-file IInput*.aidl = file:/services/core/java/com/android/server/input/OWNERS
+per-file Input*.java = file:/services/core/java/com/android/server/input/OWNERS
+per-file Input*.aidl = file:/services/core/java/com/android/server/input/OWNERS
+per-file KeyEvent.java = file:/services/core/java/com/android/server/input/OWNERS
+per-file MotionEvent.java = file:/services/core/java/com/android/server/input/OWNERS
+per-file PointerIcon.java = file:/services/core/java/com/android/server/input/OWNERS
+per-file SimulatedDpad.java = file:/services/core/java/com/android/server/input/OWNERS
+
+# InputWindowHandle
+per-file InputWindowHandle.java  = file:/services/core/java/com/android/server/input/OWNERS
+per-file InputWindowHandle.java  = file:/services/core/java/com/android/server/wm/OWNERS
+
+# Surface
+per-file Surface.java = file:/graphics/java/android/graphics/OWNERS
+per-file Surface.java = file:/services/core/java/com/android/server/wm/OWNERS
+per-file SurfaceView.java = file:/graphics/java/android/graphics/OWNERS
+per-file SurfaceView.java = file:/services/core/java/com/android/server/wm/OWNERS
+per-file SurfaceHolder.java = file:/graphics/java/android/graphics/OWNERS
+per-file SurfaceHolder.java = file:/services/core/java/com/android/server/wm/OWNERS
+
+# View
+per-file View.java = file:/services/accessibility/OWNERS
+per-file View.java = file:/core/java/android/service/autofill/OWNERS
+per-file View.java = file:/graphics/java/android/graphics/OWNERS
+per-file View.java = file:/services/core/java/com/android/server/input/OWNERS
+per-file View.java = file:/services/core/java/com/android/server/wm/OWNERS
+per-file ViewRootImpl.java = file:/services/accessibility/OWNERS
+per-file ViewRootImpl.java = file:/core/java/android/service/autofill/OWNERS
+per-file ViewRootImpl.java = file:/graphics/java/android/graphics/OWNERS
+per-file ViewRootImpl.java = file:/services/core/java/com/android/server/input/OWNERS
+per-file ViewRootImpl.java = file:/services/core/java/com/android/server/wm/OWNERS
+
+# WindowManager
+per-file DisplayCutout.aidl = file:/services/core/java/com/android/server/wm/OWNERS
+per-file DisplayCutout.java = file:/services/core/java/com/android/server/wm/OWNERS
+per-file IDisplay*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
+per-file Inset*.java = file:/services/core/java/com/android/server/wm/OWNERS
+per-file Inset*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
+per-file IPinnedStackListener.aidl = file:/services/core/java/com/android/server/wm/OWNERS
+per-file IRecents*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
+per-file IRemote*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
+per-file IWindow*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
+per-file RemoteAnimation*.java = file:/services/core/java/com/android/server/wm/OWNERS
+per-file RemoteAnimation*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
+per-file SurfaceControl*.java = file:/services/core/java/com/android/server/wm/OWNERS
+per-file SurfaceControl*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
+per-file SurfaceSession.java = file:/services/core/java/com/android/server/wm/OWNERS
+per-file SyncRtSurfaceTransactionApplier.java = file:/services/core/java/com/android/server/wm/OWNERS
+per-file ViewRootInsetsControllerHost.java = file:/services/core/java/com/android/server/wm/OWNERS
+per-file Window*.java = file:/services/core/java/com/android/server/wm/OWNERS
+per-file Window*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
