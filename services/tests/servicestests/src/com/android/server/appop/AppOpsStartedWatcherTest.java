@@ -63,11 +63,11 @@ public class AppOpsStartedWatcherTest {
         inOrder.verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
                 .times(1)).onOpStarted(eq(AppOpsManager.OP_FINE_LOCATION),
                 eq(Process.myUid()), eq(getContext().getPackageName()),
-                eq(AppOpsManager.MODE_ALLOWED));
+                eq(AppOpsManager.OP_FLAG_SELF), eq(AppOpsManager.MODE_ALLOWED));
         inOrder.verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
                 .times(1)).onOpStarted(eq(AppOpsManager.OP_CAMERA),
                 eq(Process.myUid()), eq(getContext().getPackageName()),
-                eq(AppOpsManager.MODE_ALLOWED));
+                eq(AppOpsManager.OP_FLAG_SELF), eq(AppOpsManager.MODE_ALLOWED));
 
         // Stop watching
         appOpsManager.stopWatchingStarted(listener);
@@ -91,7 +91,7 @@ public class AppOpsStartedWatcherTest {
         verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
                 .times(2)).onOpStarted(eq(AppOpsManager.OP_CAMERA),
                 eq(Process.myUid()), eq(getContext().getPackageName()),
-                eq(AppOpsManager.MODE_ALLOWED));
+                eq(AppOpsManager.OP_FLAG_SELF), eq(AppOpsManager.MODE_ALLOWED));
         verifyNoMoreInteractions(listener);
 
         // Finish up

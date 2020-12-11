@@ -16,6 +16,9 @@
 
 package com.android.server;
 
+import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.OP_CAMERA;
+import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.service.SensorPrivacyIndividualEnabledSensorProto.CAMERA;
 import static android.service.SensorPrivacyIndividualEnabledSensorProto.MICROPHONE;
@@ -23,7 +26,16 @@ import static android.service.SensorPrivacyIndividualEnabledSensorProto.UNKNOWN;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.AppOpsManager;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.drawable.Icon;
 import android.hardware.ISensorPrivacyListener;
 import android.hardware.ISensorPrivacyManager;
 import android.hardware.SensorPrivacyManager;
@@ -78,6 +90,12 @@ public final class SensorPrivacyService extends SystemService {
     private static final String XML_ATTRIBUTE_ENABLED = "enabled";
     private static final String XML_ATTRIBUTE_SENSOR = "sensor";
 
+    private static final String SENSOR_PRIVACY_CHANNEL_ID = Context.SENSOR_PRIVACY_SERVICE;
+    private static final String ACTION_DISABLE_INDIVIDUAL_SENSOR_PRIVACY =
+            SensorPrivacyService.class.getName() + ".action.disable_sensor_privacy";
+    private static final String EXTRA_SENSOR = SensorPrivacyService.class.getName()
+            + ".extra.sensor";
+
     private final SensorPrivacyServiceImpl mSensorPrivacyServiceImpl;
 
     public SensorPrivacyService(Context context) {
@@ -90,7 +108,8 @@ public final class SensorPrivacyService extends SystemService {
         publishBinderService(Context.SENSOR_PRIVACY_SERVICE, mSensorPrivacyServiceImpl);
     }
 
-    class SensorPrivacyServiceImpl extends ISensorPrivacyManager.Stub {
+    class SensorPrivacyServiceImpl extends ISensorPrivacyManager.Stub implements
+            AppOpsManager.OnOpNotedListener, AppOpsManager.OnOpStartedListener {
 
         private final SensorPrivacyHandler mHandler;
         private final Context mContext;
@@ -110,6 +129,98 @@ public final class SensorPrivacyService extends SystemService {
             synchronized (mLock) {
                 readPersistedSensorPrivacyStateLocked();
             }
+
+            int[] micAndCameraOps = new int[]{OP_RECORD_AUDIO, OP_CAMERA};
+            AppOpsManager appOpsManager = mContext.getSystemService(AppOpsManager.class);
+            appOpsManager.startWatchingNoted(micAndCameraOps, this);
+            appOpsManager.startWatchingStarted(micAndCameraOps, this);
+
+            mContext.registerReceiver(new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    setIndividualSensorPrivacy(intent.getIntExtra(EXTRA_SENSOR, UNKNOWN), false);
+                }
+            }, new IntentFilter(ACTION_DISABLE_INDIVIDUAL_SENSOR_PRIVACY));
+        }
+
+        @Override
+        public void onOpStarted(int code, int uid, String packageName,
+                @AppOpsManager.OpFlags int flags, @AppOpsManager.Mode int result) {
+            onOpNoted(code, uid, packageName, flags, result);
+        }
+
+        @Override
+        public void onOpNoted(int code, int uid, String packageName,
+                @AppOpsManager.OpFlags int flags, @AppOpsManager.Mode int result) {
+            if (result != MODE_ALLOWED || (flags & AppOpsManager.OP_FLAGS_ALL_TRUSTED) == 0) {
+                return;
+            }
+
+            int sensor;
+            if (code == OP_RECORD_AUDIO) {
+                sensor = MICROPHONE;
+            } else {
+                sensor = CAMERA;
+            }
+
+            onSensorUseStarted(uid, packageName, sensor);
+        }
+
+        /**
+         * Called when a sensor protected by individual sensor privacy is attempting to get used.
+         *
+         * @param uid The uid of the app using the sensor
+         * @param packageName The package name of the app using the sensor
+         * @param sensor The sensor that is attempting to be used
+         */
+        private void onSensorUseStarted(int uid, String packageName, int sensor) {
+            if (!isIndividualSensorPrivacyEnabled(sensor)) {
+                return;
+            }
+
+            // TODO moltmann: Use dialog instead of notification if we can determine the activity
+            //                which triggered this usage
+
+            // TODO evanseverson: - Implement final UX for notification
+            //                    - Finalize strings and icons and add as resources
+
+            int icon;
+            CharSequence notificationMessage;
+            if (sensor == MICROPHONE) {
+                icon = com.android.internal.R.drawable.ic_mic;
+                notificationMessage = "Microphone is muted because of sensor privacy";
+            } else {
+                icon = com.android.internal.R.drawable.ic_camera;
+                notificationMessage = "Camera is blocked because of sensor privacy";
+            }
+
+            NotificationManager notificationManager =
+                    mContext.getSystemService(NotificationManager.class);
+            NotificationChannel channel = new NotificationChannel(
+                    SENSOR_PRIVACY_CHANNEL_ID, "Sensor privacy",
+                    NotificationManager.IMPORTANCE_HIGH);
+            channel.setSound(null, null);
+            channel.setBypassDnd(true);
+            channel.enableVibration(false);
+            channel.setBlockable(false);
+
+            notificationManager.createNotificationChannel(channel);
+
+            notificationManager.notify(sensor,
+                    new Notification.Builder(mContext, SENSOR_PRIVACY_CHANNEL_ID)
+                            .setContentTitle(notificationMessage)
+                            .setSmallIcon(icon)
+                            .addAction(new Notification.Action.Builder(
+                                    Icon.createWithResource(mContext, icon),
+                                    "Disable sensor privacy",
+                                    PendingIntent.getBroadcast(mContext, sensor,
+                                            new Intent(ACTION_DISABLE_INDIVIDUAL_SENSOR_PRIVACY)
+                                                    .setPackage(mContext.getPackageName())
+                                                    .putExtra(EXTRA_SENSOR, sensor),
+                                            PendingIntent.FLAG_IMMUTABLE
+                                                    | PendingIntent.FLAG_UPDATE_CURRENT))
+                                    .build())
+                            .build());
         }
 
         /**
@@ -130,6 +241,15 @@ public final class SensorPrivacyService extends SystemService {
             enforceSensorPrivacyPermission();
             synchronized (mLock) {
                 mIndividualEnabled.put(sensor, enable);
+
+                if (!enable) {
+                    // Remove any notifications prompting the user to disable sensory privacy
+                    NotificationManager notificationManager =
+                            mContext.getSystemService(NotificationManager.class);
+
+                    notificationManager.cancel(sensor);
+                }
+
                 persistSensorPrivacyState();
             }
         }
