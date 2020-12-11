@@ -520,11 +520,11 @@ package android.net.wifi {
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public void startLocalOnlyHotspot(@NonNull android.net.wifi.SoftApConfiguration, @Nullable java.util.concurrent.Executor, @Nullable android.net.wifi.WifiManager.LocalOnlyHotspotCallback);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public boolean startScan(android.os.WorkSource);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public void startSubscriptionProvisioning(@NonNull android.net.wifi.hotspot2.OsuProvider, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.hotspot2.ProvisioningCallback);
-    method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void startTemporarilyDisablingAllNonCarrierMergedWifi(int);
+    method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public void startTemporarilyDisablingAllNonCarrierMergedWifi(int);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public boolean startTetheredHotspot(@Nullable android.net.wifi.SoftApConfiguration);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public void stopEasyConnectSession();
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public boolean stopSoftAp();
-    method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void stopTemporarilyDisablingAllNonCarrierMergedWifi();
+    method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public void stopTemporarilyDisablingAllNonCarrierMergedWifi();
     method @RequiresPermission(android.Manifest.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS) public void unregisterCoexCallback(@NonNull android.net.wifi.WifiManager.CoexCallback);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void unregisterNetworkRequestMatchCallback(@NonNull android.net.wifi.WifiManager.NetworkRequestMatchCallback);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void unregisterSoftApCallback(@NonNull android.net.wifi.WifiManager.SoftApCallback);
