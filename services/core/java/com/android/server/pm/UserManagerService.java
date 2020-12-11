@@ -4760,13 +4760,32 @@ public class UserManagerService extends IUserManager.Stub {
                 final boolean hasParent = user.profileGroupId != user.id
                         && user.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID;
                 if (verbose) {
-                    pw.printf("%d: id=%d, name=%s, flags=%s%s%s%s%s%s%s\n", i, user.id, user.name,
+                    final DevicePolicyManagerInternal dpm = getDevicePolicyManagerInternal();
+                    String deviceOwner = "";
+                    String profileOwner = "";
+                    if (dpm != null) {
+                        final long ident = Binder.clearCallingIdentity();
+                        // NOTE: dpm methods below CANNOT be called while holding the mUsersLock
+                        try {
+                            if (dpm.getDeviceOwnerUserId() == user.id) {
+                                deviceOwner = " (device-owner)";
+                            }
+                            if (dpm.getProfileOwnerAsUser(user.id) != null) {
+                                profileOwner = " (profile-owner)";
+                            }
+                        } finally {
+                            Binder.restoreCallingIdentity(ident);
+                        }
+                    }
+                    pw.printf("%d: id=%d, name=%s, flags=%s%s%s%s%s%s%s%s%s\n", i, user.id,
+                            user.name,
                             UserInfo.flagsToString(user.flags),
                             hasParent ? " (parentId=" + user.profileGroupId + ")" : "",
                             running ? " (running)" : "",
                             user.partial ? " (partial)" : "",
                             user.preCreated ? " (pre-created)" : "",
                             user.convertedFromPreCreated ? " (converted)" : "",
+                            deviceOwner, profileOwner,
                             current ? " (current)" : "");
                 } else {
                     // NOTE: the standard "list users" command is used by integration tests and
