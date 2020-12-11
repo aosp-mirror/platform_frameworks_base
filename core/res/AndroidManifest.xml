@@ -2259,7 +2259,9 @@
     <!-- Allows to query ongoing call details and manage ongoing calls
      <p>Protection level: signature|appop -->
     <permission android:name="android.permission.MANAGE_ONGOING_CALLS"
-        android:protectionLevel="signature|appop" />
+        android:protectionLevel="signature|appop"
+        android:label="@string/permlab_manageOngoingCalls"
+        android:description="@string/permdesc_manageOngoingCalls" />
 
     <!-- Allows the app to request network scans from telephony.
          <p>Not for use by third-party applications.
