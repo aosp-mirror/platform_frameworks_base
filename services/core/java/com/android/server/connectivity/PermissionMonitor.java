@@ -35,7 +35,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.UserInfo;
 import android.net.INetd;
 import android.net.UidRange;
 import android.os.Build;
@@ -174,11 +173,9 @@ public class PermissionMonitor implements PackageManagerInternal.PackageListObse
             netdPermsUids.put(uid, netdPermsUids.get(uid) | otherNetdPerms);
         }
 
-        List<UserInfo> users = mUserManager.getAliveUsers();
-        if (users != null) {
-            for (UserInfo user : users) {
-                mUsers.add(user.id);
-            }
+        final List<UserHandle> users = mUserManager.getUserHandles(true /* excludeDying */);
+        for (UserHandle user : users) {
+            mUsers.add(user.getIdentifier());
         }
 
         final SparseArray<ArraySet<String>> systemPermission =
