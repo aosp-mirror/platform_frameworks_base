@@ -61,10 +61,9 @@ class AppPairsTest(
             setup {
                 eachRun {
                     uiDevice.wakeUpAndGoToHomeScreen()
-                    primaryApp.open()
-                    uiDevice.pressHome()
-                    secondaryApp.open()
-                    uiDevice.pressHome()
+                    primaryApp.launchViaIntent()
+                    secondaryApp.launchViaIntent()
+                    nonResizeableApp.launchViaIntent()
                     updateTaskId()
                 }
             }
@@ -90,7 +89,7 @@ class AppPairsTest(
 
     @Test
     fun testAppPairs_pairPrimaryAndSecondaryApps() {
-        val testTag = "testAppPaired_pairPrimaryAndSecondary"
+        val testTag = "testAppPairs_pairPrimaryAndSecondaryApps"
         runWithFlicker(appPairsSetup) {
             withTestName { testTag }
             repeat {
@@ -176,6 +175,36 @@ class AppPairsTest(
         }
     }
 
+    @Test
+    fun testAppPairs_canNotPairNonResizeableApps() {
+        val testTag = "testAppPairs_canNotPairNonResizeableApps"
+        runWithFlicker(appPairsSetup) {
+            withTestName { testTag }
+            repeat {
+                TEST_REPETITIONS
+            }
+            transitions {
+                nonResizeableApp.launchViaIntent()
+                // TODO pair apps through normal UX flow
+                executeShellCommand(composePairsCommand(
+                    primaryTaskId, nonResizeableTaskId, true /* pair */))
+                SystemClock.sleep(AppPairsHelper.TIMEOUT_MS)
+            }
+            assertions {
+                layersTrace {
+                    appPairsDividerIsInvisible()
+                }
+                windowManagerTrace {
+                    end {
+                        showsAppWindow(nonResizeableApp.defaultWindowName)
+                            .and()
+                            .hidesAppWindow(primaryApp.defaultWindowName)
+                    }
+                }
+            }
+        }
+    }
+
     private fun composePairsCommand(
         primaryApp: String,
         secondaryApp: String,
@@ -202,6 +231,7 @@ class AppPairsTest(
     private fun updateTaskId() {
         val primaryAppComponent = primaryApp.openAppIntent.component
         val secondaryAppComponent = secondaryApp.openAppIntent.component
+        val nonResizeableAppComponent = nonResizeableApp.openAppIntent.component
         if (primaryAppComponent != null) {
             primaryTaskId = appPairsHelper.getTaskIdForActivity(
                     primaryAppComponent.packageName, primaryAppComponent.className).toString()
@@ -210,11 +240,17 @@ class AppPairsTest(
             secondaryTaskId = appPairsHelper.getTaskIdForActivity(
                     secondaryAppComponent.packageName, secondaryAppComponent.className).toString()
         }
+        if (nonResizeableAppComponent != null) {
+            nonResizeableTaskId = appPairsHelper.getTaskIdForActivity(
+                nonResizeableAppComponent.packageName,
+                nonResizeableAppComponent.className).toString()
+        }
     }
 
     companion object {
         var primaryTaskId = ""
         var secondaryTaskId = ""
+        var nonResizeableTaskId = ""
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<Array<Any>> {

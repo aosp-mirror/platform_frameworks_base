@@ -86,6 +86,17 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".NonResizeableActivity"
+                  android:resizeableActivity="false"
+                  android:taskAffinity="com.android.wm.shell.flicker.testapp.NonResizeableActivity"
+                  android:label="NonResizeableApp"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
         <activity android:name=".SimpleActivity"
                   android:taskAffinity="com.android.wm.shell.flicker.testapp.SimpleActivity"
                   android:label="SimpleApp"

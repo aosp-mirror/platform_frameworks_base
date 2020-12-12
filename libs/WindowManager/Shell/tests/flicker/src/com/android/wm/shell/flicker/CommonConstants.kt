@@ -37,3 +37,4 @@ const val TEST_APP_FIXED_ACTIVITY_LABEL = "FixedApp"
 // Test App > SplitScreen Activity
 const val TEST_APP_SPLITSCREEN_PRIMARY_LABEL = "SplitScreenPrimaryApp"
 const val TEST_APP_SPLITSCREEN_SECONDARY_LABEL = "SplitScreenSecondaryApp"
+const val TEST_APP_NONRESIZEABLE_LABEL = "NonResizeableApp"
