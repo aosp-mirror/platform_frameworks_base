@@ -756,8 +756,9 @@ class AppErrors {
     boolean handleAppCrashLocked(ProcessRecord app, String reason,
             String shortMsg, String longMsg, String stackTrace, AppErrorDialog.Data data) {
         final long now = SystemClock.uptimeMillis();
-        final boolean showBackground = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
+        final boolean showBackground = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.ANR_SHOW_BACKGROUND, 0,
+                mService.mUserController.getCurrentUserId()) != 0;
 
         final boolean procIsBoundForeground =
             (app.getCurProcState() == ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
@@ -889,8 +890,9 @@ class AppErrors {
 
     void handleShowAppErrorUi(Message msg) {
         AppErrorDialog.Data data = (AppErrorDialog.Data) msg.obj;
-        boolean showBackground = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
+        boolean showBackground = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.ANR_SHOW_BACKGROUND, 0,
+                mService.mUserController.getCurrentUserId()) != 0;
 
         final int userId;
         synchronized (mService) {
@@ -982,8 +984,9 @@ class AppErrors {
                 return;
             }
 
-            boolean showBackground = Settings.Secure.getInt(mContext.getContentResolver(),
-                    Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
+            boolean showBackground = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.ANR_SHOW_BACKGROUND, 0,
+                    mService.mUserController.getCurrentUserId()) != 0;
             if (mService.mAtmInternal.canShowErrorDialogs() || showBackground) {
                 proc.getDialogController().showAnrDialogs(data);
             } else {
