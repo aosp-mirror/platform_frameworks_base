@@ -5236,8 +5236,6 @@ public class SettingsProvider extends ContentProvider {
                                     && !Integer.toString(Secure.LOCATION_MODE_OFF)
                                             .equals(locationMode.getValue()));
                     initGlobalSettingsDefaultValForWearLocked(
-                            Global.Wearable.RETAIL_MODE, Global.Wearable.RETAIL_MODE_CONSUMER);
-                    initGlobalSettingsDefaultValForWearLocked(
                             Global.Wearable.PHONE_PLAY_STORE_AVAILABILITY,
                             Global.Wearable.PHONE_PLAY_STORE_AVAILABILITY_UNKNOWN);
                     initGlobalSettingsDefaultValForWearLocked(

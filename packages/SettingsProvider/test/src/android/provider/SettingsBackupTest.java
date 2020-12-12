@@ -605,7 +605,6 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.HOTWORD_DETECTION_ENABLED,
                     Settings.Global.Wearable.DEFAULT_VIBRATION,
                     Settings.Global.Wearable.OBTAIN_PAIRED_DEVICE_LOCATION,
-                    Settings.Global.Wearable.RETAIL_MODE,
                     Settings.Global.Wearable.PHONE_PLAY_STORE_AVAILABILITY,
                     Settings.Global.Wearable.BUG_REPORT,
                     Settings.Global.Wearable.SMART_ILLUMINATE_ENABLED,
