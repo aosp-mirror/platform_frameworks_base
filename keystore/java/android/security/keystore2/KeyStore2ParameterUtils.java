@@ -18,8 +18,8 @@ package android.security.keystore2;
 
 import android.annotation.NonNull;
 import android.hardware.biometrics.BiometricManager;
-import android.hardware.keymint.KeyParameter;
-import android.hardware.keymint.SecurityLevel;
+import android.hardware.security.keymint.KeyParameter;
+import android.hardware.security.keymint.SecurityLevel;
 import android.security.GateKeeper;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keystore.KeyProperties;
