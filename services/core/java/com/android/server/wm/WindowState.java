@@ -119,6 +119,8 @@ import static com.android.server.policy.WindowManagerPolicy.TRANSIT_ENTER;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_EXIT;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
 import static com.android.server.wm.AnimationSpecProto.MOVE;
+import static com.android.server.wm.DisplayContent.IME_TARGET_INPUT;
+import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.DisplayContent.logsGestureExclusionRestrictions;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
@@ -1112,9 +1114,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final int layoutXDiff;
         final int layoutYDiff;
         final WindowState imeWin = mWmService.mRoot.getCurrentInputMethodWindow();
+        final InsetsControlTarget imeTarget = dc.getImeTarget(IME_TARGET_LAYERING);
         final boolean isInputMethodAdjustTarget = windowsAreFloating
-                ? dc.mInputMethodTarget != null && task == dc.mInputMethodTarget.getTask()
-                : isInputMethodTarget();
+                ? imeTarget != null && task == imeTarget.getWindow().getTask()
+                : isImeLayeringTarget();
         final boolean isImeTarget =
                 imeWin != null && imeWin.isVisibleNow() && isInputMethodAdjustTarget;
         if (isFullscreenAndFillsDisplay || layoutInParentFrame()) {
@@ -1451,9 +1454,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     void onDisplayChanged(DisplayContent dc) {
         if (dc != null && mDisplayContent != null && dc != mDisplayContent
-                && mDisplayContent.mInputMethodInputTarget == this) {
-            dc.setInputMethodInputTarget(mDisplayContent.mInputMethodInputTarget);
-            mDisplayContent.mInputMethodInputTarget = null;
+                && getImeInputTarget() == this) {
+            dc.updateImeInputAndControlTarget(getImeInputTarget());
+            mDisplayContent.setImeInputTarget(null);
         }
         super.onDisplayChanged(dc);
         // Window was not laid out for this display yet, so make sure mLayoutSeq does not match.
@@ -2158,14 +2161,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         final DisplayContent dc = getDisplayContent();
-        if (isInputMethodTarget()) {
-            // Make sure to set mInputMethodTarget as null when the removed window is the IME
-            // target, in case computeImeTarget may use the outdated target.
-            dc.mInputMethodTarget = null;
+        if (isImeLayeringTarget()) {
+            // Make sure to set mImeLayeringTarget as null when the removed window is the
+            // IME target, in case computeImeTarget may use the outdated target.
+            dc.setImeLayeringTarget(null);
             dc.computeImeTarget(true /* updateImeTarget */);
         }
-        if (dc.mInputMethodInputTarget == this) {
-            dc.setInputMethodInputTarget(null);
+        if (dc.getImeTarget(IME_TARGET_INPUT) == this) {
+            dc.updateImeInputAndControlTarget(null);
         }
 
         final int type = mAttrs.type;
@@ -4615,7 +4618,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // directly above it. The exception is if we are in split screen
         // in which case we process the IME at the DisplayContent level to
         // ensure it is above the docked divider.
-        if (isInputMethodTarget() && !inSplitScreenWindowingMode()) {
+        if (isImeLayeringTarget() && !inSplitScreenWindowingMode()) {
             if (getDisplayContent().forAllImeWindows(callback, traverseTopToBottom)) {
                 return true;
             }
@@ -5211,9 +5214,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     boolean needsZBoost() {
-        final WindowState inputMethodTarget = getDisplayContent().mInputMethodTarget;
-        if (mIsImWindow && inputMethodTarget != null) {
-            final ActivityRecord activity = inputMethodTarget.mActivityRecord;
+        final InsetsControlTarget target = getDisplayContent().getImeTarget(IME_TARGET_LAYERING);
+        if (mIsImWindow && target != null) {
+            final ActivityRecord activity = target.getWindow().mActivityRecord;
             if (activity != null) {
                 return activity.needsZBoost();
             }
@@ -5365,14 +5368,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         if (isChildWindow()) {
             // If we are a child of the input method target we need this promotion.
-            if (getParentWindow().isInputMethodTarget()) {
+            if (getParentWindow().isImeLayeringTarget()) {
                 return true;
             }
         } else if (mActivityRecord != null) {
             // Likewise if we share a token with the Input method target and are ordered
             // above it but not necessarily a child (e.g. a Dialog) then we also need
             // this promotion.
-            final WindowState imeTarget = getDisplayContent().mInputMethodTarget;
+            final WindowState imeTarget = getImeLayeringTarget();
             boolean inTokenWithAndAboveImeTarget = imeTarget != null && imeTarget != this
                     && imeTarget.mToken == mToken
                     && mAttrs.type != TYPE_APPLICATION_STARTING
@@ -5499,8 +5502,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return !mTapExcludeRegion.isEmpty();
     }
 
-    boolean isInputMethodTarget() {
-        return getDisplayContent().mInputMethodTarget == this;
+    boolean isImeLayeringTarget() {
+        return getDisplayContent().getImeTarget(IME_TARGET_LAYERING) == this;
+    }
+
+    WindowState getImeLayeringTarget() {
+        final InsetsControlTarget target = getDisplayContent().getImeTarget(IME_TARGET_LAYERING);
+        return target != null ? target.getWindow() : null;
+    }
+
+    WindowState getImeInputTarget() {
+        final InsetsControlTarget target = mDisplayContent.getImeTarget(IME_TARGET_INPUT);
+        return target != null ? target.getWindow() : null;
     }
 
     long getFrameNumber() {
