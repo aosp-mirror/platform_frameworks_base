@@ -1,0 +1,5 @@
+# Bug component: 25700
+
+file:/core/java/android/view/OWNERS
+
+per-file *Input* = file:/services/core/java/com/android/server/inputmethod/OWNERS

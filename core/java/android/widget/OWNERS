@@ -7,3 +7,5 @@ aurimas@google.com
 siyamed@google.com
 
 per-file TextView.java, EditText.java, Editor.java = siyamed@google.com, nona@google.com, clarabayarri@google.com
+
+per-file SpellChecker.java = file:../view/inputmethod/OWNERS
