@@ -16,8 +16,8 @@
 
 package android.security.keystore2;
 
-import android.hardware.keymint.KeyParameter;
-import android.hardware.keymint.SecurityLevel;
+import android.hardware.security.keymint.KeyParameter;
+import android.hardware.security.keymint.SecurityLevel;
 import android.security.KeyStore2;
 import android.security.KeyStoreSecurityLevel;
 import android.security.keymaster.KeymasterArguments;
