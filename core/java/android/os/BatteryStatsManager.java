@@ -160,6 +160,7 @@ public final class BatteryStatsManager {
         mBatteryStats = batteryStats;
     }
 
+
     /**
      * Returns BatteryUsageStats, which contains power attribution data on a per-subsystem
      * and per-UID basis.
@@ -169,8 +170,20 @@ public final class BatteryStatsManager {
     @RequiresPermission(android.Manifest.permission.BATTERY_STATS)
     @NonNull
     public BatteryUsageStats getBatteryUsageStats() {
+        return getBatteryUsageStats(BatteryUsageStatsQuery.DEFAULT);
+    }
+
+    /**
+     * Returns BatteryUsageStats, which contains power attribution data on a per-subsystem
+     * and per-UID basis.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.BATTERY_STATS)
+    @NonNull
+    public BatteryUsageStats getBatteryUsageStats(BatteryUsageStatsQuery query) {
         try {
-            return mBatteryStats.getBatteryUsageStats();
+            return mBatteryStats.getBatteryUsageStats(query);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
