@@ -23,6 +23,7 @@
 using android::hardware::hidl_vec;
 using android::hardware::Return;
 
+using IGnssMeasurementInterface = android::hardware::gnss::IGnssMeasurementInterface;
 using IGnssMeasurement_V1_0 = android::hardware::gnss::V1_0::IGnssMeasurement;
 using IGnssMeasurement_V1_1 = android::hardware::gnss::V1_1::IGnssMeasurement;
 using IGnssMeasurement_V2_0 = android::hardware::gnss::V2_0::IGnssMeasurement;
@@ -43,17 +44,33 @@ jboolean checkGnssMeasurementStatus(const IGnssMeasurement_V1_0::GnssMeasurement
 
 namespace android::gnss {
 
+// Implementation of GnssMeasurement
+
+GnssMeasurement::GnssMeasurement(const sp<IGnssMeasurementInterface>& iGnssMeasurement)
+      : mIGnssMeasurement(iGnssMeasurement) {}
+
+jboolean GnssMeasurement::setCallback(const std::unique_ptr<GnssMeasurementCallback>& callback,
+                                      bool enableFullTracking) {
+    auto status = mIGnssMeasurement->setCallback(callback->getAidl(), enableFullTracking);
+    return checkAidlStatus(status, "IGnssMeasurement setCallback() failed.");
+}
+
+jboolean GnssMeasurement::close() {
+    auto status = mIGnssMeasurement->close();
+    return checkAidlStatus(status, "IGnssMeasurement close() failed.");
+}
+
 // Implementation of GnssMeasurement_V1_0
 
 GnssMeasurement_V1_0::GnssMeasurement_V1_0(const sp<IGnssMeasurement_V1_0>& iGnssMeasurement)
       : mIGnssMeasurement_V1_0(iGnssMeasurement) {}
 
-jboolean GnssMeasurement_V1_0::setCallback(const sp<GnssMeasurementCallback>& callback,
+jboolean GnssMeasurement_V1_0::setCallback(const std::unique_ptr<GnssMeasurementCallback>& callback,
                                            bool enableFullTracking) {
     if (enableFullTracking == true) {
         ALOGW("Full tracking is mode not supported in 1.0 GNSS HAL.");
     }
-    auto status = mIGnssMeasurement_V1_0->setCallback(callback);
+    auto status = mIGnssMeasurement_V1_0->setCallback(callback->getHidl());
     if (!checkHidlReturn(status, "IGnssMeasurement setCallback() failed.")) {
         return JNI_FALSE;
     }
@@ -71,9 +88,9 @@ jboolean GnssMeasurement_V1_0::close() {
 GnssMeasurement_V1_1::GnssMeasurement_V1_1(const sp<IGnssMeasurement_V1_1>& iGnssMeasurement)
       : GnssMeasurement_V1_0{iGnssMeasurement}, mIGnssMeasurement_V1_1(iGnssMeasurement) {}
 
-jboolean GnssMeasurement_V1_1::setCallback(const sp<GnssMeasurementCallback>& callback,
+jboolean GnssMeasurement_V1_1::setCallback(const std::unique_ptr<GnssMeasurementCallback>& callback,
                                            bool enableFullTracking) {
-    auto status = mIGnssMeasurement_V1_1->setCallback_1_1(callback, enableFullTracking);
+    auto status = mIGnssMeasurement_V1_1->setCallback_1_1(callback->getHidl(), enableFullTracking);
     if (!checkHidlReturn(status, "IGnssMeasurement setCallback_V1_1() failed.")) {
         return JNI_FALSE;
     }
@@ -86,9 +103,9 @@ jboolean GnssMeasurement_V1_1::setCallback(const sp<GnssMeasurementCallback>& ca
 GnssMeasurement_V2_0::GnssMeasurement_V2_0(const sp<IGnssMeasurement_V2_0>& iGnssMeasurement)
       : GnssMeasurement_V1_1{iGnssMeasurement}, mIGnssMeasurement_V2_0(iGnssMeasurement) {}
 
-jboolean GnssMeasurement_V2_0::setCallback(const sp<GnssMeasurementCallback>& callback,
+jboolean GnssMeasurement_V2_0::setCallback(const std::unique_ptr<GnssMeasurementCallback>& callback,
                                            bool enableFullTracking) {
-    auto status = mIGnssMeasurement_V2_0->setCallback_2_0(callback, enableFullTracking);
+    auto status = mIGnssMeasurement_V2_0->setCallback_2_0(callback->getHidl(), enableFullTracking);
     if (!checkHidlReturn(status, "IGnssMeasurement setCallback_2_0() failed.")) {
         return JNI_FALSE;
     }
@@ -101,9 +118,9 @@ jboolean GnssMeasurement_V2_0::setCallback(const sp<GnssMeasurementCallback>& ca
 GnssMeasurement_V2_1::GnssMeasurement_V2_1(const sp<IGnssMeasurement_V2_1>& iGnssMeasurement)
       : GnssMeasurement_V2_0{iGnssMeasurement}, mIGnssMeasurement_V2_1(iGnssMeasurement) {}
 
-jboolean GnssMeasurement_V2_1::setCallback(const sp<GnssMeasurementCallback>& callback,
+jboolean GnssMeasurement_V2_1::setCallback(const std::unique_ptr<GnssMeasurementCallback>& callback,
                                            bool enableFullTracking) {
-    auto status = mIGnssMeasurement_V2_1->setCallback_2_1(callback, enableFullTracking);
+    auto status = mIGnssMeasurement_V2_1->setCallback_2_1(callback->getHidl(), enableFullTracking);
     if (!checkHidlReturn(status, "IGnssMeasurement setCallback_2_1() failed.")) {
         return JNI_FALSE;
     }

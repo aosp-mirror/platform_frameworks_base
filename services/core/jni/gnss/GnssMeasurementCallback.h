@@ -27,6 +27,7 @@
 #include <android/hardware/gnss/1.1/IGnssMeasurement.h>
 #include <android/hardware/gnss/2.0/IGnssMeasurement.h>
 #include <android/hardware/gnss/2.1/IGnssMeasurement.h>
+#include <android/hardware/gnss/BnGnssMeasurementCallback.h>
 #include <log/log.h>
 #include "Utils.h"
 #include "jni.h"
@@ -44,12 +45,36 @@ extern jmethodID method_reportMeasurementData;
 
 void GnssMeasurement_class_init_once(JNIEnv* env, jclass& clazz);
 
+void setMeasurementData(JNIEnv* env, jobject& callbacksObj, jobject clock,
+                        jobjectArray measurementArray);
+
+class GnssMeasurementCallbackAidl : public hardware::gnss::BnGnssMeasurementCallback {
+public:
+    GnssMeasurementCallbackAidl(jobject& callbacksObj) : mCallbacksObj(callbacksObj) {}
+    android::binder::Status gnssMeasurementCb(const hardware::gnss::GnssData& data) override;
+
+private:
+    void translateSingleGnssMeasurement(JNIEnv* env,
+                                        const hardware::gnss::GnssMeasurement& measurement,
+                                        JavaObject& object);
+
+    jobjectArray translateAllGnssMeasurements(
+            JNIEnv* env, const std::vector<hardware::gnss::GnssMeasurement>& measurements);
+
+    void translateAndSetGnssData(const hardware::gnss::GnssData& data);
+
+    void translateGnssClock(JNIEnv* env, const hardware::gnss::GnssData& data, JavaObject& object);
+
+    jobject& mCallbacksObj;
+};
+
 /*
  * GnssMeasurementCallback implements the callback methods required for the
  * GnssMeasurement interface.
  */
-struct GnssMeasurementCallback : public hardware::gnss::V2_1::IGnssMeasurementCallback {
-    GnssMeasurementCallback(jobject& callbacksObj) : mCallbacksObj(callbacksObj) {}
+class GnssMeasurementCallbackHidl : public hardware::gnss::V2_1::IGnssMeasurementCallback {
+public:
+    GnssMeasurementCallbackHidl(jobject& callbacksObj) : mCallbacksObj(callbacksObj) {}
     hardware::Return<void> gnssMeasurementCb_2_1(
             const hardware::gnss::V2_1::IGnssMeasurementCallback::GnssData& data) override;
     hardware::Return<void> gnssMeasurementCb_2_0(
@@ -61,7 +86,7 @@ struct GnssMeasurementCallback : public hardware::gnss::V2_1::IGnssMeasurementCa
 
 private:
     template <class T>
-    void translateSingleGnssMeasurement(const T* measurement, JavaObject& object);
+    void translateSingleGnssMeasurement(const T& measurement, JavaObject& object);
 
     template <class T>
     jobjectArray translateAllGnssMeasurements(JNIEnv* env, const T* measurements, size_t count);
@@ -73,93 +98,114 @@ private:
     size_t getMeasurementCount(const T& data);
 
     template <class T>
-    void translateGnssClock(JavaObject& object, const T& data);
-
-    void setMeasurementData(JNIEnv* env, jobject clock, jobjectArray measurementArray);
+    void translateGnssClock(const T& data, JavaObject& object);
 
     jobject& mCallbacksObj;
 };
 
+class GnssMeasurementCallback {
+public:
+    GnssMeasurementCallback(jobject& callbacksObj) : mCallbacksObj(callbacksObj) {}
+    sp<GnssMeasurementCallbackAidl> getAidl() {
+        if (callbackAidl == nullptr) {
+            callbackAidl = sp<GnssMeasurementCallbackAidl>::make(mCallbacksObj);
+        }
+        return callbackAidl;
+    }
+
+    sp<GnssMeasurementCallbackHidl> getHidl() {
+        if (callbackHidl == nullptr) {
+            callbackHidl = sp<GnssMeasurementCallbackHidl>::make(mCallbacksObj);
+        }
+        return callbackHidl;
+    }
+
+private:
+    jobject& mCallbacksObj;
+    sp<GnssMeasurementCallbackAidl> callbackAidl;
+    sp<GnssMeasurementCallbackHidl> callbackHidl;
+};
+
 template <class T>
-void GnssMeasurementCallback::translateAndSetGnssData(const T& data) {
+void GnssMeasurementCallbackHidl::translateAndSetGnssData(const T& data) {
     JNIEnv* env = getJniEnv();
 
     JavaObject gnssClockJavaObject(env, class_gnssClock, method_gnssClockCtor);
-    translateGnssClock(gnssClockJavaObject, data);
+    translateGnssClock(data, gnssClockJavaObject);
     jobject clock = gnssClockJavaObject.get();
 
     size_t count = getMeasurementCount(data);
     jobjectArray measurementArray =
             translateAllGnssMeasurements(env, data.measurements.data(), count);
-    setMeasurementData(env, clock, measurementArray);
+    setMeasurementData(env, mCallbacksObj, clock, measurementArray);
 
     env->DeleteLocalRef(clock);
     env->DeleteLocalRef(measurementArray);
 }
 
 template <>
-size_t GnssMeasurementCallback::getMeasurementCount<
+size_t GnssMeasurementCallbackHidl::getMeasurementCount<
         hardware::gnss::V1_0::IGnssMeasurementCallback::GnssData>(
         const hardware::gnss::V1_0::IGnssMeasurementCallback::GnssData& data);
 
 template <class T>
-size_t GnssMeasurementCallback::getMeasurementCount(const T& data) {
+size_t GnssMeasurementCallbackHidl::getMeasurementCount(const T& data) {
     return data.measurements.size();
 }
 
 // Preallocate object as: JavaObject object(env, "android/location/GnssMeasurement");
 template <>
-void GnssMeasurementCallback::translateSingleGnssMeasurement<
+void GnssMeasurementCallbackHidl::translateSingleGnssMeasurement<
         hardware::gnss::V1_0::IGnssMeasurementCallback::GnssMeasurement>(
-        const hardware::gnss::V1_0::IGnssMeasurementCallback::GnssMeasurement* measurement,
+        const hardware::gnss::V1_0::IGnssMeasurementCallback::GnssMeasurement& measurement,
         JavaObject& object);
 
 // Preallocate object as: JavaObject object(env, "android/location/GnssMeasurement");
 template <>
-void GnssMeasurementCallback::translateSingleGnssMeasurement<
+void GnssMeasurementCallbackHidl::translateSingleGnssMeasurement<
         hardware::gnss::V1_1::IGnssMeasurementCallback::GnssMeasurement>(
-        const hardware::gnss::V1_1::IGnssMeasurementCallback::GnssMeasurement* measurement_V1_1,
+        const hardware::gnss::V1_1::IGnssMeasurementCallback::GnssMeasurement& measurement_V1_1,
         JavaObject& object);
 
 // Preallocate object as: JavaObject object(env, "android/location/GnssMeasurement");
 template <>
-void GnssMeasurementCallback::translateSingleGnssMeasurement<
+void GnssMeasurementCallbackHidl::translateSingleGnssMeasurement<
         hardware::gnss::V2_0::IGnssMeasurementCallback::GnssMeasurement>(
-        const hardware::gnss::V2_0::IGnssMeasurementCallback::GnssMeasurement* measurement_V2_0,
+        const hardware::gnss::V2_0::IGnssMeasurementCallback::GnssMeasurement& measurement_V2_0,
         JavaObject& object);
 
 // Preallocate object as: JavaObject object(env, "android/location/GnssMeasurement");
 template <>
-void GnssMeasurementCallback::translateSingleGnssMeasurement<
+void GnssMeasurementCallbackHidl::translateSingleGnssMeasurement<
         hardware::gnss::V2_1::IGnssMeasurementCallback::GnssMeasurement>(
-        const hardware::gnss::V2_1::IGnssMeasurementCallback::GnssMeasurement* measurement_V2_1,
+        const hardware::gnss::V2_1::IGnssMeasurementCallback::GnssMeasurement& measurement_V2_1,
         JavaObject& object);
 
 template <class T>
-void GnssMeasurementCallback::translateGnssClock(JavaObject& object, const T& data) {
-    translateGnssClock(object, data.clock);
+void GnssMeasurementCallbackHidl::translateGnssClock(const T& data, JavaObject& object) {
+    translateGnssClock(data.clock, object);
 }
 
 template <>
-void GnssMeasurementCallback::translateGnssClock(
-        JavaObject& object, const hardware::gnss::V1_0::IGnssMeasurementCallback::GnssClock& clock);
+void GnssMeasurementCallbackHidl::translateGnssClock(
+        const hardware::gnss::V1_0::IGnssMeasurementCallback::GnssClock& clock, JavaObject& object);
 
 template <>
-void GnssMeasurementCallback::translateGnssClock(
-        JavaObject& object, const hardware::gnss::V2_1::IGnssMeasurementCallback::GnssClock& clock);
+void GnssMeasurementCallbackHidl::translateGnssClock(
+        const hardware::gnss::V2_1::IGnssMeasurementCallback::GnssClock& clock, JavaObject& object);
 
 template <>
-void GnssMeasurementCallback::translateGnssClock(
-        JavaObject& object, const hardware::gnss::V2_0::IGnssMeasurementCallback::GnssData& data);
+void GnssMeasurementCallbackHidl::translateGnssClock(
+        const hardware::gnss::V2_0::IGnssMeasurementCallback::GnssData& data, JavaObject& object);
 
 template <>
-void GnssMeasurementCallback::translateGnssClock(
-        JavaObject& object, const hardware::gnss::V2_1::IGnssMeasurementCallback::GnssData& data);
+void GnssMeasurementCallbackHidl::translateGnssClock(
+        const hardware::gnss::V2_1::IGnssMeasurementCallback::GnssData& data, JavaObject& object);
 
 template <class T>
-jobjectArray GnssMeasurementCallback::translateAllGnssMeasurements(JNIEnv* env,
-                                                                   const T* measurements,
-                                                                   size_t count) {
+jobjectArray GnssMeasurementCallbackHidl::translateAllGnssMeasurements(JNIEnv* env,
+                                                                       const T* measurements,
+                                                                       size_t count) {
     if (count == 0) {
         return nullptr;
     }
@@ -169,7 +215,7 @@ jobjectArray GnssMeasurementCallback::translateAllGnssMeasurements(JNIEnv* env,
 
     for (uint16_t i = 0; i < count; ++i) {
         JavaObject object(env, class_gnssMeasurement, method_gnssMeasurementCtor);
-        translateSingleGnssMeasurement(&(measurements[i]), object);
+        translateSingleGnssMeasurement(measurements[i], object);
         jobject gnssMeasurement = object.get();
         env->SetObjectArrayElement(gnssMeasurementArray, i, gnssMeasurement);
         env->DeleteLocalRef(gnssMeasurement);
