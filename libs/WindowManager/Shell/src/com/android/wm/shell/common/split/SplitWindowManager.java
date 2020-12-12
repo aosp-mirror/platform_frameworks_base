@@ -51,10 +51,17 @@ public final class SplitWindowManager extends WindowlessWindowManager {
 
     private Context mContext;
     private SurfaceControlViewHost mViewHost;
+    final private ParentContainerCallbacks mParentContainerCallbacks;
 
-    public SplitWindowManager(Context context, Configuration config, SurfaceControl rootSurface) {
-        super(config, rootSurface, null /* hostInputToken */);
+    public interface ParentContainerCallbacks {
+        void attachToParentSurface(SurfaceControl.Builder b);
+    }
+
+    public SplitWindowManager(Context context, Configuration config,
+            ParentContainerCallbacks parentContainerCallbacks) {
+        super(config, null /* rootSurface */, null /* hostInputToken */);
         mContext = context.createConfigurationContext(config);
+        mParentContainerCallbacks = parentContainerCallbacks;
     }
 
     @Override
@@ -71,6 +78,11 @@ public final class SplitWindowManager extends WindowlessWindowManager {
     public void setConfiguration(Configuration configuration) {
         super.setConfiguration(configuration);
         mContext = mContext.createConfigurationContext(configuration);
+    }
+
+    @Override
+    protected void attachToParentSurface(SurfaceControl.Builder b) {
+        mParentContainerCallbacks.attachToParentSurface(b);
     }
 
     /** Inflates {@link DividerView} on to the root surface. */

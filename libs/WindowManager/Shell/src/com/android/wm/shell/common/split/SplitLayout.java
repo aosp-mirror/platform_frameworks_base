@@ -57,10 +57,12 @@ public class SplitLayout {
     private int mDividePosition;
 
     public SplitLayout(Context context, Configuration configuration,
-            LayoutChangeListener layoutChangeListener, SurfaceControl rootLeash) {
+            LayoutChangeListener layoutChangeListener,
+            SplitWindowManager.ParentContainerCallbacks parentContainerCallbacks) {
         mContext = context.createConfigurationContext(configuration);
         mLayoutChangeListener = layoutChangeListener;
-        mSplitWindowManager = new SplitWindowManager(mContext, configuration, rootLeash);
+        mSplitWindowManager = new SplitWindowManager(
+                mContext, configuration, parentContainerCallbacks);
 
         mDividerWindowWidth = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_divider_thickness);

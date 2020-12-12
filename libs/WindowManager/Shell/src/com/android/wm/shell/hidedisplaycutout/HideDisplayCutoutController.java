@@ -27,6 +27,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.wm.shell.common.DisplayController;
 
 import java.io.PrintWriter;
+import java.util.concurrent.Executor;
 
 /**
  * Manages the hide display cutout status.
@@ -51,7 +52,7 @@ public class HideDisplayCutoutController implements HideDisplayCutout {
      */
     @Nullable
     public static HideDisplayCutoutController create(
-            Context context, DisplayController displayController) {
+            Context context, DisplayController displayController, Executor executor) {
         // The SystemProperty is set for devices that support this feature and is used to control
         // whether to create the HideDisplayCutout instance.
         // It's defined in the device.mk (e.g. device/google/crosshatch/device.mk).
@@ -60,7 +61,7 @@ public class HideDisplayCutoutController implements HideDisplayCutout {
         }
 
         HideDisplayCutoutOrganizer organizer =
-                new HideDisplayCutoutOrganizer(context, displayController);
+                new HideDisplayCutoutOrganizer(context, displayController, executor);
         return new HideDisplayCutoutController(context, organizer);
     }
 

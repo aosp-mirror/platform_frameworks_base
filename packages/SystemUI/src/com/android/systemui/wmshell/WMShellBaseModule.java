@@ -34,6 +34,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.dagger.WMSingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.wm.shell.FullscreenTaskListener;
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.ShellInit;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -288,6 +289,13 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
+    static RootTaskDisplayAreaOrganizer provideRootTaskDisplayAreaOrganizer(
+            @ShellMainThread ShellExecutor mainExecutor, Context context) {
+        return new RootTaskDisplayAreaOrganizer(mainExecutor);
+    }
+
+    @WMSingleton
+    @Provides
     static TaskStackListenerImpl providerTaskStackListenerImpl(@Main Handler handler) {
         return new TaskStackListenerImpl(handler);
     }
@@ -317,16 +325,18 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static Optional<OneHanded> provideOneHandedController(Context context,
-            DisplayController displayController, TaskStackListenerImpl taskStackListener) {
+            DisplayController displayController, TaskStackListenerImpl taskStackListener,
+            @ShellMainThread ShellExecutor mainExecutor) {
         return Optional.ofNullable(OneHandedController.create(context, displayController,
-                taskStackListener));
+                taskStackListener, mainExecutor));
     }
 
     @WMSingleton
     @Provides
     static Optional<HideDisplayCutout> provideHideDisplayCutoutController(Context context,
-            DisplayController displayController) {
-        return Optional.ofNullable(HideDisplayCutoutController.create(context, displayController));
+            DisplayController displayController, @ShellMainThread ShellExecutor mainExecutor) {
+        return Optional.ofNullable(
+                HideDisplayCutoutController.create(context, displayController, mainExecutor));
     }
 
     @WMSingleton
