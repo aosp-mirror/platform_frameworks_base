@@ -916,6 +916,84 @@ public final class DataFailCause {
     /** System preference change back to SRAT during handoff */
     public static final int HANDOFF_PREFERENCE_CHANGED = 0x8CB;
 
+    //IKE error notifications message as specified in 3GPP TS 24.302 (Section 8.1.2.2).
+
+    /** The PDN connection corresponding to the requested APN has been rejected. */
+    public static final int IWLAN_PDN_CONNECTION_REJECTION = 0x2000;
+    /**
+     * The PDN connection has been rejected. No additional PDN connections can be established
+     * for the UE due to the network policies or capabilities.
+     */
+    public static final int IWLAN_MAX_CONNECTION_REACHED = 0x2001;
+    /**
+     * The PDN connection has been rejected due to a semantic error in TFT operation.
+     */
+    public static final int IWLAN_SEMANTIC_ERROR_IN_THE_TFT_OPERATION = 0x2031;
+    /**
+     * The PDN connection has been rejected due to a syntactic error in TFT operation.
+     */
+    public static final int IWLAN_SYNTACTICAL_ERROR_IN_THE_TFT_OPERATION = 0x2032;
+    /**
+     * The PDN connection has been rejected due to sematic errors in the packet filter.
+     */
+    public static final int IWLAN_SEMANTIC_ERRORS_IN_PACKET_FILTERS = 0x2034;
+    /**
+     * The PDN connection has been rejected due to syntactic errors in the packet filter.
+     */
+    public static final int IWLAN_SYNTACTICAL_ERRORS_IN_PACKET_FILTERS = 0x2035;
+    /**
+     * No non-3GPP subscription is associated with the IMSI.
+     * The UE is not allowed to use non-3GPP access to EPC.
+     */
+    public static final int IWLAN_NON_3GPP_ACCESS_TO_EPC_NOT_ALLOWED = 0x2328;
+    /** The user identified by the IMSI is unknown. */
+    public static final int IWLAN_USER_UNKNOWN = 0x2329;
+    /**
+     * The requested APN is not included in the user's profile,
+     * and therefore is not authorized for that user.
+     */
+    public static final int IWLAN_NO_APN_SUBSCRIPTION = 0x232A;
+    /** The user is barred from using the non-3GPP access or the subscribed APN. */
+    public static final int IWLAN_AUTHORIZATION_REJECTED = 0x232B;
+    /** The Mobile Equipment used is not acceptable to the network */
+    public static final int IWLAN_ILLEGAL_ME = 0x232E;
+    /**
+     * The network has determined that the requested procedure cannot be completed successfully
+     * due to network failure.
+     */
+    public static final int IWLAN_NETWORK_FAILURE = 0x2904;
+    /** The access type is restricted to the user. */
+    public static final int IWLAN_RAT_TYPE_NOT_ALLOWED = 0x2AF9;
+    /** The network does not accept emergency PDN bringup request using an IMEI */
+    public static final int IWLAN_IMEI_NOT_ACCEPTED = 0x2AFD;
+    /**
+     * The ePDG performs PLMN filtering (based on roaming agreements) and rejects
+     * the request from the UE.
+     * The UE requests service in a PLMN where the UE is not allowed to operate.
+     */
+    public static final int IWLAN_PLMN_NOT_ALLOWED = 0x2B03;
+    /** The ePDG does not support un-authenticated IMSI based emergency PDN bringup **/
+    public static final int IWLAN_UNAUTHENTICATED_EMERGENCY_NOT_SUPPORTED = 0x2B2F;
+
+    // Device is unable to establish an IPSec tunnel with the ePDG for any reason
+    // e.g authentication fail or certificate validation or DNS Resolution and timeout failure.
+
+    /** IKE configuration error resulting in failure  */
+    public static final int IWLAN_IKEV2_CONFIG_FAILURE = 0x4000;
+    /**
+     * Sent in the response to an IKE_AUTH message when, for some reason,
+     * the authentication failed.
+     */
+    public static final int IWLAN_IKEV2_AUTH_FAILURE = 0x4001;
+    /** IKE message timeout, tunnel setup failed due to no response from EPDG  */
+    public static final int IWLAN_IKEV2_MSG_TIMEOUT = 0x4002;
+    /** IKE Certification validation failure  */
+    public static final int IWLAN_IKEV2_CERT_INVALID = 0x4003;
+    /** Unable to resolve FQDN for the ePDG to an IP address */
+    public static final int IWLAN_DNS_RESOLUTION_NAME_FAILURE = 0x4004;
+    /** No response received from the DNS Server due to a timeout*/
+    public static final int IWLAN_DNS_RESOLUTION_TIMEOUT = 0x4005;
+
     // OEM sepecific error codes. To be used by OEMs when they don't
     // want to reveal error code which would be replaced by ERROR_UNSPECIFIED
     public static final int OEM_DCFAILCAUSE_1 = 0x1001;
@@ -1341,6 +1419,34 @@ public final class DataFailCause {
         sFailCauseMap.put(VSNCP_RECONNECT_NOT_ALLOWED, "VSNCP_RECONNECT_NOT_ALLOWED");
         sFailCauseMap.put(IPV6_PREFIX_UNAVAILABLE, "IPV6_PREFIX_UNAVAILABLE");
         sFailCauseMap.put(HANDOFF_PREFERENCE_CHANGED, "HANDOFF_PREFERENCE_CHANGED");
+        sFailCauseMap.put(IWLAN_PDN_CONNECTION_REJECTION, "IWLAN_PDN_CONNECTION_REJECTION");
+        sFailCauseMap.put(IWLAN_MAX_CONNECTION_REACHED, "IWLAN_MAX_CONNECTION_REACHED");
+        sFailCauseMap.put(IWLAN_SEMANTIC_ERROR_IN_THE_TFT_OPERATION,
+                "IWLAN_SEMANTIC_ERROR_IN_THE_TFT_OPERATION");
+        sFailCauseMap.put(IWLAN_SYNTACTICAL_ERROR_IN_THE_TFT_OPERATION,
+                "IWLAN_SYNTACTICAL_ERROR_IN_THE_TFT_OPERATION");
+        sFailCauseMap.put(IWLAN_SEMANTIC_ERRORS_IN_PACKET_FILTERS,
+                "IWLAN_SEMANTIC_ERRORS_IN_PACKET_FILTERS");
+        sFailCauseMap.put(IWLAN_SYNTACTICAL_ERRORS_IN_PACKET_FILTERS,
+                "IWLAN_SYNTACTICAL_ERRORS_IN_PACKET_FILTERS");
+        sFailCauseMap.put(IWLAN_NON_3GPP_ACCESS_TO_EPC_NOT_ALLOWED,
+                "IWLAN_NON_3GPP_ACCESS_TO_EPC_NOT_ALLOWED");
+        sFailCauseMap.put(IWLAN_USER_UNKNOWN, "IWLAN_USER_UNKNOWN");
+        sFailCauseMap.put(IWLAN_NO_APN_SUBSCRIPTION, "IWLAN_NO_APN_SUBSCRIPTION");
+        sFailCauseMap.put(IWLAN_AUTHORIZATION_REJECTED, "IWLAN_AUTHORIZATION_REJECTED");
+        sFailCauseMap.put(IWLAN_ILLEGAL_ME, "IWLAN_ILLEGAL_ME");
+        sFailCauseMap.put(IWLAN_NETWORK_FAILURE, "IWLAN_NETWORK_FAILURE");
+        sFailCauseMap.put(IWLAN_RAT_TYPE_NOT_ALLOWED, "IWLAN_RAT_TYPE_NOT_ALLOWED");
+        sFailCauseMap.put(IWLAN_IMEI_NOT_ACCEPTED, "IWLAN_IMEI_NOT_ACCEPTED");
+        sFailCauseMap.put(IWLAN_PLMN_NOT_ALLOWED, "IWLAN_PLMN_NOT_ALLOWED");
+        sFailCauseMap.put(IWLAN_UNAUTHENTICATED_EMERGENCY_NOT_SUPPORTED,
+                "IWLAN_UNAUTHENTICATED_EMERGENCY_NOT_SUPPORTED");
+        sFailCauseMap.put(IWLAN_IKEV2_CONFIG_FAILURE, "IWLAN_IKEV2_CONFIG_FAILURE");
+        sFailCauseMap.put(IWLAN_IKEV2_AUTH_FAILURE, "IWLAN_IKEV2_AUTH_FAILURE");
+        sFailCauseMap.put(IWLAN_IKEV2_MSG_TIMEOUT, "IWLAN_IKEV2_MSG_TIMEOUT");
+        sFailCauseMap.put(IWLAN_IKEV2_CERT_INVALID, "IWLAN_IKEV2_CERT_INVALID");
+        sFailCauseMap.put(IWLAN_DNS_RESOLUTION_NAME_FAILURE, "IWLAN_DNS_RESOLUTION_NAME_FAILURE");
+        sFailCauseMap.put(IWLAN_DNS_RESOLUTION_TIMEOUT, "IWLAN_DNS_RESOLUTION_TIMEOUT");
         sFailCauseMap.put(OEM_DCFAILCAUSE_1, "OEM_DCFAILCAUSE_1");
         sFailCauseMap.put(OEM_DCFAILCAUSE_2, "OEM_DCFAILCAUSE_2");
         sFailCauseMap.put(OEM_DCFAILCAUSE_3, "OEM_DCFAILCAUSE_3");
