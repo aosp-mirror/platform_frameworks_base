@@ -1139,9 +1139,17 @@ public class AppOpsManager {
     // TODO: Add as AppProtoEnums
     public static final int OP_RECORD_AUDIO_HOTWORD = 102;
 
+    /**
+     * App output audio is being recorded.
+     *
+     * @hide
+     */
+    // TODO: Add as AppProtoEnums
+    public static final int OP_RECORD_AUDIO_OUTPUT = 106;
+
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 104;
+    @UnsupportedAppUsage
+    public static final int _NUM_OP = 107;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1488,6 +1496,13 @@ public class AppOpsManager {
      */
     public static final String OPSTR_RECORD_AUDIO_HOTWORD = "android:record_audio_hotword";
 
+    /**
+     * App output audio is being recorded
+     *
+     * @hide
+     */
+    public static final String OPSTR_RECORD_AUDIO_OUTPUT = "android:record_audio_output";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -1682,6 +1697,9 @@ public class AppOpsManager {
             OP_PHONE_CALL_CAMERA,               // OP_PHONE_CALL_CAMERA
             OP_RECORD_AUDIO_HOTWORD,            // RECORD_AUDIO_HOTWORD
             OP_MANAGE_ONGOING_CALLS,            // MANAGE_ONGOING_CALLS
+            104,                                // placeholders
+            105,
+            OP_RECORD_AUDIO_OUTPUT,             // RECORD_AUDIO_OUTPUT
     };
 
     /**
@@ -1792,6 +1810,9 @@ public class AppOpsManager {
             OPSTR_PHONE_CALL_CAMERA,
             OPSTR_RECORD_AUDIO_HOTWORD,
             OPSTR_MANAGE_ONGOING_CALLS,
+            "", // placeholders
+            "",
+            OPSTR_RECORD_AUDIO_OUTPUT,
     };
 
     /**
@@ -1903,6 +1924,9 @@ public class AppOpsManager {
             "PHONE_CALL_CAMERA",
             "RECORD_AUDIO_HOTWORD",
             "MANAGE_ONGOING_CALLS",
+            "", // placeholders
+            "",
+            "RECORD_AUDIO_OUTPUT",
     };
 
     /**
@@ -2015,6 +2039,9 @@ public class AppOpsManager {
             null, // no permission for OP_PHONE_CALL_CAMERA
             null, // no permission for OP_RECORD_AUDIO_HOTWORD
             Manifest.permission.MANAGE_ONGOING_CALLS,
+            null, // placeholders
+            null,
+            null, // no permission for OP_RECORD_AUDIO_OUTPUT
     };
 
     /**
@@ -2127,6 +2154,9 @@ public class AppOpsManager {
             null, // PHONE_CALL_MICROPHONE
             null, // RECORD_AUDIO_HOTWORD
             null, // MANAGE_ONGOING_CALLS
+            null, // placeholders
+            null,
+            null, // RECORD_AUDIO_OUTPUT
     };
 
     /**
@@ -2238,6 +2268,9 @@ public class AppOpsManager {
             null, // PHONE_CALL_CAMERA
             null, // RECORD_AUDIO_HOTWORD
             null, // MANAGE_ONGOING_CALLS
+            null, // placeholders
+            null,
+            null, // RECORD_AUDIO_OUTPUT
     };
 
     /**
@@ -2348,6 +2381,9 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED, // PHONE_CALL_CAMERA
             AppOpsManager.MODE_ALLOWED, // OP_RECORD_AUDIO_HOTWORD
             AppOpsManager.MODE_DEFAULT, // MANAGE_ONGOING_CALLS
+            AppOpsManager.MODE_DEFAULT, // placeholders
+            AppOpsManager.MODE_DEFAULT,
+            AppOpsManager.MODE_ALLOWED, // OP_RECORD_AUDIO_OUTPUT
     };
 
     /**
@@ -2462,6 +2498,9 @@ public class AppOpsManager {
             false, // PHONE_CALL_CAMERA
             false, // RECORD_AUDIO_HOTWORD
             true, // MANAGE_ONGOING_CALLS
+            false, // placeholders
+            false,
+            false, // RECORD_AUDIO_OUTPUT
     };
 
     /**
