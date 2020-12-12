@@ -16,13 +16,17 @@
 
 package com.android.internal.inputmethod;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
 import android.annotation.AnyThread;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.lang.annotation.Retention;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -51,21 +55,100 @@ public final class Completable {
         /**
          * Lock {@link Object} to guard complete operations within this class.
          */
-        protected final Object mValueLock = new Object();
+        protected final Object mStateLock = new Object();
 
         /**
-         * {@code true} after {@link #onComplete()} gets called.
+         * Indicates the completion state of this object.
          */
-        @GuardedBy("mValueLock")
-        protected boolean mHasValue = false;
+        @GuardedBy("mStateLock")
+        @CompletionState
+        protected int mState = CompletionState.NOT_COMPLETED;
 
         /**
-         * @return {@link true} if {@link #onComplete()} gets called already.
+         * {@link Throwable} message passed to {@link #onError(ThrowableHolder)}.
+         *
+         * <p>This is not {@code null} only when {@link #mState} is
+         * {@link CompletionState#COMPLETED_WITH_ERROR}.</p>
+         */
+        @GuardedBy("mStateLock")
+        @Nullable
+        protected String mMessage = null;
+
+        @Retention(SOURCE)
+        @IntDef({
+                CompletionState.NOT_COMPLETED,
+                CompletionState.COMPLETED_WITH_VALUE,
+                CompletionState.COMPLETED_WITH_ERROR})
+        protected @interface CompletionState {
+            /**
+             * This object is not completed yet.
+             */
+            int NOT_COMPLETED = 0;
+            /**
+             * This object is already completed with a value.
+             */
+            int COMPLETED_WITH_VALUE = 1;
+            /**
+             * This object is already completed with an error.
+             */
+            int COMPLETED_WITH_ERROR = 2;
+        }
+
+        /**
+         * Converts the given {@link CompletionState} into a human-readable string.
+         *
+         * @param state {@link CompletionState} to be converted.
+         * @return a human-readable {@link String} for the given {@code state}.
+         */
+        @AnyThread
+        protected static String stateToString(@CompletionState int state) {
+            switch (state) {
+                case CompletionState.NOT_COMPLETED:
+                    return "NOT_COMPLETED";
+                case CompletionState.COMPLETED_WITH_VALUE:
+                    return "COMPLETED_WITH_VALUE";
+                case CompletionState.COMPLETED_WITH_ERROR:
+                    return "COMPLETED_WITH_ERROR";
+                default:
+                    return "Unknown(value=" + state + ")";
+            }
+        }
+
+        /**
+         * @return {@link true} if {@link #onComplete()} gets called and {@link #mState} is
+         *         {@link CompletionState#COMPLETED_WITH_VALUE} .
          */
         @AnyThread
         public boolean hasValue() {
-            synchronized (mValueLock) {
-                return mHasValue;
+            synchronized (mStateLock) {
+                return mState == CompletionState.COMPLETED_WITH_VALUE;
+            }
+        }
+
+        /**
+         * Provides the base implementation of {@code getValue()} for derived classes.
+         *
+         * <p>Must be called after acquiring {@link #mStateLock}.</p>
+         *
+         * @throws RuntimeException when {@link #mState} is
+         *                          {@link CompletionState#COMPLETED_WITH_ERROR}.
+         * @throws UnsupportedOperationException when {@link #mState} is not
+         *                                       {@link CompletionState#COMPLETED_WITH_VALUE} and
+         *                                       {@link CompletionState#COMPLETED_WITH_ERROR}.
+         */
+        @GuardedBy("mStateLock")
+        protected void enforceGetValueLocked() {
+            switch (mState) {
+                case CompletionState.NOT_COMPLETED:
+                    throw new UnsupportedOperationException(
+                            "getValue() is allowed only if hasValue() returns true");
+                case CompletionState.COMPLETED_WITH_VALUE:
+                    return;
+                case CompletionState.COMPLETED_WITH_ERROR:
+                    throw new RuntimeException(mMessage);
+                default:
+                    throw new UnsupportedOperationException(
+                            "getValue() is not allowed on state=" + stateToString(mState));
             }
         }
 
@@ -75,6 +158,27 @@ public final class Completable {
         @AnyThread
         protected void onComplete() {
             mLatch.countDown();
+        }
+
+        /**
+         * Notify when exception happened.
+         *
+         * @param throwableHolder contains the {@link Throwable} object when exception happened.
+         */
+        @AnyThread
+        protected void onError(ThrowableHolder throwableHolder) {
+            synchronized (mStateLock) {
+                switch (mState) {
+                    case CompletionState.NOT_COMPLETED:
+                        mMessage = throwableHolder.getMessage();
+                        mState = CompletionState.COMPLETED_WITH_ERROR;
+                        break;
+                    default:
+                        throw new UnsupportedOperationException(
+                                "onError() is not allowed on state=" + stateToString(mState));
+                }
+            }
+            onComplete();
         }
 
         /**
@@ -140,7 +244,7 @@ public final class Completable {
      * Completable object of integer primitive.
      */
     public static final class Int extends ValueBase {
-        @GuardedBy("mValueLock")
+        @GuardedBy("mStateLock")
         private int mValue = 0;
 
         /**
@@ -150,29 +254,30 @@ public final class Completable {
          */
         @AnyThread
         void onComplete(int value) {
-            synchronized (mValueLock) {
-                if (mHasValue) {
-                    throw new UnsupportedOperationException(
-                            "onComplete() cannot be called multiple times");
+            synchronized (mStateLock) {
+                switch (mState) {
+                    case CompletionState.NOT_COMPLETED:
+                        mValue = value;
+                        mState = CompletionState.COMPLETED_WITH_VALUE;
+                        break;
+                    default:
+                        throw new UnsupportedOperationException(
+                                "onComplete() is not allowed on state=" + stateToString(mState));
                 }
-                mValue = value;
-                mHasValue = true;
             }
             onComplete();
         }
 
         /**
          * @return value associated with this object.
+         * @throws RuntimeException when called while {@link #onError} happened.
          * @throws UnsupportedOperationException when called while {@link #hasValue()} returns
          *                                       {@code false}.
          */
         @AnyThread
         public int getValue() {
-            synchronized (mValueLock) {
-                if (!mHasValue) {
-                    throw new UnsupportedOperationException(
-                            "getValue() is allowed only if hasValue() returns true");
-                }
+            synchronized (mStateLock) {
+                enforceGetValueLocked();
                 return mValue;
             }
         }
@@ -184,7 +289,7 @@ public final class Completable {
      * @param <T> type associated with this completable object.
      */
     public static class Values<T> extends ValueBase {
-        @GuardedBy("mValueLock")
+        @GuardedBy("mStateLock")
         @Nullable
         private T mValue = null;
 
@@ -195,30 +300,31 @@ public final class Completable {
          */
         @AnyThread
         void onComplete(@Nullable T value) {
-            synchronized (mValueLock) {
-                if (mHasValue) {
-                    throw new UnsupportedOperationException(
-                            "onComplete() cannot be called multiple times");
+            synchronized (mStateLock) {
+                switch (mState) {
+                    case CompletionState.NOT_COMPLETED:
+                        mValue = value;
+                        mState = CompletionState.COMPLETED_WITH_VALUE;
+                        break;
+                    default:
+                        throw new UnsupportedOperationException(
+                                "onComplete() is not allowed on state=" + stateToString(mState));
                 }
-                mValue = value;
-                mHasValue = true;
             }
             onComplete();
         }
 
         /**
          * @return value associated with this object.
+         * @throws RuntimeException when called while {@link #onError} happened
          * @throws UnsupportedOperationException when called while {@link #hasValue()} returns
          *                                       {@code false}.
          */
         @AnyThread
         @Nullable
         public T getValue() {
-            synchronized (mValueLock) {
-                if (!mHasValue) {
-                    throw new UnsupportedOperationException(
-                            "getValue() is allowed only if hasValue() returns true");
-                }
+            synchronized (mStateLock) {
+                enforceGetValueLocked();
                 return mValue;
             }
         }

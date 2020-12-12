@@ -519,9 +519,6 @@ public class LocationManagerService extends ILocationManager.Stub {
     public List<String> getAllProviders() {
         ArrayList<String> providers = new ArrayList<>(mProviderManagers.size());
         for (LocationProviderManager manager : mProviderManagers) {
-            if (FUSED_PROVIDER.equals(manager.getName())) {
-                continue;
-            }
             providers.add(manager.getName());
         }
         return providers;
@@ -538,9 +535,6 @@ public class LocationManagerService extends ILocationManager.Stub {
             ArrayList<String> providers = new ArrayList<>(mProviderManagers.size());
             for (LocationProviderManager manager : mProviderManagers) {
                 String name = manager.getName();
-                if (FUSED_PROVIDER.equals(name)) {
-                    continue;
-                }
                 if (enabledOnly && !manager.isEnabled(UserHandle.getCallingUserId())) {
                     continue;
                 }
@@ -565,7 +559,9 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         if (!providers.isEmpty()) {
-            if (providers.contains(GPS_PROVIDER)) {
+            if (providers.contains(FUSED_PROVIDER)) {
+                return FUSED_PROVIDER;
+            } else if (providers.contains(GPS_PROVIDER)) {
                 return GPS_PROVIDER;
             } else if (providers.contains(NETWORK_PROVIDER)) {
                 return NETWORK_PROVIDER;
@@ -1046,10 +1042,6 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public boolean isProviderEnabledForUser(String provider, int userId) {
-        // fused provider is accessed indirectly via criteria rather than the provider-based APIs,
-        // so we discourage its use
-        if (FUSED_PROVIDER.equals(provider)) return false;
-
         return mLocalService.isProviderEnabledForUser(provider, userId);
     }
 

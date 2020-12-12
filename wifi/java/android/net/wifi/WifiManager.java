@@ -4647,7 +4647,9 @@ public class WifiManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
     public void startTemporarilyDisablingAllNonCarrierMergedWifi(int subscriptionId) {
         try {
             mService.startTemporarilyDisablingAllNonCarrierMergedWifi(subscriptionId);
@@ -4662,7 +4664,9 @@ public class WifiManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
     public void stopTemporarilyDisablingAllNonCarrierMergedWifi() {
         try {
             mService.stopTemporarilyDisablingAllNonCarrierMergedWifi();

@@ -33,6 +33,7 @@ import static junit.framework.Assert.assertNotNull;
 
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -91,6 +92,7 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     private MagnificationModeSwitch mMagnificationModeSwitch;
     private View.OnTouchListener mTouchListener;
     private List<MotionEvent> mMotionEvents = new ArrayList<>();
+    private Runnable mFadeOutAnimation;
 
     @Before
     public void setUp() throws Exception {
@@ -119,6 +121,7 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
             event.recycle();
         }
         mMotionEvents.clear();
+        mFadeOutAnimation = null;
     }
 
     @Test
@@ -164,15 +167,9 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     }
 
     @Test
-    public void showMagnificationButton_windowMode_verifyAnimationEndAction() {
-        // Execute the runnable immediately to run the animation.
-        doAnswer((invocation) -> {
-            final Runnable action = invocation.getArgument(0);
-            action.run();
-            return null;
-        }).when(mSpyImageView).postOnAnimationDelayed(any(Runnable.class), anyLong());
-
+    public void showMagnificationButton_windowModeAndFadingOut_verifyAnimationEndAction() {
         mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        executeFadeOutAnimation();
 
         // Verify the end action after fade-out.
         final ArgumentCaptor<Runnable> endActionCaptor = ArgumentCaptor.forClass(Runnable.class);
@@ -207,14 +204,36 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         final long downTime = SystemClock.uptimeMillis();
         mTouchListener.onTouch(mSpyImageView,
                 obtainMotionEvent(downTime, 0, ACTION_DOWN, 100, 100));
-
-        verify(mViewPropertyAnimator).cancel();
-
         resetAndStubMockImageViewAndAnimator();
         mTouchListener.onTouch(mSpyImageView,
                 obtainMotionEvent(downTime, downTime, ACTION_UP, 100, 100));
 
         verifyTapAction(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+    }
+
+    @Test
+    public void sendDownEvent_fullscreenMode_fadeOutAnimationIsNull() {
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+        resetAndStubMockImageViewAndAnimator();
+
+        final long downTime = SystemClock.uptimeMillis();
+        mTouchListener.onTouch(mSpyImageView,
+                obtainMotionEvent(downTime, 0, ACTION_DOWN, 100, 100));
+
+        assertNull(mFadeOutAnimation);
+    }
+
+    @Test
+    public void sendDownEvent_fullscreenModeAndFadingOut_cancelAnimation() {
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+        executeFadeOutAnimation();
+        resetAndStubMockImageViewAndAnimator();
+
+        final long downTime = SystemClock.uptimeMillis();
+        mTouchListener.onTouch(mSpyImageView,
+                obtainMotionEvent(downTime, 0, ACTION_DOWN, 100, 100));
+
+        verify(mViewPropertyAnimator).cancel();
     }
 
     @Test
@@ -229,7 +248,6 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         final long downTime = SystemClock.uptimeMillis();
         mTouchListener.onTouch(mSpyImageView, obtainMotionEvent(
                 downTime, 0, ACTION_DOWN, 100, 100));
-        verify(mViewPropertyAnimator).cancel();
 
         mTouchListener.onTouch(mSpyImageView,
                 obtainMotionEvent(downTime, downTime, ACTION_MOVE, 100 + offset,
@@ -384,6 +402,16 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
             return null;
         }).when(mSpyImageView).post(any(Runnable.class));
         doReturn(mViewPropertyAnimator).when(mSpyImageView).animate();
+        doAnswer((invocation) -> {
+            mFadeOutAnimation = invocation.getArgument(0);
+            return null;
+        }).when(mSpyImageView).postOnAnimationDelayed(any(Runnable.class), anyLong());
+        doAnswer((invocation) -> {
+            if (mFadeOutAnimation == invocation.getArgument(0)) {
+                mFadeOutAnimation = null;
+            }
+            return null;
+        }).when(mSpyImageView).removeCallbacks(any(Runnable.class));
     }
 
     private void resetAndStubMockAnimator() {
@@ -411,5 +439,11 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         MotionEvent event = MotionEvent.obtain(downTime, eventTime, action, x, y, 0);
         mMotionEvents.add(event);
         return event;
+    }
+
+    private void executeFadeOutAnimation() {
+        assertNotNull(mFadeOutAnimation);
+        mFadeOutAnimation.run();
+        mFadeOutAnimation = null;
     }
 }

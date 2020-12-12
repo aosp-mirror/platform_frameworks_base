@@ -19,7 +19,9 @@ package android.telephony.ims.stub;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.telephony.ims.DelegateMessageCallback;
+import android.telephony.ims.DelegateRegistrationState;
 import android.telephony.ims.ImsService;
+import android.telephony.ims.SipDelegateConnection;
 import android.telephony.ims.SipDelegateImsConfiguration;
 import android.telephony.ims.SipDelegateManager;
 import android.telephony.ims.SipMessage;
@@ -65,10 +67,13 @@ public interface SipDelegate {
      * The framework is requesting that routing resources associated with the SIP dialog using the
      * provided Call-ID to be cleaned up.
      * <p>
-     * Typically a SIP Dialog close event will be signalled by that dialog receiving a BYE or 200 OK
-     * message, however, in some cases, the framework will request that the ImsService close the
+     * Typically, a SIP Dialog close event will be signalled by that dialog receiving a BYE or
+     * 200 OK message, however, the IMS application will still call
+     * {@link SipDelegateConnection#closeDialog(String)} to signal to the framework that resources
+     * can be released. In some cases, the framework will request that the ImsService close the
      * dialog due to the open dialog holding up an event such as applying a provisioning change or
-     * handing over to another transport type.
+     * handing over to another transport type. See {@link DelegateRegistrationState}.
+     *
      * @param callId The call-ID header value associated with the ongoing SIP Dialog that the
      *         framework is requesting be closed.
      */

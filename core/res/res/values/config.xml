@@ -4574,6 +4574,6 @@
     <!-- Indicates that default fitness tracker app needs to request sensor and location permissions. -->
     <bool name="config_trackerAppNeedsPermissions">false</bool>
 
-  <!-- Component with platform query permissions for AppSearch -->
-    <string name="config_defaultAppSearchPlatformQuerierComponent" translatable="false"></string>
+    <!-- Package with global data query permissions for AppSearch -->
+    <string name="config_globalAppSearchDataQuerierPackage" translatable="false"></string>
 </resources>

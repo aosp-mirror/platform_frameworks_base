@@ -623,6 +623,14 @@ abstract class HdmiCecLocalDevice {
             return false;
         }
 
+        if (isPowerOffOrToggleCommand(message) || isPowerOnOrToggleCommand(message)) {
+            // Power commands should already be handled above. Don't continue and convert the CEC
+            // keycode to Android keycode.
+            // Do not <Feature Abort> as the local device should already be in the correct power
+            // state.
+            return true;
+        }
+
         final long downTime = SystemClock.uptimeMillis();
         final byte[] params = message.getParams();
         final int keycode = HdmiCecKeycode.cecKeycodeAndParamsToAndroidKey(params);

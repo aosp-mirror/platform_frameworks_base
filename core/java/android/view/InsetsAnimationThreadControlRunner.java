@@ -81,6 +81,7 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
                 SyncRtSurfaceTransactionApplier.SurfaceParams surfaceParams = params[i];
                 applyParams(t, surfaceParams, mTmpFloat9);
             }
+            t.setFrameTimelineVsync(Choreographer.getSfInstance().getVsyncId());
             t.apply();
             t.close();
         }

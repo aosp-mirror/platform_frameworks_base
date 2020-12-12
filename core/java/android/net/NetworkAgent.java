@@ -51,7 +51,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * An agent manages the life cycle of a network. A network starts its
  * life cycle when {@link register} is called on NetworkAgent. The network
  * is then connecting. When full L3 connectivity has been established,
- * the agent shoud call {@link markConnected} to inform the system that
+ * the agent should call {@link markConnected} to inform the system that
  * this network is ready to use. When the network disconnects its life
  * ends and the agent should call {@link unregister}, at which point the
  * system will clean up and free resources.
@@ -94,12 +94,6 @@ public abstract class NetworkAgent {
     @Nullable
     private volatile Network mNetwork;
 
-    // Whether this NetworkAgent is using the legacy (never unhidden) API. The difference is
-    // that the legacy API uses NetworkInfo to convey the state, while the current API is
-    // exposing methods to manage it and generate it internally instead.
-    // TODO : remove this as soon as all agents have been converted.
-    private final boolean mIsLegacy;
-
     private final Handler mHandler;
     private volatile AsyncChannel mAsyncChannel;
     private final String LOG_TAG;
@@ -110,8 +104,6 @@ public abstract class NetworkAgent {
     private static final long BW_REFRESH_MIN_WIN_MS = 500;
     private boolean mBandwidthUpdateScheduled = false;
     private AtomicBoolean mBandwidthUpdatePending = new AtomicBoolean(false);
-    // Not used by legacy agents. Non-legacy agents use this to convert the NetworkAgent system API
-    // into the internal API of ConnectivityService.
     @NonNull
     private NetworkInfo mNetworkInfo;
     @NonNull
@@ -337,35 +329,6 @@ public abstract class NetworkAgent {
      */
     public static final int CMD_REMOVE_KEEPALIVE_PACKET_FILTER = BASE + 17;
 
-    /** @hide TODO: remove and replace usage with the public constructor. */
-    public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
-            NetworkCapabilities nc, LinkProperties lp, int score) {
-        this(looper, context, logTag, ni, nc, lp, score, null, NetworkProvider.ID_NONE);
-        // Register done by the constructor called in the previous line
-    }
-
-    /** @hide TODO: remove and replace usage with the public constructor. */
-    public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
-            NetworkCapabilities nc, LinkProperties lp, int score, NetworkAgentConfig config) {
-        this(looper, context, logTag, ni, nc, lp, score, config, NetworkProvider.ID_NONE);
-        // Register done by the constructor called in the previous line
-    }
-
-    /** @hide TODO: remove and replace usage with the public constructor. */
-    public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
-            NetworkCapabilities nc, LinkProperties lp, int score, int providerId) {
-        this(looper, context, logTag, ni, nc, lp, score, null, providerId);
-        // Register done by the constructor called in the previous line
-    }
-
-    /** @hide TODO: remove and replace usage with the public constructor. */
-    public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
-            NetworkCapabilities nc, LinkProperties lp, int score, NetworkAgentConfig config,
-            int providerId) {
-        this(looper, context, logTag, nc, lp, score, config, providerId, ni, true /* legacy */);
-        register();
-    }
-
     private static NetworkInfo getLegacyNetworkInfo(final NetworkAgentConfig config) {
         // The subtype can be changed with (TODO) setLegacySubtype, but it starts
         // with 0 (TelephonyManager.NETWORK_TYPE_UNKNOWN) and an empty description.
@@ -393,7 +356,7 @@ public abstract class NetworkAgent {
             @NonNull NetworkAgentConfig config, @Nullable NetworkProvider provider) {
         this(looper, context, logTag, nc, lp, score, config,
                 provider == null ? NetworkProvider.ID_NONE : provider.getProviderId(),
-                getLegacyNetworkInfo(config), false /* legacy */);
+                getLegacyNetworkInfo(config));
     }
 
     private static class InitialConfiguration {
@@ -418,11 +381,9 @@ public abstract class NetworkAgent {
 
     private NetworkAgent(@NonNull Looper looper, @NonNull Context context, @NonNull String logTag,
             @NonNull NetworkCapabilities nc, @NonNull LinkProperties lp, int score,
-            @NonNull NetworkAgentConfig config, int providerId, @NonNull NetworkInfo ni,
-            boolean legacy) {
+            @NonNull NetworkAgentConfig config, int providerId, @NonNull NetworkInfo ni) {
         mHandler = new NetworkAgentHandler(looper);
         LOG_TAG = logTag;
-        mIsLegacy = legacy;
         mNetworkInfo = new NetworkInfo(ni);
         this.providerId = providerId;
         if (ni == null || nc == null || lp == null) {
@@ -696,11 +657,6 @@ public abstract class NetworkAgent {
      * Call {@link #unregister} to disconnect.
      */
     public void markConnected() {
-        if (mIsLegacy) {
-            throw new UnsupportedOperationException(
-                    "Legacy agents can't call markConnected.");
-        }
-        // |reason| cannot be used by the non-legacy agents
         mNetworkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTED, null /* reason */,
                 mNetworkInfo.getExtraInfo());
         queueOrSendMessage(EVENT_NETWORK_INFO_CHANGED, mNetworkInfo);
@@ -713,9 +669,6 @@ public abstract class NetworkAgent {
      * the network is torn down and this agent can no longer be used.
      */
     public void unregister() {
-        if (mIsLegacy) {
-            throw new UnsupportedOperationException("Legacy agents can't call unregister.");
-        }
         // When unregistering an agent nobody should use the extrainfo (or reason) any more.
         mNetworkInfo.setDetailedState(NetworkInfo.DetailedState.DISCONNECTED, null /* reason */,
                 null /* extraInfo */);
@@ -735,9 +688,6 @@ public abstract class NetworkAgent {
      */
     @Deprecated
     public void setLegacySubtype(final int legacySubtype, @NonNull final String legacySubtypeName) {
-        if (mIsLegacy) {
-            throw new UnsupportedOperationException("Legacy agents can't call setLegacySubtype.");
-        }
         mNetworkInfo.setSubtype(legacySubtype, legacySubtypeName);
         queueOrSendMessage(EVENT_NETWORK_INFO_CHANGED, mNetworkInfo);
     }
@@ -760,9 +710,6 @@ public abstract class NetworkAgent {
      */
     @Deprecated
     public void setLegacyExtraInfo(@Nullable final String extraInfo) {
-        if (mIsLegacy) {
-            throw new UnsupportedOperationException("Legacy agents can't call setLegacyExtraInfo.");
-        }
         mNetworkInfo.setExtraInfo(extraInfo);
         queueOrSendMessage(EVENT_NETWORK_INFO_CHANGED, mNetworkInfo);
     }
@@ -773,9 +720,6 @@ public abstract class NetworkAgent {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public final void sendNetworkInfo(NetworkInfo networkInfo) {
-        if (!mIsLegacy) {
-            throw new UnsupportedOperationException("Only legacy agents can call sendNetworkInfo.");
-        }
         queueOrSendMessage(EVENT_NETWORK_INFO_CHANGED, new NetworkInfo(networkInfo));
     }
 

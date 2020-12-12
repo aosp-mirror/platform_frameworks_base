@@ -62,7 +62,8 @@ public final class DelegateRegistrationState implements Parcelable {
     /**
      * This feature tag is being deregistered because the PDN that the IMS registration is on is
      *changing.
-     * All open SIP dialogs need to be closed before the PDN change can proceed.
+     * All open SIP dialogs need to be closed before the PDN change can proceed using
+     * {@link SipDelegateConnection#closeDialog(String)}.
      */
     public static final int DEREGISTERING_REASON_PDN_CHANGE = 3;
 
@@ -73,7 +74,8 @@ public final class DelegateRegistrationState implements Parcelable {
      * a user triggered hange, such as data being enabled/disabled.
      * <p>
      * All open SIP dialogs associated with the new deprovisioned feature tag need to be closed
-     * before the IMS registration modification can proceed.
+     * using {@link SipDelegateConnection#closeDialog(String)} before the IMS registration
+     * modification can proceed.
      */
     public static final int DEREGISTERING_REASON_PROVISIONING_CHANGE = 4;
 
@@ -81,8 +83,8 @@ public final class DelegateRegistrationState implements Parcelable {
      * This feature tag is deregistering because the SipDelegate associated with this feature tag
      * needs to change its supported feature set.
      * <p>
-     * All open SIP Dialogs associated with this feature tag must be closed before this operation
-     * can proceed.
+     * All open SIP Dialogs associated with this feature tag must be  closed
+     * using {@link SipDelegateConnection#closeDialog(String)} before this operation can proceed.
      */
     public static final int DEREGISTERING_REASON_FEATURE_TAGS_CHANGING = 5;
 
@@ -90,8 +92,8 @@ public final class DelegateRegistrationState implements Parcelable {
      * This feature tag is deregistering because the SipDelegate is in the process of being
      * destroyed.
      * <p>
-     * All open SIP Dialogs associated with this feature tag must be closed before this operation
-     * can proceed.
+     * All open SIP Dialogs associated with this feature tag must be closed
+     * using {@link SipDelegateConnection#closeDialog(String)} before this operation can proceed.
      */
     public static final int DEREGISTERING_REASON_DESTROY_PENDING = 6;
 

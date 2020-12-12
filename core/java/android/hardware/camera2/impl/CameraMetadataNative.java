@@ -1719,37 +1719,25 @@ public class CameraMetadataNative implements Parcelable {
     private static native long nativeAllocateCopy(long ptr)
             throws NullPointerException;
 
-    @FastNative
     private static synchronized native void nativeWriteToParcel(Parcel dest, long ptr);
-    @FastNative
     private static synchronized native void nativeReadFromParcel(Parcel source, long ptr);
-    @FastNative
     private static synchronized native void nativeSwap(long ptr, long otherPtr)
             throws NullPointerException;
-    @FastNative
     private static synchronized native void nativeClose(long ptr);
-    @FastNative
     private static synchronized native boolean nativeIsEmpty(long ptr);
-    @FastNative
     private static synchronized native int nativeGetEntryCount(long ptr);
-    @FastNative
     private static synchronized native long nativeGetBufferSize(long ptr);
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    @FastNative
     private static synchronized native byte[] nativeReadValues(int tag, long ptr);
-    @FastNative
     private static synchronized native void nativeWriteValues(int tag, byte[] src, long ptr);
     private static synchronized native void nativeDump(long ptr) throws IOException; // dump to LOGD
 
-    @FastNative
     private static synchronized native ArrayList nativeGetAllVendorKeys(long ptr, Class keyClass);
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    @FastNative
     private static synchronized native int nativeGetTagFromKeyLocal(long ptr, String keyName)
             throws IllegalArgumentException;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    @FastNative
     private static synchronized native int nativeGetTypeFromTagLocal(long ptr, int tag)
             throws IllegalArgumentException;
     @FastNative

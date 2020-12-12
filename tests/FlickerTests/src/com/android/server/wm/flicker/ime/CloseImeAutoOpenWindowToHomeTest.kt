@@ -27,6 +27,8 @@ import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import com.android.server.wm.flicker.helpers.buildTestTag
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
+import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
+import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
@@ -68,8 +70,10 @@ class CloseImeAutoOpenWindowToHomeTest(
                     }
                     repeat { configuration.repetitions }
                     setup {
-                        eachRun {
+                        test {
                             device.wakeUpAndGoToHomeScreen()
+                        }
+                        eachRun {
                             this.setRotation(configuration.startRotation)
                             testApp.open()
                             testApp.openIME(device)
@@ -89,6 +93,8 @@ class CloseImeAutoOpenWindowToHomeTest(
                         windowManagerTrace {
                             navBarWindowIsAlwaysVisible()
                             statusBarWindowIsAlwaysVisible()
+                            visibleWindowsShownMoreThanOneConsecutiveEntry(listOf(IME_WINDOW_TITLE))
+
                             imeWindowBecomesInvisible(bugId = 141458352)
                             imeAppWindowBecomesInvisible(testApp, bugId = 157449248)
                         }
@@ -100,10 +106,14 @@ class CloseImeAutoOpenWindowToHomeTest(
                                 Surface.ROTATION_0, bugId = 140855415)
                             statusBarLayerRotatesScales(configuration.startRotation,
                                 Surface.ROTATION_0)
-                            navBarLayerIsAlwaysVisible(enabled = false)
-                            statusBarLayerIsAlwaysVisible(enabled = false)
+                            navBarLayerIsAlwaysVisible(
+                                    enabled = Surface.ROTATION_0 == configuration.startRotation)
+                            statusBarLayerIsAlwaysVisible(
+                                    enabled = Surface.ROTATION_0 == configuration.startRotation)
+                            visibleLayersShownMoreThanOneConsecutiveEntry(listOf(IME_WINDOW_TITLE))
+
                             imeLayerBecomesInvisible(bugId = 141458352)
-                            imeAppLayerBecomesInvisible(testApp, bugId = 153739621)
+                            imeAppLayerBecomesInvisible(testApp)
                         }
                     }
                 }

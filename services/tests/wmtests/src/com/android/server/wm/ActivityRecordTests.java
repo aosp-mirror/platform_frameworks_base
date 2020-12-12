@@ -1051,7 +1051,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord nextTop = nextStack.getTopNonFinishingActivity();
         nextTop.setState(STOPPED, "test");
 
-        task.mPausingActivity = currentTop;
+        task.setPausingActivity(currentTop);
         currentTop.finishing = true;
         currentTop.setState(PAUSED, "test");
         currentTop.completeFinishing("completePauseLocked");
@@ -1211,7 +1211,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         focusedActivity.nowVisible = true;
         focusedActivity.mVisibleRequested = true;
         focusedActivity.setState(RESUMED, "test");
-        stack.mResumedActivity = focusedActivity;
+        stack.setResumedActivity(focusedActivity, "test");
 
         topActivity.completeFinishing("test");
 

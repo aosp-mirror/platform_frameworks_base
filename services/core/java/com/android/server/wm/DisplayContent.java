@@ -80,6 +80,7 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.DisplayAreaOrganizer.FEATURE_ROOT;
 import static android.window.DisplayAreaOrganizer.FEATURE_WINDOWED_MAGNIFICATION;
 
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_BOOT;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
@@ -2256,8 +2257,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     @Nullable
     Task getRootTask(int rootTaskId) {
-        return getItemFromTaskDisplayAreas(taskDisplayArea ->
-                        taskDisplayArea.getRootTask(rootTaskId));
+        return getRootTask(rootTask -> rootTask.getRootTaskId() == rootTaskId);
     }
 
     int getRootTaskCount() {
@@ -2834,7 +2834,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     void prepareFreezingTaskBounds() {
-        forAllTaskDisplayAreas(TaskDisplayArea::prepareFreezingTaskBounds);
+        forAllRootTasks(Task::prepareFreezingTaskBounds);
     }
 
     void rotateBounds(int oldRotation, int newRotation, Rect bounds) {
@@ -4191,8 +4191,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         // Initialize state of exiting applications.
-        forAllTaskDisplayAreas(taskDisplayArea -> {
-            taskDisplayArea.setExitingTokensHasVisible(hasVisible);
+        forAllRootTasks(task -> {
+            final ArrayList<ActivityRecord> activities = task.mExitingActivities;
+            for (int j = activities.size() - 1; j >= 0; --j) {
+                activities.get(j).hasVisible = hasVisible;
+            }
         });
     }
 
@@ -4205,7 +4208,22 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         // Time to remove any exiting applications?
-        forAllTaskDisplayAreas(TaskDisplayArea::removeExistingAppTokensIfPossible);
+        forAllRootTasks(task -> {
+            final ArrayList<ActivityRecord> activities = task.mExitingActivities;
+            for (int j = activities.size() - 1; j >= 0; --j) {
+                final ActivityRecord activity = activities.get(j);
+                if (!activity.hasVisible && !mDisplayContent.mClosingApps.contains(activity)
+                        && (!activity.mIsExiting || activity.isEmpty())) {
+                    // Make sure there is no animation running on this activity, so any windows
+                    // associated with it will be removed as soon as their animations are
+                    // complete.
+                    cancelAnimation();
+                    ProtoLog.v(WM_DEBUG_ADD_REMOVE,
+                            "performLayout: Activity exiting now removed %s", activity);
+                    activity.removeIfPossible();
+                }
+            }
+        });
     }
 
     @Override
@@ -5128,15 +5146,56 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * ACTIVITY_TYPE_STANDARD or ACTIVITY_TYPE_UNDEFINED
      */
     void removeRootTasksInWindowingModes(int... windowingModes) {
-        forAllTaskDisplayAreas(taskDisplayArea -> {
-            taskDisplayArea.removeRootTasksInWindowingModes(windowingModes);
+        if (windowingModes == null || windowingModes.length == 0) {
+            return;
+        }
+
+        // Collect the root tasks that are necessary to be removed instead of performing the removal
+        // by looping the children, so that we don't miss any root tasks after the children size
+        // changed or reordered.
+        final ArrayList<Task> rootTasks = new ArrayList<>();
+        forAllRootTasks(rootTask -> {
+            for (int windowingMode : windowingModes) {
+                if (rootTask.mCreatedByOrganizer
+                        || rootTask.getWindowingMode() != windowingMode
+                        || !rootTask.isActivityTypeStandardOrUndefined()) {
+                    continue;
+                }
+                rootTasks.add(rootTask);
+            }
         });
+        for (int i = rootTasks.size() - 1; i >= 0; --i) {
+            mRootWindowContainer.mTaskSupervisor.removeRootTask(rootTasks.get(i));
+        }
     }
 
     void removeRootTasksWithActivityTypes(int... activityTypes) {
-        forAllTaskDisplayAreas(taskDisplayArea -> {
-            taskDisplayArea.removeRootTasksWithActivityTypes(activityTypes);
+        if (activityTypes == null || activityTypes.length == 0) {
+            return;
+        }
+
+        // Collect the root tasks that are necessary to be removed instead of performing the removal
+        // by looping the children, so that we don't miss any root tasks after the children size
+        // changed or reordered.
+        final ArrayList<Task> rootTasks = new ArrayList<>();
+        forAllRootTasks(rootTask -> {
+            for (int activityType : activityTypes) {
+                // Collect the root tasks that are currently being organized.
+                if (rootTask.mCreatedByOrganizer) {
+                    for (int k = rootTask.getChildCount() - 1; k >= 0; --k) {
+                        final Task task = (Task) rootTask.getChildAt(k);
+                        if (task.getActivityType() == activityType) {
+                            rootTasks.add(task);
+                        }
+                    }
+                } else if (rootTask.getActivityType() == activityType) {
+                    rootTasks.add(rootTask);
+                }
+            }
         });
+        for (int i = rootTasks.size() - 1; i >= 0; --i) {
+            mRootWindowContainer.mTaskSupervisor.removeRootTask(rootTasks.get(i));
+        }
     }
 
     ActivityRecord topRunningActivity() {

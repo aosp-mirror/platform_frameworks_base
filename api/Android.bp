@@ -38,6 +38,7 @@ genrule {
         ":framework-statsd{.public.api.txt}",
         ":framework-tethering{.public.api.txt}",
         ":framework-wifi{.public.api.txt}",
+        ":i18n.module.public.api{.public.api.txt}",
         ":non-updatable-current.txt",
     ],
     out: ["current.txt"],
@@ -50,7 +51,10 @@ genrule {
             dest: "current.txt",
         },
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/public/api",
             dest: "android.txt",
         },
@@ -72,6 +76,7 @@ genrule {
         ":framework-statsd{.public.stubs.source}",
         ":framework-tethering{.public.stubs.source}",
         ":framework-wifi{.public.stubs.source}",
+        ":i18n.module.public.api{.public.stubs.source}",
     ],
     out: ["current.srcjar"],
     tools: ["merge_zips"],
@@ -92,6 +97,7 @@ genrule {
         ":framework-statsd{.public.removed-api.txt}",
         ":framework-tethering{.public.removed-api.txt}",
         ":framework-wifi{.public.removed-api.txt}",
+        ":i18n.module.public.api{.public.removed-api.txt}",
         ":non-updatable-removed.txt",
     ],
     out: ["removed.txt"],
@@ -130,7 +136,10 @@ genrule {
             dest: "system-current.txt",
         },
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/system/api",
             dest: "android.txt",
         },
@@ -189,7 +198,10 @@ genrule {
             dest: "module-lib-current.txt",
         },
         {
-            targets: ["sdk", "win_sdk"],
+            targets: [
+                "sdk",
+                "win_sdk",
+            ],
             dir: "apistubs/android/module-lib/api",
             dest: "android.txt",
         },

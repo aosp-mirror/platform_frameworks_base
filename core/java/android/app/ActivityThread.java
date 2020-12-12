@@ -6681,8 +6681,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     private InstrumentationInfo prepareInstrumentation(AppBindData data) {
         final InstrumentationInfo ii;
         try {
-            ii = new ApplicationPackageManager(
-                    null, getPackageManager(), getPermissionManager())
+            ii = new ApplicationPackageManager(null, getPackageManager())
                     .getInstrumentationInfo(data.instrumentationName, 0);
         } catch (PackageManager.NameNotFoundException e) {
             throw new RuntimeException(

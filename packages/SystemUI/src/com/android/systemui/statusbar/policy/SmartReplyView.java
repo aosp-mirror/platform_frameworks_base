@@ -102,8 +102,7 @@ public class SmartReplyView extends ViewGroup {
         mHeightUpperLimit = NotificationUtils.getFontScaledHeight(mContext,
             R.dimen.smart_reply_button_max_height);
 
-        mCurrentBackgroundColor = context.getColor(R.color.smart_reply_button_background);
-        mDefaultBackgroundColor = mCurrentBackgroundColor;
+        mDefaultBackgroundColor = context.getColor(R.color.smart_reply_button_background);
         mDefaultTextColor = mContext.getColor(R.color.smart_reply_button_text);
         mDefaultTextColorDarkBg = mContext.getColor(R.color.smart_reply_button_text_dark_bg);
         mDefaultStrokeColor = mContext.getColor(R.color.smart_reply_button_stroke);
@@ -142,8 +141,9 @@ public class SmartReplyView extends ViewGroup {
         mSingleToDoubleLineButtonWidthIncrease =
                 2 * (doubleLineButtonPaddingHorizontal - singleLineButtonPaddingHorizontal);
 
-
         mBreakIterator = BreakIterator.getLineInstance();
+
+        setBackgroundTintColor(mDefaultBackgroundColor);
         reallocateCandidateButtonQueueForSqueezing();
     }
 
@@ -182,7 +182,7 @@ public class SmartReplyView extends ViewGroup {
     public void resetSmartSuggestions(View newSmartReplyContainer) {
         mSmartReplyContainer = newSmartReplyContainer;
         removeAllViews();
-        mCurrentBackgroundColor = mDefaultBackgroundColor;
+        setBackgroundTintColor(mDefaultBackgroundColor);
     }
 
     /** Add buttons to the {@link SmartReplyView} */

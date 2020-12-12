@@ -181,6 +181,16 @@ public final class ResultCallbacks {
                 }
                 value.onComplete(result);
             }
+
+            @BinderThread
+            @Override
+            public void onError(ThrowableHolder throwableHolder) {
+                final Completable.InputBindResult value = unwrap(atomicRef);
+                if (value == null) {
+                    return;
+                }
+                value.onError(throwableHolder);
+            }
         };
     }
 }

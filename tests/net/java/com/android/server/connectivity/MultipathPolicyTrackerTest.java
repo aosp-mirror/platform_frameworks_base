@@ -130,6 +130,7 @@ public class MultipathPolicyTrackerTest {
 
         when(mContext.getResources()).thenReturn(mResources);
         when(mContext.getApplicationInfo()).thenReturn(new ApplicationInfo());
+        // Mock user id to all users that Context#registerReceiver will register with all users too.
         doReturn(UserHandle.ALL.getIdentifier()).when(mUserAllContext).getUserId();
         when(mContext.createContextAsUser(eq(UserHandle.ALL), anyInt()))
                 .thenReturn(mUserAllContext);

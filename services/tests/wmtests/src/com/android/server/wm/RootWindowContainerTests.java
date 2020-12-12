@@ -91,10 +91,9 @@ public class RootWindowContainerTests extends WindowTestsBase {
     @Test
     public void testAllPausedActivitiesComplete() {
         DisplayContent displayContent = mWm.mRoot.getDisplayContent(DEFAULT_DISPLAY);
-        TaskDisplayArea taskDisplayArea = displayContent.getDefaultTaskDisplayArea();
-        Task stack = taskDisplayArea.getRootTask(task -> true, false /* traverseTopToBottom */);
         ActivityRecord activity = createActivityRecord(displayContent);
-        stack.mPausingActivity = activity;
+        Task task = activity.getTask();
+        task.setPausingActivity(activity);
 
         activity.setState(PAUSING, "test PAUSING");
         assertThat(mWm.mRoot.allPausedActivitiesComplete()).isFalse();

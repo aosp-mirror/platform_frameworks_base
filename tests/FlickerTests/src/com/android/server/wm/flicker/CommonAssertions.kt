@@ -48,11 +48,12 @@ fun WmAssertion.navBarWindowIsAlwaysVisible(
 }
 
 fun WmAssertion.visibleWindowsShownMoreThanOneConsecutiveEntry(
+    ignoreWindows: List<String> = emptyList(),
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
-    all("visibleWindowShownMoreThanOneConsecutiveEntry", bugId, enabled) {
-        this.visibleWindowsShownMoreThanOneConsecutiveEntry()
+    all("visibleWindowsShownMoreThanOneConsecutiveEntry", bugId, enabled) {
+        this.visibleWindowsShownMoreThanOneConsecutiveEntry(ignoreWindows)
     }
 }
 
@@ -204,11 +205,12 @@ fun LayersAssertion.statusBarLayerRotatesScales(
 }
 
 fun LayersAssertion.visibleLayersShownMoreThanOneConsecutiveEntry(
+    ignoreLayers: List<String> = emptyList(),
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
     all("visibleLayersShownMoreThanOneConsecutiveEntry", bugId, enabled) {
-        this.visibleLayersShownMoreThanOneConsecutiveEntry()
+        this.visibleLayersShownMoreThanOneConsecutiveEntry(ignoreLayers)
     }
 }
 

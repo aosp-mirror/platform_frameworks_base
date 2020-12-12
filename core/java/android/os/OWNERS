@@ -25,4 +25,7 @@ per-file PowerComponents.java = file:/BATTERY_STATS_OWNERS
 
 per-file GraphicsEnvironment.java = chrisforbes@google.com, cnorthrop@google.com, lpy@google.com, timvp@google.com, zzyiwei@google.com
 
+per-file *Network* = file:/services/core/java/com/android/server/net/OWNERS
+per-file *Power* = file:/services/core/java/com/android/server/power/OWNERS
+per-file *Telephony* = file:/telephony/OWNERS
 per-file *Zygote* = file:/ZYGOTE_OWNERS

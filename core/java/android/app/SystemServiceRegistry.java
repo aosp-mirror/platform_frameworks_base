@@ -63,7 +63,6 @@ import android.content.pm.CrossProfileApps;
 import android.content.pm.DataLoaderManager;
 import android.content.pm.ICrossProfileApps;
 import android.content.pm.IDataLoaderManager;
-import android.content.pm.IPackageManager;
 import android.content.pm.IShortcutService;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
@@ -176,6 +175,7 @@ import android.os.image.IDynamicSystemService;
 import android.os.incremental.IIncrementalService;
 import android.os.incremental.IncrementalManager;
 import android.os.storage.StorageManager;
+import android.permission.LegacyPermissionManager;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.print.IPrintManager;
@@ -1264,8 +1264,15 @@ public final class SystemServiceRegistry {
                     @Override
                     public PermissionManager createService(ContextImpl ctx)
                             throws ServiceNotFoundException {
-                        IPackageManager packageManager = AppGlobals.getPackageManager();
-                        return new PermissionManager(ctx.getOuterContext(), packageManager);
+                        return new PermissionManager(ctx.getOuterContext());
+                    }});
+
+        registerService(Context.LEGACY_PERMISSION_SERVICE, LegacyPermissionManager.class,
+                new CachedServiceFetcher<LegacyPermissionManager>() {
+                    @Override
+                    public LegacyPermissionManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        return new LegacyPermissionManager();
                     }});
 
         registerService(Context.PERMISSION_CONTROLLER_SERVICE, PermissionControllerManager.class,

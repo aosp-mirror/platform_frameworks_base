@@ -59,8 +59,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.PackageManager.Property;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
@@ -95,8 +93,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
-import android.permission.IOnPermissionsChangeListener;
-import android.permission.IPermissionManager;
 import android.permission.PermissionManager;
 import android.provider.Settings;
 import android.system.ErrnoException;
@@ -106,7 +102,6 @@ import android.system.StructStat;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.DebugUtils;
 import android.util.LauncherIcons;
 import android.util.Log;
 
@@ -129,7 +124,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -137,14 +131,6 @@ import java.util.Set;
 public class ApplicationPackageManager extends PackageManager {
     private static final String TAG = "ApplicationPackageManager";
     private static final boolean DEBUG_ICONS = false;
-    /**
-     * Note: Changing this won't do anything on it's own - you should also change the filtering in
-     * {@link #shouldTraceGrant}
-     *
-     * @hide
-     */
-    public static final boolean DEBUG_TRACE_GRANTS = false;
-    public static final boolean DEBUG_TRACE_PERMISSION_UPDATES = false;
 
     private static final int DEFAULT_EPHEMERAL_COOKIE_MAX_SIZE_BYTES = 16384; // 16KB
 
@@ -171,6 +157,8 @@ public class ApplicationPackageManager extends PackageManager {
     @GuardedBy("mLock")
     private UserManager mUserManager;
     @GuardedBy("mLock")
+    private PermissionManager mPermissionManager;
+    @GuardedBy("mLock")
     private PackageInstaller mInstaller;
     @GuardedBy("mLock")
     private ArtManager mArtManager;
@@ -187,6 +175,15 @@ public class ApplicationPackageManager extends PackageManager {
                 mUserManager = UserManager.get(mContext);
             }
             return mUserManager;
+        }
+    }
+
+    private PermissionManager getPermissionManager() {
+        synchronized (mLock) {
+            if (mPermissionManager == null) {
+                mPermissionManager = mContext.getSystemService(PermissionManager.class);
+            }
+            return mPermissionManager;
         }
     }
 
@@ -355,66 +352,41 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     @SuppressWarnings("unchecked")
     public List<PermissionGroupInfo> getAllPermissionGroups(int flags) {
-        try {
-            final ParceledListSlice<PermissionGroupInfo> parceledList =
-                    mPermissionManager.getAllPermissionGroups(flags);
-            if (parceledList == null) {
-                return Collections.emptyList();
-            }
-            return parceledList.getList();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getPermissionManager().getAllPermissionGroups(flags);
     }
 
     @Override
     public PermissionGroupInfo getPermissionGroupInfo(String groupName, int flags)
             throws NameNotFoundException {
-        try {
-            final PermissionGroupInfo pgi =
-                    mPermissionManager.getPermissionGroupInfo(groupName, flags);
-            if (pgi != null) {
-                return pgi;
-            }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        final PermissionGroupInfo permissionGroupInfo = getPermissionManager()
+                .getPermissionGroupInfo(groupName, flags);
+        if (permissionGroupInfo == null) {
+            throw new NameNotFoundException(groupName);
         }
-        throw new NameNotFoundException(groupName);
+        return permissionGroupInfo;
     }
 
     @Override
     public PermissionInfo getPermissionInfo(String permName, int flags)
             throws NameNotFoundException {
-        try {
-            final String packageName = mContext.getOpPackageName();
-            final PermissionInfo pi =
-                    mPermissionManager.getPermissionInfo(permName, packageName, flags);
-            if (pi != null) {
-                return pi;
-            }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        final PermissionInfo permissionInfo = getPermissionManager().getPermissionInfo(permName,
+                flags);
+        if (permissionInfo == null) {
+            throw new NameNotFoundException(permName);
         }
-        throw new NameNotFoundException(permName);
+        return permissionInfo;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public List<PermissionInfo> queryPermissionsByGroup(String groupName, int flags)
             throws NameNotFoundException {
-        try {
-            final ParceledListSlice<PermissionInfo> parceledList =
-                    mPermissionManager.queryPermissionsByGroup(groupName, flags);
-            if (parceledList != null) {
-                final List<PermissionInfo> pi = parceledList.getList();
-                if (pi != null) {
-                    return pi;
-                }
-            }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        final List<PermissionInfo> permissionInfos = getPermissionManager().queryPermissionsByGroup(
+                groupName, flags);
+        if (permissionInfos == null) {
+            throw new NameNotFoundException(groupName);
         }
-        throw new NameNotFoundException(groupName);
+        return permissionInfos;
     }
 
     @Override
@@ -724,11 +696,7 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public boolean isPermissionRevokedByPolicy(String permName, String pkgName) {
-        try {
-            return mPermissionManager.isPermissionRevokedByPolicy(permName, pkgName, getUserId());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getPermissionManager().isPermissionRevokedByPolicy(pkgName, permName);
     }
 
     /**
@@ -750,50 +718,23 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public boolean addPermission(PermissionInfo info) {
-        try {
-            return mPermissionManager.addPermission(info, false);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getPermissionManager().addPermission(info, false);
     }
 
     @Override
     public boolean addPermissionAsync(PermissionInfo info) {
-        try {
-            return mPermissionManager.addPermission(info, true);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getPermissionManager().addPermission(info, true);
     }
 
     @Override
     public void removePermission(String name) {
-        try {
-            mPermissionManager.removePermission(name);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        getPermissionManager().removePermission(name);
     }
 
     @Override
     public void grantRuntimePermission(String packageName, String permissionName,
             UserHandle user) {
-        if (DEBUG_TRACE_GRANTS
-                && shouldTraceGrant(packageName, permissionName, user.getIdentifier())) {
-            Log.i(TAG, "App " + mContext.getPackageName() + " is granting " + packageName + " "
-                    + permissionName + " for user " + user.getIdentifier(), new RuntimeException());
-        }
-        try {
-            mPM.grantRuntimePermission(packageName, permissionName, user.getIdentifier());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /** @hide */
-    public static boolean shouldTraceGrant(String packageName, String permissionName, int userId) {
-        // To be modified when debugging
-        return false;
+        getPermissionManager().grantRuntimePermission(packageName, permissionName, user);
     }
 
     @Override
@@ -804,124 +745,55 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public void revokeRuntimePermission(String packageName, String permName, UserHandle user,
             String reason) {
-        if (DEBUG_TRACE_PERMISSION_UPDATES
-                && shouldTraceGrant(packageName, permName, user.getIdentifier())) {
-            Log.i(TAG, "App " + mContext.getPackageName() + " is revoking " + packageName + " "
-                    + permName + " for user " + user.getIdentifier() + " with reason " + reason,
-                    new RuntimeException());
-        }
-        try {
-            mPermissionManager
-                    .revokeRuntimePermission(packageName, permName, user.getIdentifier(), reason);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        getPermissionManager().revokeRuntimePermission(packageName, permName, user, reason);
     }
 
     @Override
     public int getPermissionFlags(String permName, String packageName, UserHandle user) {
-        try {
-            return mPermissionManager
-                    .getPermissionFlags(permName, packageName, user.getIdentifier());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getPermissionManager().getPermissionFlags(packageName, permName, user);
     }
 
     @Override
     public void updatePermissionFlags(String permName, String packageName,
             int flagMask, int flagValues, UserHandle user) {
-        if (DEBUG_TRACE_PERMISSION_UPDATES
-                && shouldTraceGrant(packageName, permName, user.getIdentifier())) {
-            Log.i(TAG, "App " + mContext.getPackageName() + " is updating flags for "
-                    + packageName + " "
-                    + permName + " for user " + user.getIdentifier() + ": "
-                    + DebugUtils.flagsToString(PackageManager.class, "FLAG_PERMISSION_", flagMask)
-                    + " := " + DebugUtils.flagsToString(
-                            PackageManager.class, "FLAG_PERMISSION_", flagValues),
-                    new RuntimeException());
-        }
-        try {
-            final boolean checkAdjustPolicyFlagPermission =
-                    mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.Q;
-            mPermissionManager.updatePermissionFlags(permName, packageName, flagMask,
-                    flagValues, checkAdjustPolicyFlagPermission, user.getIdentifier());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        getPermissionManager().updatePermissionFlags(packageName, permName, flagMask, flagValues,
+                user);
     }
 
     @Override
     public @NonNull Set<String> getWhitelistedRestrictedPermissions(
             @NonNull String packageName, @PermissionWhitelistFlags int flags) {
-        try {
-            final int userId = getUserId();
-            final List<String> whitelist = mPermissionManager
-                    .getWhitelistedRestrictedPermissions(packageName, flags, userId);
-            if (whitelist != null) {
-                return new ArraySet<>(whitelist);
-            }
-            return Collections.emptySet();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getPermissionManager().getAllowlistedRestrictedPermissions(packageName, flags);
     }
 
     @Override
     public boolean addWhitelistedRestrictedPermission(@NonNull String packageName,
             @NonNull String permName, @PermissionWhitelistFlags int flags) {
-        try {
-            final int userId = getUserId();
-            return mPermissionManager
-                    .addWhitelistedRestrictedPermission(packageName, permName, flags, userId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getPermissionManager().addAllowlistedRestrictedPermission(packageName, permName,
+                flags);
     }
 
     @Override
-    public boolean setAutoRevokeWhitelisted(
-            @NonNull String packageName, boolean whitelisted) {
-        try {
-            final int userId = getUserId();
-            return mPermissionManager.setAutoRevokeWhitelisted(packageName, whitelisted, userId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+    public boolean setAutoRevokeWhitelisted(@NonNull String packageName, boolean whitelisted) {
+        return getPermissionManager().setAutoRevokeExempted(packageName, whitelisted);
     }
 
     @Override
     public boolean isAutoRevokeWhitelisted(@NonNull String packageName) {
-        try {
-            final int userId = getUserId();
-            return mPermissionManager.isAutoRevokeWhitelisted(packageName, userId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getPermissionManager().isAutoRevokeExempted(packageName);
     }
 
     @Override
     public boolean removeWhitelistedRestrictedPermission(@NonNull String packageName,
             @NonNull String permName, @PermissionWhitelistFlags int flags) {
-        try {
-            final int userId = getUserId();
-            return mPermissionManager
-                    .removeWhitelistedRestrictedPermission(packageName, permName, flags, userId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getPermissionManager().removeAllowlistedRestrictedPermission(packageName, permName,
+                flags);
     }
 
     @Override
     @UnsupportedAppUsage
     public boolean shouldShowRequestPermissionRationale(String permName) {
-        try {
-            final String packageName = mContext.getPackageName();
-            return mPermissionManager
-                    .shouldShowRequestPermissionRationale(permName, packageName, getUserId());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getPermissionManager().shouldShowRequestPermissionRationale(permName);
     }
 
     @Override
@@ -1880,34 +1752,12 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public void addOnPermissionsChangeListener(OnPermissionsChangedListener listener) {
-        synchronized (mPermissionListeners) {
-            if (mPermissionListeners.get(listener) != null) {
-                return;
-            }
-            OnPermissionsChangeListenerDelegate delegate =
-                    new OnPermissionsChangeListenerDelegate(listener, Looper.getMainLooper());
-            try {
-                mPermissionManager.addOnPermissionsChangeListener(delegate);
-                mPermissionListeners.put(listener, delegate);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
+        getPermissionManager().addOnPermissionsChangeListener(listener);
     }
 
     @Override
     public void removeOnPermissionsChangeListener(OnPermissionsChangedListener listener) {
-        synchronized (mPermissionListeners) {
-            IOnPermissionsChangeListener delegate = mPermissionListeners.get(listener);
-            if (delegate != null) {
-                try {
-                    mPermissionManager.removeOnPermissionsChangeListener(delegate);
-                    mPermissionListeners.remove(listener);
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
-            }
-        }
+        getPermissionManager().removeOnPermissionsChangeListener(listener);
     }
 
     @UnsupportedAppUsage
@@ -1918,11 +1768,9 @@ public class ApplicationPackageManager extends PackageManager {
         }
     }
 
-    protected ApplicationPackageManager(ContextImpl context, IPackageManager pm,
-            IPermissionManager permissionManager) {
+    protected ApplicationPackageManager(ContextImpl context, IPackageManager pm) {
         mContext = context;
         mPM = pm;
-        mPermissionManager = permissionManager;
     }
 
     /**
@@ -3234,7 +3082,6 @@ public class ApplicationPackageManager extends PackageManager {
     private final ContextImpl mContext;
     @UnsupportedAppUsage
     private final IPackageManager mPM;
-    private final IPermissionManager mPermissionManager;
 
     /** Assume locked until we hear otherwise */
     private volatile boolean mUserUnlocked = false;
@@ -3244,41 +3091,6 @@ public class ApplicationPackageManager extends PackageManager {
             = new ArrayMap<ResourceName, WeakReference<Drawable.ConstantState>>();
     private static ArrayMap<ResourceName, WeakReference<CharSequence>> sStringCache
             = new ArrayMap<ResourceName, WeakReference<CharSequence>>();
-
-    private final Map<OnPermissionsChangedListener, IOnPermissionsChangeListener>
-            mPermissionListeners = new ArrayMap<>();
-
-    public class OnPermissionsChangeListenerDelegate extends IOnPermissionsChangeListener.Stub
-            implements Handler.Callback{
-        private static final int MSG_PERMISSIONS_CHANGED = 1;
-
-        private final OnPermissionsChangedListener mListener;
-        private final Handler mHandler;
-
-
-        public OnPermissionsChangeListenerDelegate(OnPermissionsChangedListener listener,
-                Looper looper) {
-            mListener = listener;
-            mHandler = new Handler(looper, this);
-        }
-
-        @Override
-        public void onPermissionsChanged(int uid) {
-            mHandler.obtainMessage(MSG_PERMISSIONS_CHANGED, uid, 0).sendToTarget();
-        }
-
-        @Override
-        public boolean handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_PERMISSIONS_CHANGED: {
-                    final int uid = msg.arg1;
-                    mListener.onPermissionsChanged(uid);
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
 
     @Override
     public boolean canRequestPackageInstalls() {

@@ -174,6 +174,7 @@ import android.app.ProfilerInfo;
 import android.app.WaitResult;
 import android.app.backup.BackupManager.OperationType;
 import android.app.backup.IBackupManager;
+import android.app.compat.CompatChanges;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStatsManager;
@@ -13713,6 +13714,37 @@ public class ActivityManagerService extends IActivityManager.Stub
                     forceStopPackageLocked(packageName, -1, false, true, true,
                             false, false, userId, "package unstartable");
                     break;
+                case Intent.ACTION_CLOSE_SYSTEM_DIALOGS:
+                    if (!canCloseSystemDialogs(callingPid, callingUid, callerApp)) {
+                        // The app can't close system dialogs, throw only if it targets S+
+                        if (CompatChanges.isChangeEnabled(
+                                ActivityManager.LOCK_DOWN_CLOSE_SYSTEM_DIALOGS, callingUid)) {
+                            throw new SecurityException(
+                                    "Permission Denial: " + Intent.ACTION_CLOSE_SYSTEM_DIALOGS
+                                            + " broadcast from " + callerPackage + " (pid="
+                                            + callingPid + ", uid=" + callingUid + ")"
+                                            + " requires "
+                                            + permission.BROADCAST_CLOSE_SYSTEM_DIALOGS + ".");
+                        } else if (CompatChanges.isChangeEnabled(
+                                ActivityManager.DROP_CLOSE_SYSTEM_DIALOGS, callingUid)) {
+                            Slog.w(TAG, "Permission Denial: " + intent.getAction()
+                                    + " broadcast from " + callerPackage + " (pid=" + callingPid
+                                    + ", uid=" + callingUid + ")"
+                                    + " requires "
+                                    + permission.BROADCAST_CLOSE_SYSTEM_DIALOGS
+                                    + ", dropping broadcast.");
+                            // Returning success seems to be the pattern here
+                            return ActivityManager.BROADCAST_SUCCESS;
+                        } else {
+                            Slog.w(TAG, intent.getAction()
+                                    + " broadcast from " + callerPackage + " (pid=" + callingPid
+                                    + ", uid=" + callingUid + ")"
+                                    + " will require  "
+                                    + permission.BROADCAST_CLOSE_SYSTEM_DIALOGS
+                                    + " in future builds.");
+                        }
+                    }
+                    break;
             }
 
             if (Intent.ACTION_PACKAGE_ADDED.equals(action) ||
@@ -14003,6 +14035,32 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         return ActivityManager.BROADCAST_SUCCESS;
+    }
+
+    private boolean canCloseSystemDialogs(int pid, int uid, @Nullable ProcessRecord callerApp) {
+        if (checkPermission(permission.BROADCAST_CLOSE_SYSTEM_DIALOGS, pid, uid)
+                == PERMISSION_GRANTED) {
+            return true;
+        }
+        if (callerApp == null) {
+            synchronized (mPidsSelfLocked) {
+                callerApp = mPidsSelfLocked.get(pid);
+            }
+        }
+        // Check if the instrumentation of the process has the permission. This covers the usual
+        // test started from the shell (which has the permission) case. This is needed for apps
+        // targeting SDK level < S but we are also allowing for targetSdk S+ as a convenience to
+        // avoid breaking a bunch of existing tests and asking them to adopt shell permissions to do
+        // this.
+        if (callerApp != null) {
+            ActiveInstrumentation instrumentation = callerApp.getActiveInstrumentation();
+            if (instrumentation != null && checkPermission(
+                    permission.BROADCAST_CLOSE_SYSTEM_DIALOGS, -1, instrumentation.mSourceUid)
+                    == PERMISSION_GRANTED) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
