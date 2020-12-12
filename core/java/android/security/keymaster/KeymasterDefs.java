@@ -16,18 +16,18 @@
 
 package android.security.keymaster;
 
-import android.hardware.keymint.Algorithm;
-import android.hardware.keymint.BlockMode;
-import android.hardware.keymint.Digest;
-import android.hardware.keymint.ErrorCode;
-import android.hardware.keymint.HardwareAuthenticatorType;
-import android.hardware.keymint.KeyFormat;
-import android.hardware.keymint.KeyOrigin;
-import android.hardware.keymint.KeyPurpose;
-import android.hardware.keymint.PaddingMode;
-import android.hardware.keymint.SecurityLevel;
-import android.hardware.keymint.Tag;
-import android.hardware.keymint.TagType;
+import android.hardware.security.keymint.Algorithm;
+import android.hardware.security.keymint.BlockMode;
+import android.hardware.security.keymint.Digest;
+import android.hardware.security.keymint.ErrorCode;
+import android.hardware.security.keymint.HardwareAuthenticatorType;
+import android.hardware.security.keymint.KeyFormat;
+import android.hardware.security.keymint.KeyOrigin;
+import android.hardware.security.keymint.KeyPurpose;
+import android.hardware.security.keymint.PaddingMode;
+import android.hardware.security.keymint.SecurityLevel;
+import android.hardware.security.keymint.Tag;
+import android.hardware.security.keymint.TagType;
 
 import java.util.HashMap;
 import java.util.Map;
