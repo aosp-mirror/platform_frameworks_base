@@ -35,6 +35,7 @@ package android.net.wifi {
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.ScanResult> CREATOR;
     field public String SSID;
     field public static final int WIFI_STANDARD_11AC = 5; // 0x5
+    field public static final int WIFI_STANDARD_11AD = 7; // 0x7
     field public static final int WIFI_STANDARD_11AX = 6; // 0x6
     field public static final int WIFI_STANDARD_11N = 4; // 0x4
     field public static final int WIFI_STANDARD_LEGACY = 1; // 0x1

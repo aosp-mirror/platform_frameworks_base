@@ -88,6 +88,13 @@ public final class SoftApConfiguration implements Parcelable {
     public static final int BAND_6GHZ = 1 << 2;
 
     /**
+     * 60GHz band.
+     * @hide
+     */
+    @SystemApi
+    public static final int BAND_60GHZ = 1 << 3;
+
+    /**
      * Device is allowed to choose the optimal band (2Ghz, 5Ghz, 6Ghz) based on device capability,
      * operating country code and current radio conditions.
      * @hide
@@ -104,11 +111,13 @@ public final class SoftApConfiguration implements Parcelable {
             BAND_2GHZ,
             BAND_5GHZ,
             BAND_6GHZ,
+            BAND_60GHZ,
     })
     public @interface BandType {}
 
     private static boolean isBandValid(@BandType int band) {
-        return ((band != 0) && ((band & ~BAND_ANY) == 0));
+        int bandAny = BAND_2GHZ | BAND_5GHZ | BAND_6GHZ | BAND_60GHZ;
+        return ((band != 0) && ((band & ~bandAny) == 0));
     }
 
     private static final int MIN_CH_2G_BAND = 1;
@@ -117,6 +126,8 @@ public final class SoftApConfiguration implements Parcelable {
     private static final int MAX_CH_5G_BAND = 196;
     private static final int MIN_CH_6G_BAND = 1;
     private static final int MAX_CH_6G_BAND = 253;
+    private static final int MIN_CH_60G_BAND = 1;
+    private static final int MAX_CH_60G_BAND = 6;
 
 
 
@@ -139,6 +150,13 @@ public final class SoftApConfiguration implements Parcelable {
                     return false;
                 }
                 break;
+
+            case BAND_60GHZ:
+                if (channel < MIN_CH_60G_BAND || channel >  MAX_CH_60G_BAND) {
+                    return false;
+                }
+                break;
+
             default:
                 return false;
         }
