@@ -17,8 +17,12 @@
 package com.android.frameworks.core.powerstatsviewer;
 
 import android.content.Context;
+import android.os.BatteryConsumer;
 import android.os.BatteryStats;
+import android.os.BatteryUsageStats;
 import android.os.Process;
+import android.os.UidBatteryConsumer;
+import android.os.UserHandle;
 
 import com.android.internal.os.BatterySipper;
 import com.android.internal.os.BatteryStatsHelper;
@@ -58,7 +62,7 @@ public class PowerStatsData {
     private final List<Entry> mEntries = new ArrayList<>();
 
     public PowerStatsData(Context context, BatteryStatsHelper batteryStatsHelper,
-            String powerConsumerId) {
+            BatteryUsageStats batteryUsageStats, String powerConsumerId) {
         List<BatterySipper> usageList = batteryStatsHelper.getUsageList();
         BatteryStats batteryStats = batteryStatsHelper.getStats();
 
@@ -92,14 +96,14 @@ public class PowerStatsData {
         long totalAudioTimeMs = 0;
         long totalVideoTimeMs = 0;
 
-        BatterySipper requestedPowerConsumer = null;
+        BatterySipper requestedBatterySipper = null;
         for (BatterySipper sipper : usageList) {
             if (sipper.drainType == BatterySipper.DrainType.SCREEN) {
                 totalScreenPower = sipper.sumPower();
             }
 
             if (powerConsumerId(sipper).equals(powerConsumerId)) {
-                requestedPowerConsumer = sipper;
+                requestedBatterySipper = sipper;
             }
 
             totalPowerMah += sipper.sumPower();
@@ -136,81 +140,95 @@ public class PowerStatsData {
             totalVideoTimeMs += sipper.videoTimeMs;
         }
 
-        long totalScreenMeasuredEnergyUJ = batteryStats.getScreenOnEnergy();
+        BatteryConsumer requestedBatteryConsumer = null;
 
-        if (requestedPowerConsumer == null) {
+        for (BatteryConsumer consumer : batteryUsageStats.getUidBatteryConsumers()) {
+            if (powerConsumerId(consumer).equals(powerConsumerId)) {
+                requestedBatteryConsumer = consumer;
+                break;
+            }
+        }
+
+        if (requestedBatterySipper == null) {
             mPowerConsumerInfo = null;
             return;
         }
 
+        long totalScreenMeasuredEnergyUJ = batteryStats.getScreenOnEnergy();
+
         mPowerConsumerInfo = PowerConsumerInfoHelper.makePowerConsumerInfo(
-                context.getPackageManager(), requestedPowerConsumer);
+                context.getPackageManager(), requestedBatterySipper);
 
         addEntry("Total power", EntryType.POWER,
-                requestedPowerConsumer.totalSmearedPowerMah, totalSmearedPowerMah);
-        maybeAddMeasuredEnergyEntry(requestedPowerConsumer.drainType, batteryStats);
+                requestedBatterySipper.totalSmearedPowerMah, totalSmearedPowerMah);
+        maybeAddMeasuredEnergyEntry(requestedBatterySipper.drainType, batteryStats);
 
         addEntry("... excluding system", EntryType.POWER,
-                requestedPowerConsumer.totalSmearedPowerMah, totalPowerExcludeSystemMah);
+                requestedBatterySipper.totalSmearedPowerMah, totalPowerExcludeSystemMah);
         addEntry("Screen, smeared", EntryType.POWER,
-                requestedPowerConsumer.screenPowerMah, totalScreenPower);
+                requestedBatterySipper.screenPowerMah, totalScreenPower);
         if (totalScreenMeasuredEnergyUJ != BatteryStats.ENERGY_DATA_UNAVAILABLE) {
             final double measuredCharge = UJ_2_MAH * totalScreenMeasuredEnergyUJ;
             final double ratio = measuredCharge / totalScreenPower;
             addEntry("Screen, smeared (PowerStatsHal adjusted)", EntryType.POWER,
-                    requestedPowerConsumer.screenPowerMah * ratio, measuredCharge);
+                    requestedBatterySipper.screenPowerMah * ratio, measuredCharge);
         }
         addEntry("Other, smeared", EntryType.POWER,
-                requestedPowerConsumer.proportionalSmearMah, totalProportionalSmearMah);
+                requestedBatterySipper.proportionalSmearMah, totalProportionalSmearMah);
         addEntry("Excluding smeared", EntryType.POWER,
-                requestedPowerConsumer.totalPowerMah, totalPowerMah);
-        addEntry("CPU", EntryType.POWER,
-                requestedPowerConsumer.cpuPowerMah, totalCpuPowerMah);
+                requestedBatterySipper.totalPowerMah, totalPowerMah);
+        if (requestedBatteryConsumer != null) {
+            addEntry("CPU", EntryType.POWER,
+                    requestedBatteryConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU),
+                    totalCpuPowerMah);
+        }
+        addEntry("CPU (sipper)", EntryType.POWER,
+                requestedBatterySipper.cpuPowerMah, totalCpuPowerMah);
         addEntry("System services", EntryType.POWER,
-                requestedPowerConsumer.systemServiceCpuPowerMah, totalSystemServiceCpuPowerMah);
+                requestedBatterySipper.systemServiceCpuPowerMah, totalSystemServiceCpuPowerMah);
         addEntry("Usage", EntryType.POWER,
-                requestedPowerConsumer.usagePowerMah, totalUsagePowerMah);
+                requestedBatterySipper.usagePowerMah, totalUsagePowerMah);
         addEntry("Wake lock", EntryType.POWER,
-                requestedPowerConsumer.wakeLockPowerMah, totalWakeLockPowerMah);
+                requestedBatterySipper.wakeLockPowerMah, totalWakeLockPowerMah);
         addEntry("Mobile radio", EntryType.POWER,
-                requestedPowerConsumer.mobileRadioPowerMah, totalMobileRadioPowerMah);
+                requestedBatterySipper.mobileRadioPowerMah, totalMobileRadioPowerMah);
         addEntry("WiFi", EntryType.POWER,
-                requestedPowerConsumer.wifiPowerMah, totalWifiPowerMah);
+                requestedBatterySipper.wifiPowerMah, totalWifiPowerMah);
         addEntry("Bluetooth", EntryType.POWER,
-                requestedPowerConsumer.bluetoothPowerMah, totalBluetoothPowerMah);
+                requestedBatterySipper.bluetoothPowerMah, totalBluetoothPowerMah);
         addEntry("GPS", EntryType.POWER,
-                requestedPowerConsumer.gpsPowerMah, totalGpsPowerMah);
+                requestedBatterySipper.gpsPowerMah, totalGpsPowerMah);
         addEntry("Camera", EntryType.POWER,
-                requestedPowerConsumer.cameraPowerMah, totalCameraPowerMah);
+                requestedBatterySipper.cameraPowerMah, totalCameraPowerMah);
         addEntry("Flashlight", EntryType.POWER,
-                requestedPowerConsumer.flashlightPowerMah, totalFlashlightPowerMah);
+                requestedBatterySipper.flashlightPowerMah, totalFlashlightPowerMah);
         addEntry("Sensors", EntryType.POWER,
-                requestedPowerConsumer.sensorPowerMah, totalSensorPowerMah);
+                requestedBatterySipper.sensorPowerMah, totalSensorPowerMah);
         addEntry("Audio", EntryType.POWER,
-                requestedPowerConsumer.audioPowerMah, totalAudioPowerMah);
+                requestedBatterySipper.audioPowerMah, totalAudioPowerMah);
         addEntry("Video", EntryType.POWER,
-                requestedPowerConsumer.videoPowerMah, totalVideoPowerMah);
+                requestedBatterySipper.videoPowerMah, totalVideoPowerMah);
 
         addEntry("CPU time", EntryType.DURATION,
-                requestedPowerConsumer.cpuTimeMs, totalCpuTimeMs);
+                requestedBatterySipper.cpuTimeMs, totalCpuTimeMs);
         addEntry("CPU foreground time", EntryType.DURATION,
-                requestedPowerConsumer.cpuFgTimeMs, totalCpuFgTimeMs);
+                requestedBatterySipper.cpuFgTimeMs, totalCpuFgTimeMs);
         addEntry("Wake lock time", EntryType.DURATION,
-                requestedPowerConsumer.wakeLockTimeMs, totalWakeLockTimeMs);
+                requestedBatterySipper.wakeLockTimeMs, totalWakeLockTimeMs);
         addEntry("WiFi running time", EntryType.DURATION,
-                requestedPowerConsumer.wifiRunningTimeMs, totalWifiRunningTimeMs);
+                requestedBatterySipper.wifiRunningTimeMs, totalWifiRunningTimeMs);
         addEntry("Bluetooth time", EntryType.DURATION,
-                requestedPowerConsumer.bluetoothRunningTimeMs, totalBluetoothRunningTimeMs);
+                requestedBatterySipper.bluetoothRunningTimeMs, totalBluetoothRunningTimeMs);
         addEntry("GPS time", EntryType.DURATION,
-                requestedPowerConsumer.gpsTimeMs, totalGpsTimeMs);
+                requestedBatterySipper.gpsTimeMs, totalGpsTimeMs);
         addEntry("Camera time", EntryType.DURATION,
-                requestedPowerConsumer.cameraTimeMs, totalCameraTimeMs);
+                requestedBatterySipper.cameraTimeMs, totalCameraTimeMs);
         addEntry("Flashlight time", EntryType.DURATION,
-                requestedPowerConsumer.flashlightTimeMs, totalFlashlightTimeMs);
+                requestedBatterySipper.flashlightTimeMs, totalFlashlightTimeMs);
         addEntry("Audio time", EntryType.DURATION,
-                requestedPowerConsumer.audioTimeMs, totalAudioTimeMs);
+                requestedBatterySipper.audioTimeMs, totalAudioTimeMs);
         addEntry("Video time", EntryType.DURATION,
-                requestedPowerConsumer.videoTimeMs, totalVideoTimeMs);
+                requestedBatterySipper.videoTimeMs, totalVideoTimeMs);
     }
 
     private boolean isSystemSipper(BatterySipper sipper) {
@@ -271,5 +289,15 @@ public class PowerStatsData {
 
     public static String powerConsumerId(BatterySipper sipper) {
         return sipper.drainType + "|" + sipper.userId + "|" + sipper.getUid();
+    }
+
+    public static String powerConsumerId(BatteryConsumer consumer) {
+        if (consumer instanceof UidBatteryConsumer) {
+            return BatterySipper.DrainType.APP + "|"
+                    + UserHandle.getUserId(((UidBatteryConsumer) consumer).getUid()) + "|"
+                    + ((UidBatteryConsumer) consumer).getUid();
+        } else {
+            return "";
+        }
     }
 }

@@ -26,6 +26,7 @@ import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.util.Slog;
+import android.view.Choreographer;
 import android.view.SurfaceControl;
 import android.window.TaskOrganizer;
 import android.window.WindowContainerToken;
@@ -338,6 +339,7 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
             SurfaceControl.Transaction t = mTransactionPool.acquire();
             float value = (float) animation.getAnimatedValue();
             onProgress(value, t);
+            t.setFrameTimelineVsync(Choreographer.getSfInstance().getVsyncId());
             t.apply();
             mTransactionPool.release(t);
         });

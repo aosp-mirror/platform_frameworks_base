@@ -37,6 +37,7 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.Slog;
+import android.view.Choreographer;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
@@ -1108,6 +1109,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             }
             resizeSplitSurfaces(t, mDockedRect, mDockedTaskRect, mOtherRect, mOtherTaskRect);
             if (ownTransaction) {
+                t.setFrameTimelineVsync(Choreographer.getSfInstance().getVsyncId());
                 t.apply();
                 mTiles.releaseTransaction(t);
             }

@@ -18,6 +18,7 @@
     <privapp-permissions package="com.android.car.provision">
         <permission name="android.car.permission.CAR_POWERTRAIN"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
+        <permission name="android.permission.INTERACT_ACROSS_USERS_FULL"/>
         <permission name="android.permission.MASTER_CLEAR"/>
         <permission name="android.permission.QUERY_ALL_PACKAGES"/>
         <permission name="android.permission.SEND_CATEGORY_CAR_NOTIFICATIONS"/>

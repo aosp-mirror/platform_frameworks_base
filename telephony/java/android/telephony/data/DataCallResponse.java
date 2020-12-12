@@ -253,7 +253,9 @@ public final class DataCallResponse implements Parcelable {
     public int getCause() { return mCause; }
 
     /**
-     * @return The suggested data retry time in milliseconds.
+     * @return The suggested data retry time in milliseconds. 0 when network does not
+     * suggest a retry time (Note this is different from the replacement
+     * {@link #getRetryDurationMillis()}).
      *
      * @deprecated Use {@link #getRetryDurationMillis()} instead.
      */

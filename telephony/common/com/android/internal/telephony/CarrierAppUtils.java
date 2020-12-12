@@ -26,7 +26,7 @@ import android.os.Build;
 import android.os.CarrierAssociatedAppEntry;
 import android.os.SystemConfigManager;
 import android.os.UserHandle;
-import android.permission.PermissionManager;
+import android.permission.LegacyPermissionManager;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
@@ -141,8 +141,8 @@ public final class CarrierAppUtils {
             Map<String, List<CarrierAssociatedAppEntry>>
             systemCarrierAssociatedAppsDisabledUntilUsed, Context context) {
         PackageManager packageManager = context.getPackageManager();
-        PermissionManager permissionManager =
-                (PermissionManager) context.getSystemService(Context.PERMISSION_SERVICE);
+        LegacyPermissionManager permissionManager = (LegacyPermissionManager)
+                context.getSystemService(Context.LEGACY_PERMISSION_SERVICE);
         List<ApplicationInfo> candidates = getDefaultCarrierAppCandidatesHelper(
                 userId, systemCarrierAppsDisabledUntilUsed, context);
         if (candidates == null || candidates.isEmpty()) {

@@ -7760,6 +7760,32 @@ public final class Settings {
                 "minimal_post_processing_allowed";
 
         /**
+         * No mode switching will happen.
+         *
+         * @see #MATCH_CONTENT_FRAME_RATE
+         * @hide
+         */
+        public static final int MATCH_CONTENT_FRAMERATE_NEVER = 0;
+
+        /**
+         * Allow only refresh rate switching between modes in the same configuration group.
+         * This way only switches without visual interruptions for the user will be allowed.
+         *
+         * @see #MATCH_CONTENT_FRAME_RATE
+         * @hide
+         */
+        public static final int MATCH_CONTENT_FRAMERATE_SEAMLESSS_ONLY = 1;
+
+        /**
+         * Allow refresh rate switching between all refresh rates even if the switch will have
+         * visual interruptions for the user.
+         *
+         * @see #MATCH_CONTENT_FRAME_RATE
+         * @hide
+         */
+        public static final int MATCH_CONTENT_FRAMERATE_ALWAYS = 2;
+
+        /**
          * User's preference for refresh rate switching.
          *
          * <p>Values:
@@ -7769,6 +7795,9 @@ public final class Settings {
          *     for the user.
          *
          * @see android.view.Surface#setFrameRate
+         * @see #MATCH_CONTENT_FRAMERATE_NEVER
+         * @see #MATCH_CONTENT_FRAMERATE_SEAMLESSS_ONLY
+         * @see #MATCH_CONTENT_FRAMERATE_ALWAYS
          * @hide
          */
         public static final String MATCH_CONTENT_FRAME_RATE =

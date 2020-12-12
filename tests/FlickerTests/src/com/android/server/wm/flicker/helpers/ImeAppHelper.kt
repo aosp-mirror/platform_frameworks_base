@@ -22,6 +22,7 @@ import android.support.test.launcherhelper.LauncherStrategyFactory
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.Assert
 
 open class ImeAppHelper(
@@ -38,7 +39,7 @@ open class ImeAppHelper(
         Assert.assertNotNull("Text field not found, this usually happens when the device " +
                 "was left in an unknown state (e.g. in split screen)", editText)
         editText.click()
-        if (!device.waitForIME()) {
+        if (!WindowManagerStateHelper().waitImeWindowShown()) {
             Assert.fail("IME did not appear")
         }
     }
@@ -46,6 +47,8 @@ open class ImeAppHelper(
     open fun closeIME(device: UiDevice) {
         device.pressBack()
         // Using only the AccessibilityInfo it is not possible to identify if the IME is active
-        device.waitForIdle(1000)
+        if (!WindowManagerStateHelper().waitImeWindowGone()) {
+            Assert.fail("IME did not close")
+        }
     }
 }

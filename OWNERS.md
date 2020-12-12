@@ -1,3 +1,5 @@
+# Background
+
 As general background, `OWNERS` files expedite code reviews by helping code
 authors quickly find relevant reviewers, and they also ensure that stakeholders
 are involved in code changes in their areas.
@@ -27,8 +29,40 @@ main `services/core/` project:
   * `media/`
   * `wifi/`
 
+# Design
+
 Area maintainers are strongly encouraged to list people in a single
 authoritative `OWNERS` file in **exactly one** location.  Then, other paths
 should reference that single authoritative `OWNERS` file using an include
 directive.  This approach ensures that updates are applied consistently across
 the tree, reducing maintenance burden.
+
+# Examples
+
+The exact syntax of `OWNERS` files can be difficult to get correct, so here are
+some common examples:
+
+```
+# Complete include of top-level owners from this repo
+include /ZYGOTE_OWNERS
+# Partial include of top-level owners from this repo
+per-file ZygoteFile.java = file:/ZYGOTE_OWNERS
+```
+```
+# Complete include of subdirectory owners from this repo
+include /services/core/java/com/android/server/net/OWNERS
+# Partial include of subdirectory owners from this repo
+per-file NetworkFile.java = file:/services/core/java/com/android/server/net/OWNERS
+```
+```
+# Complete include of top-level owners from another repo
+include platform/libcore:/OWNERS
+# Partial include of top-level owners from another repo
+per-file LibcoreFile.java = file:platform/libcore:/OWNERS
+```
+```
+# Complete include of subdirectory owners from another repo
+include platform/frameworks/av:/camera/OWNERS
+# Partial include of subdirectory owners from another repo
+per-file CameraFile.java = file:platform/frameworks/av:/camera/OWNERS
+```

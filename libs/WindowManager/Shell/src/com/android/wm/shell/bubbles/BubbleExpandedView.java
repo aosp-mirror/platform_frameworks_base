@@ -59,7 +59,6 @@ import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.wm.shell.R;
 import com.android.wm.shell.TaskView;
 import com.android.wm.shell.common.AlphaOptimizedButton;
-import com.android.wm.shell.common.HandlerExecutor;
 import com.android.wm.shell.common.TriangleShape;
 
 import java.io.FileDescriptor;
@@ -304,11 +303,6 @@ public class BubbleExpandedView extends LinearLayout {
         setLayoutDirection(LAYOUT_DIRECTION_LOCALE);
     }
 
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        mTaskView.setExecutor(new HandlerExecutor(getHandler()));
-    }
     /**
      * Initialize {@link BubbleController} and {@link BubbleStackView} here, this method must need
      * to be called after view inflate.

@@ -17,7 +17,9 @@
 package com.android.internal.inputmethod;
 
 import com.android.internal.view.InputBindResult;
+import com.android.internal.inputmethod.ThrowableHolder;
 
 oneway interface IInputBindResultResultCallback {
     void onResult(in InputBindResult result);
+    void onError(in ThrowableHolder exception);
 }

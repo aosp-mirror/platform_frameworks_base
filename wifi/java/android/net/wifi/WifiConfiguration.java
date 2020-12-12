@@ -19,6 +19,7 @@ package android.net.wifi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.PackageManager;
@@ -46,10 +47,13 @@ import com.android.net.module.util.MacAddressUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * A class representing a configured Wi-Fi network, including the
@@ -250,6 +254,11 @@ public class WifiConfiguration implements Parcelable {
          */
         public static final int WAPI = 3;
 
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(value = {WPA, RSN, OSEN, WAPI})
+        public @interface ProtocolScheme {};
+
         public static final String varName = "proto";
 
         public static final String[] strings = { "WPA", "RSN", "OSEN", "WAPI" };
@@ -273,6 +282,11 @@ public class WifiConfiguration implements Parcelable {
 
         /** SAE (Used only for WPA3-Personal) */
         public static final int SAE = 3;
+
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(value = {OPEN, SHARED, LEAP, SAE})
+        public @interface AuthAlgorithmScheme {};
 
         public static final String varName = "auth_alg";
 
@@ -308,6 +322,10 @@ public class WifiConfiguration implements Parcelable {
          */
         public static final int GCMP_128 = 5;
 
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(value = {NONE, TKIP, CCMP, GCMP_256, SMS4, GCMP_128})
+        public @interface PairwiseCipherScheme {};
 
         public static final String varName = "pairwise";
 
@@ -359,6 +377,11 @@ public class WifiConfiguration implements Parcelable {
          */
         public static final int GCMP_128 = 7;
 
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(value = {WEP40, WEP104, TKIP, CCMP, GTK_NOT_USED, GCMP_256, SMS4, GCMP_128})
+        public @interface GroupCipherScheme {};
+
         public static final String varName = "group";
 
         public static final String[] strings =
@@ -387,9 +410,16 @@ public class WifiConfiguration implements Parcelable {
         /** GMAC-256 = Galois Message Authentication Code */
         public static final int BIP_GMAC_256 = 2;
 
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(value = {BIP_CMAC_256, BIP_GMAC_128, BIP_GMAC_256})
+        public @interface GroupMgmtCipherScheme {};
+
         private static final String varName = "groupMgmt";
 
-        private static final String[] strings = { "BIP_CMAC_256",
+        /** @hide */
+        @SuppressLint("AllUpper")
+        public static final @NonNull String[] strings = { "BIP_CMAC_256",
                 "BIP_GMAC_128", "BIP_GMAC_256"};
     }
 
@@ -410,9 +440,16 @@ public class WifiConfiguration implements Parcelable {
         /** Diffie-Hellman with_RSA signature */
         public static final int ECDHE_RSA = 1;
 
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(value = {ECDHE_ECDSA, ECDHE_RSA})
+        public @interface SuiteBCipherScheme {};
+
         private static final String varName = "SuiteB";
 
-        private static final String[] strings = { "ECDHE_ECDSA", "ECDHE_RSA" };
+        /** @hide */
+        @SuppressLint("AllUpper")
+        public static final String[] strings = { "ECDHE_ECDSA", "ECDHE_RSA" };
     }
 
     /** Possible status of a network configuration. */
@@ -460,6 +497,11 @@ public class WifiConfiguration implements Parcelable {
     public static final int SECURITY_TYPE_WAPI_CERT = 8;
     /** Security type for a WPA3-Enterprise network. */
     public static final int SECURITY_TYPE_EAP_WPA3_ENTERPRISE = 9;
+    /**
+     * Security type for an OSEN network.
+     * @hide
+     */
+    public static final int SECURITY_TYPE_OSEN = 10;
 
     /**
      * Security types we support.
@@ -481,8 +523,51 @@ public class WifiConfiguration implements Parcelable {
     })
     public @interface SecurityType {}
 
+    private List<SecurityParams> mSecurityParamsList = new ArrayList<>();
+
+    private void updateLegacySecurityParams() {
+        if (mSecurityParamsList.isEmpty()) return;
+        mSecurityParamsList.get(0).updateLegacyWifiConfiguration(this);
+    }
+
     /**
      * Set the various security params to correspond to the provided security type.
+     * This is accomplished by setting the various BitSets exposed in WifiConfiguration.
+     * <br>
+     * This API would clear existing security types and add a default one.
+     *
+     * @param securityType One of the following security types:
+     * {@link #SECURITY_TYPE_OPEN},
+     * {@link #SECURITY_TYPE_WEP},
+     * {@link #SECURITY_TYPE_PSK},
+     * {@link #SECURITY_TYPE_EAP},
+     * {@link #SECURITY_TYPE_SAE},
+     * {@link #SECURITY_TYPE_OWE},
+     * {@link #SECURITY_TYPE_WAPI_PSK},
+     * {@link #SECURITY_TYPE_WAPI_CERT},
+     * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE},
+     * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT}
+     */
+    public void setSecurityParams(@SecurityType int securityType) {
+        // Clear existing data.
+        mSecurityParamsList = new ArrayList<>();
+        addSecurityParams(securityType);
+    }
+
+    /**
+     * Add the various security params.
+     * <br>
+     * This API would clear existing security types and add a default one.
+     * @hide
+     */
+    public void setSecurityParams(SecurityParams params) {
+        // Clear existing data.
+        mSecurityParamsList = new ArrayList<>();
+        addSecurityParams(params);
+    }
+
+    /**
+     * Add the various security params to correspond to the provided security type.
      * This is accomplished by setting the various BitSets exposed in WifiConfiguration.
      *
      * @param securityType One of the following security types:
@@ -491,103 +576,318 @@ public class WifiConfiguration implements Parcelable {
      * {@link #SECURITY_TYPE_PSK},
      * {@link #SECURITY_TYPE_EAP},
      * {@link #SECURITY_TYPE_SAE},
-     * {@link #SECURITY_TYPE_EAP_SUITE_B},
      * {@link #SECURITY_TYPE_OWE},
      * {@link #SECURITY_TYPE_WAPI_PSK},
      * {@link #SECURITY_TYPE_WAPI_CERT},
      * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE},
      * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT}
+     *
+     * @hide
      */
-    public void setSecurityParams(@SecurityType int securityType) {
-        // Clear all the bitsets.
-        allowedKeyManagement.clear();
-        allowedProtocols.clear();
-        allowedAuthAlgorithms.clear();
-        allowedPairwiseCiphers.clear();
-        allowedGroupCiphers.clear();
-        allowedGroupManagementCiphers.clear();
-        allowedSuiteBCiphers.clear();
-
+    public void addSecurityParams(@SecurityType int securityType) {
+        // This ensures that there won't be duplicate security types.
+        if (mSecurityParamsList.stream().anyMatch(params -> params.isSecurityType(securityType))) {
+            throw new IllegalArgumentException("duplicate security type " + securityType);
+        }
+        SecurityParams params = null;
         switch (securityType) {
             case SECURITY_TYPE_OPEN:
-                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+                params = SecurityParams.createOpenParams();
                 break;
             case SECURITY_TYPE_WEP:
-                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
-                allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
-                allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.SHARED);
+                params = SecurityParams.createWepParams();
                 break;
             case SECURITY_TYPE_PSK:
-                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+                params = SecurityParams.createWpaWpa2PersonalParams();
                 break;
             case SECURITY_TYPE_EAP:
-                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP);
-                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
+                params = SecurityParams.createWpaWpa2EnterpriseParams();
                 break;
             case SECURITY_TYPE_SAE:
-                allowedProtocols.set(WifiConfiguration.Protocol.RSN);
-                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.SAE);
-                allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
-                allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.GCMP_128);
-                allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.GCMP_256);
-                allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
-                allowedGroupCiphers.set(WifiConfiguration.GroupCipher.GCMP_128);
-                allowedGroupCiphers.set(WifiConfiguration.GroupCipher.GCMP_256);
-                requirePmf = true;
+                params = SecurityParams.createWpa3PersonalParams();
                 break;
             // The value of {@link SECURITY_TYPE_EAP_SUITE_B} is the same as
-            // {@link SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT}, remove it to avoid
+            // {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT}, remove it to avoid
             // duplicate case label errors.
             case SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT:
-                allowedProtocols.set(WifiConfiguration.Protocol.RSN);
-                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP);
-                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
-                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.SUITE_B_192);
-                allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.GCMP_128);
-                allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.GCMP_256);
-                allowedGroupCiphers.set(WifiConfiguration.GroupCipher.GCMP_128);
-                allowedGroupCiphers.set(WifiConfiguration.GroupCipher.GCMP_256);
-                allowedGroupManagementCiphers.set(WifiConfiguration.GroupMgmtCipher.BIP_GMAC_256);
-                // Note: allowedSuiteBCiphers bitset will be set by the service once the
-                // certificates are attached to this profile
-                requirePmf = true;
+                params = SecurityParams.createWpa3Enterprise192BitParams();
                 break;
             case SECURITY_TYPE_OWE:
-                allowedProtocols.set(WifiConfiguration.Protocol.RSN);
-                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.OWE);
-                allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
-                allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.GCMP_128);
-                allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.GCMP_256);
-                allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
-                allowedGroupCiphers.set(WifiConfiguration.GroupCipher.GCMP_128);
-                allowedGroupCiphers.set(WifiConfiguration.GroupCipher.GCMP_256);
-                requirePmf = true;
+                params = SecurityParams.createEnhancedOpenParams();
                 break;
             case SECURITY_TYPE_WAPI_PSK:
-                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WAPI_PSK);
-                allowedProtocols.set(WifiConfiguration.Protocol.WAPI);
-                allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.SMS4);
-                allowedGroupCiphers.set(WifiConfiguration.GroupCipher.SMS4);
+                params = SecurityParams.createWapiPskParams();
                 break;
             case SECURITY_TYPE_WAPI_CERT:
-                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WAPI_CERT);
-                allowedProtocols.set(WifiConfiguration.Protocol.WAPI);
-                allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.SMS4);
-                allowedGroupCiphers.set(WifiConfiguration.GroupCipher.SMS4);
+                params = SecurityParams.createWapiCertParams();
                 break;
             case SECURITY_TYPE_EAP_WPA3_ENTERPRISE:
-                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP);
-                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
-                allowedProtocols.set(WifiConfiguration.Protocol.RSN);
-                allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
-                allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.GCMP_256);
-                allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
-                allowedGroupCiphers.set(WifiConfiguration.GroupCipher.GCMP_256);
-                requirePmf = true;
+                params = SecurityParams.createWpa3EnterpriseParams();
+                break;
+            case SECURITY_TYPE_OSEN:
+                params = SecurityParams.createOsenParams();
                 break;
             default:
                 throw new IllegalArgumentException("unknown security type " + securityType);
         }
+
+        addSecurityParams(params);
+    }
+
+    /** @hide */
+    public void addSecurityParams(@NonNull SecurityParams newParams) {
+        if (mSecurityParamsList.stream().anyMatch(params -> params.isSameSecurityType(newParams))) {
+            throw new IllegalArgumentException("duplicate security params " + newParams);
+        }
+        if (!mSecurityParamsList.isEmpty()) {
+            if (newParams.isEnterpriseSecurityType() && !isEnterprise()) {
+                throw new IllegalArgumentException(
+                        "An enterprise security type cannot be added to a personal configuation.");
+            }
+            if (!newParams.isEnterpriseSecurityType() && isEnterprise()) {
+                throw new IllegalArgumentException(
+                        "A personal security type cannot be added to an enterprise configuation.");
+            }
+            if (newParams.isOpenSecurityType() && !isOpenNetwork()) {
+                throw new IllegalArgumentException(
+                        "An open security type cannot be added to a non-open configuation.");
+            }
+            if (!newParams.isOpenSecurityType() && isOpenNetwork()) {
+                throw new IllegalArgumentException(
+                        "A non-open security type cannot be added to an open configuation.");
+            }
+            if (newParams.isSecurityType(SECURITY_TYPE_OSEN)) {
+                throw new IllegalArgumentException(
+                        "An OSEN security type must be the only one type.");
+            }
+        }
+        mSecurityParamsList.add(new SecurityParams(newParams));
+        updateLegacySecurityParams();
+    }
+
+    /**
+     * If there is no security params, generate one according to legacy fields.
+     * @hide
+     */
+    public void convertLegacyFieldsToSecurityParamsIfNeeded() {
+        if (!mSecurityParamsList.isEmpty()) return;
+
+        if (allowedKeyManagement.get(KeyMgmt.WAPI_CERT)) {
+            setSecurityParams(SECURITY_TYPE_WAPI_CERT);
+        } else if (allowedKeyManagement.get(KeyMgmt.WAPI_PSK)) {
+            setSecurityParams(SECURITY_TYPE_WAPI_PSK);
+        } else if (allowedKeyManagement.get(KeyMgmt.SUITE_B_192)) {
+            setSecurityParams(SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT);
+        } else if (allowedKeyManagement.get(KeyMgmt.OWE)) {
+            setSecurityParams(SECURITY_TYPE_OWE);
+        } else if (allowedKeyManagement.get(KeyMgmt.SAE)) {
+            setSecurityParams(SECURITY_TYPE_SAE);
+        } else if (allowedKeyManagement.get(KeyMgmt.OSEN)) {
+            setSecurityParams(SECURITY_TYPE_OSEN);
+        } else if (allowedKeyManagement.get(KeyMgmt.WPA2_PSK)) {
+            setSecurityParams(SECURITY_TYPE_PSK);
+        } else if (allowedKeyManagement.get(KeyMgmt.WPA_EAP)) {
+            if (requirePmf) {
+                setSecurityParams(SECURITY_TYPE_EAP_WPA3_ENTERPRISE);
+            } else {
+                setSecurityParams(SECURITY_TYPE_EAP);
+            }
+        } else if (allowedKeyManagement.get(KeyMgmt.WPA_PSK)) {
+            setSecurityParams(SECURITY_TYPE_PSK);
+        } else if (allowedKeyManagement.get(KeyMgmt.NONE)) {
+            if (hasWepKeys()) {
+                setSecurityParams(SECURITY_TYPE_WEP);
+            } else {
+                setSecurityParams(SECURITY_TYPE_OPEN);
+            }
+        } else {
+            setSecurityParams(SECURITY_TYPE_OPEN);
+        }
+    }
+
+    /**
+     * Disable the various security params to correspond to the provided security type.
+     * This is accomplished by setting the various BitSets exposed in WifiConfiguration.
+     *
+     * @param securityType One of the following security types:
+     * {@link #SECURITY_TYPE_OPEN},
+     * {@link #SECURITY_TYPE_WEP},
+     * {@link #SECURITY_TYPE_PSK},
+     * {@link #SECURITY_TYPE_EAP},
+     * {@link #SECURITY_TYPE_SAE},
+     * {@link #SECURITY_TYPE_OWE},
+     * {@link #SECURITY_TYPE_WAPI_PSK},
+     * {@link #SECURITY_TYPE_WAPI_CERT},
+     * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE},
+     * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT}
+     *
+     * @hide
+     */
+    public void setSecurityParamsEnabled(@SecurityType int securityType, boolean enable) {
+        mSecurityParamsList.stream()
+                .filter(params -> params.isSecurityType(securityType))
+                .findAny()
+                .ifPresent(params -> params.setEnabled(enable));
+    }
+
+    /**
+     * Get the specific security param.
+     *
+     * @param securityType One of the following security types:
+     * {@link #SECURITY_TYPE_OPEN},
+     * {@link #SECURITY_TYPE_WEP},
+     * {@link #SECURITY_TYPE_PSK},
+     * {@link #SECURITY_TYPE_EAP},
+     * {@link #SECURITY_TYPE_SAE},
+     * {@link #SECURITY_TYPE_OWE},
+     * {@link #SECURITY_TYPE_WAPI_PSK},
+     * {@link #SECURITY_TYPE_WAPI_CERT},
+     * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE},
+     * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT}
+     *
+     * @return the copy of specific security params if found; otherwise null.
+     * @hide
+     */
+    public @Nullable SecurityParams getSecurityParams(@SecurityType int securityType) {
+        SecurityParams p = mSecurityParamsList.stream()
+                .filter(params -> params.isSecurityType(securityType))
+                .findAny()
+                .orElse(null);
+        return (p != null) ? new SecurityParams(p) : null;
+    }
+
+    /**
+     * Indicate whether this configuration is the specific security type.
+     *
+     * @param securityType One of the following security types:
+     * {@link #SECURITY_TYPE_OPEN},
+     * {@link #SECURITY_TYPE_WEP},
+     * {@link #SECURITY_TYPE_PSK},
+     * {@link #SECURITY_TYPE_EAP},
+     * {@link #SECURITY_TYPE_SAE},
+     * {@link #SECURITY_TYPE_OWE},
+     * {@link #SECURITY_TYPE_WAPI_PSK},
+     * {@link #SECURITY_TYPE_WAPI_CERT},
+     * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE},
+     * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT}
+     *
+     * @return true if there is a security params matches the type.
+     * @hide
+     */
+    public boolean isSecurityType(@SecurityType int securityType) {
+        return mSecurityParamsList.stream()
+                .anyMatch(params -> params.isSecurityType(securityType));
+    }
+
+    /**
+     * Get the security params list of this configuration.
+     *
+     * The returning list is a priority list, the first is the lowest priority and default one.
+     *
+     * @return this list of security params.
+     * @hide
+     */
+    public List<SecurityParams> getSecurityParamsList() {
+        return Collections.unmodifiableList(mSecurityParamsList);
+    }
+
+    /**
+     * Enable the support of Fast Initial Link Set-up (FILS).
+     *
+     * FILS can be applied to all security types.
+     * @param enableFilsSha256 Enable FILS SHA256.
+     * @param enableFilsSha384 Enable FILS SHA256.
+     * @hide
+     */
+    public void enableFils(boolean enableFilsSha256, boolean enableFilsSha384) {
+        mSecurityParamsList.stream()
+                .forEach(params -> params.enableFils(enableFilsSha256, enableFilsSha384));
+        updateLegacySecurityParams();
+    }
+
+    /**
+     * Indicate FILS SHA256 is enabled.
+     *
+     * @return true if FILS SHA256 is enabled.
+     * @hide
+     */
+    public boolean isFilsSha256Enabled() {
+        return mSecurityParamsList.stream()
+                .anyMatch(params -> params.getAllowedKeyManagement().get(KeyMgmt.FILS_SHA256));
+    }
+
+    /**
+     * Indicate FILS SHA384 is enabled.
+     *
+     * @return true if FILS SHA384 is enabled.
+     * @hide
+     */
+    public boolean isFilsSha384Enabled() {
+        return mSecurityParamsList.stream()
+                .anyMatch(params -> params.getAllowedKeyManagement().get(KeyMgmt.FILS_SHA384));
+    }
+
+    /**
+     * Enable Suite-B ciphers.
+     *
+     * @param enableEcdheEcdsa enable Diffie-Hellman with Elliptic Curve ECDSA cipher support.
+     * @param enableEcdheRsa enable Diffie-Hellman with RSA cipher support.
+     * @hide
+     */
+    public void enableSuiteBCiphers(boolean enableEcdheEcdsa, boolean enableEcdheRsa) {
+        mSecurityParamsList.stream()
+                .filter(params -> params.isSecurityType(SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT))
+                .findAny()
+                .ifPresent(params -> params.enableSuiteBCiphers(enableEcdheEcdsa, enableEcdheRsa));
+        updateLegacySecurityParams();
+    }
+
+    /**
+     * Indicate ECDHE_ECDSA is enabled.
+     *
+     * @return true if enabled.
+     * @hide
+     */
+    public boolean isSuiteBCipherEcdheEcdsaEnabled() {
+        return mSecurityParamsList.stream()
+                .anyMatch(params -> params.getAllowedSuiteBCiphers().get(SuiteBCipher.ECDHE_ECDSA));
+    }
+
+    /**
+     * Indicate ECDHE_RSA is enabled.
+     *
+     * @return true if enabled.
+     * @hide
+     */
+    public boolean isSuiteBCipherEcdheRsaEnabled() {
+        return mSecurityParamsList.stream()
+                .anyMatch(params -> params.getAllowedSuiteBCiphers().get(SuiteBCipher.ECDHE_RSA));
+    }
+
+    /**
+     * Set SAE Hash-toElement only mode enabled.
+     *
+     * @param enable true if enabled; false otherwise.
+     * @hide
+     */
+    public void enableSaeH2eOnlyMode(boolean enable) {
+        mSecurityParamsList.stream()
+                .filter(params -> params.isSecurityType(SECURITY_TYPE_SAE))
+                .findAny()
+                .ifPresent(params -> params.enableSaeH2eOnlyMode(enable));
+    }
+
+    /**
+     * Set SAE Public-Key only mode enabled.
+     *
+     * @param enable true if enabled; false otherwise.
+     * @hide
+     */
+    public void enableSaePkOnlyMode(boolean enable) {
+        mSecurityParamsList.stream()
+                .filter(params -> params.isSecurityType(SECURITY_TYPE_SAE))
+                .findAny()
+                .ifPresent(params -> params.enableSaePkOnlyMode(enable));
     }
 
     /** @hide */
@@ -1161,27 +1461,25 @@ public class WifiConfiguration implements Parcelable {
         return metered;
     }
 
-    /**
-     * @hide
-     * Returns true if this WiFi config is for an open network.
-     */
-    public boolean isOpenNetwork() {
-        final int cardinality = allowedKeyManagement.cardinality();
-        final boolean hasNoKeyMgmt = cardinality == 0
-                || (cardinality == 1 && (allowedKeyManagement.get(KeyMgmt.NONE)
-                || allowedKeyManagement.get(KeyMgmt.OWE)));
-
-        boolean hasNoWepKeys = true;
-        if (wepKeys != null) {
-            for (int i = 0; i < wepKeys.length; i++) {
-                if (wepKeys[i] != null) {
-                    hasNoWepKeys = false;
-                    break;
-                }
+    /** Check whether wep keys exist. */
+    private boolean hasWepKeys() {
+        if (wepKeys == null) return false;
+        for (int i = 0; i < wepKeys.length; i++) {
+            if (wepKeys[i] != null) {
+                return true;
             }
         }
+        return false;
+    }
 
-        return hasNoKeyMgmt && hasNoWepKeys;
+    /**
+     * @hide
+     * Returns true if this WiFi config is for an Open or Enhanced Open network.
+     */
+    public boolean isOpenNetwork() {
+        boolean hasNonOpenSecurityType = mSecurityParamsList.stream()
+                .anyMatch(params -> !params.isOpenSecurityType());
+        return !hasNonOpenSecurityType && !hasWepKeys();
     }
 
     /**
@@ -2365,12 +2663,11 @@ public class WifiConfiguration implements Parcelable {
      */
     @UnsupportedAppUsage
     public boolean isEnterprise() {
-        return (allowedKeyManagement.get(KeyMgmt.WPA_EAP)
-                || allowedKeyManagement.get(KeyMgmt.IEEE8021X)
-                || allowedKeyManagement.get(KeyMgmt.SUITE_B_192)
-                || allowedKeyManagement.get(KeyMgmt.WAPI_CERT))
+        boolean hasEnterpriseSecurityType = mSecurityParamsList.stream()
+                .anyMatch(params -> params.isEnterpriseSecurityType());
+        return (hasEnterpriseSecurityType
                 && enterpriseConfig != null
-                && enterpriseConfig.getEapMethod() != WifiEnterpriseConfig.Eap.NONE;
+                && enterpriseConfig.getEapMethod() != WifiEnterpriseConfig.Eap.NONE);
     }
 
     private static String logTimeOfDay(long millis) {
@@ -2551,6 +2848,10 @@ public class WifiConfiguration implements Parcelable {
         if (this.preSharedKey != null) {
             sbuf.append('*');
         }
+
+        sbuf.append("\nSecurityParams List:\n");
+        mSecurityParamsList.stream()
+                .forEach(params -> sbuf.append(params.toString()));
 
         sbuf.append("\nEnterprise config:\n");
         sbuf.append(enterpriseConfig);
@@ -3000,6 +3301,7 @@ public class WifiConfiguration implements Parcelable {
             allowedGroupCiphers    = (BitSet) source.allowedGroupCiphers.clone();
             allowedGroupManagementCiphers = (BitSet) source.allowedGroupManagementCiphers.clone();
             allowedSuiteBCiphers    = (BitSet) source.allowedSuiteBCiphers.clone();
+            mSecurityParamsList = new ArrayList(source.mSecurityParamsList);
             enterpriseConfig = new WifiEnterpriseConfig(source.enterpriseConfig);
 
             defaultGwMacAddress = source.defaultGwMacAddress;
@@ -3090,6 +3392,10 @@ public class WifiConfiguration implements Parcelable {
         writeBitSet(dest, allowedGroupManagementCiphers);
         writeBitSet(dest, allowedSuiteBCiphers);
 
+        dest.writeInt(mSecurityParamsList.size());
+        mSecurityParamsList.stream()
+                .forEach(params -> params.writeToParcel(dest, flags));
+
         dest.writeParcelable(enterpriseConfig, flags);
 
         dest.writeParcelable(mIpConfiguration, flags);
@@ -3170,6 +3476,11 @@ public class WifiConfiguration implements Parcelable {
                 config.allowedGroupCiphers    = readBitSet(in);
                 config.allowedGroupManagementCiphers = readBitSet(in);
                 config.allowedSuiteBCiphers   = readBitSet(in);
+
+                int numSecurityParams = in.readInt();
+                for (int i = 0; i < numSecurityParams; i++) {
+                    config.mSecurityParamsList.add(SecurityParams.createFromParcel(in));
+                }
 
                 config.enterpriseConfig = in.readParcelable(null);
                 config.setIpConfiguration(in.readParcelable(null));
@@ -3253,9 +3564,10 @@ public class WifiConfiguration implements Parcelable {
      * @hide
      */
     public boolean needsPreSharedKey() {
-        return allowedKeyManagement.get(KeyMgmt.WPA_PSK)
-                || allowedKeyManagement.get(KeyMgmt.SAE)
-                || allowedKeyManagement.get(KeyMgmt.WAPI_PSK);
+        return mSecurityParamsList.stream()
+                .anyMatch(params -> params.isSecurityType(SECURITY_TYPE_PSK)
+                        || params.isSecurityType(SECURITY_TYPE_SAE)
+                        || params.isSecurityType(SECURITY_TYPE_WAPI_PSK));
     }
 
     /**

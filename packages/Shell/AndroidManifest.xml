@@ -364,6 +364,9 @@
     <!-- Permissions required for CTS tests to close system dialogs -->
     <uses-permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS" />
 
+    <!-- Permission required for CTS test - HideOverlayWindowsTest -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"

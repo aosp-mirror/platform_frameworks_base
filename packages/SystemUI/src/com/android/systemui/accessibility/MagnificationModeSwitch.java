@@ -149,7 +149,7 @@ class MagnificationModeSwitch {
         }
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                mImageView.animate().cancel();
+                stopFadeOutAnimation();
                 mLastDown.set(event.getRawX(), event.getRawY());
                 mLastDrag.set(event.getRawX(), event.getRawY());
                 return true;
@@ -217,13 +217,18 @@ class MagnificationModeSwitch {
                     AccessibilityManager.FLAG_CONTENT_ICONS
                             | AccessibilityManager.FLAG_CONTENT_CONTROLS);
         }
+        // Refresh the time slot of the fade-out task whenever this method is called.
+        stopFadeOutAnimation();
+        mImageView.postOnAnimationDelayed(mFadeOutAnimationTask, mUiTimeout);
+    }
+
+    private void stopFadeOutAnimation() {
+        mImageView.removeCallbacks(mFadeOutAnimationTask);
         if (mIsFadeOutAnimating) {
             mImageView.animate().cancel();
             mImageView.setAlpha(1f);
+            mIsFadeOutAnimating = false;
         }
-        // Refresh the time slot of the fade-out task whenever this method is called.
-        mImageView.removeCallbacks(mFadeOutAnimationTask);
-        mImageView.postOnAnimationDelayed(mFadeOutAnimationTask, mUiTimeout);
     }
 
     void onConfigurationChanged(int configDiff) {

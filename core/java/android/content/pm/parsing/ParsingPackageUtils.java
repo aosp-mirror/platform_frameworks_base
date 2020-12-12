@@ -71,7 +71,6 @@ import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseInput.DeferredError;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
-import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.content.pm.split.DefaultSplitAssetLoader;
 import android.content.pm.split.SplitAssetDependencyLoader;
 import android.content.pm.split.SplitAssetLoader;
@@ -85,9 +84,9 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.FileUtils;
-import android.os.RemoteException;
 import android.os.Trace;
 import android.os.ext.SdkExtensions;
+import android.permission.PermissionManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -2664,17 +2663,13 @@ public class ParsingPackageUtils {
     }
 
     private static void convertSplitPermissions(ParsingPackage pkg) {
-        List<SplitPermissionInfoParcelable> splitPermissions;
-
-        try {
-            splitPermissions = ActivityThread.getPermissionManager().getSplitPermissions();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        final List<PermissionManager.SplitPermissionInfo> splitPermissions =
+                ActivityThread.currentApplication().getSystemService(PermissionManager.class)
+                        .getSplitPermissions();
 
         final int listSize = splitPermissions.size();
         for (int is = 0; is < listSize; is++) {
-            final SplitPermissionInfoParcelable spi = splitPermissions.get(is);
+            final PermissionManager.SplitPermissionInfo spi = splitPermissions.get(is);
             List<String> requestedPermissions = pkg.getRequestedPermissions();
             if (pkg.getTargetSdkVersion() >= spi.getTargetSdk()
                     || !requestedPermissions.contains(spi.getSplitPermission())) {

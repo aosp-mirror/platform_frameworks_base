@@ -928,6 +928,15 @@
         interfere with the performance or operation of your device when an
         emergency cell broadcast is received.</string>
 
+    <!-- Title for an application which grants an app the ability to see and manage calls on
+         the user's device. Usually reserved for apps associated with wearable devices that
+         can show information about calls. -->
+    <string name="permlab_manageOngoingCalls">Manage ongoing calls</string>
+    <!-- Description of an application permission, listed so the user can choose whether they
+         want to allow the application to do this. -->
+    <string name="permdesc_manageOngoingCalls">Allows an app to see details about ongoing calls
+         on your device and to control these calls.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readCellBroadcasts">read cell broadcast messages</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

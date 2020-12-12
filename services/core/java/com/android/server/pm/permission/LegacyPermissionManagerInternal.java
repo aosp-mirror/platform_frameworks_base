@@ -99,52 +99,6 @@ public interface LegacyPermissionManagerInternal {
      */
     void scheduleReadDefaultPermissionExceptions();
 
-    // TODO(zhanghai): The following methods should be moved to a new AIDL to support
-    //  the legacy PermissionManager directly in a later CL.
-
-    /**
-     * Grant default permissions to currently active LUI app
-     * @param packageName The package name for the LUI app
-     * @param userId The user ID
-     */
-    void grantDefaultPermissionsToActiveLuiApp(String packageName, int userId);
-
-    /**
-     * Revoke default permissions to currently active LUI app
-     * @param packageNames The package names for the LUI apps
-     * @param userId The user ID
-     */
-    void revokeDefaultPermissionsFromLuiApps(String[] packageNames, int userId);
-
-    /**
-     * Grant default permissions to currently active Ims services
-     * @param packageNames The package names for the Ims services
-     * @param userId The user ID
-     */
-    void grantDefaultPermissionsToEnabledImsServices(String[] packageNames, int userId);
-
-    /**
-     * Grant default permissions to currently enabled telephony data services
-     * @param packageNames The package name for the services
-     * @param userId The user ID
-     */
-    void grantDefaultPermissionsToEnabledTelephonyDataServices(String[] packageNames, int userId);
-
-    /**
-     * Revoke default permissions to currently active telephony data services
-     * @param packageNames The package name for the services
-     * @param userId The IDhandle
-     */
-    void revokeDefaultPermissionsFromDisabledTelephonyDataServices(String[] packageNames,
-            int userId);
-
-    /**
-     * Grant default permissions to currently enabled carrier apps
-     * @param packageNames Package names of the apps to be granted permissions
-     * @param userId The user ID
-     */
-    void grantDefaultPermissionsToEnabledCarrierApps(String[] packageNames, int userId);
-
     /**
      * Provider for package names.
      */

@@ -94,6 +94,8 @@ package android.app {
     method public static void resumeAppSwitches() throws android.os.RemoteException;
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public void scheduleApplicationInfoChanged(java.util.List<java.lang.String>, int);
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public boolean updateMccMncConfiguration(@NonNull String, @NonNull String);
+    field public static final long DROP_CLOSE_SYSTEM_DIALOGS = 174664120L; // 0xa6929b8L
+    field public static final long LOCK_DOWN_CLOSE_SYSTEM_DIALOGS = 174664365L; // 0xa692aadL
     field public static final int PROCESS_CAPABILITY_ALL = 7; // 0x7
     field public static final int PROCESS_CAPABILITY_ALL_EXPLICIT = 1; // 0x1
     field public static final int PROCESS_CAPABILITY_ALL_IMPLICIT = 6; // 0x6
@@ -961,7 +963,6 @@ package android.location {
     method @NonNull public String[] getBackgroundThrottlingWhitelist();
     method @NonNull public String[] getIgnoreSettingsWhitelist();
     method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public java.util.List<java.lang.String> getProviderPackages(@NonNull String);
-    field public static final String FUSED_PROVIDER = "fused";
   }
 
 }
@@ -1009,6 +1010,8 @@ package android.media {
     field public static final int DEVICE_ROLE_DISABLED = 2; // 0x2
     field public static final int DEVICE_ROLE_NONE = 0; // 0x0
     field public static final int DEVICE_ROLE_PREFERRED = 1; // 0x1
+    field public static final int OFFLOAD_GAPLESS_SUPPORTED = 2; // 0x2
+    field public static final int OFFLOAD_SUPPORTED = 1; // 0x1
     field public static final int STREAM_DEFAULT = -1; // 0xffffffff
   }
 

@@ -6511,9 +6511,10 @@ public class AppOpsManager {
          * @param code The op code.
          * @param uid The UID performing the operation.
          * @param packageName The package performing the operation.
+         * @param flags The flags of this op
          * @param result The result of the note.
          */
-        void onOpNoted(int code, int uid, String packageName, int result);
+        void onOpNoted(int code, int uid, String packageName, @OpFlags int flags, @Mode int result);
     }
 
     /**
@@ -6550,9 +6551,10 @@ public class AppOpsManager {
          * @param op The op code.
          * @param uid The UID performing the operation.
          * @param packageName The package performing the operation.
+         * @param flags The flags of this op
          * @param result The result of the start.
          */
-        void onOpStarted(int op, int uid, String packageName, int result);
+        void onOpStarted(int op, int uid, String packageName, @OpFlags int flags, @Mode int result);
     }
 
     AppOpsManager(Context context, IAppOpsService service) {
@@ -7135,8 +7137,8 @@ public class AppOpsManager {
              }
              cb = new IAppOpsStartedCallback.Stub() {
                  @Override
-                 public void opStarted(int op, int uid, String packageName, int mode) {
-                     callback.onOpStarted(op, uid, packageName, mode);
+                 public void opStarted(int op, int uid, String packageName, int flags, int mode) {
+                     callback.onOpStarted(op, uid, packageName, flags, mode);
                  }
              };
              mStartedWatchers.put(callback, cb);
@@ -7202,8 +7204,8 @@ public class AppOpsManager {
             }
             cb = new IAppOpsNotedCallback.Stub() {
                 @Override
-                public void opNoted(int op, int uid, String packageName, int mode) {
-                    callback.onOpNoted(op, uid, packageName, mode);
+                public void opNoted(int op, int uid, String packageName, int flags, int mode) {
+                    callback.onOpNoted(op, uid, packageName, flags, mode);
                 }
             };
             mNotedWatchers.put(callback, cb);

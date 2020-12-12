@@ -94,7 +94,7 @@ package android {
     field public static final String HANDLE_CAR_MODE_CHANGES = "android.permission.HANDLE_CAR_MODE_CHANGES";
     field public static final String HARDWARE_TEST = "android.permission.HARDWARE_TEST";
     field public static final String HDMI_CEC = "android.permission.HDMI_CEC";
-    field public static final String HIDE_NON_SYSTEM_OVERLAY_WINDOWS = "android.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS";
+    field @Deprecated public static final String HIDE_NON_SYSTEM_OVERLAY_WINDOWS = "android.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS";
     field public static final String INJECT_EVENTS = "android.permission.INJECT_EVENTS";
     field public static final String INSTALL_DYNAMIC_SYSTEM = "android.permission.INSTALL_DYNAMIC_SYSTEM";
     field public static final String INSTALL_GRANT_RUNTIME_PERMISSIONS = "android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS";
@@ -4173,7 +4173,6 @@ package android.location {
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setLocationEnabledForUser(boolean, @NonNull android.os.UserHandle);
     method @Deprecated @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean setProviderEnabledForUser(@NonNull String, boolean, @NonNull android.os.UserHandle);
     method @Deprecated @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public boolean unregisterGnssBatchedLocationCallback(@NonNull android.location.BatchedLocationCallback);
-    field public static final String FUSED_PROVIDER = "fused";
   }
 
   public final class LocationRequest implements android.os.Parcelable {
@@ -11294,7 +11293,6 @@ package android.telephony.data {
     method @NonNull public android.telephony.data.ApnThrottleStatus.Builder setSlotIndex(int);
     method @NonNull public android.telephony.data.ApnThrottleStatus.Builder setThrottleExpiryTimeMillis(long);
     method @NonNull public android.telephony.data.ApnThrottleStatus.Builder setTransportType(int);
-    field public static final long NO_THROTTLE_EXPIRY_TIME = -1L; // 0xffffffffffffffffL
   }
 
   public final class DataCallResponse implements android.os.Parcelable {
@@ -12330,6 +12328,7 @@ package android.telephony.ims {
   }
 
   public interface SipDelegateConnection {
+    method public void closeDialog(@NonNull String);
     method public void notifyMessageReceiveError(@NonNull String, int);
     method public void notifyMessageReceived(@NonNull String);
     method public void sendMessage(@NonNull android.telephony.ims.SipMessage, long);

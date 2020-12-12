@@ -2259,7 +2259,9 @@
     <!-- Allows to query ongoing call details and manage ongoing calls
      <p>Protection level: signature|appop -->
     <permission android:name="android.permission.MANAGE_ONGOING_CALLS"
-        android:protectionLevel="signature|appop" />
+        android:protectionLevel="signature|appop"
+        android:label="@string/permlab_manageOngoingCalls"
+        android:description="@string/permdesc_manageOngoingCalls" />
 
     <!-- Allows the app to request network scans from telephony.
          <p>Not for use by third-party applications.
@@ -2729,6 +2731,10 @@
     -->
     <permission android:name="android.permission.TOGGLE_AUTOMOTIVE_PROJECTION"
                 android:protectionLevel="signature|privileged" />
+
+    <!-- Allows an app to prevent non-system-overlay windows from being drawn on top of it -->
+    <permission android:name="android.permission.HIDE_OVERLAY_WINDOWS"
+                android:protectionLevel="normal" />
 
     <!-- ================================== -->
     <!-- Permissions affecting the system wallpaper -->
@@ -3284,6 +3290,7 @@
          {@link android.view.WindowManager.LayoutsParams#SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS}
          to hide non-system-overlay windows.
          <p>Not for use by third-party applications.
+         @deprecated Use {@link android.Manifest.permission#HIDE_OVERLAY_WINDOWS} instead
          @hide
     -->
     <permission android:name="android.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS"
@@ -3961,6 +3968,12 @@
          @hide -->
     <permission android:name="android.permission.MANAGE_COMPANION_DEVICES"
                 android:protectionLevel="signature" />
+
+    <!-- Allows an application to subscribe to notifications about the presence status change
+         of their associated companion device
+         -->
+    <permission android:name="android.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE"
+                android:protectionLevel="normal" />
 
     <!-- @SystemApi Allows an application to use SurfaceFlinger's low level features.
          <p>Not for use by third-party applications.

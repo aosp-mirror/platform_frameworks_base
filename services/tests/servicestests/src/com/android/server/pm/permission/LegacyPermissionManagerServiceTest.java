@@ -29,14 +29,10 @@ import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Process;
-import android.permission.PermissionManagerInternal;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.server.LocalServices;
-
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,19 +40,17 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidJUnit4.class)
-public class PermissionManagerServiceTest {
-    private static final String TAG = "PermissionManagerServiceTag";
-
+public class LegacyPermissionManagerServiceTest {
     private static final int SYSTEM_UID = 1000;
     private static final int SYSTEM_PID = 1234;
     private static final int APP_UID = Process.FIRST_APPLICATION_UID;
     private static final int APP_PID = 5678;
 
-    private PermissionManagerService mPermissionManagerService;
+    private LegacyPermissionManagerService mLegacyPermissionManagerService;
     private Context mContext;
 
     @Mock
-    private PermissionManagerService.Injector mInjector;
+    private LegacyPermissionManagerService.Injector mInjector;
 
     @Mock
     private AppOpsManager mAppOpsManager;
@@ -69,16 +63,7 @@ public class PermissionManagerServiceTest {
         MockitoAnnotations.initMocks(this);
 
         mContext = InstrumentationRegistry.getContext();
-        mPermissionManagerService = new PermissionManagerService(mContext, mInjector);
-    }
-
-    @After
-    public void tearDown() {
-        // The LocalServices added by the constructor of the PermissionManagerService can either be
-        // removed here after each test when tests are run serially, or to run them in parallel
-        // the Injector can provide methods to add these that can be ignored by the mock.
-        LocalServices.removeServiceForTest(PermissionManagerServiceInternal.class);
-        LocalServices.removeServiceForTest(PermissionManagerInternal.class);
+        mLegacyPermissionManagerService = new LegacyPermissionManagerService(mContext, mInjector);
     }
 
     @Test
@@ -88,7 +73,7 @@ public class PermissionManagerServiceTest {
         setupCheckDeviceIdentifierAccessTest(APP_PID, APP_UID);
 
         assertThrows(SecurityException.class,
-                () -> mPermissionManagerService.checkDeviceIdentifierAccess(
+                () -> mLegacyPermissionManagerService.checkDeviceIdentifierAccess(
                         mContext.getPackageName(), "testCheckDeviceIdentifierAccess", null,
                         APP_PID, SYSTEM_UID));
     }
@@ -100,7 +85,7 @@ public class PermissionManagerServiceTest {
         setupCheckDeviceIdentifierAccessTest(APP_PID, APP_UID);
 
         assertThrows(SecurityException.class,
-                () -> mPermissionManagerService.checkDeviceIdentifierAccess(
+                () -> mLegacyPermissionManagerService.checkDeviceIdentifierAccess(
                         mContext.getPackageName(), "testCheckDeviceIdentifierAccess", null,
                         SYSTEM_PID, APP_UID));
     }
@@ -111,7 +96,7 @@ public class PermissionManagerServiceTest {
         // checks can run through completion and return denied.
         setupCheckDeviceIdentifierAccessTest(APP_PID, APP_UID);
 
-        int result = mPermissionManagerService.checkDeviceIdentifierAccess(
+        int result = mLegacyPermissionManagerService.checkDeviceIdentifierAccess(
                 mContext.getPackageName(), "testCheckDeviceIdentifierAccess", null, APP_PID,
                 APP_UID);
 
@@ -122,7 +107,7 @@ public class PermissionManagerServiceTest {
     public void checkDeviceIdentifierAccess_systemUid_returnsGranted() {
         // The system UID should always have access to device identifiers.
         setupCheckDeviceIdentifierAccessTest(SYSTEM_PID, SYSTEM_UID);
-        int result = mPermissionManagerService.checkDeviceIdentifierAccess(
+        int result = mLegacyPermissionManagerService.checkDeviceIdentifierAccess(
                 mContext.getPackageName(), "testCheckDeviceIdentifierAccess", null, SYSTEM_PID,
                 SYSTEM_UID);
 
@@ -137,7 +122,7 @@ public class PermissionManagerServiceTest {
         when(mInjector.checkPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
                 APP_PID, APP_UID)).thenReturn(PackageManager.PERMISSION_GRANTED);
 
-        int result = mPermissionManagerService.checkDeviceIdentifierAccess(
+        int result = mLegacyPermissionManagerService.checkDeviceIdentifierAccess(
                 mContext.getPackageName(), "testCheckDeviceIdentifierAccess", null, APP_PID,
                 APP_UID);
 
@@ -153,7 +138,7 @@ public class PermissionManagerServiceTest {
                 eq(APP_UID), eq(mContext.getPackageName()), any(), any())).thenReturn(
                 AppOpsManager.MODE_ALLOWED);
 
-        int result = mPermissionManagerService.checkDeviceIdentifierAccess(
+        int result = mLegacyPermissionManagerService.checkDeviceIdentifierAccess(
                 mContext.getPackageName(), "testCheckDeviceIdentifierAccess", null, APP_PID,
                 APP_UID);
 
@@ -168,7 +153,7 @@ public class PermissionManagerServiceTest {
         when(mDevicePolicyManager.hasDeviceIdentifierAccess(mContext.getPackageName(), APP_PID,
                 APP_UID)).thenReturn(true);
 
-        int result = mPermissionManagerService.checkDeviceIdentifierAccess(
+        int result = mLegacyPermissionManagerService.checkDeviceIdentifierAccess(
                 mContext.getPackageName(), "testCheckDeviceIdentifierAccess", null, APP_PID,
                 APP_UID);
 

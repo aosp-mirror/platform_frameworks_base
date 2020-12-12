@@ -19,7 +19,6 @@ package android.permission;
 import static android.os.Build.VERSION_CODES.S;
 
 import android.Manifest;
-import android.annotation.CallbackExecutor;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -29,6 +28,7 @@ import android.annotation.SystemService;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
+import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.ChangeId;
@@ -44,7 +44,6 @@ import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.annotations.Immutable;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -52,8 +51,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.Executor;
-import java.util.function.Consumer;
 
 /**
  * System level service for accessing the permission capabilities of the platform.
@@ -89,35 +86,24 @@ public final class PermissionManager {
 
     private final IPermissionManager mPermissionManager;
 
+    private final LegacyPermissionManager mLegacyPermissionManager;
+
     private List<SplitPermissionInfo> mSplitPermissionInfos;
 
     /**
      * Creates a new instance.
      *
-     * @param context The current context in which to operate.
-     * @hide
-     */
-    public PermissionManager(@NonNull Context context, IPackageManager packageManager)
-            throws ServiceManager.ServiceNotFoundException {
-        this(context, packageManager, IPermissionManager.Stub.asInterface(
-                ServiceManager.getServiceOrThrow("permissionmgr")));
-    }
-
-    /**
-     * Creates a new instance with the provided instantiation of the IPermissionManager.
+     * @param context The current context in which to operate
      *
-     * @param context           the current context in which to operate
-     * @param packageManager    package manager service to be used for package related permission
-     *                          requests
-     * @param permissionManager injectable permission manager service
      * @hide
      */
-    @VisibleForTesting
-    public PermissionManager(@NonNull Context context, IPackageManager packageManager,
-            IPermissionManager permissionManager) {
+    public PermissionManager(@NonNull Context context)
+            throws ServiceManager.ServiceNotFoundException {
         mContext = context;
-        mPackageManager = packageManager;
-        mPermissionManager = permissionManager;
+        mPackageManager = AppGlobals.getPackageManager();
+        mPermissionManager = IPermissionManager.Stub.asInterface(ServiceManager.getServiceOrThrow(
+                "permissionmgr"));
+        mLegacyPermissionManager = context.getSystemService(LegacyPermissionManager.class);
     }
 
     /**
@@ -195,132 +181,6 @@ public final class PermissionManager {
         mSplitPermissionInfos = splitPermissionInfoListToNonParcelableList(parcelableList);
 
         return mSplitPermissionInfos;
-    }
-
-    /**
-     * Grant default permissions to currently active LUI app
-     * @param packageName The package name for the LUI app
-     * @param user The user handle
-     * @param executor The executor for the callback
-     * @param callback The callback provided by caller to be notified when grant completes
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS)
-    public void grantDefaultPermissionsToLuiApp(
-            @NonNull String packageName, @NonNull UserHandle user,
-            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
-        try {
-            mPermissionManager.grantDefaultPermissionsToActiveLuiApp(
-                    packageName, user.getIdentifier());
-            executor.execute(() -> callback.accept(true));
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Revoke default permissions to currently active LUI app
-     * @param packageNames The package names for the LUI apps
-     * @param user The user handle
-     * @param executor The executor for the callback
-     * @param callback The callback provided by caller to be notified when grant completes
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS)
-    public void revokeDefaultPermissionsFromLuiApps(
-            @NonNull String[] packageNames, @NonNull UserHandle user,
-            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
-        try {
-            mPermissionManager.revokeDefaultPermissionsFromLuiApps(
-                    packageNames, user.getIdentifier());
-            executor.execute(() -> callback.accept(true));
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Grant default permissions to currently active Ims services
-     * @param packageNames The package names for the Ims services
-     * @param user The user handle
-     * @param executor The executor for the callback
-     * @param callback The callback provided by caller to be notified when grant completes
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS)
-    public void grantDefaultPermissionsToEnabledImsServices(
-            @NonNull String[] packageNames, @NonNull UserHandle user,
-            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
-        try {
-            mPermissionManager.grantDefaultPermissionsToEnabledImsServices(
-                    packageNames, user.getIdentifier());
-            executor.execute(() -> callback.accept(true));
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Grant default permissions to currently enabled telephony data services
-     * @param packageNames The package name for the services
-     * @param user The user handle
-     * @param executor The executor for the callback
-     * @param callback The callback provided by caller to be notified when grant completes
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS)
-    public void grantDefaultPermissionsToEnabledTelephonyDataServices(
-            @NonNull String[] packageNames, @NonNull UserHandle user,
-            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
-        try {
-            mPermissionManager.grantDefaultPermissionsToEnabledTelephonyDataServices(
-                    packageNames, user.getIdentifier());
-            executor.execute(() -> callback.accept(true));
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Revoke default permissions to currently active telephony data services
-     * @param packageNames The package name for the services
-     * @param user The user handle
-     * @param executor The executor for the callback
-     * @param callback The callback provided by caller to be notified when revoke completes
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS)
-    public void revokeDefaultPermissionsFromDisabledTelephonyDataServices(
-            @NonNull String[] packageNames, @NonNull UserHandle user,
-            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
-        try {
-            mPermissionManager.revokeDefaultPermissionsFromDisabledTelephonyDataServices(
-                    packageNames, user.getIdentifier());
-            executor.execute(() -> callback.accept(true));
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Grant default permissions to currently enabled carrier apps
-     * @param packageNames Package names of the apps to be granted permissions
-     * @param user The user handle
-     * @param executor The executor for the callback
-     * @param callback The callback provided by caller to be notified when grant completes
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS)
-    public void grantDefaultPermissionsToEnabledCarrierApps(@NonNull String[] packageNames,
-            @NonNull UserHandle user, @NonNull @CallbackExecutor Executor executor,
-            @NonNull Consumer<Boolean> callback) {
-        try {
-            mPermissionManager.grantDefaultPermissionsToEnabledCarrierApps(packageNames,
-                    user.getIdentifier());
-            executor.execute(() -> callback.accept(true));
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
     }
 
     /**
@@ -530,12 +390,8 @@ public final class PermissionManager {
     @SystemApi
     public int checkDeviceIdentifierAccess(@Nullable String packageName, @Nullable String message,
             @Nullable String callingFeatureId, int pid, int uid) {
-        try {
-            return mPermissionManager.checkDeviceIdentifierAccess(packageName, message,
-                    callingFeatureId, pid, uid);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return mLegacyPermissionManager.checkDeviceIdentifierAccess(packageName, message,
+                callingFeatureId, pid, uid);
     }
 
     /* @hide */

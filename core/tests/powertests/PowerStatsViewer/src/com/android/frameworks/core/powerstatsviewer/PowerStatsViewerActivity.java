@@ -19,6 +19,8 @@ package com.android.frameworks.core.powerstatsviewer;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.BatteryStats;
+import android.os.BatteryStatsManager;
+import android.os.BatteryUsageStats;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -48,7 +50,8 @@ import java.util.Locale;
 public class PowerStatsViewerActivity extends ComponentActivity {
     private static final int POWER_STATS_REFRESH_RATE_MILLIS = 60 * 1000;
     public static final String PREF_SELECTED_POWER_CONSUMER = "powerConsumerId";
-    private static final String LOADER_ARG_POWER_CONSUMER_ID = "powerConsumerId";
+    public static final int LOADER_BATTERY_STATS_HELPER = 0;
+    public static final int LOADER_BATTERY_USAGE_STATS = 1;
 
     private PowerStatsDataAdapter mPowerStatsDataAdapter;
     private Runnable mPowerStatsRefresh = this::periodicPowerStatsRefresh;
@@ -63,6 +66,8 @@ public class PowerStatsViewerActivity extends ComponentActivity {
     private View mEmptyView;
     private ActivityResultLauncher<Void> mStartAppPicker = registerForActivityResult(
             PowerConsumerPickerActivity.CONTRACT, this::onApplicationSelected);
+    private BatteryStatsHelper mBatteryStatsHelper;
+    private BatteryUsageStats mBatteryUsageStats;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -130,19 +135,19 @@ public class PowerStatsViewerActivity extends ComponentActivity {
     }
 
     private void loadPowerStats() {
-        Bundle args = new Bundle();
-        args.putString(LOADER_ARG_POWER_CONSUMER_ID, mPowerConsumerId);
-        LoaderManager.getInstance(this).restartLoader(0, args, new PowerStatsDataLoaderCallbacks());
+        LoaderManager loaderManager = LoaderManager.getInstance(this);
+        loaderManager.restartLoader(LOADER_BATTERY_STATS_HELPER, null,
+                new BatteryStatsHelperLoaderCallbacks());
+        loaderManager.restartLoader(LOADER_BATTERY_USAGE_STATS, null,
+                new BatteryUsageStatsLoaderCallbacks());
     }
 
-    private static class PowerStatsDataLoader extends AsyncLoaderCompat<PowerStatsData> {
-        private final String mPowerConsumerId;
+    private static class BatteryStatsHelperLoader extends AsyncLoaderCompat<BatteryStatsHelper> {
         private final BatteryStatsHelper mBatteryStatsHelper;
         private final UserManager mUserManager;
 
-        PowerStatsDataLoader(Context context, String powerConsumerId) {
+        BatteryStatsHelperLoader(Context context) {
             super(context);
-            mPowerConsumerId = powerConsumerId;
             mUserManager = context.getSystemService(UserManager.class);
             mBatteryStatsHelper = new BatteryStatsHelper(context,
                     false /* collectBatteryBroadcast */);
@@ -151,68 +156,123 @@ public class PowerStatsViewerActivity extends ComponentActivity {
         }
 
         @Override
-        public PowerStatsData loadInBackground() {
+        public BatteryStatsHelper loadInBackground() {
             mBatteryStatsHelper.refreshStats(BatteryStats.STATS_SINCE_CHARGED,
                     UserHandle.myUserId());
-            return new PowerStatsData(getContext(), mBatteryStatsHelper, mPowerConsumerId);
+            return mBatteryStatsHelper;
         }
 
         @Override
-        protected void onDiscardResult(PowerStatsData result) {
+        protected void onDiscardResult(BatteryStatsHelper result) {
         }
     }
 
-    private class PowerStatsDataLoaderCallbacks implements LoaderCallbacks<PowerStatsData> {
+    private class BatteryStatsHelperLoaderCallbacks implements LoaderCallbacks<BatteryStatsHelper> {
         @NonNull
         @Override
-        public Loader<PowerStatsData> onCreateLoader(int id, Bundle args) {
-            return new PowerStatsDataLoader(PowerStatsViewerActivity.this,
-                    args.getString(LOADER_ARG_POWER_CONSUMER_ID));
+        public Loader<BatteryStatsHelper> onCreateLoader(int id, Bundle args) {
+            return new BatteryStatsHelperLoader(PowerStatsViewerActivity.this);
         }
 
         @Override
-        public void onLoadFinished(@NonNull Loader<PowerStatsData> loader,
-                PowerStatsData powerStatsData) {
+        public void onLoadFinished(@NonNull Loader<BatteryStatsHelper> loader,
+                BatteryStatsHelper batteryStatsHelper) {
+            onBatteryStatsHelperLoaded(batteryStatsHelper);
+        }
 
-            PowerConsumerInfoHelper.PowerConsumerInfo
-                    powerConsumerInfo = powerStatsData.getPowerConsumerInfo();
-            if (powerConsumerInfo == null) {
-                mTitleView.setText("Power consumer not found");
+        @Override
+        public void onLoaderReset(@NonNull Loader<BatteryStatsHelper> loader) {
+        }
+    }
+
+    private static class BatteryUsageStatsLoader extends AsyncLoaderCompat<BatteryUsageStats> {
+        private final BatteryStatsManager mBatteryStatsManager;
+
+        BatteryUsageStatsLoader(Context context) {
+            super(context);
+            mBatteryStatsManager = context.getSystemService(BatteryStatsManager.class);
+        }
+
+        @Override
+        public BatteryUsageStats loadInBackground() {
+            return mBatteryStatsManager.getBatteryUsageStats();
+        }
+
+        @Override
+        protected void onDiscardResult(BatteryUsageStats result) {
+        }
+    }
+
+    private class BatteryUsageStatsLoaderCallbacks implements LoaderCallbacks<BatteryUsageStats> {
+        @NonNull
+        @Override
+        public Loader<BatteryUsageStats> onCreateLoader(int id, Bundle args) {
+            return new BatteryUsageStatsLoader(PowerStatsViewerActivity.this);
+        }
+
+        @Override
+        public void onLoadFinished(@NonNull Loader<BatteryUsageStats> loader,
+                BatteryUsageStats batteryUsageStats) {
+            onBatteryUsageStatsLoaded(batteryUsageStats);
+        }
+
+        @Override
+        public void onLoaderReset(@NonNull Loader<BatteryUsageStats> loader) {
+        }
+    }
+
+    public void onBatteryStatsHelperLoaded(BatteryStatsHelper batteryStatsHelper) {
+        mBatteryStatsHelper = batteryStatsHelper;
+        onPowerStatsDataLoaded();
+    }
+
+    private void onBatteryUsageStatsLoaded(BatteryUsageStats batteryUsageStats) {
+        mBatteryUsageStats = batteryUsageStats;
+        onPowerStatsDataLoaded();
+    }
+
+    public void onPowerStatsDataLoaded() {
+        if (mBatteryStatsHelper == null || mBatteryUsageStats == null) {
+            return;
+        }
+
+        PowerStatsData powerStatsData = new PowerStatsData(this, mBatteryStatsHelper,
+                mBatteryUsageStats, mPowerConsumerId);
+
+        PowerConsumerInfoHelper.PowerConsumerInfo
+                powerConsumerInfo = powerStatsData.getPowerConsumerInfo();
+        if (powerConsumerInfo == null) {
+            mTitleView.setText("Power consumer not found");
+            mPackagesView.setVisibility(View.GONE);
+        } else {
+            mTitleView.setText(powerConsumerInfo.label);
+            if (powerConsumerInfo.details != null) {
+                mDetailsView.setText(powerConsumerInfo.details);
+                mDetailsView.setVisibility(View.VISIBLE);
+            } else {
+                mDetailsView.setVisibility(View.GONE);
+            }
+            mIconView.setImageDrawable(
+                    powerConsumerInfo.iconInfo.loadIcon(getPackageManager()));
+
+            if (powerConsumerInfo.packages != null) {
+                mPackagesView.setText(powerConsumerInfo.packages);
+                mPackagesView.setVisibility(View.VISIBLE);
+            } else {
                 mPackagesView.setVisibility(View.GONE);
-            } else {
-                mTitleView.setText(powerConsumerInfo.label);
-                if (powerConsumerInfo.details != null) {
-                    mDetailsView.setText(powerConsumerInfo.details);
-                    mDetailsView.setVisibility(View.VISIBLE);
-                } else {
-                    mDetailsView.setVisibility(View.GONE);
-                }
-                mIconView.setImageDrawable(
-                        powerConsumerInfo.iconInfo.loadIcon(getPackageManager()));
-
-                if (powerConsumerInfo.packages != null) {
-                    mPackagesView.setText(powerConsumerInfo.packages);
-                    mPackagesView.setVisibility(View.VISIBLE);
-                } else {
-                    mPackagesView.setVisibility(View.GONE);
-                }
             }
-
-            mPowerStatsDataAdapter.setEntries(powerStatsData.getEntries());
-            if (powerStatsData.getEntries().isEmpty()) {
-                mEmptyView.setVisibility(View.VISIBLE);
-                mPowerStatsDataView.setVisibility(View.GONE);
-            } else {
-                mEmptyView.setVisibility(View.GONE);
-                mPowerStatsDataView.setVisibility(View.VISIBLE);
-            }
-
-            mLoadingView.setVisibility(View.GONE);
         }
 
-        @Override
-        public void onLoaderReset(@NonNull Loader<PowerStatsData> loader) {
+        mPowerStatsDataAdapter.setEntries(powerStatsData.getEntries());
+        if (powerStatsData.getEntries().isEmpty()) {
+            mEmptyView.setVisibility(View.VISIBLE);
+            mPowerStatsDataView.setVisibility(View.GONE);
+        } else {
+            mEmptyView.setVisibility(View.GONE);
+            mPowerStatsDataView.setVisibility(View.VISIBLE);
         }
+
+        mLoadingView.setVisibility(View.GONE);
     }
 
     private static class PowerStatsDataAdapter extends

@@ -20,13 +20,13 @@ import android.content.Context;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.text.TextUtils;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayEventReceiver;
 import android.view.DisplayInfo;
 
-import com.android.internal.util.IndentingPrintWriter;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -102,13 +102,10 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     private final SparseArray<DisplayGroup> mDisplayGroups = new SparseArray<>();
 
     private final DisplayDeviceRepository mDisplayDeviceRepo;
-    private final PersistentDataStore mPersistentDataStore;
     private final Listener mListener;
 
-    LogicalDisplayMapper(Context context, DisplayDeviceRepository repo, Listener listener,
-            PersistentDataStore persistentDataStore) {
+    LogicalDisplayMapper(Context context, DisplayDeviceRepository repo, Listener listener) {
         mDisplayDeviceRepo = repo;
-        mPersistentDataStore = persistentDataStore;
         mListener = listener;
         mSingleDisplayDemoMode = SystemProperties.getBoolean("persist.demo.singledisplay", false);
         mDisplayDeviceRepo.addListener(this);
@@ -238,7 +235,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         // Find the associated LogicalDisplays for the configured "folding" DeviceDisplays.
         final LogicalDisplay displayFolded = getLocked(deviceFolded);
         final LogicalDisplay displayUnfolded = getLocked(deviceUnfolded);
-        if (displayFolded == null || displayFolded == null) {
+        if (displayFolded == null || displayUnfolded == null) {
             // If the expected displays are not present, return early.
             return;
         }

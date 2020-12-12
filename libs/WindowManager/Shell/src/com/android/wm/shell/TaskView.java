@@ -87,14 +87,10 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
         super(context, null, 0, 0, true /* disableBackgroundLayer */);
 
         mTaskOrganizer = organizer;
+        mExecutor = organizer.getExecutor();
         setUseAlpha();
         getHolder().addCallback(this);
         mGuard.open("release");
-    }
-
-    // TODO: Use TaskOrganizer executor when part of wmshell proper
-    public void setExecutor(Executor executor) {
-        mExecutor = executor;
     }
 
     /**

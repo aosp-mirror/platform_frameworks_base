@@ -16,7 +16,11 @@
 
 package android.view;
 
+import static android.Manifest.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
+import static android.Manifest.permission.HIDE_OVERLAY_WINDOWS;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
@@ -24,6 +28,7 @@ import android.annotation.IdRes;
 import android.annotation.LayoutRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.StyleRes;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -988,6 +993,26 @@ public abstract class Window {
     public final void setRestrictedCaptionAreaListener(OnRestrictedCaptionAreaChangedListener listener) {
         mOnRestrictedCaptionAreaChangedListener = listener;
         mRestrictedCaptionAreaRect = listener != null ? new Rect() : null;
+    }
+
+    /**
+     * Prevent non-system overlay windows from being drawn on top of this window.
+     *
+     * @param hide whether non-system overlay windows should be hidden.
+     */
+    @RequiresPermission(HIDE_OVERLAY_WINDOWS)
+    public final void setHideOverlayWindows(boolean hide) {
+        // This permission check is here to throw early and let the developer know that they need
+        // to hold HIDE_OVERLAY_WINDOWS for the flag to have any effect. The WM verifies that the
+        // owner of the window has the permission before applying the flag, but this is done
+        // asynchronously.
+        if (mContext.checkSelfPermission(HIDE_NON_SYSTEM_OVERLAY_WINDOWS) != PERMISSION_GRANTED
+                && mContext.checkSelfPermission(HIDE_OVERLAY_WINDOWS) != PERMISSION_GRANTED) {
+            throw new SecurityException(
+                    "Permission denial: setHideOverlayWindows: HIDE_OVERLAY_WINDOWS");
+        }
+        setPrivateFlags(hide ? SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS : 0,
+                SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
     }
 
     /**

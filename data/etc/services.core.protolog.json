@@ -1021,12 +1021,6 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "-903853754": {
-      "message": "pauseBackStacks: stack=%s mResumedActivity=%s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_STATES",
-      "at": "com\/android\/server\/wm\/TaskDisplayArea.java"
-    },
     "-883738232": {
       "message": "Adding more than one toast window for UID at a time.",
       "level": "WARN",
@@ -1717,12 +1711,6 @@
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/Session.java"
     },
-    "-49129622": {
-      "message": "performLayout: Activity exiting now removed %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ADD_REMOVE",
-      "at": "com\/android\/server\/wm\/TaskDisplayArea.java"
-    },
     "-33096143": {
       "message": "applyAnimation: transition animation is disabled or skipped. container=%s",
       "level": "VERBOSE",
@@ -1776,6 +1764,12 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "44438983": {
+      "message": "performLayout: Activity exiting now removed %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ADD_REMOVE",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "45285419": {
       "message": "startingWindow was set but startingSurface==null, couldn't remove",
@@ -1836,12 +1830,6 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowContextListenerController.java"
-    },
-    "91350919": {
-      "message": "Attempted to set IME flag to a display that does not exist: %d",
-      "level": "WARN",
-      "group": "WM_ERROR",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "94402792": {
       "message": "Moving to RESUMED: %s (in existing)",
@@ -2124,6 +2112,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/AppTransition.java"
+    },
+    "349443311": {
+      "message": "pauseBackStacks: task=%s mResumedActivity=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_STATES",
+      "at": "com\/android\/server\/wm\/TaskDisplayArea.java"
     },
     "355720268": {
       "message": "stopFreezingDisplayLocked: Unfreezing now",

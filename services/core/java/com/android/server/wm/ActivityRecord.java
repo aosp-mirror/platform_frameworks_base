@@ -2568,7 +2568,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         final Task rootTask = getRootTask();
-        final boolean mayAdjustTop = (isState(RESUMED) || rootTask.mResumedActivity == null)
+        final boolean mayAdjustTop = (isState(RESUMED) || rootTask.getResumedActivity() == null)
                 && rootTask.isFocusedStackOnDisplay()
                 // Do not adjust focus task because the task will be reused to launch new activity.
                 && !task.isClearingToReuseTask();
@@ -2640,12 +2640,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // Tell window manager to prepare for this one to be removed.
                 setVisibility(false);
 
-                if (rootTask.mPausingActivity == null) {
+                if (task.getPausingActivity() == null) {
                     ProtoLog.v(WM_DEBUG_STATES, "Finish needs to pause: %s", this);
                     if (DEBUG_USER_LEAVING) {
                         Slog.v(TAG_USER_LEAVING, "finish() => pause with userLeaving=false");
                     }
-                    rootTask.startPausingLocked(false /* userLeaving */, false /* uiSleeping */,
+                    task.startPausingLocked(false /* userLeaving */, false /* uiSleeping */,
                             null /* resuming */, "finish");
                 }
 
@@ -2733,7 +2733,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final boolean isCurrentVisible = mVisibleRequested || isState(PAUSED);
         if (isCurrentVisible) {
             final Task stack = getStack();
-            final ActivityRecord activity = stack.mResumedActivity;
+            final ActivityRecord activity = stack.getResumedActivity();
             boolean ensureVisibility = false;
             if (activity != null && !activity.occludesParent()) {
                 // If the resume activity is not opaque, we need to make sure the visibilities of
@@ -2961,10 +2961,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean safelyDestroy(String reason) {
         if (isDestroyable()) {
             if (DEBUG_SWITCH) {
-                final Task stack = getRootTask();
+                final Task task = getTask();
                 Slog.v(TAG_SWITCH, "Safely destroying " + this + " in state " + getState()
-                        + " resumed=" + stack.mResumedActivity
-                        + " pausing=" + stack.mPausingActivity
+                        + " resumed=" + task.getResumedActivity()
+                        + " pausing=" + task.getPausingActivity()
                         + " for reason " + reason);
             }
             return destroyImmediately(reason);
@@ -4842,7 +4842,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     // If the app is capable of entering PIP, we should try pausing it now
                     // so it can PIP correctly.
                     if (deferHidingClient) {
-                        getRootTask().startPausingLocked(userLeaving, false /* uiSleeping */,
+                        task.startPausingLocked(userLeaving, false /* uiSleeping */,
                                 null /* resuming */, "makeInvisible");
                         break;
                     }
@@ -5073,25 +5073,24 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         ProtoLog.v(WM_DEBUG_STATES, "Activity paused: token=%s, timeout=%b", appToken,
                 timeout);
 
-        final Task stack = getStack();
-
-        if (stack != null) {
+        if (task != null) {
             removePauseTimeout();
 
-            if (stack.mPausingActivity == this) {
+            final ActivityRecord pausingActivity = task.getPausingActivity();
+            if (pausingActivity == this) {
                 ProtoLog.v(WM_DEBUG_STATES, "Moving to PAUSED: %s %s", this,
                         (timeout ? "(due to timeout)" : " (pause complete)"));
                 mAtmService.deferWindowLayout();
                 try {
-                    stack.completePauseLocked(true /* resumeNext */, null /* resumingActivity */);
+                    task.completePauseLocked(true /* resumeNext */, null /* resumingActivity */);
                 } finally {
                     mAtmService.continueWindowLayout();
                 }
                 return;
             } else {
                 EventLogTags.writeWmFailedToPause(mUserId, System.identityHashCode(this),
-                        shortComponentName, stack.mPausingActivity != null
-                                ? stack.mPausingActivity.shortComponentName : "(none)");
+                        shortComponentName, pausingActivity != null
+                                ? pausingActivity.shortComponentName : "(none)");
                 if (isState(PAUSING)) {
                     setState(PAUSED, "activityPausedLocked");
                     if (finishing) {
@@ -5189,10 +5188,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void activityStopped(Bundle newIcicle, PersistableBundle newPersistentState,
             CharSequence description) {
-        final Task stack = getRootTask();
         final boolean isStopping = mState == STOPPING;
         if (!isStopping && mState != RESTARTING_PROCESS) {
-            Slog.i(TAG, "Activity reported stop, but no longer stopping: " + this);
+            Slog.i(TAG, "Activity reported stop, but no longer stopping: " + this + " " + mState);
             removeStopTimeout();
             return;
         }
@@ -5229,6 +5227,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     mRootWindowContainer.updatePreviousProcess(this);
                 }
             }
+            mTaskSupervisor.checkReadyForSleepLocked(true /* allowDelay */);
         }
     }
 
@@ -5721,14 +5720,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // First find the real culprit...  if this activity has stopped, then the key dispatching
         // timeout should not be caused by this.
         if (stopped) {
-            final Task stack = mRootWindowContainer.getTopDisplayFocusedRootTask();
-            if (stack == null) {
+            final Task rootTask = mRootWindowContainer.getTopDisplayFocusedRootTask();
+            if (rootTask == null) {
                 return this;
             }
             // Try to use the one which is closest to top.
-            ActivityRecord r = stack.getResumedActivity();
+            ActivityRecord r = rootTask.getResumedActivity();
             if (r == null) {
-                r = stack.mPausingActivity;
+                r = rootTask.getPausingActivity();
             }
             if (r != null) {
                 return r;
@@ -5806,9 +5805,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // This would be redundant.
             return false;
         }
-        final Task stack = getRootTask();
-        if (isState(RESUMED) || stack == null || this == stack.mPausingActivity || !mHaveState
-                || !stopped) {
+        if (isState(RESUMED) || getRootTask() == null || this == task.getPausingActivity()
+                || !mHaveState || !stopped) {
             // We're not ready for this kind of thing.
             return false;
         }

@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.Manifest.permission.DEVICE_POWER;
 import static android.Manifest.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
+import static android.Manifest.permission.HIDE_OVERLAY_WINDOWS;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
@@ -124,7 +125,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         mCanAddInternalSystemWindow = service.mContext.checkCallingOrSelfPermission(
                 INTERNAL_SYSTEM_WINDOW) == PERMISSION_GRANTED;
         mCanHideNonSystemOverlayWindows = service.mContext.checkCallingOrSelfPermission(
-                HIDE_NON_SYSTEM_OVERLAY_WINDOWS) == PERMISSION_GRANTED;
+                HIDE_NON_SYSTEM_OVERLAY_WINDOWS) == PERMISSION_GRANTED
+                || service.mContext.checkCallingOrSelfPermission(HIDE_OVERLAY_WINDOWS)
+                == PERMISSION_GRANTED;
         mOverlaysCanBeHidden = !mCanAddInternalSystemWindow
                 && !mService.mAtmInternal.isCallerRecents(mUid);
         mCanAcquireSleepToken = service.mContext.checkCallingOrSelfPermission(DEVICE_POWER)

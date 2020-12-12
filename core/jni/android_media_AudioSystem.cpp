@@ -2083,10 +2083,9 @@ android_media_AudioSystem_getStreamVolumeDB(JNIEnv *env, jobject thiz,
                                                   (audio_devices_t)device);
 }
 
-static jboolean
-android_media_AudioSystem_isOffloadSupported(JNIEnv *env, jobject thiz,
-        jint encoding, jint sampleRate, jint channelMask, jint channelIndexMask, jint streamType)
-{
+static jint android_media_AudioSystem_getOffloadSupport(JNIEnv *env, jobject thiz, jint encoding,
+                                                        jint sampleRate, jint channelMask,
+                                                        jint channelIndexMask, jint streamType) {
     audio_offload_info_t format = AUDIO_INFO_INITIALIZER;
     format.format = (audio_format_t) audioFormatToNative(encoding);
     format.sample_rate = (uint32_t) sampleRate;
@@ -2098,7 +2097,7 @@ android_media_AudioSystem_isOffloadSupported(JNIEnv *env, jobject thiz,
     // client side code cannot access "audio.offload.min.duration.secs" property to make a query
     // agnostic of duration, so using acceptable estimate of 2mn
     format.duration_us = 120 * 1000000;
-    return AudioSystem::isOffloadSupported(format);
+    return AudioSystem::getOffloadSupport(format);
 }
 
 static jint
@@ -2574,8 +2573,8 @@ static const JNINativeMethod gMethods[] =
           (void *)android_media_AudioSystem_registerRecordingCallback},
          {"systemReady", "()I", (void *)android_media_AudioSystem_systemReady},
          {"getStreamVolumeDB", "(III)F", (void *)android_media_AudioSystem_getStreamVolumeDB},
-         {"native_is_offload_supported", "(IIIII)Z",
-          (void *)android_media_AudioSystem_isOffloadSupported},
+         {"native_get_offload_support", "(IIIII)I",
+          (void *)android_media_AudioSystem_getOffloadSupport},
          {"getMicrophones", "(Ljava/util/ArrayList;)I",
           (void *)android_media_AudioSystem_getMicrophones},
          {"getSurroundFormats", "(Ljava/util/Map;Z)I",

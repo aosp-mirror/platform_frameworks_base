@@ -5127,7 +5127,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 admin1.getPackageName(), managedProfileUserId);
 
         try {
-            assertExpectException(IllegalArgumentException.class, null, () ->
+            assertExpectException(SecurityException.class, null, () ->
                     parentDpm.setPasswordQuality(
                             admin1, DevicePolicyManager.PASSWORD_QUALITY_COMPLEX));
         } finally {
