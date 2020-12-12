@@ -36,7 +36,7 @@ import com.android.wm.shell.pip.tv.PipControlsView;
 import com.android.wm.shell.pip.tv.PipControlsViewController;
 import com.android.wm.shell.pip.tv.PipNotification;
 import com.android.wm.shell.pip.tv.TvPipMenuController;
-import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import java.util.Optional;
 
@@ -120,7 +120,7 @@ public abstract class TvPipModule {
             PipBoundsState pipBoundsState,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
-            Optional<SplitScreen> splitScreenOptional, DisplayController displayController,
+            Optional<LegacySplitScreen> splitScreenOptional, DisplayController displayController,
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer) {
         return new PipTaskOrganizer(context, pipBoundsState, pipBoundsAlgorithm,
                 tvMenuController, pipSurfaceTransactionHelper, splitScreenOptional,

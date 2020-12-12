@@ -148,7 +148,7 @@ import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubbles;
-import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -245,7 +245,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private StatusBarComponent.Builder mStatusBarComponentBuilder;
     @Mock private StatusBarComponent mStatusBarComponent;
     @Mock private PluginManager mPluginManager;
-    @Mock private SplitScreen mSplitScreen;
+    @Mock private LegacySplitScreen mLegacySplitScreen;
     @Mock private SuperStatusBarViewFactory mSuperStatusBarViewFactory;
     @Mock private LightsOutNotifController mLightsOutNotifController;
     @Mock private ViewMediatorCallback mViewMediatorCallback;
@@ -405,7 +405,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mCommandQueue,
                 mStatusBarComponentBuilderProvider,
                 mPluginManager,
-                Optional.of(mSplitScreen),
+                Optional.of(mLegacySplitScreen),
                 mLightsOutNotifController,
                 mStatusBarNotificationActivityStarterBuilder,
                 mShadeController,

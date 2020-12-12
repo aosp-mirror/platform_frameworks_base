@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.splitscreen;
+package com.android.wm.shell.legacysplitscreen;
 
 import static android.view.PointerIcon.TYPE_HORIZONTAL_DOUBLE_ARROW;
 import static android.view.PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW;
@@ -75,7 +75,7 @@ import java.util.function.Consumer;
 public class DividerView extends FrameLayout implements OnTouchListener,
         OnComputeInternalInsetsListener {
     private static final String TAG = "DividerView";
-    private static final boolean DEBUG = SplitScreenController.DEBUG;
+    private static final boolean DEBUG = LegacySplitScreenController.DEBUG;
 
     interface DividerCallbacks {
         void onDraggingStart();
@@ -137,12 +137,12 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private final Rect mOtherInsetRect = new Rect();
     private final Rect mLastResizeRect = new Rect();
     private final Rect mTmpRect = new Rect();
-    private SplitScreenController mSplitScreenController;
+    private LegacySplitScreenController mSplitScreenController;
     private WindowManagerProxy mWindowManagerProxy;
     private DividerWindowManager mWindowManager;
     private VelocityTracker mVelocityTracker;
     private FlingAnimationUtils mFlingAnimationUtils;
-    private SplitDisplayLayout mSplitLayout;
+    private LegacySplitDisplayLayout mSplitLayout;
     private DividerImeController mImeController;
     private DividerCallbacks mCallback;
     private final AnimationHandler mAnimationHandler = new AnimationHandler();
@@ -156,7 +156,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private boolean mAdjustedForIme;
     private DividerState mState;
 
-    private SplitScreenTaskListener mTiles;
+    private LegacySplitScreenTaskListener mTiles;
     boolean mFirstLayout = true;
     int mDividerPositionX;
     int mDividerPositionY;
@@ -353,10 +353,11 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         }
     }
 
-    void injectDependencies(SplitScreenController splitScreenController,
+    void injectDependencies(LegacySplitScreenController splitScreenController,
             DividerWindowManager windowManager, DividerState dividerState,
-            DividerCallbacks callback, SplitScreenTaskListener tiles, SplitDisplayLayout sdl,
-            DividerImeController imeController, WindowManagerProxy wmProxy) {
+            DividerCallbacks callback, LegacySplitScreenTaskListener tiles,
+            LegacySplitDisplayLayout sdl, DividerImeController imeController,
+            WindowManagerProxy wmProxy) {
         mSplitScreenController = splitScreenController;
         mWindowManager = windowManager;
         mState = dividerState;

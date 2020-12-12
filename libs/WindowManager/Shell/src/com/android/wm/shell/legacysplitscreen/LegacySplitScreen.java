@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.splitscreen;
+package com.android.wm.shell.legacysplitscreen;
 
 import android.graphics.Rect;
 import android.window.WindowContainerToken;
@@ -29,7 +29,7 @@ import java.util.function.Consumer;
  * Interface to engage split screen feature.
  */
 @ExternalThread
-public interface SplitScreen {
+public interface LegacySplitScreen {
     /** Called when keyguard showing state changed. */
     void onKeyguardVisibilityChanged(boolean isShowing);
 

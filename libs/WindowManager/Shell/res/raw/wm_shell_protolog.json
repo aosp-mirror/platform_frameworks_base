@@ -1,12 +1,6 @@
 {
   "version": "1.0.0",
   "messages": {
-    "-1993693214": {
-      "message": "Letterbox Task Changed: #%d",
-      "level": "VERBOSE",
-      "group": "WM_SHELL_TASK_ORG",
-      "at": "com\/android\/wm\/shell\/letterbox\/LetterboxTaskListener.java"
-    },
     "-1683614271": {
       "message": "Existing task: id=%d component=%s",
       "level": "VERBOSE",
@@ -36,6 +30,12 @@
       "level": "VERBOSE",
       "group": "WM_SHELL_DRAG_AND_DROP",
       "at": "com\/android\/wm\/shell\/draganddrop\/DragAndDropController.java"
+    },
+    "-1362429294": {
+      "message": "%s onTaskAppeared Primary taskId=%d",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TASK_ORG",
+      "at": "com\/android\/wm\/shell\/legacysplitscreen\/LegacySplitScreenTaskListener.java"
     },
     "-1340279385": {
       "message": "Remove listener=%s",
@@ -73,12 +73,6 @@
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
     },
-    "-842742255": {
-      "message": "%s onTaskAppeared unknown taskId=%d winMode=%d",
-      "level": "VERBOSE",
-      "group": "WM_SHELL_TASK_ORG",
-      "at": "com\/android\/wm\/shell\/splitscreen\/SplitScreenTaskListener.java"
-    },
     "-742394458": {
       "message": "pair task1=%d task2=%d in AppPair=%s",
       "level": "VERBOSE",
@@ -91,17 +85,11 @@
       "group": "WM_SHELL_DRAG_AND_DROP",
       "at": "com\/android\/wm\/shell\/draganddrop\/DragLayout.java"
     },
-    "-679492476": {
-      "message": "%s onTaskAppeared Primary taskId=%d",
+    "-298656957": {
+      "message": "%s onTaskAppeared unknown taskId=%d winMode=%d",
       "level": "VERBOSE",
       "group": "WM_SHELL_TASK_ORG",
-      "at": "com\/android\/wm\/shell\/splitscreen\/SplitScreenTaskListener.java"
-    },
-    "-342975160": {
-      "message": "Letterbox Task Vanished: #%d",
-      "level": "VERBOSE",
-      "group": "WM_SHELL_TASK_ORG",
-      "at": "com\/android\/wm\/shell\/letterbox\/LetterboxTaskListener.java"
+      "at": "com\/android\/wm\/shell\/legacysplitscreen\/LegacySplitScreenTaskListener.java"
     },
     "-234284913": {
       "message": "unpair taskId=%d pair=%s",
@@ -114,12 +102,6 @@
       "level": "VERBOSE",
       "group": "WM_SHELL_TRANSITIONS",
       "at": "com\/android\/wm\/shell\/Transitions.java"
-    },
-    "154313206": {
-      "message": "%s onTaskAppeared Secondary taskId=%d",
-      "level": "VERBOSE",
-      "group": "WM_SHELL_TASK_ORG",
-      "at": "com\/android\/wm\/shell\/splitscreen\/SplitScreenTaskListener.java"
     },
     "157713005": {
       "message": "Task info changed taskId=%d",
@@ -138,6 +120,12 @@
       "level": "VERBOSE",
       "group": "WM_SHELL_DRAG_AND_DROP",
       "at": "com\/android\/wm\/shell\/draganddrop\/DragAndDropController.java"
+    },
+    "473543554": {
+      "message": "%s onTaskAppeared Supported",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TASK_ORG",
+      "at": "com\/android\/wm\/shell\/legacysplitscreen\/LegacySplitScreenTaskListener.java"
     },
     "481673835": {
       "message": "addListenerForTaskId taskId=%s",
@@ -175,6 +163,12 @@
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
     },
+    "982027396": {
+      "message": "%s onTaskAppeared Secondary taskId=%d",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TASK_ORG",
+      "at": "com\/android\/wm\/shell\/legacysplitscreen\/LegacySplitScreenTaskListener.java"
+    },
     "1079041527": {
       "message": "incrementPool size=%d",
       "level": "VERBOSE",
@@ -199,12 +193,6 @@
       "group": "WM_SHELL_DRAG_AND_DROP",
       "at": "com\/android\/wm\/shell\/draganddrop\/DragAndDropController.java"
     },
-    "1885882094": {
-      "message": "Letterbox Task Appeared: #%d",
-      "level": "VERBOSE",
-      "group": "WM_SHELL_TASK_ORG",
-      "at": "com\/android\/wm\/shell\/letterbox\/LetterboxTaskListener.java"
-    },
     "1891981945": {
       "message": "release entry.taskId=%s listener=%s size=%d",
       "level": "VERBOSE",
@@ -228,12 +216,6 @@
       "level": "VERBOSE",
       "group": "WM_SHELL_DRAG_AND_DROP",
       "at": "com\/android\/wm\/shell\/draganddrop\/DragAndDropController.java"
-    },
-    "2135461748": {
-      "message": "%s onTaskAppeared Supported",
-      "level": "VERBOSE",
-      "group": "WM_SHELL_TASK_ORG",
-      "at": "com\/android\/wm\/shell\/splitscreen\/SplitScreenTaskListener.java"
     }
   },
   "groups": {

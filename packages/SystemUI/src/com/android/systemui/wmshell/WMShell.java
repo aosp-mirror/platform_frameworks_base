@@ -61,7 +61,7 @@ import com.android.wm.shell.onehanded.OneHandedGestureHandler.OneHandedGestureEv
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.protolog.ShellProtoLogImpl;
-import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -93,7 +93,7 @@ public final class WMShell extends SystemUI
     private final ScreenLifecycle mScreenLifecycle;
     private final SysUiState mSysUiState;
     private final Optional<Pip> mPipOptional;
-    private final Optional<SplitScreen> mSplitScreenOptional;
+    private final Optional<LegacySplitScreen> mSplitScreenOptional;
     private final Optional<OneHanded> mOneHandedOptional;
     private final Optional<HideDisplayCutout> mHideDisplayCutoutOptional;
     private final ProtoTracer mProtoTracer;
@@ -112,7 +112,7 @@ public final class WMShell extends SystemUI
             ScreenLifecycle screenLifecycle,
             SysUiState sysUiState,
             Optional<Pip> pipOptional,
-            Optional<SplitScreen> splitScreenOptional,
+            Optional<LegacySplitScreen> splitScreenOptional,
             Optional<OneHanded> oneHandedOptional,
             Optional<HideDisplayCutout> hideDisplayCutoutOptional,
             ProtoTracer protoTracer,
@@ -190,7 +190,7 @@ public final class WMShell extends SystemUI
     }
 
     @VisibleForTesting
-    void initSplitScreen(SplitScreen splitScreen) {
+    void initSplitScreen(LegacySplitScreen legacySplitScreen) {
         mSplitScreenKeyguardCallback = new KeyguardUpdateMonitorCallback() {
             @Override
             public void onKeyguardVisibilityChanged(boolean showing) {
@@ -198,7 +198,7 @@ public final class WMShell extends SystemUI
                 // above everything, it is actually transparent except for notifications, so
                 // we still need to hide any surfaces that are below it.
                 // TODO(b/148906453): Figure out keyguard dismiss animation for divider view.
-                splitScreen.onKeyguardVisibilityChanged(showing);
+                legacySplitScreen.onKeyguardVisibilityChanged(showing);
             }
         };
         mKeyguardUpdateMonitor.registerCallback(mSplitScreenKeyguardCallback);

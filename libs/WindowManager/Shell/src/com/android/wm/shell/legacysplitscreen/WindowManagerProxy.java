@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.splitscreen;
+package com.android.wm.shell.legacysplitscreen;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
@@ -88,8 +88,8 @@ class WindowManagerProxy {
         mTaskOrganizer = taskOrganizer;
     }
 
-    void dismissOrMaximizeDocked(final SplitScreenTaskListener tiles, SplitDisplayLayout layout,
-            final boolean dismissOrMaximize) {
+    void dismissOrMaximizeDocked(final LegacySplitScreenTaskListener tiles,
+            LegacySplitDisplayLayout layout, final boolean dismissOrMaximize) {
         mExecutor.execute(() -> applyDismissSplit(tiles, layout, dismissOrMaximize));
     }
 
@@ -114,7 +114,7 @@ class WindowManagerProxy {
         mExecutor.execute(mSetTouchableRegionRunnable);
     }
 
-    void applyResizeSplits(int position, SplitDisplayLayout splitLayout) {
+    void applyResizeSplits(int position, LegacySplitDisplayLayout splitLayout) {
         WindowContainerTransaction t = new WindowContainerTransaction();
         splitLayout.resizeSplits(position, t);
         new WindowOrganizer().applyTransaction(t);
@@ -141,7 +141,7 @@ class WindowManagerProxy {
      * split is minimized. This actually "sticks out" of the secondary split area, but when in
      * minimized mode, the secondary split gets a 'negative' crop to expose it.
      */
-    boolean applyHomeTasksMinimized(SplitDisplayLayout layout, WindowContainerToken parent,
+    boolean applyHomeTasksMinimized(LegacySplitDisplayLayout layout, WindowContainerToken parent,
             @NonNull WindowContainerTransaction wct) {
         // Resize the home/recents stacks to the larger minimized-state size
         final Rect homeBounds;
@@ -189,7 +189,7 @@ class WindowManagerProxy {
      *
      * @return whether the home stack is resizable
      */
-    boolean applyEnterSplit(SplitScreenTaskListener tiles, SplitDisplayLayout layout) {
+    boolean applyEnterSplit(LegacySplitScreenTaskListener tiles, LegacySplitDisplayLayout layout) {
         // Set launchtile first so that any stack created after
         // getAllRootTaskInfos and before reparent (even if unlikely) are placed
         // correctly.
@@ -241,7 +241,7 @@ class WindowManagerProxy {
      *                          split (thus resulting in the top of the secondary split becoming
      *                          fullscreen. {@code false} resolves the other way.
      */
-    void applyDismissSplit(SplitScreenTaskListener tiles, SplitDisplayLayout layout,
+    void applyDismissSplit(LegacySplitScreenTaskListener tiles, LegacySplitDisplayLayout layout,
             boolean dismissOrMaximize) {
         // Set launch root first so that any task created after getChildContainers and
         // before reparent (pretty unlikely) are put into fullscreen.
