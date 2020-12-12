@@ -39,7 +39,6 @@ import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.app.IServiceConnection;
 import android.app.KeyguardManager;
-import android.app.admin.DevicePolicyManager.DevicePolicyOperation;
 import android.app.admin.SecurityLog.SecurityEvent;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -12781,6 +12780,68 @@ public class DevicePolicyManager {
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
+        }
+    }
+
+    /**
+     * Returns an enrollment-specific identifier of this device, which is guaranteed to be the same
+     * value for the same device, enrolled into the same organization by the same managing app.
+     * This identifier is high-entropy, useful for uniquely identifying individual devices within
+     * the same organisation.
+     * It is available both in a work profile and on a fully-managed device.
+     * The identifier would be consistent even if the work profile is removed and enrolled again
+     * (to the same organization), or the device is factory reset and re-enrolled.
+
+     * Can only be called by the Profile Owner or Device Owner, if the
+     * {@link #setOrganizationId(String)} was previously called.
+     * If {@link #setOrganizationId(String)} was not called, then the returned value will be an
+     * empty string.
+     *
+     * @return A stable, enrollment-specific identifier.
+     * @throws SecurityException if the caller is not a profile owner or device owner.
+     */
+    @NonNull public String getEnrollmentSpecificId() {
+        if (mService == null) {
+            return "";
+        }
+
+        try {
+            return mService.getEnrollmentSpecificId();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the Enterprise ID for the work profile or managed device. This is a requirement for
+     * generating an enrollment-specific ID for the device, see {@link #getEnrollmentSpecificId()}.
+     *
+     * It is recommended that the Enterprise ID is at least 6 characters long, and no more than
+     * 64 characters.
+     *
+     * @param enterpriseId An identifier of the organization this work profile or device is
+     *                     enrolled into.
+     */
+    public void setOrganizationId(@NonNull String enterpriseId) {
+        setOrganizationIdForUser(mContext.getPackageName(), enterpriseId, myUserId());
+    }
+
+    /**
+     * Sets the Enterprise ID for the work profile or managed device. This is a requirement for
+     * generating an enrollment-specific ID for the device, see
+     * {@link #getEnrollmentSpecificId()}.
+     *
+     * @hide
+     */
+    public void setOrganizationIdForUser(@NonNull String packageName,
+            @NonNull String enterpriseId, @UserIdInt int userId) {
+        if (mService == null) {
+            return;
+        }
+        try {
+            mService.setOrganizationIdForUser(packageName, enterpriseId, userId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
         }
     }
 }

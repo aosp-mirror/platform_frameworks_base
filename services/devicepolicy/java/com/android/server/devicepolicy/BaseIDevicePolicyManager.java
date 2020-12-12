@@ -15,6 +15,7 @@
  */
 package com.android.server.devicepolicy;
 
+import android.annotation.NonNull;
 import android.app.admin.DevicePolicySafetyChecker;
 import android.app.admin.IDevicePolicyManager;
 import android.content.ComponentName;
@@ -101,4 +102,11 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     public boolean canProfileOwnerResetPasswordWhenLocked(int userId) {
         return false;
     }
+
+    public String getEnrollmentSpecificId() {
+        return "";
+    }
+
+    public void setOrganizationIdForUser(
+            @NonNull String callerPackage, @NonNull String enterpriseId, int userId) {}
 }

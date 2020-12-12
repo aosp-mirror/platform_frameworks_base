@@ -134,6 +134,8 @@ class ActiveAdmin {
     private static final String TAG_ALWAYS_ON_VPN_LOCKDOWN = "vpn-lockdown";
     private static final String TAG_COMMON_CRITERIA_MODE = "common-criteria-mode";
     private static final String TAG_PASSWORD_COMPLEXITY = "password-complexity";
+    private static final String TAG_ORGANIZATION_ID = "organization-id";
+    private static final String TAG_ENROLLMENT_SPECIFIC_ID = "enrollment-specific-id";
     private static final String ATTR_VALUE = "value";
     private static final String ATTR_LAST_NETWORK_LOGGING_NOTIFICATION = "last-notification";
     private static final String ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS = "num-notifications";
@@ -273,6 +275,8 @@ class ActiveAdmin {
     public String mAlwaysOnVpnPackage;
     public boolean mAlwaysOnVpnLockdown;
     boolean mCommonCriteriaMode;
+    public String mOrganizationId;
+    public String mEnrollmentSpecificId;
 
     ActiveAdmin(DeviceAdminInfo info, boolean isParent) {
         this.info = info;
@@ -533,6 +537,12 @@ class ActiveAdmin {
         if (mPasswordComplexity != PASSWORD_COMPLEXITY_NONE) {
             writeAttributeValueToXml(out, TAG_PASSWORD_COMPLEXITY, mPasswordComplexity);
         }
+        if (!TextUtils.isEmpty(mOrganizationId)) {
+            writeTextToXml(out, TAG_ORGANIZATION_ID, mOrganizationId);
+        }
+        if (!TextUtils.isEmpty(mEnrollmentSpecificId)) {
+            writeTextToXml(out, TAG_ENROLLMENT_SPECIFIC_ID, mEnrollmentSpecificId);
+        }
     }
 
     void writeTextToXml(TypedXmlSerializer out, String tag, String text) throws IOException {
@@ -766,6 +776,22 @@ class ActiveAdmin {
                 mCommonCriteriaMode = parser.getAttributeBoolean(null, ATTR_VALUE, false);
             } else if (TAG_PASSWORD_COMPLEXITY.equals(tag)) {
                 mPasswordComplexity = parser.getAttributeInt(null, ATTR_VALUE);
+            } else if (TAG_ORGANIZATION_ID.equals(tag)) {
+                type = parser.next();
+                if (type == TypedXmlPullParser.TEXT) {
+                    mOrganizationId = parser.getText();
+                } else {
+                    Log.w(DevicePolicyManagerService.LOG_TAG,
+                            "Missing Organization ID.");
+                }
+            } else if (TAG_ENROLLMENT_SPECIFIC_ID.equals(tag)) {
+                type = parser.next();
+                if (type == TypedXmlPullParser.TEXT) {
+                    mEnrollmentSpecificId = parser.getText();
+                } else {
+                    Log.w(DevicePolicyManagerService.LOG_TAG,
+                            "Missing Enrollment-specific ID.");
+                }
             } else {
                 Slog.w(DevicePolicyManagerService.LOG_TAG, "Unknown admin tag: " + tag);
                 XmlUtils.skipCurrentTag(parser);
@@ -1107,5 +1133,15 @@ class ActiveAdmin {
 
         pw.print("mPasswordComplexity=");
         pw.println(mPasswordComplexity);
+
+        if (!TextUtils.isEmpty(mOrganizationId)) {
+            pw.print("mOrganizationId=");
+            pw.println(mOrganizationId);
+        }
+
+        if (!TextUtils.isEmpty(mEnrollmentSpecificId)) {
+            pw.print("mEnrollmentSpecificId=");
+            pw.println(mEnrollmentSpecificId);
+        }
     }
 }

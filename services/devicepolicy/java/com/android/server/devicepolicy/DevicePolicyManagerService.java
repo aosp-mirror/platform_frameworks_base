@@ -15577,4 +15577,69 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return true;
         }
     }
+
+    @Override
+    public String getEnrollmentSpecificId() {
+        if (!mHasFeature) {
+            return "";
+        }
+
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(
+                isDeviceOwner(caller) || isProfileOwner(caller));
+
+        synchronized (getLockObject()) {
+            final ActiveAdmin requiredAdmin = getDeviceOrProfileOwnerAdminLocked(
+                    caller.getUserId());
+            final String esid = requiredAdmin.mEnrollmentSpecificId;
+            return esid != null ? esid : "";
+        }
+    }
+
+    @Override
+    public void setOrganizationIdForUser(
+            @NonNull String callerPackage, @NonNull String organizationId, int userId) {
+        if (!mHasFeature) {
+            return;
+        }
+        Objects.requireNonNull(callerPackage);
+
+        final CallerIdentity caller = getCallerIdentity(callerPackage);
+        // Only the DPC can set this ID.
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller),
+                "Only a Device Owner or Profile Owner may set the Enterprise ID.");
+        // Empty enterprise ID must not be provided in calls to this method.
+        Preconditions.checkArgument(!TextUtils.isEmpty(organizationId),
+                "Enterprise ID may not be empty.");
+
+        Log.i(LOG_TAG,
+                String.format("Setting Enterprise ID to %s for user %d", organizationId, userId));
+
+        synchronized (getLockObject()) {
+            ActiveAdmin owner = getDeviceOrProfileOwnerAdminLocked(userId);
+            // As the caller is the system, it must specify the component name of the profile owner
+            // as a safety check.
+            Preconditions.checkCallAuthorization(
+                    owner != null && owner.getUserHandle().getIdentifier() == userId,
+                    String.format("The Profile Owner or Device Owner may only set the Enterprise ID"
+                            + " on its own user, called on user %d but owner user is %d", userId,
+                            owner.getUserHandle().getIdentifier()));
+            Preconditions.checkState(
+                    TextUtils.isEmpty(owner.mOrganizationId) || owner.mOrganizationId.equals(
+                            organizationId),
+                    "The organization ID has been previously set to a different value and cannot "
+                            + "be changed");
+            final String dpcPackage = owner.info.getPackageName();
+            mInjector.binderWithCleanCallingIdentity(() -> {
+                EnterpriseSpecificIdCalculator esidCalculator =
+                        new EnterpriseSpecificIdCalculator(mContext);
+
+                final String esid = esidCalculator.calculateEnterpriseId(dpcPackage,
+                        organizationId);
+                owner.mOrganizationId = organizationId;
+                owner.mEnrollmentSpecificId = esid;
+                saveSettingsLocked(userId);
+            });
+        }
+    }
 }
