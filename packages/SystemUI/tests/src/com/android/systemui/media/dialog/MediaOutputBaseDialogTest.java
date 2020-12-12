@@ -35,6 +35,7 @@ import android.widget.TextView;
 import androidx.core.graphics.drawable.IconCompat;
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -61,6 +62,7 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
     private ActivityStarter mStarter = mock(ActivityStarter.class);
     private NotificationEntryManager mNotificationEntryManager =
             mock(NotificationEntryManager.class);
+    private final UiEventLogger mUiEventLogger = mock(UiEventLogger.class);
 
     private MediaOutputBaseDialogImpl mMediaOutputBaseDialogImpl;
     private MediaOutputController mMediaOutputController;
@@ -73,7 +75,7 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
     public void setUp() {
         mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE, false,
                 mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
-                mNotificationEntryManager);
+                mNotificationEntryManager, mUiEventLogger);
         mMediaOutputBaseDialogImpl = new MediaOutputBaseDialogImpl(mContext,
                 mMediaOutputController);
         mMediaOutputBaseDialogImpl.onCreate(new Bundle());
