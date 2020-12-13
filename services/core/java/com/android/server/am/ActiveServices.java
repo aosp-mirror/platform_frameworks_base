@@ -19,7 +19,6 @@ package com.android.server.am;
 import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND;
 import static android.Manifest.permission.SYSTEM_ALERT_WINDOW;
-import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
 import static android.os.Process.NFC_UID;
@@ -168,6 +167,7 @@ public final class ActiveServices {
     public static final int FGS_FEATURE_ALLOWED_BY_SYSTEM_ALERT_WINDOW_PERMISSION = 16;
     public static final int FGS_FEATURE_ALLOWED_BY_FGS_BINDING = 17;
     public static final int FGS_FEATURE_ALLOWED_BY_DEVICE_DEMO_MODE = 18;
+    public static final int FGS_FEATURE_ALLOWED_BY_PROCESS_RECORD = 19;
 
     @IntDef(flag = true, prefix = { "FGS_FEATURE_" }, value = {
             FGS_FEATURE_DENIED,
@@ -187,7 +187,8 @@ public final class ActiveServices {
             FGS_FEATURE_ALLOWED_BY_DEVICE_IDLE_ALLOW_LIST,
             FGS_FEATURE_ALLOWED_BY_SYSTEM_ALERT_WINDOW_PERMISSION,
             FGS_FEATURE_ALLOWED_BY_FGS_BINDING,
-            FGS_FEATURE_ALLOWED_BY_DEVICE_DEMO_MODE
+            FGS_FEATURE_ALLOWED_BY_DEVICE_DEMO_MODE,
+            FGS_FEATURE_ALLOWED_BY_PROCESS_RECORD
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FgsFeatureRetCode {}
@@ -5244,10 +5245,14 @@ public final class ActiveServices {
         if (ret == FGS_FEATURE_DENIED) {
             for (int i = mAm.mProcessList.mLruProcesses.size() - 1; i >= 0; i--) {
                 final ProcessRecord pr = mAm.mProcessList.mLruProcesses.get(i);
-                if (pr.uid == callingUid
-                        && pr.mAllowStartFgsState <= PROCESS_STATE_BOUND_FOREGROUND_SERVICE) {
-                    ret = FGS_FEATURE_ALLOWED_BY_PROC_STATE;
-                    break;
+                if (pr.uid == callingUid) {
+                    if (pr.mAllowStartFgs) {
+                        ret = FGS_FEATURE_ALLOWED_BY_PROCESS_RECORD;
+                        break;
+                    } else if (pr.isAllowedStartFgsState()) {
+                        ret = FGS_FEATURE_ALLOWED_BY_PROC_STATE;
+                        break;
+                    }
                 }
             }
         }
@@ -5286,7 +5291,7 @@ public final class ActiveServices {
         }
 
         if (ret == FGS_FEATURE_DENIED) {
-            if (mAm.isWhitelistedForFgsStartLocked(r.appInfo.uid)) {
+            if (mAm.isWhitelistedForFgsStartLocked(callingUid)) {
                 // uid is on DeviceIdleController's user/system allowlist
                 // or AMS's FgsStartTempAllowList.
                 ret = FGS_FEATURE_ALLOWED_BY_DEVICE_IDLE_ALLOW_LIST;
@@ -5354,6 +5359,8 @@ public final class ActiveServices {
                 return "ALLOWED_BY_FGS_BINDING";
             case FGS_FEATURE_ALLOWED_BY_DEVICE_DEMO_MODE:
                 return "ALLOWED_BY_DEVICE_DEMO_MODE";
+            case FGS_FEATURE_ALLOWED_BY_PROCESS_RECORD:
+                return "ALLOWED_BY_PROCESS_RECORD";
             default:
                 return "";
         }
