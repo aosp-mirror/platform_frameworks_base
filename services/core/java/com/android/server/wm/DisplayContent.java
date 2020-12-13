@@ -685,6 +685,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     private boolean mInEnsureActivitiesVisible = false;
 
+    // Used to indicate that the movement of child tasks to top will not move the display to top as
+    // well and thus won't change the top resumed / focused record
+    boolean mDontMoveToTop;
+
     private final Consumer<WindowState> mUpdateWindowsForAnimator = w -> {
         WindowStateAnimator winAnimator = w.mWinAnimator;
         final ActivityRecord activity = w.mActivityRecord;
