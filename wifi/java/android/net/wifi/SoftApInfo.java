@@ -86,6 +86,34 @@ public final class SoftApInfo implements Parcelable {
      */
     public static final int CHANNEL_WIDTH_160MHZ = 6;
 
+    /**
+     * AP Channel bandwidth is 2160 MHZ.
+     *
+     * @see #getBandwidth()
+     */
+    public static final int CHANNEL_WIDTH_2160MHZ = 7;
+
+    /**
+     * AP Channel bandwidth is 4320 MHZ.
+     *
+     * @see #getBandwidth()
+     */
+    public static final int CHANNEL_WIDTH_4320MHZ = 8;
+
+    /**
+     * AP Channel bandwidth is 6480 MHZ.
+     *
+     * @see #getBandwidth()
+     */
+    public static final int CHANNEL_WIDTH_6480MHZ = 9;
+
+    /**
+     * AP Channel bandwidth is 8640 MHZ.
+     *
+     * @see #getBandwidth()
+     */
+    public static final int CHANNEL_WIDTH_8640MHZ = 10;
+
     /** The frequency which AP resides on.  */
     private int mFrequency = 0;
 
@@ -125,7 +153,9 @@ public final class SoftApInfo implements Parcelable {
      *
      * @return One of {@link #CHANNEL_WIDTH_20MHZ}, {@link #CHANNEL_WIDTH_40MHZ},
      * {@link #CHANNEL_WIDTH_80MHZ}, {@link #CHANNEL_WIDTH_160MHZ},
-     * {@link #CHANNEL_WIDTH_80MHZ_PLUS_MHZ} or {@link #CHANNEL_WIDTH_INVALID}.
+     * {@link #CHANNEL_WIDTH_80MHZ_PLUS_MHZ}, {@link #CHANNEL_WIDTH_2160MHZ},
+     * {@link #CHANNEL_WIDTH_4320MHZ}, {@link #CHANNEL_WIDTH_6480MHZ},
+     * {@link #CHANNEL_WIDTH_8640MHZ}, or {@link #CHANNEL_WIDTH_INVALID}.
      */
     @WifiAnnotations.Bandwidth
     public int getBandwidth() {

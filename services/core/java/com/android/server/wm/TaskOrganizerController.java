@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
+import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.WindowOrganizerController.CONTROLLABLE_CONFIGS;
 import static com.android.server.wm.WindowOrganizerController.CONTROLLABLE_WINDOW_CONFIGS;
 
@@ -580,11 +581,11 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             synchronized (mGlobalLock) {
                 DisplayContent dc = mService.mWindowManager.mRoot
                         .getDisplayContent(displayId);
-                if (dc == null || dc.mInputMethodTarget == null) {
+                if (dc == null || dc.getImeTarget(IME_TARGET_LAYERING) == null) {
                     return null;
                 }
                 // Avoid WindowState#getRootTask() so we don't attribute system windows to a task.
-                final Task task = dc.mInputMethodTarget.getTask();
+                final Task task = dc.getImeTarget(IME_TARGET_LAYERING).getWindow().getTask();
                 if (task == null) {
                     return null;
                 }

@@ -320,6 +320,11 @@ public final class ScanResult implements Parcelable {
     public static final int WIFI_STANDARD_11AX = 6;
 
     /**
+     * Wi-Fi 802.11ad/ay
+     */
+    public static final int WIFI_STANDARD_11AD = 7;
+
+    /**
      * AP wifi standard.
      */
     private @WifiStandard int mWifiStandard;
@@ -352,6 +357,8 @@ public final class ScanResult implements Parcelable {
                 return "11ac";
             case WIFI_STANDARD_11AX:
                 return "11ax";
+            case WIFI_STANDARD_11AD:
+                return "11ad";
             case WIFI_STANDARD_UNKNOWN:
                 return "unknown";
         }
@@ -701,6 +708,13 @@ public final class ScanResult implements Parcelable {
                     return BAND_6_GHZ_OP_CLASS_136_CH_2_FREQ_MHZ;
                 }
                 return ((channel - BAND_6_GHZ_FIRST_CH_NUM) * 5) + BAND_6_GHZ_START_FREQ_MHZ;
+            } else {
+                return UNSPECIFIED;
+            }
+        }
+        if (band == WifiScanner.WIFI_BAND_60_GHZ) {
+            if (channel >= BAND_60_GHZ_FIRST_CH_NUM && channel <= BAND_60_GHZ_LAST_CH_NUM) {
+                return ((channel - BAND_60_GHZ_FIRST_CH_NUM) * 2160) + BAND_60_GHZ_START_FREQ_MHZ;
             } else {
                 return UNSPECIFIED;
             }

@@ -52,19 +52,19 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
     public void testTransparentControlTargetWindowCanShowIme() {
         final WindowState appWin = createWindow(null, TYPE_APPLICATION, "app");
         final WindowState popup = createWindow(appWin, TYPE_APPLICATION, "popup");
-        mDisplayContent.mInputMethodControlTarget = popup;
-        mDisplayContent.mInputMethodTarget = appWin;
+        mDisplayContent.setImeControlTarget(popup);
+        mDisplayContent.setImeLayeringTarget(appWin);
         popup.mAttrs.format = PixelFormat.TRANSPARENT;
         mImeProvider.scheduleShowImePostLayout(appWin);
-        assertTrue(mImeProvider.isImeTargetFromDisplayContentAndImeSame());
+        assertTrue(mImeProvider.isReadyToShowIme());
     }
 
     @Test
     public void testInputMethodInputTargetCanShowIme() {
         WindowState target = createWindow(null, TYPE_APPLICATION, "app");
-        mDisplayContent.mInputMethodTarget = target;
+        mDisplayContent.setImeLayeringTarget(target);
         mImeProvider.scheduleShowImePostLayout(target);
-        assertTrue(mImeProvider.isImeTargetFromDisplayContentAndImeSame());
+        assertTrue(mImeProvider.isReadyToShowIme());
     }
 
     @Test
@@ -74,8 +74,8 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
         mImeProvider.setWindow(ime, null, null);
 
         WindowState target = createWindow(null, TYPE_APPLICATION, "app");
-        mDisplayContent.mInputMethodTarget = target;
-        mDisplayContent.mInputMethodControlTarget = target;
+        mDisplayContent.setImeLayeringTarget(target);
+        mDisplayContent.setImeControlTarget(target);
 
         mImeProvider.scheduleShowImePostLayout(target);
         assertFalse(mImeProvider.isImeShowing());

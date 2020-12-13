@@ -75,6 +75,7 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
     @Nullable
     OneHandedGestureEventCallback mGestureEventCallback;
     private Rect mGestureRegion = new Rect();
+    private boolean mIsStopGesture;
 
     /**
      * Constructor of OneHandedGestureHandler, we only handle the gesture of
@@ -153,25 +154,30 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
                         float distance = (float) Math.hypot(mLastPos.x - mDownPos.x,
                                 mLastPos.y - mDownPos.y);
                         if (distance > mDragDistThreshold) {
-                            mGestureEventCallback.onStop();
+                            mIsStopGesture = true;
                         }
                     }
                     break;
                 case MotionEvent.ACTION_UP:
                     if (mLastPos.y >= mDownPos.y && mPassedSlop) {
                         mGestureEventCallback.onStart();
+                    } else if (mIsStopGesture) {
+                        mGestureEventCallback.onStop();
                     }
-                    mPassedSlop = false;
-                    mAllowGesture = false;
+                    clearState();
                     break;
                 case MotionEvent.ACTION_CANCEL:
-                    mPassedSlop = false;
-                    mAllowGesture = false;
+                    clearState();
                     break;
                 default:
                     break;
             }
         }
+    }
+
+    private void clearState() {
+        mPassedSlop = false;
+        mIsStopGesture = false;
     }
 
     private void disposeInputChannel() {

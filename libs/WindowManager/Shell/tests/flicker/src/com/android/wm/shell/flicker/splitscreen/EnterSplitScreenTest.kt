@@ -21,14 +21,21 @@ import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.dsl.runWithFlicker
+import com.android.server.wm.flicker.helpers.WindowUtils
+import com.android.server.wm.flicker.helpers.canSplitScreen
+import com.android.server.wm.flicker.helpers.exitSplitScreen
+import com.android.server.wm.flicker.helpers.isInSplitScreen
 import com.android.server.wm.flicker.helpers.launchSplitScreen
+import com.android.server.wm.flicker.helpers.openQuickstep
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
+import com.android.wm.shell.flicker.dockedStackDividerIsInvisible
 import com.android.wm.shell.flicker.dockedStackDividerIsVisible
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper.Companion.TEST_REPETITIONS
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
+import org.junit.Assert
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -56,14 +63,16 @@ class EnterSplitScreenTest(
             setup {
                 eachRun {
                     uiDevice.wakeUpAndGoToHomeScreen()
-                    splitScreenApp.open()
-                    uiDevice.pressHome()
                 }
             }
             teardown {
                 eachRun {
+                    if (uiDevice.isInSplitScreen()) {
+                        uiDevice.exitSplitScreen()
+                    }
                     splitScreenApp.exit()
                     secondaryApp.exit()
+                    nonResizeableApp.exit()
                 }
             }
             assertions {
@@ -87,6 +96,7 @@ class EnterSplitScreenTest(
                 TEST_REPETITIONS
             }
             transitions {
+                splitScreenApp.launchViaIntent()
                 uiDevice.launchSplitScreen()
             }
             assertions {
@@ -118,10 +128,8 @@ class EnterSplitScreenTest(
                 TEST_REPETITIONS
             }
             transitions {
-                secondaryApp.open()
-                uiDevice.pressHome()
-                splitScreenApp.open()
-                uiDevice.pressHome()
+                secondaryApp.launchViaIntent()
+                splitScreenApp.launchViaIntent()
                 uiDevice.launchSplitScreen()
                 splitScreenApp.reopenAppFromOverview()
             }
@@ -144,6 +152,98 @@ class EnterSplitScreenTest(
                     end {
                         showsAppWindow(splitScreenApp.defaultWindowName)
                                 .and().showsAppWindow(secondaryApp.defaultWindowName)
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun testNonResizeableNotDocked() {
+        val testTag = "testNonResizeableNotDocked"
+        runWithFlicker(splitScreenSetup) {
+            withTestName { testTag }
+            repeat {
+                TEST_REPETITIONS
+            }
+            transitions {
+                nonResizeableApp.launchViaIntent()
+                uiDevice.openQuickstep()
+                if (uiDevice.canSplitScreen()) {
+                    Assert.fail("Non-resizeable app should not enter split screen")
+                }
+            }
+            assertions {
+                layersTrace {
+                    dockedStackDividerIsInvisible()
+                }
+                windowManagerTrace {
+                    end {
+                        hidesAppWindow(nonResizeableApp.defaultWindowName)
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun testNonResizeableWhenAlreadyInSplitScreenPrimary() {
+        val testTag = "testNonResizeableWhenAlreadyInSplitScreenPrimary"
+        runWithFlicker(splitScreenSetup) {
+            withTestName { testTag }
+            repeat {
+                TEST_REPETITIONS
+            }
+            transitions {
+                nonResizeableApp.launchViaIntent()
+                splitScreenApp.launchViaIntent()
+                uiDevice.launchSplitScreen()
+                nonResizeableApp.reopenAppFromOverview()
+            }
+            assertions {
+                layersTrace {
+                    dockedStackDividerIsInvisible()
+                    end("appsEndingBounds", enabled = false) {
+                        val displayBounds = WindowUtils.getDisplayBounds(rotation)
+                        this.hasVisibleRegion(nonResizeableApp.defaultWindowName, displayBounds)
+                    }
+                }
+                windowManagerTrace {
+                    end {
+                        showsAppWindow(nonResizeableApp.defaultWindowName)
+                        hidesAppWindow(splitScreenApp.defaultWindowName)
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun testNonResizeableWhenAlreadyInSplitScreenSecondary() {
+        val testTag = "testNonResizeableWhenAlreadyInSplitScreenSecondary"
+        runWithFlicker(splitScreenSetup) {
+            withTestName { testTag }
+            repeat {
+                TEST_REPETITIONS
+            }
+            transitions {
+                splitScreenApp.launchViaIntent()
+                uiDevice.launchSplitScreen()
+                uiDevice.pressBack()
+                nonResizeableApp.launchViaIntent()
+            }
+            assertions {
+                layersTrace {
+                    dockedStackDividerIsInvisible()
+                    end("appsEndingBounds", enabled = false) {
+                        val displayBounds = WindowUtils.getDisplayBounds(rotation)
+                        this.hasVisibleRegion(nonResizeableApp.defaultWindowName, displayBounds)
+                    }
+                }
+                windowManagerTrace {
+                    end {
+                        showsAppWindow(nonResizeableApp.defaultWindowName)
+                        hidesAppWindow(splitScreenApp.defaultWindowName)
                     }
                 }
             }

@@ -116,6 +116,11 @@ public final class SoftApCapability implements Parcelable {
     private int[] mSupportedChannelListIn6g = EMPTY_INT_ARRAY;
 
     /**
+     * A list storing supported 60G channels.
+     */
+    private int[] mSupportedChannelListIn60g = EMPTY_INT_ARRAY;
+
+    /**
      * Get the maximum supported client numbers which AP resides on.
      */
     public int getMaxSupportedClients() {
@@ -147,8 +152,8 @@ public final class SoftApCapability implements Parcelable {
      * Set supported channel list in target band type.
      *
      * @param band One of the following band types:
-     * {@link SoftApConfiguation#BAND_2GHZ}, {@link SoftApConfiguation#BAND_5GHZ} or
-     * {@link SoftApConfiguation#BAND_6GHZ}.
+     * {@link SoftApConfiguation#BAND_2GHZ}, {@link SoftApConfiguation#BAND_5GHZ},
+     * {@link SoftApConfiguation#BAND_6GHZ}, or {@link SoftApConfiguation#BAND_60GHZ}.
      * @param  supportedChannelList supported channel list in target band
      * @return true if band and supportedChannelList are valid, otherwise false.
      *
@@ -168,6 +173,9 @@ public final class SoftApCapability implements Parcelable {
             case SoftApConfiguration.BAND_6GHZ:
                 mSupportedChannelListIn6g = supportedChannelList;
                 break;
+            case SoftApConfiguration.BAND_60GHZ:
+                mSupportedChannelListIn60g = supportedChannelList;
+                break;
             default:
                 throw new IllegalArgumentException("Invalid band: " + band);
         }
@@ -181,8 +189,8 @@ public final class SoftApCapability implements Parcelable {
      * {@link SoftapConfiguration.Builder#setChannel(int, int)} API.
      *
      * @param band One of the following band types:
-     * {@link SoftApConfiguation#BAND_2GHZ}, {@link SoftApConfiguation#BAND_5GHZ} or
-     * {@link SoftApConfiguation#BAND_6GHZ}.
+     * {@link SoftApConfiguation#BAND_2GHZ}, {@link SoftApConfiguation#BAND_5GHZ},
+     * {@link SoftApConfiguation#BAND_6GHZ}, {@link SoftApConfiguation#BAND_60GHZ}.
      * @return List of supported channels for the band.
      *
      * @throws IllegalArgumentException when band type is invalid.
@@ -199,6 +207,8 @@ public final class SoftApCapability implements Parcelable {
                 return mSupportedChannelListIn5g;
             case SoftApConfiguration.BAND_6GHZ:
                 return mSupportedChannelListIn6g;
+            case SoftApConfiguration.BAND_60GHZ:
+                return mSupportedChannelListIn60g;
             default:
                 throw new IllegalArgumentException("Invalid band: " + band);
         }
@@ -214,6 +224,7 @@ public final class SoftApCapability implements Parcelable {
             mSupportedChannelListIn24g = source.mSupportedChannelListIn24g;
             mSupportedChannelListIn5g = source.mSupportedChannelListIn5g;
             mSupportedChannelListIn6g = source.mSupportedChannelListIn6g;
+            mSupportedChannelListIn60g = source.mSupportedChannelListIn60g;
         }
     }
 
@@ -244,6 +255,7 @@ public final class SoftApCapability implements Parcelable {
         dest.writeIntArray(mSupportedChannelListIn24g);
         dest.writeIntArray(mSupportedChannelListIn5g);
         dest.writeIntArray(mSupportedChannelListIn6g);
+        dest.writeIntArray(mSupportedChannelListIn60g);
     }
 
     @NonNull
@@ -255,6 +267,7 @@ public final class SoftApCapability implements Parcelable {
             capability.setSupportedChannelList(SoftApConfiguration.BAND_2GHZ, in.createIntArray());
             capability.setSupportedChannelList(SoftApConfiguration.BAND_5GHZ, in.createIntArray());
             capability.setSupportedChannelList(SoftApConfiguration.BAND_6GHZ, in.createIntArray());
+            capability.setSupportedChannelList(SoftApConfiguration.BAND_60GHZ, in.createIntArray());
             return capability;
         }
 
@@ -273,6 +286,8 @@ public final class SoftApCapability implements Parcelable {
                 .append(Arrays.toString(mSupportedChannelListIn24g));
         sbuf.append("SupportedChannelListIn5g").append(Arrays.toString(mSupportedChannelListIn5g));
         sbuf.append("SupportedChannelListIn6g").append(Arrays.toString(mSupportedChannelListIn6g));
+        sbuf.append("SupportedChannelListIn60g")
+                .append(Arrays.toString(mSupportedChannelListIn60g));
         return sbuf.toString();
     }
 
@@ -285,7 +300,8 @@ public final class SoftApCapability implements Parcelable {
                 && mMaximumSupportedClientNumber == capability.mMaximumSupportedClientNumber
                 && Arrays.equals(mSupportedChannelListIn24g, capability.mSupportedChannelListIn24g)
                 && Arrays.equals(mSupportedChannelListIn5g, capability.mSupportedChannelListIn5g)
-                && Arrays.equals(mSupportedChannelListIn6g, capability.mSupportedChannelListIn6g);
+                && Arrays.equals(mSupportedChannelListIn6g, capability.mSupportedChannelListIn6g)
+                && Arrays.equals(mSupportedChannelListIn60g, capability.mSupportedChannelListIn60g);
     }
 
     @Override
@@ -293,6 +309,7 @@ public final class SoftApCapability implements Parcelable {
         return Objects.hash(mSupportedFeatures, mMaximumSupportedClientNumber,
                 Arrays.hashCode(mSupportedChannelListIn24g),
                 Arrays.hashCode(mSupportedChannelListIn5g),
-                Arrays.hashCode(mSupportedChannelListIn6g));
+                Arrays.hashCode(mSupportedChannelListIn6g),
+                Arrays.hashCode(mSupportedChannelListIn60g));
     }
 }

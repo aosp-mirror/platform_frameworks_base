@@ -105,6 +105,9 @@ import static com.android.internal.util.LatencyTracker.ACTION_ROTATE_SCREEN;
 import static com.android.server.LockGuard.INDEX_WINDOW;
 import static com.android.server.LockGuard.installLock;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static com.android.server.wm.DisplayContent.IME_TARGET_CONTROL;
+import static com.android.server.wm.DisplayContent.IME_TARGET_INPUT;
+import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
@@ -6322,20 +6325,20 @@ public class WindowManagerService extends IWindowManager.Stub
         mRoot.dumpTopFocusedDisplayId(pw);
         mRoot.forAllDisplays(dc -> {
             final int displayId = dc.getDisplayId();
-            final WindowState inputMethodTarget = dc.mInputMethodTarget;
-            final WindowState inputMethodInputTarget = dc.mInputMethodInputTarget;
-            final InsetsControlTarget inputMethodControlTarget = dc.mInputMethodControlTarget;
-            if (inputMethodTarget != null) {
-                pw.print("  mInputMethodTarget in display# "); pw.print(displayId);
-                pw.print(' '); pw.println(inputMethodTarget);
+            final InsetsControlTarget imeLayeringTarget = dc.getImeTarget(IME_TARGET_LAYERING);
+            final InsetsControlTarget imeInputTarget = dc.getImeTarget(IME_TARGET_INPUT);
+            final InsetsControlTarget imeControlTarget = dc.getImeTarget(IME_TARGET_CONTROL);
+            if (imeLayeringTarget != null) {
+                pw.print("  imeLayeringTarget in display# "); pw.print(displayId);
+                pw.print(' '); pw.println(imeLayeringTarget);
             }
-            if (inputMethodInputTarget != null) {
-                pw.print("  mInputMethodInputTarget in display# "); pw.print(displayId);
-                pw.print(' '); pw.println(inputMethodInputTarget);
+            if (imeInputTarget != null) {
+                pw.print("  imeInputTarget in display# "); pw.print(displayId);
+                pw.print(' '); pw.println(imeInputTarget);
             }
-            if (inputMethodControlTarget != null) {
-                pw.print("  inputMethodControlTarget in display# "); pw.print(displayId);
-                pw.print(' '); pw.println(inputMethodControlTarget);
+            if (imeControlTarget != null) {
+                pw.print("  imeControlTarget in display# "); pw.print(displayId);
+                pw.print(' '); pw.println(imeControlTarget);
             }
         });
         pw.print("  mInTouchMode="); pw.println(mInTouchMode);
@@ -7630,7 +7633,7 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mGlobalLock) {
                 final WindowState imeTarget = mWindowMap.get(imeTargetWindowToken);
                 if (imeTarget != null) {
-                    imeTarget.getDisplayContent().setInputMethodInputTarget(imeTarget);
+                    imeTarget.getDisplayContent().updateImeInputAndControlTarget(imeTarget);
                 }
             }
         }
@@ -7773,10 +7776,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     // requested to be hidden.
                     dc.getInsetsStateController().getImeSourceProvider().abortShowImePostLayout();
                 }
-                if (dc != null && dc.mInputMethodControlTarget != null) {
+                if (dc != null && dc.getImeTarget(IME_TARGET_CONTROL) != null) {
                     ProtoLog.d(WM_DEBUG_IME, "hideIme Control target: %s ",
-                            dc.mInputMethodControlTarget);
-                    dc.mInputMethodControlTarget.hideInsets(
+                            dc.getImeTarget(IME_TARGET_CONTROL));
+                    dc.getImeTarget(IME_TARGET_CONTROL).hideInsets(
                             WindowInsets.Type.ime(), true /* fromIme */);
                 }
                 if (dc != null) {
@@ -7900,7 +7903,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (dc == null) {
                     return null;
                 }
-                final InsetsControlTarget target = dc.mInputMethodControlTarget;
+                final InsetsControlTarget target = dc.getImeTarget(IME_TARGET_CONTROL);
                 if (target == null) {
                     return null;
                 }
@@ -7913,10 +7916,10 @@ public class WindowManagerService extends IWindowManager.Stub
         public String getImeTargetNameForLogging(int displayId) {
             synchronized (mGlobalLock) {
                 final DisplayContent dc = mRoot.getDisplayContent(displayId);
-                if (dc == null) {
+                if (dc == null || dc.getImeTarget(IME_TARGET_LAYERING) == null) {
                     return null;
                 }
-                return dc.mInputMethodTarget != null ? dc.mInputMethodTarget.getName() : null;
+                return dc.getImeTarget(IME_TARGET_LAYERING).getWindow().getName();
             }
         }
     }
