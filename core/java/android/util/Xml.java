@@ -69,7 +69,7 @@ public class Xml {
      * @hide
      */
     public static final boolean ENABLE_BINARY_DEFAULT = SystemProperties
-            .getBoolean("persist.sys.binary_xml", false);
+            .getBoolean("persist.sys.binary_xml", true);
 
     /**
      * Parses the given xml string and fires events on the given SAX handler.
