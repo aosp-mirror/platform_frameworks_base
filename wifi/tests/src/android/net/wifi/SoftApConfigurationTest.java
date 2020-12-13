@@ -519,4 +519,14 @@ public class SoftApConfigurationTest {
         }
         assertTrue(isIllegalArgumentExceptionHappened);
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testInvalidConfigWhenSet60GhzChannels() throws Exception {
+        SparseIntArray invalid_channels = new SparseIntArray();
+        invalid_channels.put(SoftApConfiguration.BAND_60GHZ, 99);
+        SoftApConfiguration config = new SoftApConfiguration.Builder()
+                .setSsid("ssid")
+                .setChannels(invalid_channels)
+                .build();
+    }
 }

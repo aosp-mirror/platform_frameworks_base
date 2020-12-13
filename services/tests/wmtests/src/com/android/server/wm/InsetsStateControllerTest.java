@@ -31,6 +31,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.server.wm.DisplayContent.IME_TARGET_INPUT;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -181,16 +182,18 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         // This can be the IME z-order target while app cannot be the IME z-order target.
         // This is also the only IME control target in this test, so IME won't be invisible caused
         // by the control-target change.
-        mDisplayContent.mInputMethodInputTarget = createWindow(null, TYPE_APPLICATION, "base");
+        mDisplayContent.updateImeInputAndControlTarget(
+                createWindow(null, TYPE_APPLICATION, "base"));
 
         // Make IME and stay visible during the test.
         mImeWindow.setHasSurface(true);
         getController().getSourceProvider(ITYPE_IME).setWindow(mImeWindow, null, null);
-        getController().onImeControlTargetChanged(mDisplayContent.mInputMethodInputTarget);
+        getController().onImeControlTargetChanged(mDisplayContent.getImeTarget(IME_TARGET_INPUT));
         final InsetsState requestedState = new InsetsState();
         requestedState.getSource(ITYPE_IME).setVisible(true);
-        mDisplayContent.mInputMethodInputTarget.updateRequestedVisibility(requestedState);
-        getController().onInsetsModified(mDisplayContent.mInputMethodInputTarget);
+        mDisplayContent.getImeTarget(IME_TARGET_INPUT).getWindow()
+                .updateRequestedVisibility(requestedState);
+        getController().onInsetsModified(mDisplayContent.getImeTarget(IME_TARGET_INPUT));
 
         // Send our spy window (app) into the system so that we can detect the invocation.
         final WindowState win = createWindow(null, TYPE_APPLICATION, "app");

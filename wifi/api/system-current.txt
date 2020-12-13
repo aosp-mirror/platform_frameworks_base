@@ -277,6 +277,7 @@ package android.net.wifi {
     method @Nullable public android.net.wifi.WifiConfiguration toWifiConfiguration();
     field public static final int BAND_2GHZ = 1; // 0x1
     field public static final int BAND_5GHZ = 2; // 0x2
+    field public static final int BAND_60GHZ = 8; // 0x8
     field public static final int BAND_6GHZ = 4; // 0x4
     field @Deprecated public static final int BAND_ANY = 7; // 0x7
     field public static final int RANDOMIZATION_NONE = 0; // 0x0
@@ -314,9 +315,13 @@ package android.net.wifi {
     field public static final int CHANNEL_WIDTH_160MHZ = 6; // 0x6
     field public static final int CHANNEL_WIDTH_20MHZ = 2; // 0x2
     field public static final int CHANNEL_WIDTH_20MHZ_NOHT = 1; // 0x1
+    field public static final int CHANNEL_WIDTH_2160MHZ = 7; // 0x7
     field public static final int CHANNEL_WIDTH_40MHZ = 3; // 0x3
+    field public static final int CHANNEL_WIDTH_4320MHZ = 8; // 0x8
+    field public static final int CHANNEL_WIDTH_6480MHZ = 9; // 0x9
     field public static final int CHANNEL_WIDTH_80MHZ = 4; // 0x4
     field public static final int CHANNEL_WIDTH_80MHZ_PLUS_MHZ = 5; // 0x5
+    field public static final int CHANNEL_WIDTH_8640MHZ = 10; // 0xa
     field public static final int CHANNEL_WIDTH_INVALID = 0; // 0x0
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.SoftApInfo> CREATOR;
   }

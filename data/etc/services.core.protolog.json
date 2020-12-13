@@ -1063,6 +1063,12 @@
       "group": "WM_DEBUG_TASKS",
       "at": "com\/android\/server\/wm\/ActivityTaskSupervisor.java"
     },
+    "-856590985": {
+      "message": "dcTarget: %s mImeRequester: %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/ImeInsetsSourceProvider.java"
+    },
     "-856025122": {
       "message": "SURFACE transparentRegionHint=%s: %s",
       "level": "INFO",
@@ -2376,12 +2382,6 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "632168013": {
-      "message": "dcTarget: %s mImeTargetFromIme: %s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_IME",
-      "at": "com\/android\/server\/wm\/ImeInsetsSourceProvider.java"
     },
     "633654009": {
       "message": "SURFACE POS (setPositionInTransaction) @ (%f,%f): %s",

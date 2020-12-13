@@ -737,7 +737,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                     || ((pinnedByCallerSet != null) && pinnedByCallerSet.contains(si.getId()));
 
             if (!getPinnedByAnyLauncher) {
-                if (si.isFloating()) {
+                if (si.isFloating() && !si.isCached()) {
                     if (!isPinnedByCaller) {
                         continue;
                     }

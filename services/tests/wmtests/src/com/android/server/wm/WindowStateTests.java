@@ -789,7 +789,7 @@ public class WindowStateTests extends WindowTestsBase {
     public void testNeedsRelativeLayeringToIme_notAttached() {
         WindowState sameTokenWindow = createWindow(null, TYPE_BASE_APPLICATION, mAppWindow.mToken,
                 "SameTokenWindow");
-        mDisplayContent.mInputMethodTarget = mAppWindow;
+        mDisplayContent.setImeLayeringTarget(mAppWindow);
         sameTokenWindow.mActivityRecord.getStack().setWindowingMode(
                 WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         assertTrue(sameTokenWindow.needsRelativeLayeringToIme());
@@ -802,7 +802,7 @@ public class WindowStateTests extends WindowTestsBase {
     public void testNeedsRelativeLayeringToIme_startingWindow() {
         WindowState sameTokenWindow = createWindow(null, TYPE_APPLICATION_STARTING,
                 mAppWindow.mToken, "SameTokenWindow");
-        mDisplayContent.mInputMethodTarget = mAppWindow;
+        mDisplayContent.setImeLayeringTarget(mAppWindow);
         sameTokenWindow.mActivityRecord.getStack().setWindowingMode(
                 WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         assertFalse(sameTokenWindow.needsRelativeLayeringToIme());
