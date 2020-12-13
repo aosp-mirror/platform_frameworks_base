@@ -62,14 +62,12 @@ public class ShellTaskOrganizer extends TaskOrganizer {
     public static final int TASK_LISTENER_TYPE_FULLSCREEN = -2;
     public static final int TASK_LISTENER_TYPE_MULTI_WINDOW = -3;
     public static final int TASK_LISTENER_TYPE_PIP = -4;
-    public static final int TASK_LISTENER_TYPE_LETTERBOX = -5;
 
     @IntDef(prefix = {"TASK_LISTENER_TYPE_"}, value = {
             TASK_LISTENER_TYPE_UNDEFINED,
             TASK_LISTENER_TYPE_FULLSCREEN,
             TASK_LISTENER_TYPE_MULTI_WINDOW,
             TASK_LISTENER_TYPE_PIP,
-            TASK_LISTENER_TYPE_LETTERBOX,
     })
     public @interface TaskListenerType {}
 
@@ -371,9 +369,7 @@ public class ShellTaskOrganizer extends TaskOrganizer {
     static @TaskListenerType int taskInfoToTaskListenerType(RunningTaskInfo runningTaskInfo) {
         switch (runningTaskInfo.getWindowingMode()) {
             case WINDOWING_MODE_FULLSCREEN:
-                return runningTaskInfo.letterboxActivityBounds != null
-                        ? TASK_LISTENER_TYPE_LETTERBOX
-                        : TASK_LISTENER_TYPE_FULLSCREEN;
+                return TASK_LISTENER_TYPE_FULLSCREEN;
             case WINDOWING_MODE_MULTI_WINDOW:
                 return TASK_LISTENER_TYPE_MULTI_WINDOW;
             case WINDOWING_MODE_PINNED:
@@ -389,8 +385,6 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         switch (type) {
             case TASK_LISTENER_TYPE_FULLSCREEN:
                 return "TASK_LISTENER_TYPE_FULLSCREEN";
-            case TASK_LISTENER_TYPE_LETTERBOX:
-                return "TASK_LISTENER_TYPE_LETTERBOX";
             case TASK_LISTENER_TYPE_MULTI_WINDOW:
                 return "TASK_LISTENER_TYPE_MULTI_WINDOW";
             case TASK_LISTENER_TYPE_PIP:

@@ -16,18 +16,14 @@
 
 package com.android.wm.shell;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
-import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_FULLSCREEN;
-import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_LETTERBOX;
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_MULTI_WINDOW;
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_PIP;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -38,7 +34,6 @@ import static org.mockito.Mockito.verify;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
-import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -47,7 +42,6 @@ import android.window.ITaskOrganizer;
 import android.window.ITaskOrganizerController;
 import android.window.TaskAppearedInfo;
 
-import androidx.annotation.Nullable;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
@@ -263,28 +257,6 @@ public class ShellTaskOrganizerTests {
         assertTrue(mwListener.appeared.contains(task2));
     }
 
-    @Test
-    public void testTaskInfoToTaskListenerType_whenLetterboxBoundsPassed_returnsLetterboxType() {
-        RunningTaskInfo taskInfo = createTaskInfo(
-                /* taskId */ 1,
-                WINDOWING_MODE_FULLSCREEN,
-                /* letterboxActivityBounds */ new Rect(1, 1, 1, 1));
-
-        assertEquals(
-                ShellTaskOrganizer.taskInfoToTaskListenerType(taskInfo),
-                TASK_LISTENER_TYPE_LETTERBOX);
-    }
-
-    @Test
-    public void testTaskInfoToTaskListenerType_whenLetterboxBoundsIsNull_returnsFullscreenType() {
-        RunningTaskInfo taskInfo = createTaskInfo(
-                /* taskId */ 1, WINDOWING_MODE_FULLSCREEN, /* letterboxActivityBounds */ null);
-
-        assertEquals(
-                ShellTaskOrganizer.taskInfoToTaskListenerType(taskInfo),
-                TASK_LISTENER_TYPE_FULLSCREEN);
-    }
-
     private static RunningTaskInfo createTaskInfo(int taskId, int windowingMode) {
         RunningTaskInfo taskInfo = new RunningTaskInfo();
         taskInfo.taskId = taskId;
@@ -292,12 +264,4 @@ public class ShellTaskOrganizerTests {
         return taskInfo;
     }
 
-    private static RunningTaskInfo createTaskInfo(
-                int taskId, int windowingMode, @Nullable Rect letterboxActivityBounds) {
-        RunningTaskInfo taskInfo = new RunningTaskInfo();
-        taskInfo.taskId = taskId;
-        taskInfo.configuration.windowConfiguration.setWindowingMode(windowingMode);
-        taskInfo.letterboxActivityBounds = Rect.copyOrNull(letterboxActivityBounds);
-        return taskInfo;
-    }
 }
