@@ -18,6 +18,7 @@ package android.util;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.SystemProperties;
 import android.system.ErrnoException;
 import android.system.Os;
 
@@ -64,8 +65,11 @@ public class Xml {
     /**
      * Feature flag: when set, {@link #resolveSerializer(OutputStream)} will
      * emit binary XML by default.
+     *
+     * @hide
      */
-    private static final boolean ENABLE_BINARY_DEFAULT = false;
+    public static final boolean ENABLE_BINARY_DEFAULT = SystemProperties
+            .getBoolean("persist.sys.binary_xml", false);
 
     /**
      * Parses the given xml string and fires events on the given SAX handler.
@@ -172,7 +176,7 @@ public class Xml {
             if (!in.markSupported()) {
                 in = new BufferedInputStream(in);
             }
-            in.mark(4);
+            in.mark(8);
             in.read(magic);
             in.reset();
         }

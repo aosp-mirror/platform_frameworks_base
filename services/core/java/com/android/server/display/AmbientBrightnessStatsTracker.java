@@ -217,7 +217,6 @@ public class AmbientBrightnessStatsTracker {
                 }
 
                 final LocalDate cutOffDate = mInjector.getLocalDate().minusDays(MAX_DAYS_TO_TRACK);
-                parser.next();
                 int outerDepth = parser.getDepth();
                 while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
                         && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {

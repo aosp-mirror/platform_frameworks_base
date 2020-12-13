@@ -622,7 +622,6 @@ public class BrightnessTracker {
 
             final long timeCutOff = mInjector.currentTimeMillis() - MAX_EVENT_AGE;
 
-            parser.next();
             int outerDepth = parser.getDepth();
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
                     && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {

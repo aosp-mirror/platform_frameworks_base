@@ -28,7 +28,7 @@ import java.util.Objects;
 /**
  * Wrapper which delegates all calls through to the given {@link XmlSerializer}.
  */
-public class XmlSerializerWrapper {
+public class XmlSerializerWrapper implements XmlSerializer {
     private final XmlSerializer mWrapped;
 
     public XmlSerializerWrapper(@NonNull XmlSerializer wrapped) {

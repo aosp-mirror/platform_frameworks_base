@@ -120,7 +120,7 @@ public final class BinaryXmlSerializer implements TypedXmlSerializer {
 
     @Override
     public void setOutput(@NonNull OutputStream os, @Nullable String encoding) throws IOException {
-        if (encoding != null && !StandardCharsets.UTF_8.name().equals(encoding)) {
+        if (encoding != null && !StandardCharsets.UTF_8.name().equalsIgnoreCase(encoding)) {
             throw new UnsupportedOperationException();
         }
 
@@ -144,7 +144,10 @@ public final class BinaryXmlSerializer implements TypedXmlSerializer {
     @Override
     public void startDocument(@Nullable String encoding, @Nullable Boolean standalone)
             throws IOException {
-        if (encoding != null && !StandardCharsets.UTF_8.name().equals(encoding)) {
+        if (encoding != null && !StandardCharsets.UTF_8.name().equalsIgnoreCase(encoding)) {
+            throw new UnsupportedOperationException();
+        }
+        if (standalone != null && !standalone) {
             throw new UnsupportedOperationException();
         }
         mOut.writeByte(START_DOCUMENT | TYPE_NULL);

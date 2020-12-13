@@ -28,7 +28,6 @@ import static org.junit.Assert.fail;
 import android.content.om.OverlayInfo;
 import android.text.TextUtils;
 import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -40,7 +39,7 @@ import org.xmlpull.v1.XmlPullParser;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.StringReader;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -287,7 +286,7 @@ public class OverlayManagerSettingsTests {
     public void testPersistEmpty() throws Exception {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         mSettings.persist(os);
-        String xml = new String(os.toByteArray(), "utf-8");
+        ByteArrayInputStream xml = new ByteArrayInputStream(os.toByteArray());
 
         assertEquals(1, countXmlTags(xml, "overlays"));
         assertEquals(0, countXmlTags(xml, "item"));
@@ -300,7 +299,7 @@ public class OverlayManagerSettingsTests {
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         mSettings.persist(os);
-        final String xml = new String(os.toByteArray(), "utf-8");
+        ByteArrayInputStream xml = new ByteArrayInputStream(os.toByteArray());
 
         assertEquals(1, countXmlTags(xml, "overlays"));
         assertEquals(2, countXmlTags(xml, "item"));
@@ -319,7 +318,7 @@ public class OverlayManagerSettingsTests {
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         mSettings.persist(os);
-        String xml = new String(os.toByteArray(), "utf-8");
+        ByteArrayInputStream xml = new ByteArrayInputStream(os.toByteArray());
 
         assertEquals(1, countXmlTags(xml, "overlays"));
         assertEquals(2, countXmlTags(xml, "item"));
@@ -338,7 +337,7 @@ public class OverlayManagerSettingsTests {
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         mSettings.persist(os);
-        String xml = new String(os.toByteArray(), "utf-8");
+        ByteArrayInputStream xml = new ByteArrayInputStream(os.toByteArray());
 
         assertEquals(1, countXmlAttributesWhere(xml, "item", "isEnabled", "true"));
     }
@@ -391,8 +390,7 @@ public class OverlayManagerSettingsTests {
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         mSettings.persist(os);
-        String xml = new String(os.toByteArray(), "utf-8");
-        ByteArrayInputStream is = new ByteArrayInputStream(xml.getBytes("utf-8"));
+        ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
         OverlayManagerSettings newSettings = new OverlayManagerSettings();
         newSettings.restore(is);
 
@@ -403,10 +401,10 @@ public class OverlayManagerSettingsTests {
         assertEquals(OVERLAY_B1, b);
     }
 
-    private int countXmlTags(String xml, String tagToLookFor) throws Exception {
+    private int countXmlTags(InputStream in, String tagToLookFor) throws Exception {
+        in.reset();
         int count = 0;
-        TypedXmlPullParser parser = Xml.newFastPullParser();
-        parser.setInput(new StringReader(xml));
+        TypedXmlPullParser parser = Xml.resolvePullParser(in);
         int event = parser.getEventType();
         while (event != XmlPullParser.END_DOCUMENT) {
             if (event == XmlPullParser.START_TAG && tagToLookFor.equals(parser.getName())) {
@@ -417,11 +415,11 @@ public class OverlayManagerSettingsTests {
         return count;
     }
 
-    private int countXmlAttributesWhere(String xml, String tag, String attr, String value)
+    private int countXmlAttributesWhere(InputStream in, String tag, String attr, String value)
             throws Exception {
+        in.reset();
         int count = 0;
-        TypedXmlPullParser parser = Xml.newFastPullParser();
-        parser.setInput(new StringReader(xml));
+        TypedXmlPullParser parser = Xml.resolvePullParser(in);
         int event = parser.getEventType();
         while (event != XmlPullParser.END_DOCUMENT) {
             if (event == XmlPullParser.START_TAG && tag.equals(parser.getName())) {

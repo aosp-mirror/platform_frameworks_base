@@ -66,7 +66,7 @@ public class BinaryXmlTest {
         final TypedXmlPullParser in = Xml.newBinaryPullParser();
         final ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
         in.setInput(is, StandardCharsets.UTF_8.name());
-        assertNext(in, START_TAG, "tag", 1);
+        assertNext(in, START_TAG, "tag");
         assertEquals(count, in.getAttributeCount());
     }
 
@@ -140,7 +140,12 @@ public class BinaryXmlTest {
                 doVerifyWrite(xml);
                 data = os.toByteArray();
             }
-            try (InputStream is = new ByteArrayInputStream(data)) {
+            try (InputStream is = new ByteArrayInputStream(data) {
+                @Override
+                public boolean markSupported() {
+                    return false;
+                }
+            }) {
                 doVerifyRead(Xml.resolvePullParser(is));
             }
         }
@@ -152,7 +157,12 @@ public class BinaryXmlTest {
                 doVerifyWrite(xml);
                 data = os.toByteArray();
             }
-            try (InputStream is = new ByteArrayInputStream(data)) {
+            try (InputStream is = new ByteArrayInputStream(data) {
+                @Override
+                public boolean markSupported() {
+                    return false;
+                }
+            }) {
                 doVerifyRead(Xml.resolvePullParser(is));
             }
         }

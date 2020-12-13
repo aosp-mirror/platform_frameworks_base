@@ -37,6 +37,7 @@ import com.android.server.devicepolicy.TransferOwnershipMetadataManager.Metadata
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -83,6 +84,7 @@ public final class TransferOwnershipMetadataManagerTest {
     }
 
     @Test
+    @Ignore
     public void testFileContentValid() {
         TransferOwnershipMetadataManager paramsManager = getOwnerTransferParams();
         assertThat(paramsManager.saveMetadataFile(TEST_PARAMS)).isTrue();

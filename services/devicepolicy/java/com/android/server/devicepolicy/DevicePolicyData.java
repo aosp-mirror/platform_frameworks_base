@@ -413,7 +413,6 @@ class DevicePolicyData {
                 policy.mPermissionPolicy = permissionPolicy;
             }
 
-            parser.next();
             int outerDepth = parser.getDepth();
             policy.mLockTaskPackages.clear();
             policy.mAdminList.clear();

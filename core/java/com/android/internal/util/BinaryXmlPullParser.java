@@ -95,8 +95,8 @@ public final class BinaryXmlPullParser implements TypedXmlPullParser {
     private Attribute[] mAttributes;
 
     @Override
-    public void setInput(InputStream is, String inputEncoding) throws XmlPullParserException {
-        if (inputEncoding != null && !StandardCharsets.UTF_8.name().equals(inputEncoding)) {
+    public void setInput(InputStream is, String encoding) throws XmlPullParserException {
+        if (encoding != null && !StandardCharsets.UTF_8.name().equalsIgnoreCase(encoding)) {
             throw new UnsupportedOperationException();
         }
 
@@ -262,19 +262,27 @@ public final class BinaryXmlPullParser implements TypedXmlPullParser {
                 break;
             }
             case XmlPullParser.START_DOCUMENT: {
+                mCurrentName = null;
+                mCurrentText = null;
+                if (mAttributeCount > 0) resetAttributes();
                 break;
             }
             case XmlPullParser.END_DOCUMENT: {
+                mCurrentName = null;
+                mCurrentText = null;
+                if (mAttributeCount > 0) resetAttributes();
                 break;
             }
             case XmlPullParser.START_TAG: {
                 mCurrentName = mIn.readInternedUTF();
-                resetAttributes();
+                mCurrentText = null;
+                if (mAttributeCount > 0) resetAttributes();
                 break;
             }
             case XmlPullParser.END_TAG: {
                 mCurrentName = mIn.readInternedUTF();
-                resetAttributes();
+                mCurrentText = null;
+                if (mAttributeCount > 0) resetAttributes();
                 break;
             }
             case XmlPullParser.TEXT:
@@ -283,12 +291,15 @@ public final class BinaryXmlPullParser implements TypedXmlPullParser {
             case XmlPullParser.COMMENT:
             case XmlPullParser.DOCDECL:
             case XmlPullParser.IGNORABLE_WHITESPACE: {
+                mCurrentName = null;
                 mCurrentText = mIn.readUTF();
+                if (mAttributeCount > 0) resetAttributes();
                 break;
             }
             case XmlPullParser.ENTITY_REF: {
                 mCurrentName = mIn.readUTF();
                 mCurrentText = resolveEntity(mCurrentName);
+                if (mAttributeCount > 0) resetAttributes();
                 break;
             }
             default: {
@@ -428,7 +439,11 @@ public final class BinaryXmlPullParser implements TypedXmlPullParser {
     @Override
     public String getAttributeValue(String namespace, String name) {
         final int index = getAttributeIndex(namespace, name);
-        return mAttributes[index].getValueString();
+        if (index != -1) {
+            return mAttributes[index].getValueString();
+        } else {
+            return null;
+        }
     }
 
     @Override
