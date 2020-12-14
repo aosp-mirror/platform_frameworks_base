@@ -30,8 +30,11 @@ import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.modules.utils.build.SdkLevel;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
@@ -46,6 +49,9 @@ import java.util.StringJoiner;
  */
 public final class RangingRequest implements Parcelable {
     private static final int MAX_PEERS = 10;
+    private static final int DEFAULT_RTT_BURST_SIZE = 8;
+    private static final int MIN_RTT_BURST_SIZE = 2;
+    private static final int MAX_RTT_BURST_SIZE = 17;
 
     /**
      * Returns the maximum number of peers to range which can be specified in a single {@code
@@ -59,12 +65,80 @@ public final class RangingRequest implements Parcelable {
         return MAX_PEERS;
     }
 
+    /**
+     * Returns the default RTT burst size used to determine the average range.
+     *
+     * @return the RTT burst size used by default
+     */
+    public static int getDefaultRttBurstSize() {
+        if (!SdkLevel.isAtLeastS()) {
+            throw new UnsupportedOperationException();
+        }
+        return DEFAULT_RTT_BURST_SIZE;
+    }
+
+    /**
+     * Returns the minimum RTT burst size that can be used to determine a average range.
+     *
+     * @return the minimum RTT burst size that can be used
+     */
+    public static int getMinRttBurstSize() {
+        if (!SdkLevel.isAtLeastS()) {
+            throw new UnsupportedOperationException();
+        }
+        return MIN_RTT_BURST_SIZE;
+    }
+
+    /**
+     * Returns the minimum RTT burst size that can be used to determine a average range.
+     *
+     * @return the maximum RTT burst size that can be used
+     */
+    public static int getMaxRttBurstSize() {
+        if (!SdkLevel.isAtLeastS()) {
+            throw new UnsupportedOperationException();
+        }
+        return MAX_RTT_BURST_SIZE;
+    }
+
     /** @hide */
     public final List<ResponderConfig> mRttPeers;
 
     /** @hide */
-    private RangingRequest(List<ResponderConfig> rttPeers) {
+    public final int mRttBurstSize;
+
+    /** @hide */
+    private RangingRequest(List<ResponderConfig> rttPeers, int rttBurstSize) {
         mRttPeers = rttPeers;
+        mRttBurstSize = rttBurstSize;
+    }
+
+    /**
+     * Returns the list of RTT capable peers.
+     *
+     * @return the list of RTT capable peers in a common system representation
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    public List<ResponderConfig> getRttPeers() {
+        if (!SdkLevel.isAtLeastS()) {
+            throw new UnsupportedOperationException();
+        }
+        return mRttPeers;
+    }
+
+    /**
+     * Returns the RTT burst size used to determine the average range.
+     *
+     * @return the RTT burst size used
+     */
+    public int getRttBurstSize() {
+        if (!SdkLevel.isAtLeastS()) {
+            throw new UnsupportedOperationException();
+        }
+        return mRttBurstSize;
     }
 
     @Override
@@ -75,6 +149,7 @@ public final class RangingRequest implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeList(mRttPeers);
+        dest.writeInt(mRttBurstSize);
     }
 
     public static final @android.annotation.NonNull Creator<RangingRequest> CREATOR = new Creator<RangingRequest>() {
@@ -85,7 +160,7 @@ public final class RangingRequest implements Parcelable {
 
         @Override
         public RangingRequest createFromParcel(Parcel in) {
-            return new RangingRequest(in.readArrayList(null));
+            return new RangingRequest(in.readArrayList(null), in.readInt());
         }
     };
 
@@ -105,10 +180,18 @@ public final class RangingRequest implements Parcelable {
             throw new IllegalArgumentException(
                     "Ranging to too many peers requested. Use getMaxPeers() API to get limit.");
         }
-
         for (ResponderConfig peer: mRttPeers) {
             if (!peer.isValid(awareSupported)) {
                 throw new IllegalArgumentException("Invalid Responder specification");
+            }
+        }
+        if (SdkLevel.isAtLeastS()) {
+            if (mRttBurstSize < getMinRttBurstSize() || mRttBurstSize > getMaxRttBurstSize()) {
+                throw new IllegalArgumentException("RTT burst size is out of range");
+            }
+        } else {
+            if (mRttBurstSize != DEFAULT_RTT_BURST_SIZE) {
+                throw new IllegalArgumentException("RTT burst size is not the default value");
             }
         }
     }
@@ -118,6 +201,32 @@ public final class RangingRequest implements Parcelable {
      */
     public static final class Builder {
         private List<ResponderConfig> mRttPeers = new ArrayList<>();
+        private int mRttBurstSize = DEFAULT_RTT_BURST_SIZE;
+
+        /**
+         * Set the RTT Burst size for the ranging request.
+         * <p>
+         * If not set, the default RTT burst size given by
+         * {@link #getDefaultRttBurstSize()} is used to determine the default value.
+         * If set, the value must be in the range {@link #getMinRttBurstSize()} and
+         * {@link #getMaxRttBurstSize()} inclusively, or a
+         * {@link java.lang.IllegalArgumentException} will be thrown.
+         *
+         * @param rttBurstSize The number of FTM packets used to estimate a range.
+         * @return The builder to facilitate chaining
+         * {@code builder.setXXX(..).setXXX(..)}.
+         */
+        @NonNull
+        public Builder setRttBurstSize(int rttBurstSize) {
+            if (!SdkLevel.isAtLeastS()) {
+                throw new UnsupportedOperationException();
+            }
+            if (rttBurstSize < MIN_RTT_BURST_SIZE || rttBurstSize > MAX_RTT_BURST_SIZE) {
+                throw new IllegalArgumentException("RTT burst size out of range.");
+            }
+            mRttBurstSize = rttBurstSize;
+            return this;
+        }
 
         /**
          * Add the device specified by the {@link ScanResult} to the list of devices with
@@ -241,7 +350,7 @@ public final class RangingRequest implements Parcelable {
          * builder.
          */
         public RangingRequest build() {
-            return new RangingRequest(mRttPeers);
+            return new RangingRequest(mRttPeers, mRttBurstSize);
         }
     }
 
@@ -257,11 +366,13 @@ public final class RangingRequest implements Parcelable {
 
         RangingRequest lhs = (RangingRequest) o;
 
-        return mRttPeers.size() == lhs.mRttPeers.size() && mRttPeers.containsAll(lhs.mRttPeers);
+        return mRttPeers.size() == lhs.mRttPeers.size()
+                && mRttPeers.containsAll(lhs.mRttPeers)
+                && mRttBurstSize == lhs.mRttBurstSize;
     }
 
     @Override
     public int hashCode() {
-        return mRttPeers.hashCode();
+        return Objects.hash(mRttPeers, mRttBurstSize);
     }
 }
