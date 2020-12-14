@@ -24,12 +24,14 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.MediaHost
 import com.android.systemui.plugins.qs.QSTile
+import com.android.systemui.plugins.qs.QSTileView
 import com.android.systemui.qs.customize.QSCustomizerController
 import com.android.systemui.qs.logging.QSLogger
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.any
@@ -59,6 +61,8 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     private lateinit var tile: QSTile
     @Mock
     private lateinit var tileLayout: TileLayout
+    @Mock
+    private lateinit var tileView: QSTileView
 
     private lateinit var controller: QuickQSPanelController
 
@@ -68,6 +72,7 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
 
         `when`(quickQSPanel.tileLayout).thenReturn(tileLayout)
         `when`(quickQSPanel.dumpableTag).thenReturn("")
+        `when`(qsTileHost.createTileView(any(), anyBoolean())).thenReturn(tileView)
 
         controller = QuickQSPanelController(
                 quickQSPanel,

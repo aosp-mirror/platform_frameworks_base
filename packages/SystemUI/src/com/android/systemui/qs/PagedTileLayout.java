@@ -70,6 +70,8 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private int mMinRows = 1;
     private int mMaxColumns = TileLayout.NO_MAX_COLUMNS;
 
+    private boolean mShowLabels = true;
+
     public PagedTileLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         mScroller = new Scroller(context, SCROLL_CUBIC);
@@ -81,6 +83,16 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         mClippingRect = new Rect();
     }
     private int mLastMaxHeight = -1;
+
+    @Override
+    public void setShowLabels(boolean show) {
+        mShowLabels = show;
+        for (TilePage p : mPages) {
+            p.setShowLabels(show);
+        }
+        mDistributeTiles = true;
+        requestLayout();
+    }
 
     public void saveInstanceState(Bundle outState) {
         outState.putInt(CURRENT_PAGE, getCurrentItem());
@@ -219,6 +231,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
                 .inflate(R.layout.qs_paged_page, this, false);
         page.setMinRows(mMinRows);
         page.setMaxColumns(mMaxColumns);
+        page.setShowLabels(mShowLabels);
         return page;
     }
 

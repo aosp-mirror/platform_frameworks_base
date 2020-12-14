@@ -20,6 +20,7 @@ import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
@@ -47,6 +48,7 @@ import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
 public class QSCustomizer extends LinearLayout {
 
     static final int MENU_RESET = Menu.FIRST;
+    static final int MENU_REMOVE_LABELS = Menu.FIRST + 1;
     static final String EXTRA_QS_CUSTOMIZING = "qs_customizing";
 
     private final QSDetailClipper mClipper;
@@ -75,6 +77,11 @@ public class QSCustomizer extends LinearLayout {
 
         toolbar.getMenu().add(Menu.NONE, MENU_RESET, 0,
                 mContext.getString(com.android.internal.R.string.reset));
+        if (Build.IS_ENG || Build.IS_USERDEBUG) {
+            // Prototype menu item
+            toolbar.getMenu().add(Menu.NONE, MENU_REMOVE_LABELS, Menu.NONE, "Remove labels")
+                    .setCheckable(true);
+        }
         toolbar.setTitle(R.string.qs_edit);
         mRecyclerView = findViewById(android.R.id.list);
         mTransparentView = findViewById(R.id.customizer_transparent_view);

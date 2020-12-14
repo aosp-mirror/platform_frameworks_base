@@ -71,6 +71,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     private float mRevealExpansion;
 
     private final QSHost.Callback mQSHostCallback = this::setTiles;
+    protected boolean mShowLabels = true;
 
     private final QSPanel.OnConfigurationChangedListener mOnConfigurationChangedListener =
             new QSPanel.OnConfigurationChangedListener() {
@@ -183,6 +184,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         final TileRecord r = new TileRecord();
         r.tile = tile;
         r.tileView = mHost.createTileView(tile, collapsedView);
+        r.tileView.setShowLabels(mShowLabels);
         mView.addTile(r);
         mRecords.add(r);
         mCachedSpecs = getTilesSpecs();
