@@ -359,6 +359,8 @@
     <string name="permdesc_receiveMms" msgid="958102423732219710">"Umožňuje aplikaci přijmout a zpracovat zprávy MMS. Znamená to, že aplikace může sledovat zprávy odeslané do vašeho zařízení nebo je smazat, aniž by se vám zobrazily."</string>
     <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"Přesměrování zpráv informačních služeb"</string>
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Umožňuje aplikaci vytvořit vazbu s modulem informačních služeb za účelem přesměrovávání přijatých zpráv informačních služeb. Výstražná upozornění informačních služeb jsou v některých oblastech odesílána za účelem varování před výjimečnými událostmi. Škodlivé aplikace mohou narušit výkon či provoz vašeho zařízení během přijímání zpráv informačních služeb."</string>
+    <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Správa probíhajících hovorů"</string>
+    <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Umožňuje aplikaci zobrazit podrobnosti o probíhajících hovorech v zařízení a tyto hovory ovládat."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"čtení zpráv informačních služeb"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Umožňuje aplikaci číst zprávy informačních služeb přijaté ve vašem zařízení. Výstražná upozornění informačních služeb jsou v některých oblastech odesílána za účelem varování před výjimečnými událostmi. Škodlivé aplikace mohou narušit výkon či provoz vašeho zařízení během přijímání zpráv informačních služeb."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"čtení zdrojů přihlášených k odběru"</string>

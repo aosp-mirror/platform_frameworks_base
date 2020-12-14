@@ -353,6 +353,8 @@
     <string name="permdesc_receiveMms" msgid="958102423732219710">"Leyfir forriti að taka á móti og vinna úr MMS-skilaboðum. Þetta þýðir að forritið getur fylgst með eða eytt skilaboðum sem send eru í tækið án þess að birta þér þau."</string>
     <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"Framsenda skilaboð frá endurvarpa"</string>
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Heimilar forritinu að bindast endurvarpseiningunni til að framsenda skilaboð frá endurvarpa þegar þau berast. Viðvaranir frá endurvarpa berast á tilteknum stöðum til að vara þig við neyðarástandi. Spilliforrit geta truflað afköst eða virkni tækisins þegar neyðarboð berast frá endurvarpa."</string>
+    <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Stjórna símtölum sem eru í gangi"</string>
+    <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Leyfir forriti að sjá upplýsingar um og stjórna símtölum sem eru í gangi í tækinu þínu."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"lesa skilaboð frá endurvarpa"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Leyfir forriti að lesa skilaboð frá endurvarpa sem tækið móttekur. Viðvaranir frá endurvarpa berast á tilteknum stöðum til að vara þig við neyðarástandi. Spilliforrit geta truflað afköst eða virkni tækisins þegar neyðarboð berast frá endurvarpa."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"lesa strauma í áskrift"</string>
