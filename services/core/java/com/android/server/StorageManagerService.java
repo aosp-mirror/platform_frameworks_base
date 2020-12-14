@@ -4612,14 +4612,7 @@ class StorageManagerService extends IStorageManager.Stub
 
                     // Create package obb and data dir if it doesn't exist.
                     int appUid = UserHandle.getUid(userId, mPmInternal.getPackage(pkg).getUid());
-                    File file = new File(packageObbDir);
-                    if (!file.exists()) {
-                        vold.setupAppDir(packageObbDir, appUid);
-                    }
-                    file = new File(packageDataDir);
-                    if (!file.exists()) {
-                        vold.setupAppDir(packageDataDir, appUid);
-                    }
+                    vold.ensureAppDirsCreated(new String[] {packageObbDir, packageDataDir}, appUid);
                 }
             } catch (ServiceManager.ServiceNotFoundException | RemoteException e) {
                 Slog.e(TAG, "Unable to create obb and data directories for " + processName,e);
