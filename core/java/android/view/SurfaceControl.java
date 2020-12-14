@@ -232,6 +232,7 @@ public final class SurfaceControl implements Parcelable {
             long nativeSurfaceControl);
     private static native void nativeRemoveJankDataListener(long nativeListener);
     private static native long nativeCreateJankDataListenerWrapper(OnJankDataListener listener);
+    private static native int nativeGetGPUContextPriority();
 
     @Nullable
     @GuardedBy("mLock")
@@ -2438,7 +2439,15 @@ public final class SurfaceControl implements Parcelable {
         nativeRemoveJankDataListener(listener.mNativePtr.get());
     }
 
-     /**
+    /**
+     * Return GPU Context priority that is set in SurfaceFlinger's Render Engine.
+     * @hide
+     */
+    public static int getGPUContextPriority() {
+        return nativeGetGPUContextPriority();
+    }
+
+    /**
      * An atomic set of changes to a set of SurfaceControl.
      */
     public static class Transaction implements Closeable, Parcelable {
