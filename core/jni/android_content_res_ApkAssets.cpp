@@ -24,6 +24,7 @@
 #include "utils/misc.h"
 #include "utils/Trace.h"
 
+#include "android_util_AssetManager_private.h"
 #include "core_jni_helpers.h"
 #include "jni.h"
 #include "nativehelper/ScopedUtfChars.h"
@@ -347,12 +348,17 @@ static jlong NativeOpenXml(JNIEnv* env, jclass /*clazz*/, jlong ptr, jstring fil
     return 0;
   }
 
+  const auto buffer = asset->getIncFsBuffer(true /* aligned */);
+  const size_t length = asset->getLength();
+  if (!buffer.convert<uint8_t>().verify(length)) {
+    jniThrowException(env, kResourcesNotFound, kIOErrorMessage);
+    return 0;
+  }
+
   // DynamicRefTable is only needed when looking up resource references. Opening an XML file
   // directly from an ApkAssets has no notion of proper resource references.
-  std::unique_ptr<ResXMLTree> xml_tree = util::make_unique<ResXMLTree>(nullptr /*dynamicRefTable*/);
-  status_t err = xml_tree->setTo(asset->getBuffer(true), asset->getLength(), true);
-  asset.reset();
-
+  auto xml_tree = util::make_unique<ResXMLTree>(nullptr /*dynamicRefTable*/);
+  status_t err = xml_tree->setTo(buffer.unsafe_ptr(), length, true);
   if (err != NO_ERROR) {
     jniThrowException(env, "java/io/FileNotFoundException", "Corrupt XML binary file");
     return 0;
