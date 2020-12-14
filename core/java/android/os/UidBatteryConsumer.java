@@ -80,16 +80,14 @@ public final class UidBatteryConsumer extends BatteryConsumer implements Parcela
     /**
      * Builder for UidBatteryConsumer.
      */
-    public static final class Builder {
-        private final PowerComponents.Builder mPowerComponentsBuilder;
+    public static final class Builder extends BaseBuilder<Builder> {
         private final BatteryStats.Uid mBatteryStatsUid;
         private final int mUid;
         private String mPackageWithHighestDrain;
 
         public Builder(int customPowerComponentCount, int customTimeComponentCount,
                 BatteryStats.Uid batteryStatsUid) {
-            mPowerComponentsBuilder = new PowerComponents.Builder(customPowerComponentCount,
-                    customTimeComponentCount);
+            super(customPowerComponentCount, customTimeComponentCount);
             mBatteryStatsUid = batteryStatsUid;
             mUid = batteryStatsUid.getUid();
         }
@@ -108,69 +106,6 @@ public final class UidBatteryConsumer extends BatteryConsumer implements Parcela
         @NonNull
         public UidBatteryConsumer build() {
             return new UidBatteryConsumer(this);
-        }
-
-        /**
-         * Sets the amount of drain attributed to the specified drain type, e.g. CPU, WiFi etc.
-         *
-         * @param componentId    The ID of the power component, e.g.
-         *                       {@link BatteryConsumer#POWER_COMPONENT_CPU}.
-         * @param componentPower Amount of consumed power in mAh.
-         */
-        @NonNull
-        public Builder setConsumedPower(@PowerComponent int componentId, double componentPower) {
-            mPowerComponentsBuilder.setConsumedPower(componentId, componentPower);
-            return this;
-        }
-
-        /**
-         * Sets the amount of drain attributed to the specified custom drain type.
-         *
-         * @param componentId    The ID of the custom power component.
-         * @param componentPower Amount of consumed power in mAh.
-         */
-        @NonNull
-        public Builder setConsumedPowerForCustomComponent(int componentId, double componentPower) {
-            mPowerComponentsBuilder.setConsumedPowerForCustomComponent(componentId, componentPower);
-            return this;
-        }
-
-        /**
-         * Sets the amount of power consumed since BatteryStats reset, mAh.
-         */
-        @NonNull
-        public Builder setConsumedPower(double consumedPower) {
-            mPowerComponentsBuilder.setTotalPowerConsumed(consumedPower);
-            return this;
-        }
-
-        /**
-         * Sets the amount of time used by the specified component, e.g. CPU, WiFi etc.
-         *
-         * @param componentId                  The ID of the time component, e.g.
-         *                                     {@link UidBatteryConsumer#TIME_COMPONENT_CPU}.
-         * @param componentUsageDurationMillis Amount of time in milliseconds.
-         */
-        @NonNull
-        public Builder setUsageDurationMillis(@UidBatteryConsumer.TimeComponent int componentId,
-                long componentUsageDurationMillis) {
-            mPowerComponentsBuilder.setUsageDurationMillis(componentId,
-                    componentUsageDurationMillis);
-            return this;
-        }
-
-        /**
-         * Sets the amount of time used by the specified custom component.
-         *
-         * @param componentId                  The ID of the custom power component.
-         * @param componentUsageDurationMillis Amount of time in milliseconds.
-         */
-        @NonNull
-        public Builder setUsageDurationForCustomComponentMillis(int componentId,
-                long componentUsageDurationMillis) {
-            mPowerComponentsBuilder.setUsageDurationForCustomComponentMillis(componentId,
-                    componentUsageDurationMillis);
-            return this;
         }
 
         /**
