@@ -34,8 +34,6 @@ android_app {
 
     compile_multilib: "both",
     jni_libs: ["libshim_jni"],
-
-    uses_libs: ["android.test.runner"],
 }
 
 genrule {
@@ -110,7 +108,6 @@ android_app {
     compile_multilib: "both",
     jni_libs: ["libshim_jni"],
 
-    uses_libs: ["android.test.runner"],
 }
 
 //##########################################################
