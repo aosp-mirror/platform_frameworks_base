@@ -26,6 +26,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,13 +41,18 @@ public class KeyguardIndicationTextViewTest extends SysuiTestCase {
     @Before
     public void setup() {
         mKeyguardIndicationTextView = new KeyguardIndicationTextView(mContext);
+        mKeyguardIndicationTextView.setAnimationsEnabled(false);
+    }
+
+    @After
+    public void tearDown() {
+        mKeyguardIndicationTextView.setAnimationsEnabled(true);
     }
 
     @Test
     public void switchIndication_null_hideIndication() {
         mKeyguardIndicationTextView.switchIndication(null /* text */);
 
-        assertThat(mKeyguardIndicationTextView.getVisibility()).isEqualTo(View.INVISIBLE);
         assertThat(mKeyguardIndicationTextView.getText()).isEqualTo("");
     }
 
@@ -54,7 +60,6 @@ public class KeyguardIndicationTextViewTest extends SysuiTestCase {
     public void switchIndication_emptyText_hideIndication() {
         mKeyguardIndicationTextView.switchIndication("" /* text */);
 
-        assertThat(mKeyguardIndicationTextView.getVisibility()).isEqualTo(View.INVISIBLE);
         assertThat(mKeyguardIndicationTextView.getText()).isEqualTo("");
     }
 
