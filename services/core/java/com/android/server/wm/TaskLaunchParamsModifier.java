@@ -126,10 +126,6 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             root = activity;
         }
 
-        // TODO: Investigate whether we can safely ignore all cases where we don't have root
-        // activity available. Note we can't know if the bounds are valid if we're not sure of the
-        // requested orientation of the root activity. Therefore if we found such a case we may need
-        // to pass the activity into this modifier in that case.
         if (root == null) {
             // There is a case that can lead us here. The caller is moving the top activity that is
             // in a task that has multiple activities to PIP mode. For that the caller is creating a
