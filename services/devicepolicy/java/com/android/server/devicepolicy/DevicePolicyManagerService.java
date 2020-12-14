@@ -940,7 +940,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
             // Persist updates if the removed package was an admin or delegate.
             if (removedAdmin || removedDelegate) {
-                saveSettingsLocked(policy.mUserHandle);
+                saveSettingsLocked(policy.mUserId);
             }
         }
         if (removedAdmin) {
@@ -8746,37 +8746,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         int userCount = mUserData.size();
         for (int u = 0; u < userCount; u++) {
             DevicePolicyData policy = getUserData(mUserData.keyAt(u));
-            pw.println();
-            pw.println("Enabled Device Admins (User " + policy.mUserHandle
-                    + ", provisioningState: " + policy.mUserProvisioningState + "):");
-            final int n = policy.mAdminList.size();
-            for (int i = 0; i < n; i++) {
-                ActiveAdmin ap = policy.mAdminList.get(i);
-                if (ap != null) {
-                    pw.increaseIndent();
-                    pw.print(ap.info.getComponent().flattenToShortString());
-                    pw.println(":");
-                    pw.increaseIndent();
-                    ap.dump(pw);
-                    pw.decreaseIndent();
-                    pw.decreaseIndent();
-                }
-            }
-            if (!policy.mRemovingAdmins.isEmpty()) {
-                pw.increaseIndent();
-                pw.println("Removing Device Admins (User " + policy.mUserHandle + "): "
-                        + policy.mRemovingAdmins);
-                pw.decreaseIndent();
-            }
-            pw.println();
-            pw.increaseIndent();
-            pw.print("mPasswordOwner="); pw.println(policy.mPasswordOwner);
-            pw.print("mUserControlDisabledPackages=");
-            pw.println(policy.mUserControlDisabledPackages);
-            pw.print("mAppsSuspended="); pw.println(policy.mAppsSuspended);
-            pw.print("mUserSetupComplete="); pw.println(policy.mUserSetupComplete);
-            pw.print("mAffiliationIds="); pw.println(policy.mAffiliationIds);
-            pw.decreaseIndent();
+            policy.dump(pw);
         }
     }
 
