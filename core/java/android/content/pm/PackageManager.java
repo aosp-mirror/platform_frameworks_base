@@ -54,6 +54,7 @@ import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Rect;
@@ -6700,6 +6701,22 @@ public abstract class PackageManager {
     @NonNull
     public abstract Resources getResourcesForApplication(@NonNull ApplicationInfo app)
             throws NameNotFoundException;
+
+    /**
+     * Retrieve the resources for an application for the provided configuration.
+     *
+     * @param app Information about the desired application.
+     * @param configuration Overridden configuration when loading the Resources
+     *
+     * @return Returns the application's Resources.
+     * @throws NameNotFoundException Thrown if the resources for the given
+     * application could not be loaded (most likely because it was uninstalled).
+     */
+    @NonNull
+    public Resources getResourcesForApplication(@NonNull ApplicationInfo app, @Nullable
+            Configuration configuration) throws NameNotFoundException {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Retrieve the resources associated with an application.  Given the full
