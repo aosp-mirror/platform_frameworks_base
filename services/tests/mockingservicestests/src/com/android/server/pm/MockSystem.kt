@@ -36,7 +36,6 @@ import android.os.SystemProperties
 import android.os.UserHandle
 import android.os.UserManager
 import android.os.incremental.IncrementalManager
-import android.permission.IPermissionManager
 import android.util.ArrayMap
 import android.util.DisplayMetrics
 import android.util.EventLog
@@ -184,7 +183,6 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         val dexManager: DexManager = mock()
         val installer: Installer = mock()
         val displayMetrics: DisplayMetrics = mock()
-        val permissionManager: IPermissionManager = mock()
     }
 
     companion object {
@@ -246,7 +244,6 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         whenever(mocks.injector.permissionManagerServiceInternal) {
             mocks.permissionManagerInternal
         }
-        whenever(mocks.injector.permissionManagerService).thenReturn(mocks.permissionManager)
         whenever(mocks.injector.incrementalManager).thenReturn(mocks.incrementalManager)
         whenever(mocks.injector.compatibility).thenReturn(mocks.platformCompat)
         whenever(mocks.injector.settings).thenReturn(mocks.settings)

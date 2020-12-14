@@ -1218,7 +1218,7 @@ public final class PermissionManager {
     private static int checkPackageNamePermissionUncached(
             String permName, String pkgName, @UserIdInt int userId) {
         try {
-            return ActivityThread.getPermissionManager().checkPermission(
+            return ActivityThread.getPackageManager().checkPermission(
                     permName, pkgName, userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
