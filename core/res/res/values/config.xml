@@ -4575,4 +4575,7 @@
 
     <!-- Package with global data query permissions for AppSearch -->
     <string name="config_globalAppSearchDataQuerierPackage" translatable="false"></string>
+
+    <!-- If true, attach the navigation bar to the app during app transition -->
+    <bool name="config_attachNavBarToAppDuringTransition">false</bool>
 </resources>
