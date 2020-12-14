@@ -42,16 +42,4 @@
     <!-- Bounds [left top right bottom] on screen for picture-in-picture (PIP) windows,
      when the PIP menu is shown in center. -->
     <string translatable="false" name="pip_menu_bounds">"596 280 1324 690"</string>
-
-    <!-- Gravity of letterboxed apps in portrait screen orientation.
-         Can be Gravity.TOP, Gravity.CENTER or Gravity.BOTTOM.
-         Any other value will result in runtime exception for a letterboxed activity.
-         Default is Gravity.TOP. -->
-    <integer name="config_letterboxPortraitGravity">0x00000030</integer>
-
-    <!-- Gravity of letterboxed apps in landscape screen orientation.
-         Can be Gravity.LEFT, Gravity.CENTER or Gravity.RIGHT.
-         Any other value will result in runtime exception for a letterboxed activity.
-         Default is Gravity.CENTER. -->
-    <integer name="config_letterboxLandscapeGravity">0x00000011</integer>
 </resources>
