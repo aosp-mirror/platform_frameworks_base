@@ -816,13 +816,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (!mShouldDrawNotificationBackground) {
             return;
         }
-        final boolean newFlowHideShelf = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.SHOW_NEW_NOTIF_DISMISS, 1 /* on by default */) == 1;
-        if (newFlowHideShelf) {
-            mBackgroundPaint.setColor(Color.TRANSPARENT);
-            invalidate();
-            return;
-        }
         // Interpolate between semi-transparent notification panel background color
         // and white AOD separator.
         float colorInterpolation = MathUtils.smoothStep(0.4f /* start */, 1f /* end */,
@@ -5569,15 +5562,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mSectionsManager.updateSectionBoundaries(reason);
     }
 
-    boolean isSilkDismissEnabled() {
-        return Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.SHOW_NEW_NOTIF_DISMISS, 1 /* enabled by default */) == 1;
-    }
-
     void updateContinuousBackgroundDrawing() {
-        if (isSilkDismissEnabled()) {
-            return;
-        }
         boolean continuousBackground = !mAmbientState.isFullyAwake()
                 && mSwipeHelper.isSwiping();
         if (continuousBackground != mContinuousBackgroundUpdate) {
