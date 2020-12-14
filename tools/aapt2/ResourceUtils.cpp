@@ -751,10 +751,12 @@ std::unique_ptr<Item> ParseBinaryResValue(const ResourceType& type, const Config
   switch (res_value.dataType) {
     case android::Res_value::TYPE_STRING: {
       const std::string str = util::GetString(src_pool, data);
-      const android::ResStringPool_span* spans = src_pool.styleAt(data);
+      auto spans_result = src_pool.styleAt(data);
 
       // Check if the string has a valid style associated with it.
-      if (spans != nullptr && spans->name.index != android::ResStringPool_span::END) {
+      if (spans_result.has_value() &&
+          (*spans_result)->name.index != android::ResStringPool_span::END) {
+        const android::ResStringPool_span* spans = spans_result->unsafe_ptr();
         StyleString style_str = {str};
         while (spans->name.index != android::ResStringPool_span::END) {
           style_str.spans.push_back(Span{util::GetString(src_pool, spans->name.index),

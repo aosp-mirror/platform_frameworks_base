@@ -98,18 +98,19 @@ Result<std::string> XmlParser::Node::GetAttributeStringValue(const std::string& 
 
   switch ((*value).dataType) {
     case Res_value::TYPE_STRING: {
-      size_t len;
-      const String16 value16(parser_.getStrings().stringAt((*value).data, &len));
-      return std::string(String8(value16).c_str());
+      if (auto str = parser_.getStrings().string8ObjectAt((*value).data)) {
+        return std::string(str->string());
+      }
+      break;
     }
     case Res_value::TYPE_INT_DEC:
     case Res_value::TYPE_INT_HEX:
     case Res_value::TYPE_INT_BOOLEAN: {
       return std::to_string((*value).data);
     }
-    default:
-      return Error(R"(Failed to convert attribute "%s" value to a string)", name.c_str());
   }
+
+  return Error(R"(Failed to convert attribute "%s" value to a string)", name.c_str());
 }
 
 Result<Res_value> XmlParser::Node::GetAttributeValue(const std::string& name) const {

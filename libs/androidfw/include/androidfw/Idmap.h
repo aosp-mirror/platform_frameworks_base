@@ -40,8 +40,8 @@ class IdmapResMap;
 class OverlayStringPool : public ResStringPool {
  public:
   virtual ~OverlayStringPool();
-  const char16_t* stringAt(size_t idx, size_t* outLen) const override;
-  const char* string8At(size_t idx, size_t* outLen) const override;
+  base::expected<StringPiece16, NullOrIOError> stringAt(size_t idx) const override;
+  base::expected<StringPiece, NullOrIOError> string8At(size_t idx) const override;
   size_t size() const override;
 
   explicit OverlayStringPool(const LoadedIdmap* loaded_idmap);

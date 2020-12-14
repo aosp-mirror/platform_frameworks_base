@@ -24,8 +24,11 @@
 #include "androidfw/AttributeFinder.h"
 
 constexpr bool kDebugStyles = false;
+#define DEBUG_LOG(...) do { if (kDebugStyles) { ALOGI(__VA_ARGS__); } } while(0)
 
 namespace android {
+
+namespace {
 
 // Java asset cookies have 0 as an invalid cookie, but TypedArray expects < 0.
 static uint32_t ApkAssetsCookieToJavaCookie(ApkAssetsCookie cookie) {
@@ -36,8 +39,7 @@ class XmlAttributeFinder
     : public BackTrackingAttributeFinder<XmlAttributeFinder, size_t> {
  public:
   explicit XmlAttributeFinder(const ResXMLParser* parser)
-      : BackTrackingAttributeFinder(
-            0, parser != nullptr ? parser->getAttributeCount() : 0),
+      : BackTrackingAttributeFinder(0, parser != nullptr ? parser->getAttributeCount() : 0),
         parser_(parser) {}
 
   inline uint32_t GetAttribute(size_t index) const {
@@ -61,136 +63,149 @@ class BagAttributeFinder
   }
 };
 
-bool ResolveAttrs(Theme* theme, uint32_t def_style_attr, uint32_t def_style_res,
-                  uint32_t* src_values, size_t src_values_length, uint32_t* attrs,
-                  size_t attrs_length, uint32_t* out_values, uint32_t* out_indices) {
-  if (kDebugStyles) {
-    ALOGI("APPLY STYLE: theme=0x%p defStyleAttr=0x%x defStyleRes=0x%x", theme,
-          def_style_attr, def_style_res);
-  }
-
-  AssetManager2* assetmanager = theme->GetAssetManager();
-  ResTable_config config;
-  Res_value value;
-
-  int indices_idx = 0;
-
-  // Load default style from attribute, if specified...
-  uint32_t def_style_flags = 0u;
-  if (def_style_attr != 0) {
-    Res_value value;
-    if (theme->GetAttribute(def_style_attr, &value, &def_style_flags) != kInvalidCookie) {
-      if (value.dataType == Res_value::TYPE_REFERENCE) {
-        def_style_res = value.data;
+base::expected<const ResolvedBag*, NullOrIOError> GetStyleBag(Theme* theme,
+                                                              uint32_t theme_attribute_resid,
+                                                              uint32_t fallback_resid,
+                                                              uint32_t* out_theme_flags) {
+  // Load the style from the attribute if specified.
+  if (theme_attribute_resid != 0U) {
+    std::optional<AssetManager2::SelectedValue> value = theme->GetAttribute(theme_attribute_resid);
+    if (value.has_value()) {
+      *out_theme_flags |= value->flags;
+      auto result = theme->GetAssetManager()->ResolveBag(*value);
+      if (result.has_value() || IsIOError(result)) {
+        return result;
       }
     }
   }
 
-  // Retrieve the default style bag, if requested.
-  const ResolvedBag* default_style_bag = nullptr;
-  if (def_style_res != 0) {
-    default_style_bag = assetmanager->GetBag(def_style_res);
-    if (default_style_bag != nullptr) {
-      def_style_flags |= default_style_bag->type_spec_flags;
+  // Fallback to loading the style from the resource id if specified.
+  if (fallback_resid != 0U) {
+    return theme->GetAssetManager()->GetBag(fallback_resid);
+  }
+
+  return base::unexpected(std::nullopt);
+}
+
+base::expected<const ResolvedBag*, NullOrIOError> GetXmlStyleBag(Theme* theme,
+                                                                 ResXMLParser* xml_parser,
+                                                                 uint32_t* out_theme_flags) {
+  if (xml_parser == nullptr) {
+    return base::unexpected(std::nullopt);
+  }
+
+  // Retrieve the style resource ID associated with the current XML tag's style attribute.
+  Res_value value;
+  const ssize_t idx = xml_parser->indexOfStyle();
+  if (idx < 0 || xml_parser->getAttributeValue(idx, &value) < 0) {
+    return base::unexpected(std::nullopt);
+  }
+
+  if (value.dataType == Res_value::TYPE_ATTRIBUTE) {
+    // Resolve the attribute with out theme.
+    if (std::optional<AssetManager2::SelectedValue> result = theme->GetAttribute(value.data)) {
+      *out_theme_flags |= result->flags;
+      return theme->GetAssetManager()->ResolveBag(*result);
     }
   }
 
-  BagAttributeFinder def_style_attr_finder(default_style_bag);
+  if (value.dataType == Res_value::TYPE_REFERENCE) {
+    return theme->GetAssetManager()->GetBag(value.data);
+  }
+
+  return base::unexpected(std::nullopt);
+}
+
+} // namespace
+
+base::expected<std::monostate, IOError> ResolveAttrs(Theme* theme, uint32_t def_style_attr,
+                                                     uint32_t def_style_res, uint32_t* src_values,
+                                                     size_t src_values_length, uint32_t* attrs,
+                                                     size_t attrs_length, uint32_t* out_values,
+                                                     uint32_t* out_indices) {
+  DEBUG_LOG("APPLY STYLE: theme=0x%p defStyleAttr=0x%x defStyleRes=0x%x", theme, def_style_attr,
+            def_style_res);
+
+  int indices_idx = 0;
+  const AssetManager2* assetmanager = theme->GetAssetManager();
+
+  // Load default style from attribute or resource id, if specified...
+  uint32_t def_style_theme_flags = 0U;
+  const auto default_style_bag = GetStyleBag(theme, def_style_attr, def_style_res,
+                                             &def_style_theme_flags);
+  if (UNLIKELY(IsIOError(default_style_bag))) {
+    return base::unexpected(GetIOError(default_style_bag.error()));
+  }
+
+  BagAttributeFinder def_style_attr_finder(default_style_bag.value_or(nullptr));
 
   // Now iterate through all of the attributes that the client has requested,
   // filling in each with whatever data we can find.
   for (size_t ii = 0; ii < attrs_length; ii++) {
     const uint32_t cur_ident = attrs[ii];
-
-    if (kDebugStyles) {
-      ALOGI("RETRIEVING ATTR 0x%08x...", cur_ident);
-    }
-
-    ApkAssetsCookie cookie = kInvalidCookie;
-    uint32_t type_set_flags = 0;
-
-    value.dataType = Res_value::TYPE_NULL;
-    value.data = Res_value::DATA_NULL_UNDEFINED;
-    config.density = 0;
+    DEBUG_LOG("RETRIEVING ATTR 0x%08x...", cur_ident);
 
     // Try to find a value for this attribute...  we prioritize values
     // coming from, first XML attributes, then XML style, then default
     // style, and finally the theme.
 
     // Retrieve the current input value if available.
+    AssetManager2::SelectedValue value{};
     if (src_values_length > 0 && src_values[ii] != 0) {
-      value.dataType = Res_value::TYPE_ATTRIBUTE;
+      value.type = Res_value::TYPE_ATTRIBUTE;
       value.data = src_values[ii];
-      if (kDebugStyles) {
-        ALOGI("-> From values: type=0x%x, data=0x%08x", value.dataType, value.data);
-      }
+      DEBUG_LOG("-> From values: type=0x%x, data=0x%08x", value.type, value.data);
     } else {
       const ResolvedBag::Entry* const entry = def_style_attr_finder.Find(cur_ident);
       if (entry != def_style_attr_finder.end()) {
-        cookie = entry->cookie;
-        type_set_flags = def_style_flags;
-        value = entry->value;
-        if (kDebugStyles) {
-          ALOGI("-> From def style: type=0x%x, data=0x%08x", value.dataType, value.data);
-        }
+        value = AssetManager2::SelectedValue(*default_style_bag, *entry);
+        value.flags |= def_style_theme_flags;
+        DEBUG_LOG("-> From def style: type=0x%x, data=0x%08x", value.type, value.data);
       }
     }
 
-    uint32_t resid = 0;
-    if (value.dataType != Res_value::TYPE_NULL) {
+    if (value.type != Res_value::TYPE_NULL) {
       // Take care of resolving the found resource to its final value.
-      ApkAssetsCookie new_cookie =
-          theme->ResolveAttributeReference(cookie, &value, &config, &type_set_flags, &resid);
-      if (new_cookie != kInvalidCookie) {
-        cookie = new_cookie;
+      const auto result = theme->ResolveAttributeReference(value);
+      if (UNLIKELY(IsIOError(result))) {
+        return base::unexpected(GetIOError(result.error()));
       }
-      if (kDebugStyles) {
-        ALOGI("-> Resolved attr: type=0x%x, data=0x%08x", value.dataType, value.data);
-      }
+      DEBUG_LOG("-> Resolved attr: type=0x%x, data=0x%08x", value.type, value.data);
     } else if (value.data != Res_value::DATA_NULL_EMPTY) {
       // If we still don't have a value for this attribute, try to find it in the theme!
-      ApkAssetsCookie new_cookie = theme->GetAttribute(cur_ident, &value, &type_set_flags);
-      if (new_cookie != kInvalidCookie) {
-        if (kDebugStyles) {
-          ALOGI("-> From theme: type=0x%x, data=0x%08x", value.dataType, value.data);
+      if (auto attr_value = theme->GetAttribute(cur_ident)) {
+        value = *attr_value;
+        DEBUG_LOG("-> From theme: type=0x%x, data=0x%08x", value.type, value.data);
+
+        const auto result = assetmanager->ResolveReference(value, true /* cache_value */);
+        if (UNLIKELY(IsIOError(result))) {
+          return base::unexpected(GetIOError(result.error()));
         }
-        new_cookie =
-            assetmanager->ResolveReference(new_cookie, &value, &config, &type_set_flags, &resid);
-        if (new_cookie != kInvalidCookie) {
-          cookie = new_cookie;
-        }
-        if (kDebugStyles) {
-          ALOGI("-> Resolved theme: type=0x%x, data=0x%08x", value.dataType, value.data);
-        }
+        DEBUG_LOG("-> Resolved theme: type=0x%x, data=0x%08x", value.type, value.data);
       }
     }
 
     // Deal with the special @null value -- it turns back to TYPE_NULL.
-    if (value.dataType == Res_value::TYPE_REFERENCE && value.data == 0) {
-      if (kDebugStyles) {
-        ALOGI("-> Setting to @null!");
-      }
-      value.dataType = Res_value::TYPE_NULL;
+    if (value.type == Res_value::TYPE_REFERENCE && value.data == 0) {
+      DEBUG_LOG("-> Setting to @null!");
+      value.type = Res_value::TYPE_NULL;
       value.data = Res_value::DATA_NULL_UNDEFINED;
-      cookie = kInvalidCookie;
+      value.cookie = kInvalidCookie;
     }
 
-    if (kDebugStyles) {
-      ALOGI("Attribute 0x%08x: type=0x%x, data=0x%08x", cur_ident, value.dataType, value.data);
-    }
+    DEBUG_LOG("Attribute 0x%08x: type=0x%x, data=0x%08x", cur_ident, value.type, value.data);
 
     // Write the final value back to Java.
-    out_values[STYLE_TYPE] = value.dataType;
+    out_values[STYLE_TYPE] = value.type;
     out_values[STYLE_DATA] = value.data;
-    out_values[STYLE_ASSET_COOKIE] = ApkAssetsCookieToJavaCookie(cookie);
-    out_values[STYLE_RESOURCE_ID] = resid;
-    out_values[STYLE_CHANGING_CONFIGURATIONS] = type_set_flags;
-    out_values[STYLE_DENSITY] = config.density;
+    out_values[STYLE_ASSET_COOKIE] = ApkAssetsCookieToJavaCookie(value.cookie);
+    out_values[STYLE_RESOURCE_ID] = value.resid;
+    out_values[STYLE_CHANGING_CONFIGURATIONS] = value.flags;
+    out_values[STYLE_DENSITY] = value.config.density;
 
     if (out_indices != nullptr &&
-        (value.dataType != Res_value::TYPE_NULL || value.data == Res_value::DATA_NULL_EMPTY)) {
-      indices_idx++;
-      out_indices[indices_idx] = ii;
+        (value.type != Res_value::TYPE_NULL || value.data == Res_value::DATA_NULL_EMPTY)) {
+      out_indices[++indices_idx] = ii;
     }
 
     out_values += STYLE_NUM_ENTRIES;
@@ -199,93 +214,46 @@ bool ResolveAttrs(Theme* theme, uint32_t def_style_attr, uint32_t def_style_res,
   if (out_indices != nullptr) {
     out_indices[0] = indices_idx;
   }
-  return true;
+  return {};
 }
 
-void ApplyStyle(Theme* theme, ResXMLParser* xml_parser, uint32_t def_style_attr,
-                uint32_t def_style_resid, const uint32_t* attrs, size_t attrs_length,
-                uint32_t* out_values, uint32_t* out_indices) {
-  if (kDebugStyles) {
-    ALOGI("APPLY STYLE: theme=0x%p defStyleAttr=0x%x defStyleRes=0x%x xml=0x%p", theme,
-          def_style_attr, def_style_resid, xml_parser);
-  }
-
-  AssetManager2* assetmanager = theme->GetAssetManager();
-  ResTable_config config;
-  Res_value value;
+base::expected<std::monostate, IOError> ApplyStyle(Theme* theme, ResXMLParser* xml_parser,
+                                                   uint32_t def_style_attr,
+                                                   uint32_t def_style_resid,
+                                                   const uint32_t* attrs, size_t attrs_length,
+                                                   uint32_t* out_values, uint32_t* out_indices) {
+  DEBUG_LOG("APPLY STYLE: theme=0x%p defStyleAttr=0x%x defStyleRes=0x%x xml=0x%p", theme,
+            def_style_attr, def_style_resid, xml_parser);
 
   int indices_idx = 0;
+  const AssetManager2* assetmanager = theme->GetAssetManager();
 
   // Load default style from attribute, if specified...
-  uint32_t def_style_flags = 0u;
-  if (def_style_attr != 0) {
-    Res_value value;
-    if (theme->GetAttribute(def_style_attr, &value, &def_style_flags) != kInvalidCookie) {
-      if (value.dataType == Res_value::TYPE_REFERENCE) {
-        def_style_resid = value.data;
-      }
-    }
+  uint32_t def_style_theme_flags = 0U;
+  const auto default_style_bag = GetStyleBag(theme, def_style_attr, def_style_resid,
+                                             &def_style_theme_flags);
+  if (IsIOError(default_style_bag)) {
+    return base::unexpected(GetIOError(default_style_bag.error()));
   }
 
   // Retrieve the style resource ID associated with the current XML tag's style attribute.
-  uint32_t style_resid = 0u;
-  uint32_t style_flags = 0u;
-  if (xml_parser != nullptr) {
-    ssize_t idx = xml_parser->indexOfStyle();
-    if (idx >= 0 && xml_parser->getAttributeValue(idx, &value) >= 0) {
-      if (value.dataType == value.TYPE_ATTRIBUTE) {
-        // Resolve the attribute with out theme.
-        if (theme->GetAttribute(value.data, &value, &style_flags) == kInvalidCookie) {
-          value.dataType = Res_value::TYPE_NULL;
-        }
-      }
-
-      if (value.dataType == value.TYPE_REFERENCE) {
-        style_resid = value.data;
-      }
-    }
+  uint32_t xml_style_theme_flags = 0U;
+  const auto xml_style_bag = GetXmlStyleBag(theme, xml_parser, &def_style_theme_flags);
+  if (IsIOError(xml_style_bag)) {
+    return base::unexpected(GetIOError(xml_style_bag.error()));
   }
 
-  // Retrieve the default style bag, if requested.
-  const ResolvedBag* default_style_bag = nullptr;
-  if (def_style_resid != 0) {
-    default_style_bag = assetmanager->GetBag(def_style_resid);
-    if (default_style_bag != nullptr) {
-      def_style_flags |= default_style_bag->type_spec_flags;
-    }
-  }
-
-  BagAttributeFinder def_style_attr_finder(default_style_bag);
-
-  // Retrieve the style class bag, if requested.
-  const ResolvedBag* xml_style_bag = nullptr;
-  if (style_resid != 0) {
-    xml_style_bag = assetmanager->GetBag(style_resid);
-    if (xml_style_bag != nullptr) {
-      style_flags |= xml_style_bag->type_spec_flags;
-    }
-  }
-
-  BagAttributeFinder xml_style_attr_finder(xml_style_bag);
-
-  // Retrieve the XML attributes, if requested.
+  BagAttributeFinder def_style_attr_finder(default_style_bag.value_or(nullptr));
+  BagAttributeFinder xml_style_attr_finder(xml_style_bag.value_or(nullptr));
   XmlAttributeFinder xml_attr_finder(xml_parser);
 
   // Now iterate through all of the attributes that the client has requested,
   // filling in each with whatever data we can find.
   for (size_t ii = 0; ii < attrs_length; ii++) {
     const uint32_t cur_ident = attrs[ii];
+    DEBUG_LOG("RETRIEVING ATTR 0x%08x...", cur_ident);
 
-    if (kDebugStyles) {
-      ALOGI("RETRIEVING ATTR 0x%08x...", cur_ident);
-    }
-
-    ApkAssetsCookie cookie = kInvalidCookie;
-    uint32_t type_set_flags = 0u;
-
-    value.dataType = Res_value::TYPE_NULL;
-    value.data = Res_value::DATA_NULL_UNDEFINED;
-    config.density = 0;
+    AssetManager2::SelectedValue value{};
     uint32_t value_source_resid = 0;
 
     // Try to find a value for this attribute...  we prioritize values
@@ -296,178 +264,152 @@ void ApplyStyle(Theme* theme, ResXMLParser* xml_parser, uint32_t def_style_attr,
     const size_t xml_attr_idx = xml_attr_finder.Find(cur_ident);
     if (xml_attr_idx != xml_attr_finder.end()) {
       // We found the attribute we were looking for.
-      xml_parser->getAttributeValue(xml_attr_idx, &value);
-      if (kDebugStyles) {
-        ALOGI("-> From XML: type=0x%x, data=0x%08x", value.dataType, value.data);
-      }
+      Res_value attribute_value{};
+      xml_parser->getAttributeValue(xml_attr_idx, &attribute_value);
+      value.type = attribute_value.dataType;
+      value.data = attribute_value.data;
       value_source_resid = xml_parser->getSourceResourceId();
+      DEBUG_LOG("-> From XML: type=0x%x, data=0x%08x", value.type, value.data);
     }
 
-    if (value.dataType == Res_value::TYPE_NULL && value.data != Res_value::DATA_NULL_EMPTY) {
+    if (value.type == Res_value::TYPE_NULL && value.data != Res_value::DATA_NULL_EMPTY) {
       // Walk through the style class values looking for the requested attribute.
       const ResolvedBag::Entry* entry = xml_style_attr_finder.Find(cur_ident);
       if (entry != xml_style_attr_finder.end()) {
-        // We found the attribute we were looking for.
-        cookie = entry->cookie;
-        type_set_flags = style_flags;
-        value = entry->value;
+        value = AssetManager2::SelectedValue(*xml_style_bag, *entry);
+        value.flags |= xml_style_theme_flags;
         value_source_resid = entry->style;
-        if (kDebugStyles) {
-          ALOGI("-> From style: type=0x%x, data=0x%08x, style=0x%08x", value.dataType, value.data,
-              entry->style);
-        }
+        DEBUG_LOG("-> From style: type=0x%x, data=0x%08x, style=0x%08x", value.type, value.data,
+                  value_source_resid);
       }
     }
 
-    if (value.dataType == Res_value::TYPE_NULL && value.data != Res_value::DATA_NULL_EMPTY) {
+    if (value.type == Res_value::TYPE_NULL && value.data != Res_value::DATA_NULL_EMPTY) {
       // Walk through the default style values looking for the requested attribute.
       const ResolvedBag::Entry* entry = def_style_attr_finder.Find(cur_ident);
       if (entry != def_style_attr_finder.end()) {
-        // We found the attribute we were looking for.
-        cookie = entry->cookie;
-        type_set_flags = def_style_flags;
-        value = entry->value;
-        if (kDebugStyles) {
-          ALOGI("-> From def style: type=0x%x, data=0x%08x, style=0x%08x", value.dataType, value.data,
-              entry->style);
-        }
+        value = AssetManager2::SelectedValue(*default_style_bag, *entry);
+        value.flags |= def_style_theme_flags;
         value_source_resid = entry->style;
+        DEBUG_LOG("-> From def style: type=0x%x, data=0x%08x, style=0x%08x", value.type, value.data,
+                  entry->style);
       }
     }
 
-    uint32_t resid = 0u;
-    if (value.dataType != Res_value::TYPE_NULL) {
+    if (value.type != Res_value::TYPE_NULL) {
       // Take care of resolving the found resource to its final value.
-      ApkAssetsCookie new_cookie =
-          theme->ResolveAttributeReference(cookie, &value, &config, &type_set_flags, &resid);
-      if (new_cookie != kInvalidCookie) {
-        cookie = new_cookie;
+      auto result = theme->ResolveAttributeReference(value);
+      if (UNLIKELY(IsIOError(result))) {
+        return base::unexpected(GetIOError(result.error()));
       }
-
-      if (kDebugStyles) {
-        ALOGI("-> Resolved attr: type=0x%x, data=0x%08x", value.dataType, value.data);
-      }
+      DEBUG_LOG("-> Resolved attr: type=0x%x, data=0x%08x", value.type, value.data);
     } else if (value.data != Res_value::DATA_NULL_EMPTY) {
       // If we still don't have a value for this attribute, try to find it in the theme!
-      ApkAssetsCookie new_cookie = theme->GetAttribute(cur_ident, &value, &type_set_flags);
-      // TODO: set value_source_resid for the style in the theme that was used.
-      if (new_cookie != kInvalidCookie) {
-        if (kDebugStyles) {
-          ALOGI("-> From theme: type=0x%x, data=0x%08x", value.dataType, value.data);
-        }
-        new_cookie =
-            assetmanager->ResolveReference(new_cookie, &value, &config, &type_set_flags, &resid);
-        if (new_cookie != kInvalidCookie) {
-          cookie = new_cookie;
-        }
+      if (auto attr_value = theme->GetAttribute(cur_ident)) {
+        value = *attr_value;
+        DEBUG_LOG("-> From theme: type=0x%x, data=0x%08x", value.type, value.data);
 
-        if (kDebugStyles) {
-          ALOGI("-> Resolved theme: type=0x%x, data=0x%08x", value.dataType, value.data);
+        auto result = assetmanager->ResolveReference(value, true /* cache_value */);
+        if (UNLIKELY(IsIOError(result))) {
+          return base::unexpected(GetIOError(result.error()));
         }
+        DEBUG_LOG("-> Resolved theme: type=0x%x, data=0x%08x", value.type, value.data);
+        // TODO: set value_source_resid for the style in the theme that was used.
       }
     }
 
     // Deal with the special @null value -- it turns back to TYPE_NULL.
-    if (value.dataType == Res_value::TYPE_REFERENCE && value.data == 0) {
-      if (kDebugStyles) {
-        ALOGI("-> Setting to @null!");
-      }
-      value.dataType = Res_value::TYPE_NULL;
+    if (value.type == Res_value::TYPE_REFERENCE && value.data == 0U) {
+      DEBUG_LOG("-> Setting to @null!");
+      value.type = Res_value::TYPE_NULL;
       value.data = Res_value::DATA_NULL_UNDEFINED;
-      cookie = kInvalidCookie;
+      value.cookie = kInvalidCookie;
     }
 
-    if (kDebugStyles) {
-      ALOGI("Attribute 0x%08x: type=0x%x, data=0x%08x", cur_ident, value.dataType, value.data);
-    }
+    DEBUG_LOG("Attribute 0x%08x: type=0x%x, data=0x%08x", cur_ident, value.type, value.data);
 
     // Write the final value back to Java.
-    out_values[STYLE_TYPE] = value.dataType;
+    out_values[STYLE_TYPE] = value.type;
     out_values[STYLE_DATA] = value.data;
-    out_values[STYLE_ASSET_COOKIE] = ApkAssetsCookieToJavaCookie(cookie);
-    out_values[STYLE_RESOURCE_ID] = resid;
-    out_values[STYLE_CHANGING_CONFIGURATIONS] = type_set_flags;
-    out_values[STYLE_DENSITY] = config.density;
+    out_values[STYLE_ASSET_COOKIE] = ApkAssetsCookieToJavaCookie(value.cookie);
+    out_values[STYLE_RESOURCE_ID] = value.resid;
+    out_values[STYLE_CHANGING_CONFIGURATIONS] = value.flags;
+    out_values[STYLE_DENSITY] = value.config.density;
     out_values[STYLE_SOURCE_RESOURCE_ID] = value_source_resid;
 
-    if (value.dataType != Res_value::TYPE_NULL || value.data == Res_value::DATA_NULL_EMPTY) {
-      indices_idx++;
-
+    if (value.type != Res_value::TYPE_NULL || value.data == Res_value::DATA_NULL_EMPTY) {
       // out_indices must NOT be nullptr.
-      out_indices[indices_idx] = ii;
+      out_indices[++indices_idx] = ii;
     }
     out_values += STYLE_NUM_ENTRIES;
   }
 
   // out_indices must NOT be nullptr.
   out_indices[0] = indices_idx;
+  return {};
 }
 
-bool RetrieveAttributes(AssetManager2* assetmanager, ResXMLParser* xml_parser, uint32_t* attrs,
-                        size_t attrs_length, uint32_t* out_values, uint32_t* out_indices) {
-  ResTable_config config;
-  Res_value value;
-
+base::expected<std::monostate, IOError> RetrieveAttributes(AssetManager2* assetmanager,
+                                                           ResXMLParser* xml_parser,
+                                                           uint32_t* attrs,
+                                                           size_t attrs_length,
+                                                           uint32_t* out_values,
+                                                           uint32_t* out_indices) {
   int indices_idx = 0;
 
   // Retrieve the XML attributes, if requested.
-  const size_t xml_attr_count = xml_parser->getAttributeCount();
   size_t ix = 0;
+  const size_t xml_attr_count = xml_parser->getAttributeCount();
   uint32_t cur_xml_attr = xml_parser->getAttributeNameResID(ix);
 
   // Now iterate through all of the attributes that the client has requested,
   // filling in each with whatever data we can find.
   for (size_t ii = 0; ii < attrs_length; ii++) {
     const uint32_t cur_ident = attrs[ii];
-    ApkAssetsCookie cookie = kInvalidCookie;
-    uint32_t type_set_flags = 0u;
-
-    value.dataType = Res_value::TYPE_NULL;
-    value.data = Res_value::DATA_NULL_UNDEFINED;
-    config.density = 0;
+     AssetManager2::SelectedValue value{};
 
     // Try to find a value for this attribute...
     // Skip through XML attributes until the end or the next possible match.
     while (ix < xml_attr_count && cur_ident > cur_xml_attr) {
-      ix++;
-      cur_xml_attr = xml_parser->getAttributeNameResID(ix);
-    }
-    // Retrieve the current XML attribute if it matches, and step to next.
-    if (ix < xml_attr_count && cur_ident == cur_xml_attr) {
-      xml_parser->getAttributeValue(ix, &value);
-      ix++;
-      cur_xml_attr = xml_parser->getAttributeNameResID(ix);
+      cur_xml_attr = xml_parser->getAttributeNameResID(++ix);
     }
 
-    uint32_t resid = 0u;
-    if (value.dataType != Res_value::TYPE_NULL) {
+    // Retrieve the current XML attribute if it matches, and step to next.
+    if (ix < xml_attr_count && cur_ident == cur_xml_attr) {
+      Res_value attribute_value{};
+      xml_parser->getAttributeValue(ix, &attribute_value);
+      value.type = attribute_value.dataType;
+      value.data = attribute_value.data;
+      cur_xml_attr = xml_parser->getAttributeNameResID(++ix);
+    }
+
+    if (value.type != Res_value::TYPE_NULL) {
       // Take care of resolving the found resource to its final value.
-      ApkAssetsCookie new_cookie =
-          assetmanager->ResolveReference(cookie, &value, &config, &type_set_flags, &resid);
-      if (new_cookie != kInvalidCookie) {
-        cookie = new_cookie;
+      auto result = assetmanager->ResolveReference(value);
+      if (UNLIKELY(IsIOError(result))) {
+        return base::unexpected(GetIOError(result.error()));
       }
     }
 
     // Deal with the special @null value -- it turns back to TYPE_NULL.
-    if (value.dataType == Res_value::TYPE_REFERENCE && value.data == 0) {
-      value.dataType = Res_value::TYPE_NULL;
+    if (value.type == Res_value::TYPE_REFERENCE && value.data == 0U) {
+      value.type = Res_value::TYPE_NULL;
       value.data = Res_value::DATA_NULL_UNDEFINED;
-      cookie = kInvalidCookie;
+      value.cookie = kInvalidCookie;
     }
 
     // Write the final value back to Java.
-    out_values[STYLE_TYPE] = value.dataType;
+    out_values[STYLE_TYPE] = value.type;
     out_values[STYLE_DATA] = value.data;
-    out_values[STYLE_ASSET_COOKIE] = ApkAssetsCookieToJavaCookie(cookie);
-    out_values[STYLE_RESOURCE_ID] = resid;
-    out_values[STYLE_CHANGING_CONFIGURATIONS] = type_set_flags;
-    out_values[STYLE_DENSITY] = config.density;
+    out_values[STYLE_ASSET_COOKIE] = ApkAssetsCookieToJavaCookie(value.cookie);
+    out_values[STYLE_RESOURCE_ID] = value.resid;
+    out_values[STYLE_CHANGING_CONFIGURATIONS] = value.flags;
+    out_values[STYLE_DENSITY] = value.config.density;
 
     if (out_indices != nullptr &&
-        (value.dataType != Res_value::TYPE_NULL || value.data == Res_value::DATA_NULL_EMPTY)) {
-      indices_idx++;
-      out_indices[indices_idx] = ii;
+        (value.type != Res_value::TYPE_NULL ||
+         value.data == Res_value::DATA_NULL_EMPTY)) {
+      out_indices[++indices_idx] = ii;
     }
 
     out_values += STYLE_NUM_ENTRIES;
@@ -476,7 +418,7 @@ bool RetrieveAttributes(AssetManager2* assetmanager, ResXMLParser* xml_parser, u
   if (out_indices != nullptr) {
     out_indices[0] = indices_idx;
   }
-  return true;
+  return {};
 }
 
 }  // namespace android
