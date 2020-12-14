@@ -15,20 +15,15 @@
  */
 
 package com.android.server.locksettings;
-
 import static android.os.UserHandle.USER_SYSTEM;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.pm.UserInfo;
-import android.hardware.rebootescrow.IRebootEscrow;
-import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.os.ServiceSpecificException;
 import android.os.SystemClock;
 import android.os.UserManager;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.util.Slog;
 
@@ -44,7 +39,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.NoSuchElementException;
 
 class RebootEscrowManager {
     private static final String TAG = "RebootEscrowManager";
@@ -116,8 +110,24 @@ class RebootEscrowManager {
     static class Injector {
         protected Context mContext;
 
+        private final RebootEscrowProviderInterface mRebootEscrowProvider;
+
         Injector(Context context) {
             mContext = context;
+            RebootEscrowProviderInterface rebootEscrowProvider = null;
+            // TODO(xunchang) add implementation for server based ror.
+            if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_OTA,
+                    "server_based_ror_enabled", false)) {
+                Slog.e(TAG, "Server based ror isn't implemented yet.");
+            } else {
+                rebootEscrowProvider = new RebootEscrowProviderHalImpl();
+            }
+
+            if (rebootEscrowProvider != null && rebootEscrowProvider.hasRebootEscrowSupport()) {
+                mRebootEscrowProvider = rebootEscrowProvider;
+            } else {
+                mRebootEscrowProvider = null;
+            }
         }
 
         public Context getContext() {
@@ -128,15 +138,8 @@ class RebootEscrowManager {
             return (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         }
 
-        @Nullable
-        public IRebootEscrow getRebootEscrow() {
-            try {
-                return IRebootEscrow.Stub.asInterface(ServiceManager.getService(
-                        "android.hardware.rebootescrow.IRebootEscrow/default"));
-            } catch (NoSuchElementException e) {
-                Slog.i(TAG, "Device doesn't implement RebootEscrow HAL");
-            }
-            return null;
+        public RebootEscrowProviderInterface getRebootEscrowProvider() {
+            return mRebootEscrowProvider;
         }
 
         public int getBootCount() {
@@ -210,45 +213,18 @@ class RebootEscrowManager {
     }
 
     private RebootEscrowKey getAndClearRebootEscrowKey() {
-        IRebootEscrow rebootEscrow = mInjector.getRebootEscrow();
-        if (rebootEscrow == null) {
-            Slog.w(TAG, "Had reboot escrow data for users, but RebootEscrow HAL is unavailable");
+        RebootEscrowProviderInterface rebootEscrowProvider = mInjector.getRebootEscrowProvider();
+        if (rebootEscrowProvider == null) {
+            Slog.w(TAG,
+                    "Had reboot escrow data for users, but RebootEscrowProvider is unavailable");
             return null;
         }
 
-        try {
-            byte[] escrowKeyBytes = rebootEscrow.retrieveKey();
-            if (escrowKeyBytes == null) {
-                Slog.w(TAG, "Had reboot escrow data for users, but could not retrieve key");
-                return null;
-            } else if (escrowKeyBytes.length != 32) {
-                Slog.e(TAG, "IRebootEscrow returned key of incorrect size "
-                        + escrowKeyBytes.length);
-                return null;
-            }
-
-            // Make sure we didn't get the null key.
-            int zero = 0;
-            for (int i = 0; i < escrowKeyBytes.length; i++) {
-                zero |= escrowKeyBytes[i];
-            }
-            if (zero == 0) {
-                Slog.w(TAG, "IRebootEscrow returned an all-zeroes key");
-                return null;
-            }
-
-            // Overwrite the existing key with the null key
-            rebootEscrow.storeKey(new byte[32]);
-
+        RebootEscrowKey key = rebootEscrowProvider.getAndClearRebootEscrowKey(null);
+        if (key != null) {
             mEventLog.addEntry(RebootEscrowEvent.RETRIEVED_STORED_KEK);
-            return RebootEscrowKey.fromKeyBytes(escrowKeyBytes);
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Could not retrieve escrow data");
-            return null;
-        } catch (ServiceSpecificException e) {
-            Slog.w(TAG, "Got service-specific exception: " + e.errorCode);
-            return null;
         }
+        return key;
     }
 
     private boolean restoreRebootEscrowForUser(@UserIdInt int userId, RebootEscrowKey key) {
@@ -279,9 +255,9 @@ class RebootEscrowManager {
             return;
         }
 
-        IRebootEscrow rebootEscrow = mInjector.getRebootEscrow();
-        if (rebootEscrow == null) {
-            Slog.w(TAG, "Reboot escrow requested, but RebootEscrow HAL is unavailable");
+        if (mInjector.getRebootEscrowProvider() == null) {
+            Slog.w(TAG,
+                    "Had reboot escrow data for users, but RebootEscrowProvider is unavailable");
             return;
         }
 
@@ -293,6 +269,7 @@ class RebootEscrowManager {
 
         final RebootEscrowData escrowData;
         try {
+            // TODO(xunchang) further wrap the escrowData with a key from keystore.
             escrowData = RebootEscrowData.fromSyntheticPassword(escrowKey, spVersion,
                     syntheticPassword);
         } catch (IOException e) {
@@ -330,18 +307,16 @@ class RebootEscrowManager {
         mRebootEscrowWanted = false;
         setRebootEscrowReady(false);
 
-        IRebootEscrow rebootEscrow = mInjector.getRebootEscrow();
-        if (rebootEscrow == null) {
+
+        RebootEscrowProviderInterface rebootEscrowProvider = mInjector.getRebootEscrowProvider();
+        if (rebootEscrowProvider == null) {
+            Slog.w(TAG,
+                    "Had reboot escrow data for users, but RebootEscrowProvider is unavailable");
             return;
         }
 
         mStorage.removeKey(REBOOT_ESCROW_ARMED_KEY, USER_SYSTEM);
-
-        try {
-            rebootEscrow.storeKey(new byte[32]);
-        } catch (RemoteException | ServiceSpecificException e) {
-            Slog.w(TAG, "Could not call RebootEscrow HAL to shred key");
-        }
+        rebootEscrowProvider.clearRebootEscrowKey();
 
         List<UserInfo> users = mUserManager.getUsers();
         for (UserInfo user : users) {
@@ -356,9 +331,10 @@ class RebootEscrowManager {
             return false;
         }
 
-        IRebootEscrow rebootEscrow = mInjector.getRebootEscrow();
-        if (rebootEscrow == null) {
-            Slog.w(TAG, "Escrow marked as ready, but RebootEscrow HAL is unavailable");
+        RebootEscrowProviderInterface rebootEscrowProvider = mInjector.getRebootEscrowProvider();
+        if (rebootEscrowProvider == null) {
+            Slog.w(TAG,
+                    "Had reboot escrow data for users, but RebootEscrowProvider is unavailable");
             return false;
         }
 
@@ -372,15 +348,7 @@ class RebootEscrowManager {
             return false;
         }
 
-        boolean armedRebootEscrow = false;
-        try {
-            rebootEscrow.storeKey(escrowKey.getKeyBytes());
-            armedRebootEscrow = true;
-            Slog.i(TAG, "Reboot escrow key stored with RebootEscrow HAL");
-        } catch (RemoteException | ServiceSpecificException e) {
-            Slog.e(TAG, "Failed escrow secret to RebootEscrow HAL", e);
-        }
-
+        boolean armedRebootEscrow = rebootEscrowProvider.storeRebootEscrowKey(escrowKey, null);
         if (armedRebootEscrow) {
             mStorage.setInt(REBOOT_ESCROW_ARMED_KEY, mInjector.getBootCount(), USER_SYSTEM);
             mEventLog.addEntry(RebootEscrowEvent.SET_ARMED_STATUS);
@@ -397,7 +365,7 @@ class RebootEscrowManager {
     }
 
     boolean prepareRebootEscrow() {
-        if (mInjector.getRebootEscrow() == null) {
+        if (mInjector.getRebootEscrowProvider() == null) {
             return false;
         }
 
@@ -408,7 +376,7 @@ class RebootEscrowManager {
     }
 
     boolean clearRebootEscrow() {
-        if (mInjector.getRebootEscrow() == null) {
+        if (mInjector.getRebootEscrowProvider() == null) {
             return false;
         }
 

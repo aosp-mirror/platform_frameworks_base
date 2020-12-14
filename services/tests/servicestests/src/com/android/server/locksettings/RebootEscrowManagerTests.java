@@ -95,13 +95,24 @@ public class RebootEscrowManagerTests {
 
     static class MockInjector extends RebootEscrowManager.Injector {
         private final IRebootEscrow mRebootEscrow;
+        private final RebootEscrowProviderInterface mRebootEscrowProvider;
         private final UserManager mUserManager;
         private final MockableRebootEscrowInjected mInjected;
 
-        MockInjector(Context context, UserManager userManager, IRebootEscrow rebootEscrow,
+        MockInjector(Context context, UserManager userManager,
+                IRebootEscrow rebootEscrow,
                 MockableRebootEscrowInjected injected) {
             super(context);
             mRebootEscrow = rebootEscrow;
+
+            RebootEscrowProviderHalImpl.Injector halInjector =
+                    new RebootEscrowProviderHalImpl.Injector() {
+                        @Override
+                        public IRebootEscrow getRebootEscrow() {
+                            return mRebootEscrow;
+                        }
+                    };
+            mRebootEscrowProvider = new RebootEscrowProviderHalImpl(halInjector);
             mUserManager = userManager;
             mInjected = injected;
         }
@@ -112,8 +123,8 @@ public class RebootEscrowManagerTests {
         }
 
         @Override
-        public IRebootEscrow getRebootEscrow() {
-            return mRebootEscrow;
+        public RebootEscrowProviderInterface getRebootEscrowProvider() {
+            return mRebootEscrowProvider;
         }
 
         @Override
