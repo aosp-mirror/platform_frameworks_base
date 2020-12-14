@@ -395,7 +395,7 @@ public class NotificationStackScrollLayoutController {
                     if (mView.getDismissAllInProgress()) {
                         return;
                     }
-                    mView.onSwipeEnd();
+                    mView.onSwipeEnd(view);
                     if (view instanceof ExpandableNotificationRow) {
                         ExpandableNotificationRow row = (ExpandableNotificationRow) view;
                         if (row.isHeadsUp()) {
@@ -450,12 +450,12 @@ public class NotificationStackScrollLayoutController {
                 @Override
                 public void onBeginDrag(View v) {
                     mFalsingCollector.onNotificationStartDismissing();
-                    mView.onSwipeBegin();
+                    mView.onSwipeBegin(v);
                 }
 
                 @Override
                 public void onChildSnappedBack(View animView, float targetLeft) {
-                    mView.onSwipeEnd();
+                    mView.onSwipeEnd(animView);
                     if (animView instanceof ExpandableNotificationRow) {
                         ExpandableNotificationRow row = (ExpandableNotificationRow) animView;
                         if (row.isPinned() && !canChildBeDismissed(row)

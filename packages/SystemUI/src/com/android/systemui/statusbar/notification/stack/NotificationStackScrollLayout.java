@@ -4967,7 +4967,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mSwipedOutViews.add(v);
     }
 
-    void onSwipeBegin() {
+    void onSwipeBegin(View v) {
+        if (v instanceof ExpandableView) {
+            ExpandableView ev = (ExpandableView) v;
+            ev.setIsBeingSwiped(true);
+            mController.getNoticationRoundessManager()
+                    .updateViewWithoutCallback(ev, true /* animate */);
+        }
         requestDisallowInterceptTouchEvent(true);
         updateFirstAndLastBackgroundViews();
         updateContinuousShadowDrawing();
@@ -4975,7 +4981,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         requestChildrenUpdate();
     }
 
-    void onSwipeEnd() {
+    void onSwipeEnd(View v) {
+        if (v instanceof ExpandableView) {
+            ExpandableView ev = (ExpandableView) v;
+            ev.setIsBeingSwiped(false);
+            mController.getNoticationRoundessManager()
+                    .updateViewWithoutCallback(ev, true /* animate */);
+        }
         updateFirstAndLastBackgroundViews();
     }
 
