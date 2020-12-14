@@ -1199,6 +1199,8 @@ public class ConnectivityServiceTest {
                 updateState(NetworkInfo.DetailedState.DISCONNECTED, "disconnect");
             }
             mAgentRegistered = false;
+            setUids(null);
+            mInterface = null;
         }
 
         @Override
@@ -6176,11 +6178,15 @@ public class ConnectivityServiceTest {
 
         // Create a fake restricted profile whose parent is our user ID.
         final int userId = UserHandle.getUserId(uid);
+        when(mUserManager.canHaveRestrictedProfile(userId)).thenReturn(true);
         final int restrictedUserId = userId + 1;
         final UserInfo info = new UserInfo(restrictedUserId, "user", UserInfo.FLAG_RESTRICTED);
         info.restrictedProfileParentId = userId;
         assertTrue(info.isRestricted());
         when(mUserManager.getUserInfo(restrictedUserId)).thenReturn(info);
+        when(mPackageManager.getPackageUidAsUser(ALWAYS_ON_PACKAGE, restrictedUserId))
+                .thenReturn(UserHandle.getUid(restrictedUserId, VPN_UID));
+
         final Intent addedIntent = new Intent(ACTION_USER_ADDED);
         addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, restrictedUserId);
 
@@ -6220,6 +6226,54 @@ public class ConnectivityServiceTest {
                 && caps.getUids().contains(new UidRange(uid, uid))
                 && caps.hasTransport(TRANSPORT_VPN)
                 && !caps.hasTransport(TRANSPORT_WIFI));
+
+        // Test lockdown with restricted profiles.
+        mServiceContext.setPermission(
+                Manifest.permission.CONTROL_ALWAYS_ON_VPN, PERMISSION_GRANTED);
+        mServiceContext.setPermission(
+                Manifest.permission.CONTROL_VPN, PERMISSION_GRANTED);
+        mServiceContext.setPermission(
+                Manifest.permission.NETWORK_SETTINGS, PERMISSION_GRANTED);
+
+        // Connect wifi and check that UIDs in the main and restricted profiles have network access.
+        mMockVpn.disconnect();
+        mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(true /* validated */);
+        final int restrictedUid = UserHandle.getUid(restrictedUserId, 42 /* appId */);
+        assertNotNull(mCm.getActiveNetworkForUid(uid));
+        assertNotNull(mCm.getActiveNetworkForUid(restrictedUid));
+
+        // Enable always-on VPN lockdown. The main user loses network access because no VPN is up.
+        final ArrayList<String> allowList = new ArrayList<>();
+        mService.setAlwaysOnVpnPackage(userId, ALWAYS_ON_PACKAGE, true /* lockdown */, allowList);
+        waitForIdle();
+        assertNull(mCm.getActiveNetworkForUid(uid));
+        assertNotNull(mCm.getActiveNetworkForUid(restrictedUid));
+
+        // Start the restricted profile, and check that the UID within it loses network access.
+        when(mUserManager.getAliveUsers()).thenReturn(
+                Arrays.asList(new UserInfo[] {
+                        new UserInfo(userId, "", 0),
+                        info
+                }));
+        // TODO: check that VPN app within restricted profile still has access, etc.
+        handler.post(() -> mServiceContext.sendBroadcast(addedIntent));
+        waitForIdle();
+        assertNull(mCm.getActiveNetworkForUid(uid));
+        assertNull(mCm.getActiveNetworkForUid(restrictedUid));
+
+        // Stop the restricted profile, and check that the UID within it has network access again.
+        when(mUserManager.getAliveUsers()).thenReturn(
+                Arrays.asList(new UserInfo[] {
+                        new UserInfo(userId, "", 0),
+                }));
+        handler.post(() -> mServiceContext.sendBroadcast(removedIntent));
+        waitForIdle();
+        assertNull(mCm.getActiveNetworkForUid(uid));
+        assertNotNull(mCm.getActiveNetworkForUid(restrictedUid));
+
+        mService.setAlwaysOnVpnPackage(userId, null, false /* lockdown */, allowList);
+        waitForIdle();
     }
 
     @Test
