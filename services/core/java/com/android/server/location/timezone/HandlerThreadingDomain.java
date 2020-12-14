@@ -16,6 +16,7 @@
 
 package com.android.server.location.timezone;
 
+import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
 import android.os.Handler;
 
@@ -57,12 +58,12 @@ final class HandlerThreadingDomain extends ThreadingDomain {
     }
 
     @Override
-    void postDelayed(@NonNull Runnable r, long delayMillis) {
+    void postDelayed(@NonNull Runnable r, @DurationMillisLong long delayMillis) {
         getHandler().postDelayed(r, delayMillis);
     }
 
     @Override
-    void postDelayed(Runnable r, Object token, long delayMillis) {
+    void postDelayed(Runnable r, Object token, @DurationMillisLong long delayMillis) {
         getHandler().postDelayed(r, token, delayMillis);
     }
 
