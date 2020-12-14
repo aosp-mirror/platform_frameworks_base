@@ -331,11 +331,12 @@ public class ConnectivityServiceTest {
     private static final String TAG = "ConnectivityServiceTest";
 
     private static final int TIMEOUT_MS = 500;
-    private static final int TEST_LINGER_DELAY_MS = 300;
-    // Chosen to be less than the linger timeout. This ensures that we can distinguish between a
-    // LOST callback that arrives immediately and a LOST callback that arrives after the linger
-    // timeout. For this, our assertions should run fast enough to leave less than
-    // (mService.mLingerDelayMs - TEST_CALLBACK_TIMEOUT_MS) between the time callbacks are
+    private static final int TEST_LINGER_DELAY_MS = 400;
+    private static final int TEST_NASCENT_DELAY_MS = 300;
+    // Chosen to be less than the linger and nascent timeout. This ensures that we can distinguish
+    // between a LOST callback that arrives immediately and a LOST callback that arrives after
+    // the linger/nascent timeout. For this, our assertions should run fast enough to leave
+    // less than (mService.mLingerDelayMs - TEST_CALLBACK_TIMEOUT_MS) between the time callbacks are
     // supposedly fired, and the time we call expectCallback.
     private static final int TEST_CALLBACK_TIMEOUT_MS = 250;
     // Chosen to be less than TEST_CALLBACK_TIMEOUT_MS. This ensures that requests have time to
@@ -1389,6 +1390,7 @@ public class ConnectivityServiceTest {
                 mMockNetd,
                 mDeps);
         mService.mLingerDelayMs = TEST_LINGER_DELAY_MS;
+        mService.mNascentDelayMs = TEST_NASCENT_DELAY_MS;
         verify(mDeps).makeMultinetworkPolicyTracker(any(), any(), any());
 
         final ArgumentCaptor<INetworkPolicyListener> policyListenerCaptor =
@@ -1729,6 +1731,108 @@ public class ConnectivityServiceTest {
         mWiFiNetworkAgent.disconnect();
         b.expectBroadcast();
         verifyNoNetwork();
+    }
+
+    /**
+     * Verify a newly created network will be inactive instead of torn down even if no one is
+     * requesting.
+     */
+    @Test
+    public void testNewNetworkInactive() throws Exception {
+        // Create a callback that monitoring the testing network.
+        final TestNetworkCallback listenCallback = new TestNetworkCallback();
+        mCm.registerNetworkCallback(new NetworkRequest.Builder().build(), listenCallback);
+
+        // 1. Create a network that is not requested by anyone, and does not satisfy any of the
+        // default requests. Verify that the network will be inactive instead of torn down.
+        mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connectWithoutInternet();
+        listenCallback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+        listenCallback.assertNoCallback();
+
+        // Verify that the network will be torn down after nascent expiry. A small period of time
+        // is added in case of flakiness.
+        final int nascentTimeoutMs =
+                mService.mNascentDelayMs + mService.mNascentDelayMs / 4;
+        listenCallback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent, nascentTimeoutMs);
+
+        // 2. Create a network that is satisfied by a request comes later.
+        mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connectWithoutInternet();
+        listenCallback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+        final NetworkRequest wifiRequest = new NetworkRequest.Builder()
+                .addTransportType(TRANSPORT_WIFI).build();
+        final TestNetworkCallback wifiCallback = new TestNetworkCallback();
+        mCm.requestNetwork(wifiRequest, wifiCallback);
+        wifiCallback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+
+        // Verify that the network will be kept since the request is still satisfied. And is able
+        // to get disconnected as usual if the request is released after the nascent timer expires.
+        listenCallback.assertNoCallback(nascentTimeoutMs);
+        mCm.unregisterNetworkCallback(wifiCallback);
+        listenCallback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
+
+        // 3. Create a network that is satisfied by a request comes later.
+        mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connectWithoutInternet();
+        listenCallback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+        mCm.requestNetwork(wifiRequest, wifiCallback);
+        wifiCallback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+
+        // Verify that the network will still be torn down after the request gets removed.
+        mCm.unregisterNetworkCallback(wifiCallback);
+        listenCallback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
+
+        // There is no need to ensure that LOSING is never sent in the common case that the
+        // network immediately satisfies a request that was already present, because it is already
+        // verified anywhere whenever {@code TestNetworkCallback#expectAvailable*} is called.
+
+        mCm.unregisterNetworkCallback(listenCallback);
+    }
+
+    /**
+     * Verify a newly created network will be inactive and switch to background if only background
+     * request is satisfied.
+     */
+    @Test
+    public void testNewNetworkInactive_bgNetwork() throws Exception {
+        // Create a callback that monitoring the wifi network.
+        final TestNetworkCallback wifiListenCallback = new TestNetworkCallback();
+        mCm.registerNetworkCallback(new NetworkRequest.Builder()
+                .addTransportType(TRANSPORT_WIFI).build(), wifiListenCallback);
+
+        // Create callbacks that can monitor background and foreground mobile networks.
+        // This is done by granting using background networks permission before registration. Thus,
+        // the service will not add {@code NET_CAPABILITY_FOREGROUND} by default.
+        grantUsingBackgroundNetworksPermissionForUid(Binder.getCallingUid());
+        final TestNetworkCallback bgMobileListenCallback = new TestNetworkCallback();
+        final TestNetworkCallback fgMobileListenCallback = new TestNetworkCallback();
+        mCm.registerNetworkCallback(new NetworkRequest.Builder()
+                .addTransportType(TRANSPORT_CELLULAR).build(), bgMobileListenCallback);
+        mCm.registerNetworkCallback(new NetworkRequest.Builder()
+                .addTransportType(TRANSPORT_CELLULAR)
+                .addCapability(NET_CAPABILITY_FOREGROUND).build(), fgMobileListenCallback);
+
+        // Connect wifi, which satisfies default request.
+        mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(true);
+        wifiListenCallback.expectAvailableThenValidatedCallbacks(mWiFiNetworkAgent);
+
+        // Connect a cellular network, verify that satisfies only the background callback.
+        setAlwaysOnNetworks(true);
+        mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR);
+        mCellNetworkAgent.connect(true);
+        bgMobileListenCallback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
+        fgMobileListenCallback.assertNoCallback();
+        assertFalse(isForegroundNetwork(mCellNetworkAgent));
+
+        mCellNetworkAgent.disconnect();
+        bgMobileListenCallback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
+        fgMobileListenCallback.assertNoCallback();
+
+        mCm.unregisterNetworkCallback(wifiListenCallback);
+        mCm.unregisterNetworkCallback(bgMobileListenCallback);
+        mCm.unregisterNetworkCallback(fgMobileListenCallback);
     }
 
     @Test
@@ -3888,8 +3992,9 @@ public class ConnectivityServiceTest {
             setAlwaysOnNetworks(false);
             testFactory.expectRequestRemove();
 
-            // ...  and cell data to be torn down.
-            cellNetworkCallback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
+            // ...  and cell data to be torn down after nascent network timeout.
+            cellNetworkCallback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent,
+                    mService.mNascentDelayMs + TEST_CALLBACK_TIMEOUT_MS);
             assertLength(1, mCm.getAllNetworks());
         } finally {
             testFactory.terminate();
