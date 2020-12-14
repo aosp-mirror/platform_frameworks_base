@@ -321,16 +321,6 @@ interface INetworkManagementService
     void setFirewallChainEnabled(int chain, boolean enable);
 
     /**
-     * Set all packets from users in ranges to go through VPN specified by netId.
-     */
-    void addVpnUidRanges(int netId, in UidRange[] ranges);
-
-    /**
-     * Clears the special VPN rules for users in ranges and VPN specified by netId.
-     */
-    void removeVpnUidRanges(int netId, in UidRange[] ranges);
-
-    /**
      * Start listening for mobile activity state changes.
      */
     void registerNetworkActivityListener(INetworkActivityListener listener);
@@ -360,8 +350,6 @@ interface INetworkManagementService
     void addInterfaceToLocalNetwork(String iface, in List<RouteInfo> routes);
     void removeInterfaceFromLocalNetwork(String iface);
     int removeRoutesFromLocalNetwork(in List<RouteInfo> routes);
-
-    void setAllowOnlyVpnForUids(boolean enable, in UidRange[] uidRanges);
 
     boolean isNetworkRestricted(int uid);
 }
