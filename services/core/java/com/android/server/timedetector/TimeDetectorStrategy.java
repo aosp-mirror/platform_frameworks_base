@@ -19,6 +19,7 @@ package com.android.server.timedetector;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.timedetector.GnssTimeSuggestion;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.NetworkTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
@@ -40,7 +41,7 @@ import java.lang.annotation.RetentionPolicy;
  */
 public interface TimeDetectorStrategy {
 
-    @IntDef({ ORIGIN_TELEPHONY, ORIGIN_MANUAL, ORIGIN_NETWORK })
+    @IntDef({ ORIGIN_TELEPHONY, ORIGIN_MANUAL, ORIGIN_NETWORK, ORIGIN_GNSS })
     @Retention(RetentionPolicy.SOURCE)
     @interface Origin {}
 
@@ -56,6 +57,10 @@ public interface TimeDetectorStrategy {
     @Origin
     int ORIGIN_NETWORK = 3;
 
+    /** Used when a time value originated from a gnss signal. */
+    @Origin
+    int ORIGIN_GNSS = 4;
+
     /** Processes the suggested time from telephony sources. */
     void suggestTelephonyTime(@NonNull TelephonyTimeSuggestion timeSuggestion);
 
@@ -69,6 +74,9 @@ public interface TimeDetectorStrategy {
 
     /** Processes the suggested time from network sources. */
     void suggestNetworkTime(@NonNull NetworkTimeSuggestion timeSuggestion);
+
+    /** Processes the suggested time from gnss sources. */
+    void suggestGnssTime(@NonNull GnssTimeSuggestion timeSuggestion);
 
     /**
      * Handles the auto-time configuration changing For example, when the auto-time setting is
@@ -102,6 +110,8 @@ public interface TimeDetectorStrategy {
                 return "network";
             case ORIGIN_TELEPHONY:
                 return "telephony";
+            case ORIGIN_GNSS:
+                return "gnss";
             default:
                 throw new IllegalArgumentException("origin=" + origin);
         }
@@ -119,6 +129,8 @@ public interface TimeDetectorStrategy {
                 return ORIGIN_NETWORK;
             case "telephony":
                 return ORIGIN_TELEPHONY;
+            case "gnss":
+                return ORIGIN_GNSS;
             default:
                 throw new IllegalArgumentException("originString=" + originString);
         }

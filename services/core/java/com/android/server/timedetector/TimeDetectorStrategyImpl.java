@@ -23,6 +23,7 @@ import static java.util.stream.Collectors.joining;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
+import android.app.timedetector.GnssTimeSuggestion;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.NetworkTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
@@ -109,6 +110,10 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     private final ReferenceWithHistory<NetworkTimeSuggestion> mLastNetworkSuggestion =
             new ReferenceWithHistory<>(KEEP_SUGGESTION_HISTORY_SIZE);
 
+    @GuardedBy("this")
+    private final ReferenceWithHistory<GnssTimeSuggestion> mLastGnssSuggestion =
+            new ReferenceWithHistory<>(KEEP_SUGGESTION_HISTORY_SIZE);
+
     /**
      * The interface used by the strategy to interact with the surrounding service.
      *
@@ -163,6 +168,20 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
 
     TimeDetectorStrategyImpl(@NonNull Callback callback) {
         mCallback = callback;
+    }
+
+    @Override
+    public synchronized void suggestGnssTime(@NonNull GnssTimeSuggestion timeSuggestion) {
+        final TimestampedValue<Long> newUtcTime = timeSuggestion.getUtcTime();
+
+        if (!validateAutoSuggestionTime(newUtcTime, timeSuggestion)) {
+            return;
+        }
+
+        mLastGnssSuggestion.set(timeSuggestion);
+
+        String reason = "GNSS time suggestion received: suggestion=" + timeSuggestion;
+        doAutoTimeDetection(reason);
     }
 
     @Override
@@ -280,6 +299,11 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         mLastNetworkSuggestion.dump(ipw);
         ipw.decreaseIndent(); // level 2
 
+        ipw.println("Gnss suggestion history:");
+        ipw.increaseIndent(); // level 2
+        mLastGnssSuggestion.dump(ipw);
+        ipw.decreaseIndent(); // level 2
+
         ipw.decreaseIndent(); // level 1
         ipw.flush();
     }
@@ -384,6 +408,14 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
                     newUtcTime = networkSuggestion.getUtcTime();
                     cause = "Found good network suggestion."
                             + ", networkSuggestion=" + networkSuggestion
+                            + ", detectionReason=" + detectionReason;
+                }
+            } else if (origin == ORIGIN_GNSS) {
+                GnssTimeSuggestion gnssTimeSuggestion = findLatestValidGnssSuggestion();
+                if (gnssTimeSuggestion != null) {
+                    newUtcTime = gnssTimeSuggestion.getUtcTime();
+                    cause = "Found good gnss suggestion."
+                            + ", gnssTimeSuggestion=" + gnssTimeSuggestion
                             + ", detectionReason=" + detectionReason;
                 }
             } else {
@@ -527,6 +559,26 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         return networkSuggestion;
     }
 
+    /** Returns the latest, valid, gnss suggestion. Returns {@code null} if there isn't one. */
+    @GuardedBy("this")
+    @Nullable
+    private GnssTimeSuggestion findLatestValidGnssSuggestion() {
+        GnssTimeSuggestion gnssTimeSuggestion = mLastGnssSuggestion.get();
+        if (gnssTimeSuggestion == null) {
+            // No gnss suggestions received. This is normal if there's no gnss signal.
+            return null;
+        }
+
+        TimestampedValue<Long> utcTime = gnssTimeSuggestion.getUtcTime();
+        long elapsedRealTimeMillis = mCallback.elapsedRealtimeMillis();
+        if (!validateSuggestionUtcTime(elapsedRealTimeMillis, utcTime)) {
+            // The latest suggestion is not valid, usually due to its age.
+            return null;
+        }
+
+        return gnssTimeSuggestion;
+    }
+
     @GuardedBy("this")
     private boolean setSystemClockIfRequired(
             @Origin int origin, @NonNull TimestampedValue<Long> time, @NonNull String cause) {
@@ -655,6 +707,16 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     }
 
     /**
+     * Returns the latest valid gnss suggestion. Not intended for general use: it is used during
+     * tests to check strategy behavior.
+     */
+    @VisibleForTesting
+    @Nullable
+    public synchronized GnssTimeSuggestion findLatestValidGnssSuggestionForTests() {
+        return findLatestValidGnssSuggestion();
+    }
+
+    /**
      * A method used to inspect state during tests. Not intended for general use.
      */
     @VisibleForTesting
@@ -670,6 +732,15 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     @Nullable
     public NetworkTimeSuggestion getLatestNetworkSuggestion() {
         return mLastNetworkSuggestion.get();
+    }
+
+    /**
+     * A method used to inspect state during tests. Not intended for general use.
+     */
+    @VisibleForTesting
+    @Nullable
+    public synchronized GnssTimeSuggestion getLatestGnssSuggestion() {
+        return mLastGnssSuggestion.get();
     }
 
     private static boolean validateSuggestionUtcTime(
