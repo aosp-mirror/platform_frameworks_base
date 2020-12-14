@@ -2823,6 +2823,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     break;
                 }
                 case NetworkAgent.EVENT_UNDERLYING_NETWORKS_CHANGED: {
+                    // TODO: prevent loops, e.g., if a network declares itself as underlying.
                     if (!nai.supportsUnderlyingNetworks()) {
                         Log.wtf(TAG, "Non-virtual networks cannot have underlying networks");
                         break;
@@ -3422,6 +3423,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
         nai.clearLingerState();
+        propagateUnderlyingNetworkCapabilities(nai.network);
         if (nai.isSatisfyingRequest(mDefaultRequest.requestId)) {
             mDefaultNetworkNai = null;
             updateDataActivityTracking(null /* newNetwork */, nai);
@@ -3429,9 +3431,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             ensureNetworkTransitionWakelock(nai.toShortString());
         }
         mLegacyTypeTracker.remove(nai, wasDefault);
-        if (!nai.networkCapabilities.hasTransport(TRANSPORT_VPN)) {
-            propagateUnderlyingNetworkCapabilities();
-        }
         rematchAllNetworksAndRequests();
         mLingerMonitor.noteDisconnect(nai);
         if (nai.created) {
@@ -4820,17 +4819,35 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    private Network[] underlyingNetworksOrDefault(Network[] underlyingNetworks) {
+        final Network defaultNetwork = getNetwork(getDefaultNetwork());
+        if (underlyingNetworks == null && defaultNetwork != null) {
+            // null underlying networks means to track the default.
+            underlyingNetworks = new Network[] { defaultNetwork };
+        }
+        return underlyingNetworks;
+    }
+
+    // Returns true iff |network| is an underlying network of |nai|.
+    private boolean hasUnderlyingNetwork(NetworkAgentInfo nai, Network network) {
+        // TODO: support more than one level of underlying networks, either via a fixed-depth search
+        // (e.g., 2 levels of underlying networks), or via loop detection, or....
+        if (!nai.supportsUnderlyingNetworks()) return false;
+        final Network[] underlying = underlyingNetworksOrDefault(nai.declaredUnderlyingNetworks);
+        return ArrayUtils.contains(underlying, network);
+    }
+
     /**
-     * Ask all networks with underlying networks to recompute and update their capabilities.
+     * Recompute the capabilities for any networks that had a specific network as underlying.
      *
      * When underlying networks change, such networks may have to update capabilities to reflect
      * things like the metered bit, their transports, and so on. The capabilities are calculated
      * immediately. This method runs on the ConnectivityService thread.
      */
-    private void propagateUnderlyingNetworkCapabilities() {
+    private void propagateUnderlyingNetworkCapabilities(Network updatedNetwork) {
         ensureRunningOnConnectivityServiceThread();
         for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
-            if (nai.supportsUnderlyingNetworks()) {
+            if (updatedNetwork == null || hasUnderlyingNetwork(nai, updatedNetwork)) {
                 updateCapabilitiesForNetwork(nai);
             }
         }
@@ -6369,27 +6386,28 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * This method should never alter the agent's NetworkCapabilities, only store data in |nai|.
      */
     private void processCapabilitiesFromAgent(NetworkAgentInfo nai, NetworkCapabilities nc) {
-        nai.declaredMetered = !nc.hasCapability(NET_CAPABILITY_NOT_METERED);
+        // Note: resetting the owner UID before storing the agent capabilities in NAI means that if
+        // the agent attempts to change the owner UID, then nai.declaredCapabilities will not
+        // actually be the same as the capabilities sent by the agent. Still, it is safer to reset
+        // the owner UID here and behave as if the agent had never tried to change it.
         if (nai.networkCapabilities.getOwnerUid() != nc.getOwnerUid()) {
             Log.e(TAG, nai.toShortString() + ": ignoring attempt to change owner from "
                     + nai.networkCapabilities.getOwnerUid() + " to " + nc.getOwnerUid());
             nc.setOwnerUid(nai.networkCapabilities.getOwnerUid());
         }
+        nai.declaredCapabilities = new NetworkCapabilities(nc);
     }
 
-    /** Modifies |caps| based on the capabilities of the specified underlying networks. */
+    /** Modifies |newNc| based on the capabilities of |underlyingNetworks| and |agentCaps|. */
     @VisibleForTesting
     void applyUnderlyingCapabilities(@Nullable Network[] underlyingNetworks,
-            @NonNull NetworkCapabilities caps,  boolean declaredMetered) {
-        final Network defaultNetwork = getNetwork(getDefaultNetwork());
-        if (underlyingNetworks == null && defaultNetwork != null) {
-            // null underlying networks means to track the default.
-            underlyingNetworks = new Network[] { defaultNetwork };
-        }
-        int[] transportTypes = new int[] { NetworkCapabilities.TRANSPORT_VPN };
+            @NonNull NetworkCapabilities agentCaps, @NonNull NetworkCapabilities newNc) {
+        underlyingNetworks = underlyingNetworksOrDefault(underlyingNetworks);
+        int[] transportTypes = agentCaps.getTransportTypes();
         int downKbps = NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
         int upKbps = NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
-        boolean metered = declaredMetered; // metered if any underlying is metered, or agentMetered
+        // metered if any underlying is metered, or originally declared metered by the agent.
+        boolean metered = !agentCaps.hasCapability(NET_CAPABILITY_NOT_METERED);
         boolean roaming = false; // roaming if any underlying is roaming
         boolean congested = false; // congested if any underlying is congested
         boolean suspended = true; // suspended if all underlying are suspended
@@ -6435,13 +6453,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
             suspended = false;
         }
 
-        caps.setTransportTypes(transportTypes);
-        caps.setLinkDownstreamBandwidthKbps(downKbps);
-        caps.setLinkUpstreamBandwidthKbps(upKbps);
-        caps.setCapability(NET_CAPABILITY_NOT_METERED, !metered);
-        caps.setCapability(NET_CAPABILITY_NOT_ROAMING, !roaming);
-        caps.setCapability(NET_CAPABILITY_NOT_CONGESTED, !congested);
-        caps.setCapability(NET_CAPABILITY_NOT_SUSPENDED, !suspended);
+        newNc.setTransportTypes(transportTypes);
+        newNc.setLinkDownstreamBandwidthKbps(downKbps);
+        newNc.setLinkUpstreamBandwidthKbps(upKbps);
+        newNc.setCapability(NET_CAPABILITY_NOT_METERED, !metered);
+        newNc.setCapability(NET_CAPABILITY_NOT_ROAMING, !roaming);
+        newNc.setCapability(NET_CAPABILITY_NOT_CONGESTED, !congested);
+        newNc.setCapability(NET_CAPABILITY_NOT_SUSPENDED, !suspended);
     }
 
     /**
@@ -6498,7 +6516,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         if (nai.supportsUnderlyingNetworks()) {
-            applyUnderlyingCapabilities(nai.declaredUnderlyingNetworks, newNc, nai.declaredMetered);
+            applyUnderlyingCapabilities(nai.declaredUnderlyingNetworks, nai.declaredCapabilities,
+                    newNc);
         }
 
         return newNc;
@@ -6577,11 +6596,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
 
-        if (!newNc.hasTransport(TRANSPORT_VPN)) {
-            // Tell VPNs about updated capabilities, since they may need to
-            // bubble those changes through.
-            propagateUnderlyingNetworkCapabilities();
-        }
+        // This network might have been underlying another network. Propagate its capabilities.
+        propagateUnderlyingNetworkCapabilities(nai.network);
 
         if (!newNc.equalsTransportTypes(prevNc)) {
             mDnsManager.updateTransportsForNetwork(
@@ -6911,8 +6927,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         updateTcpBufferSizes(null != newNetwork
                 ? newNetwork.linkProperties.getTcpBufferSizes() : null);
         notifyIfacesChangedForNetworkStats();
-        // Fix up the NetworkCapabilities of any VPNs that don't specify underlying networks.
-        propagateUnderlyingNetworkCapabilities();
+        // Fix up the NetworkCapabilities of any networks that have this network as underlying.
+        if (newNetwork != null) {
+            propagateUnderlyingNetworkCapabilities(newNetwork.network);
+        }
     }
 
     private void processListenRequests(@NonNull final NetworkAgentInfo nai) {
@@ -7368,13 +7386,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
             networkAgent.networkCapabilities.addCapability(NET_CAPABILITY_FOREGROUND);
 
             if (!createNativeNetwork(networkAgent)) return;
-            if (networkAgent.isVPN()) {
-                // Initialize the VPN capabilities to their starting values according to the
-                // underlying networks. This will avoid a spurious callback to
-                // onCapabilitiesUpdated being sent in updateAllVpnCapabilities below as
-                // the VPN would switch from its default, blank capabilities to those
-                // that reflect the capabilities of its underlying networks.
-                propagateUnderlyingNetworkCapabilities();
+            if (networkAgent.supportsUnderlyingNetworks()) {
+                // Initialize the network's capabilities to their starting values according to the
+                // underlying networks. This ensures that the capabilities are correct before
+                // anything happens to the network.
+                updateCapabilitiesForNetwork(networkAgent);
             }
             networkAgent.created = true;
         }
@@ -7415,10 +7431,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // disconnection NetworkAgents should stop any signal strength monitoring they have been
             // doing.
             updateSignalStrengthThresholds(networkAgent, "CONNECT", null);
-
-            if (networkAgent.supportsUnderlyingNetworks()) {
-                propagateUnderlyingNetworkCapabilities();
-            }
 
             // Consider network even though it is not yet validated.
             rematchAllNetworksAndRequests();
