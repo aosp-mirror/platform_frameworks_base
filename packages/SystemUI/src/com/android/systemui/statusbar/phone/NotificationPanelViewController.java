@@ -1140,6 +1140,7 @@ public class NotificationPanelViewController extends PanelViewController {
         if (isFullyCollapsed()) {
             expand(true /* animate */);
         } else {
+            traceQsJank(true /* startTracing */, false /* wasCancelled */);
             flingSettings(0 /* velocity */, FLING_EXPAND);
         }
     }
