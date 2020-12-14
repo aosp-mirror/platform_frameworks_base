@@ -165,11 +165,13 @@ class BluetoothRouteProvider {
 
     private void buildBluetoothRoutes() {
         mBluetoothRoutes.clear();
-        for (BluetoothDevice device : mBluetoothAdapter.getBondedDevices()) {
-            if (device.isConnected()) {
-                BluetoothRouteInfo newBtRoute = createBluetoothRoute(device);
-                if (newBtRoute.connectedProfiles.size() > 0) {
-                    mBluetoothRoutes.put(device.getAddress(), newBtRoute);
+        if (mBluetoothAdapter.getBondedDevices() != null) {
+            for (BluetoothDevice device : mBluetoothAdapter.getBondedDevices()) {
+                if (device.isConnected()) {
+                    BluetoothRouteInfo newBtRoute = createBluetoothRoute(device);
+                    if (newBtRoute.connectedProfiles.size() > 0) {
+                        mBluetoothRoutes.put(device.getAddress(), newBtRoute);
+                    }
                 }
             }
         }
