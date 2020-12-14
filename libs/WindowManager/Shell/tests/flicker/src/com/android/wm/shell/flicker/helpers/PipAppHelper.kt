@@ -20,20 +20,17 @@ import android.app.Instrumentation
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
 import android.os.SystemClock
-import android.view.KeyEvent.KEYCODE_WINDOW
 import androidx.test.uiautomator.By
-import androidx.test.uiautomator.Until
+import androidx.test.uiautomator.BySelector
 import com.android.server.wm.flicker.helpers.closePipWindow
 import com.android.server.wm.flicker.helpers.hasPipWindow
-import com.android.wm.shell.flicker.SYSTEM_UI_PACKAGE_NAME
 import com.android.wm.shell.flicker.TEST_APP_PIP_ACTIVITY_LABEL
+import com.android.wm.shell.flicker.pip.tv.closeTvPipWindow
+import com.android.wm.shell.flicker.pip.tv.isFocusedOrHasFocusedChild
 import com.android.wm.shell.flicker.testapp.Components
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.fail
 
-class PipAppHelper(
-    instrumentation: Instrumentation
-) : BaseAppHelper(
+class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         instrumentation,
         TEST_APP_PIP_ACTIVITY_LABEL,
         Components.PipActivity()
@@ -47,12 +44,34 @@ class PipAppHelper(
             it.packageName == packageName
         }
 
-    fun clickButton(resourceId: String) =
-            uiDevice.findObject(By.res(packageName, resourceId))?.click()
-                ?: fail("$resourceId button is not found")
+    fun clickObject(resId: String) {
+        val selector = By.res(packageName, resId)
+        val obj = uiDevice.findObject(selector) ?: error("Could not find `$resId` object")
+
+        if (!isTelevision) {
+            obj.click()
+        } else {
+            focusOnObject(selector) || error("Could not focus on `$resId` object")
+            uiDevice.pressDPadCenter()
+        }
+    }
+
+    private fun focusOnObject(selector: BySelector): Boolean {
+        // We expect all the focusable UI elements to be arranged in a way so that it is possible
+        // to "cycle" over all them by clicking the D-Pad DOWN button, going back up to "the top"
+        // from "the bottom".
+        repeat(FOCUS_ATTEMPTS) {
+            uiDevice.findObject(selector)?.apply { if (isFocusedOrHasFocusedChild) return true }
+                    ?: error("The object we try to focus on is gone.")
+
+            uiDevice.pressDPadDown()
+            uiDevice.waitForIdle()
+        }
+        return false
+    }
 
     fun clickEnterPipButton() {
-        clickButton("enter_pip")
+        clickObject(ENTER_PIP_BUTTON_ID)
 
         // TODO(b/172321238): remove this check once hasPipWindow is fixed on TVs
         if (!isTelevision) {
@@ -64,17 +83,14 @@ class PipAppHelper(
     }
 
     fun clickStartMediaSessionButton() {
-        val startButton = uiDevice.findObject(By.res(packageName, "media_session_start"))
-        assertNotNull("Start button not found, this usually happens when the device " +
-                "was left in an unknown state (e.g. in split screen)", startButton)
-        startButton.click()
+        clickObject(MEDIA_SESSION_START_RADIO_BUTTON_ID)
     }
 
     fun checkWithCustomActionsCheckbox() = uiDevice
-            .findObject(By.res(packageName, "with_custom_actions"))
-            ?.takeIf { it.isCheckable }
-            ?.apply { if (!isChecked) click() }
-            ?: error("'With custom actions' checkbox not found")
+            .findObject(By.res(packageName, WITH_CUSTOM_ACTIONS_BUTTON_ID))
+                ?.takeIf { it.isCheckable }
+                ?.apply { if (!isChecked) clickObject(WITH_CUSTOM_ACTIONS_BUTTON_ID) }
+                ?: error("'With custom actions' checkbox not found")
 
     fun pauseMedia() = mediaController?.transportControls?.pause()
             ?: error("No active media session found")
@@ -83,21 +99,21 @@ class PipAppHelper(
             ?: error("No active media session found")
 
     fun closePipWindow() {
-        // TODO(b/172321238): remove this check once and simply call closePipWindow once the TV
-        //  logic is integrated there.
-        if (!isTelevision) {
-            uiDevice.closePipWindow()
+        if (isTelevision) {
+            uiDevice.closeTvPipWindow()
         } else {
-            // Bring up Pip menu
-            uiDevice.pressKeyCode(KEYCODE_WINDOW)
-
-            // Wait for the menu to come up and render the close button
-            val closeButton = uiDevice.wait(
-                    Until.findObject(By.res(SYSTEM_UI_PACKAGE_NAME, "close_button")), 3_000)
-            assertNotNull("Pip menu close button is not found", closeButton)
-            closeButton.click()
-
-            waitUntilClosed()
+            uiDevice.closePipWindow()
         }
+
+        if (!waitUntilClosed()) {
+            fail("Couldn't close Pip")
+        }
+    }
+
+    companion object {
+        private const val FOCUS_ATTEMPTS = 20
+        private const val ENTER_PIP_BUTTON_ID = "enter_pip"
+        private const val WITH_CUSTOM_ACTIONS_BUTTON_ID = "with_custom_actions"
+        private const val MEDIA_SESSION_START_RADIO_BUTTON_ID = "media_session_start"
     }
 }
