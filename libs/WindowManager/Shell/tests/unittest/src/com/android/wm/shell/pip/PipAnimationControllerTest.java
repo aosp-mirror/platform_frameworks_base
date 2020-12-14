@@ -197,6 +197,11 @@ public class PipAnimationControllerTest extends ShellTestCase {
         }
 
         @Override
+        public SurfaceControl.Transaction setFrameTimelineVsync(long frameTimelineVsyncId) {
+            return this;
+        }
+
+        @Override
         public void apply() {}
     }
 }
