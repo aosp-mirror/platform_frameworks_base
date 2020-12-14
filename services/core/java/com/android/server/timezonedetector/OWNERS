@@ -1,1 +1,3 @@
-include /core/java/android/app/timezone/OWNERS
+# Bug component: 847766
+mingaleev@google.com
+include /core/java/android/app/timedetector/OWNERS
