@@ -419,20 +419,6 @@ public class ActivityTaskManager {
     }
 
     /**
-     * Requests that an activity should enter picture-in-picture mode if possible.
-     * @hide
-     */
-    @TestApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
-    public void requestPictureInPictureMode(@NonNull IBinder token) {
-        try {
-            getService().requestPictureInPictureMode(token);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * @return whether the UI mode of the given config supports error dialogs (ANR, crash, etc).
      * @hide
      */
