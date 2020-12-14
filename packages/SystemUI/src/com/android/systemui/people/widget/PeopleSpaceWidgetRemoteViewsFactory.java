@@ -34,7 +34,6 @@ import com.android.systemui.people.PeopleSpaceUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /** People Space Widget RemoteViewsFactory class. */
 public class PeopleSpaceWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
@@ -45,7 +44,7 @@ public class PeopleSpaceWidgetRemoteViewsFactory implements RemoteViewsService.R
     private INotificationManager mNotificationManager;
     private PackageManager mPackageManager;
     private LauncherApps mLauncherApps;
-    private List<Map.Entry<Long, PeopleSpaceTile>> mTiles = new ArrayList<>();
+    private List<PeopleSpaceTile> mTiles = new ArrayList<>();
     private Context mContext;
 
     public PeopleSpaceWidgetRemoteViewsFactory(Context context, Intent intent) {
@@ -100,11 +99,10 @@ public class PeopleSpaceWidgetRemoteViewsFactory implements RemoteViewsService.R
         RemoteViews personView = new RemoteViews(mContext.getPackageName(),
                 R.layout.people_space_widget_item);
         try {
-            Map.Entry<Long, PeopleSpaceTile> entry = mTiles.get(i);
-            PeopleSpaceTile tile = entry.getValue();
-            long lastInteraction = entry.getKey();
+            PeopleSpaceTile tile = mTiles.get(i);
 
-            String status = PeopleSpaceUtils.getLastInteractionString(mContext, lastInteraction);
+            String status = PeopleSpaceUtils.getLastInteractionString(mContext,
+                    tile.getLastInteractionTimestamp(), true);
 
             personView.setTextViewText(R.id.status, status);
             personView.setTextViewText(R.id.name, tile.getUserName().toString());
