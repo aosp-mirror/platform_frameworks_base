@@ -20,6 +20,7 @@ android_app {
     platform_apis: true,
     privileged: true,
     libs: ["org.apache.http.legacy"],
+    uses_libs: ["org.apache.http.legacy"],
     static_libs: [
         "libprotobuf-java-nano",
         "volley",
