@@ -43,6 +43,7 @@ interface IHdmiControlService {
     HdmiDeviceInfo getActiveSource();
     void oneTouchPlay(IHdmiControlCallback callback);
     void toggleAndFollowTvPower();
+    boolean shouldHandleTvPowerKey();
     void queryDisplayStatus(IHdmiControlCallback callback);
     void addHdmiControlStatusChangeListener(IHdmiControlStatusChangeListener listener);
     void removeHdmiControlStatusChangeListener(IHdmiControlStatusChangeListener listener);
