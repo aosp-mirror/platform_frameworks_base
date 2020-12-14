@@ -67,35 +67,3 @@ package com.android.location.provider {
 
 }
 
-package com.android.location.timezone.provider {
-
-  public final class LocationTimeZoneEventUnbundled {
-    method public int getEventType();
-    method @NonNull public java.util.List<java.lang.String> getTimeZoneIds();
-    field public static final int EVENT_TYPE_PERMANENT_FAILURE = 1; // 0x1
-    field public static final int EVENT_TYPE_SUCCESS = 2; // 0x2
-    field public static final int EVENT_TYPE_UNCERTAIN = 3; // 0x3
-  }
-
-  public static final class LocationTimeZoneEventUnbundled.Builder {
-    ctor public LocationTimeZoneEventUnbundled.Builder();
-    method @NonNull public com.android.location.timezone.provider.LocationTimeZoneEventUnbundled build();
-    method @NonNull public com.android.location.timezone.provider.LocationTimeZoneEventUnbundled.Builder setEventType(int);
-    method @NonNull public com.android.location.timezone.provider.LocationTimeZoneEventUnbundled.Builder setTimeZoneIds(@NonNull java.util.List<java.lang.String>);
-  }
-
-  public abstract class LocationTimeZoneProviderBase {
-    ctor public LocationTimeZoneProviderBase(android.content.Context, String);
-    method public final android.os.IBinder getBinder();
-    method protected final android.content.Context getContext();
-    method protected abstract void onSetRequest(@NonNull com.android.location.timezone.provider.LocationTimeZoneProviderRequestUnbundled);
-    method protected final void reportLocationTimeZoneEvent(@NonNull com.android.location.timezone.provider.LocationTimeZoneEventUnbundled);
-  }
-
-  public final class LocationTimeZoneProviderRequestUnbundled {
-    method @IntRange(from=0) public long getInitializationTimeoutMillis();
-    method public boolean getReportLocationTimeZone();
-  }
-
-}
-
