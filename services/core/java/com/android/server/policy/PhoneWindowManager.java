@@ -647,8 +647,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_LAUNCH_ASSIST:
                     final int deviceId = msg.arg1;
-                    final String hint = (String) msg.obj;
-                    launchAssistAction(hint, deviceId);
+                    final Long eventTime = (Long) msg.obj;
+                    launchAssistAction(null /* hint */, deviceId, eventTime);
                     break;
                 case MSG_LAUNCH_VOICE_ASSIST_WITH_WAKE_LOCK:
                     launchVoiceAssistWithWakeLock();
@@ -658,7 +658,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     finishPowerKeyPress();
                     break;
                 case MSG_POWER_LONG_PRESS:
-                    powerLongPress();
+                    powerLongPress((Long) msg.obj /* eventTime */);
                     break;
                 case MSG_POWER_VERY_LONG_PRESS:
                     powerVeryLongPress();
@@ -933,9 +933,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // Wait for a long press or for the button to be released to decide what to do.
                 if (hasLongPressOnPowerBehavior()) {
                     if ((event.getFlags() & KeyEvent.FLAG_LONG_PRESS) != 0) {
-                        powerLongPress();
+                        powerLongPress(event.getEventTime());
                     } else {
-                        Message msg = mHandler.obtainMessage(MSG_POWER_LONG_PRESS);
+                        Message msg = mHandler.obtainMessage(MSG_POWER_LONG_PRESS,
+                                event.getEventTime());
                         msg.setAsynchronous(true);
                         mHandler.sendMessageDelayed(msg,
                                 ViewConfiguration.get(mContext).getDeviceGlobalActionKeyTimeout());
@@ -952,9 +953,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
                 if (mSupportLongPressPowerWhenNonInteractive && hasLongPressOnPowerBehavior()) {
                     if ((event.getFlags() & KeyEvent.FLAG_LONG_PRESS) != 0) {
-                        powerLongPress();
+                        powerLongPress(event.getEventTime());
                     } else {
-                        Message msg = mHandler.obtainMessage(MSG_POWER_LONG_PRESS);
+                        Message msg = mHandler.obtainMessage(MSG_POWER_LONG_PRESS,
+                                event.getEventTime());
                         msg.setAsynchronous(true);
                         mHandler.sendMessageDelayed(msg,
                                 ViewConfiguration.get(mContext).getDeviceGlobalActionKeyTimeout());
@@ -1187,7 +1189,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return 1;
     }
 
-    private void powerLongPress() {
+    private void powerLongPress(long eventTime) {
         final int behavior = getResolvedLongPressOnPowerBehavior();
         switch (behavior) {
             case LONG_PRESS_POWER_NOTHING:
@@ -1220,7 +1222,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, false,
                         "Power - Long Press - Go To Assistant");
                 final int powerKeyDeviceId = Integer.MIN_VALUE;
-                launchAssistAction(null, powerKeyDeviceId);
+                launchAssistAction(null, powerKeyDeviceId, eventTime);
                 break;
         }
     }
@@ -1623,7 +1625,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             } else if ((event.getFlags() & KeyEvent.FLAG_LONG_PRESS) != 0) {
                 if (!keyguardOn) {
                     // Post to main thread to avoid blocking input pipeline.
-                    mHandler.post(() -> handleLongPressOnHome(event.getDeviceId()));
+                    mHandler.post(() -> handleLongPressOnHome(event.getDeviceId(),
+                            event.getEventTime()));
                 }
             }
             return -1;
@@ -1636,7 +1639,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
-        private void handleLongPressOnHome(int deviceId) {
+        private void handleLongPressOnHome(int deviceId, long eventTime) {
             if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_NOTHING) {
                 return;
             }
@@ -1648,7 +1651,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     launchAllAppsAction();
                     break;
                 case LONG_PRESS_HOME_ASSIST:
-                    launchAssistAction(null, deviceId);
+                    launchAssistAction(null, deviceId, eventTime);
                     break;
                 case LONG_PRESS_HOME_NOTIFICATION_PANEL:
                     toggleNotificationPanel();
@@ -2783,7 +2786,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (down) {
                 mPendingMetaAction = true;
             } else if (mPendingMetaAction) {
-                launchAssistAction(Intent.EXTRA_ASSIST_INPUT_HINT_KEYBOARD, event.getDeviceId());
+                launchAssistAction(Intent.EXTRA_ASSIST_INPUT_HINT_KEYBOARD, event.getDeviceId(),
+                        event.getEventTime());
             }
             return -1;
         }
@@ -3153,22 +3157,24 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // various parts of the UI.
 
     /** Asks the status bar to startAssist(), usually a full "assistant" interface */
-    private void launchAssistAction(String hint, int deviceId) {
+    private void launchAssistAction(String hint, int deviceId, long eventTime) {
         sendCloseSystemWindows(SYSTEM_DIALOG_REASON_ASSIST);
         if (!isUserSetupComplete()) {
             // Disable opening assist window during setup
             return;
         }
+
+        // Add Intent Extra data.
         Bundle args = null;
-        if (deviceId > Integer.MIN_VALUE || hint != null) {
-            args = new Bundle();
-            if (deviceId > Integer.MIN_VALUE) {
-                args.putInt(Intent.EXTRA_ASSIST_INPUT_DEVICE_ID, deviceId);
-            }
-            if (hint != null) {
-                args.putBoolean(hint, true);
-            }
+        args = new Bundle();
+        if (deviceId > Integer.MIN_VALUE) {
+            args.putInt(Intent.EXTRA_ASSIST_INPUT_DEVICE_ID, deviceId);
         }
+        if (hint != null) {
+            args.putBoolean(hint, true);
+        }
+        args.putLong(Intent.EXTRA_TIME, eventTime);
+
         ((SearchManager) mContext.createContextAsUser(UserHandle.of(mCurrentUserId), 0)
                 .getSystemService(Context.SEARCH_SERVICE)).launchAssist(args);
     }
@@ -3790,7 +3796,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 final boolean longPressed = event.getRepeatCount() > 0;
                 if (down && !longPressed) {
                     Message msg = mHandler.obtainMessage(MSG_LAUNCH_ASSIST, event.getDeviceId(),
-                            0 /* unused */, null /* hint */);
+                            0 /* unused */, event.getEventTime() /* eventTime */);
                     msg.setAsynchronous(true);
                     msg.sendToTarget();
                 }
