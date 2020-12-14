@@ -2,4 +2,19 @@
 
 file:/core/java/android/view/OWNERS
 
+# Autofill
+per-file IInlineSuggestions*.aidl = file:/core/java/android/service/autofill/OWNERS
+per-file InlineSuggestions*.java = file:/core/java/android/service/autofill/OWNERS
+
+# Ime
 per-file *Input* = file:/services/core/java/com/android/server/inputmethod/OWNERS
+
+# Surface
+per-file *Surface* = file:/graphics/java/android/graphics/OWNERS
+per-file *Surface* = file:/services/core/java/com/android/server/wm/OWNERS
+
+# WindowManager
+per-file AppearanceRegion = file:/services/core/java/com/android/server/wm/OWNERS
+per-file BaseIWIndow.java = file:/services/core/java/com/android/server/wm/OWNERS
+per-file RotationPolicy.java = file:/services/core/java/com/android/server/wm/OWNERS
+per-file WindowManagerPolicyThread.java = file:/services/core/java/com/android/server/wm/OWNERS
