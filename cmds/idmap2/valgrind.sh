@@ -53,6 +53,5 @@ valgrind="valgrind --error-exitcode=1 -q --track-origins=yes --leak-check=full"
 _eval "idmap2 create" "$valgrind idmap2 create --policy public --target-apk-path $target_path --overlay-apk-path $overlay_path --idmap-path $idmap_path"
 _eval "idmap2 dump" "$valgrind idmap2 dump --idmap-path $idmap_path"
 _eval "idmap2 lookup" "$valgrind idmap2 lookup --idmap-path $idmap_path --config '' --resid test.target:string/str1"
-_eval "idmap2 verify" "$valgrind idmap2 verify --idmap-path $idmap_path"
 _eval "idmap2_tests" "$valgrind $ANDROID_HOST_OUT/nativetest64/idmap2_tests/idmap2_tests"
 exit $errors
