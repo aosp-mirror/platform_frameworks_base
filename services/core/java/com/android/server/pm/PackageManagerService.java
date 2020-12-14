@@ -101,7 +101,7 @@ import static android.content.pm.PackageManager.TYPE_UNKNOWN;
 import static android.content.pm.PackageManager.UNINSTALL_REASON_UNKNOWN;
 import static android.content.pm.PackageManagerInternal.LAST_KNOWN_PACKAGE;
 import static android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V4;
-import static android.content.pm.PackageParser.isApkFile;
+import static android.content.pm.parsing.ApkLiteParseUtils.isApkFile;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.os.incremental.IncrementalManager.isIncrementalPath;
 import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
@@ -211,9 +211,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManagerInternal.PackageListObserver;
 import android.content.pm.PackageManagerInternal.PrivateResolveFlags;
 import android.content.pm.PackageParser;
-import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
-import android.content.pm.PackageParser.ParseFlags;
 import android.content.pm.PackageParser.SigningDetails;
 import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.PackagePartitions;
@@ -241,7 +239,9 @@ import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.IArtManager;
 import android.content.pm.parsing.ApkLiteParseUtils;
+import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.ParsingPackageUtils;
+import android.content.pm.parsing.ParsingPackageUtils.ParseFlags;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedIntentInfo;
@@ -6163,7 +6163,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         if (separateProcesses != null && separateProcesses.length() > 0) {
             if ("*".equals(separateProcesses)) {
-                mDefParseFlags = PackageParser.PARSE_IGNORE_PROCESSES;
+                mDefParseFlags = ParsingPackageUtils.PARSE_IGNORE_PROCESSES;
                 mSeparateProcesses = null;
                 Slog.w(TAG, "Running with debug.separate_processes: * (ALL)");
             } else {
@@ -6363,7 +6363,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 scanFlags = scanFlags | SCAN_FIRST_BOOT_OR_UPGRADE;
             }
 
-            final int systemParseFlags = mDefParseFlags | PackageParser.PARSE_IS_SYSTEM_DIR;
+            final int systemParseFlags = mDefParseFlags | ParsingPackageUtils.PARSE_IS_SYSTEM_DIR;
             final int systemScanFlags = scanFlags | SCAN_AS_SYSTEM;
 
             PackageParser2 packageParser = injector.getScanningCachingPackageParser();
@@ -7003,7 +7003,7 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private boolean enableCompressedPackage(AndroidPackage stubPkg,
             @NonNull PackageSetting stubPkgSetting) {
-        final int parseFlags = mDefParseFlags | PackageParser.PARSE_CHATTY
+        final int parseFlags = mDefParseFlags | ParsingPackageUtils.PARSE_CHATTY
                 | PackageParser.PARSE_ENFORCE_CODE;
         synchronized (mInstallLock) {
             final AndroidPackage pkg;
@@ -11207,7 +11207,8 @@ public class PackageManagerService extends IPackageManager.Stub
             @ParseFlags int parseFlags, @ScanFlags int scanFlags, long currentTime,
             @Nullable UserHandle user)
                     throws PackageManagerException {
-        final boolean scanSystemPartition = (parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) != 0;
+        final boolean scanSystemPartition =
+                (parseFlags & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR) != 0;
         final String renamedPkgName;
         final PackageSetting disabledPkgSetting;
         final boolean isSystemPkgUpdated;
@@ -11250,7 +11251,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             0 /*pkgFlags*/, 0 /*pkgPrivateFlags*/, true)
                     : null;
             if (DEBUG_PACKAGE_SCANNING
-                    && (parseFlags & PackageParser.PARSE_CHATTY) != 0
+                    && (parseFlags & ParsingPackageUtils.PARSE_CHATTY) != 0
                     && sharedUserSetting != null) {
                 Log.d(TAG, "Shared UserID " + parsedPackage.getSharedUserId()
                         + " (uid=" + sharedUserSetting.userId + "):"
@@ -13069,10 +13070,11 @@ public class PackageManagerService extends IPackageManager.Stub
                 sharedUserSetting = mSettings.getSharedUserLPw(parsedPackage.getSharedUserId(),
                         0 /*pkgFlags*/, 0 /*pkgPrivateFlags*/, true /*create*/);
                 if (DEBUG_PACKAGE_SCANNING) {
-                    if ((parseFlags & PackageParser.PARSE_CHATTY) != 0)
+                    if ((parseFlags & ParsingPackageUtils.PARSE_CHATTY) != 0) {
                         Log.d(TAG, "Shared UserID " + parsedPackage.getSharedUserId()
                                 + " (uid=" + sharedUserSetting.userId + "):"
                                 + " packages=" + sharedUserSetting.packages);
+                    }
                 }
             }
             String platformPackageName = mPlatformPackage == null
@@ -13229,7 +13231,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final int userId = user == null ? 0 : user.getIdentifier();
         // Modify state for the given package setting
         commitPackageSettings(pkg, oldPkg, pkgSetting, scanFlags,
-                (parseFlags & PackageParser.PARSE_CHATTY) != 0 /*chatty*/, reconciledPkg);
+                (parseFlags & ParsingPackageUtils.PARSE_CHATTY) != 0 /*chatty*/, reconciledPkg);
         if (pkgSetting.getInstantApp(userId)) {
             mInstantAppRegistry.addInstantAppLPw(userId, pkgSetting.appId);
         }
@@ -13437,8 +13439,9 @@ public class PackageManagerService extends IPackageManager.Stub
         List<String> changedAbiCodePath = null;
 
         if (DEBUG_PACKAGE_SCANNING) {
-            if ((parseFlags & PackageParser.PARSE_CHATTY) != 0)
+            if ((parseFlags & ParsingPackageUtils.PARSE_CHATTY) != 0) {
                 Log.d(TAG, "Scanning package " + parsedPackage.getPackageName());
+            }
         }
 
         // Initialize package source and resource directories
@@ -13705,7 +13708,7 @@ public class PackageManagerService extends IPackageManager.Stub
         } else if (pkgSetting.firstInstallTime == 0) {
             // We need *something*.  Take time time stamp of the file.
             pkgSetting.firstInstallTime = pkgSetting.lastUpdateTime = scanFileTime;
-        } else if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) != 0) {
+        } else if ((parseFlags & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR) != 0) {
             if (scanFileTime != pkgSetting.timeStamp) {
                 // A package on the system image has changed; consider this
                 // to be an update.
@@ -13902,7 +13905,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private void assertPackageIsValid(AndroidPackage pkg, final @ParseFlags int parseFlags,
             final @ScanFlags int scanFlags)
                     throws PackageManagerException {
-        if ((parseFlags & PackageParser.PARSE_ENFORCE_CODE) != 0) {
+        if ((parseFlags & ParsingPackageUtils.PARSE_ENFORCE_CODE) != 0) {
             assertCodePolicy(pkg);
         }
 
@@ -14159,7 +14162,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 if ((scanFlags & SCAN_AS_SYSTEM) != 0) {
                     // We are scanning a system overlay. This can be the first scan of the
                     // system/vendor/oem partition, or an update to the system overlay.
-                    if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
+                    if ((parseFlags & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR) == 0) {
                         // This must be an update to a system overlay. Immutable overlays cannot be
                         // upgraded.
                         Objects.requireNonNull(mOverlayConfig,
@@ -14239,7 +14242,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // If the package is not on a system partition ensure it is signed with at least the
             // minimum signature scheme version required for its target SDK.
-            if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
+            if ((parseFlags & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR) == 0) {
                 int minSignatureSchemeVersion =
                         ApkSignatureVerifier.getMinimumSignatureSchemeVersionForTargetSdk(
                                 pkg.getTargetSdkVersion());
@@ -17905,11 +17908,12 @@ public class PackageManagerService extends IPackageManager.Stub
             // Try enumerating all code paths before deleting
             List<String> allCodePaths = Collections.EMPTY_LIST;
             if (codeFile != null && codeFile.exists()) {
-                try {
-                    final PackageLite pkg = PackageParser.parsePackageLite(codeFile, 0);
-                    allCodePaths = pkg.getAllCodePaths();
-                } catch (PackageParserException e) {
-                    // Ignored; we tried our best
+                final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+                final ParseResult<PackageLite> result = ApkLiteParseUtils.parsePackageLite(
+                        input.reset(), codeFile, /* flags */ 0);
+                if (result.isSuccess()) {
+                    // Ignore error; we tried our best
+                    allCodePaths = result.getResult().getAllApkPaths();
                 }
             }
 
@@ -18527,7 +18531,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     // We just determined the app is signed correctly, so bring
                     // over the latest parsed certs.
                 } else {
-                    if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
+                    if ((parseFlags & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR) == 0) {
                         throw new ReconcileFailure(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
                                 "Package " + parsedPackage.getPackageName()
                                         + " upgrade keys do not match the previously installed"
@@ -18577,7 +18581,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         }
                     }
                 } catch (PackageManagerException e) {
-                    if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
+                    if ((parseFlags & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR) == 0) {
                         throw new ReconcileFailure(e);
                     }
                     signingDetails = parsedPackage.getSigningDetails();
@@ -18656,7 +18660,8 @@ public class PackageManagerService extends IPackageManager.Stub
             // apps are scanned to avoid dependency based scanning.
             final ScanResult scanResult = scannedPackages.get(installPackageName);
             if ((scanResult.request.scanFlags & SCAN_BOOTING) != 0
-                    || (scanResult.request.parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) != 0) {
+                    || (scanResult.request.parseFlags & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR)
+                    != 0) {
                 continue;
             }
             try {
@@ -19541,9 +19546,9 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         // Retrieve PackageSettings and parse package
-        @ParseFlags final int parseFlags = mDefParseFlags | PackageParser.PARSE_CHATTY
-                | PackageParser.PARSE_ENFORCE_CODE
-                | (onExternal ? PackageParser.PARSE_EXTERNAL_STORAGE : 0);
+        @ParseFlags final int parseFlags = mDefParseFlags | ParsingPackageUtils.PARSE_CHATTY
+                | ParsingPackageUtils.PARSE_ENFORCE_CODE
+                | (onExternal ? ParsingPackageUtils.PARSE_EXTERNAL_STORAGE : 0);
 
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "parsePackage");
         final ParsedPackage parsedPackage;
@@ -21270,8 +21275,8 @@ public class PackageManagerService extends IPackageManager.Stub
         final File codePath = new File(codePathString);
         @ParseFlags int parseFlags =
                 mDefParseFlags
-                | PackageParser.PARSE_MUST_BE_APK
-                | PackageParser.PARSE_IS_SYSTEM_DIR;
+                | ParsingPackageUtils.PARSE_MUST_BE_APK
+                | ParsingPackageUtils.PARSE_IS_SYSTEM_DIR;
         @ScanFlags int scanFlags = SCAN_AS_SYSTEM;
         for (int i = mDirsToScanAsSystem.size() - 1; i >= 0; i--) {
             ScanPartition partition = mDirsToScanAsSystem.get(i);
@@ -24716,7 +24721,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final ArrayList<PackageFreezer> freezers = new ArrayList<>();
         final ArrayList<AndroidPackage> loaded = new ArrayList<>();
-        final int parseFlags = mDefParseFlags | PackageParser.PARSE_EXTERNAL_STORAGE;
+        final int parseFlags = mDefParseFlags | ParsingPackageUtils.PARSE_EXTERNAL_STORAGE;
 
         final VersionInfo ver;
         final List<PackageSetting> packages;

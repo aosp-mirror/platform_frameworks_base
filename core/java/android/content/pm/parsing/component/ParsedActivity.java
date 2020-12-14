@@ -28,7 +28,6 @@ import android.app.ActivityTaskManager;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -127,7 +126,7 @@ public class ParsedActivity extends ParsedMainComponent {
         activity.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
         activity.documentLaunchMode = ActivityInfo.DOCUMENT_LAUNCH_NONE;
         activity.maxRecents = ActivityTaskManager.getDefaultAppRecentsLimitStatic();
-        activity.configChanges = PackageParser.getActivityConfigChanges(0, 0);
+        activity.configChanges = ParsedActivityUtils.getActivityConfigChanges(0, 0);
         activity.softInputMode = 0;
         activity.persistableMode = ActivityInfo.PERSIST_NEVER;
         activity.screenOrientation = SCREEN_ORIENTATION_UNSPECIFIED;

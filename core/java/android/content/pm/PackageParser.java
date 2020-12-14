@@ -30,6 +30,7 @@ import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_UNRESIZEABLE;
+import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
@@ -53,8 +54,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.split.DefaultSplitAssetLoader;
-import android.content.pm.split.SplitAssetDependencyLoader;
 import android.content.pm.split.SplitAssetLoader;
 import android.content.res.ApkAssets;
 import android.content.res.AssetManager;
@@ -80,6 +79,7 @@ import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Base64;
 import android.util.DisplayMetrics;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.PackageUtils;
 import android.util.Pair;
@@ -118,6 +118,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -8571,6 +8572,412 @@ public class PackageParser {
         public PackageParserException(int error, String detailMessage, Throwable throwable) {
             super(detailMessage, throwable);
             this.error = error;
+        }
+    }
+
+    // Duplicate the SplitAsset related classes with PackageParser.Package/ApkLite here, and
+    // change the original one using new Package/ApkLite. The propose is that we don't want to
+    // have two branches of methods in SplitAsset related classes so we can keep real classes
+    // clean and move all the legacy code to one place.
+
+    /**
+     * A helper class that implements the dependency tree traversal for splits. Callbacks
+     * are implemented by subclasses to notify whether a split has already been constructed
+     * and is cached, and to actually create the split requested.
+     *
+     * This helper is meant to be subclassed so as to reduce the number of allocations
+     * needed to make use of it.
+     *
+     * All inputs and outputs are assumed to be indices into an array of splits.
+     *
+     * @hide
+     * @deprecated Do not use. New changes should use
+     * {@link android.content.pm.split.SplitDependencyLoader} instead.
+     */
+    @Deprecated
+    private abstract static class SplitDependencyLoader<E extends Exception> {
+        private final @NonNull SparseArray<int[]> mDependencies;
+
+        /**
+         * Construct a new SplitDependencyLoader. Meant to be called from the
+         * subclass constructor.
+         * @param dependencies The dependency tree of splits.
+         */
+        protected SplitDependencyLoader(@NonNull SparseArray<int[]> dependencies) {
+            mDependencies = dependencies;
+        }
+
+        /**
+         * Traverses the dependency tree and constructs any splits that are not already
+         * cached. This routine short-circuits and skips the creation of splits closer to the
+         * root if they are cached, as reported by the subclass implementation of
+         * {@link #isSplitCached(int)}. The construction of splits is delegated to the subclass
+         * implementation of {@link #constructSplit(int, int[], int)}.
+         * @param splitIdx The index of the split to load. 0 represents the base Application.
+         */
+        protected void loadDependenciesForSplit(@IntRange(from = 0) int splitIdx) throws E {
+            // Quick check before any allocations are done.
+            if (isSplitCached(splitIdx)) {
+                return;
+            }
+
+            // Special case the base, since it has no dependencies.
+            if (splitIdx == 0) {
+                final int[] configSplitIndices = collectConfigSplitIndices(0);
+                constructSplit(0, configSplitIndices, -1);
+                return;
+            }
+
+            // Build up the dependency hierarchy.
+            final IntArray linearDependencies = new IntArray();
+            linearDependencies.add(splitIdx);
+
+            // Collect all the dependencies that need to be constructed.
+            // They will be listed from leaf to root.
+            while (true) {
+                // Only follow the first index into the array. The others are config splits and
+                // get loaded with the split.
+                final int[] deps = mDependencies.get(splitIdx);
+                if (deps != null && deps.length > 0) {
+                    splitIdx = deps[0];
+                } else {
+                    splitIdx = -1;
+                }
+
+                if (splitIdx < 0 || isSplitCached(splitIdx)) {
+                    break;
+                }
+
+                linearDependencies.add(splitIdx);
+            }
+
+            // Visit each index, from right to left (root to leaf).
+            int parentIdx = splitIdx;
+            for (int i = linearDependencies.size() - 1; i >= 0; i--) {
+                final int idx = linearDependencies.get(i);
+                final int[] configSplitIndices = collectConfigSplitIndices(idx);
+                constructSplit(idx, configSplitIndices, parentIdx);
+                parentIdx = idx;
+            }
+        }
+
+        private @NonNull int[] collectConfigSplitIndices(int splitIdx) {
+            // The config splits appear after the first element.
+            final int[] deps = mDependencies.get(splitIdx);
+            if (deps == null || deps.length <= 1) {
+                return EmptyArray.INT;
+            }
+            return Arrays.copyOfRange(deps, 1, deps.length);
+        }
+
+        /**
+         * Subclass to report whether the split at `splitIdx` is cached and need not be constructed.
+         * It is assumed that if `splitIdx` is cached, any parent of `splitIdx` is also cached.
+         * @param splitIdx The index of the split to check for in the cache.
+         * @return true if the split is cached and does not need to be constructed.
+         */
+        protected abstract boolean isSplitCached(@IntRange(from = 0) int splitIdx);
+
+        /**
+         * Subclass to construct a split at index `splitIdx` with parent split `parentSplitIdx`.
+         * The result is expected to be cached by the subclass in its own structures.
+         * @param splitIdx The index of the split to construct. 0 represents the base Application.
+         * @param configSplitIndices The array of configuration splits to load along with this
+         *                           split. May be empty (length == 0) but never null.
+         * @param parentSplitIdx The index of the parent split. -1 if there is no parent.
+         * @throws E Subclass defined exception representing failure to construct a split.
+         */
+        protected abstract void constructSplit(@IntRange(from = 0) int splitIdx,
+                @NonNull @IntRange(from = 1) int[] configSplitIndices,
+                @IntRange(from = -1) int parentSplitIdx) throws E;
+
+        public static class IllegalDependencyException extends Exception {
+            private IllegalDependencyException(String message) {
+                super(message);
+            }
+        }
+
+        private static int[] append(int[] src, int elem) {
+            if (src == null) {
+                return new int[] { elem };
+            }
+            int[] dst = Arrays.copyOf(src, src.length + 1);
+            dst[src.length] = elem;
+            return dst;
+        }
+
+        public static @NonNull SparseArray<int[]> createDependenciesFromPackage(
+                PackageLite pkg)
+                throws SplitDependencyLoader.IllegalDependencyException {
+            // The data structure that holds the dependencies. In PackageParser, splits are stored
+            // in their own array, separate from the base. We treat all paths as equals, so
+            // we need to insert the base as index 0, and shift all other splits.
+            final SparseArray<int[]> splitDependencies = new SparseArray<>();
+
+            // The base depends on nothing.
+            splitDependencies.put(0, new int[] {-1});
+
+            // First write out the <uses-split> dependencies. These must appear first in the
+            // array of ints, as is convention in this class.
+            for (int splitIdx = 0; splitIdx < pkg.splitNames.length; splitIdx++) {
+                if (!pkg.isFeatureSplits[splitIdx]) {
+                    // Non-feature splits don't have dependencies.
+                    continue;
+                }
+
+                // Implicit dependency on the base.
+                final int targetIdx;
+                final String splitDependency = pkg.usesSplitNames[splitIdx];
+                if (splitDependency != null) {
+                    final int depIdx = Arrays.binarySearch(pkg.splitNames, splitDependency);
+                    if (depIdx < 0) {
+                        throw new SplitDependencyLoader.IllegalDependencyException(
+                                "Split '" + pkg.splitNames[splitIdx] + "' requires split '"
+                                        + splitDependency + "', which is missing.");
+                    }
+                    targetIdx = depIdx + 1;
+                } else {
+                    // Implicitly depend on the base.
+                    targetIdx = 0;
+                }
+                splitDependencies.put(splitIdx + 1, new int[] {targetIdx});
+            }
+
+            // Write out the configForSplit reverse-dependencies. These appear after the
+            // <uses-split> dependencies and are considered leaves.
+            //
+            // At this point, all splits in splitDependencies have the first element in their
+            // array set.
+            for (int splitIdx = 0, size = pkg.splitNames.length; splitIdx < size; splitIdx++) {
+                if (pkg.isFeatureSplits[splitIdx]) {
+                    // Feature splits are not configForSplits.
+                    continue;
+                }
+
+                // Implicit feature for the base.
+                final int targetSplitIdx;
+                final String configForSplit = pkg.configForSplit[splitIdx];
+                if (configForSplit != null) {
+                    final int depIdx = Arrays.binarySearch(pkg.splitNames, configForSplit);
+                    if (depIdx < 0) {
+                        throw new SplitDependencyLoader.IllegalDependencyException(
+                                "Split '" + pkg.splitNames[splitIdx] + "' targets split '"
+                                        + configForSplit + "', which is missing.");
+                    }
+
+                    if (!pkg.isFeatureSplits[depIdx]) {
+                        throw new SplitDependencyLoader.IllegalDependencyException(
+                                "Split '" + pkg.splitNames[splitIdx] + "' declares itself as "
+                                        + "configuration split for a non-feature split '"
+                                        + pkg.splitNames[depIdx] + "'");
+                    }
+                    targetSplitIdx = depIdx + 1;
+                } else {
+                    targetSplitIdx = 0;
+                }
+                splitDependencies.put(targetSplitIdx,
+                        append(splitDependencies.get(targetSplitIdx), splitIdx + 1));
+            }
+
+            // Verify that there are no cycles.
+            final BitSet bitset = new BitSet();
+            for (int i = 0, size = splitDependencies.size(); i < size; i++) {
+                int splitIdx = splitDependencies.keyAt(i);
+
+                bitset.clear();
+                while (splitIdx != -1) {
+                    // Check if this split has been visited yet.
+                    if (bitset.get(splitIdx)) {
+                        throw new SplitDependencyLoader.IllegalDependencyException(
+                                "Cycle detected in split dependencies.");
+                    }
+
+                    // Mark the split so that if we visit it again, we no there is a cycle.
+                    bitset.set(splitIdx);
+
+                    // Follow the first dependency only, the others are leaves by definition.
+                    final int[] deps = splitDependencies.get(splitIdx);
+                    splitIdx = deps != null ? deps[0] : -1;
+                }
+            }
+            return splitDependencies;
+        }
+    }
+
+    /**
+     * Loads the base and split APKs into a single AssetManager.
+     * @hide
+     * @deprecated Do not use. New changes should use
+     * {@link android.content.pm.split.DefaultSplitAssetLoader} instead.
+     */
+    @Deprecated
+    private static class DefaultSplitAssetLoader implements SplitAssetLoader {
+        private final String mBaseCodePath;
+        private final String[] mSplitCodePaths;
+        private final @ParseFlags int mFlags;
+        private AssetManager mCachedAssetManager;
+
+        DefaultSplitAssetLoader(PackageLite pkg, @ParseFlags int flags) {
+            mBaseCodePath = pkg.baseCodePath;
+            mSplitCodePaths = pkg.splitCodePaths;
+            mFlags = flags;
+        }
+
+        private static ApkAssets loadApkAssets(String path, @ParseFlags int flags)
+                throws PackageParserException {
+            if ((flags & PackageParser.PARSE_MUST_BE_APK) != 0 && !PackageParser.isApkPath(path)) {
+                throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
+                        "Invalid package file: " + path);
+            }
+
+            try {
+                return ApkAssets.loadFromPath(path);
+            } catch (IOException e) {
+                throw new PackageParserException(INSTALL_FAILED_INVALID_APK,
+                        "Failed to load APK at path " + path, e);
+            }
+        }
+
+        @Override
+        public AssetManager getBaseAssetManager() throws PackageParserException {
+            if (mCachedAssetManager != null) {
+                return mCachedAssetManager;
+            }
+
+            ApkAssets[] apkAssets = new ApkAssets[(mSplitCodePaths != null
+                    ? mSplitCodePaths.length : 0) + 1];
+
+            // Load the base.
+            int splitIdx = 0;
+            apkAssets[splitIdx++] = loadApkAssets(mBaseCodePath, mFlags);
+
+            // Load any splits.
+            if (!ArrayUtils.isEmpty(mSplitCodePaths)) {
+                for (String apkPath : mSplitCodePaths) {
+                    apkAssets[splitIdx++] = loadApkAssets(apkPath, mFlags);
+                }
+            }
+
+            AssetManager assets = new AssetManager();
+            assets.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    Build.VERSION.RESOURCES_SDK_INT);
+            assets.setApkAssets(apkAssets, false /*invalidateCaches*/);
+
+            mCachedAssetManager = assets;
+            return mCachedAssetManager;
+        }
+
+        @Override
+        public AssetManager getSplitAssetManager(int splitIdx) throws PackageParserException {
+            return getBaseAssetManager();
+        }
+
+        @Override
+        public void close() throws Exception {
+            IoUtils.closeQuietly(mCachedAssetManager);
+        }
+    }
+
+    /**
+     * Loads AssetManagers for splits and their dependencies. This SplitAssetLoader implementation
+     * is to be used when an application opts-in to isolated split loading.
+     * @hide
+     * @deprecated Do not use. New changes should use
+     * {@link android.content.pm.split.SplitAssetDependencyLoader} instead.
+     */
+    @Deprecated
+    private static class SplitAssetDependencyLoader extends
+            SplitDependencyLoader<PackageParserException> implements SplitAssetLoader {
+        private final String[] mSplitPaths;
+        private final @ParseFlags int mFlags;
+        private final ApkAssets[][] mCachedSplitApks;
+        private final AssetManager[] mCachedAssetManagers;
+
+        SplitAssetDependencyLoader(PackageLite pkg,
+                SparseArray<int[]> dependencies, @ParseFlags int flags) {
+            super(dependencies);
+
+            // The base is inserted into index 0, so we need to shift all the splits by 1.
+            mSplitPaths = new String[pkg.splitCodePaths.length + 1];
+            mSplitPaths[0] = pkg.baseCodePath;
+            System.arraycopy(pkg.splitCodePaths, 0, mSplitPaths, 1, pkg.splitCodePaths.length);
+
+            mFlags = flags;
+            mCachedSplitApks = new ApkAssets[mSplitPaths.length][];
+            mCachedAssetManagers = new AssetManager[mSplitPaths.length];
+        }
+
+        @Override
+        protected boolean isSplitCached(int splitIdx) {
+            return mCachedAssetManagers[splitIdx] != null;
+        }
+
+        private static ApkAssets loadApkAssets(String path, @ParseFlags int flags)
+                throws PackageParserException {
+            if ((flags & PackageParser.PARSE_MUST_BE_APK) != 0 && !PackageParser.isApkPath(path)) {
+                throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
+                        "Invalid package file: " + path);
+            }
+
+            try {
+                return ApkAssets.loadFromPath(path);
+            } catch (IOException e) {
+                throw new PackageParserException(PackageManager.INSTALL_FAILED_INVALID_APK,
+                        "Failed to load APK at path " + path, e);
+            }
+        }
+
+        private static AssetManager createAssetManagerWithAssets(ApkAssets[] apkAssets) {
+            final AssetManager assets = new AssetManager();
+            assets.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    Build.VERSION.RESOURCES_SDK_INT);
+            assets.setApkAssets(apkAssets, false /*invalidateCaches*/);
+            return assets;
+        }
+
+        @Override
+        protected void constructSplit(int splitIdx, @NonNull int[] configSplitIndices,
+                int parentSplitIdx) throws PackageParserException {
+            final ArrayList<ApkAssets> assets = new ArrayList<>();
+
+            // Include parent ApkAssets.
+            if (parentSplitIdx >= 0) {
+                Collections.addAll(assets, mCachedSplitApks[parentSplitIdx]);
+            }
+
+            // Include this ApkAssets.
+            assets.add(loadApkAssets(mSplitPaths[splitIdx], mFlags));
+
+            // Load and include all config splits for this feature.
+            for (int configSplitIdx : configSplitIndices) {
+                assets.add(loadApkAssets(mSplitPaths[configSplitIdx], mFlags));
+            }
+
+            // Cache the results.
+            mCachedSplitApks[splitIdx] = assets.toArray(new ApkAssets[assets.size()]);
+            mCachedAssetManagers[splitIdx] = createAssetManagerWithAssets(
+                    mCachedSplitApks[splitIdx]);
+        }
+
+        @Override
+        public AssetManager getBaseAssetManager() throws PackageParserException {
+            loadDependenciesForSplit(0);
+            return mCachedAssetManagers[0];
+        }
+
+        @Override
+        public AssetManager getSplitAssetManager(int idx) throws PackageParserException {
+            // Since we insert the base at position 0, and PackageParser keeps splits separate from
+            // the base, we need to adjust the index.
+            loadDependenciesForSplit(idx + 1);
+            return mCachedAssetManagers[idx + 1];
+        }
+
+        @Override
+        public void close() throws Exception {
+            for (AssetManager assets : mCachedAssetManagers) {
+                IoUtils.closeQuietly(assets);
+            }
         }
     }
 }

@@ -22,9 +22,9 @@ import android.annotation.AttrRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Intent;
-import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
 import android.content.pm.parsing.ParsingPackage;
+import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.ParsingUtils;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
@@ -77,7 +77,7 @@ public class ComponentParseUtils {
     @NonNull
     public static ParseResult<String> buildProcessName(@NonNull String pkg, String defProc,
             CharSequence procSeq, int flags, String[] separateProcesses, ParseInput input) {
-        if ((flags & PackageParser.PARSE_IGNORE_PROCESSES) != 0 && !"system".contentEquals(
+        if ((flags & ParsingPackageUtils.PARSE_IGNORE_PROCESSES) != 0 && !"system".contentEquals(
                 procSeq)) {
             return input.success(defProc != null ? defProc : pkg);
         }

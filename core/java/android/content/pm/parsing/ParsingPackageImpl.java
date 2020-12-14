@@ -333,7 +333,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     private int fullBackupContent;
     private int iconRes;
-    private int installLocation = PackageParser.PARSE_DEFAULT_INSTALL_LOCATION;
+    private int installLocation = ParsingPackageUtils.PARSE_DEFAULT_INSTALL_LOCATION;
     private int labelRes;
     private int largestWidthLimitDp;
     private int logo;
@@ -1011,7 +1011,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         // TODO(b/135203078): See ParsingPackageImpl#getHiddenApiEnforcementPolicy
 //        appInfo.mHiddenApiPolicy
 //        appInfo.hiddenUntilInstalled
-        appInfo.icon = (PackageParser.sUseRoundIcon && roundIconRes != 0) ? roundIconRes : iconRes;
+        appInfo.icon =
+                (ParsingPackageUtils.sUseRoundIcon && roundIconRes != 0) ? roundIconRes : iconRes;
         appInfo.iconRes = iconRes;
         appInfo.roundIconRes = roundIconRes;
         appInfo.installLocation = installLocation;

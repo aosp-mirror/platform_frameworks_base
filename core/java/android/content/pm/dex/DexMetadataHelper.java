@@ -17,11 +17,11 @@
 package android.content.pm.dex;
 
 import static android.content.pm.PackageManager.INSTALL_FAILED_BAD_DEX_METADATA;
-import static android.content.pm.PackageParser.APK_FILE_EXTENSION;
+import static android.content.pm.parsing.ApkLiteParseUtils.APK_FILE_EXTENSION;
 
-import android.content.pm.PackageParser;
-import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
+import android.content.pm.parsing.ApkLiteParseUtils;
+import android.content.pm.parsing.PackageLite;
 import android.util.ArrayMap;
 import android.util.jar.StrictJarFile;
 
@@ -87,7 +87,7 @@ public class DexMetadataHelper {
      * NOTE: involves I/O checks.
      */
     private static Map<String, String> getPackageDexMetadata(PackageLite pkg) {
-        return buildPackageApkToDexMetadataMap(pkg.getAllCodePaths());
+        return buildPackageApkToDexMetadataMap(pkg.getAllApkPaths());
     }
 
     /**
@@ -125,7 +125,7 @@ public class DexMetadataHelper {
      * @throws IllegalArgumentException if the code path is not an .apk.
      */
     public static String buildDexMetadataPathForApk(String codePath) {
-        if (!PackageParser.isApkPath(codePath)) {
+        if (!ApkLiteParseUtils.isApkPath(codePath)) {
             throw new IllegalStateException(
                     "Corrupted package. Code path is not an apk " + codePath);
         }
@@ -140,7 +140,7 @@ public class DexMetadataHelper {
      * extension (e.g. 'foo.dm' will match 'foo' or 'foo.apk').
      */
     private static String buildDexMetadataPathForFile(File targetFile) {
-        return PackageParser.isApkFile(targetFile)
+        return ApkLiteParseUtils.isApkFile(targetFile)
                 ? buildDexMetadataPathForApk(targetFile.getPath())
                 : targetFile.getPath() + DEX_METADATA_FILE_EXTENSION;
     }
@@ -179,7 +179,7 @@ public class DexMetadataHelper {
     public static void validateDexPaths(String[] paths) {
         ArrayList<String> apks = new ArrayList<>();
         for (int i = 0; i < paths.length; i++) {
-            if (PackageParser.isApkPath(paths[i])) {
+            if (ApkLiteParseUtils.isApkPath(paths[i])) {
                 apks.add(paths[i]);
             }
         }

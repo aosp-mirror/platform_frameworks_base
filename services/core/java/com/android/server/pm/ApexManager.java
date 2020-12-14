@@ -30,9 +30,9 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.parsing.PackageInfoWithoutStateUtils;
+import android.content.pm.parsing.ParsingPackageUtils;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.RemoteException;
@@ -508,7 +508,8 @@ public abstract class ApexManager {
 
             for (ApexInfo ai : allPkgs) {
                 File apexFile = new File(ai.modulePath);
-                parallelPackageParser.submit(apexFile, PackageParser.PARSE_COLLECT_CERTIFICATES);
+                parallelPackageParser.submit(apexFile,
+                        ParsingPackageUtils.PARSE_COLLECT_CERTIFICATES);
                 parsingApexInfo.put(apexFile, ai);
             }
 

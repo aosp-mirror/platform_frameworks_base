@@ -24,7 +24,7 @@ import static android.content.pm.Checksum.TYPE_WHOLE_SHA1;
 import static android.content.pm.Checksum.TYPE_WHOLE_SHA256;
 import static android.content.pm.Checksum.TYPE_WHOLE_SHA512;
 import static android.content.pm.PackageManager.EXTRA_CHECKSUMS;
-import static android.content.pm.PackageParser.APK_FILE_EXTENSION;
+import static android.content.pm.parsing.ApkLiteParseUtils.APK_FILE_EXTENSION;
 import static android.util.apk.ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA256;
 import static android.util.apk.ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA512;
 import static android.util.apk.ApkSigningBlockUtils.CONTENT_DIGEST_VERITY_CHUNKED_SHA256;
@@ -38,6 +38,7 @@ import android.content.pm.ApkChecksum;
 import android.content.pm.Checksum;
 import android.content.pm.PackageParser;
 import android.content.pm.Signature;
+import android.content.pm.parsing.ApkLiteParseUtils;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.os.incremental.IncrementalManager;
@@ -149,7 +150,7 @@ public class ApkChecksums {
      * @throws IllegalArgumentException if the code path is not an .apk.
      */
     public static String buildDigestsPathForApk(String codePath) {
-        if (!PackageParser.isApkPath(codePath)) {
+        if (!ApkLiteParseUtils.isApkPath(codePath)) {
             throw new IllegalStateException("Code path is not an apk " + codePath);
         }
         return codePath.substring(0, codePath.length() - APK_FILE_EXTENSION.length())

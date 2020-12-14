@@ -35,9 +35,12 @@ import android.content.Intent;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
-import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
+import android.content.pm.parsing.ApkLiteParseUtils;
+import android.content.pm.parsing.PackageLite;
+import android.content.pm.parsing.result.ParseResult;
+import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.Build;
 import android.os.Debug;
 import android.os.Environment;
@@ -819,8 +822,8 @@ public class PackageManagerServiceUtils {
     /**
      * Parse given package and return minimal details.
      */
-    public static PackageInfoLite getMinimalPackageInfo(Context context,
-            PackageParser.PackageLite pkg, String packagePath, int flags, String abiOverride) {
+    public static PackageInfoLite getMinimalPackageInfo(Context context, PackageLite pkg,
+            String packagePath, int flags, String abiOverride) {
         final PackageInfoLite ret = new PackageInfoLite();
         if (packagePath == null || pkg == null) {
             Slog.i(TAG, "Invalid package file " + packagePath);
@@ -843,19 +846,19 @@ public class PackageManagerServiceUtils {
         }
 
         final int recommendedInstallLocation = PackageHelper.resolveInstallLocation(context,
-                pkg.packageName, pkg.installLocation, sizeBytes, flags);
+                pkg.getPackageName(), pkg.getInstallLocation(), sizeBytes, flags);
 
-        ret.packageName = pkg.packageName;
-        ret.splitNames = pkg.splitNames;
-        ret.versionCode = pkg.versionCode;
-        ret.versionCodeMajor = pkg.versionCodeMajor;
-        ret.baseRevisionCode = pkg.baseRevisionCode;
-        ret.splitRevisionCodes = pkg.splitRevisionCodes;
-        ret.installLocation = pkg.installLocation;
-        ret.verifiers = pkg.verifiers;
+        ret.packageName = pkg.getPackageName();
+        ret.splitNames = pkg.getSplitNames();
+        ret.versionCode = pkg.getVersionCode();
+        ret.versionCodeMajor = pkg.getVersionCodeMajor();
+        ret.baseRevisionCode = pkg.getBaseRevisionCode();
+        ret.splitRevisionCodes = pkg.getSplitRevisionCodes();
+        ret.installLocation = pkg.getInstallLocation();
+        ret.verifiers = pkg.getVerifiers();
         ret.recommendedInstallLocation = recommendedInstallLocation;
-        ret.multiArch = pkg.multiArch;
-        ret.debuggable = pkg.debuggable;
+        ret.multiArch = pkg.isMultiArch();
+        ret.debuggable = pkg.isDebuggable();
 
         return ret;
     }
@@ -868,11 +871,16 @@ public class PackageManagerServiceUtils {
      */
     public static long calculateInstalledSize(String packagePath, String abiOverride) {
         final File packageFile = new File(packagePath);
-        final PackageParser.PackageLite pkg;
         try {
-            pkg = PackageParser.parsePackageLite(packageFile, 0);
-            return PackageHelper.calculateInstalledSize(pkg, abiOverride);
-        } catch (PackageParserException | IOException e) {
+            final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+            final ParseResult<PackageLite> result = ApkLiteParseUtils.parsePackageLite(
+                    input.reset(), packageFile, /* flags */ 0);
+            if (result.isError()) {
+                throw new PackageManagerException(result.getErrorCode(),
+                        result.getErrorMessage(), result.getException());
+            }
+            return PackageHelper.calculateInstalledSize(result.getResult(), abiOverride);
+        } catch (PackageManagerException | IOException e) {
             Slog.w(TAG, "Failed to calculate installed size: " + e);
             return -1;
         }
@@ -931,16 +939,23 @@ public class PackageManagerServiceUtils {
 
         try {
             final File packageFile = new File(packagePath);
-            final PackageParser.PackageLite pkg = PackageParser.parsePackageLite(packageFile, 0);
-            copyFile(pkg.baseCodePath, targetDir, "base.apk");
-            if (!ArrayUtils.isEmpty(pkg.splitNames)) {
-                for (int i = 0; i < pkg.splitNames.length; i++) {
-                    copyFile(pkg.splitCodePaths[i], targetDir,
-                            "split_" + pkg.splitNames[i] + ".apk");
+            final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+            final ParseResult<PackageLite> result = ApkLiteParseUtils.parsePackageLite(
+                    input.reset(), packageFile, /* flags */ 0);
+            if (result.isError()) {
+                Slog.w(TAG, "Failed to parse package at " + packagePath);
+                return result.getErrorCode();
+            }
+            final PackageLite pkg = result.getResult();
+            copyFile(pkg.getBaseApkPath(), targetDir, "base.apk");
+            if (!ArrayUtils.isEmpty(pkg.getSplitNames())) {
+                for (int i = 0; i < pkg.getSplitNames().length; i++) {
+                    copyFile(pkg.getSplitApkPaths()[i], targetDir,
+                            "split_" + pkg.getSplitNames()[i] + ".apk");
                 }
             }
             return PackageManager.INSTALL_SUCCEEDED;
-        } catch (PackageParserException | IOException | ErrnoException e) {
+        } catch (IOException | ErrnoException e) {
             Slog.w(TAG, "Failed to copy package at " + packagePath + ": " + e);
             return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
         }

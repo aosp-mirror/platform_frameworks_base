@@ -24,6 +24,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageParser;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.parsing.ParsingPackageRead;
+import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.component.ParsedAttribution;
 import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedPermissionGroup;
@@ -56,7 +57,7 @@ public interface AndroidPackage extends PkgAppInfo, PkgPackageInfo, ParsingPacka
 
     /**
      * The names of packages to adopt ownership of permissions from, parsed under
-     * {@link PackageParser#TAG_ADOPT_PERMISSIONS}.
+     * {@link ParsingPackageUtils#TAG_ADOPT_PERMISSIONS}.
      * @see R.styleable#AndroidManifestOriginalPackage_name
      */
     @NonNull
@@ -84,7 +85,7 @@ public interface AndroidPackage extends PkgAppInfo, PkgPackageInfo, ParsingPacka
 
     /**
      * For use with {@link com.android.server.pm.KeySetManagerService}. Parsed in
-     * {@link PackageParser#TAG_KEY_SETS}.
+     * {@link ParsingPackageUtils#TAG_KEY_SETS}.
      * @see R.styleable#AndroidManifestKeySet
      * @see R.styleable#AndroidManifestPublicKey
      */
@@ -230,7 +231,7 @@ public interface AndroidPackage extends PkgAppInfo, PkgPackageInfo, ParsingPacka
 
     /**
      * For use with {@link com.android.server.pm.KeySetManagerService}. Parsed in
-     * {@link PackageParser#TAG_KEY_SETS}.
+     * {@link ParsingPackageUtils#TAG_KEY_SETS}.
      * @see R.styleable#AndroidManifestUpgradeKeySet
      */
     @NonNull
