@@ -3066,7 +3066,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& 
         for (size_t ti=0; ti<N; ti++) {
             // Retrieve them in the same order as the type string block.
             size_t len;
-            String16 typeName(p->getTypeStrings().stringAt(ti, &len));
+            String16 typeName(UnpackOptionalString(p->getTypeStrings().stringAt(ti), &len));
             sp<Type> t = p->getTypes().valueFor(typeName);
             LOG_ALWAYS_FATAL_IF(t == NULL && typeName != String16("<empty>"),
                                 "Type name %s not found",
@@ -4169,7 +4169,7 @@ status_t ResourceTable::Package::setStrings(const sp<AaptFile>& data,
         const size_t N = strings->size();
         for (size_t i=0; i<N; i++) {
             size_t len;
-            mappings->add(String16(strings->stringAt(i, &len)), i);
+            mappings->add(String16(UnpackOptionalString(strings->stringAt(i), &len)), i);
         }
     }
     return err;
