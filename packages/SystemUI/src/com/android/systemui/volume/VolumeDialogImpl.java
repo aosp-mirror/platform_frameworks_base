@@ -569,9 +569,8 @@ public class VolumeDialogImpl implements VolumeDialog,
                 }
             }
         });
-        animator.setInterpolator(expand ? new SystemUIInterpolators.LogDecelerateInterpolator()
-                : new SystemUIInterpolators.LogAccelerateInterpolator());
-        animator.setDuration(UPDATE_ANIMATION_DURATION);
+        animator.setInterpolator(new SystemUIInterpolators.LogDecelerateInterpolator());
+        animator.setDuration(expand ? DIALOG_SHOW_ANIMATION_DURATION : DIALOG_HIDE_ANIMATION_DURATION);
         animator.start();
     }
 
