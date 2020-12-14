@@ -48,6 +48,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.net.ConnectivityManager;
 import android.net.DnsResolver;
+import android.net.INetd;
 import android.net.INetworkManagementEventObserver;
 import android.net.Ikev2VpnProfile;
 import android.net.IpPrefix;
@@ -68,6 +69,7 @@ import android.net.NetworkProvider;
 import android.net.NetworkRequest;
 import android.net.RouteInfo;
 import android.net.UidRange;
+import android.net.UidRangeParcel;
 import android.net.VpnManager;
 import android.net.VpnService;
 import android.net.ipsec.ike.ChildSessionCallback;
@@ -188,7 +190,8 @@ public class Vpn {
 
     private PendingIntent mStatusIntent;
     private volatile boolean mEnableTeardown = true;
-    private final INetworkManagementService mNetd;
+    private final INetworkManagementService mNms;
+    private final INetd mNetd;
     @VisibleForTesting
     protected VpnConfig mConfig;
     private final NetworkProvider mNetworkProvider;
@@ -234,7 +237,7 @@ public class Vpn {
      * @see mLockdown
      */
     @GuardedBy("this")
-    private final Set<UidRange> mBlockedUidsAsToldToNetd = new ArraySet<>();
+    private final Set<UidRangeParcel> mBlockedUidsAsToldToNetd = new ArraySet<>();
 
     // The user id of initiating VPN.
     private final int mUserId;
@@ -363,22 +366,23 @@ public class Vpn {
         }
     }
 
-    public Vpn(Looper looper, Context context, INetworkManagementService netService,
+    public Vpn(Looper looper, Context context, INetworkManagementService netService, INetd netd,
             @UserIdInt int userId, @NonNull KeyStore keyStore) {
-        this(looper, context, new Dependencies(), netService, userId, keyStore,
+        this(looper, context, new Dependencies(), netService, netd, userId, keyStore,
                 new SystemServices(context), new Ikev2SessionCreator());
     }
 
     @VisibleForTesting
     protected Vpn(Looper looper, Context context, Dependencies deps,
-            INetworkManagementService netService,
+            INetworkManagementService netService, INetd netd,
             int userId, @NonNull KeyStore keyStore, SystemServices systemServices,
             Ikev2SessionCreator ikev2SessionCreator) {
         mContext = context;
         mConnectivityManager = mContext.getSystemService(ConnectivityManager.class);
         mUserIdContext = context.createContextAsUser(UserHandle.of(userId), 0 /* flags */);
         mDeps = deps;
-        mNetd = netService;
+        mNms = netService;
+        mNetd = netd;
         mUserId = userId;
         mLooper = looper;
         mSystemServices = systemServices;
@@ -912,7 +916,7 @@ public class Vpn {
             }
 
             try {
-                mNetd.denyProtect(mOwnerUID);
+                mNms.denyProtect(mOwnerUID);
             } catch (Exception e) {
                 Log.wtf(TAG, "Failed to disallow UID " + mOwnerUID + " to call protect() " + e);
             }
@@ -922,7 +926,7 @@ public class Vpn {
             mOwnerUID = getAppUid(newPackage, mUserId);
             mIsPackageTargetingAtLeastQ = doesPackageTargetAtLeastQ(newPackage);
             try {
-                mNetd.allowProtect(mOwnerUID);
+                mNms.allowProtect(mOwnerUID);
             } catch (Exception e) {
                 Log.wtf(TAG, "Failed to allow UID " + mOwnerUID + " to call protect() " + e);
             }
@@ -1579,24 +1583,25 @@ public class Vpn {
             exemptedPackages = new ArrayList<>(mLockdownAllowlist);
             exemptedPackages.add(mPackage);
         }
-        final Set<UidRange> rangesToTellNetdToRemove = new ArraySet<>(mBlockedUidsAsToldToNetd);
+        final Set<UidRangeParcel> rangesToTellNetdToRemove =
+                new ArraySet<>(mBlockedUidsAsToldToNetd);
 
-        final Set<UidRange> rangesToTellNetdToAdd;
+        final Set<UidRangeParcel> rangesToTellNetdToAdd;
         if (enforce) {
-            final Set<UidRange> rangesThatShouldBeBlocked =
+            final Set<UidRange> restrictedProfilesRanges =
                     createUserAndRestrictedProfilesRanges(mUserId,
-                            /* allowedApplications */ null,
-                            /* disallowedApplications */ exemptedPackages);
+                    /* allowedApplications */ null,
+                    /* disallowedApplications */ exemptedPackages);
+            final Set<UidRangeParcel> rangesThatShouldBeBlocked = new ArraySet<>();
 
             // The UID range of the first user (0-99999) would block the IPSec traffic, which comes
             // directly from the kernel and is marked as uid=0. So we adjust the range to allow
             // it through (b/69873852).
-            for (UidRange range : rangesThatShouldBeBlocked) {
-                if (range.start == 0) {
-                    rangesThatShouldBeBlocked.remove(range);
-                    if (range.stop != 0) {
-                        rangesThatShouldBeBlocked.add(new UidRange(1, range.stop));
-                    }
+            for (UidRange range : restrictedProfilesRanges) {
+                if (range.start == 0 && range.stop != 0) {
+                    rangesThatShouldBeBlocked.add(new UidRangeParcel(1, range.stop));
+                } else if (range.start != 0) {
+                    rangesThatShouldBeBlocked.add(new UidRangeParcel(range.start, range.stop));
                 }
             }
 
@@ -1628,13 +1633,13 @@ public class Vpn {
      *         including added ranges that already existed or removed ones that didn't.
      */
     @GuardedBy("this")
-    private boolean setAllowOnlyVpnForUids(boolean enforce, Collection<UidRange> ranges) {
+    private boolean setAllowOnlyVpnForUids(boolean enforce, Collection<UidRangeParcel> ranges) {
         if (ranges.size() == 0) {
             return true;
         }
-        final UidRange[] rangesArray = ranges.toArray(new UidRange[ranges.size()]);
+        final UidRangeParcel[] stableRanges = ranges.toArray(new UidRangeParcel[ranges.size()]);
         try {
-            mNetd.setAllowOnlyVpnForUids(enforce, rangesArray);
+            mNetd.networkRejectNonSecureVpn(enforce, stableRanges);
         } catch (RemoteException | RuntimeException e) {
             Log.e(TAG, "Updating blocked=" + enforce
                     + " for UIDs " + Arrays.toString(ranges.toArray()) + " failed", e);
@@ -1849,8 +1854,18 @@ public class Vpn {
         if (mNetworkInfo.isConnected()) {
             return !appliesToUid(uid);
         } else {
-            return UidRange.containsUid(mBlockedUidsAsToldToNetd, uid);
+            return containsUid(mBlockedUidsAsToldToNetd, uid);
         }
+    }
+
+    private boolean containsUid(Collection<UidRangeParcel> ranges, int uid) {
+        if (ranges == null) return false;
+        for (UidRangeParcel range : ranges) {
+            if (range.start <= uid && uid <= range.stop) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void updateAlwaysOnNotification(DetailedState networkState) {
@@ -2495,7 +2510,7 @@ public class Vpn {
                                     address /* unused */,
                                     address /* unused */,
                                     network);
-                    mNetd.setInterfaceUp(mTunnelIface.getInterfaceName());
+                    mNms.setInterfaceUp(mTunnelIface.getInterfaceName());
 
                     mSession = mIkev2SessionCreator.createIkeSession(
                             mContext,
