@@ -916,21 +916,26 @@ class Task extends WindowContainer<WindowContainer> {
             mTaskSupervisor.mRecentTasks.remove(this);
         }
 
-        removeIfPossible();
+        removeIfPossible("cleanUpResourcesForDestroy");
     }
 
     @VisibleForTesting
     @Override
     void removeIfPossible() {
+        removeIfPossible("removeTaskIfPossible");
+    }
+
+    void removeIfPossible(String reason) {
         final boolean isRootTask = isRootTask();
         if (!isRootTask) {
             mAtmService.getLockTaskController().clearLockedTask(this);
         }
         if (shouldDeferRemoval()) {
-            if (DEBUG_ROOT_TASK) Slog.i(TAG, "removeTask: deferring removing taskId=" + mTaskId);
+            if (DEBUG_ROOT_TASK) Slog.i(TAG,
+                    "removeTask:" + reason + " deferring removing taskId=" + mTaskId);
             return;
         }
-        removeImmediately();
+        removeImmediately(reason);
         if (isLeafTask()) {
             mAtmService.getTaskChangeNotificationController().notifyTaskRemoved(mTaskId);
 
@@ -1774,8 +1779,8 @@ class Task extends WindowContainer<WindowContainer> {
                 getRootTask().removeChild(this, reason);
             }
             EventLogTags.writeWmTaskRemoved(mTaskId,
-                    "removeChild: last r=" + r + " in t=" + this);
-            removeIfPossible();
+                    "removeChild:" + reason + " last r=" + r + " in t=" + this);
+            removeIfPossible(reason);
         }
     }
 
@@ -1818,7 +1823,7 @@ class Task extends WindowContainer<WindowContainer> {
                 if (r.finishing) return;
                 // Task was restored from persistent storage.
                 r.takeFromHistory();
-                removeChild(r);
+                removeChild(r, reason);
             });
         } else {
             forAllActivities((r) -> {
@@ -3214,8 +3219,12 @@ class Task extends WindowContainer<WindowContainer> {
 
     @Override
     void removeImmediately() {
-        if (DEBUG_ROOT_TASK) Slog.i(TAG, "removeTask: removing taskId=" + mTaskId);
-        EventLogTags.writeWmTaskRemoved(mTaskId, "removeTask");
+        removeImmediately("removeTask");
+    }
+
+    void removeImmediately(String reason) {
+        if (DEBUG_ROOT_TASK) Slog.i(TAG, "removeTask:" + reason + " removing taskId=" + mTaskId);
+        EventLogTags.writeWmTaskRemoved(mTaskId, reason);
 
         // If applicable let the TaskOrganizer know the Task is vanishing.
         setTaskOrganizer(null);
@@ -4986,7 +4995,7 @@ class Task extends WindowContainer<WindowContainer> {
             mTaskAppearedSent = false;
             setForceHidden(FLAG_FORCE_HIDDEN_FOR_TASK_ORG, false /* set */);
             if (mCreatedByOrganizer) {
-                removeImmediately();
+                removeImmediately("setTaskOrganizer");
             }
         }
 
@@ -6717,7 +6726,7 @@ class Task extends WindowContainer<WindowContainer> {
     /** Finish all activities in the stack without waiting. */
     void finishAllActivitiesImmediately() {
         if (!hasChild()) {
-            removeIfPossible();
+            removeIfPossible("finishAllActivitiesImmediately");
             return;
         }
         forAllActivities((r) -> {
@@ -8011,7 +8020,7 @@ class Task extends WindowContainer<WindowContainer> {
 
             // Task created by organizer are added as root.
             final Task launchRootTask = mCreatedByOrganizer
-                    ? null : tda.updateLaunchRootTask(mWindowingMode);
+                    ? null : tda.getLaunchRootTask(mWindowingMode, mActivityType);
             if (launchRootTask != null) {
                 // Since this task will be put into a root task, its windowingMode will be
                 // inherited.

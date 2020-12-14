@@ -5490,7 +5490,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (!hasNonEmptyHomeRootTask && getRootTaskCount() > 0) {
             // Release this display if only empty home root task(s) are left. This display will be
             // released along with the root task(s) removal.
-            forAllRootTasks(Task::removeIfPossible);
+            forAllRootTasks(t -> {t.removeIfPossible("releaseSelfIfNeeded");});
         } else if (getTopRootTask() == null) {
             removeIfPossible();
             mRootWindowContainer.mTaskSupervisor

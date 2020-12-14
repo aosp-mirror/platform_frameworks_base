@@ -56,12 +56,6 @@ interface ITaskOrganizerController {
     WindowContainerToken getImeTarget(int display);
 
     /**
-     * Set's the root task to launch new tasks into on a display. {@code null} means no launch root
-     * and thus new tasks just end up directly on the display.
-     */
-    void setLaunchRoot(int displayId, in WindowContainerToken root);
-
-    /**
      * Requests that the given task organizer is notified when back is pressed on the root activity
      * of one of its controlled tasks.
      */
