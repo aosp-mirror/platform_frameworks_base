@@ -30,5 +30,4 @@ per-file *Telephony* = file:/telephony/OWNERS
 per-file *Zygote* = file:/ZYGOTE_OWNERS
 
 # RecoverySystem
-per-file IRecoverySystem.aidl = rvrolyk@google.com, zhaojiac@google.com
-per-file RecoverySystem.java = rvrolyk@google.com, zhaojiac@google.com
+per-file *Recovery* = file:/services/core/java/com/android/server/recoverysystem/OWNERS
