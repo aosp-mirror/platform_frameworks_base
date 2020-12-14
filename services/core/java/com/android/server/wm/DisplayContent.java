@@ -2300,10 +2300,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return count[0];
     }
 
-    @VisibleForTesting
     @Nullable
     Task getTopRootTask() {
-        return getItemFromTaskDisplayAreas(TaskDisplayArea::getTopRootTask);
+        return getRootTask(t -> true);
     }
 
     /**
@@ -5479,12 +5478,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return;
         }
 
-        // Check if all task display areas have only the empty home stacks left.
-        boolean hasNonEmptyHomeStack = forAllRootTasks(stack ->
-                !stack.isActivityTypeHome() || stack.hasChild());
-        if (!hasNonEmptyHomeStack && getRootTaskCount() > 0) {
-            // Release this display if only empty home stack(s) are left. This display will be
-            // released along with the stack(s) removal.
+        // Check if all task display areas have only the empty home root tasks left.
+        boolean hasNonEmptyHomeRootTask = forAllRootTasks(rootTask ->
+                !rootTask.isActivityTypeHome() || rootTask.hasChild());
+        if (!hasNonEmptyHomeRootTask && getRootTaskCount() > 0) {
+            // Release this display if only empty home root task(s) are left. This display will be
+            // released along with the root task(s) removal.
             forAllRootTasks(Task::removeIfPossible);
         } else if (getTopRootTask() == null) {
             removeIfPossible();
@@ -5525,12 +5524,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return;
         }
         mInEnsureActivitiesVisible = true;
+        mAtmService.mTaskSupervisor.beginActivityVisibilityUpdate();
         try {
-            forAllTaskDisplayAreas(taskDisplayArea -> {
-                taskDisplayArea.ensureActivitiesVisible(starting, configChanges,
-                        preserveWindows, notifyClients, userLeaving);
+            forAllRootTasks(rootTask -> {
+                rootTask.ensureActivitiesVisible(starting, configChanges, preserveWindows,
+                        notifyClients, userLeaving);
             });
         } finally {
+            mAtmService.mTaskSupervisor.endActivityVisibilityUpdate();
             mInEnsureActivitiesVisible = false;
         }
     }

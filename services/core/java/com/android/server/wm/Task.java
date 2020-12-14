@@ -5320,20 +5320,19 @@ class Task extends WindowContainer<WindowContainer> {
         final TaskDisplayArea taskDisplayArea = getDisplayArea();
 
         if (inSplitScreenSecondaryWindowingMode()) {
-            // If the stack is in split-screen secondary mode, we need to make sure we move the
-            // primary split-screen stack forward in the case it is currently behind a fullscreen
-            // stack so both halves of the split-screen appear on-top and the fullscreen stack isn't
-            // cutting between them.
+            // If the root task is in split-screen secondary mode, we need to make sure we move the
+            // primary split-screen root task forward in the case it is currently behind a
+            // fullscreen root task so both halves of the split-screen appear on-top and the
+            // fullscreen root task isn't cutting between them.
             // TODO(b/70677280): This is a workaround until we can fix as part of b/70677280.
-            final Task topFullScreenStack =
+            final Task topFullScreenRootTask =
                     taskDisplayArea.getTopRootTaskInWindowingMode(WINDOWING_MODE_FULLSCREEN);
-            if (topFullScreenStack != null) {
-                final Task primarySplitScreenStack =
+            if (topFullScreenRootTask != null) {
+                final Task primarySplitScreenRootTask =
                         taskDisplayArea.getRootSplitScreenPrimaryTask();
-                if (primarySplitScreenStack != null
-                        && taskDisplayArea.getIndexOf(topFullScreenStack)
-                        > taskDisplayArea.getIndexOf(primarySplitScreenStack)) {
-                    primarySplitScreenStack.moveToFront(reason + " splitScreenToTop");
+                if (primarySplitScreenRootTask != null
+                        && topFullScreenRootTask.compareTo(primarySplitScreenRootTask) > 0) {
+                    primarySplitScreenRootTask.moveToFront(reason + " splitScreenToTop");
                 }
             }
         }
@@ -5748,7 +5747,7 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     /**
-     * @return {@code true} if this is the focused stack on its current display, {@code false}
+     * @return {@code true} if this is the focused root task on its current display, {@code false}
      * otherwise.
      */
     boolean isFocusedStackOnDisplay() {
@@ -6700,18 +6699,21 @@ class Task extends WindowContainer<WindowContainer> {
         });
     }
 
-    /** @return true if the stack behind this one is a standard activity type. */
-    private boolean inFrontOfStandardStack() {
+    /** @return true if the root task behind this one is a standard activity type. */
+    private boolean inFrontOfStandardRootTask() {
         final TaskDisplayArea taskDisplayArea = getDisplayArea();
         if (taskDisplayArea == null) {
             return false;
         }
-        final int index = taskDisplayArea.getIndexOf(this);
+        final int index = taskDisplayArea.getTaskIndexOf(this);
         if (index == 0) {
             return false;
         }
-        final Task stackBehind = taskDisplayArea.getChildAt(index - 1);
-        return stackBehind.isActivityTypeStandard();
+        final int[] indexCount = new int[1];
+        final Task rootTaskBehind = taskDisplayArea.getRootTask(
+                // From bottom to top, find the one behind this Task.
+                task -> ++indexCount[0] == index, false /* traverseTopToBottom */);
+        return rootTaskBehind.isActivityTypeStandard();
     }
 
     boolean shouldUpRecreateTaskLocked(ActivityRecord srec, String destAffinity) {
@@ -6732,7 +6734,7 @@ class Task extends WindowContainer<WindowContainer> {
         if (srec.isRootOfTask() && task.getBaseIntent() != null
                 && task.getBaseIntent().isDocument()) {
             // Okay, this activity is at the root of its task.  What to do, what to do...
-            if (!inFrontOfStandardStack()) {
+            if (!inFrontOfStandardRootTask()) {
                 // Finishing won't return to an application, so we need to recreate.
                 return true;
             }

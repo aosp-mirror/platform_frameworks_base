@@ -167,7 +167,7 @@ public class ActivityStackTests extends WindowTestsBase {
                 null /* task */);
 
         // Assert that stack is at the bottom.
-        assertEquals(0, mDefaultTaskDisplayArea.getIndexOf(primarySplitScreen));
+        assertEquals(0, mDefaultTaskDisplayArea.getTaskIndexOf(primarySplitScreen));
 
         // Ensure no longer in splitscreen.
         assertEquals(WINDOWING_MODE_FULLSCREEN, primarySplitScreen.getWindowingMode());
@@ -748,10 +748,10 @@ public class ActivityStackTests extends WindowTestsBase {
         doReturn(false).when(fullscreenStack).isTranslucent(any());
 
         // Ensure that we don't move the home stack if it is already behind the top fullscreen stack
-        int homeStackIndex = mDefaultTaskDisplayArea.getIndexOf(homeStack);
+        int homeStackIndex = mDefaultTaskDisplayArea.getTaskIndexOf(homeStack);
         assertEquals(fullscreenStack, getRootTaskAbove(homeStack));
         mDefaultTaskDisplayArea.moveRootTaskBehindBottomMostVisibleRootTask(homeStack);
-        assertEquals(homeStackIndex, mDefaultTaskDisplayArea.getIndexOf(homeStack));
+        assertEquals(homeStackIndex, mDefaultTaskDisplayArea.getTaskIndexOf(homeStack));
     }
 
     @Test
@@ -766,10 +766,10 @@ public class ActivityStackTests extends WindowTestsBase {
         doReturn(true).when(fullscreenStack).isTranslucent(any());
 
         // Ensure that we don't move the home stack if it is already behind the top fullscreen stack
-        int homeStackIndex = mDefaultTaskDisplayArea.getIndexOf(homeStack);
+        int homeStackIndex = mDefaultTaskDisplayArea.getTaskIndexOf(homeStack);
         assertEquals(fullscreenStack, getRootTaskAbove(homeStack));
         mDefaultTaskDisplayArea.moveRootTaskBehindBottomMostVisibleRootTask(homeStack);
-        assertEquals(homeStackIndex, mDefaultTaskDisplayArea.getIndexOf(homeStack));
+        assertEquals(homeStackIndex, mDefaultTaskDisplayArea.getTaskIndexOf(homeStack));
     }
 
     @Test
@@ -784,10 +784,10 @@ public class ActivityStackTests extends WindowTestsBase {
         doReturn(false).when(fullscreenStack).isTranslucent(any());
 
         // Ensure we don't move the home stack if it is already on top
-        int homeStackIndex = mDefaultTaskDisplayArea.getIndexOf(homeStack);
+        int homeStackIndex = mDefaultTaskDisplayArea.getTaskIndexOf(homeStack);
         assertNull(getRootTaskAbove(homeStack));
         mDefaultTaskDisplayArea.moveRootTaskBehindBottomMostVisibleRootTask(homeStack);
-        assertEquals(homeStackIndex, mDefaultTaskDisplayArea.getIndexOf(homeStack));
+        assertEquals(homeStackIndex, mDefaultTaskDisplayArea.getTaskIndexOf(homeStack));
     }
 
     @Test
@@ -853,9 +853,9 @@ public class ActivityStackTests extends WindowTestsBase {
         doReturn(false).when(fullscreenStack2).isTranslucent(any());
 
         // Ensure we don't move the home stack behind itself
-        int homeStackIndex = mDefaultTaskDisplayArea.getIndexOf(homeStack);
+        int homeStackIndex = mDefaultTaskDisplayArea.getTaskIndexOf(homeStack);
         mDefaultTaskDisplayArea.moveRootTaskBehindRootTask(homeStack, homeStack);
-        assertEquals(homeStackIndex, mDefaultTaskDisplayArea.getIndexOf(homeStack));
+        assertEquals(homeStackIndex, mDefaultTaskDisplayArea.getTaskIndexOf(homeStack));
     }
 
     @Test

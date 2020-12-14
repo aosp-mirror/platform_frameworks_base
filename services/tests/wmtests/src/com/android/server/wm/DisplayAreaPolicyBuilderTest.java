@@ -692,7 +692,7 @@ public class DisplayAreaPolicyBuilderTest {
     private Map<DisplayArea<?>, Set<Integer>> calculateZSets(
             DisplayAreaPolicyBuilder.Result policy,
             DisplayArea.Tokens ime,
-            DisplayArea<Task> tasks) {
+            TaskDisplayArea taskDisplayArea) {
         Map<DisplayArea<?>, Set<Integer>> zSets = new HashMap<>();
         int[] types = {TYPE_STATUS_BAR, TYPE_NAVIGATION_BAR, TYPE_PRESENTATION,
                 TYPE_APPLICATION_OVERLAY};
@@ -700,7 +700,7 @@ public class DisplayAreaPolicyBuilderTest {
             WindowToken token = tokenOfType(type);
             recordLayer(policy.findAreaForToken(token), token.getWindowLayerFromType(), zSets);
         }
-        recordLayer(tasks, APPLICATION_LAYER, zSets);
+        recordLayer(taskDisplayArea, APPLICATION_LAYER, zSets);
         recordLayer(ime, mPolicy.getWindowLayerFromTypeLw(TYPE_INPUT_METHOD), zSets);
         return zSets;
     }

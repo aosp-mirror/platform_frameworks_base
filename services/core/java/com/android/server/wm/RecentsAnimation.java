@@ -413,9 +413,10 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
 
     @Override
     public void onRootTaskOrderChanged(Task rootTask) {
-        ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "onStackOrderChanged(): stack=%s", rootTask);
-        if (mDefaultTaskDisplayArea.getIndexOf(rootTask) == -1 || !rootTask.shouldBeVisible(null)) {
-            // The stack is not visible, so ignore this change
+        ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "onRootTaskOrderChanged(): rootTask=%s", rootTask);
+        if (mDefaultTaskDisplayArea.getRootTask(t -> t == rootTask) == null
+                || !rootTask.shouldBeVisible(null)) {
+            // The root task is not visible, so ignore this change
             return;
         }
         final RecentsAnimationController controller =

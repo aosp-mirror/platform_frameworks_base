@@ -901,6 +901,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-1069336896": {
+      "message": "onRootTaskOrderChanged(): rootTask=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
+      "at": "com\/android\/server\/wm\/RecentsAnimation.java"
+    },
     "-1066383762": {
       "message": "Sleep still waiting to pause %s",
       "level": "VERBOSE",
@@ -1302,6 +1308,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/am\/ActivityManagerService.java"
+    },
+    "-592371899": {
+      "message": "Skipping rootTask: (mismatch activity\/rootTask) %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_TASKS",
+      "at": "com\/android\/server\/wm\/TaskDisplayArea.java"
     },
     "-583031528": {
       "message": "%s",
@@ -2119,12 +2131,6 @@
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/AppTransition.java"
     },
-    "349443311": {
-      "message": "pauseBackStacks: task=%s mResumedActivity=%s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_STATES",
-      "at": "com\/android\/server\/wm\/TaskDisplayArea.java"
-    },
     "355720268": {
       "message": "stopFreezingDisplayLocked: Unfreezing now",
       "level": "DEBUG",
@@ -2160,6 +2166,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "391189028": {
+      "message": "pauseBackTasks: task=%s mResumedActivity=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_STATES",
+      "at": "com\/android\/server\/wm\/TaskDisplayArea.java"
     },
     "397105698": {
       "message": "grantEmbeddedWindowFocus remove request for win=%s dropped since no candidate was found",
@@ -2244,12 +2256,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_ORGANIZER",
       "at": "com\/android\/server\/wm\/DisplayAreaOrganizerController.java"
-    },
-    "490877640": {
-      "message": "onStackOrderChanged(): stack=%s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
-      "at": "com\/android\/server\/wm\/RecentsAnimation.java"
     },
     "495032901": {
       "message": "Expected target stack=%s to restored behind stack=%s but it is behind stack=%s",
@@ -2574,12 +2580,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
-    },
-    "875196661": {
-      "message": "Skipping stack: (mismatch activity\/stack) %s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_TASKS",
-      "at": "com\/android\/server\/wm\/TaskDisplayArea.java"
     },
     "883475718": {
       "message": "Report configuration: %s %s %s",
