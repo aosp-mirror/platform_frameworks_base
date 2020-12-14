@@ -1532,8 +1532,8 @@ public class StatsPullAtomService extends SystemService {
                 // All shared app gids are accounted together.
                 uid = LAST_SHARED_APPLICATION_GID;
                 mutateInPlace = true;
-            } else if (UserHandle.isApp(uid)) {
-                // Apps are accounted under their app id.
+            } else {
+                // Everything else is accounted under their base uid.
                 uid = UserHandle.getAppId(uid);
             }
 
