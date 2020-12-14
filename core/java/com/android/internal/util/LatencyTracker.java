@@ -86,6 +86,11 @@ public class LatencyTracker {
      */
     public static final int ACTION_FACE_WAKE_AND_UNLOCK = 7;
 
+    /**
+     * Time between the swipe-up gesture and window drawn of recents activity.
+     */
+    public static final int ACTION_START_RECENTS_ANIMATION = 8;
+
     private static final String[] NAMES = new String[]{
             "expand panel",
             "toggle recents",
@@ -94,7 +99,9 @@ public class LatencyTracker {
             "check credential unlocked",
             "turn on screen",
             "rotate the screen",
-            "face wake-and-unlock"};
+            "face wake-and-unlock",
+            "start recents-animation",
+    };
 
     private static final int[] STATSD_ACTION = new int[]{
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_EXPAND_PANEL,
@@ -105,6 +112,7 @@ public class LatencyTracker {
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_TURN_ON_SCREEN,
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN,
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_FACE_WAKE_AND_UNLOCK,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_START_RECENTS_ANIMATION,
     };
 
     private static LatencyTracker sLatencyTracker;
@@ -170,6 +178,8 @@ public class LatencyTracker {
                 return "ACTION_ROTATE_SCREEN";
             case 8:
                 return "ACTION_FACE_WAKE_AND_UNLOCK";
+            case 9:
+                return "ACTION_START_RECENTS_ANIMATION";
             default:
                 throw new IllegalArgumentException("Invalid action");
         }
