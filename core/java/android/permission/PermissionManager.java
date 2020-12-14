@@ -305,7 +305,7 @@ public final class PermissionManager {
     public boolean isPermissionRevokedByPolicy(@NonNull String packageName,
             @NonNull String permissionName) {
         try {
-            return mPermissionManager.isPermissionRevokedByPolicy(permissionName, packageName,
+            return mPermissionManager.isPermissionRevokedByPolicy(packageName, permissionName,
                     mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -332,7 +332,7 @@ public final class PermissionManager {
      * @param permissionName the permission name to grant
      * @param user the user for which to grant the permission
      *
-     * @see #revokeRuntimePermission(String, String, android.os.UserHandle)
+     * @see #revokeRuntimePermission(String, String, android.os.UserHandle, String)
      *
      * @hide
      */
@@ -411,7 +411,7 @@ public final class PermissionManager {
     public int getPermissionFlags(@NonNull String packageName, @NonNull String permissionName,
             @NonNull UserHandle user) {
         try {
-            return mPermissionManager.getPermissionFlags(permissionName, packageName,
+            return mPermissionManager.getPermissionFlags(packageName, permissionName,
                     user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -450,7 +450,7 @@ public final class PermissionManager {
         try {
             final boolean checkAdjustPolicyFlagPermission =
                     mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.Q;
-            mPermissionManager.updatePermissionFlags(permissionName, packageName, flagMask,
+            mPermissionManager.updatePermissionFlags(packageName, permissionName, flagMask,
                     flagValues, checkAdjustPolicyFlagPermission, user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -721,8 +721,8 @@ public final class PermissionManager {
     public boolean shouldShowRequestPermissionRationale(@NonNull String permissionName) {
         try {
             final String packageName = mContext.getPackageName();
-            return mPermissionManager.shouldShowRequestPermissionRationale(permissionName,
-                    packageName, mContext.getUserId());
+            return mPermissionManager.shouldShowRequestPermissionRationale(packageName,
+                    permissionName, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
