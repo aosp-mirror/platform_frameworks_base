@@ -30,7 +30,6 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SPLIT;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING;
 import static android.content.pm.PackageManager.INSTALL_STAGED;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
-import static android.content.pm.PackageParser.APEX_FILE_EXTENSION;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_WRONLY;
@@ -254,6 +253,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final ApkChecksum[] EMPTY_FILE_CHECKSUM_ARRAY = {};
 
     private static final String SYSTEM_DATA_LOADER_PACKAGE = "android";
+    private static final String APEX_FILE_EXTENSION = ".apex";
 
     private static final int INCREMENTAL_STORAGE_BLOCKED_TIMEOUT_MS = 2000;
     private static final int INCREMENTAL_STORAGE_UNHEALTHY_TIMEOUT_MS = 7000;

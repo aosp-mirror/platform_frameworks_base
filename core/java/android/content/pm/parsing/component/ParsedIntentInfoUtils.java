@@ -44,6 +44,8 @@ public class ParsedIntentInfoUtils {
 
     private static final String TAG = ParsingUtils.TAG;
 
+    public static final boolean DEBUG = false;
+
     @NonNull
     public static ParseResult<ParsedIntentInfo> parseIntentInfo(String className,
             ParsingPackage pkg, Resources res, XmlResourceParser parser, boolean allowGlobs,
