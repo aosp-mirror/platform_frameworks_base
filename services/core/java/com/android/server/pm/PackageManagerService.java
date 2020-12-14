@@ -20805,8 +20805,12 @@ public class PackageManagerService extends IPackageManager.Stub
                 mSettings.applyDefaultPreferredAppsLPw(userId);
                 clearIntentFilterVerificationsLPw(userId);
                 primeDomainVerificationsLPw(userId);
+                final int numPackages = mPackages.size();
+                for (int i = 0; i < numPackages; i++) {
+                    final AndroidPackage pkg = mPackages.valueAt(i);
+                    mPermissionManager.resetRuntimePermissions(pkg, userId);
+                }
             }
-            mPermissionManager.resetAllRuntimePermissions(userId);
             updateDefaultHomeNotLocked(userId);
             // TODO: We have to reset the default SMS and Phone. This requires
             // significant refactoring to keep all default apps in the package
@@ -22304,7 +22308,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mUserManager.reconcileUsers(StorageManager.UUID_PRIVATE_INTERNAL);
         reconcileApps(StorageManager.UUID_PRIVATE_INTERNAL);
 
-        mPermissionManager.systemReady();
+        mPermissionManager.onSystemReady();
 
         int[] grantPermissionsUserIds = EMPTY_INT_ARRAY;
         for (int userId : UserManagerService.getInstance().getUserIds()) {
