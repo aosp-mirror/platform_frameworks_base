@@ -4954,8 +4954,8 @@ public class ConnectivityServiceTest {
         expectForceUpdateIfaces(onlyCell, MOBILE_IFNAME);
         reset(mStatsService);
 
-        // Captive portal change shouldn't update ifaces
-        mCellNetworkAgent.addCapability(NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL);
+        // Temp metered change shouldn't update ifaces
+        mCellNetworkAgent.addCapability(NetworkCapabilities.NET_CAPABILITY_TEMPORARILY_NOT_METERED);
         waitForIdle();
         verify(mStatsService, never())
                 .forceUpdateIfaces(eq(onlyCell), any(NetworkState[].class), eq(MOBILE_IFNAME),
