@@ -1562,22 +1562,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
                             nc, mDeps.getCallingUid(), callingPackageName));
         }
 
-        synchronized (mVpns) {
-            if (!mLockdownEnabled) {
-                Vpn vpn = mVpns.get(userId);
-                if (vpn != null) {
-                    Network[] networks = vpn.getUnderlyingNetworks();
-                    if (networks != null) {
-                        for (Network network : networks) {
-                            nc = getNetworkCapabilitiesInternal(network);
-                            if (nc != null) {
-                                result.put(
-                                        network,
-                                        maybeSanitizeLocationInfoForCaller(
-                                                nc, mDeps.getCallingUid(), callingPackageName));
-                            }
-                        }
-                    }
+        // No need to check mLockdownEnabled. If it's true, getVpnUnderlyingNetworks returns null.
+        final Network[] networks = getVpnUnderlyingNetworks(Binder.getCallingUid());
+        if (networks != null) {
+            for (Network network : networks) {
+                nc = getNetworkCapabilitiesInternal(network);
+                if (nc != null) {
+                    result.put(network, maybeSanitizeLocationInfoForCaller(
+                                    nc, mDeps.getCallingUid(), callingPackageName));
                 }
             }
         }
