@@ -20,11 +20,17 @@ per-file android_view_PointerIcon.* = file:/services/core/java/com/android/serve
 per-file android_graphics_BLASTBufferQueue.cpp = file:/services/core/java/com/android/server/wm/OWNERS
 per-file android_view_Surface* = file:/services/core/java/com/android/server/wm/OWNERS
 
+# Resources
+per-file android_content_res_* = file:/core/java/android/content/res/OWNERS
+per-file android_util_AssetManager* = file:/core/java/android/content/res/OWNERS
+per-file android_util_StringBlock* = file:/core/java/android/content/res/OWNERS
+per-file android_util_XmlBlock* = file:/core/java/android/content/res/OWNERS
+per-file com_android_internal_content_om_OverlayConfig* = file:/core/java/android/content/res/OWNERS
+
 per-file *Zygote* = file:/ZYGOTE_OWNERS
 per-file Android.bp = file:platform/build/soong:/OWNERS
 per-file android_animation_* = file:/core/java/android/animation/OWNERS
 per-file android_app_admin_* = file:/core/java/android/app/admin/OWNERS
-per-file android_content_res_* = file:/core/java/android/content/res/OWNERS
 per-file android_graphics_* = file:/graphics/java/android/graphics/OWNERS
 per-file android_hardware_Usb* = file:/services/usb/OWNERS
 per-file android_hardware_display_* = file:/core/java/android/hardware/display/OWNERS
