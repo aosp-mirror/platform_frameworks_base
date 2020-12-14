@@ -136,4 +136,13 @@ interface IRecentsAnimationController {
      * @return {@code true} when target removed successfully, {@code false} otherwise.
      */
     boolean removeTask(int taskId);
+
+    /**
+     * Detach navigation bar from app.
+     *
+     * The system reparents the leash of navigation bar to the app when the recents animation starts
+     * and Launcher should call this method to let system restore the navigation bar to its
+     * original position when the quick switch gesture is finished.
+     */
+    void detachNavigationBarFromApp();
 }
