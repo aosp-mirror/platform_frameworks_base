@@ -1,0 +1,3 @@
+set noparent
+
+include platform/frameworks/base:/services/core/java/com/android/server/net/OWNERS
