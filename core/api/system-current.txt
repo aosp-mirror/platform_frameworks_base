@@ -7001,6 +7001,7 @@ package android.os {
 
   public abstract static class BugreportManager.BugreportCallback {
     ctor public BugreportManager.BugreportCallback();
+    method public void onEarlyReportFinished();
     method public void onError(int);
     method public void onFinished();
     method public void onProgress(@FloatRange(from=0.0f, to=100.0f) float);

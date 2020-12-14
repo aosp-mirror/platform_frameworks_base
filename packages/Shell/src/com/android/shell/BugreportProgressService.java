@@ -378,6 +378,9 @@ public class BugreportProgressService extends Service {
             }
         }
 
+        @Override
+        public void onEarlyReportFinished() {}
+
         /**
          * Reads bugreport id and links it to the bugreport info to track a bugreport that is in
          * process. id is incremented in the dumpstate code.
