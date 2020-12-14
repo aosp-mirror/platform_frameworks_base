@@ -65,13 +65,21 @@ public:
     /* Constructor.
      * See AudioEffect constructor for details on parameters.
      */
-                        Visualizer(const String16& opPackageName,
-                                   int32_t priority = 0,
-                                   effect_callback_t cbf = NULL,
-                                   void* user = NULL,
-                                   audio_session_t sessionId = AUDIO_SESSION_OUTPUT_MIX);
+                        explicit Visualizer(const String16& opPackageName);
 
                         ~Visualizer();
+
+    /**
+     * Initialize an uninitialized Visualizer.
+     * See AudioEffect 'set' function for details on parameters.
+     */
+    status_t    set(int32_t priority = 0,
+                    effect_callback_t cbf = NULL,
+                    void* user = NULL,
+                    audio_session_t sessionId = AUDIO_SESSION_OUTPUT_MIX,
+                    audio_io_handle_t io = AUDIO_IO_HANDLE_NONE,
+                    const AudioDeviceTypeAddr& device = {},
+                    bool probe = false);
 
     // Declared 'final' because we call this in ~Visualizer().
     status_t    setEnabled(bool enabled) final;
@@ -163,15 +171,15 @@ private:
     uint32_t initCaptureSize();
 
     Mutex mCaptureLock;
-    uint32_t mCaptureRate;
-    uint32_t mCaptureSize;
-    uint32_t mSampleRate;
-    uint32_t mScalingMode;
-    uint32_t mMeasurementMode;
-    capture_cbk_t mCaptureCallBack;
-    void *mCaptureCbkUser;
+    uint32_t mCaptureRate = CAPTURE_RATE_DEF;
+    uint32_t mCaptureSize = CAPTURE_SIZE_DEF;
+    uint32_t mSampleRate = 44100000;
+    uint32_t mScalingMode = VISUALIZER_SCALING_MODE_NORMALIZED;
+    uint32_t mMeasurementMode = MEASUREMENT_MODE_NONE;
+    capture_cbk_t mCaptureCallBack = nullptr;
+    void *mCaptureCbkUser = nullptr;
     sp<CaptureThread> mCaptureThread;
-    uint32_t mCaptureFlags;
+    uint32_t mCaptureFlags = 0;
 };
 
 
