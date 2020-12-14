@@ -57,8 +57,6 @@ import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutoutController;
-import com.android.wm.shell.letterbox.LetterboxConfigController;
-import com.android.wm.shell.letterbox.LetterboxTaskListener;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.Pip;
@@ -173,7 +171,6 @@ public abstract class WMShellBaseModule {
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<SplitScreen> splitScreenOptional,
             Optional<AppPairs> appPairsOptional,
-            LetterboxTaskListener letterboxTaskListener,
             FullscreenTaskListener fullscreenTaskListener,
             Transitions transitions) {
         return new ShellInit(displayImeController,
@@ -181,7 +178,6 @@ public abstract class WMShellBaseModule {
                 shellTaskOrganizer,
                 splitScreenOptional,
                 appPairsOptional,
-                letterboxTaskListener,
                 fullscreenTaskListener,
                 transitions);
     }
@@ -198,11 +194,9 @@ public abstract class WMShellBaseModule {
             Optional<Pip> pipOptional,
             Optional<OneHanded> oneHandedOptional,
             Optional<HideDisplayCutout> hideDisplayCutout,
-            Optional<AppPairs> appPairsOptional,
-            LetterboxConfigController letterboxConfigController) {
+            Optional<AppPairs> appPairsOptional) {
         return Optional.of(new ShellCommandHandler(shellTaskOrganizer, splitScreenOptional,
-                pipOptional, oneHandedOptional, hideDisplayCutout, appPairsOptional,
-                letterboxConfigController));
+                pipOptional, oneHandedOptional, hideDisplayCutout, appPairsOptional));
     }
 
     @WMSingleton
@@ -334,21 +328,6 @@ public abstract class WMShellBaseModule {
     static FullscreenTaskListener provideFullscreenTaskListener(
             SyncTransactionQueue syncQueue) {
         return new FullscreenTaskListener(syncQueue);
-    }
-
-    @WMSingleton
-    @Provides
-    static LetterboxTaskListener provideLetterboxTaskListener(
-            SyncTransactionQueue syncQueue,
-            LetterboxConfigController letterboxConfigController,
-            WindowManager windowManager) {
-        return new LetterboxTaskListener(syncQueue, letterboxConfigController, windowManager);
-    }
-
-    @WMSingleton
-    @Provides
-    static LetterboxConfigController provideLetterboxConfigController(Context context) {
-        return new LetterboxConfigController(context);
     }
 
     @WMSingleton

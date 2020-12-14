@@ -20,8 +20,9 @@ import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_FULLSCR
 import static com.android.wm.shell.ShellTaskOrganizer.taskListenerTypeToString;
 
 import android.app.ActivityManager;
-import android.util.ArraySet;
+import android.graphics.Point;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.view.SurfaceControl;
 
 import androidx.annotation.NonNull;
@@ -40,7 +41,7 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
 
     private final SyncTransactionQueue mSyncQueue;
 
-    private final ArraySet<Integer> mTasks = new ArraySet<>();
+    private final SparseArray<SurfaceControl> mLeashByTaskId = new SparseArray<>();
 
     public FullscreenTaskListener(SyncTransactionQueue syncQueue) {
         mSyncQueue = syncQueue;
@@ -48,39 +49,44 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
 
     @Override
     public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
-        synchronized (mTasks) {
-            if (mTasks.contains(taskInfo.taskId)) {
-                throw new RuntimeException("Task appeared more than once: #" + taskInfo.taskId);
-            }
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Fullscreen Task Appeared: #%d",
-                    taskInfo.taskId);
-            mTasks.add(taskInfo.taskId);
-            mSyncQueue.runInSync(t -> {
-                // Reset several properties back to fullscreen (PiP, for example, leaves all these
-                // properties in a bad state).
-                t.setWindowCrop(leash, null);
-                t.setPosition(leash, 0, 0);
-                // TODO(shell-transitions): Eventually set everything in transition so there's no
-                //                          SF Transaction here.
-                if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
-                    t.setAlpha(leash, 1f);
-                    t.setMatrix(leash, 1, 0, 0, 1);
-                    t.show(leash);
-                }
-            });
+        if (mLeashByTaskId.get(taskInfo.taskId) != null) {
+            throw new IllegalStateException("Task appeared more than once: #" + taskInfo.taskId);
         }
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Fullscreen Task Appeared: #%d",
+                taskInfo.taskId);
+        mLeashByTaskId.put(taskInfo.taskId, leash);
+        final Point positionInParent = taskInfo.positionInParent;
+        mSyncQueue.runInSync(t -> {
+            // Reset several properties back to fullscreen (PiP, for example, leaves all these
+            // properties in a bad state).
+            t.setWindowCrop(leash, null);
+            t.setPosition(leash, positionInParent.x, positionInParent.y);
+            // TODO(shell-transitions): Eventually set everything in transition so there's no
+            //                          SF Transaction here.
+            if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
+                t.setAlpha(leash, 1f);
+                t.setMatrix(leash, 1, 0, 0, 1);
+                t.show(leash);
+            }
+        });
+    }
+
+    @Override
+    public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
+        final SurfaceControl leash = mLeashByTaskId.get(taskInfo.taskId);
+        final Point positionInParent = taskInfo.positionInParent;
+        mSyncQueue.runInSync(t -> t.setPosition(leash, positionInParent.x, positionInParent.y));
     }
 
     @Override
     public void onTaskVanished(ActivityManager.RunningTaskInfo taskInfo) {
-        synchronized (mTasks) {
-            if (!mTasks.remove(taskInfo.taskId)) {
-                Slog.e(TAG, "Task already vanished: #" + taskInfo.taskId);
-                return;
-            }
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Fullscreen Task Vanished: #%d",
-                    taskInfo.taskId);
+        if (mLeashByTaskId.get(taskInfo.taskId) == null) {
+            Slog.e(TAG, "Task already vanished: #" + taskInfo.taskId);
+            return;
         }
+        mLeashByTaskId.remove(taskInfo.taskId);
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Fullscreen Task Vanished: #%d",
+                taskInfo.taskId);
     }
 
     @Override
@@ -88,7 +94,7 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
         final String innerPrefix = prefix + "  ";
         final String childPrefix = innerPrefix + "  ";
         pw.println(prefix + this);
-        pw.println(innerPrefix + mTasks.size() + " Tasks");
+        pw.println(innerPrefix + mLeashByTaskId.size() + " Tasks");
     }
 
     @Override
