@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.row;
 
 import static android.provider.Settings.Secure.SHOW_NOTIFICATION_SNOOZE;
+import static android.view.HapticFeedbackConstants.CLOCK_TICK;
 
 import static com.android.systemui.SwipeHelper.SWIPED_FAR_ENOUGH_SIZE_FRACTION;
 
@@ -113,6 +114,8 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
 
     private boolean mIsUserTouching;
 
+    private boolean mSnappingToDismiss;
+
     private final PeopleNotificationIdentifier mPeopleNotificationIdentifier;
 
     public NotificationMenuRow(Context context,
@@ -173,6 +176,11 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     @VisibleForTesting
     protected boolean isSnapping() {
         return mSnapping;
+    }
+
+    @VisibleForTesting
+    protected boolean isSnappingToDismiss() {
+        return mSnappingToDismiss;
     }
 
     @Override
@@ -346,6 +354,14 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
             mCheckForDrag = new CheckForDrag();
             mHandler.postDelayed(mCheckForDrag, SHOW_MENU_DELAY);
         }
+        if (canBeDismissed()) {
+            final float dismissThreshold = getDismissThreshold();
+            final boolean snappingToDismiss = delta < -dismissThreshold || delta > dismissThreshold;
+            if (mSnappingToDismiss != snappingToDismiss) {
+                getMenuView().performHapticFeedback(CLOCK_TICK);
+            }
+            mSnappingToDismiss = snappingToDismiss;
+        }
     }
 
     @VisibleForTesting
@@ -361,7 +377,8 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
 
     @Override
     public void onTouchStart() {
-       beginDrag();
+        beginDrag();
+        mSnappingToDismiss = false;
     }
 
     @Override
