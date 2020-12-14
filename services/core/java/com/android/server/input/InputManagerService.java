@@ -244,7 +244,7 @@ public class InputManagerService extends IInputManager.Stub
             int deviceId, int sourceMask, int[] keyCodes, boolean[] keyExists);
     private static native InputChannel nativeCreateInputChannel(long ptr, String name);
     private static native InputChannel nativeCreateInputMonitor(long ptr, int displayId,
-            boolean isGestureMonitor, String name);
+            boolean isGestureMonitor, String name, int pid);
     private static native void nativeRemoveInputChannel(long ptr, IBinder connectionToken);
     private static native void nativePilferPointers(long ptr, IBinder token);
     private static native void nativeSetInputFilterEnabled(long ptr, boolean enable);
@@ -586,7 +586,7 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         return nativeCreateInputMonitor(mPtr, displayId, false /* isGestureMonitor */,
-                inputChannelName);
+                inputChannelName, Binder.getCallingPid());
     }
 
     /**
@@ -614,7 +614,7 @@ public class InputManagerService extends IInputManager.Stub
         final long ident = Binder.clearCallingIdentity();
         try {
             InputChannel inputChannel = nativeCreateInputMonitor(
-                    mPtr, displayId, true /*isGestureMonitor*/, inputChannelName);
+                    mPtr, displayId, true /*isGestureMonitor*/, inputChannelName, pid);
             InputMonitorHost host = new InputMonitorHost(inputChannel.getToken());
             synchronized (mGestureMonitorPidsLock) {
                 mGestureMonitorPidsByToken.put(inputChannel.getToken(), pid);
