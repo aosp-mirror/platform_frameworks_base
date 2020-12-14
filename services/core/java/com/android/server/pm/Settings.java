@@ -295,6 +295,7 @@ public final class Settings {
     private final File mKernelMappingFilename;
 
     /** Map from package name to settings */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     final ArrayMap<String, PackageSetting> mPackages = new ArrayMap<>();
 
     /**
