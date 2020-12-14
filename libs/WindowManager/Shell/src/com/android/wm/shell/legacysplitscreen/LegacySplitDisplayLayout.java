@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.splitscreen;
+package com.android.wm.shell.legacysplitscreen;
 
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
@@ -40,14 +40,14 @@ import com.android.wm.shell.common.DisplayLayout;
  * Handles split-screen related internal display layout. In general, this represents the
  * WM-facing understanding of the splits.
  */
-public class SplitDisplayLayout {
+public class LegacySplitDisplayLayout {
     /** Minimum size of an adjusted stack bounds relative to original stack bounds. Used to
      * restrict IME adjustment so that a min portion of top stack remains visible.*/
     private static final float ADJUSTED_STACK_FRACTION_MIN = 0.3f;
 
     private static final int DIVIDER_WIDTH_INACTIVE_DP = 4;
 
-    SplitScreenTaskListener mTiles;
+    LegacySplitScreenTaskListener mTiles;
     DisplayLayout mDisplayLayout;
     Context mContext;
 
@@ -62,7 +62,8 @@ public class SplitDisplayLayout {
     Rect mAdjustedPrimary = null;
     Rect mAdjustedSecondary = null;
 
-    public SplitDisplayLayout(Context ctx, DisplayLayout dl, SplitScreenTaskListener taskTiles) {
+    public LegacySplitDisplayLayout(Context ctx, DisplayLayout dl,
+            LegacySplitScreenTaskListener taskTiles) {
         mTiles = taskTiles;
         mDisplayLayout = dl;
         mContext = ctx;

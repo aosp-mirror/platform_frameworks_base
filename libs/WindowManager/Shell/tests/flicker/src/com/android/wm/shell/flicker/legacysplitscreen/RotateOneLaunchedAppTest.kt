@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker.splitscreen
+package com.android.wm.shell.flicker.legacysplitscreen
 
 import android.view.Surface
 import androidx.test.filters.RequiresDevice

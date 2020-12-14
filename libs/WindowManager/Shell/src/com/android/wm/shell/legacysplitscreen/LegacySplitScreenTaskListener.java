@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.splitscreen;
+package com.android.wm.shell.legacysplitscreen;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
@@ -43,9 +43,9 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
-class SplitScreenTaskListener implements ShellTaskOrganizer.TaskListener {
-    private static final String TAG = "SplitScreenTaskListener";
-    private static final boolean DEBUG = SplitScreenController.DEBUG;
+class LegacySplitScreenTaskListener implements ShellTaskOrganizer.TaskListener {
+    private static final String TAG = LegacySplitScreenTaskListener.class.getSimpleName();
+    private static final boolean DEBUG = LegacySplitScreenController.DEBUG;
 
     private final ShellTaskOrganizer mTaskOrganizer;
     private final SyncTransactionQueue mSyncQueue;
@@ -58,12 +58,12 @@ class SplitScreenTaskListener implements ShellTaskOrganizer.TaskListener {
     SurfaceControl mPrimaryDim;
     SurfaceControl mSecondaryDim;
     Rect mHomeBounds = new Rect();
-    final SplitScreenController mSplitScreenController;
+    final LegacySplitScreenController mSplitScreenController;
     private boolean mSplitScreenSupported = false;
 
     final SurfaceSession mSurfaceSession = new SurfaceSession();
 
-    SplitScreenTaskListener(SplitScreenController splitScreenController,
+    LegacySplitScreenTaskListener(LegacySplitScreenController splitScreenController,
                     ShellTaskOrganizer shellTaskOrganizer,
                     SyncTransactionQueue syncQueue) {
         mSplitScreenController = splitScreenController;

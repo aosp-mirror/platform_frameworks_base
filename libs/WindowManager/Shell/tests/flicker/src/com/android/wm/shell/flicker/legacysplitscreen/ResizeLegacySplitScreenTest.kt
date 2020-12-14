@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker.splitscreen
+package com.android.wm.shell.flicker.legacysplitscreen
 
 import android.graphics.Region
 import android.util.Rational
@@ -63,7 +63,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @FlakyTest(bugId = 159096424)
-class ResizeSplitScreenTest(
+class ResizeLegacySplitScreenTest(
     testName: String,
     flickerSpec: Flicker
 ) : FlickerTestRunner(testName, flickerSpec) {

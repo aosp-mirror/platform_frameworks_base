@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker.splitscreen
+package com.android.wm.shell.flicker.legacysplitscreen
 
 import com.android.wm.shell.flicker.NonRotationTestBase
 import com.android.wm.shell.flicker.TEST_APP_NONRESIZEABLE_LABEL

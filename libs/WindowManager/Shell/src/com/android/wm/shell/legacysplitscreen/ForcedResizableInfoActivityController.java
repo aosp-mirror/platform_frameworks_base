@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.splitscreen;
+package com.android.wm.shell.legacysplitscreen;
 
 
-import static com.android.wm.shell.splitscreen.ForcedResizableInfoActivity.EXTRA_FORCED_RESIZEABLE_REASON;
+import static com.android.wm.shell.legacysplitscreen.ForcedResizableInfoActivity.EXTRA_FORCED_RESIZEABLE_REASON;
 
 import android.app.ActivityOptions;
 import android.content.Context;
@@ -69,7 +69,7 @@ final class ForcedResizableInfoActivityController implements DividerView.Divider
     }
 
     ForcedResizableInfoActivityController(Context context,
-            SplitScreenController splitScreenController) {
+            LegacySplitScreenController splitScreenController) {
         mContext = context;
         splitScreenController.registerInSplitScreenListener(mDockedStackExistsListener);
     }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.splitscreen;
+package com.android.wm.shell.legacysplitscreen;
 
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;

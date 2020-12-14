@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.splitscreen;
+package com.android.wm.shell.legacysplitscreen;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;

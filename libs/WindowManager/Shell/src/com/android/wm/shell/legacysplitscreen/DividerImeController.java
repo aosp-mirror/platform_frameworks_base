@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.splitscreen;
+package com.android.wm.shell.legacysplitscreen;
 
 import static android.content.res.Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
 import static android.content.res.Configuration.SCREEN_WIDTH_DP_UNDEFINED;
@@ -37,11 +37,11 @@ import com.android.wm.shell.common.TransactionPool;
 
 class DividerImeController implements DisplayImeController.ImePositionProcessor {
     private static final String TAG = "DividerImeController";
-    private static final boolean DEBUG = SplitScreenController.DEBUG;
+    private static final boolean DEBUG = LegacySplitScreenController.DEBUG;
 
     private static final float ADJUSTED_NONFOCUS_DIM = 0.3f;
 
-    private final SplitScreenTaskListener mSplits;
+    private final LegacySplitScreenTaskListener mSplits;
     private final TransactionPool mTransactionPool;
     private final Handler mHandler;
     private final TaskOrganizer mTaskOrganizer;
@@ -93,8 +93,8 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
     private boolean mPausedTargetAdjusted = false;
     private boolean mAdjustedWhileHidden = false;
 
-    DividerImeController(SplitScreenTaskListener splits, TransactionPool pool, Handler handler,
-            TaskOrganizer taskOrganizer) {
+    DividerImeController(LegacySplitScreenTaskListener splits, TransactionPool pool,
+            Handler handler, TaskOrganizer taskOrganizer) {
         mSplits = splits;
         mTransactionPool = pool;
         mHandler = handler;
@@ -105,7 +105,7 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
         return mSplits.mSplitScreenController.getDividerView();
     }
 
-    private SplitDisplayLayout getLayout() {
+    private LegacySplitDisplayLayout getLayout() {
         return mSplits.mSplitScreenController.getSplitLayout();
     }
 
@@ -202,7 +202,7 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
             // Reposition the server's secondary split position so that it evaluates
             // insets properly.
             WindowContainerTransaction wct = new WindowContainerTransaction();
-            final SplitDisplayLayout splitLayout = getLayout();
+            final LegacySplitDisplayLayout splitLayout = getLayout();
             if (mTargetAdjusted) {
                 splitLayout.updateAdjustedBounds(mShownTop, mHiddenTop, mShownTop);
                 wct.setBounds(mSplits.mSecondary.token, splitLayout.mAdjustedSecondary);
@@ -285,7 +285,7 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
     private void onProgress(float progress, SurfaceControl.Transaction t) {
         final DividerView view = getView();
         if (mTargetAdjusted != mAdjusted && !mPaused) {
-            final SplitDisplayLayout splitLayout = getLayout();
+            final LegacySplitDisplayLayout splitLayout = getLayout();
             final float fraction = mTargetAdjusted ? progress : 1.f - progress;
             mLastAdjustTop = (int) (fraction * mShownTop + (1.f - fraction) * mHiddenTop);
             splitLayout.updateAdjustedBounds(mLastAdjustTop, mHiddenTop, mShownTop);

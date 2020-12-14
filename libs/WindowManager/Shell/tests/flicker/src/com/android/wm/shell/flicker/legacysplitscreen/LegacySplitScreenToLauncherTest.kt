@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker.splitscreen
+package com.android.wm.shell.flicker.legacysplitscreen
 
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
@@ -24,9 +24,9 @@ import com.android.server.wm.flicker.DOCKED_STACK_DIVIDER
 import com.android.server.wm.flicker.Flicker
 import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
-import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.helpers.StandardAppHelper
-import com.android.server.wm.flicker.focusChanges
+import com.android.server.wm.flicker.endRotation
+import com.android.server.wm.flicker.focusDoesNotChange
 import com.android.server.wm.flicker.helpers.buildTestTag
 import com.android.server.wm.flicker.helpers.exitSplitScreen
 import com.android.server.wm.flicker.helpers.isInSplitScreen
@@ -48,13 +48,13 @@ import org.junit.runners.Parameterized
 
 /**
  * Test open app to split screen.
- * To run this test: `atest WMShellFlickerTests:OpenAppToSplitScreenTest`
+ * To run this test: `atest WMShellFlickerTests:SplitScreenToLauncherTest`
  */
 @Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class OpenAppToSplitScreenTest(
+class LegacySplitScreenToLauncherTest(
     testName: String,
     flickerSpec: Flicker
 ) : FlickerTestRunner(testName, flickerSpec) {
@@ -70,7 +70,7 @@ class OpenAppToSplitScreenTest(
             return FlickerTestRunnerFactory(instrumentation, listOf(Surface.ROTATION_0))
                 .buildTest { configuration ->
                     withTestName {
-                        buildTestTag("appToSplitScreen", testApp, configuration)
+                        buildTestTag("splitScreenToLauncher", testApp, configuration)
                     }
                     repeat { configuration.repetitions }
                     setup {
@@ -80,20 +80,22 @@ class OpenAppToSplitScreenTest(
                         eachRun {
                             testApp.open()
                             this.setRotation(configuration.endRotation)
+                            device.launchSplitScreen()
+                            device.waitForIdle()
                         }
                     }
                     teardown {
                         eachRun {
+                            testApp.exit()
+                        }
+                        test {
                             if (device.isInSplitScreen()) {
                                 device.exitSplitScreen()
                             }
                         }
-                        test {
-                            testApp.exit()
-                        }
                     }
                     transitions {
-                        device.launchSplitScreen()
+                        device.exitSplitScreen()
                     }
                     assertions {
                         windowManagerTrace {
@@ -102,24 +104,28 @@ class OpenAppToSplitScreenTest(
                         }
 
                         layersTrace {
-                            navBarLayerIsAlwaysVisible(bugId = 140855415)
+                            navBarLayerIsAlwaysVisible()
                             statusBarLayerIsAlwaysVisible()
-                            noUncoveredRegions(configuration.endRotation, enabled = false)
-                            navBarLayerRotatesAndScales(configuration.endRotation,
-                                bugId = 140855415)
+                            noUncoveredRegions(configuration.endRotation)
+                            navBarLayerRotatesAndScales(configuration.endRotation)
                             statusBarLayerRotatesScales(configuration.endRotation)
 
-                            all("dividerLayerBecomesVisible") {
-                                this.hidesLayer(DOCKED_STACK_DIVIDER)
+                            // b/161435597 causes the test not to work on 90 degrees
+                            all("dividerLayerBecomesInvisible") {
+                                this.showsLayer(DOCKED_STACK_DIVIDER)
                                     .then()
-                                    .showsLayer(DOCKED_STACK_DIVIDER)
+                                    .hidesLayer(DOCKED_STACK_DIVIDER)
+                            }
+
+                            all("appLayerBecomesInvisible") {
+                                this.showsLayer(testApp.getPackage())
+                                    .then()
+                                    .hidesLayer(testApp.getPackage())
                             }
                         }
 
                         eventLog {
-                            focusChanges(testApp.`package`,
-                                "recents_animation_input_consumer", "NexusLauncherActivity",
-                                bugId = 151179149)
+                            focusDoesNotChange(bugId = 151179149)
                         }
                     }
                 }

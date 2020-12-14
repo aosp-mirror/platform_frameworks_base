@@ -82,7 +82,7 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.theme.ThemeOverlayApplier;
 import com.android.systemui.util.leak.LeakDetector;
 import com.android.wm.shell.pip.Pip;
-import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -213,7 +213,7 @@ public class DependencyProvider {
             BroadcastDispatcher broadcastDispatcher,
             CommandQueue commandQueue,
             Optional<Pip> pipOptional,
-            Optional<SplitScreen> splitScreenOptional,
+            Optional<LegacySplitScreen> splitScreenOptional,
             Optional<Recents> recentsOptional,
             Lazy<StatusBar> statusBarLazy,
             ShadeController shadeController,

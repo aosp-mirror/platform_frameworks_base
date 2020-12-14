@@ -47,7 +47,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @FlakyTest(bugId = 161435597)
-class PipSplitScreenTest(
+class PipLegacySplitScreenTest(
     rotationName: String,
     rotation: Int
 ) : AppTestBase(rotationName, rotation) {

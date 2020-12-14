@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.splitscreen;
+package com.android.wm.shell.legacysplitscreen;
 
 import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
@@ -65,7 +65,7 @@ import java.util.function.Consumer;
 /**
  * Controls split screen feature.
  */
-public class SplitScreenController implements SplitScreen,
+public class LegacySplitScreenController implements LegacySplitScreen,
         DisplayController.OnDisplaysChangedListener {
     static final boolean DEBUG = false;
 
@@ -80,7 +80,7 @@ public class SplitScreenController implements SplitScreen,
     private final DividerState mDividerState = new DividerState();
     private final ForcedResizableInfoActivityController mForcedResizableController;
     private final Handler mHandler;
-    private final SplitScreenTaskListener mSplits;
+    private final LegacySplitScreenTaskListener mSplits;
     private final SystemWindows mSystemWindows;
     final TransactionPool mTransactionPool;
     private final WindowManagerProxy mWindowManagerProxy;
@@ -96,12 +96,12 @@ public class SplitScreenController implements SplitScreen,
     private DividerView mView;
 
     // Keeps track of real-time split geometry including snap positions and ime adjustments
-    private SplitDisplayLayout mSplitLayout;
+    private LegacySplitDisplayLayout mSplitLayout;
 
     // Transient: this contains the layout calculated for a new rotation requested by WM. This is
     // kept around so that we can wait for a matching configuration change and then use the exact
     // layout that we sent back to WM.
-    private SplitDisplayLayout mRotateSplitLayout;
+    private LegacySplitDisplayLayout mRotateSplitLayout;
 
     private boolean mIsKeyguardShowing;
     private boolean mVisible = false;
@@ -109,7 +109,7 @@ public class SplitScreenController implements SplitScreen,
     private boolean mAdjustedForIme = false;
     private boolean mHomeStackResizable = false;
 
-    public SplitScreenController(Context context,
+    public LegacySplitScreenController(Context context,
             DisplayController displayController, SystemWindows systemWindows,
             DisplayImeController imeController, Handler handler, TransactionPool transactionPool,
             ShellTaskOrganizer shellTaskOrganizer, SyncTransactionQueue syncQueue,
@@ -123,7 +123,7 @@ public class SplitScreenController implements SplitScreen,
         mTransactionPool = transactionPool;
         mWindowManagerProxy = new WindowManagerProxy(syncQueue, shellTaskOrganizer);
         mTaskOrganizer = shellTaskOrganizer;
-        mSplits = new SplitScreenTaskListener(this, shellTaskOrganizer, syncQueue);
+        mSplits = new LegacySplitScreenTaskListener(this, shellTaskOrganizer, syncQueue);
         mImePositionProcessor = new DividerImeController(mSplits, mTransactionPool, mHandler,
                 shellTaskOrganizer);
         mRotationController =
@@ -134,8 +134,8 @@ public class SplitScreenController implements SplitScreen,
                     WindowContainerTransaction t = new WindowContainerTransaction();
                     DisplayLayout displayLayout =
                             new DisplayLayout(mDisplayController.getDisplayLayout(display));
-                    SplitDisplayLayout sdl =
-                            new SplitDisplayLayout(mContext, displayLayout, mSplits);
+                    LegacySplitDisplayLayout sdl =
+                            new LegacySplitDisplayLayout(mContext, displayLayout, mSplits);
                     sdl.rotateTo(toRotation);
                     mRotateSplitLayout = sdl;
                     final int position = isDividerVisible()
@@ -229,7 +229,7 @@ public class SplitScreenController implements SplitScreen,
         if (displayId != DEFAULT_DISPLAY) {
             return;
         }
-        mSplitLayout = new SplitDisplayLayout(mDisplayController.getDisplayContext(displayId),
+        mSplitLayout = new LegacySplitDisplayLayout(mDisplayController.getDisplayContext(displayId),
                 mDisplayController.getDisplayLayout(displayId), mSplits);
         mImeController.addPositionProcessor(mImePositionProcessor);
         mDisplayController.addDisplayChangingController(mRotationController);
@@ -251,7 +251,7 @@ public class SplitScreenController implements SplitScreen,
         if (displayId != DEFAULT_DISPLAY || !mSplits.isSplitScreenSupported()) {
             return;
         }
-        mSplitLayout = new SplitDisplayLayout(mDisplayController.getDisplayContext(displayId),
+        mSplitLayout = new LegacySplitDisplayLayout(mDisplayController.getDisplayContext(displayId),
                 mDisplayController.getDisplayLayout(displayId), mSplits);
         if (mRotateSplitLayout == null) {
             int midPos = mSplitLayout.getSnapAlgorithm().getMiddleTarget().position;
@@ -586,7 +586,7 @@ public class SplitScreenController implements SplitScreen,
         }
     }
 
-    SplitDisplayLayout getSplitLayout() {
+    LegacySplitDisplayLayout getSplitLayout() {
         return mSplitLayout;
     }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker.splitscreen
+package com.android.wm.shell.flicker.legacysplitscreen
 
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
@@ -52,7 +52,7 @@ import org.junit.runners.Parameterized
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class EnterSplitScreenTest(
+class EnterLegacySplitScreenTest(
     rotationName: String,
     rotation: Int
 ) : SplitScreenTestBase(rotationName, rotation) {
