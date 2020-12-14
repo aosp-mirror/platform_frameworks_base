@@ -40256,6 +40256,7 @@ package android.telephony {
     field public static final int SERVICE_OPTION_OUT_OF_ORDER = 34; // 0x22
     field public static final int SIGNAL_LOST = -3; // 0xfffffffd
     field public static final int SIM_CARD_CHANGED = 2043; // 0x7fb
+    field public static final int SLICE_REJECTED = 2252; // 0x8cc
     field public static final int SYNCHRONIZATION_FAILURE = 2184; // 0x888
     field public static final int TEST_LOOPBACK_REGULAR_DEACTIVATION = 2196; // 0x894
     field public static final int TETHERED_CALL_ACTIVE = -6; // 0xfffffffa
