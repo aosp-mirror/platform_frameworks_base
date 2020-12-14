@@ -265,7 +265,7 @@ base::expected<std::monostate, IOError> ApplyStyle(Theme* theme, ResXMLParser* x
     const size_t xml_attr_idx = xml_attr_finder.Find(cur_ident);
     if (xml_attr_idx != xml_attr_finder.end()) {
       // We found the attribute we were looking for.
-      Res_value attribute_value;
+      Res_value attribute_value{};
       xml_parser->getAttributeValue(xml_attr_idx, &attribute_value);
       value.type = attribute_value.dataType;
       value.data = attribute_value.data;
@@ -377,7 +377,7 @@ base::expected<std::monostate, IOError> RetrieveAttributes(AssetManager2* assetm
 
     // Retrieve the current XML attribute if it matches, and step to next.
     if (ix < xml_attr_count && cur_ident == cur_xml_attr) {
-      Res_value attribute_value;
+      Res_value attribute_value{};
       xml_parser->getAttributeValue(ix, &attribute_value);
       value.type = attribute_value.dataType;
       value.data = attribute_value.data;
