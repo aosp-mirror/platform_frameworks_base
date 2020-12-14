@@ -16,4 +16,7 @@
   -->
 <resources>
     <integer name="quick_settings_num_columns">3</integer>
+
+    <!-- Max number of columns for quick controls area -->
+    <integer name="controls_max_columns">2</integer>
 </resources>
