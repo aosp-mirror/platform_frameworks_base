@@ -39,7 +39,6 @@
 #include "androidfw/AssetManager2.h"
 #include "androidfw/AttributeResolution.h"
 #include "androidfw/MutexGuard.h"
-#include "androidfw/PosixUtils.h"
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/ResourceUtils.h"
 
@@ -58,7 +57,6 @@ extern "C" int capget(cap_user_header_t hdrp, cap_user_data_t datap);
 extern "C" int capset(cap_user_header_t hdrp, const cap_user_data_t datap);
 
 using ::android::base::StringPrintf;
-using ::android::util::ExecuteBinary;
 
 namespace android {
 
@@ -112,88 +110,6 @@ constexpr inline static jint ApkAssetsCookieToJavaCookie(ApkAssetsCookie cookie)
 
 constexpr inline static ApkAssetsCookie JavaCookieToApkAssetsCookie(jint cookie) {
   return cookie > 0 ? static_cast<ApkAssetsCookie>(cookie - 1) : kInvalidCookie;
-}
-
-static jobjectArray NativeCreateIdmapsForStaticOverlaysTargetingAndroid(JNIEnv* env,
-                                                                        jclass /*clazz*/) {
-  // --input-directory can be given multiple times, but idmap2 expects the directory to exist
-  std::vector<std::string> input_dirs;
-  struct stat st;
-  if (stat(AssetManager::VENDOR_OVERLAY_DIR, &st) == 0) {
-    input_dirs.push_back(AssetManager::VENDOR_OVERLAY_DIR);
-  }
-
-  if (stat(AssetManager::PRODUCT_OVERLAY_DIR, &st) == 0) {
-    input_dirs.push_back(AssetManager::PRODUCT_OVERLAY_DIR);
-  }
-
-  if (stat(AssetManager::SYSTEM_EXT_OVERLAY_DIR, &st) == 0) {
-    input_dirs.push_back(AssetManager::SYSTEM_EXT_OVERLAY_DIR);
-  }
-
-  if (stat(AssetManager::ODM_OVERLAY_DIR, &st) == 0) {
-    input_dirs.push_back(AssetManager::ODM_OVERLAY_DIR);
-  }
-
-  if (stat(AssetManager::OEM_OVERLAY_DIR, &st) == 0) {
-    input_dirs.push_back(AssetManager::OEM_OVERLAY_DIR);
-  }
-
-  if (input_dirs.empty()) {
-    LOG(WARNING) << "no directories for idmap2 to scan";
-    return env->NewObjectArray(0, g_stringClass, nullptr);
-  }
-
-  if (access("/system/bin/idmap2", X_OK) == -1) {
-    PLOG(WARNING) << "unable to execute idmap2";
-    return nullptr;
-  }
-
-  std::vector<std::string> argv{"/system/bin/idmap2",
-    "scan",
-    "--recursive",
-    "--target-package-name", "android",
-    "--target-apk-path", "/system/framework/framework-res.apk",
-    "--output-directory", "/data/resource-cache"};
-
-  for (const auto& dir : input_dirs) {
-    argv.push_back("--input-directory");
-    argv.push_back(dir);
-  }
-
-  const auto result = ExecuteBinary(argv);
-
-  if (!result) {
-      LOG(ERROR) << "failed to execute idmap2";
-      return nullptr;
-  }
-
-  if (result->status != 0) {
-    LOG(ERROR) << "idmap2: " << result->stderr;
-    return nullptr;
-  }
-
-  std::vector<std::string> idmap_paths;
-  std::istringstream input(result->stdout);
-  std::string path;
-  while (std::getline(input, path)) {
-    idmap_paths.push_back(path);
-  }
-
-  jobjectArray array = env->NewObjectArray(idmap_paths.size(), g_stringClass, nullptr);
-  if (array == nullptr) {
-    return nullptr;
-  }
-  for (size_t i = 0; i < idmap_paths.size(); i++) {
-    const std::string path = idmap_paths[i];
-    jstring java_string = env->NewStringUTF(path.c_str());
-    if (env->ExceptionCheck()) {
-      return nullptr;
-    }
-    env->SetObjectArrayElement(array, i, java_string);
-    env->DeleteLocalRef(java_string);
-  }
-  return array;
 }
 
 static jint CopyValue(JNIEnv* env, ApkAssetsCookie cookie, const Res_value& value, uint32_t ref,
@@ -1563,8 +1479,6 @@ static const JNINativeMethod gAssetManagerMethods[] = {
     {"nativeAssetGetRemainingLength", "(J)J", (void*)NativeAssetGetRemainingLength},
 
     // System/idmap related methods.
-    {"nativeCreateIdmapsForStaticOverlaysTargetingAndroid", "()[Ljava/lang/String;",
-     (void*)NativeCreateIdmapsForStaticOverlaysTargetingAndroid},
     {"nativeGetOverlayableMap", "(JLjava/lang/String;)Ljava/util/Map;",
      (void*)NativeGetOverlayableMap},
     {"nativeGetOverlayablesToString", "(JLjava/lang/String;)Ljava/lang/String;",
