@@ -5888,10 +5888,21 @@ public class ConnectivityServiceTest {
         assertTrue(nc.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
     }
 
+    private void assertDefaultNetworkCapabilities(int userId, NetworkAgentWrapper... networks) {
+        final NetworkCapabilities[] defaultCaps = mService.getDefaultNetworkCapabilitiesForUser(
+                userId, "com.android.calling.package");
+        final String defaultCapsString = Arrays.toString(defaultCaps);
+        assertEquals(defaultCapsString, defaultCaps.length, networks.length);
+        final Set<NetworkCapabilities> defaultCapsSet = new ArraySet<>(defaultCaps);
+        for (NetworkAgentWrapper network : networks) {
+            final NetworkCapabilities nc = mCm.getNetworkCapabilities(network.getNetwork());
+            final String msg = "Did not find " + nc + " in " + Arrays.toString(defaultCaps);
+            assertTrue(msg, defaultCapsSet.contains(nc));
+        }
+    }
+
     @Test
     public void testVpnSetUnderlyingNetworks() throws Exception {
-        final int uid = Process.myUid();
-
         final TestNetworkCallback vpnNetworkCallback = new TestNetworkCallback();
         final NetworkRequest vpnNetworkRequest = new NetworkRequest.Builder()
                 .removeCapability(NET_CAPABILITY_NOT_VPN)
@@ -5914,6 +5925,9 @@ public class ConnectivityServiceTest {
         // A VPN without underlying networks is not suspended.
         assertTrue(nc.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
 
+        final int userId = UserHandle.getUserId(Process.myUid());
+        assertDefaultNetworkCapabilities(userId /* no networks */);
+
         // Connect cell and use it as an underlying network.
         mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR);
         mCellNetworkAgent.addCapability(NET_CAPABILITY_NOT_SUSPENDED);
@@ -5927,6 +5941,7 @@ public class ConnectivityServiceTest {
                 && caps.hasTransport(TRANSPORT_CELLULAR) && !caps.hasTransport(TRANSPORT_WIFI)
                 && !caps.hasCapability(NET_CAPABILITY_NOT_METERED)
                 && caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
+        assertDefaultNetworkCapabilities(userId, mCellNetworkAgent);
 
         mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
         mWiFiNetworkAgent.addCapability(NET_CAPABILITY_NOT_METERED);
@@ -5941,6 +5956,7 @@ public class ConnectivityServiceTest {
                 && caps.hasTransport(TRANSPORT_CELLULAR) && caps.hasTransport(TRANSPORT_WIFI)
                 && !caps.hasCapability(NET_CAPABILITY_NOT_METERED)
                 && caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
+        assertDefaultNetworkCapabilities(userId, mCellNetworkAgent, mWiFiNetworkAgent);
 
         // Don't disconnect, but note the VPN is not using wifi any more.
         mService.setUnderlyingNetworksForVpn(
@@ -5951,6 +5967,9 @@ public class ConnectivityServiceTest {
                 && caps.hasTransport(TRANSPORT_CELLULAR) && !caps.hasTransport(TRANSPORT_WIFI)
                 && !caps.hasCapability(NET_CAPABILITY_NOT_METERED)
                 && caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
+        // The return value of getDefaultNetworkCapabilitiesForUser always includes the default
+        // network (wifi) as well as the underlying networks (cell).
+        assertDefaultNetworkCapabilities(userId, mCellNetworkAgent, mWiFiNetworkAgent);
 
         // Remove NOT_SUSPENDED from the only network and observe VPN is now suspended.
         mCellNetworkAgent.removeCapability(NET_CAPABILITY_NOT_SUSPENDED);
@@ -5979,6 +5998,7 @@ public class ConnectivityServiceTest {
                 && !caps.hasTransport(TRANSPORT_CELLULAR) && caps.hasTransport(TRANSPORT_WIFI)
                 && caps.hasCapability(NET_CAPABILITY_NOT_METERED)
                 && caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
+        assertDefaultNetworkCapabilities(userId, mWiFiNetworkAgent);
 
         // Use both again.
         mService.setUnderlyingNetworksForVpn(
@@ -5989,6 +6009,7 @@ public class ConnectivityServiceTest {
                 && caps.hasTransport(TRANSPORT_CELLULAR) && caps.hasTransport(TRANSPORT_WIFI)
                 && !caps.hasCapability(NET_CAPABILITY_NOT_METERED)
                 && caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
+        assertDefaultNetworkCapabilities(userId, mCellNetworkAgent, mWiFiNetworkAgent);
 
         // Cell is suspended again. As WiFi is not, this should not cause a callback.
         mCellNetworkAgent.removeCapability(NET_CAPABILITY_NOT_SUSPENDED);
@@ -6006,6 +6027,7 @@ public class ConnectivityServiceTest {
         // a bug in ConnectivityService, but as the SUSPENDED and RESUMED callbacks have never
         // been public and are deprecated and slated for removal, there is no sense in spending
         // resources fixing this bug now.
+        assertDefaultNetworkCapabilities(userId, mCellNetworkAgent, mWiFiNetworkAgent);
 
         // Use both again.
         mService.setUnderlyingNetworksForVpn(
@@ -6018,6 +6040,7 @@ public class ConnectivityServiceTest {
                 && caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
         // As above, the RESUMED callback not being sent here is a bug, but not a bug that's
         // worth anybody's time to fix.
+        assertDefaultNetworkCapabilities(userId, mCellNetworkAgent, mWiFiNetworkAgent);
 
         // Disconnect cell. Receive update without even removing the dead network from the
         // underlying networks – it's dead anyway. Not metered any more.
@@ -6026,6 +6049,7 @@ public class ConnectivityServiceTest {
                 (caps) -> caps.hasTransport(TRANSPORT_VPN)
                 && !caps.hasTransport(TRANSPORT_CELLULAR) && caps.hasTransport(TRANSPORT_WIFI)
                 && caps.hasCapability(NET_CAPABILITY_NOT_METERED));
+        assertDefaultNetworkCapabilities(userId, mWiFiNetworkAgent);
 
         // Disconnect wifi too. No underlying networks means this is now metered.
         mWiFiNetworkAgent.disconnect();
@@ -6033,6 +6057,11 @@ public class ConnectivityServiceTest {
                 (caps) -> caps.hasTransport(TRANSPORT_VPN)
                 && !caps.hasTransport(TRANSPORT_CELLULAR) && !caps.hasTransport(TRANSPORT_WIFI)
                 && !caps.hasCapability(NET_CAPABILITY_NOT_METERED));
+        // When a network disconnects, the callbacks are fired before all state is updated, so for a
+        // short time, synchronous calls will behave as if the network is still connected. Wait for
+        // things to settle.
+        waitForIdle();
+        assertDefaultNetworkCapabilities(userId /* no networks */);
 
         mMockVpn.disconnect();
     }
