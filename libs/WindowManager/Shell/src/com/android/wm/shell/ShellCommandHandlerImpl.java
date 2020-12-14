@@ -16,18 +16,16 @@
 
 package com.android.wm.shell;
 
-import android.util.Slog;
-
 import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
+import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.io.PrintWriter;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 /**
  * An entry point into the shell for dumping shell internal state and running adb commands.
@@ -38,6 +36,7 @@ public final class ShellCommandHandlerImpl {
     private static final String TAG = ShellCommandHandlerImpl.class.getSimpleName();
 
     private final Optional<LegacySplitScreen> mLegacySplitScreenOptional;
+    private final Optional<SplitScreen> mSplitScreenOptional;
     private final Optional<Pip> mPipOptional;
     private final Optional<OneHanded> mOneHandedOptional;
     private final Optional<HideDisplayCutout> mHideDisplayCutout;
@@ -49,19 +48,21 @@ public final class ShellCommandHandlerImpl {
     public static ShellCommandHandler create(
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<LegacySplitScreen> legacySplitScreenOptional,
+            Optional<SplitScreen> splitScreenOptional,
             Optional<Pip> pipOptional,
             Optional<OneHanded> oneHandedOptional,
             Optional<HideDisplayCutout> hideDisplayCutout,
             Optional<AppPairs> appPairsOptional,
             ShellExecutor mainExecutor) {
         return new ShellCommandHandlerImpl(shellTaskOrganizer, legacySplitScreenOptional,
-                pipOptional, oneHandedOptional, hideDisplayCutout, appPairsOptional,
-                mainExecutor).mImpl;
+                splitScreenOptional, pipOptional, oneHandedOptional, hideDisplayCutout,
+                appPairsOptional, mainExecutor).mImpl;
     }
 
     private ShellCommandHandlerImpl(
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<LegacySplitScreen> legacySplitScreenOptional,
+            Optional<SplitScreen> splitScreenOptional,
             Optional<Pip> pipOptional,
             Optional<OneHanded> oneHandedOptional,
             Optional<HideDisplayCutout> hideDisplayCutout,
@@ -69,6 +70,7 @@ public final class ShellCommandHandlerImpl {
             ShellExecutor mainExecutor) {
         mShellTaskOrganizer = shellTaskOrganizer;
         mLegacySplitScreenOptional = legacySplitScreenOptional;
+        mSplitScreenOptional = splitScreenOptional;
         mPipOptional = pipOptional;
         mOneHandedOptional = oneHandedOptional;
         mHideDisplayCutout = hideDisplayCutout;
@@ -88,6 +90,9 @@ public final class ShellCommandHandlerImpl {
         pw.println();
         pw.println();
         mAppPairsOptional.ifPresent(appPairs -> appPairs.dump(pw, ""));
+        pw.println();
+        pw.println();
+        mSplitScreenOptional.ifPresent(splitScreen -> splitScreen.dump(pw, ""));
     }
 
 
@@ -102,13 +107,16 @@ public final class ShellCommandHandlerImpl {
                 return runPair(args, pw);
             case "unpair":
                 return runUnpair(args, pw);
+            case "pinTask":
+                return runPinTask(args, pw);
+            case "unpinTask":
+                return runUnpinTask(args, pw);
             case "help":
                 return runHelp(pw);
             default:
                 return false;
         }
     }
-
 
     private boolean runPair(String[] args, PrintWriter pw) {
         if (args.length < 4) {
@@ -133,6 +141,28 @@ public final class ShellCommandHandlerImpl {
         return true;
     }
 
+    private boolean runPinTask(String[] args, PrintWriter pw) {
+        if (args.length < 3) {
+            // First arguments are "WMShell" and command name.
+            pw.println("Error: task id should be provided as arguments");
+            return false;
+        }
+        final int taskId = new Integer(args[2]);
+        mSplitScreenOptional.ifPresent(split -> split.pinTask(taskId));
+        return true;
+    }
+
+    private boolean runUnpinTask(String[] args, PrintWriter pw) {
+        if (args.length < 3) {
+            // First arguments are "WMShell" and command name.
+            pw.println("Error: task id should be provided as arguments");
+            return false;
+        }
+        final int taskId = new Integer(args[2]);
+        mSplitScreenOptional.ifPresent(split -> split.unpinTask(taskId));
+        return true;
+    }
+
     private boolean runHelp(PrintWriter pw) {
         pw.println("Window Manager Shell commands:");
         pw.println("  help");
@@ -142,6 +172,9 @@ public final class ShellCommandHandlerImpl {
         pw.println("  pair <taskId1> <taskId2>");
         pw.println("  unpair <taskId>");
         pw.println("    Pairs/unpairs tasks with given ids.");
+        pw.println("  pinTask <taskId>");
+        pw.println("  unpinTask <taskId>");
+        pw.println("    Pin/Unpin a task with given id in split-screen mode.");
         return true;
     }
 

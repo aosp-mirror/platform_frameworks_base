@@ -49,7 +49,7 @@ public class SplitWindowManagerTests extends ShellTestCase {
         MockitoAnnotations.initMocks(this);
         final Configuration configuration = new Configuration();
         configuration.setToDefaults();
-        mSplitWindowManager = new SplitWindowManager(mContext, configuration,
+        mSplitWindowManager = new SplitWindowManager("TestSplitDivider", mContext, configuration,
                 b -> b.setParent(mSurfaceControl));
         when(mSplitLayout.getDividerBounds()).thenReturn(
                 new Rect(0, 0, configuration.windowConfiguration.getBounds().width(),

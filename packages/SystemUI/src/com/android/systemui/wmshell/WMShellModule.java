@@ -20,6 +20,7 @@ import android.content.Context;
 import android.view.IWindowManager;
 
 import com.android.systemui.dagger.WMSingleton;
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.apppairs.AppPairs;
@@ -46,6 +47,8 @@ import com.android.wm.shell.pip.phone.PhonePipMenuController;
 import com.android.wm.shell.pip.phone.PipAppOpsListener;
 import com.android.wm.shell.pip.phone.PipController;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
+import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
@@ -79,6 +82,15 @@ public class WMShellModule {
         return new LegacySplitScreenController(context, displayController, systemWindows,
                 displayImeController, transactionPool, shellTaskOrganizer, syncQueue,
                 taskStackListener, transitions, mainExecutor);
+    }
+
+    @WMSingleton
+    @Provides
+    static SplitScreen provideSplitScreen(ShellTaskOrganizer shellTaskOrganizer,
+            SyncTransactionQueue syncQueue, Context context,
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
+        return new SplitScreenController(shellTaskOrganizer, syncQueue, context,
+                rootTaskDisplayAreaOrganizer);
     }
 
     @WMSingleton
