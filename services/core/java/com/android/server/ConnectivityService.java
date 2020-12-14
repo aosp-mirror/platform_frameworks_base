@@ -62,6 +62,7 @@ import static android.system.OsConstants.IPPROTO_UDP;
 import static java.util.Map.Entry;
 
 import android.Manifest;
+import android.annotation.BoolRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
@@ -986,6 +987,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mDefaultWifiRequest = createDefaultInternetRequestForTransport(
                 NetworkCapabilities.TRANSPORT_WIFI, NetworkRequest.Type.BACKGROUND_REQUEST);
 
+        mDefaultVehicleRequest = createAlwaysOnRequestForCapability(
+                NetworkCapabilities.NET_CAPABILITY_VEHICLE_INTERNAL,
+                NetworkRequest.Type.BACKGROUND_REQUEST);
+
         mHandlerThread = mDeps.makeHandlerThread();
         mHandlerThread.start();
         mHandler = new InternalHandler(mHandlerThread.getLooper());
@@ -1192,6 +1197,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return new NetworkRequest(netCap, TYPE_NONE, nextNetworkRequestId(), type);
     }
 
+    private NetworkRequest createAlwaysOnRequestForCapability(int capability,
+            NetworkRequest.Type type) {
+        final NetworkCapabilities netCap = new NetworkCapabilities();
+        netCap.clearAll();
+        netCap.addCapability(capability);
+        netCap.setRequestorUidAndPackageName(Process.myUid(), mContext.getPackageName());
+        return new NetworkRequest(netCap, TYPE_NONE, nextNetworkRequestId(), type);
+    }
+
     // Used only for testing.
     // TODO: Delete this and either:
     // 1. Give FakeSettingsProvider the ability to send settings change notifications (requires
@@ -1209,10 +1223,19 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mHandler.sendEmptyMessage(EVENT_PRIVATE_DNS_SETTINGS_CHANGED);
     }
 
+    private void handleAlwaysOnNetworkRequest(NetworkRequest networkRequest, @BoolRes int id) {
+        final boolean enable = mContext.getResources().getBoolean(id);
+        handleAlwaysOnNetworkRequest(networkRequest, enable);
+    }
+
     private void handleAlwaysOnNetworkRequest(
             NetworkRequest networkRequest, String settingName, boolean defaultValue) {
         final boolean enable = toBool(Settings.Global.getInt(
                 mContext.getContentResolver(), settingName, encodeBool(defaultValue)));
+        handleAlwaysOnNetworkRequest(networkRequest, enable);
+    }
+
+    private void handleAlwaysOnNetworkRequest(NetworkRequest networkRequest, boolean enable) {
         final boolean isEnabled = (mNetworkRequests.get(networkRequest) != null);
         if (enable == isEnabled) {
             return;  // Nothing to do.
@@ -1229,9 +1252,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void handleConfigureAlwaysOnNetworks() {
         handleAlwaysOnNetworkRequest(
-                mDefaultMobileDataRequest,Settings.Global.MOBILE_DATA_ALWAYS_ON, true);
+                mDefaultMobileDataRequest, Settings.Global.MOBILE_DATA_ALWAYS_ON, true);
         handleAlwaysOnNetworkRequest(mDefaultWifiRequest, Settings.Global.WIFI_ALWAYS_REQUESTED,
                 false);
+        handleAlwaysOnNetworkRequest(mDefaultVehicleRequest,
+                com.android.internal.R.bool.config_vehicleInternalNetworkAlwaysRequested);
     }
 
     private void registerSettingsCallbacks() {
@@ -6010,6 +6035,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // Request used to optionally keep wifi data active even when higher
     // priority networks like ethernet are active.
     private final NetworkRequest mDefaultWifiRequest;
+
+    // Request used to optionally keep vehicle internal network always active
+    private final NetworkRequest mDefaultVehicleRequest;
 
     private NetworkAgentInfo getDefaultNetwork() {
         return mDefaultNetworkNai;
