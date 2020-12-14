@@ -3513,42 +3513,63 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return null;
     }
 
-    private void handleRegisterNetworkRequestWithIntent(Message msg) {
+    private void handleRegisterNetworkRequestWithIntent(@NonNull final Message msg) {
         final NetworkRequestInfo nri = (NetworkRequestInfo) (msg.obj);
-
-        NetworkRequestInfo existingRequest = findExistingNetworkRequestInfo(nri.mPendingIntent);
+        // handleRegisterNetworkRequestWithIntent() doesn't apply to multilayer requests.
+        ensureNotMultilayerRequest(nri, "handleRegisterNetworkRequestWithIntent");
+        final NetworkRequestInfo existingRequest =
+                findExistingNetworkRequestInfo(nri.mPendingIntent);
         if (existingRequest != null) { // remove the existing request.
-            if (DBG) log("Replacing " + existingRequest.request + " with "
-                    + nri.request + " because their intents matched.");
-            handleReleaseNetworkRequest(existingRequest.request, getCallingUid(),
+            if (DBG) {
+                log("Replacing " + existingRequest.mRequests.get(0) + " with "
+                        + nri.mRequests.get(0) + " because their intents matched.");
+            }
+            handleReleaseNetworkRequest(existingRequest.mRequests.get(0), getCallingUid(),
                     /* callOnUnavailable */ false);
         }
         handleRegisterNetworkRequest(nri);
     }
 
-    private void handleRegisterNetworkRequest(NetworkRequestInfo nri) {
+    private void handleRegisterNetworkRequest(@NonNull final NetworkRequestInfo nri) {
         ensureRunningOnConnectivityServiceThread();
-        mNetworkRequests.put(nri.request, nri);
         mNetworkRequestInfoLogs.log("REGISTER " + nri);
-        if (nri.request.isListen()) {
-            for (NetworkAgentInfo network : mNetworkAgentInfos) {
-                if (nri.request.networkCapabilities.hasSignalStrength() &&
-                        network.satisfiesImmutableCapabilitiesOf(nri.request)) {
-                    updateSignalStrengthThresholds(network, "REGISTER", nri.request);
+        for (final NetworkRequest req : nri.mRequests) {
+            mNetworkRequests.put(req, nri);
+            if (req.isListen()) {
+                for (final NetworkAgentInfo network : mNetworkAgentInfos) {
+                    if (req.networkCapabilities.hasSignalStrength()
+                            && network.satisfiesImmutableCapabilitiesOf(req)) {
+                        updateSignalStrengthThresholds(network, "REGISTER", req);
+                    }
                 }
             }
         }
         rematchAllNetworksAndRequests();
-        if (nri.request.isRequest() && nri.getSatisfier() == null) {
-            sendUpdatedScoreToFactories(nri.request, null);
+        // If an active request exists, return as its score has already been sent if needed.
+        if (null != nri.getActiveRequest()) {
+            return;
+        }
+
+        // As this request was not satisfied on rematch and thus never had any scores sent to the
+        // factories, send null now for each request of type REQUEST.
+        for (final NetworkRequest req : nri.mRequests) {
+            if (!req.isRequest()) {
+                continue;
+            }
+            sendUpdatedScoreToFactories(req, null);
         }
     }
 
-    private void handleReleaseNetworkRequestWithIntent(PendingIntent pendingIntent,
-            int callingUid) {
-        NetworkRequestInfo nri = findExistingNetworkRequestInfo(pendingIntent);
+    private void handleReleaseNetworkRequestWithIntent(@NonNull final PendingIntent pendingIntent,
+            final int callingUid) {
+        final NetworkRequestInfo nri = findExistingNetworkRequestInfo(pendingIntent);
         if (nri != null) {
-            handleReleaseNetworkRequest(nri.request, callingUid, /* callOnUnavailable */ false);
+            // handleReleaseNetworkRequestWithIntent() paths don't apply to multilayer requests.
+            ensureNotMultilayerRequest(nri, "handleReleaseNetworkRequestWithIntent");
+            handleReleaseNetworkRequest(
+                    nri.mRequests.get(0),
+                    callingUid,
+                    /* callOnUnavailable */ false);
         }
     }
 
@@ -3652,30 +3673,45 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return nri;
     }
 
-    private void handleTimedOutNetworkRequest(final NetworkRequestInfo nri) {
+    private void ensureNotMultilayerRequest(@NonNull final NetworkRequestInfo nri,
+            final String callingMethod) {
+        if (nri.isMultilayerRequest()) {
+            throw new IllegalStateException(
+                    callingMethod + " does not support multilayer requests.");
+        }
+    }
+
+    private void handleTimedOutNetworkRequest(@NonNull final NetworkRequestInfo nri) {
         ensureRunningOnConnectivityServiceThread();
-        if (mNetworkRequests.get(nri.request) == null) {
+        // handleTimedOutNetworkRequest() is part of the requestNetwork() flow which works off of a
+        // single NetworkRequest and thus does not apply to multilayer requests.
+        ensureNotMultilayerRequest(nri, "handleTimedOutNetworkRequest");
+        if (mNetworkRequests.get(nri.mRequests.get(0)) == null) {
             return;
         }
         if (nri.getSatisfier() != null) {
             return;
         }
-        if (VDBG || (DBG && nri.request.isRequest())) {
-            log("releasing " + nri.request + " (timeout)");
+        if (VDBG || (DBG && nri.mRequests.get(0).isRequest())) {
+            log("releasing " + nri.mRequests.get(0) + " (timeout)");
         }
         handleRemoveNetworkRequest(nri);
-        callCallbackForRequest(nri, null, ConnectivityManager.CALLBACK_UNAVAIL, 0);
+        callCallbackForRequest(
+                nri, null, ConnectivityManager.CALLBACK_UNAVAIL, 0);
     }
 
-    private void handleReleaseNetworkRequest(NetworkRequest request, int callingUid,
-            boolean callOnUnavailable) {
+    private void handleReleaseNetworkRequest(@NonNull final NetworkRequest request,
+            final int callingUid,
+            final boolean callOnUnavailable) {
         final NetworkRequestInfo nri =
                 getNriForAppRequest(request, callingUid, "release NetworkRequest");
         if (nri == null) {
             return;
         }
-        if (VDBG || (DBG && nri.request.isRequest())) {
-            log("releasing " + nri.request + " (release request)");
+        // handleReleaseNetworkRequest() paths don't apply to multilayer requests.
+        ensureNotMultilayerRequest(nri, "handleReleaseNetworkRequest");
+        if (VDBG || (DBG && request.isRequest())) {
+            log("releasing " + request + " (release request)");
         }
         handleRemoveNetworkRequest(nri);
         if (callOnUnavailable) {
@@ -5451,12 +5487,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     /**
      * Tracks info about the requester.
-     * Also used to notice when the calling process dies so we can self-expire
+     * Also used to notice when the calling process dies so as to self-expire
      */
     @VisibleForTesting
     protected class NetworkRequestInfo implements IBinder.DeathRecipient {
         final List<NetworkRequest> mRequests;
-        final NetworkRequest request;
 
         // mSatisfier and mActiveRequest rely on one another therefore set them together.
         void setSatisfier(
@@ -5492,7 +5527,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final Messenger messenger;
 
         NetworkRequestInfo(NetworkRequest r, PendingIntent pi) {
-            request = r;
             mRequests = initializeRequests(r);
             ensureAllNetworkRequestsHaveType(mRequests);
             mPendingIntent = pi;
@@ -5506,7 +5540,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         NetworkRequestInfo(Messenger m, NetworkRequest r, IBinder binder) {
             super();
             messenger = m;
-            request = r;
             mRequests = initializeRequests(r);
             ensureAllNetworkRequestsHaveType(mRequests);
             mBinder = binder;
@@ -5961,13 +5994,19 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     @Override
-    public void declareNetworkRequestUnfulfillable(NetworkRequest request) {
+    public void declareNetworkRequestUnfulfillable(@NonNull final NetworkRequest request) {
         if (request.hasTransport(TRANSPORT_TEST)) {
             enforceNetworkFactoryOrTestNetworksPermission();
         } else {
             enforceNetworkFactoryPermission();
         }
-        mHandler.post(() -> handleReleaseNetworkRequest(request, mDeps.getCallingUid(), true));
+        final NetworkRequestInfo nri = mNetworkRequests.get(request);
+        if (nri != null) {
+            // declareNetworkRequestUnfulfillable() paths don't apply to multilayer requests.
+            ensureNotMultilayerRequest(nri, "declareNetworkRequestUnfulfillable");
+            mHandler.post(() -> handleReleaseNetworkRequest(
+                    nri.mRequests.get(0), mDeps.getCallingUid(), true));
+        }
     }
 
     // NOTE: Accessed on multiple threads, must be synchronized on itself.
