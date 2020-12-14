@@ -16,8 +16,6 @@
 
 package android.net.wifi;
 
-import android.content.pm.ParceledListSlice;
-
 import android.net.wifi.hotspot2.OsuProvider;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.net.wifi.hotspot2.IProvisioningCallback;
@@ -46,6 +44,8 @@ import android.net.wifi.WifiNetworkSuggestion;
 import android.os.Messenger;
 import android.os.ResultReceiver;
 import android.os.WorkSource;
+
+import com.android.modules.utils.ParceledListSlice;
 
 /**
  * Interface that allows controlling and querying Wi-Fi connectivity.
