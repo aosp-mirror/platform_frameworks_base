@@ -188,28 +188,28 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // either the linger timeout expiring and the network being taken down, or the network
     // satisfying a request again.
     public static class LingerTimer implements Comparable<LingerTimer> {
-        public final NetworkRequest request;
+        public final int requestId;
         public final long expiryMs;
 
-        public LingerTimer(NetworkRequest request, long expiryMs) {
-            this.request = request;
+        public LingerTimer(int requestId, long expiryMs) {
+            this.requestId = requestId;
             this.expiryMs = expiryMs;
         }
         public boolean equals(Object o) {
             if (!(o instanceof LingerTimer)) return false;
             LingerTimer other = (LingerTimer) o;
-            return (request.requestId == other.request.requestId) && (expiryMs == other.expiryMs);
+            return (requestId == other.requestId) && (expiryMs == other.expiryMs);
         }
         public int hashCode() {
-            return Objects.hash(request.requestId, expiryMs);
+            return Objects.hash(requestId, expiryMs);
         }
         public int compareTo(LingerTimer other) {
             return (expiryMs != other.expiryMs) ?
                     Long.compare(expiryMs, other.expiryMs) :
-                    Integer.compare(request.requestId, other.request.requestId);
+                    Integer.compare(requestId, other.requestId);
         }
         public String toString() {
-            return String.format("%s, expires %dms", request.toString(),
+            return String.format("%s, expires %dms", requestId,
                     expiryMs - SystemClock.elapsedRealtime());
         }
     }
@@ -411,7 +411,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         updateRequestCounts(REMOVE, existing);
         mNetworkRequests.remove(requestId);
         if (existing.isRequest()) {
-            unlingerRequest(existing);
+            unlingerRequest(existing.requestId);
         }
     }
 
@@ -557,33 +557,33 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     }
 
     /**
-     * Sets the specified request to linger on this network for the specified time. Called by
+     * Sets the specified requestId to linger on this network for the specified time. Called by
      * ConnectivityService when the request is moved to another network with a higher score.
      */
-    public void lingerRequest(NetworkRequest request, long now, long duration) {
-        if (mLingerTimerForRequest.get(request.requestId) != null) {
+    public void lingerRequest(int requestId, long now, long duration) {
+        if (mLingerTimerForRequest.get(requestId) != null) {
             // Cannot happen. Once a request is lingering on a particular network, we cannot
             // re-linger it unless that network becomes the best for that request again, in which
             // case we should have unlingered it.
-            Log.wtf(TAG, toShortString() + ": request " + request.requestId + " already lingered");
+            Log.wtf(TAG, toShortString() + ": request " + requestId + " already lingered");
         }
         final long expiryMs = now + duration;
-        LingerTimer timer = new LingerTimer(request, expiryMs);
+        LingerTimer timer = new LingerTimer(requestId, expiryMs);
         if (VDBG) Log.d(TAG, "Adding LingerTimer " + timer + " to " + toShortString());
         mLingerTimers.add(timer);
-        mLingerTimerForRequest.put(request.requestId, timer);
+        mLingerTimerForRequest.put(requestId, timer);
     }
 
     /**
      * Cancel lingering. Called by ConnectivityService when a request is added to this network.
-     * Returns true if the given request was lingering on this network, false otherwise.
+     * Returns true if the given requestId was lingering on this network, false otherwise.
      */
-    public boolean unlingerRequest(NetworkRequest request) {
-        LingerTimer timer = mLingerTimerForRequest.get(request.requestId);
+    public boolean unlingerRequest(int requestId) {
+        LingerTimer timer = mLingerTimerForRequest.get(requestId);
         if (timer != null) {
             if (VDBG) Log.d(TAG, "Removing LingerTimer " + timer + " from " + toShortString());
             mLingerTimers.remove(timer);
-            mLingerTimerForRequest.remove(request.requestId);
+            mLingerTimerForRequest.remove(requestId);
             return true;
         }
         return false;
