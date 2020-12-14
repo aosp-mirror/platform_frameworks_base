@@ -2682,6 +2682,23 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature(String, int)}: If this feature is supported, the feature version
+     * specifies a date such that the device is known to pass the OpenGLES dEQP test suite
+     * associated with that date.  The date is encoded as follows:
+     * <ul>
+     * <li>Year in bits 31-16</li>
+     * <li>Month in bits 15-8</li>
+     * <li>Day in bits 7-0</li>
+     * </ul>
+     * <p>
+     * Example: 2021-03-01 is encoded as 0x07E50301, and would indicate that the device passes the
+     * OpenGL ES dEQP test suite version that was current on 2021-03-01.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_OPENGLES_DEQP_LEVEL = "android.software.opengles.deqp.level";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device includes broadcast radio tuner.
      * @hide
      */
