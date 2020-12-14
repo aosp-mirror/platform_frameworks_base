@@ -5471,6 +5471,7 @@ public class ConnectivityServiceTest {
         final Network wifi = mWiFiNetworkAgent.getNetwork();
 
         final NetworkCapabilities initialCaps = new NetworkCapabilities();
+        initialCaps.addTransportType(TRANSPORT_VPN);
         initialCaps.addCapability(NET_CAPABILITY_INTERNET);
         initialCaps.removeCapability(NET_CAPABILITY_NOT_VPN);
 
@@ -5502,44 +5503,45 @@ public class ConnectivityServiceTest {
         withWifiAndMobileUnderlying.setLinkDownstreamBandwidthKbps(10);
         withWifiAndMobileUnderlying.setLinkUpstreamBandwidthKbps(20);
 
+        final NetworkCapabilities initialCapsNotMetered = new NetworkCapabilities(initialCaps);
+        initialCapsNotMetered.addCapability(NET_CAPABILITY_NOT_METERED);
+
         NetworkCapabilities caps = new NetworkCapabilities(initialCaps);
-        final boolean notDeclaredMetered = false;
-        mService.applyUnderlyingCapabilities(new Network[]{}, caps, notDeclaredMetered);
+        mService.applyUnderlyingCapabilities(new Network[]{}, initialCapsNotMetered, caps);
         assertEquals(withNoUnderlying, caps);
 
         caps = new NetworkCapabilities(initialCaps);
-        mService.applyUnderlyingCapabilities(new Network[]{null}, caps, notDeclaredMetered);
+        mService.applyUnderlyingCapabilities(new Network[]{null}, initialCapsNotMetered, caps);
         assertEquals(withNoUnderlying, caps);
 
         caps = new NetworkCapabilities(initialCaps);
-        mService.applyUnderlyingCapabilities(new Network[]{mobile}, caps, notDeclaredMetered);
+        mService.applyUnderlyingCapabilities(new Network[]{mobile}, initialCapsNotMetered, caps);
         assertEquals(withMobileUnderlying, caps);
 
-        mService.applyUnderlyingCapabilities(new Network[]{wifi}, caps, notDeclaredMetered);
+        mService.applyUnderlyingCapabilities(new Network[]{wifi}, initialCapsNotMetered, caps);
         assertEquals(withWifiUnderlying, caps);
 
-        final boolean isDeclaredMetered = true;
         withWifiUnderlying.removeCapability(NET_CAPABILITY_NOT_METERED);
         caps = new NetworkCapabilities(initialCaps);
-        mService.applyUnderlyingCapabilities(new Network[]{wifi}, caps, isDeclaredMetered);
+        mService.applyUnderlyingCapabilities(new Network[]{wifi}, initialCaps, caps);
         assertEquals(withWifiUnderlying, caps);
 
         caps = new NetworkCapabilities(initialCaps);
-        mService.applyUnderlyingCapabilities(new Network[]{mobile, wifi}, caps, isDeclaredMetered);
+        mService.applyUnderlyingCapabilities(new Network[]{mobile, wifi}, initialCaps, caps);
         assertEquals(withWifiAndMobileUnderlying, caps);
 
         withWifiUnderlying.addCapability(NET_CAPABILITY_NOT_METERED);
         caps = new NetworkCapabilities(initialCaps);
         mService.applyUnderlyingCapabilities(new Network[]{null, mobile, null, wifi},
-                caps, notDeclaredMetered);
+                initialCapsNotMetered, caps);
         assertEquals(withWifiAndMobileUnderlying, caps);
 
         caps = new NetworkCapabilities(initialCaps);
         mService.applyUnderlyingCapabilities(new Network[]{null, mobile, null, wifi},
-                caps, notDeclaredMetered);
+                initialCapsNotMetered, caps);
         assertEquals(withWifiAndMobileUnderlying, caps);
 
-        mService.applyUnderlyingCapabilities(null, caps, notDeclaredMetered);
+        mService.applyUnderlyingCapabilities(null, initialCapsNotMetered, caps);
         assertEquals(withWifiUnderlying, caps);
     }
 
