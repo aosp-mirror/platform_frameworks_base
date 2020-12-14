@@ -73,7 +73,6 @@ class NotificationSectionsManager @Inject internal constructor(
 
     private lateinit var parent: NotificationStackScrollLayout
     private var initialized = false
-    private var onClearSilentNotifsClickListener: View.OnClickListener? = null
 
     @VisibleForTesting
     val silentHeaderView: SectionHeaderView?
@@ -439,11 +438,6 @@ class NotificationSectionsManager @Inject internal constructor(
             Log.d(TAG, "updateSections: f=$fs s=$i")
             Log.d(TAG, "updateSections: l=$ls s=$i")
         }
-    }
-
-    /** Listener for when the "clear all" button is clicked on the gentle notification header. */
-    fun setOnClearSilentNotifsClickListener(listener: View.OnClickListener) {
-        onClearSilentNotifsClickListener = listener
     }
 
     fun setHeaderForegroundColor(@ColorInt color: Int) {

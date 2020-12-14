@@ -518,12 +518,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mSectionsManager = notificationSectionsManager;
 
         mSectionsManager.initialize(this, LayoutInflater.from(context));
-        mSectionsManager.setOnClearSilentNotifsClickListener(v -> {
-            // Leave the shade open if there will be other notifs left over to clear
-            final boolean closeShade =
-                    !mController.hasActiveClearableNotifications(ROWS_HIGH_PRIORITY);
-            clearNotifications(ROWS_GENTLE, closeShade);
-        });
         mSections = mSectionsManager.createSectionsForBuckets();
 
         mAmbientState = new AmbientState(context, mSectionsManager);
