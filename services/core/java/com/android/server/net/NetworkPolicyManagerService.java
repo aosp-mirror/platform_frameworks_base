@@ -149,6 +149,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.IConnectivityManager;
@@ -606,6 +607,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     @GuardedBy("mUidRulesFirstLock")
     private final SparseBooleanArray mInternetPermissionMap = new SparseBooleanArray();
 
+    private RestrictedModeObserver mRestrictedModeObserver;
+
     // TODO: keep allowlist of system-critical services that should never have
     // rules enforced, such as system, phone, and radio UIDs.
 
@@ -619,7 +622,35 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         int COUNT = IS_UID_NETWORKING_BLOCKED + 1;
     }
 
-    public final StatLogger mStatLogger = new StatLogger(new String[] {
+    private static class RestrictedModeObserver extends ContentObserver {
+        private final Context mContext;
+        private final RestrictedModeListener mListener;
+
+        RestrictedModeObserver(Context ctx, RestrictedModeListener listener) {
+            super(null);
+            mContext = ctx;
+            mListener = listener;
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.RESTRICTED_NETWORKING_MODE), false,
+                    this);
+        }
+
+        public boolean isRestrictedModeEnabled() {
+            return Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.RESTRICTED_NETWORKING_MODE, 0) != 0;
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            mListener.onChange(isRestrictedModeEnabled());
+        }
+
+        public interface RestrictedModeListener {
+            void onChange(boolean enabled);
+        }
+    }
+
+    public final StatLogger mStatLogger = new StatLogger(new String[]{
             "updateNetworkEnabledNL()",
             "isUidNetworkingBlocked()",
     });
@@ -794,9 +825,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     mRestrictPower = mPowerManagerInternal.getLowPowerState(
                             ServiceType.NETWORK_FIREWALL).batterySaverEnabled;
 
-                    mRestrictedNetworkingMode = Settings.Global.getInt(
-                            mContext.getContentResolver(),
-                            Settings.Global.RESTRICTED_NETWORKING_MODE, 0) != 0;
+                    mRestrictedModeObserver = new RestrictedModeObserver(mContext,
+                            enabled -> {
+                                synchronized (mUidRulesFirstLock) {
+                                    mRestrictedNetworkingMode = enabled;
+                                    updateRestrictedModeAllowlistUL();
+                                }
+                            });
+                    mRestrictedNetworkingMode = mRestrictedModeObserver.isRestrictedModeEnabled();
 
                     mSystemReady = true;
 
