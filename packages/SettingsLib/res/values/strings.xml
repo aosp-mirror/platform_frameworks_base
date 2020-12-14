@@ -1404,4 +1404,79 @@
     <string name="wifi_hotspot_switch_on_text">On</string>
     <!-- Label for Wifi hotspot switch off. Toggles hotspot off [CHAR LIMIT=30] -->
     <string name="wifi_hotspot_switch_off_text">Off</string>
+
+    <!-- Content description of the carrier network changing icon. [CHAR LIMIT=NONE] -->
+    <string name="carrier_network_change_mode">Carrier network changing</string>
+
+    <!-- Content description of the data connection type 3G. [CHAR LIMIT=NONE] -->
+    <string name="data_connection_3g">3G</string>
+
+    <!-- Content description of the data connection type Edge. [CHAR LIMIT=NONE] -->
+    <string name="data_connection_edge">EDGE</string>
+
+    <!-- Content description of the data connection type CDMA. [CHAR LIMIT=NONE] -->
+    <string name="data_connection_cdma">1X</string>
+
+    <!-- Content description of the data connection type GPRS. [CHAR LIMIT=NONE] -->
+    <string name="data_connection_gprs">GPRS</string>
+
+    <!-- Content description of the data connection type 3.5G. [CHAR LIMIT=NONE] -->
+    <string name="data_connection_3_5g">H</string>
+
+    <!-- Content description of the data connection type 3.5G+. [CHAR LIMIT=NONE] -->
+    <string name="data_connection_3_5g_plus">H+</string>
+
+    <!-- Content description of the data connection type 4G . [CHAR LIMIT=NONE] -->
+    <string name="data_connection_4g">4G</string>
+
+    <!-- Content description of the data connection type 4G+. [CHAR LIMIT=NONE] -->
+    <string name="data_connection_4g_plus">4G+</string>
+
+    <!-- Content description of the data connection type LTE. [CHAR LIMIT=NONE] -->
+    <string name="data_connection_lte">LTE</string>
+
+    <!-- Content description of the data connection type LTE+. [CHAR LIMIT=NONE] -->
+    <string name="data_connection_lte_plus">LTE+</string>
+
+    <!-- Content description of the data connection type 5Ge with HTML styling. DO NOT TRANSLATE [CHAR LIMIT=NONE] -->
+    <string name="data_connection_5ge_html" translate="false"> &lt;i>5G &lt;small>E&lt;/small>&lt;/i> </string>
+
+    <!-- Content description of the data connection type 5G. [CHAR LIMIT=NONE] -->
+    <string name="data_connection_5g" translatable="false">5G</string>
+
+    <!-- Content description of the data connection type 5G+. [CHAR LIMIT=NONE] -->
+    <string name="data_connection_5g_plus" translatable="false">5G+</string>
+
+    <!-- Content description of the cell data being disabled. [CHAR LIMIT=NONE] -->
+    <string name="cell_data_off_content_description">Mobile data off</string>
+
+    <!-- Content description of the cell data for not default subscription. [CHAR LIMIT=NONE] -->
+    <string name="not_default_data_content_description">Not set to use data</string>
+
+    <!-- Content description of the phone signal when no signal for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_no_phone">No phone.</string>
+    <!-- Content description of the phone signal when it is one bar for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_phone_one_bar">Phone one bar.</string>
+    <!-- Content description of the phone signal when it is two bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_phone_two_bars">Phone two bars.</string>
+    <!-- Content description of the phone signal when it is three bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_phone_three_bars">Phone three bars.</string>
+    <!-- Content description of the phone signal when it is full for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_phone_signal_full">Phone signal full.</string>
+
+    <!-- Content description of the data signal when no signal for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_no_data">No data.</string>
+    <!-- Content description of the data signal when it is one bar for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_data_one_bar">Data one bar.</string>
+    <!-- Content description of the data signal when it is two bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_data_two_bars">Data two bars.</string>
+    <!-- Content description of the data signal when it is three bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_data_three_bars">Data three bars.</string>
+    <!-- Content description of the data signal when it is full for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_data_signal_full">Data signal full.</string>
+
+    <!-- Content description of the Ethernet connection when disconnected for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_ethernet_disconnected">Ethernet disconnected.</string>
+    <!-- Content description of the Ethernet connection when connected for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_ethernet_connected">Ethernet connected.</string>
 </resources>

@@ -18,6 +18,9 @@ package com.android.systemui.statusbar.policy;
 import android.content.Context;
 import android.net.NetworkCapabilities;
 
+import com.android.settingslib.AccessibilityContentDescriptions;
+import com.android.settingslib.SignalIcon.IconGroup;
+import com.android.settingslib.SignalIcon.State;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
@@ -25,7 +28,7 @@ import java.util.BitSet;
 
 
 public class EthernetSignalController extends
-        SignalController<SignalController.State, SignalController.IconGroup> {
+        SignalController<State, IconGroup> {
 
     public EthernetSignalController(Context context,
             CallbackHandler callbackHandler, NetworkControllerImpl networkController) {
@@ -57,7 +60,7 @@ public class EthernetSignalController extends
     }
 
     @Override
-    public SignalController.State cleanState() {
-        return new SignalController.State();
+    public State cleanState() {
+        return new State();
     }
 }
