@@ -215,7 +215,6 @@ import android.os.PersistableBundle;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.Process;
-import android.os.RecoverySystem;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -245,7 +244,6 @@ import android.security.keymaster.KeymasterCertificateChain;
 import android.security.keystore.AttestationUtils;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.ParcelableKeyGenParameterSpec;
-import android.service.persistentdata.PersistentDataBlockManager;
 import android.stats.devicepolicy.DevicePolicyEnums;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
@@ -1026,6 +1024,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mSafetyChecker = new OneTimeSafetyChecker(this, operation, safe);
     }
 
+    // TODO(b/175392542): remove if not needed by ManagedProvisioning app anymore
+    @Override
+    public void factoryReset(String reason) {
+        Preconditions.checkCallAuthorization(
+                hasCallingOrSelfPermission(permission.MASTER_CLEAR));
+        Slog.w(LOG_TAG, "factoryReset(): " + reason);
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            FactoryResetter.factoryReset(mContext, /* shutdown= */ false, reason,
+                    /* force= */ false, /* wipeEuicc= */ false, /* wipeAdoptableStorage= */ false,
+                    /* wipeFactoryResetProtection= */ false);
+        } catch (IOException e) {
+            // Shouldn't happen.
+            Slog.wtf(LOG_TAG, "Could not factory reset", e);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
     /**
      * Unit test will subclass it to inject mocks.
      */
@@ -1276,8 +1293,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         void recoverySystemRebootWipeUserData(boolean shutdown, String reason, boolean force,
-                boolean wipeEuicc) throws IOException {
-            RecoverySystem.rebootWipeUserData(mContext, shutdown, reason, force, wipeEuicc);
+                boolean wipeEuicc, boolean wipeExtRequested, boolean wipeResetProtectionData)
+                        throws IOException {
+            FactoryResetter.factoryReset(mContext, shutdown, reason, force, wipeEuicc,
+                    wipeExtRequested, wipeResetProtectionData);
         }
 
         boolean systemPropertiesGetBoolean(String key, boolean def) {
@@ -6073,17 +6092,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         caller.getUserId()));
     }
 
-    private void forceWipeDeviceNoLock(boolean wipeExtRequested, String reason, boolean wipeEuicc) {
+    private void forceWipeDeviceNoLock(boolean wipeExtRequested, String reason, boolean wipeEuicc,
+            boolean wipeResetProtectionData) {
         wtfIfInLock();
         boolean success = false;
         try {
-            if (wipeExtRequested) {
-                StorageManager sm = (StorageManager) mContext.getSystemService(
-                    Context.STORAGE_SERVICE);
-                sm.wipeAdoptableDisks();
-            }
             mInjector.recoverySystemRebootWipeUserData(
-                /*shutdown=*/ false, reason, /*force=*/ true, /*wipeEuicc=*/ wipeEuicc);
+                    /* shutdown= */ false, reason, /* force= */ true, /* wipeEuicc= */ wipeEuicc,
+                    wipeExtRequested, wipeResetProtectionData);
             success = true;
         } catch (IOException | SecurityException e) {
             Slog.w(LOG_TAG, "Failed requesting data wipe", e);
@@ -6230,22 +6246,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         + " restriction is set for user " + userId);
             }
 
-            if ((flags & WIPE_RESET_PROTECTION_DATA) != 0) {
-                PersistentDataBlockManager manager = (PersistentDataBlockManager)
-                        mContext.getSystemService(Context.PERSISTENT_DATA_BLOCK_SERVICE);
-                if (manager != null) {
-                    manager.wipe();
-                }
-            }
-
-            // TODO If split user is enabled and the device owner is set in the primary user
-            // (rather than system), we should probably trigger factory reset. Current code just
-            // removes that user (but still clears FRP...)
             if (userId == UserHandle.USER_SYSTEM) {
-                forceWipeDeviceNoLock(/*wipeExtRequested=*/ (
-                        flags & WIPE_EXTERNAL_STORAGE) != 0,
+                forceWipeDeviceNoLock(
+                        (flags & WIPE_EXTERNAL_STORAGE) != 0,
                         internalReason,
-                        /*wipeEuicc=*/ (flags & WIPE_EUICC) != 0);
+                        (flags & WIPE_EUICC) != 0,
+                        (flags & WIPE_RESET_PROTECTION_DATA) != 0);
             } else {
                 forceWipeUser(userId, wipeReasonForUser, (flags & WIPE_SILENTLY) != 0);
             }

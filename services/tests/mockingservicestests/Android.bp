@@ -19,6 +19,7 @@ android_test {
 
     static_libs: [
         "services.core",
+        "services.devicepolicy",
         "services.net",
         "services.usage",
         "service-jobscheduler",
