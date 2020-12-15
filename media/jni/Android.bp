@@ -139,12 +139,15 @@ cc_library_shared {
     name: "libmedia_tv_tuner",
     srcs: [
         "android_media_tv_Tuner.cpp",
+        "tuner/FrontendClient.cpp",
+        "tuner/TunerClient.cpp",
     ],
 
     shared_libs: [
         "android.hardware.graphics.bufferqueue@2.0",
         "android.hardware.tv.tuner@1.0",
         "android.hardware.tv.tuner@1.1",
+        "libbinder_ndk",
         "libandroid_runtime",
         "libcutils",
         "libfmq",
@@ -153,6 +156,7 @@ cc_library_shared {
         "libmedia",
         "libnativehelper",
         "libutils",
+        "tv_tuner_aidl_interface-ndk_platform",
     ],
     defaults: [
         "libcodec2-impl-defaults",

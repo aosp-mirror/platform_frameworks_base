@@ -555,7 +555,6 @@ public class Tuner implements AutoCloseable  {
      */
     private native Frontend nativeOpenFrontendByHandle(int handle);
     @Result
-    private native int nativeCloseFrontendByHandle(int handle);
     private native int nativeTune(int type, FrontendSettings settings);
     private native int nativeStopTune();
     private native int nativeScan(int settingsType, FrontendSettings settings, int scanType);
