@@ -5,5 +5,9 @@ package android.app.appsearch {
     method public static void initialize();
   }
 
+  public class GlobalSearchSession {
+    method @NonNull public android.app.appsearch.SearchResults query(@NonNull String, @NonNull android.app.appsearch.SearchSpec, @NonNull java.util.concurrent.Executor);
+  }
+
 }
 
