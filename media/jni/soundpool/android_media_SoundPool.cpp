@@ -22,6 +22,7 @@
 #include <utils/Log.h>
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include <android_runtime/AndroidRuntime.h>
 #include "SoundPool.h"
 
@@ -181,7 +182,7 @@ static void android_media_callback(SoundPoolEvent event, SoundPool* soundPool, v
 
 static jint
 android_media_SoundPool_native_setup(JNIEnv *env, jobject thiz, jobject weakRef,
-        jint maxChannels, jobject jaa)
+        jint maxChannels, jobject jaa, jstring opPackageName)
 {
     if (jaa == nullptr) {
         ALOGE("Error creating SoundPool: invalid audio attributes");
@@ -203,7 +204,8 @@ android_media_SoundPool_native_setup(JNIEnv *env, jobject thiz, jobject weakRef,
     paa->flags = env->GetIntField(jaa, javaAudioAttrFields.fieldFlags);
 
     ALOGV("android_media_SoundPool_native_setup");
-    auto *ap = new SoundPool(maxChannels, paa);
+    ScopedUtfChars opPackageNameStr(env, opPackageName);
+    auto *ap = new SoundPool(maxChannels, paa, opPackageNameStr.c_str());
     if (ap == nullptr) {
         return -1;
     }
@@ -298,7 +300,7 @@ static JNINativeMethod gMethods[] = {
         (void *)android_media_SoundPool_setRate
     },
     {   "native_setup",
-        "(Ljava/lang/Object;ILjava/lang/Object;)I",
+        "(Ljava/lang/Object;ILjava/lang/Object;Ljava/lang/String;)I",
         (void*)android_media_SoundPool_native_setup
     },
     {   "native_release",
