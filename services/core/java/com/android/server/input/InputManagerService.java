@@ -2216,31 +2216,23 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback
-    private void notifyConnectionUnresponsive(IBinder token, String reason) {
-        Integer gestureMonitorPid;
-        synchronized (mGestureMonitorPidsLock) {
-            gestureMonitorPid = mGestureMonitorPidsByToken.get(token);
-        }
-        if (gestureMonitorPid != null) {
-            mWindowManagerCallbacks.notifyGestureMonitorUnresponsive(gestureMonitorPid, reason);
-            return;
-        }
-        // If we couldn't find a gesture monitor for this token, it's a window
+    private void notifyWindowUnresponsive(IBinder token, String reason) {
         mWindowManagerCallbacks.notifyWindowUnresponsive(token, reason);
     }
 
     // Native callback
-    private void notifyConnectionResponsive(IBinder token) {
-        Integer gestureMonitorPid;
-        synchronized (mGestureMonitorPidsLock) {
-            gestureMonitorPid = mGestureMonitorPidsByToken.get(token);
-        }
-        if (gestureMonitorPid != null) {
-            mWindowManagerCallbacks.notifyGestureMonitorResponsive(gestureMonitorPid);
-            return;
-        }
-        // If we couldn't find a gesture monitor for this token, it's a window
+    private void notifyMonitorUnresponsive(int pid, String reason) {
+        mWindowManagerCallbacks.notifyGestureMonitorUnresponsive(pid, reason);
+    }
+
+    // Native callback
+    private void notifyWindowResponsive(IBinder token) {
         mWindowManagerCallbacks.notifyWindowResponsive(token);
+    }
+
+    // Native callback
+    private void notifyMonitorResponsive(int pid) {
+        mWindowManagerCallbacks.notifyGestureMonitorResponsive(pid);
     }
 
     // Native callback.

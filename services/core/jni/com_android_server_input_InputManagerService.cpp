@@ -98,8 +98,10 @@ static struct {
     jmethodID notifySwitch;
     jmethodID notifyInputChannelBroken;
     jmethodID notifyNoFocusedWindowAnr;
-    jmethodID notifyConnectionUnresponsive;
-    jmethodID notifyConnectionResponsive;
+    jmethodID notifyWindowUnresponsive;
+    jmethodID notifyWindowResponsive;
+    jmethodID notifyMonitorUnresponsive;
+    jmethodID notifyMonitorResponsive;
     jmethodID notifyFocusChanged;
     jmethodID notifyUntrustedTouch;
     jmethodID filterInputEvent;
@@ -263,9 +265,13 @@ public:
     void notifySwitch(nsecs_t when, uint32_t switchValues, uint32_t switchMask,
                       uint32_t policyFlags) override;
     void notifyConfigurationChanged(nsecs_t when) override;
+    // ANR-related callbacks -- start
     void notifyNoFocusedWindowAnr(const std::shared_ptr<InputApplicationHandle>& handle) override;
-    void notifyConnectionUnresponsive(const sp<IBinder>& token, const std::string& reason) override;
-    void notifyConnectionResponsive(const sp<IBinder>& token) override;
+    void notifyWindowUnresponsive(const sp<IBinder>& token, const std::string& reason) override;
+    void notifyWindowResponsive(const sp<IBinder>& token) override;
+    void notifyMonitorUnresponsive(int32_t pid, const std::string& reason) override;
+    void notifyMonitorResponsive(int32_t pid) override;
+    // ANR-related callbacks -- end
     void notifyInputChannelBroken(const sp<IBinder>& token) override;
     void notifyFocusChanged(const sp<IBinder>& oldToken, const sp<IBinder>& newToken) override;
     void notifyUntrustedTouch(const std::string& obscuringPackage) override;
@@ -744,10 +750,10 @@ void NativeInputManager::notifyNoFocusedWindowAnr(
     checkAndClearExceptionFromCallback(env, "notifyNoFocusedWindowAnr");
 }
 
-void NativeInputManager::notifyConnectionUnresponsive(const sp<IBinder>& token,
-                                                      const std::string& reason) {
+void NativeInputManager::notifyWindowUnresponsive(const sp<IBinder>& token,
+                                                  const std::string& reason) {
 #if DEBUG_INPUT_DISPATCHER_POLICY
-    ALOGD("notifyConnectionUnresponsive");
+    ALOGD("notifyWindowUnresponsive");
 #endif
     ATRACE_CALL();
 
@@ -757,14 +763,14 @@ void NativeInputManager::notifyConnectionUnresponsive(const sp<IBinder>& token,
     jobject tokenObj = javaObjectForIBinder(env, token);
     ScopedLocalRef<jstring> reasonObj(env, env->NewStringUTF(reason.c_str()));
 
-    env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyConnectionUnresponsive, tokenObj,
+    env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyWindowUnresponsive, tokenObj,
                         reasonObj.get());
-    checkAndClearExceptionFromCallback(env, "notifyConnectionUnresponsive");
+    checkAndClearExceptionFromCallback(env, "notifyWindowUnresponsive");
 }
 
-void NativeInputManager::notifyConnectionResponsive(const sp<IBinder>& token) {
+void NativeInputManager::notifyWindowResponsive(const sp<IBinder>& token) {
 #if DEBUG_INPUT_DISPATCHER_POLICY
-    ALOGD("notifyConnectionResponsive");
+    ALOGD("notifyWindowResponsive");
 #endif
     ATRACE_CALL();
 
@@ -773,8 +779,37 @@ void NativeInputManager::notifyConnectionResponsive(const sp<IBinder>& token) {
 
     jobject tokenObj = javaObjectForIBinder(env, token);
 
-    env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyConnectionResponsive, tokenObj);
-    checkAndClearExceptionFromCallback(env, "notifyConnectionResponsive");
+    env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyWindowResponsive, tokenObj);
+    checkAndClearExceptionFromCallback(env, "notifyWindowResponsive");
+}
+
+void NativeInputManager::notifyMonitorUnresponsive(int32_t pid, const std::string& reason) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+    ALOGD("notifyMonitorUnresponsive");
+#endif
+    ATRACE_CALL();
+
+    JNIEnv* env = jniEnv();
+    ScopedLocalFrame localFrame(env);
+
+    ScopedLocalRef<jstring> reasonObj(env, env->NewStringUTF(reason.c_str()));
+
+    env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyMonitorUnresponsive, pid,
+                        reasonObj.get());
+    checkAndClearExceptionFromCallback(env, "notifyMonitorUnresponsive");
+}
+
+void NativeInputManager::notifyMonitorResponsive(int32_t pid) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+    ALOGD("notifyMonitorResponsive");
+#endif
+    ATRACE_CALL();
+
+    JNIEnv* env = jniEnv();
+    ScopedLocalFrame localFrame(env);
+
+    env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyMonitorResponsive, pid);
+    checkAndClearExceptionFromCallback(env, "notifyMonitorResponsive");
 }
 
 void NativeInputManager::notifyInputChannelBroken(const sp<IBinder>& token) {
@@ -2024,11 +2059,17 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gServiceClassInfo.notifyNoFocusedWindowAnr, clazz, "notifyNoFocusedWindowAnr",
                   "(Landroid/view/InputApplicationHandle;)V");
 
-    GET_METHOD_ID(gServiceClassInfo.notifyConnectionUnresponsive, clazz,
-                  "notifyConnectionUnresponsive", "(Landroid/os/IBinder;Ljava/lang/String;)V");
+    GET_METHOD_ID(gServiceClassInfo.notifyWindowUnresponsive, clazz, "notifyWindowUnresponsive",
+                  "(Landroid/os/IBinder;Ljava/lang/String;)V");
 
-    GET_METHOD_ID(gServiceClassInfo.notifyConnectionResponsive, clazz, "notifyConnectionResponsive",
+    GET_METHOD_ID(gServiceClassInfo.notifyMonitorUnresponsive, clazz, "notifyMonitorUnresponsive",
+                  "(ILjava/lang/String;)V");
+
+    GET_METHOD_ID(gServiceClassInfo.notifyWindowResponsive, clazz, "notifyWindowResponsive",
                   "(Landroid/os/IBinder;)V");
+
+    GET_METHOD_ID(gServiceClassInfo.notifyMonitorResponsive, clazz, "notifyMonitorResponsive",
+                  "(I)V");
 
     GET_METHOD_ID(gServiceClassInfo.filterInputEvent, clazz,
             "filterInputEvent", "(Landroid/view/InputEvent;I)Z");
