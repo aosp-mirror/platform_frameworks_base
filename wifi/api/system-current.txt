@@ -964,6 +964,10 @@ package android.net.wifi.p2p {
 
 package android.net.wifi.rtt {
 
+  public final class RangingRequest implements android.os.Parcelable {
+    method @NonNull public java.util.List<android.net.wifi.rtt.ResponderConfig> getRttPeers();
+  }
+
   public static final class RangingRequest.Builder {
     method public android.net.wifi.rtt.RangingRequest.Builder addResponder(@NonNull android.net.wifi.rtt.ResponderConfig);
   }

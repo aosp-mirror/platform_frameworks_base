@@ -16,8 +16,10 @@
 
 package com.android.wm.shell.flicker
 
+import android.graphics.Region
 import com.android.server.wm.flicker.dsl.EventLogAssertion
 import com.android.server.wm.flicker.dsl.LayersAssertion
+import com.android.server.wm.flicker.helpers.WindowUtils
 
 @JvmOverloads
 fun LayersAssertion.appPairsDividerIsVisible(
@@ -57,6 +59,50 @@ fun LayersAssertion.dockedStackDividerIsInvisible(
     end("dockedStackDividerIsInvisible", bugId, enabled) {
         this.hasNotLayer(FlickerTestBase.DOCKED_STACK_DIVIDER)
     }
+}
+
+@JvmOverloads
+fun LayersAssertion.dockedStackPrimaryBoundsIsVisible(
+    rotation: Int,
+    primaryLayerName: String,
+    bugId: Int = 0,
+    enabled: Boolean = bugId == 0
+) {
+    end("PrimaryAppBounds", bugId, enabled) {
+        val entry = this.trace.entries.firstOrNull()
+                ?: throw IllegalStateException("Trace is empty")
+        val dividerRegion = entry.getVisibleBounds(FlickerTestBase.DOCKED_STACK_DIVIDER)
+        this.hasVisibleRegion(primaryLayerName, getPrimaryRegion(dividerRegion, rotation))
+    }
+}
+
+@JvmOverloads
+fun LayersAssertion.dockedStackSecondaryBoundsIsVisible(
+    rotation: Int,
+    secondaryLayerName: String,
+    bugId: Int = 0,
+    enabled: Boolean = bugId == 0
+) {
+    end("SecondaryAppBounds", bugId, enabled) {
+        val entry = this.trace.entries.firstOrNull()
+                ?: throw IllegalStateException("Trace is empty")
+        val dividerRegion = entry.getVisibleBounds(FlickerTestBase.DOCKED_STACK_DIVIDER)
+        this.hasVisibleRegion(secondaryLayerName, getSecondaryRegion(dividerRegion, rotation))
+    }
+}
+
+fun getPrimaryRegion(dividerRegion: Region, rotation: Int): Region {
+    val displayBounds = WindowUtils.getDisplayBounds(rotation)
+    return Region(0, 0, displayBounds.getBounds().right,
+            dividerRegion.getBounds().bottom - WindowUtils.dockedStackDividerInset)
+}
+
+fun getSecondaryRegion(dividerRegion: Region, rotation: Int): Region {
+    val displayBounds = WindowUtils.getDisplayBounds(rotation)
+    return Region(0,
+            dividerRegion.getBounds().bottom - WindowUtils.dockedStackDividerInset,
+            displayBounds.getBounds().right,
+            displayBounds.getBounds().bottom - WindowUtils.navigationBarHeight)
 }
 
 fun EventLogAssertion.focusChanges(

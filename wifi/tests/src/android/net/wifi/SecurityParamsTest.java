@@ -85,11 +85,11 @@ public class SecurityParamsTest {
                 expectedAllowedGroupCiphers, expectedRequirePmf);
     }
 
-    /** Verify EAP Passpoint params creator. */
+    /** Verify Passpoint R1 params creator. */
     @Test
-    public void testEapPasspointCreator() throws Exception {
-        SecurityParams p = SecurityParams.createPasspointParams(false);
-        int expectedSecurityType = WifiConfiguration.SECURITY_TYPE_EAP;
+    public void testEapPasspointR1Creator() throws Exception {
+        SecurityParams p = SecurityParams.createPasspointParams(SecurityParams.PASSPOINT_R1);
+        int expectedSecurityType = WifiConfiguration.SECURITY_TYPE_PASSPOINT_R1_R2;
         int[] expectedAllowedKeyManagement = new int[] {KeyMgmt.WPA_EAP, KeyMgmt.IEEE8021X};
         int[] expectedAllowedProtocols = new int[] {};
         int[] expectedAllowedAuthAlgorithms = new int[] {};
@@ -100,9 +100,36 @@ public class SecurityParamsTest {
                 expectedAllowedKeyManagement, expectedAllowedProtocols,
                 expectedAllowedAuthAlgorithms, expectedAllowedPairwiseCiphers,
                 expectedAllowedGroupCiphers, expectedRequirePmf);
+    }
 
-        p = SecurityParams.createPasspointParams(true);
-        expectedRequirePmf = true;
+    /** Verify Passpoint R2 params creator. */
+    @Test
+    public void testEapPasspointR2Creator() throws Exception {
+        SecurityParams p = SecurityParams.createPasspointParams(SecurityParams.PASSPOINT_R2);
+        int expectedSecurityType = WifiConfiguration.SECURITY_TYPE_PASSPOINT_R1_R2;
+        int[] expectedAllowedKeyManagement = new int[] {KeyMgmt.WPA_EAP, KeyMgmt.IEEE8021X};
+        int[] expectedAllowedProtocols = new int[] {};
+        int[] expectedAllowedAuthAlgorithms = new int[] {};
+        int[] expectedAllowedPairwiseCiphers = new int[] {};
+        int[] expectedAllowedGroupCiphers = new int[] {};
+        boolean expectedRequirePmf = false;
+        verifySecurityParams(p, expectedSecurityType,
+                expectedAllowedKeyManagement, expectedAllowedProtocols,
+                expectedAllowedAuthAlgorithms, expectedAllowedPairwiseCiphers,
+                expectedAllowedGroupCiphers, expectedRequirePmf);
+    }
+
+    /** Verify Passpoint R3 params creator. */
+    @Test
+    public void testEapPasspointR3Creator() throws Exception {
+        SecurityParams p = SecurityParams.createPasspointParams(SecurityParams.PASSPOINT_R3);
+        int expectedSecurityType = WifiConfiguration.SECURITY_TYPE_PASSPOINT_R3;
+        int[] expectedAllowedKeyManagement = new int[] {KeyMgmt.WPA_EAP, KeyMgmt.IEEE8021X};
+        int[] expectedAllowedProtocols = new int[] {};
+        int[] expectedAllowedAuthAlgorithms = new int[] {};
+        int[] expectedAllowedPairwiseCiphers = new int[] {};
+        int[] expectedAllowedGroupCiphers = new int[] {};
+        boolean expectedRequirePmf = true;
         verifySecurityParams(p, expectedSecurityType,
                 expectedAllowedKeyManagement, expectedAllowedProtocols,
                 expectedAllowedAuthAlgorithms, expectedAllowedPairwiseCiphers,
@@ -408,7 +435,9 @@ public class SecurityParamsTest {
 
         SecurityParams[] nonOpenSecurityParams = new SecurityParams[] {
                 SecurityParams.createWpaWpa2EnterpriseParams(),
-                SecurityParams.createPasspointParams(false),
+                SecurityParams.createPasspointParams(SecurityParams.PASSPOINT_R1),
+                SecurityParams.createPasspointParams(SecurityParams.PASSPOINT_R2),
+                SecurityParams.createPasspointParams(SecurityParams.PASSPOINT_R3),
                 SecurityParams.createOsenParams(),
                 SecurityParams.createWapiCertParams(),
                 SecurityParams.createWapiPskParams(),
@@ -428,7 +457,9 @@ public class SecurityParamsTest {
     public void testIsEnterpriseNetwork() {
         SecurityParams[] enterpriseSecurityParams = new SecurityParams[] {
                 SecurityParams.createWpaWpa2EnterpriseParams(),
-                SecurityParams.createPasspointParams(false),
+                SecurityParams.createPasspointParams(SecurityParams.PASSPOINT_R1),
+                SecurityParams.createPasspointParams(SecurityParams.PASSPOINT_R2),
+                SecurityParams.createPasspointParams(SecurityParams.PASSPOINT_R3),
                 SecurityParams.createWapiCertParams(),
                 SecurityParams.createWpa3Enterprise192BitParams(),
                 SecurityParams.createWpa3EnterpriseParams(),

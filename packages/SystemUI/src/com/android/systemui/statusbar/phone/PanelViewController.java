@@ -862,6 +862,8 @@ public abstract class PanelViewController {
                             mView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                             if (mAnimateAfterExpanding) {
                                 notifyExpandingStarted();
+                                InteractionJankMonitor.getInstance().begin(
+                                        CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
                                 fling(0, true /* expand */);
                             } else {
                                 setExpandedFraction(1f);

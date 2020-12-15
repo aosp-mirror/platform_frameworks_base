@@ -3140,6 +3140,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             // On TVs, if the app doesn't implement search, we want to launch assist.
             Bundle args = new Bundle();
             args.putInt(Intent.EXTRA_ASSIST_INPUT_DEVICE_ID, event.getDeviceId());
+            args.putLong(Intent.EXTRA_TIME, event.getEventTime());
             ((SearchManager) getContext().getSystemService(Context.SEARCH_SERVICE))
                     .launchAssist(args);
             return true;

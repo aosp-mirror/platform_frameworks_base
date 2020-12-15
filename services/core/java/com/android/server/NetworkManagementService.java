@@ -60,7 +60,6 @@ import android.net.NetworkStack;
 import android.net.NetworkStats;
 import android.net.RouteInfo;
 import android.net.TetherStatsParcel;
-import android.net.UidRange;
 import android.net.UidRangeParcel;
 import android.net.shared.NetdUtils;
 import android.net.shared.RouteUtils;
@@ -1393,38 +1392,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         }
     }
 
-    private static UidRangeParcel makeUidRangeParcel(int start, int stop) {
-        UidRangeParcel range = new UidRangeParcel();
-        range.start = start;
-        range.stop = stop;
-        return range;
-    }
-
-    private static UidRangeParcel[] toStableParcels(UidRange[] ranges) {
-        UidRangeParcel[] stableRanges = new UidRangeParcel[ranges.length];
-        for (int i = 0; i < ranges.length; i++) {
-            stableRanges[i] = makeUidRangeParcel(ranges[i].start, ranges[i].stop);
-        }
-        return stableRanges;
-    }
-
-    @Override
-    public void setAllowOnlyVpnForUids(boolean add, UidRange[] uidRanges)
-            throws ServiceSpecificException {
-        NetworkStack.checkNetworkStackPermission(mContext);
-        try {
-            mNetdService.networkRejectNonSecureVpn(add, toStableParcels(uidRanges));
-        } catch (ServiceSpecificException e) {
-            Log.w(TAG, "setAllowOnlyVpnForUids(" + add + ", " + Arrays.toString(uidRanges) + ")"
-                    + ": netd command failed", e);
-            throw e;
-        } catch (RemoteException e) {
-            Log.w(TAG, "setAllowOnlyVpnForUids(" + add + ", " + Arrays.toString(uidRanges) + ")"
-                    + ": netd command failed", e);
-            throw e.rethrowAsRuntimeException();
-        }
-    }
-
     private void applyUidCleartextNetworkPolicy(int uid, int policy) {
         final int policyValue;
         switch (policy) {
@@ -1553,27 +1520,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     @Override
-    public void addVpnUidRanges(int netId, UidRange[] ranges) {
-        NetworkStack.checkNetworkStackPermission(mContext);
-
-        try {
-            mNetdService.networkAddUidRanges(netId, toStableParcels(ranges));
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
-    public void removeVpnUidRanges(int netId, UidRange[] ranges) {
-        NetworkStack.checkNetworkStackPermission(mContext);
-        try {
-            mNetdService.networkRemoveUidRanges(netId, toStableParcels(ranges));
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
     public void setFirewallEnabled(boolean enabled) {
         enforceSystemUid();
         try {
@@ -1616,7 +1562,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             ranges = new UidRangeParcel[] {
                 // TODO: is there a better way of finding all existing users? If so, we could
                 // specify their ranges here.
-                makeUidRangeParcel(Process.FIRST_APPLICATION_UID, Integer.MAX_VALUE),
+                new UidRangeParcel(Process.FIRST_APPLICATION_UID, Integer.MAX_VALUE),
             };
             // ... except for the UIDs that have allow rules.
             synchronized (mRulesLock) {
@@ -1647,7 +1593,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                 for (int i = 0; i < ranges.length; i++) {
                     if (rules.valueAt(i) == FIREWALL_RULE_DENY) {
                         int uid = rules.keyAt(i);
-                        ranges[numUids] = makeUidRangeParcel(uid, uid);
+                        ranges[numUids] = new UidRangeParcel(uid, uid);
                         numUids++;
                     }
                 }

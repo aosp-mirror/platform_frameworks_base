@@ -502,6 +502,20 @@ public class WifiConfiguration implements Parcelable {
      * @hide
      */
     public static final int SECURITY_TYPE_OSEN = 10;
+    /**
+     * Security type for a Passpoint R1/R2 network.
+     * Passpoint R1/R2 uses Enterprise security, where TKIP and WEP are not allowed.
+     * @hide
+     */
+    public static final int SECURITY_TYPE_PASSPOINT_R1_R2 = 11;
+
+    /**
+     * Security type for a Passpoint R3 network.
+     * Passpoint R3 uses Enterprise security, where TKIP and WEP are not allowed,
+     * and PMF must be set to Required.
+     * @hide
+     */
+    public static final int SECURITY_TYPE_PASSPOINT_R3 = 12;
 
     /**
      * Security types we support.
@@ -520,6 +534,8 @@ public class WifiConfiguration implements Parcelable {
             SECURITY_TYPE_WAPI_CERT,
             SECURITY_TYPE_EAP_WPA3_ENTERPRISE,
             SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT,
+            SECURITY_TYPE_PASSPOINT_R1_R2,
+            SECURITY_TYPE_PASSPOINT_R3,
     })
     public @interface SecurityType {}
 
@@ -546,7 +562,7 @@ public class WifiConfiguration implements Parcelable {
      * {@link #SECURITY_TYPE_WAPI_PSK},
      * {@link #SECURITY_TYPE_WAPI_CERT},
      * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE},
-     * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT}
+     * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT},
      */
     public void setSecurityParams(@SecurityType int securityType) {
         // Clear existing data.
@@ -580,7 +596,7 @@ public class WifiConfiguration implements Parcelable {
      * {@link #SECURITY_TYPE_WAPI_PSK},
      * {@link #SECURITY_TYPE_WAPI_CERT},
      * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE},
-     * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT}
+     * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT},
      *
      * @hide
      */
@@ -626,6 +642,12 @@ public class WifiConfiguration implements Parcelable {
                 break;
             case SECURITY_TYPE_OSEN:
                 params = SecurityParams.createOsenParams();
+                break;
+            case SECURITY_TYPE_PASSPOINT_R1_R2:
+                params = SecurityParams.createPasspointParams(SecurityParams.PASSPOINT_R2);
+                break;
+            case SECURITY_TYPE_PASSPOINT_R3:
+                params = SecurityParams.createPasspointParams(SecurityParams.PASSPOINT_R3);
                 break;
             default:
                 throw new IllegalArgumentException("unknown security type " + securityType);
@@ -719,7 +741,7 @@ public class WifiConfiguration implements Parcelable {
      * {@link #SECURITY_TYPE_WAPI_PSK},
      * {@link #SECURITY_TYPE_WAPI_CERT},
      * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE},
-     * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT}
+     * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT},
      *
      * @hide
      */
@@ -743,7 +765,7 @@ public class WifiConfiguration implements Parcelable {
      * {@link #SECURITY_TYPE_WAPI_PSK},
      * {@link #SECURITY_TYPE_WAPI_CERT},
      * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE},
-     * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT}
+     * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT},
      *
      * @return the copy of specific security params if found; otherwise null.
      * @hide
@@ -769,7 +791,7 @@ public class WifiConfiguration implements Parcelable {
      * {@link #SECURITY_TYPE_WAPI_PSK},
      * {@link #SECURITY_TYPE_WAPI_CERT},
      * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE},
-     * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT}
+     * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT},
      *
      * @return true if there is a security params matches the type.
      * @hide

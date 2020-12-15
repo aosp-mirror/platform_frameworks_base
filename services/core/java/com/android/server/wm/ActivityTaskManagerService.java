@@ -2538,9 +2538,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Override
     public int getLockTaskModeState() {
-        synchronized (mGlobalLock) {
-            return getLockTaskController().getLockTaskModeState();
-        }
+        return getLockTaskController().getLockTaskModeState();
     }
 
     @Override

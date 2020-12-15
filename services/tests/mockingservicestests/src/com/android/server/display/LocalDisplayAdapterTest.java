@@ -19,11 +19,14 @@ package com.android.server.display;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.Mockito.never;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -40,7 +43,9 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.server.LocalServices;
+import com.android.server.display.LocalDisplayAdapter.BacklightAdapter;
 import com.android.server.lights.LightsManager;
+import com.android.server.lights.LogicalLight;
 
 import com.google.common.truth.Truth;
 
@@ -78,6 +83,8 @@ public class LocalDisplayAdapterTest {
     private Resources mMockedResources;
     @Mock
     private LightsManager mMockedLightsManager;
+    @Mock
+    private LogicalLight mMockedBacklight;
 
     private Handler mHandler;
 
@@ -490,6 +497,49 @@ public class LocalDisplayAdapterTest {
         updateAvailableDisplays();
         mInjector.getTransmitter().sendHotplug(display, /* connected */ true);
         waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+    }
+
+    @Test
+    public void testBacklightAdapter_withSurfaceControlSupport() {
+        final Binder displayToken = new Binder();
+        doReturn(true).when(() -> SurfaceControl.getDisplayBrightnessSupport(displayToken));
+
+        // Test as default display
+        BacklightAdapter ba = new BacklightAdapter(displayToken, true /*isDefault*/);
+        ba.setBrightness(0.514f);
+        verify(() -> SurfaceControl.setDisplayBrightness(displayToken, 0.514f));
+
+        // Test as not default display
+        BacklightAdapter ba2 = new BacklightAdapter(displayToken,
+                false /*isDefault*/);
+        ba2.setBrightness(0.323f);
+        verify(() -> SurfaceControl.setDisplayBrightness(displayToken, 0.323f));
+    }
+
+    @Test
+    public void testBacklightAdapter_withoutSourceControlSupport_defaultDisplay() {
+        final Binder displayToken = new Binder();
+        doReturn(false).when(() -> SurfaceControl.getDisplayBrightnessSupport(displayToken));
+        doReturn(mMockedBacklight).when(mMockedLightsManager)
+                .getLight(LightsManager.LIGHT_ID_BACKLIGHT);
+
+        BacklightAdapter ba = new BacklightAdapter(displayToken, true /*isDefault*/);
+        ba.setBrightness(0.123f);
+        verify(mMockedBacklight).setBrightness(0.123f);
+    }
+
+    @Test
+    public void testBacklightAdapter_withoutSourceControlSupport_nonDefaultDisplay() {
+        final Binder displayToken = new Binder();
+        doReturn(false).when(() -> SurfaceControl.getDisplayBrightnessSupport(displayToken));
+        doReturn(mMockedBacklight).when(mMockedLightsManager)
+                .getLight(LightsManager.LIGHT_ID_BACKLIGHT);
+
+        BacklightAdapter ba = new BacklightAdapter(displayToken, false /*isDefault*/);
+        ba.setBrightness(0.456f);
+
+        // Adapter does not forward any brightness in this case.
+        verify(mMockedBacklight, never()).setBrightness(anyFloat());
     }
 
     private void assertDisplayDpi(DisplayDeviceInfo info, int expectedPort,

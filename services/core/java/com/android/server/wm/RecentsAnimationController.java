@@ -57,7 +57,9 @@ import android.view.WindowInsets.Type;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.util.LatencyTracker;
 import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -84,6 +86,11 @@ import java.util.stream.Collectors;
 public class RecentsAnimationController implements DeathRecipient {
     private static final String TAG = RecentsAnimationController.class.getSimpleName();
     private static final long FAILSAFE_DELAY = 1000;
+    /**
+     * If the recents animation is canceled before the delay since the window drawn, do not log the
+     * action because the duration is too small that may be just a mistouch,
+     */
+    private static final long LATENCY_TRACKER_LOG_DELAY_MS = 300;
 
     public static final int REORDER_KEEP_IN_PLACE = 0;
     public static final int REORDER_MOVE_TO_TOP = 1;
@@ -123,7 +130,7 @@ public class RecentsAnimationController implements DeathRecipient {
     private boolean mPendingStart = true;
 
     // Set when the animation has been canceled
-    private boolean mCanceled;
+    private volatile boolean mCanceled;
 
     // Whether or not the input consumer is enabled. The input consumer must be both registered and
     // enabled for it to start intercepting touch events.
@@ -364,6 +371,9 @@ public class RecentsAnimationController implements DeathRecipient {
                 Binder.restoreCallingIdentity(token);
             }
         }
+
+        @Override
+        public void detachNavigationBarFromApp() {}
     };
 
     /**
@@ -590,6 +600,15 @@ public class RecentsAnimationController implements DeathRecipient {
                 !recentTaskIds.get(task.mTaskId), true /* hidden */, finishedCallback);
         mPendingNewTaskTargets.add(task.mTaskId);
         return adapter.createRemoteAnimationTarget();
+    }
+
+    void logRecentsAnimationStartTime(int durationMs) {
+        BackgroundThread.getHandler().postDelayed(() -> {
+            if (!mCanceled) {
+                mService.mLatencyTracker.logAction(LatencyTracker.ACTION_START_RECENTS_ANIMATION,
+                        durationMs);
+            }
+        }, LATENCY_TRACKER_LOG_DELAY_MS);
     }
 
     private boolean removeTaskInternal(int taskId) {
