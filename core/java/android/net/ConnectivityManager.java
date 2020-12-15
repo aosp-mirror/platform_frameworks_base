@@ -2108,17 +2108,6 @@ public class ConnectivityManager {
         // ignored
     }
 
-    /** {@hide} */
-    @Deprecated
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public NetworkQuotaInfo getActiveNetworkQuotaInfo() {
-        try {
-            return mService.getActiveNetworkQuotaInfo();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
     /**
      * @hide
      * @deprecated Talk to TelephonyManager directly
