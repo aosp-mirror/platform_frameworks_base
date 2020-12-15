@@ -249,7 +249,7 @@ class FalsingCollectorImpl implements FalsingCollector {
     public void onTouchEvent(MotionEvent ev) {
         // We delay processing down events to see if another component wants to process them.
         // If #avoidGesture is called after a MotionEvent.ACTION_DOWN, all following motion events
-        //will be ignored by the collector until another MotionEvent.ACTION_DOWN is passed in.
+        // will be ignored by the collector until another MotionEvent.ACTION_DOWN is passed in.
         // avoidGesture must be called immediately following the MotionEvent.ACTION_DOWN, before
         // any other events are processed, otherwise the whole gesture will be recorded.
         if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) {

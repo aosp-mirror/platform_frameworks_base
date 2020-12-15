@@ -121,6 +121,12 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
     }
 
     @Override
+    protected void onViewDetached() {
+        super.onViewDetached();
+        mView.removeMotionEventListener(mGlobalTouchListener);
+    }
+
+    @Override
     public void onResume(int reason) {
         super.onResume(reason);
         mPasswordEntry.requestFocus();
