@@ -20730,6 +20730,11 @@ public class PackageManagerService extends IPackageManager.Stub
     @GuardedBy("mLock")
     void clearIntentFilterVerificationsLPw(String packageName, int userId,
             boolean alsoResetStatus) {
+        if (SystemConfig.getInstance().getLinkedApps().contains(packageName)) {
+            // Nope, need to preserve the system configuration approval for this app
+            return;
+        }
+
         if (userId == UserHandle.USER_ALL) {
             if (mSettings.removeIntentFilterVerificationLPw(packageName,
                     mUserManager.getUserIds())) {
