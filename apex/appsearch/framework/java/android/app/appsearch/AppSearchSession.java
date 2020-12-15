@@ -36,7 +36,6 @@ import java.util.function.Consumer;
  * placed and queried.
  *
  * This class is thread safe.
- * @hide
  */
 public final class AppSearchSession {
     private final String mDatabaseName;
