@@ -33,7 +33,7 @@ import android.media.session.MediaSession.QueueItem;
 import android.media.session.MediaSession.Token;
 import android.media.session.MediaSessionManager;
 import android.media.session.MediaSessionManager.OnActiveSessionsChangedListener;
-import android.media.session.MediaSessionManager.RemoteVolumeControllerCallback;
+import android.media.session.MediaSessionManager.RemoteSessionCallback;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.os.Handler;
@@ -100,8 +100,8 @@ public class MediaSessions {
         mMgr.addOnActiveSessionsChangedListener(mSessionsListener, null, mHandler);
         mInit = true;
         postUpdateSessions();
-        mMgr.registerRemoteVolumeControllerCallback(mHandlerExecutor,
-                mRemoteVolumeControllerCallback);
+        mMgr.registerRemoteSessionCallback(mHandlerExecutor,
+                mRemoteSessionCallback);
     }
 
     protected void postUpdateSessions() {
@@ -116,7 +116,7 @@ public class MediaSessions {
         if (D.BUG) Log.d(TAG, "destroy");
         mInit = false;
         mMgr.removeOnActiveSessionsChangedListener(mSessionsListener);
-        mMgr.unregisterRemoteVolumeControllerCallback(mRemoteVolumeControllerCallback);
+        mMgr.unregisterRemoteSessionCallback(mRemoteSessionCallback);
     }
 
     /**
@@ -142,11 +142,11 @@ public class MediaSessions {
         mCallbacks.onRemoteVolumeChanged(token, flags);
     }
 
-    private void onUpdateRemoteControllerH(Token sessionToken) {
+    private void onUpdateRemoteSessionListH(Token sessionToken) {
         final MediaController controller =
                 sessionToken != null ? new MediaController(mContext, sessionToken) : null;
         final String pkg = controller != null ? controller.getPackageName() : null;
-        if (D.BUG) Log.d(TAG, "updateRemoteControllerH " + pkg);
+        if (D.BUG) Log.d(TAG, "onUpdateRemoteSessionListH " + pkg);
         // this may be our only indication that a remote session is changed, refresh
         postUpdateSessions();
     }
@@ -336,8 +336,8 @@ public class MediaSessions {
                 }
             };
 
-    private final RemoteVolumeControllerCallback mRemoteVolumeControllerCallback =
-            new RemoteVolumeControllerCallback() {
+    private final RemoteSessionCallback mRemoteSessionCallback =
+            new RemoteSessionCallback() {
                 @Override
                 public void onVolumeChanged(@NonNull MediaSession.Token sessionToken,
                         int flags) {
@@ -346,15 +346,17 @@ public class MediaSessions {
                 }
 
                 @Override
-                public void onSessionChanged(@Nullable MediaSession.Token sessionToken) {
-                    mHandler.obtainMessage(H.UPDATE_REMOTE_CONTROLLER, sessionToken).sendToTarget();
+                public void onDefaultRemoteSessionChanged(
+                        @Nullable MediaSession.Token sessionToken) {
+                    mHandler.obtainMessage(H.UPDATE_REMOTE_SESSION_LIST,
+                            sessionToken).sendToTarget();
                 }
     };
 
     private final class H extends Handler {
         private static final int UPDATE_SESSIONS = 1;
         private static final int REMOTE_VOLUME_CHANGED = 2;
-        private static final int UPDATE_REMOTE_CONTROLLER = 3;
+        private static final int UPDATE_REMOTE_SESSION_LIST = 3;
 
         private H(Looper looper) {
             super(looper);
@@ -369,8 +371,8 @@ public class MediaSessions {
                 case REMOTE_VOLUME_CHANGED:
                     onRemoteVolumeChangedH((Token) msg.obj, msg.arg1);
                     break;
-                case UPDATE_REMOTE_CONTROLLER:
-                    onUpdateRemoteControllerH((Token) msg.obj);
+                case UPDATE_REMOTE_SESSION_LIST:
+                    onUpdateRemoteSessionListH((Token) msg.obj);
                     break;
             }
         }

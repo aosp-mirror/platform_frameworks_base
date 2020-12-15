@@ -25,7 +25,7 @@ import android.media.session.MediaSession;
  * TODO add in better support for multiple remote sessions.
  * @hide
  */
-oneway interface IRemoteVolumeControllerCallback {
+oneway interface IRemoteSessionCallback {
     void onVolumeChanged(in MediaSession.Token sessionToken, int flags);
     // sets the default session to use with the slider, replaces remoteSliderVisibility
     // on IVolumeController

@@ -17,7 +17,7 @@ package android.media.session;
 
 import android.content.ComponentName;
 import android.content.pm.ParceledListSlice;
-import android.media.IRemoteVolumeControllerCallback;
+import android.media.IRemoteSessionCallback;
 import android.media.Session2Token;
 import android.media.session.IActiveSessionsListener;
 import android.media.session.IOnMediaKeyEventDispatchedListener;
@@ -57,8 +57,8 @@ interface ISessionManager {
     void addSession2TokensListener(in ISession2TokensListener listener, int userId);
     void removeSession2TokensListener(in ISession2TokensListener listener);
 
-    void registerRemoteVolumeControllerCallback(in IRemoteVolumeControllerCallback rvc);
-    void unregisterRemoteVolumeControllerCallback(in IRemoteVolumeControllerCallback rvc);
+    void registerRemoteSessionCallback(in IRemoteSessionCallback rvc);
+    void unregisterRemoteSessionCallback(in IRemoteSessionCallback rvc);
 
     // For PhoneWindowManager to precheck media keys
     boolean isGlobalPriorityActive();
