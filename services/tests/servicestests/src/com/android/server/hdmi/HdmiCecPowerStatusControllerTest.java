@@ -62,7 +62,7 @@ public class HdmiCecPowerStatusControllerTest {
     private FakeNativeWrapper mNativeWrapper;
     private TestLooper mTestLooper = new TestLooper();
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
-    private int mHdmiCecVersion = HdmiControlManager.HDMI_CEC_VERSION_1_4_b;
+    private int mHdmiCecVersion = HdmiControlManager.HDMI_CEC_VERSION_1_4_B;
     @Mock
     private IPowerManager mIPowerManagerMock;
     @Mock

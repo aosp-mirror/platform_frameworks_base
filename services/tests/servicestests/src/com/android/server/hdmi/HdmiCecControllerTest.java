@@ -79,7 +79,7 @@ public class HdmiCecControllerTest {
     }
 
     private HdmiCecController mHdmiCecController;
-    private int mCecVersion = HdmiControlManager.HDMI_CEC_VERSION_1_4_b;
+    private int mCecVersion = HdmiControlManager.HDMI_CEC_VERSION_1_4_B;
     private int mLogicalAddress = 16;
     private AllocateAddressCallback mCallback =
             new AllocateAddressCallback() {
