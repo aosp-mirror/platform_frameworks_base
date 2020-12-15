@@ -51,6 +51,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
+import com.android.server.RescueParty;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.File;
@@ -540,7 +541,10 @@ class Rollback {
             PackageInstaller.Session parentSession = packageInstaller.openSession(
                     parentSessionId);
 
+            List<String> packageNames = new ArrayList<>(info.getPackages().size());
             for (PackageRollbackInfo pkgRollbackInfo : info.getPackages()) {
+                packageNames.add(pkgRollbackInfo.getPackageName());
+
                 if (pkgRollbackInfo.isApkInApex()) {
                     // No need to issue a downgrade install request for apk-in-apex. It will
                     // be rolled back when its parent apex is downgraded.
@@ -600,6 +604,9 @@ class Rollback {
                 }
                 parentSession.addChildSessionId(sessionId);
             }
+
+            // Clear flags.
+            RescueParty.resetDeviceConfigForPackages(packageNames);
 
             Consumer<Intent> onResult = result -> {
                 mHandler.post(() -> {
