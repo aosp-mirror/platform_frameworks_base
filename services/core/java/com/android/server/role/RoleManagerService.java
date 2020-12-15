@@ -104,14 +104,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
     private final Object mLock = new Object();
 
     @NonNull
-    private final RoleHoldersResolver mLegacyRoleResolver;
-
-    /** @see #getRoleHolders(String, int) */
-    public interface RoleHoldersResolver {
-        /** @return a list of packages that hold a given role for a given user */
-        @NonNull
-        List<String> getRoleHolders(@NonNull String roleName, @UserIdInt int userId);
-    }
+    private final LegacyRoleHolderProvider mLegacyRoleHolderProvider;
 
     /**
      * Maps user id to its state.
@@ -147,10 +140,10 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             new SparseArray<>();
 
     public RoleManagerService(@NonNull Context context,
-            @NonNull RoleHoldersResolver legacyRoleResolver) {
+            @NonNull LegacyRoleHolderProvider legacyRoleHolderProvider) {
         super(context);
 
-        mLegacyRoleResolver = legacyRoleResolver;
+        mLegacyRoleHolderProvider = legacyRoleHolderProvider;
 
         RoleControllerManager.initializeRemoteServiceComponentName(context);
 
@@ -276,7 +269,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         // Any role for which we have a record are already migrated
         RoleUserState userState = getOrCreateUserState(userId);
         if (!userState.isRoleAvailable(role)) {
-            List<String> roleHolders = mLegacyRoleResolver.getRoleHolders(role, userId);
+            List<String> roleHolders = mLegacyRoleHolderProvider.getLegacyRoleHolders(role, userId);
             if (roleHolders.isEmpty()) {
                 return;
             }
