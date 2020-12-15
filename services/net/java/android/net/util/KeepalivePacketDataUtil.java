@@ -19,12 +19,16 @@ package android.net.util;
 import static android.net.SocketKeepalive.ERROR_INVALID_IP_ADDRESS;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.net.InvalidPacketException;
+import android.net.KeepalivePacketData;
 import android.net.NattKeepalivePacketData;
 import android.net.NattKeepalivePacketDataParcelable;
 import android.net.TcpKeepalivePacketData;
 import android.net.TcpKeepalivePacketDataParcelable;
+import android.os.Build;
 import android.system.OsConstants;
+import android.util.Log;
 
 import com.android.net.module.util.IpUtils;
 
@@ -44,6 +48,8 @@ public final class KeepalivePacketDataUtil {
     private static final int IPV4_HEADER_LENGTH = 20;
     private static final int IPV6_HEADER_LENGTH = 40;
     private static final int TCP_HEADER_LENGTH = 20;
+
+    private static final String TAG = KeepalivePacketDataUtil.class.getSimpleName();
 
     /**
      * Convert a NattKeepalivePacketData to a NattKeepalivePacketDataParcelable.
@@ -151,4 +157,67 @@ public final class KeepalivePacketDataUtil {
     }
 
     // TODO: add buildV6Packet.
+
+    /**
+     * Get a {@link TcpKeepalivePacketDataParcelable} from {@link KeepalivePacketData}, if the
+     * generic class actually contains TCP keepalive data.
+     *
+     * @deprecated This method is used on R platforms where android.net.TcpKeepalivePacketData was
+     * not yet system API. Newer platforms should use android.net.TcpKeepalivePacketData directly.
+     *
+     * @param data A {@link KeepalivePacketData} that may contain TCP keepalive data.
+     * @return A parcelable containing TCP keepalive data, or null if the input data does not
+     *         contain TCP keepalive data.
+     */
+    @Deprecated
+    @SuppressWarnings("AndroidFrameworkCompatChange") // API version check used to Log.wtf
+    @Nullable
+    public static TcpKeepalivePacketDataParcelable parseTcpKeepalivePacketData(
+            @Nullable KeepalivePacketData data) {
+        if (data == null) return null;
+
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
+            Log.wtf(TAG, "parseTcpKeepalivePacketData should not be used after R, use "
+                    + "TcpKeepalivePacketData instead.");
+        }
+
+        // Reconstruct TcpKeepalivePacketData from the packet contained in KeepalivePacketData
+        final ByteBuffer buffer = ByteBuffer.wrap(data.getPacket());
+        buffer.order(ByteOrder.BIG_ENDIAN);
+
+        // Most of the fields are accessible from the KeepalivePacketData superclass: instead of
+        // using Struct to parse everything, just extract the extra fields necessary for
+        // TcpKeepalivePacketData.
+        final int tcpSeq;
+        final int tcpAck;
+        final int wndSize;
+        final int ipTos;
+        final int ttl;
+        try {
+            // This only support IPv4, because TcpKeepalivePacketData only supports IPv4 for R and
+            // below, and this method should not be used on newer platforms.
+            tcpSeq = buffer.getInt(IPV4_HEADER_LENGTH + 4);
+            tcpAck = buffer.getInt(IPV4_HEADER_LENGTH + 8);
+            wndSize = buffer.getShort(IPV4_HEADER_LENGTH + 14);
+            ipTos = buffer.get(1);
+            ttl = buffer.get(8);
+        } catch (IndexOutOfBoundsException e) {
+            return null;
+        }
+
+        final TcpKeepalivePacketDataParcelable p = new TcpKeepalivePacketDataParcelable();
+        p.srcAddress = data.getSrcAddress().getAddress();
+        p.srcPort = data.getSrcPort();
+        p.dstAddress = data.getDstAddress().getAddress();
+        p.dstPort = data.getDstPort();
+        p.seq = tcpSeq;
+        p.ack = tcpAck;
+        // TcpKeepalivePacketData could actually use non-zero wndScale, but this does not affect
+        // actual functionality as generated packets will be the same (no wndScale option added)
+        p.rcvWnd = wndSize;
+        p.rcvWndScale = 0;
+        p.tos = ipTos;
+        p.ttl = ttl;
+        return p;
+    }
 }

@@ -20,6 +20,7 @@ import static com.android.testutils.ParcelUtils.assertParcelingIsLossless;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.net.util.KeepalivePacketDataUtil;
@@ -155,5 +156,50 @@ public final class KeepalivePacketDataUtilTest {
                 + " srcPort: 1234, dstAddress: [10, 0, 0, 5], dstPort: 4321, seq: 286331153,"
                 + " ack: 572662306, rcvWnd: 48000, rcvWndScale: 2, tos: 4, ttl: 64}";
         assertEquals(expected, resultData.toString());
+    }
+
+    @Test
+    public void testParseTcpKeepalivePacketData() throws Exception {
+        final int srcPort = 1234;
+        final int dstPort = 4321;
+        final int sequence = 0x11111111;
+        final int ack = 0x22222222;
+        final int wnd = 4800;
+        final int wndScale = 2;
+        final int tos = 4;
+        final int ttl = 64;
+        final TcpKeepalivePacketDataParcelable testParcel = new TcpKeepalivePacketDataParcelable();
+        testParcel.srcAddress = IPV4_KEEPALIVE_SRC_ADDR;
+        testParcel.srcPort = srcPort;
+        testParcel.dstAddress = IPV4_KEEPALIVE_DST_ADDR;
+        testParcel.dstPort = dstPort;
+        testParcel.seq = sequence;
+        testParcel.ack = ack;
+        testParcel.rcvWnd = wnd;
+        testParcel.rcvWndScale = wndScale;
+        testParcel.tos = tos;
+        testParcel.ttl = ttl;
+
+        final KeepalivePacketData testData =
+                KeepalivePacketDataUtil.fromStableParcelable(testParcel);
+        final TcpKeepalivePacketDataParcelable parsedParcelable =
+                KeepalivePacketDataUtil.parseTcpKeepalivePacketData(testData);
+        final TcpKeepalivePacketData roundTripData =
+                KeepalivePacketDataUtil.fromStableParcelable(parsedParcelable);
+
+        // Generated packet is the same, but rcvWnd / wndScale will differ if scale is non-zero
+        assertTrue(testData.getPacket().length > 0);
+        assertArrayEquals(testData.getPacket(), roundTripData.getPacket());
+
+        testParcel.rcvWndScale = 0;
+        final KeepalivePacketData noScaleTestData =
+                KeepalivePacketDataUtil.fromStableParcelable(testParcel);
+        final TcpKeepalivePacketDataParcelable noScaleParsedParcelable =
+                KeepalivePacketDataUtil.parseTcpKeepalivePacketData(noScaleTestData);
+        final TcpKeepalivePacketData noScaleRoundTripData =
+                KeepalivePacketDataUtil.fromStableParcelable(noScaleParsedParcelable);
+        assertEquals(noScaleTestData, noScaleRoundTripData);
+        assertTrue(noScaleTestData.getPacket().length > 0);
+        assertArrayEquals(noScaleTestData.getPacket(), noScaleRoundTripData.getPacket());
     }
 }

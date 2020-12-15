@@ -21,6 +21,7 @@ rule android.net.ProvisioningConfigurationParcelable* com.android.wifi.x.@0
 rule android.net.ResolverParamsParcel* com.android.wifi.x.@0
 rule android.net.RouteInfoParcel* com.android.wifi.x.@0
 rule android.net.ScanResultInfoParcelable* com.android.wifi.x.@0
+rule android.net.TcpKeepalivePacketDataParcelable* com.android.wifi.x.@0
 rule android.net.TetherConfigParcel* com.android.wifi.x.@0
 rule android.net.TetherOffloadRuleParcel* com.android.wifi.x.@0
 rule android.net.TetherStatsParcel* com.android.wifi.x.@0
@@ -43,7 +44,6 @@ rule android.net.DhcpResults* com.android.wifi.x.@0
 rule android.net.InterfaceConfiguration* com.android.wifi.x.@0
 rule android.net.IpMemoryStore* com.android.wifi.x.@0
 rule android.net.NetworkMonitorManager* com.android.wifi.x.@0
-rule android.net.TcpKeepalivePacketData* com.android.wifi.x.@0
 rule android.net.NetworkFactory* com.android.wifi.x.@0
 rule android.net.ip.IpClientCallbacks* com.android.wifi.x.@0
 rule android.net.ip.IpClientManager* com.android.wifi.x.@0
