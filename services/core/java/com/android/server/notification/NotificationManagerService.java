@@ -2274,10 +2274,24 @@ public class NotificationManagerService extends SystemService {
             if (!DeviceConfig.NAMESPACE_SYSTEMUI.equals(properties.getNamespace())) {
                 return;
             }
-            if (properties.getKeyset()
-                    .contains(SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE)) {
-                mAssistants.allowAdjustmentType(Adjustment.KEY_IMPORTANCE);
-                mAssistants.resetDefaultAssistantsIfNecessary();
+            for (String name : properties.getKeyset()) {
+                if (SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE.equals(name)) {
+                    mAssistants.resetDefaultAssistantsIfNecessary();
+                } else if (SystemUiDeviceConfigFlags.ENABLE_NAS_PRIORITIZER.equals(name)) {
+                    String value = properties.getString(name, null);
+                    if ("true".equals(value)) {
+                        mAssistants.allowAdjustmentType(Adjustment.KEY_IMPORTANCE);
+                    } else if ("false".equals(value)) {
+                        mAssistants.disallowAdjustmentType(Adjustment.KEY_IMPORTANCE);
+                    }
+                } else if (SystemUiDeviceConfigFlags.ENABLE_NAS_RANKING.equals(name)) {
+                    String value = properties.getString(name, null);
+                    if ("true".equals(value)) {
+                        mAssistants.allowAdjustmentType(Adjustment.KEY_RANKING_SCORE);
+                    } else if ("false".equals(value)) {
+                        mAssistants.disallowAdjustmentType(Adjustment.KEY_RANKING_SCORE);
+                    }
+                }
             }
         };
         DeviceConfig.addOnPropertiesChangedListener(
