@@ -22,8 +22,13 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.Surface.ROTATION_90;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
+import static android.window.DisplayAreaOrganizer.FEATURE_IME_PLACEHOLDER;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 import static android.window.DisplayAreaOrganizer.FEATURE_WINDOWED_MAGNIFICATION;
 
@@ -40,6 +45,7 @@ import static org.mockito.Mockito.verify;
 
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
 
@@ -253,6 +259,68 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         assertThat(newActivityBounds.height()).isEqualTo(activityBounds.height());
     }
 
+    @Test
+    public void testPlaceImeContainer_reparentToTargetDisplayAreaGroup() {
+        setupImeWindow();
+        final DisplayArea.Tokens imeContainer = mDisplay.getImeContainer();
+        final WindowToken imeToken = tokenOfType(TYPE_INPUT_METHOD);
+
+        // By default, the ime container is attached to DC as defined in DAPolicy.
+        assertThat(imeContainer.getRootDisplayArea()).isEqualTo(mDisplay);
+        assertThat(mDisplay.findAreaForToken(imeToken)).isEqualTo(imeContainer);
+
+        final WindowState firstActivityWin =
+                createWindow(null /* parent */, TYPE_APPLICATION_STARTING, mFirstActivity,
+                        "firstActivityWin");
+        spyOn(firstActivityWin);
+        final WindowState secondActivityWin =
+                createWindow(null /* parent */, TYPE_APPLICATION_STARTING, mSecondActivity,
+                        "firstActivityWin");
+        spyOn(secondActivityWin);
+
+        // firstActivityWin should be the target
+        doReturn(true).when(firstActivityWin).canBeImeTarget();
+        doReturn(false).when(secondActivityWin).canBeImeTarget();
+
+        WindowState imeTarget = mDisplay.computeImeTarget(true /* updateImeTarget */);
+
+        assertThat(imeTarget).isEqualTo(firstActivityWin);
+        verify(mFirstRoot).placeImeContainer(imeContainer);
+        assertThat(imeContainer.getRootDisplayArea()).isEqualTo(mFirstRoot);
+        assertThat(imeContainer.getParent().asDisplayArea().mFeatureId)
+                .isEqualTo(FEATURE_IME_PLACEHOLDER);
+        assertThat(mDisplay.findAreaForToken(imeToken)).isNull();
+        assertThat(mFirstRoot.findAreaForToken(imeToken)).isEqualTo(imeContainer);
+        assertThat(mSecondRoot.findAreaForToken(imeToken)).isNull();
+
+        // secondActivityWin should be the target
+        doReturn(false).when(firstActivityWin).canBeImeTarget();
+        doReturn(true).when(secondActivityWin).canBeImeTarget();
+
+        imeTarget = mDisplay.computeImeTarget(true /* updateImeTarget */);
+
+        assertThat(imeTarget).isEqualTo(secondActivityWin);
+        verify(mSecondRoot).placeImeContainer(imeContainer);
+        assertThat(imeContainer.getRootDisplayArea()).isEqualTo(mSecondRoot);
+        assertThat(imeContainer.getParent().asDisplayArea().mFeatureId)
+                .isEqualTo(FEATURE_IME_PLACEHOLDER);
+        assertThat(mDisplay.findAreaForToken(imeToken)).isNull();
+        assertThat(mFirstRoot.findAreaForToken(imeToken)).isNull();
+        assertThat(mSecondRoot.findAreaForToken(imeToken)).isEqualTo(imeContainer);
+    }
+
+    private void setupImeWindow() {
+        final WindowState imeWindow = createWindow(null /* parent */,
+                TYPE_INPUT_METHOD, mDisplay, "mImeWindow");
+        imeWindow.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
+        mDisplay.mInputMethodWindow = imeWindow;
+    }
+
+    private WindowToken tokenOfType(int type) {
+        return new WindowToken(mWm, new Binder(), type, false /* persistOnEmpty */,
+                mDisplay, false /* ownerCanManageAppTokens */);
+    }
+
     /** Display with two {@link DisplayAreaGroup}. Each of them take half of the screen. */
     private static class DualDisplayContent extends TestDisplayContent {
         final DisplayAreaGroup mFirstRoot;
@@ -356,6 +424,11 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
                                     .upTo(TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY)
                                     .except(TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY)
                                     .setNewDisplayAreaSupplier(DisplayArea.Dimmable::new)
+                                    .build())
+                            .addFeature(new DisplayAreaPolicyBuilder.Feature.Builder(
+                                    wmService.mPolicy,
+                                    "ImePlaceholder", FEATURE_IME_PLACEHOLDER)
+                                    .and(TYPE_INPUT_METHOD, TYPE_INPUT_METHOD_DIALOG)
                                     .build());
 
             // First
@@ -367,7 +440,12 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
             firstTdaList.add(firstTaskDisplayArea);
             DisplayAreaPolicyBuilder.HierarchyBuilder firstHierarchy =
                     new DisplayAreaPolicyBuilder.HierarchyBuilder(firstRoot)
-                            .setTaskDisplayAreas(firstTdaList);
+                            .setTaskDisplayAreas(firstTdaList)
+                            .addFeature(new DisplayAreaPolicyBuilder.Feature.Builder(
+                                    wmService.mPolicy,
+                                    "ImePlaceholder", FEATURE_IME_PLACEHOLDER)
+                                    .and(TYPE_INPUT_METHOD, TYPE_INPUT_METHOD_DIALOG)
+                                    .build());
 
             // Second
             final RootDisplayArea secondRoot = new DisplayAreaGroup(wmService, "SecondRoot",
@@ -378,7 +456,12 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
             secondTdaList.add(secondTaskDisplayArea);
             DisplayAreaPolicyBuilder.HierarchyBuilder secondHierarchy =
                     new DisplayAreaPolicyBuilder.HierarchyBuilder(secondRoot)
-                            .setTaskDisplayAreas(secondTdaList);
+                            .setTaskDisplayAreas(secondTdaList)
+                            .addFeature(new DisplayAreaPolicyBuilder.Feature.Builder(
+                                    wmService.mPolicy,
+                                    "ImePlaceholder", FEATURE_IME_PLACEHOLDER)
+                                    .and(TYPE_INPUT_METHOD, TYPE_INPUT_METHOD_DIALOG)
+                                    .build());
 
             return new DisplayAreaPolicyBuilder()
                     .setRootHierarchy(rootHierarchy)
