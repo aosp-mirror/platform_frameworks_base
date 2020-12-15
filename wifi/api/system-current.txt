@@ -398,6 +398,8 @@ package android.net.wifi {
     method @Deprecated public boolean hasEverConnected();
     field @Deprecated public static final int DISABLED_ASSOCIATION_REJECTION = 1; // 0x1
     field @Deprecated public static final int DISABLED_AUTHENTICATION_FAILURE = 2; // 0x2
+    field @Deprecated public static final int DISABLED_AUTHENTICATION_FAILURE_CARRIER_SPECIFIC = 10; // 0xa
+    field @Deprecated public static final int DISABLED_AUTHENTICATION_FAILURE_GENERIC = 2; // 0x2
     field @Deprecated public static final int DISABLED_AUTHENTICATION_NO_CREDENTIALS = 5; // 0x5
     field @Deprecated public static final int DISABLED_AUTHENTICATION_NO_SUBSCRIPTION = 9; // 0x9
     field @Deprecated public static final int DISABLED_BY_WIFI_MANAGER = 7; // 0x7
