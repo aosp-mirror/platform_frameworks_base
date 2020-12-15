@@ -575,8 +575,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         @Override
         public void installSession(IntentSender statusReceiver) {
             assertCallerIsOwnerOrRootOrSystemLocked();
-            Preconditions.checkArgument(!hasParentSessionId()); // Don't allow installing child
-                                                                // sessions
+            assertNotChildLocked("StagedSession#installSession");
             Preconditions.checkArgument(isCommitted() && isSessionReady());
 
             // Since staged sessions are installed during boot, the original reference to status
@@ -750,7 +749,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         public void verifySession() {
             assertCallerIsOwnerOrRootOrSystemLocked();
             Preconditions.checkArgument(isCommitted());
-            Preconditions.checkArgument(isStaged());
             Preconditions.checkArgument(!mSessionApplied && !mSessionFailed);
             verify();
         }
