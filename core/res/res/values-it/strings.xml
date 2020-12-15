@@ -1231,7 +1231,7 @@
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Volume notifiche"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Suoneria predefinita"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Predefinita (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="397111123930141876">"Nessuna"</string>
+    <string name="ringtone_silent" msgid="397111123930141876">"Nessuno"</string>
     <string name="ringtone_picker_title" msgid="667342618626068253">"Suonerie"</string>
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Suoni delle sveglie"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Suoni di notifica"</string>
@@ -1937,7 +1937,7 @@
       <item quantity="one">Un suggerimento di Compilazione automatica</item>
     </plurals>
     <string name="autofill_save_title" msgid="7719802414283739775">"Vuoi salvare su "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
-    <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Vuoi salvare <xliff:g id="TYPE">%1$s</xliff:g> su "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Vuoi salvare la <xliff:g id="TYPE">%1$s</xliff:g> su "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"Vuoi salvare <xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g> su "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_3types" msgid="6598228952100102578">"Vuoi salvare <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> e <xliff:g id="TYPE_2">%3$s</xliff:g> su "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title" msgid="3630695947047069136">"Vuoi aggiornare su "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>

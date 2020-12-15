@@ -1128,7 +1128,7 @@
     <string name="whichViewApplication" msgid="5733194231473132945">"Abrir com"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"Abrir com %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"Abrir"</string>
-    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Abra os links de <xliff:g id="HOST">%1$s</xliff:g> com:"</string>
+    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Abrir os links de <xliff:g id="HOST">%1$s</xliff:g> com:"</string>
     <string name="whichOpenLinksWith" msgid="1120936181362907258">"Abrir os links com:"</string>
     <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"Abra os links com a app <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
     <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Abra os links de <xliff:g id="HOST">%1$s</xliff:g> com a app <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>

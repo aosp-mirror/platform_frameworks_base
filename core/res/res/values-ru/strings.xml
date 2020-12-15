@@ -298,7 +298,7 @@
     <string name="safeMode" msgid="8974401416068943888">"Безопасный режим"</string>
     <string name="android_system_label" msgid="5974767339591067210">"Система Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Переключиться на личный профиль"</string>
-    <string name="managed_profile_label" msgid="7316778766973512382">"Переключиться на рабочий профиль"</string>
+    <string name="managed_profile_label" msgid="7316778766973512382">"Перейти в рабочий профиль"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Контакты"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"доступ к контактам"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Местоположение"</string>
@@ -1261,7 +1261,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Выбран режим \"Без звука\""</string>
     <string name="volume_call" msgid="7625321655265747433">"Громкость при разговоре"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Громкость при разговоре"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"Громкость сигнала предупреждения"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"Громкость будильника"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Громкость уведомления"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Громкость"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Громкость Bluetooth-устройства"</string>
@@ -1312,7 +1312,7 @@
     <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"Отмена"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"Запомнить выбор"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Это можно изменить позже в разделе настроек \"Приложения\"."</string>
-    <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Всегда разрешать"</string>
+    <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Разрешать всегда"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Не разрешать"</string>
     <string name="sim_removed_title" msgid="5387212933992546283">"SIM-карта удалена"</string>
     <string name="sim_removed_message" msgid="9051174064474904617">"Пока вы не вставите действующую SIM-карту, мобильная сеть будет недоступна."</string>
@@ -1688,7 +1688,7 @@
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Выберите функции, которые будут запускаться с помощью кнопки специальных возможностей"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Выберите функции, которые будут запускаться с помощью кнопки регулировки громкости"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Сервис \"<xliff:g id="SERVICE_NAME">%s</xliff:g>\" отключен."</string>
-    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Изменить быстрые клавиши"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Изменить ярлыки"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Готово"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Деактивировать быстрое включение"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Использовать быстрое включение"</string>

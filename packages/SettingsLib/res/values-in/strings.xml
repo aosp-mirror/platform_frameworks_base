@@ -156,7 +156,7 @@
     <string name="launch_defaults_none" msgid="8049374306261262709">"Tidak ada setelan default"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Setelan text-to-speech"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Keluaran text-to-speech"</string>
-    <string name="tts_default_rate_title" msgid="3964187817364304022">"Laju bicara"</string>
+    <string name="tts_default_rate_title" msgid="3964187817364304022">"Kecepatan ucapan"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Kecepatan teks diucapkan"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Tinggi nada"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"Memengaruhi nada ucapan yang disintesis"</string>
@@ -180,8 +180,8 @@
     <string name="tts_engine_settings_button" msgid="477155276199968948">"Luncurkan setelan mesin"</string>
     <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"Mesin yang dipilih"</string>
     <string name="tts_general_section_title" msgid="8919671529502364567">"Umum"</string>
-    <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"Setel ulang tinggi nada ucapan"</string>
-    <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"Setel ulang tinggi nada diucapkannya teks menjadi default."</string>
+    <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"Reset tinggi nada ucapan"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"Reset tinggi nada diucapkannya teks menjadi default."</string>
   <string-array name="tts_rate_entries">
     <item msgid="9004239613505400644">"Sangat lambat"</item>
     <item msgid="1815382991399815061">"Lambat"</item>

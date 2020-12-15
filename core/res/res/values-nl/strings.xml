@@ -711,7 +711,7 @@
     <item msgid="6216981255272016212">"Aangepast"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item msgid="7786349763648997741">"Thuis"</item>
+    <item msgid="7786349763648997741">"Privé"</item>
     <item msgid="435564470865989199">"Werk"</item>
     <item msgid="4199433197875490373">"Overig"</item>
     <item msgid="3233938986670468328">"Aangepast"</item>
@@ -769,7 +769,7 @@
     <string name="eventTypeAnniversary" msgid="4684702412407916888">"Jubileum"</string>
     <string name="eventTypeOther" msgid="530671238533887997">"Overig"</string>
     <string name="emailTypeCustom" msgid="1809435350482181786">"Aangepast"</string>
-    <string name="emailTypeHome" msgid="1597116303154775999">"Thuis"</string>
+    <string name="emailTypeHome" msgid="1597116303154775999">"Privé"</string>
     <string name="emailTypeWork" msgid="2020095414401882111">"Werk"</string>
     <string name="emailTypeOther" msgid="5131130857030897465">"Overig"</string>
     <string name="emailTypeMobile" msgid="787155077375364230">"Mobiel"</string>
@@ -931,9 +931,9 @@
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nWeet u zeker dat u deze pagina wilt verlaten?"</string>
     <string name="save_password_label" msgid="9161712335355510035">"Bevestigen"</string>
     <string name="double_tap_toast" msgid="7065519579174882778">"Tip: dubbeltik om in en uit te zoomen."</string>
-    <string name="autofill_this_form" msgid="3187132440451621492">"Autom. aanvullen"</string>
-    <string name="setup_autofill" msgid="5431369130866618567">"Autom. aanvullen instellen"</string>
-    <string name="autofill_window_title" msgid="4379134104008111961">"Automatisch aanvullen met <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
+    <string name="autofill_this_form" msgid="3187132440451621492">"Autom. invullen"</string>
+    <string name="setup_autofill" msgid="5431369130866618567">"Autom. invullen instellen"</string>
+    <string name="autofill_window_title" msgid="4379134104008111961">"Automatisch invullen met <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
     <string name="autofill_address_name_separator" msgid="8190155636149596125">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3402882515222673691">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="760522655085707045">", "</string>
@@ -1101,7 +1101,7 @@
     <string name="selectTextMode" msgid="3225108910999318778">"Tekst selecteren"</string>
     <string name="undo" msgid="3175318090002654673">"Ongedaan maken"</string>
     <string name="redo" msgid="7231448494008532233">"Opnieuw"</string>
-    <string name="autofill" msgid="511224882647795296">"Automatisch aanvullen"</string>
+    <string name="autofill" msgid="511224882647795296">"Automatisch invullen"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"Tekstselectie"</string>
     <string name="addToDictionary" msgid="8041821113480950096">"Toevoegen aan woordenboek"</string>
     <string name="deleteText" msgid="4200807474529938112">"Verwijderen"</string>
@@ -1276,7 +1276,7 @@
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Nooit toestaan"</string>
     <string name="sim_removed_title" msgid="5387212933992546283">"Simkaart verwijderd"</string>
     <string name="sim_removed_message" msgid="9051174064474904617">"Het mobiele netwerk is niet beschikbaar totdat u het apparaat opnieuw start met een geldige simkaart."</string>
-    <string name="sim_done_button" msgid="6464250841528410598">"Gereed"</string>
+    <string name="sim_done_button" msgid="6464250841528410598">"Klaar"</string>
     <string name="sim_added_title" msgid="7930779986759414595">"Simkaart aangesloten"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"Start je apparaat opnieuw voor toegang tot het mobiele netwerk."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Opnieuw starten"</string>
@@ -1289,7 +1289,7 @@
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"Tijd instellen"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"Datum instellen"</string>
     <string name="date_time_set" msgid="4603445265164486816">"Instellen"</string>
-    <string name="date_time_done" msgid="8363155889402873463">"Gereed"</string>
+    <string name="date_time_done" msgid="8363155889402873463">"Klaar"</string>
     <string name="perms_new_perm_prefix" msgid="6984556020395757087"><font size="12" fgcolor="#ff33b5e5">"NIEUW: "</font></string>
     <string name="perms_description_app" msgid="2747752389870161996">"Geleverd door <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="5729199278862516390">"Geen rechten nodig"</string>
@@ -1376,7 +1376,7 @@
     <string name="ext_media_status_removed" msgid="241223931135751691">"Verwijderd"</string>
     <string name="ext_media_status_unmounted" msgid="8145812017295835941">"Uitgeworpen"</string>
     <string name="ext_media_status_checking" msgid="159013362442090347">"Controleren…"</string>
-    <string name="ext_media_status_mounted" msgid="3459448555811203459">"Gereed"</string>
+    <string name="ext_media_status_mounted" msgid="3459448555811203459">"Klaar"</string>
     <string name="ext_media_status_mounted_ro" msgid="1974809199760086956">"Alleen lezen"</string>
     <string name="ext_media_status_bad_removal" msgid="508448566481406245">"Onveilig verwijderd"</string>
     <string name="ext_media_status_unmountable" msgid="7043574843541087748">"Beschadigd"</string>
@@ -1401,7 +1401,7 @@
     <string name="ime_action_search" msgid="4501435960587287668">"Zoeken"</string>
     <string name="ime_action_send" msgid="8456843745664334138">"Verzenden"</string>
     <string name="ime_action_next" msgid="4169702997635728543">"Volgende"</string>
-    <string name="ime_action_done" msgid="6299921014822891569">"Gereed"</string>
+    <string name="ime_action_done" msgid="6299921014822891569">"Klaar"</string>
     <string name="ime_action_previous" msgid="6548799326860401611">"Vorige"</string>
     <string name="ime_action_default" msgid="8265027027659800121">"Uitvoeren"</string>
     <string name="dial_number_using" msgid="6060769078933953531">"Nummer bellen\nmet <xliff:g id="NUMBER">%s</xliff:g>"</string>
@@ -1448,7 +1448,7 @@
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> van <xliff:g id="TOTAL">%d</xliff:g></item>
       <item quantity="one">1 overeenkomst</item>
     </plurals>
-    <string name="action_mode_done" msgid="2536182504764803222">"Gereed"</string>
+    <string name="action_mode_done" msgid="2536182504764803222">"Klaar"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Gedeelde opslag wissen…"</string>
     <string name="share" msgid="4157615043345227321">"Delen"</string>
     <string name="find" msgid="5015737188624767706">"Vinden"</string>
@@ -1492,7 +1492,7 @@
     <string name="keyboardview_keycode_alt" msgid="8997420058584292385">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="2134624484115716975">"Annuleren"</string>
     <string name="keyboardview_keycode_delete" msgid="2661117313730098650">"Delete"</string>
-    <string name="keyboardview_keycode_done" msgid="2524518019001653851">"Gereed"</string>
+    <string name="keyboardview_keycode_done" msgid="2524518019001653851">"Klaar"</string>
     <string name="keyboardview_keycode_mode_change" msgid="2743735349997999020">"Modus wijzigen"</string>
     <string name="keyboardview_keycode_shift" msgid="3026509237043975573">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="168054869339091055">"Enter"</string>
@@ -1645,7 +1645,7 @@
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Functies kiezen voor gebruik met de sneltoets via de volumeknop"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> is uitgeschakeld"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Snelkoppelingen bewerken"</string>
-    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Gereed"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Klaar"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Sneltoets uitschakelen"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Sneltoets gebruiken"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Kleurinversie"</string>
@@ -1774,7 +1774,7 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Volledig scherm wordt weergegeven"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Swipe omlaag vanaf de bovenkant van het scherm om af te sluiten."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Ik snap het"</string>
-    <string name="done_label" msgid="7283767013231718521">"Gereed"</string>
+    <string name="done_label" msgid="7283767013231718521">"Klaar"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Ronde schuifregelaar voor uren"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Ronde schuifregelaar voor minuten"</string>
     <string name="select_hours" msgid="5982889657313147347">"Uren selecteren"</string>
@@ -1928,13 +1928,13 @@
     <string name="time_picker_prompt_label" msgid="303588544656363889">"Typ een tijd"</string>
     <string name="time_picker_text_input_mode_description" msgid="4761160667516611576">"Schakel naar de tekstinvoermodus om de tijd in te voeren."</string>
     <string name="time_picker_radial_mode_description" msgid="1222342577115016953">"Schakel naar de klokmodus om de tijd in te voeren."</string>
-    <string name="autofill_picker_accessibility_title" msgid="4425806874792196599">"Opties voor automatisch aanvullen"</string>
-    <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Opslaan voor Automatisch aanvullen"</string>
+    <string name="autofill_picker_accessibility_title" msgid="4425806874792196599">"Opties voor automatisch invullen"</string>
+    <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Opslaan voor Automatisch invullen"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"Content kan niet automatisch worden aangevuld"</string>
-    <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Geen suggesties van Automatisch aanvullen"</string>
+    <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Geen suggesties van Automatisch invullen"</string>
     <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> suggesties van Automatisch aanvullen</item>
-      <item quantity="one">Eén suggestie van Automatisch aanvullen</item>
+      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> suggesties van Automatisch invullen</item>
+      <item quantity="one">Eén suggestie van Automatisch invullen</item>
     </plurals>
     <string name="autofill_save_title" msgid="7719802414283739775">"Opslaan in "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"<xliff:g id="TYPE">%1$s</xliff:g> opslaan in "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>

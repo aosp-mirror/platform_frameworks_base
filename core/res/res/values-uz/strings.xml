@@ -1219,7 +1219,7 @@
     <string name="volume_music" msgid="7727274216734955095">"Multimedia tovushi"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Bluetooth orqali ijro etilmoqda"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Ovozsiz rejim tanlandi"</string>
-    <string name="volume_call" msgid="7625321655265747433">"Suhbat vaqtidagi tovush balandligi"</string>
+    <string name="volume_call" msgid="7625321655265747433">"Suhbat tovushi"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Kiruvchi bluetooth tovushi"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"Signal tovushi"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Eslatma tovushi"</string>
@@ -1231,7 +1231,7 @@
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Eslatma tovushi"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Standart rington"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Standart (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="397111123930141876">"Yo‘q"</string>
+    <string name="ringtone_silent" msgid="397111123930141876">"Hech qanday"</string>
     <string name="ringtone_picker_title" msgid="667342618626068253">"Ringtonlar"</string>
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Signal ovozlari"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Bildirishnoma ovozlari"</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Administrator tomonidan yangilangan"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Administrator tomonidan o‘chirilgan"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Batareya quvvatini uzaytirish uchun Quvvat tejash funksiyasi:\n\n•Tungi mavzuni yoqadi\n•Fondagi harakatlar, vizual effektlar va “Hey Google” kabi boshqa funksiyalarni faolsizlantiradi\n\n"<annotation id="url">"Batafsil"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"Batareya quvvatini uzaytirish uchun Quvvat tejash funksiyasi:\n\n•Tungi mavzuni yoqadi\n•Fondagi harakatlar, vizual effektlar va “Hey Google” kabi boshqa funksiyalarni faolsizlantiradi"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Batareya quvvatini uzaytirish uchun Quvvat tejash funksiyasi:\n\n•Tungi mavzuni yoqadi\n•Fondagi harakatlar, vizual effektlar va “Ok Google” kabi boshqa funksiyalarni faolsizlantiradi\n\n"<annotation id="url">"Batafsil"</annotation></string>
+    <string name="battery_saver_description" msgid="8587408568232177204">"Batareya quvvatini uzaytirish uchun Quvvat tejash funksiyasi:\n\n•Tungi mavzuni yoqadi\n•Fondagi harakatlar, vizual effektlar va “Ok Google” kabi boshqa funksiyalarni faolsizlantiradi"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Trafik tejash rejimida ayrim ilovalar uchun orqa fonda internetdan foydalanish imkoniyati cheklanadi. Siz ishlatayotgan ilova zaruratga qarab internet-trafik sarflashi mumkin, biroq cheklangan miqdorda. Masalan, rasmlar ustiga bosmaguningizcha ular yuklanmaydi."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Trafik tejash yoqilsinmi?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Yoqish"</string>
