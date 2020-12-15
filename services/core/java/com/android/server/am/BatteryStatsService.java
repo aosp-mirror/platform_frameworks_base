@@ -688,6 +688,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         if (update) {
             mWorker.scheduleSync("modem-data", BatteryExternalStatsWorker.UPDATE_RADIO);
         }
+        FrameworkStatsLog.write_non_chained(
+                FrameworkStatsLog.MOBILE_RADIO_POWER_STATE_CHANGED, uid, null, powerState);
     }
 
     public void notePhoneOn() {
@@ -869,6 +871,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             }
             mStats.noteWifiRadioPowerState(powerState, tsNanos, uid);
         }
+        FrameworkStatsLog.write_non_chained(
+                FrameworkStatsLog.WIFI_RADIO_POWER_STATE_CHANGED, uid, null, powerState);
     }
 
     public void noteWifiRunning(WorkSource ws) {
