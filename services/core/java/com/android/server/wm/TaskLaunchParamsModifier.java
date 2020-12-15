@@ -95,30 +95,22 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         mSupervisor = supervisor;
     }
 
-    @VisibleForTesting
-    int onCalculate(Task task, ActivityInfo.WindowLayout layout, ActivityRecord activity,
-            ActivityRecord source, ActivityOptions options, LaunchParams currentParams,
-            LaunchParams outParams) {
-        return onCalculate(task, layout, activity, source, options, PHASE_BOUNDS, currentParams,
-                outParams, null);
-    }
-
     @Override
-    public int onCalculate(@Nullable Task task, @NonNull ActivityInfo.WindowLayout layout,
-            @NonNull ActivityRecord activity, @Nullable ActivityRecord source,
-            ActivityOptions options, int phase, LaunchParams currentParams, LaunchParams outParams,
-            @Nullable Request request) {
+    public int onCalculate(@Nullable Task task, @Nullable ActivityInfo.WindowLayout layout,
+            @Nullable ActivityRecord activity, @Nullable ActivityRecord source,
+            @Nullable ActivityOptions options, @Nullable Request request, int phase,
+            LaunchParams currentParams, LaunchParams outParams) {
         initLogBuilder(task, activity);
-        final int result = calculate(task, layout, activity, source, options, phase, currentParams,
-                outParams, request);
+        final int result = calculate(task, layout, activity, source, options, request, phase,
+                currentParams, outParams);
         outputLog();
         return result;
     }
 
-    private int calculate(@Nullable Task task, @NonNull ActivityInfo.WindowLayout layout,
-            @NonNull ActivityRecord activity, @Nullable ActivityRecord source,
-            ActivityOptions options, int phase, LaunchParams currentParams, LaunchParams outParams,
-            @Nullable Request request) {
+    private int calculate(@Nullable Task task, @Nullable ActivityInfo.WindowLayout layout,
+            @Nullable ActivityRecord activity, @Nullable ActivityRecord source,
+            @Nullable ActivityOptions options, @Nullable Request request, int phase,
+            LaunchParams currentParams, LaunchParams outParams) {
         final ActivityRecord root;
         if (task != null) {
             root = task.getRootActivity() == null ? activity : task.getRootActivity();
