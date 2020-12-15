@@ -1802,6 +1802,18 @@
     <!-- [CHAR LIMIT=150] Notification Importance title: automatic importance level summary -->
     <string name="notification_channel_summary_automatic">Have the system determine if this notification should make sound or vibration</string>
 
+    <!-- [CHAR LIMIT=150] Notification Importance title: automatic importance level summary (alerted) -->
+    <string name="notification_channel_summary_automatic_alerted">&lt;b>Status:&lt;/b> Promoted to Default</string>
+
+    <!-- [CHAR LIMIT=150] Notification Importance title: automatic importance level summary (silenced) -->
+    <string name="notification_channel_summary_automatic_silenced">&lt;b>Status:&lt;/b> Demoted to Silent</string>
+
+    <!-- [CHAR LIMIT=150] Notification Importance title: automatic importance level summary (promoted) -->
+    <string name="notification_channel_summary_automatic_promoted">&lt;b>Status:&lt;/b> Ranked Higher</string>
+
+    <!-- [CHAR LIMIT=150] Notification Importance title: automatic importance level summary (demoted) -->
+    <string name="notification_channel_summary_automatic_demoted">&lt;b>Status:&lt;/b> Ranked Lower</string>
+
     <!-- [CHAR LIMIT=150] Notification Importance title: important conversation level summary -->
     <string name="notification_channel_summary_priority">Shows at top of conversation section, appears as floating bubble, displays profile picture on lock screen</string>
 
@@ -1848,11 +1860,13 @@
     <string name="notification_appops_ok">OK</string>
 
     <!-- Notification Inline controls: describes how the notification was adjusted [CHAR_LIMIT=NONE] -->
-    <string name="feedback_silenced">This notification was silenced by the system.</string>
+    <string name="feedback_alerted">This notification was automatically &lt;b>promoted to Default&lt;/b> by the system.</string>
     <!-- Notification Inline controls: describes how the notification was adjusted [CHAR_LIMIT=NONE] -->
-    <string name="feedback_promoted">This notification was promoted by the system.</string>
+    <string name="feedback_silenced">This notification was automatically &lt;b>demoted to Silent&lt;/b> by the system.</string>
     <!-- Notification Inline controls: describes how the notification was adjusted [CHAR_LIMIT=NONE] -->
-    <string name="feedback_demoted">This notification was demoted by the system.</string>
+    <string name="feedback_promoted">This notification was automatically &lt;b>ranked higher&lt;/b> in your shade.</string>
+    <!-- Notification Inline controls: describes how the notification was adjusted [CHAR_LIMIT=NONE] -->
+    <string name="feedback_demoted">This notification was automatically &lt;b>ranked lower&lt;/b> in your shade.</string>
     <!-- Notification Inline controls: prompts the user for feedback [CHAR_LIMIT=NONE] -->
     <string name="feedback_prompt">Was this correct?</string>
     <!-- Notification Inline controls: responds to user provided feedback [CHAR_LIMIT=NONE] -->

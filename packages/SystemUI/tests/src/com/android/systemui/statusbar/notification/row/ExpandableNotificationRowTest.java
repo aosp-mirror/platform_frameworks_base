@@ -210,7 +210,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         // public notification is custom layout - no header
         mGroupRow.setSensitive(true, true);
         mGroupRow.setOnFeedbackClickListener(null);
-        mGroupRow.showFeedbackIcon(false);
+        mGroupRow.showFeedbackIcon(false, 0);
     }
 
     @Test
@@ -224,11 +224,12 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         mGroupRow.setChildrenContainer(mockContainer);
 
         final boolean show = true;
-        mGroupRow.showFeedbackIcon(show);
+        final int resId = 1;
+        mGroupRow.showFeedbackIcon(show, resId);
 
-        verify(mockContainer, times(1)).showFeedbackIcon(show);
-        verify(privateLayout, times(1)).showFeedbackIcon(show);
-        verify(publicLayout, times(1)).showFeedbackIcon(show);
+        verify(mockContainer, times(1)).showFeedbackIcon(show, resId);
+        verify(privateLayout, times(1)).showFeedbackIcon(show, resId);
+        verify(publicLayout, times(1)).showFeedbackIcon(show, resId);
     }
 
     @Test

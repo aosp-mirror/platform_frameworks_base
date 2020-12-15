@@ -103,7 +103,7 @@ public abstract class NotificationViewWrapper implements TransformableView {
     /**
      * Shows or hides feedback icon.
      */
-    public void showFeedbackIcon(boolean show) {
+    public void showFeedbackIcon(boolean show, int resId) {
     }
 
     public void onReinflated() {

@@ -374,7 +374,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(false),
                 eq(false),
                 eq(true), /* wasShownHighPriority */
-                eq(false) /* showAutomaticSetting */);
+                eq(mAssistantFeedbackController));
     }
 
     @Test
@@ -408,7 +408,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(true),
                 eq(false),
                 eq(false), /* wasShownHighPriority */
-                eq(false) /* showAutomaticSetting */);
+                eq(mAssistantFeedbackController));
     }
 
     @Test
@@ -440,7 +440,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(false),
                 eq(false),
                 eq(false), /* wasShownHighPriority */
-                eq(false) /* showAutomaticSetting */);
+                eq(mAssistantFeedbackController));
     }
 
     @Test

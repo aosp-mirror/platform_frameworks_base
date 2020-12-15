@@ -24,18 +24,18 @@
         android:clipChildren="false"
         android:clipToPadding="false"
         android:orientation="vertical"
-        android:paddingStart="@*android:dimen/notification_content_margin_start"
-        android:paddingEnd="@*android:dimen/notification_content_margin_end"
-        android:background="?android:attr/colorBackground"
-        android:theme="@*android:style/Theme.DeviceDefault.Light">
+        android:paddingStart="@dimen/notification_shade_content_margin_horizontal"
+        android:paddingEnd="@dimen/notification_shade_content_margin_horizontal"
+        android:background="?android:attr/colorBackground">
 
     <!-- Package Info -->
     <LinearLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/notification_guts_conversation_header_height"
+        android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:clipChildren="false"
+        android:paddingTop="@dimen/notification_guts_header_top_padding"
         android:clipToPadding="false">
         <ImageView
             android:id="@+id/pkg_icon"
@@ -49,7 +49,6 @@
             android:layout_weight="1"
             android:layout_width="0dp"
             android:orientation="vertical"
-
             android:layout_height="wrap_content"
             android:minHeight="@dimen/notification_guts_conversation_icon_size"
             android:layout_centerVertical="true"
@@ -63,10 +62,11 @@
                 android:orientation="horizontal">
                 <TextView
                     android:id="@+id/pkg_name"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    style="@style/TextAppearance.NotificationImportanceChannelGroup"
+                    style="@style/TextAppearance.NotificationImportanceApp"
                     android:ellipsize="end"
+                    android:textDirection="locale"
                     android:maxLines="1"/>
             </LinearLayout>
         </LinearLayout>
@@ -76,8 +76,7 @@
         android:id="@+id/prompt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@*android:dimen/notification_header_padding_top"
-        style="@style/TextAppearance.NotificationInfo.Secondary" />
+        android:layout_marginTop="@*android:dimen/notification_header_padding_top" />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
