@@ -403,6 +403,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_PERMISSIONS = "permissions";
 
     /**
+     * Namespace for ota related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_OTA = "ota";
+
+    /**
      * Namespace for all widget related features.
      *
      * @hide
