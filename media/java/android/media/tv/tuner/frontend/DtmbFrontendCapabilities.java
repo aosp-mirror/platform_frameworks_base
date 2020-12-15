@@ -46,8 +46,7 @@ public final class DtmbFrontendCapabilities extends FrontendCapabilities {
     /**
      * Gets modulation capability.
      *
-     * @return full modulation capabilies. If the caps bitwise AND with any value from
-     * bit masks {@link DtmbFrontendSettings.Modulation} is true, then that modulation is supported.
+     * @return the bit mask of all the supported modulations.
      */
     @DtmbFrontendSettings.Modulation
     public int getModulationCapability() {
@@ -57,9 +56,7 @@ public final class DtmbFrontendCapabilities extends FrontendCapabilities {
     /**
      * Gets Transmission Mode capability.
      *
-     * @return full Transmission Mode capabilies. If the caps bitwise AND with any value from
-     * bit masks {@link DtmbFrontendSettings.TransmissionMode} is true, then that transmission mode
-     * is supported.
+     * @return the bit mask of all the supported transmission modes.
      */
     @DtmbFrontendSettings.TransmissionMode
     public int getTransmissionModeCapability() {
@@ -69,9 +66,7 @@ public final class DtmbFrontendCapabilities extends FrontendCapabilities {
     /**
      * Gets Guard Interval capability.
      *
-     * @return full Guard Interval capabilies. If the caps bitwise AND with any value from
-     * bit masks {@link DtmbFrontendSettings.GuardInterval} is true, then that Guard Interval is
-     * supported.
+     * @return the bit mask of all the supported guard intervals.
      */
     @DtmbFrontendSettings.GuardInterval
     public int getGuardIntervalCapability() {
@@ -81,9 +76,7 @@ public final class DtmbFrontendCapabilities extends FrontendCapabilities {
     /**
      * Gets Time Interleave Mode capability.
      *
-     * @return full Time Interleave Mode capabilies. If the caps bitwise AND with any value from
-     * bit masks {@link DtmbFrontendSettings.TimeInterleaveMode} is true, then that Time Interleave
-     * Mode is supported.
+     * @return the bit mask of all the supported time interleave modes.
      */
     @DtmbFrontendSettings.TimeInterleaveMode
     public int getTimeInterleaveModeCapability() {
@@ -93,8 +86,7 @@ public final class DtmbFrontendCapabilities extends FrontendCapabilities {
     /**
      * Gets Code Rate capability.
      *
-     * @return full Code Rate capabilies. If the caps bitwise AND with any value from
-     * bit masks {@link DtmbFrontendSettings.CodeRate} is true, then that Code Rate is supported.
+     * @return the bit mask of all the supported code rates.
      */
     @DtmbFrontendSettings.CodeRate
     public int getCodeRateCapability() {
@@ -104,8 +96,7 @@ public final class DtmbFrontendCapabilities extends FrontendCapabilities {
     /**
      * Gets Bandwidth capability.
      *
-     * @return full Bandwidth capabilies. If the caps bitwise AND with any value from
-     * bit masks {@link DtmbFrontendSettings.Bandwidth} is true, then that Bandwidth is supported.
+     * @return the bit mask of all the supported bandwidth.
      */
     @DtmbFrontendSettings.Bandwidth
     public int getBandwidthCapability() {

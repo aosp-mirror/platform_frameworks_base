@@ -22,7 +22,7 @@ import android.annotation.SystemApi;
  * Ip Cid Change event sent from {@link Filter} objects new ip cid.
  *
  * <p>This event is only sent in Tuner 1.1 or higher version. Use
- * {@link TunerVersionChecker.getTunerVersion()} to get the version information.
+ * {@link TunerVersionChecker#getTunerVersion()} to get the version information.
  *
  * @hide
  */
@@ -38,7 +38,7 @@ public final class IpCidChangeEvent extends FilterEvent {
      * Gets ip cid.
      *
      * <p>This event is only sent in Tuner 1.1 or higher version. Use
-     * {@link TunerVersionChecker.getTunerVersion()} to get the version information.
+     * {@link TunerVersionChecker#getTunerVersion()} to get the version information.
      */
     public int getIpCid() {
         return mCid;

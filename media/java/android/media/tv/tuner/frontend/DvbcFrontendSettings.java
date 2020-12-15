@@ -120,7 +120,7 @@ public class DvbcFrontendSettings extends FrontendSettings {
 
 
     /**
-     * @deprecated Use the {@link FrontendSettings#FrontendSpectralInversion} instead.
+     * @deprecated Use the {@code FrontendSpectralInversion} instead.
      * @hide
      */
     @Deprecated
@@ -439,7 +439,7 @@ public class DvbcFrontendSettings extends FrontendSettings {
          * Set the time interleave mode.
          *
          * <p>This API is only supported by Tuner HAL 1.1 or higher. Unsupported version would cause
-         * no-op. Use {@link TunerVersionChecker.getTunerVersion()} to check the version.
+         * no-op. Use {@link TunerVersionChecker#getTunerVersion()} to check the version.
          *
          * @param interleaveMode the value to set as the time interleave mode. Default value is
          * {@link #TIME_INTERLEAVE_MODE_UNDEFINED}.
@@ -456,7 +456,7 @@ public class DvbcFrontendSettings extends FrontendSettings {
          * Set the Bandwidth.
          *
          * <p>This API is only supported by Tuner HAL 1.1 or higher. Unsupported version would cause
-         * no-op. Use {@link TunerVersionChecker.getTunerVersion()} to check the version.
+         * no-op. Use {@link TunerVersionChecker#getTunerVersion()} to check the version.
          *
          * @param bandwidth the value to set as the bandwidth. Default value is
          * {@link #BANDWIDTH_UNDEFINED}.
