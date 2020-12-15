@@ -84,6 +84,7 @@ import javax.inject.Inject;
  */
 public class ScreenshotController {
     private static final String TAG = logTag(ScreenshotController.class);
+
     /**
      * POD used in the AsyncTask which saves an image in the background.
      */
@@ -350,10 +351,20 @@ public class ScreenshotController {
         // Inflate the screenshot layout
         mScreenshotView = (ScreenshotView)
                 LayoutInflater.from(mContext).inflate(R.layout.global_screenshot, null);
-        mScreenshotView.init(mUiEventLogger, this::resetScreenshotView);
+        mScreenshotView.init(mUiEventLogger, new ScreenshotView.ScreenshotViewCallback() {
+            @Override
+            public void onUserInteraction() {
+                resetTimeout();
+            }
+
+            @Override
+            public void onDismiss() {
+                resetScreenshotView();
+            }
+        });
 
         // TODO(159460485): Remove this when focus is handled properly in the system
-        mScreenshotView.setOnTouchListener((v, event) -> {
+        mDecorView.setOnTouchListener((v, event) -> {
             if (event.getActionMasked() == MotionEvent.ACTION_OUTSIDE) {
                 if (DEBUG_INPUT) {
                     Log.d(TAG, "onTouch: ACTION_OUTSIDE");
@@ -432,7 +443,7 @@ public class ScreenshotController {
             }
             if (DEBUG_WINDOW) {
                 Log.d(TAG, "saveScreenshot: screenshotView is already attached, resetting. "
-                        + "(dismissing=" + mScreenshotView.isDismissing()  + ")");
+                        + "(dismissing=" + mScreenshotView.isDismissing() + ")");
             }
             mScreenshotView.reset();
         }
@@ -580,11 +591,8 @@ public class ScreenshotController {
         mSaveInBgTask.execute();
     }
 
-    /**
-     * Sets up the action shade and its entrance animation, once we get the screenshot URI.
-     */
-    private void showUiOnActionsReady(ScreenshotController.SavedImageData imageData) {
-        logSuccessOnActionsReady(imageData);
+    private void resetTimeout() {
+        mScreenshotHandler.removeMessages(MESSAGE_CORNER_TIMEOUT);
 
         AccessibilityManager accessibilityManager = (AccessibilityManager)
                 mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
@@ -592,12 +600,25 @@ public class ScreenshotController {
                 SCREENSHOT_CORNER_DEFAULT_TIMEOUT_MILLIS,
                 AccessibilityManager.FLAG_CONTENT_CONTROLS);
 
-        if (DEBUG_UI) {
-            Log.d(TAG, "Showing UI actions, dismiss timeout: " + timeoutMs + " ms");
-        }
         mScreenshotHandler.sendMessageDelayed(
                 mScreenshotHandler.obtainMessage(MESSAGE_CORNER_TIMEOUT),
                 timeoutMs);
+        if (DEBUG_UI) {
+            Log.d(TAG, "dismiss timeout: " + timeoutMs + " ms");
+        }
+
+    }
+
+    /**
+     * Sets up the action shade and its entrance animation, once we get the screenshot URI.
+     */
+    private void showUiOnActionsReady(ScreenshotController.SavedImageData imageData) {
+        logSuccessOnActionsReady(imageData);
+        if (DEBUG_UI) {
+            Log.d(TAG, "Showing UI actions");
+        }
+
+        resetTimeout();
 
         if (imageData.uri != null) {
             mScreenshotHandler.post(() -> {
