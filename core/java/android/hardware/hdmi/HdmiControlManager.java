@@ -1372,6 +1372,87 @@ public final class HdmiControlManager {
     }
 
     /**
+     * Listener used to get setting change notification.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface CecSettingChangeListener {
+        /**
+         * Called when value of a setting changes.
+         *
+         * @param setting name of a CEC setting that changed
+         */
+        void onChange(@NonNull @CecSettingName String setting);
+    }
+
+    private final ArrayMap<String,
+            ArrayMap<CecSettingChangeListener, IHdmiCecSettingChangeListener>>
+                    mCecSettingChangeListeners = new ArrayMap<>();
+
+    private void addCecSettingChangeListener(
+            @NonNull @CecSettingName String setting,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull CecSettingChangeListener listener) {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            return;
+        }
+        if (mCecSettingChangeListeners.containsKey(setting)
+                && mCecSettingChangeListeners.get(setting).containsKey(listener)) {
+            Log.e(TAG, "listener is already registered");
+            return;
+        }
+        IHdmiCecSettingChangeListener wrappedListener =
+                getCecSettingChangeListenerWrapper(executor, listener);
+        if (!mCecSettingChangeListeners.containsKey(setting)) {
+            mCecSettingChangeListeners.put(setting, new ArrayMap<>());
+        }
+        mCecSettingChangeListeners.get(setting).put(listener, wrappedListener);
+        try {
+            mService.addCecSettingChangeListener(setting, wrappedListener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private void removeCecSettingChangeListener(
+            @NonNull @CecSettingName String setting,
+            @NonNull CecSettingChangeListener listener) {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            return;
+        }
+        IHdmiCecSettingChangeListener wrappedListener =
+                !mCecSettingChangeListeners.containsKey(setting) ? null :
+                    mCecSettingChangeListeners.get(setting).remove(listener);
+        if (wrappedListener == null) {
+            Log.e(TAG, "tried to remove not-registered listener");
+            return;
+        }
+        try {
+            mService.removeCecSettingChangeListener(setting, wrappedListener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private IHdmiCecSettingChangeListener getCecSettingChangeListenerWrapper(
+            Executor executor, final CecSettingChangeListener listener) {
+        return new IHdmiCecSettingChangeListener.Stub() {
+            @Override
+            public void onChange(String setting) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> listener.onChange(setting));
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
+        };
+    }
+
+    /**
      * Get a set of user-modifiable settings.
      *
      * @return a set of user-modifiable settings.
@@ -1490,6 +1571,53 @@ public final class HdmiControlManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Add change listener for global status of HDMI CEC.
+     *
+     * <p>To stop getting the notification,
+     * use {@link #removeHdmiCecEnabledChangeListener(CecSettingChangeListener)}.
+     *
+     * Note that each invocation of the callback will be executed on an arbitrary
+     * Binder thread. This means that all callback implementations must be
+     * thread safe. To specify the execution thread, use
+     * {@link addHdmiCecEnabledChangeListener(Executor, CecSettingChangeListener)}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void addHdmiCecEnabledChangeListener(@NonNull CecSettingChangeListener listener) {
+        addHdmiCecEnabledChangeListener(ConcurrentUtils.DIRECT_EXECUTOR, listener);
+    }
+
+    /**
+     * Add change listener for global status of HDMI CEC.
+     *
+     * <p>To stop getting the notification,
+     * use {@link #removeHdmiCecEnabledChangeListener(CecSettingChangeListener)}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void addHdmiCecEnabledChangeListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull CecSettingChangeListener listener) {
+        addCecSettingChangeListener(CEC_SETTING_NAME_HDMI_CEC_ENABLED, executor, listener);
+    }
+
+    /**
+     * Remove change listener for global status of HDMI CEC.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void removeHdmiCecEnabledChangeListener(
+            @NonNull CecSettingChangeListener listener) {
+        removeCecSettingChangeListener(CEC_SETTING_NAME_HDMI_CEC_ENABLED, listener);
     }
 
     /**

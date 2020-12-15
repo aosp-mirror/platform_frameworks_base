@@ -2741,6 +2741,8 @@ package android.hardware.hdmi {
   }
 
   public final class HdmiControlManager {
+    method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void addHdmiCecEnabledChangeListener(@NonNull android.hardware.hdmi.HdmiControlManager.CecSettingChangeListener);
+    method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void addHdmiCecEnabledChangeListener(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.hdmi.HdmiControlManager.CecSettingChangeListener);
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void addHotplugEventListener(android.hardware.hdmi.HdmiControlManager.HotplugEventListener);
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void addHotplugEventListener(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.hdmi.HdmiControlManager.HotplugEventListener);
     method @NonNull @RequiresPermission(android.Manifest.permission.HDMI_CEC) public java.util.List<java.lang.Integer> getAllowedCecSettingIntValues(@NonNull String);
@@ -2759,6 +2761,7 @@ package android.hardware.hdmi {
     method @NonNull @RequiresPermission(android.Manifest.permission.HDMI_CEC) public java.util.List<java.lang.String> getUserCecSettings();
     method public boolean isDeviceConnected(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
     method public void powerOffDevice(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
+    method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void removeHdmiCecEnabledChangeListener(@NonNull android.hardware.hdmi.HdmiControlManager.CecSettingChangeListener);
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void removeHotplugEventListener(android.hardware.hdmi.HdmiControlManager.HotplugEventListener);
     method public void setActiveSource(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void setHdmiCecEnabled(@NonNull int);
@@ -2869,6 +2872,10 @@ package android.hardware.hdmi {
     field public static final int TIMER_STATUS_PROGRAMMED_INFO_MIGHT_NOT_ENOUGH_SPACE = 11; // 0xb
     field public static final int TIMER_STATUS_PROGRAMMED_INFO_NOT_ENOUGH_SPACE = 9; // 0x9
     field public static final int TIMER_STATUS_PROGRAMMED_INFO_NO_MEDIA_INFO = 10; // 0xa
+  }
+
+  public static interface HdmiControlManager.CecSettingChangeListener {
+    method public void onChange(@NonNull String);
   }
 
   @IntDef({android.hardware.hdmi.HdmiControlManager.RESULT_SUCCESS, android.hardware.hdmi.HdmiControlManager.RESULT_TIMEOUT, android.hardware.hdmi.HdmiControlManager.RESULT_SOURCE_NOT_AVAILABLE, android.hardware.hdmi.HdmiControlManager.RESULT_TARGET_NOT_AVAILABLE, android.hardware.hdmi.HdmiControlManager.RESULT_ALREADY_IN_PROGRESS, android.hardware.hdmi.HdmiControlManager.RESULT_EXCEPTION, android.hardware.hdmi.HdmiControlManager.RESULT_INCORRECT_MODE, android.hardware.hdmi.HdmiControlManager.RESULT_COMMUNICATION_FAILED}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS) public static @interface HdmiControlManager.ControlCallbackResult {

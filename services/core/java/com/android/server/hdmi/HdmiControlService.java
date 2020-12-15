@@ -40,6 +40,7 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiHotplugEvent;
 import android.hardware.hdmi.HdmiPortInfo;
+import android.hardware.hdmi.IHdmiCecSettingChangeListener;
 import android.hardware.hdmi.IHdmiCecVolumeControlFeatureListener;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.hdmi.IHdmiControlService;
@@ -74,6 +75,7 @@ import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.sysprop.HdmiProperties;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -307,6 +309,11 @@ public class HdmiControlService extends SystemService {
     @GuardedBy("mLock")
     private final ArrayList<VendorCommandListenerRecord> mVendorCommandListenerRecords =
             new ArrayList<>();
+
+    // List of records for CEC setting change listener to handle the caller killed in action.
+    @GuardedBy("mLock")
+    private final ArrayMap<String, RemoteCallbackList<IHdmiCecSettingChangeListener>>
+            mHdmiCecSettingChangeListenerRecords = new ArrayMap<>();
 
     @GuardedBy("mLock")
     private InputChangeListenerRecord mInputChangeListenerRecord;
@@ -2222,6 +2229,20 @@ public class HdmiControlService extends SystemService {
         }
 
         @Override
+        public void addCecSettingChangeListener(String name,
+                final IHdmiCecSettingChangeListener listener) {
+            enforceAccessPermission();
+            HdmiControlService.this.addCecSettingChangeListener(name, listener);
+        }
+
+        @Override
+        public void removeCecSettingChangeListener(String name,
+                final IHdmiCecSettingChangeListener listener) {
+            enforceAccessPermission();
+            HdmiControlService.this.removeCecSettingChangeListener(name, listener);
+        }
+
+        @Override
         public List<String> getUserCecSettings() {
             enforceAccessPermission();
             long token = Binder.clearCallingIdentity();
@@ -3449,5 +3470,54 @@ public class HdmiControlService extends SystemService {
     @VisibleForTesting
     protected HdmiCecConfig getHdmiCecConfig() {
         return mHdmiCecConfig;
+    }
+
+    private HdmiCecConfig.SettingChangeListener mSettingChangeListener =
+            new HdmiCecConfig.SettingChangeListener() {
+                @Override
+                public void onChange(String name) {
+                    synchronized (mLock) {
+                        if (!mHdmiCecSettingChangeListenerRecords.containsKey(name)) {
+                            return;
+                        }
+                        mHdmiCecSettingChangeListenerRecords.get(name).broadcast(listener -> {
+                            invokeCecSettingChangeListenerLocked(name, listener);
+                        });
+                    }
+                }
+            };
+
+    private void addCecSettingChangeListener(String name,
+            final IHdmiCecSettingChangeListener listener) {
+        synchronized (mLock) {
+            if (!mHdmiCecSettingChangeListenerRecords.containsKey(name)) {
+                mHdmiCecSettingChangeListenerRecords.put(name, new RemoteCallbackList<>());
+                mHdmiCecConfig.registerChangeListener(name, mSettingChangeListener);
+            }
+            mHdmiCecSettingChangeListenerRecords.get(name).register(listener);
+        }
+    }
+
+    private void removeCecSettingChangeListener(String name,
+            final IHdmiCecSettingChangeListener listener) {
+        synchronized (mLock) {
+            if (!mHdmiCecSettingChangeListenerRecords.containsKey(name)) {
+                return;
+            }
+            mHdmiCecSettingChangeListenerRecords.get(name).unregister(listener);
+            if (mHdmiCecSettingChangeListenerRecords.get(name).getRegisteredCallbackCount() == 0) {
+                mHdmiCecSettingChangeListenerRecords.remove(name);
+                mHdmiCecConfig.removeChangeListener(name, mSettingChangeListener);
+            }
+        }
+    }
+
+    private void invokeCecSettingChangeListenerLocked(String name,
+            final IHdmiCecSettingChangeListener listener) {
+        try {
+            listener.onChange(name);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to report setting change", e);
+        }
     }
 }
