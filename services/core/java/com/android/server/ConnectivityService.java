@@ -113,7 +113,6 @@ import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkMonitorManager;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkProvider;
-import android.net.NetworkQuotaInfo;
 import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
 import android.net.NetworkStack;
@@ -1778,14 +1777,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
         return result.toArray(new NetworkState[result.size()]);
-    }
-
-    @Override
-    @Deprecated
-    public NetworkQuotaInfo getActiveNetworkQuotaInfo() {
-        Log.w(TAG, "Shame on UID " + Binder.getCallingUid()
-                + " for calling the hidden API getNetworkQuotaInfo(). Shame!");
-        return new NetworkQuotaInfo();
     }
 
     @Override
