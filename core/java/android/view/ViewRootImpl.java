@@ -117,6 +117,7 @@ import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.RenderNode;
+import android.graphics.drawable.BackgroundBlurDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.hardware.display.DisplayManager;
@@ -188,7 +189,6 @@ import android.window.ClientWindowFrames;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.graphics.drawable.BackgroundBlurDrawable;
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.SomeArgs;
@@ -670,6 +670,14 @@ public final class ViewRootImpl implements ViewParent,
 
     private final BackgroundBlurDrawable.Aggregator mBlurRegionAggregator =
             new BackgroundBlurDrawable.Aggregator(this);
+
+    /**
+     * @return {@link BackgroundBlurDrawable.Aggregator} for this instance.
+     */
+    @NonNull
+    public BackgroundBlurDrawable.Aggregator getBlurRegionAggregator() {
+        return mBlurRegionAggregator;
+    }
 
     /**
      * @return {@link ImeFocusController} for this instance.
@@ -10046,13 +10054,6 @@ public final class ViewRootImpl implements ViewParent,
             transaction.deferTransactionUntil(surfaceControl, surfaceControl, frameNumber);
             transaction.apply();
         }
-    }
-
-    /**
-     * Creates a background blur drawable for the backing {@link Surface}.
-     */
-    public BackgroundBlurDrawable createBackgroundBlurDrawable() {
-        return mBlurRegionAggregator.createBackgroundBlurDrawable(mContext);
     }
 
     @Override
