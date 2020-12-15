@@ -5225,7 +5225,6 @@ public abstract class Context {
      * indexing and querying app data managed by the system.
      *
      * @see #getSystemService(String)
-     * @hide
      */
     public static final String APP_SEARCH_SERVICE = "app_search";
 
