@@ -43,7 +43,7 @@ public class QSTileView extends QSTileBaseView {
     protected TextView mSecondLine;
     private ImageView mPadLock;
     private int mState;
-    private ViewGroup mLabelContainer;
+    protected ViewGroup mLabelContainer;
     private View mExpandIndicator;
     private View mExpandSpace;
     private ColorStateList mColorLabelDefault;
@@ -150,5 +150,10 @@ public class QSTileView extends QSTileBaseView {
         mLabelContainer.setOnLongClickListener(longClick);
         mLabelContainer.setClickable(false);
         mLabelContainer.setLongClickable(false);
+    }
+
+    @Override
+    public void setShowLabels(boolean show) {
+        mHandler.post(() -> mLabelContainer.setVisibility(show ? VISIBLE : GONE));
     }
 }
