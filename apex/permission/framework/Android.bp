@@ -19,6 +19,7 @@ filegroup {
         "java/**/*.aidl",
     ],
     path: "java",
+    visibility: ["//frameworks/base"],
 }
 
 java_sdk_library {

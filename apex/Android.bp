@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+package {
+    default_visibility: [":__subpackages__"],
+}
+
 mainline_stubs_args =
     "--error UnhiddenSystemApi " +
     "--hide BroadcastBehavior " +
@@ -129,6 +133,13 @@ java_defaults {
         enabled: true,
         sdk_version: "module_current",
     },
+    defaults_visibility: [
+        ":__subpackages__",
+        "//frameworks/base/libs/hwui",
+        "//frameworks/base/wifi",
+        "//packages/modules:__subpackages__",
+        "//packages/providers/MediaProvider:__subpackages__",
+    ],
 }
 
 // Defaults for mainline module system server provided java_sdk_library instances.
@@ -140,6 +151,10 @@ java_defaults {
         enabled: true,
         sdk_version: "module_current",
     },
+    defaults_visibility: [
+        ":__subpackages__",
+        "//packages/modules:__subpackages__",
+    ],
 }
 
 stubs_defaults {
