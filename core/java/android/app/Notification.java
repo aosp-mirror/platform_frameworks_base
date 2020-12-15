@@ -1202,7 +1202,6 @@ public class Notification implements Parcelable
      * {@link BigPictureStyle#bigPicture(Bitmap) big picture} is to be shown in the collapsed state
      * of a {@link BigPictureStyle} notification.  This will replace a
      * {@link Builder#setLargeIcon(Icon) large icon} in that state if one was provided.
-     * @hide
      */
     public static final String EXTRA_PROMOTE_PICTURE = "android.promotePicture";
 
@@ -7022,7 +7021,8 @@ public class Notification implements Parcelable
          * Overrides ContentTitle in the big form of the template.
          * This defaults to the value passed to setContentTitle().
          */
-        public BigPictureStyle setBigContentTitle(CharSequence title) {
+        @NonNull
+        public BigPictureStyle setBigContentTitle(@Nullable CharSequence title) {
             internalSetBigContentTitle(safeCharSequence(title));
             return this;
         }
@@ -7030,7 +7030,8 @@ public class Notification implements Parcelable
         /**
          * Set the first line of text after the detail section in the big form of the template.
          */
-        public BigPictureStyle setSummaryText(CharSequence cs) {
+        @NonNull
+        public BigPictureStyle setSummaryText(@Nullable CharSequence cs) {
             internalSetSummaryText(safeCharSequence(cs));
             return this;
         }
@@ -7055,7 +7056,8 @@ public class Notification implements Parcelable
         /**
          * Provide the bitmap to be used as the payload for the BigPicture notification.
          */
-        public BigPictureStyle bigPicture(Bitmap b) {
+        @NonNull
+        public BigPictureStyle bigPicture(@Nullable Bitmap b) {
             mPicture = b;
             return this;
         }
@@ -7064,7 +7066,6 @@ public class Notification implements Parcelable
          * When set, the {@link #bigPicture(Bitmap) big picture} of this style will be promoted and
          * shown in place of the {@link Builder#setLargeIcon(Icon) large icon} in the collapsed
          * state of this notification.
-         * @hide
          */
         @NonNull
         public BigPictureStyle showBigPictureWhenCollapsed(boolean show) {
@@ -7075,14 +7076,16 @@ public class Notification implements Parcelable
         /**
          * Override the large icon when the big notification is shown.
          */
-        public BigPictureStyle bigLargeIcon(Bitmap b) {
+        @NonNull
+        public BigPictureStyle bigLargeIcon(@Nullable Bitmap b) {
             return bigLargeIcon(b != null ? Icon.createWithBitmap(b) : null);
         }
 
         /**
          * Override the large icon when the big notification is shown.
          */
-        public BigPictureStyle bigLargeIcon(Icon icon) {
+        @NonNull
+        public BigPictureStyle bigLargeIcon(@Nullable Icon icon) {
             mBigLargeIconSet = true;
             mBigLargeIcon = icon;
             return this;
