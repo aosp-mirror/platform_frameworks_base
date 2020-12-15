@@ -1687,6 +1687,7 @@ package android.bluetooth {
     field @NonNull public static final android.os.ParcelUuid HOGP;
     field @NonNull public static final android.os.ParcelUuid HSP;
     field @NonNull public static final android.os.ParcelUuid HSP_AG;
+    field @NonNull public static final android.os.ParcelUuid LE_AUDIO;
     field @NonNull public static final android.os.ParcelUuid MAP;
     field @NonNull public static final android.os.ParcelUuid MAS;
     field @NonNull public static final android.os.ParcelUuid MNS;
