@@ -26,6 +26,8 @@ import android.os.RemoteException;
 import android.util.Singleton;
 import android.view.RemoteAnimationDefinition;
 
+import com.android.internal.policy.IKeyguardDismissCallback;
+
 /**
  * Provides the activity associated operations that communicate with system.
  *
@@ -426,6 +428,37 @@ public class ActivityClient {
     void setDisablePreviewScreenshots(IBinder token, boolean disable) {
         try {
             getActivityClientController().setDisablePreviewScreenshots(token, disable);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Restart the process and activity to adopt the latest configuration for size compat mode.
+     * This only takes effect for visible activity because invisible background activity can be
+     * restarted naturally when it becomes visible.
+     */
+    public void restartActivityProcessIfVisible(IBinder token) {
+        try {
+            getActivityClientController().restartActivityProcessIfVisible(token);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /** Removes the snapshot of home task. */
+    public void invalidateHomeTaskSnapshot(IBinder homeToken) {
+        try {
+            getActivityClientController().invalidateHomeTaskSnapshot(homeToken);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    void dismissKeyguard(IBinder token, IKeyguardDismissCallback callback,
+            CharSequence message) {
+        try {
+            getActivityClientController().dismissKeyguard(token, callback, message);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
