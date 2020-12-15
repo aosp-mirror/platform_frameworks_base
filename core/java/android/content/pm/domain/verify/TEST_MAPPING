@@ -1,0 +1,12 @@
+{
+  "presubmit": [
+    {
+      "name": "PackageManagerServiceUnitTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.pm.test.domain.verify"
+        }
+      ]
+    }
+  ]
+}

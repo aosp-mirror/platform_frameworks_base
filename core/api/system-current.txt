@@ -2696,6 +2696,37 @@ package android.content.pm.dex {
 
 }
 
+package android.content.pm.domain.verify {
+
+  public final class DomainVerificationRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.Set<java.lang.String> getPackageNames();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.domain.verify.DomainVerificationRequest> CREATOR;
+  }
+
+  public final class DomainVerificationSet implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.Map<java.lang.String,java.lang.Integer> getHostToStateMap();
+    method @NonNull public java.util.UUID getIdentifier();
+    method @NonNull public String getPackageName();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.domain.verify.DomainVerificationSet> CREATOR;
+  }
+
+  public final class DomainVerificationUserSelection implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.Map<java.lang.String,java.lang.Boolean> getHostToUserSelectionMap();
+    method @NonNull public java.util.UUID getIdentifier();
+    method @NonNull public String getPackageName();
+    method @NonNull public android.os.UserHandle getUser();
+    method @NonNull public boolean isLinkHandlingAllowed();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.domain.verify.DomainVerificationUserSelection> CREATOR;
+  }
+
+}
+
 package android.content.pm.permission {
 
   @Deprecated public final class RuntimePermissionPresentationInfo implements android.os.Parcelable {
