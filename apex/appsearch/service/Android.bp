@@ -28,5 +28,11 @@ java_library {
         "libicing",
     ],
     jarjar_rules: "jarjar-rules.txt",
+    visibility: [
+        "//frameworks/base/apex/appsearch:__subpackages__",
+        // These are required until appsearch is properly unbundled.
+        "//frameworks/base/services/tests/mockingservicestests",
+        "//frameworks/base/services/tests/servicestests",
+    ],
     apex_available: ["com.android.appsearch"],
 }

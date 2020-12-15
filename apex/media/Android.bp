@@ -1,4 +1,4 @@
-// Copyright (C) 2019 The Android Open Source Project
+// Copyright (C) 2020 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,31 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-filegroup {
-    name: "framework-blobstore-sources",
-    srcs: [
-        "java/**/*.java",
-        "java/**/*.aidl"
-    ],
-    path: "java",
-    visibility: ["//frameworks/base"],
-}
-
-java_library {
-    name: "blobstore-framework",
-    installable: false,
-    compile_dex: true,
-    sdk_version: "core_platform",
-    srcs: [
-        ":framework-blobstore-sources",
-    ],
-    aidl: {
-        export_include_dirs: [
-            "java",
-        ],
-    },
-    libs: [
-        "framework-minus-apex",
+package {
+    default_visibility: [
+        ":__subpackages__",
+        "//frameworks/av/apex",
+        "//frameworks/av/apex/testing",
     ],
 }
