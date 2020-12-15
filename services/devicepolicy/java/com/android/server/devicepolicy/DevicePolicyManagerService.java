@@ -4148,6 +4148,43 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
+    public boolean isActivePasswordSufficientForDeviceRequirement() {
+        if (!mHasFeature) {
+            return true;
+        }
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(isProfileOwner(caller));
+
+        final int profileUserId = caller.getUserId();
+        Preconditions.checkCallingUser(isManagedProfile(profileUserId));
+
+        // This method is always called on the parent DPM instance to check if its password (i.e.
+        // the device password) is sufficient for all explicit password requirement set on it
+        // So retrieve the parent user Id to which the device password belongs.
+        final int parentUser = getProfileParentId(profileUserId);
+        enforceUserUnlocked(parentUser);
+
+        synchronized (getLockObject()) {
+
+            // Combine password policies across the user and its profiles. Profile admins are
+            // excluded since we only want explicit password requirements, while profile admin
+            // requirement are applicable only when the profile has unified challenge.
+            List<ActiveAdmin> admins = getActiveAdminsForUserAndItsManagedProfilesLocked(parentUser,
+                    /* shouldIncludeProfileAdmins */ (user) -> false);
+            ArrayList<PasswordMetrics> adminMetrics = new ArrayList<>(admins.size());
+            int maxRequiredComplexity = PASSWORD_COMPLEXITY_NONE;
+            for (ActiveAdmin admin : admins) {
+                adminMetrics.add(admin.mPasswordPolicy.getMinMetrics());
+                maxRequiredComplexity = Math.max(maxRequiredComplexity, admin.mPasswordComplexity);
+            }
+
+            PasswordMetrics metrics = mLockSettingsInternal.getUserPasswordMetrics(parentUser);
+            return PasswordMetrics.validatePasswordMetrics(PasswordMetrics.merge(adminMetrics),
+                    maxRequiredComplexity, false, metrics).isEmpty();
+        }
+    }
+
+    @Override
     public boolean isUsingUnifiedPassword(ComponentName admin) {
         if (!mHasFeature) {
             return true;
