@@ -271,7 +271,7 @@ public class HdmiCecLocalDeviceTest {
     public void handleCecVersion_isHandled() {
         boolean result = mHdmiLocalDevice.onMessage(
                 HdmiCecMessageBuilder.buildCecVersion(ADDR_PLAYBACK_1, mHdmiLocalDevice.mAddress,
-                        HdmiControlManager.HDMI_CEC_VERSION_1_4_b));
+                        HdmiControlManager.HDMI_CEC_VERSION_1_4_B));
 
         assertThat(result).isTrue();
     }

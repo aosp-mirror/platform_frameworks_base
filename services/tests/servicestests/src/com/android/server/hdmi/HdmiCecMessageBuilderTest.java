@@ -104,7 +104,7 @@ public class HdmiCecMessageBuilderTest {
     @Test
     public void buildReportFeatures_basicTv_1_4() {
         HdmiCecMessage message = HdmiCecMessageBuilder.buildReportFeatures(ADDR_TV,
-                HdmiControlManager.HDMI_CEC_VERSION_1_4_b,
+                HdmiControlManager.HDMI_CEC_VERSION_1_4_B,
                 Lists.newArrayList(HdmiDeviceInfo.DEVICE_TV), Constants.RC_PROFILE_TV,
                 Lists.newArrayList(Constants.RC_PROFILE_TV_NONE), Collections.emptyList());
 
@@ -114,7 +114,7 @@ public class HdmiCecMessageBuilderTest {
     @Test
     public void buildReportFeatures_basicPlayback_1_4() {
         HdmiCecMessage message = HdmiCecMessageBuilder.buildReportFeatures(ADDR_PLAYBACK_1,
-                HdmiControlManager.HDMI_CEC_VERSION_1_4_b,
+                HdmiControlManager.HDMI_CEC_VERSION_1_4_B,
                 Lists.newArrayList(HdmiDeviceInfo.DEVICE_PLAYBACK), Constants.RC_PROFILE_TV,
                 Lists.newArrayList(Constants.RC_PROFILE_TV_NONE), Collections.emptyList());
 
@@ -124,7 +124,7 @@ public class HdmiCecMessageBuilderTest {
     @Test
     public void buildReportFeatures_basicPlaybackAudioSystem_1_4() {
         HdmiCecMessage message = HdmiCecMessageBuilder.buildReportFeatures(ADDR_PLAYBACK_1,
-                HdmiControlManager.HDMI_CEC_VERSION_1_4_b,
+                HdmiControlManager.HDMI_CEC_VERSION_1_4_B,
                 Lists.newArrayList(HdmiDeviceInfo.DEVICE_PLAYBACK,
                         HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM), Constants.RC_PROFILE_TV,
                 Lists.newArrayList(Constants.RC_PROFILE_TV_NONE), Collections.emptyList());
