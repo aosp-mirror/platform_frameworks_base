@@ -25,7 +25,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.LauncherApps;
@@ -35,8 +34,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
-import android.os.UserHandle;
-import android.service.notification.StatusBarNotification;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -186,17 +183,34 @@ public class PeopleSpaceTileTest {
     }
 
     @Test
-    public void testNotification() {
-        Notification notification = new Notification.Builder(mContext, "test").build();
-        StatusBarNotification sbn = new StatusBarNotification("pkg" /* pkg */, "pkg" /* opPkg */,
-                1 /* id */, "" /* tag */, 0 /* uid */, 0 /* initialPid */, 0 /* score */,
-                notification, UserHandle.CURRENT, 0 /* postTime */);
+    public void testNotificationKey() {
         PeopleSpaceTile tile = new PeopleSpaceTile
                 .Builder(new ShortcutInfo.Builder(mContext, "123").build(), mLauncherApps)
-                .setNotification(sbn)
+                .setNotificationKey("test")
                 .build();
 
-        assertThat(tile.getNotification()).isEqualTo(sbn);
+        assertThat(tile.getNotificationKey()).isEqualTo("test");
+    }
+
+    @Test
+    public void testNotificationContent() {
+        PeopleSpaceTile tile = new PeopleSpaceTile
+                .Builder(new ShortcutInfo.Builder(mContext, "123").build(), mLauncherApps)
+                .setNotificationContent("test")
+                .build();
+
+        assertThat(tile.getNotificationContent()).isEqualTo("test");
+    }
+
+    @Test
+    public void testNotificationDataUri() {
+        PeopleSpaceTile tile =
+                new PeopleSpaceTile.Builder(new ShortcutInfo.Builder(mContext, "123").build(),
+                        mLauncherApps)
+                .setNotificationDataUri(Uri.parse("test"))
+                .build();
+
+        assertThat(tile.getNotificationDataUri()).isEqualTo(Uri.parse("test"));
     }
 
     @Test

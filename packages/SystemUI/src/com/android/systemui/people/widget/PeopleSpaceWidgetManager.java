@@ -21,8 +21,10 @@ import android.app.NotificationChannel;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -34,6 +36,8 @@ import com.android.systemui.R;
 import com.android.systemui.people.PeopleSpaceUtils;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
+
+import java.util.Objects;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -84,7 +88,6 @@ public class PeopleSpaceWidgetManager {
             int[] widgetIds = mAppWidgetService.getAppWidgetIds(
                     new ComponentName(mContext, PeopleSpaceWidgetProvider.class)
             );
-
             if (widgetIds.length == 0) {
                 if (DEBUG) Log.d(TAG, "no widgets to update");
                 return;
@@ -93,6 +96,7 @@ public class PeopleSpaceWidgetManager {
             if (DEBUG) Log.d(TAG, "updating " + widgetIds.length + " widgets");
             boolean showSingleConversation = Settings.Global.getInt(mContext.getContentResolver(),
                     Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0) == 0;
+
             if (showSingleConversation) {
                 PeopleSpaceUtils.updateSingleConversationWidgets(mContext, widgetIds,
                         mAppWidgetManager, mNotificationManager);
@@ -100,6 +104,41 @@ public class PeopleSpaceWidgetManager {
                 mAppWidgetService
                         .notifyAppWidgetViewDataChanged(mContext.getOpPackageName(), widgetIds,
                                 R.id.widget_list_view);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Exception: " + e);
+        }
+    }
+
+    /**
+     * Check if any existing People tiles match the incoming notification change, and store the
+     * change in the tile if so.
+     */
+    public void storeNotificationChange(StatusBarNotification sbn,
+            PeopleSpaceUtils.NotificationAction notificationAction) {
+        if (DEBUG) Log.d(TAG, "storeNotificationChange called");
+        boolean showSingleConversation = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0) == 0;
+        if (!showSingleConversation) {
+            return;
+        }
+        try {
+            int[] widgetIds = mAppWidgetService.getAppWidgetIds(
+                    new ComponentName(mContext, PeopleSpaceWidgetProvider.class)
+            );
+            if (widgetIds.length == 0) {
+                return;
+            }
+
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
+            for (int widgetId : widgetIds) {
+                String shortcutId = sp.getString(String.valueOf(widgetId), null);
+                if (!Objects.equals(sbn.getShortcutId(), shortcutId)) {
+                    continue;
+                }
+                if (DEBUG) Log.d(TAG, "Storing notification change, key:" + sbn.getKey());
+                PeopleSpaceUtils.storeNotificationChange(
+                        sbn, notificationAction, mAppWidgetManager, widgetId);
             }
         } catch (Exception e) {
             Log.e(TAG, "Exception: " + e);
@@ -120,6 +159,7 @@ public class PeopleSpaceWidgetManager {
         public void onNotificationPosted(
                 StatusBarNotification sbn, NotificationListenerService.RankingMap rankingMap) {
             if (DEBUG) Log.d(TAG, "onNotificationPosted");
+            storeNotificationChange(sbn, PeopleSpaceUtils.NotificationAction.POSTED);
             updateWidgets();
         }
 
@@ -129,6 +169,7 @@ public class PeopleSpaceWidgetManager {
                 NotificationListenerService.RankingMap rankingMap
         ) {
             if (DEBUG) Log.d(TAG, "onNotificationRemoved");
+            storeNotificationChange(sbn, PeopleSpaceUtils.NotificationAction.REMOVED);
             updateWidgets();
         }
 
@@ -138,6 +179,7 @@ public class PeopleSpaceWidgetManager {
                 NotificationListenerService.RankingMap rankingMap,
                 int reason) {
             if (DEBUG) Log.d(TAG, "onNotificationRemoved with reason " + reason);
+            storeNotificationChange(sbn, PeopleSpaceUtils.NotificationAction.REMOVED);
             updateWidgets();
         }
 
