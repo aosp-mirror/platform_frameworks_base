@@ -6892,4 +6892,95 @@ public class WifiManager {
         }
     }
 
+    /**
+     * Interface for network suggestion user approval status change listener.
+     * Should be implemented by applications and registered using
+     * {@link #addSuggestionUserApprovalStatusListener(Executor,
+     * SuggestionUserApprovalStatusListener)} (
+     */
+    public interface SuggestionUserApprovalStatusListener {
+
+        /**
+         * Called when the user approval status of the App has changed. The current status can be
+         * queried by {@link #getNetworkSuggestionUserApprovalStatus()}
+         */
+        void onUserApprovalStatusChange();
+    }
+
+    private class SuggestionUserApprovalStatusListenerProxy extends
+            ISuggestionUserApprovalStatusListener.Stub {
+        private final Executor mExecutor;
+        private final SuggestionUserApprovalStatusListener mListener;
+
+        SuggestionUserApprovalStatusListenerProxy(@NonNull Executor executor,
+                @NonNull SuggestionUserApprovalStatusListener listener) {
+            mExecutor = executor;
+            mListener = listener;
+        }
+
+        @Override
+        public void onUserApprovalStatusChange() {
+            mExecutor.execute(() -> mListener.onUserApprovalStatusChange());
+        }
+
+    }
+
+    /**
+     * Add a listener for Wi-Fi network suggestion user approval status.
+     * See {@link SuggestionUserApprovalStatusListener}.
+     * Caller will receive a callback when the user approval status of the caller has changed.
+     * Caller can remove a previously registered listener using
+     * {@link WifiManager#removeSuggestionUserApprovalStatusListener(
+     * SuggestionUserApprovalStatusListener)}
+     * A caller can add multiple listeners to monitor the event.
+     * @param executor The executor to execute the listener of the {@code listener} object.
+     * @param listener listener for suggestion user approval status changes.
+     * @return true if succeed otherwise false.
+     */
+    @RequiresPermission(ACCESS_WIFI_STATE)
+    public boolean addSuggestionUserApprovalStatusListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull SuggestionUserApprovalStatusListener listener) {
+        if (!SdkLevel.isAtLeastS()) {
+            throw new UnsupportedOperationException();
+        }
+        if (listener == null) throw new IllegalArgumentException("Listener cannot be null");
+        if (executor == null) throw new IllegalArgumentException("Executor cannot be null");
+        Log.v(TAG, "addSuggestionUserApprovalStatusListener listener=" + listener
+                + ", executor=" + executor);
+        try {
+            return mService.addSuggestionUserApprovalStatusListener(new Binder(),
+                    new SuggestionUserApprovalStatusListenerProxy(executor, listener),
+                    listener.hashCode(), mContext.getOpPackageName(), mContext.getAttributionTag());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+    }
+
+    /**
+     * Allow callers to remove a previously registered listener using
+     * {@link #addSuggestionUserApprovalStatusListener(Executor,
+     * SuggestionUserApprovalStatusListener)}. After calling this method,
+     * applications will no longer receive network suggestion user approval status change through
+     * that listener.
+     *
+     * @param listener listener to remove.
+     */
+    @RequiresPermission(ACCESS_WIFI_STATE)
+    public void removeSuggestionUserApprovalStatusListener(
+            @NonNull SuggestionUserApprovalStatusListener listener) {
+        if (!SdkLevel.isAtLeastS()) {
+            throw new UnsupportedOperationException();
+        }
+        if (listener == null) throw new IllegalArgumentException("Listener cannot be null");
+        Log.v(TAG, "removeSuggestionUserApprovalStatusListener: listener=" + listener);
+        try {
+            mService.removeSuggestionUserApprovalStatusListener(listener.hashCode(),
+                    mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
 }
