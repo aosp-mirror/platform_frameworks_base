@@ -16,6 +16,7 @@
 
 package com.android.internal.graphics.drawable;
 
+import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -92,9 +93,11 @@ public final class BackgroundBlurDrawable extends Drawable {
         canvas.drawRenderNode(mRenderNode);
     }
 
-    @Override
-    public void setTint(int tintColor) {
-        mPaint.setColor(tintColor);
+    /**
+     * Color that will be alpha blended on top of the blur.
+     */
+    public void setColor(@ColorInt int color) {
+        mPaint.setColor(color);
     }
 
     @Override
