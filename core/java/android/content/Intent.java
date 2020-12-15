@@ -2846,6 +2846,21 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_INTENT_FILTER_NEEDS_VERIFICATION = "android.intent.action.INTENT_FILTER_NEEDS_VERIFICATION";
 
+
+    /**
+     * Broadcast Action: Sent to the system domain verification agent when an app's domains need
+     * to be verified. The data contains the domains hosts to be verified against.
+     * <p class="note">
+     * This is a protected intent that can only be sent by the system.
+     * </p>
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DOMAINS_NEED_VERIFICATION =
+            "android.intent.action.DOMAINS_NEED_VERIFICATION";
+
     /**
      * Broadcast Action: Resources for a set of packages (which were
      * previously unavailable) are currently
