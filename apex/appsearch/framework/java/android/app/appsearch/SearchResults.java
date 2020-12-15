@@ -39,7 +39,6 @@ import java.util.function.Consumer;
  * <p>Should close this object after finish fetching results.
  *
  * <p>This class is not thread safe.
- * @hide
  */
 public class SearchResults implements Closeable {
     private static final String TAG = "SearchResults";

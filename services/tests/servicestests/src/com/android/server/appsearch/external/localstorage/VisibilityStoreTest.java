@@ -18,13 +18,14 @@ package com.android.server.appsearch.external.localstorage;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.google.common.collect.ImmutableSet;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.util.Collections;
-import java.util.Set;
 
 public class VisibilityStoreTest {
 
@@ -38,22 +39,78 @@ public class VisibilityStoreTest {
         mVisibilityStore = mAppSearchImpl.getVisibilityStoreLocked();
     }
 
+    /**
+     * Make sure that we don't conflict with any special characters that AppSearchImpl has reserved.
+     */
+    @Test
+    public void testValidPackageName() {
+        assertThat(VisibilityStore.PACKAGE_NAME)
+                .doesNotContain(
+                        "" + AppSearchImpl.PACKAGE_DELIMITER); // Convert the chars to CharSequences
+        assertThat(VisibilityStore.PACKAGE_NAME)
+                .doesNotContain(
+                        ""
+                                + AppSearchImpl
+                                        .DATABASE_DELIMITER); // Convert the chars to CharSequences
+    }
+
+    /**
+     * Make sure that we don't conflict with any special characters that AppSearchImpl has reserved.
+     */
+    @Test
+    public void testValidDatabaseName() {
+        assertThat(VisibilityStore.DATABASE_NAME)
+                .doesNotContain(
+                        "" + AppSearchImpl.PACKAGE_DELIMITER); // Convert the chars to CharSequences
+        assertThat(VisibilityStore.DATABASE_NAME)
+                .doesNotContain(
+                        ""
+                                + AppSearchImpl
+                                        .DATABASE_DELIMITER); // Convert the chars to CharSequences
+    }
+
     @Test
     public void testSetVisibility() throws Exception {
         mVisibilityStore.setVisibility(
-                "database", /*schemasNotPlatformSurfaceable=*/ Set.of("schema1", "schema2"));
-        assertThat(mVisibilityStore.getSchemasNotPlatformSurfaceable("database"))
-                .containsExactly("schema1", "schema2");
+                "prefix",
+                /*schemasNotPlatformSurfaceable=*/ ImmutableSet.of(
+                        "prefix/schema1", "prefix/schema2"));
+        assertThat(mVisibilityStore.isSchemaPlatformSurfaceable("prefix", "prefix/schema1"))
+                .isFalse();
+        assertThat(mVisibilityStore.isSchemaPlatformSurfaceable("prefix", "prefix/schema2"))
+                .isFalse();
 
         // New .setVisibility() call completely overrides previous visibility settings. So
-        // "schema1" isn't preserved.
+        // "schema2" isn't preserved.
         mVisibilityStore.setVisibility(
-                "database", /*schemasNotPlatformSurfaceable=*/ Set.of("schema1", "schema3"));
-        assertThat(mVisibilityStore.getSchemasNotPlatformSurfaceable("database"))
-                .containsExactly("schema1", "schema3");
+                "prefix",
+                /*schemasNotPlatformSurfaceable=*/ ImmutableSet.of(
+                        "prefix/schema1", "prefix/schema3"));
+        assertThat(mVisibilityStore.isSchemaPlatformSurfaceable("prefix", "prefix/schema1"))
+                .isFalse();
+        assertThat(mVisibilityStore.isSchemaPlatformSurfaceable("prefix", "prefix/schema2"))
+                .isTrue();
+        assertThat(mVisibilityStore.isSchemaPlatformSurfaceable("prefix", "prefix/schema3"))
+                .isFalse();
 
         mVisibilityStore.setVisibility(
-                "database", /*schemasNotPlatformSurfaceable=*/ Collections.emptySet());
-        assertThat(mVisibilityStore.getSchemasNotPlatformSurfaceable("database")).isEmpty();
+                "prefix", /*schemasNotPlatformSurfaceable=*/ Collections.emptySet());
+        assertThat(mVisibilityStore.isSchemaPlatformSurfaceable("prefix", "prefix/schema1"))
+                .isTrue();
+        assertThat(mVisibilityStore.isSchemaPlatformSurfaceable("prefix", "prefix/schema2"))
+                .isTrue();
+        assertThat(mVisibilityStore.isSchemaPlatformSurfaceable("prefix", "prefix/schema3"))
+                .isTrue();
+    }
+
+    @Test
+    public void testEmptyPrefix() throws Exception {
+        mVisibilityStore.setVisibility(
+                /*prefix=*/ "",
+                /*schemasNotPlatformSurfaceable=*/ ImmutableSet.of("schema1", "schema2"));
+        assertThat(mVisibilityStore.isSchemaPlatformSurfaceable(/*prefix=*/ "", "schema1"))
+                .isFalse();
+        assertThat(mVisibilityStore.isSchemaPlatformSurfaceable(/*prefix=*/ "", "schema2"))
+                .isFalse();
     }
 }

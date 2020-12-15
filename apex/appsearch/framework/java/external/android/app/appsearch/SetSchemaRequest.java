@@ -19,6 +19,7 @@ package android.app.appsearch;
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.app.appsearch.exceptions.AppSearchException;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 
 import com.android.internal.util.Preconditions;
@@ -28,6 +29,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -38,14 +40,17 @@ import java.util.Set;
 public final class SetSchemaRequest {
     private final Set<AppSearchSchema> mSchemas;
     private final Set<String> mSchemasNotPlatformSurfaceable;
+    private final Map<String, Set<PackageIdentifier>> mSchemasPackageAccessible;
     private final boolean mForceOverride;
 
     SetSchemaRequest(
             @NonNull Set<AppSearchSchema> schemas,
             @NonNull Set<String> schemasNotPlatformSurfaceable,
+            @NonNull Map<String, Set<PackageIdentifier>> schemasPackageAccessible,
             boolean forceOverride) {
         mSchemas = Preconditions.checkNotNull(schemas);
         mSchemasNotPlatformSurfaceable = Preconditions.checkNotNull(schemasNotPlatformSurfaceable);
+        mSchemasPackageAccessible = Preconditions.checkNotNull(schemasPackageAccessible);
         mForceOverride = forceOverride;
     }
 
@@ -65,6 +70,39 @@ public final class SetSchemaRequest {
         return Collections.unmodifiableSet(mSchemasNotPlatformSurfaceable);
     }
 
+    /**
+     * Returns a mapping of schema types to the set of packages that have access to that schema
+     * type. Each package is represented by a {@link PackageIdentifier}. name and byte[]
+     * certificate.
+     *
+     * <p>This method is inefficient to call repeatedly.
+     *
+     * @hide
+     */
+    @NonNull
+    public Map<String, Set<PackageIdentifier>> getSchemasPackageAccessible() {
+        Map<String, Set<PackageIdentifier>> copy = new ArrayMap<>();
+        for (String key : mSchemasPackageAccessible.keySet()) {
+            copy.put(key, new ArraySet<>(mSchemasPackageAccessible.get(key)));
+        }
+        return copy;
+    }
+
+    /**
+     * Returns a mapping of schema types to the set of packages that have access to that schema
+     * type. Each package is represented by a {@link PackageIdentifier}. name and byte[]
+     * certificate.
+     *
+     * <p>A more efficient version of {@code #getSchemasPackageAccessible}, but it returns a
+     * modifiable map. This is not meant to be unhidden and should only be used by internal classes.
+     *
+     * @hide
+     */
+    @NonNull
+    public Map<String, Set<PackageIdentifier>> getSchemasPackageAccessibleInternal() {
+        return mSchemasPackageAccessible;
+    }
+
     /** Returns whether this request will force the schema to be overridden. */
     public boolean isForceOverride() {
         return mForceOverride;
@@ -74,6 +112,8 @@ public final class SetSchemaRequest {
     public static final class Builder {
         private final Set<AppSearchSchema> mSchemas = new ArraySet<>();
         private final Set<String> mSchemasNotPlatformSurfaceable = new ArraySet<>();
+        private final Map<String, Set<PackageIdentifier>> mSchemasPackageAccessible =
+                new ArrayMap<>();
         private boolean mForceOverride = false;
         private boolean mBuilt = false;
 
@@ -102,32 +142,62 @@ public final class SetSchemaRequest {
         }
 
         /**
-         * Sets visibility on system UI surfaces for schema types.
+         * Sets visibility on system UI surfaces for the given {@code schemaType}.
          *
+         * @param schemaType The schema type to set visibility on.
+         * @param visible Whether the {@code schemaType} will be visible or not.
          * @hide
          */
         @NonNull
         public Builder setSchemaTypeVisibilityForSystemUi(
-                boolean visible, @NonNull String... schemaTypes) {
-            Preconditions.checkNotNull(schemaTypes);
-            return this.setSchemaTypeVisibilityForSystemUi(visible, Arrays.asList(schemaTypes));
+                @NonNull String schemaType, boolean visible) {
+            Preconditions.checkNotNull(schemaType);
+            Preconditions.checkState(!mBuilt, "Builder has already been used");
+
+            if (visible) {
+                mSchemasNotPlatformSurfaceable.remove(schemaType);
+            } else {
+                mSchemasNotPlatformSurfaceable.add(schemaType);
+            }
+            return this;
         }
 
         /**
-         * Sets visibility on system UI surfaces for schema types.
+         * Sets visibility for a package for the given {@code schemaType}.
          *
+         * @param schemaType The schema type to set visibility on.
+         * @param visible Whether the {@code schemaType} will be visible or not.
+         * @param packageIdentifier Represents the package that will be granted visibility.
          * @hide
          */
         @NonNull
-        public Builder setSchemaTypeVisibilityForSystemUi(
-                boolean visible, @NonNull Collection<String> schemaTypes) {
+        public Builder setSchemaTypeVisibilityForPackage(
+                @NonNull String schemaType,
+                boolean visible,
+                @NonNull PackageIdentifier packageIdentifier) {
+            Preconditions.checkNotNull(schemaType);
+            Preconditions.checkNotNull(packageIdentifier);
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Preconditions.checkNotNull(schemaTypes);
+
+            Set<PackageIdentifier> packageIdentifiers = mSchemasPackageAccessible.get(schemaType);
             if (visible) {
-                mSchemasNotPlatformSurfaceable.removeAll(schemaTypes);
+                if (packageIdentifiers == null) {
+                    packageIdentifiers = new ArraySet<>();
+                }
+                packageIdentifiers.add(packageIdentifier);
+                mSchemasPackageAccessible.put(schemaType, packageIdentifiers);
             } else {
-                mSchemasNotPlatformSurfaceable.addAll(schemaTypes);
+                if (packageIdentifiers == null) {
+                    // Return early since there was nothing set to begin with.
+                    return this;
+                }
+                packageIdentifiers.remove(packageIdentifier);
+                if (packageIdentifiers.isEmpty()) {
+                    // Remove the entire key so that we don't have empty sets as values.
+                    mSchemasPackageAccessible.remove(schemaType);
+                }
             }
+
             return this;
         }
 
@@ -159,21 +229,24 @@ public final class SetSchemaRequest {
 
             // Verify that any schema types with visibility settings refer to a real schema.
             // Create a copy because we're going to remove from the set for verification purposes.
-            Set<String> schemasNotPlatformSurfaceableCopy =
-                    new ArraySet<>(mSchemasNotPlatformSurfaceable);
+            Set<String> referencedSchemas = new ArraySet<>(mSchemasNotPlatformSurfaceable);
+            referencedSchemas.addAll(mSchemasPackageAccessible.keySet());
+
             for (AppSearchSchema schema : mSchemas) {
-                schemasNotPlatformSurfaceableCopy.remove(schema.getSchemaType());
+                referencedSchemas.remove(schema.getSchemaType());
             }
-            if (!schemasNotPlatformSurfaceableCopy.isEmpty()) {
+            if (!referencedSchemas.isEmpty()) {
                 // We still have schema types that weren't seen in our mSchemas set. This means
                 // there wasn't a corresponding AppSearchSchema.
                 throw new IllegalArgumentException(
-                        "Schema types "
-                                + schemasNotPlatformSurfaceableCopy
-                                + " referenced, but were not added.");
+                        "Schema types " + referencedSchemas + " referenced, but were not added.");
             }
 
-            return new SetSchemaRequest(mSchemas, mSchemasNotPlatformSurfaceable, mForceOverride);
+            return new SetSchemaRequest(
+                    mSchemas,
+                    mSchemasNotPlatformSurfaceable,
+                    mSchemasPackageAccessible,
+                    mForceOverride);
         }
     }
 }

@@ -16,13 +16,15 @@
 
 package android.app.appsearch;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 /**
  * The callback interface to return {@link AppSearchBatchResult}.
  *
  * @param <KeyType> The type of the keys for {@link AppSearchBatchResult#getSuccesses} and
  * {@link AppSearchBatchResult#getFailures}.
  * @param <ValueType> The type of result objects associated with the keys.
- * @hide
  */
 public interface BatchResultCallback<KeyType, ValueType> {
 
@@ -31,15 +33,14 @@ public interface BatchResultCallback<KeyType, ValueType> {
      *
      * @param result The result of the executed request.
      */
-    void onResult(AppSearchBatchResult<KeyType, ValueType> result);
-
+    void onResult(@NonNull AppSearchBatchResult<KeyType, ValueType> result);
 
     /**
      * Called when a system error occurred.
      *
      * @param throwable The cause throwable.
      */
-    default void onSystemError(Throwable throwable) {
+    default void onSystemError(@Nullable Throwable throwable) {
         if (throwable != null) {
             throw new RuntimeException(throwable);
         }
