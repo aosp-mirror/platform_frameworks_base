@@ -4702,6 +4702,26 @@
     <permission android:name="android.permission.BIND_INTENT_FILTER_VERIFIER"
         android:protectionLevel="signature" />
 
+    <!-- @SystemApi @hide Domain verification agent package needs to have this permission before the
+         system will trust it to verify domains.
+
+         TODO(159952358): STOPSHIP: This must be updated to the new "internal" protectionLevel
+    -->
+    <permission android:name="android.permission.DOMAIN_VERIFICATION_AGENT"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- @SystemApi @hide Must be required by the domain verification agent's intent
+         BroadcastReceiver, to ensure that only the system can interact with it.
+    -->
+    <permission android:name="android.permission.BIND_DOMAIN_VERIFICATION_AGENT"
+        android:protectionLevel="signature" />
+
+    <!-- @SystemApi @hide Allows an app like Settings to update the user's grants to what domains
+         an app is allowed to automatically open.
+    -->
+    <permission android:name="android.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION"
+        android:protectionLevel="signature" />
+
     <!-- @SystemApi Allows applications to access serial ports via the SerialManager.
          @hide -->
     <permission android:name="android.permission.SERIAL_PORT"
