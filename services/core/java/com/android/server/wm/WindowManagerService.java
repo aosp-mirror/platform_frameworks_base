@@ -1040,7 +1040,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private WindowContentFrameStats mTempWindowRenderStats;
 
-    private final LatencyTracker mLatencyTracker;
+    final LatencyTracker mLatencyTracker;
 
     /**
      * Whether the UI is currently running in touch mode (not showing
@@ -1124,18 +1124,16 @@ public class WindowManagerService extends IWindowManager.Stub
             // While running a recents animation, this will get called early because we show the
             // recents animation target activity immediately when the animation starts. Defer the
             // mLaunchTaskBehind updates until recents animation finishes.
-            final boolean isRecentsAnimationTarget = getRecentsAnimationController() != null
-                    && getRecentsAnimationController().isTargetApp(atoken);
-            if (atoken.mLaunchTaskBehind && !isRecentsAnimationTarget) {
+            if (atoken.mLaunchTaskBehind && !isRecentsAnimationTarget(atoken)) {
                 mAtmService.mTaskSupervisor.scheduleLaunchTaskBehindComplete(atoken.token);
                 atoken.mLaunchTaskBehind = false;
             } else {
                 atoken.updateReportedVisibilityLocked();
                 // We should also defer sending the finished callback until the recents animation
                 // successfully finishes.
-                if (atoken.mEnteringAnimation && !isRecentsAnimationTarget) {
+                if (atoken.mEnteringAnimation && !isRecentsAnimationTarget(atoken)) {
                     atoken.mEnteringAnimation = false;
-                    if (atoken != null && atoken.attachedToProcess()) {
+                    if (atoken.attachedToProcess()) {
                         try {
                             atoken.app.getThread().scheduleEnterAnimationComplete(atoken.appToken);
                         } catch (RemoteException e) {
@@ -2970,6 +2968,10 @@ public class WindowManagerService extends IWindowManager.Stub
             // TODO(mult-display): currently only default display support recents animation.
             getDefaultDisplayContentLocked().mAppTransition.updateBooster();
         }
+    }
+
+    boolean isRecentsAnimationTarget(ActivityRecord r) {
+        return mRecentsAnimationController != null && mRecentsAnimationController.isTargetApp(r);
     }
 
     void setWindowOpaqueLocked(IBinder token, boolean isOpaque) {

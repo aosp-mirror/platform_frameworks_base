@@ -106,7 +106,7 @@ public class SystemUIFactory {
             // components that shouldn't be run in the test environment
             builder = prepareSysUIComponentBuilder(builder, mWMComponent)
                     .setPip(mWMComponent.getPip())
-                    .setSplitScreen(mWMComponent.getSplitScreen())
+                    .setLegacySplitScreen(mWMComponent.getLegacySplitScreen())
                     .setOneHanded(mWMComponent.getOneHanded())
                     .setBubbles(mWMComponent.getBubbles())
                     .setHideDisplayCutout(mWMComponent.getHideDisplayCutout())
@@ -117,7 +117,7 @@ public class SystemUIFactory {
             // is separating this logic into newly creating SystemUITestsFactory.
             builder = prepareSysUIComponentBuilder(builder, mWMComponent)
                     .setPip(Optional.ofNullable(null))
-                    .setSplitScreen(Optional.ofNullable(null))
+                    .setLegacySplitScreen(Optional.ofNullable(null))
                     .setOneHanded(Optional.ofNullable(null))
                     .setBubbles(Optional.ofNullable(null))
                     .setHideDisplayCutout(Optional.ofNullable(null))

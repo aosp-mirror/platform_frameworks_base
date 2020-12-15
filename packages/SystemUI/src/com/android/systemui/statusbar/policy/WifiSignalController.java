@@ -28,6 +28,9 @@ import android.net.wifi.WifiManager;
 import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.settingslib.AccessibilityContentDescriptions;
+import com.android.settingslib.SignalIcon.IconGroup;
+import com.android.settingslib.SignalIcon.State;
 import com.android.settingslib.wifi.WifiStatusTracker;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
@@ -36,7 +39,7 @@ import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 import java.util.Objects;
 
 public class WifiSignalController extends
-        SignalController<WifiSignalController.WifiState, SignalController.IconGroup> {
+        SignalController<WifiSignalController.WifiState, IconGroup> {
     private final boolean mHasMobileDataFeature;
     private final WifiStatusTracker mWifiTracker;
 
@@ -156,7 +159,7 @@ public class WifiSignalController extends
         }
     }
 
-    static class WifiState extends SignalController.State {
+    static class WifiState extends State {
         String ssid;
         boolean isTransient;
         boolean isDefault;

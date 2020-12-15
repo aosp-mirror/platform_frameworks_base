@@ -123,14 +123,16 @@ public class SplitLayout {
         mBounds1.set(mRootBounds);
         mBounds2.set(mRootBounds);
         if (isLandscape(mRootBounds)) {
+            position += mRootBounds.left;
             mDividerBounds.left = position - mDividerInsets;
             mDividerBounds.right = mDividerBounds.left + mDividerWindowWidth;
-            mBounds1.right = mBounds1.left + position;
+            mBounds1.right = position;
             mBounds2.left = mBounds1.right + mDividerSize;
         } else {
+            position += mRootBounds.top;
             mDividerBounds.top = position - mDividerInsets;
             mDividerBounds.bottom = mDividerBounds.top + mDividerWindowWidth;
-            mBounds1.bottom = mBounds1.top + position;
+            mBounds1.bottom = position;
             mBounds2.top = mBounds1.bottom + mDividerSize;
         }
     }

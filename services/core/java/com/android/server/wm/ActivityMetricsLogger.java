@@ -631,6 +631,10 @@ class ActivityMetricsLogger {
         if (info.mLoggedTransitionStarting && info.allDrawn()) {
             done(false /* abort */, info, "notifyWindowsDrawn - all windows drawn", timestampNs);
         }
+        if (r.mWmService.isRecentsAnimationTarget(r)) {
+            r.mWmService.getRecentsAnimationController().logRecentsAnimationStartTime(
+                    info.mSourceEventDelayMs + info.mWindowsDrawnDelayMs);
+        }
         return infoSnapshot;
     }
 

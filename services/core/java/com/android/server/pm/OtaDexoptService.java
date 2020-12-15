@@ -128,12 +128,12 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         synchronized (mPackageManagerService.mLock) {
             // Important: the packages we need to run with ab-ota compiler-reason.
             important = PackageManagerServiceUtils.getPackagesForDexopt(
-                    mPackageManagerService.mSettings.mPackages.values(), mPackageManagerService,
-                    DEBUG_DEXOPT);
+                    mPackageManagerService.mSettings.getPackagesLocked().values(),
+                    mPackageManagerService, DEBUG_DEXOPT);
             // Remove Platform Package from A/B OTA b/160735835.
             important.removeIf(isPlatformPackage);
             // Others: we should optimize this with the (first-)boot compiler-reason.
-            others = new ArrayList<>(mPackageManagerService.mSettings.mPackages.values());
+            others = new ArrayList<>(mPackageManagerService.mSettings.getPackagesLocked().values());
             others.removeAll(important);
             others.removeIf(PackageManagerServiceUtils.REMOVE_IF_NULL_PKG);
             others.removeIf(isPlatformPackage);

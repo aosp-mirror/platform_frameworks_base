@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 
-<com.android.wm.shell.splitscreen.DividerView
+<com.android.wm.shell.legacysplitscreen.DividerView
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_height="match_parent"
         android:layout_width="match_parent">
@@ -24,15 +24,15 @@
         android:id="@+id/docked_divider_background"
         android:background="@color/docked_divider_background"/>
 
-    <com.android.wm.shell.splitscreen.MinimizedDockShadow
+    <com.android.wm.shell.legacysplitscreen.MinimizedDockShadow
         style="@style/DockedDividerMinimizedShadow"
         android:id="@+id/minimized_dock_shadow"
         android:alpha="0"/>">
 
-    <com.android.wm.shell.splitscreen.DividerHandleView
+    <com.android.wm.shell.legacysplitscreen.DividerHandleView
         style="@style/DockedDividerHandle"
         android:id="@+id/docked_divider_handle"
         android:contentDescription="@string/accessibility_divider"
         android:background="@null"/>
 
-</com.android.wm.shell.splitscreen.DividerView>
+</com.android.wm.shell.legacysplitscreen.DividerView>

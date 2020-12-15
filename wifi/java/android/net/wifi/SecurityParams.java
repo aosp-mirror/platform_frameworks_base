@@ -16,6 +16,7 @@
 
 package android.net.wifi;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.net.wifi.WifiConfiguration.AuthAlgorithm;
 import android.net.wifi.WifiConfiguration.GroupCipher;
@@ -27,6 +28,8 @@ import android.net.wifi.WifiConfiguration.SecurityType;
 import android.net.wifi.WifiConfiguration.SuiteBCipher;
 import android.os.Parcel;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.BitSet;
 import java.util.Objects;
 
@@ -36,6 +39,23 @@ import java.util.Objects;
  */
 public class SecurityParams {
     private static final String TAG = "SecurityParams";
+
+    /** Passpoint Release 1 */
+    public static final int PASSPOINT_R1 = 1;
+
+    /** Passpoint Release 2 */
+    public static final int PASSPOINT_R2 = 2;
+
+    /** Passpoint Release 3 */
+    public static final int PASSPOINT_R3 = 3;
+
+    @IntDef(prefix = { "PASSPOINT_" }, value = {
+        PASSPOINT_R1,
+        PASSPOINT_R2,
+        PASSPOINT_R3,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PasspointRelease {}
 
     private @SecurityType int mSecurityType = WifiConfiguration.SECURITY_TYPE_PSK;
 
@@ -98,6 +118,8 @@ public class SecurityParams {
      * True if the network requires Protected Management Frames (PMF), false otherwise.
      */
     private boolean mRequirePmf = false;
+
+    private @PasspointRelease int mPasspointRelease = PASSPOINT_R2;
 
     /** Indicate that this SAE security type only accepts H2E (Hash-to-Element) mode. */
     private boolean mIsSaeH2eOnlyMode = false;
@@ -562,11 +584,22 @@ public class SecurityParams {
     }
 
     /**
-     * Create EAP security params for Passpoint.
+     * Create Passpoint security params.
      */
-    public static @NonNull SecurityParams createPasspointParams(boolean requirePmf) {
+    public static @NonNull SecurityParams createPasspointParams(@PasspointRelease int release) {
         SecurityParams params = new SecurityParams();
-        params.mSecurityType = WifiConfiguration.SECURITY_TYPE_EAP;
+        switch (release) {
+            case PASSPOINT_R1:
+            case PASSPOINT_R2:
+                params.mSecurityType = WifiConfiguration.SECURITY_TYPE_PASSPOINT_R1_R2;
+                break;
+            case PASSPOINT_R3:
+                params.mSecurityType = WifiConfiguration.SECURITY_TYPE_PASSPOINT_R3;
+                params.mRequirePmf = true;
+                break;
+            default:
+                throw new IllegalArgumentException("invalid passpoint release " + release);
+        }
 
         params.mAllowedKeyManagement.set(KeyMgmt.WPA_EAP);
         params.mAllowedKeyManagement.set(KeyMgmt.IEEE8021X);
@@ -574,12 +607,9 @@ public class SecurityParams {
         params.mAllowedProtocols.set(Protocol.RSN);
 
         params.mAllowedPairwiseCiphers.set(PairwiseCipher.CCMP);
-        params.mAllowedPairwiseCiphers.set(PairwiseCipher.TKIP);
 
         params.mAllowedGroupCiphers.set(GroupCipher.CCMP);
-        params.mAllowedGroupCiphers.set(GroupCipher.TKIP);
 
-        params.mRequirePmf = requirePmf;
         return params;
     }
 

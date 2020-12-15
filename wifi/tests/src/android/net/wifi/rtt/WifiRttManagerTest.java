@@ -16,6 +16,8 @@
 
 package android.net.wifi.rtt;
 
+import static junit.framework.Assert.fail;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -143,6 +145,7 @@ public class WifiRttManagerTest {
         PeerHandle peerHandle1 = new PeerHandle(12);
 
         RangingRequest.Builder builder = new RangingRequest.Builder();
+        builder.setRttBurstSize(4);
         builder.addAccessPoint(scanResult1);
         builder.addAccessPoints(scanResults2and3);
         builder.addWifiAwarePeer(mac1);
@@ -163,6 +166,60 @@ public class WifiRttManagerTest {
     }
 
     /**
+     * Validate the rtt burst size is set correctly when in range.
+     */
+    @Test
+    public void testRangingRequestSetBurstSize() {
+        ScanResult scanResult = new ScanResult();
+        scanResult.BSSID = "AA:BB:CC:DD:EE:FF";
+
+        // create request
+        RangingRequest.Builder builder = new RangingRequest.Builder();
+        builder.setRttBurstSize(4);
+        builder.addAccessPoint(scanResult);
+        RangingRequest request = builder.build();
+
+        // confirm rtt burst size is set correctly to default value
+        assertEquals(request.getRttBurstSize(), 4);
+    }
+
+    /**
+     * Validate the rtt burst size cannot be smaller than the minimum.
+     */
+    @Test
+    public void testRangingRequestMinBurstSizeIsEnforced() {
+        ScanResult scanResult = new ScanResult();
+        scanResult.BSSID = "AA:BB:CC:DD:EE:FF";
+
+        // create request
+        try {
+            RangingRequest.Builder builder = new RangingRequest.Builder();
+            builder.setRttBurstSize(RangingRequest.getMinRttBurstSize() - 1);
+            fail("RTT burst size was smaller than min value.");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+    }
+
+    /**
+     * Validate the rtt burst size cannot exceed the maximum.
+     */
+    @Test
+    public void testRangingRequestMaxBurstSizeIsEnforced() {
+        ScanResult scanResult = new ScanResult();
+        scanResult.BSSID = "AA:BB:CC:DD:EE:FF";
+
+        // create request
+        try {
+            RangingRequest.Builder builder = new RangingRequest.Builder();
+            builder.setRttBurstSize(RangingRequest.getMaxRttBurstSize() + 1);
+            fail("RTT Burst size exceeded max value.");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+    }
+
+    /**
      * Validate that can request as many range operation as the upper limit on number of requests.
      */
     @Test
@@ -175,7 +232,7 @@ public class WifiRttManagerTest {
         }
         MacAddress mac1 = MacAddress.fromString("00:01:02:03:04:05");
 
-        // create request
+        // create request using max RTT Peers
         RangingRequest.Builder builder = new RangingRequest.Builder();
         builder.addAccessPoint(scanResult);
         builder.addAccessPoints(scanResultList);
@@ -185,6 +242,18 @@ public class WifiRttManagerTest {
 
         // verify request
         request.enforceValidity(true);
+        // confirm rtt burst size is set correctly to default value
+        assertEquals(request.getRttBurstSize(), RangingRequest.getDefaultRttBurstSize());
+        // confirm the number of peers in the request is the max number of peers
+        List<ResponderConfig> rttPeers = request.getRttPeers();
+        int numRttPeers = rttPeers.size();
+        assertEquals(RangingRequest.getMaxPeers(), numRttPeers);
+        // confirm each peer has the correct mac address
+        for (int i = 0; i < numRttPeers - 1; ++i) {
+            assertEquals("AA:BB:CC:DD:EE:FF", rttPeers.get(i).macAddress.toString().toUpperCase());
+        }
+        assertEquals("00:01:02:03:04:05",
+                rttPeers.get(numRttPeers - 1).macAddress.toString().toUpperCase());
     }
 
     /**

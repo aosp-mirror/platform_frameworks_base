@@ -95,7 +95,7 @@ import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedEvents;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
-import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -130,7 +130,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private final Context mContext;
     private final Optional<Pip> mPipOptional;
     private final Optional<Lazy<StatusBar>> mStatusBarOptionalLazy;
-    private final Optional<SplitScreen> mSplitScreenOptional;
+    private final Optional<LegacySplitScreen> mSplitScreenOptional;
     private SysUiState mSysUiState;
     private final Handler mHandler;
     private final Lazy<NavigationBarController> mNavBarControllerLazy;
@@ -636,7 +636,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             NavigationModeController navModeController,
             NotificationShadeWindowController statusBarWinController, SysUiState sysUiState,
             Optional<Pip> pipOptional,
-            Optional<SplitScreen> splitScreenOptional,
+            Optional<LegacySplitScreen> splitScreenOptional,
             Optional<Lazy<StatusBar>> statusBarOptionalLazy,
             Optional<OneHanded> oneHandedOptional,
             BroadcastDispatcher broadcastDispatcher) {

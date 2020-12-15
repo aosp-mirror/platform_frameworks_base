@@ -23,7 +23,6 @@ import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.os.UidBatteryConsumer;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.SparseArray;
@@ -110,19 +109,18 @@ public class BatteryUsageStatsProvider {
         // TODO(b/174186358): read extra power component number from configuration
         final int customPowerComponentCount = 0;
         final int customTimeComponentCount = 0;
-        final BatteryUsageStats.Builder batteryUsageStatsBuilder = new BatteryUsageStats.Builder()
-                .setDischargePercentage(batteryStatsHelper.getStats().getDischargeAmount(0))
-                .setConsumedPower(batteryStatsHelper.getTotalPower());
+        final BatteryUsageStats.Builder batteryUsageStatsBuilder =
+                new BatteryUsageStats.Builder(customPowerComponentCount, customTimeComponentCount)
+                        .setDischargePercentage(batteryStatsHelper.getStats().getDischargeAmount(0))
+                        .setConsumedPower(batteryStatsHelper.getTotalPower());
 
         final List<BatterySipper> usageList = batteryStatsHelper.getUsageList();
         for (int i = 0; i < usageList.size(); i++) {
             final BatterySipper sipper = usageList.get(i);
             if (sipper.drainType == BatterySipper.DrainType.APP) {
-                batteryUsageStatsBuilder.addUidBatteryConsumerBuilder(
-                        new UidBatteryConsumer.Builder(customPowerComponentCount,
-                                customTimeComponentCount, sipper.uidObj)
-                                .setPackageWithHighestDrain(sipper.packageWithHighestDrain)
-                                .setConsumedPower(sipper.sumPower()));
+                batteryUsageStatsBuilder.getOrCreateUidBatteryConsumerBuilder(sipper.uidObj)
+                        .setPackageWithHighestDrain(sipper.packageWithHighestDrain)
+                        .setConsumedPower(sipper.sumPower());
             }
         }
 

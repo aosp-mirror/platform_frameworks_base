@@ -61,8 +61,8 @@ import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.draganddrop.DragAndDropPolicy.Target;
-import com.android.wm.shell.splitscreen.DividerView;
-import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.legacysplitscreen.DividerView;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -90,7 +90,7 @@ public class DragAndDropPolicyTest {
     private ActivityTaskManager mActivityTaskManager;
 
     @Mock
-    private SplitScreen mSplitScreen;
+    private LegacySplitScreen mLegacySplitScreen;
 
     @Mock
     private DragAndDropPolicy.Starter mStarter;
@@ -123,7 +123,7 @@ public class DragAndDropPolicyTest {
         mInsets = Insets.of(0, 0, 0, 0);
 
         DividerView divider = mock(DividerView.class);
-        doReturn(divider).when(mSplitScreen).getDividerView();
+        doReturn(divider).when(mLegacySplitScreen).getDividerView();
         doReturn(new Rect(50, 0, 100, 100)).when(divider)
                 .getNonMinimizedSplitScreenSecondaryBounds();
 
@@ -131,9 +131,10 @@ public class DragAndDropPolicyTest {
             Consumer<Boolean> callback = invocation.getArgument(0);
             callback.accept(true);
             return null;
-        }).when(mSplitScreen).registerInSplitScreenListener(any());
+        }).when(mLegacySplitScreen).registerInSplitScreenListener(any());
 
-        mPolicy = new DragAndDropPolicy(mContext, mActivityTaskManager, mSplitScreen, mStarter);
+        mPolicy = new DragAndDropPolicy(
+                mContext, mActivityTaskManager, mLegacySplitScreen, mStarter);
         mActivityClipData = createClipData(MIMETYPE_APPLICATION_ACTIVITY);
         mNonResizeableActivityClipData = createClipData(MIMETYPE_APPLICATION_ACTIVITY);
         setClipDataResizeable(mNonResizeableActivityClipData, false);
@@ -207,7 +208,7 @@ public class DragAndDropPolicyTest {
     }
 
     private void setInSplitScreen(boolean inSplitscreen) {
-        doReturn(inSplitscreen).when(mSplitScreen).isDividerVisible();
+        doReturn(inSplitscreen).when(mLegacySplitScreen).isDividerVisible();
     }
 
     @Test

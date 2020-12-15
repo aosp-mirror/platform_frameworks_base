@@ -188,6 +188,7 @@ import android.net.RouteInfo;
 import android.net.RouteInfoParcel;
 import android.net.SocketKeepalive;
 import android.net.UidRange;
+import android.net.UidRangeParcel;
 import android.net.Uri;
 import android.net.VpnManager;
 import android.net.metrics.IpConnectivityLog;
@@ -1055,7 +1056,7 @@ public class ConnectivityServiceTest {
 
         public MockVpn(int userId) {
             super(startHandlerThreadAndReturnLooper(), mServiceContext, mNetworkManagementService,
-                    userId, mock(KeyStore.class));
+                    mMockNetd, userId, mock(KeyStore.class));
             mConfig = new VpnConfig();
         }
 
@@ -1094,10 +1095,11 @@ public class ConnectivityServiceTest {
             mMockNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_VPN, lp,
                     mNetworkCapabilities);
             mMockNetworkAgent.waitForIdle(TIMEOUT_MS);
-            verify(mNetworkManagementService, times(1))
-                    .addVpnUidRanges(eq(mMockVpn.getNetId()), eq(uids.toArray(new UidRange[0])));
-            verify(mNetworkManagementService, never())
-                    .removeVpnUidRanges(eq(mMockVpn.getNetId()), any());
+
+            verify(mMockNetd, times(1)).networkAddUidRanges(eq(mMockVpn.getNetId()),
+                    eq(toUidRangeStableParcels(uids)));
+            verify(mMockNetd, never())
+                    .networkRemoveUidRanges(eq(mMockVpn.getNetId()), any());
             mAgentRegistered = true;
             mNetworkCapabilities.set(mMockNetworkAgent.getNetworkCapabilities());
             mNetworkAgent = mMockNetworkAgent.getNetworkAgent();
@@ -1167,6 +1169,11 @@ public class ConnectivityServiceTest {
         private synchronized void setVpnInfo(VpnInfo vpnInfo) {
             mVpnInfo = vpnInfo;
         }
+    }
+
+    private UidRangeParcel[] toUidRangeStableParcels(final @NonNull Set<UidRange> ranges) {
+        return ranges.stream().map(
+                r -> new UidRangeParcel(r.start, r.stop)).toArray(UidRangeParcel[]::new);
     }
 
     private void mockVpn(int uid) {
@@ -4947,8 +4954,8 @@ public class ConnectivityServiceTest {
         expectForceUpdateIfaces(onlyCell, MOBILE_IFNAME);
         reset(mStatsService);
 
-        // Captive portal change shouldn't update ifaces
-        mCellNetworkAgent.addCapability(NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL);
+        // Temp metered change shouldn't update ifaces
+        mCellNetworkAgent.addCapability(NetworkCapabilities.NET_CAPABILITY_TEMPORARILY_NOT_METERED);
         waitForIdle();
         verify(mStatsService, never())
                 .forceUpdateIfaces(eq(onlyCell), any(NetworkState[].class), eq(MOBILE_IFNAME),
@@ -5464,6 +5471,7 @@ public class ConnectivityServiceTest {
         final Network wifi = mWiFiNetworkAgent.getNetwork();
 
         final NetworkCapabilities initialCaps = new NetworkCapabilities();
+        initialCaps.addTransportType(TRANSPORT_VPN);
         initialCaps.addCapability(NET_CAPABILITY_INTERNET);
         initialCaps.removeCapability(NET_CAPABILITY_NOT_VPN);
 
@@ -5495,44 +5503,45 @@ public class ConnectivityServiceTest {
         withWifiAndMobileUnderlying.setLinkDownstreamBandwidthKbps(10);
         withWifiAndMobileUnderlying.setLinkUpstreamBandwidthKbps(20);
 
+        final NetworkCapabilities initialCapsNotMetered = new NetworkCapabilities(initialCaps);
+        initialCapsNotMetered.addCapability(NET_CAPABILITY_NOT_METERED);
+
         NetworkCapabilities caps = new NetworkCapabilities(initialCaps);
-        final boolean notDeclaredMetered = false;
-        mService.applyUnderlyingCapabilities(new Network[]{}, caps, notDeclaredMetered);
+        mService.applyUnderlyingCapabilities(new Network[]{}, initialCapsNotMetered, caps);
         assertEquals(withNoUnderlying, caps);
 
         caps = new NetworkCapabilities(initialCaps);
-        mService.applyUnderlyingCapabilities(new Network[]{null}, caps, notDeclaredMetered);
+        mService.applyUnderlyingCapabilities(new Network[]{null}, initialCapsNotMetered, caps);
         assertEquals(withNoUnderlying, caps);
 
         caps = new NetworkCapabilities(initialCaps);
-        mService.applyUnderlyingCapabilities(new Network[]{mobile}, caps, notDeclaredMetered);
+        mService.applyUnderlyingCapabilities(new Network[]{mobile}, initialCapsNotMetered, caps);
         assertEquals(withMobileUnderlying, caps);
 
-        mService.applyUnderlyingCapabilities(new Network[]{wifi}, caps, notDeclaredMetered);
+        mService.applyUnderlyingCapabilities(new Network[]{wifi}, initialCapsNotMetered, caps);
         assertEquals(withWifiUnderlying, caps);
 
-        final boolean isDeclaredMetered = true;
         withWifiUnderlying.removeCapability(NET_CAPABILITY_NOT_METERED);
         caps = new NetworkCapabilities(initialCaps);
-        mService.applyUnderlyingCapabilities(new Network[]{wifi}, caps, isDeclaredMetered);
+        mService.applyUnderlyingCapabilities(new Network[]{wifi}, initialCaps, caps);
         assertEquals(withWifiUnderlying, caps);
 
         caps = new NetworkCapabilities(initialCaps);
-        mService.applyUnderlyingCapabilities(new Network[]{mobile, wifi}, caps, isDeclaredMetered);
+        mService.applyUnderlyingCapabilities(new Network[]{mobile, wifi}, initialCaps, caps);
         assertEquals(withWifiAndMobileUnderlying, caps);
 
         withWifiUnderlying.addCapability(NET_CAPABILITY_NOT_METERED);
         caps = new NetworkCapabilities(initialCaps);
         mService.applyUnderlyingCapabilities(new Network[]{null, mobile, null, wifi},
-                caps, notDeclaredMetered);
+                initialCapsNotMetered, caps);
         assertEquals(withWifiAndMobileUnderlying, caps);
 
         caps = new NetworkCapabilities(initialCaps);
         mService.applyUnderlyingCapabilities(new Network[]{null, mobile, null, wifi},
-                caps, notDeclaredMetered);
+                initialCapsNotMetered, caps);
         assertEquals(withWifiAndMobileUnderlying, caps);
 
-        mService.applyUnderlyingCapabilities(null, caps, notDeclaredMetered);
+        mService.applyUnderlyingCapabilities(null, initialCapsNotMetered, caps);
         assertEquals(withWifiUnderlying, caps);
     }
 

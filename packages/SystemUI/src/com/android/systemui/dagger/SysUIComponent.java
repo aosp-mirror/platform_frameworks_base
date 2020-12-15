@@ -30,7 +30,7 @@ import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
-import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import java.util.Optional;
 
@@ -59,7 +59,7 @@ public interface SysUIComponent {
         Builder setPip(Optional<Pip> p);
 
         @BindsInstance
-        Builder setSplitScreen(Optional<SplitScreen> s);
+        Builder setLegacySplitScreen(Optional<LegacySplitScreen> s);
 
         @BindsInstance
         Builder setAppPairs(Optional<AppPairs> s);

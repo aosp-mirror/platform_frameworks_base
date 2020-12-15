@@ -21,7 +21,6 @@ import android.app.PendingIntent;
 import android.app.people.ConversationChannel;
 import android.app.people.IPeopleManager;
 import android.app.people.PeopleSpaceTile;
-import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
@@ -120,8 +119,7 @@ public class PeopleSpaceUtils {
                         e -> e.getValue().getId().equals(shortcutId)).findFirst();
                 if (!entry.isPresent() || shortcutId == null) {
                     if (DEBUG) Log.d(TAG, "Matching conversation not found for shortcut ID");
-                    AppWidgetHost host = new AppWidgetHost(context, 0);
-                    host.deleteAppWidgetId(appWidgetId);
+                    //TODO: Delete app widget id when crash is fixed (b/175486868)
                     continue;
                 }
                 PeopleSpaceTile tile = entry.get().getValue();

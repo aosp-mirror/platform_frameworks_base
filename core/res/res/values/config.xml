@@ -654,10 +654,9 @@
          The default is false. -->
     <bool name="config_lidControlsSleep">false</bool>
 
-    <!-- Indicate whether closing the lid causes the device to enter the folded state which means
-         to get a smaller screen and opening the lid causes the device to enter the unfolded state
-         which means to get a larger screen. -->
-    <bool name="config_lidControlsDisplayFold">false</bool>
+    <!-- The device state (supplied by DeviceStateManager) that should be treated as folded by the
+         display fold controller. Default is DeviceStateManager.INVALID_DEVICE_STATE. -->
+    <integer name="config_foldedDeviceState">-1</integer>
 
     <!-- Indicate the display area rect for foldable devices in folded state. -->
     <string name="config_foldedArea"></string>

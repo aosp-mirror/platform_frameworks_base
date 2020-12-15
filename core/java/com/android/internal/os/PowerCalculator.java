@@ -76,10 +76,10 @@ public abstract class PowerCalculator {
      */
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
-        final List<UidBatteryConsumer.Builder> uidBatteryConsumerBuilders =
+        final SparseArray<UidBatteryConsumer.Builder> uidBatteryConsumerBuilders =
                 builder.getUidBatteryConsumerBuilders();
         for (int i = uidBatteryConsumerBuilders.size() - 1; i >= 0; i--) {
-            final UidBatteryConsumer.Builder app = uidBatteryConsumerBuilders.get(i);
+            final UidBatteryConsumer.Builder app = uidBatteryConsumerBuilders.valueAt(i);
             calculateApp(app, app.getBatteryStatsUid(), rawRealtimeUs, rawUptimeUs, statsType);
         }
     }

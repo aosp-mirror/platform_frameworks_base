@@ -1220,7 +1220,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * your UI, which will eventually culminate in {@link #onShow}.  This is similar to calling
      * {@link VoiceInteractionService#showSession VoiceInteractionService.showSession}.
      * @param args Arbitrary arguments that will be propagated {@link #onShow}.
-     * @param flags Indicates additional optional behavior that should be performed.  May
+     * @param flags Indicates additional optional behavior that should be performed. May
      * be any combination of
      * {@link VoiceInteractionSession#SHOW_WITH_ASSIST VoiceInteractionSession.SHOW_WITH_ASSIST} and
      * {@link VoiceInteractionSession#SHOW_WITH_SCREENSHOT
@@ -1583,6 +1583,11 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      *
      * @param args The arguments that were supplied to
      * {@link VoiceInteractionService#showSession VoiceInteractionService.showSession}.
+     * Some example keys include : "invocation_type", "invocation_phone_state",
+     * "invocation_time_ms", Intent.EXTRA_TIME ("android.intent.extra.TIME") indicating timing
+     * in milliseconds of the KeyEvent that triggered Assistant and
+     * Intent.EXTRA_ASSIST_INPUT_DEVICE_ID (android.intent.extra.ASSIST_INPUT_DEVICE_ID)
+     *  referring to the device that sent the request.
      * @param showFlags The show flags originally provided to
      * {@link VoiceInteractionService#showSession VoiceInteractionService.showSession}.
      */

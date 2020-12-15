@@ -20,20 +20,19 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.server.wm.utils.CommonUtils.runWithShellPermissionIdentity;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.ActivityView;
-import android.app.IActivityManager;
 import android.app.ITaskStackListener;
-import android.app.Instrumentation;
 import android.app.Instrumentation.ActivityMonitor;
 import android.app.TaskStackListener;
 import android.content.ComponentName;
@@ -44,7 +43,6 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.uiautomator.UiDevice;
 import android.text.TextUtils;
 import android.view.Display;
 import android.view.ViewGroup;
@@ -52,10 +50,7 @@ import android.view.ViewGroup;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 
-import com.android.compatibility.common.util.SystemUtil;
-
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -70,16 +65,10 @@ import java.util.function.Predicate;
 @MediumTest
 public class TaskStackChangedListenerTest {
 
-    private IActivityManager mService;
     private ITaskStackListener mTaskStackListener;
 
     private static final int WAIT_TIMEOUT_MS = 5000;
     private static final Object sLock = new Object();
-
-    @Before
-    public void setUp() throws Exception {
-        mService = ActivityManager.getService();
-    }
 
     @After
     public void tearDown() throws Exception {
@@ -374,7 +363,7 @@ public class TaskStackChangedListenerTest {
         final ActivityMonitor monitor = new ActivityMonitor(activityClass.getName(), null, false);
         getInstrumentation().addMonitor(monitor);
         final Context context = getInstrumentation().getContext();
-        SystemUtil.runWithShellPermissionIdentity(() -> context.startActivity(
+        runWithShellPermissionIdentity(() -> context.startActivity(
                 new Intent(context, activityClass).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                 options.toBundle()));
         final TestActivity activity =

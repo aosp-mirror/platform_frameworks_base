@@ -1436,9 +1436,7 @@ public final class FileUtils {
     public static FileDescriptor convertToModernFd(FileDescriptor fd) {
         try {
             Context context = AppGlobals.getInitialApplication();
-            // TODO(b/169327180): Consider device config.
-            if (!SystemProperties.getBoolean("persist.sys.fuse.transcode_enabled", false)
-                    || !SystemProperties.getBoolean("persist.sys.fuse.transcode_optimize", true)
+            if (!SystemProperties.getBoolean("sys.fuse.transcode_enabled", false)
                     || UserHandle.getAppId(Process.myUid()) == getMediaProviderAppId(context)) {
                 // If transcode is enabled we optimize by default, unless explicitly disabled.
                 // Never convert modern fd for MediaProvider, because this requires

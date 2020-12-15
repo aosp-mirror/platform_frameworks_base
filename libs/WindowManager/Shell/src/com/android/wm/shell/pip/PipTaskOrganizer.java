@@ -66,7 +66,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.pip.phone.PipUpdateThread;
-import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -142,7 +142,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private final int mEnterExitAnimationDuration;
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
     private final Map<IBinder, Configuration> mInitialState = new HashMap<>();
-    private final Optional<SplitScreen> mSplitScreenOptional;
+    private final Optional<LegacySplitScreen> mSplitScreenOptional;
     protected final ShellTaskOrganizer mTaskOrganizer;
 
     // These callbacks are called on the update thread
@@ -265,7 +265,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             @NonNull PipBoundsAlgorithm boundsHandler,
             @NonNull PipMenuController pipMenuController,
             @NonNull PipSurfaceTransactionHelper surfaceTransactionHelper,
-            Optional<SplitScreen> splitScreenOptional,
+            Optional<LegacySplitScreen> splitScreenOptional,
             @NonNull DisplayController displayController,
             @NonNull PipUiEventLogger pipUiEventLogger,
             @NonNull ShellTaskOrganizer shellTaskOrganizer) {
@@ -1118,7 +1118,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     }
 
     /**
-     * Sync with {@link SplitScreen} on destination bounds if PiP is going to split screen.
+     * Sync with {@link LegacySplitScreen} on destination bounds if PiP is going to split screen.
      *
      * @param destinationBoundsOut contain the updated destination bounds if applicable
      * @return {@code true} if destinationBounds is altered for split screen
@@ -1128,15 +1128,15 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             return false;
         }
 
-        SplitScreen splitScreen = mSplitScreenOptional.get();
-        if (!splitScreen.isDividerVisible()) {
+        LegacySplitScreen legacySplitScreen = mSplitScreenOptional.get();
+        if (!legacySplitScreen.isDividerVisible()) {
             // fail early if system is not in split screen mode
             return false;
         }
 
         // PiP window will go to split-secondary mode instead of fullscreen, populates the
         // split screen bounds here.
-        destinationBoundsOut.set(splitScreen.getDividerView()
+        destinationBoundsOut.set(legacySplitScreen.getDividerView()
                 .getNonMinimizedSplitScreenSecondaryBounds());
         return true;
     }

@@ -116,9 +116,11 @@ public class QSCarrier extends LinearLayout {
         return TextUtils.equals(typeContentDescription,
                 mContext.getString(R.string.data_connection_no_internet))
                 || TextUtils.equals(typeContentDescription,
-                mContext.getString(R.string.cell_data_off_content_description))
+                mContext.getString(
+                        com.android.settingslib.R.string.cell_data_off_content_description))
                 || TextUtils.equals(typeContentDescription,
-                mContext.getString(R.string.not_default_data_content_description));
+                mContext.getString(
+                        com.android.settingslib.R.string.not_default_data_content_description));
     }
 
     public void setCarrierText(CharSequence text) {

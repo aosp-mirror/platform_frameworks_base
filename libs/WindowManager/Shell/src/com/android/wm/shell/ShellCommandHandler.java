@@ -21,7 +21,7 @@ import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
-import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import java.io.PrintWriter;
 import java.util.Optional;
@@ -33,7 +33,7 @@ import java.util.Optional;
  */
 public final class ShellCommandHandler {
 
-    private final Optional<SplitScreen> mSplitScreenOptional;
+    private final Optional<LegacySplitScreen> mLegacySplitScreenOptional;
     private final Optional<Pip> mPipOptional;
     private final Optional<OneHanded> mOneHandedOptional;
     private final Optional<HideDisplayCutout> mHideDisplayCutout;
@@ -42,13 +42,13 @@ public final class ShellCommandHandler {
 
     public ShellCommandHandler(
             ShellTaskOrganizer shellTaskOrganizer,
-            Optional<SplitScreen> splitScreenOptional,
+            Optional<LegacySplitScreen> legacySplitScreenOptional,
             Optional<Pip> pipOptional,
             Optional<OneHanded> oneHandedOptional,
             Optional<HideDisplayCutout> hideDisplayCutout,
             Optional<AppPairs> appPairsOptional) {
         mShellTaskOrganizer = shellTaskOrganizer;
-        mSplitScreenOptional = splitScreenOptional;
+        mLegacySplitScreenOptional = legacySplitScreenOptional;
         mPipOptional = pipOptional;
         mOneHandedOptional = oneHandedOptional;
         mHideDisplayCutout = hideDisplayCutout;
@@ -62,7 +62,7 @@ public final class ShellCommandHandler {
         pw.println();
         pw.println();
         mPipOptional.ifPresent(pip -> pip.dump(pw));
-        mSplitScreenOptional.ifPresent(splitScreen -> splitScreen.dump(pw));
+        mLegacySplitScreenOptional.ifPresent(splitScreen -> splitScreen.dump(pw));
         mOneHandedOptional.ifPresent(oneHanded -> oneHanded.dump(pw));
         mHideDisplayCutout.ifPresent(hideDisplayCutout -> hideDisplayCutout.dump(pw));
         pw.println();

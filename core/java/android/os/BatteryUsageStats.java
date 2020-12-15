@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
+import android.util.SparseArray;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,14 +32,20 @@ public final class BatteryUsageStats implements Parcelable {
     private final double mConsumedPower;
     private final int mDischargePercentage;
     private final ArrayList<UidBatteryConsumer> mUidBatteryConsumers;
+    private final ArrayList<SystemBatteryConsumer> mSystemBatteryConsumers;
 
     private BatteryUsageStats(@NonNull Builder builder) {
         mConsumedPower = builder.mConsumedPower;
         mDischargePercentage = builder.mDischargePercentage;
-        final int uidBatteryConsumerCount = builder.mUidBatteryConsumerBuilders.size();
+        int uidBatteryConsumerCount = builder.mUidBatteryConsumerBuilders.size();
         mUidBatteryConsumers = new ArrayList<>(uidBatteryConsumerCount);
         for (int i = 0; i < uidBatteryConsumerCount; i++) {
-            mUidBatteryConsumers.add(builder.mUidBatteryConsumerBuilders.get(i).build());
+            mUidBatteryConsumers.add(builder.mUidBatteryConsumerBuilders.valueAt(i).build());
+        }
+        int systemBatteryConsumerCount = builder.mSystemBatteryConsumerBuilders.size();
+        mSystemBatteryConsumers = new ArrayList<>(systemBatteryConsumerCount);
+        for (int i = 0; i < systemBatteryConsumerCount; i++) {
+            mSystemBatteryConsumers.add(builder.mSystemBatteryConsumerBuilders.valueAt(i).build());
         }
     }
 
@@ -63,6 +70,11 @@ public final class BatteryUsageStats implements Parcelable {
         return mUidBatteryConsumers;
     }
 
+    @NonNull
+    public List<SystemBatteryConsumer> getSystemBatteryConsumers() {
+        return mSystemBatteryConsumers;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -71,6 +83,8 @@ public final class BatteryUsageStats implements Parcelable {
     private BatteryUsageStats(@NonNull Parcel source) {
         mUidBatteryConsumers = new ArrayList<>();
         source.readParcelableList(mUidBatteryConsumers, getClass().getClassLoader());
+        mSystemBatteryConsumers = new ArrayList<>();
+        source.readParcelableList(mSystemBatteryConsumers, getClass().getClassLoader());
         mConsumedPower = source.readDouble();
         mDischargePercentage = source.readInt();
     }
@@ -78,6 +92,7 @@ public final class BatteryUsageStats implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeParcelableList(mUidBatteryConsumers, flags);
+        dest.writeParcelableList(mSystemBatteryConsumers, flags);
         dest.writeDouble(mConsumedPower);
         dest.writeInt(mDischargePercentage);
     }
@@ -97,10 +112,19 @@ public final class BatteryUsageStats implements Parcelable {
      * Builder for BatteryUsageStats.
      */
     public static final class Builder {
+        private final int mCustomPowerComponentCount;
+        private final int mCustomTimeComponentCount;
         private double mConsumedPower;
         private int mDischargePercentage;
-        private final ArrayList<UidBatteryConsumer.Builder> mUidBatteryConsumerBuilders =
-                new ArrayList<>();
+        private final SparseArray<UidBatteryConsumer.Builder> mUidBatteryConsumerBuilders =
+                new SparseArray<>();
+        private final SparseArray<SystemBatteryConsumer.Builder> mSystemBatteryConsumerBuilders =
+                new SparseArray<>();
+
+        public Builder(int customPowerComponentCount, int customTimeComponentCount) {
+            mCustomPowerComponentCount = customPowerComponentCount;
+            mCustomTimeComponentCount = customTimeComponentCount;
+        }
 
         /**
          * Constructs a read-only object using the Builder values.
@@ -113,6 +137,7 @@ public final class BatteryUsageStats implements Parcelable {
         /**
          * Sets the battery discharge amount since BatteryStats reset as percentage of the full
          * charge.
+         *
          */
         @SuppressLint("PercentageInt") // See b/174188159
         @NonNull
@@ -131,18 +156,40 @@ public final class BatteryUsageStats implements Parcelable {
         }
 
         /**
-         * Adds a UidBatteryConsumer, which represents battery attribution data for an
-         * individual UID.
+         * Creates or returns a exiting UidBatteryConsumer, which represents battery attribution
+         * data for an individual UID.
          */
         @NonNull
-        public Builder addUidBatteryConsumerBuilder(
-                @NonNull UidBatteryConsumer.Builder uidBatteryConsumer) {
-            mUidBatteryConsumerBuilders.add(uidBatteryConsumer);
-            return this;
+        public UidBatteryConsumer.Builder getOrCreateUidBatteryConsumerBuilder(
+                @NonNull BatteryStats.Uid batteryStatsUid) {
+            int uid = batteryStatsUid.getUid();
+            UidBatteryConsumer.Builder builder = mUidBatteryConsumerBuilders.get(uid);
+            if (builder == null) {
+                builder = new UidBatteryConsumer.Builder(mCustomPowerComponentCount,
+                        mCustomTimeComponentCount, batteryStatsUid);
+                mUidBatteryConsumerBuilders.put(uid, builder);
+            }
+            return builder;
+        }
+
+        /**
+         * Creates or returns a exiting UidBatteryConsumer, which represents battery attribution
+         * data for an individual UID.
+         */
+        @NonNull
+        public SystemBatteryConsumer.Builder getOrCreateSystemBatteryConsumerBuilder(
+                @SystemBatteryConsumer.DrainType int drainType) {
+            SystemBatteryConsumer.Builder builder = mSystemBatteryConsumerBuilders.get(drainType);
+            if (builder == null) {
+                builder = new SystemBatteryConsumer.Builder(mCustomPowerComponentCount,
+                        mCustomTimeComponentCount, drainType);
+                mSystemBatteryConsumerBuilders.put(drainType, builder);
+            }
+            return builder;
         }
 
         @NonNull
-        public List<UidBatteryConsumer.Builder> getUidBatteryConsumerBuilders() {
+        public SparseArray<UidBatteryConsumer.Builder> getUidBatteryConsumerBuilders() {
             return mUidBatteryConsumerBuilders;
         }
     }

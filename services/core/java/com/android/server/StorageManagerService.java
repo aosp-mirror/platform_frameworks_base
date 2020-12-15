@@ -108,6 +108,7 @@ import android.os.storage.StorageManagerInternal;
 import android.os.storage.StorageVolume;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
+import android.provider.DeviceConfig;
 import android.provider.DocumentsContract;
 import android.provider.Downloads;
 import android.provider.MediaStore;
@@ -879,6 +880,8 @@ class StorageManagerService extends IStorageManager.Stub
                     com.android.internal.R.bool.config_zramWriteback)) {
             ZramWriteback.scheduleZramWriteback(mContext);
         }
+
+        updateTranscodeEnabled();
     }
 
     /**
@@ -908,6 +911,21 @@ class StorageManagerService extends IStorageManager.Stub
                 ZramWriteback.scheduleZramWriteback(mContext);
             }
         }
+    }
+
+    private void updateTranscodeEnabled() {
+        // See MediaProvider TranscodeHelper#getBooleanProperty for more information
+        boolean transcodeEnabled = false;
+        boolean defaultValue = true;
+
+        if (SystemProperties.getBoolean("persist.sys.fuse.transcode_user_control", false)) {
+            transcodeEnabled = SystemProperties.getBoolean("persist.sys.fuse.transcode_enabled",
+                    defaultValue);
+        } else {
+            transcodeEnabled = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                    "transcode_enabled", defaultValue);
+        }
+        SystemProperties.set("sys.fuse.transcode_enabled", String.valueOf(transcodeEnabled));
     }
 
     /**
@@ -4375,14 +4393,7 @@ class StorageManagerService extends IStorageManager.Stub
 
                     // Create package obb and data dir if it doesn't exist.
                     int appUid = UserHandle.getUid(userId, mPmInternal.getPackage(pkg).getUid());
-                    File file = new File(packageObbDir);
-                    if (!file.exists()) {
-                        vold.setupAppDir(packageObbDir, appUid);
-                    }
-                    file = new File(packageDataDir);
-                    if (!file.exists()) {
-                        vold.setupAppDir(packageDataDir, appUid);
-                    }
+                    vold.ensureAppDirsCreated(new String[] {packageObbDir, packageDataDir}, appUid);
                 }
             } catch (ServiceManager.ServiceNotFoundException | RemoteException e) {
                 Slog.e(TAG, "Unable to create obb and data directories for " + processName,e);
@@ -4488,10 +4499,13 @@ class StorageManagerService extends IStorageManager.Stub
                 // When using FUSE, we may need to kill the app if the op changes
                 switch(code) {
                     case OP_REQUEST_INSTALL_PACKAGES:
-                        if (previousMode == MODE_ALLOWED || mode == MODE_ALLOWED) {
-                            // If we transition to/from MODE_ALLOWED, kill the app to make
-                            // sure it has the correct view of /storage. Changing between
-                            // MODE_DEFAULT / MODE_ERRORED is a no-op
+                        // In R, we used to kill the app here if it transitioned to/from
+                        // MODE_ALLOWED, to make sure the app had the correct (writable) OBB
+                        // view. But the majority of apps don't handle OBBs anyway, and for those
+                        // that do, they can restart themselves. Therefore, starting from S,
+                        // only kill the app when it transitions away from MODE_ALLOWED (eg,
+                        // when the permission is taken away).
+                        if (previousMode == MODE_ALLOWED && mode != MODE_ALLOWED) {
                             killAppForOpChange(code, uid);
                         }
                         return;

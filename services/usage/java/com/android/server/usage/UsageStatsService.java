@@ -184,10 +184,12 @@ public class UsageStatsService extends SystemService implements
     private static class ActivityData {
         private final String mTaskRootPackage;
         private final String mTaskRootClass;
+        private final String mUsageSourcePackage;
         public int lastEvent = Event.NONE;
-        private ActivityData(String taskRootPackage, String taskRootClass) {
+        private ActivityData(String taskRootPackage, String taskRootClass, String sourcePackage) {
             mTaskRootPackage = taskRootPackage;
             mTaskRootClass = taskRootClass;
+            mUsageSourcePackage = sourcePackage;
         }
     }
 
@@ -840,23 +842,25 @@ public class UsageStatsService extends SystemService implements
                                     .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__MOVE_TO_FOREGROUND);
                     // check if this activity has already been resumed
                     if (mVisibleActivities.get(event.mInstanceId) != null) break;
-                    final ActivityData resumedData = new ActivityData(event.mTaskRootPackage,
-                            event.mTaskRootClass);
-                    resumedData.lastEvent = Event.ACTIVITY_RESUMED;
-                    mVisibleActivities.put(event.mInstanceId, resumedData);
+                    final String usageSourcePackage;
+                    switch(mUsageSource) {
+                        case USAGE_SOURCE_CURRENT_ACTIVITY:
+                            usageSourcePackage = event.mPackage;
+                            break;
+                        case USAGE_SOURCE_TASK_ROOT_ACTIVITY:
+                        default:
+                            usageSourcePackage = event.mTaskRootPackage;
+                            break;
+                    }
                     try {
-                        switch(mUsageSource) {
-                            case USAGE_SOURCE_CURRENT_ACTIVITY:
-                                mAppTimeLimit.noteUsageStart(event.mPackage, userId);
-                                break;
-                            case USAGE_SOURCE_TASK_ROOT_ACTIVITY:
-                            default:
-                                mAppTimeLimit.noteUsageStart(event.mTaskRootPackage, userId);
-                                break;
-                        }
+                        mAppTimeLimit.noteUsageStart(usageSourcePackage, userId);
                     } catch (IllegalArgumentException iae) {
                         Slog.e(TAG, "Failed to note usage start", iae);
                     }
+                    final ActivityData resumedData = new ActivityData(event.mTaskRootPackage,
+                            event.mTaskRootClass, usageSourcePackage);
+                    resumedData.lastEvent = Event.ACTIVITY_RESUMED;
+                    mVisibleActivities.put(event.mInstanceId, resumedData);
                     break;
                 case Event.ACTIVITY_PAUSED:
                     final ActivityData pausedData = mVisibleActivities.get(event.mInstanceId);
@@ -928,15 +932,7 @@ public class UsageStatsService extends SystemService implements
                         event.mTaskRootClass = prevData.mTaskRootClass;
                     }
                     try {
-                        switch(mUsageSource) {
-                            case USAGE_SOURCE_CURRENT_ACTIVITY:
-                                mAppTimeLimit.noteUsageStop(event.mPackage, userId);
-                                break;
-                            case USAGE_SOURCE_TASK_ROOT_ACTIVITY:
-                            default:
-                                mAppTimeLimit.noteUsageStop(event.mTaskRootPackage, userId);
-                                break;
-                        }
+                        mAppTimeLimit.noteUsageStop(prevData.mUsageSourcePackage, userId);
                     } catch (IllegalArgumentException iae) {
                         Slog.w(TAG, "Failed to note usage stop", iae);
                     }

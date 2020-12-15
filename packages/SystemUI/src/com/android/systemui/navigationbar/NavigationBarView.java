@@ -93,7 +93,7 @@ import com.android.systemui.statusbar.phone.LightBarTransitionsController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.wm.shell.pip.Pip;
-import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import java.io.PrintWriter;
 import java.util.function.Consumer;
@@ -1289,8 +1289,8 @@ public class NavigationBarView extends FrameLayout implements
         return super.onApplyWindowInsets(insets);
     }
 
-    void registerDockedListener(SplitScreen splitScreen) {
-        splitScreen.registerInSplitScreenListener(mDockedListener);
+    void registerDockedListener(LegacySplitScreen legacySplitScreen) {
+        legacySplitScreen.registerInSplitScreenListener(mDockedListener);
     }
 
     void registerPipExclusionBoundsChangeListener(Pip pip) {

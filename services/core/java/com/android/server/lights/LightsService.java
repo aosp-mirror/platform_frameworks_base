@@ -29,14 +29,12 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.Trace;
 import android.provider.Settings;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.SurfaceControl;
 
 import com.android.internal.BrightnessSynchronizer;
 import com.android.internal.annotations.GuardedBy;
@@ -262,25 +260,9 @@ public class LightsService extends SystemService {
     }
 
     private final class LightImpl extends LogicalLight {
-        private final IBinder mDisplayToken;
-        private final int mSurfaceControlMaximumBrightness;
 
         private LightImpl(Context context, HwLight hwLight) {
             mHwLight = hwLight;
-            mDisplayToken = SurfaceControl.getInternalDisplayToken();
-            final boolean brightnessSupport = SurfaceControl.getDisplayBrightnessSupport(
-                    mDisplayToken);
-            if (DEBUG) {
-                Slog.d(TAG, "Display brightness support: " + brightnessSupport);
-            }
-            int maximumBrightness = 0;
-            if (brightnessSupport) {
-                PowerManager pm = context.getSystemService(PowerManager.class);
-                if (pm != null) {
-                    maximumBrightness = pm.getMaximumScreenBrightnessSetting();
-                }
-            }
-            mSurfaceControlMaximumBrightness = maximumBrightness;
         }
 
         @Override
@@ -301,28 +283,10 @@ public class LightsService extends SystemService {
                             + ": brightness=" + brightness);
                     return;
                 }
-                // Ideally, we'd like to set the brightness mode through the SF/HWC as well, but
-                // right now we just fall back to the old path through Lights brightessMode is
-                // anything but USER or the device shouldBeInLowPersistenceMode().
-                if (brightnessMode == BRIGHTNESS_MODE_USER && !shouldBeInLowPersistenceMode()
-                        && mSurfaceControlMaximumBrightness == 255) {
-                    // New system
-                    // TODO: the last check should be mSurfaceControlMaximumBrightness != 0; the
-                    // reason we enforce 255 right now is to stay consistent with the old path. In
-                    // the future, the framework should be refactored so that brightness is a float
-                    // between 0.0f and 1.0f, and the actual number of supported brightness levels
-                    // is determined in the device-specific implementation.
-                    if (DEBUG) {
-                        Slog.d(TAG, "Using new setBrightness path!");
-                    }
-                    SurfaceControl.setDisplayBrightness(mDisplayToken, brightness);
-                } else {
-                    // Old system
-                    int brightnessInt = BrightnessSynchronizer.brightnessFloatToInt(brightness);
-                    int color = brightnessInt & 0x000000ff;
-                    color = 0xff000000 | (color << 16) | (color << 8) | color;
-                    setLightLocked(color, LIGHT_FLASH_NONE, 0, 0, brightnessMode);
-                }
+                int brightnessInt = BrightnessSynchronizer.brightnessFloatToInt(brightness);
+                int color = brightnessInt & 0x000000ff;
+                color = 0xff000000 | (color << 16) | (color << 8) | color;
+                setLightLocked(color, LIGHT_FLASH_NONE, 0, 0, brightnessMode);
             }
         }
 

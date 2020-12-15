@@ -21,6 +21,7 @@ import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.Process;
+import android.os.SystemBatteryConsumer;
 import android.os.UidBatteryConsumer;
 import android.os.UserHandle;
 
@@ -154,6 +155,15 @@ public class BatteryConsumerData {
             return;
         }
 
+        if (requestedBatteryConsumer == null) {
+            for (BatteryConsumer consumer : batteryUsageStats.getSystemBatteryConsumers()) {
+                if (batteryConsumerId(consumer).equals(batteryConsumerId)) {
+                    requestedBatteryConsumer = consumer;
+                    break;
+                }
+            }
+        }
+
         mBatteryConsumerInfo = BatteryConsumerInfoHelper.makeBatteryConsumerInfo(
                 context.getPackageManager(), requestedBatterySipper);
         long totalScreenMeasuredEnergyUJ = batteryStats.getScreenOnEnergy();
@@ -185,8 +195,14 @@ public class BatteryConsumerData {
                 requestedBatterySipper.cpuPowerMah, totalCpuPowerMah);
         addEntry("System services", EntryType.POWER,
                 requestedBatterySipper.systemServiceCpuPowerMah, totalSystemServiceCpuPowerMah);
-        addEntry("Usage", EntryType.POWER,
-                requestedBatterySipper.usagePowerMah, totalUsagePowerMah);
+        if (requestedBatteryConsumer != null) {
+            addEntry("Usage", EntryType.POWER,
+                    requestedBatteryConsumer.getConsumedPower(
+                            BatteryConsumer.POWER_COMPONENT_USAGE), totalUsagePowerMah);
+        } else {
+            addEntry("Usage (sipper)", EntryType.POWER,
+                    requestedBatterySipper.usagePowerMah, totalUsagePowerMah);
+        }
         addEntry("Wake lock", EntryType.POWER,
                 requestedBatterySipper.wakeLockPowerMah, totalWakeLockPowerMah);
         addEntry("Mobile radio", EntryType.POWER,
@@ -295,6 +311,8 @@ public class BatteryConsumerData {
             return BatterySipper.DrainType.APP + "|"
                     + UserHandle.getUserId(((UidBatteryConsumer) consumer).getUid()) + "|"
                     + ((UidBatteryConsumer) consumer).getUid();
+        } else if (consumer instanceof SystemBatteryConsumer) {
+            return ((SystemBatteryConsumer) consumer).getDrainType() + "|0|0";
         } else {
             return "";
         }

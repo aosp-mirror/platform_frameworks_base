@@ -26,8 +26,8 @@ import android.view.WindowManagerGlobal;
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.wm.shell.splitscreen.DividerView;
-import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.legacysplitscreen.DividerView;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import java.util.Optional;
 
@@ -41,7 +41,7 @@ public class ShortcutKeyDispatcher extends SystemUI
         implements ShortcutKeyServiceProxy.Callbacks {
 
     private static final String TAG = "ShortcutKeyDispatcher";
-    private final Optional<SplitScreen> mSplitScreenOptional;
+    private final Optional<LegacySplitScreen> mSplitScreenOptional;
 
     private ShortcutKeyServiceProxy mShortcutKeyServiceProxy = new ShortcutKeyServiceProxy(this);
     private IWindowManager mWindowManagerService = WindowManagerGlobal.getWindowManagerService();
@@ -55,7 +55,7 @@ public class ShortcutKeyDispatcher extends SystemUI
     protected final long SC_DOCK_RIGHT = META_MASK | KeyEvent.KEYCODE_RIGHT_BRACKET;
 
     @Inject
-    public ShortcutKeyDispatcher(Context context, Optional<SplitScreen> splitScreenOptional) {
+    public ShortcutKeyDispatcher(Context context, Optional<LegacySplitScreen> splitScreenOptional) {
         super(context);
         mSplitScreenOptional = splitScreenOptional;
     }
