@@ -2613,6 +2613,15 @@ public class DevicePolicyManager {
     /** @hide */
     @TestApi
     public static final int OPERATION_REBOOT = 7;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_WIPE_DATA = 8;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_LOGOUT_USER = 9;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_SET_USER_RESTRICTION = 10;
 
     private static final String PREFIX_OPERATION = "OPERATION_";
 
@@ -2624,7 +2633,10 @@ public class DevicePolicyManager {
             OPERATION_STOP_USER,
             OPERATION_CREATE_AND_MANAGE_USER,
             OPERATION_REMOVE_USER,
-            OPERATION_REBOOT
+            OPERATION_REBOOT,
+            OPERATION_WIPE_DATA,
+            OPERATION_LOGOUT_USER,
+            OPERATION_SET_USER_RESTRICTION
     })
     @Retention(RetentionPolicy.SOURCE)
     public static @interface DevicePolicyOperation {
