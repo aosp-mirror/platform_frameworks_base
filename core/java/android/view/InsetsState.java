@@ -116,20 +116,22 @@ public class InsetsState implements Parcelable {
     public static final int ITYPE_LEFT_MANDATORY_GESTURES = 9;
     public static final int ITYPE_RIGHT_MANDATORY_GESTURES = 10;
 
-    public static final int ITYPE_TOP_TAPPABLE_ELEMENT = 11;
-    public static final int ITYPE_BOTTOM_TAPPABLE_ELEMENT = 12;
+    public static final int ITYPE_LEFT_TAPPABLE_ELEMENT = 11;
+    public static final int ITYPE_TOP_TAPPABLE_ELEMENT = 12;
+    public static final int ITYPE_RIGHT_TAPPABLE_ELEMENT = 13;
+    public static final int ITYPE_BOTTOM_TAPPABLE_ELEMENT = 14;
 
-    public static final int ITYPE_LEFT_DISPLAY_CUTOUT = 13;
-    public static final int ITYPE_TOP_DISPLAY_CUTOUT = 14;
-    public static final int ITYPE_RIGHT_DISPLAY_CUTOUT = 15;
-    public static final int ITYPE_BOTTOM_DISPLAY_CUTOUT = 16;
+    public static final int ITYPE_LEFT_DISPLAY_CUTOUT = 15;
+    public static final int ITYPE_TOP_DISPLAY_CUTOUT = 16;
+    public static final int ITYPE_RIGHT_DISPLAY_CUTOUT = 17;
+    public static final int ITYPE_BOTTOM_DISPLAY_CUTOUT = 18;
 
     /** Input method window. */
-    public static final int ITYPE_IME = 17;
+    public static final int ITYPE_IME = 19;
 
     /** Additional system decorations inset type. */
-    public static final int ITYPE_CLIMATE_BAR = 18;
-    public static final int ITYPE_EXTRA_NAVIGATION_BAR = 19;
+    public static final int ITYPE_CLIMATE_BAR = 20;
+    public static final int ITYPE_EXTRA_NAVIGATION_BAR = 21;
 
     static final int LAST_TYPE = ITYPE_EXTRA_NAVIGATION_BAR;
     public static final int SIZE = LAST_TYPE + 1;
@@ -542,7 +544,9 @@ public class InsetsState implements Parcelable {
             case ITYPE_LEFT_GESTURES:
             case ITYPE_RIGHT_GESTURES:
                 return Type.SYSTEM_GESTURES;
+            case ITYPE_LEFT_TAPPABLE_ELEMENT:
             case ITYPE_TOP_TAPPABLE_ELEMENT:
+            case ITYPE_RIGHT_TAPPABLE_ELEMENT:
             case ITYPE_BOTTOM_TAPPABLE_ELEMENT:
                 return Type.TAPPABLE_ELEMENT;
             case ITYPE_LEFT_DISPLAY_CUTOUT:
@@ -615,8 +619,12 @@ public class InsetsState implements Parcelable {
                 return "ITYPE_LEFT_MANDATORY_GESTURES";
             case ITYPE_RIGHT_MANDATORY_GESTURES:
                 return "ITYPE_RIGHT_MANDATORY_GESTURES";
+            case ITYPE_LEFT_TAPPABLE_ELEMENT:
+                return "ITYPE_LEFT_TAPPABLE_ELEMENT";
             case ITYPE_TOP_TAPPABLE_ELEMENT:
                 return "ITYPE_TOP_TAPPABLE_ELEMENT";
+            case ITYPE_RIGHT_TAPPABLE_ELEMENT:
+                return "ITYPE_RIGHT_TAPPABLE_ELEMENT";
             case ITYPE_BOTTOM_TAPPABLE_ELEMENT:
                 return "ITYPE_BOTTOM_TAPPABLE_ELEMENT";
             case ITYPE_LEFT_DISPLAY_CUTOUT:
