@@ -392,6 +392,14 @@ final class CompatConfig {
         return alreadyKnown;
     }
 
+    boolean defaultChangeIdValue(long changeId) {
+        CompatChange c = mChanges.get(changeId);
+        if (c == null) {
+            return true;
+        }
+        return c.defaultValue();
+    }
+
     @VisibleForTesting
     void clearChanges() {
         synchronized (mChanges) {

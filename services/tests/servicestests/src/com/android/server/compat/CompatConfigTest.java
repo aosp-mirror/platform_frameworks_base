@@ -190,6 +190,22 @@ public class CompatConfigTest {
     }
 
     @Test
+    public void testIsChangeEnabledForInvalidApp() throws Exception {
+        final long disabledChangeId = 1234L;
+        final long enabledChangeId = 1235L;
+        final long targetSdkChangeId = 1236L;
+        CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
+                .addEnabledChangeWithId(enabledChangeId)
+                .addDisabledChangeWithId(disabledChangeId)
+                .addEnableSinceSdkChangeWithId(42, targetSdkChangeId)
+                .build();
+
+        assertThat(compatConfig.isChangeEnabled(enabledChangeId, null)).isTrue();
+        assertThat(compatConfig.isChangeEnabled(disabledChangeId, null)).isFalse();
+        assertThat(compatConfig.isChangeEnabled(targetSdkChangeId, null)).isTrue();
+    }
+
+    @Test
     public void testPreventAddOverride() throws Exception {
         final long changeId = 1234L;
         CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
