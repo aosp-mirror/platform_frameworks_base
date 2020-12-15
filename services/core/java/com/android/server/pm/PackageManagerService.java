@@ -260,7 +260,6 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Debug;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -5529,8 +5528,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // to the same user is not sufficient
             enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false,
                     !isRecentsAccessingChildProfiles(Binder.getCallingUid(), userId),
-                    "MATCH_ANY_USER flag requires INTERACT_ACROSS_USERS permission at "
-                    + Debug.getCallers(5));
+                    "MATCH_ANY_USER flag requires INTERACT_ACROSS_USERS permission");
         } else if ((flags & PackageManager.MATCH_UNINSTALLED_PACKAGES) != 0 && isCallerSystemUser
                 && mUserManager.hasManagedProfile(UserHandle.USER_SYSTEM)) {
             // If the caller wants all packages and has a restricted profile associated with it,
