@@ -144,7 +144,86 @@ public:
 
     ItemHeader* last() const { return isEmpty() ? nullptr : itemAt(mBuffer->endOffset); }
 
+    class sentinal {
+    public:
+        explicit sentinal(const uint8_t* end) : end(end) {}
+    private:
+        const uint8_t* const end;
+    };
+
+    sentinal end() const {
+        return sentinal{end_ptr()};
+    }
+
+    template <ItemTypes T>
+    class filtered_iterator {
+    public:
+        explicit filtered_iterator(uint8_t* start, const uint8_t* end)
+                : mCurrent(start), mEnd(end) {
+            ItemHeader* header = reinterpret_cast<ItemHeader*>(mCurrent);
+            if (header->type != T) {
+                advance();
+            }
+        }
+
+        filtered_iterator& operator++() {
+            advance();
+            return *this;
+        }
+
+        // Although this iterator self-terminates, we need a placeholder to compare against
+        // to make for-each loops happy
+        bool operator!=(const sentinal& other) const {
+            return mCurrent != mEnd;
+        }
+
+        ItemContainer<T>& operator*() {
+            return *reinterpret_cast<ItemContainer<T>*>(mCurrent);
+        }
+    private:
+        void advance() {
+            ItemHeader* header = reinterpret_cast<ItemHeader*>(mCurrent);
+            do {
+                mCurrent += header->size;
+                header = reinterpret_cast<ItemHeader*>(mCurrent);
+            } while (mCurrent != mEnd && header->type != T);
+        }
+        uint8_t* mCurrent;
+        const uint8_t* const mEnd;
+    };
+
+    template <ItemTypes T>
+    class filtered_view {
+    public:
+        explicit filtered_view(uint8_t* start, const uint8_t* end) : mStart(start), mEnd(end) {}
+
+        filtered_iterator<T> begin() const {
+            return filtered_iterator<T>{mStart, mEnd};
+        }
+
+        sentinal end() const {
+            return sentinal{mEnd};
+        }
+    private:
+        uint8_t* mStart;
+        const uint8_t* const mEnd;
+    };
+
+    template <ItemTypes T>
+    filtered_view<T> filter() const {
+        return filtered_view<T>{start_ptr(), end_ptr()};
+    }
+
 private:
+
+    uint8_t* start_ptr() const {
+        return reinterpret_cast<uint8_t*>(mBuffer) + mBuffer->startOffset;
+    }
+
+    const uint8_t* end_ptr() const {
+        return reinterpret_cast<uint8_t*>(mBuffer) + mBuffer->used;
+    }
+
     template <typename F, std::size_t... I>
     void for_each(F&& f, std::index_sequence<I...>) const {
         // Validate we're not empty
@@ -159,8 +238,8 @@ private:
         }...};
 
         // Do the actual iteration of each item
-        uint8_t* current = reinterpret_cast<uint8_t*>(mBuffer) + mBuffer->startOffset;
-        uint8_t* end = reinterpret_cast<uint8_t*>(mBuffer) + mBuffer->used;
+        uint8_t* current = start_ptr();
+        const uint8_t* end = end_ptr();
         while (current != end) {
             auto header = reinterpret_cast<ItemHeader*>(current);
             // `f` could be a destructor, so ensure all accesses to the OP happen prior to invoking

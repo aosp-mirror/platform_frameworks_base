@@ -618,6 +618,7 @@ cc_test {
         "tests/unit/LayerUpdateQueueTests.cpp",
         "tests/unit/LinearAllocatorTests.cpp",
         "tests/unit/MatrixTests.cpp",
+        "tests/unit/OpBufferTests.cpp",
         "tests/unit/PathInterpolatorTests.cpp",
         "tests/unit/RenderNodeDrawableTests.cpp",
         "tests/unit/RenderNodeTests.cpp",

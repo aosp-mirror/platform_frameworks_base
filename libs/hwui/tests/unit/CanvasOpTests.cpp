@@ -36,50 +36,6 @@ using namespace android::uirenderer::test;
 // We lazy
 using Op = CanvasOpType;
 
-enum MockTypes {
-    Lifecycle,
-    COUNT
-};
-
-template<MockTypes T>
-struct MockOp;
-
-template<MockTypes T>
-struct MockOpContainer {
-    OpBufferItemHeader<MockTypes> header;
-    MockOp<T> impl;
-};
-
-struct LifecycleTracker {
-    int ctor_count = 0;
-    int dtor_count = 0;
-
-    int alive() { return ctor_count - dtor_count; }
-};
-
-template<>
-struct MockOp<MockTypes::Lifecycle> {
-    MockOp() = delete;
-    void operator=(const MockOp&) = delete;
-
-    MockOp(LifecycleTracker* tracker) : tracker(tracker) {
-        tracker->ctor_count += 1;
-    }
-
-    MockOp(const MockOp& other) {
-        tracker = other.tracker;
-        tracker->ctor_count += 1;
-    }
-
-    ~MockOp() {
-        tracker->dtor_count += 1;
-    }
-
-    LifecycleTracker* tracker = nullptr;
-};
-
-using MockBuffer = OpBuffer<MockTypes, MockOpContainer>;
-
 class CanvasOpCountingReceiver {
 public:
     template <CanvasOpType T>
@@ -102,62 +58,6 @@ static int countItems(const T& t) {
         count++;
     });
     return count;
-}
-
-TEST(CanvasOp, lifecycleCheck) {
-    LifecycleTracker tracker;
-    {
-        MockBuffer buffer;
-        buffer.push_container(MockOpContainer<MockTypes::Lifecycle> {
-            .impl = MockOp<MockTypes::Lifecycle>{&tracker}
-        });
-        EXPECT_EQ(tracker.alive(), 1);
-        buffer.clear();
-        EXPECT_EQ(tracker.alive(), 0);
-    }
-    EXPECT_EQ(tracker.alive(), 0);
-}
-
-TEST(CanvasOp, lifecycleCheckMove) {
-    LifecycleTracker tracker;
-    {
-        MockBuffer buffer;
-        buffer.push_container(MockOpContainer<MockTypes::Lifecycle> {
-            .impl = MockOp<MockTypes::Lifecycle>{&tracker}
-        });
-        EXPECT_EQ(tracker.alive(), 1);
-        {
-            MockBuffer other(std::move(buffer));
-            EXPECT_EQ(tracker.alive(), 1);
-            EXPECT_EQ(buffer.size(), 0);
-            EXPECT_GT(other.size(), 0);
-            EXPECT_EQ(1, countItems(other));
-            EXPECT_EQ(0, countItems(buffer));
-
-            other.push_container(MockOpContainer<MockTypes::Lifecycle> {
-                .impl = MockOp<MockTypes::Lifecycle>{&tracker}
-            });
-
-            EXPECT_EQ(2, countItems(other));
-            EXPECT_EQ(2, tracker.alive());
-
-            buffer.push_container(MockOpContainer<MockTypes::Lifecycle> {
-                .impl = MockOp<MockTypes::Lifecycle>{&tracker}
-            });
-            EXPECT_EQ(1, countItems(buffer));
-            EXPECT_EQ(3, tracker.alive());
-
-            buffer = std::move(other);
-            EXPECT_EQ(2, countItems(buffer));
-            EXPECT_EQ(2, tracker.alive());
-        }
-        EXPECT_EQ(2, countItems(buffer));
-        EXPECT_EQ(2, tracker.alive());
-        buffer.clear();
-        EXPECT_EQ(0, countItems(buffer));
-        EXPECT_EQ(0, tracker.alive());
-    }
-    EXPECT_EQ(tracker.alive(), 0);
 }
 
 TEST(CanvasOp, verifyConst) {
@@ -707,8 +607,4 @@ TEST(CanvasOp, frontendSaveCount) {
 
     EXPECT_EQ(1, receiver[Op::Save]);
     EXPECT_EQ(1, receiver[Op::Restore]);
-}
-
-TEST(CanvasOp, frontendTransform) {
-
 }
