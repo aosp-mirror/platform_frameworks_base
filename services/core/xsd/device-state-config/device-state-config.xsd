@@ -37,15 +37,21 @@
                     </xs:restriction>
                 </xs:simpleType>
             </xs:element>
-            <xs:element name="name" type="xs:string" minOccurs="0" />
+            <xs:element name="name" type="xs:string" minOccurs="0">
+                <xs:annotation name="nullable" />
+            </xs:element>
             <xs:element name="conditions" type="conditions" />
         </xs:sequence>
     </xs:complexType>
 
     <xs:complexType name="conditions">
         <xs:sequence>
-            <xs:element name="lid-switch" type="lidSwitchCondition" minOccurs="0" />
-            <xs:element name="sensor" type="sensorCondition" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="lid-switch" type="lidSwitchCondition" minOccurs="0">
+                <xs:annotation name="nullable" />
+            </xs:element>
+            <xs:element name="sensor" type="sensorCondition" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation name="nullable" />
+            </xs:element>
         </xs:sequence>
     </xs:complexType>
 
@@ -66,12 +72,20 @@
     <xs:complexType name="numericRange">
         <xs:sequence>
             <xs:choice minOccurs="0">
-                <xs:element name="min" type="xs:decimal" />
-                <xs:element name="min-inclusive" type="xs:decimal" />
+                <xs:element name="min" type="xs:decimal">
+                    <xs:annotation name="nullable" />
+                </xs:element>
+                <xs:element name="min-inclusive" type="xs:decimal">
+                    <xs:annotation name="nullable" />
+                </xs:element>
             </xs:choice>
             <xs:choice minOccurs="0">
-                <xs:element name="max" type="xs:decimal" />
-                <xs:element name="max-inclusive" type="xs:decimal"/>
+                <xs:element name="max" type="xs:decimal">
+                    <xs:annotation name="nullable" />
+                </xs:element>
+                <xs:element name="max-inclusive" type="xs:decimal">
+                    <xs:annotation name="nullable" />
+                </xs:element>
             </xs:choice>
         </xs:sequence>
     </xs:complexType>
