@@ -25,7 +25,6 @@ import android.net.Network;
 import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
-import android.net.NetworkQuotaInfo;
 import android.net.NetworkRequest;
 import android.net.NetworkState;
 import android.net.ISocketKeepaliveCallback;
@@ -76,7 +75,6 @@ interface IConnectivityManager
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     NetworkState[] getAllNetworkState();
 
-    NetworkQuotaInfo getActiveNetworkQuotaInfo();
     boolean isActiveNetworkMetered();
 
     boolean requestRouteToHostAddress(int networkType, in byte[] hostAddress,
