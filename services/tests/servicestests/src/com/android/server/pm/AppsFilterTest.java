@@ -382,7 +382,7 @@ public class AppsFilterTest {
     }
 
     @Test
-    public void testForceQueryable_SystemDoesntFilter() throws Exception {
+    public void testForceQueryable_DoesntFilter() throws Exception {
         final AppsFilter appsFilter =
                 new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
                         mMockExecutor);
@@ -396,24 +396,6 @@ public class AppsFilterTest {
                 pkg("com.some.other.package"), DUMMY_CALLING_APPID);
 
         assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_APPID, calling, target,
-                SYSTEM_USER));
-    }
-
-
-    @Test
-    public void testForceQueryable_NonSystemFilters() throws Exception {
-        final AppsFilter appsFilter =
-                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor);
-        simulateAddBasicAndroid(appsFilter);
-        appsFilter.onSystemReady();
-
-        PackageSetting target = simulateAddPackage(appsFilter,
-                pkg("com.some.package").setForceQueryable(true), DUMMY_TARGET_APPID);
-        PackageSetting calling = simulateAddPackage(appsFilter,
-                pkg("com.some.other.package"), DUMMY_CALLING_APPID);
-
-        assertTrue(appsFilter.shouldFilterApplication(DUMMY_CALLING_APPID, calling, target,
                 SYSTEM_USER));
     }
 

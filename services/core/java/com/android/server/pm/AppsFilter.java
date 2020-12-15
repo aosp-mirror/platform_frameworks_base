@@ -567,9 +567,9 @@ public class AppsFilter {
         final boolean newIsForceQueryable =
                 mForceQueryable.contains(newPkgSetting.appId)
                         /* shared user that is already force queryable */
-                        || newPkgSetting.forceQueryableOverride /* adb override */
-                        || (newPkgSetting.isSystem() && (mSystemAppsQueryable
                         || newPkg.isForceQueryable()
+                        || newPkgSetting.forceQueryableOverride
+                        || (newPkgSetting.isSystem() && (mSystemAppsQueryable
                         || ArrayUtils.contains(mForceQueryableByDevicePackageNames,
                         newPkg.getPackageName())));
         if (newIsForceQueryable
