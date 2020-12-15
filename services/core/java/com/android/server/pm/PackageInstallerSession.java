@@ -35,6 +35,7 @@ import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_WRONLY;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.internal.util.XmlUtils.readBitmapAttribute;
 import static com.android.internal.util.XmlUtils.readByteArrayAttribute;
 import static com.android.internal.util.XmlUtils.readStringAttribute;
@@ -132,6 +133,7 @@ import android.util.apk.ApkSignatureVerifier;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.messages.nano.SystemMessageProto;
@@ -201,6 +203,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             "installOriginatingPackageName";
     private static final String ATTR_CREATED_MILLIS = "createdMillis";
     private static final String ATTR_UPDATED_MILLIS = "updatedMillis";
+    private static final String ATTR_COMMITTED_MILLIS = "committedMillis";
     private static final String ATTR_SESSION_STAGE_DIR = "sessionStageDir";
     private static final String ATTR_SESSION_STAGE_CID = "sessionStageCid";
     private static final String ATTR_PREPARED = "prepared";
@@ -290,6 +293,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     /** Timestamp of the last time this session changed state  */
     @GuardedBy("mLock")
     private long updatedMillis;
+
+    /** Timestamp of the time this session is committed  */
+    @GuardedBy("mLock")
+    private long committedMillis;
 
     /** Uid of the creator of this session. */
     private final int mOriginalInstallerUid;
@@ -625,7 +632,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             Context context, PackageManagerService pm,
             PackageSessionProvider sessionProvider, Looper looper, StagingManager stagingManager,
             int sessionId, int userId, int installerUid, @NonNull InstallSource installSource,
-            SessionParams params, long createdMillis,
+            SessionParams params, long createdMillis, long committedMillis,
             File stageDir, String stageCid, InstallationFile[] files,
             ArrayMap<String, List<CertifiedChecksum>> checksums,
             boolean prepared, boolean committed, boolean destroyed, boolean sealed,
@@ -648,6 +655,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         this.params = params;
         this.createdMillis = createdMillis;
         this.updatedMillis = createdMillis;
+        this.committedMillis = committedMillis;
         this.stageDir = stageDir;
         this.stageCid = stageCid;
         this.mShouldBeSealed = sealed;
@@ -1641,6 +1649,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 mActiveCount.incrementAndGet();
 
                 mCommitted = true;
+                committedMillis = System.currentTimeMillis();
             }
             return true;
         } catch (PackageManagerException e) {
@@ -2963,7 +2972,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     /**
      * @return the package name of this session
      */
-    String getPackageName() {
+    @VisibleForTesting(visibility = PACKAGE)
+    public String getPackageName() {
         synchronized (mLock) {
             return mPackageName;
         }
@@ -2975,6 +2985,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     public long getUpdatedMillis() {
         synchronized (mLock) {
             return updatedMillis;
+        }
+    }
+
+    long getCommittedMillis() {
+        synchronized (mLock) {
+            return committedMillis;
         }
     }
 
@@ -3923,6 +3939,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         pw.printPair("mInstallerUid", mInstallerUid);
         pw.printPair("createdMillis", createdMillis);
         pw.printPair("updatedMillis", updatedMillis);
+        pw.printPair("committedMillis", committedMillis);
         pw.printPair("stageDir", stageDir);
         pw.printPair("stageCid", stageCid);
         pw.println();
@@ -4099,6 +4116,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     mInstallSource.originatingPackageName);
             out.attributeLong(null, ATTR_CREATED_MILLIS, createdMillis);
             out.attributeLong(null, ATTR_UPDATED_MILLIS, updatedMillis);
+            out.attributeLong(null, ATTR_COMMITTED_MILLIS, committedMillis);
             if (stageDir != null) {
                 writeStringAttribute(out, ATTR_SESSION_STAGE_DIR,
                         stageDir.getAbsolutePath());
@@ -4252,6 +4270,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 readStringAttribute(in, ATTR_ORIGINATING_PACKAGE_NAME);
         final long createdMillis = in.getAttributeLong(null, ATTR_CREATED_MILLIS);
         long updatedMillis = in.getAttributeLong(null, ATTR_UPDATED_MILLIS);
+        final long committedMillis = in.getAttributeLong(null, ATTR_COMMITTED_MILLIS, 0L);
         final String stageDirRaw = readStringAttribute(in, ATTR_SESSION_STAGE_DIR);
         final File stageDir = (stageDirRaw != null) ? new File(stageDirRaw) : null;
         final String stageCid = readStringAttribute(in, ATTR_SESSION_STAGE_CID);
@@ -4395,8 +4414,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 installOriginatingPackageName, installerPackageName, installerAttributionTag);
         return new PackageInstallerSession(callback, context, pm, sessionProvider,
                 installerThread, stagingManager, sessionId, userId, installerUid,
-                installSource, params, createdMillis, stageDir, stageCid, fileArray, checksums,
-                prepared, committed, destroyed, sealed, childSessionIdsArray, parentSessionId,
-                isReady, isFailed, isApplied, stagedSessionErrorCode, stagedSessionErrorMessage);
+                installSource, params, createdMillis, committedMillis, stageDir, stageCid,
+                fileArray, checksums, prepared, committed, destroyed, sealed, childSessionIdsArray,
+                parentSessionId, isReady, isFailed, isApplied, stagedSessionErrorCode,
+                stagedSessionErrorMessage);
     }
 }

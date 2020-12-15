@@ -173,6 +173,7 @@ public class PackageInstallerSessionTest {
                 /* installSource */ installSource,
                 /* sessionParams */ params,
                 /* createdMillis */ 0L,
+                /* committedMillis */ 0L,
                 /* stageDir */ mTmpDir,
                 /* stageCid */ null,
                 /* files */ null,
