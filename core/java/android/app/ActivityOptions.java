@@ -1878,7 +1878,7 @@ public class ActivityOptions {
         /** Launched from recents gesture handler. */
         public static final int TYPE_RECENTS_ANIMATION = 4;
 
-        @IntDef(flag = true, prefix = { "TYPE_" }, value = {
+        @IntDef(prefix = { "TYPE_" }, value = {
                 TYPE_LAUNCHER,
                 TYPE_NOTIFICATION,
                 TYPE_LOCKSCREEN,
