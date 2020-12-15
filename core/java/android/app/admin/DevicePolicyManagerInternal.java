@@ -231,7 +231,13 @@ public abstract class DevicePolicyManagerInternal {
      * Returns the profile owner component for the given user, or {@code null} if there is not one.
      */
     @Nullable
-    public abstract ComponentName getProfileOwnerAsUser(int userHandle);
+    public abstract ComponentName getProfileOwnerAsUser(@UserIdInt int userId);
+
+    /**
+     * Returns the user id of the device owner, or {@link UserHandle#USER_NULL} if there is not one.
+     */
+    @UserIdInt
+    public abstract int getDeviceOwnerUserId();
 
     /**
      * Returns whether the given package is a device owner or a profile owner in the calling user.
