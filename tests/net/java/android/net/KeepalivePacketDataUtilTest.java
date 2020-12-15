@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,10 @@ import static com.android.testutils.ParcelUtils.assertParcelingIsLossless;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import android.net.util.KeepalivePacketDataUtil;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -31,7 +34,7 @@ import java.net.InetAddress;
 import java.nio.ByteBuffer;
 
 @RunWith(JUnit4.class)
-public final class TcpKeepalivePacketDataTest {
+public final class KeepalivePacketDataUtilTest {
     private static final byte[] IPV4_KEEPALIVE_SRC_ADDR = {10, 0, 0, 1};
     private static final byte[] IPV4_KEEPALIVE_DST_ADDR = {10, 0, 0, 5};
 
@@ -39,7 +42,7 @@ public final class TcpKeepalivePacketDataTest {
     public void setUp() {}
 
     @Test
-    public void testV4TcpKeepalivePacket() throws Exception {
+    public void testFromTcpKeepaliveStableParcelable() throws Exception {
         final int srcPort = 1234;
         final int dstPort = 4321;
         final int seq = 0x11111111;
@@ -61,7 +64,7 @@ public final class TcpKeepalivePacketDataTest {
         testInfo.tos = tos;
         testInfo.ttl = ttl;
         try {
-            resultData = TcpKeepalivePacketData.tcpKeepalivePacket(testInfo);
+            resultData = KeepalivePacketDataUtil.fromStableParcelable(testInfo);
         } catch (InvalidPacketException e) {
             fail("InvalidPacketException: " + e);
         }
@@ -72,8 +75,8 @@ public final class TcpKeepalivePacketDataTest {
         assertEquals(testInfo.dstPort, resultData.getDstPort());
         assertEquals(testInfo.seq, resultData.tcpSeq);
         assertEquals(testInfo.ack, resultData.tcpAck);
-        assertEquals(testInfo.rcvWnd, resultData.tcpWnd);
-        assertEquals(testInfo.rcvWndScale, resultData.tcpWndScale);
+        assertEquals(testInfo.rcvWnd, resultData.tcpWindow);
+        assertEquals(testInfo.rcvWndScale, resultData.tcpWindowScale);
         assertEquals(testInfo.tos, resultData.ipTos);
         assertEquals(testInfo.ttl, resultData.ipTtl);
 
@@ -113,7 +116,7 @@ public final class TcpKeepalivePacketDataTest {
     //TODO: add ipv6 test when ipv6 supported
 
     @Test
-    public void testParcel() throws Exception {
+    public void testToTcpKeepaliveStableParcelable() throws Exception {
         final int srcPort = 1234;
         final int dstPort = 4321;
         final int sequence = 0x11111111;
@@ -135,8 +138,8 @@ public final class TcpKeepalivePacketDataTest {
         testInfo.ttl = ttl;
         TcpKeepalivePacketData testData = null;
         TcpKeepalivePacketDataParcelable resultData = null;
-        testData = TcpKeepalivePacketData.tcpKeepalivePacket(testInfo);
-        resultData = testData.toStableParcelable();
+        testData = KeepalivePacketDataUtil.fromStableParcelable(testInfo);
+        resultData = KeepalivePacketDataUtil.toStableParcelable(testData);
         assertArrayEquals(resultData.srcAddress, IPV4_KEEPALIVE_SRC_ADDR);
         assertArrayEquals(resultData.dstAddress, IPV4_KEEPALIVE_DST_ADDR);
         assertEquals(resultData.srcPort, srcPort);
@@ -153,5 +156,50 @@ public final class TcpKeepalivePacketDataTest {
                 + " srcPort: 1234, dstAddress: [10, 0, 0, 5], dstPort: 4321, seq: 286331153,"
                 + " ack: 572662306, rcvWnd: 48000, rcvWndScale: 2, tos: 4, ttl: 64}";
         assertEquals(expected, resultData.toString());
+    }
+
+    @Test
+    public void testParseTcpKeepalivePacketData() throws Exception {
+        final int srcPort = 1234;
+        final int dstPort = 4321;
+        final int sequence = 0x11111111;
+        final int ack = 0x22222222;
+        final int wnd = 4800;
+        final int wndScale = 2;
+        final int tos = 4;
+        final int ttl = 64;
+        final TcpKeepalivePacketDataParcelable testParcel = new TcpKeepalivePacketDataParcelable();
+        testParcel.srcAddress = IPV4_KEEPALIVE_SRC_ADDR;
+        testParcel.srcPort = srcPort;
+        testParcel.dstAddress = IPV4_KEEPALIVE_DST_ADDR;
+        testParcel.dstPort = dstPort;
+        testParcel.seq = sequence;
+        testParcel.ack = ack;
+        testParcel.rcvWnd = wnd;
+        testParcel.rcvWndScale = wndScale;
+        testParcel.tos = tos;
+        testParcel.ttl = ttl;
+
+        final KeepalivePacketData testData =
+                KeepalivePacketDataUtil.fromStableParcelable(testParcel);
+        final TcpKeepalivePacketDataParcelable parsedParcelable =
+                KeepalivePacketDataUtil.parseTcpKeepalivePacketData(testData);
+        final TcpKeepalivePacketData roundTripData =
+                KeepalivePacketDataUtil.fromStableParcelable(parsedParcelable);
+
+        // Generated packet is the same, but rcvWnd / wndScale will differ if scale is non-zero
+        assertTrue(testData.getPacket().length > 0);
+        assertArrayEquals(testData.getPacket(), roundTripData.getPacket());
+
+        testParcel.rcvWndScale = 0;
+        final KeepalivePacketData noScaleTestData =
+                KeepalivePacketDataUtil.fromStableParcelable(testParcel);
+        final TcpKeepalivePacketDataParcelable noScaleParsedParcelable =
+                KeepalivePacketDataUtil.parseTcpKeepalivePacketData(noScaleTestData);
+        final TcpKeepalivePacketData noScaleRoundTripData =
+                KeepalivePacketDataUtil.fromStableParcelable(noScaleParsedParcelable);
+        assertEquals(noScaleTestData, noScaleRoundTripData);
+        assertTrue(noScaleTestData.getPacket().length > 0);
+        assertArrayEquals(noScaleTestData.getPacket(), noScaleRoundTripData.getPacket());
     }
 }
