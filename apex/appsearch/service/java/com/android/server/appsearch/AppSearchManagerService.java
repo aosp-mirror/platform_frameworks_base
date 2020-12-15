@@ -47,7 +47,6 @@ import java.util.List;
  */
 public class AppSearchManagerService extends SystemService {
     private static final String TAG = "AppSearchManagerService";
-    private static final char CALLING_NAME_DATABASE_DELIMITER = '$';
 
     public AppSearchManagerService(Context context) {
         super(context);
@@ -78,8 +77,9 @@ public class AppSearchManagerService extends SystemService {
                     schemas.add(new AppSearchSchema(schemaBundles.get(i)));
                 }
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
-                databaseName = rewriteDatabaseNameWithUid(databaseName, callingUid);
-                impl.setSchema(databaseName, schemas, schemasNotPlatformSurfaceable, forceOverride);
+                String packageName = convertUidToPackageName(callingUid);
+                impl.setSchema(packageName, databaseName, schemas, schemasNotPlatformSurfaceable,
+                        forceOverride);
                 invokeCallbackOnResult(callback,
                         AppSearchResult.newSuccessfulResult(/*result=*/ null));
             } catch (Throwable t) {
@@ -100,8 +100,8 @@ public class AppSearchManagerService extends SystemService {
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
-                databaseName = rewriteDatabaseNameWithUid(databaseName, callingUid);
-                List<AppSearchSchema> schemas = impl.getSchema(databaseName);
+                String packageName = convertUidToPackageName(callingUid);
+                List<AppSearchSchema> schemas = impl.getSchema(packageName, databaseName);
                 List<Bundle> schemaBundles = new ArrayList<>(schemas.size());
                 for (int i = 0; i < schemas.size(); i++) {
                     schemaBundles.add(schemas.get(i).getBundle());
@@ -130,13 +130,13 @@ public class AppSearchManagerService extends SystemService {
                 AppSearchBatchResult.Builder<String, Void> resultBuilder =
                         new AppSearchBatchResult.Builder<>();
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
-                databaseName = rewriteDatabaseNameWithUid(databaseName, callingUid);
+                String packageName = convertUidToPackageName(callingUid);
                 for (int i = 0; i < documentBundles.size(); i++) {
                     GenericDocument document = new GenericDocument(documentBundles.get(i));
                     try {
                         // TODO(b/173451571): reduce burden of binder thread by enqueue request onto
                         // a separate thread.
-                        impl.putDocument(databaseName, document);
+                        impl.putDocument(packageName, databaseName, document);
                         resultBuilder.setSuccess(document.getUri(), /*result=*/ null);
                     } catch (Throwable t) {
                         resultBuilder.setResult(document.getUri(), throwableToFailedResult(t));
@@ -165,11 +165,12 @@ public class AppSearchManagerService extends SystemService {
                 AppSearchBatchResult.Builder<String, Bundle> resultBuilder =
                         new AppSearchBatchResult.Builder<>();
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
-                databaseName = rewriteDatabaseNameWithUid(databaseName, callingUid);
+                String packageName = convertUidToPackageName(callingUid);
                 for (int i = 0; i < uris.size(); i++) {
                     String uri = uris.get(i);
                     try {
-                        GenericDocument document = impl.getDocument(databaseName, namespace, uri);
+                        GenericDocument document = impl.getDocument(packageName, databaseName,
+                                namespace, uri);
                         resultBuilder.setSuccess(uri, document.getBundle());
                     } catch (Throwable t) {
                         resultBuilder.setResult(uri, throwableToFailedResult(t));
@@ -199,8 +200,9 @@ public class AppSearchManagerService extends SystemService {
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
-                databaseName = rewriteDatabaseNameWithUid(databaseName, callingUid);
+                String packageName = convertUidToPackageName(callingUid);
                 SearchResultPage searchResultPage = impl.query(
+                        packageName,
                         databaseName,
                         queryExpression,
                         new SearchSpec(searchSpecBundle));
@@ -283,15 +285,15 @@ public class AppSearchManagerService extends SystemService {
             int callingUid = Binder.getCallingUidOrThrow();
             int callingUserId = UserHandle.getUserId(callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
-            AppSearchBatchResult.Builder<String, Void> resultBuilder =
-                    new AppSearchBatchResult.Builder<>();
             try {
+                AppSearchBatchResult.Builder<String, Void> resultBuilder =
+                        new AppSearchBatchResult.Builder<>();
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
-                databaseName = rewriteDatabaseNameWithUid(databaseName, callingUid);
+                String packageName = convertUidToPackageName(callingUid);
                 for (int i = 0; i < uris.size(); i++) {
                     String uri = uris.get(i);
                     try {
-                        impl.remove(databaseName, namespace, uri);
+                        impl.remove(packageName, databaseName, namespace, uri);
                         resultBuilder.setSuccess(uri, /*result= */null);
                     } catch (Throwable t) {
                         resultBuilder.setResult(uri, throwableToFailedResult(t));
@@ -320,8 +322,8 @@ public class AppSearchManagerService extends SystemService {
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
-                databaseName = rewriteDatabaseNameWithUid(databaseName, callingUid);
-                impl.removeByQuery(databaseName, queryExpression,
+                String packageName = convertUidToPackageName(callingUid);
+                impl.removeByQuery(packageName, databaseName, queryExpression,
                         new SearchSpec(searchSpecBundle));
                 invokeCallbackOnResult(callback, AppSearchResult.newSuccessfulResult(null));
             } catch (Throwable t) {
@@ -348,13 +350,13 @@ public class AppSearchManagerService extends SystemService {
         }
 
         /**
-         * Rewrites the database name by adding a prefix of unique name for the given uid.
+         * Returns a package name for the given uid.
          *
          * <p>The current implementation returns the package name of the app with this uid in a
          * format like {@code com.example.package} or {@code com.example.sharedname:5678}.
          */
         @NonNull
-        private String rewriteDatabaseNameWithUid(String databaseName, int callingUid) {
+        private String convertUidToPackageName(int callingUid) {
             // For regular apps, this call will return the package name. If callingUid is an
             // android:sharedUserId, this value may be another type of name and have a :uid suffix.
             String callingUidName = getContext().getPackageManager().getNameForUid(callingUid);
@@ -363,12 +365,12 @@ public class AppSearchManagerService extends SystemService {
                 throw new IllegalStateException(
                         "Failed to look up package name for uid " + callingUid);
             }
-            return callingUidName + CALLING_NAME_DATABASE_DELIMITER + databaseName;
+            return callingUidName;
         }
 
-        /**  Invokes the {@link IAppSearchResultCallback} with the result. */
+        /** Invokes the {@link IAppSearchResultCallback} with the result. */
         private void invokeCallbackOnResult(IAppSearchResultCallback callback,
-                AppSearchResult result) {
+                AppSearchResult<?> result) {
             try {
                 callback.onResult(result);
             } catch (RemoteException e) {
@@ -376,9 +378,9 @@ public class AppSearchManagerService extends SystemService {
             }
         }
 
-        /**  Invokes the {@link IAppSearchBatchResultCallback} with the result. */
+        /** Invokes the {@link IAppSearchBatchResultCallback} with the result. */
         private void invokeCallbackOnResult(IAppSearchBatchResultCallback callback,
-                AppSearchBatchResult result) {
+                AppSearchBatchResult<?, ?> result) {
             try {
                 callback.onResult(result);
             } catch (RemoteException e) {
@@ -387,9 +389,9 @@ public class AppSearchManagerService extends SystemService {
         }
 
         /**
-         *  Invokes the {@link IAppSearchResultCallback} with an throwable.
+         * Invokes the {@link IAppSearchResultCallback} with an throwable.
          *
-         *  <p>The throwable is convert to a {@link AppSearchResult};
+         * <p>The throwable is convert to a {@link AppSearchResult};
          */
         private void invokeCallbackOnError(IAppSearchResultCallback callback, Throwable throwable) {
             try {
@@ -400,7 +402,7 @@ public class AppSearchManagerService extends SystemService {
         }
 
         /**
-         *  Invokes the {@link IAppSearchBatchResultCallback} with an throwable.
+         * Invokes the {@link IAppSearchBatchResultCallback} with an unexpected internal throwable.
          *
          * <p>The throwable is converted to {@link ParcelableException}.
          */
