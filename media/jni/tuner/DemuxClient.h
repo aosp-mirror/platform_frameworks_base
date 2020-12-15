@@ -22,10 +22,12 @@
 #include <android/hardware/tv/tuner/1.1/types.h>
 
 #include "FilterClient.h"
+#include "FilterClientCallback.h"
 #include "FrontendClient.h"
 
 //using ::aidl::android::media::tv::tuner::ITunerDemux;
 
+using ::android::hardware::tv::tuner::V1_0::DemuxFilterType;
 using ::android::hardware::tv::tuner::V1_0::IDemux;
 
 using namespace std;
@@ -44,19 +46,19 @@ public:
     /**
      * Set a frontend resource as data input of the demux.
      */
-    Result setFrontendDataSource(sp<FrontendClient> tunerFrontend);
+    Result setFrontendDataSource(sp<FrontendClient> frontendClient);
 
     /**
      * Open a new filter client.
      */
-    //FilterClient openFilter(int mainType, int subType, int bufferSize, FilterClientCallback cb);
+    sp<FilterClient> openFilter(DemuxFilterType type, int bufferSize, sp<FilterClientCallback> cb);
 
     // TODO: handle TimeFilterClient
 
     /**
      * Get hardware sync ID for audio and video.
      */
-    int getAvSyncHwId(FilterClient tunerFilter);
+    int getAvSyncHwId(sp<FilterClient> filterClient);
 
     /**
      * Get current time stamp to use for A/V sync.
@@ -85,6 +87,8 @@ public:
     Result close();
 
 private:
+    sp<IFilter> openHidlFilter(DemuxFilterType type, int bufferSize, sp<HidlFilterCallback> cb);
+
     /**
      * An AIDL Tuner Demux Singleton assigned at the first time the Tuner Client
      * opens a demux. Default null when demux is not opened.

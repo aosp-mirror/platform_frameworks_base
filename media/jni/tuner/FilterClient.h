@@ -19,27 +19,57 @@
 
 //#include <aidl/android/media/tv/tuner/ITunerFilter.h>
 #include <android/hardware/tv/tuner/1.1/IFilter.h>
+#include <android/hardware/tv/tuner/1.1/IFilterCallback.h>
 #include <android/hardware/tv/tuner/1.1/types.h>
 #include <fmq/MessageQueue.h>
 
-//#include "FilterClientCallback.h"
+#include "FilterClientCallback.h"
 
 //using ::aidl::android::media::tv::tuner::ITunerFilter;
 
 using ::android::hardware::EventFlag;
 using ::android::hardware::MessageQueue;
 using ::android::hardware::MQDescriptorSync;
+using ::android::hardware::Return;
+using ::android::hardware::Void;
 using ::android::hardware::hidl_handle;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterSettings;
 using ::android::hardware::tv::tuner::V1_0::IFilter;
 using ::android::hardware::tv::tuner::V1_0::Result;
 using ::android::hardware::tv::tuner::V1_1::AvStreamType;
+using ::android::hardware::tv::tuner::V1_1::IFilterCallback;
 
 using namespace std;
 
 using MQ = MessageQueue<uint8_t, kSynchronizedReadWrite>;
 
 namespace android {
+
+// TODO: pending aidl interface
+/*class TunerFilterCallback : public BnTunerFilterCallback {
+
+public:
+    TunerFilterCallback(sp<FilterClientCallback> filterClientCallback);
+
+    Status onFilterEvent(vector<TunerDemuxFilterEvent> events);
+    Status onFilterStatus(int status);
+
+private:
+    sp<FilterClientCallback> mFilterClientCallback;
+};*/
+
+struct HidlFilterCallback : public IFilterCallback {
+
+public:
+    HidlFilterCallback(sp<FilterClientCallback> filterClientCallback);
+    virtual Return<void> onFilterEvent_1_1(const DemuxFilterEvent& filterEvent,
+            const DemuxFilterEventExt& filterEventExt);
+    virtual Return<void> onFilterEvent(const DemuxFilterEvent& filterEvent);
+    virtual Return<void> onFilterStatus(const DemuxFilterStatus status);
+
+private:
+    sp<FilterClientCallback> mFilterClientCallback;
+};
 
 struct FilterClient : public RefBase {
 
@@ -50,11 +80,6 @@ public:
 
     // TODO: remove after migration to Tuner Service is done.
     void setHidlFilter(sp<IFilter> filter);
-
-    /**
-     * Set the filter client callback.
-     */
-    //Result setCallback(FilterClientCallback filterClientCallback);
 
     /**
      * Read size of data from filter FMQ into buffer.
@@ -142,24 +167,28 @@ private:
      * opens a filter. Default null when Tuner Service does not exist.
      */
     // TODO: pending on aidl interface
-    //static shared_ptr<ITunerFilter> mTunerFilter;
+    //shared_ptr<ITunerFilter> mTunerFilter;
 
     /**
      * A 1.0 Filter HAL interface that is ready before migrating to the TunerFilter.
      * This is a temprary interface before Tuner Framework migrates to use TunerService.
      * Default null when the HAL service does not exist.
      */
-    static sp<IFilter> mFilter;
+    sp<IFilter> mFilter;
 
     /**
      * A 1.1 Filter HAL interface that is ready before migrating to the TunerFilter.
      * This is a temprary interface before Tuner Framework migrates to use TunerService.
      * Default null when the HAL service does not exist.
      */
-    static sp<::android::hardware::tv::tuner::V1_1::IFilter> mFilter_1_1;
+    sp<::android::hardware::tv::tuner::V1_1::IFilter> mFilter_1_1;
 
     unique_ptr<MQ> mFilterMQ;
     EventFlag* mFilterMQEventFlag;
+
+    sp<FilterClientCallback> mCallback;
+    //shared_ptr<TunerFilterCallback> mAidlCallback;
+    sp<HidlFilterCallback> mHidlCallback;
 };
 }  // namespace android
 
