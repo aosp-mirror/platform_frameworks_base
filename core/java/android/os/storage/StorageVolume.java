@@ -38,6 +38,7 @@ import com.android.internal.util.Preconditions;
 import java.io.CharArrayWriter;
 import java.io.File;
 import java.util.Locale;
+import java.util.UUID;
 
 /**
  * Information about a shared/external storage volume for a specific user.
@@ -98,6 +99,7 @@ public final class StorageVolume implements Parcelable {
     private final boolean mAllowMassStorage;
     private final long mMaxFileSize;
     private final UserHandle mOwner;
+    private final UUID mUuid;
     private final String mFsUuid;
     private final String mState;
 
@@ -133,7 +135,7 @@ public final class StorageVolume implements Parcelable {
     /** {@hide} */
     public StorageVolume(String id, File path, File internalPath, String description,
             boolean primary, boolean removable, boolean emulated, boolean allowMassStorage,
-            long maxFileSize, UserHandle owner, String fsUuid, String state) {
+            long maxFileSize, UserHandle owner, UUID uuid, String fsUuid, String state) {
         mId = Preconditions.checkNotNull(id);
         mPath = Preconditions.checkNotNull(path);
         mInternalPath = Preconditions.checkNotNull(internalPath);
@@ -144,6 +146,7 @@ public final class StorageVolume implements Parcelable {
         mAllowMassStorage = allowMassStorage;
         mMaxFileSize = maxFileSize;
         mOwner = Preconditions.checkNotNull(owner);
+        mUuid = uuid;
         mFsUuid = fsUuid;
         mState = Preconditions.checkNotNull(state);
     }
@@ -159,6 +162,11 @@ public final class StorageVolume implements Parcelable {
         mAllowMassStorage = in.readInt() != 0;
         mMaxFileSize = in.readLong();
         mOwner = in.readParcelable(null);
+        if (in.readInt() != 0) {
+            mUuid = StorageManager.convert(in.readString());
+        } else {
+            mUuid = null;
+        }
         mFsUuid = in.readString8();
         mState = in.readString8();
     }
@@ -285,6 +293,20 @@ public final class StorageVolume implements Parcelable {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public UserHandle getOwner() {
         return mOwner;
+    }
+
+    /**
+     * Gets the converted volume UUID. If a valid UUID is returned, it is compatible with other
+     * APIs that make use of {@link UUID} like {@link StorageManager#allocateBytes} and
+     * {@link android.content.pm.ApplicationInfo#storageUuid}
+     *
+     * @return the UUID for the volume or {@code null} for "portable" storage devices which haven't
+     * been adopted.
+     *
+     * @see <a href="https://source.android.com/devices/storage/adoptable">Adoptable storage</a>
+     */
+    public @Nullable UUID getStorageUuid() {
+        return mUuid;
     }
 
     /**
@@ -513,6 +535,12 @@ public final class StorageVolume implements Parcelable {
         parcel.writeInt(mAllowMassStorage ? 1 : 0);
         parcel.writeLong(mMaxFileSize);
         parcel.writeParcelable(mOwner, flags);
+        if (mUuid != null) {
+            parcel.writeInt(1);
+            parcel.writeString8(StorageManager.convert(mUuid));
+        } else {
+            parcel.writeInt(0);
+        }
         parcel.writeString8(mFsUuid);
         parcel.writeString8(mState);
     }
