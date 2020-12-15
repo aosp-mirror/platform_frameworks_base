@@ -129,10 +129,9 @@ public class PipBoundsAlgorithm {
                 : getDefaultBounds();
 
         final boolean useCurrentSize = reentryState != null && reentryState.getSize() != null;
-        final Rect r = transformBoundsToAspectRatioIfValid(destinationBounds,
+        return transformBoundsToAspectRatioIfValid(destinationBounds,
                 mPipBoundsState.getAspectRatio(), false /* useCurrentMinEdgeSize */,
                 useCurrentSize);
-        return r;
     }
 
     /** Returns the current bounds adjusted to the new aspect ratio, if valid. */

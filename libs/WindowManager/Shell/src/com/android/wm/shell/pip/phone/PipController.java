@@ -114,14 +114,14 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         // the bounds for the next orientation using the destination bounds of the animation
         // TODO: Technically this should account for movement animation bounds as well
         Rect currentBounds = mPipTaskOrganizer.getCurrentOrAnimatingBounds();
-        final boolean changed = onDisplayRotationChanged(mContext,
-                mPipBoundsState.getNormalBounds(), currentBounds, mTmpInsetBounds, displayId,
-                fromRotation, toRotation, t);
+        final Rect outBounds = new Rect();
+        final boolean changed = onDisplayRotationChanged(mContext, outBounds, currentBounds,
+                mTmpInsetBounds, displayId, fromRotation, toRotation, t);
         if (changed) {
             // If the pip was in the offset zone earlier, adjust the new bounds to the bottom of the
             // movement bounds
-            mTouchHandler.adjustBoundsForRotation(mPipBoundsState.getNormalBounds(),
-                    mPipBoundsState.getBounds(), mTmpInsetBounds);
+            mTouchHandler.adjustBoundsForRotation(outBounds, mPipBoundsState.getBounds(),
+                    mTmpInsetBounds);
 
             // The bounds are being applied to a specific snap fraction, so reset any known offsets
             // for the previous orientation before updating the movement bounds.
@@ -129,14 +129,18 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             // not during the fixed rotation. In fixed rotation case, app is about to enter PiP
             // and we need the offsets preserved to calculate the destination bounds.
             if (!mIsInFixedRotation) {
-                mPipBoundsState.setShelfVisibility(false /* showing */, 0 /* height */);
+                // Update the shelf visibility without updating the movement bounds. We're already
+                // updating them below with the |fromRotation| flag set, which is more accurate
+                // than using the |fromShelfAdjustment|.
+                mPipBoundsState.setShelfVisibility(false /* showing */, 0 /* height */,
+                        false /* updateMovementBounds */);
                 mPipBoundsState.setImeVisibility(false /* showing */, 0 /* height */);
                 mTouchHandler.onShelfVisibilityChanged(false, 0);
                 mTouchHandler.onImeVisibilityChanged(false, 0);
             }
 
-            updateMovementBounds(mPipBoundsState.getNormalBounds(), true /* fromRotation */,
-                    false /* fromImeAdjustment */, false /* fromShelfAdjustment */, t);
+            updateMovementBounds(outBounds, true /* fromRotation */, false /* fromImeAdjustment */,
+                    false /* fromShelfAdjustment */, t);
         }
     };
 
@@ -248,12 +252,16 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
                             false /* fromImeAdjustment */, false /* fromShelfAdjustment */,
                             null /* wct */);
                 });
-        mPipBoundsState.setOnShelfVisibilityChangeCallback((isShowing, height) -> {
-            mTouchHandler.onShelfVisibilityChanged(isShowing, height);
-            updateMovementBounds(mPipBoundsState.getBounds(),
-                    false /* fromRotation */, false /* fromImeAdjustment */,
-                    true /* fromShelfAdjustment */, null /* windowContainerTransaction */);
-        });
+        mPipBoundsState.setOnShelfVisibilityChangeCallback(
+                (isShowing, height, updateMovementBounds) -> {
+                    mTouchHandler.onShelfVisibilityChanged(isShowing, height);
+                    if (updateMovementBounds) {
+                        updateMovementBounds(mPipBoundsState.getBounds(),
+                                false /* fromRotation */, false /* fromImeAdjustment */,
+                                true /* fromShelfAdjustment */,
+                                null /* windowContainerTransaction */);
+                    }
+                });
         if (mTouchHandler != null) {
             // Register the listener for input consumer touch events. Only for Phone
             mPipInputConsumer.setInputListener(mTouchHandler::handleTouchEvent);
