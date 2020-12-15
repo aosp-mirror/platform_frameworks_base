@@ -27,10 +27,11 @@ namespace android {
 
 /////////////// FrontendClient ///////////////////////
 
-FrontendClient::FrontendClient(shared_ptr<ITunerFrontend> tunerFrontend) {
+FrontendClient::FrontendClient(shared_ptr<ITunerFrontend> tunerFrontend, int frontendHandle) {
     mTunerFrontend = tunerFrontend;
     mAidlCallback = NULL;
     mHidlCallback = NULL;
+    mFrontendHandle = frontendHandle;
 }
 
 FrontendClient::~FrontendClient() {
@@ -39,6 +40,7 @@ FrontendClient::~FrontendClient() {
     mFrontend_1_1 = NULL;
     mAidlCallback = NULL;
     mHidlCallback = NULL;
+    mFrontendHandle = -1;
 }
 
 Result FrontendClient::setCallback(sp<FrontendClientCallback> frontendClientCallback) {
@@ -114,6 +116,14 @@ Result FrontendClient::close() {
     }
 
     return Result::INVALID_STATE;
+}
+
+shared_ptr<ITunerFrontend> FrontendClient::getAidlFrontend() {
+    return mTunerFrontend;
+}
+
+int FrontendClient::getId() {
+    return getResourceIdFromHandle(mFrontendHandle);
 }
 
 /////////////// TunerFrontendCallback ///////////////////////

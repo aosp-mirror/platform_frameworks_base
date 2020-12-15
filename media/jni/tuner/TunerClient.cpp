@@ -82,13 +82,13 @@ sp<FrontendClient> TunerClient::openFrontend(int frontendHandle) {
         // TODO: handle error code
         shared_ptr<ITunerFrontend> tunerFrontend;
         mTunerService->openFrontend(frontendHandle, &tunerFrontend);
-        return new FrontendClient(tunerFrontend);
+        return new FrontendClient(tunerFrontend, frontendHandle);
     }
 
     if (mTuner != NULL) {
         sp<IFrontend> hidlFrontend = openHidlFrontendByHandle(frontendHandle);
         if (hidlFrontend != NULL) {
-            sp<FrontendClient> frontendClient = new FrontendClient(NULL);
+            sp<FrontendClient> frontendClient = new FrontendClient(NULL, frontendHandle);
             frontendClient->setHidlFrontend(hidlFrontend);
             return frontendClient;
         }
@@ -130,6 +130,27 @@ shared_ptr<FrontendDtmbCapabilities> TunerClient::getFrontendDtmbCapabilities(in
         });
         if (result == Result::SUCCESS) {
             return make_shared<FrontendDtmbCapabilities>(dtmbCaps);
+        }
+    }
+
+    return NULL;
+}
+
+sp<DemuxClient> TunerClient::openDemux(int /*demuxHandle*/) {
+    if (mTunerService != NULL) {
+        // TODO: handle error code
+        /*shared_ptr<ITunerDemux> tunerDemux;
+        mTunerService->openDemux(demuxHandle, &tunerDemux);
+        return new DemuxClient(tunerDemux);*/
+    }
+
+    if (mTuner != NULL) {
+        // TODO: pending aidl interface
+        sp<DemuxClient> demuxClient = new DemuxClient();
+        sp<IDemux> hidlDemux = openHidlDemux();
+        if (hidlDemux != NULL) {
+            demuxClient->setHidlDemux(hidlDemux);
+            return demuxClient;
         }
     }
 
@@ -181,6 +202,21 @@ Result TunerClient::getHidlFrontendInfo(int id, FrontendInfo& feInfo) {
         res = r;
     });
     return res;
+}
+
+sp<IDemux> TunerClient::openHidlDemux() {
+    sp<IDemux> demux;
+    Result res;
+
+    mTuner->openDemux([&](Result result, uint32_t /*id*/, const sp<IDemux>& demuxSp) {
+        demux = demuxSp;
+        res = result;
+    });
+    if (res != Result::SUCCESS || demux == nullptr) {
+        ALOGE("Failed to open demux");
+        return NULL;
+    }
+    return demux;
 }
 
 FrontendInfo TunerClient::FrontendInfoAidlToHidl(TunerServiceFrontendInfo aidlFrontendInfo) {
