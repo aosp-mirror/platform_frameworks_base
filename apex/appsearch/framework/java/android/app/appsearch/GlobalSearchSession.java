@@ -19,6 +19,7 @@ package android.app.appsearch;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.RemoteException;
 
 import java.util.Objects;
@@ -31,6 +32,7 @@ import java.util.function.Consumer;
  * <p>Apps can retrieve indexed documents through the query API.
  * @hide
  */
+@SystemApi
 public class GlobalSearchSession {
 
     private final IAppSearchManager mService;
