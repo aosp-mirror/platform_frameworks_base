@@ -2056,7 +2056,9 @@ public class DevicePolicyManager {
     /**
      * Result code for {@link #checkProvisioningPreCondition}.
      *
-     * <p>Returned for {@link #ACTION_PROVISION_MANAGED_USER} if the user is a system user.
+     * <p>Returned for {@link #ACTION_PROVISION_MANAGED_USER} if the user is a system user and
+     * for {@link #ACTION_PROVISION_MANAGED_DEVICE} on devices running headless system user mode
+     * and the user is a system user.
      *
      * @hide
      */

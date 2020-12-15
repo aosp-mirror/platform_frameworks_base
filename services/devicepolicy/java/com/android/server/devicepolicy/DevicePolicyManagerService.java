@@ -6112,9 +6112,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private void forceWipeUser(int userId, String wipeReasonForUser, boolean wipeSilently) {
         boolean success = false;
         try {
-            IActivityManager am = mInjector.getIActivityManager();
-            if (am.getCurrentUser().id == userId) {
-                am.switchUser(UserHandle.USER_SYSTEM);
+            if (getCurrentForegroundUser() == userId) {
+                mInjector.getIActivityManager().switchUser(UserHandle.USER_SYSTEM);
             }
 
             success = mUserManagerInternal.removeUserEvenWhenDisallowed(userId);
@@ -7578,9 +7577,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             Slog.i(LOG_TAG, "Device owner set: " + admin + " on user " + userId);
 
             if (mInjector.userManagerIsHeadlessSystemUserMode()) {
-                Slog.i(LOG_TAG, "manageUser: " + admin + " on user " + userId);
-
-                manageUser(admin, admin, caller.getUserId(), null);
+                int currentForegroundUser = getCurrentForegroundUser();
+                Slog.i(LOG_TAG, "setDeviceOwner(): setting " + admin
+                        + " as profile owner on user " + currentForegroundUser);
+                // Sets profile owner on current foreground user since
+                // the human user will complete the DO setup workflow from there.
+                mInjector.binderWithCleanCallingIdentity(() ->
+                        manageUserUnchecked(/* deviceOwner= */ admin, /* profileOwner= */ admin,
+                                /* managedUser= */ currentForegroundUser,
+                                /* adminExtras= */ null));
             }
             return true;
         }
@@ -8565,16 +8570,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * permission.
      */
     private void enforceCanSetDeviceOwnerLocked(CallerIdentity caller,
-            @Nullable ComponentName owner, @UserIdInt int userId) {
+            @Nullable ComponentName owner, @UserIdInt int deviceOwnerUserId) {
         if (!isAdb(caller)) {
             Preconditions.checkCallAuthorization(
                     hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
         }
 
-        final int code = checkDeviceOwnerProvisioningPreConditionLocked(owner, userId,
-                isAdb(caller), hasIncompatibleAccountsOrNonAdbNoLock(caller, userId, owner));
+        final int code = checkDeviceOwnerProvisioningPreConditionLocked(owner,
+                /* deviceOwnerUserId= */ deviceOwnerUserId, /* callingUserId*/ caller.getUserId(),
+                isAdb(caller),
+                hasIncompatibleAccountsOrNonAdbNoLock(caller, deviceOwnerUserId, owner));
         if (code != CODE_OK) {
-            throw new IllegalStateException(computeProvisioningErrorString(code, userId));
+            throw new IllegalStateException(
+                    computeProvisioningErrorString(code, deviceOwnerUserId));
         }
     }
 
@@ -8700,6 +8708,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private boolean isShellUid(CallerIdentity caller) {
         return UserHandle.isSameApp(caller.getUid(), Process.SHELL_UID);
+    }
+
+    private @UserIdInt int getCurrentForegroundUser() {
+        try {
+            return mInjector.getIActivityManager().getCurrentUser().id;
+        } catch (RemoteException e) {
+            Slog.wtf(LOG_TAG, "cannot get current user");
+        }
+        return UserHandle.USER_NULL;
     }
 
     protected int getProfileParentId(int userHandle) {
@@ -9613,7 +9630,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final long id = mInjector.binderClearCallingIdentity();
         try {
-            manageUser(admin, profileOwner, userHandle, adminExtras);
+            manageUserUnchecked(admin, profileOwner, userHandle, adminExtras);
 
             if ((flags & DevicePolicyManager.SKIP_SETUP_WIZARD) != 0) {
                 Settings.Secure.putIntForUser(mContext.getContentResolver(),
@@ -9634,43 +9651,34 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private void manageUser(ComponentName admin, ComponentName profileOwner,
+    private void manageUserUnchecked(ComponentName admin, ComponentName profileOwner,
             @UserIdInt int userId, PersistableBundle adminExtras) {
-        // Check for permission
-        final CallerIdentity caller = getCallerIdentity();
-        Preconditions.checkCallAuthorization(canManageUsers(caller));
-        Preconditions.checkCallAuthorization(
-                hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
-        mInjector.binderWithCleanCallingIdentity(() ->
-                    manageUserNoCheck(admin, profileOwner, userId, adminExtras));
-    }
-
-    private void manageUserNoCheck(ComponentName admin, ComponentName profileOwner,
-            int user, PersistableBundle adminExtras) {
-
         final String adminPkg = admin.getPackageName();
         try {
             // Install the profile owner if not present.
-            if (!mIPackageManager.isPackageAvailable(adminPkg, user)) {
-                mIPackageManager.installExistingPackageAsUser(adminPkg, user,
+            if (!mIPackageManager.isPackageAvailable(adminPkg, userId)) {
+                mIPackageManager.installExistingPackageAsUser(adminPkg, userId,
                         PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
-                        PackageManager.INSTALL_REASON_POLICY, null);
+                        PackageManager.INSTALL_REASON_POLICY,
+                        /* allowlistedRestrictedPermissions= */ null);
             }
         } catch (RemoteException e) {
             // Does not happen, same process
+            Slog.wtf(LOG_TAG, String.format("Failed to install admin package %s for user %d",
+                    adminPkg, userId), e);
         }
 
         // Set admin.
-        setActiveAdmin(profileOwner, true, user);
+        setActiveAdmin(profileOwner, /* refreshing= */ true, userId);
         final String ownerName = getProfileOwnerName(Process.myUserHandle().getIdentifier());
-        setProfileOwner(profileOwner, ownerName, user);
+        setProfileOwner(profileOwner, ownerName, userId);
 
         synchronized (getLockObject()) {
-            DevicePolicyData policyData = getUserData(user);
+            DevicePolicyData policyData = getUserData(userId);
             policyData.mInitBundle = adminExtras;
             policyData.mAdminBroadcastPending = true;
 
-            saveSettingsLocked(user);
+            saveSettingsLocked(userId);
         }
     }
 
@@ -12304,7 +12312,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * except for adb command if no accounts or additional users are present on the device.
      */
     private int checkDeviceOwnerProvisioningPreConditionLocked(@Nullable ComponentName owner,
-            @UserIdInt int deviceOwnerUserId, boolean isAdb,
+            @UserIdInt int deviceOwnerUserId, @UserIdInt int callingUserId, boolean isAdb,
             boolean hasIncompatibleAccountsOrNonAdb) {
         if (mOwners.hasDeviceOwner()) {
             return CODE_HAS_DEVICE_OWNER;
@@ -12320,6 +12328,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (mIsWatch && hasPaired(UserHandle.USER_SYSTEM)) {
             return CODE_HAS_PAIRED;
         }
+
+        if (mInjector.userManagerIsHeadlessSystemUserMode()) {
+            if (deviceOwnerUserId != UserHandle.USER_SYSTEM) {
+                Slog.e(LOG_TAG, "In headless system user mode, "
+                        + "device owner can only be set on headless system user.");
+                return CODE_NOT_SYSTEM_USER;
+            }
+        }
+
         // TODO (b/137101239): clean up split system user codes
         if (isAdb) {
             // If shell command runs after user setup completed check device status. Otherwise, OK.
@@ -12330,6 +12347,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         && !mInjector.userManagerIsSplitSystemUser()
                         && mUserManager.getUserCount() > 1) {
                     return CODE_NONSYSTEM_USER_EXISTS;
+                }
+
+                int currentForegroundUser = getCurrentForegroundUser();
+                if (callingUserId != currentForegroundUser
+                        && mInjector.userManagerIsHeadlessSystemUserMode()
+                        && currentForegroundUser == UserHandle.USER_SYSTEM) {
+                    Slog.wtf(LOG_TAG, "In headless system user mode, "
+                            + "current user cannot be system user when setting device owner");
+                    return CODE_SYSTEM_USER;
                 }
                 if (hasIncompatibleAccountsOrNonAdb) {
                     return CODE_ACCOUNTS_NOT_EMPTY;
@@ -12362,7 +12388,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             callingUserId, deviceOwnerUserId));
             // hasIncompatibleAccountsOrNonAdb doesn't matter since the caller is not adb.
             return checkDeviceOwnerProvisioningPreConditionLocked(/* owner unknown */ null,
-                    deviceOwnerUserId, /* isAdb= */ false,
+                    deviceOwnerUserId, callingUserId, /* isAdb= */ false,
                     /* hasIncompatibleAccountsOrNonAdb=*/ true);
         }
     }
@@ -14901,8 +14927,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private boolean isLockTaskFeatureEnabled(int lockTaskFeature) throws RemoteException {
+        //TODO(b/175285301): Explicitly get the user's identity to check.
         int lockTaskFeatures =
-                getUserData(mInjector.getIActivityManager().getCurrentUser().id).mLockTaskFeatures;
+                getUserData(getCurrentForegroundUser()).mLockTaskFeatures;
         return (lockTaskFeatures & lockTaskFeature) == lockTaskFeature;
     }
 
