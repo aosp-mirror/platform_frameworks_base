@@ -8368,10 +8368,10 @@ public final class ContactsContract {
         public static final int UNKNOWN_EF_TYPE = 0;
         /** EF type identifier for the ADN partition. */
         public static final int ADN_EF_TYPE = 1;
-        /** EF type identifier for the SDN partition. */
-        public static final int SDN_EF_TYPE = 2;
         /** EF type identifier for the FDN partition. */
-        public static final int FDN_EF_TYPE = 3;
+        public static final int FDN_EF_TYPE = 2;
+        /** EF type identifier for the SDN partition. */
+        public static final int SDN_EF_TYPE = 3;
 
         /**
          * The account_name of this SIM account. See {@link RawContacts#ACCOUNT_NAME}.
