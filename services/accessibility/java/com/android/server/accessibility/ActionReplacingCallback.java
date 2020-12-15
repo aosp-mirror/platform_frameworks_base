@@ -19,16 +19,15 @@ package com.android.server.accessibility;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.util.Slog;
-import android.view.MagnificationSpec;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
+
 import com.android.internal.annotations.GuardedBy;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * If we are stripping and/or replacing the actions from a window, we need to intercept the
