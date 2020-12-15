@@ -281,11 +281,11 @@ public class JobInfo implements Parcelable {
     public static final int FLAG_EXEMPT_FROM_APP_STANDBY = 1 << 3;
 
     /**
-     * Whether it's a so-called "HPJ" or not.
+     * Whether it's an expedited job or not.
      *
      * @hide
      */
-    public static final int FLAG_FOREGROUND_JOB = 1 << 4;
+    public static final int FLAG_EXPEDITED = 1 << 4;
 
     /**
      * @hide
@@ -586,10 +586,19 @@ public class JobInfo implements Parcelable {
     }
 
     /**
-     * @see JobInfo.Builder#setForeground(boolean)
+     * @see JobInfo.Builder#setExpedited(boolean)
      */
+    public boolean isExpedited() {
+        return (flags & FLAG_EXPEDITED) != 0;
+    }
+
+    /**
+     * @see JobInfo.Builder#setExpedited(boolean)
+     * @deprecated Use {@link #isExpedited()} instead
+     */
+    @Deprecated
     public boolean isForegroundJob() {
-        return (flags & FLAG_FOREGROUND_JOB) != 0;
+        return (flags & FLAG_EXPEDITED) != 0;
     }
 
     /**
@@ -1458,7 +1467,7 @@ public class JobInfo implements Parcelable {
 
         /**
          * Setting this to true indicates that this job is important and needs to run as soon as
-         * possible with stronger guarantees than regular jobs. These "foreground" jobs will:
+         * possible with stronger guarantees than regular jobs. These "expedited" jobs will:
          * <ol>
          *     <li>Run as soon as possible</li>
          *     <li>Be exempted from Doze and battery saver restrictions</li>
@@ -1466,27 +1475,41 @@ public class JobInfo implements Parcelable {
          * </ol>
          *
          * Since these jobs have stronger guarantees than regular jobs, they will be subject to
-         * stricter quotas. As long as an app has available foreground quota, jobs scheduled with
+         * stricter quotas. As long as an app has available expedited quota, jobs scheduled with
          * this set to true will run with these guarantees. If an app has run out of available
-         * foreground quota, any pending foreground jobs will run as regular jobs.
-         * {@link JobParameters#isForegroundJob()} can be used to know whether the executing job
-         * has foreground guarantees or not. In addition, {@link JobScheduler#schedule(JobInfo)}
+         * expedited quota, any pending expedited jobs will run as regular jobs.
+         * {@link JobParameters#isExpeditedJob()} can be used to know whether the executing job
+         * has expedited guarantees or not. In addition, {@link JobScheduler#schedule(JobInfo)}
          * will immediately return {@link JobScheduler#RESULT_FAILURE} if the app does not have
          * available quota (and the job will not be successfully scheduled).
          *
-         * Foreground jobs may only set network constraints. No other constraints are allowed.
+         * Expedited jobs may only set network constraints. No other constraints are allowed.
          *
-         * Note: Even though foreground jobs are meant to run as soon as possible, they may be
+         * Note: Even though expedited jobs are meant to run as soon as possible, they may be
          * deferred if the system is under heavy load or the network constraint is satisfied
          *
-         * @see JobInfo#isForegroundJob()
+         * @see JobInfo#isExpedited()
          */
+        @NonNull
+        public Builder setExpedited(boolean expedited) {
+            if (expedited) {
+                mFlags |= FLAG_EXPEDITED;
+            } else {
+                mFlags &= (~FLAG_EXPEDITED);
+            }
+            return this;
+        }
+
+        /**
+         * @deprecated Use {@link #setExpedited(boolean)} instead.
+         */
+        @Deprecated
         @NonNull
         public Builder setForeground(boolean foreground) {
             if (foreground) {
-                mFlags |= FLAG_FOREGROUND_JOB;
+                mFlags |= FLAG_EXPEDITED;
             } else {
-                mFlags &= (~FLAG_FOREGROUND_JOB);
+                mFlags &= (~FLAG_EXPEDITED);
             }
             return this;
         }
@@ -1506,7 +1529,7 @@ public class JobInfo implements Parcelable {
          * @param importantWhileForeground whether to relax doze restrictions for this job when the
          *                                 app is in the foreground. False by default.
          * @see JobInfo#isImportantWhileForeground()
-         * @deprecated Use {@link #setForeground(boolean)} instead.
+         * @deprecated Use {@link #setExpedited(boolean)} instead.
          */
         @Deprecated
         public Builder setImportantWhileForeground(boolean importantWhileForeground) {
@@ -1633,26 +1656,26 @@ public class JobInfo implements Parcelable {
                     "An important while foreground job cannot have a time delay");
         }
 
-        if ((flags & FLAG_FOREGROUND_JOB) != 0) {
+        if ((flags & FLAG_EXPEDITED) != 0) {
             if (hasEarlyConstraint) {
-                throw new IllegalArgumentException("A foreground job cannot have a time delay");
+                throw new IllegalArgumentException("An expedited job cannot have a time delay");
             }
             if (hasLateConstraint) {
-                throw new IllegalArgumentException("A foreground job cannot have a deadline");
+                throw new IllegalArgumentException("An expedited job cannot have a deadline");
             }
             if (isPeriodic) {
-                throw new IllegalArgumentException("A foreground job cannot be periodic");
+                throw new IllegalArgumentException("An expedited job cannot be periodic");
             }
             if (isPersisted) {
-                throw new IllegalArgumentException("A foreground job cannot be persisted");
+                throw new IllegalArgumentException("An expedited job cannot be persisted");
             }
-            if (constraintFlags != 0 || (flags & ~FLAG_FOREGROUND_JOB) != 0) {
+            if (constraintFlags != 0 || (flags & ~FLAG_EXPEDITED) != 0) {
                 throw new IllegalArgumentException(
-                        "A foreground job can only have network constraints");
+                        "An expedited job can only have network constraints");
             }
             if (triggerContentUris != null && triggerContentUris.length > 0) {
                 throw new IllegalArgumentException(
-                        "Can't call addTriggerContentUri() on a foreground job");
+                        "Can't call addTriggerContentUri() on an expedited job");
             }
         }
     }

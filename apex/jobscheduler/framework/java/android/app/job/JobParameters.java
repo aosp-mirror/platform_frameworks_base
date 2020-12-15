@@ -111,9 +111,7 @@ public class JobParameters implements Parcelable {
     @UnsupportedAppUsage
     private final IBinder callback;
     private final boolean overrideDeadlineExpired;
-    // HPJs = foreground jobs.
-    // TODO(171305774): clean up naming
-    private final boolean mIsHpj;
+    private final boolean mIsExpedited;
     private final Uri[] mTriggeredContentUris;
     private final String[] mTriggeredContentAuthorities;
     private final Network network;
@@ -124,7 +122,7 @@ public class JobParameters implements Parcelable {
     /** @hide */
     public JobParameters(IBinder callback, int jobId, PersistableBundle extras,
             Bundle transientExtras, ClipData clipData, int clipGrantFlags,
-            boolean overrideDeadlineExpired, boolean isHpj, Uri[] triggeredContentUris,
+            boolean overrideDeadlineExpired, boolean isExpedited, Uri[] triggeredContentUris,
             String[] triggeredContentAuthorities, Network network) {
         this.jobId = jobId;
         this.extras = extras;
@@ -133,7 +131,7 @@ public class JobParameters implements Parcelable {
         this.clipGrantFlags = clipGrantFlags;
         this.callback = callback;
         this.overrideDeadlineExpired = overrideDeadlineExpired;
-        this.mIsHpj = isHpj;
+        this.mIsExpedited = isExpedited;
         this.mTriggeredContentUris = triggeredContentUris;
         this.mTriggeredContentAuthorities = triggeredContentAuthorities;
         this.network = network;
@@ -199,14 +197,22 @@ public class JobParameters implements Parcelable {
     }
 
     /**
-     * @return Whether this job is running as a foreground job or not. A job is guaranteed to have
-     * all foreground job guarantees for the duration of the job execution if this returns
+     * @return Whether this job is running as an expedited job or not. A job is guaranteed to have
+     * all expedited job guarantees for the duration of the job execution if this returns
      * {@code true}. This will return {@code false} if the job that wasn't requested to run as a
-     * foreground job, or if it was requested to run as a foreground job but the app didn't have
-     * any remaining foreground job quota at the time of execution.
+     * expedited job, or if it was requested to run as an expedited job but the app didn't have
+     * any remaining expedited job quota at the time of execution.
      */
+    public boolean isExpeditedJob() {
+        return mIsExpedited;
+    }
+
+    /**
+     * @deprecated Use {@link #isExpeditedJob()} instead.
+     */
+    @Deprecated
     public boolean isForegroundJob() {
-        return mIsHpj;
+        return mIsExpedited;
     }
 
     /**
@@ -352,7 +358,7 @@ public class JobParameters implements Parcelable {
         }
         callback = in.readStrongBinder();
         overrideDeadlineExpired = in.readInt() == 1;
-        mIsHpj = in.readBoolean();
+        mIsExpedited = in.readBoolean();
         mTriggeredContentUris = in.createTypedArray(Uri.CREATOR);
         mTriggeredContentAuthorities = in.createStringArray();
         if (in.readInt() != 0) {
@@ -389,7 +395,7 @@ public class JobParameters implements Parcelable {
         }
         dest.writeStrongBinder(callback);
         dest.writeInt(overrideDeadlineExpired ? 1 : 0);
-        dest.writeBoolean(mIsHpj);
+        dest.writeBoolean(mIsExpedited);
         dest.writeTypedArray(mTriggeredContentUris, flags);
         dest.writeStringArray(mTriggeredContentAuthorities);
         if (network != null) {
