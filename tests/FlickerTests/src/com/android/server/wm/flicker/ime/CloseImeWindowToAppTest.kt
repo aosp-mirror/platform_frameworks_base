@@ -53,8 +53,9 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class CloseImeWindowToAppTest(
     testName: String,
-    flickerSpec: Flicker
-) : FlickerTestRunner(testName, flickerSpec) {
+    flickerProvider: () -> Flicker,
+    cleanUp: Boolean
+) : FlickerTestRunner(testName, flickerProvider, cleanUp) {
 
     companion object {
         @Parameterized.Parameters(name = "{0}")
@@ -62,28 +63,28 @@ class CloseImeWindowToAppTest(
         fun getParams(): List<Array<Any>> {
             val instrumentation = InstrumentationRegistry.getInstrumentation()
             val testApp = ImeAppHelper(instrumentation)
-            return FlickerTestRunnerFactory(instrumentation)
+            return FlickerTestRunnerFactory(instrumentation, repetitions = 5)
                 .buildTest { configuration ->
-                    withTestName { buildTestTag("imeToApp", testApp, configuration) }
+                    withTestName { buildTestTag("imeToApp", configuration) }
                     repeat { configuration.repetitions }
                     setup {
                         test {
                             device.wakeUpAndGoToHomeScreen()
+                            testApp.launchViaIntent()
+                            this.setRotation(configuration.startRotation)
                         }
                         eachRun {
-                            this.setRotation(configuration.startRotation)
-                            testApp.open()
-                            testApp.openIME(device)
+                            testApp.openIME(device, wmHelper)
                         }
                     }
                     teardown {
-                        eachRun {
+                        test {
                             testApp.exit()
                             this.setRotation(Surface.ROTATION_0)
                         }
                     }
                     transitions {
-                        testApp.closeIME(device)
+                        testApp.closeIME(device, wmHelper)
                     }
                     assertions {
                         windowManagerTrace {
@@ -102,7 +103,7 @@ class CloseImeWindowToAppTest(
                             statusBarLayerRotatesScales(configuration.startRotation)
                             visibleLayersShownMoreThanOneConsecutiveEntry()
 
-                            imeLayerBecomesInvisible(enabled = false)
+                            imeLayerBecomesInvisible()
                             imeAppLayerIsAlwaysVisible(testApp)
                         }
                     }

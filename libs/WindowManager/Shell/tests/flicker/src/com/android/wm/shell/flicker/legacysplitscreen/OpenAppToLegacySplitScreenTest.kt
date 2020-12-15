@@ -59,7 +59,7 @@ class OpenAppToLegacySplitScreenTest(
             repeat { SplitScreenHelper.TEST_REPETITIONS }
             setup {
                 eachRun {
-                    splitScreenApp.launchViaIntent()
+                    splitScreenApp.launchViaIntent(wmHelper)
                     device.pressHome()
                     this.setRotation(rotation)
                 }

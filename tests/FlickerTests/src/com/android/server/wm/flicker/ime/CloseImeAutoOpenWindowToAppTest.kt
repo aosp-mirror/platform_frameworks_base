@@ -25,6 +25,7 @@ import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import com.android.server.wm.flicker.helpers.buildTestTag
+import com.android.server.wm.flicker.helpers.isRotated
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
@@ -45,7 +46,7 @@ import org.junit.runners.Parameterized
 
 /**
  * Test IME window closing back to app window transitions.
- * To run this test: `atest FlickerTests:CloseImeWindowToAppTest`
+ * To run this test: `atest FlickerTests:CloseImeAutoOpenWindowToAppTest`
  */
 @Presubmit
 @RequiresDevice
@@ -53,39 +54,40 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class CloseImeAutoOpenWindowToAppTest(
     testName: String,
-    flickerSpec: Flicker
-) : FlickerTestRunner(testName, flickerSpec) {
+    flickerProvider: () -> Flicker,
+    cleanUp: Boolean
+) : FlickerTestRunner(testName, flickerProvider, cleanUp) {
 
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): List<Array<Any>> {
             val instrumentation = InstrumentationRegistry.getInstrumentation()
-
-            return FlickerTestRunnerFactory(instrumentation)
+            return FlickerTestRunnerFactory(instrumentation, repetitions = 5)
                 .buildTest { configuration ->
                     val testApp = ImeAppAutoFocusHelper(instrumentation,
                         configuration.startRotation)
-                    withTag { buildTestTag("imeToAppAutoOpen", testApp, configuration) }
+                    withTestName { buildTestTag("imeToAppAutoOpen", configuration) }
                     repeat { configuration.repetitions }
                     setup {
                         test {
                             device.wakeUpAndGoToHomeScreen()
                         }
                         eachRun {
+                            testApp.launchViaIntent(wmHelper)
+                            testApp.openIME(device, wmHelper)
                             this.setRotation(configuration.startRotation)
-                            testApp.open()
-                            testApp.openIME(device)
                         }
                     }
                     teardown {
-                        eachRun {
+                        test {
                             testApp.exit()
+                            wmHelper.waitForAppTransitionIdle()
                             this.setRotation(Surface.ROTATION_0)
                         }
                     }
                     transitions {
-                        testApp.closeIME(device)
+                        testApp.closeIME(device, wmHelper)
                     }
                     assertions {
                         windowManagerTrace {
@@ -100,11 +102,13 @@ class CloseImeAutoOpenWindowToAppTest(
                             navBarLayerIsAlwaysVisible()
                             statusBarLayerIsAlwaysVisible()
                             noUncoveredRegions(configuration.startRotation)
-                            navBarLayerRotatesAndScales(configuration.startRotation)
-                            statusBarLayerRotatesScales(configuration.startRotation)
+                            navBarLayerRotatesAndScales(configuration.startRotation,
+                                enabled = !configuration.startRotation.isRotated())
+                            statusBarLayerRotatesScales(configuration.startRotation,
+                                enabled = !configuration.startRotation.isRotated())
                             visibleLayersShownMoreThanOneConsecutiveEntry()
 
-                            imeLayerBecomesInvisible(bugId = 141458352)
+                            imeLayerBecomesInvisible()
                             imeAppLayerIsAlwaysVisible(testApp)
                         }
                     }

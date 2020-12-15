@@ -101,7 +101,7 @@ class RotateTwoLaunchedAppTest(
                     statusBarWindowIsAlwaysVisible()
                     end {
                         showsAppWindow(primaryApp.defaultWindowName)
-                                .and().showsAppWindow(secondaryApp.defaultWindowName)
+                                .showsAppWindow(secondaryApp.defaultWindowName)
                     }
                 }
             }
@@ -137,7 +137,7 @@ class RotateTwoLaunchedAppTest(
                     statusBarWindowIsAlwaysVisible()
                     end {
                         showsAppWindow(primaryApp.defaultWindowName)
-                                .and().showsAppWindow(secondaryApp.defaultWindowName)
+                                .showsAppWindow(secondaryApp.defaultWindowName)
                     }
                 }
             }

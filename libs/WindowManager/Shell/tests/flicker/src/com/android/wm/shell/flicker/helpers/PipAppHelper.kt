@@ -24,16 +24,15 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
 import com.android.server.wm.flicker.helpers.closePipWindow
 import com.android.server.wm.flicker.helpers.hasPipWindow
-import com.android.wm.shell.flicker.TEST_APP_PIP_ACTIVITY_LABEL
 import com.android.wm.shell.flicker.pip.tv.closeTvPipWindow
 import com.android.wm.shell.flicker.pip.tv.isFocusedOrHasFocusedChild
 import com.android.wm.shell.flicker.testapp.Components
 import org.junit.Assert.fail
 
 class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
-        instrumentation,
-        TEST_APP_PIP_ACTIVITY_LABEL,
-        Components.PipActivity()
+    instrumentation,
+    Components.PipActivity.LABEL,
+    Components.PipActivity.COMPONENT
 ) {
     private val mediaSessionManager: MediaSessionManager
         get() = context.getSystemService(MediaSessionManager::class.java)
@@ -41,11 +40,11 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
 
     private val mediaController: MediaController?
         get() = mediaSessionManager.getActiveSessions(null).firstOrNull {
-            it.packageName == packageName
+            it.packageName == component.packageName
         }
 
     fun clickObject(resId: String) {
-        val selector = By.res(packageName, resId)
+        val selector = By.res(component.packageName, resId)
         val obj = uiDevice.findObject(selector) ?: error("Could not find `$resId` object")
 
         if (!isTelevision) {
@@ -87,7 +86,7 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
     }
 
     fun checkWithCustomActionsCheckbox() = uiDevice
-            .findObject(By.res(packageName, WITH_CUSTOM_ACTIONS_BUTTON_ID))
+            .findObject(By.res(component.packageName, WITH_CUSTOM_ACTIONS_BUTTON_ID))
                 ?.takeIf { it.isCheckable }
                 ?.apply { if (!isChecked) clickObject(WITH_CUSTOM_ACTIONS_BUTTON_ID) }
                 ?: error("'With custom actions' checkbox not found")

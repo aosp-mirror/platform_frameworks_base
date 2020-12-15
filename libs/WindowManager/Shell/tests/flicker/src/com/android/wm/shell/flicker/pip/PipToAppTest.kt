@@ -55,8 +55,9 @@ import org.junit.runners.Parameterized
 @FlakyTest(bugId = 152738416)
 class PipToAppTest(
     testName: String,
-    flickerSpec: Flicker
-) : FlickerTestRunner(testName, flickerSpec) {
+    flickerProvider: () -> Flicker,
+    cleanUp: Boolean
+) : FlickerTestRunner(testName, flickerProvider, cleanUp) {
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
@@ -71,7 +72,7 @@ class PipToAppTest(
                         test {
                             device.wakeUpAndGoToHomeScreen()
                             device.pressHome()
-                            testApp.open()
+                            testApp.launchViaIntent(wmHelper)
                         }
                         eachRun {
                             this.setRotation(configuration.startRotation)

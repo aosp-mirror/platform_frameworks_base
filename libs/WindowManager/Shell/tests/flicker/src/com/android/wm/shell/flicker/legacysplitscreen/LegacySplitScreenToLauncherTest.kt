@@ -24,7 +24,6 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.Flicker
 import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
-import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.focusDoesNotChange
 import com.android.server.wm.flicker.helpers.buildTestTag
@@ -46,6 +45,7 @@ import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import com.android.wm.shell.flicker.dockedStackDividerBecomesInvisible
+import com.android.wm.shell.flicker.helpers.SimpleAppHelper
 import org.junit.FixMethodOrder
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -61,8 +61,9 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class LegacySplitScreenToLauncherTest(
     testName: String,
-    flickerSpec: Flicker
-) : FlickerTestRunner(testName, flickerSpec) {
+    flickerProvider: () -> Flicker,
+    cleanUp: Boolean
+) : FlickerTestRunner(testName, flickerProvider, cleanUp) {
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
@@ -70,14 +71,13 @@ class LegacySplitScreenToLauncherTest(
             val instrumentation = InstrumentationRegistry.getInstrumentation()
             val launcherPackageName = LauncherStrategyFactory.getInstance(instrumentation)
                     .launcherStrategy.supportedLauncherPackage
-            val testApp = StandardAppHelper(instrumentation,
-                "com.android.wm.shell.flicker.testapp", "SimpleApp")
+            val testApp = SimpleAppHelper(instrumentation)
 
             // b/161435597 causes the test not to work on 90 degrees
             return FlickerTestRunnerFactory(instrumentation, listOf(Surface.ROTATION_0))
                 .buildTest { configuration ->
                     withTestName {
-                        buildTestTag("splitScreenToLauncher", testApp, configuration)
+                        buildTestTag("splitScreenToLauncher", configuration)
                     }
                     repeat { configuration.repetitions }
                     setup {
@@ -86,7 +86,7 @@ class LegacySplitScreenToLauncherTest(
                             device.openQuickStepAndClearRecentAppsFromOverview()
                         }
                         eachRun {
-                            testApp.open()
+                            testApp.launchViaIntent(wmHelper)
                             this.setRotation(configuration.endRotation)
                             device.launchSplitScreen()
                             device.waitForIdle()

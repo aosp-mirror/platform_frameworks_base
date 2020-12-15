@@ -27,6 +27,7 @@ import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.traces.layers.getVisibleBounds
 import com.android.wm.shell.flicker.appPairsDividerIsInvisible
 import com.android.wm.shell.flicker.appPairsDividerIsVisible
 import com.android.wm.shell.flicker.helpers.AppPairsHelper
@@ -110,7 +111,6 @@ class AppPairsTest(
                         val dividerRegion = entry.getVisibleBounds(APP_PAIR_SPLIT_DIVIDER)
                         this.hasVisibleRegion(primaryApp.defaultWindowName,
                                 appPairsHelper.getPrimaryBounds(dividerRegion))
-                                .and()
                                 .hasVisibleRegion(secondaryApp.defaultWindowName,
                                         appPairsHelper.getSecondaryBounds(dividerRegion))
                     }
@@ -118,7 +118,6 @@ class AppPairsTest(
                 windowManagerTrace {
                     end {
                         showsAppWindow(primaryApp.defaultWindowName)
-                                .and()
                                 .showsAppWindow(secondaryApp.defaultWindowName)
                     }
                 }
@@ -154,20 +153,17 @@ class AppPairsTest(
                         val dividerRegion = entry.getVisibleBounds(APP_PAIR_SPLIT_DIVIDER)
                         this.hasVisibleRegion(primaryApp.defaultWindowName,
                                 appPairsHelper.getPrimaryBounds(dividerRegion))
-                                .and()
                                 .hasVisibleRegion(secondaryApp.defaultWindowName,
                                         appPairsHelper.getSecondaryBounds(dividerRegion))
                     }
                     end("appsEndingBounds", enabled = false) {
                         this.hasNotLayer(primaryApp.defaultWindowName)
-                                .and()
                                 .hasNotLayer(secondaryApp.defaultWindowName)
                     }
                 }
                 windowManagerTrace {
                     end {
                         hidesAppWindow(primaryApp.defaultWindowName)
-                                .and()
                                 .hidesAppWindow(secondaryApp.defaultWindowName)
                     }
                 }
@@ -197,7 +193,6 @@ class AppPairsTest(
                 windowManagerTrace {
                     end {
                         showsAppWindow(nonResizeableApp.defaultWindowName)
-                            .and()
                             .hidesAppWindow(primaryApp.defaultWindowName)
                     }
                 }

@@ -100,7 +100,7 @@ class RotateOneLaunchedAppTest(
                     navBarWindowIsAlwaysVisible()
                     statusBarWindowIsAlwaysVisible()
                     end {
-                        showsAppWindow(splitScreenApp.defaultWindowName)
+                        isVisible(splitScreenApp.defaultWindowName)
                     }
                 }
             }
@@ -132,7 +132,7 @@ class RotateOneLaunchedAppTest(
                     navBarWindowIsAlwaysVisible()
                     statusBarWindowIsAlwaysVisible()
                     end {
-                        showsAppWindow(splitScreenApp.defaultWindowName)
+                        isVisible(splitScreenApp.defaultWindowName)
                     }
                 }
             }

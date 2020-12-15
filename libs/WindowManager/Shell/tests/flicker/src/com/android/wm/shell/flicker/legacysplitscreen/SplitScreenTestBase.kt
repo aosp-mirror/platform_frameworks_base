@@ -27,26 +27,15 @@ import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import com.android.wm.shell.flicker.NonRotationTestBase
-import com.android.wm.shell.flicker.TEST_APP_NONRESIZEABLE_LABEL
-import com.android.wm.shell.flicker.TEST_APP_SPLITSCREEN_PRIMARY_LABEL
-import com.android.wm.shell.flicker.TEST_APP_SPLITSCREEN_SECONDARY_LABEL
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
-import com.android.wm.shell.flicker.testapp.Components
 
 abstract class SplitScreenTestBase(
     rotationName: String,
     rotation: Int
 ) : NonRotationTestBase(rotationName, rotation) {
-    protected val splitScreenApp = SplitScreenHelper(instrumentation,
-            TEST_APP_SPLITSCREEN_PRIMARY_LABEL,
-            Components.SplitScreenActivity())
-    protected val secondaryApp = SplitScreenHelper(instrumentation,
-            TEST_APP_SPLITSCREEN_SECONDARY_LABEL,
-            Components.SplitScreenSecondaryActivity())
-    protected val nonResizeableApp = SplitScreenHelper(instrumentation,
-            TEST_APP_NONRESIZEABLE_LABEL,
-            Components.NonResizeableActivity())
-
+    protected val splitScreenApp = SplitScreenHelper.getPrimary(instrumentation)
+    protected val secondaryApp = SplitScreenHelper.getSecondary(instrumentation)
+    protected val nonResizeableApp = SplitScreenHelper.getNonResizeable(instrumentation)
     protected val LAUNCHER_PACKAGE_NAME = LauncherStrategyFactory.getInstance(instrumentation)
             .launcherStrategy.supportedLauncherPackage
     protected val LIVE_WALLPAPER_PACKAGE_NAME =

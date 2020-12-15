@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package com.android.wm.shell.flicker.helpers
 import android.app.Instrumentation
 import com.android.wm.shell.flicker.testapp.Components
 
-class FixedAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
+class SimpleAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
     instrumentation,
-    Components.FixedActivity.LABEL,
-    Components.FixedActivity.COMPONENT
+    Components.SimpleActivity.LABEL,
+    Components.SimpleActivity.COMPONENT
 )
