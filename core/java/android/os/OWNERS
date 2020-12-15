@@ -29,3 +29,7 @@ per-file *Network* = file:/services/core/java/com/android/server/net/OWNERS
 per-file *Power* = file:/services/core/java/com/android/server/power/OWNERS
 per-file *Telephony* = file:/telephony/OWNERS
 per-file *Zygote* = file:/ZYGOTE_OWNERS
+
+# RecoverySystem
+per-file IRecoverySystem.aidl = rvrolyk@google.com, zhaojiac@google.com
+per-file RecoverySystem.java = rvrolyk@google.com, zhaojiac@google.com
