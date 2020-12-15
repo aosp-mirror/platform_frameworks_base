@@ -3477,6 +3477,7 @@
   <java-symbol type="string" name="config_defaultAugmentedAutofillService" />
   <java-symbol type="string" name="config_defaultAppPredictionService" />
   <java-symbol type="string" name="config_defaultContentSuggestionsService" />
+  <java-symbol type="string" name="config_defaultSearchUiService" />
   <java-symbol type="string" name="config_defaultMusicRecognitionService" />
   <java-symbol type="string" name="config_defaultAttentionService" />
   <java-symbol type="string" name="config_defaultSystemCaptionsService" />

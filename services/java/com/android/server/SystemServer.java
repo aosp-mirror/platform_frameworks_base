@@ -323,6 +323,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.appprediction.AppPredictionManagerService";
     private static final String CONTENT_SUGGESTIONS_SERVICE_CLASS =
             "com.android.server.contentsuggestions.ContentSuggestionsManagerService";
+    private static final String SEARCH_UI_MANAGER_SERVICE_CLASS =
+            "com.android.server.searchui.SearchUiManagerService";
     private static final String DEVICE_IDLE_CONTROLLER_CLASS =
             "com.android.server.DeviceIdleController";
     private static final String BLOB_STORE_MANAGER_SERVICE_CLASS =
@@ -1570,6 +1572,12 @@ public final class SystemServer implements Dumpable {
             } else {
                 Slog.d(TAG, "ContentSuggestionsService not defined by OEM");
             }
+
+            // Search UI manager service
+            // TODO: add deviceHasConfigString(context, R.string.config_defaultSearchUiService)
+            t.traceBegin("StartSearchUiService");
+            mSystemServiceManager.startService(SEARCH_UI_MANAGER_SERVICE_CLASS);
+            t.traceEnd();
 
             t.traceBegin("InitConnectivityModuleConnector");
             try {

@@ -129,6 +129,7 @@ package android {
     field public static final String MANAGE_ONE_TIME_PERMISSION_SESSIONS = "android.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS";
     field public static final String MANAGE_ROLE_HOLDERS = "android.permission.MANAGE_ROLE_HOLDERS";
     field public static final String MANAGE_ROLLBACKS = "android.permission.MANAGE_ROLLBACKS";
+    field public static final String MANAGE_SEARCH_UI = "android.permission.MANAGE_SEARCH_UI";
     field public static final String MANAGE_SENSOR_PRIVACY = "android.permission.MANAGE_SENSOR_PRIVACY";
     field public static final String MANAGE_SOUND_TRIGGER = "android.permission.MANAGE_SOUND_TRIGGER";
     field public static final String MANAGE_SUBSCRIPTION_PLANS = "android.permission.MANAGE_SUBSCRIPTION_PLANS";
@@ -1385,6 +1386,137 @@ package android.app.role {
 
 }
 
+package android.app.search {
+
+  public final class Query implements android.os.Parcelable {
+    ctor public Query(@NonNull String, long, @Nullable android.os.Bundle);
+    method public int describeContents();
+    method @Nullable public android.os.Bundle getExtras();
+    method @NonNull public String getInput();
+    method @NonNull public long getTimestamp();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.search.Query> CREATOR;
+  }
+
+  public final class SearchAction implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public CharSequence getContentDescription();
+    method @Nullable public android.os.Bundle getExtras();
+    method @Nullable public android.graphics.drawable.Icon getIcon();
+    method @NonNull public String getId();
+    method @Nullable public android.content.Intent getIntent();
+    method @Nullable public android.app.PendingIntent getPendingIntent();
+    method @Nullable public CharSequence getSubtitle();
+    method @NonNull public CharSequence getTitle();
+    method @Nullable public android.os.UserHandle getUserHandle();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.search.SearchAction> CREATOR;
+  }
+
+  public static final class SearchAction.Builder {
+    ctor public SearchAction.Builder(@NonNull String, @NonNull String);
+    method @NonNull public android.app.search.SearchAction build();
+    method @NonNull public android.app.search.SearchAction.Builder setContentDescription(@Nullable CharSequence);
+    method @NonNull public android.app.search.SearchAction.Builder setExtras(@Nullable android.os.Bundle);
+    method @NonNull public android.app.search.SearchAction.Builder setIcon(@Nullable android.graphics.drawable.Icon);
+    method @NonNull public android.app.search.SearchAction.Builder setIntent(@Nullable android.content.Intent);
+    method @NonNull public android.app.search.SearchAction.Builder setPendingIntent(@Nullable android.app.PendingIntent);
+    method @NonNull public android.app.search.SearchAction.Builder setSubtitle(@Nullable CharSequence);
+    method @NonNull public android.app.search.SearchAction.Builder setUserHandle(@Nullable android.os.UserHandle);
+  }
+
+  public final class SearchContext implements android.os.Parcelable {
+    ctor public SearchContext(int, int, @Nullable android.os.Bundle);
+    method public int describeContents();
+    method @Nullable public android.os.Bundle getExtras();
+    method @Nullable public String getPackageName();
+    method @NonNull public int getResultTypes();
+    method @NonNull public int getTimeoutMillis();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.search.SearchContext> CREATOR;
+  }
+
+  public final class SearchSession implements java.lang.AutoCloseable {
+    method public void close();
+    method public void destroy();
+    method protected void finalize();
+    method public void notifyEvent(@NonNull android.app.search.Query, @NonNull android.app.search.SearchTargetEvent);
+    method @Nullable public void query(@NonNull android.app.search.Query, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.util.List<android.app.search.SearchTarget>>);
+  }
+
+  public final class SearchSessionId implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.search.SearchSessionId> CREATOR;
+  }
+
+  public final class SearchTarget implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public android.appwidget.AppWidgetProviderInfo getAppWidgetProviderInfo();
+    method @Nullable public android.os.Bundle getExtras();
+    method @NonNull public String getId();
+    method @NonNull public String getLayoutType();
+    method @NonNull public String getPackageName();
+    method @NonNull public String getParentId();
+    method public int getResultType();
+    method public float getScore();
+    method @Nullable public android.app.search.SearchAction getSearchAction();
+    method @Nullable public android.content.pm.ShortcutInfo getShortcutInfo();
+    method @Nullable public android.net.Uri getSliceUri();
+    method @NonNull public android.os.UserHandle getUserHandle();
+    method public boolean shouldHide();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.search.SearchTarget> CREATOR;
+  }
+
+  public static final class SearchTarget.Builder {
+    ctor public SearchTarget.Builder(int, @NonNull String, @NonNull String);
+    method @NonNull public android.app.search.SearchTarget build();
+    method @NonNull public android.app.search.SearchTarget.Builder setAppWidgetProviderInfo(@NonNull android.appwidget.AppWidgetProviderInfo);
+    method @NonNull public android.app.search.SearchTarget.Builder setExtras(@Nullable android.os.Bundle);
+    method @NonNull public android.app.search.SearchTarget.Builder setPackageName(@NonNull String);
+    method @NonNull public android.app.search.SearchTarget.Builder setParentId(@NonNull String);
+    method @NonNull public android.app.search.SearchTarget.Builder setScore(float);
+    method @NonNull public android.app.search.SearchTarget.Builder setSearchAction(@Nullable android.app.search.SearchAction);
+    method @NonNull public android.app.search.SearchTarget.Builder setShortcutInfo(@NonNull android.content.pm.ShortcutInfo);
+    method @NonNull public android.app.search.SearchTarget.Builder setShouldHide(boolean);
+    method @NonNull public android.app.search.SearchTarget.Builder setSliceUri(@NonNull android.net.Uri);
+    method @NonNull public android.app.search.SearchTarget.Builder setUserHandle(@NonNull android.os.UserHandle);
+  }
+
+  public final class SearchTargetEvent implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getAction();
+    method public int getFlags();
+    method @Nullable public String getLaunchLocation();
+    method @NonNull public String getTargetId();
+    method @NonNull public java.util.List<java.lang.String> getTargetIds();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int ACTION_DRAGNDROP = 7; // 0x7
+    field public static final int ACTION_LAUNCH_KEYBOARD_FOCUS = 6; // 0x6
+    field public static final int ACTION_LAUNCH_TOUCH = 5; // 0x5
+    field public static final int ACTION_LONGPRESS = 4; // 0x4
+    field public static final int ACTION_SURFACE_INVISIBLE = 8; // 0x8
+    field public static final int ACTION_SURFACE_VISIBLE = 1; // 0x1
+    field public static final int ACTION_TAP = 3; // 0x3
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.search.SearchTargetEvent> CREATOR;
+    field public static final int FLAG_IME_SHOWN = 1; // 0x1
+  }
+
+  public static final class SearchTargetEvent.Builder {
+    ctor public SearchTargetEvent.Builder(@NonNull String, int);
+    ctor public SearchTargetEvent.Builder(@NonNull java.util.List<java.lang.String>, int);
+    method @NonNull public android.app.search.SearchTargetEvent build();
+    method @NonNull public android.app.search.SearchTargetEvent.Builder setFlags(int);
+    method @NonNull public android.app.search.SearchTargetEvent.Builder setLaunchLocation(@Nullable String);
+  }
+
+  public final class SearchUiManager {
+    method @NonNull public android.app.search.SearchSession createSearchSession(@NonNull android.app.search.SearchContext);
+  }
+
+}
+
 package android.app.time {
 
   public final class TimeManager {
@@ -1806,6 +1938,7 @@ package android.content {
     field public static final String PERMISSION_SERVICE = "permission";
     field public static final String PERSISTENT_DATA_BLOCK_SERVICE = "persistent_data_block";
     field public static final String ROLLBACK_SERVICE = "rollback";
+    field public static final String SEARCH_UI_SERVICE = "search_ui";
     field public static final String SECURE_ELEMENT_SERVICE = "secure_element";
     field public static final String STATS_MANAGER = "stats";
     field public static final String STATUS_BAR_SERVICE = "statusbar";
@@ -9586,6 +9719,19 @@ package android.service.resolver {
     method public void setTimeSpentScore(float);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.resolver.ResolverTarget> CREATOR;
+  }
+
+}
+
+package android.service.search {
+
+  public abstract class SearchUiService extends android.app.Service {
+    ctor public SearchUiService();
+    method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method public void onCreateSearchSession(@NonNull android.app.search.SearchContext, @NonNull android.app.search.SearchSessionId);
+    method @MainThread public abstract void onDestroy(@NonNull android.app.search.SearchSessionId);
+    method @MainThread public abstract void onNotifyEvent(@NonNull android.app.search.SearchSessionId, @NonNull android.app.search.Query, @NonNull android.app.search.SearchTargetEvent);
+    method @MainThread public abstract void onQuery(@NonNull android.app.search.SearchSessionId, @NonNull android.app.search.Query, @NonNull java.util.function.Consumer<java.util.List<android.app.search.SearchTarget>>);
   }
 
 }
