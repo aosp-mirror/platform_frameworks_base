@@ -5924,25 +5924,26 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * @return {@code true} if the calling process is the credential management app.
      */
     private boolean isCredentialManagementApp(CallerIdentity caller, String alias) {
-        // Should include alias in authentication policy
-        try (KeyChainConnection connection = KeyChain.bindAsUser(mContext,
-                caller.getUserHandle())) {
-            // The policy will be null if there is no credential management app
-            AppUriAuthenticationPolicy policy =
-                    connection.getService().getCredentialManagementAppPolicy();
-            if (policy == null || policy.getAppAndUriMappings().isEmpty()
-                    || !containsAlias(policy, alias)) {
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            // Should include alias in authentication policy
+            try (KeyChainConnection connection = KeyChain.bindAsUser(mContext,
+                    caller.getUserHandle())) {
+                // The policy will be null if there is no credential management app
+                AppUriAuthenticationPolicy policy =
+                        connection.getService().getCredentialManagementAppPolicy();
+                if (policy == null || policy.getAppAndUriMappings().isEmpty()
+                        || !containsAlias(policy, alias)) {
+                    return false;
+                }
+            } catch (RemoteException | InterruptedException e) {
                 return false;
             }
-        } catch (RemoteException | InterruptedException e) {
-            return false;
-        }
 
-        AppOpsManager appOpsManager = mInjector.getAppOpsManager();
-        return appOpsManager != null
-                ? appOpsManager.noteOpNoThrow(AppOpsManager.OP_MANAGE_CREDENTIALS, caller.getUid(),
-                caller.getPackageName(), null, null) == AppOpsManager.MODE_ALLOWED
-                : false;
+            AppOpsManager appOpsManager = mInjector.getAppOpsManager();
+            if (appOpsManager == null) return false;
+            return appOpsManager.noteOpNoThrow(AppOpsManager.OP_MANAGE_CREDENTIALS, caller.getUid(),
+                    caller.getPackageName(), null, null) == AppOpsManager.MODE_ALLOWED;
+        });
     }
 
     private static boolean containsAlias(AppUriAuthenticationPolicy policy, String alias) {
