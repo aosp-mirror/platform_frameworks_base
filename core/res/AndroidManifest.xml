@@ -1769,6 +1769,16 @@
     <permission android:name="android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi @hide Allows system APK to update Wifi coex channels to avoid.
+         <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.WIFI_UPDATE_COEX_UNSAFE_CHANNELS"
+                android:protectionLevel="signature" />
+
+    <!-- @SystemApi @hide Allows applications to access Wifi coex channels being avoided.
+         <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS"
+                android:protectionLevel="signature|privileged" />
+
     <!-- ======================================= -->
     <!-- Permissions for short range, peripheral networks -->
     <!-- ======================================= -->

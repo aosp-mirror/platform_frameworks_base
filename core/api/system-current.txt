@@ -237,7 +237,9 @@ package android {
     field public static final String USE_RESERVED_DISK = "android.permission.USE_RESERVED_DISK";
     field public static final String WHITELIST_AUTO_REVOKE_PERMISSIONS = "android.permission.WHITELIST_AUTO_REVOKE_PERMISSIONS";
     field public static final String WHITELIST_RESTRICTED_PERMISSIONS = "android.permission.WHITELIST_RESTRICTED_PERMISSIONS";
+    field public static final String WIFI_ACCESS_COEX_UNSAFE_CHANNELS = "android.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS";
     field public static final String WIFI_SET_DEVICE_MOBILITY_STATE = "android.permission.WIFI_SET_DEVICE_MOBILITY_STATE";
+    field public static final String WIFI_UPDATE_COEX_UNSAFE_CHANNELS = "android.permission.WIFI_UPDATE_COEX_UNSAFE_CHANNELS";
     field public static final String WIFI_UPDATE_USABILITY_STATS_SCORE = "android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE";
     field public static final String WRITE_DEVICE_CONFIG = "android.permission.WRITE_DEVICE_CONFIG";
     field public static final String WRITE_DREAM_STATE = "android.permission.WRITE_DREAM_STATE";
