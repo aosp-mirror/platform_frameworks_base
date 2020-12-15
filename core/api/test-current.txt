@@ -371,6 +371,7 @@ package android.app {
 package android.app.admin {
 
   public class DevicePolicyManager {
+    method public void forceUpdateUserSetupComplete();
     method public long getLastBugReportRequestTime();
     method public long getLastNetworkLogRetrievalTime();
     method public long getLastSecurityLogRetrievalTime();

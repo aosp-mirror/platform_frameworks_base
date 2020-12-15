@@ -11134,6 +11134,7 @@ public class DevicePolicyManager {
      *         {@code android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS} or the caller is
      *         not {@link UserHandle#SYSTEM_USER}
      */
+    @TestApi
     public void forceUpdateUserSetupComplete() {
         try {
             mService.forceUpdateUserSetupComplete();
