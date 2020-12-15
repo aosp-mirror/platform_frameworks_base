@@ -93,7 +93,8 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         final OneHandedAnimationController animationController = new OneHandedAnimationController(
                 mContext);
         OneHandedDisplayAreaOrganizer displayAreaOrganizer = new OneHandedDisplayAreaOrganizer(
-                mContext, mMockDisplayController, animationController, mMockTutorialHandler);
+                mContext, mMockDisplayController, animationController, mMockTutorialHandler,
+                Runnable::run);
 
         assertThat(displayAreaOrganizer.isInOneHanded()).isFalse();
     }

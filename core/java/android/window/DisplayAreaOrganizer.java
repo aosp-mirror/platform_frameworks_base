@@ -24,6 +24,7 @@ import android.os.RemoteException;
 import android.view.SurfaceControl;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Interface for WindowManager to delegate control of display areas.
@@ -112,6 +113,24 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
      * @hide
      */
     public static final int FEATURE_RUNTIME_TASK_CONTAINER_FIRST = FEATURE_VENDOR_LAST + 1;
+
+    // Callbacks WM Core are posted on this executor if it isn't null, otherwise direct calls are
+    // made on the incoming binder call.
+    private final Executor mExecutor;
+
+    /** @hide */
+    public DisplayAreaOrganizer(@NonNull Executor executor) {
+        mExecutor = executor;
+    }
+
+    /**
+     * Gets the executor to run callbacks on.
+     * @hide
+     */
+    @NonNull
+    public Executor getExecutor() {
+        return mExecutor;
+    }
 
     /**
      * Registers a DisplayAreaOrganizer to manage display areas for a given feature. A feature can
@@ -208,17 +227,20 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
         @Override
         public void onDisplayAreaAppeared(@NonNull DisplayAreaInfo displayAreaInfo,
                 @NonNull SurfaceControl leash) {
-            DisplayAreaOrganizer.this.onDisplayAreaAppeared(displayAreaInfo, leash);
+            mExecutor.execute(
+                    () -> DisplayAreaOrganizer.this.onDisplayAreaAppeared(displayAreaInfo, leash));
         }
 
         @Override
         public void onDisplayAreaVanished(@NonNull DisplayAreaInfo displayAreaInfo) {
-            DisplayAreaOrganizer.this.onDisplayAreaVanished(displayAreaInfo);
+            mExecutor.execute(
+                    () -> DisplayAreaOrganizer.this.onDisplayAreaVanished(displayAreaInfo));
         }
 
         @Override
         public void onDisplayAreaInfoChanged(@NonNull DisplayAreaInfo displayAreaInfo) {
-            DisplayAreaOrganizer.this.onDisplayAreaInfoChanged(displayAreaInfo);
+            mExecutor.execute(
+                    () -> DisplayAreaOrganizer.this.onDisplayAreaInfoChanged(displayAreaInfo));
         }
     };
 

@@ -58,7 +58,7 @@ public class SplitLayoutTests extends ShellTestCase {
                 mContext,
                 getConfiguration(false),
                 mLayoutChangeListener,
-                mRootLeash);
+                b -> b.setParent(mRootLeash));
     }
 
     @Test

@@ -111,7 +111,8 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         mDisplayAreaOrganizer = new OneHandedDisplayAreaOrganizer(mContext,
                 mMockDisplayController,
                 mMockAnimationController,
-                mTutorialHandler);
+                mTutorialHandler,
+                Runnable::run);
         mSpyUpdateHandler = spy(new Handler(OneHandedThread.get().getLooper(), mUpdateCallback));
         mDisplayAreaOrganizer.setUpdateHandler(mSpyUpdateHandler);
     }

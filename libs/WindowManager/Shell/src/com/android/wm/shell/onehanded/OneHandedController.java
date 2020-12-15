@@ -45,6 +45,7 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.onehanded.OneHandedGestureHandler.OneHandedGestureEventCallback;
 
 import java.io.PrintWriter;
+import java.util.concurrent.Executor;
 
 /**
  * Manages and manipulates the one handed states, transitions, and gesture for phones.
@@ -169,7 +170,7 @@ public class OneHandedController implements OneHanded {
     @Nullable
     public static OneHandedController create(
             Context context, DisplayController displayController,
-            TaskStackListenerImpl taskStackListener) {
+            TaskStackListenerImpl taskStackListener, Executor executor) {
         if (!SystemProperties.getBoolean(SUPPORT_ONE_HANDED_MODE, false)) {
             Slog.w(TAG, "Device doesn't support OneHanded feature");
             return null;
@@ -182,7 +183,7 @@ public class OneHandedController implements OneHanded {
         OneHandedGestureHandler gestureHandler = new OneHandedGestureHandler(
                 context, displayController);
         OneHandedDisplayAreaOrganizer organizer = new OneHandedDisplayAreaOrganizer(
-                context, displayController, animationController, tutorialHandler);
+                context, displayController, animationController, tutorialHandler, executor);
         IOverlayManager overlayManager = IOverlayManager.Stub.asInterface(
                 ServiceManager.getService(Context.OVERLAY_SERVICE));
         return new OneHandedController(context, displayController, organizer, touchHandler,
