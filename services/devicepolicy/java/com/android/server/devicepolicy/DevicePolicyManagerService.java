@@ -1032,9 +1032,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Slog.w(LOG_TAG, "factoryReset(): " + reason);
         final long identity = Binder.clearCallingIdentity();
         try {
-            FactoryResetter.factoryReset(mContext, /* shutdown= */ false, reason,
-                    /* force= */ false, /* wipeEuicc= */ false, /* wipeAdoptableStorage= */ false,
-                    /* wipeFactoryResetProtection= */ false);
+            FactoryResetter.newBuilder(mContext).setReason(reason).build().factoryReset();
         } catch (IOException e) {
             // Shouldn't happen.
             Slog.wtf(LOG_TAG, "Could not factory reset", e);
@@ -1295,8 +1293,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         void recoverySystemRebootWipeUserData(boolean shutdown, String reason, boolean force,
                 boolean wipeEuicc, boolean wipeExtRequested, boolean wipeResetProtectionData)
                         throws IOException {
-            FactoryResetter.factoryReset(mContext, shutdown, reason, force, wipeEuicc,
-                    wipeExtRequested, wipeResetProtectionData);
+            FactoryResetter.newBuilder(mContext).setReason(reason).setShutdown(shutdown)
+                    .setForce(force).setWipeEuicc(wipeEuicc)
+                    .setWipeAdoptableStorage(wipeExtRequested)
+                    .setWipeFactoryResetProtection(wipeResetProtectionData)
+                    .build().factoryReset();
         }
 
         boolean systemPropertiesGetBoolean(String key, boolean def) {

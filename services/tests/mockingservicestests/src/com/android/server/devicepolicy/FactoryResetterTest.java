@@ -50,18 +50,7 @@ public final class FactoryResetterTest {
 
     private static final String TAG = FactoryResetterTest.class.getSimpleName();
 
-    // Fixed parameters
     private static final String REASON = "self-destruct";
-    private static final boolean SHUTDOWN = true;
-    private static final boolean WIPE_EUICC = true;
-
-    // Parameters under test
-    private static final boolean FORCE = true;
-    private static final boolean NO_FORCE = false;
-    private static final boolean WIPE_ADOPTABLE_STORAGE = true;
-    private static final boolean NO_WIPE_ADOPTABLE_STORAGE = false;
-    private static final boolean WIPE_FACTORY_RESET_PROTECTION = true;
-    private static final boolean NO_WIPE_FACTORY_RESET_PROTECTION = false;
 
     private MockitoSession mSession;
 
@@ -78,19 +67,13 @@ public final class FactoryResetterTest {
                 .strictness(Strictness.LENIENT)
                 .startMocking();
 
-        when(mContext.getSystemService(any(String.class))).thenAnswer((inv) -> {
+        when(mContext.getSystemService(any(Class.class))).thenAnswer((inv) -> {
             Log.d(TAG, "Mocking " + inv);
-            String service = (String) inv.getArguments()[0];
-            switch (service) {
-                case Context.PERSISTENT_DATA_BLOCK_SERVICE:
-                    return mPdbm;
-                case Context.STORAGE_SERVICE:
-                    return mSm;
-                case Context.USER_SERVICE:
-                    return mUm;
-                default:
-                    throw new IllegalArgumentException("Not expecting call for " + service);
-            }
+            Class serviceClass = (Class) inv.getArguments()[0];
+            if (serviceClass.equals(PersistentDataBlockManager.class)) return mPdbm;
+            if (serviceClass.equals(StorageManager.class)) return mSm;
+            if (serviceClass.equals(UserManager.class)) return mUm;
+            throw new IllegalArgumentException("Not expecting call for " + serviceClass);
         });
 
         doAnswer((inv) -> {
@@ -110,13 +93,23 @@ public final class FactoryResetterTest {
     }
 
     @Test
-    public void testFactoryReset_noMasterClearPermission() throws Exception {
+    public void testFactoryResetBuilder_nullContext() throws Exception {
+        assertThrows(NullPointerException.class, () -> FactoryResetter.newBuilder(null));
+    }
+
+    @Test
+    public void testFactoryResetBuilder_nullReason() throws Exception {
+        assertThrows(NullPointerException.class,
+                () -> FactoryResetter.newBuilder(mContext).setReason(null));
+    }
+
+    @Test
+    public void testFactoryReset_minimumArgs_noMasterClearPermission() throws Exception {
         revokeMasterClearPermission();
-        setFactoryResetRestriction(/* allowed= */ true);
+        allowFactoryReset();
 
         assertThrows(SecurityException.class,
-                () -> FactoryResetter.factoryReset(mContext, SHUTDOWN, REASON, NO_FORCE,
-                        WIPE_EUICC, WIPE_ADOPTABLE_STORAGE, WIPE_FACTORY_RESET_PROTECTION));
+                () -> FactoryResetter.newBuilder(mContext).build().factoryReset());
 
         verifyWipeAdoptableStorageNotCalled();
         verifyWipeFactoryResetProtectionNotCalled();
@@ -124,13 +117,11 @@ public final class FactoryResetterTest {
     }
 
     @Test
-    public void testFactoryReset_noForceDisallowed()
-            throws Exception {
-        setFactoryResetRestriction(/* allowed= */ false);
+    public void testFactoryReset_minimumArgs_withRestriction_notForced() throws Exception {
+        disallowFactoryReset();
 
         assertThrows(SecurityException.class,
-                () -> FactoryResetter.factoryReset(mContext, SHUTDOWN, REASON, NO_FORCE,
-                        WIPE_EUICC, WIPE_ADOPTABLE_STORAGE, WIPE_FACTORY_RESET_PROTECTION));
+                () -> FactoryResetter.newBuilder(mContext).build().factoryReset());
 
         verifyWipeAdoptableStorageNotCalled();
         verifyWipeFactoryResetProtectionNotCalled();
@@ -138,57 +129,69 @@ public final class FactoryResetterTest {
     }
 
     @Test
-    public void testFactoryReset_noForceAllowed() throws Exception {
-        setFactoryResetRestriction(/* allowed= */ true);
+    public void testFactoryReset_minimumArgs_noRestriction_notForced() throws Exception {
+        allowFactoryReset();
 
-        FactoryResetter.factoryReset(mContext, SHUTDOWN, REASON, NO_FORCE,
-                WIPE_EUICC, WIPE_ADOPTABLE_STORAGE, WIPE_FACTORY_RESET_PROTECTION);
-
-        verifyWipeAdoptableStorageCalled();
-        verifyWipeFactoryResetProtectionCalled();
-        verifyRebootWipeUserDataCalled(NO_FORCE);
-    }
-
-    @Test
-    public void testFactoryReset_forceDisallowed() throws Exception {
-        setFactoryResetRestriction(/* allowed= */ false);
-
-        FactoryResetter.factoryReset(mContext, SHUTDOWN, REASON, FORCE,
-                WIPE_EUICC, WIPE_ADOPTABLE_STORAGE, WIPE_FACTORY_RESET_PROTECTION);
-
-        verifyWipeAdoptableStorageCalled();
-        verifyWipeFactoryResetProtectionCalled();
-        verifyRebootWipeUserDataCalled(FORCE);
-    }
-
-    @Test
-    public void testFactoryReset_bothFalse() throws Exception {
-        FactoryResetter.factoryReset(mContext, SHUTDOWN, REASON, FORCE,
-                WIPE_EUICC, NO_WIPE_ADOPTABLE_STORAGE, NO_WIPE_FACTORY_RESET_PROTECTION);
+        FactoryResetter.newBuilder(mContext).build().factoryReset();
 
         verifyWipeAdoptableStorageNotCalled();
         verifyWipeFactoryResetProtectionNotCalled();
-        verifyRebootWipeUserDataCalled(FORCE);
+        verifyRebootWipeUserDataMinimumArgsCalled();
+    }
+
+    @Test
+    public void testFactoryReset_minimumArgs_withRestriction_forced() throws Exception {
+        disallowFactoryReset();
+
+        FactoryResetter.newBuilder(mContext).setForce(true).build().factoryReset();
+
+        verifyWipeAdoptableStorageNotCalled();
+        verifyWipeFactoryResetProtectionNotCalled();
+        verifyRebootWipeUserDataMinimumArgsButForceCalled();
     }
 
     @Test
     public void testFactoryReset_storageOnly() throws Exception {
-        FactoryResetter.factoryReset(mContext, SHUTDOWN, REASON, FORCE,
-                WIPE_EUICC, WIPE_ADOPTABLE_STORAGE, NO_WIPE_FACTORY_RESET_PROTECTION);
+        allowFactoryReset();
+
+        FactoryResetter.newBuilder(mContext)
+                .setWipeAdoptableStorage(true).build()
+                .factoryReset();
 
         verifyWipeAdoptableStorageCalled();
         verifyWipeFactoryResetProtectionNotCalled();
-        verifyRebootWipeUserDataCalled(FORCE);
+        verifyRebootWipeUserDataMinimumArgsCalled();
     }
 
     @Test
     public void testFactoryReset_frpOnly() throws Exception {
-        FactoryResetter.factoryReset(mContext, SHUTDOWN, REASON, FORCE,
-                WIPE_EUICC, NO_WIPE_ADOPTABLE_STORAGE, WIPE_FACTORY_RESET_PROTECTION);
+        allowFactoryReset();
+
+        FactoryResetter.newBuilder(mContext)
+                .setWipeFactoryResetProtection(true)
+                .build().factoryReset();
 
         verifyWipeAdoptableStorageNotCalled();
         verifyWipeFactoryResetProtectionCalled();
-        verifyRebootWipeUserDataCalled(FORCE);
+        verifyRebootWipeUserDataMinimumArgsCalled();
+    }
+
+    @Test
+    public void testFactoryReset_allArgs() throws Exception {
+        allowFactoryReset();
+
+        FactoryResetter.newBuilder(mContext)
+                .setReason(REASON)
+                .setForce(true)
+                .setShutdown(true)
+                .setWipeEuicc(true)
+                .setWipeAdoptableStorage(true)
+                .setWipeFactoryResetProtection(true)
+                .build().factoryReset();
+
+        verifyWipeAdoptableStorageCalled();
+        verifyWipeFactoryResetProtectionCalled();
+        verifyRebootWipeUserDataAllArgsCalled();
     }
 
     private void revokeMasterClearPermission() {
@@ -196,8 +199,12 @@ public final class FactoryResetterTest {
                 .thenReturn(PackageManager.PERMISSION_DENIED);
     }
 
-    private void setFactoryResetRestriction(boolean allowed) {
-        when(mUm.hasUserRestriction(UserManager.DISALLOW_FACTORY_RESET)).thenReturn(!allowed);
+    private void allowFactoryReset() {
+        when(mUm.hasUserRestriction(UserManager.DISALLOW_FACTORY_RESET)).thenReturn(false);
+    }
+
+    private void disallowFactoryReset() {
+        when(mUm.hasUserRestriction(UserManager.DISALLOW_FACTORY_RESET)).thenReturn(true);
     }
 
     private void verifyRebootWipeUserDataNotCalled() {
@@ -205,9 +212,19 @@ public final class FactoryResetterTest {
                 anyBoolean()), never());
     }
 
-    private void verifyRebootWipeUserDataCalled(boolean force) {
-        verify(() -> RecoverySystem.rebootWipeUserData(mContext, SHUTDOWN, REASON, force,
-                WIPE_EUICC));
+    private void verifyRebootWipeUserDataMinimumArgsCalled() {
+        verify(() -> RecoverySystem.rebootWipeUserData(mContext, /* shutdown= */ false,
+                /* reason= */ null, /* force= */ false, /* wipeEuicc= */ false));
+    }
+
+    private void verifyRebootWipeUserDataMinimumArgsButForceCalled() {
+        verify(() -> RecoverySystem.rebootWipeUserData(mContext, /* shutdown= */ false,
+                /* reason= */ null, /* force= */ true, /* wipeEuicc= */ false));
+    }
+
+    private void verifyRebootWipeUserDataAllArgsCalled() {
+        verify(() -> RecoverySystem.rebootWipeUserData(mContext, /* shutdown= */ true,
+                /* reason= */ REASON, /* force= */ true, /* wipeEuicc= */ true));
     }
 
     private void verifyWipeAdoptableStorageNotCalled() {
