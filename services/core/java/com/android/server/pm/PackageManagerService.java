@@ -107,6 +107,7 @@ import static android.os.incremental.IncrementalManager.isIncrementalPath;
 import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_EXTERNAL;
+import static android.provider.DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
@@ -287,6 +288,7 @@ import android.os.UserManager;
 import android.os.incremental.IStorageHealthListener;
 import android.os.incremental.IncrementalManager;
 import android.os.incremental.IncrementalStorage;
+import android.os.incremental.PerUidReadTimeouts;
 import android.os.incremental.StorageHealthCheckParams;
 import android.os.storage.DiskInfo;
 import android.os.storage.IStorageManager;
@@ -512,6 +514,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public static final boolean DEBUG_COMPRESSION = Build.IS_DEBUGGABLE;
     public static final boolean DEBUG_CACHES = false;
     public static final boolean TRACE_CACHES = false;
+    private static final boolean DEBUG_PER_UID_READ_TIMEOUTS = false;
 
     // Debug output for dexopting. This is shared between PackageManagerService, OtaDexoptService
     // and PackageDexOptimizer. All these classes have their own flag to allow switching a single
@@ -645,6 +648,24 @@ public class PackageManagerService extends IPackageManager.Stub
      * milliseconds.
      */
     private static final long DEFAULT_ENABLE_ROLLBACK_TIMEOUT_MILLIS = 10 * 1000;
+
+    /**
+     * Default IncFs timeouts. Maximum values in IncFs is 1hr.
+     *
+     * <p>If flag value is empty, the default value will be assigned.
+     *
+     * Flag type: {@code String}
+     * Namespace: NAMESPACE_PACKAGE_MANAGER_SERVICE
+     */
+    private static final String PROPERTY_INCFS_DEFAULT_TIMEOUTS = "incfs_default_timeouts";
+
+    /**
+     * Known digesters with optional timeouts.
+     *
+     * Flag type: {@code String}
+     * Namespace: NAMESPACE_PACKAGE_MANAGER_SERVICE
+     */
+    private static final String PROPERTY_KNOWN_DIGESTERS_LIST = "known_digesters_list";
 
     /**
      * The default response for package verification timeout.
@@ -908,6 +929,11 @@ public class PackageManagerService extends IPackageManager.Stub
     @GuardedBy("itself")
     final private ArrayList<IPackageChangeObserver> mPackageChangeObservers =
         new ArrayList<>();
+
+    // Cached parsed flag value. Invalidated on each flag change.
+    private PerUidReadTimeouts[] mPerUidReadTimeoutsCache;
+
+    private static final PerUidReadTimeouts[] EMPTY_PER_UID_READ_TIMEOUTS_ARRAY = {};
 
     /**
      * Unit tests will instantiate, extend and/or mock to mock dependencies / behaviors.
@@ -23738,6 +23764,17 @@ public class PackageManagerService extends IPackageManager.Stub
         mInstallerService.restoreAndApplyStagedSessionIfNeeded();
 
         mExistingPackages = null;
+
+        // Clear cache on flags changes.
+        DeviceConfig.addOnPropertiesChangedListener(
+                NAMESPACE_PACKAGE_MANAGER_SERVICE, FgThread.getExecutor(),
+                properties -> {
+                    final Set<String> keyset = properties.getKeyset();
+                    if (keyset.contains(PROPERTY_INCFS_DEFAULT_TIMEOUTS) || keyset.contains(
+                            PROPERTY_KNOWN_DIGESTERS_LIST)) {
+                        mPerUidReadTimeoutsCache = null;
+                    }
+                });
     }
 
     public void waitForAppDataPrepared() {
@@ -23828,6 +23865,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 pw.println("    v[erifiers]: print package verifier info");
                 pw.println("    d[omain-preferred-apps]: print domains preferred apps");
                 pw.println("    i[ntent-filter-verifiers]|ifv: print intent filter verifier info");
+                pw.println("    t[imeouts]: print read timeouts for known digesters");
                 pw.println("    version: print database version info");
                 pw.println("    write: write current settings now");
                 pw.println("    installs: details about install sessions");
@@ -23982,6 +24020,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 dumpState.setDump(DumpState.DUMP_SERVICE_PERMISSIONS);
             } else if ("known-packages".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_KNOWN_PACKAGES);
+            } else if ("t".equals(cmd) || "timeouts".equals(cmd)) {
+                dumpState.setDump(DumpState.DUMP_PER_UID_READ_TIMEOUTS);
             } else if ("write".equals(cmd)) {
                 synchronized (mLock) {
                     writeSettingsLPrTEMP();
@@ -24379,6 +24419,25 @@ public class PackageManagerService extends IPackageManager.Stub
 
         if (!checkin && dumpState.isDumping(DumpState.DUMP_APEX)) {
             mApexManager.dump(pw, packageName);
+        }
+
+        if (!checkin && dumpState.isDumping(DumpState.DUMP_PER_UID_READ_TIMEOUTS)
+                && packageName == null) {
+            pw.println();
+            pw.println("Per UID read timeouts:");
+            pw.println("    Default timeouts flag: " + getDefaultTimeouts());
+            pw.println("    Known digesters list flag: " + getKnownDigestersList());
+
+            PerUidReadTimeouts[] items = getPerUidReadTimeouts();
+            pw.println("    Timeouts (" + items.length + "):");
+            for (PerUidReadTimeouts item : items) {
+                pw.print("        (");
+                pw.print("uid=" + item.uid + ", ");
+                pw.print("minTimeUs=" + item.minTimeUs + ", ");
+                pw.print("minPendingTimeUs=" + item.minPendingTimeUs + ", ");
+                pw.print("maxPendingTimeUs=" + item.maxPendingTimeUs);
+                pw.println(")");
+            }
         }
     }
 
@@ -27966,6 +28025,88 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             SystemClock.sleep(durationMs);
         }
+    }
+
+    private static String getDefaultTimeouts() {
+        return DeviceConfig.getString(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                PROPERTY_INCFS_DEFAULT_TIMEOUTS, "");
+    }
+
+    private static String getKnownDigestersList() {
+        return DeviceConfig.getString(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                PROPERTY_KNOWN_DIGESTERS_LIST, "");
+    }
+
+    /**
+     * Returns the array containing per-uid timeout configuration.
+     * This is derived from DeviceConfig flags.
+     */
+    public @NonNull PerUidReadTimeouts[] getPerUidReadTimeouts() {
+        PerUidReadTimeouts[] result = mPerUidReadTimeoutsCache;
+        if (result == null) {
+            result = parsePerUidReadTimeouts();
+            mPerUidReadTimeoutsCache = result;
+        }
+        return result;
+    }
+
+    private @NonNull PerUidReadTimeouts[] parsePerUidReadTimeouts() {
+        final String defaultTimeouts = getDefaultTimeouts();
+        final String knownDigestersList = getKnownDigestersList();
+        final List<PerPackageReadTimeouts> perPackageReadTimeouts =
+                PerPackageReadTimeouts.parseDigestersList(defaultTimeouts, knownDigestersList);
+
+        if (perPackageReadTimeouts.size() == 0) {
+            return EMPTY_PER_UID_READ_TIMEOUTS_ARRAY;
+        }
+
+        final int[] allUsers = mInjector.getUserManagerService().getUserIds();
+
+        List<PerUidReadTimeouts> result = new ArrayList<>(perPackageReadTimeouts.size());
+        synchronized (mLock) {
+            for (int i = 0, size = perPackageReadTimeouts.size(); i < size; ++i) {
+                final PerPackageReadTimeouts perPackage = perPackageReadTimeouts.get(i);
+                final PackageSetting ps = mSettings.mPackages.get(perPackage.packageName);
+                if (ps == null) {
+                    if (DEBUG_PER_UID_READ_TIMEOUTS) {
+                        Slog.i(TAG, "PerUidReadTimeouts: package not found = "
+                                + perPackage.packageName);
+                    }
+                    continue;
+                }
+                final AndroidPackage pkg = ps.getPkg();
+                if (pkg.getLongVersionCode() < perPackage.versionCodes.minVersionCode
+                        || pkg.getLongVersionCode() > perPackage.versionCodes.maxVersionCode) {
+                    if (DEBUG_PER_UID_READ_TIMEOUTS) {
+                        Slog.i(TAG, "PerUidReadTimeouts: version code is not in range = "
+                                + perPackage.packageName + ":" + pkg.getLongVersionCode());
+                    }
+                    continue;
+                }
+                if (perPackage.sha256certificate != null
+                        && !pkg.getSigningDetails().hasSha256Certificate(
+                        perPackage.sha256certificate)) {
+                    if (DEBUG_PER_UID_READ_TIMEOUTS) {
+                        Slog.i(TAG, "PerUidReadTimeouts: invalid certificate = "
+                                + perPackage.packageName + ":" + pkg.getLongVersionCode());
+                    }
+                    continue;
+                }
+                for (int userId : allUsers) {
+                    if (!ps.getInstalled(userId)) {
+                        continue;
+                    }
+                    final int uid = UserHandle.getUid(userId, ps.appId);
+                    final PerUidReadTimeouts perUid = new PerUidReadTimeouts();
+                    perUid.uid = uid;
+                    perUid.minTimeUs = perPackage.timeouts.minTimeUs;
+                    perUid.minPendingTimeUs = perPackage.timeouts.minPendingTimeUs;
+                    perUid.maxPendingTimeUs = perPackage.timeouts.maxPendingTimeUs;
+                    result.add(perUid);
+                }
+            }
+        }
+        return result.toArray(new PerUidReadTimeouts[result.size()]);
     }
 }
 

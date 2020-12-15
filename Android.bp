@@ -1115,6 +1115,7 @@ filegroup {
         "core/java/android/os/incremental/IStorageLoadingProgressListener.aidl",
         "core/java/android/os/incremental/IncrementalNewFileParams.aidl",
         "core/java/android/os/incremental/IStorageHealthListener.aidl",
+        "core/java/android/os/incremental/PerUidReadTimeouts.aidl",
         "core/java/android/os/incremental/StorageHealthCheckParams.aidl",
     ],
     path: "core/java",
