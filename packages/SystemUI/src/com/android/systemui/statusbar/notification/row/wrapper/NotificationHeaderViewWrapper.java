@@ -22,6 +22,7 @@ import android.app.Notification;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.util.ArraySet;
+import android.util.Pair;
 import android.view.NotificationHeaderView;
 import android.view.NotificationTopLineView;
 import android.view.View;
@@ -132,10 +133,13 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
 
     /** Shows or hides feedback indicator */
     @Override
-    public void showFeedbackIcon(boolean show, int resId) {
+    public void showFeedbackIcon(boolean show, Pair<Integer, Integer> resIds) {
         mFeedbackIcon.setVisibility(show ? View.VISIBLE : View.GONE);
-        if (show && mFeedbackIcon instanceof ImageButton) {
-            ((ImageButton) mFeedbackIcon).setImageResource(resId);
+        if (show) {
+            if (mFeedbackIcon instanceof ImageButton) {
+                ((ImageButton) mFeedbackIcon).setImageResource(resIds.first);
+            }
+            mFeedbackIcon.setContentDescription(mView.getContext().getString(resIds.second));
         }
     }
 

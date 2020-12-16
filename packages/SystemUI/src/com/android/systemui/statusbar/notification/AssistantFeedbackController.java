@@ -27,6 +27,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.Pair;
 
 import androidx.annotation.Nullable;
 
@@ -129,24 +130,28 @@ public class AssistantFeedbackController extends ContentObserver {
     }
 
     /**
-     * Get the feedback indicator image resource according to assistant's changes on this
-     * notification's rank or importance.
+     * Get the feedback indicator image and content description resources according to assistant's
+     * changes on this notification's rank or importance.
      *
      * @param entry Notification Entry to show feedback for
      */
-    public int getFeedbackImageResource(NotificationEntry entry) {
+    public Pair<Integer, Integer> getFeedbackResources(NotificationEntry entry) {
         int feedbackStatus = getFeedbackStatus(entry);
         switch (feedbackStatus) {
             case STATUS_ALERTED:
-                return R.drawable.ic_feedback_alerted;
+                return new Pair(R.drawable.ic_feedback_alerted,
+                        R.string.notification_feedback_indicator_alerted);
             case STATUS_SILENCED:
-                return R.drawable.ic_feedback_silenced;
+                return new Pair(R.drawable.ic_feedback_silenced,
+                        R.string.notification_feedback_indicator_silenced);
             case STATUS_PROMOTED:
-                return R.drawable.ic_feedback_uprank;
+                return new Pair(R.drawable.ic_feedback_uprank,
+                        R.string.notification_feedback_indicator_promoted);
             case STATUS_DEMOTED:
-                return R.drawable.ic_feedback_downrank;
+                return new Pair(R.drawable.ic_feedback_downrank,
+                        R.string.notification_feedback_indicator_demoted);
             default:
-                return 0;
+                return new Pair(0, 0);
         }
     }
 

@@ -41,6 +41,7 @@ import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
+import android.util.Pair;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -120,9 +121,9 @@ public class AssistantFeedbackControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testGetFeedbackImageResource_settingDisabled() {
+    public void testGetFeedbackResources_settingDisabled() {
         switchSetting(OFF);
-        Assert.assertEquals(0, mAssistantFeedbackController.getFeedbackImageResource(
+        Assert.assertEquals(new Pair(0, 0), mAssistantFeedbackController.getFeedbackResources(
                 getEntry(IMPORTANCE_DEFAULT, IMPORTANCE_DEFAULT, RANKING_UNCHANGED)));
     }
 
