@@ -189,7 +189,7 @@ public class RecyclerViewCaptureHelper implements ScrollCaptureViewHelper<ViewGr
     @Override
     public void onPrepareForEnd(@NonNull ViewGroup view) {
         // Restore original position and state
-        view.scrollBy(0, mScrollDelta);
+        view.scrollBy(0, -mScrollDelta);
         view.setOverScrollMode(mOverScrollMode);
         view.setVerticalScrollBarEnabled(mScrollBarWasEnabled);
         if (DISABLE_ANIMATORS) {
