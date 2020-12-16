@@ -26,7 +26,6 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -993,8 +992,6 @@ public final class AccessibilityInteractionController {
             }
         } catch (RemoteException re) {
             /* ignore - the other side will time out */
-        } finally {
-            recycleMagnificationSpecAndRegionIfNeeded(spec, interactiveRegion);
         }
     }
 
@@ -1013,24 +1010,6 @@ public final class AccessibilityInteractionController {
             callback.setFindAccessibilityNodeInfoResult(info, interactionId);
         } catch (RemoteException re) {
                 /* ignore - the other side will time out */
-        } finally {
-            recycleMagnificationSpecAndRegionIfNeeded(spec, interactiveRegion);
-        }
-    }
-
-    private void recycleMagnificationSpecAndRegionIfNeeded(MagnificationSpec spec, Region region) {
-        if (android.os.Process.myPid() != Binder.getCallingPid()) {
-            // Specs are cached in the system process and obtained from a pool when read from
-            // a parcel, so only recycle the spec if called from another process.
-            if (spec != null) {
-                spec.recycle();
-            }
-        } else {
-            // Regions are obtained in the system process and instantiated when read from
-            // a parcel, so only recycle the region if caled from the same process.
-            if (region != null) {
-                region.recycle();
-            }
         }
     }
 

@@ -1174,7 +1174,7 @@ public class FullScreenMagnificationControllerTest {
 
     private MagnificationSpec getInterpolatedMagSpec(MagnificationSpec start, MagnificationSpec end,
             float fraction) {
-        MagnificationSpec interpolatedSpec = MagnificationSpec.obtain();
+        MagnificationSpec interpolatedSpec = new MagnificationSpec();
         interpolatedSpec.scale = start.scale + fraction * (end.scale - start.scale);
         interpolatedSpec.offsetX = start.offsetX + fraction * (end.offsetX - start.offsetX);
         interpolatedSpec.offsetY = start.offsetY + fraction * (end.offsetY - start.offsetY);
@@ -1186,7 +1186,7 @@ public class FullScreenMagnificationControllerTest {
     }
 
     private MagnificationSpec getMagnificationSpec(float scale, float offsetX, float offsetY) {
-        MagnificationSpec spec = MagnificationSpec.obtain();
+        MagnificationSpec spec = new MagnificationSpec();
         spec.scale = scale;
         spec.offsetX = offsetX;
         spec.offsetY = offsetY;

@@ -7397,9 +7397,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     throw new IllegalStateException("Magnification callbacks not set!");
                 }
             }
-            if (Binder.getCallingPid() != myPid()) {
-                spec.recycle();
-            }
         }
 
         @Override
@@ -7439,7 +7436,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 if ((spec == null || spec.isNop()) && windowState.mGlobalScale == 1.0f) {
                     return null;
                 }
-                spec = (spec == null) ? MagnificationSpec.obtain() : MagnificationSpec.obtain(spec);
+                MagnificationSpec result = new MagnificationSpec();
+                if (spec != null) {
+                    result.setTo(spec);
+                }
                 spec.scale *= windowState.mGlobalScale;
                 return spec;
             }

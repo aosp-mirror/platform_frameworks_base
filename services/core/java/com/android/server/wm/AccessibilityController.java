@@ -654,7 +654,7 @@ final class AccessibilityController {
 
             private final Path mCircularPath;
 
-            private final MagnificationSpec mMagnificationSpec = MagnificationSpec.obtain();
+            private final MagnificationSpec mMagnificationSpec = new MagnificationSpec();
 
             private final float mBorderWidth;
             private final int mHalfBorderWidth;

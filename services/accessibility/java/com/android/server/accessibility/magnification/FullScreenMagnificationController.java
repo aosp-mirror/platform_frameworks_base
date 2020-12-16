@@ -99,7 +99,7 @@ public class FullScreenMagnificationController {
          * The current magnification spec. If an animation is running, this
          * reflects the end state.
          */
-        private final MagnificationSpec mCurrentMagnificationSpec = MagnificationSpec.obtain();
+        private final MagnificationSpec mCurrentMagnificationSpec = new MagnificationSpec();
 
         private final Region mMagnificationRegion = Region.obtain();
         private final Rect mMagnificationBounds = new Rect();
@@ -1227,13 +1227,11 @@ public class FullScreenMagnificationController {
          * The magnification spec that was sent to the window manager. This should
          * only be accessed with the lock held.
          */
-        private final MagnificationSpec mSentMagnificationSpec = MagnificationSpec.obtain();
+        private final MagnificationSpec mSentMagnificationSpec = new MagnificationSpec();
 
-        private final MagnificationSpec mStartMagnificationSpec = MagnificationSpec.obtain();
+        private final MagnificationSpec mStartMagnificationSpec = new MagnificationSpec();
 
-        private final MagnificationSpec mEndMagnificationSpec = MagnificationSpec.obtain();
-
-        private final MagnificationSpec mTmpMagnificationSpec = MagnificationSpec.obtain();
+        private final MagnificationSpec mEndMagnificationSpec = new MagnificationSpec();
 
         /**
          * The animator should only be accessed and modified on the main (e.g. animation) thread.
@@ -1335,15 +1333,16 @@ public class FullScreenMagnificationController {
             synchronized (mLock) {
                 if (mEnabled) {
                     float fract = animation.getAnimatedFraction();
-                    mTmpMagnificationSpec.scale = mStartMagnificationSpec.scale
+                    MagnificationSpec magnificationSpec = new MagnificationSpec();
+                    magnificationSpec.scale = mStartMagnificationSpec.scale
                             + (mEndMagnificationSpec.scale - mStartMagnificationSpec.scale) * fract;
-                    mTmpMagnificationSpec.offsetX = mStartMagnificationSpec.offsetX
+                    magnificationSpec.offsetX = mStartMagnificationSpec.offsetX
                             + (mEndMagnificationSpec.offsetX - mStartMagnificationSpec.offsetX)
                             * fract;
-                    mTmpMagnificationSpec.offsetY = mStartMagnificationSpec.offsetY
+                    magnificationSpec.offsetY = mStartMagnificationSpec.offsetY
                             + (mEndMagnificationSpec.offsetY - mStartMagnificationSpec.offsetY)
                             * fract;
-                    setMagnificationSpecLocked(mTmpMagnificationSpec);
+                    setMagnificationSpecLocked(magnificationSpec);
                 }
             }
         }
