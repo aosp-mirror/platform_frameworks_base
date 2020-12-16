@@ -1883,7 +1883,7 @@ class ActivityStarter {
         }
 
         mSupervisor.getLaunchParamsController().calculate(targetTask, r.info.windowLayout, r,
-                sourceRecord, mOptions, PHASE_BOUNDS, mLaunchParams, mRequest);
+                sourceRecord, mOptions, mRequest, PHASE_BOUNDS, mLaunchParams);
         mPreferredTaskDisplayArea = mLaunchParams.hasPreferredTaskDisplayArea()
                 ? mLaunchParams.mPreferredTaskDisplayArea
                 : mRootWindowContainer.getDefaultTaskDisplayArea();
@@ -2274,7 +2274,7 @@ class ActivityStarter {
         // Preferred display id is the only state we need for now and it could be updated again
         // after we located a reusable task (which might be resided in another display).
         mSupervisor.getLaunchParamsController().calculate(inTask, r.info.windowLayout, r,
-                sourceRecord, options, PHASE_DISPLAY, mLaunchParams, mRequest);
+                sourceRecord, options, mRequest, PHASE_DISPLAY, mLaunchParams);
         mPreferredTaskDisplayArea = mLaunchParams.hasPreferredTaskDisplayArea()
                 ? mLaunchParams.mPreferredTaskDisplayArea
                 : mRootWindowContainer.getDefaultTaskDisplayArea();
