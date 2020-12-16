@@ -50,8 +50,7 @@ public final class MediaMetricsManagerService extends SystemService {
 
     @Override
     public void onStart() {
-        // TODO: make the service name a constant in Context.java
-        publishBinderService("playback_metrics", new BinderService());
+        publishBinderService(Context.MEDIA_METRICS_SERVICE, new BinderService());
     }
 
     private final class BinderService extends IMediaMetricsManager.Stub {
