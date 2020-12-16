@@ -232,6 +232,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     private final Matrix mTmpMatrix = new Matrix();
 
     SurfaceControlViewHost.SurfacePackage mSurfacePackage;
+    private final boolean mUseBlastSync = false;
 
     /**
      * Returns {@code true} if buffers should be submitted via blast
@@ -1922,6 +1923,6 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     }
 
     private boolean useBLASTSync(ViewRootImpl viewRoot) {
-        return viewRoot.useBLAST() && mUseBlastAdapter;
+        return viewRoot.useBLAST() && mUseBlastAdapter && mUseBlastSync;
     }
 }
