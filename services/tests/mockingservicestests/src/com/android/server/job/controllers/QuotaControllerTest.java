@@ -1960,6 +1960,79 @@ public class QuotaControllerTest {
                 .set(anyInt(), eq(expectedAlarmTime), eq(TAG_QUOTA_CHECK), any(), any());
     }
 
+    /**
+     * Test that QC handles invalid cases where an app is in the NEVER bucket but has still run
+     * jobs.
+     */
+    @Test
+    public void testMaybeScheduleStartAlarmLocked_Never_EffectiveNotNever() {
+        // saveTimingSession calls maybeScheduleCleanupAlarmLocked which interferes with these tests
+        // because it schedules an alarm too. Prevent it from doing so.
+        spyOn(mQuotaController);
+        doNothing().when(mQuotaController).maybeScheduleCleanupAlarmLocked();
+
+        // The app is really in the NEVER bucket but is elevated somehow (eg via uidActive).
+        setStandbyBucket(NEVER_INDEX);
+        final int effectiveStandbyBucket = FREQUENT_INDEX;
+
+        // No sessions saved yet.
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, effectiveStandbyBucket);
+        }
+        verify(mAlarmManager, never()).set(anyInt(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+
+        // Test with timing sessions out of window.
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - 10 * HOUR_IN_MILLIS, 5 * MINUTE_IN_MILLIS, 1), false);
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, effectiveStandbyBucket);
+        }
+        verify(mAlarmManager, never()).set(anyInt(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+
+        // Test with timing sessions in window but still in quota.
+        final long start = now - (6 * HOUR_IN_MILLIS);
+        final long expectedAlarmTime = start + 8 * HOUR_IN_MILLIS + mQcConstants.IN_QUOTA_BUFFER_MS;
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(start, 5 * MINUTE_IN_MILLIS, 1), false);
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, effectiveStandbyBucket);
+        }
+        verify(mAlarmManager, never()).set(anyInt(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+
+        // Add some more sessions, but still in quota.
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - 3 * HOUR_IN_MILLIS, MINUTE_IN_MILLIS, 1), false);
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - HOUR_IN_MILLIS, 3 * MINUTE_IN_MILLIS, 1), false);
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, effectiveStandbyBucket);
+        }
+        verify(mAlarmManager, never()).set(anyInt(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+
+        // Test when out of quota.
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - HOUR_IN_MILLIS, MINUTE_IN_MILLIS, 1), false);
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, effectiveStandbyBucket);
+        }
+        verify(mAlarmManager, times(1))
+                .set(anyInt(), eq(expectedAlarmTime), eq(TAG_QUOTA_CHECK), any(), any());
+
+        // Alarm already scheduled, so make sure it's not scheduled again.
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeScheduleStartAlarmLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, effectiveStandbyBucket);
+        }
+        verify(mAlarmManager, times(1))
+                .set(anyInt(), eq(expectedAlarmTime), eq(TAG_QUOTA_CHECK), any(), any());
+    }
+
     @Test
     public void testMaybeScheduleStartAlarmLocked_Rare() {
         // saveTimingSession calls maybeScheduleCleanupAlarmLocked which interferes with these tests
