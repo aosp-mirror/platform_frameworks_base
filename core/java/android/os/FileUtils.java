@@ -83,6 +83,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -114,6 +115,9 @@ public final class FileUtils {
     @UnsupportedAppUsage
     private FileUtils() {
     }
+
+    private static final String CAMERA_DIR_LOWER_CASE = "/storage/emulated/" + UserHandle.myUserId()
+            + "/dcim/camera";
 
     /** Regular expression for safe filenames: no spaces or metacharacters.
       *
@@ -1432,18 +1436,27 @@ public final class FileUtils {
         }
     }
 
+    // TODO(b/170488060): Consider better approach
     /** {@hide} */
+    @VisibleForTesting
     public static FileDescriptor convertToModernFd(FileDescriptor fd) {
         try {
             Context context = AppGlobals.getInitialApplication();
+            File realFile = ParcelFileDescriptor.getFile(fd);
+            String fileName = realFile.getName();
+            boolean isCameraVideo = !fileName.startsWith(".") && fileName.endsWith(".mp4")
+                    && contains(CAMERA_DIR_LOWER_CASE, realFile.getAbsolutePath().toLowerCase(
+                                    Locale.ROOT));
+
             if (!SystemProperties.getBoolean("sys.fuse.transcode_enabled", false)
-                    || UserHandle.getAppId(Process.myUid()) == getMediaProviderAppId(context)) {
-                // If transcode is enabled we optimize by default, unless explicitly disabled.
-                // Never convert modern fd for MediaProvider, because this requires
+                    || UserHandle.getAppId(Process.myUid()) == getMediaProviderAppId(context)
+                    || !isCameraVideo) {
+                // 1. If transcode is enabled we optimize by default, unless explicitly disabled.
+                // 2. Never convert modern fd for MediaProvider, because this requires
                 // MediaStore#scanFile and can cause infinite loops when MediaProvider scans
+                // 3. Only convert published mp4 videos in the DCIM/Camera dir
                 return null;
             }
-            File realFile = ParcelFileDescriptor.getFile(fd);
             Log.i(TAG, "Changing to modern format dataSource for: " + realFile);
             ContentResolver resolver = context.getContentResolver();
 
