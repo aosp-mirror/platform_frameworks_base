@@ -321,7 +321,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         @Override
         public void onTuningChanged(String key, String newValue) {
             if (QS_REMOVE_LABELS.equals(key)) {
-                boolean newShowLabels = "0".equals(newValue);
+                boolean newShowLabels = newValue == null || "0".equals(newValue);
                 if (mShowLabels == newShowLabels) return;
                 mShowLabels = newShowLabels;
                 for (TileRecord t : mRecords) {
