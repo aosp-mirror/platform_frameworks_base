@@ -92,6 +92,11 @@ public class ImsRegistrationImplBase {
         public void removeRegistrationCallback(IImsRegistrationCallback c) throws RemoteException {
             ImsRegistrationImplBase.this.removeRegistrationCallback(c);
         }
+
+        @Override
+        public void triggerFullNetworkRegistration(int sipCode, String sipReason) {
+            ImsRegistrationImplBase.this.triggerFullNetworkRegistration(sipCode, sipReason);
+        }
     };
 
     private final RemoteCallbackListExt<IImsRegistrationCallback> mCallbacks =
@@ -169,9 +174,8 @@ public class ImsRegistrationImplBase {
      *    be carrier specific.
      * @param sipReason The reason associated with the SIP error code. {@code null} if there was no
      *    reason associated with the error.
-     * @hide
      */
-    public void triggerNetworkReregistration(@IntRange(from = 100, to = 699) int sipCode,
+    public void triggerFullNetworkRegistration(@IntRange(from = 100, to = 699) int sipCode,
             @Nullable String sipReason) {
         // Stub implementation, ImsService should implement this
     }
