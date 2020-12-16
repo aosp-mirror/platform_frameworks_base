@@ -51,7 +51,7 @@ public final class UwbAddress implements Parcelable {
      *       {@link #SHORT_ADDRESS_BYTE_LENGTH} or {@link #EXTENDED_ADDRESS_BYTE_LENGTH} bytes
      */
     @NonNull
-    public static UwbAddress fromBytes(@NonNull byte[] address) throws IllegalArgumentException {
+    public static UwbAddress fromBytes(@NonNull byte[] address) {
         if (address.length != SHORT_ADDRESS_BYTE_LENGTH
                 && address.length != EXTENDED_ADDRESS_BYTE_LENGTH) {
             throw new IllegalArgumentException("Invalid UwbAddress length " + address.length);
@@ -107,7 +107,7 @@ public final class UwbAddress implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mAddressBytes.length);
         dest.writeByteArray(mAddressBytes);
     }
