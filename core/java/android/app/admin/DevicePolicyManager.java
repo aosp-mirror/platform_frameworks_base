@@ -12677,21 +12677,4 @@ public class DevicePolicyManager {
             }
         }
     }
-
-    // TODO(b/175392542): remove if not needed by ManagedProvisioning app anymore
-    /**
-     * Used by ManagedProvisioning app to factory reset the device when DO cannto be provisioned.
-     *
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.MASTER_CLEAR)
-    public void factoryReset(String reason) {
-        if (mService != null) {
-            try {
-                mService.factoryReset(reason);
-            } catch (RemoteException re) {
-                throw re.rethrowFromSystemServer();
-            }
-        }
-    }
 }

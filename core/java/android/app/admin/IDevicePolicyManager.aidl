@@ -488,6 +488,4 @@ interface IDevicePolicyManager {
     boolean canProfileOwnerResetPasswordWhenLocked(int userId);
 
     void setNextOperationSafety(int operation, boolean safe);
-    // TODO(b/175392542): remove if not needed by ManagedProvisioning app anymore
-    void factoryReset(String reason);
 }
