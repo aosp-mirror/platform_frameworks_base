@@ -33,6 +33,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.TimingsTraceLog;
+import android.view.SurfaceControl;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.systemui.dagger.ContextComponentHelper;
@@ -41,6 +42,7 @@ import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.people.PeopleSpaceActivity;
 import com.android.systemui.people.widget.PeopleSpaceWidgetProvider;
+import com.android.systemui.shared.system.ThreadedRendererCompat;
 import com.android.systemui.util.NotificationChannels;
 
 import java.lang.reflect.Constructor;
@@ -98,6 +100,18 @@ public class SystemUIApplication extends Application implements
         if (Process.myUserHandle().equals(UserHandle.SYSTEM)) {
             IntentFilter bootCompletedFilter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
             bootCompletedFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+
+            // If SF GPU context priority is set to realtime, then SysUI should run at high.
+            // The priority is defaulted at medium.
+            int sfPriority = SurfaceControl.getGPUContextPriority();
+            Log.i(TAG, "Found SurfaceFlinger's GPU Priority: " + sfPriority);
+            if (sfPriority == ThreadedRendererCompat.EGL_CONTEXT_PRIORITY_REALTIME_NV) {
+                Log.i(TAG, "Setting SysUI's GPU Context priority to: "
+                        + ThreadedRendererCompat.EGL_CONTEXT_PRIORITY_HIGH_IMG);
+                ThreadedRendererCompat.setContextPriority(
+                        ThreadedRendererCompat.EGL_CONTEXT_PRIORITY_HIGH_IMG);
+            }
+
             registerReceiver(new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
