@@ -19,6 +19,7 @@ package android.view;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.net.Uri;
@@ -222,7 +223,10 @@ public final class ContentInfo {
      * content that matched the predicate, or null if none of the items matched. The pair's
      * second object will have the content that didn't match the predicate, or null if all of
      * the items matched.
+     *
+     * @hide
      */
+    @TestApi
     @NonNull
     public Pair<ContentInfo, ContentInfo> partition(
             @NonNull Predicate<ClipData.Item> itemPredicate) {

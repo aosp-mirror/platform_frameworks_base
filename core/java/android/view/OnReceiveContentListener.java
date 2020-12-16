@@ -36,7 +36,7 @@ import android.annotation.Nullable;
  *     &#64;Override
  *     public ContentInfo onReceiveContent(View view, ContentInfo payload) {
  *         Pair&lt;ContentInfo, ContentInfo&gt; split =
- *                 payload.partition(item -&gt; item.getUri() != null);
+ *                 ContentInfoCompat.partition(payload, item -&gt; item.getUri() != null);
  *         ContentInfo uriContent = split.first;
  *         ContentInfo remaining = split.second;
  *         if (uriContent != null) {
@@ -72,8 +72,7 @@ public interface OnReceiveContentListener {
      * handling. For example, an implementation may provide handling for content URIs (to provide
      * support for inserting images, etc) and delegate the processing of text to the platform to
      * preserve the common behavior for inserting text. See the class javadoc for a sample
-     * implementation and see {@link ContentInfo#partition} for a convenient way to split the
-     * passed-in content.
+     * implementation.
      *
      * <p>If implementing handling for text: if the view has a selection, the selection should
      * be overwritten by the passed-in content; if there's no selection, the passed-in content
