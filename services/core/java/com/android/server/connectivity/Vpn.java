@@ -246,7 +246,12 @@ public class Vpn {
         void checkInterruptAndDelay(boolean sleepLonger) throws InterruptedException;
     }
 
-    static class Dependencies {
+    @VisibleForTesting
+    public static class Dependencies {
+        public boolean isCallerSystem() {
+            return Binder.getCallingUid() == Process.SYSTEM_UID;
+        }
+
         public void startService(final String serviceName) {
             SystemService.start(serviceName);
         }
@@ -265,6 +270,10 @@ public class Vpn {
 
         public File getStateFile() {
             return new File("/data/misc/vpn/state");
+        }
+
+        public DeviceIdleInternal getDeviceIdleInternal() {
+            return LocalServices.getService(DeviceIdleInternal.class);
         }
 
         public void sendArgumentsToDaemon(
@@ -369,6 +378,14 @@ public class Vpn {
     public Vpn(Looper looper, Context context, INetworkManagementService netService, INetd netd,
             @UserIdInt int userId, @NonNull KeyStore keyStore) {
         this(looper, context, new Dependencies(), netService, netd, userId, keyStore,
+                new SystemServices(context), new Ikev2SessionCreator());
+    }
+
+    @VisibleForTesting
+    public Vpn(Looper looper, Context context, Dependencies deps,
+            INetworkManagementService netService, INetd netd, @UserIdInt int userId,
+            @NonNull KeyStore keyStore) {
+        this(looper, context, deps, netService, netd, userId, keyStore,
                 new SystemServices(context), new Ikev2SessionCreator());
     }
 
@@ -772,8 +789,7 @@ public class Vpn {
 
             // Tell the OS that background services in this app need to be allowed for
             // a short time, so we can bootstrap the VPN service.
-            DeviceIdleInternal idleController =
-                    LocalServices.getService(DeviceIdleInternal.class);
+            DeviceIdleInternal idleController = mDeps.getDeviceIdleInternal();
             idleController.addPowerSaveTempWhitelistApp(Process.myUid(), alwaysOnPackage,
                     VPN_LAUNCH_IDLE_ALLOWLIST_DURATION_MS, mUserId, false, "vpn");
 
@@ -1959,10 +1975,6 @@ public class Vpn {
             return mContext.createContextAsUser(
                     UserHandle.of(userId), 0 /* flags */).getContentResolver();
         }
-
-        public boolean isCallerSystem() {
-            return Binder.getCallingUid() == Process.SYSTEM_UID;
-        }
     }
 
     private native int jniCreate(int mtu);
@@ -3112,7 +3124,7 @@ public class Vpn {
     @VisibleForTesting
     @Nullable
     VpnProfile getVpnProfilePrivileged(@NonNull String packageName, @NonNull KeyStore keyStore) {
-        if (!mSystemServices.isCallerSystem()) {
+        if (!mDeps.isCallerSystem()) {
             Log.wtf(TAG, "getVpnProfilePrivileged called as non-System UID ");
             return null;
         }
