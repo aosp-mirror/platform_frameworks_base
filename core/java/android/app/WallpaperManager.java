@@ -605,6 +605,7 @@ public class WallpaperManager {
      *     or {@code null} if no system wallpaper exists or if the calling application
      *     is not able to access the wallpaper.
      */
+    @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
     public Drawable getDrawable() {
         final ColorManagementProxy cmProxy = getColorManagementProxy();
         Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, true, FLAG_SYSTEM, cmProxy);
