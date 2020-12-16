@@ -395,8 +395,9 @@ public class VoiceInteractionManagerService extends SystemService {
                         + interactorInfo + ")");
             }
 
-            // Initializing settings, look for an interactor first (but only on non-svelte).
-            if (curInteractorInfo == null && mEnableService) {
+            // Initializing settings. Look for an interactor first, but only on non-svelte and only
+            // if the user hasn't explicitly unset it.
+            if (curInteractorInfo == null && mEnableService && !"".equals(curInteractorStr)) {
                 curInteractorInfo = findAvailInteractor(userHandle, null);
             }
 
@@ -1692,8 +1693,13 @@ public class VoiceInteractionManagerService extends SystemService {
                 if (isPackageAppearing(pkgName) != PACKAGE_UNCHANGED) {
                     return;
                 }
+                final String curInteractorStr = Settings.Secure.getStringForUser(
+                        mContext.getContentResolver(),
+                        Settings.Secure.VOICE_INTERACTION_SERVICE, mCurUser);
                 final ComponentName curInteractor = getCurInteractor(mCurUser);
-                if (curInteractor == null) {
+                // If there's no interactor and the user hasn't explicitly unset it, check if the
+                // modified package offers one.
+                if (curInteractor == null && !"".equals(curInteractorStr)) {
                     final VoiceInteractionServiceInfo availInteractorInfo
                             = findAvailInteractor(mCurUser, pkgName);
                     if (availInteractorInfo != null) {
