@@ -1563,11 +1563,11 @@ public final class QuotaController extends StateController {
                 standbyBucket);
         final long remainingEJQuota = getRemainingEJExecutionTimeLocked(userId, packageName);
 
-        if (stats.executionTimeInWindowMs < mAllowedTimePerPeriodMs
+        final boolean inRegularQuota = stats.executionTimeInWindowMs < mAllowedTimePerPeriodMs
                 && stats.executionTimeInMaxPeriodMs < mMaxExecutionTimeMs
                 && isUnderJobCountQuota
-                && isUnderTimingSessionCountQuota
-                && remainingEJQuota > 0) {
+                && isUnderTimingSessionCountQuota;
+        if (inRegularQuota && remainingEJQuota > 0) {
             // Already in quota. Why was this method called?
             if (DEBUG) {
                 Slog.e(TAG, "maybeScheduleStartAlarmLocked called for " + pkgString
@@ -1582,10 +1582,7 @@ public final class QuotaController extends StateController {
 
         long inRegularQuotaTimeElapsed = Long.MAX_VALUE;
         long inEJQuotaTimeElapsed = Long.MAX_VALUE;
-        if (!(stats.executionTimeInWindowMs < mAllowedTimePerPeriodMs
-                && stats.executionTimeInMaxPeriodMs < mMaxExecutionTimeMs
-                && isUnderJobCountQuota
-                && isUnderTimingSessionCountQuota)) {
+        if (!inRegularQuota) {
             // The time this app will have quota again.
             long inQuotaTimeElapsed = stats.inQuotaTimeElapsed;
             if (!isUnderJobCountQuota && stats.bgJobCountInWindow < stats.jobCountLimit) {
@@ -1603,17 +1600,34 @@ public final class QuotaController extends StateController {
         }
         if (remainingEJQuota <= 0) {
             final long limitMs = mEJLimitsMs[standbyBucket] - mQuotaBufferMs;
-            List<TimingSession> timingSessions = mEJTimingSessions.get(userId, packageName);
             long sumMs = 0;
-            for (int i = timingSessions.size() - 1; i >= 0; --i) {
-                TimingSession ts = timingSessions.get(i);
-                final long durationMs = ts.endTimeElapsed - ts.startTimeElapsed;
-                sumMs += durationMs;
+            final Timer ejTimer = mEJPkgTimers.get(userId, packageName);
+            if (ejTimer != null && ejTimer.isActive()) {
+                final long nowElapsed = sElapsedRealtimeClock.millis();
+                sumMs += ejTimer.getCurrentDuration(nowElapsed);
                 if (sumMs >= limitMs) {
-                    inEJQuotaTimeElapsed =
-                            ts.startTimeElapsed + (sumMs - limitMs) + mEJLimitWindowSizeMs;
-                    break;
+                    inEJQuotaTimeElapsed = (nowElapsed - limitMs) + mEJLimitWindowSizeMs;
                 }
+            }
+            List<TimingSession> timingSessions = mEJTimingSessions.get(userId, packageName);
+            if (timingSessions != null) {
+                for (int i = timingSessions.size() - 1; i >= 0; --i) {
+                    TimingSession ts = timingSessions.get(i);
+                    final long durationMs = ts.endTimeElapsed - ts.startTimeElapsed;
+                    sumMs += durationMs;
+                    if (sumMs >= limitMs) {
+                        inEJQuotaTimeElapsed =
+                                ts.startTimeElapsed + (sumMs - limitMs) + mEJLimitWindowSizeMs;
+                        break;
+                    }
+                }
+            } else if ((ejTimer == null || !ejTimer.isActive()) && inRegularQuota) {
+                // In some strange cases, an app may end be in the NEVER bucket but could have run
+                // some regular jobs. This results in no EJ timing sessions and QC having a bad
+                // time.
+                Slog.wtf(TAG,
+                        string(userId, packageName) + " has 0 EJ quota without running anything");
+                return;
             }
         }
         long inQuotaTimeElapsed = Math.min(inRegularQuotaTimeElapsed, inEJQuotaTimeElapsed);
