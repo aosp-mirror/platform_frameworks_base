@@ -1536,7 +1536,8 @@
     <permission android:name="android.permission.BIND_DIRECTORY_SEARCH"
         android:protectionLevel="signature|privileged" />
 
-    <!-- @SystemApi @hide Allows an application to modify cell broadcasts through the content provider.
+    <!-- @SystemApi @hide Allows an application to modify the cell broadcasts configuration
+         (i.e. enable or disable channels).
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.MODIFY_CELL_BROADCASTS"
                 android:protectionLevel="signature|privileged" />
