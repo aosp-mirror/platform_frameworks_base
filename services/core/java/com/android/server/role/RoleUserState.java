@@ -281,7 +281,7 @@ public class RoleUserState {
         }
 
         if (changed) {
-            mCallback.onRoleHoldersChanged(roleName, mUserId, null, packageName);
+            mCallback.onRoleHoldersChanged(roleName, mUserId);
         }
         return true;
     }
@@ -313,7 +313,7 @@ public class RoleUserState {
         }
 
         if (changed) {
-            mCallback.onRoleHoldersChanged(roleName, mUserId, packageName, null);
+            mCallback.onRoleHoldersChanged(roleName, mUserId);
         }
         return true;
     }
@@ -566,7 +566,6 @@ public class RoleUserState {
          * @param roleName the name of the role whose holders are changed
          * @param userId the user id for this role holder change
          */
-        void onRoleHoldersChanged(@NonNull String roleName, @UserIdInt int userId,
-                @Nullable String removedHolder, @Nullable String addedHolder);
+        void onRoleHoldersChanged(@NonNull String roleName, @UserIdInt int userId);
     }
 }
