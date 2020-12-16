@@ -27,6 +27,7 @@
 #include <android/hardware/gnss/1.1/IGnssMeasurement.h>
 #include <android/hardware/gnss/2.0/IGnssMeasurement.h>
 #include <android/hardware/gnss/2.1/IGnssMeasurement.h>
+#include <android/hardware/gnss/BnGnssMeasurementInterface.h>
 #include <log/log.h>
 #include "GnssMeasurementCallback.h"
 #include "jni.h"
@@ -36,16 +37,27 @@ namespace android::gnss {
 class GnssMeasurementInterface {
 public:
     virtual ~GnssMeasurementInterface() {}
-    virtual jboolean setCallback(const sp<GnssMeasurementCallback>& callback,
+    virtual jboolean setCallback(const std::unique_ptr<GnssMeasurementCallback>& callback,
                                  bool enableFullTracking) = 0;
     virtual jboolean close() = 0;
+};
+
+class GnssMeasurement : public GnssMeasurementInterface {
+public:
+    GnssMeasurement(const sp<android::hardware::gnss::IGnssMeasurementInterface>& iGnssMeasurement);
+    jboolean setCallback(const std::unique_ptr<GnssMeasurementCallback>& callback,
+                         bool enableFullTracking) override;
+    jboolean close() override;
+
+private:
+    const sp<android::hardware::gnss::IGnssMeasurementInterface> mIGnssMeasurement;
 };
 
 class GnssMeasurement_V1_0 : public GnssMeasurementInterface {
 public:
     GnssMeasurement_V1_0(
             const sp<android::hardware::gnss::V1_0::IGnssMeasurement>& iGnssMeasurement);
-    jboolean setCallback(const sp<GnssMeasurementCallback>& callback,
+    jboolean setCallback(const std::unique_ptr<GnssMeasurementCallback>& callback,
                          bool enableFullTracking) override;
     jboolean close() override;
 
@@ -57,7 +69,7 @@ class GnssMeasurement_V1_1 : public GnssMeasurement_V1_0 {
 public:
     GnssMeasurement_V1_1(
             const sp<android::hardware::gnss::V1_1::IGnssMeasurement>& iGnssMeasurement);
-    jboolean setCallback(const sp<GnssMeasurementCallback>& callback,
+    jboolean setCallback(const std::unique_ptr<GnssMeasurementCallback>& callback,
                          bool enableFullTracking) override;
 
 private:
@@ -68,7 +80,7 @@ class GnssMeasurement_V2_0 : public GnssMeasurement_V1_1 {
 public:
     GnssMeasurement_V2_0(
             const sp<android::hardware::gnss::V2_0::IGnssMeasurement>& iGnssMeasurement);
-    jboolean setCallback(const sp<GnssMeasurementCallback>& callback,
+    jboolean setCallback(const std::unique_ptr<GnssMeasurementCallback>& callback,
                          bool enableFullTracking) override;
 
 private:
@@ -79,7 +91,7 @@ class GnssMeasurement_V2_1 : public GnssMeasurement_V2_0 {
 public:
     GnssMeasurement_V2_1(
             const sp<android::hardware::gnss::V2_1::IGnssMeasurement>& iGnssMeasurement);
-    jboolean setCallback(const sp<GnssMeasurementCallback>& callback,
+    jboolean setCallback(const std::unique_ptr<GnssMeasurementCallback>& callback,
                          bool enableFullTracking) override;
 
 private:

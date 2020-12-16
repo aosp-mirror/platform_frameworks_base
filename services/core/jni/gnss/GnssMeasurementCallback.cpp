@@ -20,6 +20,12 @@
 
 namespace android::gnss {
 
+using binder::Status;
+using hardware::gnss::ElapsedRealtime;
+using hardware::gnss::GnssClock;
+using hardware::gnss::GnssData;
+using hardware::gnss::GnssMeasurement;
+
 jclass class_gnssMeasurementsEvent;
 jclass class_gnssMeasurement;
 jclass class_gnssClock;
@@ -47,174 +53,98 @@ void GnssMeasurement_class_init_once(JNIEnv* env, jclass& clazz) {
     method_gnssClockCtor = env->GetMethodID(class_gnssClock, "<init>", "()V");
 }
 
-hardware::Return<void> GnssMeasurementCallback::gnssMeasurementCb_2_1(
-        const hardware::gnss::V2_1::IGnssMeasurementCallback::GnssData& data) {
-    translateAndSetGnssData(data);
-    return hardware::Void();
+void setMeasurementData(JNIEnv* env, jobject& callbacksObj, jobject clock,
+                        jobjectArray measurementArray) {
+    jobject gnssMeasurementsEvent =
+            env->NewObject(class_gnssMeasurementsEvent, method_gnssMeasurementsEventCtor, clock,
+                           measurementArray);
+
+    env->CallVoidMethod(callbacksObj, method_reportMeasurementData, gnssMeasurementsEvent);
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    env->DeleteLocalRef(gnssMeasurementsEvent);
 }
 
-hardware::Return<void> GnssMeasurementCallback::gnssMeasurementCb_2_0(
-        const hardware::gnss::V2_0::IGnssMeasurementCallback::GnssData& data) {
-    translateAndSetGnssData(data);
-    return hardware::Void();
-}
+template <class T_Measurement, class T_Flags>
+void setMeasurementFields_V1_0(const T_Measurement& measurement, JavaObject& object) {
+    uint32_t flags = static_cast<uint32_t>(measurement.flags);
 
-hardware::Return<void> GnssMeasurementCallback::gnssMeasurementCb(
-        const hardware::gnss::V1_1::IGnssMeasurementCallback::GnssData& data) {
-    translateAndSetGnssData(data);
-    return hardware::Void();
-}
-
-hardware::Return<void> GnssMeasurementCallback::GnssMeasurementCb(
-        const hardware::gnss::V1_0::IGnssMeasurementCallback::GnssData& data) {
-    translateAndSetGnssData(data);
-    return hardware::Void();
-}
-
-template <>
-size_t GnssMeasurementCallback::getMeasurementCount<
-        hardware::gnss::V1_0::IGnssMeasurementCallback::GnssData>(
-        const hardware::gnss::V1_0::IGnssMeasurementCallback::GnssData& data) {
-    return data.measurementCount;
-}
-
-// Preallocate object as: JavaObject object(env, "android/location/GnssMeasurement");
-template <>
-void GnssMeasurementCallback::translateSingleGnssMeasurement<
-        hardware::gnss::V1_0::IGnssMeasurementCallback::GnssMeasurement>(
-        const hardware::gnss::V1_0::IGnssMeasurementCallback::GnssMeasurement* measurement,
-        JavaObject& object) {
-    uint32_t flags = static_cast<uint32_t>(measurement->flags);
-
-    SET(Svid, static_cast<int32_t>(measurement->svid));
-    SET(ConstellationType, static_cast<int32_t>(measurement->constellation));
-    SET(TimeOffsetNanos, measurement->timeOffsetNs);
-    SET(State, static_cast<int32_t>(measurement->state));
-    SET(ReceivedSvTimeNanos, measurement->receivedSvTimeInNs);
-    SET(ReceivedSvTimeUncertaintyNanos, measurement->receivedSvTimeUncertaintyInNs);
-    SET(Cn0DbHz, measurement->cN0DbHz);
-    SET(PseudorangeRateMetersPerSecond, measurement->pseudorangeRateMps);
-    SET(PseudorangeRateUncertaintyMetersPerSecond, measurement->pseudorangeRateUncertaintyMps);
+    SET(Svid, static_cast<int32_t>(measurement.svid));
+    SET(TimeOffsetNanos, measurement.timeOffsetNs);
+    SET(State, static_cast<int32_t>(measurement.state));
+    SET(ReceivedSvTimeNanos, measurement.receivedSvTimeInNs);
+    SET(ReceivedSvTimeUncertaintyNanos, measurement.receivedSvTimeUncertaintyInNs);
+    SET(PseudorangeRateMetersPerSecond, measurement.pseudorangeRateMps);
+    SET(PseudorangeRateUncertaintyMetersPerSecond, measurement.pseudorangeRateUncertaintyMps);
     SET(AccumulatedDeltaRangeState,
-        (static_cast<int32_t>(measurement->accumulatedDeltaRangeState) &
+        (static_cast<int32_t>(measurement.accumulatedDeltaRangeState) &
          ~ADR_STATE_HALF_CYCLE_REPORTED)); // Half Cycle state not reported from Hardware in V1_0
-    SET(AccumulatedDeltaRangeMeters, measurement->accumulatedDeltaRangeM);
-    SET(AccumulatedDeltaRangeUncertaintyMeters, measurement->accumulatedDeltaRangeUncertaintyM);
-
-    if (flags & static_cast<uint32_t>(GnssMeasurementFlags::HAS_CARRIER_FREQUENCY)) {
-        SET(CarrierFrequencyHz, measurement->carrierFrequencyHz);
-    }
+    SET(AccumulatedDeltaRangeMeters, measurement.accumulatedDeltaRangeM);
+    SET(AccumulatedDeltaRangeUncertaintyMeters, measurement.accumulatedDeltaRangeUncertaintyM);
 
     // Intentionally not copying deprecated fields of carrierCycles,
     // carrierPhase, carrierPhaseUncertainty
 
-    SET(MultipathIndicator, static_cast<int32_t>(measurement->multipathIndicator));
+    SET(MultipathIndicator, static_cast<int32_t>(measurement.multipathIndicator));
 
-    if (flags & static_cast<uint32_t>(GnssMeasurementFlags::HAS_SNR)) {
-        SET(SnrInDb, measurement->snrDb);
+    if (flags & static_cast<uint32_t>(T_Flags::HAS_SNR)) {
+        SET(SnrInDb, measurement.snrDb);
     }
 
-    if (flags & static_cast<uint32_t>(GnssMeasurementFlags::HAS_AUTOMATIC_GAIN_CONTROL)) {
-        SET(AutomaticGainControlLevelInDb, measurement->agcLevelDb);
-    }
-}
-
-// Preallocate object as: JavaObject object(env, "android/location/GnssMeasurement");
-template <>
-void GnssMeasurementCallback::translateSingleGnssMeasurement<
-        hardware::gnss::V1_1::IGnssMeasurementCallback::GnssMeasurement>(
-        const hardware::gnss::V1_1::IGnssMeasurementCallback::GnssMeasurement* measurement_V1_1,
-        JavaObject& object) {
-    translateSingleGnssMeasurement(&(measurement_V1_1->v1_0), object);
-
-    // Set the V1_1 flag, and mark that new field has valid information for Java Layer
-    SET(AccumulatedDeltaRangeState,
-        (static_cast<int32_t>(measurement_V1_1->accumulatedDeltaRangeState) |
-         ADR_STATE_HALF_CYCLE_REPORTED));
-}
-
-// Preallocate object as: JavaObject object(env, "android/location/GnssMeasurement");
-template <>
-void GnssMeasurementCallback::translateSingleGnssMeasurement<
-        hardware::gnss::V2_0::IGnssMeasurementCallback::GnssMeasurement>(
-        const hardware::gnss::V2_0::IGnssMeasurementCallback::GnssMeasurement* measurement_V2_0,
-        JavaObject& object) {
-    JNIEnv* env = getJniEnv();
-    translateSingleGnssMeasurement(&(measurement_V2_0->v1_1), object);
-
-    jstring codeType = env->NewStringUTF(measurement_V2_0->codeType.c_str());
-    SET(CodeType, codeType);
-
-    // Overwrite with v2_0.state since v2_0->v1_1->v1_0.state is deprecated.
-    SET(State, static_cast<int32_t>(measurement_V2_0->state));
-
-    // Overwrite with v2_0.constellation since v2_0->v1_1->v1_0.constellation is deprecated.
-    SET(ConstellationType, static_cast<int32_t>(measurement_V2_0->constellation));
-
-    if (codeType) {
-        env->DeleteLocalRef(codeType);
+    if (flags & static_cast<uint32_t>(T_Flags::HAS_AUTOMATIC_GAIN_CONTROL)) {
+        SET(AutomaticGainControlLevelInDb, measurement.agcLevelDb);
     }
 }
 
-// Preallocate object as: JavaObject object(env, "android/location/GnssMeasurement");
-template <>
-void GnssMeasurementCallback::translateSingleGnssMeasurement<
-        hardware::gnss::V2_1::IGnssMeasurementCallback::GnssMeasurement>(
-        const hardware::gnss::V2_1::IGnssMeasurementCallback::GnssMeasurement* measurement_V2_1,
-        JavaObject& object) {
-    translateSingleGnssMeasurement(&(measurement_V2_1->v2_0), object);
+template <class T_Measurement, class T_Flags>
+void setMeasurementFields_V2_1(const T_Measurement& measurement, JavaObject& object) {
+    SET(BasebandCn0DbHz, measurement.basebandCN0DbHz);
 
-    SET(BasebandCn0DbHz, measurement_V2_1->basebandCN0DbHz);
-
-    if (measurement_V2_1->flags & GnssMeasurementFlags::HAS_FULL_ISB) {
-        SET(FullInterSignalBiasNanos, measurement_V2_1->fullInterSignalBiasNs);
+    if (measurement.flags & T_Flags::HAS_FULL_ISB) {
+        SET(FullInterSignalBiasNanos, measurement.fullInterSignalBiasNs);
     }
 
-    if (measurement_V2_1->flags & GnssMeasurementFlags::HAS_FULL_ISB_UNCERTAINTY) {
-        SET(FullInterSignalBiasUncertaintyNanos,
-            measurement_V2_1->fullInterSignalBiasUncertaintyNs);
+    if (measurement.flags & T_Flags::HAS_FULL_ISB_UNCERTAINTY) {
+        SET(FullInterSignalBiasUncertaintyNanos, measurement.fullInterSignalBiasUncertaintyNs);
     }
 
-    if (measurement_V2_1->flags & GnssMeasurementFlags::HAS_SATELLITE_ISB) {
-        SET(SatelliteInterSignalBiasNanos, measurement_V2_1->satelliteInterSignalBiasNs);
+    if (measurement.flags & T_Flags::HAS_SATELLITE_ISB) {
+        SET(SatelliteInterSignalBiasNanos, measurement.satelliteInterSignalBiasNs);
     }
 
-    if (measurement_V2_1->flags & GnssMeasurementFlags::HAS_SATELLITE_ISB_UNCERTAINTY) {
+    if (measurement.flags & T_Flags::HAS_SATELLITE_ISB_UNCERTAINTY) {
         SET(SatelliteInterSignalBiasUncertaintyNanos,
-            measurement_V2_1->satelliteInterSignalBiasUncertaintyNs);
+            measurement.satelliteInterSignalBiasUncertaintyNs);
     }
 }
 
-template <>
-void GnssMeasurementCallback::translateGnssClock(
-        JavaObject& object,
-        const hardware::gnss::V1_0::IGnssMeasurementCallback::GnssClock& clock) {
+template <class T_Clock, class T_Flags>
+void setClockFields_V1_0(const T_Clock& clock, JavaObject& object) {
     uint32_t flags = static_cast<uint32_t>(clock.gnssClockFlags);
-    if (flags & static_cast<uint32_t>(GnssClockFlags::HAS_LEAP_SECOND)) {
+    if (flags & static_cast<uint32_t>(T_Flags::HAS_LEAP_SECOND)) {
         SET(LeapSecond, static_cast<int32_t>(clock.leapSecond));
     }
 
-    if (flags & static_cast<uint32_t>(GnssClockFlags::HAS_TIME_UNCERTAINTY)) {
+    if (flags & static_cast<uint32_t>(T_Flags::HAS_TIME_UNCERTAINTY)) {
         SET(TimeUncertaintyNanos, clock.timeUncertaintyNs);
     }
 
-    if (flags & static_cast<uint32_t>(GnssClockFlags::HAS_FULL_BIAS)) {
+    if (flags & static_cast<uint32_t>(T_Flags::HAS_FULL_BIAS)) {
         SET(FullBiasNanos, clock.fullBiasNs);
     }
 
-    if (flags & static_cast<uint32_t>(GnssClockFlags::HAS_BIAS)) {
+    if (flags & static_cast<uint32_t>(T_Flags::HAS_BIAS)) {
         SET(BiasNanos, clock.biasNs);
     }
 
-    if (flags & static_cast<uint32_t>(GnssClockFlags::HAS_BIAS_UNCERTAINTY)) {
+    if (flags & static_cast<uint32_t>(T_Flags::HAS_BIAS_UNCERTAINTY)) {
         SET(BiasUncertaintyNanos, clock.biasUncertaintyNs);
     }
 
-    if (flags & static_cast<uint32_t>(GnssClockFlags::HAS_DRIFT)) {
+    if (flags & static_cast<uint32_t>(T_Flags::HAS_DRIFT)) {
         SET(DriftNanosPerSecond, clock.driftNsps);
     }
 
-    if (flags & static_cast<uint32_t>(GnssClockFlags::HAS_DRIFT_UNCERTAINTY)) {
+    if (flags & static_cast<uint32_t>(T_Flags::HAS_DRIFT_UNCERTAINTY)) {
         SET(DriftUncertaintyNanosPerSecond, clock.driftUncertaintyNsps);
     }
 
@@ -222,10 +152,8 @@ void GnssMeasurementCallback::translateGnssClock(
     SET(HardwareClockDiscontinuityCount, clock.hwClockDiscontinuityCount);
 }
 
-template <>
-void GnssMeasurementCallback::translateGnssClock(
-        JavaObject& object,
-        const hardware::gnss::V2_1::IGnssMeasurementCallback::GnssClock& clock) {
+template <class T_Clock, class T_Flags>
+void setClockFields_V2_1(const T_Clock& clock, JavaObject& object) {
     JNIEnv* env = getJniEnv();
     SET(ReferenceConstellationTypeForIsb,
         static_cast<int32_t>(clock.referenceSignalTypeForIsb.constellation));
@@ -234,17 +162,216 @@ void GnssMeasurementCallback::translateGnssClock(
     jstring referenceCodeTypeForIsb =
             env->NewStringUTF(clock.referenceSignalTypeForIsb.codeType.c_str());
     SET(ReferenceCodeTypeForIsb, referenceCodeTypeForIsb);
+    env->DeleteLocalRef(referenceCodeTypeForIsb);
+}
 
-    translateGnssClock(object, clock.v1_0);
-
-    if (referenceCodeTypeForIsb) {
-        env->DeleteLocalRef(referenceCodeTypeForIsb);
+template <class T_ElapsedRealtime, class T_Flags>
+void setElapsedRealtimeFields(const T_ElapsedRealtime& elapsedRealtime, JavaObject& object) {
+    uint32_t flags = static_cast<uint32_t>(elapsedRealtime.flags);
+    if (flags & T_Flags::HAS_TIMESTAMP_NS) {
+        SET(ElapsedRealtimeNanos, static_cast<uint64_t>(elapsedRealtime.timestampNs));
+    }
+    if (flags & T_Flags::HAS_TIME_UNCERTAINTY_NS) {
+        SET(ElapsedRealtimeUncertaintyNanos,
+            static_cast<double>(elapsedRealtime.timeUncertaintyNs));
     }
 }
 
+// Implementation of GnssMeasurementCallbackAidl class.
+
+Status GnssMeasurementCallbackAidl::gnssMeasurementCb(const GnssData& data) {
+    ALOGD("%s", __func__);
+    translateAndSetGnssData(data);
+    return Status::ok();
+}
+
+void GnssMeasurementCallbackAidl::translateAndSetGnssData(const GnssData& data) {
+    JNIEnv* env = getJniEnv();
+
+    JavaObject gnssClockJavaObject(env, class_gnssClock, method_gnssClockCtor);
+    translateGnssClock(env, data, gnssClockJavaObject);
+    jobject clock = gnssClockJavaObject.get();
+
+    jobjectArray measurementArray = translateAllGnssMeasurements(env, data.measurements);
+    setMeasurementData(env, mCallbacksObj, clock, measurementArray);
+
+    env->DeleteLocalRef(clock);
+    env->DeleteLocalRef(measurementArray);
+}
+
+void GnssMeasurementCallbackAidl::translateSingleGnssMeasurement(JNIEnv* env,
+                                                                 const GnssMeasurement& measurement,
+                                                                 JavaObject& object) {
+    setMeasurementFields_V1_0<GnssMeasurement, GnssMeasurement>(measurement, object);
+    setMeasurementFields_V2_1<GnssMeasurement, GnssMeasurement>(measurement, object);
+
+    SET(Cn0DbHz, measurement.antennaCN0DbHz);
+    SET(ConstellationType, static_cast<int32_t>(measurement.signalType.constellation));
+
+    if (measurement.flags & static_cast<uint32_t>(GnssMeasurement::HAS_CARRIER_FREQUENCY)) {
+        SET(CarrierFrequencyHz, static_cast<float>(measurement.signalType.carrierFrequencyHz));
+    }
+
+    jstring codeType = env->NewStringUTF(measurement.signalType.codeType.c_str());
+    SET(CodeType, codeType);
+    env->DeleteLocalRef(codeType);
+}
+
+jobjectArray GnssMeasurementCallbackAidl::translateAllGnssMeasurements(
+        JNIEnv* env, const std::vector<GnssMeasurement>& measurements) {
+    if (measurements.size() == 0) {
+        return nullptr;
+    }
+
+    jobjectArray gnssMeasurementArray =
+            env->NewObjectArray(measurements.size(), class_gnssMeasurement,
+                                nullptr /* initialElement */);
+
+    for (uint16_t i = 0; i < measurements.size(); ++i) {
+        JavaObject object(env, class_gnssMeasurement, method_gnssMeasurementCtor);
+        translateSingleGnssMeasurement(env, measurements[i], object);
+        jobject gnssMeasurement = object.get();
+        env->SetObjectArrayElement(gnssMeasurementArray, i, gnssMeasurement);
+        env->DeleteLocalRef(gnssMeasurement);
+    }
+
+    return gnssMeasurementArray;
+}
+
+void GnssMeasurementCallbackAidl::translateGnssClock(JNIEnv* env, const GnssData& data,
+                                                     JavaObject& object) {
+    setElapsedRealtimeFields<ElapsedRealtime, ElapsedRealtime>(data.elapsedRealtime, object);
+    setClockFields_V1_0<GnssClock, GnssClock>(data.clock, object);
+    setClockFields_V2_1<GnssClock, GnssClock>(data.clock, object);
+}
+
+// Implementation of GnssMeasurementCallbackHidl class.
+
+hardware::Return<void> GnssMeasurementCallbackHidl::gnssMeasurementCb_2_1(
+        const hardware::gnss::V2_1::IGnssMeasurementCallback::GnssData& data) {
+    translateAndSetGnssData(data);
+    return hardware::Void();
+}
+
+hardware::Return<void> GnssMeasurementCallbackHidl::gnssMeasurementCb_2_0(
+        const hardware::gnss::V2_0::IGnssMeasurementCallback::GnssData& data) {
+    translateAndSetGnssData(data);
+    return hardware::Void();
+}
+
+hardware::Return<void> GnssMeasurementCallbackHidl::gnssMeasurementCb(
+        const hardware::gnss::V1_1::IGnssMeasurementCallback::GnssData& data) {
+    translateAndSetGnssData(data);
+    return hardware::Void();
+}
+
+hardware::Return<void> GnssMeasurementCallbackHidl::GnssMeasurementCb(
+        const hardware::gnss::V1_0::IGnssMeasurementCallback::GnssData& data) {
+    translateAndSetGnssData(data);
+    return hardware::Void();
+}
+
 template <>
-void GnssMeasurementCallback::translateGnssClock(
-        JavaObject& object, const hardware::gnss::V2_0::IGnssMeasurementCallback::GnssData& data) {
+size_t GnssMeasurementCallbackHidl::getMeasurementCount<
+        hardware::gnss::V1_0::IGnssMeasurementCallback::GnssData>(
+        const hardware::gnss::V1_0::IGnssMeasurementCallback::GnssData& data) {
+    return data.measurementCount;
+}
+
+// Preallocate object as: JavaObject object(env, "android/location/GnssMeasurement");
+template <>
+void GnssMeasurementCallbackHidl::translateSingleGnssMeasurement<
+        hardware::gnss::V1_0::IGnssMeasurementCallback::GnssMeasurement>(
+        const hardware::gnss::V1_0::IGnssMeasurementCallback::GnssMeasurement& measurement,
+        JavaObject& object) {
+    setMeasurementFields_V1_0<hardware::gnss::V1_0::IGnssMeasurementCallback::GnssMeasurement,
+                              GnssMeasurementFlags>(measurement, object);
+
+    SET(ConstellationType, static_cast<int32_t>(measurement.constellation));
+    SET(Cn0DbHz, measurement.cN0DbHz);
+    if (measurement.flags & static_cast<uint32_t>(GnssMeasurementFlags::HAS_CARRIER_FREQUENCY)) {
+        SET(CarrierFrequencyHz, measurement.carrierFrequencyHz);
+    }
+}
+
+// Preallocate object as: JavaObject object(env, "android/location/GnssMeasurement");
+template <>
+void GnssMeasurementCallbackHidl::translateSingleGnssMeasurement<
+        hardware::gnss::V1_1::IGnssMeasurementCallback::GnssMeasurement>(
+        const hardware::gnss::V1_1::IGnssMeasurementCallback::GnssMeasurement& measurement_V1_1,
+        JavaObject& object) {
+    translateSingleGnssMeasurement(measurement_V1_1.v1_0, object);
+
+    // Set the V1_1 flag, and mark that new field has valid information for Java Layer
+    SET(AccumulatedDeltaRangeState,
+        (static_cast<int32_t>(measurement_V1_1.accumulatedDeltaRangeState) |
+         ADR_STATE_HALF_CYCLE_REPORTED));
+}
+
+// Preallocate object as: JavaObject object(env, "android/location/GnssMeasurement");
+template <>
+void GnssMeasurementCallbackHidl::translateSingleGnssMeasurement<
+        hardware::gnss::V2_0::IGnssMeasurementCallback::GnssMeasurement>(
+        const hardware::gnss::V2_0::IGnssMeasurementCallback::GnssMeasurement& measurement_V2_0,
+        JavaObject& object) {
+    JNIEnv* env = getJniEnv();
+    translateSingleGnssMeasurement(measurement_V2_0.v1_1, object);
+
+    jstring codeType = env->NewStringUTF(measurement_V2_0.codeType.c_str());
+    SET(CodeType, codeType);
+
+    // Overwrite with v2_0.state since V2_0.v1_1.v1_0.state is deprecated.
+    SET(State, static_cast<int32_t>(measurement_V2_0.state));
+
+    // Overwrite with v2_0.constellation since V2_0.v1_1.v1_0.constellation is deprecated.
+    SET(ConstellationType, static_cast<int32_t>(measurement_V2_0.constellation));
+
+    if (codeType) {
+        env->DeleteLocalRef(codeType);
+    }
+}
+
+// Preallocate object as: JavaObject object(env, "android/location/GnssMeasurement");
+template <>
+void GnssMeasurementCallbackHidl::translateSingleGnssMeasurement<
+        hardware::gnss::V2_1::IGnssMeasurementCallback::GnssMeasurement>(
+        const hardware::gnss::V2_1::IGnssMeasurementCallback::GnssMeasurement& measurement_V2_1,
+        JavaObject& object) {
+    translateSingleGnssMeasurement(measurement_V2_1.v2_0, object);
+
+    setMeasurementFields_V2_1<hardware::gnss::V2_1::IGnssMeasurementCallback::GnssMeasurement,
+                              GnssMeasurementFlags>(measurement_V2_1, object);
+}
+
+template <>
+void GnssMeasurementCallbackHidl::translateGnssClock(
+        const hardware::gnss::V1_0::IGnssMeasurementCallback::GnssClock& clock,
+        JavaObject& object) {
+    setClockFields_V1_0<hardware::gnss::V1_0::IGnssMeasurementCallback::GnssClock,
+                        GnssClockFlags>(clock, object);
+}
+
+template <>
+void GnssMeasurementCallbackHidl::translateGnssClock(
+        const hardware::gnss::V2_1::IGnssMeasurementCallback::GnssClock& clock,
+        JavaObject& object) {
+    setClockFields_V2_1<hardware::gnss::V2_1::IGnssMeasurementCallback::GnssClock,
+                        GnssClockFlags>(clock, object);
+    translateGnssClock(clock.v1_0, object);
+}
+
+template <>
+void GnssMeasurementCallbackHidl::translateGnssClock(
+        const hardware::gnss::V2_0::IGnssMeasurementCallback::GnssData& data, JavaObject& object) {
+    setElapsedRealtimeFields<hardware::gnss::V2_0::ElapsedRealtime,
+                             hardware::gnss::V2_0::ElapsedRealtimeFlags>(data.elapsedRealtime,
+                                                                         object);
+    translateGnssClock(data.clock, object);
+}
+
+template <>
+void GnssMeasurementCallbackHidl::translateGnssClock(
+        const hardware::gnss::V2_1::IGnssMeasurementCallback::GnssData& data, JavaObject& object) {
     auto elapsedRealtime = data.elapsedRealtime;
     uint16_t flags = static_cast<uint16_t>(elapsedRealtime.flags);
     if (flags & hardware::gnss::V2_0::ElapsedRealtimeFlags::HAS_TIMESTAMP_NS) {
@@ -254,33 +381,7 @@ void GnssMeasurementCallback::translateGnssClock(
         SET(ElapsedRealtimeUncertaintyNanos,
             static_cast<double>(elapsedRealtime.timeUncertaintyNs));
     }
-    translateGnssClock(object, data.clock);
-}
-
-template <>
-void GnssMeasurementCallback::translateGnssClock(
-        JavaObject& object, const hardware::gnss::V2_1::IGnssMeasurementCallback::GnssData& data) {
-    auto elapsedRealtime = data.elapsedRealtime;
-    uint16_t flags = static_cast<uint16_t>(elapsedRealtime.flags);
-    if (flags & hardware::gnss::V2_0::ElapsedRealtimeFlags::HAS_TIMESTAMP_NS) {
-        SET(ElapsedRealtimeNanos, static_cast<uint64_t>(elapsedRealtime.timestampNs));
-    }
-    if (flags & hardware::gnss::V2_0::ElapsedRealtimeFlags::HAS_TIME_UNCERTAINTY_NS) {
-        SET(ElapsedRealtimeUncertaintyNanos,
-            static_cast<double>(elapsedRealtime.timeUncertaintyNs));
-    }
-    translateGnssClock(object, data.clock);
-}
-
-void GnssMeasurementCallback::setMeasurementData(JNIEnv* env, jobject clock,
-                                                 jobjectArray measurementArray) {
-    jobject gnssMeasurementsEvent =
-            env->NewObject(class_gnssMeasurementsEvent, method_gnssMeasurementsEventCtor, clock,
-                           measurementArray);
-
-    env->CallVoidMethod(mCallbacksObj, method_reportMeasurementData, gnssMeasurementsEvent);
-    checkAndClearExceptionFromCallback(env, __FUNCTION__);
-    env->DeleteLocalRef(gnssMeasurementsEvent);
+    translateGnssClock(data.clock, object);
 }
 
 } // namespace android::gnss

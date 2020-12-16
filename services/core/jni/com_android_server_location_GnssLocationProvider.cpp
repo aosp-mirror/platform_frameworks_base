@@ -31,6 +31,7 @@
 #include <android/hardware/gnss/2.1/IGnssMeasurement.h>
 #include <android/hardware/gnss/3.0/IGnssPsds.h>
 #include <android/hardware/gnss/BnGnss.h>
+#include <android/hardware/gnss/BnGnssMeasurementCallback.h>
 #include <android/hardware/gnss/BnGnssPowerIndicationCallback.h>
 #include <android/hardware/gnss/BnGnssPsdsCallback.h>
 #include <android/hardware/gnss/measurement_corrections/1.0/IMeasurementCorrections.h>
@@ -1754,7 +1755,15 @@ static void android_location_GnssNative_init_once(JNIEnv* env, jobject obj,
     // 1.1@IGnss can be paired {1.0, 1.1}@IGnssMeasurement
     // 1.0@IGnss is paired with 1.0@IGnssMeasurement
     gnssMeasurementIface = nullptr;
-    if (gnssHal_V2_1 != nullptr) {
+    if (gnssHalAidl != nullptr) {
+        sp<hardware::gnss::IGnssMeasurementInterface> gnssMeasurement;
+        auto status = gnssHalAidl->getExtensionGnssMeasurement(&gnssMeasurement);
+        if (checkAidlStatus(status, "Unable to get a handle to GnssMeasurement AIDL interface.")) {
+            gnssMeasurementIface =
+                    std::make_unique<android::gnss::GnssMeasurement>(gnssMeasurement);
+        }
+    }
+    if (gnssHal_V2_1 != nullptr && gnssMeasurementIface == nullptr) {
         auto gnssMeasurement = gnssHal_V2_1->getExtensionGnssMeasurement_2_1();
         if (checkHidlReturn(gnssMeasurement, "Unable to get a handle to GnssMeasurement_V2_1")) {
             gnssMeasurementIface =
@@ -2696,7 +2705,8 @@ static jboolean android_location_GnssMeasurementsProvider_start_measurement_coll
         return JNI_FALSE;
     }
 
-    return gnssMeasurementIface->setCallback(sp<gnss::GnssMeasurementCallback>::make(mCallbacksObj),
+    return gnssMeasurementIface->setCallback(std::make_unique<gnss::GnssMeasurementCallback>(
+                                                     mCallbacksObj),
                                              enableFullTracking);
 }
 
