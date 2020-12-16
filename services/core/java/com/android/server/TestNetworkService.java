@@ -107,23 +107,23 @@ class TestNetworkService extends ITestNetworkManager.Stub {
 
         String ifacePrefix = isTun ? TEST_TUN_PREFIX : TEST_TAP_PREFIX;
         String iface = ifacePrefix + sTestTunIndex.getAndIncrement();
-        return Binder.withCleanCallingIdentity(
-                () -> {
-                    try {
-                        ParcelFileDescriptor tunIntf =
-                                ParcelFileDescriptor.adoptFd(jniCreateTunTap(isTun, iface));
-                        for (LinkAddress addr : linkAddrs) {
-                            mNetd.interfaceAddAddress(
-                                    iface,
-                                    addr.getAddress().getHostAddress(),
-                                    addr.getPrefixLength());
-                        }
+        final long token = Binder.clearCallingIdentity();
+        try {
+            ParcelFileDescriptor tunIntf =
+                    ParcelFileDescriptor.adoptFd(jniCreateTunTap(isTun, iface));
+            for (LinkAddress addr : linkAddrs) {
+                mNetd.interfaceAddAddress(
+                        iface,
+                        addr.getAddress().getHostAddress(),
+                        addr.getPrefixLength());
+            }
 
-                        return new TestNetworkInterface(tunIntf, iface);
-                    } catch (RemoteException e) {
-                        throw e.rethrowFromSystemServer();
-                    }
-                });
+            return new TestNetworkInterface(tunIntf, iface);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     /**
@@ -317,7 +317,12 @@ class TestNetworkService extends ITestNetworkManager.Stub {
 
         try {
             // This requires NETWORK_STACK privileges.
-            Binder.withCleanCallingIdentity(() -> mNMS.setInterfaceUp(iface));
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mNMS.setInterfaceUp(iface);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
 
             // Synchronize all accesses to mTestNetworkTracker to prevent the case where:
             // 1. TestNetworkAgent successfully binds to death of binder

@@ -1705,16 +1705,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return newNc;
         }
 
-        Binder.withCleanCallingIdentity(
-                () -> {
-                    if (!mLocationPermissionChecker.checkLocationPermission(
-                            callerPkgName, null /* featureId */, callerUid, null /* message */)) {
-                        // Caller does not have the requisite location permissions. Reset the
-                        // owner's UID in the NetworkCapabilities.
-                        newNc.setOwnerUid(INVALID_UID);
-                    }
-                }
-        );
+        final long token = Binder.clearCallingIdentity();
+        try {
+            if (!mLocationPermissionChecker.checkLocationPermission(
+                    callerPkgName, null /* featureId */, callerUid, null /* message */)) {
+                // Caller does not have the requisite location permissions. Reset the
+                // owner's UID in the NetworkCapabilities.
+                newNc.setOwnerUid(INVALID_UID);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
 
         return newNc;
     }
@@ -3871,8 +3872,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 new CaptivePortal(new CaptivePortalImpl(network).asBinder()));
         appIntent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
 
-        Binder.withCleanCallingIdentity(() ->
-                mContext.startActivityAsUser(appIntent, UserHandle.CURRENT));
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mContext.startActivityAsUser(appIntent, UserHandle.CURRENT);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     private class CaptivePortalImpl extends ICaptivePortal.Stub {
@@ -7759,10 +7764,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         final int userId = UserHandle.getCallingUserId();
 
-        Binder.withCleanCallingIdentity(() -> {
+        final long token = Binder.clearCallingIdentity();
+        try {
             final IpMemoryStore ipMemoryStore = IpMemoryStore.getMemoryStore(mContext);
             ipMemoryStore.factoryReset();
-        });
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
 
         // Turn airplane mode off
         setAirplaneMode(false);
