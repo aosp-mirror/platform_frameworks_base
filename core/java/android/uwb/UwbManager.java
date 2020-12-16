@@ -55,6 +55,9 @@ public final class UwbManager {
      * Interface for receiving UWB adapter state changes
      */
     public interface AdapterStateCallback {
+        /**
+         * @hide
+         */
         @Retention(RetentionPolicy.SOURCE)
         @IntDef(value = {
                 STATE_CHANGED_REASON_SESSION_STARTED,
@@ -195,6 +198,9 @@ public final class UwbManager {
         }
     }
 
+    /**
+     * @hide
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(value = {
             ANGLE_OF_ARRIVAL_SUPPORT_TYPE_NONE,
@@ -387,7 +393,7 @@ public final class UwbManager {
      */
     @NonNull
     public AutoCloseable openRangingSession(@NonNull PersistableBundle parameters,
-            @NonNull Executor executor,
+            @NonNull @CallbackExecutor Executor executor,
             @NonNull RangingSession.Callback callbacks) {
         throw new UnsupportedOperationException();
     }

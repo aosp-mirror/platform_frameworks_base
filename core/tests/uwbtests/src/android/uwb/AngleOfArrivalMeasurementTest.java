@@ -48,8 +48,8 @@ public class AngleOfArrivalMeasurementTest {
         builder.setAzimuthAngleMeasurement(azimuth);
         AngleOfArrivalMeasurement measurement = tryBuild(builder, true);
 
-        assertEquals(azimuth, measurement.getAzimuth());
-        assertEquals(altitude, measurement.getAltitude());
+        assertEquals(azimuth, measurement.getAzimuthAngleMeasurement());
+        assertEquals(altitude, measurement.getAltitudeAngleMeasurement());
     }
 
     private AngleMeasurement getAngleMeasurement(double radian, double error, double confidence) {

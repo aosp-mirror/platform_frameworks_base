@@ -17,6 +17,7 @@
 package android.uwb;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.os.PersistableBundle;
 
 import java.lang.annotation.Retention;
@@ -50,8 +51,11 @@ public final class RangingSession implements AutoCloseable {
          * @param session the newly opened {@link RangingSession}
          * @param sessionInfo session specific parameters from lower layers
          */
-        void onOpenSuccess(RangingSession session, PersistableBundle sessionInfo);
+        void onOpenSuccess(@NonNull RangingSession session, @NonNull PersistableBundle sessionInfo);
 
+        /**
+         * @hide
+         */
         @Retention(RetentionPolicy.SOURCE)
         @IntDef(value = {
                 CLOSE_REASON_UNKNOWN,
@@ -125,7 +129,7 @@ public final class RangingSession implements AutoCloseable {
          *
          * @param rangingReport ranging report for this interval's measurements
          */
-        void onReportReceived(RangingReport rangingReport);
+        void onReportReceived(@NonNull RangingReport rangingReport);
     }
 
     /**
