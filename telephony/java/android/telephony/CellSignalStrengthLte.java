@@ -443,10 +443,12 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
     /**
      * Get table index for channel quality indicator
      *
+     * Reference: 3GPP TS 136.213 section 7.2.3.
+     *
      * @return the CQI table index if available or
      *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
      */
-    /** @hide */
+    @IntRange(from = 1, to = 6)
     public int getCqiTableIndex() {
         return mCqiTableIndex;
     }
@@ -454,9 +456,12 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
     /**
      * Get channel quality indicator
      *
+     * Reference: 3GPP TS 136.213 section 7.2.3.
+     *
      * @return the CQI if available or
      *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
      */
+    @IntRange(from = 0, to = 15)
     public int getCqi() {
         return mCqi;
     }
