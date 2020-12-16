@@ -31,64 +31,51 @@ import android.widget.TextView;
 import com.android.wm.shell.R;
 
 /**
- * A view containing PIP controls including fullscreen, close, and media controls.
+ * A View that represents Pip Menu action button, such as "Fullscreen" and "Close" as well custom
+ * (provided by the application in Pip) and media buttons.
  */
-public class PipControlButtonView extends RelativeLayout {
-
-    private OnFocusChangeListener mFocusChangeListener;
-    private ImageView mIconImageView;
-    ImageView mButtonImageView;
-    private TextView mDescriptionTextView;
+public class TvPipMenuActionButton extends RelativeLayout implements View.OnClickListener {
+    private final ImageView mIconImageView;
+    private final ImageView mButtonImageView;
+    private final TextView mDescriptionTextView;
     private Animator mTextFocusGainAnimator;
     private Animator mButtonFocusGainAnimator;
     private Animator mTextFocusLossAnimator;
     private Animator mButtonFocusLossAnimator;
+    private OnClickListener mOnClickListener;
 
-    private final OnFocusChangeListener mInternalFocusChangeListener =
-            new OnFocusChangeListener() {
-                @Override
-                public void onFocusChange(View v, boolean hasFocus) {
-                    if (hasFocus) {
-                        startFocusGainAnimation();
-                    } else {
-                        startFocusLossAnimation();
-                    }
-
-                    if (mFocusChangeListener != null) {
-                        mFocusChangeListener.onFocusChange(PipControlButtonView.this, hasFocus);
-                    }
-                }
-            };
-
-    public PipControlButtonView(Context context) {
+    public TvPipMenuActionButton(Context context) {
         this(context, null, 0, 0);
     }
 
-    public PipControlButtonView(Context context, AttributeSet attrs) {
+    public TvPipMenuActionButton(Context context, AttributeSet attrs) {
         this(context, attrs, 0, 0);
     }
 
-    public PipControlButtonView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public TvPipMenuActionButton(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public PipControlButtonView(
+    public TvPipMenuActionButton(
             Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        LayoutInflater inflater = (LayoutInflater) getContext()
+        final LayoutInflater inflater = (LayoutInflater) getContext()
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        inflater.inflate(R.layout.tv_pip_control_button, this);
+        inflater.inflate(R.layout.tv_pip_menu_action_button, this);
 
         mIconImageView = findViewById(R.id.icon);
         mButtonImageView = findViewById(R.id.button);
         mDescriptionTextView = findViewById(R.id.desc);
 
-        int[] values = new int[]{android.R.attr.src, android.R.attr.text};
-        TypedArray typedArray = context.obtainStyledAttributes(attrs, values, defStyleAttr,
+        final int[] values = new int[]{android.R.attr.src, android.R.attr.text};
+        final TypedArray typedArray = context.obtainStyledAttributes(attrs, values, defStyleAttr,
                 defStyleRes);
 
         setImageResource(typedArray.getResourceId(0, 0));
-        setText(typedArray.getResourceId(1, 0));
+        final int textResId = typedArray.getResourceId(1, 0);
+        if (textResId != 0) {
+            setTextAndDescription(getContext().getString(textResId));
+        }
 
         typedArray.recycle();
     }
@@ -96,7 +83,13 @@ public class PipControlButtonView extends RelativeLayout {
     @Override
     public void onFinishInflate() {
         super.onFinishInflate();
-        mButtonImageView.setOnFocusChangeListener(mInternalFocusChangeListener);
+        mButtonImageView.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                startFocusGainAnimation();
+            } else {
+                startFocusLossAnimation();
+            }
+        });
 
         mTextFocusGainAnimator = AnimatorInflater.loadAnimator(getContext(),
                 R.anim.tv_pip_controls_focus_gain_animation);
@@ -115,12 +108,19 @@ public class PipControlButtonView extends RelativeLayout {
 
     @Override
     public void setOnClickListener(OnClickListener listener) {
-        mButtonImageView.setOnClickListener(listener);
+        // We do not want to set an OnClickListener to the TvPipMenuActionButton itself, but only to
+        // the ImageView. So let's "cash" the listener we've been passed here and set a "proxy"
+        // listener to the ImageView.
+        mOnClickListener = listener;
+        mButtonImageView.setOnClickListener(listener != null ? this : null);
     }
 
     @Override
-    public void setOnFocusChangeListener(OnFocusChangeListener listener) {
-        mFocusChangeListener = listener;
+    public void onClick(View v) {
+        if (mOnClickListener != null) {
+            // Pass the correct view - this.
+            mOnClickListener.onClick(this);
+        }
     }
 
     /**
@@ -142,19 +142,9 @@ public class PipControlButtonView extends RelativeLayout {
     /**
      * Sets the text for description the with the given string.
      */
-    public void setText(CharSequence text) {
+    public void setTextAndDescription(CharSequence text) {
         mButtonImageView.setContentDescription(text);
         mDescriptionTextView.setText(text);
-    }
-
-    /**
-     * Sets the text for description the with the given resource id.
-     */
-    public void setText(int resId) {
-        if (resId != 0) {
-            mButtonImageView.setContentDescription(getContext().getString(resId));
-            mDescriptionTextView.setText(resId);
-        }
     }
 
     private static void cancelAnimator(Animator animator) {
@@ -187,8 +177,8 @@ public class PipControlButtonView extends RelativeLayout {
         mTextFocusLossAnimator.start();
         if (mButtonImageView.hasFocus()) {
             // Button uses ripple that has the default animation for the focus changes.
-            // Howevever, it doesn't expose the API to fade out while it is focused,
-            // so we should manually run the fade out animation when PIP controls row loses focus.
+            // However, it doesn't expose the API to fade out while it is focused, so we should
+            // manually run the fade out animation when PIP controls row loses focus.
             mButtonFocusLossAnimator.start();
         }
     }

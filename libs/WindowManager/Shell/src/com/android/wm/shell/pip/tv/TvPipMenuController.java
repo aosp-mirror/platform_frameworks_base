@@ -19,38 +19,97 @@ package com.android.wm.shell.pip.tv;
 import static android.view.WindowManager.SHELL_ROOT_LAYER_PIP;
 
 import android.app.RemoteAction;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ParceledListSlice;
 import android.util.Log;
 import android.view.SurfaceControl;
 
+import androidx.annotation.Nullable;
+
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.pip.PipBoundsState;
+import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipMenuController;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Manages the visibility of the PiP Menu as user interacts with PiP.
  */
-public class TvPipMenuController implements PipMenuController {
+public class TvPipMenuController implements PipMenuController, TvPipMenuView.Listener {
     private static final String TAG = "TvPipMenuController";
     private static final boolean DEBUG = PipController.DEBUG;
 
     private final Context mContext;
     private final SystemWindows mSystemWindows;
     private final PipBoundsState mPipBoundsState;
-    private PipMenuView mMenuView;
-    private PipController mPipController;
+
+    private Delegate mDelegate;
     private SurfaceControl mLeash;
+    private TvPipMenuView mMenuView;
+
+    private final List<RemoteAction> mMediaActions = new ArrayList<>();
+    private final List<RemoteAction> mAppActions = new ArrayList<>();
 
     public TvPipMenuController(Context context, PipBoundsState pipBoundsState,
-            SystemWindows systemWindows) {
+            SystemWindows systemWindows, PipMediaController pipMediaController) {
         mContext = context;
         mPipBoundsState = pipBoundsState;
         mSystemWindows = systemWindows;
+
+        // We need to "close" the menu the platform call for all the system dialogs to close (for
+        // example, on the Home button press).
+        final BroadcastReceiver closeSystemDialogsBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                hideMenu();
+            }
+        };
+        context.registerReceiver(closeSystemDialogsBroadcastReceiver,
+                new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+
+        pipMediaController.addActionListener(this::onMediaActionsChanged);
     }
 
-    void attachPipController(PipController pipController) {
-        mPipController = pipController;
+    void setDelegate(Delegate delegate) {
+        if (DEBUG) Log.d(TAG, "setDelegate(), delegate=" + delegate);
+        if (mDelegate != null) {
+            throw new IllegalStateException(
+                    "The delegate has already been set and should not change.");
+        }
+        if (delegate == null) {
+            throw new IllegalArgumentException("The delegate must not be null.");
+        }
+
+        mDelegate = delegate;
+    }
+
+    @Override
+    public void attach(SurfaceControl leash) {
+        if (mDelegate == null) {
+            throw new IllegalStateException("Delegate is not set.");
+        }
+
+        mLeash = leash;
+        attachPipMenuView();
+    }
+
+    private void attachPipMenuView() {
+        if (DEBUG) Log.d(TAG, "attachPipMenuView()");
+
+        if (mMenuView != null) {
+            detachPipMenuView();
+        }
+
+        mMenuView = new TvPipMenuView(mContext);
+        mMenuView.setListener(this);
+        mSystemWindows.addView(mMenuView,
+                getPipMenuLayoutParams(MENU_WINDOW_TITLE, 0 /* width */, 0 /* height */),
+                0, SHELL_ROOT_LAYER_PIP);
     }
 
     @Override
@@ -61,7 +120,8 @@ public class TvPipMenuController implements PipMenuController {
             mSystemWindows.updateViewLayout(mMenuView, getPipMenuLayoutParams(MENU_WINDOW_TITLE,
                     mPipBoundsState.getDisplayBounds().width(),
                     mPipBoundsState.getDisplayBounds().height()));
-            mMenuView.showMenu();
+            maybeUpdateMenuViewActions();
+            mMenuView.show();
 
             // By default, SystemWindows views are above everything else.
             // Set the relative z-order so the menu is below PiP.
@@ -77,15 +137,9 @@ public class TvPipMenuController implements PipMenuController {
         if (DEBUG) Log.d(TAG, "hideMenu()");
 
         if (isMenuVisible()) {
-            mMenuView.hideMenu();
-            mPipController.resizePinnedStack(PipController.STATE_PIP);
+            mMenuView.hide();
+            mDelegate.movePipToNormalPosition();
         }
-    }
-
-    @Override
-    public void attach(SurfaceControl leash) {
-        mLeash = leash;
-        attachPipMenuView();
     }
 
     @Override
@@ -93,20 +147,6 @@ public class TvPipMenuController implements PipMenuController {
         hideMenu();
         detachPipMenuView();
         mLeash = null;
-    }
-
-    private void attachPipMenuView() {
-        if (DEBUG) Log.d(TAG, "attachPipMenuView()");
-
-        if (mMenuView != null) {
-            detachPipMenuView();
-        }
-
-        mMenuView = new PipMenuView(mContext, mPipController);
-        mMenuView.setOnBackPressListener(this::hideMenu);
-        mSystemWindows.addView(mMenuView,
-                getPipMenuLayoutParams(MENU_WINDOW_TITLE, 0 /* width */, 0 /* height */),
-                0, SHELL_ROOT_LAYER_PIP);
     }
 
     private void detachPipMenuView() {
@@ -121,18 +161,65 @@ public class TvPipMenuController implements PipMenuController {
     }
 
     @Override
-    public void setAppActions(ParceledListSlice<RemoteAction> appActions) {
-        if (DEBUG) Log.d(TAG, "setAppActions(), actions=" + appActions);
+    public void setAppActions(ParceledListSlice<RemoteAction> actions) {
+        if (DEBUG) Log.d(TAG, "setAppActions()");
+        updateAdditionalActionsList(mAppActions, actions.getList());
+    }
 
-        if (mMenuView != null) {
-            mMenuView.setAppActions(appActions);
+    private void onMediaActionsChanged(List<RemoteAction> actions) {
+        if (DEBUG) Log.d(TAG, "onMediaActionsChanged()");
+        updateAdditionalActionsList(mMediaActions, actions);
+    }
+
+    private void updateAdditionalActionsList(
+            List<RemoteAction> destination, @Nullable List<RemoteAction> source) {
+        final int number = source != null ? source.size() : 0;
+        if (number == 0 && destination.isEmpty()) {
+            // Nothing changed.
+            return;
+        }
+
+        destination.clear();
+        if (number > 0) {
+            destination.addAll(source);
+        }
+        maybeUpdateMenuViewActions();
+    }
+
+    private void maybeUpdateMenuViewActions() {
+        if (mMenuView == null) {
+            return;
+        }
+        if (!mAppActions.isEmpty()) {
+            mMenuView.setAdditionalActions(mAppActions);
         } else {
-            Log.w(TAG, "Cannot set remote actions, there is no View");
+            mMenuView.setAdditionalActions(mMediaActions);
         }
     }
 
     @Override
     public boolean isMenuVisible() {
-        return mMenuView != null && mMenuView.getAlpha() == 1.0f;
+        return mMenuView != null && mMenuView.isVisible();
+    }
+
+    @Override
+    public void onBackPress() {
+        hideMenu();
+    }
+
+    @Override
+    public void onCloseButtonClick() {
+        mDelegate.closePip();
+    }
+
+    @Override
+    public void onFullscreenButtonClick() {
+        mDelegate.movePipToFullscreen();
+    }
+
+    interface Delegate {
+        void movePipToNormalPosition();
+        void movePipToFullscreen();
+        void closePip();
     }
 }
