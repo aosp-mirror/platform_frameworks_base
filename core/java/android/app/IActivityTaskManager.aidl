@@ -258,7 +258,6 @@ interface IActivityTaskManager {
 
     void suppressResizeConfigChanges(boolean suppress);
     boolean moveTopActivityToPinnedRootTask(int rootTaskId, in Rect bounds);
-    void requestPictureInPictureMode(in IBinder token);
 
     /**
      * Resizes the docked stack, and all other stacks as the result of the dock stack bounds change.

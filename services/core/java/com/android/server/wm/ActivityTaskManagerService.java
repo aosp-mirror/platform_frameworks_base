@@ -148,8 +148,6 @@ import android.app.WindowConfiguration;
 import android.app.admin.DevicePolicyCache;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
-import android.app.servertransaction.ClientTransaction;
-import android.app.servertransaction.EnterPipRequestedItem;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -3253,23 +3251,15 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    @VisibleForTesting
-    boolean isInPictureInPictureMode(ActivityRecord r) {
-        return r != null
-                && r.getRootTask() != null
-                && r.inPinnedWindowingMode()
-                && r.getRootTask().isInTask(r) != null;
-    }
-
     /**
      * Puts the given activity in picture in picture mode if possible.
      *
      * @return true if the activity is now in picture-in-picture mode, or false if it could not
      * enter picture-in-picture mode.
      */
-    boolean enterPictureInPictureMode(ActivityRecord r, final PictureInPictureParams params) {
+    boolean enterPictureInPictureMode(@NonNull ActivityRecord r, PictureInPictureParams params) {
         // If the activity is already in picture in picture mode, then just return early
-        if (isInPictureInPictureMode(r)) {
+        if (r.inPinnedWindowingMode()) {
             return true;
         }
 
@@ -3751,52 +3741,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             for (int i = 0; i < packageNames.size(); ++i) {
                 mTaskSupervisor.mLaunchParamsPersister.removeRecordForPackage(packageNames.get(i));
             }
-        }
-    }
-
-    /**
-     * Requests that an activity should enter picture-in-picture mode if possible.
-     */
-    @Override
-    public void requestPictureInPictureMode(IBinder token) throws RemoteException {
-        enforceTaskPermission("requestPictureInPictureMode");
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                final ActivityRecord activity = ActivityRecord.forTokenLocked(token);
-                if (activity == null) {
-                    return;
-                }
-
-                if (isInPictureInPictureMode(activity)) {
-                    throw new IllegalStateException("Activity is already in PIP mode");
-                }
-
-                final boolean canEnterPictureInPicture = activity.checkEnterPictureInPictureState(
-                        "requestPictureInPictureMode", /* beforeStopping */ false);
-                if (!canEnterPictureInPicture) {
-                    throw new IllegalStateException(
-                            "Requested PIP on an activity that doesn't support it");
-                }
-
-                if (activity.pictureInPictureArgs.isAutoEnterEnabled()) {
-                    enterPictureInPictureMode(activity, activity.pictureInPictureArgs);
-                    return;
-                }
-
-                try {
-                    final ClientTransaction transaction = ClientTransaction.obtain(
-                            activity.app.getThread(),
-                            activity.token);
-                    transaction.addCallback(EnterPipRequestedItem.obtain());
-                    getLifecycleManager().scheduleTransaction(transaction);
-                } catch (Exception e) {
-                    Slog.w(TAG, "Failed to send enter pip requested item: "
-                            + activity.intent.getComponent(), e);
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
         }
     }
 
