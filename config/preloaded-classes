@@ -11759,7 +11759,6 @@ libcore.util.XmlObjectFactory
 libcore.util.ZoneInfo$CheckedArithmeticException
 libcore.util.ZoneInfo$WallTime
 libcore.util.ZoneInfo
-org.apache.harmony.dalvik.NativeTestTarget
 org.apache.harmony.dalvik.ddmc.Chunk
 org.apache.harmony.dalvik.ddmc.ChunkHandler
 org.apache.harmony.dalvik.ddmc.DdmServer
