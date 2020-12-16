@@ -34,11 +34,11 @@ import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.ArrayUtils;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
 
-import libcore.util.ArrayUtils;
 import libcore.util.SneakyThrow;
 
 import java.io.ByteArrayInputStream;
