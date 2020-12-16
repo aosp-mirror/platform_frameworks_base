@@ -953,7 +953,8 @@ public class BatteryStatsImpl extends BatteryStats {
     /**
      * The Bluetooth controller activity (time in tx, rx, idle, and power consumed) for the device.
      */
-    ControllerActivityCounterImpl mBluetoothActivity;
+    @VisibleForTesting
+    protected ControllerActivityCounterImpl mBluetoothActivity;
 
     /**
      * The Modem controller activity (time in tx, rx, idle, and power consumed) for the device.

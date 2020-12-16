@@ -39,6 +39,7 @@ import org.junit.runners.Suite;
         BatteryStatsTimerTest.class,
         BatteryStatsUidTest.class,
         BatteryStatsUserLifecycleTests.class,
+        BluetoothPowerCalculatorTest.class,
         BstatsCpuTimesValidationTest.class,
         KernelCpuProcStringReaderTest.class,
         KernelCpuUidActiveTimeReaderTest.class,
