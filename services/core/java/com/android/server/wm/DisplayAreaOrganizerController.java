@@ -134,7 +134,7 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
 
     @Override
     public DisplayAreaAppearedInfo createTaskDisplayArea(IDisplayAreaOrganizer organizer,
-            int displayId, int rootFeatureId, String name) {
+            int displayId, int parentFeatureId, String name) {
         enforceTaskPermission("createTaskDisplayArea()");
         final long uid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
@@ -149,13 +149,26 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
                             + displayId);
                 }
 
-                final DisplayArea root = display.getItemFromDisplayAreas(da ->
-                        da.asRootDisplayArea() != null && da.mFeatureId == rootFeatureId
-                                ? da
+                // The parentFeatureId can be either a RootDisplayArea or a TaskDisplayArea.
+                // Check if there is a RootDisplayArea with the given parentFeatureId.
+                final RootDisplayArea parentRoot = display.getItemFromDisplayAreas(da ->
+                        da.asRootDisplayArea() != null && da.mFeatureId == parentFeatureId
+                                ? da.asRootDisplayArea()
                                 : null);
-                if (root == null) {
-                    throw new IllegalArgumentException("Can't find RootDisplayArea with featureId="
-                            + rootFeatureId);
+                final TaskDisplayArea parentTda;
+                if (parentRoot == null) {
+                    // There is no RootDisplayArea matching the parentFeatureId.
+                    // Check if there is a TaskDisplayArea with the given parentFeatureId.
+                    parentTda = display.getItemFromTaskDisplayAreas(taskDisplayArea ->
+                            taskDisplayArea.mFeatureId == parentFeatureId
+                                    ? taskDisplayArea
+                                    : null);
+                } else {
+                    parentTda = null;
+                }
+                if (parentRoot == null && parentTda == null) {
+                    throw new IllegalArgumentException(
+                            "Can't find a parent DisplayArea with featureId=" + parentFeatureId);
                 }
 
                 final int taskDisplayAreaFeatureId = mNextTaskDisplayAreaFeatureId++;
@@ -166,10 +179,13 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
                     // Oh well...
                 }
 
-                final TaskDisplayArea tda = createTaskDisplayArea(root.asRootDisplayArea(), name,
-                        taskDisplayAreaFeatureId);
-                return organizeDisplayArea(organizer, tda,
+                final TaskDisplayArea tda = parentRoot != null
+                        ? createTaskDisplayArea(parentRoot, name, taskDisplayAreaFeatureId)
+                        : createTaskDisplayArea(parentTda, name, taskDisplayAreaFeatureId);
+                final DisplayAreaAppearedInfo tdaInfo = organizeDisplayArea(organizer, tda,
                         "DisplayAreaOrganizerController.createTaskDisplayArea");
+                mOrganizersByFeatureIds.put(taskDisplayAreaFeatureId, organizer);
+                return tdaInfo;
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -196,6 +212,7 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
                                     + "TaskDisplayArea=" + taskDisplayArea);
                 }
 
+                mOrganizersByFeatureIds.remove(taskDisplayArea.mFeatureId);
                 deleteTaskDisplayArea(taskDisplayArea);
             }
         } finally {
@@ -253,6 +270,9 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
                 new SurfaceControl(displayArea.getSurfaceControl(), callsite));
     }
 
+    /**
+     * Creates a {@link TaskDisplayArea} as the topmost TDA below the given {@link RootDisplayArea}.
+     */
     private TaskDisplayArea createTaskDisplayArea(RootDisplayArea root, String name,
             int taskDisplayAreaFeatureId) {
         final TaskDisplayArea taskDisplayArea = new TaskDisplayArea(root.mDisplayContent,
@@ -279,6 +299,21 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
         final WindowContainer parent = topTaskContainer.getParent();
         final int index = parent.mChildren.indexOf(topTaskContainer) + 1;
         parent.addChild(taskDisplayArea, index);
+
+        return taskDisplayArea;
+    }
+
+    /**
+     * Creates a {@link TaskDisplayArea} as the topmost child of the given {@link TaskDisplayArea}.
+     */
+    private TaskDisplayArea createTaskDisplayArea(TaskDisplayArea parentTda, String name,
+            int taskDisplayAreaFeatureId) {
+        final TaskDisplayArea taskDisplayArea = new TaskDisplayArea(parentTda.mDisplayContent,
+                parentTda.mWmService, name, taskDisplayAreaFeatureId,
+                true /* createdByOrganizer */);
+
+        // Insert the TaskDisplayArea on the top.
+        parentTda.addChild(taskDisplayArea, WindowContainer.POSITION_TOP);
 
         return taskDisplayArea;
     }

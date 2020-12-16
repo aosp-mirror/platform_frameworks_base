@@ -145,15 +145,19 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
     }
 
     /**
-     * Creates a persistent task display area. It will be added to be the top most task display area
-     * in the root.
+     * Creates a persistent {@link com.android.server.wm.TaskDisplayArea}.
      *
      * The new created TDA is organized by the organizer, and will be deleted on calling
      * {@link #deleteTaskDisplayArea(WindowContainerToken)} or {@link #unregisterOrganizer()}.
      *
-     * @param displayId the display to create the new task display area in.
-     * @param rootFeatureId the root display area to create the new task display area in. Caller can
-     *                      use {@link #FEATURE_ROOT} as the root of the logical display.
+     * @param displayId the display to create the new TDA in.
+     * @param parentFeatureId the parent to create the new TDA in. If it is a
+     *                        {@link com.android.server.wm.RootDisplayArea}, the new TDA will be
+     *                        placed as the topmost TDA. If it is another TDA, the new TDA will be
+     *                        placed as the topmost child.
+     *                        Caller can use {@link #FEATURE_ROOT} as the root of the logical
+     *                        display, or {@link #FEATURE_DEFAULT_TASK_CONTAINER} as the default
+     *                        TDA.
      * @param name the name for the new task display area.
      * @return the new created task display area.
      * @throws IllegalArgumentException if failed to create a new task display area.
@@ -162,11 +166,11 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     @CallSuper
     @NonNull
-    public DisplayAreaAppearedInfo createTaskDisplayArea(int displayId, int rootFeatureId,
+    public DisplayAreaAppearedInfo createTaskDisplayArea(int displayId, int parentFeatureId,
             @NonNull String name) {
         try {
             return getController().createTaskDisplayArea(
-                    mInterface, displayId, rootFeatureId, name);
+                    mInterface, displayId, parentFeatureId, name);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
