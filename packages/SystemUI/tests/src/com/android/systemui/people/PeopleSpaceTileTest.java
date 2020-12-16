@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.app.people;
+package com.android.systemui.people;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -39,6 +39,9 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.systemui.SysuiTestCase;
+import com.android.systemui.people.PeopleSpaceTile;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,9 +50,8 @@ import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class PeopleSpaceTileTest {
+public class PeopleSpaceTileTest extends SysuiTestCase {
 
-    private Context mContext;
     private final Drawable mDrawable = new ColorDrawable(Color.BLUE);
     private final Icon mIcon = PeopleSpaceTile.convertDrawableToIcon(mDrawable);
 
@@ -58,7 +60,6 @@ public class PeopleSpaceTileTest {
 
     @Before
     public void setUp() {
-        mContext = InstrumentationRegistry.getContext();
         MockitoAnnotations.initMocks(this);
         when(mLauncherApps.getShortcutIconDrawable(any(), eq(0))).thenReturn(mDrawable);
     }
@@ -131,7 +132,7 @@ public class PeopleSpaceTileTest {
         PeopleSpaceTile tile = new PeopleSpaceTile.Builder(
                 new ShortcutInfo.Builder(mContext, "123").build(), mLauncherApps).build();
         // Automatically added by creating a ShortcutInfo.
-        assertThat(tile.getPackageName()).isEqualTo("com.android.frameworks.coretests");
+        assertThat(tile.getPackageName()).isEqualTo("com.android.systemui.tests");
 
         tile = new PeopleSpaceTile.Builder(
                 new ShortcutInfo.Builder(mContext, "123").build(), mLauncherApps).setPackageName(
