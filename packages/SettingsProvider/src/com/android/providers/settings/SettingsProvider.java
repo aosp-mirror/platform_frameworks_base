@@ -5234,11 +5234,6 @@ public class SettingsProvider extends ContentProvider {
                         initGlobalSettingsDefaultValForWearLocked(
                                 Global.Wearable.ALT_BYPASS_WIFI_REQUIREMENT_TIME_MILLIS, 0L);
                         initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.WIRELESS_DEBUG_MODE,
-                                Global.Wearable.WIRELESS_DEBUG_OFF);
-                        initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.WIFI_DEBUG_PORT, 5555);
-                        initGlobalSettingsDefaultValForWearLocked(
                                 Global.Wearable.UPDOWN_GESTURES_ENABLED,
                                 getContext()
                                         .getResources()

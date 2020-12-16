@@ -610,8 +610,6 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.AUTO_WIFI,
                     Settings.Global.Wearable.WIFI_POWER_SAVE,
                     Settings.Global.Wearable.ALT_BYPASS_WIFI_REQUIREMENT_TIME_MILLIS,
-                    Settings.Global.Wearable.WIRELESS_DEBUG_MODE,
-                    Settings.Global.Wearable.WIFI_DEBUG_PORT,
                     Settings.Global.Wearable.UPDOWN_GESTURES_ENABLED,
                     Settings.Global.Wearable.SETUP_SKIPPED,
                     Settings.Global.Wearable.LAST_CALL_FORWARD_ACTION,

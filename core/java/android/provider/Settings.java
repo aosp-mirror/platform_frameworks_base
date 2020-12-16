@@ -16352,26 +16352,6 @@ public final class Settings {
                     "alt_bypass_wifi_requirement_time_millis";
 
             /**
-             * Wireless debug settings for wear.
-             * @hide
-             */
-            public static final String WIRELESS_DEBUG_MODE = "wireless_debug_mode";
-
-            // Possible wireless debug settings.
-            /** @hide */
-            public static final int WIRELESS_DEBUG_OFF = 0;
-            /** @hide */
-            public static final int WIRELESS_DEBUG_BLUETOOTH = 1 << 0;
-            /** @hide */
-            public static final int WIRELESS_DEBUG_WIFI = 1 << 1;
-
-            /**
-             * Wifi debug port for wear.
-             * @hide
-             */
-            public static final String WIFI_DEBUG_PORT = "wireless_debug_wifi_port";
-
-            /**
              * Whether or not Up/Down Gestures are enabled.
              * @hide
              */

@@ -196,15 +196,6 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(
                 Global.Wearable.ALT_BYPASS_WIFI_REQUIREMENT_TIME_MILLIS,
                 ANY_INTEGER_VALIDATOR);
-        VALIDATORS.put(
-                Global.Wearable.WIRELESS_DEBUG_MODE,
-                new DiscreteValueValidator(
-                        new String[] {
-                            String.valueOf(Global.Wearable.WIRELESS_DEBUG_OFF),
-                            String.valueOf(Global.Wearable.WIRELESS_DEBUG_WIFI),
-                            String.valueOf(Global.Wearable.WIRELESS_DEBUG_BLUETOOTH)
-                        }));
-        VALIDATORS.put(Global.Wearable.WIFI_DEBUG_PORT, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.Wearable.UPDOWN_GESTURES_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(
                 Global.Wearable.SETUP_SKIPPED,
