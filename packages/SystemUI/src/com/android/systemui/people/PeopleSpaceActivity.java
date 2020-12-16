@@ -136,8 +136,12 @@ public class PeopleSpaceActivity extends Activity {
         editor.putString(String.valueOf(mAppWidgetId), tile.getId());
         editor.commit();
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(mContext);
+        Bundle options = new Bundle();
+        options.putParcelable(PeopleSpaceUtils.OPTIONS_PEOPLE_SPACE_TILE, tile);
+        appWidgetManager.updateAppWidgetOptions(mAppWidgetId, options);
         int[] widgetIds = appWidgetManager.getAppWidgetIds(
                 new ComponentName(mContext, PeopleSpaceWidgetProvider.class));
+        // TODO: Populate new widget with existing conversation notification, if there is any.
         PeopleSpaceUtils.updateSingleConversationWidgets(mContext, widgetIds, mAppWidgetManager,
                 mNotificationManager);
         finishActivity();

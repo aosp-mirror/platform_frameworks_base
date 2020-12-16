@@ -22,7 +22,7 @@ import android.annotation.SystemApi;
  * Scrambling Status event sent from {@link Filter} objects with Scrambling Status type.
  *
  * <p>This event is only sent in Tuner 1.1 or higher version. Use
- * {@link TunerVersionChecker.getTunerVersion()} to get the version information.
+ * {@link TunerVersionChecker#getTunerVersion()} to get the version information.
  *
  * @hide
  */
@@ -38,7 +38,7 @@ public final class ScramblingStatusEvent extends FilterEvent {
      * Gets Scrambling Status Type.
      *
      * <p>This event field is only sent in Tuner 1.1 or higher version. Use
-     * {@link TunerVersionChecker.getTunerVersion()} to get the version information.
+     * {@link TunerVersionChecker#getTunerVersion()} to get the version information.
      */
     @Filter.ScramblingStatus
     public int getScramblingStatus() {

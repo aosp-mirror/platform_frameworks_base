@@ -1300,12 +1300,12 @@ public class NotificationChildrenContainer extends ViewGroup {
     /**
      * Shows or hides feedback icon.
      */
-    public void showFeedbackIcon(boolean show) {
+    public void showFeedbackIcon(boolean show, int resId) {
         if (mNotificationHeaderWrapper != null) {
-            mNotificationHeaderWrapper.showFeedbackIcon(show);
+            mNotificationHeaderWrapper.showFeedbackIcon(show, resId);
         }
         if (mNotificationHeaderWrapperLowPriority != null) {
-            mNotificationHeaderWrapperLowPriority.showFeedbackIcon(show);
+            mNotificationHeaderWrapperLowPriority.showFeedbackIcon(show, resId);
         }
     }
 

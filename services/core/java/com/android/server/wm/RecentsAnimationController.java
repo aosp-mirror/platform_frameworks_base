@@ -88,7 +88,7 @@ public class RecentsAnimationController implements DeathRecipient {
     private static final long FAILSAFE_DELAY = 1000;
     /**
      * If the recents animation is canceled before the delay since the window drawn, do not log the
-     * action because the duration is too small that may be just a mistouch,
+     * action because the duration is too small that may be just a mistouch.
      */
     private static final long LATENCY_TRACKER_LOG_DELAY_MS = 300;
 

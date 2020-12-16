@@ -789,7 +789,7 @@
     <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"Зүүн"</string>
     <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"Баруун"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Гол хэсэг"</string>
-    <string name="keyboard_key_tab" msgid="4592772350906496730">"Чихтэй хуудас"</string>
+    <string name="keyboard_key_tab" msgid="4592772350906496730">"Таб"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Зай"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Оруулах"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Арилгах"</string>

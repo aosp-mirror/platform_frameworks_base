@@ -90,12 +90,9 @@ import java.util.function.Consumer;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class RootActivityContainerTests extends WindowTestsBase {
-    private Task mFullscreenStack;
 
     @Before
     public void setUp() throws Exception {
-        mFullscreenStack = mRootWindowContainer.getDefaultTaskDisplayArea().createRootTask(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         doNothing().when(mAtm).updateSleepIfNeededLocked();
     }
 
@@ -117,50 +114,54 @@ public class RootActivityContainerTests extends WindowTestsBase {
      */
     @Test
     public void testReplacingTaskInPinnedStack() {
+        Task fullscreenTask = mRootWindowContainer.getDefaultTaskDisplayArea().createRootTask(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         final ActivityRecord firstActivity = new ActivityBuilder(mAtm)
-                .setTask(mFullscreenStack).build();
+                .setTask(fullscreenTask).build();
         final ActivityRecord secondActivity = new ActivityBuilder(mAtm)
-                .setTask(mFullscreenStack).build();
+                .setTask(fullscreenTask).build();
 
-        mFullscreenStack.moveToFront("testReplacingTaskInPinnedStack");
+        fullscreenTask.moveToFront("testReplacingTaskInPinnedStack");
 
         // Ensure full screen stack has both tasks.
-        ensureStackPlacement(mFullscreenStack, firstActivity, secondActivity);
+        ensureStackPlacement(fullscreenTask, firstActivity, secondActivity);
 
         // Move first activity to pinned stack.
         mRootWindowContainer.moveActivityToPinnedRootTask(firstActivity, "initialMove");
 
-        final TaskDisplayArea taskDisplayArea = mFullscreenStack.getDisplayArea();
+        final TaskDisplayArea taskDisplayArea = fullscreenTask.getDisplayArea();
         Task pinnedStack = taskDisplayArea.getRootPinnedTask();
         // Ensure a task has moved over.
         ensureStackPlacement(pinnedStack, firstActivity);
-        ensureStackPlacement(mFullscreenStack, secondActivity);
+        ensureStackPlacement(fullscreenTask, secondActivity);
 
         // Move second activity to pinned stack.
         mRootWindowContainer.moveActivityToPinnedRootTask(secondActivity, "secondMove");
 
         // Need to get stacks again as a new instance might have been created.
         pinnedStack = taskDisplayArea.getRootPinnedTask();
-        mFullscreenStack = taskDisplayArea.getRootTask(WINDOWING_MODE_FULLSCREEN,
+        fullscreenTask = taskDisplayArea.getRootTask(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD);
         // Ensure stacks have swapped tasks.
         ensureStackPlacement(pinnedStack, secondActivity);
-        ensureStackPlacement(mFullscreenStack, firstActivity);
+        ensureStackPlacement(fullscreenTask, firstActivity);
     }
 
     @Test
     public void testMovingBottomMostStackActivityToPinnedStack() {
+        final Task fullscreenTask = mRootWindowContainer.getDefaultTaskDisplayArea().createRootTask(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         final ActivityRecord firstActivity = new ActivityBuilder(mAtm)
-                .setTask(mFullscreenStack).build();
+                .setTask(fullscreenTask).build();
         final Task task = firstActivity.getTask();
 
         final ActivityRecord secondActivity = new ActivityBuilder(mAtm)
-                .setTask(mFullscreenStack).build();
+                .setTask(fullscreenTask).build();
 
-        mFullscreenStack.moveTaskToBack(task);
+        fullscreenTask.moveTaskToBack(task);
 
         // Ensure full screen stack has both tasks.
-        ensureStackPlacement(mFullscreenStack, firstActivity, secondActivity);
+        ensureStackPlacement(fullscreenTask, firstActivity, secondActivity);
         assertEquals(task.getTopMostActivity(), secondActivity);
         firstActivity.setState(STOPPED, "testMovingBottomMostStackActivityToPinnedStack");
 
@@ -171,21 +172,20 @@ public class RootActivityContainerTests extends WindowTestsBase {
         assertTrue(firstActivity.mRequestForceTransition);
     }
 
-    private static void ensureStackPlacement(Task stack, ActivityRecord... activities) {
-        final Task task = stack.getBottomMostTask();
-        final ArrayList<ActivityRecord> stackActivities = new ArrayList<>();
+    private static void ensureStackPlacement(Task task, ActivityRecord... activities) {
+        final ArrayList<ActivityRecord> taskActivities = new ArrayList<>();
 
-        task.forAllActivities((Consumer<ActivityRecord>) stackActivities::add, false);
+        task.forAllActivities((Consumer<ActivityRecord>) taskActivities::add, false);
 
-        assertEquals("Expecting " + Arrays.deepToString(activities) + " got " + stackActivities,
-                stackActivities.size(), activities != null ? activities.length : 0);
+        assertEquals("Expecting " + Arrays.deepToString(activities) + " got " + taskActivities,
+                taskActivities.size(), activities != null ? activities.length : 0);
 
         if (activities == null) {
             return;
         }
 
         for (ActivityRecord activity : activities) {
-            assertTrue(stackActivities.contains(activity));
+            assertTrue(taskActivities.contains(activity));
         }
     }
 
@@ -419,19 +419,18 @@ public class RootActivityContainerTests extends WindowTestsBase {
      */
     @Test
     public void testFindTaskToMoveToFrontWhenRecentsOnOtherDisplay() {
-        // Create stack/task on default display.
+        // Create tasks on default display.
         final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
-        final Task targetStack = taskDisplayArea.createRootTask(WINDOWING_MODE_FULLSCREEN,
+        final Task targetRootTask = taskDisplayArea.createRootTask(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, false /* onTop */);
-        final Task targetTask = new TaskBuilder(mSupervisor).setParentTask(targetStack).build();
+        final Task targetTask = new TaskBuilder(mSupervisor).setParentTask(targetRootTask).build();
 
         // Create Recents on secondary display.
         final TestDisplayContent secondDisplay = addNewDisplayContentAt(
                 DisplayContent.POSITION_TOP);
-        final Task stack = secondDisplay.getDefaultTaskDisplayArea()
+        final Task rootTask = secondDisplay.getDefaultTaskDisplayArea()
                 .createRootTask(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_RECENTS, true /* onTop */);
-        final Task task = new TaskBuilder(mSupervisor).setParentTask(stack).build();
-        new ActivityBuilder(mAtm).setTask(task).build();
+        new ActivityBuilder(mAtm).setTask(rootTask).build();
 
         final String reason = "findTaskToMoveToFront";
         mSupervisor.findTaskToMoveToFront(targetTask, 0, ActivityOptions.makeBasic(), reason,
@@ -446,25 +445,24 @@ public class RootActivityContainerTests extends WindowTestsBase {
      */
     @Test
     public void testResumeActivityWhenNonTopmostStackIsTopFocused() {
-        // Create a stack at bottom.
+        // Create a root task at bottom.
         final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
-        final Task targetStack = spy(taskDisplayArea.createRootTask(WINDOWING_MODE_FULLSCREEN,
+        final Task rootTask = spy(taskDisplayArea.createRootTask(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, false /* onTop */));
-        final Task task = new TaskBuilder(mSupervisor).setParentTask(targetStack).build();
-        final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(task).build();
-        taskDisplayArea.positionChildAt(POSITION_BOTTOM, targetStack, false /*includingParents*/);
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(rootTask).build();
+        taskDisplayArea.positionChildAt(POSITION_BOTTOM, rootTask, false /*includingParents*/);
 
-        // Assume the stack is not at the topmost position (e.g. behind always-on-top stacks) but it
-        // is the current top focused stack.
-        assertFalse(targetStack.isTopStackInDisplayArea());
-        doReturn(targetStack).when(mRootWindowContainer).getTopDisplayFocusedRootTask();
+        // Assume the task is not at the topmost position (e.g. behind always-on-top stacks) but it
+        // is the current top focused task.
+        assertFalse(rootTask.isTopStackInDisplayArea());
+        doReturn(rootTask).when(mRootWindowContainer).getTopDisplayFocusedRootTask();
 
-        // Use the stack as target to resume.
+        // Use the task as target to resume.
         mRootWindowContainer.resumeFocusedTasksTopActivities(
-                targetStack, activity, null /* targetOptions */);
+                rootTask, activity, null /* targetOptions */);
 
-        // Verify the target stack should resume its activity.
-        verify(targetStack, times(1)).resumeTopActivityUncheckedLocked(
+        // Verify the target task should resume its activity.
+        verify(rootTask, times(1)).resumeTopActivityUncheckedLocked(
                 eq(activity), eq(null /* targetOptions */));
     }
 
@@ -474,7 +472,6 @@ public class RootActivityContainerTests extends WindowTestsBase {
      */
     @Test
     public void testResumeFocusedStacksStartsHomeActivity_NoActivities() {
-        mFullscreenStack.removeIfPossible();
         final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
         taskDisplayArea.getRootHomeTask().removeIfPossible();
         taskDisplayArea.createRootTask(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
@@ -496,7 +493,6 @@ public class RootActivityContainerTests extends WindowTestsBase {
      */
     @Test
     public void testResumeFocusedStacksStartsHomeActivity_ActivityOnSecondaryScreen() {
-        mFullscreenStack.removeIfPossible();
         final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
         taskDisplayArea.getRootHomeTask().removeIfPossible();
         taskDisplayArea.createRootTask(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
@@ -506,8 +502,7 @@ public class RootActivityContainerTests extends WindowTestsBase {
                 DisplayContent.POSITION_TOP);
         final Task rootTask = secondDisplay.getDefaultTaskDisplayArea().createRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        final Task task = new TaskBuilder(mSupervisor).setParentTask(rootTask).build();
-        new ActivityBuilder(mAtm).setTask(task).build();
+        new ActivityBuilder(mAtm).setTask(rootTask).build();
 
         doReturn(true).when(mRootWindowContainer).resumeHomeActivity(any(), any(), any());
 
@@ -526,44 +521,44 @@ public class RootActivityContainerTests extends WindowTestsBase {
      */
     @Test
     public void testResumeActivityLingeringTransition() {
-        // Create a stack at top.
+        // Create a root task at top.
         final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
-        final Task targetStack = spy(taskDisplayArea.createRootTask(WINDOWING_MODE_FULLSCREEN,
+        final Task rootTask = spy(taskDisplayArea.createRootTask(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, false /* onTop */));
-        final Task task = new TaskBuilder(mSupervisor).setParentTask(targetStack).build();
-        final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(task).build();
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setTask(rootTask).setOnTop(true).build();
         activity.setState(ActivityState.RESUMED, "test");
 
-        // Assume the stack is at the topmost position
-        assertTrue(targetStack.isTopStackInDisplayArea());
+        // Assume the task is at the topmost position
+        assertTrue(rootTask.isTopStackInDisplayArea());
 
-        // Use the stack as target to resume.
+        // Use the task as target to resume.
         mRootWindowContainer.resumeFocusedTasksTopActivities();
 
         // Verify the lingering app transition is being executed because it's already resumed
-        verify(targetStack, times(1)).executeAppTransition(any());
+        verify(rootTask, times(1)).executeAppTransition(any());
     }
 
     @Test
     public void testResumeActivityLingeringTransition_notExecuted() {
-        // Create a stack at bottom.
+        // Create a root task at bottom.
         final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
-        final Task targetStack = spy(taskDisplayArea.createRootTask(WINDOWING_MODE_FULLSCREEN,
+        final Task rootTask = spy(taskDisplayArea.createRootTask(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, false /* onTop */));
-        final Task task = new TaskBuilder(mSupervisor).setParentTask(targetStack).build();
-        final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(task).build();
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setTask(rootTask).setOnTop(true).build();
         activity.setState(ActivityState.RESUMED, "test");
-        taskDisplayArea.positionChildAt(POSITION_BOTTOM, targetStack, false /*includingParents*/);
+        taskDisplayArea.positionChildAt(POSITION_BOTTOM, rootTask, false /*includingParents*/);
 
-        // Assume the stack is at the topmost position
-        assertFalse(targetStack.isTopStackInDisplayArea());
-        doReturn(targetStack).when(mRootWindowContainer).getTopDisplayFocusedRootTask();
+        // Assume the task is at the topmost position
+        assertFalse(rootTask.isTopStackInDisplayArea());
+        doReturn(rootTask).when(mRootWindowContainer).getTopDisplayFocusedRootTask();
 
-        // Use the stack as target to resume.
+        // Use the task as target to resume.
         mRootWindowContainer.resumeFocusedTasksTopActivities();
 
         // Verify the lingering app transition is being executed because it's already resumed
-        verify(targetStack, never()).executeAppTransition(any());
+        verify(rootTask, never()).executeAppTransition(any());
     }
 
     /**
@@ -889,7 +884,9 @@ public class RootActivityContainerTests extends WindowTestsBase {
 
     @Test
     public void testSwitchUser_missingHomeRootTask() {
-        doReturn(mFullscreenStack).when(mRootWindowContainer).getTopDisplayFocusedRootTask();
+        final Task fullscreenTask = mRootWindowContainer.getDefaultTaskDisplayArea().createRootTask(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        doReturn(fullscreenTask).when(mRootWindowContainer).getTopDisplayFocusedRootTask();
 
         final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
         Task homeStack = taskDisplayArea.getRootHomeTask();

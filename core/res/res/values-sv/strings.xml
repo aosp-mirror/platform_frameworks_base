@@ -353,6 +353,8 @@
     <string name="permdesc_receiveMms" msgid="958102423732219710">"Tillåter att appen tar emot och hanterar MMS-meddelanden. Detta innebär att appen kan övervaka eller ta bort meddelanden som skickats till enheten utan att visa dem för dig."</string>
     <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"Vidarebefordra massutskick via sms"</string>
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Tillåter att appen binds till cellsändningsmodulen så att massutskick via sms kan vidarebefordras vid mottagandet. I vissa områden används massutskick via sms för att varna om nödsituationer. Skadliga appar kan påverka enhetens prestanda eller funktioner när ett massutskick via sms tas emot."</string>
+    <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Hantera pågående samtal"</string>
+    <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Tillåter att en app får åtkomst till information om pågående samtal på enheten och kan kontrollera dessa samtal."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"läsa SMS-meddelanden"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Appen tillåts läsa SMS som skickas till din enhet. På vissa platser skickas SMS för att varna för nödsituationer. Skadliga appar kan påverka enhetens prestanda eller funktionalitet när du får ett meddelande om en nödsituation via SMS."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"läsa flöden som du prenumererar på"</string>

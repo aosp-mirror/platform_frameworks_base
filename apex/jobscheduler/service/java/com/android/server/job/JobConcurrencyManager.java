@@ -207,7 +207,7 @@ class JobConcurrencyManager {
     private boolean isFgJob(JobStatus job) {
         // (It's super confusing PRIORITY_BOUND_FOREGROUND_SERVICE isn't FG here)
         return job.lastEvaluatedPriority >= JobInfo.PRIORITY_TOP_APP
-                || job.shouldTreatAsForegroundJob();
+                || job.shouldTreatAsExpeditedJob();
     }
 
     @GuardedBy("mLock")

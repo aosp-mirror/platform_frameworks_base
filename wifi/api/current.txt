@@ -310,6 +310,7 @@ package android.net.wifi {
     method @RequiresPermission(android.Manifest.permission.CHANGE_WIFI_STATE) public int addNetworkSuggestions(@NonNull java.util.List<android.net.wifi.WifiNetworkSuggestion>);
     method public void addOrUpdatePasspointConfiguration(android.net.wifi.hotspot2.PasspointConfiguration);
     method @RequiresPermission(allOf={android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_WIFI_STATE}) public void addSuggestionConnectionStatusListener(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.WifiManager.SuggestionConnectionStatusListener);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public boolean addSuggestionUserApprovalStatusListener(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.WifiManager.SuggestionUserApprovalStatusListener);
     method @Deprecated public static int calculateSignalLevel(int, int);
     method @IntRange(from=0) public int calculateSignalLevel(int);
     method @Deprecated public void cancelWps(android.net.wifi.WifiManager.WpsCallback);
@@ -360,6 +361,7 @@ package android.net.wifi {
     method @RequiresPermission(android.Manifest.permission.CHANGE_WIFI_STATE) public int removeNetworkSuggestions(@NonNull java.util.List<android.net.wifi.WifiNetworkSuggestion>);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_CARRIER_PROVISIONING}) public void removePasspointConfiguration(String);
     method @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public void removeSuggestionConnectionStatusListener(@NonNull android.net.wifi.WifiManager.SuggestionConnectionStatusListener);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public void removeSuggestionUserApprovalStatusListener(@NonNull android.net.wifi.WifiManager.SuggestionUserApprovalStatusListener);
     method @Deprecated public boolean saveConfiguration();
     method public void setTdlsEnabled(java.net.InetAddress, boolean);
     method public void setTdlsEnabledWithMacAddress(String, boolean);
@@ -458,6 +460,10 @@ package android.net.wifi {
 
   public static interface WifiManager.SuggestionConnectionStatusListener {
     method public void onConnectionStatus(@NonNull android.net.wifi.WifiNetworkSuggestion, int);
+  }
+
+  public static interface WifiManager.SuggestionUserApprovalStatusListener {
+    method public void onUserApprovalStatusChange();
   }
 
   public class WifiManager.WifiLock {

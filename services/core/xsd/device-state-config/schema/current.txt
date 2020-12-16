@@ -3,19 +3,19 @@ package com.android.server.policy.devicestate.config {
 
   public class Conditions {
     ctor public Conditions();
-    method public com.android.server.policy.devicestate.config.LidSwitchCondition getLidSwitch();
-    method public java.util.List<com.android.server.policy.devicestate.config.SensorCondition> getSensor();
-    method public void setLidSwitch(com.android.server.policy.devicestate.config.LidSwitchCondition);
+    method @Nullable public com.android.server.policy.devicestate.config.LidSwitchCondition getLidSwitch();
+    method @Nullable public java.util.List<com.android.server.policy.devicestate.config.SensorCondition> getSensor();
+    method public void setLidSwitch(@Nullable com.android.server.policy.devicestate.config.LidSwitchCondition);
   }
 
   public class DeviceState {
     ctor public DeviceState();
     method public com.android.server.policy.devicestate.config.Conditions getConditions();
     method public java.math.BigInteger getIdentifier();
-    method public String getName();
+    method @Nullable public String getName();
     method public void setConditions(com.android.server.policy.devicestate.config.Conditions);
     method public void setIdentifier(java.math.BigInteger);
-    method public void setName(String);
+    method public void setName(@Nullable String);
   }
 
   public class DeviceStateConfig {
@@ -31,14 +31,14 @@ package com.android.server.policy.devicestate.config {
 
   public class NumericRange {
     ctor public NumericRange();
-    method public java.math.BigDecimal getMaxInclusive_optional();
-    method public java.math.BigDecimal getMax_optional();
-    method public java.math.BigDecimal getMinInclusive_optional();
-    method public java.math.BigDecimal getMin_optional();
-    method public void setMaxInclusive_optional(java.math.BigDecimal);
-    method public void setMax_optional(java.math.BigDecimal);
-    method public void setMinInclusive_optional(java.math.BigDecimal);
-    method public void setMin_optional(java.math.BigDecimal);
+    method @Nullable public java.math.BigDecimal getMaxInclusive_optional();
+    method @Nullable public java.math.BigDecimal getMax_optional();
+    method @Nullable public java.math.BigDecimal getMinInclusive_optional();
+    method @Nullable public java.math.BigDecimal getMin_optional();
+    method public void setMaxInclusive_optional(@Nullable java.math.BigDecimal);
+    method public void setMax_optional(@Nullable java.math.BigDecimal);
+    method public void setMinInclusive_optional(@Nullable java.math.BigDecimal);
+    method public void setMin_optional(@Nullable java.math.BigDecimal);
   }
 
   public class SensorCondition {

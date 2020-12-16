@@ -323,25 +323,25 @@ public class Filter implements AutoCloseable {
     }
 
     /**
-     * Configure the Filter to monitor scrambling status and ip cid change. Set corresponding bit of
-     * {@link MonitorEventTypeMask} to monitor the change. Reset to stop monitoring.
+     * Configure the Filter to monitor scrambling status and ip cid change. Set corresponding bit
+     * to monitor the change. Reset to stop monitoring.
      *
      * <p>{@link ScramblingStatusEvent} should be sent at the following two scenarios:
      * <ul>
-     *   <li>When this method is called with {@link MONITOR_EVENT_SCRAMBLING_STATUS}, the first
+     *   <li>When this method is called with {@link #MONITOR_EVENT_SCRAMBLING_STATUS}, the first
      *       detected scrambling status should be sent.
      *   <li>When the Scrambling status transits into different status, event should be sent.
      *     <ul/>
      *
      * <p>{@link IpCidChangeEvent} should be sent at the following two scenarios:
      * <ul>
-     *   <li>When this method is called with {@link MONITOR_EVENT_IP_CID_CHANGE}, the first detected
-     *       CID for the IP should be sent.
+     *   <li>When this method is called with {@link #MONITOR_EVENT_IP_CID_CHANGE}, the first
+     *       detected CID for the IP should be sent.
      *   <li>When the CID is changed to different value for the IP filter, event should be sent.
      *     <ul/>
      *
      * <p>This configuration is only supported in Tuner 1.1 or higher version. Unsupported version
-     * will cause no-op. Use {@link TunerVersionChecker.getTunerVersion()} to get the version
+     * will cause no-op. Use {@link TunerVersionChecker#getTunerVersion()} to get the version
      * information.
      *
      * @param monitorEventTypesMask Types of event to be monitored. Set corresponding bit to

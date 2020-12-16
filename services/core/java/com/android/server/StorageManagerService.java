@@ -177,6 +177,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -3552,7 +3553,7 @@ class StorageManagerService extends IStorageManager.Stub
             final String description = mContext.getString(android.R.string.unknownName);
 
             res.add(new StorageVolume(id, path, path, description, primary, removable,
-                    emulated, allowMassStorage, maxFileSize, user, id, envState));
+                    emulated, allowMassStorage, maxFileSize, user, null /*uuid */, id, envState));
         }
 
         if (!foundPrimary) {
@@ -3570,12 +3571,13 @@ class StorageManagerService extends IStorageManager.Stub
             final boolean allowMassStorage = false;
             final long maxFileSize = 0L;
             final UserHandle owner = new UserHandle(userId);
-            final String uuid = null;
+            final String fsUuid = null;
+            final UUID uuid = null;
             final String state = Environment.MEDIA_REMOVED;
 
             res.add(0, new StorageVolume(id, path, path,
                     description, primary, removable, emulated,
-                    allowMassStorage, maxFileSize, owner, uuid, state));
+                    allowMassStorage, maxFileSize, owner, uuid, fsUuid, state));
         }
 
         return res.toArray(new StorageVolume[res.size()]);

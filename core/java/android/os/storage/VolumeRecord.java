@@ -116,7 +116,7 @@ public class VolumeRecord implements Parcelable {
         }
 
         return new StorageVolume(id, userPath, internalPath, description, primary, removable,
-                emulated, allowMassStorage, maxFileSize, user, fsUuid, envState);
+                emulated, allowMassStorage, maxFileSize, user, null /* uuid */, fsUuid, envState);
     }
 
     public void dump(IndentingPrintWriter pw) {

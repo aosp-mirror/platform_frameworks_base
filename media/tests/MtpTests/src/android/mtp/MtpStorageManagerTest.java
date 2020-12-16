@@ -132,9 +132,10 @@ public class MtpStorageManagerTest {
         secondaryStorageDir = createNewDir(TEMP_DIR_FILE);
 
         StorageVolume mainStorage = new StorageVolume("1", mainStorageDir, mainStorageDir,
-                "", true, false, true, false, -1, UserHandle.CURRENT, "", "");
+                "", true, false, true, false, -1, UserHandle.CURRENT, null /* uuid */, "", "");
         StorageVolume secondaryStorage = new StorageVolume("2", secondaryStorageDir,
-                secondaryStorageDir, "", false, false, true, false, -1, UserHandle.CURRENT, "", "");
+                secondaryStorageDir, "", false, false, true, false, -1, UserHandle.CURRENT,
+                null /* uuid */, "", "");
 
         objectsAdded = new ArrayList<>();
         objectsRemoved = new ArrayList<>();

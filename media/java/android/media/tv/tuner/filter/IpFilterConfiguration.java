@@ -100,7 +100,7 @@ public final class IpFilterConfiguration extends FilterConfiguration {
      * Gets the ip filter context id. Default value is {@link #INVALID_IP_FILTER_CONTEXT_ID}.
      *
      * <p>This API is only supported by Tuner HAL 1.1 or higher. Unsupported version would return
-     * default value. Use {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     * default value. Use {@link TunerVersionChecker#getTunerVersion()} to check the version.
      */
     @IntRange(from = 0, to = 0xefff)
     public int getIpFilterContextId() {
@@ -194,7 +194,7 @@ public final class IpFilterConfiguration extends FilterConfiguration {
          * Sets the ip filter context id. Default value is {@link #INVALID_IP_FILTER_CONTEXT_ID}.
          *
          * <p>This API is only supported by Tuner HAL 1.1 or higher. Unsupported version would cause
-         * no-op. Use {@link TunerVersionChecker.getTunerVersion()} to check the version.
+         * no-op. Use {@link TunerVersionChecker#getTunerVersion()} to check the version.
          */
         @NonNull
         public Builder setIpFilterContextId(int ipContextId) {

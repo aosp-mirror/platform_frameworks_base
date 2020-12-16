@@ -25,6 +25,12 @@ import static android.service.notification.NotificationListenerService.Ranking.R
 import static android.service.notification.NotificationListenerService.Ranking.RANKING_PROMOTED;
 import static android.service.notification.NotificationListenerService.Ranking.RANKING_UNCHANGED;
 
+import static com.android.systemui.statusbar.notification.AssistantFeedbackController.STATUS_DEMOTED;
+import static com.android.systemui.statusbar.notification.AssistantFeedbackController.STATUS_PROMOTED;
+import static com.android.systemui.statusbar.notification.AssistantFeedbackController.STATUS_SILENCED;
+import static com.android.systemui.statusbar.notification.AssistantFeedbackController.STATUS_UNCHANGED;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -39,6 +45,8 @@ import android.testing.AndroidTestingRunner;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+
+import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -76,28 +84,46 @@ public class AssistantFeedbackControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShowFeedbackIndicator_settingDisabled() {
+    public void testFeedback_settingDisabled() {
         switchSetting(OFF);
+        assertEquals(STATUS_UNCHANGED, mAssistantFeedbackController.getFeedbackStatus(
+                getEntry(IMPORTANCE_DEFAULT, IMPORTANCE_DEFAULT, RANKING_UNCHANGED)));
         assertFalse(mAssistantFeedbackController.showFeedbackIndicator(
                 getEntry(IMPORTANCE_DEFAULT, IMPORTANCE_DEFAULT, RANKING_UNCHANGED)));
     }
 
     @Test
-    public void testShowFeedbackIndicator_changedImportance() {
-        assertTrue(mAssistantFeedbackController.showFeedbackIndicator(
-                getEntry(IMPORTANCE_DEFAULT, IMPORTANCE_HIGH, RANKING_UNCHANGED)));
-        assertTrue(mAssistantFeedbackController.showFeedbackIndicator(
-                getEntry(IMPORTANCE_DEFAULT, IMPORTANCE_LOW, RANKING_UNCHANGED)));
-        assertTrue(mAssistantFeedbackController.showFeedbackIndicator(
-                getEntry(IMPORTANCE_LOW, IMPORTANCE_MIN, RANKING_UNCHANGED)));
+    public void testFeedback_changedImportance() {
+        NotificationEntry entry = getEntry(IMPORTANCE_DEFAULT, IMPORTANCE_HIGH, RANKING_UNCHANGED);
+        assertEquals(STATUS_PROMOTED, mAssistantFeedbackController.getFeedbackStatus(entry));
+        assertTrue(mAssistantFeedbackController.showFeedbackIndicator(entry));
+
+        entry = getEntry(IMPORTANCE_DEFAULT, IMPORTANCE_LOW, RANKING_UNCHANGED);
+        assertEquals(STATUS_SILENCED, mAssistantFeedbackController.getFeedbackStatus(entry));
+        assertTrue(mAssistantFeedbackController.showFeedbackIndicator(entry));
+
+        entry = getEntry(IMPORTANCE_LOW, IMPORTANCE_MIN, RANKING_UNCHANGED);
+        assertEquals(STATUS_DEMOTED, mAssistantFeedbackController.getFeedbackStatus(entry));
+        assertTrue(mAssistantFeedbackController.showFeedbackIndicator(entry));
     }
 
     @Test
-    public void testShowFeedbackIndicator_changedRanking() {
-        assertTrue(mAssistantFeedbackController.showFeedbackIndicator(
-                getEntry(IMPORTANCE_DEFAULT, IMPORTANCE_DEFAULT, RANKING_PROMOTED)));
-        assertTrue(mAssistantFeedbackController.showFeedbackIndicator(
-                getEntry(IMPORTANCE_DEFAULT, IMPORTANCE_DEFAULT, RANKING_DEMOTED)));
+    public void testFeedback_changedRanking() {
+        NotificationEntry entry =
+                getEntry(IMPORTANCE_DEFAULT, IMPORTANCE_DEFAULT, RANKING_PROMOTED);
+        assertEquals(STATUS_PROMOTED, mAssistantFeedbackController.getFeedbackStatus(entry));
+        assertTrue(mAssistantFeedbackController.showFeedbackIndicator(entry));
+
+        entry = getEntry(IMPORTANCE_DEFAULT, IMPORTANCE_DEFAULT, RANKING_DEMOTED);
+        assertEquals(STATUS_DEMOTED, mAssistantFeedbackController.getFeedbackStatus(entry));
+        assertTrue(mAssistantFeedbackController.showFeedbackIndicator(entry));
+    }
+
+    @Test
+    public void testGetFeedbackImageResource_settingDisabled() {
+        switchSetting(OFF);
+        Assert.assertEquals(0, mAssistantFeedbackController.getFeedbackImageResource(
+                getEntry(IMPORTANCE_DEFAULT, IMPORTANCE_DEFAULT, RANKING_UNCHANGED)));
     }
 
     private NotificationEntry getEntry(int oldImportance, int newImportance,

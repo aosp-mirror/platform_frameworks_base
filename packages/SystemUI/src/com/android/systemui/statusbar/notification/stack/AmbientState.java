@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.util.MathUtils;
-import android.view.View;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.NotificationShelf;
@@ -31,14 +30,13 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.SectionProvider;
 
-import java.util.ArrayList;
-
 /**
  * A global state to track all input states for the algorithm.
  */
 public class AmbientState {
 
     private static final float MAX_PULSE_HEIGHT = 100000f;
+    private static final boolean NOTIFICATIONS_HAVE_SHADOWS = false;
 
     private final SectionProvider mSectionProvider;
     private int mScrollY;
@@ -104,7 +102,7 @@ public class AmbientState {
     }
 
     private static int getBaseHeight(int zdistanceBetweenElements) {
-        return 4 * zdistanceBetweenElements;
+        return NOTIFICATIONS_HAVE_SHADOWS ? 4 * zdistanceBetweenElements : 0;
     }
 
     /**

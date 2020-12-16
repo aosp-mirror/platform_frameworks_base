@@ -41,6 +41,7 @@ import android.metrics.LogMaker;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.service.notification.StatusBarNotification;
+import android.text.Html;
 import android.text.TextUtils;
 import android.transition.ChangeBounds;
 import android.transition.Fade;
@@ -60,6 +61,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.lang.annotation.Retention;
@@ -96,6 +98,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private PackageManager mPm;
     private MetricsLogger mMetricsLogger;
     private ChannelEditorDialogController mChannelEditorDialogController;
+    private AssistantFeedbackController mAssistantFeedbackController;
 
     private String mPackageName;
     private String mAppName;
@@ -200,12 +203,13 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             boolean isDeviceProvisioned,
             boolean isNonblockable,
             boolean wasShownHighPriority,
-            boolean showAutomaticSetting)
+            AssistantFeedbackController assistantFeedbackController)
             throws RemoteException {
         mINotificationManager = iNotificationManager;
         mMetricsLogger = Dependency.get(MetricsLogger.class);
         mOnUserInteractionCallback = onUserInteractionCallback;
         mChannelEditorDialogController = channelEditorDialogController;
+        mAssistantFeedbackController = assistantFeedbackController;
         mPackageName = pkg;
         mUniqueChannelsInRow = uniqueChannelsInRow;
         mNumUniqueChannelsInRow = uniqueChannelsInRow.size();
@@ -222,7 +226,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         mAppUid = mSbn.getUid();
         mDelegatePkg = mSbn.getOpPkg();
         mIsDeviceProvisioned = isDeviceProvisioned;
-        mShowAutomaticSetting = showAutomaticSetting;
+        mShowAutomaticSetting = mAssistantFeedbackController.isFeedbackEnabled();
         mUiEventLogger = uiEventLogger;
 
         int numTotalChannels = mINotificationManager.getNumNotificationChannelsForPackage(
@@ -280,6 +284,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
         View automatic = findViewById(R.id.automatic);
         if (mShowAutomaticSetting) {
+            mAutomaticDescriptionView.setText(Html.fromHtml(mContext.getText(
+                    mAssistantFeedbackController.getInlineDescriptionResource(mEntry)).toString()));
             automatic.setVisibility(VISIBLE);
             automatic.setOnClickListener(mOnAutomatic);
         } else {

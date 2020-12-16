@@ -47,6 +47,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * Manages OneHanded display areas such as offset.
@@ -151,7 +152,8 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
     public OneHandedDisplayAreaOrganizer(Context context,
             DisplayController displayController,
             OneHandedAnimationController animationController,
-            OneHandedTutorialHandler tutorialHandler) {
+            OneHandedTutorialHandler tutorialHandler, Executor executor) {
+        super(executor);
         mUpdateHandler = new Handler(OneHandedThread.get().getLooper(), mUpdateCallback);
         mAnimationController = animationController;
         mDisplayController = displayController;

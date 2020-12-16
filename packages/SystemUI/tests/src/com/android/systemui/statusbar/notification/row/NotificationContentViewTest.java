@@ -95,7 +95,7 @@ public class NotificationContentViewTest extends SysuiTestCase {
         mView.setExpandedChild(mockExpanded);
         mView.setHeadsUpChild(mockHeadsUp);
 
-        mView.showFeedbackIcon(true);
+        mView.showFeedbackIcon(true, 1);
 
         verify(mockContracted, times(1)).setVisibility(View.VISIBLE);
         verify(mockExpanded, times(1)).setVisibility(View.VISIBLE);

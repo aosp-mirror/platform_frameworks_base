@@ -390,7 +390,7 @@ public class HdmiCecNetworkTest {
         assertThat(cecDeviceInfo.getLogicalAddress()).isEqualTo(logicalAddress);
         assertThat(cecDeviceInfo.getDevicePowerStatus()).isEqualTo(updatedPowerStatus);
         assertThat(cecDeviceInfo.getCecVersion()).isEqualTo(
-                HdmiControlManager.HDMI_CEC_VERSION_1_4_b);
+                HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
     }
 
     @Test
@@ -436,7 +436,7 @@ public class HdmiCecNetworkTest {
         assertThat(cecDeviceInfo.getDevicePowerStatus()).isEqualTo(
                 HdmiControlManager.POWER_STATUS_UNKNOWN);
         assertThat(cecDeviceInfo.getCecVersion()).isEqualTo(
-                HdmiControlManager.HDMI_CEC_VERSION_1_4_b);
+                HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
     }
 
     @Test
@@ -482,7 +482,7 @@ public class HdmiCecNetworkTest {
     @Test
     public void cecDevices_tracking_reportCecVersion_tracksCecVersion_cec14() {
         int logicalAddress = Constants.ADDR_PLAYBACK_1;
-        int cecVersion = HdmiControlManager.HDMI_CEC_VERSION_1_4_b;
+        int cecVersion = HdmiControlManager.HDMI_CEC_VERSION_1_4_B;
         mHdmiCecNetwork.handleCecMessage(
                 HdmiCecMessageBuilder.buildCecVersion(logicalAddress, Constants.ADDR_BROADCAST,
                         cecVersion));
@@ -512,7 +512,7 @@ public class HdmiCecNetworkTest {
     @Test
     public void cecDevices_tracking_reportFeatures_tracksCecVersion_cec14() {
         int logicalAddress = Constants.ADDR_PLAYBACK_1;
-        int cecVersion = HdmiControlManager.HDMI_CEC_VERSION_1_4_b;
+        int cecVersion = HdmiControlManager.HDMI_CEC_VERSION_1_4_B;
         mHdmiCecNetwork.handleCecMessage(
                 HdmiCecMessageBuilder.buildReportFeatures(logicalAddress,
                         cecVersion, Collections.emptyList(),

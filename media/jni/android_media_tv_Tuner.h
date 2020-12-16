@@ -34,6 +34,7 @@
 #include <utils/Mutex.h>
 #include <utils/RefBase.h>
 
+#include "tuner/TunerClient.h"
 #include "jni.h"
 
 using ::android::hardware::EventFlag;
@@ -76,7 +77,6 @@ using ::android::hardware::tv::tuner::V1_1::DemuxFilterEventExt;
 using ::android::hardware::tv::tuner::V1_1::DemuxFilterMonitorEvent;
 using ::android::hardware::tv::tuner::V1_1::FrontendScanMessageExt1_1;
 using ::android::hardware::tv::tuner::V1_1::FrontendScanMessageTypeExt1_1;
-using ::android::hardware::tv::tuner::V1_1::IFrontendCallback;
 
 using MQ = MessageQueue<uint8_t, kSynchronizedReadWrite>;
 
@@ -259,10 +259,7 @@ private:
     jweak mObject;
     static sp<ITuner> mTuner;
     static sp<::android::hardware::tv::tuner::V1_1::ITuner> mTuner_1_1;
-    // An integer that carries the Tuner version. The high 16 bits are the major version number
-    // while the low 16 bits are the minor version. Default value is unknown version 0.
-    static int mTunerVersion;
-    hidl_vec<FrontendId> mFeIds;
+    static sp<TunerClient> mTunerClient;
     sp<IFrontend> mFe;
     sp<::android::hardware::tv::tuner::V1_1::IFrontend> mFe_1_1;
     int mFeId;

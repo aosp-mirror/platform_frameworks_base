@@ -393,7 +393,8 @@ public class MockSystemServices {
 
     public static class RecoverySystemForMock {
         public void rebootWipeUserData(boolean shutdown, String reason, boolean force,
-                boolean wipeEuicc) throws IOException {
+                boolean wipeEuicc, boolean wipeExtRequested, boolean wipeResetProtectionData)
+                        throws IOException {
         }
     }
 

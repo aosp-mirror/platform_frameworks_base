@@ -83,8 +83,8 @@ public class TsRecordEvent extends FilterEvent {
      * and has the same format as the PTS in ISO/IEC 13818-1.
      *
      * <p>This field is only supported in Tuner 1.1 or higher version. Unsupported version will
-     * return {@link android.media.tv.tuner.Tuner.INVALID_TIMESTAMP}. Use
-     * {@link android.media.tv.tuner.TunerVersionChecker.getTunerVersion()} to get the version
+     * return {@link android.media.tv.tuner.Tuner#INVALID_TIMESTAMP}. Use
+     * {@link android.media.tv.tuner.TunerVersionChecker#getTunerVersion()} to get the version
      * information.
      */
     public long getPts() {
@@ -95,8 +95,8 @@ public class TsRecordEvent extends FilterEvent {
      * Get the address of the first macroblock in the slice defined in ITU-T Rec. H.264.
      *
      * <p>This field is only supported in Tuner 1.1 or higher version. Unsupported version will
-     * return {@link android.media.tv.tuner.Tuner.INVALID_FIRST_MACROBLOCK_IN_SLICE}. Use
-     * {@link android.media.tv.tuner.TunerVersionChecker.getTunerVersion()} to get the version
+     * return {@link android.media.tv.tuner.Tuner#INVALID_FIRST_MACROBLOCK_IN_SLICE}. Use
+     * {@link android.media.tv.tuner.TunerVersionChecker#getTunerVersion()} to get the version
      * information.
      */
     public int getFirstMacroblockInSlice() {

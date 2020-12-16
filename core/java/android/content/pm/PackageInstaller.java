@@ -53,10 +53,12 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.system.ErrnoException;
 import android.system.Os;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.ExceptionUtils;
 
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.Closeable;
@@ -1349,12 +1351,13 @@ public class PackageInstaller {
          *
          * @throws PackageManager.NameNotFoundException if the new owner could not be found.
          * @throws SecurityException if called after the session has been committed or abandoned.
-         * @throws IllegalArgumentException if streams opened through
+         * @throws IllegalStateException if streams opened through
          *                                  {@link #openWrite(String, long, long) are still open.
+         * @throws IllegalArgumentException if {@code packageName} is invalid.
          */
         public void transfer(@NonNull String packageName)
                 throws PackageManager.NameNotFoundException {
-            Objects.requireNonNull(packageName);
+            Preconditions.checkArgument(!TextUtils.isEmpty(packageName));
 
             try {
                 mSession.transfer(packageName);

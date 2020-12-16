@@ -680,7 +680,7 @@ public class FrontendStatus {
      * Gets an array of the current extended bit error ratio.
      *
      * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
-     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
      */
     @NonNull
     public int[] getBers() {
@@ -696,7 +696,7 @@ public class FrontendStatus {
      * Gets an array of the current code rates.
      *
      * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
-     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
      */
     @NonNull
     @FrontendSettings.InnerFec
@@ -713,7 +713,7 @@ public class FrontendStatus {
      * Gets the current bandwidth information.
      *
      * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
-     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
      */
     @FrontendBandwidth
     public int getBandwidth() {
@@ -729,7 +729,7 @@ public class FrontendStatus {
      * Gets the current guard interval information.
      *
      * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
-     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
      */
     @FrontendGuardInterval
     public int getGuardInterval() {
@@ -745,7 +745,7 @@ public class FrontendStatus {
      * Gets the current transmission mode information.
      *
      * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
-     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
      */
     @FrontendTransmissionMode
     public int getTransmissionMode() {
@@ -762,7 +762,7 @@ public class FrontendStatus {
      * since the last tune operation.
      *
      * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
-     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
      */
     public int getUec() {
         TunerVersionChecker.checkHigherOrEqualVersionTo(
@@ -777,7 +777,7 @@ public class FrontendStatus {
      * Gets the current DVB-T2 system id.
      *
      * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
-     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
      */
     @IntRange(from = 0, to = 0xffff)
     public int getSystemId() {
@@ -793,7 +793,7 @@ public class FrontendStatus {
      * Gets an array of the current interleaving mode information.
      *
      * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
-     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
      */
     @NonNull
     @FrontendInterleaveMode
@@ -811,7 +811,7 @@ public class FrontendStatus {
      * channels.
      *
      * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
-     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
      */
     @NonNull
     @IntRange(from = 0, to = 0xff)
@@ -828,7 +828,7 @@ public class FrontendStatus {
      * Gets an array of the Transport Stream Data Rate in BPS of the current channel.
      *
      * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
-     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
      */
     @NonNull
     public int[] getTsDataRate() {
@@ -844,7 +844,7 @@ public class FrontendStatus {
      * Gets an array of the current extended modulations information.
      *
      * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
-     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
      */
     @NonNull
     @FrontendModulation
@@ -861,7 +861,7 @@ public class FrontendStatus {
      * Gets the current roll off information.
      *
      * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
-     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
      */
     @FrontendRollOff
     public int getRollOff() {
@@ -877,7 +877,7 @@ public class FrontendStatus {
      * Gets is MISO enabled or not.
      *
      * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
-     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
      */
     public boolean isMisoEnabled() {
         TunerVersionChecker.checkHigherOrEqualVersionTo(
@@ -892,7 +892,7 @@ public class FrontendStatus {
      * Gets is the Code Rate of the frontend is linear or not.
      *
      * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
-     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
      */
     public boolean isLinear() {
         TunerVersionChecker.checkHigherOrEqualVersionTo(
@@ -907,7 +907,7 @@ public class FrontendStatus {
      * Gets is the Short Frames enabled or not.
      *
      * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
-     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
      */
     public boolean isShortFramesEnabled() {
         TunerVersionChecker.checkHigherOrEqualVersionTo(

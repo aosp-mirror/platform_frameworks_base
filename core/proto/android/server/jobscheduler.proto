@@ -313,39 +313,39 @@ message ConstantsProto {
         // The minimum amount of time between quota check alarms.
         optional int64 min_quota_check_delay_ms = 23;
 
-        // The total session limit of the particular standby bucket. Apps in this standby bucket can
-        // only have HPJ sessions totalling HPJ_LIMIT (without factoring in any rewards or free
-        // HPJs).
-        optional int64 hpj_limit_active_ms = 24;
-        // The total session limit of the particular standby bucket. Apps in this standby bucket can
-        // only have HPJ sessions totalling HPJ_LIMIT (without factoring in any rewards or free
-        // HPJs).
-        optional int64 hpj_limit_working_ms = 25;
-        // The total session limit of the particular standby bucket. Apps in this standby bucket can
-        // only have HPJ sessions totalling HPJ_LIMIT (without factoring in any rewards or free
-        // HPJs).
-        optional int64 hpj_limit_frequent_ms = 26;
-        // The total session limit of the particular standby bucket. Apps in this standby bucket can
-        // only have HPJ sessions totalling HPJ_LIMIT (without factoring in any rewards or free
-        // HPJs).
-        optional int64 hpj_limit_rare_ms = 27;
-        // The total session limit of the particular standby bucket. Apps in this standby bucket can
-        // only have HPJ sessions totalling HPJ_LIMIT (without factoring in any rewards or free
-        // HPJs).
-        optional int64 hpj_limit_restricted_ms = 28;
-        // The period of time used to calculate HPJ sessions. Apps can only have HPJ sessions
-        // totalling HPJ_LIMIT_<bucket>_MS within this period of time (without factoring in any
-        // rewards or free HPJs).
-        optional int64 hpj_window_size_ms = 29;
+        // The total expedited job session limit of the particular standby bucket. Apps in this
+        // standby bucket can only have expedited job sessions totalling EJ_LIMIT (without factoring
+        // in any rewards or free EJs).
+        optional int64 expedited_job_limit_active_ms = 24;
+        // The total expedited job session limit of the particular standby bucket. Apps in this
+        // standby bucket can only have expedited job sessions totalling EJ_LIMIT (without factoring
+        // in any rewards or free EJs).
+        optional int64 expedited_job_limit_working_ms = 25;
+        // The total expedited job session limit of the particular standby bucket. Apps in this
+        // standby bucket can only have expedited job sessions totalling EJ_LIMIT (without factoring
+        // in any rewards or free EJs).
+        optional int64 expedited_job_limit_frequent_ms = 26;
+        // The total expedited job session limit of the particular standby bucket. Apps in this
+        // standby bucket can only have expedited job sessions totalling EJ_LIMIT (without factoring
+        // in any rewards or free EJs).
+        optional int64 expedited_job_limit_rare_ms = 27;
+        // The total expedited job session limit of the particular standby bucket. Apps in this
+        // standby bucket can only have expedited job sessions totalling EJ_LIMIT (without factoring
+        // in any rewards or free EJs).
+        optional int64 expedited_job_limit_restricted_ms = 28;
+        // The period of time used to calculate expedited job sessions. Apps can only have expedited
+        // job sessions totalling EJ_LIMIT_<bucket>_MS within this period of time (without factoring
+        // in any rewards or free EJs).
+        optional int64 expedited_job_window_size_ms = 29;
         // Length of time used to split an app's top time into chunks.
-        optional int64 hpj_top_app_time_chunk_size_ms = 30;
-        // How much HPJ quota to give back to an app based on the number of top app time chunks
+        optional int64 expedited_job_top_app_time_chunk_size_ms = 30;
+        // How much EJ quota to give back to an app based on the number of top app time chunks
         // it had.
-        optional int64 hpj_reward_top_app_ms = 31;
-        // How much HPJ quota to give back to an app based on each non-top user interaction.
-        optional int64 hpj_reward_interaction_ms = 32;
-        // How much HPJ quota to give back to an app based on each notification seen event.
-        optional int64 hpj_reward_notification_seen_ms = 33;
+        optional int64 expedited_job_reward_top_app_ms = 31;
+        // How much EJ quota to give back to an app based on each non-top user interaction.
+        optional int64 expedited_job_reward_interaction_ms = 32;
+        // How much EJ quota to give back to an app based on each notification seen event.
+        optional int64 expedited_job_reward_notification_seen_ms = 33;
 
         // Next tag: 34
     }

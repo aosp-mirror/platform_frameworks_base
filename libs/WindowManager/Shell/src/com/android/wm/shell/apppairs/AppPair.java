@@ -96,7 +96,7 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.LayoutChan
         mTaskInfo2 = task2;
         mSplitLayout = new SplitLayout(
                 mDisplayController.getDisplayContext(mRootTaskInfo.displayId),
-                mRootTaskInfo.configuration, this, mRootTaskLeash);
+                mRootTaskInfo.configuration, this, b -> b.setParent(mRootTaskLeash));
 
         final WindowContainerToken token1 = task1.token;
         final WindowContainerToken token2 = task2.token;

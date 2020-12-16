@@ -359,6 +359,10 @@
     <string name="permdesc_receiveMms" msgid="958102423732219710">"Pozwala aplikacji na odbieranie i przetwarzanie MMS-ów. To oznacza, że aplikacja będzie mogła bez Twojej wiedzy monitorować i usuwać wiadomości wysyłane do Twojego urządzenia."</string>
     <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"Przekaż komunikaty z sieci komórkowej"</string>
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Zezwala aplikacji powiązać się z modułem komunikatów z sieci komórkowej, aby przekazywać je w momencie, w którym są otrzymywane. W niektórych lokalizacjach komunikaty alarmowe z sieci komórkowej są dostarczane, aby ostrzec Cię o sytuacjach zagrożenia. Złośliwe aplikacje mogą wpływać na działanie urządzenia lub zakłócać je po nadejściu komunikatu alarmowego z sieci komórkowej."</string>
+    <!-- no translation found for permlab_manageOngoingCalls (281244770664231782) -->
+    <skip />
+    <!-- no translation found for permdesc_manageOngoingCalls (7003138133829915265) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"odczyt komunikatów z sieci komórkowej"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Zezwala aplikacji na odczyt komunikatów z sieci komórkowej odebranych na urządzeniu. Komunikaty alarmowe z sieci komórkowej są dostarczane w niektórych lokalizacjach w celu ostrzeżenia Cię o sytuacjach zagrożenia. Złośliwe aplikacje mogą wpływać na wydajność lub zakłócać działanie urządzenia po odebraniu komunikatu alarmowego z sieci komórkowej."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"czytanie subskrybowanych źródeł"</string>

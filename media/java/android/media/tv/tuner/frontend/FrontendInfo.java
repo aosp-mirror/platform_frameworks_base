@@ -57,7 +57,7 @@ public class FrontendInfo {
     /**
      * Gets frontend ID.
      *
-     * @return the frontend ID or {@link android.media.tv.tuner.Tuner.INVALID_FRONTEND_ID}
+     * @return the frontend ID or {@link android.media.tv.tuner.Tuner#INVALID_FRONTEND_ID}
      *         if invalid
      */
     public int getId() {

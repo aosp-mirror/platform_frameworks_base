@@ -356,6 +356,10 @@
     <string name="permdesc_receiveMms" msgid="958102423732219710">"Permite aplicației să primească și să proceseze mesaje MMS. Acest lucru înseamnă că aplicația ar putea monitoriza sau șterge mesajele trimise pe dispozitivul dvs. fără a vi le arăta."</string>
     <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"Redirecționează mesajele cu transmisie celulară"</string>
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Permite aplicației să se conecteze la modulul de transmisie celulară pentru a redirecționa mesajele cu transmisie celulară pe măsură ce le primește. Alertele cu transmisie celulară sunt difuzate în unele locații pentru a vă avertiza cu privire la situațiile de urgență. Aplicațiile rău intenționate pot afecta performanța sau funcționarea dispozitivului dvs. când este primită o transmisie celulară de urgență."</string>
+    <!-- no translation found for permlab_manageOngoingCalls (281244770664231782) -->
+    <skip />
+    <!-- no translation found for permdesc_manageOngoingCalls (7003138133829915265) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"citește mesajele cu transmisie celulară"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Permite aplicației să citească mesajele primite prin transmisie celulară de dispozitivul dvs. Alertele cu transmisie celulară sunt difuzate în unele locații pentru a vă avertiza cu privire la situațiile de urgență. Aplicațiile rău intenționate pot afecta performanța sau funcționarea dispozitivului dvs. când este primită o transmisie celulară de urgență."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"citire feeduri abonat"</string>

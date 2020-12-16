@@ -117,7 +117,6 @@ import android.media.tv.tunerresourcemanager.ITunerResourceManager;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
 import android.net.ConnectivityDiagnosticsManager;
 import android.net.ConnectivityManager;
-import android.net.ConnectivityThread;
 import android.net.EthernetManager;
 import android.net.IConnectivityManager;
 import android.net.IEthernetManager;
@@ -781,8 +780,7 @@ public final class SystemServiceRegistry {
             public LowpanManager createService(ContextImpl ctx) throws ServiceNotFoundException {
                 IBinder b = ServiceManager.getServiceOrThrow(Context.LOWPAN_SERVICE);
                 ILowpanManager service = ILowpanManager.Stub.asInterface(b);
-                return new LowpanManager(ctx.getOuterContext(), service,
-                        ConnectivityThread.getInstanceLooper());
+                return new LowpanManager(ctx.getOuterContext(), service);
             }});
 
         registerService(Context.ETHERNET_SERVICE, EthernetManager.class,

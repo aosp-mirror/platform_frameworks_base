@@ -73,6 +73,7 @@ import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
+import android.graphics.RenderEffect;
 import android.graphics.RenderNode;
 import android.graphics.Shader;
 import android.graphics.drawable.ColorDrawable;
@@ -21062,6 +21063,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // invalidate() here
         invalidateParentCaches();
         invalidate(true);
+    }
+
+    /**
+     * Configure the {@link android.graphics.RenderEffect} to apply to this View.
+     * This will apply a visual effect to the results of the View before it is drawn. For example if
+     * {@link RenderEffect#createBlurEffect(float, float, RenderEffect, Shader.TileMode)}
+     * is provided, the contents will be drawn in a separate layer, then this layer will be blurred
+     * when this View is drawn.
+     * @param renderEffect to be applied to the View. Passing null clears the previously configured
+     *                     {@link RenderEffect}
+     */
+    public void setRenderEffect(@Nullable RenderEffect renderEffect) {
+        if (mRenderNode.setRenderEffect(renderEffect)) {
+            invalidateViewProperty(true, true);
+        }
     }
 
     /**
