@@ -29,11 +29,14 @@ import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.os.Binder;
 import android.util.CloseGuard;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
+import android.view.ViewTreeObserver;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
@@ -44,7 +47,7 @@ import java.util.concurrent.Executor;
  * View that can display a task.
  */
 public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
-        ShellTaskOrganizer.TaskListener {
+        ShellTaskOrganizer.TaskListener, ViewTreeObserver.OnComputeInternalInsetsListener {
 
     /** Callback for listening task state. */
     public interface Listener {
@@ -82,6 +85,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
 
     private final Rect mTmpRect = new Rect();
     private final Rect mTmpRootRect = new Rect();
+    private final int[] mTmpLocation = new int[2];
 
     public TaskView(Context context, ShellTaskOrganizer organizer) {
         super(context, null, 0, 0, true /* disableBackgroundLayer */);
@@ -334,5 +338,37 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
         // Unparent the task when this surface is destroyed
         mTransaction.reparent(mTaskLeash, null).apply();
         updateTaskVisibility();
+    }
+
+    @Override
+    public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo inoutInfo) {
+        // TODO(b/176854108): Consider to move the logic into gatherTransparentRegions since this
+        //   is dependent on the order of listener.
+        // If there are multiple TaskViews, we'll set the touchable area as the root-view, then
+        // subtract each TaskView from it.
+        if (inoutInfo.touchableRegion.isEmpty()) {
+            inoutInfo.setTouchableInsets(
+                    ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
+            View root = getRootView();
+            root.getLocationInWindow(mTmpLocation);
+            mTmpRootRect.set(mTmpLocation[0], mTmpLocation[1], root.getWidth(), root.getHeight());
+            inoutInfo.touchableRegion.set(mTmpRootRect);
+        }
+        getLocationInWindow(mTmpLocation);
+        mTmpRect.set(mTmpLocation[0], mTmpLocation[1],
+                mTmpLocation[0] + getWidth(), mTmpLocation[1] + getHeight());
+        inoutInfo.touchableRegion.op(mTmpRect, Region.Op.DIFFERENCE);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        getViewTreeObserver().addOnComputeInternalInsetsListener(this);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
     }
 }
