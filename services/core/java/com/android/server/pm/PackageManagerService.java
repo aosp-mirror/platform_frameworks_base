@@ -5417,6 +5417,14 @@ public class PackageManagerService extends IPackageManager.Stub
                             InstantAppRegistry.DEFAULT_UNINSTALLED_INSTANT_APP_MIN_CACHE_PERIOD))) {
                 return;
             }
+
+            // 11. Free storage service cache
+            StorageManagerInternal smInternal =
+                    mInjector.getLocalService(StorageManagerInternal.class);
+            // TODO(b/170481432): Decide what value of bytes needs to be sent instead of
+            // sending the bytes parameter of freeStorage
+            smInternal.freeCache(volumeUuid, bytes);
+            if (file.getUsableSpace() >= bytes) return;
         } else {
             try {
                 mInstaller.freeCache(volumeUuid, bytes, 0, 0);
