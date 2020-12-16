@@ -243,4 +243,16 @@ public abstract class DevicePolicyManagerInternal {
      * Returns whether the given package is a device owner or a profile owner in the calling user.
      */
     public abstract boolean isDeviceOrProfileOwnerInCallingUser(String packageName);
+
+    /**
+     * Returns whether this class supports being deferred the responsibility for resetting the given
+     * op.
+     */
+    public abstract boolean supportsResetOp(int op);
+
+    /**
+     * Resets the given op across the profile group of the given user for the given package. Assumes
+     * {@link #supportsResetOp(int)} is true.
+     */
+    public abstract void resetOp(int op, String packageName, @UserIdInt int userId);
 }
