@@ -76,10 +76,10 @@ public final class JobServiceContext implements ServiceConnection {
     /** Amount of time a job is allowed to execute for before being considered timed-out. */
     public static final long DEFAULT_EXECUTING_TIMESLICE_MILLIS = 10 * 60 * 1000;  // 10mins.
     /**
-     * Amount of time a RESTRICTED HPJ is allowed to execute for before being considered
+     * Amount of time a RESTRICTED expedited job is allowed to execute for before being considered
      * timed-out.
      */
-    public static final long DEFAULT_RESTRICTED_HPJ_EXECUTING_TIMESLICE_MILLIS =
+    public static final long DEFAULT_RESTRICTED_EXPEDITED_JOB_EXECUTING_TIMESLICE_MILLIS =
             DEFAULT_EXECUTING_TIMESLICE_MILLIS / 2;
     /** Amount of time the JobScheduler waits for the initial service launch+bind. */
     private static final long OP_BIND_TIMEOUT_MILLIS = 18 * 1000;
@@ -231,7 +231,7 @@ public final class JobServiceContext implements ServiceConnection {
             final JobInfo ji = job.getJob();
             mParams = new JobParameters(mRunningCallback, job.getJobId(), ji.getExtras(),
                     ji.getTransientExtras(), ji.getClipData(), ji.getClipGrantFlags(),
-                    isDeadlineExpired, job.shouldTreatAsForegroundJob(),
+                    isDeadlineExpired, job.shouldTreatAsExpeditedJob(),
                     triggeredUris, triggeredAuthorities, job.network);
             mExecutionStartTimeElapsed = sElapsedRealtimeClock.millis();
 
@@ -259,7 +259,7 @@ public final class JobServiceContext implements ServiceConnection {
             boolean binding = false;
             try {
                 final int bindFlags;
-                if (job.shouldTreatAsForegroundJob()) {
+                if (job.shouldTreatAsExpeditedJob()) {
                     // Add BIND_FOREGROUND_SERVICE to make it BFGS. Without it, it'll be
                     // PROCESS_STATE_IMPORTANT_FOREGROUND. Unclear which is better here.
                     // TODO(171305774): The job should run on the little cores. We'll probably need
@@ -865,9 +865,9 @@ public final class JobServiceContext implements ServiceConnection {
         final long timeoutMillis;
         switch (mVerb) {
             case VERB_EXECUTING:
-                timeoutMillis = mRunningJob.shouldTreatAsForegroundJob()
+                timeoutMillis = mRunningJob.shouldTreatAsExpeditedJob()
                         && mRunningJob.getStandbyBucket() == RESTRICTED_INDEX
-                        ? DEFAULT_RESTRICTED_HPJ_EXECUTING_TIMESLICE_MILLIS
+                        ? DEFAULT_RESTRICTED_EXPEDITED_JOB_EXECUTING_TIMESLICE_MILLIS
                         : DEFAULT_EXECUTING_TIMESLICE_MILLIS;
                 break;
 

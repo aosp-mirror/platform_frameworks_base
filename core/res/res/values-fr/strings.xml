@@ -356,6 +356,10 @@
     <string name="permdesc_receiveMms" msgid="958102423732219710">"Permet à l\'application de recevoir et de traiter les MMS. Cette autorisation lui donne la possibilité de surveiller ou supprimer les messages envoyés à votre appareil sans vous les montrer."</string>
     <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"Transférer les messages reçus via un canal de diffusion cellulaire"</string>
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Autorise l\'application à établir une connexion avec le module de diffusion cellulaire afin de transférer les messages reçus via un canal de diffusion cellulaire. Des alertes de diffusion cellulaire sont générées dans certaines régions afin de vous avertir de situations d\'urgence. Des applications malveillantes peuvent interférer avec les performances ou le fonctionnement de votre appareil lors de la réception d\'une alerte d\'urgence par diffusion cellulaire."</string>
+    <!-- no translation found for permlab_manageOngoingCalls (281244770664231782) -->
+    <skip />
+    <!-- no translation found for permdesc_manageOngoingCalls (7003138133829915265) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"lire les messages reçus via un canal de diffusion cellulaire"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Permet à l\'application de lire les messages que votre appareil reçoit via un canal de diffusion cellulaire. Dans certaines zones géographiques, des alertes vous sont envoyées afin de vous prévenir en cas de situation d\'urgence. Les applications malveillantes peuvent venir perturber les performances ou le fonctionnement de votre appareil lorsqu\'un message est reçu via un canal de diffusion cellulaire."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"lire les flux auxquels vous êtes abonné"</string>

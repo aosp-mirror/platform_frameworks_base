@@ -52,6 +52,8 @@ import javax.inject.Named;
  */
 @QSScope
 public class QSPanelController extends QSPanelControllerBase<QSPanel> {
+    public static final String QS_REMOVE_LABELS = "sysui_remove_labels";
+
     private final QSSecurityFooter mQsSecurityFooter;
     private final TunerService mTunerService;
     private final QSCustomizerController mQsCustomizerController;
@@ -120,6 +122,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         updateMediaDisappearParameters();
 
         mTunerService.addTunable(mView, QS_SHOW_BRIGHTNESS);
+        mTunerService.addTunable(mTunable, QS_REMOVE_LABELS);
         mView.updateResources();
         if (mView.isListening()) {
             refreshAllTiles();
@@ -133,6 +136,13 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     }
 
     @Override
+    boolean switchTileLayout(boolean force) {
+        boolean result = super.switchTileLayout(force);
+        getTileLayout().setShowLabels(mShowLabels);
+        return result;
+    }
+
+    @Override
     protected QSTileRevealController createTileRevealController() {
         return mQsTileRevealControllerFactory.create(
                 this, (PagedTileLayout) mView.createRegularTileLayout());
@@ -140,6 +150,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
 
     @Override
     protected void onViewDetached() {
+        mTunerService.removeTunable(mTunable);
         mTunerService.removeTunable(mView);
         mView.removeOnConfigurationChangedListener(mOnConfigurationChangedListener);
         if (mBrightnessMirrorController != null) {
@@ -305,5 +316,21 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     public boolean isExpanded() {
         return mView.isExpanded();
     }
+
+    private TunerService.Tunable mTunable = new TunerService.Tunable() {
+        @Override
+        public void onTuningChanged(String key, String newValue) {
+            if (QS_REMOVE_LABELS.equals(key)) {
+                boolean newShowLabels = "0".equals(newValue);
+                if (mShowLabels == newShowLabels) return;
+                mShowLabels = newShowLabels;
+                for (TileRecord t : mRecords) {
+                    t.tileView.setShowLabels(mShowLabels);
+                }
+                getTileLayout().setShowLabels(mShowLabels);
+                mView.requestLayout();
+            }
+        }
+    };
 }
 

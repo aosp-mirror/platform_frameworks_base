@@ -19,6 +19,8 @@ package com.android.systemui.people.widget;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 
+import static com.android.systemui.people.PeopleSpaceUtils.OPTIONS_PEOPLE_SPACE_TILE;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -30,15 +32,24 @@ import static org.mockito.Mockito.when;
 import static java.util.Objects.requireNonNull;
 
 import android.app.INotificationManager;
+import android.app.Notification;
 import android.app.NotificationChannel;
+import android.app.Person;
+import android.app.people.PeopleSpaceTile;
 import android.appwidget.AppWidgetManager;
+import android.content.ContentResolver;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
+import android.graphics.drawable.Icon;
+import android.net.Uri;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.ConversationChannelWrapper;
+import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.widget.RemoteViews;
 
@@ -46,9 +57,11 @@ import androidx.preference.PreferenceManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.appwidget.IAppWidgetService;
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
+import com.android.systemui.statusbar.SbnBuilder;
 import com.android.systemui.statusbar.notification.collection.NoManSimulator;
 import com.android.systemui.statusbar.notification.collection.NoManSimulator.NotifEvent;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -79,6 +92,9 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     private static final int WIDGET_ID_WITH_SHORTCUT = 1;
     private static final int WIDGET_ID_WITHOUT_SHORTCUT = 2;
     private static final String SHORTCUT_ID = "101";
+    private static final String OTHER_SHORTCUT_ID = "102";
+    private static final String NOTIFICATION_KEY = "notification_key";
+    private static final String NOTIFICATION_CONTENT = "notification_content";
 
     private PeopleSpaceWidgetManager mManager;
 
@@ -93,6 +109,26 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
 
     @Captor
     private ArgumentCaptor<NotificationHandler> mListenerCaptor;
+
+    private static Icon sIcon = Icon.createWithResource("package", R.drawable.ic_android);
+    private static Uri sUri = new Uri.Builder()
+            .scheme(ContentResolver.SCHEME_CONTENT)
+            .authority("something")
+            .path("test")
+            .build();
+    private static Person sPerson = new Person.Builder()
+            .setName("name")
+            .setKey("abc")
+            .setUri("uri")
+            .setBot(false)
+            .build();
+    private static PeopleSpaceTile sPeopleSpaceTile =
+            new PeopleSpaceTile
+                    .Builder(SHORTCUT_ID, "username", sIcon, new Intent())
+                    .setNotificationKey(NOTIFICATION_KEY)
+                    .setNotificationContent(NOTIFICATION_CONTENT)
+                    .setNotificationDataUri(sUri)
+                    .build();
 
     private final NoManSimulator mNoMan = new NoManSimulator();
     private final FakeSystemClock mClock = new FakeSystemClock();
@@ -110,6 +146,18 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         mNoMan.addListener(serviceListener);
         Settings.Global.putInt(mContext.getContentResolver(),
                 Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 2);
+
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putString(String.valueOf(WIDGET_ID_WITH_SHORTCUT), SHORTCUT_ID);
+        editor.commit();
+        Bundle options = new Bundle();
+        options.putParcelable(OPTIONS_PEOPLE_SPACE_TILE, sPeopleSpaceTile);
+
+        when(mAppWidgetManager.getAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT)))
+                .thenReturn(options);
+        when(mAppWidgetManager.getAppWidgetOptions(eq(WIDGET_ID_WITHOUT_SHORTCUT)))
+                .thenReturn(new Bundle());
     }
 
     @Test
@@ -123,7 +171,6 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                         .setPkg(TEST_PACKAGE_A));
         mClock.advanceTime(MIN_LINGER_DURATION);
 
-        verify(mIAppWidgetService, times(1)).getAppWidgetIds(any());
         verify(mIAppWidgetService, never()).notifyAppWidgetViewDataChanged(any(), any(), anyInt());
     }
 
@@ -140,7 +187,6 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                         .setPkg(TEST_PACKAGE_A));
         mClock.advanceTime(MIN_LINGER_DURATION);
 
-        verify(mIAppWidgetService, times(1)).getAppWidgetIds(any());
         verify(mAppWidgetManager, never()).updateAppWidget(anyInt(), any(RemoteViews.class));
         verify(mIAppWidgetService, never()).notifyAppWidgetViewDataChanged(any(), any(), anyInt());
     }
@@ -156,7 +202,6 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                         .setPkg(TEST_PACKAGE_A));
         mClock.advanceTime(MIN_LINGER_DURATION);
 
-        verify(mIAppWidgetService, times(1)).getAppWidgetIds(any());
         verify(mIAppWidgetService, times(1))
                 .notifyAppWidgetViewDataChanged(any(), eq(widgetIdsArray), anyInt());
         verify(mIAppWidgetService, never()).updateAppWidgetIds(any(), any(),
@@ -171,17 +216,12 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         when(mINotificationManager.getConversations(true)).thenReturn(
                 new ParceledListSlice(getConversationWithShortcutId()));
         int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT};
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
-        SharedPreferences.Editor editor = sp.edit();
-        editor.putString(String.valueOf(WIDGET_ID_WITH_SHORTCUT), SHORTCUT_ID);
-        editor.commit();
         when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
 
         NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
                 .setPkg(TEST_PACKAGE_A)
                 .setId(1));
 
-        verify(mIAppWidgetService, times(1)).getAppWidgetIds(any());
         verify(mIAppWidgetService, never())
                 .notifyAppWidgetViewDataChanged(any(), eq(widgetIdsArray), anyInt());
         verify(mAppWidgetManager, times(1)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
@@ -198,10 +238,6 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         when(mINotificationManager.getConversations(true)).thenReturn(
                 new ParceledListSlice(getConversationWithShortcutId()));
         int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT};
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
-        SharedPreferences.Editor editor = sp.edit();
-        editor.putString(String.valueOf(WIDGET_ID_WITH_SHORTCUT), SHORTCUT_ID);
-        editor.commit();
         when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
 
         NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
@@ -212,7 +248,6 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 .setPkg(TEST_PACKAGE_B)
                 .setId(2));
 
-        verify(mIAppWidgetService, times(2)).getAppWidgetIds(any());
         verify(mIAppWidgetService, never())
                 .notifyAppWidgetViewDataChanged(any(), eq(widgetIdsArray), anyInt());
         verify(mAppWidgetManager, times(2)).updateAppWidget(eq(WIDGET_ID_WITH_SHORTCUT),
@@ -234,7 +269,6 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 .setPkg(TEST_PACKAGE_B)
                 .setId(2));
 
-        verify(mIAppWidgetService, times(2)).getAppWidgetIds(any());
         verify(mIAppWidgetService, times(2))
                 .notifyAppWidgetViewDataChanged(any(), eq(widgetIdsArray), anyInt());
         verify(mAppWidgetManager, never()).updateAppWidget(anyInt(),
@@ -252,7 +286,6 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         mClock.advanceTime(4);
         NotifEvent notif1b = mNoMan.retractNotif(notif1.sbn, 0);
 
-        verify(mIAppWidgetService, times(2)).getAppWidgetIds(any());
         verify(mIAppWidgetService, times(2))
                 .notifyAppWidgetViewDataChanged(any(), eq(widgetIdsArray), anyInt());
         verify(mAppWidgetManager, never()).updateAppWidget(anyInt(),
@@ -290,11 +323,122 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 UserHandle.getUserHandleForUid(0), channel, IMPORTANCE_HIGH);
         mClock.advanceTime(MIN_LINGER_DURATION);
 
-        verify(mIAppWidgetService, times(1)).getAppWidgetIds(any());
         verify(mIAppWidgetService, times(1))
                 .notifyAppWidgetViewDataChanged(any(), eq(widgetIdsArray), anyInt());
         verify(mAppWidgetManager, never()).updateAppWidget(anyInt(),
                 any(RemoteViews.class));
+    }
+
+    @Test
+    public void testDoNotUpdateNotificationPostedIfNoExistingTile() throws RemoteException {
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0);
+        when(mINotificationManager.getConversations(true)).thenReturn(
+                new ParceledListSlice(getConversationWithShortcutId()));
+        int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT};
+        when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
+
+        StatusBarNotification sbn = createConversationNotification(OTHER_SHORTCUT_ID);
+        NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
+                .setSbn(sbn)
+                .setPkg(TEST_PACKAGE_A)
+                .setId(1));
+        mClock.advanceTime(MIN_LINGER_DURATION);
+
+        verify(mAppWidgetManager, never())
+                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT), any());
+    }
+
+    @Test
+    public void testDoNotUpdateNotificationRemovedIfNoExistingTile() throws RemoteException {
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0);
+        when(mINotificationManager.getConversations(true)).thenReturn(
+                new ParceledListSlice(getConversationWithShortcutId()));
+        int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT};
+        when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
+
+        StatusBarNotification sbn = createConversationNotification(OTHER_SHORTCUT_ID);
+        NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
+                .setSbn(sbn)
+                .setPkg(TEST_PACKAGE_A)
+                .setId(1));
+        mClock.advanceTime(4);
+        NotifEvent notif1b = mNoMan.retractNotif(notif1.sbn, 0);
+        mClock.advanceTime(MIN_LINGER_DURATION);
+
+        verify(mAppWidgetManager, never())
+                .updateAppWidgetOptions(anyInt(), any());
+    }
+
+    @Test
+    public void testUpdateNotificationPostedIfExistingTile() throws RemoteException {
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0);
+        when(mINotificationManager.getConversations(true)).thenReturn(
+                new ParceledListSlice(getConversationWithShortcutId()));
+        int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT};
+        when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
+
+        StatusBarNotification sbn = createConversationNotification(SHORTCUT_ID);
+        NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
+                .setSbn(sbn)
+                .setPkg(TEST_PACKAGE_A)
+                .setId(1));
+        mClock.advanceTime(MIN_LINGER_DURATION);
+
+        verify(mAppWidgetManager, times(1))
+                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT), any());
+    }
+
+    @Test
+    public void testDoNotUpdateNotificationPostedWithoutMessagesIfExistingTile()
+            throws RemoteException {
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0);
+        when(mINotificationManager.getConversations(true)).thenReturn(
+                new ParceledListSlice(getConversationWithShortcutId()));
+        int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT};
+        when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
+
+        Notification notification = new Notification.Builder(mContext)
+                .setContentTitle("TEST_TITLE")
+                .setContentText("TEST_TEXT")
+                .setShortcutId(SHORTCUT_ID)
+                .build();
+        StatusBarNotification sbn = new SbnBuilder()
+                .setNotification(notification)
+                .build();
+        NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
+                .setSbn(sbn)
+                .setPkg(TEST_PACKAGE_A)
+                .setId(1));
+        mClock.advanceTime(MIN_LINGER_DURATION);
+
+        verify(mAppWidgetManager, never())
+                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT), any());
+    }
+
+    @Test
+    public void testUpdateNotificationRemovedIfExistingTile() throws RemoteException {
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0);
+        when(mINotificationManager.getConversations(true)).thenReturn(
+                new ParceledListSlice(getConversationWithShortcutId()));
+        int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT};
+        when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
+
+        StatusBarNotification sbn = createConversationNotification(SHORTCUT_ID);
+        NotifEvent notif1 = mNoMan.postNotif(new NotificationEntryBuilder()
+                .setSbn(sbn)
+                .setPkg(TEST_PACKAGE_A)
+                .setId(1));
+        mClock.advanceTime(MIN_LINGER_DURATION);
+        NotifEvent notif1b = mNoMan.retractNotif(notif1.sbn, 0);
+        mClock.advanceTime(MIN_LINGER_DURATION);
+
+        verify(mAppWidgetManager, times(2))
+                .updateAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT), any());
     }
 
     /** Returns a list of a single conversation associated with {@code SHORTCUT_ID}. */
@@ -305,5 +449,19 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 "name").build());
         convos.add(convo1);
         return convos;
+    }
+
+    private StatusBarNotification createConversationNotification(String shortcutId) {
+        Notification notification = new Notification.Builder(mContext)
+                .setContentTitle("TEST_TITLE")
+                .setContentText("TEST_TEXT")
+                .setShortcutId(shortcutId)
+                .setStyle(new Notification.MessagingStyle(sPerson)
+                        .addMessage(new Notification.MessagingStyle.Message("text3", 10, sPerson))
+                )
+                .build();
+        return new SbnBuilder()
+                .setNotification(notification)
+                .build();
     }
 }

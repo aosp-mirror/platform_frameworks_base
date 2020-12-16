@@ -46,8 +46,8 @@ import com.android.wm.shell.pip.phone.PhonePipMenuController;
 import com.android.wm.shell.pip.phone.PipAppOpsListener;
 import com.android.wm.shell.pip.phone.PipController;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
-import com.android.wm.shell.splitscreen.SplitScreen;
-import com.android.wm.shell.splitscreen.SplitScreenController;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -72,12 +72,12 @@ public class WMShellModule {
 
     @WMSingleton
     @Provides
-    static SplitScreen provideSplitScreen(Context context,
+    static LegacySplitScreen provideLegacySplitScreen(Context context,
             DisplayController displayController, SystemWindows systemWindows,
             DisplayImeController displayImeController, @Main Handler handler,
             TransactionPool transactionPool, ShellTaskOrganizer shellTaskOrganizer,
             SyncTransactionQueue syncQueue, TaskStackListenerImpl taskStackListener) {
-        return new SplitScreenController(context, displayController, systemWindows,
+        return new LegacySplitScreenController(context, displayController, systemWindows,
                 displayImeController, handler, transactionPool, shellTaskOrganizer, syncQueue,
                 taskStackListener);
     }
@@ -145,7 +145,7 @@ public class WMShellModule {
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PhonePipMenuController menuPhoneController,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
-            Optional<SplitScreen> splitScreenOptional, DisplayController displayController,
+            Optional<LegacySplitScreen> splitScreenOptional, DisplayController displayController,
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer) {
         return new PipTaskOrganizer(context, pipBoundsState, pipBoundsAlgorithm,
                 menuPhoneController, pipSurfaceTransactionHelper, splitScreenOptional,

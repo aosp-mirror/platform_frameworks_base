@@ -1672,12 +1672,13 @@ public final class ActiveServices {
     // TODO: remove as part of fixing b/173627642
     @SuppressWarnings("AndroidFrameworkCompatChange")
     private void postFgsNotificationLocked(ServiceRecord r) {
+        final boolean isLegacyApp = (r.appInfo.targetSdkVersion < Build.VERSION_CODES.S);
         boolean showNow = !mAm.mConstants.mFlagFgsNotificationDeferralEnabled;
         if (!showNow) {
             // Legacy apps' FGS notifications are not deferred unless the relevant
             // DeviceConfig element has been set
             showNow = mAm.mConstants.mFlagFgsNotificationDeferralApiGated
-                    && r.appInfo.targetSdkVersion < Build.VERSION_CODES.S;
+                    && isLegacyApp;
         }
         if (!showNow) {
             // is the notification such that it should show right away?
@@ -1731,6 +1732,11 @@ public final class ActiveServices {
         if (DEBUG_FOREGROUND_SERVICE) {
             Slog.d(TAG_SERVICE, "FGS " + r
                     + " notification in " + (when - now) + " ms");
+        }
+        if (isLegacyApp) {
+            Slog.i(TAG_SERVICE, "Deferring FGS notification in legacy app "
+                    + r.appInfo.packageName + "/" + UserHandle.formatUid(r.appInfo.uid)
+                    + " : " + r.foregroundNoti);
         }
         mAm.mHandler.postAtTime(mPostDeferredFGSNotifications, when);
     }

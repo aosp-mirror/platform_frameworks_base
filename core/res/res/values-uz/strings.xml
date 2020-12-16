@@ -353,6 +353,8 @@
     <string name="permdesc_receiveMms" msgid="958102423732219710">"Ilovaga MMS xabarlarini qabul qilish va ularni qayta ishlash uchun ruxsat beradi. Bu sizga yuborilgan xabarlarni ilova sizga ko‘rsatmasdan kuzatishi va o‘chirishi mumkinligini bildiradi."</string>
     <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"Aholini ogohlantirish xabarlarini uzatish"</string>
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Qabul qilingan aholini ogohlantirish xabarlarini shu holicha uzatish uchun ilovani aholini ogohlantirish moduliga bogʻlash imkonini beradi. Ilovaga ayrim mamlakatlarda aholini favqulodda vaziyatlarda ogohlantirish uchun yuboriladigan tarqatma xabarlarni oʻqish uchun ruxsat beradi. Zararli dasturlar bunday xabarlar kelayotgan qurilmaning ishlashiga xalaqit qilishi mumkin."</string>
+    <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Amaldagi chaqiruvlarni boshqarish"</string>
+    <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Ilovaga qurilmangizdagi amaldagi chaqiruv tafsilotlarini koʻrish va uni boshqarish huquqini beradi."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"uyali tarmoq operatori xabarlarini o‘qish"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Ilovaga qurilmangiz tomonidan qabul qilingan uyali tarmoq operatori xabarlarini o‘qish uchun ruxsat beradi. Uyali tarmoq operatorining ogohlantiruvchi xabarlari ba’zi manzillarga favqulodda holatlar haqida ogohlantirish uchun jo‘natiladi. Zararli ilovalar uyali tarmoq orqali favqulodda xabar qabul qilinganda qurilmangizning ish faoliyati yoki amallariga xalaqit qilishi mumkin"</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"obunalarni o‘qish"</string>
@@ -1773,7 +1775,7 @@
     <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"Yangi PIN kodni tasdiqlash"</string>
     <string name="restr_pin_create_pin" msgid="917067613896366033">"Cheklovlarni o‘zgartirish uchun PIN-kod yaratish"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN-kod mos kelmadi. Qayta urinib ko‘ring."</string>
-    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN kod kamida 4 ta raqamdan iborat bo‘lishi shart."</string>
+    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN kod juda qisqa, kamida 4 ta raqam kiriting."</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> soniyadan so‘ng qayta urinib ko‘ring</item>
       <item quantity="one">1 soniyadan so‘ng qayta urinib ko‘ring</item>

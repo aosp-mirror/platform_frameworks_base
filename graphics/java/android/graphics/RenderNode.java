@@ -858,9 +858,10 @@ public final class RenderNode {
      * be blurred when this RenderNode is drawn into the destination.
      * @param renderEffect to be applied to the RenderNode. Passing null clears all previously
      *          configured RenderEffects
+     * @return True if the value changed, false if the new value was the same as the previous value.
      */
-    public void setRenderEffect(@Nullable RenderEffect renderEffect) {
-        nSetRenderEffect(mNativeRenderNode,
+    public boolean setRenderEffect(@Nullable RenderEffect renderEffect) {
+        return nSetRenderEffect(mNativeRenderNode,
                 renderEffect != null ? renderEffect.getNativeInstance() : 0);
     }
 
@@ -1670,7 +1671,7 @@ public final class RenderNode {
     private static native boolean nSetAlpha(long renderNode, float alpha);
 
     @CriticalNative
-    private static native void nSetRenderEffect(long renderNode, long renderEffect);
+    private static native boolean nSetRenderEffect(long renderNode, long renderEffect);
 
     @CriticalNative
     private static native boolean nSetHasOverlappingRendering(long renderNode,

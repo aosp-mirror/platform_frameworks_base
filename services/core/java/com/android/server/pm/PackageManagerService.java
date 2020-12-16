@@ -260,7 +260,6 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Debug;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -5529,8 +5528,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // to the same user is not sufficient
             enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false,
                     !isRecentsAccessingChildProfiles(Binder.getCallingUid(), userId),
-                    "MATCH_ANY_USER flag requires INTERACT_ACROSS_USERS permission at "
-                    + Debug.getCallers(5));
+                    "MATCH_ANY_USER flag requires INTERACT_ACROSS_USERS permission");
         } else if ((flags & PackageManager.MATCH_UNINSTALLED_PACKAGES) != 0 && isCallerSystemUser
                 && mUserManager.hasManagedProfile(UserHandle.USER_SYSTEM)) {
             // If the caller wants all packages and has a restricted profile associated with it,
@@ -17692,12 +17690,12 @@ public class PackageManagerService extends IPackageManager.Stub
             final SparseArray<int[]> newBroadcastAllowList;
             final String codePath;
             synchronized (mLock) {
-                final PackageSetting ps = mSettings.mPackages.get(mPackageName);
+                final PackageSetting ps = mSettings.getPackageLPr(mPackageName);
                 if (ps == null) {
                     return;
                 }
                 newBroadcastAllowList = mAppsFilter.getVisibilityAllowList(
-                        ps, mInstalledUserIds, mSettings.mPackages);
+                        ps, mInstalledUserIds, mSettings.getPackagesLocked());
                 codePath = ps.getPathString();
             }
             Bundle extras = new Bundle();
@@ -17715,12 +17713,12 @@ public class PackageManagerService extends IPackageManager.Stub
         public void onPackageUnstartable(int reason) {
             final SparseArray<int[]> newBroadcastAllowList;
             synchronized (mLock) {
-                final PackageSetting ps = mSettings.mPackages.get(mPackageName);
+                final PackageSetting ps = mSettings.getPackageLPr(mPackageName);
                 if (ps == null) {
                     return;
                 }
                 newBroadcastAllowList = mAppsFilter.getVisibilityAllowList(
-                        ps, mInstalledUserIds, mSettings.mPackages);
+                        ps, mInstalledUserIds, mSettings.getPackagesLocked());
             }
             Bundle extras = new Bundle();
             extras.putInt(Intent.EXTRA_UID, mUid);
@@ -17737,12 +17735,12 @@ public class PackageManagerService extends IPackageManager.Stub
         public void onPackageStartable() {
             final SparseArray<int[]> newBroadcastAllowList;
             synchronized (mLock) {
-                final PackageSetting ps = mSettings.mPackages.get(mPackageName);
+                final PackageSetting ps = mSettings.getPackageLPr(mPackageName);
                 if (ps == null) {
                     return;
                 }
                 newBroadcastAllowList = mAppsFilter.getVisibilityAllowList(
-                        ps, mInstalledUserIds, mSettings.mPackages);
+                        ps, mInstalledUserIds, mSettings.getPackagesLocked());
             }
             Bundle extras = new Bundle();
             extras.putInt(Intent.EXTRA_UID, mUid);
@@ -17768,7 +17766,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public void onPackageLoadingProgressChanged(float progress) {
             final PackageSetting ps;
             synchronized (mLock) {
-                ps = mSettings.mPackages.get(mPackageName);
+                ps = mSettings.getPackageLPr(mPackageName);
             }
             if (ps == null) {
                 return;
@@ -17791,7 +17789,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public void onHealthStatus(int storageId, int status) throws RemoteException {
             final PackageSetting ps;
             synchronized (mLock) {
-                ps = mSettings.mPackages.get(mPackageName);
+                ps = mSettings.getPackageLPr(mPackageName);
             }
             if (ps == null) {
                 return;
@@ -17804,7 +17802,7 @@ public class PackageManagerService extends IPackageManager.Stub
             int userId) {
         final PackageSetting ps;
         synchronized (mLock) {
-            ps = mSettings.mPackages.get(packageName);
+            ps = mSettings.getPackageLPr(packageName);
             if (ps == null) {
                 Slog.w(TAG, "Failed to get package setting. Package " + packageName
                         + " is not installed");
@@ -20730,6 +20728,11 @@ public class PackageManagerService extends IPackageManager.Stub
     @GuardedBy("mLock")
     void clearIntentFilterVerificationsLPw(String packageName, int userId,
             boolean alsoResetStatus) {
+        if (SystemConfig.getInstance().getLinkedApps().contains(packageName)) {
+            // Nope, need to preserve the system configuration approval for this app
+            return;
+        }
+
         if (userId == UserHandle.USER_ALL) {
             if (mSettings.removeIntentFilterVerificationLPw(packageName,
                     mUserManager.getUserIds())) {
@@ -24612,7 +24615,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // which was uninstalled while keeping its data.
             AndroidPackage dataOwnerPkg = mPackages.get(packageName);
             if (dataOwnerPkg  == null) {
-                PackageSetting ps = mSettings.mPackages.get(packageName);
+                PackageSetting ps = mSettings.getPackageLPr(packageName);
                 if (ps != null) {
                     dataOwnerPkg = ps.pkg;
                 }
@@ -26059,7 +26062,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public void notifyPackageCrashOrAnr(@NonNull String packageName) {
             final PackageSetting ps;
             synchronized (mLock) {
-                ps = mSettings.mPackages.get(packageName);
+                ps = mSettings.getPackageLPr(packageName);
                 if (ps == null) {
                     Slog.w(TAG, "Failed notifyPackageCrash. Package " + packageName
                             + " is not installed");

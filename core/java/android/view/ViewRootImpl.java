@@ -200,7 +200,6 @@ import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.RootViewSurfaceTaker;
 import com.android.internal.view.SurfaceCallbackHelper;
 
-import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -7687,12 +7686,18 @@ public final class ViewRootImpl implements ViewParent,
         mImeFocusController.dumpDebug(proto, IME_FOCUS_CONTROLLER);
     }
 
-    public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+    /**
+     * Dump information about this ViewRootImpl
+     * @param prefix the prefix that will be prepended to each line of the produced output
+     * @param writer the writer that will receive the resulting text
+     */
+    public void dump(String prefix, PrintWriter writer) {
         String innerPrefix = prefix + "  ";
         writer.println(prefix + "ViewRoot:");
         writer.println(innerPrefix + "mAdded=" + mAdded);
         writer.println(innerPrefix + "mRemoved=" + mRemoved);
         writer.println(innerPrefix + "mStopped=" + mStopped);
+        writer.println(innerPrefix + "mPausedForTransition=" + mPausedForTransition);
         writer.println(innerPrefix + "mConsumeBatchedInputScheduled="
                 + mConsumeBatchedInputScheduled);
         writer.println(innerPrefix + "mConsumeBatchedInputImmediatelyScheduled="
@@ -7707,6 +7712,12 @@ public final class ViewRootImpl implements ViewParent,
         writer.println(innerPrefix + "mIsAmbientMode="  + mIsAmbientMode);
         writer.println(innerPrefix + "mUnbufferedInputSource="
                 + Integer.toHexString(mUnbufferedInputSource));
+        if (mAttachInfo != null) {
+            writer.print(innerPrefix + "mAttachInfo= ");
+            mAttachInfo.dump(innerPrefix, writer);
+        } else {
+            writer.println(innerPrefix + "mAttachInfo=<null>");
+        }
 
         mFirstInputStage.dump(innerPrefix, writer);
 

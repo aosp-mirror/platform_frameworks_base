@@ -46,7 +46,7 @@ public final class RemoveByUriRequest {
         return mNamespace;
     }
 
-    /** Returns the URIs to remove from the namespace. */
+    /** Returns the URIs of documents to remove from the namespace. */
     @NonNull
     public Set<String> getUris() {
         return Collections.unmodifiableSet(mUris);

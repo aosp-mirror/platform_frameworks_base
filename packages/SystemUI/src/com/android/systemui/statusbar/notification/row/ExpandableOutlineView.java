@@ -54,7 +54,8 @@ public abstract class ExpandableOutlineView extends ExpandableView {
             R.id.bottom_roundess_animator_end_tag,
             R.id.bottom_roundess_animator_start_tag);
     private static final AnimationProperties ROUNDNESS_PROPERTIES =
-            new AnimationProperties().setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+            new AnimationProperties().setDuration(
+                    StackStateAnimator.ANIMATION_DURATION_CORNER_RADIUS);
     private static final Path EMPTY_PATH = new Path();
 
     private final Rect mOutlineRect = new Rect();

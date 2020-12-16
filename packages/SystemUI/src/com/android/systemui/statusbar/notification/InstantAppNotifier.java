@@ -59,7 +59,7 @@ import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.NotificationChannels;
-import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import java.util.List;
 import java.util.Optional;
@@ -82,11 +82,11 @@ public class InstantAppNotifier extends SystemUI
     private final CommandQueue mCommandQueue;
     private boolean mDockedStackExists;
     private KeyguardStateController mKeyguardStateController;
-    private final Optional<SplitScreen> mSplitScreenOptional;
+    private final Optional<LegacySplitScreen> mSplitScreenOptional;
 
     @Inject
     public InstantAppNotifier(Context context, CommandQueue commandQueue,
-            @UiBackground Executor uiBgExecutor, Optional<SplitScreen> splitScreenOptional) {
+            @UiBackground Executor uiBgExecutor, Optional<LegacySplitScreen> splitScreenOptional) {
         super(context);
         mSplitScreenOptional = splitScreenOptional;
         mCommandQueue = commandQueue;

@@ -234,7 +234,7 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubbles;
-import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -394,7 +394,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
     private final Provider<StatusBarComponent.Builder> mStatusBarComponentBuilder;
     private final PluginManager mPluginManager;
-    private final Optional<SplitScreen> mSplitScreenOptional;
+    private final Optional<LegacySplitScreen> mSplitScreenOptional;
     private final StatusBarNotificationActivityStarter.Builder
             mStatusBarNotificationActivityStarterBuilder;
     private final ShadeController mShadeController;
@@ -738,7 +738,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             CommandQueue commandQueue,
             Provider<StatusBarComponent.Builder> statusBarComponentBuilder,
             PluginManager pluginManager,
-            Optional<SplitScreen> splitScreenOptional,
+            Optional<LegacySplitScreen> splitScreenOptional,
             LightsOutNotifController lightsOutNotifController,
             StatusBarNotificationActivityStarter.Builder
                     statusBarNotificationActivityStarterBuilder,
@@ -1568,14 +1568,14 @@ public class StatusBar extends SystemUI implements DemoMode,
             return false;
         }
 
-        final SplitScreen splitScreen = mSplitScreenOptional.get();
-        if (splitScreen.isDividerVisible()) {
-            if (splitScreen.isMinimized() && !splitScreen.isHomeStackResizable()) {
+        final LegacySplitScreen legacySplitScreen = mSplitScreenOptional.get();
+        if (legacySplitScreen.isDividerVisible()) {
+            if (legacySplitScreen.isMinimized() && !legacySplitScreen.isHomeStackResizable()) {
                 // Undocking from the minimized state is not supported
                 return false;
             }
 
-            splitScreen.onUndockingTask();
+            legacySplitScreen.onUndockingTask();
             if (metricsUndockAction != -1) {
                 mMetricsLogger.action(metricsUndockAction);
             }
@@ -1587,7 +1587,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             return false;
         }
 
-        if (splitScreen.splitPrimaryTask()) {
+        if (legacySplitScreen.splitPrimaryTask()) {
             if (metricsDockAction != -1) {
                 mMetricsLogger.action(metricsDockAction);
             }

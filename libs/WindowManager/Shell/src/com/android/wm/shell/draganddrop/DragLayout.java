@@ -35,7 +35,6 @@ import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsets.Type;
-import android.view.animation.Interpolator;
 
 import androidx.annotation.NonNull;
 
@@ -43,10 +42,9 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
-import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import java.util.ArrayList;
-import java.util.function.Consumer;
 
 /**
  * Coordinates the visible drop targets for the current drag.
@@ -63,7 +61,7 @@ public class DragLayout extends View {
     private boolean mIsShowing;
     private boolean mHasDropped;
 
-    public DragLayout(Context context, SplitScreen splitscreen) {
+    public DragLayout(Context context, LegacySplitScreen splitscreen) {
         super(context);
         mPolicy = new DragAndDropPolicy(context, splitscreen);
         mDisplayMargin = context.getResources().getDimensionPixelSize(

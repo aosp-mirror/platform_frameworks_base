@@ -203,7 +203,7 @@ public class HdmiDeviceInfo implements Parcelable {
     public HdmiDeviceInfo(int logicalAddress, int physicalAddress, int portId, int deviceType,
             int vendorId, String displayName, int powerStatus) {
         this(logicalAddress, physicalAddress, portId, deviceType,
-                vendorId, displayName, powerStatus, HdmiControlManager.HDMI_CEC_VERSION_1_4_b);
+                vendorId, displayName, powerStatus, HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
     }
 
     /**
@@ -221,7 +221,7 @@ public class HdmiDeviceInfo implements Parcelable {
             int vendorId, String displayName) {
         this(logicalAddress, physicalAddress, portId, deviceType,
                 vendorId, displayName, HdmiControlManager.POWER_STATUS_UNKNOWN,
-                HdmiControlManager.HDMI_CEC_VERSION_1_4_b);
+                HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
     }
 
     /**
@@ -239,7 +239,7 @@ public class HdmiDeviceInfo implements Parcelable {
         mId = idForHardware(portId);
         mLogicalAddress = -1;
         mDeviceType = DEVICE_RESERVED;
-        mHdmiCecVersion = HdmiControlManager.HDMI_CEC_VERSION_1_4_b;
+        mHdmiCecVersion = HdmiControlManager.HDMI_CEC_VERSION_1_4_B;
         mVendorId = 0;
         mDevicePowerStatus = HdmiControlManager.POWER_STATUS_UNKNOWN;
         mDisplayName = "HDMI" + portId;
@@ -265,7 +265,7 @@ public class HdmiDeviceInfo implements Parcelable {
         mId = idForMhlDevice(portId);
         mLogicalAddress = -1;
         mDeviceType = DEVICE_RESERVED;
-        mHdmiCecVersion = HdmiControlManager.HDMI_CEC_VERSION_1_4_b;
+        mHdmiCecVersion = HdmiControlManager.HDMI_CEC_VERSION_1_4_B;
         mVendorId = 0;
         mDevicePowerStatus = HdmiControlManager.POWER_STATUS_UNKNOWN;
         mDisplayName = "Mobile";
@@ -287,7 +287,7 @@ public class HdmiDeviceInfo implements Parcelable {
 
         mLogicalAddress = -1;
         mDeviceType = DEVICE_INACTIVE;
-        mHdmiCecVersion = HdmiControlManager.HDMI_CEC_VERSION_1_4_b;
+        mHdmiCecVersion = HdmiControlManager.HDMI_CEC_VERSION_1_4_B;
         mPortId = PORT_INVALID;
         mDevicePowerStatus = HdmiControlManager.POWER_STATUS_UNKNOWN;
         mDisplayName = "Inactive";

@@ -537,7 +537,9 @@ public class ShortcutService extends IShortcutService.Stub {
         synchronized (mLock) {
             // Clear the launcher cache for this user. It will be set again next time the default
             // launcher is read from RoleManager.
-            getUserShortcutsLocked(userId).setCachedLauncher(null);
+            if (isUserLoadedLocked(userId)) {
+                getUserShortcutsLocked(userId).setCachedLauncher(null);
+            }
         }
     }
 

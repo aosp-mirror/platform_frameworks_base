@@ -1038,6 +1038,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             if (mModule != null) {
                 mModule.detach();
                 mModule = null;
+                mServiceDisabled = false;
             }
         }
     }

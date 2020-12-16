@@ -59,6 +59,7 @@ import android.util.SparseArray;
 import android.util.apk.ApkSignatureVerifier;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
@@ -720,7 +721,8 @@ public class StagingManager {
      * </ul>
      * @throws PackageManagerException if session fails the check
      */
-    private void checkNonOverlappingWithStagedSessions(@NonNull PackageInstallerSession session)
+    @VisibleForTesting
+    void checkNonOverlappingWithStagedSessions(@NonNull PackageInstallerSession session)
             throws PackageManagerException {
         if (session.isMultiPackage()) {
             // We cannot say a parent session overlaps until we process its children
@@ -744,6 +746,13 @@ public class StagingManager {
                 if (stagedSession.hasParentSessionId() || !stagedSession.isCommitted()
                         || stagedSession.isStagedAndInTerminalState()
                         || stagedSession.isDestroyed()) {
+                    continue;
+                }
+
+                if (stagedSession.getCommittedMillis() > session.getCommittedMillis()) {
+                    // Ignore sessions that are committed after the provided session. When there are
+                    // overlaps between sessions, we will fail the one committed later instead of
+                    // the earlier one.
                     continue;
                 }
 
@@ -793,7 +802,8 @@ public class StagingManager {
         }
     }
 
-    private void createSession(@NonNull PackageInstallerSession sessionInfo) {
+    @VisibleForTesting
+    void createSession(@NonNull PackageInstallerSession sessionInfo) {
         synchronized (mStagedSessions) {
             mStagedSessions.append(sessionInfo.sessionId, sessionInfo);
         }

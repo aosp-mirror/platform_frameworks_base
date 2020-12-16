@@ -45,7 +45,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.pip.phone.PhonePipMenuController;
-import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -69,7 +69,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
     @Mock private PhonePipMenuController mMockPhonePipMenuController;
     @Mock private PipSurfaceTransactionHelper mMockPipSurfaceTransactionHelper;
     @Mock private PipUiEventLogger mMockPipUiEventLogger;
-    @Mock private Optional<SplitScreen> mMockOptionalSplitScreen;
+    @Mock private Optional<LegacySplitScreen> mMockOptionalSplitScreen;
     @Mock private ShellTaskOrganizer mMockShellTaskOrganizer;
     private PipBoundsState mPipBoundsState;
 

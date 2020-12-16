@@ -1097,6 +1097,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 }
             });
         }
+        FrameworkStatsLog.write_non_chained(
+                FrameworkStatsLog.MOBILE_RADIO_POWER_STATE_CHANGED, uid, null, powerState);
     }
 
     public void notePhoneOn() {
@@ -1402,6 +1404,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 }
             });
         }
+        FrameworkStatsLog.write_non_chained(
+                FrameworkStatsLog.WIFI_RADIO_POWER_STATE_CHANGED, uid, null, powerState);
     }
 
     public void noteWifiRunning(final WorkSource ws) {

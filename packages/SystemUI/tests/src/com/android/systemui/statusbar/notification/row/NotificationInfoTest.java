@@ -64,6 +64,7 @@ import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 
@@ -113,6 +114,8 @@ public class NotificationInfoTest extends SysuiTestCase {
     private OnUserInteractionCallback mOnUserInteractionCallback;
     @Mock
     private ChannelEditorDialogController mChannelEditorDialogController;
+    @Mock
+    private AssistantFeedbackController mAssistantFeedbackController;
 
     @Before
     public void setUp() throws Exception {
@@ -160,6 +163,9 @@ public class NotificationInfoTest extends SysuiTestCase {
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID, 0,
                 new Notification(), UserHandle.CURRENT, null, 0);
         mEntry = new NotificationEntryBuilder().setSbn(mSbn).build();
+        when(mAssistantFeedbackController.isFeedbackEnabled()).thenReturn(false);
+        when(mAssistantFeedbackController.getInlineDescriptionResource(any()))
+                .thenReturn(R.string.notification_channel_summary_automatic);
     }
 
     @Test
@@ -180,7 +186,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                false);
+                mAssistantFeedbackController);
         final TextView textView = mNotificationInfo.findViewById(R.id.pkg_name);
         assertTrue(textView.getText().toString().contains("App Name"));
         assertEquals(VISIBLE, mNotificationInfo.findViewById(R.id.header).getVisibility());
@@ -206,7 +212,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                false);
+                mAssistantFeedbackController);
         final ImageView iconView = mNotificationInfo.findViewById(R.id.pkg_icon);
         assertEquals(iconDrawable, iconView.getDrawable());
     }
@@ -228,7 +234,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                false);
+                mAssistantFeedbackController);
         final TextView nameView = mNotificationInfo.findViewById(R.id.delegate_name);
         assertEquals(GONE, nameView.getVisibility());
     }
@@ -259,7 +265,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                false);
+                mAssistantFeedbackController);
         final TextView nameView = mNotificationInfo.findViewById(R.id.delegate_name);
         assertEquals(VISIBLE, nameView.getVisibility());
         assertTrue(nameView.getText().toString().contains("Proxied"));
@@ -282,7 +288,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                false);
+                mAssistantFeedbackController);
         final TextView groupNameView = mNotificationInfo.findViewById(R.id.group_name);
         assertEquals(GONE, groupNameView.getVisibility());
     }
@@ -310,7 +316,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                false);
+                mAssistantFeedbackController);
         final TextView groupNameView = mNotificationInfo.findViewById(R.id.group_name);
         assertEquals(View.VISIBLE, groupNameView.getVisibility());
         assertEquals("Test Group Name", groupNameView.getText());
@@ -333,7 +339,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                false);
+                mAssistantFeedbackController);
         final TextView textView = mNotificationInfo.findViewById(R.id.channel_name);
         assertEquals(TEST_CHANNEL_NAME, textView.getText());
     }
@@ -355,7 +361,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                false);
+                mAssistantFeedbackController);
         final TextView textView = mNotificationInfo.findViewById(R.id.channel_name);
         assertEquals(GONE, textView.getVisibility());
     }
@@ -381,7 +387,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                false);
+                mAssistantFeedbackController);
         final TextView textView = mNotificationInfo.findViewById(R.id.channel_name);
         assertEquals(VISIBLE, textView.getVisibility());
     }
@@ -403,7 +409,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 true,
                 true,
-                false);
+                mAssistantFeedbackController);
         final TextView textView = mNotificationInfo.findViewById(R.id.channel_name);
         assertEquals(VISIBLE, textView.getVisibility());
     }
@@ -429,7 +435,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                false);
+                mAssistantFeedbackController);
 
         final View settingsButton = mNotificationInfo.findViewById(R.id.info);
         settingsButton.performClick();
@@ -454,7 +460,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                false);
+                mAssistantFeedbackController);
         final View settingsButton = mNotificationInfo.findViewById(R.id.info);
         assertTrue(settingsButton.getVisibility() != View.VISIBLE);
     }
@@ -479,7 +485,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 false,
                 false,
                 true,
-                false);
+                mAssistantFeedbackController);
         final View settingsButton = mNotificationInfo.findViewById(R.id.info);
         assertTrue(settingsButton.getVisibility() != View.VISIBLE);
     }
@@ -501,7 +507,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                false);
+                mAssistantFeedbackController);
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -517,7 +523,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                false);
+                mAssistantFeedbackController);
         final View settingsButton = mNotificationInfo.findViewById(R.id.info);
         assertEquals(View.VISIBLE, settingsButton.getVisibility());
     }
@@ -542,7 +548,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 true,
                 true,
-                false);
+                mAssistantFeedbackController);
 
         mNotificationInfo.findViewById(R.id.info).performClick();
         // Verify that listener was triggered.
@@ -568,7 +574,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                false);
+                mAssistantFeedbackController);
         final TextView channelNameView =
                 mNotificationInfo.findViewById(R.id.channel_name);
         assertEquals(GONE, channelNameView.getVisibility());
@@ -592,7 +598,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                false);
+                mAssistantFeedbackController);
         assertEquals(GONE, mNotificationInfo.findViewById(
                 R.id.interruptiveness_settings).getVisibility());
         assertEquals(VISIBLE, mNotificationInfo.findViewById(
@@ -616,7 +622,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 true,
                 true,
-                false);
+                mAssistantFeedbackController);
         final TextView view = mNotificationInfo.findViewById(R.id.non_configurable_text);
         assertEquals(View.VISIBLE, view.getVisibility());
         assertEquals(mContext.getString(R.string.notification_unblockable_desc),
@@ -627,6 +633,7 @@ public class NotificationInfoTest extends SysuiTestCase {
 
     @Test
     public void testBindNotification_automaticIsVisible() throws Exception {
+        when(mAssistantFeedbackController.isFeedbackEnabled()).thenReturn(true);
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -642,7 +649,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                true);
+                mAssistantFeedbackController);
         assertEquals(VISIBLE, mNotificationInfo.findViewById(R.id.automatic).getVisibility());
         assertEquals(VISIBLE, mNotificationInfo.findViewById(R.id.automatic_summary).getVisibility());
     }
@@ -664,13 +671,14 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                false);
+                mAssistantFeedbackController);
         assertEquals(GONE, mNotificationInfo.findViewById(R.id.automatic).getVisibility());
         assertEquals(GONE, mNotificationInfo.findViewById(R.id.automatic_summary).getVisibility());
     }
 
     @Test
     public void testBindNotification_automaticIsSelected() throws Exception {
+        when(mAssistantFeedbackController.isFeedbackEnabled()).thenReturn(true);
         mNotificationChannel.unlockFields(USER_LOCKED_IMPORTANCE);
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
@@ -687,7 +695,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                true);
+                mAssistantFeedbackController);
         assertTrue(mNotificationInfo.findViewById(R.id.automatic).isSelected());
     }
 
@@ -708,7 +716,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                false);
+                mAssistantFeedbackController);
         assertTrue(mNotificationInfo.findViewById(R.id.alert).isSelected());
     }
 
@@ -729,7 +737,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 false,
-                false);
+                mAssistantFeedbackController);
         assertTrue(mNotificationInfo.findViewById(R.id.silence).isSelected());
     }
 
@@ -750,7 +758,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                false);
+                mAssistantFeedbackController);
         mTestableLooper.processAllMessages();
         verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
                 anyString(), eq(TEST_UID), any());
@@ -773,7 +781,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                false);
+                mAssistantFeedbackController);
         assertEquals(1, mUiEventLogger.numLogs());
         assertEquals(NotificationControlsEvent.NOTIFICATION_CONTROLS_OPEN.getId(),
                 mUiEventLogger.eventId(0));
@@ -797,7 +805,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 false,
-                false);
+                mAssistantFeedbackController);
 
         mNotificationInfo.findViewById(R.id.alert).performClick();
         mTestableLooper.processAllMessages();
@@ -824,7 +832,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                false);
+                mAssistantFeedbackController);
 
         mNotificationInfo.findViewById(R.id.silence).performClick();
         mTestableLooper.processAllMessages();
@@ -851,7 +859,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                false);
+                mAssistantFeedbackController);
 
         mNotificationInfo.findViewById(R.id.automatic).performClick();
         mTestableLooper.processAllMessages();
@@ -862,6 +870,7 @@ public class NotificationInfoTest extends SysuiTestCase {
     @Test
     public void testHandleCloseControls_persistAutomatic()
             throws Exception {
+        when(mAssistantFeedbackController.isFeedbackEnabled()).thenReturn(true);
         mNotificationChannel.unlockFields(USER_LOCKED_IMPORTANCE);
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
@@ -878,7 +887,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                true);
+                mAssistantFeedbackController);
 
         mNotificationInfo.handleCloseControls(true, false);
         mTestableLooper.processAllMessages();
@@ -905,7 +914,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                false);
+                mAssistantFeedbackController);
 
         mNotificationInfo.handleCloseControls(true, false);
         mTestableLooper.processAllMessages();
@@ -940,7 +949,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                false);
+                mAssistantFeedbackController);
 
         mNotificationInfo.handleCloseControls(true, false);
 
@@ -968,7 +977,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                false);
+                mAssistantFeedbackController);
 
         mNotificationInfo.findViewById(R.id.silence).performClick();
         mNotificationInfo.findViewById(R.id.done).performClick();
@@ -1008,7 +1017,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 false,
-                false);
+                mAssistantFeedbackController);
 
         mNotificationInfo.findViewById(R.id.alert).performClick();
         mNotificationInfo.findViewById(R.id.done).performClick();
@@ -1026,6 +1035,7 @@ public class NotificationInfoTest extends SysuiTestCase {
 
     @Test
     public void testAutomaticUnlocksUserImportance() throws Exception {
+        when(mAssistantFeedbackController.isFeedbackEnabled()).thenReturn(true);
         mNotificationChannel.setImportance(IMPORTANCE_DEFAULT);
         mNotificationChannel.lockFields(USER_LOCKED_IMPORTANCE);
         mNotificationInfo.bindNotification(
@@ -1043,7 +1053,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                true);
+                mAssistantFeedbackController);
 
         mNotificationInfo.findViewById(R.id.automatic).performClick();
         mNotificationInfo.findViewById(R.id.done).performClick();
@@ -1074,7 +1084,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                false);
+                mAssistantFeedbackController);
 
         mNotificationInfo.findViewById(R.id.silence).performClick();
         mNotificationInfo.findViewById(R.id.done).performClick();
@@ -1109,7 +1119,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 false,
-                false);
+                mAssistantFeedbackController);
 
         assertEquals(mContext.getString(R.string.inline_done_button),
                 ((TextView) mNotificationInfo.findViewById(R.id.done)).getText());
@@ -1147,7 +1157,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 false,
-                false);
+                mAssistantFeedbackController);
 
         assertEquals(mContext.getString(R.string.inline_done_button),
                 ((TextView) mNotificationInfo.findViewById(R.id.done)).getText());
@@ -1184,7 +1194,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 true,
-                false);
+                mAssistantFeedbackController);
 
         mNotificationInfo.findViewById(R.id.silence).performClick();
         mNotificationInfo.findViewById(R.id.done).performClick();
@@ -1212,7 +1222,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 false,
-                false);
+                mAssistantFeedbackController);
 
         assertEquals(mContext.getString(R.string.inline_done_button),
                 ((TextView) mNotificationInfo.findViewById(R.id.done)).getText());
@@ -1243,7 +1253,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 false,
-                false);
+                mAssistantFeedbackController);
 
         mNotificationInfo.findViewById(R.id.alert).performClick();
         mNotificationInfo.findViewById(R.id.done).performClick();
@@ -1277,7 +1287,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 false,
-                false);
+                mAssistantFeedbackController);
 
         mNotificationInfo.findViewById(R.id.alert).performClick();
         mNotificationInfo.findViewById(R.id.done).performClick();
@@ -1310,7 +1320,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 false,
-                false);
+                mAssistantFeedbackController);
 
         mNotificationInfo.findViewById(R.id.alert).performClick();
         mNotificationInfo.findViewById(R.id.done).performClick();
@@ -1343,7 +1353,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 false,
-                false);
+                mAssistantFeedbackController);
 
         mNotificationInfo.findViewById(R.id.alert).performClick();
 
@@ -1369,7 +1379,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 true,
                 false,
                 false,
-                false);
+                mAssistantFeedbackController);
 
         assertFalse(mNotificationInfo.willBeRemoved());
     }

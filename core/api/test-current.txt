@@ -2440,7 +2440,6 @@ package android.window {
   }
 
   public class DisplayAreaOrganizer extends android.window.WindowOrganizer {
-    ctor public DisplayAreaOrganizer();
     method public void onDisplayAreaAppeared(@NonNull android.window.DisplayAreaInfo, @NonNull android.view.SurfaceControl);
     method public void onDisplayAreaVanished(@NonNull android.window.DisplayAreaInfo);
     method @CallSuper @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public java.util.List<android.window.DisplayAreaAppearedInfo> registerOrganizer(int);

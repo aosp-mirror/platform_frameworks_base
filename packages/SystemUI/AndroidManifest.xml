@@ -391,7 +391,7 @@
         </activity-alias>
 
         <activity
-            android:name="com.android.wm.shell.splitscreen.ForcedResizableInfoActivity"
+            android:name="com.android.wm.shell.legacysplitscreen.ForcedResizableInfoActivity"
             android:theme="@style/ForcedResizableTheme"
             android:excludeFromRecents="true"
             android:stateNotNeeded="true"

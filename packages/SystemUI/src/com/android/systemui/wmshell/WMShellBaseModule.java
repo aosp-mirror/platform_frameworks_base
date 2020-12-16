@@ -34,6 +34,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.dagger.WMSingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.wm.shell.FullscreenTaskListener;
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.ShellInit;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -65,7 +66,7 @@ import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.phone.PipAppOpsListener;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
-import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -169,14 +170,14 @@ public abstract class WMShellBaseModule {
     static ShellInit provideShellInit(DisplayImeController displayImeController,
             DragAndDropController dragAndDropController,
             ShellTaskOrganizer shellTaskOrganizer,
-            Optional<SplitScreen> splitScreenOptional,
+            Optional<LegacySplitScreen> legacySplitScreenOptional,
             Optional<AppPairs> appPairsOptional,
             FullscreenTaskListener fullscreenTaskListener,
             Transitions transitions) {
         return new ShellInit(displayImeController,
                 dragAndDropController,
                 shellTaskOrganizer,
-                splitScreenOptional,
+                legacySplitScreenOptional,
                 appPairsOptional,
                 fullscreenTaskListener,
                 transitions);
@@ -190,12 +191,12 @@ public abstract class WMShellBaseModule {
     @Provides
     static Optional<ShellCommandHandler> provideShellCommandHandler(
             ShellTaskOrganizer shellTaskOrganizer,
-            Optional<SplitScreen> splitScreenOptional,
+            Optional<LegacySplitScreen> legacySplitScreenOptional,
             Optional<Pip> pipOptional,
             Optional<OneHanded> oneHandedOptional,
             Optional<HideDisplayCutout> hideDisplayCutout,
             Optional<AppPairs> appPairsOptional) {
-        return Optional.of(new ShellCommandHandler(shellTaskOrganizer, splitScreenOptional,
+        return Optional.of(new ShellCommandHandler(shellTaskOrganizer, legacySplitScreenOptional,
                 pipOptional, oneHandedOptional, hideDisplayCutout, appPairsOptional));
     }
 
@@ -282,12 +283,19 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
+    static RootTaskDisplayAreaOrganizer provideRootTaskDisplayAreaOrganizer(
+            @ShellMainThread ShellExecutor mainExecutor, Context context) {
+        return new RootTaskDisplayAreaOrganizer(mainExecutor);
+    }
+
+    @WMSingleton
+    @Provides
     static TaskStackListenerImpl providerTaskStackListenerImpl(@Main Handler handler) {
         return new TaskStackListenerImpl(handler);
     }
 
     @BindsOptionalOf
-    abstract SplitScreen optionalSplitScreen();
+    abstract LegacySplitScreen optionalLegacySplitScreen();
 
     @BindsOptionalOf
     abstract AppPairs optionalAppPairs();
@@ -311,16 +319,18 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static Optional<OneHanded> provideOneHandedController(Context context,
-            DisplayController displayController, TaskStackListenerImpl taskStackListener) {
+            DisplayController displayController, TaskStackListenerImpl taskStackListener,
+            @ShellMainThread ShellExecutor mainExecutor) {
         return Optional.ofNullable(OneHandedController.create(context, displayController,
-                taskStackListener));
+                taskStackListener, mainExecutor));
     }
 
     @WMSingleton
     @Provides
     static Optional<HideDisplayCutout> provideHideDisplayCutoutController(Context context,
-            DisplayController displayController) {
-        return Optional.ofNullable(HideDisplayCutoutController.create(context, displayController));
+            DisplayController displayController, @ShellMainThread ShellExecutor mainExecutor) {
+        return Optional.ofNullable(
+                HideDisplayCutoutController.create(context, displayController, mainExecutor));
     }
 
     @WMSingleton

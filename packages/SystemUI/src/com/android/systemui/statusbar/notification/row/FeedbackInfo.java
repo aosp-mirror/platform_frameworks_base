@@ -16,10 +16,6 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
-import static android.service.notification.NotificationListenerService.Ranking.RANKING_DEMOTED;
-import static android.service.notification.NotificationListenerService.Ranking.RANKING_PROMOTED;
-
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.content.Context;
@@ -30,6 +26,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
+import android.text.Html;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -138,30 +135,30 @@ public class FeedbackInfo extends LinearLayout implements NotificationGuts.GutsC
         no.setVisibility(View.VISIBLE);
         yes.setOnClickListener(this::positiveFeedback);
         no.setOnClickListener(this::negativeFeedback);
-        prompt.setText(getPrompt());
+        prompt.setText(Html.fromHtml(getPrompt()));
     }
 
     @SuppressLint("DefaultLocale")
     private String getPrompt() {
         StringBuilder sb = new StringBuilder();
-        int oldImportance = mRanking.getChannel().getImportance();
-        int newImportance = mRanking.getImportance();
-        int ranking = mRanking.getRankingAdjustment();
+        int status = mFeedbackController.getFeedbackStatus(mEntry);
         if (DEBUG) {
             sb.append(String.format(
                     "[DEBUG]: oldImportance=%d, newImportance=%d, ranking=%d\n\n",
                     mRanking.getChannel().getImportance(), mRanking.getImportance(),
                     mRanking.getRankingAdjustment()));
         }
-        if (oldImportance >= IMPORTANCE_DEFAULT && newImportance < IMPORTANCE_DEFAULT) {
-            sb.append(mContext.getString(R.string.feedback_silenced));
-        } else if (newImportance > oldImportance || ranking == RANKING_PROMOTED) {
-            sb.append(mContext.getString(R.string.feedback_promoted));
-        } else if (newImportance < oldImportance || ranking == RANKING_DEMOTED) {
-            sb.append(mContext.getString(R.string.feedback_demoted));
+        if (status == mFeedbackController.STATUS_ALERTED) {
+            sb.append(mContext.getText(R.string.feedback_alerted));
+        } else if (status == mFeedbackController.STATUS_SILENCED) {
+            sb.append(mContext.getText(R.string.feedback_silenced));
+        } else if (status == mFeedbackController.STATUS_PROMOTED) {
+            sb.append(mContext.getText(R.string.feedback_promoted));
+        } else if (status == mFeedbackController.STATUS_DEMOTED) {
+            sb.append(mContext.getText(R.string.feedback_demoted));
         }
         sb.append(" ");
-        sb.append(mContext.getString(R.string.feedback_prompt));
+        sb.append(mContext.getText(R.string.feedback_prompt));
 
         return sb.toString();
     }

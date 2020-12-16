@@ -65,7 +65,7 @@ import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.wm.shell.pip.Pip;
-import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -98,7 +98,7 @@ public class NavigationBarController implements Callbacks,
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final CommandQueue mCommandQueue;
     private final Optional<Pip> mPipOptional;
-    private final Optional<SplitScreen> mSplitScreenOptional;
+    private final Optional<LegacySplitScreen> mSplitScreenOptional;
     private final Optional<Recents> mRecentsOptional;
     private final Lazy<StatusBar> mStatusBarLazy;
     private final ShadeController mShadeController;
@@ -133,7 +133,7 @@ public class NavigationBarController implements Callbacks,
             BroadcastDispatcher broadcastDispatcher,
             CommandQueue commandQueue,
             Optional<Pip> pipOptional,
-            Optional<SplitScreen> splitScreenOptional,
+            Optional<LegacySplitScreen> splitScreenOptional,
             Optional<Recents> recentsOptional,
             Lazy<StatusBar> statusBarLazy,
             ShadeController shadeController,

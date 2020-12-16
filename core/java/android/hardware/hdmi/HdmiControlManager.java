@@ -350,7 +350,7 @@ public final class HdmiControlManager {
      *
      * @hide
      */
-    public static final int HDMI_CEC_VERSION_1_4_b = 0x05;
+    public static final int HDMI_CEC_VERSION_1_4_B = 0x05;
     /**
      * Version constant for HDMI-CEC v2.0.
      *
@@ -361,7 +361,7 @@ public final class HdmiControlManager {
      * @hide
      */
     @IntDef({
-            HDMI_CEC_VERSION_1_4_b,
+            HDMI_CEC_VERSION_1_4_B,
             HDMI_CEC_VERSION_2_0
     })
     @Retention(RetentionPolicy.SOURCE)

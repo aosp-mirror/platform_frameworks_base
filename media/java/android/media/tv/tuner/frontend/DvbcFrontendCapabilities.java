@@ -45,9 +45,9 @@ public class DvbcFrontendCapabilities extends FrontendCapabilities {
     /**
      * Gets inner FEC capability.
      *
-     * @deprecated Use {@link getInnerFecCapability()} with long return value instead. This function
-     *             returns the correct cap value when the value is not bigger than the max integer
-     *             value. Otherwise it returns {@link FrontendSettings#FEC_UNDEFINED}.
+     * @deprecated Use {@link #getInnerFecCapability()} with long return value instead. This
+     *             function returns the correct cap value when the value is not bigger than the max
+     *             integer value. Otherwise it returns {@link FrontendSettings#FEC_UNDEFINED}.
      */
     @Deprecated
     @FrontendSettings.InnerFec

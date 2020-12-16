@@ -51,6 +51,7 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
     private boolean mCancelled = false;
     private int mTotalFramesCount = 0;
     private int mMissedFramesCount = 0;
+    private int mSfMissedFramesCount = 0;
     private long mMaxFrameTimeNanos = 0;
 
     private Session mSession;
@@ -132,6 +133,8 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
             mRendererWrapper.removeObserver(mObserver);
 
             // Log the frame stats as counters to make them easily accessible in traces.
+            Trace.traceCounter(Trace.TRACE_TAG_APP, mSession.getName() + "#sfMissedFrames",
+                    mSfMissedFramesCount);
             Trace.traceCounter(Trace.TRACE_TAG_APP, mSession.getName() + "#missedFrames",
                     mMissedFramesCount);
             Trace.traceCounter(Trace.TRACE_TAG_APP, mSession.getName() + "#totalFrames",
@@ -141,7 +144,7 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
 
             // Trigger perfetto if necessary.
             boolean overMissedFramesThreshold = mTraceThresholdMissedFrames != -1
-                    && mMissedFramesCount >= mTraceThresholdMissedFrames;
+                    && (mMissedFramesCount + mSfMissedFramesCount) >= mTraceThresholdMissedFrames;
             boolean overFrameTimeThreshold = mTraceThresholdFrameTimeMillis != -1
                     && mMaxFrameTimeNanos >= mTraceThresholdFrameTimeMillis * NANOS_IN_MILLISECOND;
             if (overMissedFramesThreshold || overFrameTimeThreshold) {
@@ -153,7 +156,8 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
                         mSession.getStatsdInteractionType(),
                         mTotalFramesCount,
                         mMissedFramesCount,
-                        mMaxFrameTimeNanos);
+                        mMaxFrameTimeNanos,
+                        mSfMissedFramesCount);
             }
             return;
         }
@@ -168,6 +172,7 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
             mMaxFrameTimeNanos = Math.max(totalDurationNanos, mMaxFrameTimeNanos);
         }
 
+        // TODO(b/171049584): Also update mSfMissedFramesCount once the data is available.
         if (isJankyFrame) {
             mMissedFramesCount += 1;
         }

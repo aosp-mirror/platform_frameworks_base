@@ -2108,17 +2108,6 @@ public class ConnectivityManager {
         // ignored
     }
 
-    /** {@hide} */
-    @Deprecated
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public NetworkQuotaInfo getActiveNetworkQuotaInfo() {
-        try {
-            return mService.getActiveNetworkQuotaInfo();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
     /**
      * @hide
      * @deprecated Talk to TelephonyManager directly
@@ -3163,9 +3152,9 @@ public class ConnectivityManager {
     }
 
     /**
-     * Set sign in error notification to visible or in visible
+     * Set sign in error notification to visible or invisible
      *
-     * {@hide}
+     * @hide
      * @deprecated Doesn't properly deal with multiple connected networks of the same type.
      */
     @Deprecated

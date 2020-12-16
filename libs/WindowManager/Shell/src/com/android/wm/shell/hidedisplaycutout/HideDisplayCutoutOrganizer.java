@@ -45,6 +45,7 @@ import com.android.wm.shell.common.DisplayController;
 
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Manages the display areas of hide display cutout feature.
@@ -88,7 +89,9 @@ class HideDisplayCutoutOrganizer extends DisplayAreaOrganizer {
                 t.apply();
             };
 
-    HideDisplayCutoutOrganizer(Context context, DisplayController displayController) {
+    HideDisplayCutoutOrganizer(Context context, DisplayController displayController,
+            Executor executor) {
+        super(executor);
         mContext = context;
         mDisplayController = displayController;
     }

@@ -484,8 +484,8 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
                     stack.push(notificationChildren.get(i));
                 }
             }
-
-            row.showFeedbackIcon(mAssistantFeedbackController.showFeedbackIndicator(entry));
+            row.showFeedbackIcon(mAssistantFeedbackController.showFeedbackIndicator(entry),
+                    mAssistantFeedbackController.getFeedbackImageResource(entry));
             row.setLastAudiblyAlertedMs(entry.getLastAudiblyAlertedMs());
         }
 

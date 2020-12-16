@@ -1138,6 +1138,7 @@ public class BatterySaverPolicy extends ContentObserver implements
                     ipw.println(mLastDeviceConfigProperties.getString(key, null));
                 }
             }
+            ipw.decreaseIndent();
 
             ipw.println("mAccessibilityEnabled=" + mAccessibilityEnabled.get());
             ipw.println("mAutomotiveProjectionActive=" + mAutomotiveProjectionActive.get());
@@ -1191,7 +1192,7 @@ public class BatterySaverPolicy extends ContentObserver implements
     }
 
     private void dumpMap(PrintWriter pw, ArrayMap<String, String> map) {
-        if (map == null) {
+        if (map == null || map.size() == 0) {
             pw.println("N/A");
             return;
         }

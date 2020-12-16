@@ -7098,7 +7098,7 @@ public class Activity extends ContextThemeWrapper
         if (getWindow() != null &&
                 getWindow().peekDecorView() != null &&
                 getWindow().peekDecorView().getViewRootImpl() != null) {
-            getWindow().peekDecorView().getViewRootImpl().dump(prefix, fd, writer, args);
+            getWindow().peekDecorView().getViewRootImpl().dump(prefix, writer);
         }
 
         mHandler.getLooper().dump(new PrintWriterPrinter(writer), prefix);

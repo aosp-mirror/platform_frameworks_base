@@ -347,7 +347,7 @@ public class AppsFilter {
         }
         final StateProvider stateProvider = command -> {
             synchronized (injector.getLock()) {
-                command.currentState(injector.getSettings().mPackages,
+                command.currentState(injector.getSettings().getPackagesLocked(),
                         injector.getUserManagerInternal().getUserInfos());
             }
         };

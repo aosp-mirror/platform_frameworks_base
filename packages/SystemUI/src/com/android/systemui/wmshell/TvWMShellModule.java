@@ -29,8 +29,8 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
-import com.android.wm.shell.splitscreen.SplitScreen;
-import com.android.wm.shell.splitscreen.SplitScreenController;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 
 import java.util.concurrent.Executor;
 
@@ -54,12 +54,12 @@ public class TvWMShellModule {
 
     @WMSingleton
     @Provides
-    static SplitScreen provideSplitScreen(Context context,
+    static LegacySplitScreen provideSplitScreen(Context context,
             DisplayController displayController, SystemWindows systemWindows,
             DisplayImeController displayImeController, @Main Handler handler,
             TransactionPool transactionPool, ShellTaskOrganizer shellTaskOrganizer,
             SyncTransactionQueue syncQueue, TaskStackListenerImpl taskStackListener) {
-        return new SplitScreenController(context, displayController, systemWindows,
+        return new LegacySplitScreenController(context, displayController, systemWindows,
                 displayImeController, handler, transactionPool, shellTaskOrganizer, syncQueue,
                 taskStackListener);
     }

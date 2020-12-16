@@ -39,5 +39,6 @@
         android:layout_height="match_parent"
         android:visibility="gone"
         android:pointerIcon="crosshair"/>
-    <include layout="@layout/global_screenshot_static"/>
+    <include layout="@layout/global_screenshot_static"
+             android:id="@+id/global_screenshot_static"/>
 </com.android.systemui.screenshot.ScreenshotView>

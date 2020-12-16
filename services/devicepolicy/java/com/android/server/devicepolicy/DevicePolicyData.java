@@ -16,14 +16,15 @@
 
 package com.android.server.devicepolicy;
 
+import android.annotation.UserIdInt;
 import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.os.FileUtils;
 import android.os.PersistableBundle;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
@@ -77,13 +78,14 @@ class DevicePolicyData {
     private static final String ATTR_DEVICE_PROVISIONING_CONFIG_APPLIED =
             "device-provisioning-config-applied";
     private static final String ATTR_DEVICE_PAIRED = "device-paired";
+
     private static final String TAG = DevicePolicyManagerService.LOG_TAG;
     private static final boolean VERBOSE_LOG = false; // DO NOT SUBMIT WITH TRUE
 
     int mFailedPasswordAttempts = 0;
     boolean mPasswordValidAtLastCheckpoint = true;
 
-    int mUserHandle;
+    final @UserIdInt int mUserId;
     int mPasswordOwner = -1;
     long mLastMaximumTimeToLock = -1;
     boolean mUserSetupComplete = false;
@@ -144,8 +146,8 @@ class DevicePolicyData {
     // apps were suspended or unsuspended.
     boolean mAppsSuspended = false;
 
-    DevicePolicyData(int userHandle) {
-        mUserHandle = userHandle;
+    DevicePolicyData(@UserIdInt int userId) {
+        mUserId = userId;
     }
 
     /**
@@ -156,7 +158,7 @@ class DevicePolicyData {
         try {
             File chooseForWrite = file.chooseForWrite();
             if (VERBOSE_LOG) {
-                Slog.v(TAG, "Storing data for user " + policyData.mUserHandle + " on "
+                Slog.v(TAG, "Storing data for user " + policyData.mUserId + " on "
                         + chooseForWrite);
             }
             stream = new FileOutputStream(chooseForWrite, false);
@@ -365,7 +367,7 @@ class DevicePolicyData {
         FileInputStream stream = null;
         File file = journaledFile.chooseForRead();
         if (VERBOSE_LOG) {
-            Slog.v(TAG, "Loading data for user " + policy.mUserHandle + " from " + file);
+            Slog.v(TAG, "Loading data for user " + policy.mUserId + " from " + file);
         }
         boolean needsRewrite = false;
         try {
@@ -555,5 +557,38 @@ class DevicePolicyData {
                 mPasswordOwner = -1;
             }
         }
+    }
+
+    void dump(IndentingPrintWriter pw) {
+        pw.println();
+        pw.println("Enabled Device Admins (User " + mUserId + ", provisioningState: "
+                + mUserProvisioningState + "):");
+        final int n = mAdminList.size();
+        for (int i = 0; i < n; i++) {
+            ActiveAdmin ap = mAdminList.get(i);
+            if (ap != null) {
+                pw.increaseIndent();
+                pw.print(ap.info.getComponent().flattenToShortString());
+                pw.println(":");
+                pw.increaseIndent();
+                ap.dump(pw);
+                pw.decreaseIndent();
+                pw.decreaseIndent();
+            }
+        }
+        if (!mRemovingAdmins.isEmpty()) {
+            pw.increaseIndent();
+            pw.println("Removing Device Admins (User " + mUserId + "): " + mRemovingAdmins);
+            pw.decreaseIndent();
+        }
+        pw.println();
+        pw.increaseIndent();
+        pw.print("mPasswordOwner="); pw.println(mPasswordOwner);
+        pw.print("mUserControlDisabledPackages=");
+        pw.println(mUserControlDisabledPackages);
+        pw.print("mAppsSuspended="); pw.println(mAppsSuspended);
+        pw.print("mUserSetupComplete="); pw.println(mUserSetupComplete);
+        pw.print("mAffiliationIds="); pw.println(mAffiliationIds);
+        pw.decreaseIndent();
     }
 }

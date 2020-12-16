@@ -41,7 +41,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.wm.shell.pip.Pip;
-import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -70,7 +70,7 @@ public class OverviewProxyServiceTest extends SysuiTestCase {
     @Mock private NavigationModeController mMockNavModeController;
     @Mock private NotificationShadeWindowController mMockStatusBarWinController;
     @Mock private Optional<Pip> mMockPipOptional;
-    @Mock private Optional<SplitScreen> mMockSplitScreenOptional;
+    @Mock private Optional<LegacySplitScreen> mMockSplitScreenOptional;
     @Mock private Optional<Lazy<StatusBar>> mMockStatusBarOptionalLazy;
     @Mock private Optional<com.android.wm.shell.onehanded.OneHanded> mMockOneHandedOptional;
     @Mock private PackageManager mPackageManager;

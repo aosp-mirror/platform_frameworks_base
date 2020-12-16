@@ -696,7 +696,7 @@ static const JNINativeMethod gMethods[] = {
     { "nSetRevealClip",        "(JZFFF)Z", (void*) android_view_RenderNode_setRevealClip },
 
     { "nSetAlpha",             "(JF)Z",  (void*) android_view_RenderNode_setAlpha },
-    { "nSetRenderEffect",      "(JJ)V",  (void*) android_view_RenderNode_setRenderEffect },
+    { "nSetRenderEffect",      "(JJ)Z",  (void*) android_view_RenderNode_setRenderEffect },
     { "nSetHasOverlappingRendering", "(JZ)Z",
             (void*) android_view_RenderNode_setHasOverlappingRendering },
     { "nSetUsageHint",    "(JI)V", (void*) android_view_RenderNode_setUsageHint },

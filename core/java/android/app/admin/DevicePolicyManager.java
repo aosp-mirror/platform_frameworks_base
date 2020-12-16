@@ -2056,7 +2056,9 @@ public class DevicePolicyManager {
     /**
      * Result code for {@link #checkProvisioningPreCondition}.
      *
-     * <p>Returned for {@link #ACTION_PROVISION_MANAGED_USER} if the user is a system user.
+     * <p>Returned for {@link #ACTION_PROVISION_MANAGED_USER} if the user is a system user and
+     * for {@link #ACTION_PROVISION_MANAGED_DEVICE} on devices running headless system user mode
+     * and the user is a system user.
      *
      * @hide
      */
@@ -12670,6 +12672,23 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 mService.setNextOperationSafety(operation, safe);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    // TODO(b/175392542): remove if not needed by ManagedProvisioning app anymore
+    /**
+     * Used by ManagedProvisioning app to factory reset the device when DO cannto be provisioned.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MASTER_CLEAR)
+    public void factoryReset(String reason) {
+        if (mService != null) {
+            try {
+                mService.factoryReset(reason);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }

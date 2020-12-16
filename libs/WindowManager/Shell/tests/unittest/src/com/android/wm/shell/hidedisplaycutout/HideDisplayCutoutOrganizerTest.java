@@ -93,7 +93,7 @@ public class HideDisplayCutoutOrganizerTest {
         when(mMockDisplayController.getDisplay(anyInt())).thenReturn(mDisplay);
 
         HideDisplayCutoutOrganizer organizer = new HideDisplayCutoutOrganizer(
-                mContext, mMockDisplayController);
+                mContext, mMockDisplayController, Runnable::run);
         mOrganizer = Mockito.spy(organizer);
         doNothing().when(mOrganizer).unregisterOrganizer();
         doNothing().when(mOrganizer).applyBoundsAndOffsets(any(), any(), any(), any());

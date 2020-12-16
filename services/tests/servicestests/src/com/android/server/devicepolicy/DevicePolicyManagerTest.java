@@ -4681,9 +4681,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 thenReturn("Just a test string.");
 
         dpm.wipeData(0);
-        verify(getServices().recoverySystem).rebootWipeUserData(
-                /*shutdown=*/ eq(false), anyString(), /*force=*/ eq(true),
-                /*wipeEuicc=*/ eq(false));
+
+        verifyRebootWipeUserData(/* wipeEuicc= */ false);
     }
 
     @Test
@@ -4697,9 +4696,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 thenReturn("Just a test string.");
 
         dpm.wipeData(WIPE_EUICC);
-        verify(getServices().recoverySystem).rebootWipeUserData(
-                /*shutdown=*/ eq(false), anyString(), /*force=*/ eq(true),
-                /*wipeEuicc=*/ eq(true));
+
+        verifyRebootWipeUserData(/* wipeEuicc= */ true);
     }
 
     @Test
@@ -4802,9 +4800,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // The device should be wiped even if DISALLOW_FACTORY_RESET is enabled, because both the
         // user restriction and the policy were set by the DO.
-        verify(getServices().recoverySystem).rebootWipeUserData(
-                /*shutdown=*/ eq(false), anyString(), /*force=*/ eq(true),
-                /*wipeEuicc=*/ eq(false));
+        verifyRebootWipeUserData(/* wipeEuicc= */ false);
     }
 
     @Test
@@ -4863,9 +4859,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpm.reportFailedPasswordAttempt(UserHandle.USER_SYSTEM);
 
         // For managed profile on an organization owned device, the whole device should be wiped.
-        verify(getServices().recoverySystem).rebootWipeUserData(
-                /*shutdown=*/ eq(false), anyString(), /*force=*/ eq(true),
-                /*wipeEuicc=*/ eq(false));
+        verifyRebootWipeUserData(/* wipeEuicc= */ false);
     }
 
     @Test
@@ -4907,9 +4901,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpm.reportFailedPasswordAttempt(MANAGED_PROFILE_USER_ID);
 
         // For managed profile on an organization owned device, the whole device should be wiped.
-        verify(getServices().recoverySystem).rebootWipeUserData(
-                /*shutdown=*/ eq(false), anyString(), /*force=*/ eq(true),
-                /*wipeEuicc=*/ eq(false));
+        verifyRebootWipeUserData(/* wipeEuicc= */ false);
     }
 
     @Test
@@ -5786,6 +5778,12 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             assertThat(ownerInstalledCaCerts).isNotNull();
             assertThat(ownerInstalledCaCerts.isEmpty()).isTrue();
         });
+    }
+
+    private void verifyRebootWipeUserData(boolean wipeEuicc) throws Exception {
+        verify(getServices().recoverySystem).rebootWipeUserData(/*shutdown=*/ eq(false),
+                /* reason= */ anyString(), /*force=*/ eq(true), eq(wipeEuicc),
+                /* wipeAdoptableStorage= */ eq(false), /* wipeFactoryResetProtection= */ eq(false));
     }
 
     private void assertAttestationFlags(int attestationFlags, int[] expectedFlags) {

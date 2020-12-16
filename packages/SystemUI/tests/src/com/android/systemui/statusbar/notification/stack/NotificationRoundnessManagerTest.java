@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
+import static com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager.SMALL_CORNER_RADIUS;
+
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -139,7 +141,7 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
                 createSection(null, null)
         });
         Assert.assertEquals(1.0f, mSecond.getCurrentBottomRoundness(), 0.0f);
-        Assert.assertEquals(0.0f, mSecond.getCurrentTopRoundness(), 0.0f);
+        Assert.assertEquals(SMALL_CORNER_RADIUS, mSecond.getCurrentTopRoundness(), 0.0f);
     }
 
     @Test
@@ -166,8 +168,8 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
 
         row.setHeadsUp(false);
         mRoundnessManager.updateView(entry.getRow(), false);
-        Assert.assertEquals(0f, row.getCurrentBottomRoundness(), 0.0f);
-        Assert.assertEquals(0f, row.getCurrentTopRoundness(), 0.0f);
+        Assert.assertEquals(SMALL_CORNER_RADIUS, row.getCurrentBottomRoundness(), 0.0f);
+        Assert.assertEquals(SMALL_CORNER_RADIUS, row.getCurrentTopRoundness(), 0.0f);
     }
 
     @Test
@@ -177,7 +179,7 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
                 createSection(null, mSecond)
         });
         Assert.assertEquals(1.0f, mSecond.getCurrentBottomRoundness(), 0.0f);
-        Assert.assertEquals(0.0f, mSecond.getCurrentTopRoundness(), 0.0f);
+        Assert.assertEquals(SMALL_CORNER_RADIUS, mSecond.getCurrentTopRoundness(), 0.0f);
     }
 
     @Test
@@ -186,7 +188,7 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
                 createSection(mFirst, mFirst),
                 createSection(mSecond, null)
         });
-        Assert.assertEquals(0.0f, mSecond.getCurrentBottomRoundness(), 0.0f);
+        Assert.assertEquals(SMALL_CORNER_RADIUS, mSecond.getCurrentBottomRoundness(), 0.0f);
         Assert.assertEquals(1.0f, mSecond.getCurrentTopRoundness(), 0.0f);
     }
 
@@ -196,7 +198,7 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
                 createSection(mFirst, null),
                 createSection(null, null)
         });
-        Assert.assertEquals(0.0f, mFirst.getCurrentBottomRoundness(), 0.0f);
+        Assert.assertEquals(SMALL_CORNER_RADIUS, mFirst.getCurrentBottomRoundness(), 0.0f);
         Assert.assertEquals(1.0f, mFirst.getCurrentTopRoundness(), 0.0f);
     }
 
@@ -206,8 +208,8 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
                 createSection(mSecond, mSecond),
                 createSection(null, null)
         });
-        Assert.assertEquals(0.0f, mFirst.getCurrentBottomRoundness(), 0.0f);
-        Assert.assertEquals(0.0f, mFirst.getCurrentTopRoundness(), 0.0f);
+        Assert.assertEquals(SMALL_CORNER_RADIUS, mFirst.getCurrentBottomRoundness(), 0.0f);
+        Assert.assertEquals(SMALL_CORNER_RADIUS, mFirst.getCurrentTopRoundness(), 0.0f);
     }
 
     @Test
@@ -253,8 +255,8 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
                 createSection(mSecond, mSecond),
                 createSection(null, null)
         });
-        Assert.assertEquals(0.0f, mFirst.getCurrentBottomRoundness(), 0.0f);
-        Assert.assertEquals(0.0f, mFirst.getCurrentTopRoundness(), 0.0f);
+        Assert.assertEquals(SMALL_CORNER_RADIUS, mFirst.getCurrentBottomRoundness(), 0.0f);
+        Assert.assertEquals(SMALL_CORNER_RADIUS, mFirst.getCurrentTopRoundness(), 0.0f);
     }
 
     @Test
@@ -303,8 +305,8 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
         });
         mFirst.setHeadsUpAnimatingAway(true);
         mFirst.setHeadsUpAnimatingAway(false);
-        Assert.assertEquals(0.0f, mFirst.getCurrentBottomRoundness(), 0.0f);
-        Assert.assertEquals(0.0f, mFirst.getCurrentTopRoundness(), 0.0f);
+        Assert.assertEquals(SMALL_CORNER_RADIUS, mFirst.getCurrentBottomRoundness(), 0.0f);
+        Assert.assertEquals(SMALL_CORNER_RADIUS, mFirst.getCurrentTopRoundness(), 0.0f);
     }
 
     @Test

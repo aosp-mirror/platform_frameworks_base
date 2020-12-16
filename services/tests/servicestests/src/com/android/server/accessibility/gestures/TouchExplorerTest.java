@@ -35,7 +35,10 @@ import static com.android.server.accessibility.gestures.TouchState.STATE_TOUCH_E
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.verify;
 
+import android.accessibilityservice.AccessibilityGestureEvent;
+import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
 import android.graphics.PointF;
 import android.os.Looper;
@@ -51,6 +54,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accessibility.EventStreamTransformation;
+import com.android.server.accessibility.utils.GestureLogParser;
 import com.android.server.testutils.OffsettableClock;
 
 import org.junit.Before;
@@ -58,7 +62,15 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,6 +105,11 @@ public class TouchExplorerTest {
     private int mTouchSlop;
     private long mLastDownTime = Integer.MIN_VALUE;
 
+    @Mock
+    private AccessibilityManagerService mMockAms;
+    @Captor
+    private ArgumentCaptor<AccessibilityGestureEvent> mGestureCaptor;
+
     // mock package-private GestureManifold class
     @Rule
     public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
@@ -122,6 +139,7 @@ public class TouchExplorerTest {
 
     @Before
     public void setUp() {
+        MockitoAnnotations.initMocks(this);
         if (Looper.myLooper() == null) {
             Looper.prepare();
         }
@@ -130,7 +148,7 @@ public class TouchExplorerTest {
         AccessibilityManagerService ams = new AccessibilityManagerService(mContext);
         mCaptor = new EventCaptor();
         mHandler = new TestHandler();
-        mTouchExplorer = new TouchExplorer(mContext, ams, null, mHandler);
+        mTouchExplorer = new TouchExplorer(mContext, mMockAms, null, mHandler);
         mTouchExplorer.setNext(mCaptor);
     }
 
@@ -393,6 +411,61 @@ public class TouchExplorerTest {
         send(pointerUpEvent());
         send(upEvent());
         mTouchExplorer.setMultiFingerGesturesEnabled(false);
+    }
+
+    @Test
+    public void testTouchExploreGestureLog() {
+        passInGesture(com.android.frameworks.servicestests.R.raw.a11y_touch_explore_gesture,
+                AccessibilityService.GESTURE_TOUCH_EXPLORATION);
+    }
+    @Test
+    public void testThreeFingerSwipeDownGestureLog() {
+        passInGesture(
+                com.android.frameworks.servicestests.R.raw.a11y_three_finger_swipe_down_gesture,
+                AccessibilityService.GESTURE_3_FINGER_SWIPE_DOWN);
+    }
+
+    /**
+     * Used to play back event data of a gesture by parsing the log into MotionEvents and sending
+     * them to TouchExplorer.
+     * @param resourceId a raw resource that corresponds to a text file
+     * @param gestureId the id of the gesture expected to be dispatched
+     */
+    private void passInGesture(int resourceId, int gestureId) {
+        mTouchExplorer.setMultiFingerGesturesEnabled(true);
+        mTouchExplorer.setSendMotionEventsEnabled(true);
+        mTouchExplorer.setTwoFingerPassthroughEnabled(true);
+        List<Integer> actions = new ArrayList<>();
+        try (
+            InputStream fis = mContext.getResources().openRawResource(resourceId);
+            InputStreamReader isr = new InputStreamReader(fis, Charset.forName("UTF-8"));
+            BufferedReader br = new BufferedReader(isr);
+        )  {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.isEmpty() || !line.contains("MotionEvent")) {
+                    continue;
+                }
+
+                MotionEvent motionEvent = GestureLogParser.getMotionEventFromLogLine(line);
+                actions.add(motionEvent.getAction());
+                send(motionEvent);
+            }
+
+            // Fast forward to dispatch GESTURE_TOUCH_EXPLORATION
+            mHandler.fastForward(USER_INTENT_TIMEOUT);
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+
+        verify(mMockAms).onGesture(mGestureCaptor.capture());
+        AccessibilityGestureEvent gestureEvent = mGestureCaptor.getValue();
+        assertEquals(gestureId, gestureEvent.getGestureId());
+        List<MotionEvent> motionEvents = gestureEvent.getMotionEvents();
+        assertEquals(actions.size(), motionEvents.size());
+        for (int i = 0; i < actions.size(); i++) {
+            assertEquals((int) actions.get(i), motionEvents.get(i).getAction());
+        }
     }
 
     private static MotionEvent fromTouchscreen(MotionEvent ev) {

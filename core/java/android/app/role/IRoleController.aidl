@@ -16,7 +16,9 @@
 
 package android.app.role;
 
+import android.app.role.RolePrivileges;
 import android.os.RemoteCallback;
+import com.android.internal.infra.AndroidFuture;
 
 /**
  * @hide
@@ -40,4 +42,6 @@ oneway interface IRoleController {
             in RemoteCallback callback);
 
     void isRoleVisible(in String roleName, in RemoteCallback callback);
+
+    void getRolePrivileges(in String roleName, in AndroidFuture<RolePrivileges> callback);
 }

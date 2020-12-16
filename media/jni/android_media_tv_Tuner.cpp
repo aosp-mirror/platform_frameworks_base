@@ -1172,7 +1172,7 @@ Return<void> FrontendCallback::onScanMessageExt1_1(FrontendScanMessageTypeExt1_1
 
 sp<ITuner> JTuner::mTuner;
 sp<::android::hardware::tv::tuner::V1_1::ITuner> JTuner::mTuner_1_1;
-int JTuner::mTunerVersion = 0;
+sp<TunerClient> JTuner::mTunerClient;
 
 JTuner::JTuner(JNIEnv *env, jobject thiz)
     : mClass(NULL) {
@@ -1181,8 +1181,12 @@ JTuner::JTuner(JNIEnv *env, jobject thiz)
 
     mClass = (jclass)env->NewGlobalRef(clazz);
     mObject = env->NewWeakGlobalRef(thiz);
+    // TODO: remove after migrate to client lib
     if (mTuner == NULL) {
         mTuner = getTunerService();
+    }
+    if (mTunerClient == NULL) {
+        mTunerClient = new TunerClient();
     }
 }
 
@@ -1198,13 +1202,13 @@ JTuner::~JTuner() {
     env->DeleteWeakGlobalRef(mObject);
     env->DeleteGlobalRef(mClass);
     mTuner = NULL;
+    mTunerClient = NULL;
     mClass = NULL;
     mObject = NULL;
 }
 
 sp<ITuner> JTuner::getTunerService() {
     if (mTuner == nullptr) {
-        mTunerVersion = 0;
         mTuner_1_1 = ::android::hardware::tv::tuner::V1_1::ITuner::getService();
 
         if (mTuner_1_1 == nullptr) {
@@ -1212,12 +1216,9 @@ sp<ITuner> JTuner::getTunerService() {
             mTuner = ITuner::getService();
             if (mTuner == nullptr) {
                 ALOGW("Failed to get tuner 1.0 service.");
-            } else {
-                mTunerVersion = 1 << 16;
             }
         } else {
             mTuner = static_cast<sp<ITuner>>(mTuner_1_1);
-            mTunerVersion = ((1 << 16) | 1);
          }
      }
      return mTuner;
@@ -1225,15 +1226,13 @@ sp<ITuner> JTuner::getTunerService() {
 
 jint JTuner::getTunerVersion() {
     ALOGD("JTuner::getTunerVersion()");
-    return (jint) mTunerVersion;
+    return (jint) mTunerClient->getHalTunerVersion();
 }
 
 jobject JTuner::getFrontendIds() {
     ALOGD("JTuner::getFrontendIds()");
-    mTuner->getFrontendIds([&](Result, const hidl_vec<FrontendId>& frontendIds) {
-        mFeIds = frontendIds;
-    });
-    if (mFeIds.size() == 0) {
+    vector<FrontendId> ids = mTunerClient->getFrontendIds();
+    if (ids.size() == 0) {
         ALOGW("Frontend isn't available");
         return NULL;
     }
@@ -1246,8 +1245,8 @@ jobject JTuner::getFrontendIds() {
     jclass integerClazz = env->FindClass("java/lang/Integer");
     jmethodID intInit = env->GetMethodID(integerClazz, "<init>", "(I)V");
 
-    for (int i=0; i < mFeIds.size(); i++) {
-       jobject idObj = env->NewObject(integerClazz, intInit, mFeIds[i]);
+    for (int i=0; i < ids.size(); i++) {
+       jobject idObj = env->NewObject(integerClazz, intInit, ids[i]);
        env->CallBooleanMethod(obj, arrayListAdd, idObj);
     }
     return obj;
@@ -1282,14 +1281,6 @@ jobject JTuner::openFrontendById(int id) {
             gFields.frontendInitID,
             mObject,
             (jint) jId);
-}
-
-jint JTuner::closeFrontendById(int id) {
-    if (mFe != NULL && mFeId == id) {
-        Result r = mFe->close();
-        return (jint) r;
-    }
-    return (jint) Result::SUCCESS;
 }
 
 jobject JTuner::getAnalogFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps) {
@@ -1402,37 +1393,26 @@ jobject JTuner::getDtmbFrontendCaps(JNIEnv *env, int id) {
     jclass clazz = env->FindClass("android/media/tv/tuner/frontend/DtmbFrontendCapabilities");
     jmethodID capsInit = env->GetMethodID(clazz, "<init>", "(IIIIII)V");
 
-    if (mTuner_1_1 == NULL) {
-        ALOGD("1.1 Tuner is not found. Dtmb Frontend Caps are not supported.");
+    shared_ptr<FrontendDtmbCapabilities> dtmbCaps = mTunerClient->getFrontendDtmbCapabilities(id);
+    if (dtmbCaps == NULL) {
         return NULL;
     }
 
-    Result result;
-    FrontendDtmbCapabilities dtmbCaps;
-    mTuner_1_1->getFrontendDtmbCapabilities(id,
-            [&](Result r, const FrontendDtmbCapabilities& caps) {
-        dtmbCaps = caps;
-        result = r;
-    });
-    jint modulationCap = dtmbCaps.modulationCap;
-    jint transmissionModeCap = dtmbCaps.transmissionModeCap;
-    jint guardIntervalCap = dtmbCaps.guardIntervalCap;
-    jint interleaveModeCap = dtmbCaps.interleaveModeCap;
-    jint codeRateCap = dtmbCaps.codeRateCap;
-    jint bandwidthCap = dtmbCaps.bandwidthCap;
+    jint modulationCap = dtmbCaps->modulationCap;
+    jint transmissionModeCap = dtmbCaps->transmissionModeCap;
+    jint guardIntervalCap = dtmbCaps->guardIntervalCap;
+    jint interleaveModeCap = dtmbCaps->interleaveModeCap;
+    jint codeRateCap = dtmbCaps->codeRateCap;
+    jint bandwidthCap = dtmbCaps->bandwidthCap;
 
     return env->NewObject(clazz, capsInit, modulationCap, transmissionModeCap, guardIntervalCap,
             interleaveModeCap, codeRateCap, bandwidthCap);
 }
 
 jobject JTuner::getFrontendInfo(int id) {
-    FrontendInfo feInfo;
-    Result res;
-    mTuner->getFrontendInfo(id, [&](Result r, const FrontendInfo& info) {
-        feInfo = info;
-        res = r;
-    });
-    if (res != Result::SUCCESS) {
+    shared_ptr<FrontendInfo> feInfo;
+    feInfo = mTunerClient->getFrontendInfo(id);
+    if (feInfo == NULL) {
         return NULL;
     }
 
@@ -1441,30 +1421,27 @@ jobject JTuner::getFrontendInfo(int id) {
     jmethodID infoInit = env->GetMethodID(clazz, "<init>",
             "(IIIIIIII[ILandroid/media/tv/tuner/frontend/FrontendCapabilities;)V");
 
-    jint type = (jint) feInfo.type;
-    jint minFrequency = feInfo.minFrequency;
-    jint maxFrequency = feInfo.maxFrequency;
-    jint minSymbolRate = feInfo.minSymbolRate;
-    jint maxSymbolRate = feInfo.maxSymbolRate;
-    jint acquireRange = feInfo.acquireRange;
-    jint exclusiveGroupId = feInfo.exclusiveGroupId;
-    jintArray statusCaps = env->NewIntArray(feInfo.statusCaps.size());
+    jint type = (jint) feInfo->type;
+    jint minFrequency = feInfo->minFrequency;
+    jint maxFrequency = feInfo->maxFrequency;
+    jint minSymbolRate = feInfo->minSymbolRate;
+    jint maxSymbolRate = feInfo->maxSymbolRate;
+    jint acquireRange = feInfo->acquireRange;
+    jint exclusiveGroupId = feInfo->exclusiveGroupId;
+    jintArray statusCaps = env->NewIntArray(feInfo->statusCaps.size());
     env->SetIntArrayRegion(
-            statusCaps, 0, feInfo.statusCaps.size(),
-            reinterpret_cast<jint*>(&feInfo.statusCaps[0]));
-    FrontendInfo::FrontendCapabilities caps = feInfo.frontendCaps;
+            statusCaps, 0, feInfo->statusCaps.size(),
+            reinterpret_cast<jint*>(&feInfo->statusCaps[0]));
+    FrontendInfo::FrontendCapabilities caps = feInfo->frontendCaps;
 
     jobject jcaps = NULL;
 
-    if (feInfo.type == static_cast<FrontendType>(
+    if (feInfo->type == static_cast<FrontendType>(
             ::android::hardware::tv::tuner::V1_1::FrontendType::DTMB)) {
-        if (mTuner_1_1 == NULL) {
-            return NULL;
-        }
         jcaps = getDtmbFrontendCaps(env, id);
     }
 
-    switch(feInfo.type) {
+    switch(feInfo->type) {
         case FrontendType::ANALOG:
             if (FrontendInfo::FrontendCapabilities::hidl_discriminator::analogCaps
                     == caps.getDiscriminator()) {
@@ -3426,13 +3403,6 @@ static jobject android_media_tv_Tuner_open_frontend_by_handle(
     return tuner->openFrontendById(id);
 }
 
-static jint android_media_tv_Tuner_close_frontend_by_handle(
-        JNIEnv *env, jobject thiz, jint handle) {
-    sp<JTuner> tuner = getTuner(env, thiz);
-    uint32_t id = getResourceIdFromHandle(handle);
-    return tuner->closeFrontendById(id);
-}
-
 static int android_media_tv_Tuner_tune(JNIEnv *env, jobject thiz, jint type, jobject settings) {
     sp<JTuner> tuner = getTuner(env, thiz);
     FrontendSettings setting = getFrontendSettings(env, type, settings);
@@ -4746,8 +4716,6 @@ static const JNINativeMethod gTunerMethods[] = {
             (void *)android_media_tv_Tuner_get_frontend_ids },
     { "nativeOpenFrontendByHandle", "(I)Landroid/media/tv/tuner/Tuner$Frontend;",
             (void *)android_media_tv_Tuner_open_frontend_by_handle },
-    { "nativeCloseFrontendByHandle", "(I)I",
-            (void *)android_media_tv_Tuner_close_frontend_by_handle },
     { "nativeTune", "(ILandroid/media/tv/tuner/frontend/FrontendSettings;)I",
             (void *)android_media_tv_Tuner_tune },
     { "nativeStopTune", "()I", (void *)android_media_tv_Tuner_stop_tune },

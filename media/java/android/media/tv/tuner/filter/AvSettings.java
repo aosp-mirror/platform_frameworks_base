@@ -251,9 +251,9 @@ public class AvSettings extends Settings {
          * Sets the Audio Stream Type.
          *
          * <p>This API is only supported by Tuner HAL 1.1 or higher. Unsupported version would cause
-         * no-op. Use {@link TunerVersionChecker.getTunerVersion()} to check the version.
+         * no-op. Use {@link TunerVersionChecker#getTunerVersion()} to check the version.
          *
-         * @param audioStreamType the {@link AudioStreamType} to set.
+         * @param audioStreamType the audio stream type to set.
          */
         @NonNull
         public Builder setAudioStreamType(@AudioStreamType int audioStreamType) {
@@ -269,9 +269,9 @@ public class AvSettings extends Settings {
          * Sets the Video Stream Type.
          *
          * <p>This API is only supported by Tuner HAL 1.1 or higher. Unsupported version would cause
-         * no-op. Use {@link TunerVersionChecker.getTunerVersion()} to check the version.
+         * no-op. Use {@link TunerVersionChecker#getTunerVersion()} to check the version.
          *
-         * @param videoStreamType the {@link VideoStreamType} to set.
+         * @param videoStreamType the video stream type to set.
          */
         @NonNull
         public Builder setVideoStreamType(@VideoStreamType int videoStreamType) {

@@ -126,6 +126,10 @@ public class WindowlessWindowManager implements IWindowSession {
         }
     }
 
+    protected void attachToParentSurface(SurfaceControl.Builder b) {
+        b.setParent(mRootSurface);
+    }
+
     /**
      * IWindowSession implementation.
      */
@@ -135,11 +139,11 @@ public class WindowlessWindowManager implements IWindowSession {
             DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
             InsetsState outInsetsState, InsetsSourceControl[] outActiveControls) {
         final SurfaceControl.Builder b = new SurfaceControl.Builder(mSurfaceSession)
-                .setParent(mRootSurface)
                 .setFormat(attrs.format)
                 .setBufferSize(getSurfaceWidth(attrs), getSurfaceHeight(attrs))
                 .setName(attrs.getTitle().toString())
                 .setCallsite("WindowlessWindowManager.addToDisplay");
+        attachToParentSurface(b);
         final SurfaceControl sc = b.build();
 
         if (((attrs.inputFeatures &

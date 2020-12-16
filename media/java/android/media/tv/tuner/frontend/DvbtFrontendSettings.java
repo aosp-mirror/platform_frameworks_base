@@ -586,7 +586,7 @@ public class DvbtFrontendSettings extends FrontendSettings {
          *
          * <p>{@link #TRANSMISSION_MODE_EXTENDED_8K}, {@link #TRANSMISSION_MODE_EXTENDED_16K} and
          * {@link #TRANSMISSION_MODE_EXTENDED_32K} are only supported by Tuner HAL 1.1 or higher.
-         * Unsupported version would cause no-op. Use {@link TunerVersionChecker.getTunerVersion()}
+         * Unsupported version would cause no-op. Use {@link TunerVersionChecker#getTunerVersion()}
          * to check the version.
          *
          * <p>Default value is {@link #TRANSMISSION_MODE_UNDEFINED}.
@@ -617,7 +617,7 @@ public class DvbtFrontendSettings extends FrontendSettings {
          * <p>{@link #CONSTELLATION_QPSK_R}, {@link #CONSTELLATION_16QAM_R},
          * {@link #CONSTELLATION_64QAM_R} and {@link #CONSTELLATION_256QAM_Rare} are only supported
          * by Tuner HAL 1.1 or higher. Unsupported version would cause no-op. Use
-         * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+         * {@link TunerVersionChecker#getTunerVersion()} to check the version.
          *
          * <p>Default value is {@link #CONSTELLATION_UNDEFINED}.
          */

@@ -22,7 +22,7 @@ import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.draganddrop.DragAndDropController;
-import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import java.util.Optional;
 
@@ -34,7 +34,7 @@ public class ShellInit {
     private final DisplayImeController mDisplayImeController;
     private final DragAndDropController mDragAndDropController;
     private final ShellTaskOrganizer mShellTaskOrganizer;
-    private final Optional<SplitScreen> mSplitScreenOptional;
+    private final Optional<LegacySplitScreen> mLegacySplitScreenOptional;
     private final Optional<AppPairs> mAppPairsOptional;
     private final FullscreenTaskListener mFullscreenTaskListener;
     private final Transitions mTransitions;
@@ -42,14 +42,14 @@ public class ShellInit {
     public ShellInit(DisplayImeController displayImeController,
             DragAndDropController dragAndDropController,
             ShellTaskOrganizer shellTaskOrganizer,
-            Optional<SplitScreen> splitScreenOptional,
+            Optional<LegacySplitScreen> legacySplitScreenOptional,
             Optional<AppPairs> appPairsOptional,
             FullscreenTaskListener fullscreenTaskListener,
             Transitions transitions) {
         mDisplayImeController = displayImeController;
         mDragAndDropController = dragAndDropController;
         mShellTaskOrganizer = shellTaskOrganizer;
-        mSplitScreenOptional = splitScreenOptional;
+        mLegacySplitScreenOptional = legacySplitScreenOptional;
         mAppPairsOptional = appPairsOptional;
         mFullscreenTaskListener = fullscreenTaskListener;
         mTransitions = transitions;
@@ -67,7 +67,7 @@ public class ShellInit {
 
         mAppPairsOptional.ifPresent(AppPairs::onOrganizerRegistered);
         // Bind the splitscreen impl to the drag drop controller
-        mDragAndDropController.setSplitScreenController(mSplitScreenOptional);
+        mDragAndDropController.setSplitScreenController(mLegacySplitScreenOptional);
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             mTransitions.register(mShellTaskOrganizer);

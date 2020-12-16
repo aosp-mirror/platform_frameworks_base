@@ -356,6 +356,10 @@
     <string name="permdesc_receiveMms" msgid="958102423732219710">"Ļauj lietotnei saņemt un apstrādāt multiziņas. Tas nozīmē, ka lietotne var pārraudzīt vai dzēst uz jūsu ierīci nosūtītos ziņojumus, neparādot tos jums."</string>
     <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"Pārsūtīt šūnu apraides ziņojumus"</string>
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Ļauj piesaistīt lietotni šūnu apraides modulim, lai pārsūtītu šūnu apraides ziņojumus, tiklīdz tie tiek saņemti. Šūnu apraides brīdinājumi tiek piegādāti noteiktās atrašanās vietās, lai brīdinātu jūs par ārkārtas situācijām. Ļaunprātīgas lietotnes var traucēt ierīces veiktspēju vai darbības, kad ir saņemts ārkārtas šūnas apraides ziņojums."</string>
+    <!-- no translation found for permlab_manageOngoingCalls (281244770664231782) -->
+    <skip />
+    <!-- no translation found for permdesc_manageOngoingCalls (7003138133829915265) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"šūnu apraides ziņojumu lasīšana"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Ļauj lietotnei lasīt ierīcē saņemtos šūnu apraides ziņojumus. Šūnu apraides brīdinājumi tiek piegādāti dažās atrašanās vietās, lai brīdinātu jūs par ārkārtas situācijām. Ļaunprātīgas lietotnes var traucēt ierīces veiktspēju vai darbības, kad ir saņemts ārkārtas šūnas apraides ziņojums."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"lasīt abonētās plūsmas"</string>

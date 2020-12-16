@@ -108,6 +108,7 @@ import android.os.storage.StorageManagerInternal;
 import android.os.storage.StorageVolume;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
+import android.provider.DeviceConfig;
 import android.provider.DocumentsContract;
 import android.provider.Downloads;
 import android.provider.MediaStore;
@@ -176,6 +177,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -879,6 +881,8 @@ class StorageManagerService extends IStorageManager.Stub
                     com.android.internal.R.bool.config_zramWriteback)) {
             ZramWriteback.scheduleZramWriteback(mContext);
         }
+
+        updateTranscodeEnabled();
     }
 
     /**
@@ -908,6 +912,21 @@ class StorageManagerService extends IStorageManager.Stub
                 ZramWriteback.scheduleZramWriteback(mContext);
             }
         }
+    }
+
+    private void updateTranscodeEnabled() {
+        // See MediaProvider TranscodeHelper#getBooleanProperty for more information
+        boolean transcodeEnabled = false;
+        boolean defaultValue = true;
+
+        if (SystemProperties.getBoolean("persist.sys.fuse.transcode_user_control", false)) {
+            transcodeEnabled = SystemProperties.getBoolean("persist.sys.fuse.transcode_enabled",
+                    defaultValue);
+        } else {
+            transcodeEnabled = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                    "transcode_enabled", defaultValue);
+        }
+        SystemProperties.set("sys.fuse.transcode_enabled", String.valueOf(transcodeEnabled));
     }
 
     /**
@@ -3534,7 +3553,7 @@ class StorageManagerService extends IStorageManager.Stub
             final String description = mContext.getString(android.R.string.unknownName);
 
             res.add(new StorageVolume(id, path, path, description, primary, removable,
-                    emulated, allowMassStorage, maxFileSize, user, id, envState));
+                    emulated, allowMassStorage, maxFileSize, user, null /*uuid */, id, envState));
         }
 
         if (!foundPrimary) {
@@ -3552,12 +3571,13 @@ class StorageManagerService extends IStorageManager.Stub
             final boolean allowMassStorage = false;
             final long maxFileSize = 0L;
             final UserHandle owner = new UserHandle(userId);
-            final String uuid = null;
+            final String fsUuid = null;
+            final UUID uuid = null;
             final String state = Environment.MEDIA_REMOVED;
 
             res.add(0, new StorageVolume(id, path, path,
                     description, primary, removable, emulated,
-                    allowMassStorage, maxFileSize, owner, uuid, state));
+                    allowMassStorage, maxFileSize, owner, uuid, fsUuid, state));
         }
 
         return res.toArray(new StorageVolume[res.size()]);

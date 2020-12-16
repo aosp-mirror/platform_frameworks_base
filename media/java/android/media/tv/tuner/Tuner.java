@@ -555,7 +555,6 @@ public class Tuner implements AutoCloseable  {
      */
     private native Frontend nativeOpenFrontendByHandle(int handle);
     @Result
-    private native int nativeCloseFrontendByHandle(int handle);
     private native int nativeTune(int type, FrontendSettings settings);
     private native int nativeStopTune();
     private native int nativeScan(int settingsType, FrontendSettings settings, int scanType);
@@ -686,7 +685,7 @@ public class Tuner implements AutoCloseable  {
      *
      * <p>Tuner resource manager (TRM) uses the client priority value to decide whether it is able
      * to get frontend resource. If the client can't get the resource, this call returns {@link
-     * Result#RESULT_UNAVAILABLE}.
+     * #RESULT_UNAVAILABLE}.
      *
      * <p>
      * This locks the frontend to a frequency by providing signal
@@ -700,7 +699,7 @@ public class Tuner implements AutoCloseable  {
      *
      * <p>Tuning with {@link android.media.tv.tuner.frontend.DtmbFrontendSettings} is only
      * supported in Tuner 1.1 or higher version. Unsupported version will cause no-op. Use {@link
-     * TunerVersionChecker.getTunerVersion()} to get the version information.
+     * TunerVersionChecker#getTunerVersion()} to get the version information.
      *
      * @param settings Signal delivery information the frontend uses to
      *                 search and lock the signal.
@@ -749,7 +748,7 @@ public class Tuner implements AutoCloseable  {
      *
      * <p>Scanning with {@link android.media.tv.tuner.frontend.DtmbFrontendSettings} is only
      * supported in Tuner 1.1 or higher version. Unsupported version will cause no-op. Use {@link
-     * TunerVersionChecker.getTunerVersion()} to get the version information.
+     * TunerVersionChecker#getTunerVersion()} to get the version information.
      *
      * @param settings A {@link FrontendSettings} to configure the frontend.
      * @param scanType The scan type.
@@ -855,7 +854,7 @@ public class Tuner implements AutoCloseable  {
      * <p>This retrieve the statuses of the frontend for given status types.
      *
      * @param statusTypes an array of status types which the caller requests. Any types that are not
-     *        in {@link FrontendInfo.getStatusCapabilities()} would be ignored.
+     *        in {@link FrontendInfo#getStatusCapabilities()} would be ignored.
      * @return statuses which response the caller's requests. {@code null} if the operation failed.
      */
     @Nullable
@@ -904,7 +903,7 @@ public class Tuner implements AutoCloseable  {
      * use the output from CI-CAM as the input after this call.
      *
      * <p> Note that this API is used to connect the CI-CAM to the Demux module while
-     * {@link connectFrontendToCiCam(int)} is used to connect CI-CAM to the Frontend module.
+     * {@link #connectFrontendToCiCam(int)} is used to connect CI-CAM to the Frontend module.
      *
      * @param ciCamId specify CI-CAM Id to connect.
      * @return result status of the operation.
@@ -926,20 +925,20 @@ public class Tuner implements AutoCloseable  {
      * the TS directly from the frontend.
      *
      * <p> Note that this API is used to connect the CI-CAM to the Frontend module while
-     * {@link connectCiCam(int)} is used to connect CI-CAM to the Demux module.
+     * {@link #connectCiCam(int)} is used to connect CI-CAM to the Demux module.
      *
      * <p>Use {@link #disconnectFrontendToCiCam(int)} to disconnect.
      *
      * <p>This API is only supported by Tuner HAL 1.1 or higher. Unsupported version would cause
-     * no-op and return {@link INVALID_LTS_ID}. Use {@link TunerVersionChecker.getTunerVersion()} to
-     * check the version.
+     * no-op and return {@link #INVALID_LTS_ID}. Use {@link TunerVersionChecker#getTunerVersion()}
+     * to check the version.
      *
      * @param ciCamId specify CI-CAM Id, which is the id of the Conditional Access Modules (CAM)
      *                Common Interface (CI), to link.
      * @return Local transport stream id when connection is successfully established. Failed
-     *         operation returns {@link INVALID_LTS_ID} while unsupported version also returns
-     *         {@link INVALID_LTS_ID}. Check the current HAL version using
-     *         {@link TunerVersionChecker.getTunerVersion()}.
+     *         operation returns {@link #INVALID_LTS_ID} while unsupported version also returns
+     *         {@link #INVALID_LTS_ID}. Check the current HAL version using
+     *         {@link TunerVersionChecker#getTunerVersion()}.
      */
     public int connectFrontendToCiCam(int ciCamId) {
         if (TunerVersionChecker.checkHigherOrEqualVersionTo(TunerVersionChecker.TUNER_VERSION_1_1,
@@ -957,7 +956,7 @@ public class Tuner implements AutoCloseable  {
      * <p>The demux will use the output from the frontend as the input after this call.
      *
      * <p> Note that this API is used to disconnect the CI-CAM to the Demux module while
-     * {@link disconnectFrontendToCiCam(int)} is used to disconnect CI-CAM to the Frontend module.
+     * {@link #disconnectFrontendToCiCam(int)} is used to disconnect CI-CAM to the Frontend module.
      *
      * @return result status of the operation.
      */
@@ -975,15 +974,15 @@ public class Tuner implements AutoCloseable  {
      * <p>It is used by the client to unlink CI-CAM to a Frontend.
      *
      * <p> Note that this API is used to disconnect the CI-CAM to the Demux module while
-     * {@link disconnectCiCam(int)} is used to disconnect CI-CAM to the Frontend module.
+     * {@link #disconnectCiCam(int)} is used to disconnect CI-CAM to the Frontend module.
      *
      * <p>This API is only supported by Tuner HAL 1.1 or higher. Unsupported version would cause
-     * no-op. Use {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     * no-op. Use {@link TunerVersionChecker#getTunerVersion()} to check the version.
      *
      * @param ciCamId specify CI-CAM Id, which is the id of the Conditional Access Modules (CAM)
      *                Common Interface (CI), to disconnect.
      * @return result status of the operation. Unsupported version would return
-     *         {@link RESULT_UNAVAILABLE}
+     *         {@link #RESULT_UNAVAILABLE}
      */
     @Result
     public int disconnectFrontendToCiCam(int ciCamId) {
@@ -1292,7 +1291,7 @@ public class Tuner implements AutoCloseable  {
     /**
      * Opens a Descrambler in tuner.
      *
-     * @return  a {@link Descrambler} object.
+     * @return a {@link Descrambler} object.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_DESCRAMBLER)
     @Nullable

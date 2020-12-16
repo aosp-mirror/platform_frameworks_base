@@ -17,6 +17,7 @@ package com.android.systemui.theme;
 
 import android.content.om.OverlayInfo;
 import android.content.om.OverlayManager;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -49,6 +50,8 @@ import java.util.stream.Collectors;
 public class ThemeOverlayApplier implements Dumpable {
     private static final String TAG = "ThemeOverlayApplier";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean MONET_ENABLED = SystemProperties
+            .getBoolean("persist.sysui.monet", false);
 
     @VisibleForTesting
     static final String MONET_ACCENT_COLOR_PACKAGE = "com.android.theme.accentcolor.color";
@@ -178,6 +181,9 @@ public class ThemeOverlayApplier implements Dumpable {
     }
 
     private void collectMonetSystemOverlays() {
+        if (!MONET_ENABLED) {
+            return;
+        }
         List<OverlayInfo> androidOverlays = mOverlayManager
                 .getOverlayInfosForTarget(ANDROID_PACKAGE, UserHandle.SYSTEM);
         for (OverlayInfo overlayInfo : androidOverlays) {

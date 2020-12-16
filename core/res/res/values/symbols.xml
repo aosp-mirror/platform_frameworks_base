@@ -1436,6 +1436,10 @@
   <java-symbol type="drawable" name="ic_mic" />
   <java-symbol type="drawable" name="ic_alert_window_layer" />
   <java-symbol type="drawable" name="ic_feedback_indicator" />
+  <java-symbol type="drawable" name="ic_feedback_alerted" />
+  <java-symbol type="drawable" name="ic_feedback_silenced" />
+  <java-symbol type="drawable" name="ic_feedback_uprank" />
+  <java-symbol type="drawable" name="ic_feedback_downrank" />
 
   <java-symbol type="drawable" name="ic_account_circle" />
   <java-symbol type="color" name="user_icon_1" />
@@ -3473,6 +3477,7 @@
   <java-symbol type="string" name="config_defaultAugmentedAutofillService" />
   <java-symbol type="string" name="config_defaultAppPredictionService" />
   <java-symbol type="string" name="config_defaultContentSuggestionsService" />
+  <java-symbol type="string" name="config_defaultSearchUiService" />
   <java-symbol type="string" name="config_defaultMusicRecognitionService" />
   <java-symbol type="string" name="config_defaultAttentionService" />
   <java-symbol type="string" name="config_defaultSystemCaptionsService" />

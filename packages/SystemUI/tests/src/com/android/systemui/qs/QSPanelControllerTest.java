@@ -103,6 +103,7 @@ public class QSPanelControllerTest extends SysuiTestCase {
         when(mQSPanel.isAttachedToWindow()).thenReturn(true);
         when(mQSPanel.getDumpableTag()).thenReturn("QSPanel");
         when(mQSPanel.createRegularTileLayout()).thenReturn(mPagedTileLayout);
+        when(mQSPanel.getTileLayout()).thenReturn(mPagedTileLayout);
         when(mQSTileHost.getTiles()).thenReturn(Collections.singleton(mQSTile));
         when(mQSTileHost.createTileView(eq(mQSTile), anyBoolean())).thenReturn(mQSTileView);
         when(mToggleSliderViewControllerFactory.create(any(), any()))

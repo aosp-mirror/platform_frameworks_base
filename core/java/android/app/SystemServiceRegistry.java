@@ -32,6 +32,7 @@ import android.app.job.JobSchedulerFrameworkInitializer;
 import android.app.prediction.AppPredictionManager;
 import android.app.role.RoleControllerManager;
 import android.app.role.RoleManager;
+import android.app.search.SearchUiManager;
 import android.app.slice.SliceManager;
 import android.app.time.TimeManager;
 import android.app.timedetector.TimeDetector;
@@ -117,7 +118,6 @@ import android.media.tv.tunerresourcemanager.ITunerResourceManager;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
 import android.net.ConnectivityDiagnosticsManager;
 import android.net.ConnectivityManager;
-import android.net.ConnectivityThread;
 import android.net.EthernetManager;
 import android.net.IConnectivityManager;
 import android.net.IEthernetManager;
@@ -781,8 +781,7 @@ public final class SystemServiceRegistry {
             public LowpanManager createService(ContextImpl ctx) throws ServiceNotFoundException {
                 IBinder b = ServiceManager.getServiceOrThrow(Context.LOWPAN_SERVICE);
                 ILowpanManager service = ILowpanManager.Stub.asInterface(b);
-                return new LowpanManager(ctx.getOuterContext(), service,
-                        ConnectivityThread.getInstanceLooper());
+                return new LowpanManager(ctx.getOuterContext(), service);
             }});
 
         registerService(Context.ETHERNET_SERVICE, EthernetManager.class,
@@ -1173,6 +1172,16 @@ public final class SystemServiceRegistry {
                 // manager to apps so the performance impact is practically zero
                 return null;
             }});
+
+        registerService(Context.SEARCH_UI_SERVICE, SearchUiManager.class,
+            new CachedServiceFetcher<SearchUiManager>() {
+                @Override
+                public SearchUiManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
+                    IBinder b = ServiceManager.getService(Context.SEARCH_UI_SERVICE);
+                    return b == null ? null : new SearchUiManager(ctx);
+                }
+            });
 
         registerService(Context.APP_PREDICTION_SERVICE, AppPredictionManager.class,
                 new CachedServiceFetcher<AppPredictionManager>() {

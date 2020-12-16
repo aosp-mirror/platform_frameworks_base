@@ -1586,15 +1586,15 @@ public class NotificationContentView extends FrameLayout {
         return null;
     }
 
-    public void showFeedbackIcon(boolean show) {
+    public void showFeedbackIcon(boolean show, int resId) {
         if (mContractedChild != null) {
-            mContractedWrapper.showFeedbackIcon(show);
+            mContractedWrapper.showFeedbackIcon(show, resId);
         }
         if (mExpandedChild != null) {
-            mExpandedWrapper.showFeedbackIcon(show);
+            mExpandedWrapper.showFeedbackIcon(show, resId);
         }
         if (mHeadsUpChild != null) {
-            mHeadsUpWrapper.showFeedbackIcon(show);
+            mHeadsUpWrapper.showFeedbackIcon(show, resId);
         }
     }
 

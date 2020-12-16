@@ -344,7 +344,7 @@ public class DvbsFrontendSettings extends FrontendSettings {
      * Get if the client can handle the Diseqc Rx Message or not. Default value is false.
      *
      * The setter {@link Builder#setCanHandleDiseqcRxMessage(boolean)} is only supported with
-     * Tuner HAL 1.1 or higher. Use {@link TunerVersionChecker.getTunerVersion()} to check the
+     * Tuner HAL 1.1 or higher. Use {@link TunerVersionChecker#getTunerVersion()} to check the
      * version.
      */
     public boolean canHandleDiseqcRxMessage() {
@@ -394,7 +394,7 @@ public class DvbsFrontendSettings extends FrontendSettings {
          * Set the scan type.
          *
          * <p>This API is only supported by Tuner HAL 1.1 or higher. Unsupported version would cause
-         * no-op. Use {@link TunerVersionChecker.getTunerVersion()} to check the version.
+         * no-op. Use {@link TunerVersionChecker#getTunerVersion()} to check the version.
          *
          * @param scanType the value to set as the scan type. Default value is
          * {@link android.media.tv.tuner.frontend.DvbsFrontendSettings#DVBS_SCAN_TYPE_UNDEFINED}.
@@ -414,7 +414,7 @@ public class DvbsFrontendSettings extends FrontendSettings {
          * channel in the hardware layer.
          *
          * <p>This API is only supported by Tuner HAL 1.1 or higher. Unsupported version would cause
-         * no-op. Use {@link TunerVersionChecker.getTunerVersion()} to check the version.
+         * no-op. Use {@link TunerVersionChecker#getTunerVersion()} to check the version.
          */
         @NonNull
         public Builder setCanHandleDiseqcRxMessage(boolean canHandleDiseqcMessage) {

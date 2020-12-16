@@ -370,9 +370,9 @@ final class ActivityManagerConstants extends ContentObserver {
     volatile boolean mFlagFgsNotificationDeferralEnabled = true;
 
     // Restrict FGS notification deferral policy to only those apps that target
-    // API version S or higher.  Enabled by default; set to "false" to defer FGS
-    // notifications from legacy apps as well.
-    volatile boolean mFlagFgsNotificationDeferralApiGated = true;
+    // API version S or higher.  Disabled by default; set to "true" to force
+    // legacy app FGS notifications to display immediately in all cases.
+    volatile boolean mFlagFgsNotificationDeferralApiGated = false;
 
     // Time in milliseconds to defer FGS notifications after their transition to
     // the foreground state.
@@ -806,7 +806,7 @@ final class ActivityManagerConstants extends ContentObserver {
         mFlagFgsNotificationDeferralApiGated = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_DEFERRED_FGS_NOTIFICATIONS_API_GATED,
-                /*default value*/ true);
+                /*default value*/ false);
     }
 
     private void updateFgsNotificationDeferralInterval() {

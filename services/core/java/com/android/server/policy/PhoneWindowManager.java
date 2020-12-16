@@ -4017,9 +4017,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return true;
         }
 
-        // Watches handle BACK specially
+        // Watches handle BACK and hardware buttons specially
         if (mHasFeatureWatch && (keyCode == KeyEvent.KEYCODE_BACK
-                || keyCode == KeyEvent.KEYCODE_STEM_PRIMARY)) {
+                || keyCode == KeyEvent.KEYCODE_STEM_PRIMARY
+                || keyCode == KeyEvent.KEYCODE_STEM_1
+                || keyCode == KeyEvent.KEYCODE_STEM_2
+                || keyCode == KeyEvent.KEYCODE_STEM_3)) {
             return false;
         }
 

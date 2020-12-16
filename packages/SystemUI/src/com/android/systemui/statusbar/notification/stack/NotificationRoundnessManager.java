@@ -20,12 +20,9 @@ import android.util.MathUtils;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
-import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
-import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
 import java.util.HashSet;
 
@@ -48,6 +45,11 @@ public class NotificationRoundnessManager {
     private ExpandableNotificationRow mTrackedHeadsUp;
     private float mAppearFraction;
 
+    // Radius for notification corners WITH adjacent notifications
+    // as percent of radius WITHOUT adjacent notifications.
+    // TODO(b/175710408) pull from dimens and hide from beta builds.
+    static final float SMALL_CORNER_RADIUS = 4f/28;
+
     @Inject
     NotificationRoundnessManager(
             KeyguardBypassController keyguardBypassController,
@@ -67,7 +69,7 @@ public class NotificationRoundnessManager {
         }
     }
 
-    private boolean updateViewWithoutCallback(ExpandableView view,
+    boolean updateViewWithoutCallback(ExpandableView view,
             boolean animate) {
         float topRoundness = getRoundness(view, true /* top */);
         float bottomRoundness = getRoundness(view, false /* top */);
@@ -107,7 +109,9 @@ public class NotificationRoundnessManager {
     }
 
     private float getRoundness(ExpandableView view, boolean top) {
-        if ((view.isPinned() || view.isHeadsUpAnimatingAway()) && !mExpanded) {
+        if ((view.isPinned()
+                || view.isBeingSwiped()
+                || (view.isHeadsUpAnimatingAway()) && !mExpanded)) {
             return 1.0f;
         }
         if (isFirstInSection(view, true /* include first section */) && top) {
@@ -124,7 +128,7 @@ public class NotificationRoundnessManager {
         if (view.showingPulsing() && !mBypassController.getBypassEnabled()) {
             return 1.0f;
         }
-        return 0.0f;
+        return SMALL_CORNER_RADIUS;
     }
 
     public void setExpanded(float expandedHeight, float appearFraction) {
