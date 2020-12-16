@@ -759,7 +759,7 @@ public class ScreenshotView extends FrameLayout implements
         }
 
         @Override
-        public boolean onTouch(View v, MotionEvent event) {
+        public boolean onTouch(View view, MotionEvent event) {
             boolean gestureResult = mGestureDetector.onTouchEvent(event);
             mCallbacks.onUserInteraction();
             if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
@@ -789,6 +789,10 @@ public class ScreenshotView extends FrameLayout implements
                         createSwipeReturnAnimation().start();
                     }
                     return true;
+                } else {
+                    if (view == mScreenshotPreview) {
+                        mScreenshotPreview.performClick();
+                    }
                 }
             }
             return gestureResult;
