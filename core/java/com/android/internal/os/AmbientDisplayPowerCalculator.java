@@ -16,7 +16,11 @@
 
 package com.android.internal.os;
 
+import android.os.BatteryConsumer;
 import android.os.BatteryStats;
+import android.os.BatteryUsageStats;
+import android.os.BatteryUsageStatsQuery;
+import android.os.SystemBatteryConsumer;
 import android.os.UserHandle;
 import android.util.SparseArray;
 
@@ -26,11 +30,30 @@ import java.util.List;
  * Estimates power consumed by the ambient display
  */
 public class AmbientDisplayPowerCalculator extends PowerCalculator {
-
-    private final PowerProfile mPowerProfile;
+    private final UsageBasedPowerEstimator mPowerEstimator;
 
     public AmbientDisplayPowerCalculator(PowerProfile powerProfile) {
-        mPowerProfile = powerProfile;
+        mPowerEstimator = new UsageBasedPowerEstimator(
+                powerProfile.getAveragePower(PowerProfile.POWER_AMBIENT_DISPLAY));
+    }
+
+    /**
+     * Ambient display power is the additional power the screen takes while in ambient display/
+     * screen doze/always-on display (interchangeable terms) mode.
+     */
+    @Override
+    public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
+            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query,
+            SparseArray<UserHandle> asUsers) {
+        final long durationMs = calculateDuration(batteryStats, rawRealtimeUs,
+                BatteryStats.STATS_SINCE_CHARGED);
+        final double powerMah = mPowerEstimator.calculatePower(durationMs);
+        if (powerMah > 0) {
+            builder.getOrCreateSystemBatteryConsumerBuilder(
+                    SystemBatteryConsumer.DRAIN_TYPE_AMBIENT_DISPLAY)
+                    .setConsumedPower(BatteryConsumer.POWER_COMPONENT_USAGE, powerMah)
+                    .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_USAGE, durationMs);
+        }
     }
 
     /**
@@ -42,16 +65,18 @@ public class AmbientDisplayPowerCalculator extends PowerCalculator {
     @Override
     public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
-
-        long ambientDisplayMs = batteryStats.getScreenDozeTime(rawRealtimeUs, statsType) / 1000;
-        double power = mPowerProfile.getAveragePower(PowerProfile.POWER_AMBIENT_DISPLAY)
-                * ambientDisplayMs / (60 * 60 * 1000);
-        if (power > 0) {
+        final long durationMs = calculateDuration(batteryStats, rawRealtimeUs, statsType);
+        final double powerMah = mPowerEstimator.calculatePower(durationMs);
+        if (powerMah > 0) {
             BatterySipper bs = new BatterySipper(BatterySipper.DrainType.AMBIENT_DISPLAY, null, 0);
-            bs.usagePowerMah = power;
-            bs.usageTimeMs = ambientDisplayMs;
+            bs.usagePowerMah = powerMah;
+            bs.usageTimeMs = durationMs;
             bs.sumPower();
             sippers.add(bs);
         }
+    }
+
+    private long calculateDuration(BatteryStats batteryStats, long rawRealtimeUs, int statsType) {
+        return batteryStats.getScreenDozeTime(rawRealtimeUs, statsType) / 1000;
     }
 }

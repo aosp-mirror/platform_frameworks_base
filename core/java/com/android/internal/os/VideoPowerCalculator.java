@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,35 +21,25 @@ import android.os.BatteryUsageStatsQuery;
 import android.os.UidBatteryConsumer;
 
 /**
- * Power calculator for the flashlight.
+ * A {@link PowerCalculator} to calculate power consumed by video hardware.
+ *
+ * Also see {@link PowerProfile#POWER_VIDEO}.
  */
-public class FlashlightPowerCalculator extends PowerCalculator {
-    // Calculate flashlight power usage.  Right now, this is based on the average power draw
-    // of the flash unit when kept on over a short period of time.
+public class VideoPowerCalculator extends PowerCalculator {
     private final UsageBasedPowerEstimator mPowerEstimator;
 
-    public FlashlightPowerCalculator(PowerProfile profile) {
+    public VideoPowerCalculator(PowerProfile powerProfile) {
         mPowerEstimator = new UsageBasedPowerEstimator(
-                profile.getAveragePower(PowerProfile.POWER_FLASHLIGHT));
+                powerProfile.getAveragePower(PowerProfile.POWER_VIDEO));
     }
 
     @Override
     protected void calculateApp(UidBatteryConsumer.Builder app, BatteryStats.Uid u,
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
-        final long durationMs = mPowerEstimator.calculateDuration(u.getFlashlightTurnedOnTimer(),
+        final long durationMs = mPowerEstimator.calculateDuration(u.getVideoTurnedOnTimer(),
                 rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED);
         final double powerMah = mPowerEstimator.calculatePower(durationMs);
-        app.setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_FLASHLIGHT, durationMs)
-                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT, powerMah);
-    }
-
-    @Override
-    protected void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
-            long rawUptimeUs, int statsType) {
-        final long durationMs = mPowerEstimator.calculateDuration(u.getFlashlightTurnedOnTimer(),
-                rawRealtimeUs, statsType);
-        final double powerMah = mPowerEstimator.calculatePower(durationMs);
-        app.flashlightTimeMs = durationMs;
-        app.flashlightPowerMah = powerMah;
+        app.setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_VIDEO, durationMs)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_VIDEO, powerMah);
     }
 }
