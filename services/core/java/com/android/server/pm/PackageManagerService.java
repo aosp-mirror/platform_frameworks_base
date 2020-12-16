@@ -1822,6 +1822,13 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private class DomainVerificationConnection implements
             DomainVerificationService.Connection {
+
+        @Override
+        public void scheduleWriteSettings() {
+            synchronized (mLock) {
+                PackageManagerService.this.scheduleWriteSettingsLocked();
+            }
+        }
     }
 
     /**
@@ -5885,7 +5892,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 (i, pm) -> new Settings(Environment.getDataDirectory(),
                         RuntimePermissionsPersistence.createInstance(),
                         i.getPermissionManagerServiceInternal(),
-                        i.getIntentFilterVerificationManager(), lock),
+                        i.getIntentFilterVerificationManager(),
+                        domainVerificationService, lock),
                 (i, pm) -> AppsFilter.create(pm.mPmInternal, i),
                 (i, pm) -> (PlatformCompat) ServiceManager.getService("platform_compat"),
                 (i, pm) -> SystemConfig.getInstance(),
@@ -13296,7 +13304,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final int userId = user == null ? 0 : user.getIdentifier();
         // Modify state for the given package setting
-        commitPackageSettings(pkg, oldPkg, pkgSetting, scanFlags,
+        commitPackageSettings(pkg, oldPkg, pkgSetting, oldPkgSetting, scanFlags,
                 (parseFlags & ParsingPackageUtils.PARSE_CHATTY) != 0 /*chatty*/, reconciledPkg);
         if (pkgSetting.getInstantApp(userId)) {
             mInstantAppRegistry.addInstantAppLPw(userId, pkgSetting.appId);
@@ -13553,6 +13561,9 @@ public class PackageManagerService extends IPackageManager.Stub
             usesStaticLibraries = new String[parsedPackage.getUsesStaticLibraries().size()];
             parsedPackage.getUsesStaticLibraries().toArray(usesStaticLibraries);
         }
+
+        final UUID newDomainSetId = injector.getDomainVerificationManagerInternal().generateNewId();
+
         // TODO(b/135203078): Remove appInfoFlag usage in favor of individually assigned booleans
         //  to avoid adding something that's unsupported due to lack of state, since it's called
         //  with null.
@@ -13576,7 +13587,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     parsedPackage.getVersionCode(), pkgFlags, pkgPrivateFlags, user,
                     true /*allowInstall*/, instantApp, virtualPreload,
                     UserManagerService.getInstance(), usesStaticLibraries,
-                    parsedPackage.getUsesStaticLibrariesVersions(), parsedPackage.getMimeGroups());
+                    parsedPackage.getUsesStaticLibrariesVersions(), parsedPackage.getMimeGroups(),
+                    newDomainSetId);
         } else {
             // make a deep copy to avoid modifying any existing system state.
             pkgSetting = new PackageSetting(pkgSetting);
@@ -13595,7 +13607,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     PackageInfoUtils.appInfoPrivateFlags(parsedPackage, pkgSetting),
                     UserManagerService.getInstance(),
                     usesStaticLibraries, parsedPackage.getUsesStaticLibrariesVersions(),
-                    parsedPackage.getMimeGroups());
+                    parsedPackage.getMimeGroups(), newDomainSetId);
         }
         if (createNewPackage && originalPkgSetting != null) {
             // This is the initial transition from the original package, so,
@@ -14440,8 +14452,8 @@ public class PackageManagerService extends IPackageManager.Stub
      * Adds a scanned package to the system. When this method is finished, the package will
      * be available for query, resolution, etc...
      */
-    private void commitPackageSettings(AndroidPackage pkg,
-            @Nullable AndroidPackage oldPkg, PackageSetting pkgSetting,
+    private void commitPackageSettings(@NonNull AndroidPackage pkg, @Nullable AndroidPackage oldPkg,
+            @NonNull PackageSetting pkgSetting, @Nullable PackageSetting oldPkgSetting,
             final @ScanFlags int scanFlags, boolean chatty, ReconciledPackage reconciledPkg) {
         final String pkgName = pkg.getPackageName();
         if (mCustomResolverComponentName != null &&
@@ -20950,6 +20962,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 synchronized (mLock) {
                     mIntentFilterVerificationManager.clearIntentFilterVerificationsLocked(
                             deletedPs.name, UserHandle.USER_ALL, true);
+                    mDomainVerificationManager.clearPackage(deletedPs.name);
                     clearDefaultBrowserIfNeeded(packageName);
                     mSettings.getKeySetManagerService().removeAppKeySetDataLPw(packageName);
                     mAppsFilter.removePackage(getPackageSetting(packageName));
@@ -22084,6 +22097,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 mSettings.applyDefaultPreferredAppsLPw(userId);
                 mIntentFilterVerificationManager.clearIntentFilterVerificationsLocked(userId,
                         mPackages);
+                mDomainVerificationManager.clearUser(userId);
                 primeDomainVerificationsLPw(userId);
                 final int numPackages = mPackages.size();
                 for (int i = 0; i < numPackages; i++) {

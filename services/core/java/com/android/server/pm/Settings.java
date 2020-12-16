@@ -106,6 +106,8 @@ import com.android.permission.persistence.RuntimePermissionsState;
 import com.android.server.LocalServices;
 import com.android.server.backup.PreferredActivityBackupHelper;
 import com.android.server.pm.Installer.InstallerException;
+import com.android.server.pm.domain.verify.DomainVerificationManagerInternal;
+import com.android.server.pm.domain.verify.DomainVerificationPersistence;
 import com.android.server.pm.intent.verify.legacy.IntentFilterVerificationManager;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
@@ -154,6 +156,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Holds information about dynamic settings.
@@ -510,6 +513,8 @@ public final class Settings implements Watchable, Snappable {
 
     private final IntentFilterVerificationManager mIntentFilterVerificationManager;
 
+    private final DomainVerificationManagerInternal mDomainVerificationManager;
+
     /**
      * The observer that watches for changes from array members
      */
@@ -537,6 +542,7 @@ public final class Settings implements Watchable, Snappable {
         mBackupStoppedPackagesFilename = null;
         mKernelMappingFilename = null;
         mIntentFilterVerificationManager = null;
+        mDomainVerificationManager = null;
         mPackages.registerObserver(mObserver);
         mInstallerPackages.registerObserver(mObserver);
         mKernelMapping.registerObserver(mObserver);
@@ -558,7 +564,9 @@ public final class Settings implements Watchable, Snappable {
 
     Settings(File dataDir, RuntimePermissionsPersistence runtimePermissionsPersistence,
             LegacyPermissionDataProvider permissionDataProvider,
-            IntentFilterVerificationManager intentFilterVerificationManager, Object lock)  {
+            @NonNull IntentFilterVerificationManager intentFilterVerificationManager,
+            @NonNull DomainVerificationManagerInternal domainVerificationManager,
+            @NonNull Object lock)  {
         mLock = lock;
         mAppIds = new WatchedArrayList<>();
         mOtherAppIds = new WatchedSparseArray<>();
@@ -586,6 +594,7 @@ public final class Settings implements Watchable, Snappable {
         mBackupStoppedPackagesFilename = new File(mSystemDir, "packages-stopped-backup.xml");
 
         mIntentFilterVerificationManager = intentFilterVerificationManager;
+        mDomainVerificationManager = domainVerificationManager;
 
         mPackages.registerObserver(mObserver);
         mInstallerPackages.registerObserver(mObserver);
@@ -629,6 +638,7 @@ public final class Settings implements Watchable, Snappable {
         mKernelMappingFilename = null;
 
         mIntentFilterVerificationManager = r.mIntentFilterVerificationManager;
+        mDomainVerificationManager = r.mDomainVerificationManager;
 
         mInstallerPackages.addAll(r.mInstallerPackages);
         mKernelMapping.putAll(r.mKernelMapping);
@@ -766,7 +776,8 @@ public final class Settings implements Watchable, Snappable {
                 p.legacyNativeLibraryPathString, p.primaryCpuAbiString,
                 p.secondaryCpuAbiString, p.cpuAbiOverrideString,
                 p.appId, p.versionCode, p.pkgFlags, p.pkgPrivateFlags,
-                p.usesStaticLibraries, p.usesStaticLibrariesVersions, p.mimeGroups);
+                p.usesStaticLibraries, p.usesStaticLibrariesVersions, p.mimeGroups,
+                mDomainVerificationManager.generateNewId());
         if (ret != null) {
             ret.getPkgState().setUpdatedSystemApp(false);
         }
@@ -786,7 +797,8 @@ public final class Settings implements Watchable, Snappable {
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString, int uid, long vc, int
             pkgFlags, int pkgPrivateFlags, String[] usesStaticLibraries,
-            long[] usesStaticLibraryNames, Map<String, ArraySet<String>> mimeGroups) {
+            long[] usesStaticLibraryNames, Map<String, ArraySet<String>> mimeGroups,
+            @NonNull UUID domainSetId) {
         PackageSetting p = mPackages.get(name);
         if (p != null) {
             if (p.appId == uid) {
@@ -799,7 +811,7 @@ public final class Settings implements Watchable, Snappable {
         p = new PackageSetting(name, realName, codePath, legacyNativeLibraryPathString,
                 primaryCpuAbiString, secondaryCpuAbiString, cpuAbiOverrideString, vc, pkgFlags,
                 pkgPrivateFlags, 0 /*userId*/, usesStaticLibraries, usesStaticLibraryNames,
-                mimeGroups);
+                mimeGroups, domainSetId);
         p.appId = uid;
         if (registerExistingAppIdLPw(uid, p, name)) {
             mPackages.put(name, p);
@@ -863,7 +875,7 @@ public final class Settings implements Watchable, Snappable {
             UserHandle installUser, boolean allowInstall, boolean instantApp,
             boolean virtualPreload, UserManagerService userManager,
             String[] usesStaticLibraries, long[] usesStaticLibrariesVersions,
-            Set<String> mimeGroupNames) {
+            Set<String> mimeGroupNames, @NonNull UUID domainSetId) {
         final PackageSetting pkgSetting;
         if (originalPkg != null) {
             if (PackageManagerService.DEBUG_UPGRADE) Log.v(PackageManagerService.TAG, "Package "
@@ -883,12 +895,13 @@ public final class Settings implements Watchable, Snappable {
             pkgSetting.usesStaticLibrariesVersions = usesStaticLibrariesVersions;
             // Update new package state.
             pkgSetting.setTimeStamp(codePath.lastModified());
+            pkgSetting.setDomainSetId(domainSetId);
         } else {
             pkgSetting = new PackageSetting(pkgName, realPkgName, codePath,
                     legacyNativeLibraryPath, primaryCpuAbi, secondaryCpuAbi,
                     null /*cpuAbiOverrideString*/, versionCode, pkgFlags, pkgPrivateFlags,
                     0 /*sharedUserId*/, usesStaticLibraries,
-                    usesStaticLibrariesVersions, createMimeGroups(mimeGroupNames));
+                    usesStaticLibrariesVersions, createMimeGroups(mimeGroupNames), domainSetId);
             pkgSetting.setTimeStamp(codePath.lastModified());
             pkgSetting.sharedUser = sharedUser;
             // If this is not a system app, it starts out stopped.
@@ -983,7 +996,7 @@ public final class Settings implements Watchable, Snappable {
             @Nullable String primaryCpuAbi, @Nullable String secondaryCpuAbi, int pkgFlags,
             int pkgPrivateFlags, @NonNull UserManagerService userManager,
             @Nullable String[] usesStaticLibraries, @Nullable long[] usesStaticLibrariesVersions,
-            @Nullable Set<String> mimeGroupNames)
+            @Nullable Set<String> mimeGroupNames, @NonNull UUID domainSetId)
                     throws PackageManagerException {
         final String pkgName = pkgSetting.name;
         if (pkgSetting.sharedUser != sharedUser) {
@@ -1059,6 +1072,7 @@ public final class Settings implements Watchable, Snappable {
             pkgSetting.usesStaticLibrariesVersions = null;
         }
         pkgSetting.updateMimeGroups(mimeGroupNames);
+        pkgSetting.setDomainSetId(domainSetId);
     }
 
     /**
@@ -2342,6 +2356,8 @@ public final class Settings implements Watchable, Snappable {
 
             mIntentFilterVerificationManager.writeRestoredIntentFilterVerifications(serializer);
 
+            mDomainVerificationManager.writeSettings(serializer);
+
             mKeySetManagerService.writeKeySetManagerServiceLPr(serializer);
 
             serializer.endTag(null, "packages");
@@ -2717,6 +2733,8 @@ public final class Settings implements Watchable, Snappable {
         serializer.attributeFloat(null, "loadingProgress",
                 pkg.getIncrementalStates().getProgress());
 
+        serializer.attribute(null, "domainSetId", pkg.getDomainSetId().toString());
+
         writeUsesStaticLibLPw(serializer, pkg.usesStaticLibraries, pkg.usesStaticLibrariesVersions);
 
         pkg.signatures.writeXml(serializer, "sigs", mPastSignatures);
@@ -2904,7 +2922,9 @@ public final class Settings implements Watchable, Snappable {
                     ver.sdkVersion = parser.getAttributeInt(null, ATTR_SDK_VERSION);
                     ver.databaseVersion = parser.getAttributeInt(null, ATTR_DATABASE_VERSION);
                     ver.fingerprint = XmlUtils.readStringAttribute(parser, ATTR_FINGERPRINT);
-                } else {
+                } else if (tagName.equals(DomainVerificationPersistence.TAG_DOMAIN_VERIFICATIONS)) {
+                    mDomainVerificationManager.readSettings(parser);
+                }else {
                     Slog.w(PackageManagerService.TAG, "Unknown element under <packages>: "
                             + parser.getName());
                     XmlUtils.skipCurrentTag(parser);
@@ -3385,9 +3405,15 @@ public final class Settings implements Watchable, Snappable {
         if (codePathStr.contains("/priv-app/")) {
             pkgPrivateFlags |= ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
         }
+
+        // When reading a disabled setting, use a disabled domainSetId, which makes it easier to
+        // debug invalid entries. The actual logic for migrating to a new ID is done in other
+        // methods that use DomainVerificationManagerInternal#generateNewId
+        UUID domainSetId = DomainVerificationManagerInternal.DISABLED_ID;
         PackageSetting ps = new PackageSetting(name, realName, new File(codePathStr),
                 legacyNativeLibraryPathStr, primaryCpuAbiStr, secondaryCpuAbiStr, cpuAbiOverrideStr,
-                versionCode, pkgFlags, pkgPrivateFlags, 0 /*sharedUserId*/, null, null, null);
+                versionCode, pkgFlags, pkgPrivateFlags, 0 /*sharedUserId*/, null, null, null,
+                domainSetId);
         long timeStamp = parser.getAttributeLongHex(null, "ft", 0);
         if (timeStamp == 0) {
             timeStamp = parser.getAttributeLong(null, "ts", 0);
@@ -3460,6 +3486,7 @@ public final class Settings implements Watchable, Snappable {
         boolean isStartable = false;
         boolean isLoading = false;
         float loadingProgress = 0;
+        UUID domainSetId;
         try {
             name = parser.getAttributeValue(null, ATTR_NAME);
             realName = parser.getAttributeValue(null, "realName");
@@ -3495,6 +3522,15 @@ public final class Settings implements Watchable, Snappable {
             volumeUuid = parser.getAttributeValue(null, "volumeUuid");
             categoryHint = parser.getAttributeInt(null, "categoryHint",
                     ApplicationInfo.CATEGORY_UNDEFINED);
+
+            String domainSetIdString = parser.getAttributeValue(null, "domainSetId");
+
+            if (TextUtils.isEmpty(domainSetIdString)) {
+                // If empty, assume restoring from previous platform version and generate an ID
+                domainSetId = mDomainVerificationManager.generateNewId();
+            } else {
+                domainSetId = UUID.fromString(domainSetIdString);
+            }
 
             systemStr = parser.getAttributeValue(null, "publicFlags");
             if (systemStr != null) {
@@ -3567,7 +3603,7 @@ public final class Settings implements Watchable, Snappable {
                         legacyNativeLibraryPathStr, primaryCpuAbiString, secondaryCpuAbiString,
                         cpuAbiOverrideString, userId, versionCode, pkgFlags, pkgPrivateFlags,
                         null /*usesStaticLibraries*/, null /*usesStaticLibraryVersions*/,
-                        null /*mimeGroups*/);
+                        null /*mimeGroups*/, domainSetId);
                 if (PackageManagerService.DEBUG_SETTINGS)
                     Log.i(PackageManagerService.TAG, "Reading package " + name + ": userId="
                             + userId + " pkg=" + packageSetting);
@@ -3588,7 +3624,7 @@ public final class Settings implements Watchable, Snappable {
                             versionCode, pkgFlags, pkgPrivateFlags, sharedUserId,
                             null /*usesStaticLibraries*/,
                             null /*usesStaticLibraryVersions*/,
-                            null /*mimeGroups*/);
+                            null /*mimeGroups*/, domainSetId);
                     packageSetting.setTimeStamp(timeStamp);
                     packageSetting.firstInstallTime = firstInstallTime;
                     packageSetting.lastUpdateTime = lastUpdateTime;
@@ -3974,6 +4010,7 @@ public final class Settings implements Watchable, Snappable {
         removeCrossProfileIntentFiltersLPw(userId);
 
         mRuntimePermissionsPersistence.onUserRemovedLPw(userId);
+        mDomainVerificationManager.clearUser(userId);
 
         writePackageListLPr();
 

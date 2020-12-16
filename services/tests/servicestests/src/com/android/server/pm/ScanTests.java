@@ -50,6 +50,7 @@ import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
 
 import com.android.server.compat.PlatformCompat;
+import com.android.server.pm.domain.verify.DomainVerificationManagerInternal;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.PackageImpl;
@@ -91,6 +92,14 @@ public class ScanTests {
         when(mMockInjector.getAbiHelper()).thenReturn(mMockPackageAbiHelper);
         when(mMockInjector.getUserManagerInternal()).thenReturn(mMockUserManager);
         when(mMockInjector.getCompatibility()).thenReturn(mMockCompatibility);
+
+        DomainVerificationManagerInternal domainVerificationManager =
+                mock(DomainVerificationManagerInternal.class);
+        when(domainVerificationManager.generateNewId())
+                .thenAnswer(invocation -> UUID.randomUUID());
+
+        when(mMockInjector.getDomainVerificationManagerInternal())
+                .thenReturn(domainVerificationManager);
     }
 
     @Before
