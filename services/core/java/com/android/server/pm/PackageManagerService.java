@@ -377,6 +377,8 @@ import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.dex.ViewCompiler;
+import com.android.server.pm.domain.verify.DomainVerificationManagerInternal;
+import com.android.server.pm.domain.verify.DomainVerificationService;
 import com.android.server.pm.intent.verify.legacy.IntentFilterVerificationManager;
 import com.android.server.pm.intent.verify.legacy.IntentFilterVerificationParams;
 import com.android.server.pm.intent.verify.legacy.IntentVerifierProxy;
@@ -1071,6 +1073,8 @@ public class PackageManagerService extends IPackageManager.Stub
         private final Singleton<ModuleInfoProvider> mModuleInfoProviderProducer;
         private final Singleton<IntentFilterVerificationManager>
                 mIntentFilterVerificationManagerProducer;
+        private final Singleton<DomainVerificationManagerInternal>
+                mDomainVerificationManagerInternalProducer;
         private final Singleton<Handler> mHandlerProducer;
 
         Injector(Context context, Object lock, Installer installer,
@@ -1101,6 +1105,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 Producer<ModuleInfoProvider> moduleInfoProviderProducer,
                 Producer<LegacyPermissionManagerInternal> legacyPermissionManagerInternalProducer,
                 Producer<IntentFilterVerificationManager> intentFilterVerificationManagerProducer,
+                Producer<DomainVerificationManagerInternal>
+                        domainVerificationManagerInternalProducer,
                 Producer<Handler> handlerProducer,
                 SystemWrapper systemWrapper,
                 ServiceProducer getLocalServiceProducer,
@@ -1141,6 +1147,8 @@ public class PackageManagerService extends IPackageManager.Stub
             mGetSystemServiceProducer = getSystemServiceProducer;
             mIntentFilterVerificationManagerProducer =
                     new Singleton<>(intentFilterVerificationManagerProducer);
+            mDomainVerificationManagerInternalProducer =
+                    new Singleton<>(domainVerificationManagerInternalProducer);
             mHandlerProducer = new Singleton<>(handlerProducer);
         }
 
@@ -1290,6 +1298,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
         public IntentFilterVerificationManager getIntentFilterVerificationManager() {
             return mIntentFilterVerificationManagerProducer.get(this, mPackageManager);
+        }
+
+        public DomainVerificationManagerInternal getDomainVerificationManagerInternal() {
+            return mDomainVerificationManagerInternalProducer.get(this, mPackageManager);
         }
 
         public Handler getHandler() {
@@ -1471,7 +1483,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
     boolean mResolverReplaced = false;
 
-    private final @NonNull IntentFilterVerificationManager mIntentFilterVerificationManager;
+    @NonNull
+    private final IntentFilterVerificationManager mIntentFilterVerificationManager;
+
+    @NonNull
+    private final DomainVerificationManagerInternal mDomainVerificationManager;
 
     /** The service connection to the ephemeral resolver */
     final InstantAppResolverConnection mInstantAppResolverConnection;
@@ -1800,6 +1816,13 @@ public class PackageManagerService extends IPackageManager.Stub
                     return mInjector.getLocalService(DeviceIdleInternal.class);
                 }
             };
+
+    private final DomainVerificationConnection mDomainVerificationConnection =
+            new DomainVerificationConnection();
+
+    private class DomainVerificationConnection implements
+            DomainVerificationService.Connection {
+    }
 
     /**
      * Invalidate the package info cache, which includes updating the cached computer.
@@ -5837,7 +5860,8 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     public static PackageManagerService main(Context context, Installer installer,
-            boolean factoryTest, boolean onlyCore) {
+            @NonNull DomainVerificationService domainVerificationService, boolean factoryTest,
+            boolean onlyCore) {
         // Self-check for initial settings.
         PackageManagerServiceCompilerMapping.checkProperties();
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG + "Timing",
@@ -5897,6 +5921,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 (i, pm) -> new IntentFilterVerificationManager(pm.mContext, i.getHandler(),
                         pm.mIntentFilterVerificationConnection, SystemConfig.getInstance(),
                         i.getUserManagerService()),
+                (i, pm) -> domainVerificationService,
                 (i, pm) -> {
                     HandlerThread thread = new ServiceThread(TAG,
                             Process.THREAD_PRIORITY_BACKGROUND, true /*allowIo*/);
@@ -6075,6 +6100,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mSettings = injector.getSettings();
         mUserManager = injector.getUserManagerService();
         mIntentFilterVerificationManager = injector.getIntentFilterVerificationManager();
+        mDomainVerificationManager = injector.getDomainVerificationManagerInternal();
         mHandler = injector.getHandler();
 
         mApexManager = testParams.apexManager;
@@ -6322,6 +6348,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mProcessLoggingHandler = new ProcessLoggingHandler();
             Watchdog.getInstance().addThread(mHandler, WATCHDOG_TIMEOUT);
             mIntentFilterVerificationManager = injector.getIntentFilterVerificationManager();
+            mDomainVerificationManager = injector.getDomainVerificationManagerInternal();
 
             ArrayMap<String, SystemConfig.SharedLibraryEntry> libConfig
                     = systemConfig.getSharedLibraries();
@@ -27934,6 +27961,11 @@ public class PackageManagerService extends IPackageManager.Stub
                 BroadcastOptions.TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
                 duration);
         return bOptions;
+    }
+
+    @NonNull
+    public DomainVerificationService.Connection getDomainVerificationConnection() {
+        return mDomainVerificationConnection;
     }
 }
 

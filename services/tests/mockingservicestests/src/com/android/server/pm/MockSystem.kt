@@ -59,11 +59,13 @@ import com.android.server.SystemServerInitThreadPool
 import com.android.server.compat.PlatformCompat
 import com.android.server.extendedtestutils.wheneverStatic
 import com.android.server.pm.dex.DexManager
+import com.android.server.pm.domain.verify.DomainVerificationManagerInternal
 import com.android.server.pm.parsing.PackageParser2
 import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.parsing.pkg.PackageImpl
 import com.android.server.pm.parsing.pkg.ParsedPackage
 import com.android.server.pm.permission.PermissionManagerServiceInternal
+import com.android.server.testutils.TestHandler
 import com.android.server.testutils.mock
 import com.android.server.testutils.nullable
 import com.android.server.testutils.whenever
@@ -183,6 +185,8 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         val dexManager: DexManager = mock()
         val installer: Installer = mock()
         val displayMetrics: DisplayMetrics = mock()
+        val domainVerificationManagerInternal: DomainVerificationManagerInternal = mock()
+        val handler = TestHandler(null)
     }
 
     companion object {
@@ -258,6 +262,9 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         whenever(mocks.injector.userManagerInternal).thenReturn(mocks.userManagerInternal)
         whenever(mocks.injector.installer).thenReturn(mocks.installer)
         whenever(mocks.injector.displayMetrics).thenReturn(mocks.displayMetrics)
+        whenever(mocks.injector.domainVerificationManagerInternal)
+            .thenReturn(mocks.domainVerificationManagerInternal)
+        whenever(mocks.injector.handler) { mocks.handler }
         wheneverStatic { SystemConfig.getInstance() }.thenReturn(mocks.systemConfig)
         whenever(mocks.systemConfig.availableFeatures).thenReturn(DEFAULT_AVAILABLE_FEATURES_MAP)
         whenever(mocks.systemConfig.sharedLibraries).thenReturn(DEFAULT_SHARED_LIBRARIES_LIST)

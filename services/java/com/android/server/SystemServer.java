@@ -1067,8 +1067,10 @@ public final class SystemServer implements Dumpable {
                 mSystemContext, new Singleton<DomainVerificationService.Connection>() {
             @Override
             protected DomainVerificationService.Connection create() {
-                // TODO(b/159952358): Hook up to PackageManagerService
-                return null;
+                // Deferred retrieval from PackageManagerService, since PMS is initialized after
+                // DVS. The alternative would be to expose this through the PackageManagerInternal
+                // local service, but making it visible to consumers of that interface isn't useful.
+                return mPackageManagerService.getDomainVerificationConnection();
             }
         });
         mSystemServiceManager.startService(domainVerificationService);
@@ -1078,7 +1080,8 @@ public final class SystemServer implements Dumpable {
         try {
             Watchdog.getInstance().pauseWatchingCurrentThread("packagemanagermain");
             mPackageManagerService = PackageManagerService.main(mSystemContext, installer,
-                    mFactoryTestMode != FactoryTest.FACTORY_TEST_OFF, mOnlyCore);
+                    domainVerificationService, mFactoryTestMode != FactoryTest.FACTORY_TEST_OFF,
+                    mOnlyCore);
         } finally {
             Watchdog.getInstance().resumeWatchingCurrentThread("packagemanagermain");
         }
