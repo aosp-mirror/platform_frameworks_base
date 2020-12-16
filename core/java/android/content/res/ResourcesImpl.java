@@ -534,7 +534,24 @@ public class ResourcesImpl {
             remainder = languageTag.substring(separator);
         }
 
-        return Locale.adjustLanguageCode(language) + remainder;
+        // No need to convert to lower cases because the language in the return value of
+        // Locale.toLanguageTag has been lower-cased.
+        final String adjustedLanguage;
+        switch(language) {
+            case "id":
+                adjustedLanguage = "in";
+                break;
+            case "yi":
+                adjustedLanguage = "ji";
+                break;
+            case "he":
+                adjustedLanguage = "iw";
+                break;
+            default:
+                adjustedLanguage = language;
+                break;
+        }
+        return adjustedLanguage + remainder;
     }
 
     /**
