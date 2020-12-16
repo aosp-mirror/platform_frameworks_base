@@ -31,6 +31,23 @@ public class BitmapShader extends Shader {
     private int mTileX;
     private int mTileY;
 
+    /*
+     *  This is cache of the last value from the Paint of bitmap-filtering.
+     *  In the future, BitmapShaders will carry their own (expanded) data for this
+     *  (e.g. including mipmap options, or bicubic weights)
+     *
+     *  When that happens, this bool will become those extended values, and we will
+     *  need to track whether this Shader was created with those new constructors,
+     *  or from the current "legacy" constructor, which (for compatibility) will
+     *  still need to know the Paint's setting.
+     *
+     *  When the filter Paint setting is finally gone, we will be able to remove
+     *  the filterFromPaint parameter currently being passed to createNativeInstance()
+     *  and shouldDiscardNativeInstance(), as shaders will always know their filter
+     *  settings.
+     */
+    private boolean mFilterFromPaint;
+
     /**
      * Call this to create a new shader that will draw with a bitmap.
      *
@@ -49,14 +66,24 @@ public class BitmapShader extends Shader {
         mBitmap = bitmap;
         mTileX = tileX;
         mTileY = tileY;
+        mFilterFromPaint = false;
     }
 
     /** @hide */
     @Override
-    protected long createNativeInstance(long nativeMatrix) {
-        return nativeCreate(nativeMatrix, mBitmap.getNativeInstance(), mTileX, mTileY);
+    protected long createNativeInstance(long nativeMatrix, boolean filterFromPaint) {
+        mFilterFromPaint = filterFromPaint;
+        return nativeCreate(nativeMatrix, mBitmap.getNativeInstance(), mTileX, mTileY,
+                            mFilterFromPaint);
+    }
+
+    /** @hide */
+    @Override
+    protected boolean shouldDiscardNativeInstance(boolean filterFromPaint) {
+        return mFilterFromPaint != filterFromPaint;
     }
 
     private static native long nativeCreate(long nativeMatrix, long bitmapHandle,
-            int shaderTileModeX, int shaderTileModeY);
+            int shaderTileModeX, int shaderTileModeY, boolean filter);
 }
+

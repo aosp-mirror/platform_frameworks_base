@@ -698,7 +698,8 @@ public class Paint {
      */
     @UnsupportedAppUsage
     public synchronized long getNativeInstance() {
-        long newNativeShader = mShader == null ? 0 : mShader.getNativeInstance();
+        boolean filter = isFilterBitmap();
+        long newNativeShader = mShader == null ? 0 : mShader.getNativeInstance(filter);
         if (newNativeShader != mNativeShader) {
             mNativeShader = newNativeShader;
             nSetShader(mNativePaint, mNativeShader);
