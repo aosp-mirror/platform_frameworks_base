@@ -570,15 +570,10 @@
         <!-- People Space UI Screen -->
         <activity android:name=".people.PeopleSpaceActivity"
             android:label="People"
-            android:icon="@drawable/ic_music_note"
             android:exported="true"
-            android:enabled="false"
-            android:theme="@android:style/Theme.Material.NoActionBar"
-            android:launchMode="singleInstance">
+            android:theme="@android:style/Theme.Material.NoActionBar">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
