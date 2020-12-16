@@ -28,6 +28,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.SharedElementCallback;
 import android.app.prediction.AppPredictionContext;
 import android.app.prediction.AppPredictionManager;
 import android.app.prediction.AppPredictor;
@@ -176,6 +177,13 @@ public class ChooserActivity extends ResolverActivity implements
     public static final String EXTRA_PRIVATE_RETAIN_IN_ON_STOP
             = "com.android.internal.app.ChooserActivity.EXTRA_PRIVATE_RETAIN_IN_ON_STOP";
 
+    /**
+     * Transition name for the first image preview.
+     * To be used for shared element transition into this activity.
+     * @hide
+     */
+    public static final String FIRST_IMAGE_PREVIEW_TRANSITION_NAME = "chooser_preview_image_1";
+
     private static final String PREF_NUM_SHEET_EXPANSIONS = "pref_num_sheet_expansions";
 
     private static final String CHIP_LABEL_METADATA_KEY = "android.service.chooser.chip_label";
@@ -307,6 +315,8 @@ public class ChooserActivity extends ResolverActivity implements
     @VisibleForTesting
     protected ChooserMultiProfilePagerAdapter mChooserMultiProfilePagerAdapter;
 
+    private boolean mRemoveSharedElements = false;
+
     private class ContentPreviewCoordinator {
         private static final int IMAGE_FADE_IN_MILLIS = 150;
         private static final int IMAGE_LOAD_TIMEOUT = 1;
@@ -370,9 +380,28 @@ public class ChooserActivity extends ResolverActivity implements
                         if (task.mExtraCount > 0) {
                             imageView.setExtraImageCount(task.mExtraCount);
                         }
+
+                        setupPreDrawForSharedElementTransition(imageView);
                 }
             }
         };
+
+        private void setupPreDrawForSharedElementTransition(View v) {
+            v.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    v.getViewTreeObserver().removeOnPreDrawListener(this);
+
+                    if (!mRemoveSharedElements && isActivityTransitionRunning()) {
+                        // Disable the window animations as it interferes with the
+                        // transition animation.
+                        getWindow().setWindowAnimations(0);
+                    }
+                    startPostponedEnterTransition();
+                    return true;
+                }
+            });
+        }
 
         ContentPreviewCoordinator(View parentView, boolean hideParentOnFail) {
             super();
@@ -413,6 +442,8 @@ public class ChooserActivity extends ResolverActivity implements
                 }
                 mHideParentOnFail = false;
             }
+            mRemoveSharedElements = true;
+            startPostponedEnterTransition();
         }
 
         private void collapseParentView() {
@@ -794,6 +825,19 @@ public class ChooserActivity extends ResolverActivity implements
         );
         mDirectShareShortcutInfoCache = new HashMap<>();
         mChooserTargetComponentNameCache = new HashMap<>();
+
+        setEnterSharedElementCallback(new SharedElementCallback() {
+            @Override
+            public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+                if (mRemoveSharedElements) {
+                    names.remove(FIRST_IMAGE_PREVIEW_TRANSITION_NAME);
+                    sharedElements.remove(FIRST_IMAGE_PREVIEW_TRANSITION_NAME);
+                }
+                super.onMapSharedElements(names, sharedElements);
+                mRemoveSharedElements = false;
+            }
+        });
+        postponeEnterTransition();
     }
 
     @Override
@@ -1337,6 +1381,8 @@ public class ChooserActivity extends ResolverActivity implements
         String action = targetIntent.getAction();
         if (Intent.ACTION_SEND.equals(action)) {
             Uri uri = targetIntent.getParcelableExtra(Intent.EXTRA_STREAM);
+            imagePreview.findViewById(R.id.content_preview_image_1_large)
+                    .setTransitionName(ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME);
             mPreviewCoord.loadUriIntoView(R.id.content_preview_image_1_large, uri, 0);
         } else {
             ContentResolver resolver = getContentResolver();
@@ -1356,6 +1402,8 @@ public class ChooserActivity extends ResolverActivity implements
                 return contentPreviewLayout;
             }
 
+            imagePreview.findViewById(R.id.content_preview_image_1_large)
+                    .setTransitionName(ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME);
             mPreviewCoord.loadUriIntoView(R.id.content_preview_image_1_large, imageUris.get(0), 0);
 
             if (imageUris.size() == 2) {

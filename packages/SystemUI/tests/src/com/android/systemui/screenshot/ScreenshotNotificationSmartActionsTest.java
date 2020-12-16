@@ -43,6 +43,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ShareTransition;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -175,10 +176,11 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         data.finisher = null;
         data.mActionsReadyListener = null;
         SaveImageInBackgroundTask task =
-                new SaveImageInBackgroundTask(mContext, mScreenshotSmartActions, data);
+                new SaveImageInBackgroundTask(mContext, mScreenshotSmartActions, data,
+                        ShareTransition::new);
 
         Notification.Action shareAction = task.createShareAction(mContext, mContext.getResources(),
-                Uri.parse("Screenshot_123.png"));
+                Uri.parse("Screenshot_123.png")).get().shareAction;
 
         Intent intent = shareAction.actionIntent.getIntent();
         assertNotNull(intent);
@@ -202,7 +204,8 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         data.finisher = null;
         data.mActionsReadyListener = null;
         SaveImageInBackgroundTask task =
-                new SaveImageInBackgroundTask(mContext, mScreenshotSmartActions, data);
+                new SaveImageInBackgroundTask(mContext, mScreenshotSmartActions, data,
+                        ShareTransition::new);
 
         Notification.Action editAction = task.createEditAction(mContext, mContext.getResources(),
                 Uri.parse("Screenshot_123.png"));
@@ -229,7 +232,8 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         data.finisher = null;
         data.mActionsReadyListener = null;
         SaveImageInBackgroundTask task =
-                new SaveImageInBackgroundTask(mContext, mScreenshotSmartActions, data);
+                new SaveImageInBackgroundTask(mContext, mScreenshotSmartActions, data,
+                        ShareTransition::new);
 
         Notification.Action deleteAction = task.createDeleteAction(mContext,
                 mContext.getResources(),

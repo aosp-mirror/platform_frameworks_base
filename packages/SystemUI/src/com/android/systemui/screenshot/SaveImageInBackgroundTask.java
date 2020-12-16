@@ -56,6 +56,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
+import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ShareTransition;
 
 import java.io.File;
 import java.io.IOException;
@@ -74,6 +75,7 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 /**
  * An AsyncTask that saves an image to the media store in the background.
@@ -95,12 +97,15 @@ class  SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
     private final String mScreenshotId;
     private final boolean mSmartActionsEnabled;
     private final Random mRandom = new Random();
+    private final Supplier<ShareTransition> mSharedElementTransition;
 
     SaveImageInBackgroundTask(Context context, ScreenshotSmartActions screenshotSmartActions,
-            ScreenshotController.SaveImageInBackgroundData data) {
+            ScreenshotController.SaveImageInBackgroundData data,
+            Supplier<ShareTransition> sharedElementTransition) {
         mContext = context;
         mScreenshotSmartActions = screenshotSmartActions;
         mImageData = new ScreenshotController.SavedImageData();
+        mSharedElementTransition = sharedElementTransition;
 
         // Prepare all the output metadata
         mParams = data;
@@ -135,7 +140,6 @@ class  SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
 
         ContentResolver resolver = mContext.getContentResolver();
         Bitmap image = mParams.image;
-        Resources r = mContext.getResources();
 
         try {
             // Save the screenshot to the MediaStore
@@ -233,7 +237,7 @@ class  SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
 
             mImageData.uri = uri;
             mImageData.smartActions = smartActions;
-            mImageData.shareAction = createShareAction(mContext, mContext.getResources(), uri);
+            mImageData.shareTransition = createShareAction(mContext, mContext.getResources(), uri);
             mImageData.editAction = createEditAction(mContext, mContext.getResources(), uri);
             mImageData.deleteAction = createDeleteAction(mContext, mContext.getResources(), uri);
 
@@ -284,61 +288,68 @@ class  SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         mParams.clearImage();
     }
 
+    /**
+     * Assumes that the action intent is sent immediately after being supplied.
+     */
     @VisibleForTesting
-    Notification.Action createShareAction(Context context, Resources r, Uri uri) {
-        // Note: Both the share and edit actions are proxied through ActionProxyReceiver in
-        // order to do some common work like dismissing the keyguard and sending
-        // closeSystemWindows
+    Supplier<ShareTransition> createShareAction(Context context, Resources r, Uri uri) {
+        return () -> {
+            ShareTransition transition = mSharedElementTransition.get();
 
-        // Create a share intent, this will always go through the chooser activity first
-        // which should not trigger auto-enter PiP
-        String subjectDate = DateFormat.getDateTimeInstance().format(new Date(mImageTime));
-        String subject = String.format(SCREENSHOT_SHARE_SUBJECT_TEMPLATE, subjectDate);
-        Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-        sharingIntent.setType("image/png");
-        sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
-        // Include URI in ClipData also, so that grantPermission picks it up.
-        // We don't use setData here because some apps interpret this as "to:".
-        ClipData clipdata = new ClipData(new ClipDescription("content",
-                new String[]{ClipDescription.MIMETYPE_TEXT_PLAIN}),
-                new ClipData.Item(uri));
-        sharingIntent.setClipData(clipdata);
-        sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
-        sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            // Note: Both the share and edit actions are proxied through ActionProxyReceiver in
+            // order to do some common work like dismissing the keyguard and sending
+            // closeSystemWindows
 
-        // Make sure pending intents for the system user are still unique across users
-        // by setting the (otherwise unused) request code to the current user id.
-        int requestCode = context.getUserId();
+            // Create a share intent, this will always go through the chooser activity first
+            // which should not trigger auto-enter PiP
+            String subjectDate = DateFormat.getDateTimeInstance().format(new Date(mImageTime));
+            String subject = String.format(SCREENSHOT_SHARE_SUBJECT_TEMPLATE, subjectDate);
+            Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+            sharingIntent.setType("image/png");
+            sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
+            // Include URI in ClipData also, so that grantPermission picks it up.
+            // We don't use setData here because some apps interpret this as "to:".
+            ClipData clipdata = new ClipData(new ClipDescription("content",
+                    new String[]{ClipDescription.MIMETYPE_TEXT_PLAIN}),
+                    new ClipData.Item(uri));
+            sharingIntent.setClipData(clipdata);
+            sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+            sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-        Intent sharingChooserIntent =
-                Intent.createChooser(sharingIntent, null)
-                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK)
-                        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            // Make sure pending intents for the system user are still unique across users
+            // by setting the (otherwise unused) request code to the current user id.
+            int requestCode = context.getUserId();
 
-        // cancel current pending intent (if any) since clipData isn't used for matching
-        PendingIntent pendingIntent = PendingIntent.getActivityAsUser(
-                context, 0, sharingChooserIntent,
-                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
-                null, UserHandle.CURRENT);
+            Intent sharingChooserIntent = Intent.createChooser(sharingIntent, null)
+                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK)
+                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-        // Create a share action for the notification
-        PendingIntent shareAction = PendingIntent.getBroadcastAsUser(context, requestCode,
-                new Intent(context, ActionProxyReceiver.class)
-                        .putExtra(ScreenshotController.EXTRA_ACTION_INTENT, pendingIntent)
-                        .putExtra(ScreenshotController.EXTRA_DISALLOW_ENTER_PIP, true)
-                        .putExtra(ScreenshotController.EXTRA_ID, mScreenshotId)
-                        .putExtra(ScreenshotController.EXTRA_SMART_ACTIONS_ENABLED,
-                                mSmartActionsEnabled)
-                        .setAction(Intent.ACTION_SEND)
-                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND),
-                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
-                UserHandle.SYSTEM);
+            // cancel current pending intent (if any) since clipData isn't used for matching
+            PendingIntent pendingIntent = PendingIntent.getActivityAsUser(
+                    context, 0, sharingChooserIntent,
+                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                    transition.bundle, UserHandle.CURRENT);
 
-        Notification.Action.Builder shareActionBuilder = new Notification.Action.Builder(
-                Icon.createWithResource(r, R.drawable.ic_screenshot_share),
-                r.getString(com.android.internal.R.string.share), shareAction);
+            // Create a share action for the notification
+            PendingIntent shareAction = PendingIntent.getBroadcastAsUser(context, requestCode,
+                    new Intent(context, ActionProxyReceiver.class)
+                            .putExtra(ScreenshotController.EXTRA_ACTION_INTENT, pendingIntent)
+                            .putExtra(ScreenshotController.EXTRA_DISALLOW_ENTER_PIP, true)
+                            .putExtra(ScreenshotController.EXTRA_ID, mScreenshotId)
+                            .putExtra(ScreenshotController.EXTRA_SMART_ACTIONS_ENABLED,
+                                    mSmartActionsEnabled)
+                            .setAction(Intent.ACTION_SEND)
+                            .addFlags(Intent.FLAG_RECEIVER_FOREGROUND),
+                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                    UserHandle.SYSTEM);
 
-        return shareActionBuilder.build();
+            Notification.Action.Builder shareActionBuilder = new Notification.Action.Builder(
+                    Icon.createWithResource(r, R.drawable.ic_screenshot_share),
+                    r.getString(com.android.internal.R.string.share), shareAction);
+
+            transition.shareAction = shareActionBuilder.build();
+            return transition;
+        };
     }
 
     @VisibleForTesting
@@ -354,8 +365,7 @@ class  SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         if (!TextUtils.isEmpty(editorPackage)) {
             editIntent.setComponent(ComponentName.unflattenFromString(editorPackage));
         }
-        editIntent.setType("image/png");
-        editIntent.setData(uri);
+        editIntent.setDataAndType(uri, "image/png");
         editIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         editIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         editIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
