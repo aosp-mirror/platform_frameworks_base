@@ -18,7 +18,10 @@ package android.uwb;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.os.Binder;
 import android.os.PersistableBundle;
+import android.os.RemoteException;
+import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -34,12 +37,26 @@ import java.util.concurrent.Executor;
  * {@link UwbManager#openRangingSession(PersistableBundle, Executor, Callback)} to request to open a
  * session. Once the session is opened, a {@link RangingSession} object is provided through
  * {@link RangingSession.Callback#onOpenSuccess(RangingSession, PersistableBundle)}. If opening a
- * session fails, the failure is reported through {@link RangingSession.Callback#onClosed(int)} with
- * the failure reason.
+ * session fails, the failure is reported through
+ * {@link RangingSession.Callback#onClosed(int, PersistableBundle)} with the failure reason.
  *
  * @hide
  */
 public final class RangingSession implements AutoCloseable {
+    private static final String TAG = "Uwb.RangingSession";
+    private final SessionHandle mSessionHandle;
+    private final IUwbAdapter mAdapter;
+    private final Executor mExecutor;
+    private final Callback mCallback;
+
+    private enum State {
+        INIT,
+        OPEN,
+        CLOSED,
+    }
+
+    private State mState;
+
     /**
      * Interface for receiving {@link RangingSession} events
      */
@@ -116,13 +133,20 @@ public final class RangingSession implements AutoCloseable {
         int CLOSE_REASON_REMOTE_REQUEST = 7;
 
         /**
+         * Indicates that the session was closed for a protocol specific reason. The associated
+         * {@link PersistableBundle} should be consulted for additional information.
+         */
+        int CLOSE_REASON_PROTOCOL_SPECIFIC = 8;
+
+        /**
          * Invoked when session is either closed spontaneously, or per user request via
          * {@link RangingSession#close()} or {@link AutoCloseable#close()}, or when session failed
          * to open.
          *
          * @param reason reason for the session closure
+         * @param parameters protocol specific parameters related to the close reason
          */
-        void onClosed(@CloseReason int reason);
+        void onClosed(@CloseReason int reason, @NonNull PersistableBundle parameters);
 
         /**
          * Called once per ranging interval even when a ranging measurement fails
@@ -133,20 +157,97 @@ public final class RangingSession implements AutoCloseable {
     }
 
     /**
+     * @hide
+     */
+    public RangingSession(Executor executor, Callback callback, IUwbAdapter adapter,
+            SessionHandle sessionHandle) {
+        mState = State.INIT;
+        mExecutor = executor;
+        mCallback = callback;
+        mAdapter = adapter;
+        mSessionHandle = sessionHandle;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isOpen() {
+        return mState == State.OPEN;
+    }
+
+    /**
      * Close the ranging session
      * <p>If this session is currently open, it will close and stop the session.
      * <p>If the session is in the process of being opened, it will attempt to stop the session from
      * being opened.
-     * <p>If the session is already closed, the registered {@link Callback#onClosed(int)} callback
-     * will still be invoked.
+     * <p>If the session is already closed, the registered
+     * {@link Callback#onClosed(int, PersistableBundle)} callback will still be invoked.
      *
-     * <p>{@link Callback#onClosed(int)} will be invoked using the same callback
+     * <p>{@link Callback#onClosed(int, PersistableBundle)} will be invoked using the same callback
      * object given to {@link UwbManager#openRangingSession(PersistableBundle, Executor, Callback)}
      * when the {@link RangingSession} was opened. The callback will be invoked after each call to
      * {@link #close()}, even if the {@link RangingSession} is already closed.
      */
     @Override
     public void close() {
-        throw new UnsupportedOperationException();
+        if (mState == State.CLOSED) {
+            mExecutor.execute(() -> mCallback.onClosed(
+                    Callback.CLOSE_REASON_LOCAL_CLOSE_API, new PersistableBundle()));
+            return;
+        }
+
+        try {
+            mAdapter.closeRanging(mSessionHandle);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void onRangingStarted(@NonNull PersistableBundle parameters) {
+        if (mState == State.CLOSED) {
+            Log.w(TAG, "onRangingStarted invoked for a closed session");
+            return;
+        }
+
+        mState = State.OPEN;
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mExecutor.execute(() -> mCallback.onOpenSuccess(this, parameters));
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void onRangingClosed(@Callback.CloseReason int reason, PersistableBundle parameters) {
+        mState = State.CLOSED;
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mExecutor.execute(() -> mCallback.onClosed(reason, parameters));
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void onRangingResult(@NonNull RangingReport report) {
+        if (!isOpen()) {
+            Log.w(TAG, "onRangingResult invoked for non-open session");
+            return;
+        }
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mExecutor.execute(() -> mCallback.onReportReceived(report));
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 }
