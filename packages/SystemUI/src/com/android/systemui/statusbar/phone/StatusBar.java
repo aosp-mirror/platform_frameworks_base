@@ -4002,7 +4002,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         boolean launchingAffordanceWithPreview =
                 mNotificationPanelViewController.isLaunchingAffordanceWithPreview();
-        mScrimController.setLaunchingAffordanceWithPreview(launchingAffordanceWithPreview);
+        mScrimController.setLaunchingAffordanceWithPreview(true);
 
         if (mBouncerShowing) {
             // Bouncer needs the front scrim when it's on top of an activity,
