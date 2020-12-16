@@ -128,6 +128,15 @@ interface ITelephony {
      */
     boolean isRadioOnForSubscriberWithFeature(int subId, String callingPackage, String callingFeatureId);
 
+    /**
+     * Set the user-set status for enriched calling with call composer.
+     */
+    void setCallComposerStatus(int subId, int status);
+
+    /**
+     * Get the user-set status for enriched calling with call composer.
+     */
+    int getCallComposerStatus(int subId);
 
     /**
      * Supply a pin to unlock the SIM for particular subId.
