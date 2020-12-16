@@ -1,2 +1,1 @@
-include platform/libcore:/OWNERS
 include /core/java/android/os/storage/OWNERS
