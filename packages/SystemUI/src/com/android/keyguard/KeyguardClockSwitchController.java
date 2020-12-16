@@ -21,7 +21,6 @@ import android.content.ContentResolver;
 import android.content.res.Resources;
 import android.provider.Settings;
 import android.text.format.DateFormat;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -146,11 +145,10 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     /**
-     * Updates clock's text
+     * Apply dp changes on font/scale change
      */
     public void onDensityOrFontScaleChanged() {
-        mView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                mResources.getDimensionPixelSize(R.dimen.widget_big_font_size));
+        mView.onDensityOrFontScaleChanged();
     }
 
     /**

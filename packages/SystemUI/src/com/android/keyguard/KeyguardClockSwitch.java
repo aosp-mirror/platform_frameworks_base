@@ -1,6 +1,8 @@
 package com.android.keyguard;
 
 import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Paint;
@@ -47,6 +49,9 @@ public class KeyguardClockSwitch extends RelativeLayout {
      * Animation fraction when text is transitioned to/from bold.
      */
     private static final float TO_BOLD_TRANSITION_FRACTION = 0.7f;
+
+    private static final long CLOCK_OUT_MILLIS = 150;
+    private static final long CLOCK_IN_MILLIS = 200;
 
     /**
      * Layout transition that scales the default clock face.
@@ -112,6 +117,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
     private int[] mColorPalette;
 
     private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
+    private int mClockSwitchYAmount;
 
     public KeyguardClockSwitch(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -128,6 +134,17 @@ public class KeyguardClockSwitch extends RelativeLayout {
                 .addTransition(mBoldClockTransition)
                 .setDuration(KeyguardSliceView.DEFAULT_ANIM_DURATION / 2)
                 .setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
+    }
+
+    /**
+     * Apply dp changes on font/scale change
+     */
+    public void onDensityOrFontScaleChanged() {
+        setTextSize(TypedValue.COMPLEX_UNIT_PX, mContext.getResources()
+                .getDimensionPixelSize(R.dimen.widget_big_font_size));
+
+        mClockSwitchYAmount = mContext.getResources().getDimensionPixelSize(
+                R.dimen.keyguard_clock_switch_y_shift);
     }
 
     /**
@@ -181,6 +198,8 @@ public class KeyguardClockSwitch extends RelativeLayout {
         mNewLockscreenLargeClockFrame = findViewById(R.id.new_lockscreen_clock_view_large);
         mSmallClockFrame = findViewById(R.id.clock_view);
         mKeyguardStatusArea = findViewById(R.id.keyguard_status_area);
+
+        onDensityOrFontScaleChanged();
     }
 
     void setClockPlugin(ClockPlugin plugin, int statusBarState) {
@@ -296,31 +315,43 @@ public class KeyguardClockSwitch extends RelativeLayout {
         mClockViewBold.setFormat24Hour(format);
     }
 
-    private void updateClockLayout(boolean useLargeClock) {
+    private void animateClockChange(boolean useLargeClock) {
         if (mLockScreenMode != KeyguardUpdateMonitor.LOCK_SCREEN_MODE_LAYOUT_1) return;
 
-        Fade fadeIn = new Fade();
-        fadeIn.setDuration(KeyguardSliceView.DEFAULT_ANIM_DURATION);
-        fadeIn.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
-
-        Fade fadeOut = new Fade();
-        fadeOut.setDuration(KeyguardSliceView.DEFAULT_ANIM_DURATION / 2);
-        fadeOut.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
-
+        View in, out;
+        int direction = 1;
         if (useLargeClock) {
-            TransitionManager.beginDelayedTransition(mNewLockscreenClockFrame, fadeOut);
-            TransitionManager.beginDelayedTransition(mNewLockscreenLargeClockFrame, fadeIn);
-
-            mNewLockscreenClockFrame.setVisibility(View.INVISIBLE);
-            addView(mNewLockscreenLargeClockFrame);
-            mNewLockscreenLargeClockFrame.setVisibility(View.VISIBLE);
+            out = mNewLockscreenClockFrame;
+            in = mNewLockscreenLargeClockFrame;
+            addView(in);
+            direction = -1;
         } else {
-            TransitionManager.beginDelayedTransition(mNewLockscreenClockFrame, fadeIn);
-            TransitionManager.beginDelayedTransition(mNewLockscreenLargeClockFrame, fadeOut);
+            in = mNewLockscreenClockFrame;
+            out = mNewLockscreenLargeClockFrame;
 
-            removeView(mNewLockscreenLargeClockFrame);
-            mNewLockscreenClockFrame.setVisibility(View.VISIBLE);
+            // Must remove in order for notifications to appear in the proper place
+            removeView(out);
         }
+
+        AnimatorSet outAnim = new AnimatorSet();
+        outAnim.setDuration(CLOCK_OUT_MILLIS);
+        outAnim.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
+        outAnim.playTogether(
+                ObjectAnimator.ofFloat(out, View.ALPHA, 0f),
+                ObjectAnimator.ofFloat(out, View.TRANSLATION_Y, 0,
+                        direction * -mClockSwitchYAmount));
+
+        in.setAlpha(0);
+        in.setVisibility(View.VISIBLE);
+        AnimatorSet inAnim = new AnimatorSet();
+        inAnim.setDuration(CLOCK_IN_MILLIS);
+        inAnim.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
+        inAnim.playTogether(ObjectAnimator.ofFloat(in, View.ALPHA, 1f),
+                ObjectAnimator.ofFloat(in, View.TRANSLATION_Y, direction * mClockSwitchYAmount, 0));
+        inAnim.setStartDelay(CLOCK_OUT_MILLIS / 2);
+
+        inAnim.start();
+        outAnim.start();
     }
 
     /**
@@ -343,7 +374,8 @@ public class KeyguardClockSwitch extends RelativeLayout {
         if (hasVisibleNotifications == mHasVisibleNotifications) {
             return;
         }
-        updateClockLayout(!hasVisibleNotifications);
+
+        animateClockChange(!hasVisibleNotifications);
 
         mHasVisibleNotifications = hasVisibleNotifications;
         if (mDarkAmount == 0f && mBigClockContainer != null) {
