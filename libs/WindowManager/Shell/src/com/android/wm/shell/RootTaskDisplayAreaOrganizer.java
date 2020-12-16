@@ -18,6 +18,7 @@ package com.android.wm.shell;
 
 import android.util.SparseArray;
 import android.view.SurfaceControl;
+import android.window.DisplayAreaAppearedInfo;
 import android.window.DisplayAreaInfo;
 import android.window.DisplayAreaOrganizer;
 
@@ -43,7 +44,10 @@ public class RootTaskDisplayAreaOrganizer extends DisplayAreaOrganizer {
 
     public RootTaskDisplayAreaOrganizer(Executor executor) {
         super(executor);
-        registerOrganizer(FEATURE_DEFAULT_TASK_CONTAINER);
+        List<DisplayAreaAppearedInfo> infos = registerOrganizer(FEATURE_DEFAULT_TASK_CONTAINER);
+        for (int i = infos.size() - 1; i >= 0; --i) {
+            onDisplayAreaAppeared(infos.get(i).getDisplayAreaInfo(), infos.get(i).getLeash());
+        }
     }
 
     public void registerListener(int displayId, RootTaskDisplayAreaListener listener) {
