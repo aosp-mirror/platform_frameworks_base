@@ -187,16 +187,6 @@
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Батерей гурван баганатай."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Батерей дүүрэн."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Батарейн хувь тодорхойгүй байна."</string>
-    <string name="accessibility_no_phone" msgid="8828412144430247025">"Утас байхгүй."</string>
-    <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Утас нэг баганатай."</string>
-    <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Утас хоёр баганатай."</string>
-    <string name="accessibility_phone_three_bars" msgid="5670937367300884534">"Утас гурван баганатай."</string>
-    <string name="accessibility_phone_signal_full" msgid="1103449569988869971">"Утасны дохио дүүрэн."</string>
-    <string name="accessibility_no_data" msgid="2124768255213392359">"Дата байхгүй."</string>
-    <string name="accessibility_data_one_bar" msgid="3226985124149387055">"Дата нэг баганатай."</string>
-    <string name="accessibility_data_two_bars" msgid="4576231688545173059">"Дата хоёр баганатай."</string>
-    <string name="accessibility_data_three_bars" msgid="3036562180893930325">"Дата гурван баганатай."</string>
-    <string name="accessibility_data_signal_full" msgid="283507058258113551">"Дата дохио дүүрэн."</string>
     <string name="accessibility_wifi_name" msgid="4863440268606851734">"<xliff:g id="WIFI">%s</xliff:g>-тай холбогдсон."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g>-тай холбогдсон."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g>-д холбогдсон."</string>
@@ -205,8 +195,6 @@
     <string name="accessibility_wimax_two_bars" msgid="7335485192390018939">"WiMAX хоёр баганатай."</string>
     <string name="accessibility_wimax_three_bars" msgid="2773714362377629938">"WiMAX гурван баганатай."</string>
     <string name="accessibility_wimax_signal_full" msgid="3101861561730624315">"WiMAX дохио дүүрэн."</string>
-    <string name="accessibility_ethernet_disconnected" msgid="2097190491174968655">"Ethernet саллаа."</string>
-    <string name="accessibility_ethernet_connected" msgid="3988347636883115213">"Ethernet холбогдсон."</string>
     <string name="accessibility_no_signal" msgid="1115622734914921920">"Дохио байхгүй."</string>
     <string name="accessibility_not_connected" msgid="4061305616351042142">"Холбогдоогүй."</string>
     <string name="accessibility_zero_bars" msgid="1364823964848784827">"Тэг баганатай."</string>
@@ -218,30 +206,17 @@
     <string name="accessibility_desc_off" msgid="8055389500285421408">"Унтраах"</string>
     <string name="accessibility_desc_connected" msgid="3082590384032624233">"Холбогдсон."</string>
     <string name="accessibility_desc_connecting" msgid="8011433412112903614">"Холбож байна."</string>
-    <string name="data_connection_gprs" msgid="2752584037409568435">"GPRS"</string>
     <string name="data_connection_hspa" msgid="6096234094857660873">"HSPA"</string>
-    <string name="data_connection_3g" msgid="1215807817895516914">"3G"</string>
-    <string name="data_connection_3_5g" msgid="4097346596394846450">"H"</string>
-    <string name="data_connection_3_5g_plus" msgid="8938598386721354697">"H+"</string>
-    <string name="data_connection_4g" msgid="5770196771037980730">"4G"</string>
-    <string name="data_connection_4g_plus" msgid="780615287092000279">"4G+"</string>
-    <string name="data_connection_lte" msgid="557021044282539923">"LTE"</string>
-    <string name="data_connection_lte_plus" msgid="4799302403782283178">"LTE+"</string>
-    <string name="data_connection_cdma" msgid="7678457855627313518">"1X"</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Роуминг"</string>
-    <string name="data_connection_edge" msgid="6316755666481405762">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="1140839832913084973">"SIM байхгүй."</string>
     <string name="accessibility_cell_data" msgid="172950885786007392">"Мобайл дата"</string>
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"Мобайл дата асаалттай байна"</string>
-    <string name="cell_data_off_content_description" msgid="9165555931499878044">"Мобайл дата унтраалттай байна"</string>
-    <string name="not_default_data_content_description" msgid="6757881730711522517">"Дата ашиглахаар тохируулаагүй"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Идэвхгүй"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"Bluetooth модем болж байна."</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Нислэгийн горим"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN асаалттай байна."</string>
     <string name="accessibility_no_sims" msgid="5711270400476534667">"SIM карт байхгүй."</string>
-    <string name="carrier_network_change_mode" msgid="5174141476991149918">"Оператор компанийн сүлжээг өөрчилж байна"</string>
     <string name="accessibility_battery_details" msgid="6184390274150865789">"Тэжээлийн дэлгэрэнгүй мэдээллийг нээх"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Батерей <xliff:g id="NUMBER">%d</xliff:g> хувьтай."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Батарей <xliff:g id="PERCENTAGE">%1$s</xliff:g> хувьтай байна. Таны хэрэглээнд тулгуурлан ойролцоогоор <xliff:g id="TIME">%2$s</xliff:g> үлдсэн"</string>
@@ -723,6 +698,14 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Утасны тохиргоонд тулгуурлан хонх дуугаргах эсвэл чичирхийлж болзошгүй. <xliff:g id="APP_NAME">%1$s</xliff:g>-н харилцан яриаг өгөгдмөл тохиргооны дагуу бөмбөлөг болгоно."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Энэ контентын хөвөн гарч ирэх товчлолтойгоор таны анхаарлыг татдаг."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Энэ мэдэгдэл дуу гаргах эсвэл чичрэх эсэхийг системээр тодорхойлуулаарай"</string>
+    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
+    <skip />
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Харилцан ярианы хэсгийн дээд талд хөвж буй бөмбөлөг хэлбэрээр харагдах бөгөөд профайлын зургийг түгжигдсэн дэлгэцэд үзүүлнэ"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Тохиргоо"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Ач холбогдол"</string>
@@ -741,9 +724,14 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"Энэ аппыг таны дэлгэцэд бусад аппын дээр харуулж байгаа бөгөөд микрофон болон камерыг ашиглаж байна."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"Тохиргоо"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"ОК"</string>
-    <string name="feedback_silenced" msgid="5382212321253328247">"Систем энэ мэдэгдлийг дуугүй болгосон."</string>
-    <string name="feedback_promoted" msgid="8075757485407091976">"Систем энэ мэдэгдлийн зэргийг дэвшүүлсэн."</string>
-    <string name="feedback_demoted" msgid="5848066008939031913">"Систем энэ мэдэгдлийн зэргийг бууруулсан."</string>
+    <!-- no translation found for feedback_alerted (5192459808484271208) -->
+    <skip />
+    <!-- no translation found for feedback_silenced (9116540317466126457) -->
+    <skip />
+    <!-- no translation found for feedback_promoted (2125562787759780807) -->
+    <skip />
+    <!-- no translation found for feedback_demoted (951884763467110604) -->
+    <skip />
     <string name="feedback_prompt" msgid="2278631214125128281">"Энэ зөв байсан уу?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Санал хүсэлтээ илгээсэнд баярлалаа!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"ОК"</string>
@@ -839,7 +827,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Идэвхтэй"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Идэвхгүй"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Боломжгүй"</string>
-    <string name="nav_bar" msgid="4642708685386136807">"Навигацийн самбар"</string>
+    <string name="nav_bar" msgid="4642708685386136807">"Навигацын самбар"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Бүдүүвч"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Нэмэлт зүүн товчлуураар шивэх"</string>
     <string name="right_nav_bar_button_type" msgid="4472566498647364715">"Нэмэлт баруун товчлуураар шивэх"</string>
@@ -861,7 +849,7 @@
     <string name="reset" msgid="8715144064608810383">"Шинэчлэх"</string>
     <string name="adjust_button_width" msgid="8313444823666482197">"Товчлуурын өргөнг тохируулах"</string>
     <string name="clipboard" msgid="8517342737534284617">"Түр санах ой"</string>
-    <string name="accessibility_key" msgid="3471162841552818281">"Навигацийн товчлуурыг өөрчлөх"</string>
+    <string name="accessibility_key" msgid="3471162841552818281">"Навигацын товчлуурыг өөрчлөх"</string>
     <string name="left_keycode" msgid="8211040899126637342">"Зүүн түлхүүрийн код"</string>
     <string name="right_keycode" msgid="2480715509844798438">"Баруун түлхүүрийн код"</string>
     <string name="left_icon" msgid="5036278531966897006">"Зүүн дүрс тэмдэг"</string>
