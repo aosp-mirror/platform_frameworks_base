@@ -294,9 +294,10 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
      *
      * Reference: 3GPP TS 138.214 section 5.2.2.1.
      *
-     * Range [1, 3].
+     * @return the CQI table index if available or
+     *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
      */
-    /** @hide */
+    @IntRange(from = 1, to = 3)
     public int getCsiCqiTableIndex() {
         return mCsiCqiTableIndex;
     }
@@ -310,10 +311,10 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
      *
      * Reference: 3GPP TS 138.214 section 5.2.2.1.
      *
-     * Range [0, 15] for each CQI.
+     * @return the CQIs for all subbands if available or empty list if unavailable.
      */
-    /** @hide */
     @NonNull
+    @IntRange(from = 0, to = 15)
     public List<Integer> getCsiCqiReport() {
         return mCsiCqiReport;
     }
