@@ -3225,6 +3225,19 @@ public class WifiManager {
     public @interface CoexRestriction {}
 
     /**
+     * @return {@code true} if the default coex algorithm is enabled. {@code false} otherwise.
+     *
+     * @hide
+     */
+    public boolean isDefaultCoexAlgorithmEnabled() {
+        try {
+            return mService.isDefaultCoexAlgorithmEnabled();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Specify the set of {@link CoexUnsafeChannel} to propagate through the framework for
      * Wi-Fi/Cellular coex channel avoidance if the default algorithm is disabled via overlay
      * (i.e. config_wifiCoexDefaultAlgorithmEnabled = false). Otherwise do nothing.

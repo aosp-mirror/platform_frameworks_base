@@ -146,6 +146,8 @@ interface IWifiManager
 
     void updateInterfaceIpState(String ifaceName, int mode);
 
+    boolean isDefaultCoexAlgorithmEnabled();
+
     void setCoexUnsafeChannels(in List<CoexUnsafeChannel> unsafeChannels, int mandatoryRestrictions);
 
     List<CoexUnsafeChannel> getCoexUnsafeChannels();
