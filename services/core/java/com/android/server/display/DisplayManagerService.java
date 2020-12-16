@@ -1100,7 +1100,7 @@ public final class DisplayManagerService extends SystemService {
             recordStableDisplayStatsIfNeededLocked(display);
             recordTopInsetLocked(display);
         }
-        addDisplayPowerControllerLocked(displayId);
+        addDisplayPowerControllerLocked(display);
         mDisplayStates.append(displayId, Display.STATE_OFF);
         mDisplayBrightnesses.append(displayId, display.getDisplayInfoLocked().brightnessDefault);
 
@@ -1132,6 +1132,11 @@ public final class DisplayManagerService extends SystemService {
         // this point.
         sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_CHANGED);
         scheduleTraversalLocked(false);
+
+        DisplayPowerController dpc = mDisplayPowerControllers.get(displayId);
+        if (dpc != null) {
+            dpc.onDisplayChanged();
+        }
     }
 
     private void handleLogicalDisplayFrameRateOverridesChangedLocked(
@@ -1860,18 +1865,18 @@ public final class DisplayManagerService extends SystemService {
 
     private void initializeDisplayPowerControllersLocked() {
         mLogicalDisplayMapper.forEachLocked((logicalDisplay) -> addDisplayPowerControllerLocked(
-                logicalDisplay.getDisplayIdLocked()));
+                logicalDisplay));
     }
 
-    private void addDisplayPowerControllerLocked(int displayId) {
+    private void addDisplayPowerControllerLocked(LogicalDisplay display) {
         if (mPowerHandler == null) {
             // initPowerManagement has not yet been called.
             return;
         }
         final DisplayPowerController displayPowerController = new DisplayPowerController(
                 mContext, mDisplayPowerCallbacks, mPowerHandler, mSensorManager,
-                mDisplayBlanker, mLogicalDisplayMapper.getLocked(displayId));
-        mDisplayPowerControllers.append(displayId, displayPowerController);
+                mDisplayBlanker, display);
+        mDisplayPowerControllers.append(display.getDisplayIdLocked(), displayPowerController);
     }
 
     private final class DisplayManagerHandler extends Handler {
