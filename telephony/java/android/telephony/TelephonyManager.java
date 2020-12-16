@@ -8671,6 +8671,77 @@ public class TelephonyManager {
         return Collections.EMPTY_LIST;
     }
 
+    /**
+     * Call composer status OFF from user setting.
+     */
+    public static final int CALL_COMPOSER_STATUS_OFF = 0;
+
+    /**
+     * Call composer status ON from user setting.
+     */
+    public static final int CALL_COMPOSER_STATUS_ON = 1;
+
+    /** @hide */
+    @IntDef(prefix = {"CALL_COMPOSER_STATUS_"},
+            value = {
+                CALL_COMPOSER_STATUS_ON,
+                CALL_COMPOSER_STATUS_OFF,
+            })
+    public @interface CallComposerStatus {}
+
+    /**
+     * Set the user-set status for enriched calling with call composer.
+     *
+     * @param status user-set status for enriched calling with call composer;
+     *               it must be a value of either {@link #CALL_COMPOSER_STATUS_ON}
+     *               or {@link #CALL_COMPOSER_STATUS_OFF}.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
+     *
+     * @throws IllegalArgumentException if requested state is invalid.
+     * @throws SecurityException if the caller does not have the permission.
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setCallComposerStatus(@CallComposerStatus int status) {
+        if (status != CALL_COMPOSER_STATUS_ON && status != CALL_COMPOSER_STATUS_OFF) {
+            throw new IllegalArgumentException("requested status is invalid");
+        }
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.setCallComposerStatus(getSubId(), status);
+            }
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Error calling ITelephony#setCallComposerStatus", ex);
+            ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the user-set status for enriched calling with call composer.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
+     *
+     * @throws SecurityException if the caller does not have the permission.
+     *
+     * @return the user-set status for enriched calling with call composer either
+     * {@link #CALL_COMPOSER_STATUS_ON} or {@link #CALL_COMPOSER_STATUS_OFF}.
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @CallComposerStatus int getCallComposerStatus() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getCallComposerStatus(getSubId());
+            }
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Error calling ITelephony#getCallComposerStatus", ex);
+            ex.rethrowFromSystemServer();
+        }
+        return CALL_COMPOSER_STATUS_OFF;
+    }
 
     /** @hide */
     @SystemApi
