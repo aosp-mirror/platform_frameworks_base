@@ -193,4 +193,39 @@ public final class ResultCallbacks {
             }
         };
     }
+
+    /**
+     * Creates {@link IBooleanResultCallback.Stub} that is to set {@link Completable.Boolean} when
+     * receiving the result.
+     *
+     * @param value {@link Completable.Boolean} to be set when receiving the result.
+     * @return {@link IBooleanResultCallback.Stub} that can be passed as a binder IPC parameter.
+     */
+    @AnyThread
+    public static IBooleanResultCallback.Stub of(@NonNull Completable.Boolean value) {
+        final AtomicReference<WeakReference<Completable.Boolean>>
+                atomicRef = new AtomicReference<>(new WeakReference<>(value));
+
+        return new IBooleanResultCallback.Stub() {
+            @BinderThread
+            @Override
+            public void onResult(boolean result) {
+                final Completable.Boolean value = unwrap(atomicRef);
+                if (value == null) {
+                    return;
+                }
+                value.onComplete(result);
+            }
+
+            @BinderThread
+            @Override
+            public void onError(ThrowableHolder throwableHolder) {
+                final Completable.Boolean value = unwrap(atomicRef);
+                if (value == null) {
+                    return;
+                }
+                value.onError(throwableHolder);
+            }
+        };
+    }
 }

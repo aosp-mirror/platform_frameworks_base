@@ -25,6 +25,9 @@ import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.inputmethod.InputMethodManager;
 
+import com.android.internal.inputmethod.Completable;
+import com.android.internal.inputmethod.ResultCallbacks;
+
 import java.io.PrintWriter;
 
 /**
@@ -32,7 +35,9 @@ import java.io.PrintWriter;
  */
 class ImeTracingClientImpl extends ImeTracing {
     ImeTracingClientImpl() throws ServiceNotFoundException, RemoteException {
-        sEnabled = mService.isImeTraceEnabled();
+        final Completable.Boolean value = Completable.createBoolean();
+        mService.isImeTraceEnabled(ResultCallbacks.of(value));
+        sEnabled = Completable.getResult(value);
     }
 
     @Override

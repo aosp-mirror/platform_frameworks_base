@@ -22,6 +22,7 @@ import android.os.RemoteException;
 
 import com.android.internal.view.InputBindResult;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 /**
@@ -50,6 +51,32 @@ public final class CallbackUtils {
 
         try {
             result = resultSupplier.get();
+        } catch (Throwable throwable) {
+            exception = throwable;
+        }
+
+        try {
+            if (exception != null) {
+                callback.onError(ThrowableHolder.of(exception));
+                return;
+            }
+            callback.onResult(result);
+        } catch (RemoteException ignored) { }
+    }
+
+    /**
+     * A utility method using given {@link IBooleanResultCallback} to callback the result.
+     *
+     * @param callback {@link IInputBindResultResultCallback} to be called back.
+     * @param resultSupplier the supplier from which the result is provided.
+     */
+    public static void onResult(@NonNull IBooleanResultCallback callback,
+            @NonNull BooleanSupplier resultSupplier) {
+        boolean result = false;
+        Throwable exception = null;
+
+        try {
+            result = resultSupplier.getAsBoolean();
         } catch (Throwable throwable) {
             exception = throwable;
         }
