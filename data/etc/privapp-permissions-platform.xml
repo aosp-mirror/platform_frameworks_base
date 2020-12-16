@@ -452,6 +452,8 @@ applications that come with the platform
         <permission name="android.permission.TEST_BIOMETRIC" />
         <!-- Permissions required for CTS test - CtsContactsProviderTestCases -->
         <permission name="android.contacts.permission.MANAGE_SIM_ACCOUNTS" />
+        <!-- Permissions required for CTS test - CtsHdmiCecHostTestCases -->
+        <permission name="android.permission.HDMI_CEC"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

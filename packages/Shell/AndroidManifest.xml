@@ -368,6 +368,9 @@
     <!-- Permission required for CTS test - HideOverlayWindowsTest -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
 
+    <!-- Permission required for CTS test - CtsHdmiCecHostTestCases -->
+    <uses-permission android:name="android.permission.HDMI_CEC" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"
