@@ -334,6 +334,9 @@
     <!-- Permission needed for CTS test - TimeManagerTest -->
     <uses-permission android:name="android.permission.MANAGE_TIME_AND_ZONE_DETECTION" />
 
+    <!-- Permission needed for CTS test - CtsHdmiCecHostTestCases -->
+    <uses-permission android:name="android.permission.HDMI_CEC" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"
