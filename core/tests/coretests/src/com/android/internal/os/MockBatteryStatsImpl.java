@@ -16,11 +16,11 @@
 
 package com.android.internal.os;
 
+import android.location.GnssSignalQuality;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.SparseIntArray;
 
-import com.android.internal.location.gnssmetrics.GnssMetrics;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidActiveTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidClusterTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
@@ -47,7 +47,7 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         mBluetoothScanTimer = new StopwatchTimer(mClocks, null, -14, null, mOnBatteryTimeBase);
         setExternalStatsSyncLocked(new DummyExternalStatsSync());
 
-        for (int i = 0; i < GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS; i++) {
+        for (int i = 0; i < GnssSignalQuality.NUM_GNSS_SIGNAL_QUALITY_LEVELS; i++) {
             mGpsSignalQualityTimer[i] = new StopwatchTimer(clocks, null, -1000 - i, null,
                     mOnBatteryTimeBase);
         }

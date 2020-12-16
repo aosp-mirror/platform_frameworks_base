@@ -17,11 +17,10 @@ package com.android.internal.os;
 
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.location.GnssSignalQuality;
 import android.os.BatteryStats;
 import android.os.UserHandle;
 import android.util.SparseArray;
-
-import com.android.internal.location.gnssmetrics.GnssMetrics;
 
 import java.util.List;
 
@@ -83,7 +82,7 @@ public class SensorPowerCalculator extends PowerCalculator {
         averagePower = 0;
         long totalTime = 0;
         double totalPower = 0;
-        for (int i = 0; i < GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS; i++) {
+        for (int i = 0; i < GnssSignalQuality.NUM_GNSS_SIGNAL_QUALITY_LEVELS; i++) {
             long timePerLevel = stats.getGpsSignalQualityTime(i, rawRealtimeUs, statsType);
             totalTime += timePerLevel;
             totalPower +=
