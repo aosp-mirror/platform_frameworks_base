@@ -77,11 +77,11 @@ public class QSCustomizer extends LinearLayout {
 
         toolbar.getMenu().add(Menu.NONE, MENU_RESET, 0,
                 mContext.getString(com.android.internal.R.string.reset));
-        if (Build.IS_ENG || Build.IS_USERDEBUG) {
-            // Prototype menu item
-            toolbar.getMenu().add(Menu.NONE, MENU_REMOVE_LABELS, Menu.NONE, "Remove labels")
-                    .setCheckable(true);
-        }
+        // Prototype menu item
+        toolbar.getMenu()
+                .add(Menu.NONE, MENU_REMOVE_LABELS, Menu.NONE, "Remove labels")
+                .setCheckable(true)
+                .setVisible(Build.IS_ENG || Build.IS_USERDEBUG);
         toolbar.setTitle(R.string.qs_edit);
         mRecyclerView = findViewById(android.R.id.list);
         mTransparentView = findViewById(R.id.customizer_transparent_view);
