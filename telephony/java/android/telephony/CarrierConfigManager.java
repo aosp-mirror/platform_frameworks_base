@@ -4534,6 +4534,12 @@ public class CarrierConfigManager {
     public static final String KEY_USE_LOWER_MTU_VALUE_IF_BOTH_RECEIVED =
             "use_lower_mtu_value_if_both_received";
 
+    /**
+     * Indicates if auto-configuration server is used for the RCS config
+     * Reference: GSMA RCC.14
+     */
+    public static final String KEY_USE_ACS_FOR_RCS_BOOL = "use_acs_for_rcs_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -5080,6 +5086,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SUPPORTS_CALL_COMPOSER_BOOL, false);
         sDefaults.putString(KEY_CALL_COMPOSER_PICTURE_SERVER_URL_STRING, "");
         sDefaults.putBoolean(KEY_USE_LOWER_MTU_VALUE_IF_BOTH_RECEIVED, false);
+        sDefaults.putBoolean(KEY_USE_ACS_FOR_RCS_BOOL, false);
     }
 
     /**
