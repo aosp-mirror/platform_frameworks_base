@@ -34,7 +34,6 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -51,6 +50,8 @@ import android.provider.MediaStore.MediaColumns;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
+
+import androidx.exifinterface.media.ExifInterface;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
@@ -78,7 +79,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * An AsyncTask that saves an image to the media store in the background.
  */
-class  SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
+class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
     private static final String TAG = logTag(SaveImageInBackgroundTask.class);
 
     private static final String SCREENSHOT_FILE_NAME_TEMPLATE = "Screenshot_%s.png";
