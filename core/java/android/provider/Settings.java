@@ -16337,6 +16337,12 @@ public final class Settings {
              */
             public static final String AUTO_WIFI = "auto_wifi";
 
+            // Possible force wifi on states
+            /** @hide */
+            public static final int AUTO_WIFI_DISABLED = 0;
+            /** @hide */
+            public static final int AUTO_WIFI_ENABLED = 1;
+
             /**
              * The number of minutes after the WiFi enters power save mode.
              * @hide
