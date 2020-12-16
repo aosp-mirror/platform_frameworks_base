@@ -50,6 +50,8 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.UiEvent;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.ArrayUtils;
 import com.android.systemui.R;
 import com.android.systemui.people.widget.LaunchConversationActivity;
@@ -79,6 +81,29 @@ public class PeopleSpaceUtils {
     public enum NotificationAction {
         POSTED,
         REMOVED
+    }
+
+    /**
+     * The UiEvent enums that this class can log.
+     */
+    public enum PeopleSpaceWidgetEvent implements UiEventLogger.UiEventEnum {
+        @UiEvent(doc = "People space widget deleted")
+        PEOPLE_SPACE_WIDGET_DELETED(666),
+        @UiEvent(doc = "People space widget added")
+        PEOPLE_SPACE_WIDGET_ADDED(667),
+        @UiEvent(doc = "People space widget clicked to launch conversation")
+        PEOPLE_SPACE_WIDGET_CLICKED(668);
+
+        private final int mId;
+
+        PeopleSpaceWidgetEvent(int id) {
+            mId = id;
+        }
+
+        @Override
+        public int getId() {
+            return mId;
+        }
     }
 
     /** Returns a list of map entries corresponding to user's conversations. */

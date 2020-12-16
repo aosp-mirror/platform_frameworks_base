@@ -23,12 +23,15 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.util.Log;
 
+import com.android.internal.logging.UiEventLogger;
+import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.systemui.people.PeopleSpaceUtils;
 
 /** Proxy activity to launch ShortcutInfo's conversation. */
 public class LaunchConversationActivity extends Activity {
     private static final String TAG = "PeopleSpaceLaunchConv";
     private static final boolean DEBUG = PeopleSpaceUtils.DEBUG;
+    private UiEventLogger mUiEventLogger = new UiEventLoggerImpl();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -44,6 +47,7 @@ public class LaunchConversationActivity extends Activity {
             if (DEBUG) {
                 Log.d(TAG, "Launching conversation with shortcutInfo id " + tileId);
             }
+            mUiEventLogger.log(PeopleSpaceUtils.PeopleSpaceWidgetEvent.PEOPLE_SPACE_WIDGET_CLICKED);
             try {
                 LauncherApps launcherApps =
                         getApplicationContext().getSystemService(LauncherApps.class);

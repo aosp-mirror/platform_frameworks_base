@@ -38,6 +38,8 @@ import android.view.ViewGroup;
 
 import androidx.preference.PreferenceManager;
 
+import com.android.internal.logging.UiEventLogger;
+import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.systemui.R;
 import com.android.systemui.people.widget.PeopleSpaceWidgetProvider;
 
@@ -60,6 +62,7 @@ public class PeopleSpaceActivity extends Activity {
     private AppWidgetManager mAppWidgetManager;
     private int mAppWidgetId;
     private boolean mShowSingleConversation;
+    private UiEventLogger mUiEventLogger = new UiEventLoggerImpl();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,6 +152,8 @@ public class PeopleSpaceActivity extends Activity {
 
     /** Finish activity with a successful widget configuration result. */
     private void finishActivity() {
+        if (PeopleSpaceUtils.DEBUG) Log.d(TAG, "Widget added!");
+        mUiEventLogger.log(PeopleSpaceUtils.PeopleSpaceWidgetEvent.PEOPLE_SPACE_WIDGET_ADDED);
         Intent resultValue = new Intent();
         resultValue.putExtra(EXTRA_APPWIDGET_ID, mAppWidgetId);
         setResult(RESULT_OK, resultValue);
