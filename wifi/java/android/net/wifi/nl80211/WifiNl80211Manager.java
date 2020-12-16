@@ -588,7 +588,7 @@ public class WifiNl80211Manager {
     public boolean setupInterfaceForClientMode(@NonNull String ifaceName,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull ScanEventCallback scanCallback, @NonNull ScanEventCallback pnoScanCallback) {
-        Log.d(TAG, "Setting up interface for client mode");
+        Log.d(TAG, "Setting up interface for client mode: " + ifaceName);
         if (!retrieveWificondAndRegisterForDeath()) {
             return false;
         }
@@ -646,7 +646,7 @@ public class WifiNl80211Manager {
      */
     public boolean tearDownClientInterface(@NonNull String ifaceName) {
         if (getClientInterface(ifaceName) == null) {
-            Log.e(TAG, "No valid wificond client interface handler");
+            Log.e(TAG, "No valid wificond client interface handler for iface=" + ifaceName);
             return false;
         }
         try {
@@ -661,7 +661,7 @@ public class WifiNl80211Manager {
         }
 
         if (mWificond == null) {
-            Log.e(TAG, "Reference to wifiCond is null");
+            Log.e(TAG, "tearDownClientInterface: mWificond binder is null! Did wificond die?");
             return false;
         }
 
@@ -691,7 +691,7 @@ public class WifiNl80211Manager {
      * @return true on success.
      */
     public boolean setupInterfaceForSoftApMode(@NonNull String ifaceName) {
-        Log.d(TAG, "Setting up interface for soft ap mode");
+        Log.d(TAG, "Setting up interface for soft ap mode for iface=" + ifaceName);
         if (!retrieveWificondAndRegisterForDeath()) {
             return false;
         }
@@ -725,12 +725,12 @@ public class WifiNl80211Manager {
      */
     public boolean tearDownSoftApInterface(@NonNull String ifaceName) {
         if (getApInterface(ifaceName) == null) {
-            Log.e(TAG, "No valid wificond ap interface handler");
+            Log.e(TAG, "No valid wificond ap interface handler for iface=" + ifaceName);
             return false;
         }
 
         if (mWificond == null) {
-            Log.e(TAG, "Reference to wifiCond is null");
+            Log.e(TAG, "tearDownSoftApInterface: mWificond binder is null! Did wificond die?");
             return false;
         }
 
@@ -797,7 +797,7 @@ public class WifiNl80211Manager {
     @Nullable public SignalPollResult signalPoll(@NonNull String ifaceName) {
         IClientInterface iface = getClientInterface(ifaceName);
         if (iface == null) {
-            Log.e(TAG, "No valid wificond client interface handler");
+            Log.e(TAG, "No valid wificond client interface handler for iface=" + ifaceName);
             return null;
         }
 
@@ -828,7 +828,7 @@ public class WifiNl80211Manager {
     @Nullable public TxPacketCounters getTxPacketCounters(@NonNull String ifaceName) {
         IClientInterface iface = getClientInterface(ifaceName);
         if (iface == null) {
-            Log.e(TAG, "No valid wificond client interface handler");
+            Log.e(TAG, "No valid wificond client interface handler for iface=" + ifaceName);
             return null;
         }
 
@@ -871,7 +871,7 @@ public class WifiNl80211Manager {
             @ScanResultType int scanType) {
         IWifiScannerImpl scannerImpl = getScannerImpl(ifaceName);
         if (scannerImpl == null) {
-            Log.e(TAG, "No valid wificond scanner interface handler");
+            Log.e(TAG, "No valid wificond scanner interface handler for iface=" + ifaceName);
             return new ArrayList<>();
         }
         List<NativeScanResult> results = null;
@@ -936,7 +936,7 @@ public class WifiNl80211Manager {
             @Nullable Set<Integer> freqs, @Nullable List<byte[]> hiddenNetworkSSIDs) {
         IWifiScannerImpl scannerImpl = getScannerImpl(ifaceName);
         if (scannerImpl == null) {
-            Log.e(TAG, "No valid wificond scanner interface handler");
+            Log.e(TAG, "No valid wificond scanner interface handler for iface=" + ifaceName);
             return false;
         }
         SingleScanSettings settings = new SingleScanSettings();
@@ -1002,7 +1002,7 @@ public class WifiNl80211Manager {
             @NonNull PnoScanRequestCallback callback) {
         IWifiScannerImpl scannerImpl = getScannerImpl(ifaceName);
         if (scannerImpl == null) {
-            Log.e(TAG, "No valid wificond scanner interface handler");
+            Log.e(TAG, "No valid wificond scanner interface handler for iface=" + ifaceName);
             return false;
         }
 
@@ -1040,7 +1040,7 @@ public class WifiNl80211Manager {
     public boolean stopPnoScan(@NonNull String ifaceName) {
         IWifiScannerImpl scannerImpl = getScannerImpl(ifaceName);
         if (scannerImpl == null) {
-            Log.e(TAG, "No valid wificond scanner interface handler");
+            Log.e(TAG, "No valid wificond scanner interface handler for iface=" + ifaceName);
             return false;
         }
         try {
@@ -1065,7 +1065,7 @@ public class WifiNl80211Manager {
     public void abortScan(@NonNull String ifaceName) {
         IWifiScannerImpl scannerImpl = getScannerImpl(ifaceName);
         if (scannerImpl == null) {
-            Log.e(TAG, "No valid wificond scanner interface handler");
+            Log.e(TAG, "No valid wificond scanner interface handler for iface=" + ifaceName);
             return;
         }
         try {
@@ -1091,7 +1091,7 @@ public class WifiNl80211Manager {
      */
     public @NonNull int[] getChannelsMhzForBand(@WifiAnnotations.WifiBandBasic int band) {
         if (mWificond == null) {
-            Log.e(TAG, "No valid wificond scanner interface handler");
+            Log.e(TAG, "getChannelsMhzForBand: mWificond binder is null! Did wificond die?");
             return new int[0];
         }
         int[] result = null;
@@ -1141,7 +1141,7 @@ public class WifiNl80211Manager {
      */
     @Nullable public DeviceWiphyCapabilities getDeviceWiphyCapabilities(@NonNull String ifaceName) {
         if (mWificond == null) {
-            Log.e(TAG, "Can not query for device wiphy capabilities at this time");
+            Log.e(TAG, "getDeviceWiphyCapabilities: mWificond binder is null! Did wificond die?");
             return null;
         }
 
@@ -1176,7 +1176,7 @@ public class WifiNl80211Manager {
             @NonNull SoftApCallback callback) {
         IApInterface iface = getApInterface(ifaceName);
         if (iface == null) {
-            Log.e(TAG, "No valid ap interface handler");
+            Log.e(TAG, "No valid ap interface handler for iface=" + ifaceName);
             return false;
         }
 
@@ -1234,7 +1234,7 @@ public class WifiNl80211Manager {
         // TODO (b/112029045) validate mcs
         IClientInterface clientInterface = getClientInterface(ifaceName);
         if (clientInterface == null) {
-            Log.e(TAG, "No valid wificond client interface handler");
+            Log.e(TAG, "No valid wificond client interface handler for iface=" + ifaceName);
             executor.execute(() -> callback.onFailure(SEND_MGMT_FRAME_ERROR_UNKNOWN));
             return;
         }
