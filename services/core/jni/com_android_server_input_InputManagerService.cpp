@@ -240,8 +240,8 @@ public:
     void reloadCalibration();
     void setPointerIconType(int32_t iconId);
     void reloadPointerIcons();
+    void requestPointerCapture(const sp<IBinder>& windowToken, bool enabled);
     void setCustomPointerIcon(const SpriteIcon& icon);
-    void setPointerCapture(bool enabled);
     void setMotionClassifierEnabled(bool enabled);
 
     /* --- InputReaderPolicyInterface implementation --- */
@@ -280,6 +280,7 @@ public:
     void pokeUserActivity(nsecs_t eventTime, int32_t eventType) override;
     bool checkInjectEventsPermissionNonReentrant(int32_t injectorPid, int32_t injectorUid) override;
     void onPointerDownOutsideFocus(const sp<IBinder>& touchedToken) override;
+    void setPointerCapture(bool enabled) override;
 
     /* --- PointerControllerPolicyInterface implementation --- */
 
@@ -930,20 +931,8 @@ void NativeInputManager::setShowTouches(bool enabled) {
             InputReaderConfiguration::CHANGE_SHOW_TOUCHES);
 }
 
-void NativeInputManager::setPointerCapture(bool enabled) {
-    { // acquire lock
-        AutoMutex _l(mLock);
-
-        if (mLocked.pointerCapture == enabled) {
-            return;
-        }
-
-        ALOGI("Setting pointer capture to %s.", enabled ? "enabled" : "disabled");
-        mLocked.pointerCapture = enabled;
-    } // release lock
-
-    mInputManager->getReader()->requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_POINTER_CAPTURE);
+void NativeInputManager::requestPointerCapture(const sp<IBinder>& windowToken, bool enabled) {
+    mInputManager->getDispatcher()->requestPointerCapture(windowToken, enabled);
 }
 
 void NativeInputManager::setInteractive(bool interactive) {
@@ -1215,7 +1204,6 @@ void NativeInputManager::pokeUserActivity(nsecs_t eventTime, int32_t eventType) 
     android_server_PowerManagerService_userActivity(eventTime, eventType);
 }
 
-
 bool NativeInputManager::checkInjectEventsPermissionNonReentrant(
         int32_t injectorPid, int32_t injectorUid) {
     ATRACE_CALL();
@@ -1236,6 +1224,22 @@ void NativeInputManager::onPointerDownOutsideFocus(const sp<IBinder>& touchedTok
     jobject touchedTokenObj = javaObjectForIBinder(env, touchedToken);
     env->CallVoidMethod(mServiceObj, gServiceClassInfo.onPointerDownOutsideFocus, touchedTokenObj);
     checkAndClearExceptionFromCallback(env, "onPointerDownOutsideFocus");
+}
+
+void NativeInputManager::setPointerCapture(bool enabled) {
+    { // acquire lock
+        AutoMutex _l(mLock);
+
+        if (mLocked.pointerCapture == enabled) {
+            return;
+        }
+
+        ALOGV("%s pointer capture.", enabled ? "Enabling" : "Disabling");
+        mLocked.pointerCapture = enabled;
+    } // release lock
+
+    mInputManager->getReader()->requestRefreshConfiguration(
+            InputReaderConfiguration::CHANGE_POINTER_CAPTURE);
 }
 
 void NativeInputManager::loadPointerIcon(SpriteIcon* icon, int32_t displayId) {
@@ -1631,11 +1635,12 @@ static void nativeSetFocusedDisplay(JNIEnv* env, jclass /* clazz */,
     im->setFocusedDisplay(env, displayId);
 }
 
-static void nativeSetPointerCapture(JNIEnv* env, jclass /* clazz */, jlong ptr,
-        jboolean enabled) {
+static void nativeRequestPointerCapture(JNIEnv* env, jclass /* clazz */, jlong ptr,
+                                        jobject tokenObj, jboolean enabled) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+    sp<IBinder> windowToken = ibinderForJavaObject(env, tokenObj);
 
-    im->setPointerCapture(enabled);
+    im->requestPointerCapture(windowToken, enabled);
 }
 
 static void nativeSetInputDispatchMode(JNIEnv* /* env */,
@@ -1941,7 +1946,8 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"nativeSetFocusedApplication", "(JILandroid/view/InputApplicationHandle;)V",
          (void*)nativeSetFocusedApplication},
         {"nativeSetFocusedDisplay", "(JI)V", (void*)nativeSetFocusedDisplay},
-        {"nativeSetPointerCapture", "(JZ)V", (void*)nativeSetPointerCapture},
+        {"nativeRequestPointerCapture", "(JLandroid/os/IBinder;Z)V",
+         (void*)nativeRequestPointerCapture},
         {"nativeSetInputDispatchMode", "(JZZ)V", (void*)nativeSetInputDispatchMode},
         {"nativeSetSystemUiLightsOut", "(JZ)V", (void*)nativeSetSystemUiLightsOut},
         {"nativeTransferTouchFocus", "(JLandroid/os/IBinder;Landroid/os/IBinder;)Z",
