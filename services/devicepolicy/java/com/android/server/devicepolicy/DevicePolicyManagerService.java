@@ -3373,6 +3373,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 PREVENT_SETTING_PASSWORD_QUALITY_ON_PARENT, packageName, userId);
     }
 
+    private boolean isPasswordLimitingAdminTargetingP(CallerIdentity caller) {
+        if (!caller.hasAdminComponent()) {
+            return false;
+        }
+
+        synchronized (getLockObject()) {
+            return getActiveAdminWithPolicyForUidLocked(
+                    caller.getComponentName(), DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD,
+                    caller.getUid()) != null;
+        }
+    }
+
     @Override
     public void setPasswordQuality(ComponentName who, int quality, boolean parent) {
         if (!mHasFeature) {
@@ -3383,7 +3395,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(
-                isProfileOwner(caller) || isDeviceOwner(caller) || isSystemUid(caller));
+                isProfileOwner(caller) || isDeviceOwner(caller) || isSystemUid(caller)
+                || isPasswordLimitingAdminTargetingP(caller));
 
         final boolean qualityMayApplyToParent =
                 canSetPasswordQualityOnParent(who.getPackageName(), caller.getUserId());
