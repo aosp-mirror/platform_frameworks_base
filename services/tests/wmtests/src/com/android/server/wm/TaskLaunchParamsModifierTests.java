@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -32,6 +33,7 @@ import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
 import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.window.DisplayAreaOrganizer.FEATURE_RUNTIME_TASK_CONTAINER_FIRST;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -113,9 +115,9 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
         assertEquals(RESULT_SKIP, new CalculateRequestBuilder().setActivity(null).calculate());
     }
 
-    // =============================
-    // Display ID Related Tests
-    // =============================
+    // =======================
+    // Display Related Tests
+    // =======================
     @Test
     public void testDefaultToPrimaryDisplayArea() {
         createNewDisplayContent(WINDOWING_MODE_FREEFORM);
@@ -291,7 +293,7 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
         when(mActivity.getProcessName()).thenReturn(processName);
         when(mActivity.getUid()).thenReturn(uid);
         doReturn(controller)
-                .when(mSupervisor.mService)
+                .when(mAtm)
                 .getProcessController(processName, uid);
 
         assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().calculate());
@@ -312,11 +314,11 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
         when(mActivity.getProcessName()).thenReturn(processName);
         when(mActivity.getUid()).thenReturn(uid);
         doReturn(null)
-                .when(mSupervisor.mService)
+                .when(mAtm)
                 .getProcessController(processName, uid);
 
         doReturn(controller)
-                .when(mSupervisor.mService)
+                .when(mAtm)
                 .getProcessController(mActivity.launchedFromPid, mActivity.launchedFromUid);
 
         assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().calculate());
@@ -344,10 +346,10 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
                 .thenReturn(expectedTaskDisplayArea);
 
         doReturn(controllerForApplication)
-                .when(mSupervisor.mService)
+                .when(mAtm)
                 .getProcessController(processName, uid);
         doReturn(controllerForLaunching)
-                .when(mSupervisor.mService)
+                .when(mAtm)
                 .getProcessController(mActivity.launchedFromPid, mActivity.launchedFromUid);
 
         assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().calculate());
@@ -369,15 +371,15 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
         when(controller.getTopActivityDisplayArea()).thenReturn(expectedTaskDisplayArea);
 
         doReturn(null)
-                .when(mSupervisor.mService)
+                .when(mAtm)
                 .getProcessController(mActivity.processName, mActivity.info.applicationInfo.uid);
 
         doReturn(null)
-                .when(mSupervisor.mService)
+                .when(mAtm)
                 .getProcessController(mActivity.launchedFromPid, mActivity.launchedFromUid);
 
         doReturn(controller)
-                .when(mSupervisor.mService)
+                .when(mAtm)
                 .getProcessController(request.realCallingPid, request.realCallingUid);
 
         assertEquals(RESULT_CONTINUE,
@@ -389,16 +391,90 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
     @Test
     public void testUsesDefaultDisplayAreaIfWindowProcessControllerIsNotPresent() {
         doReturn(null)
-                .when(mSupervisor.mService)
+                .when(mAtm)
                 .getProcessController(mActivity.processName, mActivity.info.applicationInfo.uid);
 
         doReturn(null)
-                .when(mSupervisor.mService)
+                .when(mAtm)
                 .getProcessController(mActivity.launchedFromPid, mActivity.launchedFromUid);
 
         assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().calculate());
 
         assertEquals(DEFAULT_DISPLAY, mResult.mPreferredTaskDisplayArea.getDisplayId());
+    }
+
+    @Test
+    public void testOverridesDisplayAreaWithStandardTypeAndFullscreenMode() {
+        final TaskDisplayArea secondaryDisplayArea = createTaskDisplayArea(mDefaultDisplay,
+                mWm, "SecondaryDisplayArea", FEATURE_RUNTIME_TASK_CONTAINER_FIRST);
+        final Task launchRoot = createTaskStackOnTaskDisplayArea(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, secondaryDisplayArea);
+        launchRoot.mCreatedByOrganizer = true;
+
+        secondaryDisplayArea.setLaunchRootTask(launchRoot, new int[] { WINDOWING_MODE_FULLSCREEN },
+                new int[] { ACTIVITY_TYPE_STANDARD });
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().calculate());
+
+        assertEquals(secondaryDisplayArea, mResult.mPreferredTaskDisplayArea);
+    }
+
+    @Test
+    public void testOverridesDisplayAreaWithHomeTypeAndFullscreenMode() {
+        final TaskDisplayArea secondaryDisplayArea = createTaskDisplayArea(mDefaultDisplay,
+                mWm, "SecondaryDisplayArea", FEATURE_RUNTIME_TASK_CONTAINER_FIRST);
+        final Task launchRoot = createTaskStackOnTaskDisplayArea(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, secondaryDisplayArea);
+        launchRoot.mCreatedByOrganizer = true;
+
+        mActivity.setActivityType(ACTIVITY_TYPE_HOME);
+        secondaryDisplayArea.setLaunchRootTask(launchRoot, new int[] { WINDOWING_MODE_FULLSCREEN },
+                new int[] { ACTIVITY_TYPE_HOME });
+
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().calculate());
+
+        assertEquals(secondaryDisplayArea, mResult.mPreferredTaskDisplayArea);
+    }
+
+    @Test
+    public void testOverridesDisplayAreaWithStandardTypeAndFreeformMode() {
+        final TestDisplayContent freeformDisplay = createNewDisplayContent(
+                WINDOWING_MODE_FREEFORM);
+        final TaskDisplayArea secondaryDisplayArea = createTaskDisplayArea(freeformDisplay,
+                mWm, "SecondaryDisplayArea", FEATURE_RUNTIME_TASK_CONTAINER_FIRST);
+        final Task launchRoot = createTaskStackOnTaskDisplayArea(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, secondaryDisplayArea);
+        launchRoot.mCreatedByOrganizer = true;
+
+        secondaryDisplayArea.setLaunchRootTask(launchRoot, new int[] { WINDOWING_MODE_FREEFORM },
+                new int[] { ACTIVITY_TYPE_STANDARD });
+
+        mCurrent.mPreferredTaskDisplayArea = freeformDisplay.getDefaultTaskDisplayArea();
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().calculate());
+
+        assertEquals(secondaryDisplayArea, mResult.mPreferredTaskDisplayArea);
+    }
+
+    @Test
+    public void testNotOverrideDisplayAreaWhenActivityOptionsHasDisplayArea() {
+        final TaskDisplayArea secondaryDisplayArea = createTaskDisplayArea(mDefaultDisplay,
+                mWm, "SecondaryDisplayArea", FEATURE_RUNTIME_TASK_CONTAINER_FIRST);
+        final Task launchRoot = createTaskStackOnTaskDisplayArea(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, secondaryDisplayArea);
+        launchRoot.mCreatedByOrganizer = true;
+
+        secondaryDisplayArea.setLaunchRootTask(launchRoot, new int[] { WINDOWING_MODE_FULLSCREEN },
+                new int[] { ACTIVITY_TYPE_STANDARD });
+
+        ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchTaskDisplayArea(
+                mDefaultDisplay.getDefaultTaskDisplayArea().mRemoteToken.toWindowContainerToken());
+
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
+
+        assertEquals(
+                mDefaultDisplay.getDefaultTaskDisplayArea(), mResult.mPreferredTaskDisplayArea);
     }
 
     // =====================================
