@@ -496,6 +496,32 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * @return int An arbitrary integer used to order windows, with lower numbers below higher ones.
      */
     default int getWindowLayerFromTypeLw(int type, boolean canAddInternalSystemWindow) {
+        return getWindowLayerFromTypeLw(type, canAddInternalSystemWindow,
+                false /* roundedCornerOverlay */);
+    }
+
+    /**
+     * Returns the layer assignment for the window type. Allows you to control how different
+     * kinds of windows are ordered on-screen.
+     *
+     * @param type The type of window being assigned.
+     * @param canAddInternalSystemWindow If the owner window associated with the type we are
+     *        evaluating can add internal system windows. I.e they have
+     *        {@link Manifest.permission#INTERNAL_SYSTEM_WINDOW}. If true, alert window
+     *        types {@link android.view.WindowManager.LayoutParams#isSystemAlertWindowType(int)}
+     *        can be assigned layers greater than the layer for
+     *        {@link android.view.WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY} Else, their
+     *        layers would be lesser.
+     * @param roundedCornerOverlay {#code true} to indicate that the owner window is rounded corner
+     *                             overlay.
+     * @return int An arbitrary integer used to order windows, with lower numbers below higher ones.
+     */
+    default int getWindowLayerFromTypeLw(int type, boolean canAddInternalSystemWindow,
+            boolean roundedCornerOverlay) {
+        // Always put the rounded corner layer to the top most.
+        if (roundedCornerOverlay && canAddInternalSystemWindow) {
+            return getMaxWindowLayer();
+        }
         if (type >= FIRST_APPLICATION_WINDOW && type <= LAST_APPLICATION_WINDOW) {
             return APPLICATION_LAYER;
         }
@@ -598,8 +624,17 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         }
     }
 
+    // TODO(b/155340867): consider to remove the logic after using pure Surface for rounded corner
+    //  overlay.
+    /**
+     * Returns the max window layer.
+     * <p>Note that the max window layer should be higher that the maximum value which reported
+     * by {@link #getWindowLayerFromTypeLw(int, boolean)} to contain rounded corner overlay.</p>
+     *
+     * @see WindowManager.LayoutParams#PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY
+     */
     default int getMaxWindowLayer() {
-        return 35;
+        return 36;
     }
 
     /**

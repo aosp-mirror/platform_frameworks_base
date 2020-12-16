@@ -115,15 +115,11 @@ class RootDisplayArea extends DisplayArea<DisplayArea> {
     @Nullable
     DisplayArea.Tokens findAreaForToken(int windowType, boolean ownerCanManageAppTokens,
             boolean roundedCornerOverlay) {
-        // TODO(b/159767464): cover TYPE_INPUT_METHOD(_DIALOG) case here. mAreaForLayer doesn't
-        // contain IME container.
         int windowLayerFromType = mWmService.mPolicy.getWindowLayerFromTypeLw(windowType,
-                ownerCanManageAppTokens);
+                ownerCanManageAppTokens, roundedCornerOverlay);
         if (windowLayerFromType == APPLICATION_LAYER) {
             throw new IllegalArgumentException(
                     "There shouldn't be WindowToken on APPLICATION_LAYER");
-        } else if (roundedCornerOverlay) {
-            windowLayerFromType = mAreaForLayer.length - 1;
         }
         return mAreaForLayer[windowLayerFromType];
     }
