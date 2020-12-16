@@ -105,7 +105,8 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
     private final TunerService.Tunable mTunable = new TunerService.Tunable() {
         @Override
         public void onTuningChanged(String key, String newValue) {
-            mToolbar.getMenu().findItem(MENU_REMOVE_LABELS).setChecked(!("0".equals(newValue)));
+            mToolbar.getMenu().findItem(MENU_REMOVE_LABELS)
+                    .setChecked(newValue != null && !("0".equals(newValue)));
         }
     };
 
