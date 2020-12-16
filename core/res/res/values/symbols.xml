@@ -2252,6 +2252,10 @@
   <java-symbol type="string" name="ext_media_move_success_message" />
   <java-symbol type="string" name="ext_media_move_failure_title" />
   <java-symbol type="string" name="ext_media_move_failure_message" />
+  <java-symbol type="string" name="notification_feedback_indicator_alerted" />
+  <java-symbol type="string" name="notification_feedback_indicator_silenced" />
+  <java-symbol type="string" name="notification_feedback_indicator_promoted" />
+  <java-symbol type="string" name="notification_feedback_indicator_demoted" />
   <java-symbol type="style" name="Animation.RecentApplications" />
   <java-symbol type="integer" name="dock_enter_exit_duration" />
   <java-symbol type="bool" name="config_battery_percentage_setting_available" />
