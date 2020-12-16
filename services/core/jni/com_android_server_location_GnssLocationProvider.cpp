@@ -41,6 +41,8 @@
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/Log.h"
 #include "gnss/GnssConfiguration.h"
+#include "gnss/GnssMeasurement.h"
+#include "gnss/Utils.h"
 #include "hardware_legacy/power.h"
 #include "jni.h"
 #include "utils/Log.h"
@@ -56,11 +58,8 @@
 #include <string.h>
 #include <utils/SystemClock.h>
 
-static jclass class_gnssMeasurementsEvent;
-static jclass class_gnssMeasurement;
 static jclass class_location;
 static jclass class_gnssNavigationMessage;
-static jclass class_gnssClock;
 static jclass class_gnssAntennaInfoBuilder;
 static jclass class_gnssPowerStats;
 static jclass class_phaseCenterOffset;
@@ -68,7 +67,7 @@ static jclass class_sphericalCorrections;
 static jclass class_arrayList;
 static jclass class_doubleArray;
 
-static jobject mCallbacksObj = nullptr;
+jobject android::mCallbacksObj = nullptr;
 
 static jmethodID method_reportLocation;
 static jmethodID method_reportStatus;
@@ -90,7 +89,6 @@ static jmethodID method_reportGeofenceAddStatus;
 static jmethodID method_reportGeofenceRemoveStatus;
 static jmethodID method_reportGeofencePauseStatus;
 static jmethodID method_reportGeofenceResumeStatus;
-static jmethodID method_reportMeasurementData;
 static jmethodID method_reportAntennaInfo;
 static jmethodID method_reportNavigationMessages;
 static jmethodID method_reportLocationBatch;
@@ -123,11 +121,8 @@ static jmethodID method_correctionPlaneAltDeg;
 static jmethodID method_correctionPlaneAzimDeg;
 static jmethodID method_reportNfwNotification;
 static jmethodID method_isInEmergencySession;
-static jmethodID method_gnssMeasurementsEventCtor;
 static jmethodID method_locationCtor;
 static jmethodID method_gnssNavigationMessageCtor;
-static jmethodID method_gnssClockCtor;
-static jmethodID method_gnssMeasurementCtor;
 static jmethodID method_gnssAntennaInfoBuilderCtor;
 static jmethodID method_gnssPowerStatsCtor;
 static jmethodID method_phaseCenterOffsetCtor;
@@ -145,7 +140,7 @@ static jmethodID method_setSubHalPowerIndicationCapabilities;
  * Save a pointer to JavaVm to attach/detach threads executing
  * callback methods that need to make JNI calls.
  */
-static JavaVM* sJvm;
+JavaVM* android::ScopedJniThreadAttach::sJvm;
 
 using android::OK;
 using android::sp;
@@ -201,14 +196,6 @@ using IGnssDebug_V1_0 = android::hardware::gnss::V1_0::IGnssDebug;
 using IGnssDebug_V2_0 = android::hardware::gnss::V2_0::IGnssDebug;
 using IGnssAntennaInfo = android::hardware::gnss::V2_1::IGnssAntennaInfo;
 using IGnssAntennaInfoCallback = android::hardware::gnss::V2_1::IGnssAntennaInfoCallback;
-using IGnssMeasurement_V1_0 = android::hardware::gnss::V1_0::IGnssMeasurement;
-using IGnssMeasurement_V1_1 = android::hardware::gnss::V1_1::IGnssMeasurement;
-using IGnssMeasurement_V2_0 = android::hardware::gnss::V2_0::IGnssMeasurement;
-using IGnssMeasurement_V2_1 = android::hardware::gnss::V2_1::IGnssMeasurement;
-using IGnssMeasurementCallback_V1_0 = android::hardware::gnss::V1_0::IGnssMeasurementCallback;
-using IGnssMeasurementCallback_V1_1 = android::hardware::gnss::V1_1::IGnssMeasurementCallback;
-using IGnssMeasurementCallback_V2_0 = android::hardware::gnss::V2_0::IGnssMeasurementCallback;
-using IGnssMeasurementCallback_V2_1 = android::hardware::gnss::V2_1::IGnssMeasurementCallback;
 using IAGnssRil_V1_0 = android::hardware::gnss::V1_0::IAGnssRil;
 using IAGnssRil_V2_0 = android::hardware::gnss::V2_0::IAGnssRil;
 using IAGnss_V1_0 = android::hardware::gnss::V1_0::IAGnss;
@@ -246,12 +233,11 @@ struct GnssDeathRecipient : virtual public hidl_death_recipient
         ALOGE("IGNSS hidl service failed, trying to recover...");
 
         JNIEnv* env = android::AndroidRuntime::getJNIEnv();
-        env->CallVoidMethod(mCallbacksObj, method_reportGnssServiceDied);
+        env->CallVoidMethod(android::mCallbacksObj, method_reportGnssServiceDied);
     }
 };
 
 // Must match the value from GnssMeasurement.java
-static const uint32_t ADR_STATE_HALF_CYCLE_REPORTED = (1<<4);
 static const uint32_t SVID_FLAGS_HAS_BASEBAND_CN0 = (1<<4);
 
 sp<GnssDeathRecipient> gnssHalDeathRecipient = nullptr;
@@ -274,10 +260,6 @@ sp<IGnssBatching_V2_0> gnssBatchingIface_V2_0 = nullptr;
 sp<IGnssDebug_V1_0> gnssDebugIface = nullptr;
 sp<IGnssDebug_V2_0> gnssDebugIface_V2_0 = nullptr;
 sp<IGnssNi> gnssNiIface = nullptr;
-sp<IGnssMeasurement_V1_0> gnssMeasurementIface = nullptr;
-sp<IGnssMeasurement_V1_1> gnssMeasurementIface_V1_1 = nullptr;
-sp<IGnssMeasurement_V2_0> gnssMeasurementIface_V2_0 = nullptr;
-sp<IGnssMeasurement_V2_1> gnssMeasurementIface_V2_1 = nullptr;
 sp<IGnssNavigationMessage> gnssNavigationMessageIface = nullptr;
 sp<IGnssPowerIndication> gnssPowerIndicationIface = nullptr;
 sp<IMeasurementCorrections_V1_0> gnssCorrectionsIface_V1_0 = nullptr;
@@ -286,6 +268,7 @@ sp<IGnssVisibilityControl> gnssVisibilityControlIface = nullptr;
 sp<IGnssAntennaInfo> gnssAntennaInfoIface = nullptr;
 
 std::unique_ptr<GnssConfigurationInterface> gnssConfigurationIface = nullptr;
+std::unique_ptr<android::gnss::GnssMeasurementInterface> gnssMeasurementIface = nullptr;
 
 #define WAKE_LOCK_NAME  "GPS"
 
@@ -305,170 +288,9 @@ bool hasLatLong(const GnssLocation_V2_0& location) {
 }
 
 }  // namespace
-template<class T>
-class JavaMethodHelper {
- public:
-    // Helper function to call setter on a Java object.
-    static void callJavaMethod(
-           JNIEnv* env,
-           jclass clazz,
-           jobject object,
-           const char* method_name,
-           T value);
-
- private:
-    static const char* const signature_;
-};
-
-template<class T>
-void JavaMethodHelper<T>::callJavaMethod(
-        JNIEnv* env,
-        jclass clazz,
-        jobject object,
-        const char* method_name,
-        T value) {
-    jmethodID method = env->GetMethodID(clazz, method_name, signature_);
-    env->CallVoidMethod(object, method, value);
-}
-
-class JavaObject {
- public:
-    JavaObject(JNIEnv* env, jclass clazz, jmethodID defaultCtor);
-    JavaObject(JNIEnv* env, jclass clazz, jmethodID stringCtor, const char * sz_arg_1);
-    JavaObject(JNIEnv* env, jclass clazz, jobject object);
-
-    virtual ~JavaObject() = default;
-
-    template<class T>
-    void callSetter(const char* method_name, T value);
-    template<class T>
-    void callSetter(const char* method_name, T* value, size_t size);
-    jobject get();
-
- private:
-    JNIEnv* env_;
-    jclass clazz_;
-    jobject object_;
-};
-
-JavaObject::JavaObject(JNIEnv* env, jclass clazz, jmethodID defaultCtor) : env_(env),
-        clazz_(clazz) {
-    object_ = env_->NewObject(clazz_, defaultCtor);
-}
-
-
-JavaObject::JavaObject(JNIEnv* env, jclass clazz, jmethodID stringCtor, const char * sz_arg_1)
-        : env_(env), clazz_(clazz) {
-    jstring szArg = env->NewStringUTF(sz_arg_1);
-    object_ = env_->NewObject(clazz_, stringCtor, szArg);
-    if (szArg) {
-        env_->DeleteLocalRef(szArg);
-    }
-}
-
-
-JavaObject::JavaObject(JNIEnv* env, jclass clazz, jobject object)
-    : env_(env), clazz_(clazz), object_(object) {
-}
-
-template<class T>
-void JavaObject::callSetter(const char* method_name, T value) {
-    JavaMethodHelper<T>::callJavaMethod(
-            env_, clazz_, object_, method_name, value);
-}
-
-template<>
-void JavaObject::callSetter(
-        const char* method_name, uint8_t* value, size_t size) {
-    jbyteArray array = env_->NewByteArray(size);
-    env_->SetByteArrayRegion(array, 0, size, reinterpret_cast<jbyte*>(value));
-    jmethodID method = env_->GetMethodID(
-            clazz_,
-            method_name,
-            "([B)V");
-    env_->CallVoidMethod(object_, method, array);
-    env_->DeleteLocalRef(array);
-}
-
-jobject JavaObject::get() {
-    return object_;
-}
-
-// Define Java method signatures for all known types.
-template<>
-const char *const JavaMethodHelper<uint8_t>::signature_ = "(B)V";
-template<>
-const char *const JavaMethodHelper<int8_t>::signature_ = "(B)V";
-template<>
-const char *const JavaMethodHelper<int16_t>::signature_ = "(S)V";
-template<>
-const char *const JavaMethodHelper<uint16_t>::signature_ = "(S)V";
-template<>
-const char *const JavaMethodHelper<int32_t>::signature_ = "(I)V";
-template<>
-const char *const JavaMethodHelper<uint32_t>::signature_ = "(I)V";
-template<>
-const char *const JavaMethodHelper<int64_t>::signature_ = "(J)V";
-template<>
-const char *const JavaMethodHelper<uint64_t>::signature_ = "(J)V";
-template<>
-const char *const JavaMethodHelper<float>::signature_ = "(F)V";
-template<>
-const char *const JavaMethodHelper<double>::signature_ = "(D)V";
-template<>
-const char *const JavaMethodHelper<bool>::signature_ = "(Z)V";
-template<>
-const char *const JavaMethodHelper<jstring>::signature_ = "(Ljava/lang/String;)V";
-template <>
-const char* const JavaMethodHelper<jdoubleArray>::signature_ = "([D)V";
-
-#define SET(setter, value) object.callSetter("set" # setter, (value))
 
 static inline jboolean boolToJbool(bool value) {
     return value ? JNI_TRUE : JNI_FALSE;
-}
-
-template<class T>
-static inline void logHidlError(Return<T>& result, const char* errorMessage) {
-    ALOGE("%s HIDL transport error: %s", errorMessage, result.description().c_str());
-}
-
-template<class T>
-static jboolean checkHidlReturn(Return<T>& result, const char* errorMessage) {
-    if (!result.isOk()) {
-        logHidlError(result, errorMessage);
-        return JNI_FALSE;
-    } else {
-        return JNI_TRUE;
-    }
-}
-
-static jboolean checkHidlReturn(Return<bool>& result, const char* errorMessage) {
-    if (!result.isOk()) {
-        logHidlError(result, errorMessage);
-        return JNI_FALSE;
-    } else if (!result) {
-        ALOGE("%s", errorMessage);
-        return JNI_FALSE;
-    } else {
-        return JNI_TRUE;
-    }
-}
-
-static void checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
-    if (env->ExceptionCheck()) {
-        ALOGE("An exception was thrown by callback '%s'.", methodName);
-        LOGE_EX(env);
-        env->ExceptionClear();
-    }
-}
-
-static jboolean checkAidlStatus(const Status& status, const char* errorMessage) {
-    if (!status.isOk()) {
-        ALOGE("%s AIDL transport error: %s", errorMessage, status.toString8().c_str());
-        return JNI_FALSE;
-    }
-    return JNI_TRUE;
 }
 
 struct ScopedJniString {
@@ -498,62 +320,6 @@ private:
     jstring mJavaString;
     const char* mNativeString;
 };
-
-class ScopedJniThreadAttach {
-public:
-    ScopedJniThreadAttach() {
-        /*
-         * attachResult will also be JNI_OK if the thead was already attached to
-         * JNI before the call to AttachCurrentThread().
-         */
-        jint attachResult = sJvm->AttachCurrentThread(&mEnv, nullptr);
-        LOG_ALWAYS_FATAL_IF(attachResult != JNI_OK, "Unable to attach thread. Error %d",
-                            attachResult);
-    }
-
-    ~ScopedJniThreadAttach() {
-        jint detachResult = sJvm->DetachCurrentThread();
-        /*
-         * Return if the thread was already detached. Log error for any other
-         * failure.
-         */
-        if (detachResult == JNI_EDETACHED) {
-            return;
-        }
-
-        LOG_ALWAYS_FATAL_IF(detachResult != JNI_OK, "Unable to detach thread. Error %d",
-                            detachResult);
-    }
-
-    JNIEnv* getEnv() {
-        /*
-         * Checking validity of mEnv in case the thread was detached elsewhere.
-         */
-        LOG_ALWAYS_FATAL_IF(AndroidRuntime::getJNIEnv() != mEnv);
-        return mEnv;
-    }
-
-private:
-    JNIEnv* mEnv = nullptr;
-};
-
-thread_local std::unique_ptr<ScopedJniThreadAttach> tJniThreadAttacher;
-
-static JNIEnv* getJniEnv() {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
-
-    /*
-     * If env is nullptr, the thread is not already attached to
-     * JNI. It is attached below and the destructor for ScopedJniThreadAttach
-     * will detach it on thread exit.
-     */
-    if (env == nullptr) {
-        tJniThreadAttacher.reset(new ScopedJniThreadAttach());
-        env = tJniThreadAttacher->getEnv();
-    }
-
-    return env;
-}
 
 static jobject translateGnssLocation(JNIEnv* env,
                                      const GnssLocation_V1_0& location) {
@@ -1386,322 +1152,6 @@ void GnssAntennaInfoCallback::reportAntennaInfo(JNIEnv* env, const jobject anten
 }
 
 /*
- * GnssMeasurementCallback implements the callback methods required for the
- * GnssMeasurement interface.
- */
-struct GnssMeasurementCallback : public IGnssMeasurementCallback_V2_1 {
-    Return<void> gnssMeasurementCb_2_1(const IGnssMeasurementCallback_V2_1::GnssData& data)
-            override;
-    Return<void> gnssMeasurementCb_2_0(const IGnssMeasurementCallback_V2_0::GnssData& data)
-            override;
-    Return<void> gnssMeasurementCb(const IGnssMeasurementCallback_V1_1::GnssData& data) override;
-    Return<void> GnssMeasurementCb(const IGnssMeasurementCallback_V1_0::GnssData& data) override;
- private:
-    template<class T>
-    void translateSingleGnssMeasurement(const T* measurement, JavaObject& object);
-
-    template<class T>
-    jobjectArray translateAllGnssMeasurements(JNIEnv* env, const T* measurements, size_t count);
-
-    template<class T>
-    void translateAndSetGnssData(const T& data);
-
-    template<class T>
-    size_t getMeasurementCount(const T& data);
-
-    template<class T>
-    void translateGnssClock(JavaObject& object, const T& data);
-
-    void setMeasurementData(JNIEnv* env, jobject clock, jobjectArray measurementArray);
-};
-
-Return<void> GnssMeasurementCallback::gnssMeasurementCb_2_1(
-        const IGnssMeasurementCallback_V2_1::GnssData& data) {
-    translateAndSetGnssData(data);
-    return Void();
-}
-
-Return<void> GnssMeasurementCallback::gnssMeasurementCb_2_0(
-        const IGnssMeasurementCallback_V2_0::GnssData& data) {
-    translateAndSetGnssData(data);
-    return Void();
-}
-
-Return<void> GnssMeasurementCallback::gnssMeasurementCb(
-        const IGnssMeasurementCallback_V1_1::GnssData& data) {
-    translateAndSetGnssData(data);
-    return Void();
-}
-
-Return<void> GnssMeasurementCallback::GnssMeasurementCb(
-        const IGnssMeasurementCallback_V1_0::GnssData& data) {
-    translateAndSetGnssData(data);
-    return Void();
-}
-
-template<class T>
-void GnssMeasurementCallback::translateAndSetGnssData(const T& data) {
-    JNIEnv* env = getJniEnv();
-
-    JavaObject gnssClockJavaObject(env, class_gnssClock, method_gnssClockCtor);
-    translateGnssClock(gnssClockJavaObject, data);
-    jobject clock = gnssClockJavaObject.get();
-
-    size_t count = getMeasurementCount(data);
-    jobjectArray measurementArray = translateAllGnssMeasurements(env, data.measurements.data(), count);
-    setMeasurementData(env, clock, measurementArray);
-
-    env->DeleteLocalRef(clock);
-    env->DeleteLocalRef(measurementArray);
-}
-
-template<>
-size_t GnssMeasurementCallback::getMeasurementCount<IGnssMeasurementCallback_V1_0::GnssData>
-        (const IGnssMeasurementCallback_V1_0::GnssData& data) {
-    return data.measurementCount;
-}
-
-template<class T>
-size_t GnssMeasurementCallback::getMeasurementCount(const T& data) {
-    return data.measurements.size();
-}
-
-// Preallocate object as: JavaObject object(env, "android/location/GnssMeasurement");
-template<>
-void GnssMeasurementCallback::translateSingleGnssMeasurement
-        <IGnssMeasurementCallback_V1_0::GnssMeasurement>(
-        const IGnssMeasurementCallback_V1_0::GnssMeasurement* measurement,
-        JavaObject& object) {
-    uint32_t flags = static_cast<uint32_t>(measurement->flags);
-
-    SET(Svid, static_cast<int32_t>(measurement->svid));
-    SET(ConstellationType, static_cast<int32_t>(measurement->constellation));
-    SET(TimeOffsetNanos, measurement->timeOffsetNs);
-    SET(State, static_cast<int32_t>(measurement->state));
-    SET(ReceivedSvTimeNanos, measurement->receivedSvTimeInNs);
-    SET(ReceivedSvTimeUncertaintyNanos,
-        measurement->receivedSvTimeUncertaintyInNs);
-    SET(Cn0DbHz, measurement->cN0DbHz);
-    SET(PseudorangeRateMetersPerSecond, measurement->pseudorangeRateMps);
-    SET(PseudorangeRateUncertaintyMetersPerSecond,
-        measurement->pseudorangeRateUncertaintyMps);
-    SET(AccumulatedDeltaRangeState,
-        (static_cast<int32_t>(measurement->accumulatedDeltaRangeState) &
-        ~ADR_STATE_HALF_CYCLE_REPORTED)); // Half Cycle state not reported from Hardware in V1_0
-    SET(AccumulatedDeltaRangeMeters, measurement->accumulatedDeltaRangeM);
-    SET(AccumulatedDeltaRangeUncertaintyMeters,
-        measurement->accumulatedDeltaRangeUncertaintyM);
-
-    if (flags & static_cast<uint32_t>(GnssMeasurementFlags::HAS_CARRIER_FREQUENCY)) {
-        SET(CarrierFrequencyHz, measurement->carrierFrequencyHz);
-    }
-
-    // Intentionally not copying deprecated fields of carrierCycles,
-    // carrierPhase, carrierPhaseUncertainty
-
-    SET(MultipathIndicator, static_cast<int32_t>(measurement->multipathIndicator));
-
-    if (flags & static_cast<uint32_t>(GnssMeasurementFlags::HAS_SNR)) {
-        SET(SnrInDb, measurement->snrDb);
-    }
-
-    if (flags & static_cast<uint32_t>(GnssMeasurementFlags::HAS_AUTOMATIC_GAIN_CONTROL)) {
-        SET(AutomaticGainControlLevelInDb, measurement->agcLevelDb);
-    }
-}
-
-// Preallocate object as: JavaObject object(env, "android/location/GnssMeasurement");
-template<>
-void GnssMeasurementCallback::translateSingleGnssMeasurement
-        <IGnssMeasurementCallback_V1_1::GnssMeasurement>(
-        const IGnssMeasurementCallback_V1_1::GnssMeasurement* measurement_V1_1,
-        JavaObject& object) {
-    translateSingleGnssMeasurement(&(measurement_V1_1->v1_0), object);
-
-    // Set the V1_1 flag, and mark that new field has valid information for Java Layer
-    SET(AccumulatedDeltaRangeState,
-            (static_cast<int32_t>(measurement_V1_1->accumulatedDeltaRangeState) |
-            ADR_STATE_HALF_CYCLE_REPORTED));
-}
-
-// Preallocate object as: JavaObject object(env, "android/location/GnssMeasurement");
-template<>
-void GnssMeasurementCallback::translateSingleGnssMeasurement
-        <IGnssMeasurementCallback_V2_0::GnssMeasurement>(
-        const IGnssMeasurementCallback_V2_0::GnssMeasurement* measurement_V2_0,
-        JavaObject& object) {
-    JNIEnv* env = getJniEnv();
-    translateSingleGnssMeasurement(&(measurement_V2_0->v1_1), object);
-
-    jstring codeType = env->NewStringUTF(measurement_V2_0->codeType.c_str());
-    SET(CodeType, codeType);
-
-    // Overwrite with v2_0.state since v2_0->v1_1->v1_0.state is deprecated.
-    SET(State, static_cast<int32_t>(measurement_V2_0->state));
-
-    // Overwrite with v2_0.constellation since v2_0->v1_1->v1_0.constellation is deprecated.
-    SET(ConstellationType, static_cast<int32_t>(measurement_V2_0->constellation));
-
-    if (codeType) {
-        env->DeleteLocalRef(codeType);
-    }
-}
-
-// Preallocate object as: JavaObject object(env, "android/location/GnssMeasurement");
-template<>
-void GnssMeasurementCallback::translateSingleGnssMeasurement
-        <IGnssMeasurementCallback_V2_1::GnssMeasurement>(
-        const IGnssMeasurementCallback_V2_1::GnssMeasurement* measurement_V2_1,
-        JavaObject& object) {
-    translateSingleGnssMeasurement(&(measurement_V2_1->v2_0), object);
-
-    SET(BasebandCn0DbHz, measurement_V2_1->basebandCN0DbHz);
-
-    if (measurement_V2_1->flags & GnssMeasurementFlags::HAS_FULL_ISB) {
-        SET(FullInterSignalBiasNanos, measurement_V2_1->fullInterSignalBiasNs);
-    }
-
-    if (measurement_V2_1->flags & GnssMeasurementFlags::HAS_FULL_ISB_UNCERTAINTY) {
-        SET(FullInterSignalBiasUncertaintyNanos,
-            measurement_V2_1->fullInterSignalBiasUncertaintyNs);
-    }
-
-    if (measurement_V2_1->flags & GnssMeasurementFlags::HAS_SATELLITE_ISB) {
-        SET(SatelliteInterSignalBiasNanos, measurement_V2_1->satelliteInterSignalBiasNs);
-    }
-
-    if (measurement_V2_1->flags & GnssMeasurementFlags::HAS_SATELLITE_ISB_UNCERTAINTY) {
-        SET(SatelliteInterSignalBiasUncertaintyNanos,
-            measurement_V2_1->satelliteInterSignalBiasUncertaintyNs);
-    }
-}
-
-template<class T>
-void GnssMeasurementCallback::translateGnssClock(JavaObject& object, const T& data) {
-    translateGnssClock(object, data.clock);
-}
-
-template<>
-void GnssMeasurementCallback::translateGnssClock(
-       JavaObject& object, const IGnssMeasurementCallback_V1_0::GnssClock& clock) {
-    uint32_t flags = static_cast<uint32_t>(clock.gnssClockFlags);
-    if (flags & static_cast<uint32_t>(GnssClockFlags::HAS_LEAP_SECOND)) {
-        SET(LeapSecond, static_cast<int32_t>(clock.leapSecond));
-    }
-
-    if (flags & static_cast<uint32_t>(GnssClockFlags::HAS_TIME_UNCERTAINTY)) {
-        SET(TimeUncertaintyNanos, clock.timeUncertaintyNs);
-    }
-
-    if (flags & static_cast<uint32_t>(GnssClockFlags::HAS_FULL_BIAS)) {
-        SET(FullBiasNanos, clock.fullBiasNs);
-    }
-
-    if (flags & static_cast<uint32_t>(GnssClockFlags::HAS_BIAS)) {
-        SET(BiasNanos, clock.biasNs);
-    }
-
-    if (flags & static_cast<uint32_t>(GnssClockFlags::HAS_BIAS_UNCERTAINTY)) {
-        SET(BiasUncertaintyNanos, clock.biasUncertaintyNs);
-    }
-
-    if (flags & static_cast<uint32_t>(GnssClockFlags::HAS_DRIFT)) {
-        SET(DriftNanosPerSecond, clock.driftNsps);
-    }
-
-    if (flags & static_cast<uint32_t>(GnssClockFlags::HAS_DRIFT_UNCERTAINTY)) {
-        SET(DriftUncertaintyNanosPerSecond, clock.driftUncertaintyNsps);
-    }
-
-    SET(TimeNanos, clock.timeNs);
-    SET(HardwareClockDiscontinuityCount, clock.hwClockDiscontinuityCount);
-}
-
-template<>
-void GnssMeasurementCallback::translateGnssClock(
-       JavaObject& object, const IGnssMeasurementCallback_V2_1::GnssClock& clock) {
-    JNIEnv* env = getJniEnv();
-    SET(ReferenceConstellationTypeForIsb,
-            static_cast<int32_t>(clock.referenceSignalTypeForIsb.constellation));
-    SET(ReferenceCarrierFrequencyHzForIsb, clock.referenceSignalTypeForIsb.carrierFrequencyHz);
-
-    jstring referenceCodeTypeForIsb =
-            env->NewStringUTF(clock.referenceSignalTypeForIsb.codeType.c_str());
-    SET(ReferenceCodeTypeForIsb, referenceCodeTypeForIsb);
-
-    translateGnssClock(object, clock.v1_0);
-
-    if (referenceCodeTypeForIsb) {
-        env->DeleteLocalRef(referenceCodeTypeForIsb);
-    }
-}
-
-template<>
-void GnssMeasurementCallback::translateGnssClock(
-       JavaObject& object, const IGnssMeasurementCallback_V2_0::GnssData& data) {
-    auto elapsedRealtime = data.elapsedRealtime;
-    uint16_t flags = static_cast<uint16_t>(elapsedRealtime.flags);
-    if (flags & ElapsedRealtimeFlags::HAS_TIMESTAMP_NS) {
-        SET(ElapsedRealtimeNanos, static_cast<uint64_t>(elapsedRealtime.timestampNs));
-    }
-    if (flags & ElapsedRealtimeFlags::HAS_TIME_UNCERTAINTY_NS) {
-        SET(ElapsedRealtimeUncertaintyNanos, static_cast<double>(elapsedRealtime.timeUncertaintyNs));
-    }
-    translateGnssClock(object, data.clock);
-}
-
-template<>
-void GnssMeasurementCallback::translateGnssClock(
-       JavaObject& object, const IGnssMeasurementCallback_V2_1::GnssData& data) {
-    auto elapsedRealtime = data.elapsedRealtime;
-    uint16_t flags = static_cast<uint16_t>(elapsedRealtime.flags);
-    if (flags & ElapsedRealtimeFlags::HAS_TIMESTAMP_NS) {
-        SET(ElapsedRealtimeNanos, static_cast<uint64_t>(elapsedRealtime.timestampNs));
-    }
-    if (flags & ElapsedRealtimeFlags::HAS_TIME_UNCERTAINTY_NS) {
-        SET(ElapsedRealtimeUncertaintyNanos, static_cast<double>(elapsedRealtime.timeUncertaintyNs));
-    }
-    translateGnssClock(object, data.clock);
-}
-
-template<class T>
-jobjectArray GnssMeasurementCallback::translateAllGnssMeasurements(JNIEnv* env,
-        const T* measurements,
-        size_t count) {
-    if (count == 0) {
-        return nullptr;
-    }
-
-    jobjectArray gnssMeasurementArray = env->NewObjectArray(
-            count,
-            class_gnssMeasurement,
-            nullptr /* initialElement */);
-
-    for (uint16_t i = 0; i < count; ++i) {
-        JavaObject object(env, class_gnssMeasurement, method_gnssMeasurementCtor);
-        translateSingleGnssMeasurement(&(measurements[i]), object);
-        jobject gnssMeasurement = object.get();
-        env->SetObjectArrayElement(gnssMeasurementArray, i, gnssMeasurement);
-        env->DeleteLocalRef(gnssMeasurement);
-    }
-
-    return gnssMeasurementArray;
-}
-
-void GnssMeasurementCallback::setMeasurementData(JNIEnv* env, jobject clock,
-                             jobjectArray measurementArray) {
-    jobject gnssMeasurementsEvent = env->NewObject(class_gnssMeasurementsEvent,
-                                                   method_gnssMeasurementsEventCtor,
-                                                   clock,
-                                                   measurementArray);
-
-    env->CallVoidMethod(mCallbacksObj, method_reportMeasurementData,
-                      gnssMeasurementsEvent);
-    checkAndClearExceptionFromCallback(env, __FUNCTION__);
-    env->DeleteLocalRef(gnssMeasurementsEvent);
-}
-
-/*
  * MeasurementCorrectionsCallback implements callback methods of interface
  * IMeasurementCorrectionsCallback.hal.
  */
@@ -2073,10 +1523,6 @@ static void android_location_GnssNative_class_init_once(JNIEnv* env, jclass claz
     method_reportGeofencePauseStatus = env->GetMethodID(clazz, "reportGeofencePauseStatus",
             "(II)V");
     method_reportAntennaInfo = env->GetMethodID(clazz, "reportAntennaInfo", "(Ljava/util/List;)V");
-    method_reportMeasurementData = env->GetMethodID(
-            clazz,
-            "reportMeasurementData",
-            "(Landroid/location/GnssMeasurementsEvent;)V");
     method_reportNavigationMessages = env->GetMethodID(
             clazz,
             "reportNavigationMessage",
@@ -2150,17 +1596,6 @@ static void android_location_GnssNative_class_init_once(JNIEnv* env, jclass claz
     method_correctionPlaneAltDeg = env->GetMethodID(refPlaneClass, "getAltitudeMeters", "()D");
     method_correctionPlaneAzimDeg = env->GetMethodID(refPlaneClass, "getAzimuthDegrees", "()D");
 
-    jclass gnssMeasurementsEventClass = env->FindClass("android/location/GnssMeasurementsEvent");
-    class_gnssMeasurementsEvent= (jclass) env->NewGlobalRef(gnssMeasurementsEventClass);
-    method_gnssMeasurementsEventCtor = env->GetMethodID(
-                    class_gnssMeasurementsEvent,
-                    "<init>",
-                    "(Landroid/location/GnssClock;[Landroid/location/GnssMeasurement;)V");
-
-    jclass gnssMeasurementClass = env->FindClass("android/location/GnssMeasurement");
-    class_gnssMeasurement = (jclass) env->NewGlobalRef(gnssMeasurementClass);
-    method_gnssMeasurementCtor = env->GetMethodID(class_gnssMeasurement, "<init>", "()V");
-
     jclass gnssAntennaInfoBuilder = env->FindClass("android/location/GnssAntennaInfo$Builder");
     class_gnssAntennaInfoBuilder = (jclass)env->NewGlobalRef(gnssAntennaInfoBuilder);
     method_gnssAntennaInfoBuilderCtor =
@@ -2206,10 +1641,6 @@ static void android_location_GnssNative_class_init_once(JNIEnv* env, jclass claz
     class_gnssNavigationMessage = (jclass) env->NewGlobalRef(gnssNavigationMessageClass);
     method_gnssNavigationMessageCtor = env->GetMethodID(class_gnssNavigationMessage, "<init>", "()V");
 
-    jclass gnssClockClass = env->FindClass("android/location/GnssClock");
-    class_gnssClock = (jclass) env->NewGlobalRef(gnssClockClass);
-    method_gnssClockCtor = env->GetMethodID(class_gnssClock, "<init>", "()V");
-
     jclass arrayListClass = env->FindClass("java/util/ArrayList");
     class_arrayList = (jclass)env->NewGlobalRef(arrayListClass);
     method_arrayListCtor = env->GetMethodID(class_arrayList, "<init>", "()V");
@@ -2219,6 +1650,7 @@ static void android_location_GnssNative_class_init_once(JNIEnv* env, jclass claz
     class_doubleArray = (jclass)env->NewGlobalRef(doubleArrayClass);
 
     gnss::GnssConfiguration_class_init_once(env);
+    gnss::GnssMeasurement_class_init_once(env, clazz);
 }
 
 /* Initialization needed at system boot and whenever GNSS service dies. */
@@ -2227,7 +1659,7 @@ static void android_location_GnssNative_init_once(JNIEnv* env, jobject obj,
     /*
      * Save a pointer to JVM.
      */
-    jint jvmStatus = env->GetJavaVM(&sJvm);
+    jint jvmStatus = env->GetJavaVM(&android::ScopedJniThreadAttach::sJvm);
     if (jvmStatus != JNI_OK) {
         LOG_ALWAYS_FATAL("Unable to get Java VM. Error: %d", jvmStatus);
     }
@@ -2324,40 +1756,30 @@ static void android_location_GnssNative_init_once(JNIEnv* env, jobject obj,
     gnssMeasurementIface = nullptr;
     if (gnssHal_V2_1 != nullptr) {
         auto gnssMeasurement = gnssHal_V2_1->getExtensionGnssMeasurement_2_1();
-        if (!gnssMeasurement.isOk()) {
-            ALOGD("Unable to get a handle to GnssMeasurement_V2_1");
-        } else {
-            gnssMeasurementIface_V2_1 = gnssMeasurement;
-            gnssMeasurementIface_V2_0 = gnssMeasurementIface_V2_1;
-            gnssMeasurementIface_V1_1 = gnssMeasurementIface_V2_0;
-            gnssMeasurementIface = gnssMeasurementIface_V1_1;
+        if (checkHidlReturn(gnssMeasurement, "Unable to get a handle to GnssMeasurement_V2_1")) {
+            gnssMeasurementIface =
+                    std::make_unique<android::gnss::GnssMeasurement_V2_1>(gnssMeasurement);
         }
     }
     if (gnssHal_V2_0 != nullptr && gnssMeasurementIface == nullptr) {
         auto gnssMeasurement = gnssHal_V2_0->getExtensionGnssMeasurement_2_0();
-        if (!gnssMeasurement.isOk()) {
-            ALOGD("Unable to get a handle to GnssMeasurement_V2_0");
-        } else {
-            gnssMeasurementIface_V2_0 = gnssMeasurement;
-            gnssMeasurementIface_V1_1 = gnssMeasurementIface_V2_0;
-            gnssMeasurementIface = gnssMeasurementIface_V1_1;
+        if (checkHidlReturn(gnssMeasurement, "Unable to get a handle to GnssMeasurement_V2_0")) {
+            gnssMeasurementIface =
+                    std::make_unique<android::gnss::GnssMeasurement_V2_0>(gnssMeasurement);
         }
     }
     if (gnssHal_V1_1 != nullptr && gnssMeasurementIface == nullptr) {
-         auto gnssMeasurement = gnssHal_V1_1->getExtensionGnssMeasurement_1_1();
-         if (!gnssMeasurement.isOk()) {
-             ALOGD("Unable to get a handle to GnssMeasurement_V1_1");
-         } else {
-             gnssMeasurementIface_V1_1 = gnssMeasurement;
-             gnssMeasurementIface = gnssMeasurementIface_V1_1;
-         }
+        auto gnssMeasurement = gnssHal_V1_1->getExtensionGnssMeasurement_1_1();
+        if (checkHidlReturn(gnssMeasurement, "Unable to get a handle to GnssMeasurement_V1_1")) {
+            gnssMeasurementIface =
+                    std::make_unique<android::gnss::GnssMeasurement_V1_1>(gnssMeasurement);
+        }
     }
     if (gnssMeasurementIface == nullptr) {
          auto gnssMeasurement = gnssHal->getExtensionGnssMeasurement();
-         if (!gnssMeasurement.isOk()) {
-             ALOGD("Unable to get a handle to GnssMeasurement");
-         } else {
-             gnssMeasurementIface = gnssMeasurement;
+         if (checkHidlReturn(gnssMeasurement, "Unable to get a handle to GnssMeasurement_V1_0")) {
+             gnssMeasurementIface =
+                     std::make_unique<android::gnss::GnssMeasurement_V1_0>(gnssMeasurement);
          }
     }
 
@@ -3274,36 +2696,8 @@ static jboolean android_location_GnssMeasurementsProvider_start_measurement_coll
         return JNI_FALSE;
     }
 
-    sp<GnssMeasurementCallback> cbIface = new GnssMeasurementCallback();
-    Return<IGnssMeasurement_V1_0::GnssMeasurementStatus> result =
-            IGnssMeasurement_V1_0::GnssMeasurementStatus::ERROR_GENERIC;
-    if (gnssMeasurementIface_V2_1 != nullptr) {
-        result = gnssMeasurementIface_V2_1->setCallback_2_1(cbIface, enableFullTracking);
-    } else if (gnssMeasurementIface_V2_0 != nullptr) {
-        result = gnssMeasurementIface_V2_0->setCallback_2_0(cbIface, enableFullTracking);
-    } else if (gnssMeasurementIface_V1_1 != nullptr) {
-        result = gnssMeasurementIface_V1_1->setCallback_1_1(cbIface, enableFullTracking);
-    } else {
-        if (enableFullTracking == JNI_TRUE) {
-            ALOGW("Full tracking mode not supported in 1.0 GNSS HAL.");
-        }
-        result = gnssMeasurementIface->setCallback(cbIface);
-    }
-
-    if (!checkHidlReturn(result, "IGnssMeasurement setCallback() failed.")) {
-        return JNI_FALSE;
-    }
-
-    IGnssMeasurement_V1_0::GnssMeasurementStatus initRet = result;
-    if (initRet != IGnssMeasurement_V1_0::GnssMeasurementStatus::SUCCESS) {
-        ALOGE("An error has been found on GnssMeasurementInterface::init, status=%d",
-              static_cast<int32_t>(initRet));
-        return JNI_FALSE;
-    } else {
-        ALOGD("gnss measurement infc has been enabled");
-    }
-
-    return JNI_TRUE;
+    return gnssMeasurementIface->setCallback(sp<gnss::GnssMeasurementCallback>::make(mCallbacksObj),
+                                             enableFullTracking);
 }
 
 static jboolean android_location_GnssMeasurementsProvider_stop_measurement_collection(
@@ -3314,8 +2708,7 @@ static jboolean android_location_GnssMeasurementsProvider_stop_measurement_colle
         return JNI_FALSE;
     }
 
-    auto result = gnssMeasurementIface->close();
-    return checkHidlReturn(result, "IGnssMeasurement close() failed.");
+    return gnssMeasurementIface->close();
 }
 
 static jboolean
