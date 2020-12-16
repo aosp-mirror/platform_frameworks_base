@@ -26,6 +26,7 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 
 import android.annotation.BoolRes;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.UserIdInt;
@@ -53,6 +54,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
  * Maintains a binding to the best service that matches the given intent information. Bind and
@@ -67,6 +69,8 @@ public class ServiceWatcher implements ServiceConnection {
     private static final String EXTRA_SERVICE_IS_MULTIUSER = "serviceIsMultiuser";
 
     private static final long RETRY_DELAY_MS = 15 * 1000;
+
+    private static final Predicate<ResolveInfo> DEFAULT_SERVICE_CHECK_PREDICATE = x -> true;
 
     /** Function to run on binder interface. */
     public interface BinderRunner {
@@ -184,6 +188,7 @@ public class ServiceWatcher implements ServiceConnection {
     private final Context mContext;
     private final Handler mHandler;
     private final Intent mIntent;
+    private final Predicate<ResolveInfo> mServiceCheckPredicate;
 
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
         @Override
@@ -239,15 +244,24 @@ public class ServiceWatcher implements ServiceConnection {
             @Nullable OnBindRunner onBind, @Nullable Runnable onUnbind,
             @BoolRes int enableOverlayResId, @StringRes int nonOverlayPackageResId) {
         this(context, FgThread.getHandler(), action, onBind, onUnbind, enableOverlayResId,
-                nonOverlayPackageResId);
+                nonOverlayPackageResId, DEFAULT_SERVICE_CHECK_PREDICATE);
     }
 
     public ServiceWatcher(Context context, Handler handler, String action,
             @Nullable OnBindRunner onBind, @Nullable Runnable onUnbind,
             @BoolRes int enableOverlayResId, @StringRes int nonOverlayPackageResId) {
+        this(context, handler, action, onBind, onUnbind, enableOverlayResId, nonOverlayPackageResId,
+                DEFAULT_SERVICE_CHECK_PREDICATE);
+    }
+
+    public ServiceWatcher(Context context, Handler handler, String action,
+            @Nullable OnBindRunner onBind, @Nullable Runnable onUnbind,
+            @BoolRes int enableOverlayResId, @StringRes int nonOverlayPackageResId,
+            @NonNull Predicate<ResolveInfo> serviceCheckPredicate) {
         mContext = context;
         mHandler = handler;
         mIntent = new Intent(Objects.requireNonNull(action));
+        mServiceCheckPredicate = Objects.requireNonNull(serviceCheckPredicate);
 
         Resources resources = context.getResources();
         boolean enableOverlay = resources.getBoolean(enableOverlayResId);
@@ -269,9 +283,16 @@ public class ServiceWatcher implements ServiceConnection {
      * constraints.
      */
     public boolean checkServiceResolves() {
-        return !mContext.getPackageManager().queryIntentServicesAsUser(mIntent,
-                MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE | MATCH_SYSTEM_ONLY,
-                UserHandle.USER_SYSTEM).isEmpty();
+        List<ResolveInfo> resolveInfos = mContext.getPackageManager()
+                .queryIntentServicesAsUser(mIntent,
+                        MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE | MATCH_SYSTEM_ONLY,
+                        UserHandle.USER_SYSTEM);
+        for (ResolveInfo resolveInfo : resolveInfos) {
+            if (mServiceCheckPredicate.test(resolveInfo)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -320,6 +341,9 @@ public class ServiceWatcher implements ServiceConnection {
                     GET_META_DATA | MATCH_DIRECT_BOOT_AUTO | MATCH_SYSTEM_ONLY,
                     mCurrentUserId);
             for (ResolveInfo resolveInfo : resolveInfos) {
+                if (!mServiceCheckPredicate.test(resolveInfo)) {
+                    continue;
+                }
                 ServiceInfo serviceInfo = new ServiceInfo(resolveInfo, mCurrentUserId);
                 if (serviceInfo.compareTo(bestServiceInfo) > 0) {
                     bestServiceInfo = serviceInfo;
