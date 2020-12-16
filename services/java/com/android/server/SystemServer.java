@@ -87,6 +87,7 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.IndentingPrintWriter;
 import android.util.Pair;
+import android.util.Singleton;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.view.contentcapture.ContentCaptureManager;
@@ -160,6 +161,7 @@ import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.ShortcutService;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.dex.SystemServerDexLoadReporter;
+import com.android.server.pm.domain.verify.DomainVerificationService;
 import com.android.server.policy.PermissionPolicyService;
 import com.android.server.policy.PhoneWindowManager;
 import com.android.server.policy.role.RoleServicePlatformHelperImpl;
@@ -1059,6 +1061,18 @@ public final class SystemServer implements Dumpable {
                             .BOOT_TIME_EVENT_ELAPSED_TIME__EVENT__PACKAGE_MANAGER_INIT_START,
                     SystemClock.elapsedRealtime());
         }
+
+        t.traceBegin("StartDomainVerificationService");
+        DomainVerificationService domainVerificationService = new DomainVerificationService(
+                mSystemContext, new Singleton<DomainVerificationService.Connection>() {
+            @Override
+            protected DomainVerificationService.Connection create() {
+                // TODO(b/159952358): Hook up to PackageManagerService
+                return null;
+            }
+        });
+        mSystemServiceManager.startService(domainVerificationService);
+        t.traceEnd();
 
         t.traceBegin("StartPackageManagerService");
         try {
