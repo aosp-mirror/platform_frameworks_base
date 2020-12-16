@@ -17,7 +17,7 @@
 package android.app;
 
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.ActivityManager.TaskSnapshot;
+import android.window.TaskSnapshot;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.os.Binder;

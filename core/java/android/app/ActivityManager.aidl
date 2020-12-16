@@ -25,5 +25,3 @@ parcelable ActivityManager.RunningServiceInfo;
 parcelable ActivityManager.RunningTaskInfo;
 /** @hide */
 parcelable ActivityManager.TaskThumbnail;
-/** @hide */
-parcelable ActivityManager.TaskSnapshot;

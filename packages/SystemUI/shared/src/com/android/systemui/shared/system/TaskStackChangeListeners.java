@@ -17,8 +17,8 @@
 package com.android.systemui.shared.system;
 
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityTaskManager;
+import android.window.TaskSnapshot;
 import android.app.TaskStackListener;
 import android.content.ComponentName;
 import android.os.Handler;

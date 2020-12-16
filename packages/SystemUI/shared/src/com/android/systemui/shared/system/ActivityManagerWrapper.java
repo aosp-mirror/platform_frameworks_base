@@ -27,7 +27,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RecentTaskInfo;
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.ActivityManager.TaskSnapshot;
+import android.window.TaskSnapshot;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
@@ -122,7 +122,7 @@ public class ActivityManagerWrapper {
      * @return the task snapshot for the given {@param taskId}.
      */
     public @NonNull ThumbnailData getTaskThumbnail(int taskId, boolean isLowResolution) {
-        ActivityManager.TaskSnapshot snapshot = null;
+        TaskSnapshot snapshot = null;
         try {
             snapshot = getService().getTaskSnapshot(taskId, isLowResolution);
         } catch (RemoteException e) {

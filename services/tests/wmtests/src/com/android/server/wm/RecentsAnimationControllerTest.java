@@ -49,7 +49,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 
-import android.app.ActivityManager.TaskSnapshot;
+import android.window.TaskSnapshot;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Binder;

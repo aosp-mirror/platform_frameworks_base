@@ -26,6 +26,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Trace;
 import android.util.Log;
+import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
@@ -181,7 +182,7 @@ public class TaskStackListenerImpl extends TaskStackListener implements Handler.
     }
 
     @Override
-    public void onTaskSnapshotChanged(int taskId, ActivityManager.TaskSnapshot snapshot) {
+    public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) {
         mHandler.obtainMessage(ON_TASK_SNAPSHOT_CHANGED, taskId, 0, snapshot).sendToTarget();
     }
 
@@ -283,7 +284,7 @@ public class TaskStackListenerImpl extends TaskStackListener implements Handler.
                     Trace.beginSection("onTaskSnapshotChanged");
                     for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                         mTaskStackListeners.get(i).onTaskSnapshotChanged(msg.arg1,
-                                (ActivityManager.TaskSnapshot) msg.obj);
+                                (TaskSnapshot) msg.obj);
                     }
                     Trace.endSection();
                     break;
