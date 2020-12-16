@@ -2108,10 +2108,22 @@ public class AudioService extends IAudioService.Stub
         return getDevicesForAttributesInt(attributes);
     }
 
-    /** @see AudioManager#isMusicActive() */
-    public boolean isMusicActive() {
+    /**
+     * @see AudioManager#isMusicActive()
+     * @param remotely true if query is for remote playback (cast), false for local playback.
+     */
+    public boolean isMusicActive(boolean remotely) {
         // no permission required
-        return AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            if (remotely) {
+                return AudioSystem.isStreamActiveRemotely(AudioSystem.STREAM_MUSIC, 0);
+            } else {
+                return AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     protected @NonNull ArrayList<AudioDeviceAttributes> getDevicesForAttributesInt(
@@ -5181,7 +5193,7 @@ public class AudioService extends IAudioService.Stub
     /** only public for mocking/spying, do not call outside of AudioService */
     @VisibleForTesting
     public int getDeviceForStream(int stream) {
-        int device = getDevicesForStream(stream);
+        int device = getDevicesForStreamInt(stream);
         if ((device & (device - 1)) != 0) {
             // Multiple device selection is either:
             //  - speaker + one other device: give priority to speaker in this case.
@@ -5210,14 +5222,23 @@ public class AudioService extends IAudioService.Stub
         return device;
     }
 
-    private int getDevicesForStream(int stream) {
-        return getDevicesForStream(stream, true /*checkOthers*/);
+    /**
+     * @see AudioManager#getDevicesForStream(int)
+     */
+    public int getDevicesForStream(int streamType) {
+        ensureValidStreamType(streamType);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return mAudioSystem.getDevicesForStream(streamType);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
-    private int getDevicesForStream(int stream, boolean checkOthers) {
+    private int getDevicesForStreamInt(int stream) {
         ensureValidStreamType(stream);
         synchronized (VolumeStreamState.class) {
-            return mStreamStates[stream].observeDevicesForStream_syncVSS(checkOthers);
+            return mStreamStates[stream].observeDevicesForStream_syncVSS(true);
         }
     }
 
@@ -6402,10 +6423,10 @@ public class AudioService extends IAudioService.Stub
             }
             pw.println();
             pw.print("   Devices: ");
-            final int devices = getDevicesForStream(mStreamType);
+            final int devices = getDevicesForStreamInt(mStreamType);
             int device, i = 0, n = 0;
             // iterate all devices from 1 to DEVICE_OUT_DEFAULT exclusive
-            // (the default device is not returned by getDevicesForStream)
+            // (the default device is not returned by getDevicesForStreamInt)
             while ((device = 1 << i) != AudioSystem.DEVICE_OUT_DEFAULT) {
                 if ((devices & device) != 0) {
                     if (n++ > 0) {
@@ -7637,7 +7658,7 @@ public class AudioService extends IAudioService.Stub
                     mDeviceBroker.setForceUse_Async(AudioSystem.FOR_HDMI_SYSTEM_AUDIO, config,
                             "setHdmiSystemAudioSupported");
                 }
-                device = getDevicesForStream(AudioSystem.STREAM_MUSIC);
+                device = getDevicesForStreamInt(AudioSystem.STREAM_MUSIC);
             }
         }
         return device;
