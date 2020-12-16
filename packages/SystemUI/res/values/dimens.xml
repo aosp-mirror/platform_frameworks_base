@@ -176,8 +176,8 @@
     <!-- Minimum height of a notification to be interactable -->
     <dimen name="notification_min_interaction_height">40dp</dimen>
 
-    <!-- New radius for notifications. -->
-    <dimen name="notification_corner_radius">20dp</dimen>
+    <!-- Radius for notifications corners without adjacent notifications -->
+    <dimen name="notification_corner_radius">28dp</dimen>
 
     <!-- the padding of the shelf icon container -->
     <dimen name="shelf_icon_container_padding">13dp</dimen>
