@@ -8913,6 +8913,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // intentionally empty
     }
 
+    /** @hide */
+    public void onPerformSpellCheck() {
+        if (mEditor != null && mEditor.mSpellChecker != null) {
+            mEditor.mSpellChecker.onPerformSpellCheck();
+        }
+    }
+
     /**
      * Called by the framework in response to a private command from the
      * current method, provided by it calling

@@ -178,6 +178,12 @@ public class EditableInputConnection extends BaseInputConnection
     }
 
     @Override
+    public boolean performSpellCheck() {
+        mTextView.onPerformSpellCheck();
+        return true;
+    }
+
+    @Override
     public boolean performPrivateCommand(String action, Bundle data) {
         mTextView.onPrivateIMECommand(action, data);
         return true;

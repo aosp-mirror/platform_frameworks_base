@@ -215,6 +215,27 @@ public class SpellChecker implements SpellCheckerSessionListener {
         spellCheck();
     }
 
+    void onPerformSpellCheck() {
+        final int selectionStart = mTextView.getSelectionStart();
+        final int selectionEnd = mTextView.getSelectionEnd();
+        final int selectionRangeStart;
+        final int selectionRangeEnd;
+        if (selectionStart < selectionEnd) {
+            selectionRangeStart = selectionStart;
+            selectionRangeEnd = selectionEnd;
+        } else {
+            selectionRangeStart = selectionEnd;
+            selectionRangeEnd = selectionStart;
+        }
+        // Expand the range so that it (hopefully) includes the current sentence.
+        final int start = Math.max(0, selectionRangeStart - MIN_SENTENCE_LENGTH);
+        final int end = Math.min(mTextView.length(), selectionRangeEnd + MIN_SENTENCE_LENGTH);
+        if (DBG) {
+            Log.d(TAG, "performSpellCheckAroundSelection: " + start + ", " + end);
+        }
+        spellCheck(start, end);
+    }
+
     public void spellCheck(int start, int end) {
         if (DBG) {
             Log.d(TAG, "Start spell-checking: " + start + ", " + end);
