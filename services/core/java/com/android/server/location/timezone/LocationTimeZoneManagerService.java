@@ -24,6 +24,7 @@ import android.os.Binder;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.SystemProperties;
+import android.service.timezone.TimeZoneProviderService;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
@@ -44,7 +45,7 @@ import java.util.Objects;
  * A service class that acts as a container for the {@link LocationTimeZoneProviderController},
  * which determines what {@link com.android.server.timezonedetector.GeolocationTimeZoneSuggestion}
  * are made to the {@link TimeZoneDetectorInternal}, and the {@link LocationTimeZoneProvider}s that
- * (indirectly) generate {@link com.android.internal.location.timezone.LocationTimeZoneEvent}s.
+ * (indirectly) generate {@link TimeZoneProviderEvent}s.
  *
  * <p>For details of the time zone suggestion behavior, see {@link
  * LocationTimeZoneProviderController}.
@@ -120,9 +121,9 @@ public class LocationTimeZoneManagerService extends Binder {
     private static final String ATTRIBUTION_TAG = "LocationTimeZoneService";
 
     private static final String PRIMARY_LOCATION_TIME_ZONE_SERVICE_ACTION =
-            "com.android.location.timezone.service.v1.PrimaryLocationTimeZoneProvider";
+            TimeZoneProviderService.PRIMARY_LOCATION_TIME_ZONE_PROVIDER_SERVICE_INTERFACE;
     private static final String SECONDARY_LOCATION_TIME_ZONE_SERVICE_ACTION =
-            "com.android.location.timezone.service.v1.SecondaryLocationTimeZoneProvider";
+            TimeZoneProviderService.SECONDARY_LOCATION_TIME_ZONE_PROVIDER_SERVICE_INTERFACE;
 
 
     @NonNull private final Context mContext;

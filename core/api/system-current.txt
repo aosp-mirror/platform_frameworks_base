@@ -9814,6 +9814,38 @@ package android.service.textclassifier {
 
 }
 
+package android.service.timezone {
+
+  public abstract class TimeZoneProviderService extends android.app.Service {
+    ctor public TimeZoneProviderService();
+    method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method public abstract void onStartUpdates(long);
+    method public abstract void onStopUpdates();
+    method public final void reportPermanentFailure(@NonNull Throwable);
+    method public final void reportSuggestion(@NonNull android.service.timezone.TimeZoneProviderSuggestion);
+    method public final void reportUncertain();
+    field public static final String BIND_PERMISSION = "android.permission.INSTALL_LOCATION_TIME_ZONE_PROVIDER";
+    field public static final String PRIMARY_LOCATION_TIME_ZONE_PROVIDER_SERVICE_INTERFACE = "android.service.timezone.PrimaryLocationTimeZoneProviderService";
+    field public static final String SECONDARY_LOCATION_TIME_ZONE_PROVIDER_SERVICE_INTERFACE = "android.service.timezone.SecondaryLocationTimeZoneProviderService";
+  }
+
+  public final class TimeZoneProviderSuggestion implements android.os.Parcelable {
+    method public int describeContents();
+    method public long getElapsedRealtimeMillis();
+    method @NonNull public java.util.List<java.lang.String> getTimeZoneIds();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.timezone.TimeZoneProviderSuggestion> CREATOR;
+  }
+
+  public static final class TimeZoneProviderSuggestion.Builder {
+    ctor public TimeZoneProviderSuggestion.Builder();
+    method @NonNull public android.service.timezone.TimeZoneProviderSuggestion build();
+    method @NonNull public android.service.timezone.TimeZoneProviderSuggestion.Builder setElapsedRealtimeMillis(long);
+    method @NonNull public android.service.timezone.TimeZoneProviderSuggestion.Builder setTimeZoneIds(@NonNull java.util.List<java.lang.String>);
+  }
+
+}
+
 package android.service.trust {
 
   public class TrustAgentService extends android.app.Service {

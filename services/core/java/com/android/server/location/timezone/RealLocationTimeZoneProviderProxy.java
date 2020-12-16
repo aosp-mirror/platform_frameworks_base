@@ -22,22 +22,22 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.service.timezone.ITimeZoneProvider;
+import android.service.timezone.ITimeZoneProviderManager;
+import android.service.timezone.TimeZoneProviderSuggestion;
 import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.location.timezone.ILocationTimeZoneProvider;
-import com.android.internal.location.timezone.ILocationTimeZoneProviderManager;
-import com.android.internal.location.timezone.LocationTimeZoneEvent;
-import com.android.internal.location.timezone.LocationTimeZoneProviderRequest;
 import com.android.server.ServiceWatcher;
 
 import java.util.Objects;
 
 /**
- * System server-side proxy for ILocationTimeZoneProvider implementations, i.e. this provides the
- * system server object used to communicate with a remote LocationTimeZoneProvider over Binder,
- * which could be running in a different process. As "remote" LocationTimeZoneProviders are bound /
- * unbound this proxy will rebind to the "best" available remote process.
+ * System server-side proxy for ITimeZoneProvider implementations, i.e. this provides the
+ * system server object used to communicate with a remote {@link
+ * android.service.timezone.TimeZoneProviderService} over Binder, which could be running in a
+ * different process. As "remote" providers are bound / unbound this proxy will rebind to the "best"
+ * available remote process.
  */
 class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
 
@@ -47,7 +47,7 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
     @Nullable private ManagerProxy mManagerProxy;
 
     @GuardedBy("mProxyLock")
-    @NonNull private LocationTimeZoneProviderRequest mRequest;
+    @NonNull private TimeZoneProviderRequest mRequest;
 
     RealLocationTimeZoneProviderProxy(
             @NonNull Context context, @NonNull ThreadingDomain threadingDomain,
@@ -55,7 +55,7 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
             int nonOverlayPackageResId) {
         super(context, threadingDomain);
         mManagerProxy = null;
-        mRequest = LocationTimeZoneProviderRequest.EMPTY_REQUEST;
+        mRequest = TimeZoneProviderRequest.createStopUpdatesRequest();
         mServiceWatcher = new ServiceWatcher(context, action, this::onBind, this::onUnbind,
                 enableOverlayResId, nonOverlayPackageResId);
     }
@@ -93,12 +93,12 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
     private void onBindOnHandlerThread(@NonNull IBinder binder) {
         mThreadingDomain.assertCurrentThread();
 
-        ILocationTimeZoneProvider provider = ILocationTimeZoneProvider.Stub.asInterface(binder);
+        ITimeZoneProvider provider = ITimeZoneProvider.Stub.asInterface(binder);
 
         synchronized (mSharedLock) {
             try {
                 mManagerProxy = new ManagerProxy();
-                provider.setLocationTimeZoneProviderManager(mManagerProxy);
+                provider.setTimeZoneProviderManager(mManagerProxy);
                 trySendCurrentRequest();
                 mListener.onProviderBound();
             } catch (RemoteException e) {
@@ -118,7 +118,7 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
     }
 
     @Override
-    final void setRequest(@NonNull LocationTimeZoneProviderRequest request) {
+    final void setRequest(@NonNull TimeZoneProviderRequest request) {
         mThreadingDomain.assertCurrentThread();
 
         Objects.requireNonNull(request);
@@ -131,11 +131,14 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
 
     @GuardedBy("mProxyLock")
     private void trySendCurrentRequest() {
-        LocationTimeZoneProviderRequest request = mRequest;
+        TimeZoneProviderRequest request = mRequest;
         mServiceWatcher.runOnBinder(binder -> {
-            ILocationTimeZoneProvider service =
-                    ILocationTimeZoneProvider.Stub.asInterface(binder);
-            service.setRequest(request);
+            ITimeZoneProvider service = ITimeZoneProvider.Stub.asInterface(binder);
+            if (request.sendUpdates()) {
+                service.startUpdates(request.getInitializationTimeout().toMillis());
+            } else {
+                service.stopUpdates();
+            }
         });
     }
 
@@ -148,21 +151,39 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
     }
 
     /**
-     * A system Server-side proxy for the ILocationTimeZoneProviderManager, i.e. this is a local
-     * binder stub. Each "remote" LocationTimeZoneProvider is passed a binder instance that it
-     * then uses to communicate back with the system server, invoking the logic here.
+     * A system Server-side proxy for the ITimeZoneProviderManager, i.e. this is a local binder stub
+     * Each "remote" TimeZoneProvider is passed a binder instance that it then uses to communicate
+     * back with the system server, invoking the logic here.
      */
-    private class ManagerProxy extends ILocationTimeZoneProviderManager.Stub {
+    private class ManagerProxy extends ITimeZoneProviderManager.Stub {
 
         // executed on binder thread
         @Override
-        public void onLocationTimeZoneEvent(LocationTimeZoneEvent locationTimeZoneEvent) {
+        public void onTimeZoneProviderSuggestion(TimeZoneProviderSuggestion suggestion) {
+            onTimeZoneProviderEvent(TimeZoneProviderEvent.createSuggestionEvent(suggestion));
+        }
+
+        // executed on binder thread
+        @Override
+        public void onTimeZoneProviderUncertain() {
+            onTimeZoneProviderEvent(TimeZoneProviderEvent.createUncertainEvent());
+
+        }
+
+        // executed on binder thread
+        @Override
+        public void onTimeZoneProviderPermanentFailure(String failureReason) {
+            onTimeZoneProviderEvent(
+                    TimeZoneProviderEvent.createPermanentFailureEvent(failureReason));
+        }
+
+        private void onTimeZoneProviderEvent(TimeZoneProviderEvent event) {
             synchronized (mSharedLock) {
                 if (mManagerProxy != this) {
                     return;
                 }
             }
-            handleLocationTimeZoneEvent(locationTimeZoneEvent);
+            handleTimeZoneProviderEvent(event);
         }
     }
 }
