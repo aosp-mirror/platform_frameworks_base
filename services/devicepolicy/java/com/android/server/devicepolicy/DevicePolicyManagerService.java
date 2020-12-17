@@ -1025,23 +1025,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mSafetyChecker = new OneTimeSafetyChecker(this, operation, safe);
     }
 
-    // TODO(b/175392542): remove if not needed by ManagedProvisioning app anymore
-    @Override
-    public void factoryReset(String reason) {
-        Preconditions.checkCallAuthorization(
-                hasCallingOrSelfPermission(permission.MASTER_CLEAR));
-        Slog.w(LOG_TAG, "factoryReset(): " + reason);
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            FactoryResetter.newBuilder(mContext).setReason(reason).build().factoryReset();
-        } catch (IOException e) {
-            // Shouldn't happen.
-            Slog.wtf(LOG_TAG, "Could not factory reset", e);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
-
     /**
      * Unit test will subclass it to inject mocks.
      */
