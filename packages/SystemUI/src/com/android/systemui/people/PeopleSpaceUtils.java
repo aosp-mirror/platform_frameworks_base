@@ -64,6 +64,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -76,6 +78,11 @@ public class PeopleSpaceUtils {
     private static final int MIN_HOUR = 1;
     private static final int ONE_DAY = 1;
     public static final String OPTIONS_PEOPLE_SPACE_TILE = "options_people_space_tile";
+
+    private static final Pattern DOUBLE_EXCLAMATION_PATTERN = Pattern.compile("[!][!]+");
+    private static final Pattern DOUBLE_QUESTION_PATTERN = Pattern.compile("[?][?]+");
+    private static final Pattern ANY_DOUBLE_MARK_PATTERN = Pattern.compile("[!?][!?]+");
+    private static final Pattern MIXED_MARK_PATTERN = Pattern.compile("![?].*|.*[?]!");
 
     /** Represents whether {@link StatusBarNotification} was posted or removed. */
     public enum NotificationAction {
@@ -267,7 +274,9 @@ public class PeopleSpaceUtils {
             views.setViewVisibility(R.id.image, View.VISIBLE);
             views.setViewVisibility(R.id.content, View.GONE);
         } else {
-            views.setTextViewText(R.id.content, tile.getNotificationContent());
+            CharSequence content = tile.getNotificationContent();
+            views = setPunctuationRemoteViewsFields(views, content);
+            views.setTextViewText(R.id.content, content);
             views.setViewVisibility(R.id.content, View.VISIBLE);
             views.setViewVisibility(R.id.image, View.GONE);
         }
@@ -304,6 +313,54 @@ public class PeopleSpaceUtils {
                 activityIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE));
         return views;
+    }
+
+    private static RemoteViews setPunctuationRemoteViewsFields(
+            RemoteViews views, CharSequence content) {
+        String punctuation = getBackgroundTextFromMessage(content.toString());
+        int visibility = View.GONE;
+        if (punctuation  != null) {
+            visibility = View.VISIBLE;
+        }
+        views.setTextViewText(R.id.punctuation1, punctuation);
+        views.setTextViewText(R.id.punctuation2, punctuation);
+        views.setTextViewText(R.id.punctuation3, punctuation);
+        views.setTextViewText(R.id.punctuation4, punctuation);
+        views.setTextViewText(R.id.punctuation5, punctuation);
+        views.setTextViewText(R.id.punctuation6, punctuation);
+
+        views.setViewVisibility(R.id.punctuation1, visibility);
+        views.setViewVisibility(R.id.punctuation2, visibility);
+        views.setViewVisibility(R.id.punctuation3, visibility);
+        views.setViewVisibility(R.id.punctuation4, visibility);
+        views.setViewVisibility(R.id.punctuation5, visibility);
+        views.setViewVisibility(R.id.punctuation6, visibility);
+
+        return views;
+    }
+
+    /** Gets character for tile background decoration based on notification content. */
+    @VisibleForTesting
+    static String getBackgroundTextFromMessage(String message) {
+        if (!ANY_DOUBLE_MARK_PATTERN.matcher(message).find()) {
+            return null;
+        }
+        if (MIXED_MARK_PATTERN.matcher(message).find()) {
+            return "!?";
+        }
+        Matcher doubleQuestionMatcher = DOUBLE_QUESTION_PATTERN.matcher(message);
+        if (!doubleQuestionMatcher.find()) {
+            return "!";
+        }
+        Matcher doubleExclamationMatcher = DOUBLE_EXCLAMATION_PATTERN.matcher(message);
+        if (!doubleExclamationMatcher.find()) {
+            return "?";
+        }
+        // If we have both "!!" and "??", return the one that comes first.
+        if (doubleQuestionMatcher.start() < doubleExclamationMatcher.start()) {
+            return "?";
+        }
+        return "!";
     }
 
     /** Gets the most recent {@link Notification.MessagingStyle.Message} from the notification. */
