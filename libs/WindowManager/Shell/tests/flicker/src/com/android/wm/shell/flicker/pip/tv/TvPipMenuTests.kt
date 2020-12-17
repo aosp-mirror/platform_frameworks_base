@@ -59,16 +59,23 @@ class TvPipMenuTests : TvPipTestBase() {
 
     @Test
     fun pipMenu_correctPosition() {
-        val pipMenu = enterPip_openMenu_assertShown()
-
-        // Make sure it's fullscreen
-        assertTrue("Pip menu should be shown fullscreen", pipMenu.isFullscreen(uiDevice))
+        enterPip_openMenu_assertShown()
 
         // Make sure the PiP task is positioned where it should be.
         val activityBounds: Rect = testApp.ui?.visibleBounds
-                ?: error("Could not retrieve PiP Activity bounds")
+                ?: error("Could not retrieve Pip Activity bounds")
         assertTrue("Pip Activity is positioned correctly while Pip menu is shown",
                 pipBoundsWhileInMenu == activityBounds)
+
+        // Make sure the Pip Menu Actions are positioned correctly.
+        uiDevice.findTvPipMenuControls()?.visibleBounds?.run {
+            assertTrue("Pip Menu Actions should be positioned below the Activity in Pip",
+                top >= activityBounds.bottom)
+            assertTrue("Pip Menu Actions should be positioned central horizontally",
+                centerX() == uiDevice.displayWidth / 2)
+            assertTrue("Pip Menu Actions should be fully shown on the screen",
+                left >= 0 && right <= uiDevice.displayWidth && bottom <= uiDevice.displayHeight)
+        } ?: error("Could not retrieve Pip Menu Actions bounds")
 
         testApp.closePipWindow()
     }
@@ -100,11 +107,11 @@ class TvPipMenuTests : TvPipTestBase() {
         enterPip_openMenu_assertShown()
 
         // PiP menu should contain the Close button
-        val closeButton = uiDevice.findTvPipMenuCloseButton()
+        uiDevice.findTvPipMenuCloseButton()
                 ?: fail("\"Close PIP\" button should be shown in Pip menu")
 
         // Clicking on the Close button should close the app
-        closeButton.click()
+        uiDevice.clickTvPipMenuCloseButton()
         assertTrue("\"Close PIP\" button should close the PiP", testApp.waitUntilClosed())
     }
 
@@ -113,12 +120,12 @@ class TvPipMenuTests : TvPipTestBase() {
         enterPip_openMenu_assertShown()
 
         // PiP menu should contain the Fullscreen button
-        val fullscreenButton = uiDevice.findTvPipMenuFullscreenButton()
+        uiDevice.findTvPipMenuFullscreenButton()
                 ?: fail("\"Full screen\" button should be shown in Pip menu")
 
         // Clicking on the fullscreen button should return app to the fullscreen mode.
         // Click, wait for the app to go fullscreen
-        fullscreenButton.click()
+        uiDevice.clickTvPipMenuFullscreenButton()
         assertTrue("\"Full screen\" button should open the app fullscreen",
                 wait { testApp.ui?.isFullscreen(uiDevice) ?: false })
 
@@ -136,12 +143,12 @@ class TvPipMenuTests : TvPipTestBase() {
         assertFullscreenAndCloseButtonsAreShown()
 
         // PiP menu should contain the Pause button
-        val pauseButton = uiDevice.findTvPipMenuElementWithDescription(pauseButtonDescription)
+        uiDevice.findTvPipMenuElementWithDescription(pauseButtonDescription)
                 ?: fail("\"Pause\" button should be shown in Pip menu if there is an active " +
                         "playing media session.")
 
         // When we pause media, the button should change from Pause to Play
-        pauseButton.click()
+        uiDevice.clickTvPipMenuElementWithDescription(pauseButtonDescription)
 
         assertFullscreenAndCloseButtonsAreShown()
         // PiP menu should contain the Play button now
@@ -161,27 +168,26 @@ class TvPipMenuTests : TvPipTestBase() {
         // PiP menu should contain "No-Op", "Off" and "Clear" buttons...
         uiDevice.findTvPipMenuElementWithDescription(TEST_APP_PIP_MENU_ACTION_NO_OP)
                 ?: fail("\"No-Op\" button should be shown in Pip menu")
-        val offButton = uiDevice.findTvPipMenuElementWithDescription(TEST_APP_PIP_MENU_ACTION_OFF)
+        uiDevice.findTvPipMenuElementWithDescription(TEST_APP_PIP_MENU_ACTION_OFF)
                 ?: fail("\"Off\" button should be shown in Pip menu")
         uiDevice.findTvPipMenuElementWithDescription(TEST_APP_PIP_MENU_ACTION_CLEAR)
                 ?: fail("\"Clear\" button should be shown in Pip menu")
         // ... and should also contain the "Full screen" and "Close" buttons.
         assertFullscreenAndCloseButtonsAreShown()
 
-        offButton.click()
+        uiDevice.clickTvPipMenuElementWithDescription(TEST_APP_PIP_MENU_ACTION_OFF)
         // Invoking the "Off" action should replace it with the "On" action/button and should
         // remove the "No-Op" action/button. "Clear" action/button should remain in the menu ...
         uiDevice.waitForTvPipMenuElementWithDescription(TEST_APP_PIP_MENU_ACTION_ON)
                 ?: fail("\"On\" button should be shown in Pip for a corresponding custom action")
         assertNull("\"No-Op\" button should not be shown in Pip menu",
                 uiDevice.findTvPipMenuElementWithDescription(TEST_APP_PIP_MENU_ACTION_NO_OP))
-        val clearButton =
-                uiDevice.findTvPipMenuElementWithDescription(TEST_APP_PIP_MENU_ACTION_CLEAR)
+        uiDevice.findTvPipMenuElementWithDescription(TEST_APP_PIP_MENU_ACTION_CLEAR)
                         ?: fail("\"Clear\" button should be shown in Pip menu")
         // ... as well as the "Full screen" and "Close" buttons.
         assertFullscreenAndCloseButtonsAreShown()
 
-        clearButton.click()
+        uiDevice.clickTvPipMenuElementWithDescription(TEST_APP_PIP_MENU_ACTION_CLEAR)
         // Invoking the "Clear" action should remove all the custom actions and their corresponding
         // buttons, ...
         uiDevice.waitUntilTvPipMenuElementWithDescriptionIsGone(TEST_APP_PIP_MENU_ACTION_ON)?.also {
@@ -211,9 +217,8 @@ class TvPipMenuTests : TvPipTestBase() {
                 ?: fail("\"No-Op\" button should be shown in Pip menu")
         uiDevice.findTvPipMenuElementWithDescription(TEST_APP_PIP_MENU_ACTION_OFF)
                 ?: fail("\"Off\" button should be shown in Pip menu")
-        val clearButton =
-                uiDevice.findTvPipMenuElementWithDescription(TEST_APP_PIP_MENU_ACTION_CLEAR)
-                        ?: fail("\"Clear\" button should be shown in Pip menu")
+        uiDevice.findTvPipMenuElementWithDescription(TEST_APP_PIP_MENU_ACTION_CLEAR)
+                ?: fail("\"Clear\" button should be shown in Pip menu")
         // ... should also contain the "Full screen" and "Close" buttons, ...
         assertFullscreenAndCloseButtonsAreShown()
         // ... but should not contain media buttons.
@@ -222,7 +227,7 @@ class TvPipMenuTests : TvPipTestBase() {
         assertNull("\"Pause\" button should not be shown in menu when there are custom actions",
                 uiDevice.findTvPipMenuElementWithDescription(pauseButtonDescription))
 
-        clearButton.click()
+        uiDevice.clickTvPipMenuElementWithDescription(TEST_APP_PIP_MENU_ACTION_CLEAR)
         // Invoking the "Clear" action should remove all the custom actions, which should bring up
         // media buttons...
         uiDevice.waitForTvPipMenuElementWithDescription(pauseButtonDescription)

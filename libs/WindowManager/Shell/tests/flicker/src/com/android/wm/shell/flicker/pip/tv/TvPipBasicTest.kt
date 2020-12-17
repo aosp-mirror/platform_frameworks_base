@@ -42,7 +42,7 @@ class TvPipBasicTest(
         testApp.launchViaIntent()
 
         // Set up ratio and enter Pip
-        testApp.clickButton(radioButtonId)
+        testApp.clickObject(radioButtonId)
         testApp.clickEnterPipButton()
 
         val actualRatio: Float = testApp.ui?.visibleBounds?.ratio
