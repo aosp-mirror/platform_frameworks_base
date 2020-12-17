@@ -52,14 +52,17 @@ public final class FactoryResetter {
 
     /**
      * Factory reset the device according to the builder's arguments.
+     *
+     * @return {@code true} if device was factory reset, or {@code false} if it was delayed by the
+     * {@link DevicePolicySafetyChecker}.
      */
-    public void factoryReset() throws IOException {
+    public boolean factoryReset() throws IOException {
         Preconditions.checkCallAuthorization(mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.MASTER_CLEAR) == PackageManager.PERMISSION_GRANTED);
 
         if (mSafetyChecker == null) {
             factoryResetInternalUnchecked();
-            return;
+            return true;
         }
 
         IResultReceiver receiver = new IResultReceiver.Stub() {
@@ -77,6 +80,36 @@ public final class FactoryResetter {
         };
         Slog.i(TAG, String.format("Delaying factory reset until %s confirms", mSafetyChecker));
         mSafetyChecker.onFactoryReset(receiver);
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder("FactoryResetter[");
+        if (mReason == null) {
+            builder.append("no_reason");
+        } else {
+            builder.append("reason='").append(mReason).append("'");
+        }
+        if (mSafetyChecker != null) {
+            builder.append(",hasSafetyChecker");
+        }
+        if (mShutdown) {
+            builder.append(",shutdown");
+        }
+        if (mForce) {
+            builder.append(",force");
+        }
+        if (mWipeEuicc) {
+            builder.append(",wipeEuicc");
+        }
+        if (mWipeAdoptableStorage) {
+            builder.append(",wipeAdoptableStorage");
+        }
+        if (mWipeFactoryResetProtection) {
+            builder.append(",ipeFactoryResetProtection");
+        }
+        return builder.append(']').toString();
     }
 
     private void factoryResetInternalUnchecked() throws IOException {
