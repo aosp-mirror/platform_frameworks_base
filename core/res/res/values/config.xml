@@ -3727,6 +3727,23 @@
     -->
     <string name="config_companionDeviceManagerPackage" translatable="false"></string>
 
+    <!-- A list of packages managing companion device(s) by the same manufacturers as the main
+         device. It will fall back to showing a prompt if the association has been called multiple
+         times in a short period.
+         Note that config_companionDeviceManagerPackage and config_companionDeviceCerts are
+         parallel arrays.
+     -->
+    <string-array name="config_companionDevicePackages" translatable="false"></string-array>
+
+    <!-- A list of SHA256 Certificates managing companion device(s) by the same manufacturers as
+         the main device. It will fall back to showing a prompt if the association has been called
+         multiple times in a short period.
+         Note that config_companionDeviceCerts and config_companionDeviceManagerPackage are parallel
+         arrays.
+         Example: "1A:2B:3C:4D"
+     -->
+    <string-array name="config_companionDeviceCerts" translatable="false"></string-array>
+
     <!-- The package name for the default wellbeing app.
          This package must be trusted, as it has the permissions to control other applications
          on the device.
