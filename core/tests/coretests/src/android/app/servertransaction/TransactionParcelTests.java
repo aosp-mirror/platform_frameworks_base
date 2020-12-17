@@ -24,6 +24,7 @@ import static android.app.servertransaction.TestUtils.resultInfoList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import android.app.ActivityOptions;
 import android.app.ContentProviderHolder;
 import android.app.IApplicationThread;
 import android.app.IInstrumentationWatcher;
@@ -200,9 +201,10 @@ public class TransactionParcelTests {
                 .setIntent(intent).setIdent(ident).setInfo(activityInfo).setCurConfig(config())
                 .setOverrideConfig(overrideConfig).setCompatInfo(compat).setReferrer(referrer)
                 .setProcState(procState).setState(bundle).setPersistentState(persistableBundle)
-                .setPendingResults(resultInfoList()).setPendingNewIntents(referrerIntentList())
-                .setIsForward(true).setAssistToken(new Binder())
-                .setFixedRotationAdjustments(fixedRotationAdjustments).build();
+                .setPendingResults(resultInfoList()).setActivityOptions(ActivityOptions.makeBasic())
+                .setPendingNewIntents(referrerIntentList()).setIsForward(true)
+                .setAssistToken(new Binder()).setFixedRotationAdjustments(fixedRotationAdjustments)
+                .build();
 
         writeAndPrepareForReading(item);
 
@@ -273,7 +275,7 @@ public class TransactionParcelTests {
     @Test
     public void testStart() {
         // Write to parcel
-        StartActivityItem item = StartActivityItem.obtain();
+        StartActivityItem item = StartActivityItem.obtain(ActivityOptions.makeBasic());
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert

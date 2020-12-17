@@ -868,8 +868,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                         mergedConfiguration.getOverrideConfiguration(), r.compat,
                         r.launchedFromPackage, task.voiceInteractor, proc.getReportedProcState(),
                         r.getSavedState(), r.getPersistentSavedState(), results, newIntents,
-                        dc.isNextTransitionForward(), proc.createProfilerInfoIfNeeded(),
-                        r.assistToken, activityClientController,
+                        r.takeOptions(), dc.isNextTransitionForward(),
+                        proc.createProfilerInfoIfNeeded(), r.assistToken, activityClientController,
                         r.createFixedRotationAdjustmentsIfNeeded()));
 
                 // Set desired final state.
@@ -2566,9 +2566,10 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 try {
                     mService.moveTaskToFrontLocked(null /* appThread */, null /* callingPackage */,
                             task.mTaskId, 0, options);
-                    // Apply options to prevent pendingOptions be taken by client to make sure
-                    // the override pending app transition will be applied immediately.
-                    targetActivity.applyOptionsLocked();
+                    // Apply options to prevent pendingOptions be taken when scheduling activity
+                    // lifecycle transaction to make sure the override pending app transition will
+                    // be applied immediately.
+                    targetActivity.applyOptionsAnimation();
                 } finally {
                     mActivityMetricsLogger.notifyActivityLaunched(launchingState,
                             START_TASK_TO_FRONT, targetActivity, activityOptions);

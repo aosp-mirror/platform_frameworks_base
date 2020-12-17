@@ -1258,7 +1258,7 @@ class ActivityStarter {
         }
         // We pretend to the caller that it was really started to make it backward compatible, but
         // they will just get a cancel result.
-        ActivityOptions.abort(r.pendingOptions);
+        ActivityOptions.abort(r.getOptions());
         return true;
     }
 

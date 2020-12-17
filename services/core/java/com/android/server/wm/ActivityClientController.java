@@ -42,7 +42,6 @@ import static com.android.server.wm.Task.ActivityState.DESTROYING;
 import android.annotation.NonNull;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.IActivityClientController;
 import android.app.PictureInPictureParams;
@@ -553,23 +552,6 @@ class ActivityClientController extends IActivityClientController.Stub {
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.forTokenLocked(token);
             return r != null ? r.launchedFromPackage : null;
-        }
-    }
-
-    @Override
-    public Bundle getActivityOptions(IBinder token) {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
-                if (r == null) {
-                    return null;
-                }
-                final ActivityOptions activityOptions = r.takeOptionsLocked(true /* fromClient */);
-                return activityOptions != null ? activityOptions.toBundle() : null;
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
         }
     }
 

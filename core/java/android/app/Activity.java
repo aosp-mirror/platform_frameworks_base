@@ -890,6 +890,9 @@ public class Activity extends ContextThemeWrapper
     @UnsupportedAppUsage
     final FragmentController mFragments = FragmentController.createController(new HostCallbacks());
 
+    /** The options for scene transition. */
+    ActivityOptions mPendingOptions;
+
     private static final class ManagedCursor {
         ManagedCursor(Cursor cursor) {
             mCursor = cursor;
@@ -7258,7 +7261,7 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Retrieve the ActivityOptions passed in from the launching activity or passed back
+     * Takes the ActivityOptions passed in from the launching activity or passed back
      * from an activity launched by this activity in its call to {@link
      * #convertToTranslucent(TranslucentConversionListener, ActivityOptions)}
      *
@@ -7267,7 +7270,10 @@ public class Activity extends ContextThemeWrapper
      */
     @UnsupportedAppUsage
     ActivityOptions getActivityOptions() {
-        return ActivityOptions.fromBundle(ActivityClient.getInstance().getActivityOptions(mToken));
+        final ActivityOptions options = mPendingOptions;
+        // The option only applies once.
+        mPendingOptions = null;
+        return options;
     }
 
     /**

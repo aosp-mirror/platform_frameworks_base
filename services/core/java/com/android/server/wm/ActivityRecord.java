@@ -284,6 +284,7 @@ import android.view.DisplayInfo;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IApplicationToken;
 import android.view.InputApplicationHandle;
+import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
@@ -462,7 +463,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     HashSet<WeakReference<PendingIntentRecord>> pendingResults; // all pending intents for this act
     ArrayList<ReferrerIntent> newIntents; // any pending new intents for single-top mode
     Intent mLastNewIntent;  // the last new intent we delivered to client
-    ActivityOptions pendingOptions; // most recently given options
+    /** The most recently given options. */
+    private ActivityOptions mPendingOptions;
+    /** Non-null if {@link #mPendingOptions} specifies the remote animation. */
+    private RemoteAnimationAdapter mPendingRemoteAnimation;
     ActivityOptions returningOptions; // options that are coming back via convertToTranslucent
     AppTimeTracker appTimeTracker; // set if we are tracking the time in this app/task/activity
     ActivityServiceConnectionsHolder mServiceConnectionsHolder; // Service connections.
@@ -882,8 +886,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 }
             }
         }
-        if (pendingOptions != null) {
-            pw.print(prefix); pw.print("pendingOptions="); pw.println(pendingOptions);
+        if (mPendingOptions != null) {
+            pw.print(prefix); pw.print("pendingOptions="); pw.println(mPendingOptions);
+        }
+        if (mPendingRemoteAnimation != null) {
+            pw.print(prefix);
+            pw.print("pendingRemoteAnimationCallingPid=");
+            pw.println(mPendingRemoteAnimation.getCallingPid());
         }
         if (appTimeTracker != null) {
             appTimeTracker.dumpWithHeader(pw, prefix, false);
@@ -1633,8 +1642,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         lockTaskLaunchMode = getLockTaskLaunchMode(aInfo, options);
 
         if (options != null) {
-            pendingOptions = options;
-            final PendingIntent usageReport = pendingOptions.getUsageTimeReport();
+            setOptions(options);
+            final PendingIntent usageReport = options.getUsageTimeReport();
             if (usageReport != null) {
                 appTimeTracker = new AppTimeTracker(usageReport);
             }
@@ -2206,7 +2215,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (task != null && !finishing) {
                 task = null;
             }
-            clearOptionsLocked();
+            abortAndClearOptionsAnimation();
         }
     }
 
@@ -2993,7 +3002,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         finishing = true;
         if (stopped) {
-            clearOptionsLocked();
+            abortAndClearOptionsAnimation();
         }
         mAtmService.getTransitionController().requestTransitionIfNeeded(TRANSIT_CLOSE, this);
     }
@@ -3861,33 +3870,47 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void updateOptionsLocked(ActivityOptions options) {
         if (options != null) {
             if (DEBUG_TRANSITION) Slog.i(TAG, "Update options for " + this);
-            if (pendingOptions != null) {
-                pendingOptions.abort();
+            if (mPendingOptions != null) {
+                mPendingOptions.abort();
             }
-            pendingOptions = options;
+            setOptions(options);
         }
     }
 
-    void applyOptionsLocked() {
-        if (pendingOptions != null
-                && pendingOptions.getAnimationType() != ANIM_SCENE_TRANSITION) {
-            if (DEBUG_TRANSITION) Slog.i(TAG, "Applying options for " + this);
-            applyOptionsLocked(pendingOptions, intent);
-            if (task == null) {
-                clearOptionsLocked(false /* withAbort */);
-            } else {
-                // This will clear the options for all the ActivityRecords for this Task.
-                task.forAllActivities((r) -> {
-                    r.clearOptionsLocked(false /* withAbort */);
-                });
+    private void setOptions(@NonNull ActivityOptions options) {
+        mPendingOptions = options;
+        if (options.getAnimationType() == ANIM_REMOTE_ANIMATION) {
+            mPendingRemoteAnimation = options.getRemoteAnimationAdapter();
+        }
+    }
+
+    void applyOptionsAnimation() {
+        if (DEBUG_TRANSITION) Slog.i(TAG, "Applying options for " + this);
+        if (mPendingRemoteAnimation != null) {
+            mDisplayContent.mAppTransition.overridePendingAppTransitionRemote(
+                    mPendingRemoteAnimation);
+        } else {
+            if (mPendingOptions == null
+                    || mPendingOptions.getAnimationType() == ANIM_SCENE_TRANSITION) {
+                // Scene transition will run on the client side.
+                return;
             }
+            applyOptionsAnimation(mPendingOptions, intent);
+        }
+        if (task == null) {
+            clearOptionsAnimation();
+        } else {
+            // This will clear the options for all the ActivityRecords for this Task.
+            task.forAllActivities((r) -> {
+                r.clearOptionsAnimation();
+            });
         }
     }
 
     /**
      * Apply override app transition base on options & animation type.
      */
-    void applyOptionsLocked(ActivityOptions pendingOptions, Intent intent) {
+    private void applyOptionsAnimation(ActivityOptions pendingOptions, Intent intent) {
         final int animationType = pendingOptions.getAnimationType();
         final DisplayContent displayContent = getDisplayContent();
         switch (animationType) {
@@ -3969,10 +3992,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 displayContent.mAppTransition
                         .overridePendingAppTransitionStartCrossProfileApps();
                 break;
-            case ANIM_REMOTE_ANIMATION:
-                displayContent.mAppTransition.overridePendingAppTransitionRemote(
-                        pendingOptions.getRemoteAnimationAdapter());
-                break;
             case ANIM_NONE:
             case ANIM_UNDEFINED:
                 break;
@@ -4033,35 +4052,32 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    void clearOptionsLocked() {
-        clearOptionsLocked(true /* withAbort */);
-    }
-
-    void clearOptionsLocked(boolean withAbort) {
-        if (withAbort && pendingOptions != null) {
-            pendingOptions.abort();
+    void abortAndClearOptionsAnimation() {
+        if (mPendingOptions != null) {
+            mPendingOptions.abort();
         }
-        pendingOptions = null;
+        clearOptionsAnimation();
     }
 
-    ActivityOptions takeOptionsLocked(boolean fromClient) {
+    void clearOptionsAnimation() {
+        mPendingOptions = null;
+        mPendingRemoteAnimation = null;
+    }
+
+    ActivityOptions getOptions() {
+        return mPendingOptions;
+    }
+
+    ActivityOptions takeOptions() {
         if (DEBUG_TRANSITION) Slog.i(TAG, "Taking options for " + this + " callers="
                 + Debug.getCallers(6));
-        ActivityOptions opts = pendingOptions;
-
-        // If we are trying to take activity options from the client, do not null it out if it's a
-        // remote animation as the client doesn't need it ever. This is a workaround when client is
-        // faster to take the options than we are to resume the next activity.
-        // TODO (b/132432864): Fix the root cause of these transition preparing/applying options
-        // timing somehow
-        if (!fromClient || opts == null || opts.getRemoteAnimationAdapter() == null) {
-            pendingOptions = null;
-        }
+        final ActivityOptions opts = mPendingOptions;
+        mPendingOptions = null;
         return opts;
     }
 
     boolean allowMoveToFront() {
-        return pendingOptions == null || !pendingOptions.getAvoidMoveToFront();
+        return mPendingOptions == null || !mPendingOptions.getAvoidMoveToFront();
     }
 
     void removeUriPermissionsLocked() {
@@ -4883,7 +4899,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             try {
                 mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
-                        StartActivityItem.obtain());
+                        StartActivityItem.obtain(takeOptions()));
             } catch (Exception e) {
                 Slog.w(TAG, "Exception thrown sending start: " + intent.getComponent(), e);
             }
@@ -5204,7 +5220,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             notifyAppStopped();
 
             if (finishing) {
-                clearOptionsLocked();
+                abortAndClearOptionsAnimation();
             } else {
                 if (deferRelaunchUntilPaused) {
                     destroyImmediately("stop-config");
@@ -5838,8 +5854,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // We don't show starting window for overlay activities.
             return;
         }
-        if (pendingOptions != null
-                && pendingOptions.getAnimationType() == ActivityOptions.ANIM_SCENE_TRANSITION) {
+        if (mPendingOptions != null
+                && mPendingOptions.getAnimationType() == ActivityOptions.ANIM_SCENE_TRANSITION) {
             // Don't show starting window when using shared element transition.
             return;
         }

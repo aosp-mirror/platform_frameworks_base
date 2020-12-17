@@ -237,14 +237,6 @@ public class ActivityClient {
         }
     }
 
-    Bundle getActivityOptions(IBinder token) {
-        try {
-            return getActivityClientController().getActivityOptions(token);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
     public void setRequestedOrientation(IBinder token, int requestedOrientation) {
         try {
             getActivityClientController().setRequestedOrientation(token, requestedOrientation);

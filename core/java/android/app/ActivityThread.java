@@ -567,6 +567,9 @@ public final class ActivityThread extends ClientTransactionHandler {
         @UnsupportedAppUsage
         boolean mPreserveWindow;
 
+        /** The options for scene transition. */
+        ActivityOptions mActivityOptions;
+
         /**
          * If non-null, the activity is launching with a specified rotation, the adjustments should
          * be consumed before activity creation.
@@ -587,8 +590,8 @@ public final class ActivityThread extends ClientTransactionHandler {
                 ActivityInfo info, Configuration overrideConfig, CompatibilityInfo compatInfo,
                 String referrer, IVoiceInteractor voiceInteractor, Bundle state,
                 PersistableBundle persistentState, List<ResultInfo> pendingResults,
-                List<ReferrerIntent> pendingNewIntents, boolean isForward,
-                ProfilerInfo profilerInfo, ClientTransactionHandler client,
+                List<ReferrerIntent> pendingNewIntents, ActivityOptions activityOptions,
+                boolean isForward, ProfilerInfo profilerInfo, ClientTransactionHandler client,
                 IBinder assistToken, FixedRotationAdjustments fixedRotationAdjustments) {
             this.token = token;
             this.assistToken = assistToken;
@@ -607,6 +610,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             this.overrideConfig = overrideConfig;
             this.packageInfo = client.getPackageInfoNoCheck(activityInfo.applicationInfo,
                     compatInfo);
+            mActivityOptions = activityOptions;
             mPendingFixedRotationAdjustments = fixedRotationAdjustments;
             init();
         }
@@ -3469,6 +3473,10 @@ public final class ActivityThread extends ClientTransactionHandler {
                     activity.setTheme(theme);
                 }
 
+                if (r.mActivityOptions != null) {
+                    activity.mPendingOptions = r.mActivityOptions;
+                    r.mActivityOptions = null;
+                }
                 activity.mCalled = false;
                 if (r.isPersistable()) {
                     mInstrumentation.callActivityOnCreate(activity, r.state, r.persistentState);
@@ -3509,7 +3517,7 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     @Override
     public void handleStartActivity(ActivityClientRecord r,
-            PendingTransactionActions pendingActions) {
+            PendingTransactionActions pendingActions, ActivityOptions activityOptions) {
         final Activity activity = r.activity;
         if (!r.stopped) {
             throw new IllegalStateException("Can't start activity that is not stopped.");
@@ -3520,6 +3528,9 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         unscheduleGcIdler();
+        if (activityOptions != null) {
+            activity.mPendingOptions = activityOptions;
+        }
 
         // Start
         activity.performStart("handleStartActivity");
