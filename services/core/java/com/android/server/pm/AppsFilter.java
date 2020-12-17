@@ -55,6 +55,12 @@ import com.android.server.FgThread;
 import com.android.server.compat.CompatChange;
 import com.android.server.om.OverlayReferenceMapper;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.utils.Snappable;
+import com.android.server.utils.Snapshots;
+import com.android.server.utils.Watchable;
+import com.android.server.utils.WatchableImpl;
+import com.android.server.utils.WatchedArrayMap;
+import com.android.server.utils.Watcher;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -69,7 +75,7 @@ import java.util.concurrent.Executor;
  * manifests.
  */
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-public class AppsFilter {
+public class AppsFilter implements Watchable, Snappable {
 
     private static final String TAG = "AppsFilter";
 
@@ -145,6 +151,55 @@ public class AppsFilter {
     @GuardedBy("mCacheLock")
     private volatile SparseArray<SparseBooleanArray> mShouldFilterCache;
 
+    /**
+     * A cached snapshot.
+     */
+    private volatile AppsFilter mSnapshot = null;
+
+    /**
+     * Watchable machinery
+     */
+    private final WatchableImpl mWatchable = new WatchableImpl();
+
+    /**
+     * Ensures an observer is in the list, exactly once. The observer cannot be null.  The
+     * function quietly returns if the observer is already in the list.
+     *
+     * @param observer The {@link Watcher} to be notified when the {@link Watchable} changes.
+     */
+    public void registerObserver(@NonNull Watcher observer) {
+        mWatchable.registerObserver(observer);
+    }
+
+    /**
+     * Ensures an observer is not in the list. The observer must not be null.  The function
+     * quietly returns if the objserver is not in the list.
+     *
+     * @param observer The {@link Watcher} that should not be in the notification list.
+     */
+    public void unregisterObserver(@NonNull Watcher observer) {
+        mWatchable.unregisterObserver(observer);
+    }
+
+    /**
+     * Invokes {@link Watcher#onChange} on each registered observer.  The method can be called
+     * with the {@link Watchable} that generated the event.  In a tree of {@link Watchable}s, this
+     * is generally the first (deepest) {@link Watchable} to detect a change.
+     *
+     * @param what The {@link Watchable} that generated the event.
+     */
+    public void dispatchChange(@Nullable Watchable what) {
+        mSnapshot = null;
+        mWatchable.dispatchChange(what);
+    }
+
+    /**
+     * Report a change to observers.
+     */
+    private void onChanged() {
+        dispatchChange(this);
+    }
+
     @VisibleForTesting(visibility = PRIVATE)
     AppsFilter(StateProvider stateProvider,
             FeatureConfig featureConfig,
@@ -159,6 +214,44 @@ public class AppsFilter {
                 overlayProvider);
         mStateProvider = stateProvider;
         mBackgroundExecutor = backgroundExecutor;
+    }
+
+    /**
+     * The copy constructor is used by PackageManagerService to construct a snapshot.
+     * Attributes are not deep-copied since these are supposed to be immutable.
+     * TODO: deep-copy the attributes, if necessary.
+     */
+    private AppsFilter(AppsFilter orig) {
+        Snapshots.copy(mImplicitlyQueryable, orig.mImplicitlyQueryable);
+        Snapshots.copy(mQueriesViaPackage, orig.mQueriesViaPackage);
+        Snapshots.copy(mQueriesViaComponent, orig.mQueriesViaComponent);
+        mQueriesViaComponentRequireRecompute = orig.mQueriesViaComponentRequireRecompute;
+        mForceQueryable.addAll(orig.mForceQueryable);
+        mForceQueryableByDevicePackageNames = orig.mForceQueryableByDevicePackageNames;
+        mSystemAppsQueryable = orig.mSystemAppsQueryable;
+        mFeatureConfig = orig.mFeatureConfig;
+        mOverlayReferenceMapper = orig.mOverlayReferenceMapper;
+        mStateProvider = orig.mStateProvider;
+        mSystemSigningDetails = orig.mSystemSigningDetails;
+        mProtectedBroadcasts = orig.mProtectedBroadcasts;
+        mShouldFilterCache = orig.mShouldFilterCache;
+
+        mBackgroundExecutor = null;
+    }
+
+    /**
+     * Return a snapshot.  If the cached snapshot is null, build a new one.  The logic in
+     * the function ensures that this function returns a valid snapshot even if a race
+     * condition causes the cached snapshot to be cleared asynchronously to this method.
+     */
+    public AppsFilter snapshot() {
+        AppsFilter s = mSnapshot;
+        if (s == null) {
+            s = new AppsFilter(this);
+            s.mWatchable.seal();
+            mSnapshot = s;
+        }
+        return s;
     }
 
     /**
@@ -311,6 +404,9 @@ public class AppsFilter {
             } else {
                 mDisabledPackages.add(pkg.getPackageName());
             }
+            if (mAppsFilter != null) {
+                mAppsFilter.onChanged();
+            }
         }
 
         @Override
@@ -347,7 +443,7 @@ public class AppsFilter {
         }
         final StateProvider stateProvider = command -> {
             synchronized (injector.getLock()) {
-                command.currentState(injector.getSettings().getPackagesLocked(),
+                command.currentState(injector.getSettings().getPackagesLocked().untrackedMap(),
                         injector.getUserManagerInternal().getUserInfos());
             }
         };
@@ -482,7 +578,8 @@ public class AppsFilter {
      */
     public void grantImplicitAccess(int recipientUid, int visibleUid) {
         if (recipientUid != visibleUid) {
-            if (mImplicitlyQueryable.add(recipientUid, visibleUid) && DEBUG_LOGGING) {
+            final boolean changed = mImplicitlyQueryable.add(recipientUid, visibleUid);
+            if (changed && DEBUG_LOGGING) {
                 Slog.i(TAG, "implicit access granted: " + recipientUid + " -> " + visibleUid);
             }
             synchronized (mCacheLock) {
@@ -497,6 +594,9 @@ public class AppsFilter {
                     visibleUids.put(visibleUid, false);
                 }
             }
+            if (changed) {
+                onChanged();
+            }
         }
     }
 
@@ -505,6 +605,7 @@ public class AppsFilter {
         mFeatureConfig.onSystemReady();
 
         updateEntireShouldFilterCacheAsync();
+        onChanged();
     }
 
     /**
@@ -530,6 +631,7 @@ public class AppsFilter {
                 }
             });
         } finally {
+            onChanged();
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
     }
@@ -712,6 +814,7 @@ public class AppsFilter {
         synchronized (mCacheLock) {
             if (mShouldFilterCache != null) {
                 updateEntireShouldFilterCache();
+                onChanged();
             }
         }
     }
@@ -870,6 +973,16 @@ public class AppsFilter {
     }
 
     /**
+     * This api does type conversion on the <existingSettings> parameter.
+     */
+    @VisibleForTesting(visibility = PRIVATE)
+    @Nullable
+    SparseArray<int[]> getVisibilityAllowList(PackageSetting setting, int[] users,
+            WatchedArrayMap<String, PackageSetting> existingSettings) {
+        return getVisibilityAllowList(setting, users, existingSettings.untrackedMap());
+    }
+
+    /**
      * Equivalent to calling {@link #addPackage(PackageSetting, boolean)} with {@code isReplace}
      * equal to {@code false}.
      * @see AppsFilter#addPackage(PackageSetting, boolean)
@@ -946,6 +1059,7 @@ public class AppsFilter {
                                 siblingSetting, settings, users, settings.size());
                     }
                 }
+                onChanged();
             }
         });
     }
