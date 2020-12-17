@@ -51,6 +51,17 @@ public abstract class BatteryConsumer {
     public static final int LAST_CUSTOM_POWER_COMPONENT_ID = 9999;
 
     /**
+     * Modeled power components are used for testing only.  They are returned if the
+     * {@link BatteryUsageStatsQuery#FLAG_BATTERY_USAGE_STATS_INCLUDE_MODELED} is set.
+     * The modeled power components are retrieved with {@link #getConsumedPowerForCustomComponent}.
+     * The ID of a modeled power component is calculated as
+     * (FIRST_MODELED_POWER_COMPONENT_ID + powerComponentId), e.g.
+     * FIRST_MODELED_POWER_COMPONENT_ID + POWER_COMPONENT_CPU.
+     */
+    public static final int FIRST_MODELED_POWER_COMPONENT_ID = 10000;
+    public static final int LAST_MODELED_POWER_COMPONENT_ID = 19999;
+
+    /**
      * Time usage component, describing the particular part of the system
      * that was used for the corresponding amount of time.
      *
@@ -137,9 +148,10 @@ public abstract class BatteryConsumer {
     protected abstract static class BaseBuilder<T extends BaseBuilder<?>> {
         final PowerComponents.Builder mPowerComponentsBuilder;
 
-        public BaseBuilder(int customPowerComponentCount, int customTimeComponentCount) {
+        public BaseBuilder(int customPowerComponentCount, int customTimeComponentCount,
+                boolean includeModeledComponents) {
             mPowerComponentsBuilder = new PowerComponents.Builder(customPowerComponentCount,
-                    customTimeComponentCount);
+                    customTimeComponentCount, includeModeledComponents);
         }
 
         /**

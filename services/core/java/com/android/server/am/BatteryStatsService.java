@@ -27,6 +27,7 @@ import android.hardware.power.stats.EnergyConsumerResult;
 import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
 import android.os.BatteryUsageStats;
+import android.os.BatteryUsageStatsQuery;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -589,10 +590,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
      * Returns BatteryUsageStats, which contains power attribution data on a per-subsystem
      * and per-UID basis.
      */
-    public BatteryUsageStats getBatteryUsageStats() {
+    public BatteryUsageStats getBatteryUsageStats(BatteryUsageStatsQuery query) {
         mContext.enforceCallingPermission(
                 android.Manifest.permission.BATTERY_STATS, null);
-        return mBatteryUsageStatsProvider.getBatteryUsageStats();
+        return mBatteryUsageStatsProvider.getBatteryUsageStats(query);
     }
 
     public byte[] getStatistics() {

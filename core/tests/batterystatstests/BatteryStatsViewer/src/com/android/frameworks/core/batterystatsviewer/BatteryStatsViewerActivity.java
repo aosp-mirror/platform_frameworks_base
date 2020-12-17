@@ -21,6 +21,7 @@ import android.content.SharedPreferences;
 import android.os.BatteryStats;
 import android.os.BatteryStatsManager;
 import android.os.BatteryUsageStats;
+import android.os.BatteryUsageStatsQuery;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -197,7 +198,10 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
 
         @Override
         public BatteryUsageStats loadInBackground() {
-            return mBatteryStatsManager.getBatteryUsageStats();
+            final BatteryUsageStatsQuery query = new BatteryUsageStatsQuery.Builder()
+                    .includeModeled()
+                    .build();
+            return mBatteryStatsManager.getBatteryUsageStats(query);
         }
 
         @Override

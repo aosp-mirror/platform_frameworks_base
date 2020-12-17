@@ -142,12 +142,16 @@ public class BatteryConsumerData {
         }
 
         BatteryConsumer requestedBatteryConsumer = null;
+        double totalModeledCpuPowerMah = 0;
 
         for (BatteryConsumer consumer : batteryUsageStats.getUidBatteryConsumers()) {
             if (batteryConsumerId(consumer).equals(batteryConsumerId)) {
                 requestedBatteryConsumer = consumer;
-                break;
             }
+
+            totalModeledCpuPowerMah += consumer.getConsumedPowerForCustomComponent(
+                    BatteryConsumer.FIRST_MODELED_POWER_COMPONENT_ID
+                            + BatteryConsumer.POWER_COMPONENT_CPU);
         }
 
         if (requestedBatterySipper == null) {
@@ -190,9 +194,17 @@ public class BatteryConsumerData {
             addEntry("CPU", EntryType.POWER,
                     requestedBatteryConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU),
                     totalCpuPowerMah);
+            if (totalModeledCpuPowerMah != 0) {
+                addEntry("CPU (modeled)", EntryType.POWER,
+                        requestedBatteryConsumer.getConsumedPowerForCustomComponent(
+                                BatteryConsumer.FIRST_MODELED_POWER_COMPONENT_ID
+                                        + BatteryConsumer.POWER_COMPONENT_CPU),
+                        totalModeledCpuPowerMah);
+            }
+        } else {
+            addEntry("CPU (sipper)", EntryType.POWER,
+                    requestedBatterySipper.cpuPowerMah, totalCpuPowerMah);
         }
-        addEntry("CPU (sipper)", EntryType.POWER,
-                requestedBatterySipper.cpuPowerMah, totalCpuPowerMah);
         addEntry("System services", EntryType.POWER,
                 requestedBatterySipper.systemServiceCpuPowerMah, totalSystemServiceCpuPowerMah);
         if (requestedBatteryConsumer != null) {

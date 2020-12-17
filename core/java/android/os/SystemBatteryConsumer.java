@@ -120,8 +120,8 @@ public class SystemBatteryConsumer extends BatteryConsumer implements Parcelable
         private final int mDrainType;
 
         Builder(int customPowerComponentCount, int customTimeComponentCount,
-                @DrainType int drainType) {
-            super(customPowerComponentCount, customTimeComponentCount);
+                boolean includeModeledComponents, @DrainType int drainType) {
+            super(customPowerComponentCount, customTimeComponentCount, includeModeledComponents);
             mDrainType = drainType;
         }
 
