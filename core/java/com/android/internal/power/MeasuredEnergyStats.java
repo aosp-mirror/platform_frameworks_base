@@ -17,9 +17,12 @@
 package com.android.internal.power;
 
 
+import static android.os.BatteryStats.ENERGY_DATA_UNAVAILABLE;
+
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.os.Parcel;
+import android.util.Slog;
 import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -28,16 +31,19 @@ import com.android.internal.power.MeasuredEnergyArray.MeasuredEnergySubsystem;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Arrays;
 
 /**
- * MeasuredEnergyStats adds up the measured energy usage of various subsystems
+ * Tracks the measured energy usage of various subsystems according to their {@link EnergyBucket}.
+ *
+ * This class doesn't use a TimeBase, and instead requires manually decisions about when to
+ * accumulate since it is trivial. However, in the future, a TimeBase could be used instead.
  */
 @VisibleForTesting
 public class MeasuredEnergyStats {
-    private static final long UNAVAILABLE = -1;
-    private static final long RESET = -2;
+    private static final String TAG = "MeasuredEnergyStats";
 
+    // Note: {@link com.android.internal.os.BatteryStatsImpl#VERSION} must be updated if energy
+    // bucket integers are modified.
     public static final int ENERGY_BUCKET_UNKNOWN = -1;
     public static final int ENERGY_BUCKET_SCREEN_ON = 0;
     public static final int ENERGY_BUCKET_SCREEN_DOZE = 1;
@@ -57,45 +63,59 @@ public class MeasuredEnergyStats {
     }
 
     /**
-     * Energy snapshots from the last time each {@link MeasuredEnergySubsystem} was updated.
-     * An energy snapshot will be set to {@link #UNAVAILABLE} if the subsystem has never been
-     * updated.
-     * An energy snapshot will be set to {@link #RESET} on a reset. A subsystems energy will
-     * need to be updated at least twice to start accumulating energy again.
-     */
-    private final long[] mMeasuredEnergySnapshots =
-            new long[MeasuredEnergyArray.NUMBER_SUBSYSTEMS];
-
-    /**
-     * Total energy in microjoules since the last reset that an {@link EnergyBucket} has
-     * accumulated.
+     * Total energy (in microjoules) that an {@link EnergyBucket} has accumulated since the last
+     * reset. Values MUST be non-zero or ENERGY_DATA_UNAVAILABLE. Accumulation only occurs
+     * while the necessary conditions are satisfied (e.g. on battery).
      *
      * Warning: Long array is used for access speed. If the number of supported subsystems
-     * becomes too large, consider using an alternate data structure.
+     * becomes large, consider using an alternate data structure such as a SparseLongArray.
      */
     private final long[] mAccumulatedEnergiesMicroJoules = new long[NUMBER_ENERGY_BUCKETS];
 
     /**
-     * Last known screen state.
+     * Creates a MeasuredEnergyStats set to support the provided energy buckets.
+     * supportedEnergyBuckets should generally be of size {@link #NUMBER_ENERGY_BUCKETS}.
      */
-    private int mLastScreenState;
-
-    public MeasuredEnergyStats(MeasuredEnergyArray energyArray, int screenState) {
-        Arrays.fill(mMeasuredEnergySnapshots, UNAVAILABLE);
-
-        update(energyArray, screenState, false);
-    }
-
-    public MeasuredEnergyStats(Parcel in) {
-        in.readLongArray(mAccumulatedEnergiesMicroJoules);
+    public MeasuredEnergyStats(boolean[] supportedEnergyBuckets) {
+        // Initialize to all zeros where supported, otherwise ENERGY_DATA_UNAVAILABLE.
+        for (int bucket = 0; bucket < NUMBER_ENERGY_BUCKETS; bucket++) {
+            if (!supportedEnergyBuckets[bucket]) {
+                mAccumulatedEnergiesMicroJoules[bucket] = ENERGY_DATA_UNAVAILABLE;
+            }
+        }
     }
 
     /**
-     * Constructor for creating a temp MeasuredEnergyStats
-     * See {@link #readSummaryFromParcel(MeasuredEnergyStats, Parcel)}
+     * Creates a new zero'd MeasuredEnergyStats, using the template to determine which buckets are
+     * supported. This certainly does NOT produce an exact clone of the template.
+     */
+    private MeasuredEnergyStats(MeasuredEnergyStats template) {
+        // Initialize to all zeros where supported, otherwise ENERGY_DATA_UNAVAILABLE.
+        for (int bucket = 0; bucket < NUMBER_ENERGY_BUCKETS; bucket++) {
+            if (!template.isEnergyBucketSupported(bucket)) {
+                mAccumulatedEnergiesMicroJoules[bucket] = ENERGY_DATA_UNAVAILABLE;
+            }
+        }
+    }
+
+    /**
+     * Creates a new zero'd MeasuredEnergyStats, using the template to determine which buckets are
+     * supported.
+     */
+    public static MeasuredEnergyStats createFromTemplate(MeasuredEnergyStats template) {
+        return new MeasuredEnergyStats(template);
+    }
+
+    /**
+     * Constructor for creating a temp MeasuredEnergyStats.
+     * See {@link #readSummaryFromParcel(MeasuredEnergyStats, Parcel)}.
      */
     private MeasuredEnergyStats() {
-        Arrays.fill(mMeasuredEnergySnapshots, UNAVAILABLE);
+    }
+
+    /** Construct from parcel. */
+    public MeasuredEnergyStats(Parcel in) {
+        in.readLongArray(mAccumulatedEnergiesMicroJoules);
     }
 
     /** Write to parcel */
@@ -105,38 +125,32 @@ public class MeasuredEnergyStats {
 
     /**
      * Read from summary parcel.
-     * Note: Measured subsystem availability may be different from when the summary parcel was
-     * written.
+     * Note: Measured subsystem (and therefore bucket) availability may be different from when the
+     * summary parcel was written. Availability has already been correctly set in the constructor.
+     * Note: {@link com.android.internal.os.BatteryStatsImpl#VERSION} must be updated if summary
+     *       parceling changes.
      */
     private void readSummaryFromParcel(Parcel in) {
         final int size = in.readInt();
         for (int i = 0; i < size; i++) {
             final int bucket = in.readInt();
             final long energyUJ = in.readLong();
-
-            final int subsystem = getSubsystem(bucket);
-            // Only accept the summary energy if subsystem is currently available
-            if (subsystem != MeasuredEnergyArray.SUBSYSTEM_UNKNOWN
-                    && mMeasuredEnergySnapshots[subsystem] != UNAVAILABLE) {
-                mAccumulatedEnergiesMicroJoules[bucket] = energyUJ;
-            }
+            setValueIfSupported(bucket, energyUJ);
         }
     }
 
     /**
      * Write to summary parcel.
      * Note: Measured subsystem availability may be different when the summary parcel is read.
-     * Note: {@link com.android.internal.os.BatteryStatsImpl#VERSION} must be updated if summary
-     *       parceling changes.
      */
     private void writeSummaryToParcel(Parcel out) {
         final int sizePos = out.dataPosition();
         out.writeInt(0);
         int size = 0;
-        // Write only the buckets with reported energy
+        // Write only the supported buckets with non-zero energy.
         for (int i = 0; i < NUMBER_ENERGY_BUCKETS; i++) {
-            final int subsystem = getSubsystem(i);
-            if (mMeasuredEnergySnapshots[subsystem] == UNAVAILABLE) continue;
+            final long energy = mAccumulatedEnergiesMicroJoules[i];
+            if (energy <= 0) continue;
 
             out.writeInt(i);
             out.writeLong(mAccumulatedEnergiesMicroJoules[i]);
@@ -148,88 +162,38 @@ public class MeasuredEnergyStats {
         out.setDataPosition(currPos);
     }
 
-    /**
-     * Update with the latest measured energies and device state.
-     *
-     * @param energyArray measured energy array for some subsystems.
-     * @param screenState screen state to attribute disaply energy to after this update.
-     * @param accumulate whether or not to accumulate the latest energy
-     */
-    public void update(MeasuredEnergyArray energyArray, int screenState, boolean accumulate) {
-        final int size = energyArray.size();
-        if (!accumulate) {
-            for (int i = 0; i < size; i++) {
-                final int subsystem = energyArray.getSubsystem(i);
-                mMeasuredEnergySnapshots[subsystem] = energyArray.getEnergy(i);
-            }
-        } else {
-            for (int i = 0; i < size; i++) {
-                final int subsystem = energyArray.getSubsystem(i);
-                final long newEnergyUJ = energyArray.getEnergy(i);
-                final long oldEnergyUJ = mMeasuredEnergySnapshots[subsystem];
-                mMeasuredEnergySnapshots[subsystem] = newEnergyUJ;
-
-                // This is the first valid energy, skip accumulating the delta
-                if (oldEnergyUJ < 0) continue;
-                final long deltaUJ = newEnergyUJ - oldEnergyUJ;
-
-                final int bucket = getEnergyBucket(subsystem, mLastScreenState);
-                mAccumulatedEnergiesMicroJoules[bucket] += deltaUJ;
+    /** Updates the given bucket with the given energy iff accumulate is true. */
+    public void updateBucket(@EnergyBucket int bucket, long energyDeltaUJ, boolean accumulate) {
+        if (accumulate) {
+            if (mAccumulatedEnergiesMicroJoules[bucket] >= 0L) {
+                mAccumulatedEnergiesMicroJoules[bucket] += energyDeltaUJ;
+            } else {
+                Slog.wtf(TAG, "Attempting to add " + energyDeltaUJ + " to unavailable bucket "
+                        + ENERGY_BUCKET_NAMES[bucket] + " whose value was "
+                        + mAccumulatedEnergiesMicroJoules[bucket]);
             }
         }
-        mLastScreenState = screenState;
     }
 
     /**
-     * Map {@link MeasuredEnergySubsystem} and device state to an {@link EnergyBucket}.
-     * Keep in sync with {@link #getSubsystem}
-     */
-    @EnergyBucket
-    private int getEnergyBucket(@MeasuredEnergySubsystem int subsystem, int screenState) {
-        switch (subsystem) {
-            case MeasuredEnergyArray.SUBSYSTEM_DISPLAY:
-                if (Display.isOnState(screenState)) {
-                    return ENERGY_BUCKET_SCREEN_ON;
-                } else if (Display.isDozeState(screenState)) {
-                    return ENERGY_BUCKET_SCREEN_DOZE;
-                } else {
-                    return ENERGY_BUCKET_SCREEN_OTHER;
-                }
-            default:
-                return ENERGY_BUCKET_UNKNOWN;
-        }
-    }
-
-    /**
-     * Map {@link EnergyBucket} to a {@link MeasuredEnergySubsystem}.
-     * Keep in sync with {@link #getEnergyBucket}
-     */
-    @MeasuredEnergySubsystem
-    private int getSubsystem(@EnergyBucket int bucket) {
-        switch (bucket) {
-            case ENERGY_BUCKET_SCREEN_ON: //fallthrough
-            case ENERGY_BUCKET_SCREEN_DOZE: //fallthrough
-            case ENERGY_BUCKET_SCREEN_OTHER:
-                return MeasuredEnergyArray.SUBSYSTEM_DISPLAY;
-            default:
-                return MeasuredEnergyArray.SUBSYSTEM_UNKNOWN;
-        }
-    }
-
-    /**
-     * Check if a subsystem's measured energy is available.
-     * @param subsystem which subsystem.
-     * @return true if subsystem is avaiable.
-     */
-    public boolean hasSubsystem(@MeasuredEnergySubsystem int subsystem) {
-        return mMeasuredEnergySnapshots[subsystem] != UNAVAILABLE;
-    }
-
-    /**
-     * Return accumulated energy (in microjoules) since last reset.
+     * Return accumulated energy (in microjoules) for the given energy bucket since last reset.
+     * Returns {@link BatteryStats#ENERGY_DATA_UNAVAILABLE} if this energy data is unavailable.
      */
     public long getAccumulatedBucketEnergy(@EnergyBucket int bucket) {
         return mAccumulatedEnergiesMicroJoules[bucket];
+    }
+
+    /**
+     * Map {@link MeasuredEnergySubsystem} and device state to a Display {@link EnergyBucket}.
+     */
+    public static @EnergyBucket int getDisplayEnergyBucket(int screenState) {
+        if (Display.isOnState(screenState)) {
+            return ENERGY_BUCKET_SCREEN_ON;
+        }
+        if (Display.isDozeState(screenState)) {
+            return ENERGY_BUCKET_SCREEN_DOZE;
+        }
+        return ENERGY_BUCKET_SCREEN_OTHER;
     }
 
     /**
@@ -246,6 +210,46 @@ public class MeasuredEnergyStats {
     }
 
     /**
+     * Create a MeasuredEnergyStats using the template to determine which buckets are supported,
+     * and populate this new object from the given parcel.
+     *
+     * @return a new MeasuredEnergyStats object as described.
+     *         Returns null if the stats contain no non-0 information (such as if template is null
+     *         or if the parcel indicates there is no data to populate).
+     *
+     * @see #createFromTemplate
+     */
+    public static @Nullable MeasuredEnergyStats createAndReadSummaryFromParcel(Parcel in,
+            @Nullable MeasuredEnergyStats template) {
+        // Check if any MeasuredEnergyStats exists on the parcel
+        if (in.readInt() == 0) return null;
+
+        if (template == null) {
+            // Nothing supported now. Create placeholder object just to consume the parcel data.
+            final MeasuredEnergyStats mes = new MeasuredEnergyStats();
+            mes.readSummaryFromParcel(in);
+            return null;
+        }
+
+        final MeasuredEnergyStats stats = createFromTemplate(template);
+        stats.readSummaryFromParcel(in);
+        if (stats.containsInterestingData()) {
+            return stats;
+        } else {
+            // Don't waste RAM on it (and make sure not to persist it in the next writeSummary)
+            return null;
+        }
+    }
+
+    /** Returns true iff any of the buckets are supported and non-zero. */
+    private boolean containsInterestingData() {
+        for (int bucket = 0; bucket < NUMBER_ENERGY_BUCKETS; bucket++) {
+            if (mAccumulatedEnergiesMicroJoules[bucket] > 0) return true;
+        }
+        return false;
+    }
+
+    /**
      * Write a MeasuredEnergyStats to a parcel. If the stats is null, just write a 0.
      */
     public static void writeSummaryToParcel(@Nullable MeasuredEnergyStats stats,
@@ -258,47 +262,42 @@ public class MeasuredEnergyStats {
         stats.writeSummaryToParcel(dest);
     }
 
-    /**
-     * Reset accumulated energy.
-     */
-    public void reset() {
-        for (int i = 0; i < MeasuredEnergyArray.NUMBER_SUBSYSTEMS; i++) {
-            // Leave subsystems marked as unavailable alone.
-            if (mMeasuredEnergySnapshots[i] == UNAVAILABLE) continue;
-            mMeasuredEnergySnapshots[i] = RESET;
+    /** Reset accumulated energy. */
+    private void reset() {
+        for (int bucket = 0; bucket < NUMBER_ENERGY_BUCKETS; bucket++) {
+            setValueIfSupported(bucket, 0L);
         }
-        Arrays.fill(mAccumulatedEnergiesMicroJoules, 0);
     }
 
-    /**
-     * Dump debug data.
-     */
-    public void dump(PrintWriter pw) {
-        pw.println("Measured energy snapshot (microjoules):");
-        pw.print("   ");
-        for (int i = 0; i < MeasuredEnergyArray.NUMBER_SUBSYSTEMS; i++) {
-            final long energyUJ = mMeasuredEnergySnapshots[i];
-            if (energyUJ == UNAVAILABLE) continue;
-            pw.print(MeasuredEnergyArray.SUBSYSTEM_NAMES[i]);
-            pw.print(" : ");
-            if (energyUJ == RESET) {
-                pw.print("reset");
-            } else {
-                pw.print(energyUJ);
-            }
-            if (i != MeasuredEnergyArray.NUMBER_SUBSYSTEMS - 1) {
-                pw.print(", ");
-            }
-        }
-        pw.println();
+    /** Reset accumulated energy of the given stats. */
+    public static void resetIfNotNull(@Nullable MeasuredEnergyStats stats) {
+        if (stats != null) stats.reset();
+    }
 
+    /** If the bucket is AVAILABLE, overwrite its value; otherwise leave it as UNAVAILABLE. */
+    private void setValueIfSupported(@EnergyBucket int bucket, long value) {
+        if (mAccumulatedEnergiesMicroJoules[bucket] != ENERGY_DATA_UNAVAILABLE) {
+            mAccumulatedEnergiesMicroJoules[bucket] = value;
+        }
+    }
+
+    /** Check if measuring the energy of the given bucket is supported by this device. */
+    public boolean isEnergyBucketSupported(@EnergyBucket int bucket) {
+        return mAccumulatedEnergiesMicroJoules[bucket] != ENERGY_DATA_UNAVAILABLE;
+    }
+
+    /** Dump debug data. */
+    public void dump(PrintWriter pw) {
         pw.println("Accumulated energy since last reset (microjoules):");
         pw.print("   ");
-        for (int i = 0; i < NUMBER_ENERGY_BUCKETS; i++) {
-            pw.print(ENERGY_BUCKET_NAMES[i]);
+        for (int bucket = 0; bucket < NUMBER_ENERGY_BUCKETS; bucket++) {
+            pw.print(ENERGY_BUCKET_NAMES[bucket]);
             pw.print(" : ");
-            pw.print(mAccumulatedEnergiesMicroJoules[i]);
-            if (i != NUMBER_ENERGY_BUCKETS - 1) {
+            pw.print(mAccumulatedEnergiesMicroJoules[bucket]);
+            if (!isEnergyBucketSupported(bucket)) {
+                pw.print(" (unsupported)");
+            }
+            if (bucket != NUMBER_ENERGY_BUCKETS - 1) {
                 pw.print(", ");
             }
         }

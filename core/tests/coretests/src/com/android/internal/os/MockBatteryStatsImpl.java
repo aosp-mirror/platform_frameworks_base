@@ -25,8 +25,10 @@ import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidActiveTimeRead
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidClusterTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidUserSysTimeReader;
+import com.android.internal.power.MeasuredEnergyStats;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Queue;
 import java.util.concurrent.Future;
 
@@ -51,6 +53,10 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
             mGpsSignalQualityTimer[i] = new StopwatchTimer(clocks, null, -1000 - i, null,
                     mOnBatteryTimeBase);
         }
+
+        final boolean[] supportedBuckets = new boolean[MeasuredEnergyStats.NUMBER_ENERGY_BUCKETS];
+        Arrays.fill(supportedBuckets, true);
+        mGlobalMeasuredEnergyStats = new MeasuredEnergyStats(supportedBuckets);
 
         // A no-op handler.
         mHandler = new Handler(Looper.getMainLooper()) {
