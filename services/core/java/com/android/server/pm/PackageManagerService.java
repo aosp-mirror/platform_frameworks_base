@@ -23948,9 +23948,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 dumpState.setDump(DumpState.DUMP_MESSAGES);
             } else if ("v".equals(cmd) || "verifiers".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_VERIFIERS);
-            } else if ("i".equals(cmd) || "ifv".equals(cmd)
-                    || "intent-filter-verifiers".equals(cmd)) {
-                dumpState.setDump(DumpState.DUMP_INTENT_FILTER_VERIFIERS);
+            } else if ("dv".equals(cmd) || "domain-verifier".equals(cmd)) {
+                dumpState.setDump(DumpState.DUMP_DOMAIN_VERIFIER);
             } else if ("version".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_VERSION);
             } else if ("k".equals(cmd) || "keysets".equals(cmd)) {
@@ -24044,16 +24043,16 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            if (dumpState.isDumping(DumpState.DUMP_INTENT_FILTER_VERIFIERS) &&
+            if (dumpState.isDumping(DumpState.DUMP_DOMAIN_VERIFIER) &&
                     packageName == null) {
-                ComponentName verifierComponent =
-                        mIntentFilterVerificationManager.getVerifierComponent();
+                DomainVerificationProxy proxy = mDomainVerificationManager.getProxy();
+                ComponentName verifierComponent = proxy.getComponentName();
                 if (verifierComponent != null) {
                     String verifierPackageName = verifierComponent.getPackageName();
                     if (!checkin) {
                         if (dumpState.onTitlePrinted())
                             pw.println();
-                        pw.println("Intent Filter Verifier:");
+                        pw.println("Domain Verifier:");
                         pw.print("  Using: ");
                         pw.print(verifierPackageName);
                         pw.print(" (uid=");
@@ -24061,14 +24060,14 @@ public class PackageManagerService extends IPackageManager.Stub
                                 UserHandle.USER_SYSTEM));
                         pw.println(")");
                     } else if (verifierPackageName != null) {
-                        pw.print("ifv,"); pw.print(verifierPackageName);
+                        pw.print("dv,"); pw.print(verifierPackageName);
                         pw.print(",");
                         pw.println(getPackageUid(verifierPackageName, MATCH_DEBUG_TRIAGED_MISSING,
                                 UserHandle.USER_SYSTEM));
                     }
                 } else {
                     pw.println();
-                    pw.println("No Intent Filter Verifier available!");
+                    pw.println("No Domain Verifier available!");
                 }
             }
 
@@ -24185,63 +24184,20 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            if (!checkin
-                    && dumpState.isDumping(DumpState.DUMP_DOMAIN_PREFERRED)
-                    && packageName == null) {
-                pw.println();
-                int count = mSettings.getPackagesLocked().size();
-                if (count == 0) {
-                    pw.println("No applications!");
-                    pw.println();
-                } else {
-                    final String prefix = "  ";
-                    Collection<PackageSetting> allPackageSettings =
-                            mSettings.getPackagesLocked().values();
-                    if (allPackageSettings.size() == 0) {
-                        pw.println("No domain preferred apps!");
-                        pw.println();
-                    } else {
-                        pw.println("App verification status:");
-                        pw.println();
-                        count = 0;
-                        for (PackageSetting ps : allPackageSettings) {
-                            IntentFilterVerificationInfo ivi = ps.getIntentFilterVerificationInfo();
-                            if (ivi == null || ivi.getPackageName() == null) continue;
-                            pw.println(prefix + "Package: " + ivi.getPackageName());
-                            pw.println(prefix + "Domains: " + ivi.getDomainsString());
-                            pw.println(prefix + "Status:  " + ivi.getStatusString());
-                            pw.println();
-                            count++;
-                        }
-                        if (count == 0) {
-                            pw.println(prefix + "No app verification established.");
-                            pw.println();
-                        }
-                        for (int userId : mUserManager.getUserIds()) {
-                            pw.println("App linkages for user " + userId + ":");
-                            pw.println();
-                            count = 0;
-                            for (PackageSetting ps : allPackageSettings) {
-                                final long status = ps.getDomainVerificationStatusForUser(userId);
-                                if (status >> 32 == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED
-                                        && !DEBUG_DOMAIN_VERIFICATION) {
-                                    continue;
-                                }
-                                pw.println(prefix + "Package: " + ps.name);
-                                pw.println(prefix + "Domains: " + dumpDomainString(ps.name));
-                                String statusStr = IntentFilterVerificationInfo.
-                                        getStatusStringFromValue(status);
-                                pw.println(prefix + "Status:  " + statusStr);
-                                pw.println();
-                                count++;
-                            }
-                            if (count == 0) {
-                                pw.println(prefix + "No configured app linkages.");
-                                pw.println();
-                            }
-                        }
-                    }
+            if (!checkin && dumpState.isDumping(DumpState.DUMP_DOMAIN_PREFERRED)) {
+                android.util.IndentingPrintWriter writer =
+                        new android.util.IndentingPrintWriter(pw);
+                if (dumpState.onTitlePrinted()) pw.println();
+
+                writer.println("Domain verification status:");
+                writer.increaseIndent();
+                try {
+                    mDomainVerificationManager.printState(writer, packageName, UserHandle.USER_ALL);
+                } catch (PackageManager.NameNotFoundException e) {
+                    pw.println("Failure printing domain verification information");
+                    Slog.e(TAG, "Failure printing domain verification information", e);
                 }
+                writer.decreaseIndent();
             }
 
             if (!checkin && dumpState.isDumping(DumpState.DUMP_PERMISSIONS)) {
@@ -24430,8 +24386,8 @@ public class PackageManagerService extends IPackageManager.Stub
                             UserHandle.USER_SYSTEM));
             proto.end(requiredVerifierPackageToken);
 
-            ComponentName verifierComponent =
-                    mIntentFilterVerificationManager.getVerifierComponent();
+            DomainVerificationProxy proxy = mDomainVerificationManager.getProxy();
+            ComponentName verifierComponent = proxy.getComponentName();
             if (verifierComponent != null) {
                 String verifierPackageName = verifierComponent.getPackageName();
                 final long verifierPackageToken =

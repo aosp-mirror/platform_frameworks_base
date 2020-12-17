@@ -18,6 +18,7 @@ package com.android.server.pm.domain.verify.proxy;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ComponentName;
 
 import com.android.server.DeviceIdleInternal;
 import com.android.server.pm.domain.verify.DomainVerificationMessageCodes;
@@ -45,6 +46,11 @@ public interface DomainVerificationProxy {
 
     default boolean isCallerVerifier(int callingUid) {
         return false;
+    }
+
+    @Nullable
+    default ComponentName getComponentName() {
+        return null;
     }
 
     interface Connection {

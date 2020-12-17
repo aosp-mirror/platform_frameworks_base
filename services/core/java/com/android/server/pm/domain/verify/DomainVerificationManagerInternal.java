@@ -17,9 +17,12 @@
 package com.android.server.pm.domain.verify;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.domain.verify.DomainVerificationManager;
 import android.content.pm.domain.verify.DomainVerificationSet;
+import android.util.IndentingPrintWriter;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 
@@ -41,6 +44,9 @@ public interface DomainVerificationManagerInternal extends DomainVerificationMan
      */
     @NonNull
     UUID generateNewId();
+
+    @NonNull
+    DomainVerificationProxy getProxy();
 
     /**
      * Update the proxy implementation that talks to the domain verification agent on device. The
@@ -139,4 +145,13 @@ public interface DomainVerificationManagerInternal extends DomainVerificationMan
     void restoreSettings(@NonNull TypedXmlPullParser parser)
             throws IOException, XmlPullParserException;
 
+    /**
+     * Print the verification state and user selection state of a package.
+     *
+     * @param packageName the package whose state to change, or all packages if none is specified
+     * @param userId      the specific user to print, or null to skip printing user selection
+     *                    states, supports {@link android.os.UserHandle#USER_ALL}
+     */
+    void printState(@NonNull IndentingPrintWriter writer, @Nullable String packageName,
+            @Nullable @UserIdInt Integer userId) throws NameNotFoundException;
 }
