@@ -25,6 +25,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UiThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.AssetManager;
 import android.graphics.fonts.Font;
@@ -149,8 +150,8 @@ public class Typeface {
     static final Map<String, Typeface> sSystemFontMap = new HashMap<>();
 
     // DirectByteBuffer object to hold sSystemFontMap's backing memory mapping.
-    @GuardedBy("SYSTEM_FONT_MAP_LOCK")
     static ByteBuffer sSystemFontMapBuffer = null;
+    static SharedMemory sSystemFontMapSharedMemory = null;
 
     // Lock to guard sSystemFontMap and derived default or public typefaces.
     // sStyledCacheLock may be held while this lock is held. Holding them in the reverse order may
@@ -1252,14 +1253,27 @@ public class Typeface {
      * per process.
      */
     /** @hide */
-    public static void setSystemFontMap(SharedMemory sharedMemory)
+    @UiThread
+    public static void setSystemFontMap(@Nullable SharedMemory sharedMemory)
             throws IOException, ErrnoException {
         if (sSystemFontMapBuffer != null) {
+            // Apps can re-send BIND_APPLICATION message from their code. This is a work around to
+            // detect it and avoid crashing.
+            if (sharedMemory == null || sharedMemory == sSystemFontMapSharedMemory) {
+                return;
+            }
             throw new UnsupportedOperationException(
                     "Once set, buffer-based system font map cannot be updated");
         }
+        sSystemFontMapSharedMemory = sharedMemory;
         Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "setSystemFontMap");
         try {
+            if (sharedMemory == null) {
+                // FontManagerService is not started. This may happen in FACTORY_TEST_LOW_LEVEL
+                // mode for example.
+                loadPreinstalledSystemFontMap();
+                return;
+            }
             sSystemFontMapBuffer = sharedMemory.mapReadOnly().order(ByteOrder.BIG_ENDIAN);
             Map<String, Typeface> systemFontMap = deserializeFontMap(sSystemFontMapBuffer);
             setSystemFontMap(systemFontMap);
@@ -1319,6 +1333,7 @@ public class Typeface {
                 SharedMemory.unmap(sSystemFontMapBuffer);
             }
             sSystemFontMapBuffer = null;
+            sSystemFontMapSharedMemory = null;
         }
     }
 
