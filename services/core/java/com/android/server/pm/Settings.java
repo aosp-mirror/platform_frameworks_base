@@ -114,7 +114,14 @@ import com.android.server.pm.permission.LegacyPermissionDataProvider;
 import com.android.server.pm.permission.LegacyPermissionSettings;
 import com.android.server.pm.permission.LegacyPermissionState;
 import com.android.server.pm.permission.LegacyPermissionState.PermissionState;
+import com.android.server.utils.Snappable;
+import com.android.server.utils.Snapshots;
 import com.android.server.utils.TimingsTraceAndSlog;
+import com.android.server.utils.Watchable;
+import com.android.server.utils.WatchableImpl;
+import com.android.server.utils.WatchedArrayMap;
+import com.android.server.utils.WatchedSparseArray;
+import com.android.server.utils.Watcher;
 
 import libcore.io.IoUtils;
 
@@ -148,8 +155,56 @@ import java.util.Set;
 /**
  * Holds information about dynamic settings.
  */
-public final class Settings {
+public final class Settings implements Watchable, Snappable {
     private static final String TAG = "PackageSettings";
+
+    /**
+     * Cached snapshot
+     */
+    private volatile Settings mSnapshot = null;
+
+    /**
+     * Watchable machinery
+     */
+    private final WatchableImpl mWatchable = new WatchableImpl();
+
+    /**
+     * Ensures an observer is in the list, exactly once. The observer cannot be null.  The
+     * function quietly returns if the observer is already in the list.
+     *
+     * @param observer The {@link Watcher} to be notified when the {@link Watchable} changes.
+     */
+    public void registerObserver(@NonNull Watcher observer) {
+        mWatchable.registerObserver(observer);
+    }
+
+    /**
+     * Ensures an observer is not in the list. The observer must not be null.  The function
+     * quietly returns if the objserver is not in the list.
+     *
+     * @param observer The {@link Watcher} that should not be in the notification list.
+     */
+    public void unregisterObserver(@NonNull Watcher observer) {
+        mWatchable.unregisterObserver(observer);
+    }
+
+    /**
+     * Invokes {@link Watcher#onChange} on each registered observer.  The method can be called
+     * with the {@link Watchable} that generated the event.  In a tree of {@link Watchable}s, this
+     * is generally the first (deepest) {@link Watchable} to detect a change.
+     *
+     * @param what The {@link Watchable} that generated the event.
+     */
+    public void dispatchChange(@Nullable Watchable what) {
+        mSnapshot = null;
+        mWatchable.dispatchChange(what);
+    }
+    /**
+     * Notify listeners that this object has changed.
+     */
+    protected void onChanged() {
+        dispatchChange(this);
+    }
 
     /**
      * Current version of the package database. Set it to the latest version in
@@ -296,7 +351,7 @@ public final class Settings {
 
     /** Map from package name to settings */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
-    final ArrayMap<String, PackageSetting> mPackages = new ArrayMap<>();
+    final WatchedArrayMap<String, PackageSetting> mPackages = new WatchedArrayMap<>();
 
     /**
      * List of packages that were involved in installing other packages, i.e. are listed
@@ -368,21 +423,21 @@ public final class Settings {
 
     // The user's preferred activities associated with particular intent
     // filters.
-    private final SparseArray<PreferredIntentResolver> mPreferredActivities =
-            new SparseArray<PreferredIntentResolver>();
+    private final WatchedSparseArray<PreferredIntentResolver>
+            mPreferredActivities = new WatchedSparseArray<>();
 
     // The persistent preferred activities of the user's profile/device owner
     // associated with particular intent filters.
-    private final SparseArray<PersistentPreferredIntentResolver> mPersistentPreferredActivities =
-            new SparseArray<PersistentPreferredIntentResolver>();
+    private final WatchedSparseArray<PersistentPreferredIntentResolver>
+            mPersistentPreferredActivities = new WatchedSparseArray<>();
 
     // For every user, it is used to find to which other users the intent can be forwarded.
-    private final SparseArray<CrossProfileIntentResolver> mCrossProfileIntentResolvers =
-            new SparseArray<CrossProfileIntentResolver>();
+    private final WatchedSparseArray<CrossProfileIntentResolver>
+            mCrossProfileIntentResolvers = new WatchedSparseArray<>();
 
     final ArrayMap<String, SharedUserSetting> mSharedUsers = new ArrayMap<>();
-    private final ArrayList<SettingBase> mAppIds = new ArrayList<>();
-    private final SparseArray<SettingBase> mOtherAppIds = new SparseArray<>();
+    private final ArrayList<SettingBase> mAppIds;
+    private final SparseArray<SettingBase> mOtherAppIds;
 
     // For reading/writing settings file.
     private final ArrayList<Signature> mPastSignatures =
@@ -415,17 +470,30 @@ public final class Settings {
 
     private final File mSystemDir;
 
-    public final KeySetManagerService mKeySetManagerService = new KeySetManagerService(mPackages);
+    public final KeySetManagerService mKeySetManagerService =
+            new KeySetManagerService(mPackages.untrackedMap());
 
     /** Settings and other information about permissions */
     final LegacyPermissionSettings mPermissions;
 
     private final LegacyPermissionDataProvider mPermissionDataProvider;
 
+    /**
+     * The observer that watches for changes from array members
+     */
+    private final Watcher mObserver = new Watcher() {
+            @Override
+            public void onChange(@Nullable Watchable what) {
+                Settings.this.dispatchChange(what);
+            }
+        };
+
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     public Settings(Map<String, PackageSetting> pkgSettings) {
         mLock = new Object();
         mPackages.putAll(pkgSettings);
+        mAppIds = new ArrayList<>();
+        mOtherAppIds = new SparseArray<>();
         mSystemDir = null;
         mPermissions = null;
         mRuntimePermissionsPersistence = null;
@@ -436,11 +504,17 @@ public final class Settings {
         mStoppedPackagesFilename = null;
         mBackupStoppedPackagesFilename = null;
         mKernelMappingFilename = null;
+        mPackages.registerObserver(mObserver);
+        mPreferredActivities.registerObserver(mObserver);
+        mPersistentPreferredActivities.registerObserver(mObserver);
+        mCrossProfileIntentResolvers.registerObserver(mObserver);
     }
 
     Settings(File dataDir, RuntimePermissionsPersistence runtimePermissionsPersistence,
             LegacyPermissionDataProvider permissionDataProvider, Object lock) {
         mLock = lock;
+        mAppIds = new ArrayList<>();
+        mOtherAppIds = new SparseArray<>();
         mPermissions = new LegacyPermissionSettings(lock);
         mRuntimePermissionsPersistence = new RuntimePermissionPersistence(
                 runtimePermissionsPersistence);
@@ -463,18 +537,91 @@ public final class Settings {
         // Deprecated: Needed for migration
         mStoppedPackagesFilename = new File(mSystemDir, "packages-stopped.xml");
         mBackupStoppedPackagesFilename = new File(mSystemDir, "packages-stopped-backup.xml");
+        mPackages.registerObserver(mObserver);
+        mPreferredActivities.registerObserver(mObserver);
+        mPersistentPreferredActivities.registerObserver(mObserver);
+        mCrossProfileIntentResolvers.registerObserver(mObserver);
     }
 
-    private static void invalidatePackageCache() {
+    /**
+     * A copy constructor used in snapshot().  Attributes that are supposed to be
+     * immutable in the PackageManagerService application are referenced.  Attributes that
+     * are changed by PackageManagerService APIs are deep-copied
+     */
+    private Settings(Settings r) {
+        final int mPackagesSize = r.mPackages.size();
+        mPackages.putAll(r.mPackages);
+
+        // The following assignments satisfy Java requirements but are not
+        // needed by the read-only methods.  Note especially that the lock
+        // is not required because this clone is meant to support lock-free
+        // read-only methods.
+        mLock = null;
+        mRuntimePermissionsPersistence = r.mRuntimePermissionsPersistence;
+        mSettingsFilename = null;
+        mBackupSettingsFilename = null;
+        mPackageListFilename = null;
+        mStoppedPackagesFilename = null;
+        mBackupStoppedPackagesFilename = null;
+        mKernelMappingFilename = null;
+
+        mInstallerPackages.addAll(r.mInstallerPackages);
+        mKernelMapping.putAll(r.mKernelMapping);
+        mDisabledSysPackages.putAll(r.mDisabledSysPackages);
+        Snapshots.copy(mBlockUninstallPackages, r.mBlockUninstallPackages);
+        mRestoredIntentFilterVerifications.putAll(r.mRestoredIntentFilterVerifications);
+        mVersion.putAll(r.mVersion);
+        mVerifierDeviceIdentity = r.mVerifierDeviceIdentity;
+        WatchedSparseArray.snapshot(
+                mPreferredActivities, r.mPreferredActivities);
+        WatchedSparseArray.snapshot(
+                mPersistentPreferredActivities, r.mPersistentPreferredActivities);
+        WatchedSparseArray.snapshot(
+                mCrossProfileIntentResolvers, r.mCrossProfileIntentResolvers);
+        mSharedUsers.putAll(r.mSharedUsers);
+        mAppIds = new ArrayList<>(r.mAppIds);
+        mOtherAppIds = r.mOtherAppIds.clone();
+        mPastSignatures.addAll(r.mPastSignatures);
+        mKeySetRefs.putAll(r.mKeySetRefs);
+        mRenamedPackages.putAll(r.mRenamedPackages);
+        Snapshots.copy(mDefaultBrowserApp, r.mDefaultBrowserApp);
+        Snapshots.snapshot(mNextAppLinkGeneration, r.mNextAppLinkGeneration);
+        // mReadMessages
+        mPendingPackages.addAll(r.mPendingPackages);
+        mSystemDir = null;
+        // mKeySetManagerService;
+        mPermissions = r.mPermissions;
+        mPermissionDataProvider = r.mPermissionDataProvider;
+
+        // Do not register any Watchables
+    }
+
+    /**
+     * Return a snapshot.  If the cached snapshot is null, build a new one.  The logic in
+     * the function ensures that this function returns a valid snapshot even if a race
+     * condition causes the cached snapshot to be cleared asynchronously to this method.
+     */
+    public Settings snapshot() {
+        Settings s = mSnapshot;
+        if (s == null) {
+            s = new Settings(this);
+            s.mWatchable.seal();
+            mSnapshot = s;
+        }
+        return s;
+    }
+
+    private void invalidatePackageCache() {
         PackageManagerService.invalidatePackageInfoCache();
         ChangeIdStateCache.invalidate();
+        onChanged();
     }
 
     PackageSetting getPackageLPr(String pkgName) {
         return mPackages.get(pkgName);
     }
 
-    ArrayMap<String, PackageSetting> getPackagesLocked() {
+    WatchedArrayMap<String, PackageSetting> getPackagesLocked() {
         return mPackages;
     }
 
@@ -5558,6 +5705,7 @@ public final class Settings {
     /** This method takes a specific user id as well as UserHandle.USER_ALL. */
     void clearPackagePreferredActivities(String packageName,
             @NonNull SparseBooleanArray outUserChanged, int userId) {
+        boolean changed = false;
         ArrayList<PreferredActivity> removed = null;
         for (int i = 0; i < mPreferredActivities.size(); i++) {
             final int thisUserId = mPreferredActivities.keyAt(i);
@@ -5585,7 +5733,11 @@ public final class Settings {
                     pir.removeFilter(pa);
                 }
                 outUserChanged.put(thisUserId, true);
+                changed = true;
             }
+        }
+        if (changed) {
+            onChanged();
         }
     }
 
@@ -5616,6 +5768,9 @@ public final class Settings {
                 }
                 changed = true;
             }
+        }
+        if (changed) {
+            onChanged();
         }
         return changed;
     }
@@ -5649,6 +5804,7 @@ public final class Settings {
                 changed.add(mPreferredActivities.keyAt(i));
             }
         }
+        onChanged();
         return changed;
     }
 

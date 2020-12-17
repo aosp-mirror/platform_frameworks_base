@@ -175,22 +175,27 @@ public abstract class PackageSettingBase extends SettingBase {
 
     public void setInstallerPackageName(String packageName) {
         installSource = installSource.setInstallerPackage(packageName);
+        onChanged();
     }
 
     public void setInstallSource(InstallSource installSource) {
         this.installSource = Objects.requireNonNull(installSource);
+        onChanged();
     }
 
     void removeInstallerPackage(String packageName) {
         installSource = installSource.removeInstallerPackage(packageName);
+        onChanged();
     }
 
     public void setIsOrphaned(boolean isOrphaned) {
         installSource = installSource.setIsOrphaned(isOrphaned);
+        onChanged();
     }
 
     public void setVolumeUuid(String volumeUuid) {
         this.volumeUuid = volumeUuid;
+        onChanged();
     }
 
     public String getVolumeUuid() {
@@ -199,10 +204,12 @@ public abstract class PackageSettingBase extends SettingBase {
 
     public void setTimeStamp(long newStamp) {
         timeStamp = newStamp;
+        onChanged();
     }
 
     public void setUpdateAvailable(boolean updateAvailable) {
         this.updateAvailable = updateAvailable;
+        onChanged();
     }
 
     public boolean isUpdateAvailable() {
@@ -272,6 +279,7 @@ public abstract class PackageSettingBase extends SettingBase {
         if (state == null) {
             state = new PackageUserState();
             mUserState.put(userId, state);
+            onChanged();
         }
         return state;
     }
@@ -289,6 +297,7 @@ public abstract class PackageSettingBase extends SettingBase {
         PackageUserState st = modifyUserState(userId);
         st.enabled = state;
         st.lastDisableAppCaller = callingPackage;
+        onChanged();
     }
 
     int getEnabled(int userId) {
@@ -434,6 +443,7 @@ public abstract class PackageSettingBase extends SettingBase {
         }
         existingUserState.suspendParams.put(suspendingPackage, newSuspendParams);
         existingUserState.suspended = true;
+        onChanged();
     }
 
     void removeSuspension(String suspendingPackage, int userId) {
@@ -445,6 +455,7 @@ public abstract class PackageSettingBase extends SettingBase {
             }
         }
         existingUserState.suspended = (existingUserState.suspendParams != null);
+        onChanged();
     }
 
     void removeSuspension(Predicate<String> suspendingPackagePredicate, int userId) {
@@ -461,6 +472,7 @@ public abstract class PackageSettingBase extends SettingBase {
             }
         }
         existingUserState.suspended = (existingUserState.suspendParams != null);
+        onChanged();
     }
 
     public boolean getInstantApp(int userId) {
@@ -506,6 +518,7 @@ public abstract class PackageSettingBase extends SettingBase {
         state.instantApp = instantApp;
         state.virtualPreload = virtualPreload;
         state.harmfulAppWarning = harmfulAppWarning;
+        onChanged();
     }
 
     void setUserState(int userId, PackageUserState otherState) {
@@ -547,11 +560,17 @@ public abstract class PackageSettingBase extends SettingBase {
 
     PackageUserState modifyUserStateComponents(int userId, boolean disabled, boolean enabled) {
         PackageUserState state = modifyUserState(userId);
+        boolean changed = false;
         if (disabled && state.disabledComponents == null) {
             state.disabledComponents = new ArraySet<String>(1);
+            changed = true;
         }
         if (enabled && state.enabledComponents == null) {
             state.enabledComponents = new ArraySet<String>(1);
+            changed = true;
+        }
+        if (changed) {
+            onChanged();
         }
         return state;
     }
@@ -603,6 +622,7 @@ public abstract class PackageSettingBase extends SettingBase {
 
     void removeUser(int userId) {
         mUserState.delete(userId);
+        onChanged();
     }
 
     public int[] getNotInstalledUserIds() {
@@ -630,6 +650,7 @@ public abstract class PackageSettingBase extends SettingBase {
 
     void setIntentFilterVerificationInfo(IntentFilterVerificationInfo info) {
         verificationInfo = info;
+        onChanged();
     }
 
     // Returns a packed value as a long:
@@ -648,6 +669,7 @@ public abstract class PackageSettingBase extends SettingBase {
         state.domainVerificationStatus = status;
         if (status == PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
             state.appLinkGeneration = generation;
+            onChanged();
         }
     }
 
@@ -694,6 +716,7 @@ public abstract class PackageSettingBase extends SettingBase {
     void setHarmfulAppWarning(int userId, String harmfulAppWarning) {
         PackageUserState userState = modifyUserState(userId);
         userState.harmfulAppWarning = harmfulAppWarning;
+        onChanged();
     }
 
     String getHarmfulAppWarning(int userId) {
@@ -838,6 +861,7 @@ public abstract class PackageSettingBase extends SettingBase {
         for (int i = 0; i < other.mUserState.size(); i++) {
             mUserState.put(other.mUserState.keyAt(i), other.mUserState.valueAt(i));
         }
+        onChanged();
         return this;
     }
 }

@@ -394,6 +394,7 @@ import com.android.server.security.VerityUtils;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.utils.TimingsTraceAndSlog;
+import com.android.server.utils.WatchedArrayMap;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import dalvik.system.CloseGuard;
@@ -1002,7 +1003,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 Producer<PackageParser2> scanningPackageParserProducer,
                 Producer<PackageParser2> preparingPackageParserProducer,
                 Producer<PackageInstallerService> packageInstallerServiceProducer,
-                ProducerWithArgument<InstantAppResolverConnection, ComponentName> 
+                ProducerWithArgument<InstantAppResolverConnection, ComponentName>
                         instantAppResolverConnectionProducer,
                 Producer<ModuleInfoProvider> moduleInfoProviderProducer,
                 Producer<LegacyPermissionManagerInternal> legacyPermissionManagerInternalProducer,
@@ -3302,7 +3303,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // Clean up orphaned packages for which the code path doesn't exist
             // and they are an update to a system app - caused by bug/32321269
-            final ArrayMap<String, PackageSetting> packageSettings = mSettings.getPackagesLocked();
+            final WatchedArrayMap<String, PackageSetting> packageSettings =
+                mSettings.getPackagesLocked();
             final int packageSettingCount = packageSettings.size();
             for (int i = packageSettingCount - 1; i >= 0; i--) {
                 PackageSetting ps = packageSettings.valueAt(i);

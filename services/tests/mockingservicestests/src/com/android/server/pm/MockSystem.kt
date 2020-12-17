@@ -68,12 +68,12 @@ import com.android.server.pm.permission.PermissionManagerServiceInternal
 import com.android.server.testutils.mock
 import com.android.server.testutils.nullable
 import com.android.server.testutils.whenever
+import com.android.server.utils.WatchedArrayMap
 import org.junit.Assert
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
 import org.mockito.AdditionalMatchers.or
-import org.mockito.invocation.InvocationOnMock
 import org.mockito.quality.Strictness
 import java.io.File
 import java.io.IOException
@@ -114,7 +114,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
     private val mPreExistingSettings = ArrayMap<String, PackageSetting>()
 
     /** The active map simulating the in memory storage of Settings  */
-    private val mSettingsMap = ArrayMap<String, PackageSetting>()
+    private val mSettingsMap = WatchedArrayMap<String, PackageSetting>()
 
     init {
         val apply = ExtendedMockito.mockitoSession()
@@ -268,7 +268,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         wheneverStatic { Environment.getPackageCacheDirectory() }.thenReturn(packageCacheDirectory)
         wheneverStatic { SystemProperties.digestOf("ro.build.fingerprint") }.thenReturn("cacheName")
         wheneverStatic { Environment.getRootDirectory() }.thenReturn(rootDirectory)
-        wheneverStatic { SystemServerInitThreadPool.submit(any(Runnable::class.java), anyString())}
+        wheneverStatic { SystemServerInitThreadPool.submit(any(Runnable::class.java), anyString()) }
                 .thenAnswer { FutureTask<Any?>(it.getArgument(0), null) }
 
         wheneverStatic { Environment.getDataDirectory() }.thenReturn(dataAppDirectory.parentFile)

@@ -55,6 +55,7 @@ import com.android.server.FgThread;
 import com.android.server.compat.CompatChange;
 import com.android.server.om.OverlayReferenceMapper;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.utils.WatchedArrayMap;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -347,7 +348,7 @@ public class AppsFilter {
         }
         final StateProvider stateProvider = command -> {
             synchronized (injector.getLock()) {
-                command.currentState(injector.getSettings().getPackagesLocked(),
+                command.currentState(injector.getSettings().getPackagesLocked().untrackedMap(),
                         injector.getUserManagerInternal().getUserInfos());
             }
         };
@@ -867,6 +868,16 @@ public class AppsFilter {
             result.put(userId, Arrays.copyOf(appIds, allowListSize));
         }
         return result;
+    }
+
+    /**
+     * This api does type conversion on the <existingSettings> parameter.
+     */
+    @VisibleForTesting(visibility = PRIVATE)
+    @Nullable
+    SparseArray<int[]> getVisibilityAllowList(PackageSetting setting, int[] users,
+            WatchedArrayMap<String, PackageSetting> existingSettings) {
+        return getVisibilityAllowList(setting, users, existingSettings.untrackedMap());
     }
 
     /**
