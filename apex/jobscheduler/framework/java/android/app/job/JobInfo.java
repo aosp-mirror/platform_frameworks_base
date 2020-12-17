@@ -1666,9 +1666,6 @@ public class JobInfo implements Parcelable {
             if (isPeriodic) {
                 throw new IllegalArgumentException("An expedited job cannot be periodic");
             }
-            if (isPersisted) {
-                throw new IllegalArgumentException("An expedited job cannot be persisted");
-            }
             if (constraintFlags != 0 || (flags & ~FLAG_EXPEDITED) != 0) {
                 throw new IllegalArgumentException(
                         "An expedited job can only have network constraints");

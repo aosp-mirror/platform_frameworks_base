@@ -669,7 +669,10 @@ void SkiaCanvas::drawBitmapMesh(Bitmap& bitmap, int meshWidth, int meshHeight,
     if (paint) {
         pnt = *paint;
     }
-    pnt.setShader(bitmap.makeImage()->makeShader());
+    SkSamplingOptions sampling(pnt.isFilterBitmap() ? SkFilterMode::kLinear
+                                                    : SkFilterMode::kNearest,
+                               SkMipmapMode::kNone);
+    pnt.setShader(bitmap.makeImage()->makeShader(sampling));
     auto v = builder.detach();
     apply_looper(&pnt, [&](const SkPaint& p) {
         mCanvas->drawVertices(v, SkBlendMode::kModulate, p);

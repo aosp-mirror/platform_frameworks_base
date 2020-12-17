@@ -8913,6 +8913,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // intentionally empty
     }
 
+    /** @hide */
+    public void onPerformSpellCheck() {
+        if (mEditor != null && mEditor.mSpellChecker != null) {
+            mEditor.mSpellChecker.onPerformSpellCheck();
+        }
+    }
+
     /**
      * Called by the framework in response to a private command from the
      * current method, provided by it calling
@@ -13736,8 +13743,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * custom behavior should configure a listener via {@link #setOnReceiveContentListener}.
      *
      * <p>For non-editable TextViews the default behavior is a no-op (returns the passed-in
-     * content without acting on it). For editable TextViews the default behavior coerces all
-     * content to text and inserts into the view.
+     * content without acting on it).
+     *
+     * <p>For editable TextViews the default behavior is to insert text into the view, coercing
+     * non-text content to text as needed. The MIME types "text/plain" and "text/html" have
+     * well-defined behavior for this, while other MIME types have reasonable fallback behavior
+     * (see {@link ClipData.Item#coerceToStyledText}).
      *
      * @param payload The content to insert and related metadata.
      *

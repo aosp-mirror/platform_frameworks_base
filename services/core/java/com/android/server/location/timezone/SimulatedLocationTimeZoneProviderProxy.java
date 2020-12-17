@@ -26,7 +26,6 @@ import android.content.Context;
 import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.location.timezone.LocationTimeZoneProviderRequest;
 import com.android.server.timezonedetector.ReferenceWithHistory;
 
 import java.util.Objects;
@@ -38,7 +37,7 @@ import java.util.Objects;
 class SimulatedLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
 
     @GuardedBy("mSharedLock")
-    @NonNull private LocationTimeZoneProviderRequest mRequest;
+    @NonNull private TimeZoneProviderRequest mRequest;
 
     @GuardedBy("mSharedLock")
     @NonNull private final ReferenceWithHistory<String> mLastEvent = new ReferenceWithHistory<>(50);
@@ -46,7 +45,7 @@ class SimulatedLocationTimeZoneProviderProxy extends LocationTimeZoneProviderPro
     SimulatedLocationTimeZoneProviderProxy(
             @NonNull Context context, @NonNull ThreadingDomain threadingDomain) {
         super(context, threadingDomain);
-        mRequest = LocationTimeZoneProviderRequest.EMPTY_REQUEST;
+        mRequest = TimeZoneProviderRequest.createStopUpdatesRequest();
     }
 
     @Override
@@ -60,7 +59,7 @@ class SimulatedLocationTimeZoneProviderProxy extends LocationTimeZoneProviderPro
         Objects.requireNonNull(event);
 
         synchronized (mSharedLock) {
-            switch (event.getEventType()) {
+            switch (event.getType()) {
                 case INJECTED_EVENT_TYPE_ON_BIND: {
                     mLastEvent.set("Simulating onProviderBound(), event=" + event);
                     mThreadingDomain.post(this::onBindOnHandlerThread);
@@ -72,12 +71,12 @@ class SimulatedLocationTimeZoneProviderProxy extends LocationTimeZoneProviderPro
                     break;
                 }
                 case INJECTED_EVENT_TYPE_LOCATION_TIME_ZONE_EVENT: {
-                    if (!mRequest.getReportLocationTimeZone()) {
+                    if (!mRequest.sendUpdates()) {
                         mLastEvent.set("Test event=" + event + " is testing an invalid case:"
                                 + " reporting is off. mRequest=" + mRequest);
                     }
-                    mLastEvent.set("Simulating LocationTimeZoneEvent, event=" + event);
-                    handleLocationTimeZoneEvent(event.getLocationTimeZoneEvent());
+                    mLastEvent.set("Simulating TimeZoneProviderResult, event=" + event);
+                    handleTimeZoneProviderEvent(event.getTimeZoneProviderEvent());
                     break;
                 }
                 default: {
@@ -106,7 +105,7 @@ class SimulatedLocationTimeZoneProviderProxy extends LocationTimeZoneProviderPro
     }
 
     @Override
-    final void setRequest(@NonNull LocationTimeZoneProviderRequest request) {
+    final void setRequest(@NonNull TimeZoneProviderRequest request) {
         mThreadingDomain.assertCurrentThread();
 
         Objects.requireNonNull(request);

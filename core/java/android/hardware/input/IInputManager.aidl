@@ -94,7 +94,7 @@ interface IInputManager {
     void setPointerIconType(int typeId);
     void setCustomPointerIcon(in PointerIcon icon);
 
-    void requestPointerCapture(IBinder windowToken, boolean enabled);
+    oneway void requestPointerCapture(IBinder inputChannelToken, boolean enabled);
 
     /** Create an input monitor for gestures. */
     InputMonitor monitorGestureInput(String name, int displayId);

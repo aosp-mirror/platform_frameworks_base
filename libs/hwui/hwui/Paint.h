@@ -137,6 +137,9 @@ public:
     bool isDevKern() const { return mDevKern; }
     void setDevKern(bool d) { mDevKern = d; }
 
+    // Deprecated -- bitmapshaders will be taking this flag explicitly
+    bool isFilterBitmap() const { return this->getFilterQuality() != kNone_SkFilterQuality; }
+
     // The Java flags (Paint.java) no longer fit into the native apis directly.
     // These methods handle converting to and from them and the native representations
     // in android::Paint.
@@ -149,7 +152,7 @@ public:
     // The only respected flags are : [ antialias, dither, filterBitmap ]
     static uint32_t GetSkPaintJavaFlags(const SkPaint&);
     static void SetSkPaintJavaFlags(SkPaint*, uint32_t flags);
- 
+
 private:
     SkFont mFont;
     sk_sp<SkDrawLooper> mLooper;

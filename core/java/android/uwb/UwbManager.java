@@ -49,12 +49,16 @@ public final class UwbManager {
     private IUwbAdapter mUwbAdapter;
     private static final String SERVICE_NAME = "uwb";
 
-    private AdapterStateListener mAdapterStateListener;
+    private final AdapterStateListener mAdapterStateListener;
+    private final RangingManager mRangingManager;
 
     /**
      * Interface for receiving UWB adapter state changes
      */
     public interface AdapterStateCallback {
+        /**
+         * @hide
+         */
         @Retention(RetentionPolicy.SOURCE)
         @IntDef(value = {
                 STATE_CHANGED_REASON_SESSION_STARTED,
@@ -116,6 +120,7 @@ public final class UwbManager {
     private UwbManager(IUwbAdapter adapter) {
         mUwbAdapter = adapter;
         mAdapterStateListener = new AdapterStateListener(adapter);
+        mRangingManager = new RangingManager(adapter);
     }
 
     /**
@@ -195,6 +200,9 @@ public final class UwbManager {
         }
     }
 
+    /**
+     * @hide
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(value = {
             ANGLE_OF_ARRIVAL_SUPPORT_TYPE_NONE,
@@ -387,8 +395,8 @@ public final class UwbManager {
      */
     @NonNull
     public AutoCloseable openRangingSession(@NonNull PersistableBundle parameters,
-            @NonNull Executor executor,
+            @NonNull @CallbackExecutor Executor executor,
             @NonNull RangingSession.Callback callbacks) {
-        throw new UnsupportedOperationException();
+        return mRangingManager.openSession(parameters, executor, callbacks);
     }
 }

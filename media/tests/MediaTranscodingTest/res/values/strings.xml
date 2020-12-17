@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-	<!-- Test application name [CHAR LIMIT=32] -->
-    <string name="app_name">MediaTranscodingTest</string>
-</resources>

@@ -25,6 +25,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.util.Pair;
 import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
@@ -33,6 +34,7 @@ import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.R;
 import com.android.internal.widget.NotificationExpandButton;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
@@ -95,7 +97,8 @@ public class NotificationContentViewTest extends SysuiTestCase {
         mView.setExpandedChild(mockExpanded);
         mView.setHeadsUpChild(mockHeadsUp);
 
-        mView.showFeedbackIcon(true, 1);
+        mView.showFeedbackIcon(true, new Pair(R.drawable.ic_feedback_alerted,
+                R.string.notification_feedback_indicator_alerted));
 
         verify(mockContracted, times(1)).setVisibility(View.VISIBLE);
         verify(mockExpanded, times(1)).setVisibility(View.VISIBLE);

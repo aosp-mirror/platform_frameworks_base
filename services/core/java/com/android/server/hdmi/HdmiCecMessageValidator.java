@@ -156,7 +156,6 @@ public class HdmiCecMessageValidator {
         addValidationInfo(Constants.MESSAGE_GIVE_DECK_STATUS, statusRequestValidator, DEST_DIRECT);
         addValidationInfo(Constants.MESSAGE_PLAY, new PlayModeValidator(), DEST_DIRECT);
 
-        // TODO: Handle messages for the Tuner Control.
         addValidationInfo(
                 Constants.MESSAGE_GIVE_TUNER_DEVICE_STATUS, statusRequestValidator, DEST_DIRECT);
         addValidationInfo(
@@ -166,6 +165,10 @@ public class HdmiCecMessageValidator {
         addValidationInfo(
                 Constants.MESSAGE_SELECT_DIGITAL_SERVICE,
                 new SelectDigitalServiceValidator(),
+                DEST_DIRECT);
+        addValidationInfo(
+                Constants.MESSAGE_TUNER_DEVICE_STATUS,
+                new TunerDeviceStatusValidator(),
                 DEST_DIRECT);
 
         // Messages for the Vendor Specific Commands.
@@ -317,7 +320,14 @@ public class HdmiCecMessageValidator {
     }
 
     private boolean isValidPhysicalAddress(byte[] params, int offset) {
-        // TODO: Add more logic like validating 1.0.1.0.
+        int physicalAddress = HdmiUtils.twoBytesToInt(params, offset);
+        while (physicalAddress != 0) {
+            int maskedAddress = physicalAddress & 0xF000;
+            physicalAddress = (physicalAddress << 4) & 0xFFFF;
+            if (maskedAddress == 0 && physicalAddress != 0) {
+                return false;
+            }
+        }
 
         if (!mService.isTvDevice()) {
             // If the device is not TV, we can't convert path to port-id, so stop here.
@@ -733,6 +743,35 @@ public class HdmiCecMessageValidator {
                 || (isWithinRange(value, 0xC1, 0xC3)));
     }
 
+    /*
+     * Check if the given value is a valid Tuner Device info. A valid value is one which falls
+     * within the range description defined in CEC 1.4 Specification : Operand Descriptions
+     * (Section 17)
+     *
+     * @param params Tuner device info
+     * @return true if the Tuner device info is valid
+     */
+    private boolean isValidTunerDeviceInfo(byte[] params) {
+        int tunerDisplayInfo = params[0] & 0x7F;
+        if (tunerDisplayInfo == 0x00) {
+            // Displaying digital tuner
+            if (params.length >= 5) {
+                return isValidDigitalServiceIdentification(params, 1);
+            }
+        } else if (tunerDisplayInfo == 0x01) {
+            // Not displaying Tuner
+            return true;
+        } else if (tunerDisplayInfo == 0x02) {
+            // Displaying Analogue tuner
+            if (params.length >= 5) {
+                return (isValidAnalogueBroadcastType(params[1])
+                        && isValidAnalogueFrequency(HdmiUtils.twoBytesToInt(params, 2))
+                        && isValidBroadcastSystem(params[4]));
+            }
+        }
+        return false;
+    }
+
     private class PhysicalAddressValidator implements ParameterValidator {
         @Override
         public int isValid(byte[] params) {
@@ -1008,6 +1047,21 @@ public class HdmiCecMessageValidator {
                 return ERROR_PARAMETER_SHORT;
             }
             return toErrorCode(isValidDigitalServiceIdentification(params, 0));
+        }
+    }
+
+    /**
+     * Check if the given tuner device status parameter is valid. A valid parameter should lie
+     * within the range description defined in CEC 1.4 Specification : Operand Descriptions (Section
+     * 17)
+     */
+    private class TunerDeviceStatusValidator implements ParameterValidator {
+        @Override
+        public int isValid(byte[] params) {
+            if (params.length < 1) {
+                return ERROR_PARAMETER_SHORT;
+            }
+            return toErrorCode(isValidTunerDeviceInfo(params));
         }
     }
 

@@ -16,18 +16,32 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.Interpolators;
+
+import java.util.LinkedList;
+
 /**
  * A view to show hints on Keyguard ("Swipe up to unlock", "Tap again to open").
  */
 public class KeyguardIndicationTextView extends TextView {
 
-    private CharSequence mText = "";
+    private static final int FADE_OUT_MILLIS = 200;
+    private static final int FADE_IN_MILLIS = 250;
+    private static final long MSG_DURATION_MILLIS = 600;
+    private long mNextAnimationTime = 0;
+    private boolean mAnimationsEnabled = true;
+    private LinkedList<CharSequence> mMessages = new LinkedList<>();
 
     public KeyguardIndicationTextView(Context context) {
         super(context);
@@ -52,15 +66,68 @@ public class KeyguardIndicationTextView extends TextView {
      * @param text The text to show.
      */
     public void switchIndication(CharSequence text) {
+        if (text == null) text = "";
 
-        // TODO: Animation, make sure that we will show one indication long enough.
-        if (TextUtils.isEmpty(text)) {
-            mText = "";
-            setVisibility(View.INVISIBLE);
-        } else if (!TextUtils.equals(text, mText)) {
-            mText = text;
-            setVisibility(View.VISIBLE);
-            setText(mText);
+        CharSequence lastPendingMessage = mMessages.peekLast();
+        if (TextUtils.equals(lastPendingMessage, text)
+                || (lastPendingMessage == null && TextUtils.equals(text, getText()))) {
+            return;
+        }
+        mMessages.add(text);
+
+        Animator fadeOut = ObjectAnimator.ofFloat(this, View.ALPHA, 0f);
+        fadeOut.setDuration(getFadeOutMillis());
+        fadeOut.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
+
+        final CharSequence nextText = text;
+        fadeOut.addListener(new AnimatorListenerAdapter() {
+                public void onAnimationEnd(Animator animator) {
+                    setText(mMessages.poll());
+                }
+            });
+
+        final AnimatorSet animSet = new AnimatorSet();
+        final AnimatorSet.Builder animSetBuilder = animSet.play(fadeOut);
+
+        // Make sure each animation is visible for a minimum amount of time, while not worrying
+        // about fading in blank text
+        long timeInMillis = System.currentTimeMillis();
+        long delay = Math.max(0, mNextAnimationTime - timeInMillis);
+        setNextAnimationTime(timeInMillis + delay + getFadeOutMillis());
+
+        if (!text.equals("")) {
+            setNextAnimationTime(mNextAnimationTime + MSG_DURATION_MILLIS);
+
+            ObjectAnimator fadeIn = ObjectAnimator.ofFloat(this, View.ALPHA, 1f);
+            fadeIn.setDuration(getFadeInMillis());
+            fadeIn.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
+            animSetBuilder.before(fadeIn);
+        }
+
+        animSet.setStartDelay(delay);
+        animSet.start();
+    }
+
+    @VisibleForTesting
+    public void setAnimationsEnabled(boolean enabled) {
+        mAnimationsEnabled = enabled;
+    }
+
+    private long getFadeInMillis() {
+        if (mAnimationsEnabled) return FADE_IN_MILLIS;
+        return 0L;
+    }
+
+    private long getFadeOutMillis() {
+        if (mAnimationsEnabled) return FADE_OUT_MILLIS;
+        return 0L;
+    }
+
+    private void setNextAnimationTime(long time) {
+        if (mAnimationsEnabled) {
+            mNextAnimationTime = time;
+        } else {
+            mNextAnimationTime = 0L;
         }
     }
 

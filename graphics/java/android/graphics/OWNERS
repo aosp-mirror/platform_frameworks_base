@@ -4,6 +4,8 @@ romainguy@google.com
 jreck@google.com
 njawad@google.com
 sumir@google.com
+djsollen@google.com
+scroggo@google.com
 
 per-file BLASTBufferQueue.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file FontFamily.java = file:fonts/OWNERS

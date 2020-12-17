@@ -231,7 +231,7 @@
     <!-- Notification text displayed when we fail to save a screenshot for unknown reasons. [CHAR LIMIT=100] -->
     <string name="screenshot_failed_to_save_unknown_text">Try taking screenshot again</string>
     <!-- Notification text displayed when we fail to save a screenshot. [CHAR LIMIT=100] -->
-    <string name="screenshot_failed_to_save_text">Can\'t save screenshot due to limited storage space</string>
+    <string name="screenshot_failed_to_save_text">Can\'t save screenshot</string>
     <!-- Notification text displayed when we fail to take a screenshot. [CHAR LIMIT=100] -->
     <string name="screenshot_failed_to_capture_text">Taking screenshots isn\'t allowed by the app or
         your organization</string>

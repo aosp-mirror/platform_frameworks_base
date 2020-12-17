@@ -33,6 +33,7 @@ import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.NotificationHeaderView;
@@ -1586,15 +1587,15 @@ public class NotificationContentView extends FrameLayout {
         return null;
     }
 
-    public void showFeedbackIcon(boolean show, int resId) {
+    public void showFeedbackIcon(boolean show, Pair<Integer, Integer> resIds) {
         if (mContractedChild != null) {
-            mContractedWrapper.showFeedbackIcon(show, resId);
+            mContractedWrapper.showFeedbackIcon(show, resIds);
         }
         if (mExpandedChild != null) {
-            mExpandedWrapper.showFeedbackIcon(show, resId);
+            mExpandedWrapper.showFeedbackIcon(show, resIds);
         }
         if (mHeadsUpChild != null) {
-            mHeadsUpWrapper.showFeedbackIcon(show, resId);
+            mHeadsUpWrapper.showFeedbackIcon(show, resIds);
         }
     }
 

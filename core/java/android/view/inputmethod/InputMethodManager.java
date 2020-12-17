@@ -1747,8 +1747,14 @@ public final class InputMethodManager {
 
             try {
                 Log.d(TAG, "showSoftInput() view=" + view + " flags=" + flags);
-                return mService.showSoftInput(
-                        mClient, view.getWindowToken(), flags, resultReceiver);
+                final Completable.Boolean value = Completable.createBoolean();
+                mService.showSoftInput(
+                        mClient,
+                        view.getWindowToken(),
+                        flags,
+                        resultReceiver,
+                        ResultCallbacks.of(value));
+                return Completable.getResult(value);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1775,8 +1781,14 @@ public final class InputMethodManager {
                     Log.w(TAG, "No current root view, ignoring showSoftInputUnchecked()");
                     return;
                 }
+                final Completable.Boolean value = Completable.createBoolean();
                 mService.showSoftInput(
-                        mClient, mCurRootView.getView().getWindowToken(), flags, resultReceiver);
+                        mClient,
+                        mCurRootView.getView().getWindowToken(),
+                        flags,
+                        resultReceiver,
+                        ResultCallbacks.of(value));
+                Completable.getResult(value); // ignore the result
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1849,7 +1861,10 @@ public final class InputMethodManager {
             }
 
             try {
-                return mService.hideSoftInput(mClient, windowToken, flags, resultReceiver);
+                final Completable.Boolean value = Completable.createBoolean();
+                mService.hideSoftInput(
+                        mClient, windowToken, flags, resultReceiver, ResultCallbacks.of(value));
+                return Completable.getResult(value);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -2184,8 +2199,14 @@ public final class InputMethodManager {
                 return;
             }
             try {
+                final Completable.Boolean value = Completable.createBoolean();
                 mService.hideSoftInput(
-                        mClient, mCurRootView.getView().getWindowToken(), HIDE_NOT_ALWAYS, null);
+                        mClient,
+                        mCurRootView.getView().getWindowToken(),
+                        HIDE_NOT_ALWAYS,
+                        null,
+                        ResultCallbacks.of(value));
+                Completable.getResult(value); // ignore the result
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -2920,7 +2941,9 @@ public final class InputMethodManager {
     @TestApi
     public boolean isInputMethodPickerShown() {
         try {
-            return mService.isInputMethodPickerShownForTest();
+            final Completable.Boolean value = Completable.createBoolean();
+            mService.isInputMethodPickerShownForTest(ResultCallbacks.of(value));
+            return Completable.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

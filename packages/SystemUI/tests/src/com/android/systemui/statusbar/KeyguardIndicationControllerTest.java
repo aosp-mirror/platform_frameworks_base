@@ -74,6 +74,7 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.wakelock.WakeLockFake;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -131,6 +132,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
         mTextView = new KeyguardIndicationTextView(mContext);
+        mTextView.setAnimationsEnabled(false);
 
         mContext.addMockSystemService(Context.DEVICE_POLICY_SERVICE, mDevicePolicyManager);
         mContext.addMockSystemService(UserManager.class, mUserManager);
@@ -151,6 +153,11 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mWakeLock = new WakeLockFake();
         mWakeLockBuilder = new WakeLockFake.Builder(mContext);
         mWakeLockBuilder.setWakeLock(mWakeLock);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mTextView.setAnimationsEnabled(true);
     }
 
     private void createController() {

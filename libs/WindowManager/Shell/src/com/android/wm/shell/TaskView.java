@@ -237,7 +237,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
                 // so go ahead and hide the task entirely
                 updateTaskVisibility();
             }
-
+            mTaskOrganizer.setInterceptBackPressedOnTaskRoot(mTaskToken, true);
             // TODO: Synchronize show with the resize
             onLocationChanged();
             setResizeBackgroundColor(taskInfo.taskDescription.getBackgroundColor());
@@ -257,6 +257,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
             if (mListener != null) {
                 mListener.onTaskRemovalStarted(taskInfo.taskId);
             }
+            mTaskOrganizer.setInterceptBackPressedOnTaskRoot(mTaskToken, false);
 
             // Unparent the task when this surface is destroyed
             mTransaction.reparent(mTaskLeash, null).apply();

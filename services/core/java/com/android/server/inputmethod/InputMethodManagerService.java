@@ -159,6 +159,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.inputmethod.CallbackUtils;
+import com.android.internal.inputmethod.IBooleanResultCallback;
 import com.android.internal.inputmethod.IInputBindResultResultCallback;
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
@@ -3150,41 +3151,44 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public boolean showSoftInput(IInputMethodClient client, IBinder windowToken, int flags,
-            ResultReceiver resultReceiver) {
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showSoftInput");
-        int uid = Binder.getCallingUid();
-        ImeTracing.getInstance().triggerManagerServiceDump(
-                "InputMethodManagerService#showSoftInput");
-        synchronized (mMethodMap) {
-            if (!calledFromValidUserLocked()) {
-                return false;
-            }
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                if (mCurClient == null || client == null
-                        || mCurClient.client.asBinder() != client.asBinder()) {
-                    // We need to check if this is the current client with
-                    // focus in the window manager, to allow this call to
-                    // be made before input is started in it.
-                    final ClientState cs = mClients.get(client.asBinder());
-                    if (cs == null) {
-                        throw new IllegalArgumentException("unknown client " + client.asBinder());
-                    }
-                    if (!mWindowManagerInternal.isInputMethodClientFocus(cs.uid, cs.pid,
-                            cs.selfReportedDisplayId)) {
-                        Slog.w(TAG, "Ignoring showSoftInput of uid " + uid + ": " + client);
-                        return false;
-                    }
+    public void showSoftInput(IInputMethodClient client, IBinder windowToken, int flags,
+            ResultReceiver resultReceiver, IBooleanResultCallback resultCallback) {
+        CallbackUtils.onResult(resultCallback, () -> {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showSoftInput");
+            int uid = Binder.getCallingUid();
+            ImeTracing.getInstance().triggerManagerServiceDump(
+                    "InputMethodManagerService#showSoftInput");
+            synchronized (mMethodMap) {
+                if (!calledFromValidUserLocked()) {
+                    return false;
                 }
-                if (DEBUG) Slog.v(TAG, "Client requesting input be shown");
-                return showCurrentInputLocked(windowToken, flags, resultReceiver,
-                        SoftInputShowHideReason.SHOW_SOFT_INPUT);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    if (mCurClient == null || client == null
+                            || mCurClient.client.asBinder() != client.asBinder()) {
+                        // We need to check if this is the current client with
+                        // focus in the window manager, to allow this call to
+                        // be made before input is started in it.
+                        final ClientState cs = mClients.get(client.asBinder());
+                        if (cs == null) {
+                            throw new IllegalArgumentException(
+                                    "unknown client " + client.asBinder());
+                        }
+                        if (!mWindowManagerInternal.isInputMethodClientFocus(cs.uid, cs.pid,
+                                cs.selfReportedDisplayId)) {
+                            Slog.w(TAG, "Ignoring showSoftInput of uid " + uid + ": " + client);
+                            return false;
+                        }
+                    }
+                    if (DEBUG) Slog.v(TAG, "Client requesting input be shown");
+                    return showCurrentInputLocked(windowToken, flags, resultReceiver,
+                                    SoftInputShowHideReason.SHOW_SOFT_INPUT);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                    Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+                }
             }
-        }
+        });
     }
 
     @BinderThread
@@ -3266,44 +3270,49 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public boolean hideSoftInput(IInputMethodClient client, IBinder windowToken, int flags,
-            ResultReceiver resultReceiver) {
-        int uid = Binder.getCallingUid();
-        ImeTracing.getInstance().triggerManagerServiceDump(
-                "InputMethodManagerService#hideSoftInput");
-        synchronized (mMethodMap) {
-            if (!calledFromValidUserLocked()) {
-                return false;
-            }
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.hideSoftInput");
-                if (mCurClient == null || client == null
-                        || mCurClient.client.asBinder() != client.asBinder()) {
-                    // We need to check if this is the current client with
-                    // focus in the window manager, to allow this call to
-                    // be made before input is started in it.
-                    final ClientState cs = mClients.get(client.asBinder());
-                    if (cs == null) {
-                        throw new IllegalArgumentException("unknown client " + client.asBinder());
-                    }
-                    if (!mWindowManagerInternal.isInputMethodClientFocus(cs.uid, cs.pid,
-                            cs.selfReportedDisplayId)) {
-                        if (DEBUG) {
-                            Slog.w(TAG, "Ignoring hideSoftInput of uid " + uid + ": " + client);
-                        }
-                        return false;
-                    }
+    public void hideSoftInput(IInputMethodClient client, IBinder windowToken, int flags,
+            ResultReceiver resultReceiver, IBooleanResultCallback resultCallback) {
+        CallbackUtils.onResult(resultCallback, () -> {
+            int uid = Binder.getCallingUid();
+            ImeTracing.getInstance().triggerManagerServiceDump(
+                    "InputMethodManagerService#hideSoftInput");
+            synchronized (mMethodMap) {
+                if (!InputMethodManagerService.this.calledFromValidUserLocked()) {
+                    return false;
                 }
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.hideSoftInput");
+                    if (mCurClient == null || client == null
+                            || mCurClient.client.asBinder() != client.asBinder()) {
+                        // We need to check if this is the current client with
+                        // focus in the window manager, to allow this call to
+                        // be made before input is started in it.
+                        final ClientState cs = mClients.get(client.asBinder());
+                        if (cs == null) {
+                            throw new IllegalArgumentException(
+                                    "unknown client " + client.asBinder());
+                        }
+                        if (!mWindowManagerInternal.isInputMethodClientFocus(cs.uid, cs.pid,
+                                cs.selfReportedDisplayId)) {
+                            if (DEBUG) {
+                                Slog.w(TAG,
+                                        "Ignoring hideSoftInput of uid " + uid + ": " + client);
+                            }
+                            return false;
+                        }
+                    }
 
-                if (DEBUG) Slog.v(TAG, "Client requesting input be hidden");
-                return hideCurrentInputLocked(windowToken, flags, resultReceiver,
-                        SoftInputShowHideReason.HIDE_SOFT_INPUT);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+                    if (DEBUG) Slog.v(TAG, "Client requesting input be hidden");
+                    return InputMethodManagerService.this.hideCurrentInputLocked(windowToken,
+                            flags, resultReceiver,
+                            SoftInputShowHideReason.HIDE_SOFT_INPUT);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                    Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+                }
             }
-        }
+        });
     }
 
     boolean hideCurrentInputLocked(IBinder windowToken, int flags, ResultReceiver resultReceiver,
@@ -3726,9 +3735,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 MSG_SHOW_IM_SUBTYPE_PICKER, auxiliarySubtypeMode, displayId));
     }
 
-    public boolean isInputMethodPickerShownForTest() {
+    /**
+     * A test API for CTS to make sure that the input method menu is showing.
+     *
+     * @param resultCallback {@code true} while the input method menu is showing UI.
+     */
+    public void isInputMethodPickerShownForTest(IBooleanResultCallback resultCallback) {
         synchronized(mMethodMap) {
-            return mMenuController.isisInputMethodPickerShownForTestLocked();
+            CallbackUtils.onResult(
+                    resultCallback, mMenuController::isisInputMethodPickerShownForTestLocked);
         }
     }
 
@@ -4120,8 +4135,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @BinderThread
     @Override
-    public boolean isImeTraceEnabled() {
-        return ImeTracing.getInstance().isEnabled();
+    public void isImeTraceEnabled(IBooleanResultCallback resultCallback) {
+        CallbackUtils.onResult(resultCallback, () -> ImeTracing.getInstance().isEnabled());
     }
 
     @BinderThread

@@ -39,10 +39,12 @@ import android.app.NotificationChannel;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+import android.util.Pair;
 import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -210,7 +212,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         // public notification is custom layout - no header
         mGroupRow.setSensitive(true, true);
         mGroupRow.setOnFeedbackClickListener(null);
-        mGroupRow.showFeedbackIcon(false, 0);
+        mGroupRow.showFeedbackIcon(false, null);
     }
 
     @Test
@@ -224,12 +226,13 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         mGroupRow.setChildrenContainer(mockContainer);
 
         final boolean show = true;
-        final int resId = 1;
-        mGroupRow.showFeedbackIcon(show, resId);
+        final Pair<Integer, Integer> resIds = new Pair(R.drawable.ic_feedback_alerted,
+                R.string.notification_feedback_indicator_alerted);
+        mGroupRow.showFeedbackIcon(show, resIds);
 
-        verify(mockContainer, times(1)).showFeedbackIcon(show, resId);
-        verify(privateLayout, times(1)).showFeedbackIcon(show, resId);
-        verify(publicLayout, times(1)).showFeedbackIcon(show, resId);
+        verify(mockContainer, times(1)).showFeedbackIcon(show, resIds);
+        verify(privateLayout, times(1)).showFeedbackIcon(show, resIds);
+        verify(publicLayout, times(1)).showFeedbackIcon(show, resIds);
     }
 
     @Test

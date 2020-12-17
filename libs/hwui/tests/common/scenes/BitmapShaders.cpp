@@ -44,15 +44,16 @@ public:
                     skCanvas.drawRect(SkRect::MakeXYWH(100, 100, 100, 100), skPaint);
                 });
 
+        SkSamplingOptions sampling;
         Paint paint;
         sk_sp<SkImage> image = hwuiBitmap->makeImage();
         sk_sp<SkShader> repeatShader =
-                image->makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat);
+                image->makeShader(SkTileMode::kRepeat, SkTileMode::kRepeat, sampling);
         paint.setShader(std::move(repeatShader));
         canvas.drawRoundRect(0, 0, 500, 500, 50.0f, 50.0f, paint);
 
         sk_sp<SkShader> mirrorShader =
-                image->makeShader(SkTileMode::kMirror, SkTileMode::kMirror);
+                image->makeShader(SkTileMode::kMirror, SkTileMode::kMirror, sampling);
         paint.setShader(std::move(mirrorShader));
         canvas.drawRoundRect(0, 600, 500, 1100, 50.0f, 50.0f, paint);
     }

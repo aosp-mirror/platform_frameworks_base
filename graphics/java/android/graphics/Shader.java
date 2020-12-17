@@ -148,7 +148,7 @@ public class Shader {
     /**
      *  @hide Only to be used by subclasses in the graphics package.
      */
-    protected long createNativeInstance(long nativeMatrix) {
+    protected long createNativeInstance(long nativeMatrix, boolean filterFromPaint) {
         return 0;
     }
 
@@ -173,7 +173,7 @@ public class Shader {
      * constructed native instance is still valid.
      *  @hide Only to be used by subclasses in the graphics package.
      */
-    protected boolean shouldDiscardNativeInstance() {
+    protected boolean shouldDiscardNativeInstance(boolean filterBitmap) {
         return false;
     }
 
@@ -182,20 +182,29 @@ public class Shader {
      * @hide so it can be called by android.graphics.drawable but must not be called from outside
      * the module.
      */
-    public synchronized final long getNativeInstance() {
-        if (shouldDiscardNativeInstance()) {
+    public final synchronized long getNativeInstance(boolean filterFromPaint) {
+        if (shouldDiscardNativeInstance(filterFromPaint)) {
             discardNativeInstanceLocked();
         }
 
         if (mNativeInstance == 0) {
             mNativeInstance = createNativeInstance(mLocalMatrix == null
-                    ? 0 : mLocalMatrix.ni());
+                    ? 0 : mLocalMatrix.ni(), filterFromPaint);
             if (mNativeInstance != 0) {
                 mCleaner = NoImagePreloadHolder.sRegistry.registerNativeAllocation(
                         this, mNativeInstance);
             }
         }
         return mNativeInstance;
+    }
+
+    /**
+     * @hide so it can be called by android.graphics.drawable but must not be called from outside
+     * the module.
+     */
+    public final long getNativeInstance() {
+        // If the caller has no paint flag for filtering bitmaps, we just pass false
+        return getNativeInstance(false);
     }
 
     /**

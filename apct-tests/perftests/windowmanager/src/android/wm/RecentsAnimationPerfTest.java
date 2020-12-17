@@ -24,8 +24,8 @@ import static org.hamcrest.core.AnyOf.anyOf;
 import static org.hamcrest.core.Is.is;
 
 import android.app.ActivityManager;
-import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityTaskManager;
+import android.window.TaskSnapshot;
 import android.app.IActivityTaskManager;
 import android.content.ComponentName;
 import android.content.Context;

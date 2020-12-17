@@ -16,6 +16,11 @@
 
 package com.android.internal.location.gnssmetrics;
 
+import static android.location.GnssSignalQuality.GNSS_SIGNAL_QUALITY_GOOD;
+import static android.location.GnssSignalQuality.GNSS_SIGNAL_QUALITY_POOR;
+import static android.location.GnssSignalQuality.GNSS_SIGNAL_QUALITY_UNKNOWN;
+import static android.location.GnssSignalQuality.NUM_GNSS_SIGNAL_QUALITY_LEVELS;
+
 import android.app.StatsManager;
 import android.content.Context;
 import android.location.GnssStatus;
@@ -23,7 +28,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.connectivity.GpsBatteryStats;
-import android.server.location.ServerLocationProtoEnums;
 import android.text.format.DateUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -49,17 +53,6 @@ import java.util.List;
 public class GnssMetrics {
 
     private static final String TAG = "GnssMetrics";
-
-    private static final int GPS_SIGNAL_QUALITY_UNKNOWN =
-            ServerLocationProtoEnums.GPS_SIGNAL_QUALITY_UNKNOWN; // -1
-
-    private static final int GPS_SIGNAL_QUALITY_POOR =
-            ServerLocationProtoEnums.GPS_SIGNAL_QUALITY_POOR; // 0
-
-    private static final int GPS_SIGNAL_QUALITY_GOOD =
-            ServerLocationProtoEnums.GPS_SIGNAL_QUALITY_GOOD; // 1
-
-    public static final int NUM_GPS_SIGNAL_QUALITY_LEVELS = GPS_SIGNAL_QUALITY_GOOD + 1;
 
     /** Default time between location fixes (in millisecs) */
     private static final int DEFAULT_TIME_BETWEEN_FIXES_MILLISECS = 1000;
@@ -397,7 +390,7 @@ public class GnssMetrics {
                     stats.getLoggingDurationMs() / ((double) DateUtils.MINUTE_IN_MILLIS)).append(
                     "\n");
             long[] t = stats.getTimeInGpsSignalQualityLevel();
-            if (t != null && t.length == NUM_GPS_SIGNAL_QUALITY_LEVELS) {
+            if (t != null && t.length == NUM_GNSS_SIGNAL_QUALITY_LEVELS) {
                 s.append("  Amount of time (while on battery) Top 4 Avg CN0 > "
                         + GnssPowerMetrics.POOR_TOP_FOUR_AVG_CN0_THRESHOLD_DB_HZ
                         + " dB-Hz (min): ").append(
@@ -512,7 +505,7 @@ public class GnssMetrics {
           // so that
             // the first CNO report will trigger an update to BatteryStats
             mLastAverageCn0 = -100.0;
-            mLastSignalLevel = GPS_SIGNAL_QUALITY_UNKNOWN;
+            mLastSignalLevel = GNSS_SIGNAL_QUALITY_UNKNOWN;
         }
 
         /**
@@ -584,9 +577,9 @@ public class GnssMetrics {
          */
         private int getSignalLevel(double cn0) {
             if (cn0 > POOR_TOP_FOUR_AVG_CN0_THRESHOLD_DB_HZ) {
-                return GnssMetrics.GPS_SIGNAL_QUALITY_GOOD;
+                return GNSS_SIGNAL_QUALITY_GOOD;
             }
-            return GnssMetrics.GPS_SIGNAL_QUALITY_POOR;
+            return GNSS_SIGNAL_QUALITY_POOR;
         }
     }
 

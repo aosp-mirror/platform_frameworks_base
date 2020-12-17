@@ -858,6 +858,20 @@ public interface InputConnection {
     boolean reportFullscreenMode(boolean enabled);
 
     /**
+     * Have the editor perform spell checking around the current selection.
+     *
+     * <p>The editor can ignore this method call if it does not support spell checking.
+     *
+     * @return For editor authors, the return value will always be ignored. For IME authors, this
+     *         method returns true if the spell check request was sent (whether or not the
+     *         associated editor supports spell checking), false if the input connection is no
+     *         longer valid.
+     */
+    default boolean performSpellCheck() {
+        return false;
+    }
+
+    /**
      * API to send private commands from an input method to its
      * connected editor. This can be used to provide domain-specific
      * features that are only known between certain input methods and

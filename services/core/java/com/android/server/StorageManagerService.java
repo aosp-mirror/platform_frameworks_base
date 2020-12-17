@@ -4475,6 +4475,15 @@ class StorageManagerService extends IStorageManager.Stub
             return mMediaStoreAuthorityAppId == UserHandle.getAppId(uid);
         }
 
+        @Override
+        public void freeCache(String volumeUuid, long freeBytes) {
+            try {
+                mStorageSessionController.freeCache(volumeUuid, freeBytes);
+            } catch (ExternalStorageServiceException e) {
+                Log.e(TAG, "Failed to free cache of vol : " + volumeUuid, e);
+            }
+        }
+
         public boolean hasExternalStorage(int uid, String packageName) {
             // No need to check for system uid. This avoids a deadlock between
             // PackageManagerService and AppOpsService.

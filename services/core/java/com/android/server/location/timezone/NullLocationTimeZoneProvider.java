@@ -35,11 +35,11 @@ import java.time.Duration;
  * and a secondary {@link LocationTimeZoneProvider}, but only a primary is configured, the secondary
  * config will be left null and the {@link LocationTimeZoneProvider} implementation will be
  * defaulted to a {@link NullLocationTimeZoneProvider}. The {@link NullLocationTimeZoneProvider}
- * enters a {@link ProviderState#PROVIDER_STATE_PERM_FAILED} state immediately after being enabled
+ * enters a {@link ProviderState#PROVIDER_STATE_PERM_FAILED} state immediately after being started
  * for the first time and sends the appropriate event, which ensures the {@link
  * LocationTimeZoneProviderController} won't expect any further {@link
- * com.android.internal.location.timezone.LocationTimeZoneEvent}s to come from it, and won't attempt
- * to use it again.
+ * TimeZoneProviderEvent}s to come from it, and won't attempt to use it
+ * again.
  */
 class NullLocationTimeZoneProvider extends LocationTimeZoneProvider {
 
@@ -57,7 +57,7 @@ class NullLocationTimeZoneProvider extends LocationTimeZoneProvider {
     }
 
     @Override
-    void onEnable(@NonNull Duration initializationTimeout) {
+    void onStartUpdates(@NonNull Duration initializationTimeout) {
         // Report a failure (asynchronously using the mThreadingDomain thread to avoid recursion).
         mThreadingDomain.post(()-> {
             // Enter the perm-failed state.
@@ -69,8 +69,8 @@ class NullLocationTimeZoneProvider extends LocationTimeZoneProvider {
     }
 
     @Override
-    void onDisable() {
-        // Ignored - NullLocationTimeZoneProvider is always permanently failed.
+    void onStopUpdates() {
+        // Ignored - this implementation is always permanently failed.
     }
 
     @Override

@@ -49,7 +49,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager.TaskDescription;
-import android.app.ActivityManager.TaskSnapshot;
+import android.window.TaskSnapshot;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.graphics.Canvas;

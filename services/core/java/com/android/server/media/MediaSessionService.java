@@ -40,7 +40,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
-import android.content.pm.UserInfo;
 import android.media.AudioManager;
 import android.media.AudioPlaybackConfiguration;
 import android.media.IRemoteVolumeControllerCallback;
@@ -393,15 +392,17 @@ public class MediaSessionService extends SystemService implements Monitor {
         synchronized (mLock) {
             UserManager manager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
             mFullUserIds.clear();
-            List<UserInfo> allUsers = manager.getUsers();
+            List<UserHandle> allUsers = manager.getUserHandles(/*excludeDying=*/false);
             if (allUsers != null) {
-                for (UserInfo userInfo : allUsers) {
-                    if (userInfo.isManagedProfile()) {
-                        mFullUserIds.put(userInfo.id, userInfo.profileGroupId);
+                for (UserHandle user : allUsers) {
+                    UserHandle parent = manager.getProfileParent(user);
+                    if (parent != null) {
+                        mFullUserIds.put(user.getIdentifier(), parent.getIdentifier());
                     } else {
-                        mFullUserIds.put(userInfo.id, userInfo.id);
-                        if (mUserRecords.get(userInfo.id) == null) {
-                            mUserRecords.put(userInfo.id, new FullUserRecord(userInfo.id));
+                        mFullUserIds.put(user.getIdentifier(), user.getIdentifier());
+                        if (mUserRecords.get(user.getIdentifier()) == null) {
+                            mUserRecords.put(user.getIdentifier(),
+                                    new FullUserRecord(user.getIdentifier()));
                         }
                     }
                 }

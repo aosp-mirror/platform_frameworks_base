@@ -219,7 +219,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityOptions;
 import android.app.PendingIntent;
@@ -294,6 +293,7 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.TransitionOldType;
 import android.view.animation.Animation;
+import android.window.TaskSnapshot;
 import android.window.WindowContainerToken;
 
 import com.android.internal.R;
@@ -1756,7 +1756,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
 
-        final ActivityManager.TaskSnapshot snapshot =
+        final TaskSnapshot snapshot =
                 mWmService.mTaskSnapshotController.getSnapshot(task.mTaskId, task.mUserId,
                         false /* restoreFromDisk */, false /* isLowResolution */);
         final int type = getStartingWindowType(newTask, taskSwitch, processRunning,
@@ -1838,7 +1838,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return true;
     }
 
-    private boolean createSnapshot(ActivityManager.TaskSnapshot snapshot) {
+    private boolean createSnapshot(TaskSnapshot snapshot) {
         if (snapshot == null) {
             return false;
         }
@@ -1923,7 +1923,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     private int getStartingWindowType(boolean newTask, boolean taskSwitch, boolean processRunning,
             boolean allowTaskSnapshot, boolean activityCreated,
-            ActivityManager.TaskSnapshot snapshot) {
+            TaskSnapshot snapshot) {
         if (newTask || !processRunning || (taskSwitch && !activityCreated)) {
             return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
         } else if (taskSwitch && allowTaskSnapshot) {
@@ -1944,7 +1944,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * rotation must be the same).
      */
     @VisibleForTesting
-    boolean isSnapshotCompatible(ActivityManager.TaskSnapshot snapshot) {
+    boolean isSnapshotCompatible(TaskSnapshot snapshot) {
         if (snapshot == null) {
             return false;
         }

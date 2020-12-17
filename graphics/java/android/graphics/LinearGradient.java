@@ -154,7 +154,7 @@ public class LinearGradient extends Shader {
 
     /** @hide */
     @Override
-    protected long createNativeInstance(long nativeMatrix) {
+    protected long createNativeInstance(long nativeMatrix, boolean filterFromPaint) {
         return nativeCreate(nativeMatrix, mX0, mY0, mX1, mY1,
                 mColorLongs, mPositions, mTileMode.nativeInt,
                 colorSpace().getNativeInstance());

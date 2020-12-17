@@ -22,7 +22,7 @@ import static android.graphics.Bitmap.Config.ARGB_8888;
 
 import static com.android.systemui.shared.system.WindowManagerWrapper.WINDOWING_MODE_UNDEFINED;
 
-import android.app.ActivityManager.TaskSnapshot;
+import android.window.TaskSnapshot;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Point;

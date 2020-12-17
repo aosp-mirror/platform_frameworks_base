@@ -1679,6 +1679,10 @@ static jlong nativeCreateJankDataListenerWrapper(JNIEnv* env, jclass clazz,
     return reinterpret_cast<jlong>(new JankDataListenerWrapper(env, jankDataListenerObject));
 }
 
+static jint nativeGetGPUContextPriority(JNIEnv* env, jclass clazz) {
+    return static_cast<jint>(SurfaceComposerClient::getGPUContextPriority());
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod sSurfaceControlMethods[] = {
@@ -1869,6 +1873,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeRemoveJankDataListener },
     {"nativeCreateJankDataListenerWrapper", "(Landroid/view/SurfaceControl$OnJankDataListener;)J",
             (void*)nativeCreateJankDataListenerWrapper },
+    {"nativeGetGPUContextPriority", "()I",
+            (void*)nativeGetGPUContextPriority },
         // clang-format on
 };
 

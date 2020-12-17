@@ -611,12 +611,11 @@ class WindowStateAnimator {
         mDsDy = 1;
     }
 
+    private boolean isInBlastSync() {
+        return mService.useBLASTSync() && mWin.useBLASTSync();
+    }
+
     private boolean shouldConsumeMainWindowSizeTransaction() {
-        // If we use BLASTSync we always consume the transaction when finishing
-        // the sync.
-        if (mService.useBLASTSync() && mWin.useBLASTSync()) {
-            return false;
-        }
         // We only consume the transaction when the client is calling relayout
         // because this is the only time we know the frameNumber will be valid
         // due to the client renderer being paused. Put otherwise, only when
@@ -639,22 +638,6 @@ class WindowStateAnimator {
         }
 
         final WindowState w = mWin;
-        final Task task = w.getTask();
-
-        if (shouldConsumeMainWindowSizeTransaction()) {
-            // Use pending transaction here instead of the transaction passed in because we want to
-            // ensure the defer transaction is applied on the main transaction and not on the sync
-            // transaction. This is because the sync transaction could contain the buffer and we'd
-            // defer the transaction that contains the buffer we're deferring on.
-            SurfaceControl.Transaction pendingTransaction = mWin.getPendingTransaction();
-            pendingTransaction.deferTransactionUntil(
-                    task.getMainWindowSizeChangeTask().getSurfaceControl(),
-                    mWin.getClientViewRootSurface(), mWin.getFrameNumber());
-            pendingTransaction.deferTransactionUntil(mSurfaceController.mSurfaceControl,
-                    mWin.getClientViewRootSurface(), mWin.getFrameNumber());
-            pendingTransaction.merge(task.getMainWindowSizeChangeTransaction());
-            task.setMainWindowSizeChangeTransaction(null);
-        }
 
         if (!w.mSeamlesslyRotated) {
             // Used to offset the WSA when stack position changes before a resize.
@@ -672,6 +655,30 @@ class WindowStateAnimator {
             } else {
                 setWallpaperPositionAndScale(t, xOffset, yOffset, mWallpaperScale);
             }
+        }
+
+        final Task task = w.getTask();
+        if (shouldConsumeMainWindowSizeTransaction()) {
+            if (isInBlastSync()) {
+                // If we're in a sync transaction, there's no need to call defer transaction.
+                // The sync transaction will contain the buffer so the bounds change transaction
+                // will only be applied with the buffer.
+                t.merge(task.getMainWindowSizeChangeTransaction());
+            } else {
+                // Use pending transaction here instead of the transaction passed in because we
+                // want to ensure the defer transaction is applied on the main transaction and
+                // not on the sync  transaction. This is because the sync transaction could
+                // contain the buffer and we'd defer the transaction that contains the buffer
+                // we're deferring on.
+                SurfaceControl.Transaction pendingTransaction = mWin.getPendingTransaction();
+                pendingTransaction.deferTransactionUntil(
+                        task.getMainWindowSizeChangeTask().getSurfaceControl(),
+                        mWin.getClientViewRootSurface(), mWin.getFrameNumber());
+                pendingTransaction.deferTransactionUntil(mSurfaceController.mSurfaceControl,
+                        mWin.getClientViewRootSurface(), mWin.getFrameNumber());
+                pendingTransaction.merge(task.getMainWindowSizeChangeTransaction());
+            }
+            task.setMainWindowSizeChangeTransaction(null);
         }
     }
 

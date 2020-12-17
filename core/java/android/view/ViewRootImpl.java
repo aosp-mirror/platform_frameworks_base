@@ -4667,7 +4667,12 @@ public final class ViewRootImpl implements ViewParent,
         if (mPointerCapture == enabled) {
             return;
         }
-        InputManager.getInstance().requestPointerCapture(mAttachInfo.mWindowToken, enabled);
+        final IBinder inputToken = getInputToken();
+        if (inputToken == null) {
+            Log.e(mTag, "No input channel to request Pointer Capture.");
+            return;
+        }
+        InputManager.getInstance().requestPointerCapture(inputToken, enabled);
     }
 
     private void handlePointerCaptureChanged(boolean hasCapture) {
@@ -8378,6 +8383,11 @@ public final class ViewRootImpl implements ViewParent,
         @Override
         public void onFocusEvent(boolean hasFocus, boolean inTouchMode) {
             windowFocusChanged(hasFocus, inTouchMode);
+        }
+
+        @Override
+        public void onPointerCaptureEvent(boolean pointerCaptureEnabled) {
+            dispatchPointerCaptureChanged(pointerCaptureEnabled);
         }
 
         @Override

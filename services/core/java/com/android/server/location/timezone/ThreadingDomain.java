@@ -16,6 +16,7 @@
 
 package com.android.server.location.timezone;
 
+import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
 
 import com.android.internal.util.Preconditions;
@@ -68,9 +69,9 @@ abstract class ThreadingDomain {
     /**
      * Execute the supplied runnable on the threading domain's thread with a delay.
      */
-    abstract void postDelayed(@NonNull Runnable runnable, long delayMillis);
+    abstract void postDelayed(@NonNull Runnable runnable, @DurationMillisLong long delayMillis);
 
-    abstract void postDelayed(Runnable r, Object token, long delayMillis);
+    abstract void postDelayed(Runnable r, Object token, @DurationMillisLong long delayMillis);
 
     abstract void removeQueuedRunnables(Object token);
 
@@ -90,6 +91,7 @@ abstract class ThreadingDomain {
     final class SingleRunnableQueue {
 
         private boolean mIsQueued;
+        @DurationMillisLong
         private long mDelayMillis;
 
         /**
@@ -97,7 +99,7 @@ abstract class ThreadingDomain {
          * handler thread, cancelling any queued but not-yet-executed {@link Runnable} previously
          * added by this. This method must be called from the threading domain's thread.
          */
-        void runDelayed(Runnable r, long delayMillis) {
+        void runDelayed(Runnable r, @DurationMillisLong long delayMillis) {
             cancel();
             mIsQueued = true;
             mDelayMillis = delayMillis;
@@ -122,6 +124,7 @@ abstract class ThreadingDomain {
          * IllegalStateException} if nothing is currently queued, see {@link #hasQueued()}.
          * This method must be called from the threading domain's thread.
          */
+        @DurationMillisLong
         long getQueuedDelayMillis() {
             assertCurrentThread();
             if (!mIsQueued) {

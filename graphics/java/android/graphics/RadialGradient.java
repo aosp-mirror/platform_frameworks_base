@@ -207,7 +207,7 @@ public class RadialGradient extends Shader {
 
     /** @hide */
     @Override
-    protected long createNativeInstance(long nativeMatrix) {
+    protected long createNativeInstance(long nativeMatrix, boolean filterFromPaint) {
         return nativeCreate(nativeMatrix, mFocalX, mFocalY, mFocalRadius, mX, mY, mRadius,
                 mColorLongs, mPositions, mTileMode.nativeInt, colorSpace().getNativeInstance());
     }

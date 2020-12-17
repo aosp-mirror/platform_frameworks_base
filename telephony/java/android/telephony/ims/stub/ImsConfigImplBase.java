@@ -23,8 +23,11 @@ import android.content.Context;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.telephony.ims.ProvisioningManager;
+import android.telephony.ims.RcsClientConfiguration;
+import android.telephony.ims.RcsConfig;
 import android.telephony.ims.aidl.IImsConfig;
 import android.telephony.ims.aidl.IImsConfigCallback;
+import android.telephony.ims.aidl.IRcsConfigCallback;
 import android.util.Log;
 
 import com.android.ims.ImsConfig;
@@ -202,7 +205,13 @@ public class ImsConfigImplBase {
         @Override
         public void notifyRcsAutoConfigurationReceived(byte[] config, boolean isCompressed)
                 throws RemoteException {
-            getImsConfigImpl().notifyRcsAutoConfigurationReceived(config, isCompressed);
+            getImsConfigImpl().onNotifyRcsAutoConfigurationReceived(config, isCompressed);
+        }
+
+        @Override
+        public void notifyRcsAutoConfigurationRemoved()
+                throws RemoteException {
+            getImsConfigImpl().onNotifyRcsAutoConfigurationRemoved();
         }
 
         private void notifyImsConfigChanged(int item, int value) throws RemoteException {
@@ -227,6 +236,26 @@ public class ImsConfigImplBase {
             if (notifyChange) {
                 notifyImsConfigChanged(item, value);
             }
+        }
+
+        @Override
+        public void addRcsConfigCallback(IRcsConfigCallback c) throws RemoteException {
+            getImsConfigImpl().addRcsConfigCallback(c);
+        }
+
+        @Override
+        public void removeRcsConfigCallback(IRcsConfigCallback c) throws RemoteException {
+            getImsConfigImpl().removeRcsConfigCallback(c);
+        }
+
+        @Override
+        public void triggerRcsReconfiguration() throws RemoteException {
+            getImsConfigImpl().triggerAutoConfiguration();
+        }
+
+        @Override
+        public void setRcsClientConfiguration(RcsClientConfiguration rcc) throws RemoteException {
+            getImsConfigImpl().setRcsClientConfiguration(rcc);
         }
     }
 
@@ -257,6 +286,9 @@ public class ImsConfigImplBase {
 
     private final RemoteCallbackListExt<IImsConfigCallback> mCallbacks =
             new RemoteCallbackListExt<>();
+    private final RemoteCallbackListExt<IRcsConfigCallback> mRcsCallbacks =
+            new RemoteCallbackListExt<>();
+    private byte[] mRcsConfigData;
     ImsConfigStub mImsConfigStub;
 
     /**
@@ -320,6 +352,50 @@ public class ImsConfigImplBase {
         });
     }
 
+    private void addRcsConfigCallback(IRcsConfigCallback c) {
+        mRcsCallbacks.register(c);
+        if (mRcsConfigData != null) {
+            try {
+                c.onConfigurationChanged(mRcsConfigData);
+            } catch (RemoteException e) {
+                Log.w(TAG, "dead binder to call onConfigurationChanged, skipping.");
+            }
+        }
+    }
+
+    private void removeRcsConfigCallback(IRcsConfigCallback c) {
+        mRcsCallbacks.unregister(c);
+    }
+
+    private void onNotifyRcsAutoConfigurationReceived(byte[] config, boolean isCompressed) {
+        mRcsConfigData = isCompressed ? RcsConfig.decompressGzip(config) : config;
+        // can be null in testing
+        if (mRcsCallbacks != null) {
+            mRcsCallbacks.broadcastAction(c -> {
+                try {
+                    c.onConfigurationChanged(mRcsConfigData);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "dead binder in notifyRcsAutoConfigurationReceived, skipping.");
+                }
+            });
+        }
+        notifyRcsAutoConfigurationReceived(config, isCompressed);
+    }
+
+    private void onNotifyRcsAutoConfigurationRemoved() {
+        mRcsConfigData = null;
+        if (mRcsCallbacks != null) {
+            mRcsCallbacks.broadcastAction(c -> {
+                try {
+                    c.onConfigurationReset();
+                } catch (RemoteException e) {
+                    Log.w(TAG, "dead binder in notifyRcsAutoConfigurationRemoved, skipping.");
+                }
+            });
+        }
+        notifyRcsAutoConfigurationRemoved();
+    }
+
     /**
      * @hide
      */
@@ -366,6 +442,12 @@ public class ImsConfigImplBase {
      *
      */
     public void notifyRcsAutoConfigurationReceived(@NonNull byte[] config, boolean isCompressed) {
+    }
+
+    /**
+     * The RCS autoconfiguration XML file is removed or invalid.
+     */
+    public void notifyRcsAutoConfigurationRemoved() {
     }
 
     /**
@@ -420,5 +502,44 @@ public class ImsConfigImplBase {
      */
     public void updateImsCarrierConfigs(PersistableBundle bundle) {
         // Base Implementation - Should be overridden
+    }
+
+    /**
+     * Default messaging application parameters are sent to the ACS client
+     * using this interface.
+     * @param rcc RCS client configuration {@link RcsClientConfiguration}
+     */
+    public void setRcsClientConfiguration(@NonNull RcsClientConfiguration rcc) {
+        // Base Implementation - Should be overridden
+    }
+
+    /**
+     * Reconfiguration triggered by the RCS application. Most likely cause
+     * is the 403 forbidden to a SIP/HTTP request
+     */
+    public void triggerAutoConfiguration() {
+        // Base Implementation - Should be overridden
+    }
+
+    /**
+     * Errors during autoconfiguration connection setup are notified by the
+     * ACS client using this interface.
+     * @param errorCode HTTP error received during connection setup.
+     * @param errorString reason phrase received with the error
+     */
+    public final void notifyAutoConfigurationErrorReceived(int errorCode,
+            @NonNull String errorString) {
+        // can be null in testing
+        if (mRcsCallbacks == null) {
+            return;
+        }
+        mRcsCallbacks.broadcastAction(c -> {
+            try {
+                //TODO compressed by default?
+                c.onAutoConfigurationErrorReceived(errorCode, errorString);
+            } catch (RemoteException e) {
+                Log.w(TAG, "dead binder in notifyAutoConfigurationErrorReceived, skipping.");
+            }
+        });
     }
 }
