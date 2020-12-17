@@ -125,6 +125,7 @@ import android.app.ActivityThread;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.AppOpsManager.Mode;
 import android.app.BroadcastOptions;
 import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
@@ -12831,6 +12832,28 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         @Override
         public ComponentName getProfileOwnerAsUser(int userHandle) {
             return DevicePolicyManagerService.this.getProfileOwnerAsUser(userHandle);
+        }
+
+        @Override
+        public boolean supportsResetOp(int op) {
+            return op == AppOpsManager.OP_INTERACT_ACROSS_PROFILES
+                    && LocalServices.getService(CrossProfileAppsInternal.class) != null;
+        }
+
+        @Override
+        public void resetOp(int op, String packageName, @UserIdInt int userId) {
+            if (op != AppOpsManager.OP_INTERACT_ACROSS_PROFILES) {
+                throw new IllegalArgumentException("Unsupported op for DPM reset: " + op);
+            }
+            LocalServices.getService(CrossProfileAppsInternal.class)
+                    .setInteractAcrossProfilesAppOp(
+                            packageName, findInteractAcrossProfilesResetMode(packageName), userId);
+        }
+
+        private @Mode int findInteractAcrossProfilesResetMode(String packageName) {
+            return getDefaultCrossProfilePackages().contains(packageName)
+                    ? AppOpsManager.MODE_ALLOWED
+                    : AppOpsManager.opToDefaultMode(AppOpsManager.OP_INTERACT_ACROSS_PROFILES);
         }
     }
 
