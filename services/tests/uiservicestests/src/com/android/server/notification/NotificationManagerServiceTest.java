@@ -111,9 +111,9 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentUris;
 import android.content.Context;
-import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IIntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
@@ -1488,6 +1488,20 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mBinderService.getActiveNotifications(sbn.getPackageName());
         assertEquals(0, notifs.length);
         assertEquals(0, mService.getNotificationRecordCount());
+    }
+
+    @Test
+    public void testCancelImmediatelyAfterEnqueueNotifiesListeners_ForegroundServiceFlag()
+            throws Exception {
+        final StatusBarNotification sbn = generateNotificationRecord(null).getSbn();
+        sbn.getNotification().flags =
+                Notification.FLAG_ONGOING_EVENT | FLAG_FOREGROUND_SERVICE;
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag",
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        mBinderService.cancelNotificationWithTag(PKG, PKG, "tag", sbn.getId(), sbn.getUserId());
+        waitForIdle();
+        verify(mListeners, times(1)).notifyPostedLocked(any(), any());
+        verify(mListeners, times(1)).notifyRemovedLocked(any(), anyInt(), any());
     }
 
     @Test

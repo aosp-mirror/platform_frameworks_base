@@ -6299,6 +6299,7 @@ public class NotificationManagerService extends SystemService {
         private final int mRank;
         private final int mCount;
         private final ManagedServiceInfo mListener;
+        private final long mWhen;
 
         CancelNotificationRunnable(final int callingUid, final int callingPid,
                 final String pkg, final String tag, final int id,
@@ -6318,6 +6319,7 @@ public class NotificationManagerService extends SystemService {
             this.mRank = rank;
             this.mCount = count;
             this.mListener = listener;
+            this.mWhen = System.currentTimeMillis();
         }
 
         @Override
@@ -6329,8 +6331,33 @@ public class NotificationManagerService extends SystemService {
             }
 
             synchronized (mNotificationLock) {
-                // Look for the notification, searching both the posted and enqueued lists.
-                NotificationRecord r = findNotificationLocked(mPkg, mTag, mId, mUserId);
+                // Check to see if there is a notification in the enqueued list that hasn't had a
+                // chance to post yet.
+                List<NotificationRecord> enqueued = findEnqueuedNotificationsForCriteria(
+                        mPkg, mTag, mId, mUserId);
+                boolean repost = false;
+                if (enqueued.size() > 0) {
+                    // Found something, let's see what it was
+                    repost = true;
+                    // If all enqueues happened before this cancel then wait for them to happen,
+                    // otherwise we should let this cancel through so the next enqueue happens
+                    for (NotificationRecord r : enqueued) {
+                        if (r.mUpdateTimeMs > mWhen) {
+                            // At least one enqueue was posted after the cancel, so we're invalid
+                            Slog.i(TAG, "notification cancel ignored due to newer enqueued entry"
+                                    + "key=" + r.getSbn().getKey());
+                            return;
+                        }
+                    }
+                }
+                if (repost) {
+                    mHandler.post(this);
+                    return;
+                }
+
+                // Look for the notification in the posted list, since we already checked enqueued.
+                NotificationRecord r =
+                        findNotificationByListLocked(mNotificationList, mPkg, mTag, mId, mUserId);
                 if (r != null) {
                     // The notification was found, check if it should be removed.
 
@@ -6351,6 +6378,10 @@ public class NotificationManagerService extends SystemService {
                         return;
                     }
                     if ((r.getNotification().flags & mMustNotHaveFlags) != 0) {
+                        return;
+                    }
+                    if (r.getUpdateTimeMs() > mWhen) {
+                        // In this case, a post must have slipped by when this runnable reposted
                         return;
                     }
 

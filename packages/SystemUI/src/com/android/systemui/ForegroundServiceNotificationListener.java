@@ -50,6 +50,7 @@ public class ForegroundServiceNotificationListener {
             ForegroundServiceController foregroundServiceController,
             NotificationEntryManager notificationEntryManager,
             NotifPipeline notifPipeline,
+            ForegroundServiceLifetimeExtender fgsLifetimeExtender,
             SystemClock systemClock) {
         mContext = context;
         mForegroundServiceController = foregroundServiceController;
@@ -77,6 +78,7 @@ public class ForegroundServiceNotificationListener {
                 removeNotification(entry.getSbn());
             }
         });
+        mEntryManager.addNotificationLifetimeExtender(fgsLifetimeExtender);
 
         notifPipeline.addCollectionListener(new NotifCollectionListener() {
             @Override
