@@ -4955,6 +4955,7 @@ class Task extends WindowContainer<WindowContainer> {
             }
         } else {
             // No longer managed by any organizer.
+            mTaskAppearedSent = false;
             setForceHidden(FLAG_FORCE_HIDDEN_FOR_TASK_ORG, false /* set */);
             if (mCreatedByOrganizer) {
                 removeImmediately();
@@ -4979,6 +4980,11 @@ class Task extends WindowContainer<WindowContainer> {
      * @return {@code true} if task organizer changed.
      */
     boolean updateTaskOrganizerState(boolean forceUpdate, boolean skipTaskAppeared) {
+        if (getSurfaceControl() == null) {
+            // Can't call onTaskAppeared without a surfacecontrol, so defer this until after one
+            // is created.
+            return false;
+        }
         if (!canBeOrganized()) {
             return setTaskOrganizer(null);
         }
@@ -4987,10 +4993,6 @@ class Task extends WindowContainer<WindowContainer> {
         final TaskOrganizerController controller = mWmService.mAtmService.mTaskOrganizerController;
         final ITaskOrganizer organizer = controller.getTaskOrganizer(windowingMode);
         if (!forceUpdate && mTaskOrganizer == organizer) {
-            return false;
-        } else if (organizer != null && getSurfaceControl() == null) {
-            // Can't call onTaskAppeared without a surfacecontrol, so defer this until after one
-            // is created.
             return false;
         }
         return setTaskOrganizer(organizer, skipTaskAppeared);
@@ -7631,7 +7633,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     void dispatchTaskInfoChangedIfNeeded(boolean force) {
         if (isOrganized()) {
-            mAtmService.mTaskOrganizerController.onTaskInfoChanged(this, force);
+            mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(this, force);
         }
     }
 

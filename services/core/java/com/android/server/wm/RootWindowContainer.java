@@ -1013,7 +1013,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mWmService.scheduleAnimationLocked();
 
         // Send any pending task-info changes that were queued-up during a layout deferment
-        mWmService.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+        mWmService.mAtmService.mTaskOrganizerController.dispatchPendingTaskInfoChanges();
 
         if (DEBUG_WINDOW_TRACE) Slog.e(TAG, "performSurfacePlacementInner exit");
     }
