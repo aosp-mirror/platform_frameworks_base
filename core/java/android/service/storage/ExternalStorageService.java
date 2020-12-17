@@ -16,6 +16,7 @@
 
 package android.service.storage;
 
+import android.annotation.BytesLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SdkConstant;
@@ -29,6 +30,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.ParcelableException;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
+import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
 
 import com.android.internal.os.BackgroundThread;
@@ -37,6 +39,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.UUID;
 
 /**
  * A service to handle filesystem I/O from other apps.
@@ -147,6 +150,18 @@ public abstract class ExternalStorageService extends Service {
      */
     public abstract void onVolumeStateChanged(@NonNull StorageVolume vol) throws IOException;
 
+    /**
+     * Called when any cache held by the ExternalStorageService needs to be freed.
+     *
+     * <p> Blocks until the service frees the cache or fails in doing so.
+     *
+     * @param volumeUuid uuid of the {@link StorageVolume} from which cache needs to be freed
+     * @param bytes number of bytes which need to be freed
+     */
+    public void onFreeCacheRequested(@NonNull UUID volumeUuid, @BytesLong long bytes) {
+        throw new UnsupportedOperationException("onFreeCacheRequested not implemented");
+    }
+
     @Override
     @NonNull
     public final IBinder onBind(@NonNull Intent intent) {
@@ -175,6 +190,19 @@ public abstract class ExternalStorageService extends Service {
             mHandler.post(() -> {
                 try {
                     onVolumeStateChanged(vol);
+                    sendResult(sessionId, null /* throwable */, callback);
+                } catch (Throwable t) {
+                    sendResult(sessionId, t, callback);
+                }
+            });
+        }
+
+        @Override
+        public void freeCache(String sessionId, String volumeUuid, long bytes,
+                RemoteCallback callback) {
+            mHandler.post(() -> {
+                try {
+                    onFreeCacheRequested(StorageManager.convert(volumeUuid), bytes);
                     sendResult(sessionId, null /* throwable */, callback);
                 } catch (Throwable t) {
                     sendResult(sessionId, t, callback);

@@ -16,9 +16,6 @@
 
 package com.android.server.location.timezone;
 
-import static com.android.internal.location.timezone.LocationTimeZoneEvent.EVENT_TYPE_PERMANENT_FAILURE;
-import static com.android.internal.location.timezone.LocationTimeZoneEvent.EVENT_TYPE_SUCCESS;
-import static com.android.internal.location.timezone.LocationTimeZoneEvent.EVENT_TYPE_UNCERTAIN;
 import static com.android.server.location.timezone.LocationTimeZoneManagerService.PRIMARY_PROVIDER_NAME;
 import static com.android.server.location.timezone.LocationTimeZoneManagerService.SECONDARY_PROVIDER_NAME;
 
@@ -26,8 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.ShellCommand;
 import android.os.SystemClock;
-
-import com.android.internal.location.timezone.LocationTimeZoneEvent;
+import android.service.timezone.TimeZoneProviderSuggestion;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -50,14 +46,14 @@ final class SimulatedBinderProviderEvent {
 
 
     @NonNull private final String mProviderName;
-    private final int mEventType;
-    @Nullable private final LocationTimeZoneEvent mLocationTimeZoneEvent;
+    private final int mType;
+    @Nullable private final TimeZoneProviderEvent mTimeZoneProviderEvent;
 
     private SimulatedBinderProviderEvent(@NonNull String providerName, int eventType,
-            @Nullable LocationTimeZoneEvent locationTimeZoneEvent) {
+            @Nullable TimeZoneProviderEvent timeZoneProviderEvent) {
         this.mProviderName = Objects.requireNonNull(providerName);
-        this.mEventType = eventType;
-        this.mLocationTimeZoneEvent = locationTimeZoneEvent;
+        this.mType = eventType;
+        this.mTimeZoneProviderEvent = timeZoneProviderEvent;
     }
 
     @NonNull
@@ -66,24 +62,24 @@ final class SimulatedBinderProviderEvent {
     }
 
     @Nullable
-    LocationTimeZoneEvent getLocationTimeZoneEvent() {
-        return mLocationTimeZoneEvent;
+    TimeZoneProviderEvent getTimeZoneProviderEvent() {
+        return mTimeZoneProviderEvent;
     }
 
-    int getEventType() {
-        return mEventType;
+    int getType() {
+        return mType;
     }
 
     /** Prints the command line options that {@link #createFromArgs(ShellCommand)} understands. */
     static void printCommandLineOpts(PrintWriter pw) {
         pw.println("Simulated provider binder event:");
         pw.println();
-        pw.println("<provider name> [onBind|onUnbind|locationTimeZoneEvent"
+        pw.println("<provider name> [onBind|onUnbind|timeZoneProviderEvent"
                 + " <location time zone event args>]");
         pw.println();
         pw.println("<provider name> = " + VALID_PROVIDER_NAMES);
-        pw.println("<location time zone event args> ="
-                + " [PERMANENT_FAILURE|UNCERTAIN|SUCCESS <time zone ids>*]");
+        pw.println("<time zone provider event args> ="
+                + " [PERMANENT_FAILURE|UNCERTAIN|SUGGESTION <time zone ids>*]");
     }
 
     /**
@@ -104,8 +100,8 @@ final class SimulatedBinderProviderEvent {
                 return new SimulatedBinderProviderEvent(
                         providerName, INJECTED_EVENT_TYPE_ON_UNBIND, null);
             }
-            case "locationTimeZoneEvent": {
-                LocationTimeZoneEvent event = parseLocationTimeZoneEventArgs(shellCommand);
+            case "timeZoneProviderEvent": {
+                TimeZoneProviderEvent event = parseTimeZoneProviderEventArgs(shellCommand);
                 return new SimulatedBinderProviderEvent(providerName,
                         INJECTED_EVENT_TYPE_LOCATION_TIME_ZONE_EVENT, event);
             }
@@ -115,30 +111,31 @@ final class SimulatedBinderProviderEvent {
         }
     }
 
-    private static LocationTimeZoneEvent parseLocationTimeZoneEventArgs(ShellCommand shellCommand) {
-        LocationTimeZoneEvent.Builder eventBuilder = new LocationTimeZoneEvent.Builder()
-                .setElapsedRealtimeMillis(SystemClock.elapsedRealtime());
-
+    private static TimeZoneProviderEvent parseTimeZoneProviderEventArgs(ShellCommand shellCommand) {
+        TimeZoneProviderEvent event;
         String eventTypeString = shellCommand.getNextArgRequired();
         switch (eventTypeString.toUpperCase()) {
             case "PERMANENT_FAILURE": {
-                eventBuilder.setEventType(EVENT_TYPE_PERMANENT_FAILURE);
+                event = TimeZoneProviderEvent.createPermanentFailureEvent("Simulated");
                 break;
             }
             case "UNCERTAIN": {
-                eventBuilder.setEventType(EVENT_TYPE_UNCERTAIN);
+                event = TimeZoneProviderEvent.createUncertainEvent();
                 break;
             }
-            case "SUCCESS": {
-                eventBuilder.setEventType(EVENT_TYPE_SUCCESS)
-                        .setTimeZoneIds(parseTimeZoneArgs(shellCommand));
+            case "SUGGESTION": {
+                TimeZoneProviderSuggestion suggestion = new TimeZoneProviderSuggestion.Builder()
+                        .setElapsedRealtimeMillis(SystemClock.elapsedRealtime())
+                        .setTimeZoneIds(parseTimeZoneArgs(shellCommand))
+                        .build();
+                event = TimeZoneProviderEvent.createSuggestionEvent(suggestion);
                 break;
             }
             default: {
                 throw new IllegalArgumentException("Error: Unknown eventType: " + eventTypeString);
             }
         }
-        return eventBuilder.build();
+        return event;
     }
 
     private static List<String> parseTimeZoneArgs(ShellCommand shellCommand) {
@@ -154,8 +151,8 @@ final class SimulatedBinderProviderEvent {
     public String toString() {
         return "SimulatedBinderProviderEvent{"
                 + "mProviderName=" + mProviderName
-                + ", mEventType=" + mEventType
-                + ", mLocationTimeZoneEvent=" + mLocationTimeZoneEvent
+                + ", mType=" + mType
+                + ", mTimeZoneProviderEvent=" + mTimeZoneProviderEvent
                 + '}';
     }
 }

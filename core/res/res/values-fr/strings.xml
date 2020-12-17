@@ -52,7 +52,6 @@
     <string name="enablePin" msgid="2543771964137091212">"Échec de l\'opération. Veuillez activer le verrouillage de la carte SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one">Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentative avant que votre carte SIM ne soit verrouillée.</item>
-      <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
       <item quantity="other">Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentatives avant que votre carte SIM ne soit verrouillée.</item>
     </plurals>
     <string name="imei" msgid="2157082351232630390">"Code IMEI"</string>
@@ -180,7 +179,6 @@
     <string name="low_memory" product="default" msgid="2539532364144025569">"La mémoire du téléphone est pleine. Veuillez supprimer des fichiers pour libérer de l\'espace."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
       <item quantity="one">Autorité de certification installée</item>
-      <item quantity="many">Certificate authorities installed</item>
       <item quantity="other">Autorités de certification installées</item>
     </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"Par un tiers inconnu"</string>
@@ -256,7 +254,6 @@
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Utilisez cette option pour qu\'il y ait le moins d\'interférences système possible lorsque votre appareil ne répond pas ou qu\'il est trop lent, ou lorsque vous avez besoin de toutes les sections du rapport de bug. Aucune capture d\'écran supplémentaire ne peut être prise, et vous ne pouvez saisir aucune autre information."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
       <item quantity="one">Capture d\'écran pour le rapport de bug dans <xliff:g id="NUMBER_1">%d</xliff:g> seconde</item>
-      <item quantity="many">Taking screenshot for bug report in <xliff:g id="NUMBER_1">%d</xliff:g> seconds.</item>
       <item quantity="other">Capture d\'écran pour le rapport de bug dans <xliff:g id="NUMBER_1">%d</xliff:g> secondes</item>
     </plurals>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Capture d\'écran avec rapport de bug effectuée"</string>
@@ -356,10 +353,8 @@
     <string name="permdesc_receiveMms" msgid="958102423732219710">"Permet à l\'application de recevoir et de traiter les MMS. Cette autorisation lui donne la possibilité de surveiller ou supprimer les messages envoyés à votre appareil sans vous les montrer."</string>
     <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"Transférer les messages reçus via un canal de diffusion cellulaire"</string>
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Autorise l\'application à établir une connexion avec le module de diffusion cellulaire afin de transférer les messages reçus via un canal de diffusion cellulaire. Des alertes de diffusion cellulaire sont générées dans certaines régions afin de vous avertir de situations d\'urgence. Des applications malveillantes peuvent interférer avec les performances ou le fonctionnement de votre appareil lors de la réception d\'une alerte d\'urgence par diffusion cellulaire."</string>
-    <!-- no translation found for permlab_manageOngoingCalls (281244770664231782) -->
-    <skip />
-    <!-- no translation found for permdesc_manageOngoingCalls (7003138133829915265) -->
-    <skip />
+    <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Gérer les appels en cours"</string>
+    <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Autorise une application à afficher les détails concernant les appels en cours sur votre appareil et à contrôler ces appels."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"lire les messages reçus via un canal de diffusion cellulaire"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Permet à l\'application de lire les messages que votre appareil reçoit via un canal de diffusion cellulaire. Dans certaines zones géographiques, des alertes vous sont envoyées afin de vous prévenir en cas de situation d\'urgence. Les applications malveillantes peuvent venir perturber les performances ou le fonctionnement de votre appareil lorsqu\'un message est reçu via un canal de diffusion cellulaire."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"lire les flux auxquels vous êtes abonné"</string>
@@ -1010,7 +1005,6 @@
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Il y a plus d\'un mois"</string>
     <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
       <item quantity="one">Le dernier jour (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
-      <item quantity="many">Last <xliff:g id="COUNT_1">%d</xliff:g> days</item>
       <item quantity="other">Les <xliff:g id="COUNT_1">%d</xliff:g> derniers jours</item>
     </plurals>
     <string name="last_month" msgid="1528906781083518683">"Le mois dernier"</string>
@@ -1033,82 +1027,66 @@
     <string name="now_string_shortest" msgid="3684914126941650330">"mainten."</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
       <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> m</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g>m</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> m</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="2838655994500499651">
       <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> h</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g>h</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> h</item>
     </plurals>
     <plurals name="duration_days_shortest" formatted="false" msgid="3686058472983158496">
       <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> j</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g>d</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> j</item>
     </plurals>
     <plurals name="duration_years_shortest" formatted="false" msgid="8299112348723640338">
       <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> a</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g>y</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> a</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="849196137176399440">
       <item quantity="one">dans <xliff:g id="COUNT_1">%d</xliff:g> m</item>
-      <item quantity="many">in <xliff:g id="COUNT_1">%d</xliff:g>m</item>
       <item quantity="other">dans <xliff:g id="COUNT_1">%d</xliff:g> m</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="5386373597343170388">
       <item quantity="one">dans <xliff:g id="COUNT_1">%d</xliff:g> h</item>
-      <item quantity="many">in <xliff:g id="COUNT_1">%d</xliff:g>h</item>
       <item quantity="other">dans <xliff:g id="COUNT_1">%d</xliff:g> h</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="814754627092787227">
       <item quantity="one">dans <xliff:g id="COUNT_1">%d</xliff:g> j</item>
-      <item quantity="many">in <xliff:g id="COUNT_1">%d</xliff:g>d</item>
       <item quantity="other">dans <xliff:g id="COUNT_1">%d</xliff:g> j</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="7683731800140202145">
       <item quantity="one">dans <xliff:g id="COUNT_1">%d</xliff:g> a</item>
-      <item quantity="many">in <xliff:g id="COUNT_1">%d</xliff:g>y</item>
       <item quantity="other">dans <xliff:g id="COUNT_1">%d</xliff:g> a</item>
     </plurals>
     <plurals name="duration_minutes_relative" formatted="false" msgid="6569851308583028344">
       <item quantity="one">il y a <xliff:g id="COUNT_1">%d</xliff:g> minute</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> minutes ago</item>
       <item quantity="other">il y a <xliff:g id="COUNT_1">%d</xliff:g> minutes</item>
     </plurals>
     <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
       <item quantity="one">il y a <xliff:g id="COUNT_1">%d</xliff:g> heure</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> hours ago</item>
       <item quantity="other">il y a <xliff:g id="COUNT_1">%d</xliff:g> heures</item>
     </plurals>
     <plurals name="duration_days_relative" formatted="false" msgid="6056425878237482431">
       <item quantity="one">il y a <xliff:g id="COUNT_1">%d</xliff:g> jour</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> days ago</item>
       <item quantity="other">il y a <xliff:g id="COUNT_1">%d</xliff:g> jours</item>
     </plurals>
     <plurals name="duration_years_relative" formatted="false" msgid="2179998228861172159">
       <item quantity="one">il y a <xliff:g id="COUNT_1">%d</xliff:g> an</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> years ago</item>
       <item quantity="other">il y a <xliff:g id="COUNT_1">%d</xliff:g> ans</item>
     </plurals>
     <plurals name="duration_minutes_relative_future" formatted="false" msgid="5759885720917567723">
       <item quantity="one">dans <xliff:g id="COUNT_1">%d</xliff:g> minute</item>
-      <item quantity="many">in <xliff:g id="COUNT_1">%d</xliff:g> minutes</item>
       <item quantity="other">dans <xliff:g id="COUNT_1">%d</xliff:g> minutes</item>
     </plurals>
     <plurals name="duration_hours_relative_future" formatted="false" msgid="8963511608507707959">
       <item quantity="one">dans <xliff:g id="COUNT_1">%d</xliff:g> heure</item>
-      <item quantity="many">in <xliff:g id="COUNT_1">%d</xliff:g> hours</item>
       <item quantity="other">dans <xliff:g id="COUNT_1">%d</xliff:g> heures</item>
     </plurals>
     <plurals name="duration_days_relative_future" formatted="false" msgid="1964709470979250702">
       <item quantity="one">dans <xliff:g id="COUNT_1">%d</xliff:g> jour</item>
-      <item quantity="many">in <xliff:g id="COUNT_1">%d</xliff:g> days</item>
       <item quantity="other">dans <xliff:g id="COUNT_1">%d</xliff:g> jours</item>
     </plurals>
     <plurals name="duration_years_relative_future" formatted="false" msgid="3985129025134896371">
       <item quantity="one">dans <xliff:g id="COUNT_1">%d</xliff:g> an</item>
-      <item quantity="many">in <xliff:g id="COUNT_1">%d</xliff:g> years</item>
       <item quantity="other">dans <xliff:g id="COUNT_1">%d</xliff:g> ans</item>
     </plurals>
     <string name="VideoView_error_title" msgid="5750686717225068016">"Problème vidéo"</string>
@@ -1481,7 +1459,6 @@
     <string name="find_on_page" msgid="5400537367077438198">"Rechercher sur la page"</string>
     <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
       <item quantity="one"><xliff:g id="INDEX">%d</xliff:g> sur <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="many"><xliff:g id="INDEX">%d</xliff:g> of <xliff:g id="TOTAL">%d</xliff:g></item>
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> sur <xliff:g id="TOTAL">%d</xliff:g></item>
     </plurals>
     <string name="action_mode_done" msgid="2536182504764803222">"OK"</string>
@@ -1615,7 +1592,6 @@
     <string name="kg_wrong_pin" msgid="3680925703673166482">"Code PIN incorrect."</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
       <item quantity="one">Réessayez dans <xliff:g id="NUMBER">%d</xliff:g> seconde.</item>
-      <item quantity="many">Try again in <xliff:g id="NUMBER">%d</xliff:g> seconds.</item>
       <item quantity="other">Réessayez dans <xliff:g id="NUMBER">%d</xliff:g> secondes.</item>
     </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"Dessinez votre schéma."</string>
@@ -1802,7 +1778,6 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"Le code PIN est trop court. Il doit comporter au moins 4 chiffres."</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
       <item quantity="one">Réessayer dans <xliff:g id="COUNT">%d</xliff:g> seconde</item>
-      <item quantity="many">Try again in <xliff:g id="COUNT">%d</xliff:g> seconds</item>
       <item quantity="other">Réessayer dans <xliff:g id="COUNT">%d</xliff:g> secondes</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Veuillez réessayer ultérieurement."</string>
@@ -1834,42 +1809,34 @@
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activer"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="one">Pendant %1$d minute (jusqu\'à <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="many">For %1$d minutes (until <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">Pendant %1$d minutes (jusqu\'à <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="4230730310318858312">
       <item quantity="one">Pendant %1$d min (jusqu\'à <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="many">For %1$d min (until <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">Pendant %1$d min (jusqu\'à <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
       <item quantity="one">Pendant %1$d heure (jusqu\'à <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="many">For %1$d hours (until <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">Pendant %1$d heures (jusqu\'à <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
       <item quantity="one">Pendant %1$d h (jusqu\'à <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="many">For %1$d hr (until <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">Pendant %1$d h (jusqu\'à <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="1148568456958944998">
       <item quantity="one">Pendant %d minute</item>
-      <item quantity="many">For %d minutes</item>
       <item quantity="other">Pendant %d minutes</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2742377799995454859">
       <item quantity="one">Pendant %d min</item>
-      <item quantity="many">For %d min</item>
       <item quantity="other">Pendant %d min</item>
     </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="525401855645490022">
       <item quantity="one">Pendant %d heure</item>
-      <item quantity="many">For %d hours</item>
       <item quantity="other">Pendant %d heures</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="7644653189680911640">
       <item quantity="one">Pendant %d h</item>
-      <item quantity="many">For %d hr</item>
       <item quantity="other">Pendant %d h</item>
     </plurals>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Jusqu\'à <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
@@ -1911,7 +1878,6 @@
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g> : <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> élément sélectionné</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%1$d</xliff:g> selected</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> éléments sélectionnés</item>
     </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Sans catégorie"</string>
@@ -1979,7 +1945,6 @@
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Aucune suggestion de saisie automatique"</string>
     <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
       <item quantity="one"><xliff:g id="COUNT">%1$s</xliff:g> suggestion de saisie automatique</item>
-      <item quantity="many"><xliff:g id="COUNT">%1$s</xliff:g> autofill suggestions</item>
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> suggestions de saisie automatique</item>
     </plurals>
     <string name="autofill_save_title" msgid="7719802414283739775">"Enregistrer dans "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" ?"</string>
@@ -2074,7 +2039,6 @@
     <string name="car_loading_profile" msgid="8219978381196748070">"Chargement…"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> fichier</item>
-      <item quantity="many"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> files</item>
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> fichiers</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Aucune recommandation de personnes avec lesquelles effectuer un partage"</string>

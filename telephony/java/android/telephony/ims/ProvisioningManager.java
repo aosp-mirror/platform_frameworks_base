@@ -21,6 +21,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SdkConstant;
 import android.annotation.StringDef;
 import android.annotation.SystemApi;
 import android.annotation.WorkerThread;
@@ -31,6 +32,7 @@ import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.ims.aidl.IImsConfigCallback;
+import android.telephony.ims.aidl.IRcsConfigCallback;
 import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.feature.RcsFeature;
 import android.telephony.ims.stub.ImsConfigImplBase;
@@ -936,6 +938,115 @@ public class ProvisioningManager {
     private int mSubId;
 
     /**
+     * The callback for RCS provisioning changes.
+     */
+    public static class RcsProvisioningCallback {
+        private static class CallbackBinder extends IRcsConfigCallback.Stub {
+
+            private final RcsProvisioningCallback mLocalCallback;
+            private Executor mExecutor;
+
+            private CallbackBinder(RcsProvisioningCallback localCallback) {
+                mLocalCallback = localCallback;
+            }
+
+            @Override
+            public void onConfigurationChanged(byte[] configXml) {
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() -> mLocalCallback.onConfigurationChanged(configXml));
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+
+            @Override
+            public void onAutoConfigurationErrorReceived(int errorCode, String errorString) {
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() -> mLocalCallback.onAutoConfigurationErrorReceived(
+                            errorCode, errorString));
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+
+            @Override
+            public void onConfigurationReset() {
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() -> mLocalCallback.onConfigurationReset());
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+
+            @Override
+            public void onRemoved() {
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() -> mLocalCallback.onRemoved());
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+
+            private void setExecutor(Executor executor) {
+                mExecutor = executor;
+            }
+        }
+
+        private final CallbackBinder mBinder = new CallbackBinder(this);
+
+        /**
+         * RCS configuration received via OTA provisioning. Configuration may change
+         * due to various triggers defined in GSMA RCC.14 for ACS(auto configuration
+         * server) or other operator defined triggers. If RCS provisioning is already
+         * completed at the time of callback registration, then this method shall be
+         * invoked with the current configuration
+         * @param configXml The RCS configurationXML received OTA.
+         */
+        public void onConfigurationChanged(@NonNull byte[] configXml) {}
+
+        /**
+         * Errors during autoconfiguration connection setup are notified by the
+         * ACS(auto configuration server) client using this interface.
+         * @param errorCode HTTP error received during connection setup defined in
+         * GSMA RCC.14 2.4.3, like {@link java.net.HttpURLConnection#HTTP_UNAUTHORIZED},
+         * {@link java.net.HttpURLConnection#HTTP_FORBIDDEN}, etc.
+         * @param errorString reason phrase received with the error
+         */
+        public void onAutoConfigurationErrorReceived(int errorCode,
+                @NonNull String errorString) {}
+
+        /**
+         * When the previously valid RCS configuration is cleaned up by telephony for
+         * any case like SIM removed, default messaging application changed, etc.,
+         * this method will be invoked to notify the application regarding this change.
+         */
+        public void onConfigurationReset() {}
+
+        /**
+         * When the RCS application is no longer the Default messaging application,
+         * or when the subscription associated with this callback is removed (SIM
+         * removed, ESIM swap,etc...), callback will automatically be removed and
+         * the below method is invoked. There is a possibility that the method is
+         * invoked after the subscription has become inactive
+         */
+        public void onRemoved() {}
+
+        /**@hide*/
+        public final IRcsConfigCallback getBinder() {
+            return mBinder;
+        }
+
+        /**@hide*/
+        public void setExecutor(Executor executor) {
+            mBinder.setExecutor(executor);
+        }
+    }
+
+    /**
      * Create a new {@link ProvisioningManager} for the subscription specified.
      *
      * @param subId The ID of the subscription that this ProvisioningManager will use.
@@ -1205,6 +1316,174 @@ public class ProvisioningManager {
             throw e.rethrowAsRuntimeException();
         }
 
+    }
+
+    /**
+     * Provides the single registration capability of the device and the carrier.
+     *
+     * <p>This intent only provides the capability and not the current provisioning status of
+     * the RCS VoLTE single registration feature. Only default messaging application may receive
+     * the intent.
+     *
+     * <p>Contains {@link #EXTRA_SUBSCRIPTION_INDEX} to specify the subscription index for which
+     * the intent is valid. and {@link #EXTRA_STATUS} to specify RCS VoLTE single registration
+     * status.
+     */
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_RCS_SINGLE_REGISTRATION_CAPABILITY_UPDATE =
+            "android.telephony.ims.action.RCS_SINGLE_REGISTRATION_CAPABILITY_UPDATE";
+
+    /**
+     * Integer extra to specify subscription index.
+     */
+    public static final String EXTRA_SUBSCRIPTION_ID =
+            "android.telephony.ims.extra.SUBSCRIPTION_ID";
+
+    /**
+     * Integer extra to specify RCS single registration status
+     *
+     * <p>The value can be {@link #STATUS_CAPABLE}, {@link #STATUS_DEVICE_NOT_CAPABLE},
+     * {@link #STATUS_CARRIER_NOT_CAPABLE}, or bitwise OR of
+     * {@link #STATUS_DEVICE_NOT_CAPABLE} and {@link #STATUS_CARRIER_NOT_CAPABLE}.
+     */
+    public static final String EXTRA_STATUS = "android.telephony.ims.extra.STATUS";
+
+    /**
+     * RCS VoLTE single registration is supported by the device and carrier.
+     */
+    public static final int STATUS_CAPABLE                       = 0;
+
+    /**
+     * RCS VoLTE single registration is not supported by the device.
+     */
+    public static final int STATUS_DEVICE_NOT_CAPABLE            = 0x01;
+
+    /**
+     * RCS VoLTE single registration is not supported by the carrier
+     */
+    public static final int STATUS_CARRIER_NOT_CAPABLE           = 0x01 << 1;
+
+    /**
+     * Provide the client configuration parameters of the RCS application.
+     *
+     * <p>When this application is also the default messaging application, and RCS
+     * provisioning is done using autoconfiguration, then these parameters shall be
+     * sent in the HTTP get request to fetch the RCS provisioning. RCS client
+     * configuration must be provided by the application before registering for the
+     * provisioning status events {@link #registerRcsProvisioningChangedCallback()}
+     * @param rcc RCS client configuration {@link RcsClientConfiguration}
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    public void setRcsClientConfiguration(
+            @NonNull RcsClientConfiguration rcc) throws ImsException {
+        try {
+            getITelephony().setRcsClientConfiguration(mSubId, rcc);
+        } catch (ServiceSpecificException e) {
+            throw new ImsException(e.getMessage(), e.errorCode);
+        } catch (RemoteException | IllegalStateException e) {
+            throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
+    }
+
+    /**
+     * Returns a flag to indicate if the device software and the carrier
+     * have the capability to support RCS Volte single IMS registration.
+     * @return true if this single registration is capable, false otherwise
+     * @throws ImsException If the remote ImsService is not available for
+     * any reason or the subscription associated with this instance is no
+     * longer active. See {@link ImsException#getCode()} for more
+     * information.
+     */
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean isRcsVolteSingleRegistrationCapable() throws ImsException {
+        try {
+            return getITelephony().isRcsVolteSingleRegistrationCapable(mSubId);
+        } catch (RemoteException | IllegalStateException e) {
+            throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
+    }
+
+   /**
+     * Registers a new {@link RcsProvisioningCallback} to listen to changes to
+     * RCS provisioning xml.
+     *
+     * <p>RCS application must be the default messaging application and must
+     * have already registered its {@link RcsClientConfiguration} by using
+     * {@link #setRcsClientConfiguration} before it registers the provisioning
+     * callback. If ProvisioningManager has a valid RCS configuration at the
+     * time of callback registration and a reconfiguration is not required
+     * due to RCS client parameters change, then the callback shall be invoked
+     * immediately with the xml.
+     * When the subscription associated with this callback is removed (SIM removed,
+     * ESIM swap,etc...), this callback will automatically be removed.
+     *
+     * @param executor The {@link Executor} to call the callback methods on
+     * @param callback The rcs provisioning callback to be registered.
+     * @see #unregisterRcsProvisioningChangedCallback(RcsProvisioningCallback)
+     * @see SubscriptionManager.OnSubscriptionsChangedListener
+     * @throws IllegalArgumentException if the subscription associated with this
+     * callback is not active (SIM is not inserted, ESIM inactive) or the
+     * subscription is invalid.
+     * @throws ImsException if the subscription associated with this callback is
+     * valid, but the {@link ImsService} associated with the subscription is not
+     * available. This can happen if the service crashed, for example.
+     * It shall also throw this exception when the RCS client parameters for the
+     * application are not valid. In that case application must set the client
+     * params (See {@link #setRcsClientConfiguration()}) and re register the
+     * callback.
+     * See {@link ImsException#getCode()} for a more detailed reason.
+     */
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public void registerRcsProvisioningChangedCallback(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull RcsProvisioningCallback callback) throws ImsException {
+        callback.setExecutor(executor);
+        try {
+            getITelephony().registerRcsProvisioningChangedCallback(mSubId, callback.getBinder());
+        } catch (ServiceSpecificException e) {
+            throw new ImsException(e.getMessage(), e.errorCode);
+        } catch (RemoteException | IllegalStateException e) {
+            throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
+    }
+
+    /**
+     * Unregister an existing {@link RcsProvisioningCallback}. Application can
+     * unregister when its no longer interested in the provisioning updates
+     * like when a user disables RCS from the UI/settings.
+     * When the subscription associated with this callback is removed (SIM
+     * removed, ESIM swap, etc...), this callback will automatically be
+     * removed. If this method is called for an inactive subscription, it
+     * will result in a no-op.
+     * @param callback The existing {@link RcsProvisioningCallback} to be
+     * removed.
+     * @see #registerRcsProvisioningChangedCallback(RcsClientConfiguration,
+     * Executor, RcsProvisioningCallback) @throws IllegalArgumentException
+     * if the subscription associated with this callback is invalid.
+     */
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public void unregisterRcsProvisioningChangedCallback(
+            @NonNull RcsProvisioningCallback callback) {
+        try {
+            getITelephony().unregisterRcsProvisioningChangedCallback(
+                    mSubId, callback.getBinder());
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Reconfiguration triggered by the RCS application. Most likely cause
+     * is the 403 forbidden to a HTTP request.
+     */
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public void triggerRcsReconfiguration() {
+        try {
+            getITelephony().triggerRcsReconfiguration(mSubId);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
     }
 
     private static ITelephony getITelephony() {

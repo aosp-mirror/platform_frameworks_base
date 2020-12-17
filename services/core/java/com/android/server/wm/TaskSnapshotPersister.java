@@ -23,7 +23,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
 import android.annotation.TestApi;
-import android.app.ActivityManager.TaskSnapshot;
+import android.window.TaskSnapshot;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.os.Process;

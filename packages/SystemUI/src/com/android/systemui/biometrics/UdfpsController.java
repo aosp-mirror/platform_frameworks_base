@@ -91,7 +91,7 @@ class UdfpsController implements DozeReceiver {
     private final String mHbmDisableCommand;
     private final boolean mHbmSupported;
     // Brightness in nits in the high-brightness mode.
-    private final float mHbmNits;
+    private final float mMaxNits;
     // A spline mapping from the device's backlight value, normalized to the range [0, 1.0], to a
     // brightness in nits.
     private final Spline mBacklightToNitsSpline;
@@ -211,30 +211,51 @@ class UdfpsController implements DozeReceiver {
         // non-high-brightness mode.
         float[] nitsRange = toFloatArray(resources.obtainTypedArray(
                 com.android.internal.R.array.config_screenBrightnessNits));
+        if (nitsRange.length < 2) {
+            throw new IllegalArgumentException(
+                    String.format("nitsRange.length: %d. Must be >= 2", nitsRange.length));
+        }
 
         // The last value of this range corresponds to the high-brightness mode.
         float[] nitsAutoBrightnessValues = toFloatArray(resources.obtainTypedArray(
                 com.android.internal.R.array.config_autoBrightnessDisplayValuesNits));
+        if (nitsAutoBrightnessValues.length < 2) {
+            throw new IllegalArgumentException(
+                    String.format("nitsAutoBrightnessValues.length: %d. Must be >= 2",
+                            nitsAutoBrightnessValues.length));
+        }
 
-        mHbmNits = nitsAutoBrightnessValues[nitsAutoBrightnessValues.length - 1];
-        float[] hbmNitsRange = {nitsRange[0], mHbmNits};
+        mMaxNits = nitsAutoBrightnessValues[nitsAutoBrightnessValues.length - 1];
+        float[] hbmNitsRange = nitsRange.clone();
+        hbmNitsRange[hbmNitsRange.length - 1] = mMaxNits;
 
         // This range only consists of the minimum and maximum backlight values, which only apply
         // in non-high-brightness mode.
         float[] normalizedBacklightRange = normalizeBacklightRange(
                 resources.getIntArray(
                         com.android.internal.R.array.config_screenBrightnessBacklight));
+        if (normalizedBacklightRange.length < 2) {
+            throw new IllegalArgumentException(
+                    String.format("normalizedBacklightRange.length: %d. Must be >= 2",
+                            normalizedBacklightRange.length));
+        }
+        if (normalizedBacklightRange.length != nitsRange.length) {
+            throw new IllegalArgumentException(
+                    "normalizedBacklightRange.length != nitsRange.length");
+        }
 
         mBacklightToNitsSpline = Spline.createSpline(normalizedBacklightRange, nitsRange);
         mNitsToHbmBacklightSpline = Spline.createSpline(hbmNitsRange, normalizedBacklightRange);
         mDefaultBrightness = obtainDefaultBrightness(powerManager);
 
         // TODO(b/160025856): move to the "dump" method.
-        Log.v(TAG, String.format("ctor | mNitsRange: [%f, %f]", nitsRange[0], nitsRange[1]));
+        Log.v(TAG, String.format("ctor | mNitsRange: [%f, %f]", nitsRange[0],
+                nitsRange[nitsRange.length - 1]));
         Log.v(TAG, String.format("ctor | mHbmNitsRange: [%f, %f]", hbmNitsRange[0],
-                hbmNitsRange[1]));
+                hbmNitsRange[hbmNitsRange.length - 1]));
         Log.v(TAG, String.format("ctor | mNormalizedBacklightRange: [%f, %f]",
-                normalizedBacklightRange[0], normalizedBacklightRange[1]));
+                normalizedBacklightRange[0],
+                normalizedBacklightRange[normalizedBacklightRange.length - 1]));
 
         mFingerprintManager.setUdfpsOverlayController(new UdfpsOverlayController());
         mIsOverlayShowing = false;

@@ -56,7 +56,6 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.infra.ThrottledRunnable;
-import com.android.internal.telephony.SmsApplication;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.BitUtils;
 import com.android.internal.util.CollectionUtils;
@@ -392,16 +391,13 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
     }
 
     @Override
-    public void onRoleHoldersChanged(@NonNull String roleName, @UserIdInt int userId,
-            @Nullable String removedHolder, @Nullable String addedHolder) {
+    public void onRoleHoldersChanged(@NonNull String roleName, @UserIdInt int userId) {
         mListenerHandler.sendMessage(PooledLambda.obtainMessage(
-                RoleManagerService::notifyRoleHoldersChanged, this, roleName, userId,
-                removedHolder, addedHolder));
+                RoleManagerService::notifyRoleHoldersChanged, this, roleName, userId));
     }
 
     @WorkerThread
-    private void notifyRoleHoldersChanged(@NonNull String roleName, @UserIdInt int userId,
-            @Nullable String removedHolder, @Nullable String addedHolder) {
+    private void notifyRoleHoldersChanged(@NonNull String roleName, @UserIdInt int userId) {
         RemoteCallbackList<IOnRoleHoldersChangedListener> listeners = getListeners(userId);
         if (listeners != null) {
             notifyRoleHoldersChangedForListeners(listeners, roleName, userId);
@@ -411,12 +407,6 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                 UserHandle.USER_ALL);
         if (allUsersListeners != null) {
             notifyRoleHoldersChangedForListeners(allUsersListeners, roleName, userId);
-        }
-
-        // Legacy: sms app changed broadcasts
-        if (RoleManager.ROLE_SMS.equals(roleName)) {
-            SmsApplication.broadcastSmsAppChange(getContext(), UserHandle.of(userId),
-                    removedHolder, addedHolder);
         }
     }
 

@@ -32,6 +32,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.window.TaskSnapshot;
 
 import androidx.test.filters.SmallTest;
 
@@ -153,7 +154,7 @@ public class TaskStackListenerImplTest {
 
     @Test
     public void testOnTaskSnapshotChanged() {
-        ActivityManager.TaskSnapshot snapshot = mock(ActivityManager.TaskSnapshot.class);
+        TaskSnapshot snapshot = mock(TaskSnapshot.class);
         mImpl.onTaskSnapshotChanged(123, snapshot);
         verify(mCallback).onTaskSnapshotChanged(eq(123), eq(snapshot));
         verify(mOtherCallback).onTaskSnapshotChanged(eq(123), eq(snapshot));

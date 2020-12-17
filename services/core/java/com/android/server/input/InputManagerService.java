@@ -285,7 +285,8 @@ public class InputManagerService extends IInputManager.Stub
     private static native void nativeSetPointerIconType(long ptr, int iconId);
     private static native void nativeReloadPointerIcons(long ptr);
     private static native void nativeSetCustomPointerIcon(long ptr, PointerIcon icon);
-    private static native void nativeSetPointerCapture(long ptr, boolean detached);
+    private static native void nativeRequestPointerCapture(long ptr, IBinder windowToken,
+            boolean enabled);
     private static native boolean nativeCanDispatchToDisplay(long ptr, int deviceId, int displayId);
     private static native void nativeNotifyPortAssociationsChanged(long ptr);
     private static native void nativeSetMotionClassifierEnabled(long ptr, boolean enabled);
@@ -1611,12 +1612,12 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     @Override
-    public void requestPointerCapture(IBinder windowToken, boolean enabled) {
-        boolean requestConfigurationRefresh =
-                mWindowManagerCallbacks.requestPointerCapture(windowToken, enabled);
-        if (requestConfigurationRefresh) {
-            nativeSetPointerCapture(mPtr, enabled);
+    public void requestPointerCapture(IBinder inputChannelToken, boolean enabled) {
+        if (inputChannelToken == null) {
+            return;
         }
+
+        nativeRequestPointerCapture(mPtr, inputChannelToken, enabled);
     }
 
     public void setInputDispatchMode(boolean enabled, boolean frozen) {
@@ -2189,11 +2190,7 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback
     private void notifyFocusChanged(IBinder oldToken, IBinder newToken) {
-        final boolean requestConfigurationRefresh =
-                mWindowManagerCallbacks.notifyFocusChanged(oldToken, newToken);
-        if (requestConfigurationRefresh) {
-            nativeSetPointerCapture(mPtr, false);
-        }
+        mWindowManagerCallbacks.notifyFocusChanged(oldToken, newToken);
     }
 
     // Native callback

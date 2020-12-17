@@ -105,10 +105,10 @@ public class RuntimeShader extends Shader {
 
     /** @hide */
     @Override
-    protected long createNativeInstance(long nativeMatrix) {
+    protected long createNativeInstance(long nativeMatrix, boolean filterFromPaint) {
         long[] nativeShaders = mInputShaders.length > 0 ? new long[mInputShaders.length] : null;
         for (int i = 0; i < mInputShaders.length; i++) {
-            nativeShaders[i] = mInputShaders[i].getNativeInstance();
+            nativeShaders[i] = mInputShaders[i].getNativeInstance(filterFromPaint);
         }
 
         return nativeCreate(mNativeInstanceRuntimeShaderFactory, nativeMatrix, mUniforms,

@@ -95,10 +95,10 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
         final ActivityOptions options = mock(ActivityOptions.class);
         final Request request = new Request();
 
-        mController.calculate(record.getTask(), layout, record, source, options, PHASE_BOUNDS,
-                new LaunchParams(), request);
+        mController.calculate(record.getTask(), layout, record, source, options, request,
+                PHASE_BOUNDS, new LaunchParams());
         verify(positioner, times(1)).onCalculate(eq(record.getTask()), eq(layout), eq(record),
-                eq(source), eq(options), anyInt(), any(), any(), eq(request));
+                eq(source), eq(options), eq(request), anyInt(), any(), any());
     }
 
     /**
@@ -121,9 +121,9 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
         mPersister.putLaunchParams(userId, name, expected);
 
         mController.calculate(activity.getTask(), null /*layout*/, activity, null /*source*/,
-                null /*options*/, PHASE_BOUNDS, new LaunchParams(), null /* request */);
-        verify(positioner, times(1)).onCalculate(any(), any(), any(), any(), any(), anyInt(),
-                eq(expected), any(), any());
+                null /*options*/, null /*request*/, PHASE_BOUNDS, new LaunchParams());
+        verify(positioner, times(1)).onCalculate(any(), any(), any(), any(), any(), any(),
+                anyInt(), eq(expected), any());
     }
 
     /**
@@ -141,10 +141,10 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
         mController.registerModifier(earlyExitPositioner);
 
         mController.calculate(null /*task*/, null /*layout*/, null /*activity*/,
-                null /*source*/, null /*options*/, PHASE_BOUNDS, new LaunchParams(),
-                null /* request */);
-        verify(ignoredPositioner, never()).onCalculate(any(), any(), any(), any(), any(), anyInt(),
-                any(), any(), any());
+                null /*source*/, null /*options*/, null /*request*/,
+                PHASE_BOUNDS, new LaunchParams());
+        verify(ignoredPositioner, never()).onCalculate(any(), any(), any(), any(), any(), any(),
+                anyInt(), any(), any());
     }
 
     /**
@@ -160,22 +160,22 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
         mController.registerModifier(firstPositioner);
 
         mController.calculate(null /*task*/, null /*layout*/, null /*activity*/,
-                null /*source*/, null /*options*/, PHASE_BOUNDS, new LaunchParams(),
-                null /* request */);
-        verify(firstPositioner, times(1)).onCalculate(any(), any(), any(), any(), any(), anyInt(),
-                any(), any(), any());
+                null /*source*/, null /*options*/, null /*request*/, PHASE_BOUNDS,
+                new LaunchParams());
+        verify(firstPositioner, times(1)).onCalculate(any(), any(), any(), any(), any(), any(),
+                anyInt(), any(), any());
 
         final LaunchParamsModifier secondPositioner = spy(earlyExitPositioner);
 
         mController.registerModifier(secondPositioner);
 
         mController.calculate(null /*task*/, null /*layout*/, null /*activity*/,
-                null /*source*/, null /*options*/, PHASE_BOUNDS, new LaunchParams(),
-                null /* request */);
-        verify(firstPositioner, times(1)).onCalculate(any(), any(), any(), any(), any(), anyInt(),
-                any(), any(), any());
-        verify(secondPositioner, times(1)).onCalculate(any(), any(), any(), any(), any(), anyInt(),
-                any(), any(), any());
+                null /*source*/, null /*options*/, null /*request*/, PHASE_BOUNDS,
+                new LaunchParams());
+        verify(firstPositioner, times(1)).onCalculate(any(), any(), any(), any(), any(), any(),
+                anyInt(), any(), any());
+        verify(secondPositioner, times(1)).onCalculate(any(), any(), any(), any(), any(), any(),
+                anyInt(), any(), any());
     }
 
     /**
@@ -197,10 +197,10 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
         mController.registerModifier(positioner2);
 
         mController.calculate(null /*task*/, null /*layout*/, null /*activity*/, null /*source*/,
-                null /*options*/, PHASE_BOUNDS, new LaunchParams(), null /* request */);
+                null /*options*/, null /*request*/, PHASE_BOUNDS, new LaunchParams());
 
-        verify(positioner1, times(1)).onCalculate(any(), any(), any(), any(), any(), anyInt(),
-                eq(positioner2.getLaunchParams()), any(), any());
+        verify(positioner1, times(1)).onCalculate(any(), any(), any(), any(), any(), any(),
+                anyInt(), eq(positioner2.getLaunchParams()), any());
     }
 
     /**
@@ -223,7 +223,7 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
         final LaunchParams result = new LaunchParams();
 
         mController.calculate(null /*task*/, null /*layout*/, null /*activity*/, null /*source*/,
-                null /*options*/, PHASE_BOUNDS, result, null /* request */);
+                null /*options*/, null /*request*/, PHASE_BOUNDS, result);
 
         assertEquals(result, positioner2.getLaunchParams());
     }
@@ -242,17 +242,17 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
 
         // VR activities should always land on default display.
         mController.calculate(null /*task*/, null /*layout*/, vrActivity /*activity*/,
-                null /*source*/, null /*options*/, PHASE_BOUNDS, result, null /* request */);
+                null /*source*/, null /*options*/, null/*request*/, PHASE_BOUNDS, result);
         assertEquals(mRootWindowContainer.getDefaultTaskDisplayArea(),
                 result.mPreferredTaskDisplayArea);
 
         // Otherwise, always lands on VR 2D display.
         final ActivityRecord vr2dActivity = new ActivityBuilder(mAtm).build();
         mController.calculate(null /*task*/, null /*layout*/, vr2dActivity /*activity*/,
-                null /*source*/, null /*options*/, PHASE_BOUNDS, result, null /* request */);
+                null /*source*/, null /*options*/, null /*request*/, PHASE_BOUNDS, result);
         assertEquals(vrDisplay.getDefaultTaskDisplayArea(), result.mPreferredTaskDisplayArea);
         mController.calculate(null /*task*/, null /*layout*/, null /*activity*/, null /*source*/,
-                null /*options*/, PHASE_BOUNDS, result, null /* request */);
+                null /*options*/, null /*request*/, PHASE_BOUNDS, result);
         assertEquals(vrDisplay.getDefaultTaskDisplayArea(), result.mPreferredTaskDisplayArea);
 
         mAtm.mVr2dDisplayId = INVALID_DISPLAY;
@@ -273,10 +273,10 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
         final WindowLayout layout = new WindowLayout(0, 0, 0, 0, 0, 0, 0);
         final ActivityOptions options = mock(ActivityOptions.class);
 
-        mController.calculate(record.getTask(), layout, record, source, options, PHASE_BOUNDS,
-                new LaunchParams(), null /* request */);
+        mController.calculate(record.getTask(), layout, record, source, options, null/*request*/,
+                PHASE_BOUNDS, new LaunchParams());
         verify(positioner, times(1)).onCalculate(eq(record.getTask()), eq(layout), eq(record),
-                eq(source), eq(options), eq(PHASE_BOUNDS), any(), any(), any());
+                eq(source), eq(options), any(), eq(PHASE_BOUNDS), any(), any());
     }
 
     /**
@@ -408,9 +408,8 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
 
         @Override
         public int onCalculate(Task task, WindowLayout layout, ActivityRecord activity,
-                ActivityRecord source, ActivityOptions options, int phase,
-                LaunchParams currentParams, LaunchParams outParams,
-                Request request) {
+                ActivityRecord source, ActivityOptions options, Request request, int phase,
+                LaunchParams currentParams, LaunchParams outParams) {
             outParams.set(mParams);
             return mReturnVal;
         }

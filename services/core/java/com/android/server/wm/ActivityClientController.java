@@ -39,12 +39,15 @@ import static com.android.server.wm.ActivityTaskManagerService.enforceNotIsolate
 import static com.android.server.wm.Task.ActivityState.DESTROYED;
 import static com.android.server.wm.Task.ActivityState.DESTROYING;
 
+import android.annotation.NonNull;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.IActivityClientController;
 import android.app.PictureInPictureParams;
+import android.app.servertransaction.ClientTransaction;
+import android.app.servertransaction.EnterPipRequestedItem;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -734,6 +737,38 @@ class ActivityClientController extends IActivityClientController.Stub {
         // Truncate the number of actions if necessary.
         params.truncateActions(ActivityTaskManager.getMaxNumPictureInPictureActions(mContext));
         return r;
+    }
+
+    /**
+     * Requests that an activity should enter picture-in-picture mode if possible. This method may
+     * be used by the implementation of non-phone form factors.
+     */
+    void requestPictureInPictureMode(@NonNull ActivityRecord r) {
+        if (r.inPinnedWindowingMode()) {
+            throw new IllegalStateException("Activity is already in PIP mode");
+        }
+
+        final boolean canEnterPictureInPicture = r.checkEnterPictureInPictureState(
+                "requestPictureInPictureMode", /* beforeStopping */ false);
+        if (!canEnterPictureInPicture) {
+            throw new IllegalStateException(
+                    "Requested PIP on an activity that doesn't support it");
+        }
+
+        if (r.pictureInPictureArgs.isAutoEnterEnabled()) {
+            mService.enterPictureInPictureMode(r, r.pictureInPictureArgs);
+            return;
+        }
+
+        try {
+            final ClientTransaction transaction = ClientTransaction.obtain(
+                    r.app.getThread(), r.token);
+            transaction.addCallback(EnterPipRequestedItem.obtain());
+            mService.getLifecycleManager().scheduleTransaction(transaction);
+        } catch (Exception e) {
+            Slog.w(TAG, "Failed to send enter pip requested item: "
+                    + r.intent.getComponent(), e);
+        }
     }
 
     @Override

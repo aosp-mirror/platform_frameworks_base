@@ -442,6 +442,17 @@ public class InputConnectionWrapper implements InputConnection {
     }
 
     @AnyThread
+    @Override
+    public boolean performSpellCheck() {
+        try {
+            mIInputContext.performSpellCheck();
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    @AnyThread
     public boolean performPrivateCommand(String action, Bundle data) {
         try {
             mIInputContext.performPrivateCommand(action, data);

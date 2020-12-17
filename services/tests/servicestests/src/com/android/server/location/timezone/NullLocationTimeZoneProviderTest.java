@@ -15,9 +15,9 @@
  */
 package com.android.server.location.timezone;
 
-import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_DISABLED;
-import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_ENABLED_INITIALIZING;
 import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_PERM_FAILED;
+import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_INITIALIZING;
+import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STOPPED;
 import static com.android.server.location.timezone.TestSupport.USER1_CONFIG_GEO_DETECTION_ENABLED;
 
 import static org.junit.Assert.assertEquals;
@@ -61,14 +61,14 @@ public class NullLocationTimeZoneProviderTest {
         provider.initialize(providerState -> mTestController.onProviderStateChange(providerState));
 
         ProviderState currentState = provider.getCurrentState();
-        assertEquals(PROVIDER_STATE_DISABLED, currentState.stateEnum);
+        assertEquals(PROVIDER_STATE_STOPPED, currentState.stateEnum);
         assertNull(currentState.currentUserConfiguration);
         assertSame(provider, currentState.provider);
         mTestThreadingDomain.assertQueueEmpty();
     }
 
     @Test
-    public void enableSchedulesPermFailure() {
+    public void startSchedulesPermFailure() {
         String providerName = "primary";
         NullLocationTimeZoneProvider provider =
                 new NullLocationTimeZoneProvider(mTestThreadingDomain, providerName);
@@ -77,13 +77,14 @@ public class NullLocationTimeZoneProviderTest {
         ConfigurationInternal config = USER1_CONFIG_GEO_DETECTION_ENABLED;
         Duration arbitraryInitializationTimeout = Duration.ofMinutes(5);
         Duration arbitraryInitializationTimeoutFuzz = Duration.ofMinutes(2);
-        provider.enable(config, arbitraryInitializationTimeout, arbitraryInitializationTimeoutFuzz);
+        provider.startUpdates(config, arbitraryInitializationTimeout,
+                arbitraryInitializationTimeoutFuzz);
 
         // The NullProvider should enter the enabled state, but have schedule an immediate runnable
         // to switch to perm failure.
         ProviderState currentState = provider.getCurrentState();
         assertSame(provider, currentState.provider);
-        assertEquals(PROVIDER_STATE_ENABLED_INITIALIZING, currentState.stateEnum);
+        assertEquals(PROVIDER_STATE_STARTED_INITIALIZING, currentState.stateEnum);
         assertEquals(config, currentState.currentUserConfiguration);
         mTestThreadingDomain.assertNextQueueItemIsImmediate();
         // Entering enabled() does not trigger an onProviderStateChanged() as it is requested by the

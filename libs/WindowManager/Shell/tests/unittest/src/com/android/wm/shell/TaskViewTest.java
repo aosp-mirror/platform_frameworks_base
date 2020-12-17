@@ -215,4 +215,19 @@ public class TaskViewTest extends ShellTestCase {
 
         verify(mViewListener).onBackPressedOnTaskRoot(eq(mTaskInfo.taskId));
     }
+
+    @Test
+    public void testSetOnBackPressedOnTaskRoot() {
+        mTaskView.onTaskAppeared(mTaskInfo, mLeash);
+        verify(mOrganizer).setInterceptBackPressedOnTaskRoot(eq(mTaskInfo.token), eq(true));
+    }
+
+    @Test
+    public void testUnsetOnBackPressedOnTaskRoot() {
+        mTaskView.onTaskAppeared(mTaskInfo, mLeash);
+        verify(mOrganizer).setInterceptBackPressedOnTaskRoot(eq(mTaskInfo.token), eq(true));
+
+        mTaskView.onTaskVanished(mTaskInfo);
+        verify(mOrganizer).setInterceptBackPressedOnTaskRoot(eq(mTaskInfo.token), eq(false));
+    }
 }

@@ -18,8 +18,9 @@
 package android.telephony.ims.aidl;
 
 import android.os.PersistableBundle;
-
 import android.telephony.ims.aidl.IImsConfigCallback;
+import android.telephony.ims.aidl.IRcsConfigCallback;
+import android.telephony.ims.RcsClientConfiguration;
 
 import com.android.ims.ImsConfigListener;
 
@@ -41,4 +42,9 @@ interface IImsConfig {
     int setConfigString(int item, String value);
     void updateImsCarrierConfigs(in PersistableBundle bundle);
     void notifyRcsAutoConfigurationReceived(in byte[] config, boolean isCompressed);
+    void notifyRcsAutoConfigurationRemoved();
+    void addRcsConfigCallback(IRcsConfigCallback c);
+    void removeRcsConfigCallback(IRcsConfigCallback c);
+    void triggerRcsReconfiguration();
+    void setRcsClientConfiguration(in RcsClientConfiguration rcc);
 }

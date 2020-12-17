@@ -23,6 +23,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.ColorDrawable;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.NotificationHeaderView;
 import android.view.View;
@@ -1300,12 +1301,12 @@ public class NotificationChildrenContainer extends ViewGroup {
     /**
      * Shows or hides feedback icon.
      */
-    public void showFeedbackIcon(boolean show, int resId) {
+    public void showFeedbackIcon(boolean show, Pair<Integer, Integer> resIds) {
         if (mNotificationHeaderWrapper != null) {
-            mNotificationHeaderWrapper.showFeedbackIcon(show, resId);
+            mNotificationHeaderWrapper.showFeedbackIcon(show, resIds);
         }
         if (mNotificationHeaderWrapperLowPriority != null) {
-            mNotificationHeaderWrapperLowPriority.showFeedbackIcon(show, resId);
+            mNotificationHeaderWrapperLowPriority.showFeedbackIcon(show, resIds);
         }
     }
 

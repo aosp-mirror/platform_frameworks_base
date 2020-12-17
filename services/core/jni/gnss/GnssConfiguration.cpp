@@ -18,6 +18,7 @@
 #define LOG_TAG "GnssConfigurationJni"
 
 #include "GnssConfiguration.h"
+#include "Utils.h"
 
 using android::hardware::gnss::GnssConstellationType;
 using GnssConstellationType_V1_0 = android::hardware::gnss::V1_0::GnssConstellationType;
@@ -41,29 +42,6 @@ namespace {
 
 jclass class_gnssConfiguration_halInterfaceVersion;
 jmethodID method_halInterfaceVersionCtor;
-
-jboolean checkAidlStatus(const Status& status, const char* errorMessage) {
-    if (!status.isOk()) {
-        ALOGE("%s AIDL transport error: %s", errorMessage, status.toString8().c_str());
-        return JNI_FALSE;
-    }
-    return JNI_TRUE;
-}
-
-template <class T>
-inline void logHidlError(Return<T>& result, const char* errorMessage) {
-    ALOGE("%s HIDL transport error: %s", errorMessage, result.description().c_str());
-}
-
-template <class T>
-jboolean checkHidlReturn(Return<T>& result, const char* errorMessage) {
-    if (!result.isOk()) {
-        logHidlError(result, errorMessage);
-        return JNI_FALSE;
-    } else {
-        return JNI_TRUE;
-    }
-}
 
 jobject createHalInterfaceVersionJavaObject(JNIEnv* env, jint major, jint minor) {
     return env->NewObject(class_gnssConfiguration_halInterfaceVersion,

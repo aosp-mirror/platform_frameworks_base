@@ -33,14 +33,15 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.TimingsTraceLog;
+import android.view.SurfaceControl;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.systemui.dagger.ContextComponentHelper;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.people.PeopleSpaceActivity;
 import com.android.systemui.people.widget.PeopleSpaceWidgetProvider;
+import com.android.systemui.shared.system.ThreadedRendererCompat;
 import com.android.systemui.util.NotificationChannels;
 
 import java.lang.reflect.Constructor;
@@ -98,6 +99,18 @@ public class SystemUIApplication extends Application implements
         if (Process.myUserHandle().equals(UserHandle.SYSTEM)) {
             IntentFilter bootCompletedFilter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
             bootCompletedFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+
+            // If SF GPU context priority is set to realtime, then SysUI should run at high.
+            // The priority is defaulted at medium.
+            int sfPriority = SurfaceControl.getGPUContextPriority();
+            Log.i(TAG, "Found SurfaceFlinger's GPU Priority: " + sfPriority);
+            if (sfPriority == ThreadedRendererCompat.EGL_CONTEXT_PRIORITY_REALTIME_NV) {
+                Log.i(TAG, "Setting SysUI's GPU Context priority to: "
+                        + ThreadedRendererCompat.EGL_CONTEXT_PRIORITY_HIGH_IMG);
+                ThreadedRendererCompat.setContextPriority(
+                        ThreadedRendererCompat.EGL_CONTEXT_PRIORITY_HIGH_IMG);
+            }
+
             registerReceiver(new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
@@ -112,26 +125,12 @@ public class SystemUIApplication extends Application implements
                             mServices[i].onBootCompleted();
                         }
                     }
-                    // If flag SHOW_PEOPLE_SPACE is true, enable People Space launcher icon.
-                    // TODO(b/170396074): Remove this when we don't need an icon anymore.
-                    try {
-                        int showPeopleSpace = Settings.Global.getInt(context.getContentResolver(),
-                                Settings.Global.SHOW_PEOPLE_SPACE, 0);
-                        context.getPackageManager().setComponentEnabledSetting(
-                                new ComponentName(context, PeopleSpaceActivity.class),
-                                showPeopleSpace == 1
-                                        ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-                                        : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                                PackageManager.DONT_KILL_APP);
-                    } catch (Exception e) {
-                        Log.w(TAG, "Error enabling People Space launch icon:", e);
-                    }
 
                     // If SHOW_PEOPLE_SPACE is true, enable People Space widget provider.
                     // TODO(b/170396074): Remove this when we don't need a widget anymore.
                     try {
                         int showPeopleSpace = Settings.Global.getInt(context.getContentResolver(),
-                                Settings.Global.SHOW_PEOPLE_SPACE, 0);
+                                Settings.Global.SHOW_PEOPLE_SPACE, 1);
                         context.getPackageManager().setComponentEnabledSetting(
                                 new ComponentName(context, PeopleSpaceWidgetProvider.class),
                                 showPeopleSpace == 1

@@ -72,6 +72,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
     private static final int DO_DELETE_SURROUNDING_TEXT_IN_CODE_POINTS = 81;
     private static final int DO_BEGIN_BATCH_EDIT = 90;
     private static final int DO_END_BATCH_EDIT = 95;
+    private static final int DO_PERFORM_SPELL_CHECK = 110;
     private static final int DO_PERFORM_PRIVATE_COMMAND = 120;
     private static final int DO_CLEAR_META_KEY_STATES = 130;
     private static final int DO_REQUEST_UPDATE_CURSOR_ANCHOR_INFO = 140;
@@ -232,6 +233,15 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
 
     public void endBatchEdit() {
         dispatchMessage(obtainMessage(DO_END_BATCH_EDIT));
+    }
+
+    /**
+     * Dispatches the request for performing spell check.
+     *
+     * @see InputConnection#performSpellCheck()
+     */
+    public void performSpellCheck() {
+        dispatchMessage(obtainMessage(DO_PERFORM_SPELL_CHECK));
     }
 
     public void performPrivateCommand(String action, Bundle data) {
@@ -676,6 +686,20 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                         return;
                     }
                     ic.endBatchEdit();
+                } finally {
+                    Trace.traceEnd(Trace.TRACE_TAG_INPUT);
+                }
+                return;
+            }
+            case DO_PERFORM_SPELL_CHECK: {
+                Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#performSpellCheck");
+                try {
+                    InputConnection ic = getInputConnection();
+                    if (ic == null || !isActive()) {
+                        Log.w(TAG, "performSpellCheck on inactive InputConnection");
+                        return;
+                    }
+                    ic.performSpellCheck();
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_INPUT);
                 }

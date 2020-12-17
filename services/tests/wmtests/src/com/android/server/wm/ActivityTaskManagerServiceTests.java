@@ -98,7 +98,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         doReturn(mockLifecycleManager).when(mAtm).getLifecycleManager();
         doReturn(true).when(activity).checkEnterPictureInPictureState(anyString(), anyBoolean());
 
-        mAtm.requestPictureInPictureMode(activity.token);
+        mAtm.mActivityClientController.requestPictureInPictureMode(activity);
 
         verify(mockLifecycleManager).scheduleTransaction(mClientTransactionCaptor.capture());
         final ClientTransaction transaction = mClientTransactionCaptor.getValue();
@@ -117,7 +117,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         doReturn(false).when(activity).inPinnedWindowingMode();
         doReturn(false).when(activity).checkEnterPictureInPictureState(anyString(), anyBoolean());
 
-        mAtm.requestPictureInPictureMode(activity.token);
+        mAtm.mActivityClientController.requestPictureInPictureMode(activity);
 
         // Check enter no transactions with enter pip requests are made.
         verify(lifecycleManager, times(0)).scheduleTransaction(any());
@@ -130,7 +130,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         ClientLifecycleManager lifecycleManager = mAtm.getLifecycleManager();
         doReturn(true).when(activity).inPinnedWindowingMode();
 
-        mAtm.requestPictureInPictureMode(activity.token);
+        mAtm.mActivityClientController.requestPictureInPictureMode(activity);
 
         // Check that no transactions with enter pip requests are made.
         verify(lifecycleManager, times(0)).scheduleTransaction(any());
@@ -219,7 +219,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         //mock other operations
         doReturn(true).when(record)
                 .checkEnterPictureInPictureState("enterPictureInPictureMode", false);
-        doReturn(false).when(mAtm).isInPictureInPictureMode(any());
+        doReturn(false).when(record).inPinnedWindowingMode();
         doReturn(false).when(mAtm).isKeyguardLocked();
 
         //to simulate NPE

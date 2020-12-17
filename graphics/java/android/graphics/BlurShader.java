@@ -69,16 +69,18 @@ public final class BlurShader extends Shader {
 
     /** @hide **/
     @Override
-    protected long createNativeInstance(long nativeMatrix) {
-        mNativeInputShader = mInputShader != null ? mInputShader.getNativeInstance() : 0;
+    protected long createNativeInstance(long nativeMatrix, boolean filterFromPaint) {
+        mNativeInputShader = mInputShader != null
+                ? mInputShader.getNativeInstance(filterFromPaint) : 0;
         return nativeCreate(nativeMatrix, mRadiusX, mRadiusY, mNativeInputShader,
                 mEdgeTreatment.nativeInt);
     }
 
     /** @hide **/
     @Override
-    protected boolean shouldDiscardNativeInstance() {
-        long currentNativeInstance = mInputShader != null ? mInputShader.getNativeInstance() : 0;
+    protected boolean shouldDiscardNativeInstance(boolean filterFromPaint) {
+        long currentNativeInstance = mInputShader != null
+                ? mInputShader.getNativeInstance(filterFromPaint) : 0;
         return mNativeInputShader != currentNativeInstance;
     }
 

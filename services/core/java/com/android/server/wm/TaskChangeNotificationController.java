@@ -18,7 +18,7 @@ package com.android.server.wm;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.ActivityManager.TaskSnapshot;
+import android.window.TaskSnapshot;
 import android.app.ITaskStackListener;
 import android.app.TaskInfo;
 import android.content.ComponentName;

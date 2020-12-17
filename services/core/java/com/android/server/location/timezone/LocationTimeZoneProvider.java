@@ -16,16 +16,17 @@
 
 package com.android.server.location.timezone;
 
-import static com.android.internal.location.timezone.LocationTimeZoneEvent.EVENT_TYPE_PERMANENT_FAILURE;
-import static com.android.internal.location.timezone.LocationTimeZoneEvent.EVENT_TYPE_SUCCESS;
-import static com.android.internal.location.timezone.LocationTimeZoneEvent.EVENT_TYPE_UNCERTAIN;
 import static com.android.server.location.timezone.LocationTimeZoneManagerService.debugLog;
-import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_DISABLED;
-import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_ENABLED_CERTAIN;
-import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_ENABLED_INITIALIZING;
-import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_ENABLED_UNCERTAIN;
 import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_PERM_FAILED;
+import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_CERTAIN;
+import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_INITIALIZING;
+import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_UNCERTAIN;
+import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STOPPED;
+import static com.android.server.location.timezone.TimeZoneProviderEvent.EVENT_TYPE_PERMANENT_FAILURE;
+import static com.android.server.location.timezone.TimeZoneProviderEvent.EVENT_TYPE_SUGGESTION;
+import static com.android.server.location.timezone.TimeZoneProviderEvent.EVENT_TYPE_UNCERTAIN;
 
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -34,7 +35,6 @@ import android.os.SystemClock;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.location.timezone.LocationTimeZoneEvent;
 import com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.ProviderStateEnum;
 import com.android.server.location.timezone.ThreadingDomain.SingleRunnableQueue;
 import com.android.server.timezonedetector.ConfigurationInternal;
@@ -50,7 +50,7 @@ import java.util.Objects;
  * process, or could be a stubbed instance when no real provider is registered.
  *
  * <p>The provider is supplied with a {@link ProviderListener} via {@link
- * #initialize(ProviderListener)}. This enables it to communicates asynchronous detection / error
+ * #initialize(ProviderListener)}. This starts communication of asynchronous detection / error
  * events back to the {@link LocationTimeZoneProviderController} via the {@link
  * ProviderListener#onProviderStateChange} method. This call must be made on the
  * {@link Handler} thread from the {@link ThreadingDomain} passed to the constructor.
@@ -77,9 +77,10 @@ abstract class LocationTimeZoneProvider implements Dumpable {
      */
     static class ProviderState {
 
-        @IntDef({ PROVIDER_STATE_UNKNOWN, PROVIDER_STATE_ENABLED_INITIALIZING,
-                PROVIDER_STATE_ENABLED_CERTAIN, PROVIDER_STATE_ENABLED_UNCERTAIN,
-                PROVIDER_STATE_DISABLED, PROVIDER_STATE_PERM_FAILED })
+        @IntDef(prefix = "PROVIDER_STATE_",
+                value = { PROVIDER_STATE_UNKNOWN, PROVIDER_STATE_STARTED_INITIALIZING,
+                PROVIDER_STATE_STARTED_CERTAIN, PROVIDER_STATE_STARTED_UNCERTAIN,
+                PROVIDER_STATE_STOPPED, PROVIDER_STATE_PERM_FAILED })
         @interface ProviderStateEnum {}
 
         /**
@@ -88,31 +89,31 @@ abstract class LocationTimeZoneProvider implements Dumpable {
         static final int PROVIDER_STATE_UNKNOWN = 0;
 
         /**
-         * The provider is enabled and has not reported its first event.
+         * The provider is started and has not reported its first event.
          */
-        static final int PROVIDER_STATE_ENABLED_INITIALIZING = 1;
+        static final int PROVIDER_STATE_STARTED_INITIALIZING = 1;
 
         /**
-         * The provider is enabled and most recently reported a "success" event.
+         * The provider is started and most recently reported a "suggestion" event.
          */
-        static final int PROVIDER_STATE_ENABLED_CERTAIN = 2;
+        static final int PROVIDER_STATE_STARTED_CERTAIN = 2;
 
         /**
-         * The provider is enabled and most recently reported an "uncertain" event.
+         * The provider is started and most recently reported an "uncertain" event.
          */
-        static final int PROVIDER_STATE_ENABLED_UNCERTAIN = 3;
+        static final int PROVIDER_STATE_STARTED_UNCERTAIN = 3;
 
         /**
-         * The provider is disabled.
+         * The provider is stopped.
          *
          * This is the state after {@link #initialize} is called.
          */
-        static final int PROVIDER_STATE_DISABLED = 4;
+        static final int PROVIDER_STATE_STOPPED = 4;
 
         /**
-         * The provider has failed and cannot be re-enabled.
+         * The provider has failed and cannot be re-started.
          *
-         * Providers may enter this state after a provider is enabled.
+         * Providers may enter this state after a provider is started.
          */
         static final int PROVIDER_STATE_PERM_FAILED = 5;
 
@@ -123,16 +124,16 @@ abstract class LocationTimeZoneProvider implements Dumpable {
         public final @ProviderStateEnum int stateEnum;
 
         /**
-         * The last {@link LocationTimeZoneEvent} received. Only populated when {@link #stateEnum}
-         * is either {@link #PROVIDER_STATE_ENABLED_CERTAIN} or {@link
-         * #PROVIDER_STATE_ENABLED_UNCERTAIN}, but it can be {@code null} then too if no event has
+         * The last {@link TimeZoneProviderEvent} received. Only populated when {@link #stateEnum}
+         * is either {@link #PROVIDER_STATE_STARTED_CERTAIN} or {@link
+         * #PROVIDER_STATE_STARTED_UNCERTAIN}, but it can be {@code null} then too if no event has
          * yet been received.
          */
-        @Nullable public final LocationTimeZoneEvent event;
+        @Nullable public final TimeZoneProviderEvent event;
 
         /**
          * The user configuration associated with the current state. Only and always present when
-         * {@link #stateEnum} is one of the enabled states.
+         * {@link #stateEnum} is one of the started states.
          */
         @Nullable public final ConfigurationInternal currentUserConfiguration;
 
@@ -140,6 +141,7 @@ abstract class LocationTimeZoneProvider implements Dumpable {
          * The time according to the elapsed realtime clock when the provider entered the current
          * state. Included for debugging, not used for equality.
          */
+        @ElapsedRealtimeLong
         private final long mStateEntryTimeMillis;
 
         /**
@@ -151,7 +153,7 @@ abstract class LocationTimeZoneProvider implements Dumpable {
 
         private ProviderState(@NonNull LocationTimeZoneProvider provider,
                 @ProviderStateEnum int stateEnum,
-                @Nullable LocationTimeZoneEvent event,
+                @Nullable TimeZoneProviderEvent event,
                 @Nullable ConfigurationInternal currentUserConfiguration,
                 @Nullable String debugInfo) {
             this.provider = Objects.requireNonNull(provider);
@@ -174,25 +176,25 @@ abstract class LocationTimeZoneProvider implements Dumpable {
          * and that the required parameters for the new state are present / absent.
          */
         ProviderState newState(@ProviderStateEnum int newStateEnum,
-                @Nullable LocationTimeZoneEvent event,
+                @Nullable TimeZoneProviderEvent event,
                 @Nullable ConfigurationInternal currentUserConfig,
                 @Nullable String debugInfo) {
 
             // Check valid "from" transitions.
             switch (this.stateEnum) {
                 case PROVIDER_STATE_UNKNOWN: {
-                    if (newStateEnum != PROVIDER_STATE_DISABLED) {
+                    if (newStateEnum != PROVIDER_STATE_STOPPED) {
                         throw new IllegalArgumentException(
                                 "Must transition from " + prettyPrintStateEnum(
                                         PROVIDER_STATE_UNKNOWN)
-                                        + " to " + prettyPrintStateEnum(PROVIDER_STATE_DISABLED));
+                                        + " to " + prettyPrintStateEnum(PROVIDER_STATE_STOPPED));
                     }
                     break;
                 }
-                case PROVIDER_STATE_DISABLED:
-                case PROVIDER_STATE_ENABLED_INITIALIZING:
-                case PROVIDER_STATE_ENABLED_CERTAIN:
-                case PROVIDER_STATE_ENABLED_UNCERTAIN: {
+                case PROVIDER_STATE_STOPPED:
+                case PROVIDER_STATE_STARTED_INITIALIZING:
+                case PROVIDER_STATE_STARTED_CERTAIN:
+                case PROVIDER_STATE_STARTED_UNCERTAIN: {
                     // These can go to each other or PROVIDER_STATE_PERM_FAILED.
                     break;
                 }
@@ -211,21 +213,21 @@ abstract class LocationTimeZoneProvider implements Dumpable {
                     throw new IllegalArgumentException("Cannot transition to "
                             + prettyPrintStateEnum(PROVIDER_STATE_UNKNOWN));
                 }
-                case PROVIDER_STATE_DISABLED: {
+                case PROVIDER_STATE_STOPPED: {
                     if (event != null || currentUserConfig != null) {
                         throw new IllegalArgumentException(
-                                "Disabled state: event and currentUserConfig must be null"
+                                "Stopped state: event and currentUserConfig must be null"
                                         + ", event=" + event
                                         + ", currentUserConfig=" + currentUserConfig);
                     }
                     break;
                 }
-                case PROVIDER_STATE_ENABLED_INITIALIZING:
-                case PROVIDER_STATE_ENABLED_CERTAIN:
-                case PROVIDER_STATE_ENABLED_UNCERTAIN: {
+                case PROVIDER_STATE_STARTED_INITIALIZING:
+                case PROVIDER_STATE_STARTED_CERTAIN:
+                case PROVIDER_STATE_STARTED_UNCERTAIN: {
                     if (currentUserConfig == null) {
                         throw new IllegalArgumentException(
-                                "Enabled state: currentUserConfig must not be null");
+                                "Started state: currentUserConfig must not be null");
                     }
                     break;
                 }
@@ -245,11 +247,11 @@ abstract class LocationTimeZoneProvider implements Dumpable {
             return new ProviderState(provider, newStateEnum, event, currentUserConfig, debugInfo);
         }
 
-        /** Returns {@code true} if {@link #stateEnum} is one of the enabled states. */
-        boolean isEnabled() {
-            return stateEnum == PROVIDER_STATE_ENABLED_INITIALIZING
-                    || stateEnum == PROVIDER_STATE_ENABLED_CERTAIN
-                    || stateEnum == PROVIDER_STATE_ENABLED_UNCERTAIN;
+        /** Returns {@code true} if {@link #stateEnum} is one of the started states. */
+        boolean isStarted() {
+            return stateEnum == PROVIDER_STATE_STARTED_INITIALIZING
+                    || stateEnum == PROVIDER_STATE_STARTED_CERTAIN
+                    || stateEnum == PROVIDER_STATE_STARTED_UNCERTAIN;
         }
 
         @Override
@@ -286,14 +288,14 @@ abstract class LocationTimeZoneProvider implements Dumpable {
 
         private static String prettyPrintStateEnum(@ProviderStateEnum int state) {
             switch (state) {
-                case PROVIDER_STATE_DISABLED:
-                    return "Disabled (" + PROVIDER_STATE_DISABLED + ")";
-                case PROVIDER_STATE_ENABLED_INITIALIZING:
-                    return "Enabled initializing (" + PROVIDER_STATE_ENABLED_INITIALIZING + ")";
-                case PROVIDER_STATE_ENABLED_CERTAIN:
-                    return "Enabled certain (" + PROVIDER_STATE_ENABLED_CERTAIN + ")";
-                case PROVIDER_STATE_ENABLED_UNCERTAIN:
-                    return "Enabled uncertain (" + PROVIDER_STATE_ENABLED_UNCERTAIN + ")";
+                case PROVIDER_STATE_STOPPED:
+                    return "Stopped (" + PROVIDER_STATE_STOPPED + ")";
+                case PROVIDER_STATE_STARTED_INITIALIZING:
+                    return "Started initializing (" + PROVIDER_STATE_STARTED_INITIALIZING + ")";
+                case PROVIDER_STATE_STARTED_CERTAIN:
+                    return "Started certain (" + PROVIDER_STATE_STARTED_CERTAIN + ")";
+                case PROVIDER_STATE_STARTED_UNCERTAIN:
+                    return "Started uncertain (" + PROVIDER_STATE_STARTED_UNCERTAIN + ")";
                 case PROVIDER_STATE_PERM_FAILED:
                     return "Perm failure (" + PROVIDER_STATE_PERM_FAILED + ")";
                 case PROVIDER_STATE_UNKNOWN:
@@ -315,7 +317,7 @@ abstract class LocationTimeZoneProvider implements Dumpable {
             new ReferenceWithHistory<>(10);
 
     /**
-     * Used for scheduling initialization timeouts, i.e. for providers that have just been enabled.
+     * Used for scheduling initialization timeouts, i.e. for providers that have just been started.
      */
     @NonNull private final SingleRunnableQueue mInitializationTimeoutQueue;
 
@@ -344,7 +346,7 @@ abstract class LocationTimeZoneProvider implements Dumpable {
             mProviderListener = Objects.requireNonNull(providerListener);
             ProviderState currentState = ProviderState.createStartingState(this);
             ProviderState newState = currentState.newState(
-                    PROVIDER_STATE_DISABLED, null, null,
+                    PROVIDER_STATE_STOPPED, null, null,
                     "initialize() called");
             setCurrentState(newState, false);
 
@@ -407,28 +409,28 @@ abstract class LocationTimeZoneProvider implements Dumpable {
     }
 
     /**
-     * Enables the provider. It is an error to call this method except when the {@link
-     * #getCurrentState()} is at {@link ProviderState#PROVIDER_STATE_DISABLED}. This method must be
+     * Starts the provider. It is an error to call this method except when the {@link
+     * #getCurrentState()} is at {@link ProviderState#PROVIDER_STATE_STOPPED}. This method must be
      * called using the handler thread from the {@link ThreadingDomain}.
      */
-    final void enable(@NonNull ConfigurationInternal currentUserConfiguration,
+    final void startUpdates(@NonNull ConfigurationInternal currentUserConfiguration,
             @NonNull Duration initializationTimeout, @NonNull Duration initializationTimeoutFuzz) {
         mThreadingDomain.assertCurrentThread();
 
         synchronized (mSharedLock) {
-            assertCurrentState(PROVIDER_STATE_DISABLED);
+            assertCurrentState(PROVIDER_STATE_STOPPED);
 
             ProviderState currentState = mCurrentState.get();
             ProviderState newState = currentState.newState(
-                    PROVIDER_STATE_ENABLED_INITIALIZING, null /* event */,
-                    currentUserConfiguration, "enable() called");
+                    PROVIDER_STATE_STARTED_INITIALIZING, null /* event */,
+                    currentUserConfiguration, "startUpdates() called");
             setCurrentState(newState, false);
 
             Duration delay = initializationTimeout.plus(initializationTimeoutFuzz);
             mInitializationTimeoutQueue.runDelayed(
                     this::handleInitializationTimeout, delay.toMillis());
 
-            onEnable(initializationTimeout);
+            onStartUpdates(initializationTimeout);
         }
     }
 
@@ -437,10 +439,10 @@ abstract class LocationTimeZoneProvider implements Dumpable {
 
         synchronized (mSharedLock) {
             ProviderState currentState = mCurrentState.get();
-            if (currentState.stateEnum == PROVIDER_STATE_ENABLED_INITIALIZING) {
+            if (currentState.stateEnum == PROVIDER_STATE_STARTED_INITIALIZING) {
                 // On initialization timeout the provider becomes uncertain.
                 ProviderState newState = currentState.newState(
-                        PROVIDER_STATE_ENABLED_UNCERTAIN, null /* event */,
+                        PROVIDER_STATE_STARTED_UNCERTAIN, null /* event */,
                         currentState.currentUserConfiguration, "initialization timeout");
                 setCurrentState(newState, true);
             }
@@ -448,65 +450,64 @@ abstract class LocationTimeZoneProvider implements Dumpable {
     }
 
     /**
-     * Implemented by subclasses to do work during {@link #enable}.
+     * Implemented by subclasses to do work during {@link #startUpdates}.
      */
-    abstract void onEnable(@NonNull Duration initializationTimeout);
+    abstract void onStartUpdates(@NonNull Duration initializationTimeout);
 
     /**
-     * Disables the provider. It is an error* to call this method except when the {@link
-     * #getCurrentState()} is one of the enabled states. This method must be
+     * Stops the provider. It is an error* to call this method except when the {@link
+     * #getCurrentState()} is one of the started states. This method must be
      * called using the handler thread from the {@link ThreadingDomain}.
      */
-    final void disable() {
+    final void stopUpdates() {
         mThreadingDomain.assertCurrentThread();
 
         synchronized (mSharedLock) {
-            assertIsEnabled();
+            assertIsStarted();
 
             ProviderState currentState = mCurrentState.get();
             ProviderState newState = currentState.newState(
-                    PROVIDER_STATE_DISABLED, null, null, "disable() called");
+                    PROVIDER_STATE_STOPPED, null, null, "stopUpdates() called");
             setCurrentState(newState, false);
 
             if (mInitializationTimeoutQueue.hasQueued()) {
                 mInitializationTimeoutQueue.cancel();
             }
 
-            onDisable();
+            onStopUpdates();
         }
     }
 
     /**
-     * Implemented by subclasses to do work during {@link #disable}.
+     * Implemented by subclasses to do work during {@link #stopUpdates}.
      */
-    abstract void onDisable();
+    abstract void onStopUpdates();
 
-    /** For subclasses to invoke when a {@link LocationTimeZoneEvent} has been received. */
-    final void handleLocationTimeZoneEvent(
-            @NonNull LocationTimeZoneEvent locationTimeZoneEvent) {
+    /** For subclasses to invoke when a {@link TimeZoneProviderEvent} has been received. */
+    final void handleTimeZoneProviderEvent(@NonNull TimeZoneProviderEvent timeZoneProviderEvent) {
         mThreadingDomain.assertCurrentThread();
-        Objects.requireNonNull(locationTimeZoneEvent);
+        Objects.requireNonNull(timeZoneProviderEvent);
 
         synchronized (mSharedLock) {
-            debugLog("handleLocationTimeZoneEvent: mProviderName=" + mProviderName
-                    + ", locationTimeZoneEvent=" + locationTimeZoneEvent);
+            debugLog("handleTimeZoneProviderEvent: mProviderName=" + mProviderName
+                    + ", timeZoneProviderEvent=" + timeZoneProviderEvent);
 
             ProviderState currentState = mCurrentState.get();
-            int eventType = locationTimeZoneEvent.getEventType();
+            int eventType = timeZoneProviderEvent.getType();
             switch (currentState.stateEnum) {
                 case PROVIDER_STATE_PERM_FAILED: {
                     // After entering perm failed, there is nothing to do. The remote peer is
                     // supposed to stop sending events after it has reported perm failure.
-                    logWarn("handleLocationTimeZoneEvent: Event=" + locationTimeZoneEvent
+                    logWarn("handleTimeZoneProviderEvent: Event=" + timeZoneProviderEvent
                             + " received for provider=" + this + " when in failed state");
                     return;
                 }
-                case PROVIDER_STATE_DISABLED: {
+                case PROVIDER_STATE_STOPPED: {
                     switch (eventType) {
                         case EVENT_TYPE_PERMANENT_FAILURE: {
-                            String msg = "handleLocationTimeZoneEvent:"
-                                    + " Failure event=" + locationTimeZoneEvent
-                                    + " received for disabled provider=" + this
+                            String msg = "handleTimeZoneProviderEvent:"
+                                    + " Failure event=" + timeZoneProviderEvent
+                                    + " received for stopped provider=" + this
                                     + ", entering permanently failed state";
                             logWarn(msg);
                             ProviderState newState = currentState.newState(
@@ -517,30 +518,30 @@ abstract class LocationTimeZoneProvider implements Dumpable {
                             }
                             return;
                         }
-                        case EVENT_TYPE_SUCCESS:
+                        case EVENT_TYPE_SUGGESTION:
                         case EVENT_TYPE_UNCERTAIN: {
-                            // Any geolocation-related events received for a disabled provider are
+                            // Any geolocation-related events received for a stopped provider are
                             // ignored: they should not happen.
-                            logWarn("handleLocationTimeZoneEvent:"
-                                    + " event=" + locationTimeZoneEvent
-                                    + " received for disabled provider=" + this
+                            logWarn("handleTimeZoneProviderEvent:"
+                                    + " event=" + timeZoneProviderEvent
+                                    + " received for stopped provider=" + this
                                     + ", ignoring");
 
                             return;
                         }
                         default: {
                             throw new IllegalStateException(
-                                    "Unknown eventType=" + locationTimeZoneEvent);
+                                    "Unknown eventType=" + timeZoneProviderEvent);
                         }
                     }
                 }
-                case PROVIDER_STATE_ENABLED_INITIALIZING:
-                case PROVIDER_STATE_ENABLED_CERTAIN:
-                case PROVIDER_STATE_ENABLED_UNCERTAIN: {
+                case PROVIDER_STATE_STARTED_INITIALIZING:
+                case PROVIDER_STATE_STARTED_CERTAIN:
+                case PROVIDER_STATE_STARTED_UNCERTAIN: {
                     switch (eventType) {
                         case EVENT_TYPE_PERMANENT_FAILURE: {
-                            String msg = "handleLocationTimeZoneEvent:"
-                                    + " Failure event=" + locationTimeZoneEvent
+                            String msg = "handleTimeZoneProviderEvent:"
+                                    + " Failure event=" + timeZoneProviderEvent
                                     + " received for provider=" + this
                                     + ", entering permanently failed state";
                             logWarn(msg);
@@ -554,16 +555,16 @@ abstract class LocationTimeZoneProvider implements Dumpable {
                             return;
                         }
                         case EVENT_TYPE_UNCERTAIN:
-                        case EVENT_TYPE_SUCCESS: {
+                        case EVENT_TYPE_SUGGESTION: {
                             @ProviderStateEnum int providerStateEnum;
                             if (eventType == EVENT_TYPE_UNCERTAIN) {
-                                providerStateEnum = PROVIDER_STATE_ENABLED_UNCERTAIN;
+                                providerStateEnum = PROVIDER_STATE_STARTED_UNCERTAIN;
                             } else {
-                                providerStateEnum = PROVIDER_STATE_ENABLED_CERTAIN;
+                                providerStateEnum = PROVIDER_STATE_STARTED_CERTAIN;
                             }
                             ProviderState newState = currentState.newState(providerStateEnum,
-                                    locationTimeZoneEvent, currentState.currentUserConfiguration,
-                                    "handleLocationTimeZoneEvent() when enabled");
+                                    timeZoneProviderEvent, currentState.currentUserConfiguration,
+                                    "handleTimeZoneProviderEvent() when started");
                             setCurrentState(newState, true);
                             if (mInitializationTimeoutQueue.hasQueued()) {
                                 mInitializationTimeoutQueue.cancel();
@@ -572,7 +573,7 @@ abstract class LocationTimeZoneProvider implements Dumpable {
                         }
                         default: {
                             throw new IllegalStateException(
-                                    "Unknown eventType=" + locationTimeZoneEvent);
+                                    "Unknown eventType=" + timeZoneProviderEvent);
                         }
                     }
                 }
@@ -589,10 +590,10 @@ abstract class LocationTimeZoneProvider implements Dumpable {
     abstract void logWarn(String msg);
 
     @GuardedBy("mSharedLock")
-    private void assertIsEnabled() {
+    private void assertIsStarted() {
         ProviderState currentState = mCurrentState.get();
-        if (!currentState.isEnabled()) {
-            throw new IllegalStateException("Required an enabled state, but was " + currentState);
+        if (!currentState.isStarted()) {
+            throw new IllegalStateException("Required a started state, but was " + currentState);
         }
     }
 

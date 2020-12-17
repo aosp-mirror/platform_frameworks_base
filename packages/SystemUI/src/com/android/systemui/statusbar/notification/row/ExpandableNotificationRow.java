@@ -49,6 +49,7 @@ import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.Log;
 import android.util.MathUtils;
+import android.util.Pair;
 import android.util.Property;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -1672,12 +1673,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         requestLayout();
     }
 
-    public void showFeedbackIcon(boolean show, int resId) {
+    public void showFeedbackIcon(boolean show, Pair<Integer, Integer> resIds) {
         if (mIsSummaryWithChildren) {
-            mChildrenContainer.showFeedbackIcon(show, resId);
+            mChildrenContainer.showFeedbackIcon(show, resIds);
         }
-        mPrivateLayout.showFeedbackIcon(show, resId);
-        mPublicLayout.showFeedbackIcon(show, resId);
+        mPrivateLayout.showFeedbackIcon(show, resIds);
+        mPublicLayout.showFeedbackIcon(show, resIds);
     }
 
     /** Sets the last time the notification being displayed audibly alerted the user. */

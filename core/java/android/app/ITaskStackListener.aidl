@@ -18,6 +18,7 @@ package android.app;
 
 import android.app.ActivityManager;
 import android.content.ComponentName;
+import android.window.TaskSnapshot;
 
 /** @hide */
 oneway interface ITaskStackListener {
@@ -141,7 +142,7 @@ oneway interface ITaskStackListener {
     /**
      * Called when a task snapshot got updated.
      */
-    void onTaskSnapshotChanged(int taskId, in ActivityManager.TaskSnapshot snapshot);
+    void onTaskSnapshotChanged(int taskId, in TaskSnapshot snapshot);
 
     /**
      * Called when the resumed activity is in size compatibility mode and its override configuration

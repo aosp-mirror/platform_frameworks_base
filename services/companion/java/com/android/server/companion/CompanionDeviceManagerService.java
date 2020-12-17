@@ -18,6 +18,7 @@
 package com.android.server.companion;
 
 import static com.android.internal.util.CollectionUtils.emptyIfNull;
+import static com.android.internal.util.CollectionUtils.find;
 import static com.android.internal.util.CollectionUtils.forEach;
 import static com.android.internal.util.FunctionalUtils.uncheckExceptions;
 import static com.android.internal.util.Preconditions.checkArgument;
@@ -130,9 +131,6 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     private static final ComponentName SERVICE_TO_BIND_TO = ComponentName.createRelative(
             CompanionDeviceManager.COMPANION_DEVICE_DISCOVERY_PACKAGE_NAME,
             ".DeviceDiscoveryService");
-
-    // 10 min
-    public static final int DEVICE_DISCONNECT_PROFILE_REVOKE_DELAY_MS = 10 * 60 * 1000;
 
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "CompanionDeviceManagerService";
@@ -593,10 +591,43 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
     void removeAssociation(int userId, String pkg, String deviceMacAddress) {
         updateAssociations(associations -> CollectionUtils.filter(associations, association -> {
-            return association.getUserId() != userId
+            boolean notMatch = association.getUserId() != userId
                     || !Objects.equals(association.getDeviceMacAddress(), deviceMacAddress)
                     || !Objects.equals(association.getPackageName(), pkg);
+            if (!notMatch) {
+                onAssociationPreRemove(association);
+            }
+            return notMatch;
         }));
+    }
+
+    void onAssociationPreRemove(Association association) {
+        String deviceProfile = association.getDeviceProfile();
+        if (deviceProfile != null) {
+            Association otherAssociationWithDeviceProfile = find(
+                    getAllAssociations(association.getUserId()),
+                    a -> !a.equals(association) && deviceProfile.equals(a.getDeviceProfile()));
+            if (otherAssociationWithDeviceProfile != null) {
+                Log.i(LOG_TAG, "Not revoking " + deviceProfile
+                        + " for " + association
+                        + " - profile still present in " + otherAssociationWithDeviceProfile);
+            } else {
+                mRoleManager.removeRoleHolderAsUser(
+                        association.getDeviceProfile(),
+                        association.getPackageName(),
+                        RoleManager.MANAGE_HOLDERS_FLAG_DONT_KILL_APP,
+                        UserHandle.of(association.getUserId()),
+                        getContext().getMainExecutor(),
+                        success -> {
+                            if (!success) {
+                                Log.e(LOG_TAG, "Failed to revoke device profile role "
+                                        + association.getDeviceProfile()
+                                        + " to " + association.getPackageName()
+                                        + " for user " + association.getUserId());
+                            }
+                        });
+            }
+        }
     }
 
     private void updateSpecialAccessPermissionForAssociatedPackage(Association association) {
@@ -636,6 +667,10 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         }
 
         exemptFromAutoRevoke(packageInfo.packageName, packageInfo.applicationInfo.uid);
+
+        if (mCurrentlyConnectedDevices.contains(association.getDeviceMacAddress())) {
+            grantDeviceProfile(association);
+        }
     }
 
     private void exemptFromAutoRevoke(String packageName, int uid) {
@@ -817,72 +852,39 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     void onDeviceConnected(String address) {
         mCurrentlyConnectedDevices.add(address);
 
-        Handler.getMain().removeCallbacksAndMessages(getDisconnectJobHandlerId(address));
-
         for (UserInfo user : getAllUsers()) {
             for (Association association : getAllAssociations(user.id)) {
                 if (Objects.equals(address, association.getDeviceMacAddress())) {
                     if (association.getDeviceProfile() != null) {
                         Log.i(LOG_TAG, "Granting role " + association.getDeviceProfile()
                                 + " to " + association.getPackageName()
-                                + " due to device connected: " + address);
-                        mRoleManager.addRoleHolderAsUser(
-                                association.getDeviceProfile(),
-                                association.getPackageName(),
-                                RoleManager.MANAGE_HOLDERS_FLAG_DONT_KILL_APP,
-                                UserHandle.of(association.getUserId()),
-                                getContext().getMainExecutor(),
-                                success -> {
-                                    if (!success) {
-                                        Log.e(LOG_TAG, "Failed to grant device profile role "
-                                                + association.getDeviceProfile()
-                                                + " to " + association.getPackageName()
-                                                + " for user " + association.getUserId());
-                                    }
-                                });
+                                + " due to device connected: " + association.getDeviceMacAddress());
+                        grantDeviceProfile(association);
                     }
                 }
             }
         }
     }
 
-    void onDeviceDisconnected(String address) {
-        mCurrentlyConnectedDevices.remove(address);
-
-        Handler.getMain().postDelayed(() -> {
-            if (!mCurrentlyConnectedDevices.contains(address)) {
-                for (UserInfo user : getAllUsers()) {
-                    for (Association association : getAllAssociations(user.id)) {
-                        if (association.getDeviceProfile() != null
-                                && Objects.equals(address, association.getDeviceMacAddress())
-                                && !association.isKeepProfilePrivilegesWhenDeviceAway()) {
-                            Log.i(LOG_TAG, "Revoking role " + association.getDeviceProfile()
-                                    + " to " + association.getPackageName()
-                                    + " due to device disconnected: " + address);
-                            mRoleManager.removeRoleHolderAsUser(
-                                    association.getDeviceProfile(),
-                                    association.getPackageName(),
-                                    RoleManager.MANAGE_HOLDERS_FLAG_DONT_KILL_APP,
-                                    UserHandle.of(association.getUserId()),
-                                    getContext().getMainExecutor(),
-                                    success -> {
-                                        if (!success) {
-                                            Log.e(LOG_TAG, "Failed to revoke device profile role "
-                                                    + association.getDeviceProfile()
-                                                    + " to " + association.getPackageName()
-                                                    + " for user " + association.getUserId());
-                                        }
-                                    });
-                        }
+    private void grantDeviceProfile(Association association) {
+        mRoleManager.addRoleHolderAsUser(
+                association.getDeviceProfile(),
+                association.getPackageName(),
+                RoleManager.MANAGE_HOLDERS_FLAG_DONT_KILL_APP,
+                UserHandle.of(association.getUserId()),
+                getContext().getMainExecutor(),
+                success -> {
+                    if (!success) {
+                        Log.e(LOG_TAG, "Failed to grant device profile role "
+                                + association.getDeviceProfile()
+                                + " to " + association.getPackageName()
+                                + " for user " + association.getUserId());
                     }
-                }
-            }
-        }, getDisconnectJobHandlerId(address), DEVICE_DISCONNECT_PROFILE_REVOKE_DELAY_MS);
+                });
     }
 
-    @NonNull
-    private String getDisconnectJobHandlerId(String address) {
-        return "CDM_onDisconnected_" + address;
+    void onDeviceDisconnected(String address) {
+        mCurrentlyConnectedDevices.remove(address);
     }
 
     private class ShellCmd extends ShellCommand {
@@ -898,34 +900,48 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
         @Override
         public int onCommand(String cmd) {
-            switch (cmd) {
-                case "list": {
-                    forEach(
-                            getAllAssociations(getNextArgInt()),
-                            a -> getOutPrintWriter()
-                                    .println(a.getPackageName() + " " + a.getDeviceMacAddress()));
-                } break;
+            try {
+                switch (cmd) {
+                    case "list": {
+                        forEach(
+                                getAllAssociations(getNextArgInt()),
+                                a -> getOutPrintWriter()
+                                        .println(a.getPackageName() + " "
+                                                + a.getDeviceMacAddress()));
+                    }
+                    break;
 
-                case "associate": {
-                    addAssociation(new Association(getNextArgInt(), getNextArgRequired(),
-                            getNextArgRequired(), null, false));
-                } break;
+                    case "associate": {
+                        addAssociation(new Association(getNextArgInt(), getNextArgRequired(),
+                                getNextArgRequired(), null, false));
+                    }
+                    break;
 
-                case "disassociate": {
-                    removeAssociation(getNextArgInt(), getNextArgRequired(), getNextArgRequired());
-                } break;
+                    case "disassociate": {
+                        removeAssociation(getNextArgInt(), getNextArgRequired(),
+                                getNextArgRequired());
+                    }
+                    break;
 
-                case "simulate_connect": {
-                    onDeviceConnected(getNextArgRequired());
-                } break;
+                    case "simulate_connect": {
+                        onDeviceConnected(getNextArgRequired());
+                    }
+                    break;
 
-                case "simulate_disconnect": {
-                    onDeviceDisconnected(getNextArgRequired());
-                } break;
+                    case "simulate_disconnect": {
+                        onDeviceDisconnected(getNextArgRequired());
+                    }
+                    break;
 
-                default: return handleDefaultCommands(cmd);
+                    default:
+                        return handleDefaultCommands(cmd);
+                }
+                return 0;
+            } catch (Throwable t) {
+                Log.e(LOG_TAG, "Error running a command: $ " + cmd, t);
+                getErrPrintWriter().println(Log.getStackTraceString(t));
+                return 1;
             }
-            return 0;
         }
 
         private int getNextArgInt() {

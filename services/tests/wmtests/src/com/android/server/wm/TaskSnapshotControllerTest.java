@@ -33,7 +33,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
-import android.app.ActivityManager;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.res.Configuration;
@@ -44,6 +43,7 @@ import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
+import android.window.TaskSnapshot;
 
 import androidx.test.filters.SmallTest;
 
@@ -145,8 +145,8 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         final Point taskSize = new Point(5, 6);
 
         try {
-            ActivityManager.TaskSnapshot.Builder builder =
-                    new ActivityManager.TaskSnapshot.Builder();
+            TaskSnapshot.Builder builder =
+                    new TaskSnapshot.Builder();
             builder.setId(id);
             builder.setTopActivityComponent(activityComponent);
             builder.setAppearance(appearance);
@@ -163,7 +163,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
             // Not part of TaskSnapshot itself, used in screenshot process
             assertEquals(pixelFormat, builder.getPixelFormat());
 
-            ActivityManager.TaskSnapshot snapshot = builder.build();
+            TaskSnapshot snapshot = builder.build();
             assertEquals(id, snapshot.getId());
             assertEquals(activityComponent, snapshot.getTopActivityComponent());
             assertEquals(appearance, snapshot.getAppearance());
@@ -211,8 +211,8 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         doReturn(true).when(mAppWindow.mWinAnimator).getShown();
         doReturn(true).when(mAppWindow.mActivityRecord).isSurfaceShowing();
 
-        final ActivityManager.TaskSnapshot.Builder builder =
-                new ActivityManager.TaskSnapshot.Builder();
+        final TaskSnapshot.Builder builder =
+                new TaskSnapshot.Builder();
         boolean success = mWm.mTaskSnapshotController.prepareTaskSnapshot(
                 mAppWindow.mActivityRecord.getTask(), PixelFormat.UNKNOWN, builder);
 

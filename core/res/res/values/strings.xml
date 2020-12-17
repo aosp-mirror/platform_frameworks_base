@@ -5366,6 +5366,14 @@
     <!-- Feedback Indicator -->
     <!-- Content description of the feedback icon in the notification. [CHAR LIMIT=NONE] -->
     <string name="notification_feedback_indicator">Provide Feedback</string>
+    <!-- Content description of the alerted feedback icon in the notification. [CHAR LIMIT=NONE] -->
+    <string name="notification_feedback_indicator_alerted">This notification was promoted to Default. Tap to provide feedback.</string>
+    <!-- Content description of the silenced feedback icon in the notification. [CHAR LIMIT=NONE] -->
+    <string name="notification_feedback_indicator_silenced">This notification was demoted to Silent. Tap to provide feedback.</string>
+    <!-- Content description of the promoted feedback icon in the notification. [CHAR LIMIT=NONE] -->
+    <string name="notification_feedback_indicator_promoted">This notification was ranked higher. Tap to provide feedback.</string>
+    <!-- Content description of the demoted feedback icon in the notification. [CHAR LIMIT=NONE] -->
+    <string name="notification_feedback_indicator_demoted">This notification was ranked lower. Tap to provide feedback.</string>
 
     <!-- Dynamic mode battery saver strings -->
     <!-- The user visible name of the notification channel for the routine mode battery saver fyi notification [CHAR_LIMIT=80]-->

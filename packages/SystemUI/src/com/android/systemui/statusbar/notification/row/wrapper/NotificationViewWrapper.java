@@ -29,6 +29,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.util.Pair;
 import android.view.ContextThemeWrapper;
 import android.view.NotificationHeaderView;
 import android.view.View;
@@ -103,7 +104,7 @@ public abstract class NotificationViewWrapper implements TransformableView {
     /**
      * Shows or hides feedback icon.
      */
-    public void showFeedbackIcon(boolean show, int resId) {
+    public void showFeedbackIcon(boolean show, Pair<Integer, Integer> resIds) {
     }
 
     public void onReinflated() {

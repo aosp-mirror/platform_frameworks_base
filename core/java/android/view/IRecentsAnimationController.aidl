@@ -20,6 +20,7 @@ import android.app.ActivityManager;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
+import android.window.TaskSnapshot;
 
 /**
  * Passed to the {@link IRecentsAnimationRunner} in order for the runner to control to let the
@@ -34,8 +35,7 @@ interface IRecentsAnimationController {
      * Takes a screenshot of the task associated with the given {@param taskId}. Only valid for the
      * current set of task ids provided to the handler.
      */
-    @UnsupportedAppUsage
-    ActivityManager.TaskSnapshot screenshotTask(int taskId);
+    TaskSnapshot screenshotTask(int taskId);
 
     /**
      * Sets the final bounds on a Task. This is used by Launcher to notify the system that

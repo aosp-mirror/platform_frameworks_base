@@ -24,7 +24,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManager.TaskSnapshot;
+import android.window.TaskSnapshot;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
@@ -219,7 +219,8 @@ class TaskSnapshotController {
      * Retrieves a snapshot. If {@param restoreFromDisk} equals {@code true}, DO NOT HOLD THE WINDOW
      * MANAGER LOCK WHEN CALLING THIS METHOD!
      */
-    @Nullable TaskSnapshot getSnapshot(int taskId, int userId, boolean restoreFromDisk,
+    @Nullable
+    TaskSnapshot getSnapshot(int taskId, int userId, boolean restoreFromDisk,
             boolean isLowResolution) {
         return mCache.getSnapshot(taskId, userId, restoreFromDisk, isLowResolution
                 && mPersister.enableLowResSnapshots());
