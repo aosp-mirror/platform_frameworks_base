@@ -5167,6 +5167,14 @@ public final class Telephony {
         public static final String COLUMN_IMS_RCS_UCE_ENABLED = "ims_rcs_uce_enabled";
 
         /**
+         * TelephonyProvider column name for determining if the user has enabled cross SIM calling
+         * for this subscription.
+         *
+         * @hide
+         */
+        public static final String COLUMN_CROSS_SIM_CALLING_ENABLED = "cross_sim_calling_enabled";
+
+        /**
          * TelephonyProvider column name for whether a subscription is opportunistic, that is,
          * whether the network it connects to is limited in functionality or coverage.
          * For example, CBRS.
