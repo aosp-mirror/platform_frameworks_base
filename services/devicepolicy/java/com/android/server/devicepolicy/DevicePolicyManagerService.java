@@ -6158,6 +6158,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 (admin != null) || hasCallingOrSelfPermission(permission.MASTER_CLEAR),
                 "No active admin for user %d and caller %d does not hold MASTER_CLEAR permission",
                 caller.getUserId(), caller.getUid());
+        checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_WIPE_DATA);
 
         if (TextUtils.isEmpty(wipeReasonForUser)) {
             if (calledByProfileOwnerOnOrgOwnedDevice && !calledOnParentInstance) {
@@ -9795,6 +9796,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Objects.requireNonNull(who, "ComponentName is null");
         final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(isProfileOwner(caller) || isDeviceOwner(caller));
+        checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_LOGOUT_USER);
 
         final int callingUserId = caller.getUserId();
         synchronized (getLockObject()) {
@@ -9980,6 +9982,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     throw new SecurityException("Profile owner cannot set user restriction " + key);
                 }
             }
+            checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_USER_RESTRICTION);
 
             // Save the restriction to ActiveAdmin.
             final Bundle restrictions = activeAdmin.ensureUserRestrictions();
