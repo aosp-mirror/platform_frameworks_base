@@ -1761,7 +1761,7 @@ public final class ActiveServices {
                         // The service might have been stopped or exited foreground state
                         // in the interval, so we lazy check whether we still need to show
                         // the notification.
-                        if (r.isForeground) {
+                        if (r.isForeground && r.app != null) {
                             r.postNotification();
                         } else if (DEBUG_FOREGROUND_SERVICE) {
                             Slog.d(TAG_SERVICE, "  - service no longer running/fg, ignoring");
