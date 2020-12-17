@@ -28,6 +28,7 @@ genrule {
 genrule {
     name: "frameworks-base-api-current.txt",
     srcs: [
+        ":art.module.public.api{.public.api.txt}",
         ":conscrypt.module.public.api{.public.api.txt}",
         ":framework-media{.public.api.txt}",
         ":framework-mediaprovider{.public.api.txt}",
@@ -64,6 +65,7 @@ genrule {
     name: "frameworks-base-api-current.srcjar",
     srcs: [
         ":api-stubs-docs-non-updatable",
+        ":art.module.public.api{.public.stubs.source}",
         ":conscrypt.module.public.api{.public.stubs.source}",
         ":framework-media{.public.stubs.source}",
         ":framework-mediaprovider{.public.stubs.source}",
@@ -83,6 +85,7 @@ genrule {
 genrule {
     name: "frameworks-base-api-removed.txt",
     srcs: [
+        ":art.module.public.api{.public.removed-api.txt}",
         ":conscrypt.module.public.api{.public.removed-api.txt}",
         ":framework-media{.public.removed-api.txt}",
         ":framework-mediaprovider{.public.removed-api.txt}",
