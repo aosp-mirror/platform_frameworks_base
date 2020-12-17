@@ -41,12 +41,12 @@ public class PipUiEventLogger {
     }
 
     public void setTaskInfo(TaskInfo taskInfo) {
-        if (taskInfo != null && taskInfo.topActivity != null) {
-            mPackageName = taskInfo.topActivity.getPackageName();
-            mPackageUid = getUid(mPackageName, taskInfo.userId);
-        } else {
+        if (taskInfo == null) {
             mPackageName = null;
             mPackageUid = INVALID_PACKAGE_UID;
+        } else {
+            mPackageName = taskInfo.topActivity.getPackageName();
+            mPackageUid = getUid(mPackageName, taskInfo.userId);
         }
     }
 
