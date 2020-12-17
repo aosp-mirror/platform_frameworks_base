@@ -160,12 +160,12 @@ public class GlobalSettingsValidators {
                             String.valueOf(Global.Wearable.RETAIL_MODE_RETAIL)
                         }));
         VALIDATORS.put(
-                Global.Wearable.PLAY_STORE_AVAILABILITY,
+                Global.Wearable.PHONE_PLAY_STORE_AVAILABILITY,
                 new DiscreteValueValidator(
                         new String[] {
-                            String.valueOf(Global.Wearable.PLAY_STORE_AVAILABLE),
-                            String.valueOf(Global.Wearable.PLAY_STORE_UNAVAILABLE),
-                            String.valueOf(Global.Wearable.PLAY_STORE_AVAILABILITY_UNKNOWN)
+                            String.valueOf(Global.Wearable.PHONE_PLAY_STORE_AVAILABLE),
+                            String.valueOf(Global.Wearable.PHONE_PLAY_STORE_UNAVAILABLE),
+                            String.valueOf(Global.Wearable.PHONE_PLAY_STORE_AVAILABILITY_UNKNOWN)
                         }));
         VALIDATORS.put(
                 Global.Wearable.BUG_REPORT,

@@ -16307,18 +16307,19 @@ public final class Settings {
             public static final int RETAIL_MODE_RETAIL = 1;
 
             /**
-             * The play store availability.
+             * The play store availability on companion phone.
              * @hide
              */
-            public static final String PLAY_STORE_AVAILABILITY = "play_store_availability";
+            public static final String PHONE_PLAY_STORE_AVAILABILITY =
+                    "phone_play_store_availability";
 
-            // Possible play store availability states
+            // Possible phone play store availability states
             /** @hide */
-            public static final int PLAY_STORE_AVAILABILITY_UNKNOWN = 0;
+            public static final int PHONE_PLAY_STORE_AVAILABILITY_UNKNOWN = 0;
             /** @hide */
-            public static final int PLAY_STORE_AVAILABLE = 1;
+            public static final int PHONE_PLAY_STORE_AVAILABLE = 1;
             /** @hide */
-            public static final int PLAY_STORE_UNAVAILABLE = 2;
+            public static final int PHONE_PLAY_STORE_UNAVAILABLE = 2;
 
             /**
              * Whether the bug report is enabled.

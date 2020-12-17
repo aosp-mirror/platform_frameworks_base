@@ -5215,8 +5215,8 @@ public class SettingsProvider extends ContentProvider {
                         initGlobalSettingsDefaultValForWearLocked(
                                 Global.Wearable.RETAIL_MODE, Global.Wearable.RETAIL_MODE_CONSUMER);
                         initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.PLAY_STORE_AVAILABILITY,
-                                Global.Wearable.PLAY_STORE_AVAILABILITY_UNKNOWN);
+                                Global.Wearable.PHONE_PLAY_STORE_AVAILABILITY,
+                                Global.Wearable.PHONE_PLAY_STORE_AVAILABILITY_UNKNOWN);
                         initGlobalSettingsDefaultValForWearLocked(
                                 Global.Wearable.BUG_REPORT,
                                 "user".equals(Build.TYPE) // is user build?
