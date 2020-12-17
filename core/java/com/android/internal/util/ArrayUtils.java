@@ -745,6 +745,25 @@ public class ArrayUtils {
     }
 
     /**
+     * Throws {@link ArrayIndexOutOfBoundsException} if the range is out of bounds.
+     * @param len length of the array. Must be non-negative
+     * @param offset start index of the range. Must be non-negative
+     * @param count length of the range. Must be non-negative
+     * @throws ArrayIndexOutOfBoundsException if the range from {@code offset} with length
+     * {@code count} is out of bounds of the array
+     */
+    public static void throwsIfOutOfBounds(int len, int offset, int count) {
+        if (len < 0) {
+            throw new ArrayIndexOutOfBoundsException("Negative length: " + len);
+        }
+
+        if ((offset | count) < 0 || offset > len - count) {
+            throw new ArrayIndexOutOfBoundsException(
+                    "length=" + len + "; regionStart=" + offset + "; regionLength=" + count);
+        }
+    }
+
+    /**
      * Returns an array with values from {@code val} minus {@code null} values
      *
      * @param arrayConstructor typically {@code T[]::new} e.g. {@code String[]::new}
