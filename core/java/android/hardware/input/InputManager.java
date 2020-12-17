@@ -28,6 +28,7 @@ import android.annotation.TestApi;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.hardware.SensorManager;
 import android.os.BlockUntrustedTouchesMode;
 import android.os.Build;
 import android.os.CombinedVibrationEffect;
@@ -100,6 +101,7 @@ public final class InputManager {
     private TabletModeChangedListener mTabletModeChangedListener;
     private List<OnTabletModeChangedListenerDelegate> mOnTabletModeChangedListeners;
 
+    private InputDeviceSensorManager mInputDeviceSensorManager;
     /**
      * Broadcast Action: Query available keyboard layouts.
      * <p>
@@ -287,6 +289,18 @@ public final class InputManager {
         synchronized (InputManager.class) {
             sInstance = new InputManager(inputManagerService);
             return sInstance;
+        }
+    }
+
+    /**
+     * Clear the instance of the input manager.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static void clearInstance() {
+        synchronized (InputManager.class) {
+            sInstance = null;
         }
     }
 
@@ -1152,6 +1166,86 @@ public final class InputManager {
     }
 
     /**
+     * Get sensors information as list.
+     *
+     * @hide
+     */
+    public InputSensorInfo[] getSensorList(int deviceId) {
+        try {
+            return mIm.getSensorList(deviceId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Enable input device sensor
+     *
+     * @hide
+     */
+    public boolean enableSensor(int deviceId, int sensorType, int samplingPeriodUs,
+            int maxBatchReportLatencyUs) {
+        try {
+            return mIm.enableSensor(deviceId, sensorType, samplingPeriodUs,
+                    maxBatchReportLatencyUs);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Enable input device sensor
+     *
+     * @hide
+     */
+    public void disableSensor(int deviceId, int sensorType) {
+        try {
+            mIm.disableSensor(deviceId, sensorType);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Flush input device sensor
+     *
+     * @hide
+     */
+    public boolean flushSensor(int deviceId, int sensorType) {
+        try {
+            return mIm.flushSensor(deviceId, sensorType);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Register input device sensor listener
+     *
+     * @hide
+     */
+    public boolean registerSensorListener(IInputSensorEventListener listener) {
+        try {
+            return mIm.registerSensorListener(listener);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregister input device sensor listener
+     *
+     * @hide
+     */
+    public void unregisterSensorListener(IInputSensorEventListener listener) {
+        try {
+            mIm.unregisterSensorListener(listener);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Add a runtime association between the input port and the display port. This overrides any
      * static associations.
      * @param inputPort The port of the input device.
@@ -1289,7 +1383,7 @@ public final class InputManager {
     }
 
     /**
-     * Gets a vibrator service associated with an input device, assuming it has one.
+     * Gets a vibrator service associated with an input device, always create a new instance.
      * @return The vibrator, never null.
      * @hide
      */
@@ -1362,6 +1456,19 @@ public final class InputManager {
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Gets a sensor manager service associated with an input device, always create a new instance.
+     * @return The sensor manager, never null.
+     * @hide
+     */
+    @NonNull
+    public SensorManager getInputDeviceSensorManager(int deviceId) {
+        if (mInputDeviceSensorManager == null) {
+            mInputDeviceSensorManager = new InputDeviceSensorManager(this);
+        }
+        return mInputDeviceSensorManager.getSensorManager(deviceId);
     }
 
     /**

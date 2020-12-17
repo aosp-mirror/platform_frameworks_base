@@ -41,11 +41,13 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayViewport;
 import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.IInputManager;
+import android.hardware.input.IInputSensorEventListener;
 import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputManagerInternal;
 import android.hardware.input.InputManagerInternal.LidSwitchCallback;
+import android.hardware.input.InputSensorInfo;
 import android.hardware.input.KeyboardLayout;
 import android.hardware.input.TouchCalibration;
 import android.media.AudioManager;
@@ -117,6 +119,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -184,12 +187,24 @@ public class InputManagerService extends IInputManager.Stub
     private final List<TabletModeChangedListenerRecord> mTempTabletModeChangedListenersToNotify =
             new ArrayList<>();
 
+    private final Object mSensorEventLock = new Object();
+    // List of currently registered sensor event listeners by process id
+    @GuardedBy("mSensorEventLock")
+    private final SparseArray<SensorEventListenerRecord> mSensorEventListeners =
+            new SparseArray<>();
+    private final List<SensorEventListenerRecord> mSensorEventListenersToNotify =
+            new ArrayList<>();
+    private final List<SensorEventListenerRecord> mSensorAccuracyListenersToNotify =
+            new ArrayList<>();
+
     // Persistent data store.  Must be locked each time during use.
     private final PersistentDataStore mDataStore = new PersistentDataStore();
 
     // List of currently registered input devices changed listeners by process id.
     private Object mInputDevicesLock = new Object();
+    @GuardedBy("mInputDevicesLock")
     private boolean mInputDevicesChangedPending; // guarded by mInputDevicesLock
+    @GuardedBy("mInputDevicesLock")
     private InputDevice[] mInputDevices = new InputDevice[0];
     private final SparseArray<InputDevicesChangedListenerRecord> mInputDevicesChangedListeners =
             new SparseArray<InputDevicesChangedListenerRecord>(); // guarded by mInputDevicesLock
@@ -293,6 +308,11 @@ public class InputManagerService extends IInputManager.Stub
     private static native boolean nativeCanDispatchToDisplay(long ptr, int deviceId, int displayId);
     private static native void nativeNotifyPortAssociationsChanged(long ptr);
     private static native void nativeSetMotionClassifierEnabled(long ptr, boolean enabled);
+    private static native InputSensorInfo[] nativeGetSensorList(long ptr, int deviceId);
+    private static native boolean nativeFlushSensor(long ptr, int deviceId, int sensorType);
+    private static native boolean nativeEnableSensor(long ptr, int deviceId, int sensorType,
+            int samplingPeriodUs, int maxBatchReportLatencyUs);
+    private static native void nativeDisableSensor(long ptr, int deviceId, int sensorType);
 
     // Maximum number of milliseconds to wait for input event injection.
     private static final int INJECTION_TIMEOUT_MILLIS = 30 * 1000;
@@ -2047,6 +2067,97 @@ public class InputManagerService extends IInputManager.Stub
         nativeNotifyPortAssociationsChanged(mPtr);
     }
 
+    @Override // Binder call
+    public InputSensorInfo[] getSensorList(int deviceId) {
+        InputSensorInfo[] sensors = nativeGetSensorList(mPtr, deviceId);
+        return sensors;
+    }
+
+    @Override // Binder call
+    public boolean registerSensorListener(IInputSensorEventListener listener) {
+        if (DEBUG) {
+            Slog.d(TAG, "registerSensorListener: listener=" + listener + " callingPid="
+                    + Binder.getCallingPid());
+        }
+        if (listener == null) {
+            Slog.e(TAG, "listener must not be null");
+            return false;
+        }
+
+        synchronized (mInputDevicesLock) {
+            int callingPid = Binder.getCallingPid();
+            if (mSensorEventListeners.get(callingPid) != null) {
+                Slog.e(TAG, "The calling process " + callingPid + " has already "
+                        + "registered an InputSensorEventListener.");
+                return false;
+            }
+
+            SensorEventListenerRecord record =
+                    new SensorEventListenerRecord(callingPid, listener);
+            try {
+                IBinder binder = listener.asBinder();
+                binder.linkToDeath(record, 0);
+            } catch (RemoteException ex) {
+                // give up
+                throw new RuntimeException(ex);
+            }
+
+            mSensorEventListeners.put(callingPid, record);
+        }
+        return true;
+    }
+
+    @Override // Binder call
+    public void unregisterSensorListener(IInputSensorEventListener listener) {
+        if (DEBUG) {
+            Slog.d(TAG, "unregisterSensorListener: listener=" + listener + " callingPid="
+                    + Binder.getCallingPid());
+        }
+
+        if (listener == null) {
+            throw new IllegalArgumentException("listener must not be null");
+        }
+
+        synchronized (mInputDevicesLock) {
+            int callingPid = Binder.getCallingPid();
+            if (mSensorEventListeners.get(callingPid) != null) {
+                SensorEventListenerRecord record = mSensorEventListeners.get(callingPid);
+                if (record.getListener().asBinder() != listener.asBinder()) {
+                    throw new IllegalArgumentException("listener is not registered");
+                }
+                mSensorEventListeners.remove(callingPid);
+            }
+        }
+    }
+
+    @Override // Binder call
+    public boolean flushSensor(int deviceId, int sensorType) {
+        synchronized (mInputDevicesLock) {
+            int callingPid = Binder.getCallingPid();
+            SensorEventListenerRecord listener = mSensorEventListeners.get(callingPid);
+            if (listener != null) {
+                return nativeFlushSensor(mPtr, deviceId, sensorType);
+            }
+            return false;
+        }
+    }
+
+    @Override // Binder call
+    public boolean enableSensor(int deviceId, int sensorType, int samplingPeriodUs,
+            int maxBatchReportLatencyUs) {
+        synchronized (mInputDevicesLock) {
+            return nativeEnableSensor(mPtr, deviceId, sensorType, samplingPeriodUs,
+                    maxBatchReportLatencyUs);
+        }
+    }
+
+    @Override // Binder call
+    public void disableSensor(int deviceId, int sensorType) {
+        synchronized (mInputDevicesLock) {
+            nativeDisableSensor(mPtr, deviceId, sensorType);
+        }
+    }
+
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
@@ -2242,6 +2353,46 @@ public class InputManagerService extends IInputManager.Stub
         }
         // If we couldn't find a gesture monitor for this token, it's a window
         mWindowManagerCallbacks.notifyWindowResponsive(token);
+    }
+
+    // Native callback.
+    private void notifySensorEvent(int deviceId, int sensorType, int accuracy, long timestamp,
+            float[] values) {
+        if (DEBUG) {
+            Slog.d(TAG, "notifySensorEvent: deviceId=" + deviceId + " sensorType="
+                    + sensorType + " values=" + Arrays.toString(values));
+        }
+        mSensorEventListenersToNotify.clear();
+        final int numListeners;
+        synchronized (mSensorEventLock) {
+            numListeners = mSensorEventListeners.size();
+            for (int i = 0; i < numListeners; i++) {
+                mSensorEventListenersToNotify.add(
+                        mSensorEventListeners.valueAt(i));
+            }
+        }
+        for (int i = 0; i < numListeners; i++) {
+            mSensorEventListenersToNotify.get(i).notifySensorEvent(deviceId, sensorType,
+                    accuracy, timestamp, values);
+        }
+        mSensorEventListenersToNotify.clear();
+    }
+
+    // Native callback.
+    private void notifySensorAccuracy(int deviceId, int sensorType, int accuracy) {
+        mSensorAccuracyListenersToNotify.clear();
+        final int numListeners;
+        synchronized (mSensorEventLock) {
+            numListeners = mSensorEventListeners.size();
+            for (int i = 0; i < numListeners; i++) {
+                mSensorAccuracyListenersToNotify.add(mSensorEventListeners.valueAt(i));
+            }
+        }
+        for (int i = 0; i < numListeners; i++) {
+            mSensorAccuracyListenersToNotify.get(i).notifySensorAccuracy(
+                    deviceId, sensorType, accuracy);
+        }
+        mSensorAccuracyListenersToNotify.clear();
     }
 
     // Native callback.
@@ -2771,6 +2922,56 @@ public class InputManagerService extends IInputManager.Stub
             } catch (RemoteException ex) {
                 Slog.w(TAG, "Failed to notify process " + mPid +
                         " that tablet mode changed, assuming it died.", ex);
+                binderDied();
+            }
+        }
+    }
+
+    private void onSensorEventListenerDied(int pid) {
+        synchronized (mSensorEventLock) {
+            mSensorEventListeners.remove(pid);
+        }
+    }
+
+    private final class SensorEventListenerRecord implements DeathRecipient {
+        private final int mPid;
+        private final IInputSensorEventListener mListener;
+
+        SensorEventListenerRecord(int pid, IInputSensorEventListener listener) {
+            mPid = pid;
+            mListener = listener;
+        }
+
+        @Override
+        public void binderDied() {
+            if (DEBUG) {
+                Slog.d(TAG, "Sensor event listener for pid " + mPid + " died.");
+            }
+            onSensorEventListenerDied(mPid);
+        }
+
+        public IInputSensorEventListener getListener() {
+            return mListener;
+        }
+
+        public void notifySensorEvent(int deviceId, int sensorType, int accuracy, long timestamp,
+                float[] values) {
+            try {
+                mListener.onInputSensorChanged(deviceId, sensorType, accuracy, timestamp,
+                        values);
+            } catch (RemoteException ex) {
+                Slog.w(TAG, "Failed to notify process " + mPid
+                        + " that sensor event notified, assuming it died.", ex);
+                binderDied();
+            }
+        }
+
+        public void notifySensorAccuracy(int deviceId, int sensorType, int accuracy) {
+            try {
+                mListener.onInputSensorAccuracyChanged(deviceId, sensorType, accuracy);
+            } catch (RemoteException ex) {
+                Slog.w(TAG, "Failed to notify process " + mPid
+                        + " that sensor accuracy notified, assuming it died.", ex);
                 binderDied();
             }
         }

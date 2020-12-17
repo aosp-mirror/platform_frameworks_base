@@ -23,6 +23,8 @@ import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.TouchCalibration;
 import android.os.CombinedVibrationEffect;
+import android.hardware.input.IInputSensorEventListener;
+import android.hardware.input.InputSensorInfo;
 import android.os.IBinder;
 import android.os.VibrationEffect;
 import android.view.InputDevice;
@@ -105,4 +107,17 @@ interface IInputManager {
     // Remove the runtime association between the input port and the display port. Any existing
     // static association for the cleared input port will be restored.
     void removePortAssociation(in String inputPort);
+
+    InputSensorInfo[] getSensorList(int deviceId);
+
+    boolean registerSensorListener(IInputSensorEventListener listener);
+
+    void unregisterSensorListener(IInputSensorEventListener listener);
+
+    boolean enableSensor(int deviceId, int sensorType, int samplingPeriodUs,
+                int maxBatchReportLatencyUs);
+
+    void disableSensor(int deviceId, int sensorType);
+
+    boolean flushSensor(int deviceId, int sensorType);
 }

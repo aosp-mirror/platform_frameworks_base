@@ -44,6 +44,7 @@ import android.view.InputDevice;
 
 import androidx.test.InstrumentationRegistry;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -87,6 +88,11 @@ public class InputDeviceDelegateTest {
 
         mInputDeviceDelegate = new InputDeviceDelegate(
                 mContextSpy, new Handler(mTestLooper.getLooper()));
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        InputManager.clearInstance();
     }
 
     @Test
@@ -286,6 +292,6 @@ public class InputDeviceDelegateTest {
 
     private InputDevice createInputDevice(int id, boolean hasVibrator) {
         return new InputDevice(id, 0, 0, "name", 0, 0, "description", false, 0, 0,
-                null, hasVibrator, false, false);
+                null, hasVibrator, false, false, false /* hasSensor */);
     }
 }
