@@ -282,6 +282,7 @@ public class PeopleSpaceUtils {
                     )
             );
             views.setImageViewIcon(R.id.person_icon, tile.getUserIcon());
+            views.setBoolean(R.id.content_background, "setClipToOutline", true);
 
             Intent activityIntent = new Intent(context, LaunchConversationActivity.class);
             activityIntent.addFlags(
