@@ -379,6 +379,8 @@ import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.dex.ViewCompiler;
 import com.android.server.pm.domain.verify.DomainVerificationManagerInternal;
 import com.android.server.pm.domain.verify.DomainVerificationService;
+import com.android.server.pm.domain.verify.proxy.DomainVerificationProxy;
+import com.android.server.pm.domain.verify.proxy.DomainVerificationProxyV2;
 import com.android.server.pm.intent.verify.legacy.IntentFilterVerificationManager;
 import com.android.server.pm.intent.verify.legacy.IntentFilterVerificationParams;
 import com.android.server.pm.intent.verify.legacy.IntentVerifierProxy;
@@ -1606,6 +1608,7 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int DEFERRED_NO_KILL_INSTALL_OBSERVER = 24;
     static final int INTEGRITY_VERIFICATION_COMPLETE = 25;
     static final int CHECK_PENDING_INTEGRITY_VERIFICATION = 26;
+    static final int DOMAIN_VERIFICATION = 27;
 
     static final int DEFERRED_NO_KILL_POST_DELETE_DELAY_MS = 3 * 1000;
     static final int DEFERRED_NO_KILL_INSTALL_OBSERVER_DELAY_MS = 500;
@@ -1821,13 +1824,37 @@ public class PackageManagerService extends IPackageManager.Stub
             new DomainVerificationConnection();
 
     private class DomainVerificationConnection implements
-            DomainVerificationService.Connection {
+            DomainVerificationService.Connection, DomainVerificationProxy.Connection {
 
         @Override
         public void scheduleWriteSettings() {
             synchronized (mLock) {
                 PackageManagerService.this.scheduleWriteSettingsLocked();
             }
+        }
+
+        @Override
+        public void schedule(int code, @Nullable Object object) {
+            Message message = mHandler.obtainMessage(DOMAIN_VERIFICATION);
+            message.arg1 = code;
+            message.obj = object;
+            mHandler.sendMessage(message);
+        }
+
+        @Override
+        public long getPowerSaveTempWhitelistAppDuration() {
+            return PackageManagerService.this.getVerificationTimeout();
+        }
+
+        @Override
+        public DeviceIdleInternal getDeviceIdleInternal() {
+            return mInjector.getLocalService(DeviceIdleInternal.class);
+        }
+
+        @Override
+        public boolean isCallerPackage(int callingUid, @NonNull String packageName) {
+            final int callingUserId = UserHandle.getUserId(callingUid);
+            return callingUid == getPackageUid(packageName, 0, callingUserId);
         }
     }
 
@@ -5301,6 +5328,12 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                     break;
                 }
+                case DOMAIN_VERIFICATION: {
+                    int messageCode = msg.arg1;
+                    Object object = msg.obj;
+                    mDomainVerificationManager.runMessage(messageCode, object);
+                    break;
+                }
             }
         }
     }
@@ -6946,8 +6979,18 @@ public class PackageManagerService extends IPackageManager.Stub
                 mRequiredVerifierPackage = getRequiredButNotReallyRequiredVerifierLPr();
                 mRequiredInstallerPackage = getRequiredInstallerLPr();
                 mRequiredUninstallerPackage = getRequiredUninstallerLPr();
-                mIntentFilterVerificationManager.setVerifierComponent(
-                        getIntentFilterVerifierComponentNameLPr());
+                ComponentName domainVerificationAgent =
+                        getDomainVerificationAgentComponentNameLPr();
+                if (domainVerificationAgent != null) {
+                    mDomainVerificationManager.setProxy(
+                            new DomainVerificationProxyV2(mContext, mDomainVerificationConnection,
+                                    domainVerificationAgent));
+                } else {
+                    // TODO(b/159952358): DomainVerificationProxyV1
+                    mIntentFilterVerificationManager.setVerifierComponent(
+                            getIntentFilterVerifierComponentNameLPr());
+                }
+
                 mServicesExtensionPackageName = getRequiredServicesExtensionPackageLPr();
                 mSharedSystemSharedLibraryPackageName = getRequiredSharedLibraryLPr(
                         PackageManager.SYSTEM_SHARED_LIBRARY_SHARED,
@@ -7487,6 +7530,40 @@ public class PackageManagerService extends IPackageManager.Stub
             return best.getComponentInfo().getComponentName();
         }
         Slog.w(TAG, "Intent filter verifier not found");
+        return null;
+    }
+
+    @Nullable
+    private ComponentName getDomainVerificationAgentComponentNameLPr() {
+        Intent intent = new Intent(Intent.ACTION_DOMAINS_NEED_VERIFICATION);
+        List<ResolveInfo> matches = queryIntentReceiversInternal(intent, null,
+                MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
+                UserHandle.USER_SYSTEM, false /*allowDynamicSplits*/);
+        ResolveInfo best = null;
+        final int N = matches.size();
+        for (int i = 0; i < N; i++) {
+            final ResolveInfo cur = matches.get(i);
+            final String packageName = cur.getComponentInfo().packageName;
+            if (checkPermission(android.Manifest.permission.DOMAIN_VERIFICATION_AGENT,
+                    packageName, UserHandle.USER_SYSTEM) != PackageManager.PERMISSION_GRANTED) {
+                Slog.w(TAG, "Domain verification agent found but does not hold permission: "
+                        + packageName);
+                continue;
+            }
+
+            if (best == null || cur.priority > best.priority) {
+                if (cur.getComponentInfo().enabled) {
+                    best = cur;
+                } else {
+                    Slog.w(TAG, "Domain verification agent found but not enabled");
+                }
+            }
+        }
+
+        if (best != null) {
+            return best.getComponentInfo().getComponentName();
+        }
+        Slog.w(TAG, "Domain verification agent not found");
         return null;
     }
 

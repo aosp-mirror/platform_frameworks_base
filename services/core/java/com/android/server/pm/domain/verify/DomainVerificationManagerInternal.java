@@ -25,6 +25,7 @@ import android.util.TypedXmlSerializer;
 
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.domain.verify.models.DomainVerificationPkgState;
+import com.android.server.pm.domain.verify.proxy.DomainVerificationProxy;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -40,6 +41,18 @@ public interface DomainVerificationManagerInternal extends DomainVerificationMan
      */
     @NonNull
     UUID generateNewId();
+
+    /**
+     * Update the proxy implementation that talks to the domain verification agent on device. The
+     * default proxy is a stub that does nothing, and broadcast functionality will only work once a
+     * real implementation is attached.
+     */
+    void setProxy(@NonNull DomainVerificationProxy proxy);
+
+    /**
+     * @see DomainVerificationProxy.Connection#runMessage(int, Object)
+     */
+    boolean runMessage(int messageCode, Object object);
 
     /**
      * Restores or creates internal state for the new package. This can either be from scanning a
