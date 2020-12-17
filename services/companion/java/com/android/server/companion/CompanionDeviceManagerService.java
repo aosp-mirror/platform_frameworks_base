@@ -21,6 +21,7 @@ import static android.bluetooth.le.ScanSettings.CALLBACK_TYPE_ALL_MATCHES;
 import static android.bluetooth.le.ScanSettings.SCAN_MODE_BALANCED;
 import static android.content.Context.BIND_IMPORTANT;
 import static android.content.pm.PackageManager.MATCH_ALL;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import static com.android.internal.util.CollectionUtils.any;
 import static com.android.internal.util.CollectionUtils.emptyIfNull;
@@ -75,6 +76,7 @@ import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
+import android.content.pm.Signature;
 import android.content.pm.UserInfo;
 import android.net.NetworkPolicyManager;
 import android.os.Binder;
@@ -101,6 +103,7 @@ import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.ExceptionUtils;
 import android.util.Log;
+import android.util.PackageUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
@@ -136,8 +139,10 @@ import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -166,6 +171,9 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
     private static final String PREF_FILE_NAME = "companion_device_preferences.xml";
     private static final String PREF_KEY_AUTO_REVOKE_GRANTS_DONE = "auto_revoke_grants_done";
+
+    private static final int ASSOCIATE_WITHOUT_PROMPT_MAX_PER_TIME_WINDOW = 5;
+    private static final long ASSOCIATE_WITHOUT_PROMPT_WINDOW_MS = 60 * 60 * 1000; // 60 min;
 
     private static final String XML_TAG_ASSOCIATIONS = "associations";
     private static final String XML_TAG_ASSOCIATION = "association";
@@ -426,6 +434,11 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             mRequest = request;
             mCallingPackage = callingPackage;
             request.setCallingPackage(callingPackage);
+
+            if (mayAssociateWithoutPrompt(callingPackage, userId)) {
+                Slog.i(LOG_TAG, "setSkipPrompt(true)");
+                request.setSkipPrompt(true);
+            }
             callback.asBinder().linkToDeath(CompanionDeviceManagerService.this /* recipient */, 0);
 
             AndroidFuture<String> fetchProfileDescription =
@@ -511,7 +524,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         private boolean callerCanManageCompanionDevices() {
             return getContext().checkCallingOrSelfPermission(
                     android.Manifest.permission.MANAGE_COMPANION_DEVICES)
-                    == PackageManager.PERMISSION_GRANTED;
+                    == PERMISSION_GRANTED;
         }
 
         private void checkCallerIsSystemOr(String pkg) throws RemoteException {
@@ -591,7 +604,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
             boolean bypassMacPermission = getContext().getPackageManager().checkPermission(
                     android.Manifest.permission.COMPANION_APPROVE_WIFI_CONNECTIONS, packageName)
-                    == PackageManager.PERMISSION_GRANTED;
+                    == PERMISSION_GRANTED;
             if (bypassMacPermission) {
                 return true;
             }
@@ -878,6 +891,72 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             Slog.w(LOG_TAG,
                     "Error while granting auto revoke exemption for " + packageName, e);
         }
+    }
+
+    private Set<String> getSameOemPackageCerts(
+            String packageName, String[] oemPackages, String[] sameOemCerts) {
+        Set<String> sameOemPackageCerts = new HashSet<>();
+
+        // Assume OEM may enter same package name in the parallel string array with
+        // multiple ADK certs corresponding to it
+        for (int i = 0; i < oemPackages.length; i++) {
+            if (oemPackages[i].equals(packageName)) {
+                sameOemPackageCerts.add(sameOemCerts[i].replaceAll(":", ""));
+            }
+        }
+
+        return sameOemPackageCerts;
+    }
+
+    boolean mayAssociateWithoutPrompt(String packageName, int userId) {
+        String[] sameOemPackages = getContext()
+                .getResources()
+                .getStringArray(com.android.internal.R.array.config_companionDevicePackages);
+        if (!ArrayUtils.contains(sameOemPackages, packageName)) {
+            Slog.w(LOG_TAG, packageName
+                    + " can not silently create associations due to no package found."
+                    + " Packages from OEM: " + Arrays.toString(sameOemPackages)
+            );
+            return false;
+        }
+
+        // Throttle frequent associations
+        long now = System.currentTimeMillis();
+        Set<Association> recentAssociations = filter(
+                getAllAssociations(userId, packageName),
+                a -> now - a.getTimeApprovedMs() < ASSOCIATE_WITHOUT_PROMPT_WINDOW_MS);
+
+        if (recentAssociations.size() >= ASSOCIATE_WITHOUT_PROMPT_MAX_PER_TIME_WINDOW) {
+            Slog.w(LOG_TAG, "Too many associations. " + packageName
+                    + " already associated " + recentAssociations.size()
+                    + " devices within the last " + ASSOCIATE_WITHOUT_PROMPT_WINDOW_MS
+                    + "ms: " + recentAssociations);
+            return false;
+        }
+        String[] sameOemCerts = getContext()
+                .getResources()
+                .getStringArray(com.android.internal.R.array.config_companionDeviceCerts);
+
+        Signature[] signatures = mPackageManagerInternal
+                .getPackage(packageName).getSigningDetails().getSignatures();
+        String[] apkCerts = PackageUtils.computeSignaturesSha256Digests(signatures);
+
+        Set<String> sameOemPackageCerts =
+                getSameOemPackageCerts(packageName, sameOemPackages, sameOemCerts);
+
+        for (String cert : apkCerts) {
+            if (sameOemPackageCerts.contains(cert)) {
+                return true;
+            }
+        }
+
+        Slog.w(LOG_TAG, packageName
+                + " can not silently create associations. " + packageName
+                + " has SHA256 certs from APK: " + Arrays.toString(apkCerts)
+                + " and from OEM: " + Arrays.toString(sameOemCerts)
+        );
+
+        return false;
     }
 
     private static <T> boolean containsEither(T[] array, T a, T b) {

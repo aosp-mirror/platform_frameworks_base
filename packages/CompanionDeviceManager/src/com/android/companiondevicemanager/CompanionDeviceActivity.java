@@ -100,6 +100,9 @@ public class CompanionDeviceActivity extends Activity {
             mPairButton.setOnClickListener(v -> onDeviceConfirmed(getService().mSelectedDevice));
             getService().mSelectedDevice = selectedDevice;
             onSelectionUpdate();
+            if (getRequest().isSkipPrompt()) {
+                onDeviceConfirmed(selectedDevice);
+            }
         } else {
             setContentView(R.layout.device_chooser);
             mPairButton = findViewById(R.id.button_pair);

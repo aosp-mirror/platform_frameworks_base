@@ -123,6 +123,15 @@ public final class AssociationRequest implements Parcelable {
      */
     private long mCreationTime;
 
+    /**
+     * Whether the user-prompt may be skipped once the device is found.
+     *
+     * Populated by the system.
+     *
+     * @hide
+     */
+    private boolean mSkipPrompt = false;
+
     private void onConstructed() {
         mCreationTime = System.currentTimeMillis();
     }
@@ -135,6 +144,11 @@ public final class AssociationRequest implements Parcelable {
     /** @hide */
     public void setDeviceProfilePrivilegesDescription(@NonNull String desc) {
         mDeviceProfilePrivilegesDescription = desc;
+    }
+
+    /** @hide */
+    public void setSkipPrompt(boolean value) {
+        mSkipPrompt = true;
     }
 
     /** @hide */
@@ -207,9 +221,10 @@ public final class AssociationRequest implements Parcelable {
             markUsed();
             return new AssociationRequest(
                     mSingleDevice, emptyIfNull(mDeviceFilters),
-                    mDeviceProfile, null, null, -1L);
+                    mDeviceProfile, null, null, -1L, false);
         }
     }
+
 
 
 
@@ -250,6 +265,10 @@ public final class AssociationRequest implements Parcelable {
      *   Populated by the system.
      * @param creationTime
      *   The time at which his request was created
+     * @param skipPrompt
+     *   Whether the user-prompt may be skipped once the device is found.
+     *
+     *   Populated by the system.
      * @hide
      */
     @DataClass.Generated.Member
@@ -259,7 +278,8 @@ public final class AssociationRequest implements Parcelable {
             @Nullable @DeviceProfile String deviceProfile,
             @Nullable String callingPackage,
             @Nullable String deviceProfilePrivilegesDescription,
-            long creationTime) {
+            long creationTime,
+            boolean skipPrompt) {
         this.mSingleDevice = singleDevice;
         this.mDeviceFilters = deviceFilters;
         com.android.internal.util.AnnotationValidations.validate(
@@ -270,6 +290,7 @@ public final class AssociationRequest implements Parcelable {
         this.mCallingPackage = callingPackage;
         this.mDeviceProfilePrivilegesDescription = deviceProfilePrivilegesDescription;
         this.mCreationTime = creationTime;
+        this.mSkipPrompt = skipPrompt;
 
         onConstructed();
     }
@@ -318,6 +339,18 @@ public final class AssociationRequest implements Parcelable {
         return mCreationTime;
     }
 
+    /**
+     * Whether the user-prompt may be skipped once the device is found.
+     *
+     * Populated by the system.
+     *
+     * @hide
+     */
+    @DataClass.Generated.Member
+    public boolean isSkipPrompt() {
+        return mSkipPrompt;
+    }
+
     @Override
     @DataClass.Generated.Member
     public String toString() {
@@ -330,7 +363,8 @@ public final class AssociationRequest implements Parcelable {
                 "deviceProfile = " + mDeviceProfile + ", " +
                 "callingPackage = " + mCallingPackage + ", " +
                 "deviceProfilePrivilegesDescription = " + mDeviceProfilePrivilegesDescription + ", " +
-                "creationTime = " + mCreationTime +
+                "creationTime = " + mCreationTime + ", " +
+                "skipPrompt = " + mSkipPrompt +
         " }";
     }
 
@@ -352,7 +386,8 @@ public final class AssociationRequest implements Parcelable {
                 && Objects.equals(mDeviceProfile, that.mDeviceProfile)
                 && Objects.equals(mCallingPackage, that.mCallingPackage)
                 && Objects.equals(mDeviceProfilePrivilegesDescription, that.mDeviceProfilePrivilegesDescription)
-                && mCreationTime == that.mCreationTime;
+                && mCreationTime == that.mCreationTime
+                && mSkipPrompt == that.mSkipPrompt;
     }
 
     @Override
@@ -368,6 +403,7 @@ public final class AssociationRequest implements Parcelable {
         _hash = 31 * _hash + Objects.hashCode(mCallingPackage);
         _hash = 31 * _hash + Objects.hashCode(mDeviceProfilePrivilegesDescription);
         _hash = 31 * _hash + Long.hashCode(mCreationTime);
+        _hash = 31 * _hash + Boolean.hashCode(mSkipPrompt);
         return _hash;
     }
 
@@ -379,6 +415,7 @@ public final class AssociationRequest implements Parcelable {
 
         byte flg = 0;
         if (mSingleDevice) flg |= 0x1;
+        if (mSkipPrompt) flg |= 0x40;
         if (mDeviceProfile != null) flg |= 0x4;
         if (mCallingPackage != null) flg |= 0x8;
         if (mDeviceProfilePrivilegesDescription != null) flg |= 0x10;
@@ -403,6 +440,7 @@ public final class AssociationRequest implements Parcelable {
 
         byte flg = in.readByte();
         boolean singleDevice = (flg & 0x1) != 0;
+        boolean skipPrompt = (flg & 0x40) != 0;
         List<DeviceFilter<?>> deviceFilters = new ArrayList<>();
         in.readParcelableList(deviceFilters, DeviceFilter.class.getClassLoader());
         String deviceProfile = (flg & 0x4) == 0 ? null : in.readString();
@@ -420,6 +458,7 @@ public final class AssociationRequest implements Parcelable {
         this.mCallingPackage = callingPackage;
         this.mDeviceProfilePrivilegesDescription = deviceProfilePrivilegesDescription;
         this.mCreationTime = creationTime;
+        this.mSkipPrompt = skipPrompt;
 
         onConstructed();
     }
@@ -439,10 +478,10 @@ public final class AssociationRequest implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1614976943652L,
+            time = 1615252862756L,
             codegenVersion = "1.0.22",
             sourceFile = "frameworks/base/core/java/android/companion/AssociationRequest.java",
-            inputSignatures = "private static final  java.lang.String LOG_TAG\npublic static final  java.lang.String DEVICE_PROFILE_WATCH\nprivate  boolean mSingleDevice\nprivate @com.android.internal.util.DataClass.PluralOf(\"deviceFilter\") @android.annotation.NonNull java.util.List<android.companion.DeviceFilter<?>> mDeviceFilters\nprivate @android.annotation.Nullable @android.companion.AssociationRequest.DeviceProfile java.lang.String mDeviceProfile\nprivate @android.annotation.Nullable java.lang.String mCallingPackage\nprivate @android.annotation.Nullable java.lang.String mDeviceProfilePrivilegesDescription\nprivate  long mCreationTime\nprivate  void onConstructed()\npublic  void setCallingPackage(java.lang.String)\npublic  void setDeviceProfilePrivilegesDescription(java.lang.String)\npublic @android.compat.annotation.UnsupportedAppUsage boolean isSingleDevice()\npublic @android.annotation.NonNull @android.compat.annotation.UnsupportedAppUsage java.util.List<android.companion.DeviceFilter<?>> getDeviceFilters()\nclass AssociationRequest extends java.lang.Object implements [android.os.Parcelable]\nprivate  boolean mSingleDevice\nprivate @android.annotation.Nullable java.util.ArrayList<android.companion.DeviceFilter<?>> mDeviceFilters\nprivate @android.annotation.Nullable java.lang.String mDeviceProfile\npublic @android.annotation.NonNull android.companion.AssociationRequest.Builder setSingleDevice(boolean)\npublic @android.annotation.NonNull android.companion.AssociationRequest.Builder addDeviceFilter(android.companion.DeviceFilter<?>)\npublic @android.annotation.NonNull android.companion.AssociationRequest.Builder setDeviceProfile(java.lang.String)\npublic @android.annotation.NonNull @java.lang.Override android.companion.AssociationRequest build()\nclass Builder extends android.provider.OneTimeUseBuilder<android.companion.AssociationRequest> implements []\n@com.android.internal.util.DataClass(genToString=true, genEqualsHashCode=true, genHiddenGetters=true, genParcelable=true, genHiddenConstructor=true, genBuilder=false)")
+            inputSignatures = "private static final  java.lang.String LOG_TAG\npublic static final  java.lang.String DEVICE_PROFILE_WATCH\nprivate  boolean mSingleDevice\nprivate @com.android.internal.util.DataClass.PluralOf(\"deviceFilter\") @android.annotation.NonNull java.util.List<android.companion.DeviceFilter<?>> mDeviceFilters\nprivate @android.annotation.Nullable @android.companion.AssociationRequest.DeviceProfile java.lang.String mDeviceProfile\nprivate @android.annotation.Nullable java.lang.String mCallingPackage\nprivate @android.annotation.Nullable java.lang.String mDeviceProfilePrivilegesDescription\nprivate  long mCreationTime\nprivate  boolean mSkipPrompt\nprivate  void onConstructed()\npublic  void setCallingPackage(java.lang.String)\npublic  void setDeviceProfilePrivilegesDescription(java.lang.String)\npublic  void setSkipPrompt(boolean)\npublic @android.compat.annotation.UnsupportedAppUsage boolean isSingleDevice()\npublic @android.annotation.NonNull @android.compat.annotation.UnsupportedAppUsage java.util.List<android.companion.DeviceFilter<?>> getDeviceFilters()\nclass AssociationRequest extends java.lang.Object implements [android.os.Parcelable]\nprivate  boolean mSingleDevice\nprivate @android.annotation.Nullable java.util.ArrayList<android.companion.DeviceFilter<?>> mDeviceFilters\nprivate @android.annotation.Nullable java.lang.String mDeviceProfile\npublic @android.annotation.NonNull android.companion.AssociationRequest.Builder setSingleDevice(boolean)\npublic @android.annotation.NonNull android.companion.AssociationRequest.Builder addDeviceFilter(android.companion.DeviceFilter<?>)\npublic @android.annotation.NonNull android.companion.AssociationRequest.Builder setDeviceProfile(java.lang.String)\npublic @android.annotation.NonNull @java.lang.Override android.companion.AssociationRequest build()\nclass Builder extends android.provider.OneTimeUseBuilder<android.companion.AssociationRequest> implements []\n@com.android.internal.util.DataClass(genToString=true, genEqualsHashCode=true, genHiddenGetters=true, genParcelable=true, genHiddenConstructor=true, genBuilder=false)")
     @Deprecated
     private void __metadata() {}
 
