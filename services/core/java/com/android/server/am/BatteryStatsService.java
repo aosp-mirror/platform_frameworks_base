@@ -267,8 +267,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         mStats.setRadioScanningTimeoutLocked(mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_radioScanningTimeout) * 1000L);
         mStats.setPowerProfileLocked(new PowerProfile(context));
-        mStats.startTrackingSystemServerCpuTime();
-
         mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context, mStats);
     }
 
