@@ -1813,6 +1813,15 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.ACCESSIBILITY_BUTTON_MODE,
                 SecureSettingsProto.Accessibility.ACCESSIBILITY_BUTTON_MODE);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_FLOATING_MENU_SIZE,
+                SecureSettingsProto.Accessibility.ACCESSIBILITY_FLOATING_MENU_SIZE);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_FLOATING_MENU_ICON_TYPE,
+                SecureSettingsProto.Accessibility.ACCESSIBILITY_FLOATING_MENU_ICON_TYPE);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_FLOATING_MENU_OPACITY,
+                SecureSettingsProto.Accessibility.ACCESSIBILITY_FLOATING_MENU_OPACITY);
         p.end(accessibilityToken);
 
         final long adaptiveSleepToken = p.start(SecureSettingsProto.ADAPTIVE_SLEEP);
