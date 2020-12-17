@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -69,6 +70,8 @@ public class DomainVerificationService extends SystemService
         implements DomainVerificationManagerInternal, DomainVerificationShell.Callback {
 
     private static final String TAG = "DomainVerificationService";
+
+    public static final boolean DEBUG_APPROVAL = true;
 
     /**
      * States that are currently alive and attached to a package. Entries are exclusive with the
@@ -612,13 +615,10 @@ public class DomainVerificationService extends SystemService
             }
 
             boolean hasAutoVerifyDomains = newDomainsSize > 0;
-            boolean stateApplied = applyImmutableState(pkgName, newStateMap, newAutoVerifyDomains);
+            boolean needsBroadcast =
+                    applyImmutableState(pkgName, newStateMap, newAutoVerifyDomains);
 
-            // TODO(b/159952358): sendBroadcast should be abstracted so it doesn't have to be aware
-            //  of whether/what state was applied. Probably some method which iterates the map to
-            //  check for any domains that actually have state changeable by the domain verification
-            //  agent.
-            sendBroadcast = hasAutoVerifyDomains && !stateApplied;
+            sendBroadcast = hasAutoVerifyDomains && needsBroadcast;
 
             mAttachedPkgStates.put(pkgName, newDomainSetId, new DomainVerificationPkgState(
                     pkgName, newDomainSetId, hasAutoVerifyDomains, newStateMap, newUserStates));
@@ -661,8 +661,8 @@ public class DomainVerificationService extends SystemService
             pkgState = new DomainVerificationPkgState(pkgName, domainSetId, hasAutoVerifyDomains);
         }
 
-        boolean stateApplied = applyImmutableState(pkgState, domains);
-        if (!stateApplied && !isPendingOrRestored) {
+        boolean needsBroadcast = applyImmutableState(pkgState, domains);
+        if (needsBroadcast && !isPendingOrRestored) {
             // TODO(b/159952358): Test this behavior
             // Attempt to preserve user experience by automatically verifying all domains from
             // legacy state if they were previously approved, or by automatically enabling all
@@ -719,6 +719,8 @@ public class DomainVerificationService extends SystemService
     /**
      * Applies any immutable state as the final step when adding or migrating state. Currently only
      * applies {@link SystemConfig#getLinkedApps()}, which approves all domains for a package.
+     *
+     * @return whether or not a broadcast is necessary for this package
      */
     private boolean applyImmutableState(@NonNull String packageName,
             @NonNull ArrayMap<String, Integer> stateMap,
@@ -727,12 +729,21 @@ public class DomainVerificationService extends SystemService
             int domainsSize = autoVerifyDomains.size();
             for (int index = 0; index < domainsSize; index++) {
                 stateMap.put(autoVerifyDomains.valueAt(index),
-                        DomainVerificationState.STATE_APPROVED);
+                        DomainVerificationState.STATE_SYS_CONFIG);
             }
+            return false;
+        } else {
+            int size = stateMap.size();
+            for (int index = size - 1; index >= 0; index--) {
+                Integer state = stateMap.valueAt(index);
+                // If no longer marked in SysConfig, demote any previous SysConfig state
+                if (state == DomainVerificationState.STATE_SYS_CONFIG) {
+                    stateMap.removeAt(index);
+                }
+            }
+
             return true;
         }
-
-        return false;
     }
 
     @Override
@@ -1000,6 +1011,112 @@ public class DomainVerificationService extends SystemService
                 }
             }
         }
+    }
+
+    @Override
+    public boolean isApprovedForDomain(@NonNull PackageSetting pkgSetting, @NonNull Intent intent,
+            @UserIdInt int userId) {
+        String packageName = pkgSetting.name;
+        if (!DomainVerificationUtils.isDomainVerificationIntent(intent)) {
+            if (DEBUG_APPROVAL) {
+                debugApproval(packageName, intent, userId, false, "not valid intent");
+            }
+            return false;
+        }
+
+        // To allow an instant app to immediately open domains after being installed by the user,
+        // auto approve them for any declared autoVerify domains.
+        String host = intent.getData().getHost();
+        final AndroidPackage pkg = pkgSetting.getPkg();
+        if (pkgSetting.getInstantApp(userId) && pkg != null
+                && mCollector.collectAutoVerifyDomains(pkg).contains(host)) {
+            return true;
+        }
+
+        synchronized (mLock) {
+            DomainVerificationPkgState pkgState = mAttachedPkgStates.get(packageName);
+            if (pkgState == null) {
+                if (DEBUG_APPROVAL) {
+                    debugApproval(packageName, intent, userId, false, "pkgState unavailable");
+                }
+                return false;
+            }
+
+            ArrayMap<String, Integer> stateMap = pkgState.getStateMap();
+            DomainVerificationUserState userState = pkgState.getUserSelectionState(userId);
+
+            // Only allow autoVerify approval if the user hasn't disabled it
+            if (userState == null || !userState.isDisallowLinkHandling()) {
+                // Check if the exact host matches
+                Integer state = stateMap.get(host);
+                if (state != null && DomainVerificationManager.isStateVerified(state)) {
+                    if (DEBUG_APPROVAL) {
+                        debugApproval(packageName, intent, userId, true, "host verified exactly");
+                    }
+                    return true;
+                }
+
+                // Otherwise see if the host matches a verified domain by wildcard
+                int stateMapSize = stateMap.size();
+                for (int index = 0; index < stateMapSize; index++) {
+                    if (!DomainVerificationManager.isStateVerified(stateMap.valueAt(index))) {
+                        continue;
+                    }
+
+                    String domain = stateMap.keyAt(index);
+                    if (domain.startsWith("*.") && host.endsWith(domain.substring(2))) {
+                        if (DEBUG_APPROVAL) {
+                            debugApproval(packageName, intent, userId, true,
+                                    "host verified by wildcard");
+                        }
+                        return true;
+                    }
+                }
+            }
+
+            // Check user state if available
+            if (userState == null) {
+                if (DEBUG_APPROVAL) {
+                    debugApproval(packageName, intent, userId, false, "userState unavailable");
+                }
+                return false;
+            }
+
+            // See if the user has approved the exact host
+            ArraySet<String> enabledHosts = userState.getEnabledHosts();
+            if (enabledHosts.contains(host)) {
+                if (DEBUG_APPROVAL) {
+                    debugApproval(packageName, intent, userId, true,
+                            "host enabled by user exactly");
+                }
+                return true;
+            }
+
+            // See if the host matches a user selection by wildcard
+            int enabledHostsSize = enabledHosts.size();
+            for (int index = 0; index < enabledHostsSize; index++) {
+                String domain = enabledHosts.valueAt(index);
+                if (domain.startsWith("*.") && host.endsWith(domain.substring(2))) {
+                    if (DEBUG_APPROVAL) {
+                        debugApproval(packageName, intent, userId, true,
+                                "host enabled by user through wildcard");
+                    }
+                    return true;
+                }
+            }
+
+            if (DEBUG_APPROVAL) {
+                debugApproval(packageName, intent, userId, false, "not approved");
+            }
+            return false;
+        }
+    }
+
+    private void debugApproval(@NonNull String packageName, @NonNull Intent intent,
+            @UserIdInt int userId, boolean approved, @NonNull String reason) {
+        String approvalString = approved ? "approved" : "denied";
+        Slog.d(TAG + "Approval", packageName + " was " + approvalString + " for " + intent
+                + " for user " + userId + ": " + reason);
     }
 
     public interface Connection {

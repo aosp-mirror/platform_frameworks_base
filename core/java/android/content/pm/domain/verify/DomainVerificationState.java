@@ -34,6 +34,7 @@ public interface DomainVerificationState {
             STATE_APPROVED,
             STATE_DENIED,
             STATE_LEGACY_FAILURE,
+            STATE_SYS_CONFIG,
             STATE_FIRST_VERIFIER_DEFINED
     })
     @interface State {
@@ -53,8 +54,6 @@ public interface DomainVerificationState {
     /**
      * The system has chosen to ignore the verification agent's opinion on whether the domain should
      * be verified. This will treat the domain as verified.
-     * <p>
-     * TODO: This currently combines SysConfig and instant app. Is it worth separating those?
      */
     int STATE_APPROVED = 2;
 
@@ -85,6 +84,14 @@ public interface DomainVerificationState {
      * specific and can be defined as a special error code.
      */
     int STATE_LEGACY_FAILURE = 6;
+
+    /**
+     * The application has been granted auto verification for all domains by configuration on the
+     * system image.
+     *
+     * TODO: Can be stored per-package rather than for all domains for a package to save memory.
+     */
+    int STATE_SYS_CONFIG = 7;
 
     /**
      * @see DomainVerificationManager#STATE_FIRST_VERIFIER_DEFINED
