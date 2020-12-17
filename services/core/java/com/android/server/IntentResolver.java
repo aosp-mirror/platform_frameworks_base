@@ -839,6 +839,17 @@ public abstract class IntentResolver<F, R extends Object> {
         }
     };
 
+    // Make <this> a copy of <orig>.  The presumption is that <this> is empty.
+    protected void doCopy(IntentResolver orig) {
+        mFilters.addAll(orig.mFilters);
+        mTypeToFilter.putAll(orig.mTypeToFilter);
+        mBaseTypeToFilter.putAll(orig.mBaseTypeToFilter);
+        mWildTypeToFilter.putAll(orig.mWildTypeToFilter);
+        mSchemeToFilter.putAll(orig.mSchemeToFilter);
+        mActionToFilter.putAll(orig.mActionToFilter);
+        mTypedActionToFilter.putAll(orig.mTypedActionToFilter);
+    }
+
     /**
      * All filters that have been registered.
      */

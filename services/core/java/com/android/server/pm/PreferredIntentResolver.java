@@ -19,13 +19,15 @@ package com.android.server.pm;
 import android.annotation.NonNull;
 import android.content.IntentFilter;
 
-import java.io.PrintWriter;
+import com.android.server.utils.Snappable;
+import com.android.server.utils.WatchableIntentResolver;
 
-import com.android.server.IntentResolver;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 public class PreferredIntentResolver
-        extends IntentResolver<PreferredActivity, PreferredActivity> {
+        extends WatchableIntentResolver<PreferredActivity, PreferredActivity>
+        implements Snappable {
     @Override
     protected PreferredActivity[] newArray(int size) {
         return new PreferredActivity[size];
@@ -65,5 +67,16 @@ public class PreferredIntentResolver
             }
         }
         return true;
+    }
+
+    /**
+     * Return a snapshot of the current object.  The snapshot is a read-only copy suitable
+     * for read-only methods.
+     * @return A snapshot of the current object.
+     */
+    public PreferredIntentResolver snapshot() {
+        PreferredIntentResolver result = new PreferredIntentResolver();
+        result.doCopy(this);
+        return result;
     }
 }

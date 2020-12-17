@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-
 package com.android.server.pm;
-
 
 import android.annotation.NonNull;
 import android.content.IntentFilter;
 
-import com.android.server.IntentResolver;
+import com.android.server.utils.Snappable;
+import com.android.server.utils.WatchableIntentResolver;
+
 import java.util.List;
 
 /**
  * Used to find a list of {@link CrossProfileIntentFilter}s that match an intent.
  */
 class CrossProfileIntentResolver
-        extends IntentResolver<CrossProfileIntentFilter, CrossProfileIntentFilter> {
+        extends WatchableIntentResolver<CrossProfileIntentFilter, CrossProfileIntentFilter>
+        implements Snappable {
     @Override
     protected CrossProfileIntentFilter[] newArray(int size) {
         return new CrossProfileIntentFilter[size];
@@ -47,5 +48,16 @@ class CrossProfileIntentResolver
     @Override
     protected IntentFilter getIntentFilter(@NonNull CrossProfileIntentFilter input) {
         return input;
+    }
+
+    /**
+     * Return a snapshot of the current object.  The snapshot is a read-only copy suitable
+     * for read-only methods.
+     * @return A snapshot of the current object.
+     */
+    public CrossProfileIntentResolver snapshot() {
+        CrossProfileIntentResolver result = new CrossProfileIntentResolver();
+        result.doCopy(this);
+        return result;
     }
 }

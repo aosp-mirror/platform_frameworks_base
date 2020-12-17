@@ -19,10 +19,12 @@ package com.android.server.pm;
 import android.annotation.NonNull;
 import android.content.IntentFilter;
 
-import com.android.server.IntentResolver;
+import com.android.server.utils.Snappable;
+import com.android.server.utils.WatchableIntentResolver;
 
 public class PersistentPreferredIntentResolver
-        extends IntentResolver<PersistentPreferredActivity, PersistentPreferredActivity> {
+        extends WatchableIntentResolver<PersistentPreferredActivity, PersistentPreferredActivity>
+        implements Snappable {
     @Override
     protected PersistentPreferredActivity[] newArray(int size) {
         return new PersistentPreferredActivity[size];
@@ -36,5 +38,16 @@ public class PersistentPreferredIntentResolver
     @Override
     protected boolean isPackageForFilter(String packageName, PersistentPreferredActivity filter) {
         return packageName.equals(filter.mComponent.getPackageName());
+    }
+
+    /**
+     * Return a snapshot of the current object.  The snapshot is a read-only copy suitable
+     * for read-only methods.
+     * @return A snapshot of the current object.
+     */
+    public PersistentPreferredIntentResolver snapshot() {
+        PersistentPreferredIntentResolver result = new PersistentPreferredIntentResolver();
+        result.doCopy(this);
+        return result;
     }
 }
