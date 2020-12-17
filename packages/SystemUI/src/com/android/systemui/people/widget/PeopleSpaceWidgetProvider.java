@@ -27,6 +27,8 @@ import android.provider.Settings;
 import android.util.Log;
 import android.widget.RemoteViews;
 
+import com.android.internal.logging.UiEventLogger;
+import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.systemui.R;
 import com.android.systemui.people.PeopleSpaceUtils;
 
@@ -39,7 +41,10 @@ public class PeopleSpaceWidgetProvider extends AppWidgetProvider {
     public static final String EXTRA_PACKAGE_NAME = "extra_package_name";
     public static final String EXTRA_UID = "extra_uid";
 
+    public UiEventLogger mUiEventLogger = new UiEventLoggerImpl();
+
     /** Called when widget updates. */
+    @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
 
@@ -79,4 +84,14 @@ public class PeopleSpaceWidgetProvider extends AppWidgetProvider {
             appWidgetManager.updateAppWidget(appWidgetId, views);
         }
     }
+
+    @Override
+    public void onDeleted(Context context, int[] appWidgetIds) {
+        super.onDeleted(context, appWidgetIds);
+        for (int widgetId : appWidgetIds) {
+            if (DEBUG) Log.d(TAG, "Widget removed");
+            mUiEventLogger.log(PeopleSpaceUtils.PeopleSpaceWidgetEvent.PEOPLE_SPACE_WIDGET_DELETED);
+        }
+    }
+
 }
