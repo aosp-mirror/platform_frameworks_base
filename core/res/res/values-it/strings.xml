@@ -1441,7 +1441,7 @@
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Tocca per uscire dall\'app di guida."</string>
     <string name="back_button_label" msgid="4078224038025043387">"Indietro"</string>
     <string name="next_button_label" msgid="6040209156399907780">"Avanti"</string>
-    <string name="skip_button_label" msgid="3566599811326688389">"Ignora"</string>
+    <string name="skip_button_label" msgid="3566599811326688389">"Salta"</string>
     <string name="no_matches" msgid="6472699895759164599">"Nessuna corrispondenza"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Trova nella pagina"</string>
     <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
