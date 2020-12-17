@@ -283,6 +283,21 @@ public class DimmerTests extends WindowTestsBase {
         verify(mTransaction).remove(dimLayer);
     }
 
+    @Test
+    public void testDimmerWithBlurUpdatesTransaction() {
+        TestWindowContainer child = new TestWindowContainer(mWm);
+        mHost.addChild(child, 0);
+
+        final int blurRadius = 50;
+        mDimmer.dimBelow(mTransaction, child, 0, blurRadius);
+        SurfaceControl dimLayer = getDimLayer();
+
+        assertNotNull("Dimmer should have created a surface", dimLayer);
+
+        verify(mTransaction).setBackgroundBlurRadius(dimLayer, blurRadius);
+        verify(mTransaction).setRelativeLayer(dimLayer, child.mControl, -1);
+    }
+
     private SurfaceControl getDimLayer() {
         return mDimmer.mDimState.mDimLayer;
     }
