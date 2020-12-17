@@ -18,6 +18,7 @@
 
 #include <SkCanvas.h>
 #include <SkDrawable.h>
+#include <SkRuntimeEffect.h>
 #include <utils/RefBase.h>
 #include "CanvasProperty.h"
 
@@ -52,6 +53,59 @@ private:
     sp<uirenderer::CanvasPropertyPrimitive> mRx;
     sp<uirenderer::CanvasPropertyPrimitive> mRy;
     sp<uirenderer::CanvasPropertyPaint> mPaint;
+};
+
+class AnimatedRipple : public SkDrawable {
+public:
+    AnimatedRipple(uirenderer::CanvasPropertyPrimitive* x, uirenderer::CanvasPropertyPrimitive* y,
+                   uirenderer::CanvasPropertyPrimitive* radius,
+                   uirenderer::CanvasPropertyPaint* paint,
+                   uirenderer::CanvasPropertyPrimitive* progress,
+                   sk_sp<SkRuntimeEffect> runtimeEffect)
+            : mX(x)
+            , mY(y)
+            , mRadius(radius)
+            , mPaint(paint)
+            , mProgress(progress)
+            , mRuntimeEffectBuilder(std::move(runtimeEffect)) {}
+
+protected:
+    virtual SkRect onGetBounds() override {
+        const float x = mX->value;
+        const float y = mY->value;
+        const float radius = mRadius->value;
+        return SkRect::MakeLTRB(x - radius, y - radius, x + radius, y + radius);
+    }
+    virtual void onDraw(SkCanvas* canvas) override {
+        SkRuntimeShaderBuilder::BuilderUniform center = mRuntimeEffectBuilder.uniform("in_origin");
+        if (center.fVar != nullptr) {
+            center = SkV2{mX->value, mY->value};
+        }
+
+        SkRuntimeShaderBuilder::BuilderUniform radiusU =
+                mRuntimeEffectBuilder.uniform("in_maxRadius");
+        if (radiusU.fVar != nullptr) {
+            radiusU = mRadius->value;
+        }
+
+        SkRuntimeShaderBuilder::BuilderUniform progressU =
+                mRuntimeEffectBuilder.uniform("in_progress");
+        if (progressU.fVar != nullptr) {
+            progressU = mProgress->value;
+        }
+
+        SkPaint paint = mPaint->value;
+        paint.setShader(mRuntimeEffectBuilder.makeShader(nullptr, false));
+        canvas->drawCircle(mX->value, mY->value, mRadius->value, paint);
+    }
+
+private:
+    sp<uirenderer::CanvasPropertyPrimitive> mX;
+    sp<uirenderer::CanvasPropertyPrimitive> mY;
+    sp<uirenderer::CanvasPropertyPrimitive> mRadius;
+    sp<uirenderer::CanvasPropertyPaint> mPaint;
+    sp<uirenderer::CanvasPropertyPrimitive> mProgress;
+    SkRuntimeShaderBuilder mRuntimeEffectBuilder;
 };
 
 class AnimatedCircle : public SkDrawable {

@@ -85,6 +85,16 @@ void SkiaRecordingCanvas::drawCircle(uirenderer::CanvasPropertyPrimitive* x,
     drawDrawable(mDisplayList->allocateDrawable<AnimatedCircle>(x, y, radius, paint));
 }
 
+void SkiaRecordingCanvas::drawRipple(uirenderer::CanvasPropertyPrimitive* x,
+                                     uirenderer::CanvasPropertyPrimitive* y,
+                                     uirenderer::CanvasPropertyPrimitive* radius,
+                                     uirenderer::CanvasPropertyPaint* paint,
+                                     uirenderer::CanvasPropertyPrimitive* progress,
+                                     sk_sp<SkRuntimeEffect> runtimeEffect) {
+    drawDrawable(mDisplayList->allocateDrawable<AnimatedRipple>(x, y, radius, paint, progress,
+                                                                runtimeEffect));
+}
+
 void SkiaRecordingCanvas::enableZ(bool enableZ) {
     if (mCurrentBarrier && enableZ) {
         // Already in a re-order section, nothing to do

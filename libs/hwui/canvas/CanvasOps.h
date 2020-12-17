@@ -23,6 +23,7 @@
 #include <SkVertices.h>
 #include <SkImage.h>
 #include <SkPicture.h>
+#include <SkRuntimeEffect.h>
 #include <hwui/Bitmap.h>
 #include <log/log.h>
 #include "CanvasProperty.h"
@@ -138,6 +139,42 @@ struct CanvasOp<CanvasOpType::DrawCircleProperty> {
 
     void draw(SkCanvas* canvas) const {
         canvas->drawCircle(x->value, y->value, radius->value, paint->value);
+    }
+    ASSERT_DRAWABLE()
+};
+
+template<>
+struct CanvasOp<CanvasOpType::DrawRippleProperty> {
+    sp<uirenderer::CanvasPropertyPrimitive> x;
+    sp<uirenderer::CanvasPropertyPrimitive> y;
+    sp<uirenderer::CanvasPropertyPrimitive> radius;
+    sp<uirenderer::CanvasPropertyPaint> paint;
+    sp<uirenderer::CanvasPropertyPrimitive> progress;
+    sk_sp<SkRuntimeEffect> effect;
+
+    void draw(SkCanvas* canvas) const {
+        SkRuntimeShaderBuilder runtimeEffectBuilder(effect);
+
+        SkRuntimeShaderBuilder::BuilderUniform center = runtimeEffectBuilder.uniform("in_origin");
+        if (center.fVar != nullptr) {
+            center = SkV2{x->value, y->value};
+        }
+
+        SkRuntimeShaderBuilder::BuilderUniform radiusU =
+                runtimeEffectBuilder.uniform("in_maxRadius");
+        if (radiusU.fVar != nullptr) {
+            radiusU = radius->value;
+        }
+
+        SkRuntimeShaderBuilder::BuilderUniform progressU =
+                runtimeEffectBuilder.uniform("in_progress");
+        if (progressU.fVar != nullptr) {
+            progressU = progress->value;
+        }
+
+        SkPaint paintMod = paint->value;
+        paintMod.setShader(runtimeEffectBuilder.makeShader(nullptr, false));
+        canvas->drawCircle(x->value, y->value, radius->value, paintMod);
     }
     ASSERT_DRAWABLE()
 };
