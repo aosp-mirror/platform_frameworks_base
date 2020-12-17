@@ -77,6 +77,15 @@ final class FakeHdmiCecConfig extends HdmiCecConfig {
                     + "    </allowed-values>"
                     + "    <default-value int-value=\"1\" />"
                     + "  </setting>"
+                    + "  <setting name=\"hdmi_cec_enabled\""
+                    + "           value-type=\"int\""
+                    + "           user-configurable=\"true\">"
+                    + "    <allowed-values>"
+                    + "      <value int-value=\"0\" />"
+                    + "      <value int-value=\"1\" />"
+                    + "    </allowed-values>"
+                    + "    <default-value int-value=\"1\" />"
+                    + "  </setting>"
                     + "</cec-settings>";
 
     FakeHdmiCecConfig(@NonNull Context context) {

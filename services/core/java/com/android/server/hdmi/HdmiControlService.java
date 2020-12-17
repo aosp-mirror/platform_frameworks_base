@@ -1655,6 +1655,12 @@ public class HdmiControlService extends SystemService {
         }
 
         @Override
+        public boolean shouldHandleTvPowerKey() {
+            enforceAccessPermission();
+            return HdmiControlService.this.shouldHandleTvPowerKey();
+        }
+
+        @Override
         public void queryDisplayStatus(final IHdmiControlCallback callback) {
             enforceAccessPermission();
             runOnServiceThread(new Runnable() {
@@ -2344,6 +2350,24 @@ public class HdmiControlService extends SystemService {
             return;
         }
         source.toggleAndFollowTvPower();
+    }
+
+    @VisibleForTesting
+    protected boolean shouldHandleTvPowerKey() {
+        if (isTvDevice()) {
+            return false;
+        }
+        String powerControlMode = getHdmiCecConfig().getStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE);
+        if (powerControlMode.equals(HdmiControlManager.POWER_CONTROL_MODE_NONE)) {
+            return false;
+        }
+        int hdmiCecEnabled = getHdmiCecConfig().getIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED);
+        if (hdmiCecEnabled != HdmiControlManager.HDMI_CEC_CONTROL_ENABLED) {
+            return false;
+        }
+        return true;
     }
 
     @ServiceThreadOnly

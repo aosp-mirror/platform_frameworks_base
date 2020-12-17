@@ -195,6 +195,11 @@ public class HdmiAudioSystemClientTest {
         }
 
         @Override
+        public boolean shouldHandleTvPowerKey() {
+            return false;
+        }
+
+        @Override
         public void queryDisplayStatus(final IHdmiControlCallback callback) {
         }
 
