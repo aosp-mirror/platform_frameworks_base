@@ -187,16 +187,6 @@
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"बैटरी तीन बार."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"बैटरी पूरी है."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"इस बारे में जानकारी नहीं है कि अभी बैटरी कितने प्रतिशत चार्ज है."</string>
-    <string name="accessibility_no_phone" msgid="8828412144430247025">"कोई फ़ोन नहीं."</string>
-    <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"फ़ोन एक बार."</string>
-    <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"फ़ोन दो बार."</string>
-    <string name="accessibility_phone_three_bars" msgid="5670937367300884534">"फोन तीन बार."</string>
-    <string name="accessibility_phone_signal_full" msgid="1103449569988869971">"फ़ोन सि‍ग्‍नल पूरा."</string>
-    <string name="accessibility_no_data" msgid="2124768255213392359">"कोई डेटा नहीं."</string>
-    <string name="accessibility_data_one_bar" msgid="3226985124149387055">"डेटा एक बार."</string>
-    <string name="accessibility_data_two_bars" msgid="4576231688545173059">"डेटा दो बार."</string>
-    <string name="accessibility_data_three_bars" msgid="3036562180893930325">"डेटा तीन बार."</string>
-    <string name="accessibility_data_signal_full" msgid="283507058258113551">"डेटा सि‍ग्‍नल पूरा."</string>
     <string name="accessibility_wifi_name" msgid="4863440268606851734">"<xliff:g id="WIFI">%s</xliff:g> से कनेक्ट किया गया."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> से कनेक्ट किया गया."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> से कनेक्ट है."</string>
@@ -205,8 +195,6 @@
     <string name="accessibility_wimax_two_bars" msgid="7335485192390018939">"WiMAX दो बार."</string>
     <string name="accessibility_wimax_three_bars" msgid="2773714362377629938">"WiMAX तीन बार."</string>
     <string name="accessibility_wimax_signal_full" msgid="3101861561730624315">"WiMAX सि‍ग्‍नल पूरा है."</string>
-    <string name="accessibility_ethernet_disconnected" msgid="2097190491174968655">"ईथरनेट डिस्‍कनेक्‍ट किया गया."</string>
-    <string name="accessibility_ethernet_connected" msgid="3988347636883115213">"ईथरनेट कनेक्‍ट किया गया."</string>
     <string name="accessibility_no_signal" msgid="1115622734914921920">"कोई सिग्नल नहीं."</string>
     <string name="accessibility_not_connected" msgid="4061305616351042142">"कनेक्ट नहीं है."</string>
     <string name="accessibility_zero_bars" msgid="1364823964848784827">"शून्य बार."</string>
@@ -218,30 +206,17 @@
     <string name="accessibility_desc_off" msgid="8055389500285421408">"बंद."</string>
     <string name="accessibility_desc_connected" msgid="3082590384032624233">"कनेक्ट है."</string>
     <string name="accessibility_desc_connecting" msgid="8011433412112903614">"कनेक्ट हो रहा है."</string>
-    <string name="data_connection_gprs" msgid="2752584037409568435">"GPRS"</string>
     <string name="data_connection_hspa" msgid="6096234094857660873">"HSPA"</string>
-    <string name="data_connection_3g" msgid="1215807817895516914">"3जी"</string>
-    <string name="data_connection_3_5g" msgid="4097346596394846450">"H"</string>
-    <string name="data_connection_3_5g_plus" msgid="8938598386721354697">"H+"</string>
-    <string name="data_connection_4g" msgid="5770196771037980730">"4G"</string>
-    <string name="data_connection_4g_plus" msgid="780615287092000279">"4G+"</string>
-    <string name="data_connection_lte" msgid="557021044282539923">"एलटीई"</string>
-    <string name="data_connection_lte_plus" msgid="4799302403782283178">"LTE+"</string>
-    <string name="data_connection_cdma" msgid="7678457855627313518">"1X"</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"रोमिंग"</string>
-    <string name="data_connection_edge" msgid="6316755666481405762">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"वाई-फ़ाई"</string>
     <string name="accessibility_no_sim" msgid="1140839832913084973">"कोई सिम नहीं."</string>
     <string name="accessibility_cell_data" msgid="172950885786007392">"मोबाइल डेटा"</string>
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"मोबाइल डेटा चालू है"</string>
-    <string name="cell_data_off_content_description" msgid="9165555931499878044">"मोबाइल डेटा बंद है"</string>
-    <string name="not_default_data_content_description" msgid="6757881730711522517">"डेटा इस्तेमाल करने के लिए सेट नहीं किया गया है"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"बंद है"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"ब्लूटूथ से टेदरिंग."</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"हवाई जहाज़ मोड."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN चालू."</string>
     <string name="accessibility_no_sims" msgid="5711270400476534667">"कोई सिम कार्ड नहीं है."</string>
-    <string name="carrier_network_change_mode" msgid="5174141476991149918">"मोबाइल और इंटरनेट सेवा देने वाली कंपनी का नेटवर्क बदल रहा है"</string>
     <string name="accessibility_battery_details" msgid="6184390274150865789">"बैटरी का विवरण खोलें"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"<xliff:g id="NUMBER">%d</xliff:g> प्रति‍शत बैटरी."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> प्रतिशत बैटरी बची है और आपके इस्तेमाल के हिसाब से यह <xliff:g id="TIME">%2$s</xliff:g> में खत्म हो जाएगी"</string>
@@ -725,6 +700,14 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"फ़ोन की सेटिंग के आधार पर, सूचना आने पर घंटी बज सकती है या वाइब्रेशन हो सकता है. <xliff:g id="APP_NAME">%1$s</xliff:g> में होने वाली बातचीत, डिफ़ॉल्ट रूप से बबल के तौर पर दिखती है."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"फ़्लोट करने वाले शॉर्टकट की मदद से इस सामग्री पर आपका ध्यान बना रहता है."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"सिस्टम को यह तय करने की अनुमति दें कि इस सूचना के मिलने पर आवाज़ हो या वाइब्रेशन हो"</string>
+    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
+    <skip />
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"इससे बातचीत, सेक्शन में सबसे ऊपर और फ़्लोटिंग बबल के तौर पर दिखती है. साथ ही, लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो दिखती है"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"सेटिंग"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राथमिकता"</string>
@@ -743,9 +726,14 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"यह ऐप्लिकेशन आपकी स्क्रीन पर इस्तेमाल हो रहे दूसरे ऐप्लिकेशन के ऊपर दिखाया जा रहा है. इसके साथ ही यह माइक्रोफ़ोन और कैमरे का भी इस्तेमाल कर रहा है."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"सेटिंग"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"ठीक है"</string>
-    <string name="feedback_silenced" msgid="5382212321253328247">"सिस्टम ने उपयोगकर्ता के इस्तेमाल के आधार पर, इस सूचना के मिलने पर होने वाली आवाज़ बंद कर दी है."</string>
-    <string name="feedback_promoted" msgid="8075757485407091976">"सिस्टम ने उपयोगकर्ता के इस्तेमाल के आधार पर यह तय किया है कि कोई सूचना, खोज के क्रम में एकदम नीचे दिखेगी या फिर बिना आवाज़ किए मिलेगी."</string>
-    <string name="feedback_demoted" msgid="5848066008939031913">"सिस्टम ने उपयोगकर्ता के इस्तेमाल के आधार पर यह तय किया है कि कोई सूचना, खोज के क्रम में एकदम नीचे दिखेगी या फिर बिना आवाज़ किए मिलेगी."</string>
+    <!-- no translation found for feedback_alerted (5192459808484271208) -->
+    <skip />
+    <!-- no translation found for feedback_silenced (9116540317466126457) -->
+    <skip />
+    <!-- no translation found for feedback_promoted (2125562787759780807) -->
+    <skip />
+    <!-- no translation found for feedback_demoted (951884763467110604) -->
+    <skip />
     <string name="feedback_prompt" msgid="2278631214125128281">"आपको यह सुविधा कैसी लगी?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"सुझाव या शिकायत के लिए धन्यवाद!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"ठीक है"</string>

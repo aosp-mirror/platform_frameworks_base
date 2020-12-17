@@ -187,16 +187,6 @@
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"電池電量為三格。"</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"電池已滿。"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"電量百分比不明。"</string>
-    <string name="accessibility_no_phone" msgid="8828412144430247025">"沒有電話訊號。"</string>
-    <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"電話訊號強度為一格。"</string>
-    <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"電話訊號強度為兩格。"</string>
-    <string name="accessibility_phone_three_bars" msgid="5670937367300884534">"電話訊號強度為三格。"</string>
-    <string name="accessibility_phone_signal_full" msgid="1103449569988869971">"電話訊號滿格。"</string>
-    <string name="accessibility_no_data" msgid="2124768255213392359">"沒有數據網絡。"</string>
-    <string name="accessibility_data_one_bar" msgid="3226985124149387055">"數據網絡訊號強度為一格。"</string>
-    <string name="accessibility_data_two_bars" msgid="4576231688545173059">"數據網絡訊號強度為兩格。"</string>
-    <string name="accessibility_data_three_bars" msgid="3036562180893930325">"數據網絡訊號強度為三格。"</string>
-    <string name="accessibility_data_signal_full" msgid="283507058258113551">"數據網絡訊號滿格。"</string>
     <string name="accessibility_wifi_name" msgid="4863440268606851734">"已連線至<xliff:g id="WIFI">%s</xliff:g>。"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"已連線至<xliff:g id="BLUETOOTH">%s</xliff:g>。"</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"已連接至 <xliff:g id="CAST">%s</xliff:g>。"</string>
@@ -205,8 +195,6 @@
     <string name="accessibility_wimax_two_bars" msgid="7335485192390018939">"WiMAX 訊號強度兩格。"</string>
     <string name="accessibility_wimax_three_bars" msgid="2773714362377629938">"WiMAX 訊號強度三格。"</string>
     <string name="accessibility_wimax_signal_full" msgid="3101861561730624315">"WiMAX 訊號滿格。"</string>
-    <string name="accessibility_ethernet_disconnected" msgid="2097190491174968655">"以太網連接中斷。"</string>
-    <string name="accessibility_ethernet_connected" msgid="3988347636883115213">"已連接以太網。"</string>
     <string name="accessibility_no_signal" msgid="1115622734914921920">"沒有訊號。"</string>
     <string name="accessibility_not_connected" msgid="4061305616351042142">"未連線。"</string>
     <string name="accessibility_zero_bars" msgid="1364823964848784827">"訊號強度為零格。"</string>
@@ -218,30 +206,17 @@
     <string name="accessibility_desc_off" msgid="8055389500285421408">"關閉。"</string>
     <string name="accessibility_desc_connected" msgid="3082590384032624233">"已連線。"</string>
     <string name="accessibility_desc_connecting" msgid="8011433412112903614">"連線中。"</string>
-    <string name="data_connection_gprs" msgid="2752584037409568435">"GPRS"</string>
     <string name="data_connection_hspa" msgid="6096234094857660873">"HSPA"</string>
-    <string name="data_connection_3g" msgid="1215807817895516914">"3G"</string>
-    <string name="data_connection_3_5g" msgid="4097346596394846450">"H"</string>
-    <string name="data_connection_3_5g_plus" msgid="8938598386721354697">"H+"</string>
-    <string name="data_connection_4g" msgid="5770196771037980730">"4G"</string>
-    <string name="data_connection_4g_plus" msgid="780615287092000279">"4G+"</string>
-    <string name="data_connection_lte" msgid="557021044282539923">"LTE"</string>
-    <string name="data_connection_lte_plus" msgid="4799302403782283178">"LTE+"</string>
-    <string name="data_connection_cdma" msgid="7678457855627313518">"1X"</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"漫遊"</string>
-    <string name="data_connection_edge" msgid="6316755666481405762">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="1140839832913084973">"無 SIM 卡。"</string>
     <string name="accessibility_cell_data" msgid="172950885786007392">"流動數據"</string>
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"開咗流動數據"</string>
-    <string name="cell_data_off_content_description" msgid="9165555931499878044">"流動數據已關閉"</string>
-    <string name="not_default_data_content_description" msgid="6757881730711522517">"未設定至可使用資料"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"關閉"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"藍牙網絡共享。"</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"飛航模式。"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"開咗 VPN。"</string>
     <string name="accessibility_no_sims" msgid="5711270400476534667">"沒有 SIM 卡。"</string>
-    <string name="carrier_network_change_mode" msgid="5174141476991149918">"流動網絡供應商網絡正在變更"</string>
     <string name="accessibility_battery_details" msgid="6184390274150865789">"開啟電池詳細資料"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"電池電量為百分之 <xliff:g id="NUMBER">%d</xliff:g>。"</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"電量仲剩番 <xliff:g id="PERCENTAGE">%1$s</xliff:g>。根據你嘅使用情況，仲可以用大約 <xliff:g id="TIME">%2$s</xliff:g>"</string>
@@ -723,6 +698,14 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"可能會根據手機設定發出鈴聲或震動。「<xliff:g id="APP_NAME">%1$s</xliff:g>」的對話會預設以對話氣泡顯示。"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"為此內容建立浮動捷徑以保持注意力。"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"由系統判斷是否要讓此通知發出音效或震動"</string>
+    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
+    <skip />
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"以浮動對話泡顯示在對話部分的頂部，並在上鎖畫面顯示個人檔案相片"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"設定"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"重要"</string>
@@ -741,9 +724,14 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"此應用程式目前透過其他應用程式在畫面上顯示內容，且正在使用麥克風和相機。"</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"設定"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"確定"</string>
-    <string name="feedback_silenced" msgid="5382212321253328247">"系統已將此通知設為靜音。"</string>
-    <string name="feedback_promoted" msgid="8075757485407091976">"系統已將此通知升級。"</string>
-    <string name="feedback_demoted" msgid="5848066008939031913">"系統已將此通知降級。"</string>
+    <!-- no translation found for feedback_alerted (5192459808484271208) -->
+    <skip />
+    <!-- no translation found for feedback_silenced (9116540317466126457) -->
+    <skip />
+    <!-- no translation found for feedback_promoted (2125562787759780807) -->
+    <skip />
+    <!-- no translation found for feedback_demoted (951884763467110604) -->
+    <skip />
     <string name="feedback_prompt" msgid="2278631214125128281">"是否正確？"</string>
     <string name="feedback_response" msgid="4671729244976641339">"多謝您提供意見！"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"確定"</string>
