@@ -402,8 +402,7 @@
     <string name="transcode_settings_title" msgid="2581975870429850549">"मीडिया ट्रांसकोडिंग सेटिंग"</string>
     <string name="transcode_user_control" msgid="6176368544817731314">"ट्रांसकोडिंग की डिफ़ॉल्ट सेटिंग बदलें"</string>
     <string name="transcode_enable_all" msgid="2411165920039166710">"ट्रांसकोडिंग चालू करें"</string>
-    <string name="transcode_default" msgid="3784803084573509491">"मानकर चलें कि ऐप्लिकेशन, मॉडर्न फ़ॉर्मैट के साथ काम करेंगे"</string>
-    <string name="transcode_skip_apps" msgid="8249721984597390142">"ऐप्लिकेशन के लिए ट्रांसकोडिंग चालू करें"</string>
+    <string name="transcode_default" msgid="3784803084573509491">"मानकर चलें कि ऐप्लिकेशन, नए फ़ॉर्मैट के साथ काम करेंगे"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"चल रही सेवाएं"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"इस समय चल रही सेवाओं को देखें और नियंत्रित करें"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"वेबव्यू लागू करें"</string>
@@ -566,4 +565,29 @@
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"वायर वाला हेडफ़ोन"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"चालू है"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"बंद है"</string>
+    <string name="carrier_network_change_mode" msgid="4257621815706644026">"मोबाइल और इंटरनेट सेवा देने वाली कंपनी का नेटवर्क बदल रहा है"</string>
+    <string name="data_connection_3g" msgid="931852552688157407">"3जी"</string>
+    <string name="data_connection_edge" msgid="4625509456544797637">"EDGE"</string>
+    <string name="data_connection_cdma" msgid="9098161966701934334">"1X"</string>
+    <string name="data_connection_gprs" msgid="1251945769006770189">"GPRS"</string>
+    <string name="data_connection_3_5g" msgid="4298721462047921400">"H"</string>
+    <string name="data_connection_3_5g_plus" msgid="6683055858295918170">"H+"</string>
+    <string name="data_connection_4g" msgid="2581705503356752044">"4G"</string>
+    <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
+    <string name="data_connection_lte" msgid="7675461204366364124">"एलटीई"</string>
+    <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
+    <string name="cell_data_off_content_description" msgid="2280700839891636498">"मोबाइल डेटा बंद है"</string>
+    <string name="not_default_data_content_description" msgid="6517068332106592887">"डेटा इस्तेमाल करने के लिए सेट नहीं किया गया है"</string>
+    <string name="accessibility_no_phone" msgid="2687419663127582503">"कोई फ़ोन नहीं."</string>
+    <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"फ़ोन एक बार."</string>
+    <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"फ़ोन दो बार."</string>
+    <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"फोन तीन बार."</string>
+    <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"फ़ोन सि‍ग्‍नल पूरा."</string>
+    <string name="accessibility_no_data" msgid="4563181886936931008">"कोई डेटा नहीं."</string>
+    <string name="accessibility_data_one_bar" msgid="6892888138070752480">"डेटा एक बार."</string>
+    <string name="accessibility_data_two_bars" msgid="9202641507241802499">"डेटा दो बार."</string>
+    <string name="accessibility_data_three_bars" msgid="2813876214466722413">"डेटा तीन बार."</string>
+    <string name="accessibility_data_signal_full" msgid="1808301899314382337">"डेटा सि‍ग्‍नल पूरा."</string>
+    <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ईथरनेट डिस्‍कनेक्‍ट किया गया."</string>
+    <string name="accessibility_ethernet_connected" msgid="2093872142317190618">"ईथरनेट कनेक्‍ट किया गया."</string>
 </resources>

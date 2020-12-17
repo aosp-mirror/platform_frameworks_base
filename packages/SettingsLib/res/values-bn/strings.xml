@@ -400,13 +400,9 @@
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"সক্রিয় রয়েছে৷ টগল করতে আলতো চাপুন৷"</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"অ্যাপ স্ট্যান্ডবাই-এর অবস্থা:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="transcode_settings_title" msgid="2581975870429850549">"মিডিয়া ট্রান্সকোডিং সেটিংস"</string>
-    <!-- no translation found for transcode_user_control (6176368544817731314) -->
-    <skip />
-    <!-- no translation found for transcode_enable_all (2411165920039166710) -->
-    <skip />
-    <!-- no translation found for transcode_default (3784803084573509491) -->
-    <skip />
-    <string name="transcode_skip_apps" msgid="8249721984597390142">"অ্যাপের জন্য ট্রান্সকোডিং চালু করুন"</string>
+    <string name="transcode_user_control" msgid="6176368544817731314">"ট্রান্সকোডিং ডিফল্ট সেটিংস ওভাররাইড করুন"</string>
+    <string name="transcode_enable_all" msgid="2411165920039166710">"ট্রান্সকোডিং চালু করুন"</string>
+    <string name="transcode_default" msgid="3784803084573509491">"অ্যাপ মর্ডার্ন ফর্ম্যাটে কাজ করবে বলে ধরে নিন"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"এখন চলছে যে পরিষেবাগুলি"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"বর্তমান চলমান পরিষেবাগুলি দেখুন এবং নিয়ন্ত্রণ করুন"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"ওয়েবভিউ প্রয়োগ"</string>
@@ -569,4 +565,29 @@
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"তার যুক্ত হেডফোন"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"চালু আছে"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"বন্ধ আছে"</string>
+    <string name="carrier_network_change_mode" msgid="4257621815706644026">"পরিষেবা প্রদানকারীর নেটওয়ার্ক পরিবর্তন করা হচ্ছে"</string>
+    <string name="data_connection_3g" msgid="931852552688157407">"3G"</string>
+    <string name="data_connection_edge" msgid="4625509456544797637">"EDGE"</string>
+    <string name="data_connection_cdma" msgid="9098161966701934334">"1X"</string>
+    <string name="data_connection_gprs" msgid="1251945769006770189">"GPRS"</string>
+    <string name="data_connection_3_5g" msgid="4298721462047921400">"H"</string>
+    <string name="data_connection_3_5g_plus" msgid="6683055858295918170">"H+"</string>
+    <string name="data_connection_4g" msgid="2581705503356752044">"4G"</string>
+    <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
+    <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
+    <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
+    <string name="cell_data_off_content_description" msgid="2280700839891636498">"মোবাইল ডেটা বন্ধ করা হয়েছে"</string>
+    <string name="not_default_data_content_description" msgid="6517068332106592887">"ডেটা ব্যবহার করার জন্য সেট করা নেই"</string>
+    <string name="accessibility_no_phone" msgid="2687419663127582503">"কোনো ফোনের সংকেত নেই৷"</string>
+    <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"এক দন্ড ফোনের সংকেত রয়েছে৷"</string>
+    <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"দুই দন্ড ফোনের সংকেত রয়েছে৷"</string>
+    <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"তিন দন্ড ফোনের সংকেত রয়েছে৷"</string>
+    <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"ফোনের সংকেত পূর্ণ রয়েছে৷"</string>
+    <string name="accessibility_no_data" msgid="4563181886936931008">"কোনো ডেটা নেই৷"</string>
+    <string name="accessibility_data_one_bar" msgid="6892888138070752480">"এক দন্ড ডেটার সংকেত৷"</string>
+    <string name="accessibility_data_two_bars" msgid="9202641507241802499">"দুই দন্ড ডেটার সংকেত রয়েছে৷"</string>
+    <string name="accessibility_data_three_bars" msgid="2813876214466722413">"তিন দন্ড ডেটার সংকেত৷"</string>
+    <string name="accessibility_data_signal_full" msgid="1808301899314382337">"পূর্ণ ডেটার সংকেত রয়েছে৷"</string>
+    <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ইথারনেটের সংযোগ বিচ্ছিন্ন হয়েছে৷"</string>
+    <string name="accessibility_ethernet_connected" msgid="2093872142317190618">"ইথারনেট সংযুক্ত হয়েছে৷"</string>
 </resources>

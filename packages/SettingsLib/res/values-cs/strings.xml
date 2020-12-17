@@ -403,7 +403,6 @@
     <string name="transcode_user_control" msgid="6176368544817731314">"Přepsat výchozí nastavení překódování"</string>
     <string name="transcode_enable_all" msgid="2411165920039166710">"Povolit překódování"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Předpokládat, že aplikace podporují moderní formáty"</string>
-    <string name="transcode_skip_apps" msgid="8249721984597390142">"Povolit překódování pro aplikace"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Spuštěné služby"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Umožňuje zobrazit a ovládat aktuálně spuštěné služby"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementace WebView"</string>
@@ -568,4 +567,29 @@
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Kabelová sluchátka"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Zapnout"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Vypnout"</string>
+    <string name="carrier_network_change_mode" msgid="4257621815706644026">"Probíhá změna sítě operátora"</string>
+    <string name="data_connection_3g" msgid="931852552688157407">"3G"</string>
+    <string name="data_connection_edge" msgid="4625509456544797637">"EDGE"</string>
+    <string name="data_connection_cdma" msgid="9098161966701934334">"1X"</string>
+    <string name="data_connection_gprs" msgid="1251945769006770189">"GPRS"</string>
+    <string name="data_connection_3_5g" msgid="4298721462047921400">"H"</string>
+    <string name="data_connection_3_5g_plus" msgid="6683055858295918170">"H+"</string>
+    <string name="data_connection_4g" msgid="2581705503356752044">"4G"</string>
+    <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
+    <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
+    <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
+    <string name="cell_data_off_content_description" msgid="2280700839891636498">"Mobilní data jsou vypnuta"</string>
+    <string name="not_default_data_content_description" msgid="6517068332106592887">"Nenastaveno k využití dat"</string>
+    <string name="accessibility_no_phone" msgid="2687419663127582503">"Žádná telefonní síť."</string>
+    <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"Jedna čárka signálu telefonní sítě."</string>
+    <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"Dvě čárky signálu telefonní sítě."</string>
+    <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"Tři čárky signálu telefonní sítě."</string>
+    <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"Plný signál telefonní sítě."</string>
+    <string name="accessibility_no_data" msgid="4563181886936931008">"Žádné datové připojení."</string>
+    <string name="accessibility_data_one_bar" msgid="6892888138070752480">"Jedna čárka signálu datové sítě."</string>
+    <string name="accessibility_data_two_bars" msgid="9202641507241802499">"Dvě čárky signálu datové sítě."</string>
+    <string name="accessibility_data_three_bars" msgid="2813876214466722413">"Tři čárky signálu datové sítě."</string>
+    <string name="accessibility_data_signal_full" msgid="1808301899314382337">"Plný signál datové sítě."</string>
+    <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Síť ethernet je odpojena."</string>
+    <string name="accessibility_ethernet_connected" msgid="2093872142317190618">"Síť ethernet je připojena."</string>
 </resources>
