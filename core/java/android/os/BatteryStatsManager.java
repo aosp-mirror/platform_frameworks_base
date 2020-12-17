@@ -85,7 +85,7 @@ public final class BatteryStatsManager {
     public static final int NUM_WIFI_STATES = WIFI_STATE_SOFT_AP + 1;
 
     /** @hide */
-    @IntDef(flag = true, prefix = { "WIFI_STATE_" }, value = {
+    @IntDef(prefix = { "WIFI_STATE_" }, value = {
             WIFI_STATE_OFF,
             WIFI_STATE_OFF_SCANNING,
             WIFI_STATE_ON_NO_NETWORKS,
@@ -135,7 +135,7 @@ public final class BatteryStatsManager {
     public static final int NUM_WIFI_SUPPL_STATES = WIFI_SUPPL_STATE_UNINITIALIZED + 1;
 
     /** @hide */
-    @IntDef(flag = true, prefix = { "WIFI_SUPPL_STATE_" }, value = {
+    @IntDef(prefix = { "WIFI_SUPPL_STATE_" }, value = {
             WIFI_SUPPL_STATE_INVALID,
             WIFI_SUPPL_STATE_DISCONNECTED,
             WIFI_SUPPL_STATE_INTERFACE_DISABLED,
