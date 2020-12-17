@@ -124,6 +124,95 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
     }
 
     @Test
+    public void testGetBackgroundTextFromMessageNoPunctuation() {
+        String backgroundText = PeopleSpaceUtils.getBackgroundTextFromMessage("test");
+
+        assertThat(backgroundText).isNull();
+    }
+
+    @Test
+    public void testGetBackgroundTextFromMessageSingleExclamation() {
+        String backgroundText = PeopleSpaceUtils.getBackgroundTextFromMessage("test!");
+
+        assertThat(backgroundText).isNull();
+    }
+
+    @Test
+    public void testGetBackgroundTextFromMessageSingleQuestion() {
+        String backgroundText = PeopleSpaceUtils.getBackgroundTextFromMessage("?test");
+
+        assertThat(backgroundText).isNull();
+    }
+
+    @Test
+    public void testGetBackgroundTextFromMessageSeparatedMarks() {
+        String backgroundText = PeopleSpaceUtils.getBackgroundTextFromMessage("test! right!");
+
+        assertThat(backgroundText).isNull();
+    }
+
+    @Test
+    public void testGetBackgroundTextFromMessageDoubleExclamation() {
+        String backgroundText = PeopleSpaceUtils.getBackgroundTextFromMessage("!!test");
+
+        assertThat(backgroundText).isEqualTo("!");
+    }
+
+    @Test
+    public void testGetBackgroundTextFromMessageDoubleQuestion() {
+        String backgroundText = PeopleSpaceUtils.getBackgroundTextFromMessage("test??");
+
+        assertThat(backgroundText).isEqualTo("?");
+    }
+
+    @Test
+    public void testGetBackgroundTextFromMessageMixed() {
+        String backgroundText = PeopleSpaceUtils.getBackgroundTextFromMessage("test?!");
+
+        assertThat(backgroundText).isEqualTo("!?");
+    }
+
+    @Test
+    public void testGetBackgroundTextFromMessageMixedInTheMiddle() {
+        String backgroundText = PeopleSpaceUtils.getBackgroundTextFromMessage(
+                "test!? in the middle");
+
+        assertThat(backgroundText).isEqualTo("!?");
+    }
+
+    @Test
+    public void testGetBackgroundTextFromMessageMixedDifferentOrder() {
+        String backgroundText = PeopleSpaceUtils.getBackgroundTextFromMessage(
+                "test!? in the middle");
+
+        assertThat(backgroundText).isEqualTo("!?");
+    }
+
+    @Test
+    public void testGetBackgroundTextFromMessageMultiple() {
+        String backgroundText = PeopleSpaceUtils.getBackgroundTextFromMessage(
+                "test!?!!? in the middle");
+
+        assertThat(backgroundText).isEqualTo("!?");
+    }
+
+    @Test
+    public void testGetBackgroundTextFromMessageQuestionFirst() {
+        String backgroundText = PeopleSpaceUtils.getBackgroundTextFromMessage(
+                "test?? in the middle!!");
+
+        assertThat(backgroundText).isEqualTo("?");
+    }
+
+    @Test
+    public void testGetBackgroundTextFromMessageExclamationFirst() {
+        String backgroundText = PeopleSpaceUtils.getBackgroundTextFromMessage(
+                "test!! in the middle??");
+
+        assertThat(backgroundText).isEqualTo("!");
+    }
+
+    @Test
     public void testGetLastMessagingStyleMessage() {
         Notification notification = new Notification.Builder(mContext, "test")
                 .setContentTitle("TEST_TITLE")
