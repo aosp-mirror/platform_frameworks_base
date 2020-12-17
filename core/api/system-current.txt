@@ -1874,6 +1874,9 @@ package android.content.pm {
   public class ApplicationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
     method public boolean isEncryptionAware();
     method public boolean isInstantApp();
+    method public boolean isOem();
+    method public boolean isProduct();
+    method public boolean isVendor();
     field public String credentialProtectedDataDir;
     field public int targetSandboxVersion;
   }
