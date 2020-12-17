@@ -27,10 +27,12 @@ public final class WebContent {
 
     private final String mContent;
     private final Long mExpireTimeMillis;
+    private final int mResponseCode;
 
-    public WebContent(String content, Long expireTimeMillis) {
+    public WebContent(String content, Long expireTimeMillis, int responseCode) {
         mContent = content;
         mExpireTimeMillis = expireTimeMillis;
+        mResponseCode = responseCode;
     }
 
     /**
@@ -45,5 +47,9 @@ public final class WebContent {
      */
     public String getContent() {
         return mContent;
+    }
+
+    public int getResponseCode() {
+        return mResponseCode;
     }
 }
