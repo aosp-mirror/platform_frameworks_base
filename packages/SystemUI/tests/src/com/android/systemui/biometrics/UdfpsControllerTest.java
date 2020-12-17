@@ -175,7 +175,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Test
     public void fingerDown() throws RemoteException {
         // Configure UdfpsView to accept the ACTION_DOWN event
-        when(mUdfpsView.isScrimShowing()).thenReturn(false);
+        when(mUdfpsView.isShowScrimAndDot()).thenReturn(false);
         when(mUdfpsView.isValidTouch(anyFloat(), anyFloat(), anyFloat())).thenReturn(true);
 
         // GIVEN that the overlay is showing
