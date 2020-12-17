@@ -156,12 +156,14 @@ public class SplitLayout {
     void updateDivideBounds(int position) {
         updateBounds(position);
         mLayoutChangeListener.onBoundsChanging(this);
+        mSplitWindowManager.setResizingSplits(true);
     }
 
     void setDividePosition(int position) {
         mDividePosition = position;
         updateBounds(mDividePosition);
         mLayoutChangeListener.onBoundsChanged(this);
+        mSplitWindowManager.setResizingSplits(false);
     }
 
     /**
@@ -172,9 +174,11 @@ public class SplitLayout {
         switch (snapTarget.flag) {
             case FLAG_DISMISS_START:
                 mLayoutChangeListener.onSnappedToDismiss(false /* snappedToEnd */);
+                mSplitWindowManager.setResizingSplits(false);
                 break;
             case FLAG_DISMISS_END:
                 mLayoutChangeListener.onSnappedToDismiss(true /* snappedToEnd */);
+                mSplitWindowManager.setResizingSplits(false);
                 break;
             default:
                 flingDividePosition(currentPosition, snapTarget.position);

@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.legacysplitscreen;
+package com.android.wm.shell.common.split;
+
+import static com.android.wm.shell.common.split.DividerView.TOUCH_ANIMATION_DURATION;
+import static com.android.wm.shell.common.split.DividerView.TOUCH_RELEASE_ANIMATION_DURATION;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -84,7 +87,8 @@ public class DividerHandleView extends View {
         mCircleDiameter = (mWidth + mHeight) / 3;
     }
 
-    void setTouching(boolean touching, boolean animate) {
+    /** Sets touching state for this handle view. */
+    public void setTouching(boolean touching, boolean animate) {
         if (touching == mTouching) {
             return;
         }
@@ -116,8 +120,8 @@ public class DividerHandleView extends View {
         mAnimator = new AnimatorSet();
         mAnimator.playTogether(widthAnimator, heightAnimator);
         mAnimator.setDuration(touching
-                ? DividerView.TOUCH_ANIMATION_DURATION
-                : DividerView.TOUCH_RELEASE_ANIMATION_DURATION);
+                ? TOUCH_ANIMATION_DURATION
+                : TOUCH_RELEASE_ANIMATION_DURATION);
         mAnimator.setInterpolator(touching
                 ? Interpolators.TOUCH_RESPONSE
                 : Interpolators.FAST_OUT_SLOW_IN);
