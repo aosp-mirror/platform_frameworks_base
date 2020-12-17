@@ -95,6 +95,40 @@ public final class MarshalHelpers {
     }
 
     /**
+     * Checks whether or not {@code klass} is one of the unboxed primitive classes.
+     *
+     * <p>The following types (whether boxed or unboxed) are considered primitive:
+     * <ul>
+     * <li>byte
+     * <li>int
+     * <li>float
+     * <li>double
+     * </ul>
+     * </p>
+     *
+     * @param klass a {@link Class} instance; using {@code null} will return {@code false}
+     * @return {@code true} if primitive, {@code false} otherwise
+     */
+    public static boolean isUnwrappedPrimitiveClass(Class<?> klass) {
+        if (klass == null) {
+            return false;
+        }
+
+        if (klass == byte.class) {
+            return true;
+        } else if (klass == int.class) {
+            return true;
+        } else if (klass == float.class) {
+            return true;
+        } else if (klass == long.class) {
+            return true;
+        } else if (klass == double.class) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Checks whether or not {@code klass} is one of the metadata-primitive classes.
      *
      * <p>The following types (whether boxed or unboxed) are considered primitive:
@@ -213,6 +247,32 @@ public final class MarshalHelpers {
             case TYPE_DOUBLE:
             case TYPE_RATIONAL:
                 return nativeType;
+        }
+
+        throw new UnsupportedOperationException("Unknown nativeType " + nativeType);
+    }
+
+    /**
+     * Get the unboxed primitive type corresponding to nativeType
+     *
+     * @param nativeType the native type (RATIONAL not included)
+     *
+     * @return the native type class
+     *
+     * @throws UnsupportedOperationException if the native type was invalid
+     */
+    public static Class<?> getPrimitiveTypeClass(int nativeType) {
+        switch (nativeType) {
+            case TYPE_BYTE:
+                return byte.class;
+            case TYPE_INT32:
+                return int.class;
+            case TYPE_FLOAT:
+                return float.class;
+            case TYPE_INT64:
+                return long.class;
+            case TYPE_DOUBLE:
+                return double.class;
         }
 
         throw new UnsupportedOperationException("Unknown nativeType " + nativeType);
