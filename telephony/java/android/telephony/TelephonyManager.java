@@ -14687,4 +14687,85 @@ public class TelephonyManager {
         return networkType >= TelephonyManager.NETWORK_TYPE_UNKNOWN &&
                 networkType <= TelephonyManager.NETWORK_TYPE_NR;
     }
+
+    /**
+     * Set a {@link SignalStrengthUpdateRequest} to receive notification when signal quality
+     * measurements breach the specified thresholds.
+     *
+     * To be notified, set the signal strength update request and then register
+     * {@link TelephonyManager#listen(PhoneStateListener, int)} with
+     * {@link PhoneStateListener#LISTEN_SIGNAL_STRENGTHS}. The notification will arrive through
+     * {@link PhoneStateListener#onSignalStrengthsChanged(SignalStrength)}.
+     *
+     * To stop receiving the notification over the specified thresholds, pass the same
+     * {@link SignalStrengthUpdateRequest} object to
+     * {@link #clearSignalStrengthUpdateRequest(SignalStrengthUpdateRequest)}.
+     *
+     * System will clean up the {@link SignalStrengthUpdateRequest} if the caller process died
+     * without calling {@link #clearSignalStrengthUpdateRequest(SignalStrengthUpdateRequest)}.
+     *
+     * If this TelephonyManager object has been created with {@link #createForSubscriptionId},
+     * applies to the given subId. Otherwise, applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}. To request for multiple subIds,
+     * pass a request object to each TelephonyManager object created with
+     * {@link #createForSubscriptionId}.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * or that the calling app has carrier privileges (see
+     * {@link TelephonyManager#hasCarrierPrivileges}).
+     *
+     * Note that the thresholds in the request will be used on a best-effort basis; the system may
+     * modify requests to multiplex various request sources or to optimize power consumption. The
+     * caller should not expect to be notified with the exactly the same thresholds.
+     *
+     * @see #clearSignalStrengthUpdateRequest(SignalStrengthUpdateRequest)
+     *
+     * @param request the SignalStrengthUpdateRequest to be set into the System
+     *
+     * @throws IllegalStateException if a new request is set with same subId from the same caller
+     */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setSignalStrengthUpdateRequest(@NonNull SignalStrengthUpdateRequest request) {
+        Objects.requireNonNull(request, "request must not be null");
+
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                service.setSignalStrengthUpdateRequest(getSubId(), request, getOpPackageName());
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#setSignalStrengthUpdateRequest", e);
+        }
+    }
+
+    /**
+     * Clear a {@link SignalStrengthUpdateRequest} from the system.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * or that the calling app has carrier privileges (see
+     * {@link TelephonyManager#hasCarrierPrivileges}).
+     *
+     * <p>If the given request was not set before, this operation is a no-op.
+     *
+     * @see #setSignalStrengthUpdateRequest(SignalStrengthUpdateRequest)
+     *
+     * @param request the SignalStrengthUpdateRequest to be cleared from the System
+     */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void clearSignalStrengthUpdateRequest(@NonNull SignalStrengthUpdateRequest request) {
+        Objects.requireNonNull(request, "request must not be null");
+
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                service.clearSignalStrengthUpdateRequest(getSubId(), request, getOpPackageName());
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#clearSignalStrengthUpdateRequest", e);
+        }
+    }
 }
