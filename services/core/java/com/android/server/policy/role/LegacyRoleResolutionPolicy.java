@@ -33,6 +33,7 @@ import com.android.internal.R;
 import com.android.internal.telephony.SmsApplication;
 import com.android.internal.util.CollectionUtils;
 import com.android.server.LocalServices;
+import com.android.server.role.LegacyRoleHolderProvider;
 import com.android.server.role.RoleManagerService;
 
 import java.util.Collections;
@@ -48,7 +49,7 @@ import java.util.Objects;
  *
  * @see RoleManagerService#migrateRoleIfNecessary
  */
-public class LegacyRoleResolutionPolicy implements RoleManagerService.RoleHoldersResolver {
+public class LegacyRoleResolutionPolicy implements LegacyRoleHolderProvider {
 
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "LegacyRoleResolutionPol";
@@ -62,7 +63,7 @@ public class LegacyRoleResolutionPolicy implements RoleManagerService.RoleHolder
 
     @NonNull
     @Override
-    public List<String> getRoleHolders(@NonNull String roleName, @UserIdInt int userId) {
+    public List<String> getLegacyRoleHolders(@NonNull String roleName, @UserIdInt int userId) {
         switch (roleName) {
             case RoleManager.ROLE_ASSISTANT: {
                 String packageName;
