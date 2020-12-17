@@ -40,6 +40,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
@@ -513,6 +514,17 @@ public class BugreportReceiverTest {
     }
 
     @Test
+    public void testBugreportFinished_withEmptyBugreportFile() throws Exception {
+        sendBugreportStarted();
+
+        IoUtils.closeQuietly(mBugreportFd);
+        mBugreportFd = null;
+        sendBugreportFinished();
+
+        assertServiceNotRunning();
+    }
+
+    @Test
     public void testShareBugreportAfterServiceDies() throws Exception {
         sendBugreportStarted();
         waitForScreenshotButtonEnabled(true);
@@ -521,6 +533,18 @@ public class BugreportReceiverTest {
         assertServiceNotRunning();
         Bundle extras = acceptBugreportAndGetSharedIntent(mBugreportId);
         assertActionSendMultiple(extras);
+    }
+
+    @Test
+    public void testBugreportRequestTwice_oneStartBugreportInvoked() throws Exception {
+        sendBugreportStarted();
+        new BugreportRequestedReceiver().onReceive(mContext,
+                new Intent(INTENT_BUGREPORT_REQUESTED));
+        getInstrumentation().waitForIdleSync();
+
+        verify(mMockIDumpstate, times(1)).startBugreport(anyInt(), any(), any(), any(),
+                anyInt(), any(), anyBoolean());
+        sendBugreportFinished();
     }
 
     private void cancelExistingNotifications() {
@@ -576,9 +600,10 @@ public class BugreportReceiverTest {
      */
     private void sendBugreportStarted() throws Exception {
         Intent intent = new Intent(INTENT_BUGREPORT_REQUESTED);
-        intent.setPackage("com.android.shell");
-        intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        mContext.sendBroadcast(intent);
+        // Ideally, we should invoke BugreportRequestedReceiver by sending
+        // INTENT_BUGREPORT_REQUESTED. But the intent has been protected broadcast by the system
+        // starting from S.
+        new BugreportRequestedReceiver().onReceive(mContext, intent);
 
         ArgumentCaptor<IDumpstateListener> listenerCap = ArgumentCaptor.forClass(
                 IDumpstateListener.class);
@@ -646,7 +671,9 @@ public class BugreportReceiverTest {
      * Callbacks to service to finish the bugreport.
      */
     private void sendBugreportFinished() throws Exception {
-        writeZipFile(mBugreportFd, BUGREPORT_FILE, BUGREPORT_CONTENT);
+        if (mBugreportFd != null) {
+            writeZipFile(mBugreportFd, BUGREPORT_FILE, BUGREPORT_CONTENT);
+        }
         if (mScreenshotFd != null) {
             writeScreenshotFile(mScreenshotFd, SCREENSHOT_CONTENT);
         }
