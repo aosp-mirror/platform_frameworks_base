@@ -46,6 +46,7 @@ import com.google.android.icing.proto.GetSchemaResultProto;
 import com.google.android.icing.proto.IcingSearchEngineOptions;
 import com.google.android.icing.proto.InitializeResultProto;
 import com.google.android.icing.proto.OptimizeResultProto;
+import com.google.android.icing.proto.PersistToDiskResultProto;
 import com.google.android.icing.proto.PropertyConfigProto;
 import com.google.android.icing.proto.PropertyProto;
 import com.google.android.icing.proto.PutResultProto;
@@ -628,6 +629,24 @@ public final class AppSearchImpl {
         // the DB because it was not there or was successfully deleted.
         checkCodeOneOf(
                 deleteResultProto.getStatus(), StatusProto.Code.OK, StatusProto.Code.NOT_FOUND);
+    }
+
+    /**
+     * Persists all update/delete requests to the disk.
+     *
+     * <p>If the app crashes after a call to PersistToDisk(), Icing would be able to fully recover
+     * all data written up to this point without a costly recovery process.
+     *
+     * <p>If the app crashes before a call to PersistToDisk(), Icing would trigger a costly recovery
+     * process in next initialization. After that, Icing would still be able to recover all written
+     * data.
+     *
+     * @throws AppSearchException
+     */
+    public void persistToDisk() throws AppSearchException {
+        PersistToDiskResultProto persistToDiskResultProto =
+                mIcingSearchEngineLocked.persistToDisk();
+        checkSuccess(persistToDiskResultProto.getStatus());
     }
 
     /**
