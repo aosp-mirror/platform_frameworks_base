@@ -80,6 +80,8 @@ package android.media {
 
   public class MediaMetadataRetriever implements java.lang.AutoCloseable {
     field public static final int METADATA_KEY_VIDEO_CODEC_MIME_TYPE = 40; // 0x28
+    field public static final int METADATA_KEY_XMP_LENGTH = 42; // 0x2a
+    field public static final int METADATA_KEY_XMP_OFFSET = 41; // 0x29
   }
 
 }
