@@ -1179,7 +1179,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     @Override
     public int handleShellCommand(ParcelFileDescriptor in, ParcelFileDescriptor out,
             ParcelFileDescriptor err, String[] args) {
-        return new LocationShellCommand(this).exec(
+        return new LocationShellCommand(mContext, this).exec(
                 this, in.getFileDescriptor(), out.getFileDescriptor(), err.getFileDescriptor(),
                 args);
     }
