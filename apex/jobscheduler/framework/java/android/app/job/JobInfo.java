@@ -1472,6 +1472,7 @@ public class JobInfo implements Parcelable {
          *     <li>Run as soon as possible</li>
          *     <li>Be exempted from Doze and battery saver restrictions</li>
          *     <li>Have network access</li>
+         *     <li>Less likely to be killed than regular jobs</li>
          * </ol>
          *
          * Since these jobs have stronger guarantees than regular jobs, they will be subject to
@@ -1483,10 +1484,11 @@ public class JobInfo implements Parcelable {
          * will immediately return {@link JobScheduler#RESULT_FAILURE} if the app does not have
          * available quota (and the job will not be successfully scheduled).
          *
-         * Expedited jobs may only set network constraints. No other constraints are allowed.
+         * Expedited jobs may only set network, storage-not-low, and persistence constraints.
+         * No other constraints are allowed.
          *
          * Note: Even though expedited jobs are meant to run as soon as possible, they may be
-         * deferred if the system is under heavy load or the network constraint is satisfied
+         * deferred if the system is under heavy load or requested constraints are not satisfied.
          *
          * @see JobInfo#isExpedited()
          */
@@ -1666,9 +1668,10 @@ public class JobInfo implements Parcelable {
             if (isPeriodic) {
                 throw new IllegalArgumentException("An expedited job cannot be periodic");
             }
-            if (constraintFlags != 0 || (flags & ~FLAG_EXPEDITED) != 0) {
+            if ((constraintFlags & ~CONSTRAINT_FLAG_STORAGE_NOT_LOW) != 0
+                    || (flags & ~FLAG_EXPEDITED) != 0) {
                 throw new IllegalArgumentException(
-                        "An expedited job can only have network constraints");
+                        "An expedited job can only have network and storage-not-low constraints");
             }
             if (triggerContentUris != null && triggerContentUris.length > 0) {
                 throw new IllegalArgumentException(
