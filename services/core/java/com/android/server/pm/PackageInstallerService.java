@@ -291,23 +291,23 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     }
 
     void restoreAndApplyStagedSessionIfNeeded() {
-        List<PackageInstallerSession> stagedSessionsToRestore = new ArrayList<>();
+        List<StagingManager.StagedSession> stagedSessionsToRestore = new ArrayList<>();
         synchronized (mSessions) {
             for (int i = 0; i < mSessions.size(); i++) {
                 final PackageInstallerSession session = mSessions.valueAt(i);
                 if (session.isStaged()) {
-                    stagedSessionsToRestore.add(session);
+                    stagedSessionsToRestore.add(session.mStagedSession);
                 }
             }
         }
         // Don't hold mSessions lock when calling restoreSession, since it might trigger an APK
         // atomic install which needs to query sessions, which requires lock on mSessions.
         boolean isDeviceUpgrading = mPm.isDeviceUpgrading();
-        for (PackageInstallerSession session : stagedSessionsToRestore) {
-            if (!session.isStagedAndInTerminalState() && session.hasParentSessionId()
+        for (StagingManager.StagedSession session : stagedSessionsToRestore) {
+            if (!session.isInTerminalState() && session.hasParentSessionId()
                     && getSession(session.getParentSessionId()) == null) {
-                session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
-                        "An orphan staged session " + session.sessionId + " is found, "
+                session.setSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
+                        "An orphan staged session " + session.sessionId() + " is found, "
                                 + "parent " + session.getParentSessionId() + " is missing");
             }
             mStagingManager.restoreSession(session, isDeviceUpgrading);
@@ -1399,7 +1399,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 @Override
                 public void run() {
                     if (session.isStaged() && !success) {
-                        mStagingManager.abortSession(session);
+                        mStagingManager.abortSession(session.mStagedSession);
                     }
                     synchronized (mSessions) {
                         if (!session.isStaged() || !success) {
