@@ -24,10 +24,6 @@ import com.android.internal.util.LatencyTracker;
  * @see LatencyTracker
  */
 public class LatencyTrackerCompat {
-    public static boolean isEnabled(Context context) {
-        return LatencyTracker.isEnabled(context);
-    }
-
     /**
      * @see LatencyTracker
      * @deprecated Please use {@link LatencyTrackerCompat#logToggleRecents(Context, int)} instead.
