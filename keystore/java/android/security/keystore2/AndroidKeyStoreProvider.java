@@ -387,10 +387,10 @@ public class AndroidKeyStoreProvider extends Provider {
         for (Authorization a : response.metadata.authorizations) {
             switch (a.keyParameter.tag) {
                 case KeymasterDefs.KM_TAG_ALGORITHM:
-                    keymasterAlgorithm = a.keyParameter.integer;
+                    keymasterAlgorithm = a.keyParameter.value.getAlgorithm();
                     break;
                 case KeymasterDefs.KM_TAG_DIGEST:
-                    if (keymasterDigest == -1) keymasterDigest = a.keyParameter.integer;
+                    if (keymasterDigest == -1) keymasterDigest = a.keyParameter.value.getDigest();
                     break;
             }
         }
