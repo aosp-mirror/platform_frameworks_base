@@ -25,13 +25,14 @@ import com.android.server.pm.domain.verify.DomainVerificationMessageCodes;
 
 import java.util.Set;
 
+// TODO(b/170321181): Combine the proxy versions for supporting v1 and v2 at once
 public interface DomainVerificationProxy {
 
     default void sendBroadcastForPackages(@NonNull Set<String> packageNames) {
     }
 
     /**
-     * Runs a message on the caller's Handler as a result of {@link Connection#schedule(int,
+     * Runs a message on the caller's Handler as a result of {@link BaseConnection#schedule(int,
      * Object)}. Abstracts the actual scheduling/running from the manager class. This is also
      * necessary so that different what codes can be used depending on the verifier proxy on device,
      * to allow backporting v1. The backport proxy may schedule more or less messages than the v2
@@ -53,7 +54,7 @@ public interface DomainVerificationProxy {
         return null;
     }
 
-    interface Connection {
+    interface BaseConnection {
 
         /**
          * Schedule something to be run later. The implementation is left up to the caller.

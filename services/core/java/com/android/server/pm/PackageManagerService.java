@@ -381,6 +381,7 @@ import com.android.server.pm.dex.ViewCompiler;
 import com.android.server.pm.domain.verify.DomainVerificationManagerInternal;
 import com.android.server.pm.domain.verify.DomainVerificationService;
 import com.android.server.pm.domain.verify.proxy.DomainVerificationProxy;
+import com.android.server.pm.domain.verify.proxy.DomainVerificationProxyV1;
 import com.android.server.pm.domain.verify.proxy.DomainVerificationProxyV2;
 import com.android.server.pm.intent.verify.legacy.IntentFilterVerificationManager;
 import com.android.server.pm.intent.verify.legacy.IntentFilterVerificationParams;
@@ -1827,7 +1828,8 @@ public class PackageManagerService extends IPackageManager.Stub
             new DomainVerificationConnection();
 
     private class DomainVerificationConnection implements
-            DomainVerificationService.Connection, DomainVerificationProxy.Connection {
+            DomainVerificationService.Connection, DomainVerificationProxyV1.Connection,
+            DomainVerificationProxyV2.Connection {
 
         @Override
         public void scheduleWriteSettings() {
@@ -1881,6 +1883,12 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public AndroidPackage getPackageLocked(@NonNull String pkgName) {
             return PackageManagerService.this.getPackage(pkgName);
+        }
+
+        @Nullable
+        @Override
+        public AndroidPackage getPackage(@NonNull String packageName) {
+            return getPackageLocked(packageName);
         }
     }
 
@@ -7073,8 +7081,17 @@ public class PackageManagerService extends IPackageManager.Stub
                                     domainVerificationAgent));
                 } else {
                     // TODO(b/159952358): DomainVerificationProxyV1
-                    mIntentFilterVerificationManager.setVerifierComponent(
-                            getIntentFilterVerifierComponentNameLPr());
+                    ComponentName intentFilterVerifierComponent =
+                            getIntentFilterVerifierComponentNameLPr();
+                    if (intentFilterVerifierComponent != null) {
+                        mDomainVerificationManager.setProxy(
+                                new DomainVerificationProxyV1(mContext, mDomainVerificationManager,
+                                        mDomainVerificationManager.getCollector(),
+                                        mDomainVerificationConnection,
+                                        intentFilterVerifierComponent));
+                        mIntentFilterVerificationManager.setVerifierComponent(
+                                intentFilterVerifierComponent);
+                    }
                 }
 
                 mServicesExtensionPackageName = getRequiredServicesExtensionPackageLPr();
@@ -16427,6 +16444,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void verifyIntentFilter(int id, int verificationCode, List<String> failedDomains) {
+        DomainVerificationProxyV1.queueLegacyVerifyResult(mContext, mDomainVerificationConnection,
+                id, verificationCode, failedDomains, Binder.getCallingUid());
         mIntentFilterVerificationManager.queueVerifyResult(id, verificationCode, failedDomains);
     }
 
