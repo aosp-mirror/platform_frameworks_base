@@ -158,9 +158,6 @@ public class InputManagerService extends IInputManager.Stub
             "com.snapchat.android" // b/173297887
     };
 
-    /** TODO(b/169067926): Remove this. */
-    private static final boolean UNTRUSTED_TOUCHES_TOAST = false;
-
     // Pointer to native input manager service object.
     private final long mPtr;
 
@@ -2202,8 +2199,7 @@ public class InputManagerService extends IInputManager.Stub
     // Native callback
     private void notifyUntrustedTouch(String packageName) {
         // TODO(b/169067926): Remove toast after gathering feedback on dogfood.
-        if (!UNTRUSTED_TOUCHES_TOAST || ArrayUtils.contains(
-                PACKAGE_BLOCKLIST_FOR_UNTRUSTED_TOUCHES_TOAST, packageName)) {
+        if (ArrayUtils.contains(PACKAGE_BLOCKLIST_FOR_UNTRUSTED_TOUCHES_TOAST, packageName)) {
             Log.i(TAG, "Suppressing untrusted touch toast for " + packageName);
             return;
         }
