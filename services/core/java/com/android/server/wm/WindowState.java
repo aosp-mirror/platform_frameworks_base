@@ -943,8 +943,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mLastRequestedHeight = 0;
         mLayer = 0;
         mInputWindowHandle = new InputWindowHandle(
-                mActivityRecord != null ?
-                        mActivityRecord.getInputApplicationHandle(false /* update */) : null,
+                mActivityRecord != null
+                        ? mActivityRecord.getInputApplicationHandle(false /* update */) : null,
                     getDisplayId());
 
         // Make sure we initial all fields before adding to parentWindow, to prevent exception
