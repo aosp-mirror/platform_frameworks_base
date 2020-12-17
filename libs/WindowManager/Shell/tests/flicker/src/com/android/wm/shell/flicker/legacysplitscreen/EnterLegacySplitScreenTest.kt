@@ -29,7 +29,6 @@ import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.openQuickstep
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.wm.shell.flicker.dockedStackDividerIsInvisible
-import com.android.wm.shell.flicker.dockedStackDividerIsVisible
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper.Companion.TEST_REPETITIONS
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
@@ -38,6 +37,9 @@ import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import com.android.wm.shell.flicker.dockedStackPrimaryBoundsIsVisible
 import com.android.wm.shell.flicker.dockedStackSecondaryBoundsIsVisible
 import org.junit.Assert
+import com.android.wm.shell.flicker.dockedStackDividerBecomesVisible
+import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
+import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -46,7 +48,7 @@ import org.junit.runners.Parameterized
 
 /**
  * Test SplitScreen launch.
- * To run this test: `atest WMShellFlickerTests:EnterSplitScreenTest`
+ * To run this test: `atest WMShellFlickerTests:EnterLegacySplitScreenTest`
  */
 @Presubmit
 @RequiresDevice
@@ -81,10 +83,16 @@ class EnterLegacySplitScreenTest(
                 layersTrace {
                     navBarLayerIsAlwaysVisible()
                     statusBarLayerIsAlwaysVisible()
+                    visibleLayersShownMoreThanOneConsecutiveEntry(
+                            listOf(launcherPackageName, splitScreenApp.defaultWindowName,
+                                    secondaryApp.defaultWindowName,
+                                    nonResizeableApp.defaultWindowName)
+                    )
                 }
                 windowManagerTrace {
                     navBarWindowIsAlwaysVisible()
                     statusBarWindowIsAlwaysVisible()
+                    visibleWindowsShownMoreThanOneConsecutiveEntry(listOf(launcherPackageName))
                 }
             }
         }
@@ -103,9 +111,9 @@ class EnterLegacySplitScreenTest(
             }
             assertions {
                 layersTrace {
-                    dockedStackDividerIsVisible()
                     dockedStackPrimaryBoundsIsVisible(
                             rotation, splitScreenApp.defaultWindowName, 169271943)
+                    dockedStackDividerBecomesVisible()
                 }
                 windowManagerTrace {
                     end {
@@ -132,11 +140,11 @@ class EnterLegacySplitScreenTest(
             }
             assertions {
                 layersTrace {
-                    dockedStackDividerIsVisible()
                     dockedStackPrimaryBoundsIsVisible(
                             rotation, splitScreenApp.defaultWindowName, 169271943)
                     dockedStackSecondaryBoundsIsVisible(
                             rotation, secondaryApp.defaultWindowName, 169271943)
+                    dockedStackDividerBecomesVisible()
                 }
                 windowManagerTrace {
                     end {

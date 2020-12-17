@@ -21,6 +21,11 @@ import android.util.Rational
 import android.view.Surface
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
+import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
+import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
+import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.layerBecomesInvisible
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.dsl.runWithFlicker
 import com.android.server.wm.flicker.helpers.exitSplitScreen
@@ -29,8 +34,6 @@ import com.android.server.wm.flicker.helpers.resizeSplitScreen
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.wm.shell.flicker.dockedStackDividerIsInvisible
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper.Companion.TEST_REPETITIONS
-import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
-import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,7 +42,7 @@ import org.junit.runners.Parameterized
 
 /**
  * Test exit SplitScreen mode.
- * To run this test: `atest WMShellFlickerTests:ExitSplitScreenTest`
+ * To run this test: `atest WMShellFlickerTests:ExitLegacySplitScreenTest`
  */
 @Presubmit
 @RequiresDevice
@@ -71,6 +74,15 @@ class ExitLegacySplitScreenTest(
                     secondaryApp.exit()
                 }
             }
+            assertions {
+                windowManagerTrace {
+                    visibleWindowsShownMoreThanOneConsecutiveEntry()
+                }
+                layersTrace {
+                    visibleLayersShownMoreThanOneConsecutiveEntry(
+                            listOf(launcherPackageName))
+                }
+            }
         }
 
     @Test
@@ -87,6 +99,7 @@ class ExitLegacySplitScreenTest(
             assertions {
                 layersTrace {
                     dockedStackDividerIsInvisible()
+                    layerBecomesInvisible(splitScreenApp.defaultWindowName)
                 }
                 windowManagerTrace {
                     navBarWindowIsAlwaysVisible()
