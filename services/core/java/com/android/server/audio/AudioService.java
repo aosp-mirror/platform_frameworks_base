@@ -8777,8 +8777,14 @@ public class AudioService extends IAudioService.Stub
         mPlaybackMonitor.playerAttributes(piid, attr, Binder.getCallingUid());
     }
 
-    public void playerEvent(int piid, int event) {
-        mPlaybackMonitor.playerEvent(piid, event, Binder.getCallingUid());
+    /**
+     * Update player event
+     * @param piid Player id to update
+     * @param event The new player event
+     * @param deviceId The new player device id
+     */
+    public void playerEvent(int piid, int event, int deviceId) {
+        mPlaybackMonitor.playerEvent(piid, event, deviceId, Binder.getCallingUid());
     }
 
     public void playerHasOpPlayAudio(int piid, boolean hasOpPlayAudio) {
