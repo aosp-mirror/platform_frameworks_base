@@ -14576,6 +14576,12 @@ public class PackageManagerService extends IPackageManager.Stub
             mAppsFilter.addPackage(pkgSetting, isReplace);
             mPackageProperty.addAllProperties(pkg);
 
+            if (oldPkgSetting == null || oldPkgSetting.getPkg() == null) {
+                mDomainVerificationManager.addPackage(pkgSetting);
+            } else {
+                mDomainVerificationManager.migrateState(oldPkgSetting, pkgSetting);
+            }
+
             int collectionSize = ArrayUtils.size(pkg.getInstrumentations());
             StringBuilder r = null;
             int i;

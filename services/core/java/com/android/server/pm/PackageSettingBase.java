@@ -42,6 +42,8 @@ import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.pm.domain.verify.DomainVerificationManagerInternal;
+import com.android.server.pm.domain.verify.DomainVerificationService;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.File;
@@ -350,9 +352,18 @@ public abstract class PackageSettingBase extends SettingBase {
         return readUserState(userId).getSharedLibraryOverlayPaths();
     }
 
-    /** Only use for testing. Do NOT use in production code. */
+    /**
+     * Only use for testing. Do NOT use in production code.
+     *
+     * Unless you're {@link DomainVerificationService} and you need to migrate legacy state.
+     * This is done rather than passing in the user IDs to
+     * {@link DomainVerificationManagerInternal#addPackage(PackageSetting)} to make the v2 APIs
+     * completely correct, without legacy details, since that method inherently does not care about
+     * the users on the device.
+     */
     @VisibleForTesting
-    SparseArray<PackageUserState> getUserState() {
+    @Deprecated
+    public SparseArray<PackageUserState> getUserState() {
         return mUserState;
     }
 

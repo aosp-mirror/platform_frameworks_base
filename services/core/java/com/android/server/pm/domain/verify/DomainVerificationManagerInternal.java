@@ -23,6 +23,7 @@ import android.content.pm.domain.verify.DomainVerificationSet;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 
+import com.android.server.pm.PackageSetting;
 import com.android.server.pm.domain.verify.models.DomainVerificationPkgState;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -39,6 +40,44 @@ public interface DomainVerificationManagerInternal extends DomainVerificationMan
      */
     @NonNull
     UUID generateNewId();
+
+    /**
+     * Restores or creates internal state for the new package. This can either be from scanning a
+     * package at boot, or a truly new installation on the device. It is expected that the {@link
+     * PackageSetting#getDomainSetId()} already be set to the correct value.
+     * <p>
+     * If this is from scan, there should be a pending state that was previous read using {@link
+     * #readSettings(TypedXmlPullParser)}, which will be attached as-is to the package. In this
+     * case, a broadcast will not be sent to the domain verification agent on device, as it is
+     * assumed nothing has changed since the device rebooted.
+     * <p>
+     * If this is a new install, state will be restored from a previous call to {@link
+     * #restoreSettings(TypedXmlPullParser)}, or a new one will be generated. In either case, a
+     * broadcast will be sent to the domain verification agent so it may re-run any verification
+     * logic for the newly associated domains.
+     * <p>
+     * This will mutate internal {@link DomainVerificationPkgState} and so will hold the internal
+     * lock. This should never be called from within the domain verification classes themselves.
+     * <p>
+     * This will NOT call {@link #writeSettings(TypedXmlSerializer)}. That must be handled by the
+     * caller.
+     */
+    void addPackage(@NonNull PackageSetting newPkgSetting);
+
+    /**
+     * Migrates verification state from a previous install to a new one. It is expected that the
+     * {@link PackageSetting#getDomainSetId()} already be set to the correct value, usually from
+     * {@link #generateNewId()}. This will preserve {@link #STATE_SUCCESS} domains under the
+     * assumption that the new package will pass the same server side config as the previous
+     * package, as they have matching signatures.
+     * <p>
+     * This will mutate internal {@link DomainVerificationPkgState} and so will hold the internal
+     * lock. This should never be called from within the domain verification classes themselves.
+     * <p>
+     * This will NOT call {@link #writeSettings(TypedXmlSerializer)}. That must be handled by the
+     * caller.
+     */
+    void migrateState(@NonNull PackageSetting oldPkgSetting, @NonNull PackageSetting newPkgSetting);
 
     /**
      * Serializes the entire internal state. This is equivalent to a full backup of the existing
