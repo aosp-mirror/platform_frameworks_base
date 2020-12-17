@@ -335,5 +335,7 @@ interface IAudioService {
             in String packageName, int uid, int pid, in UserHandle userHandle,
             int targetSdkVersion);
 
-    boolean isMusicActive();
+    boolean isMusicActive(in boolean remotely);
+
+    int getDevicesForStream(in int streamType);
 }

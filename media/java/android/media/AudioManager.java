@@ -2931,7 +2931,7 @@ public class AudioManager {
     public boolean isMusicActive() {
         final IAudioService service = getService();
         try {
-            return service.isMusicActive();
+            return service.isMusicActive(false /*remotely*/);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2945,7 +2945,12 @@ public class AudioManager {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isMusicActiveRemotely() {
-        return AudioSystem.isStreamActiveRemotely(STREAM_MUSIC, 0);
+        final IAudioService service = getService();
+        try {
+            return service.isMusicActive(true /*remotely*/);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -5108,7 +5113,12 @@ public class AudioManager {
         case STREAM_NOTIFICATION:
         case STREAM_DTMF:
         case STREAM_ACCESSIBILITY:
-            return AudioSystem.getDevicesForStream(streamType);
+            final IAudioService service = getService();
+            try {
+                return service.getDevicesForStream(streamType);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         default:
             return 0;
         }
