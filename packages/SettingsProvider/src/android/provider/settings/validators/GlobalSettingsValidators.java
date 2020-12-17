@@ -205,7 +205,6 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(
                 Global.Wearable.ALT_BYPASS_WIFI_REQUIREMENT_TIME_MILLIS,
                 ANY_INTEGER_VALIDATOR);
-        VALIDATORS.put(Global.Wearable.UPDOWN_GESTURES_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(
                 Global.Wearable.SETUP_SKIPPED,
                 new DiscreteValueValidator(
