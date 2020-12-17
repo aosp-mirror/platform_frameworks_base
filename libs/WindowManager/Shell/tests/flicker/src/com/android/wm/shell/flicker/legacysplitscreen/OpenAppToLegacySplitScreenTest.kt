@@ -24,13 +24,14 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.Flicker
 import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
-import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.helpers.StandardAppHelper
+import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.focusChanges
 import com.android.server.wm.flicker.helpers.buildTestTag
 import com.android.server.wm.flicker.helpers.exitSplitScreen
 import com.android.server.wm.flicker.helpers.isInSplitScreen
 import com.android.server.wm.flicker.helpers.launchSplitScreen
+import com.android.server.wm.flicker.helpers.openQuickStepAndClearRecentAppsFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
@@ -83,6 +84,7 @@ class OpenAppToLegacySplitScreenTest(
                     setup {
                         test {
                             device.wakeUpAndGoToHomeScreen()
+                            device.openQuickStepAndClearRecentAppsFromOverview()
                         }
                         eachRun {
                             testApp.open()

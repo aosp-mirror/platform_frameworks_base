@@ -31,6 +31,7 @@ import com.android.server.wm.flicker.helpers.buildTestTag
 import com.android.server.wm.flicker.helpers.exitSplitScreen
 import com.android.server.wm.flicker.helpers.isInSplitScreen
 import com.android.server.wm.flicker.helpers.launchSplitScreen
+import com.android.server.wm.flicker.helpers.openQuickStepAndClearRecentAppsFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
@@ -82,6 +83,7 @@ class LegacySplitScreenToLauncherTest(
                     setup {
                         test {
                             device.wakeUpAndGoToHomeScreen()
+                            device.openQuickStepAndClearRecentAppsFromOverview()
                         }
                         eachRun {
                             testApp.open()
