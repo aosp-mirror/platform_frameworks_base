@@ -431,19 +431,22 @@ public class ChooserActivity extends ResolverActivity implements
         }
 
         private void maybeHideContentPreview() {
-            if (!mAtLeastOneLoaded && mHideParentOnFail) {
-                Log.i(TAG, "Hiding image preview area. Timed out waiting for preview to load"
-                        + " within " + mImageLoadTimeoutMillis + "ms.");
-                collapseParentView();
-                if (shouldShowTabs()) {
-                    hideStickyContentPreview();
-                } else if (mChooserMultiProfilePagerAdapter.getCurrentRootAdapter() != null) {
-                    mChooserMultiProfilePagerAdapter.getCurrentRootAdapter().hideContentPreview();
+            if (!mAtLeastOneLoaded) {
+                if (mHideParentOnFail) {
+                    Log.i(TAG, "Hiding image preview area. Timed out waiting for preview to load"
+                            + " within " + mImageLoadTimeoutMillis + "ms.");
+                    collapseParentView();
+                    if (shouldShowTabs()) {
+                        hideStickyContentPreview();
+                    } else if (mChooserMultiProfilePagerAdapter.getCurrentRootAdapter() != null) {
+                        mChooserMultiProfilePagerAdapter.getCurrentRootAdapter()
+                                .hideContentPreview();
+                    }
+                    mHideParentOnFail = false;
                 }
-                mHideParentOnFail = false;
+                mRemoveSharedElements = true;
+                startPostponedEnterTransition();
             }
-            mRemoveSharedElements = true;
-            startPostponedEnterTransition();
         }
 
         private void collapseParentView() {
