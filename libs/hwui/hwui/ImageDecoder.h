@@ -49,7 +49,11 @@ public:
     // The size is the final size after scaling and cropping.
     SkImageInfo getOutputInfo() const;
 
+    int width() const;
+    int height() const;
+
     bool opaque() const;
+
     bool gray() const;
 
     SkCodec::Result decode(void* pixels, size_t rowBytes);
@@ -68,6 +72,7 @@ private:
 
     SkAlphaType getOutAlphaType() const;
     sk_sp<SkColorSpace> getOutputColorSpace() const;
+    bool swapWidthHeight() const;
 };
 
 } // namespace android
