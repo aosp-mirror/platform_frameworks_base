@@ -17,13 +17,9 @@
 package com.android.server.pm;
 
 import static android.content.pm.PackageInstaller.LOCATION_DATA_APP;
-import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
-import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK;
-import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
-import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
-import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
 
 import android.accounts.IAccountManager;
+import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -108,6 +104,7 @@ import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.pm.PackageManagerShellCommandDataLoader.Metadata;
+import com.android.server.pm.domain.verify.DomainVerificationShell;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 
 import dalvik.system.DexFile;
@@ -149,6 +146,7 @@ class PackageManagerShellCommand extends ShellCommand {
     final LegacyPermissionManagerInternal mLegacyPermissionManager;
     final PermissionManager mPermissionManager;
     final Context mContext;
+    final DomainVerificationShell mDomainVerificationShell;
     final private WeakHashMap<String, Resources> mResourceCache =
             new WeakHashMap<String, Resources>();
     int mTargetUser;
@@ -158,11 +156,13 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private static final SecureRandom RANDOM = new SecureRandom();
 
-    PackageManagerShellCommand(PackageManagerService service, Context context) {
+    PackageManagerShellCommand(@NonNull PackageManagerService service,
+            @NonNull Context context, @NonNull DomainVerificationShell domainVerificationShell) {
         mInterface = service;
         mLegacyPermissionManager = LocalServices.getService(LegacyPermissionManagerInternal.class);
         mPermissionManager = context.getSystemService(PermissionManager.class);
         mContext = context;
+        mDomainVerificationShell = domainVerificationShell;
     }
 
     @Override
@@ -267,10 +267,6 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runGetPrivappDenyPermissions();
                 case "get-oem-permissions":
                     return runGetOemPermissions();
-                case "set-app-link":
-                    return runSetAppLink();
-                case "get-app-link":
-                    return runGetAppLink();
                 case "trim-caches":
                     return runTrimCaches();
                 case "create-user":
@@ -309,6 +305,12 @@ class PackageManagerShellCommand extends ShellCommand {
                 case "bypass-staged-installer-check":
                     return runBypassStagedInstallerCheck();
                 default: {
+                    Boolean domainVerificationResult =
+                            mDomainVerificationShell.runCommand(this, cmd);
+                    if (domainVerificationResult != null) {
+                        return domainVerificationResult ? 0 : 1;
+                    }
+
                     String nextArg = getNextArg();
                     if (nextArg == null) {
                         if (cmd.equalsIgnoreCase("-l")) {
@@ -2427,134 +2429,6 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private String linkStateToString(int state) {
-        switch (state) {
-            case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED: return "undefined";
-            case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK: return "ask";
-            case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS: return "always";
-            case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER: return "never";
-            case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK : return "always ask";
-        }
-        return "Unknown link state: " + state;
-    }
-
-    // pm set-app-link [--user USER_ID] PACKAGE {always|ask|always-ask|never|undefined}
-    private int runSetAppLink() throws RemoteException {
-        int userId = UserHandle.USER_SYSTEM;
-
-        String opt;
-        while ((opt = getNextOption()) != null) {
-            if (opt.equals("--user")) {
-                userId = UserHandle.parseUserArg(getNextArgRequired());
-            } else {
-                getErrPrintWriter().println("Error: unknown option: " + opt);
-                return 1;
-            }
-        }
-
-        // Package name to act on; required
-        final String pkg = getNextArg();
-        if (pkg == null) {
-            getErrPrintWriter().println("Error: no package specified.");
-            return 1;
-        }
-
-        // State to apply; {always|ask|never|undefined}, required
-        final String modeString = getNextArg();
-        if (modeString == null) {
-            getErrPrintWriter().println("Error: no app link state specified.");
-            return 1;
-        }
-
-        final int newMode;
-        switch (modeString.toLowerCase()) {
-            case "undefined":
-                newMode = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
-                break;
-
-            case "always":
-                newMode = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
-                break;
-
-            case "ask":
-                newMode = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
-                break;
-
-            case "always-ask":
-                newMode = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK;
-                break;
-
-            case "never":
-                newMode = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
-                break;
-
-            default:
-                getErrPrintWriter().println("Error: unknown app link state '" + modeString + "'");
-                return 1;
-        }
-
-        final int translatedUserId =
-                translateUserId(userId, UserHandle.USER_NULL, "runSetAppLink");
-        final PackageInfo info = mInterface.getPackageInfo(pkg, 0, translatedUserId);
-        if (info == null) {
-            getErrPrintWriter().println("Error: package " + pkg + " not found.");
-            return 1;
-        }
-
-        if ((info.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS) == 0) {
-            getErrPrintWriter().println("Error: package " + pkg + " does not handle web links.");
-            return 1;
-        }
-
-        if (!mInterface.updateIntentVerificationStatus(pkg, newMode, translatedUserId)) {
-            getErrPrintWriter().println("Error: unable to update app link status for " + pkg);
-            return 1;
-        }
-
-        return 0;
-    }
-
-    // pm get-app-link [--user USER_ID] PACKAGE
-    private int runGetAppLink() throws RemoteException {
-        int userId = UserHandle.USER_SYSTEM;
-
-        String opt;
-        while ((opt = getNextOption()) != null) {
-            if (opt.equals("--user")) {
-                userId = UserHandle.parseUserArg(getNextArgRequired());
-            } else {
-                getErrPrintWriter().println("Error: unknown option: " + opt);
-                return 1;
-            }
-        }
-
-        // Package name to act on; required
-        final String pkg = getNextArg();
-        if (pkg == null) {
-            getErrPrintWriter().println("Error: no package specified.");
-            return 1;
-        }
-
-        final int translatedUserId =
-                translateUserId(userId, UserHandle.USER_NULL, "runGetAppLink");
-        final PackageInfo info = mInterface.getPackageInfo(pkg, 0, translatedUserId);
-        if (info == null) {
-            getErrPrintWriter().println("Error: package " + pkg + " not found.");
-            return 1;
-        }
-
-        if ((info.applicationInfo.privateFlags
-                & ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS) == 0) {
-            getErrPrintWriter().println("Error: package " + pkg + " does not handle web links.");
-            return 1;
-        }
-
-        getOutPrintWriter().println(linkStateToString(
-                mInterface.getIntentVerificationStatus(pkg, translatedUserId)));
-
-        return 0;
-    }
-
     private int runTrimCaches() throws RemoteException {
         String size = getNextArg();
         if (size == null) {
@@ -3914,6 +3788,8 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("    Turns on debug logging when visibility is blocked for the given package.");
         pw.println("      --enable: turn on debug logging (default)");
         pw.println("      --disable: turn off debug logging");
+        pw.println("");
+        mDomainVerificationShell.printHelp(pw);
         pw.println("");
         Intent.printIntentArgsHelp(pw , "");
     }

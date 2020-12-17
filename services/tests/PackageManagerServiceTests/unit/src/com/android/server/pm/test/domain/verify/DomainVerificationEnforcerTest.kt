@@ -203,6 +203,31 @@ class DomainVerificationEnforcerTest {
                 ) { callingUid, callingUserId, userId, _ ->
                     assertApprovedUserSelector(callingUid, callingUserId, userId)
                 },
+
+                service(Type.INTERNAL, "setStatusInternalPackageName") { _, _, _ ->
+                    setDomainVerificationStatusInternal(
+                        TEST_PKG,
+                        DomainVerificationManager.STATE_SUCCESS,
+                        ArraySet(setOf("example.com"))
+                    )
+                },
+                service(Type.INTERNAL, "setUserSelectionInternal") { _, _, userId ->
+                    setDomainVerificationUserSelectionInternal(
+                        userId,
+                        TEST_PKG,
+                        false,
+                        ArraySet(setOf("example.com"))
+                    )
+                },
+                service(Type.INTERNAL, "verifyPackages") { _, _, _ ->
+                    verifyPackages(listOf(TEST_PKG), true)
+                },
+                service(Type.INTERNAL, "clearState") { _, _, _ ->
+                    clearDomainVerificationState(listOf(TEST_PKG))
+                },
+                service(Type.INTERNAL, "clearUserSelections") { _, _, userId ->
+                    clearUserSelections(listOf(TEST_PKG), userId)
+                },
                 service(Type.VERIFIER, "getPackageNames") { _, _, _ ->
                     validVerificationPackageNames
                 },
