@@ -12894,6 +12894,8 @@ package android.telephony.ims.stub {
     method public final void onSubscriberAssociatedUriChanged(android.net.Uri[]);
     method public final void onTechnologyChangeFailed(int, android.telephony.ims.ImsReasonInfo);
     method public void triggerFullNetworkRegistration(@IntRange(from=100, to=699) int, @Nullable String);
+    method public void triggerSipDelegateDeregistration();
+    method public void updateSipDelegateRegistration();
     field public static final int REGISTRATION_TECH_IWLAN = 1; // 0x1
     field public static final int REGISTRATION_TECH_LTE = 0; // 0x0
     field public static final int REGISTRATION_TECH_NONE = -1; // 0xffffffff

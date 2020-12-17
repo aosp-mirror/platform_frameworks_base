@@ -29,4 +29,6 @@ interface IImsRegistration {
    oneway void addRegistrationCallback(IImsRegistrationCallback c);
    oneway void removeRegistrationCallback(IImsRegistrationCallback c);
    oneway void triggerFullNetworkRegistration(int sipCode, String sipReason);
+   oneway void triggerUpdateSipDelegateRegistration();
+   oneway void triggerSipDelegateDeregistration();
 }
