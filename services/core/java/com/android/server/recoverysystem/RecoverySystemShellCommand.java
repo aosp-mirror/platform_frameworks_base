@@ -56,26 +56,31 @@ public class RecoverySystemShellCommand extends ShellCommand {
     }
 
     private int requestLskf() throws RemoteException {
-        String updateToken = getNextArgRequired();
-        boolean success = mService.requestLskf(updateToken, null);
+        String packageName = getNextArgRequired();
+        boolean success = mService.requestLskf(packageName, null);
         PrintWriter pw = getOutPrintWriter();
-        pw.println("Request LSKF status: " + (success ? "success" : "failure"));
+        pw.printf("Request LSKF for packageName: %s, status: %s\n", packageName,
+                success ? "success" : "failure");
         return 0;
     }
 
     private int clearLskf() throws RemoteException {
-        boolean success = mService.clearLskf();
+        String packageName = getNextArgRequired();
+        boolean success = mService.clearLskf(packageName);
         PrintWriter pw = getOutPrintWriter();
-        pw.println("Clear LSKF: " + (success ? "success" : "failure"));
+        pw.printf("Clear LSKF for packageName: %s, status: %s\n", packageName,
+                success ? "success" : "failure");
         return 0;
     }
 
     private int rebootAndApply() throws RemoteException {
-        String updateToken = getNextArgRequired();
+        String packageName = getNextArgRequired();
         String rebootReason = getNextArgRequired();
-        boolean success = mService.rebootWithLskf(updateToken, rebootReason);
+        boolean success = mService.rebootWithLskf(packageName, rebootReason, true);
         PrintWriter pw = getOutPrintWriter();
-        pw.println("Reboot and apply status: " + (success ? "success" : "failure"));
+        // Keep the old message for cts test.
+        pw.printf("%s Reboot and apply status: %s\n", packageName,
+                success ? "success" : "failure");
         return 0;
     }
 
