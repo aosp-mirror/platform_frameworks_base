@@ -188,7 +188,7 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
         }
         Integer rank = mTargetRanks.get(name);
         if (rank == null) {
-            Log.w(TAG, "Score requested for unknown component.");
+            Log.w(TAG, "Score requested for unknown component. Did you call compute yet?");
             return 0f;
         }
         int consecutiveSumOfRanks = (mTargetRanks.size() - 1) * (mTargetRanks.size()) / 2;
