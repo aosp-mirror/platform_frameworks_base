@@ -58,6 +58,8 @@ class EnterLegacySplitScreenTest(
     rotationName: String,
     rotation: Int
 ) : SplitScreenTestBase(rotationName, rotation) {
+    private val letterBox = "Letterbox"
+
     private val splitScreenSetup: FlickerBuilder
         get() = FlickerBuilder(instrumentation).apply {
             val testLaunchActivity = "launch_splitScreen_test_activity"
@@ -83,11 +85,6 @@ class EnterLegacySplitScreenTest(
                 layersTrace {
                     navBarLayerIsAlwaysVisible()
                     statusBarLayerIsAlwaysVisible()
-                    visibleLayersShownMoreThanOneConsecutiveEntry(
-                            listOf(launcherPackageName, splitScreenApp.defaultWindowName,
-                                    secondaryApp.defaultWindowName,
-                                    nonResizeableApp.defaultWindowName)
-                    )
                 }
                 windowManagerTrace {
                     navBarWindowIsAlwaysVisible()
@@ -114,6 +111,9 @@ class EnterLegacySplitScreenTest(
                     dockedStackPrimaryBoundsIsVisible(
                             rotation, splitScreenApp.defaultWindowName, 169271943)
                     dockedStackDividerBecomesVisible()
+                    visibleLayersShownMoreThanOneConsecutiveEntry(
+                            listOf(launcherPackageName, splitScreenApp.defaultWindowName)
+                    )
                 }
                 windowManagerTrace {
                     end {
@@ -145,6 +145,10 @@ class EnterLegacySplitScreenTest(
                     dockedStackSecondaryBoundsIsVisible(
                             rotation, secondaryApp.defaultWindowName, 169271943)
                     dockedStackDividerBecomesVisible()
+                    visibleLayersShownMoreThanOneConsecutiveEntry(
+                            listOf(launcherPackageName, splitScreenApp.defaultWindowName,
+                                    secondaryApp.defaultWindowName)
+                    )
                 }
                 windowManagerTrace {
                     end {
@@ -174,6 +178,9 @@ class EnterLegacySplitScreenTest(
             assertions {
                 layersTrace {
                     dockedStackDividerIsInvisible()
+                    visibleLayersShownMoreThanOneConsecutiveEntry(
+                            listOf(launcherPackageName, nonResizeableApp.defaultWindowName)
+                    )
                 }
                 windowManagerTrace {
                     end {
@@ -205,6 +212,10 @@ class EnterLegacySplitScreenTest(
                         val displayBounds = WindowUtils.getDisplayBounds(rotation)
                         this.hasVisibleRegion(nonResizeableApp.defaultWindowName, displayBounds)
                     }
+                    visibleLayersShownMoreThanOneConsecutiveEntry(
+                            listOf(launcherPackageName, splitScreenApp.defaultWindowName,
+                                    nonResizeableApp.defaultWindowName, letterBox)
+                    )
                 }
                 windowManagerTrace {
                     end {
@@ -237,6 +248,10 @@ class EnterLegacySplitScreenTest(
                         val displayBounds = WindowUtils.getDisplayBounds(rotation)
                         this.hasVisibleRegion(nonResizeableApp.defaultWindowName, displayBounds)
                     }
+                    visibleLayersShownMoreThanOneConsecutiveEntry(
+                            listOf(launcherPackageName, splitScreenApp.defaultWindowName,
+                                    nonResizeableApp.defaultWindowName, letterBox)
+                    )
                 }
                 windowManagerTrace {
                     end {
