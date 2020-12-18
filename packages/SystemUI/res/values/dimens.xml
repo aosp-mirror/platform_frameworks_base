@@ -677,6 +677,8 @@
     <dimen name="keyguard_clock_top_margin">36dp</dimen>
     <!-- The margin between top of clock and bottom of lock icon. -->
     <dimen name="keyguard_clock_lock_margin">16dp</dimen>
+    <!-- The amount to shift the clocks during a small/large transition -->
+    <dimen name="keyguard_clock_switch_y_shift">10dp</dimen>
 
     <item name="scrim_behind_alpha" format="float" type="dimen">0.62</item>
 

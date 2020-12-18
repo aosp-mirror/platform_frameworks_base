@@ -185,6 +185,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private DisplayDeviceInfo mInfo;
         private boolean mHavePendingChanges;
         private int mState = Display.STATE_UNKNOWN;
+        // This is only set in the runnable returned from requestDisplayStateLocked.
         private float mBrightnessState = PowerManager.BRIGHTNESS_INVALID_FLOAT;
         private int mDefaultModeId;
         private int mDefaultConfigGroup;
@@ -227,7 +228,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             mDisplayDeviceConfig = null;
             // Defer configuration file loading
             BackgroundThread.getHandler().sendMessage(PooledLambda.obtainMessage(
-                    LocalDisplayDevice::loadDisplayConfigurationBrightnessMapping, this));
+                    LocalDisplayDevice::loadDisplayConfiguration, this));
         }
 
         @Override
@@ -409,7 +410,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             return mDisplayDeviceConfig;
         }
 
-        private void loadDisplayConfigurationBrightnessMapping() {
+        private void loadDisplayConfiguration() {
             Spline nitsToHal = null;
             Spline sysToNits = null;
 
@@ -418,6 +419,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             if (mDisplayDeviceConfig == null) {
                 return;
             }
+
+            mBacklightAdapter.setForceSurfaceControl(mDisplayDeviceConfig.hasQuirk(
+                    DisplayDeviceConfig.QUIRK_CAN_SET_BRIGHTNESS_VIA_HWC));
 
             final float[] halNits = mDisplayDeviceConfig.getNits();
             final float[] halBrightness = mDisplayDeviceConfig.getBrightness();
@@ -648,10 +652,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     updateDeviceInfoLocked();
                 }
 
-                if (brightnessChanged) {
-                    mBrightnessState = brightnessState;
-                }
-
                 // Defer actually setting the display state until after we have exited
                 // the critical section since it can take hundreds of milliseconds
                 // to complete.
@@ -691,6 +691,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         // Apply brightness changes given that we are in a non-suspended state.
                         if (brightnessChanged || vrModeChange) {
                             setDisplayBrightness(brightnessState);
+                            mBrightnessState = brightnessState;
                         }
 
                         // Enter the final desired state, possibly suspended.
@@ -1208,6 +1209,14 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private final LogicalLight mBacklight;
         private final boolean mUseSurfaceControlBrightness;
 
+        private boolean mForceSurfaceControl = false;
+
+        /**
+         * @param displayToken Token for display associated with this backlight.
+         * @param isDefaultDisplay {@code true} if it is the default display.
+         * @param forceSurfaceControl {@code true} if brightness should always be
+         *                            set via SurfaceControl API.
+         */
         BacklightAdapter(IBinder displayToken, boolean isDefaultDisplay) {
             mDisplayToken = displayToken;
 
@@ -1222,23 +1231,28 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             }
         }
 
-        public void setBrightness(float brightness) {
-            if (mUseSurfaceControlBrightness) {
+        void setBrightness(float brightness) {
+            if (mUseSurfaceControlBrightness || mForceSurfaceControl) {
                 SurfaceControl.setDisplayBrightness(mDisplayToken, brightness);
             } else if (mBacklight != null) {
                 mBacklight.setBrightness(brightness);
             }
         }
 
-        public void setVrMode(boolean isVrModeEnabled) {
+        void setVrMode(boolean isVrModeEnabled) {
             if (mBacklight != null) {
                 mBacklight.setVrMode(isVrModeEnabled);
             }
         }
 
+        void setForceSurfaceControl(boolean forceSurfaceControl) {
+            mForceSurfaceControl = forceSurfaceControl;
+        }
+
         @Override
         public String toString() {
             return "BacklightAdapter [useSurfaceControl=" + mUseSurfaceControlBrightness
+                    + " (force_anyway? " + mForceSurfaceControl + ")"
                     + ", backlight=" + mBacklight + "]";
         }
     }

@@ -21,6 +21,7 @@ import android.util.Slog;
 import android.view.DisplayAddress;
 
 import com.android.server.display.config.DisplayConfiguration;
+import com.android.server.display.config.DisplayQuirks;
 import com.android.server.display.config.NitsMap;
 import com.android.server.display.config.Point;
 import com.android.server.display.config.XmlParser;
@@ -32,6 +33,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -45,6 +47,8 @@ public class DisplayDeviceConfig {
 
     public static final float HIGH_BRIGHTNESS_MODE_UNSUPPORTED = Float.NaN;
 
+    public static final String QUIRK_CAN_SET_BRIGHTNESS_VIA_HWC = "canSetBrightnessViaHwc";
+
     private static final String ETC_DIR = "etc";
     private static final String DISPLAY_CONFIG_DIR = "displayconfig";
     private static final String CONFIG_FILE_FORMAT = "display_%s.xml";
@@ -55,6 +59,7 @@ public class DisplayDeviceConfig {
 
     private float[] mNits;
     private float[] mBrightness;
+    private List<String> mQuirks;
 
     private DisplayDeviceConfig() {
     }
@@ -134,11 +139,21 @@ public class DisplayDeviceConfig {
         return mBrightness;
     }
 
+    /**
+     * @param quirkValue The quirk to test.
+     * @return {@code true} if the specified quirk is present in this configuration,
+     * {@code false} otherwise.
+     */
+    public boolean hasQuirk(String quirkValue) {
+        return mQuirks != null && mQuirks.contains(quirkValue);
+    }
+
     @Override
     public String toString() {
         String str = "DisplayDeviceConfig{"
                 + "mBrightness=" + Arrays.toString(mBrightness)
                 + ", mNits=" + Arrays.toString(mNits)
+                + ", mQuirks=" + mQuirks
                 + "}";
         return str;
     }
@@ -173,6 +188,7 @@ public class DisplayDeviceConfig {
         try (InputStream in = new BufferedInputStream(new FileInputStream(configFile))) {
             final DisplayConfiguration config = XmlParser.read(in);
             loadBrightnessMap(config);
+            loadQuirks(config);
         } catch (IOException | DatatypeConfigurationException | XmlPullParserException e) {
             Slog.e(TAG, "Encountered an error while reading/parsing display config file: "
                     + configFile, e);
@@ -209,5 +225,12 @@ public class DisplayDeviceConfig {
         }
         mNits = nits;
         mBrightness = backlight;
+    }
+
+    private void loadQuirks(DisplayConfiguration config) {
+        final DisplayQuirks quirks = config.getQuirks();
+        if (quirks != null) {
+            mQuirks = new ArrayList<>(quirks.getQuirk());
+        }
     }
 }

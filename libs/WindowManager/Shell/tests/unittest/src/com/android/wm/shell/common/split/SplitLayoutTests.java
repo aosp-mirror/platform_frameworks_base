@@ -75,15 +75,16 @@ public class SplitLayoutTests extends ShellTestCase {
     }
 
     @Test
-    @UiThreadTest
-    public void testSnapToTarget() {
-        DividerSnapAlgorithm.SnapTarget snapTarget = getSnapTarget(0 /* position */,
-                DividerSnapAlgorithm.SnapTarget.FLAG_NONE);
-        mSplitLayout.snapToTarget(0 /* currentPosition */, snapTarget);
-        verify(mLayoutChangeListener).onBoundsChanging(any(SplitLayout.class));
+    public void testSetDividePosition() {
+        mSplitLayout.setDividePosition(anyInt());
+        verify(mLayoutChangeListener).onBoundsChanged(any(SplitLayout.class));
+    }
 
+    @Test
+    @UiThreadTest
+    public void testSnapToDismissTarget() {
         // verify it callbacks properly when the snap target indicates dismissing split.
-        snapTarget = getSnapTarget(0 /* position */,
+        DividerSnapAlgorithm.SnapTarget snapTarget = getSnapTarget(0 /* position */,
                 DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_START);
         mSplitLayout.snapToTarget(0 /* currentPosition */, snapTarget);
         verify(mLayoutChangeListener).onSnappedToDismiss(eq(false));

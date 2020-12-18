@@ -60,6 +60,7 @@ package android {
     field public static final String CAMERA_OPEN_CLOSE_LISTENER = "android.permission.CAMERA_OPEN_CLOSE_LISTENER";
     field public static final String CAPTURE_AUDIO_HOTWORD = "android.permission.CAPTURE_AUDIO_HOTWORD";
     field public static final String CAPTURE_MEDIA_OUTPUT = "android.permission.CAPTURE_MEDIA_OUTPUT";
+    field public static final String CAPTURE_TUNER_AUDIO_INPUT = "android.permission.CAPTURE_TUNER_AUDIO_INPUT";
     field public static final String CAPTURE_TV_INPUT = "android.permission.CAPTURE_TV_INPUT";
     field public static final String CAPTURE_VOICE_COMMUNICATION_OUTPUT = "android.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT";
     field public static final String CHANGE_APP_IDLE_STATE = "android.permission.CHANGE_APP_IDLE_STATE";
@@ -1932,6 +1933,7 @@ package android.content {
     field public static final String EUICC_CARD_SERVICE = "euicc_card";
     field public static final String HDMI_CONTROL_SERVICE = "hdmi_control";
     field public static final String MEDIA_TRANSCODING_SERVICE = "media_transcoding";
+    field public static final String MUSIC_RECOGNITION_SERVICE = "music_recognition";
     field public static final String NETD_SERVICE = "netd";
     field public static final String NETWORK_SCORE_SERVICE = "network_score";
     field public static final String OEM_LOCK_SERVICE = "oem_lock";
@@ -2120,6 +2122,9 @@ package android.content.pm {
   public class ApplicationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
     method public boolean isEncryptionAware();
     method public boolean isInstantApp();
+    method public boolean isOem();
+    method public boolean isProduct();
+    method public boolean isVendor();
     field public String credentialProtectedDataDir;
     field public int targetSandboxVersion;
   }
@@ -8051,12 +8056,14 @@ package android.os {
 
   public class RecoverySystem {
     method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void cancelScheduledUpdate(android.content.Context) throws java.io.IOException;
-    method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void clearPrepareForUnattendedUpdate(@NonNull android.content.Context) throws java.io.IOException;
+    method @RequiresPermission(anyOf={android.Manifest.permission.RECOVERY, android.Manifest.permission.REBOOT}) public static void clearPrepareForUnattendedUpdate(@NonNull android.content.Context) throws java.io.IOException;
     method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void installPackage(android.content.Context, java.io.File, boolean) throws java.io.IOException;
-    method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void prepareForUnattendedUpdate(@NonNull android.content.Context, @NonNull String, @Nullable android.content.IntentSender) throws java.io.IOException;
+    method @RequiresPermission(anyOf={android.Manifest.permission.RECOVERY, android.Manifest.permission.REBOOT}) public static boolean isPreparedForUnattendedUpdate(@NonNull android.content.Context) throws java.io.IOException;
+    method @RequiresPermission(anyOf={android.Manifest.permission.RECOVERY, android.Manifest.permission.REBOOT}) public static void prepareForUnattendedUpdate(@NonNull android.content.Context, @NonNull String, @Nullable android.content.IntentSender) throws java.io.IOException;
     method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void processPackage(android.content.Context, java.io.File, android.os.RecoverySystem.ProgressListener, android.os.Handler) throws java.io.IOException;
     method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void processPackage(android.content.Context, java.io.File, android.os.RecoverySystem.ProgressListener) throws java.io.IOException;
-    method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void rebootAndApply(@NonNull android.content.Context, @NonNull String, @NonNull String) throws java.io.IOException;
+    method @RequiresPermission(anyOf={android.Manifest.permission.RECOVERY, android.Manifest.permission.REBOOT}) public static void rebootAndApply(@NonNull android.content.Context, @NonNull String, @NonNull String) throws java.io.IOException;
+    method @RequiresPermission(anyOf={android.Manifest.permission.RECOVERY, android.Manifest.permission.REBOOT}) public static void rebootAndApply(@NonNull android.content.Context, @NonNull String, boolean) throws java.io.IOException;
     method @RequiresPermission(allOf={android.Manifest.permission.RECOVERY, android.Manifest.permission.REBOOT}) public static void rebootWipeAb(android.content.Context, java.io.File, String) throws java.io.IOException;
     method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void scheduleUpdateOnBoot(android.content.Context, java.io.File) throws java.io.IOException;
     method public static boolean verifyPackageCompatibility(java.io.File) throws java.io.IOException;
@@ -12637,6 +12644,7 @@ package android.telephony.ims {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void createSipDelegate(@NonNull android.telephony.ims.DelegateRequest, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.stub.DelegateConnectionStateCallback, @NonNull android.telephony.ims.stub.DelegateConnectionMessageCallback) throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void destroySipDelegate(@NonNull android.telephony.ims.SipDelegateConnection, int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isSupported() throws android.telephony.ims.ImsException;
+    method public void triggerFullNetworkRegistration(@NonNull android.telephony.ims.SipDelegateConnection, @IntRange(from=100, to=699) int, @Nullable String);
     field public static final int DENIED_REASON_INVALID = 4; // 0x4
     field public static final int DENIED_REASON_IN_USE_BY_ANOTHER_DELEGATE = 1; // 0x1
     field public static final int DENIED_REASON_NOT_ALLOWED = 2; // 0x2
@@ -12885,6 +12893,9 @@ package android.telephony.ims.stub {
     method public final void onRegistering(int);
     method public final void onSubscriberAssociatedUriChanged(android.net.Uri[]);
     method public final void onTechnologyChangeFailed(int, android.telephony.ims.ImsReasonInfo);
+    method public void triggerFullNetworkRegistration(@IntRange(from=100, to=699) int, @Nullable String);
+    method public void triggerSipDelegateDeregistration();
+    method public void updateSipDelegateRegistration();
     field public static final int REGISTRATION_TECH_IWLAN = 1; // 0x1
     field public static final int REGISTRATION_TECH_LTE = 0; // 0x0
     field public static final int REGISTRATION_TECH_NONE = -1; // 0xffffffff

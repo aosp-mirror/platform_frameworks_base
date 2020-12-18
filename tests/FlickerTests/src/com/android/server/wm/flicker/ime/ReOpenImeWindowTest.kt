@@ -23,14 +23,27 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.Flicker
 import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
-import com.android.server.wm.flicker.helpers.buildTestTag
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
-import com.android.server.wm.flicker.helpers.hasWindow
+import com.android.server.wm.flicker.helpers.buildTestTag
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
+import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.navBarLayerRotatesAndScales
+import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.wallpaperWindowBecomesInvisible
+import com.android.server.wm.flicker.appLayerReplacesWallpaperLayer
+import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
+import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+import com.android.server.wm.flicker.noUncoveredRegions
 import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.startRotation
+import com.android.server.wm.flicker.endRotation
+import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarLayerRotatesScales
+import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.testapp.ActivityOptions
 import org.junit.FixMethodOrder
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -54,8 +67,9 @@ class ReOpenImeWindowTest(
         fun getParams(): List<Array<Any>> {
             val instrumentation = InstrumentationRegistry.getInstrumentation()
             val testApp = ImeAppAutoFocusHelper(instrumentation)
+            val testAppComponentName = ActivityOptions.IME_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME
 
-            return FlickerTestRunnerFactory(instrumentation, repetitions = 10)
+            return FlickerTestRunnerFactory(instrumentation, repetitions = 5)
                     .buildTest { configuration ->
                         withTestName { buildTestTag("reOpenImeAutoFocus", testApp, configuration) }
                         repeat { configuration.repetitions }
@@ -73,7 +87,7 @@ class ReOpenImeWindowTest(
                         }
                         transitions {
                             device.reopenAppFromOverview()
-                            device.hasWindow(testApp.getPackage())
+                            WindowManagerStateHelper().waitForFullScreenApp(testAppComponentName)
                         }
                         teardown {
                             eachRun {
@@ -82,6 +96,35 @@ class ReOpenImeWindowTest(
                             }
                             test {
                                 this.setRotation(Surface.ROTATION_0)
+                            }
+                        }
+                        assertions {
+                            windowManagerTrace {
+                                navBarWindowIsAlwaysVisible()
+                                statusBarWindowIsAlwaysVisible()
+                                visibleWindowsShownMoreThanOneConsecutiveEntry()
+
+                                imeWindowBecomesVisible()
+                                imeAppWindowBecomesVisible(testAppComponentName.className)
+                                wallpaperWindowBecomesInvisible()
+                            }
+
+                            layersTrace {
+                                noUncoveredRegions(Surface.ROTATION_0, configuration.endRotation,
+                                        bugId = 141361128)
+                                navBarLayerRotatesAndScales(Surface.ROTATION_0,
+                                        configuration.endRotation)
+                                statusBarLayerRotatesScales(Surface.ROTATION_0,
+                                        configuration.endRotation)
+                                statusBarLayerIsAlwaysVisible(
+                                        enabled = Surface.ROTATION_0 == configuration.endRotation)
+                                navBarLayerIsAlwaysVisible(
+                                        enabled = Surface.ROTATION_0 == configuration.endRotation)
+                                visibleLayersShownMoreThanOneConsecutiveEntry(
+                                        enabled = Surface.ROTATION_0 == configuration.endRotation)
+
+                                imeLayerBecomesVisible()
+                                appLayerReplacesWallpaperLayer(testAppComponentName.className)
                             }
                         }
                     }

@@ -16,18 +16,22 @@
 
 package com.android.internal.power;
 
-import static com.android.internal.power.MeasuredEnergyArray.NUMBER_SUBSYSTEMS;
-import static com.android.internal.power.MeasuredEnergyArray.SUBSYSTEM_DISPLAY;
+import static android.os.BatteryStats.ENERGY_DATA_UNAVAILABLE;
+
 import static com.android.internal.power.MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_DOZE;
 import static com.android.internal.power.MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_ON;
+import static com.android.internal.power.MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_OTHER;
 import static com.android.internal.power.MeasuredEnergyStats.NUMBER_ENERGY_BUCKETS;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import android.os.Parcel;
 import android.view.Display;
 
-import org.junit.Before;
+import androidx.test.filters.SmallTest;
+
 import org.junit.Test;
 
 /**
@@ -36,243 +40,225 @@ import org.junit.Test;
  * To run the tests, use
  * atest FrameworksCoreTests:com.android.internal.power.MeasuredEnergyStatsTest
  */
+@SmallTest
 public class MeasuredEnergyStatsTest {
-    private MeasuredEnergyStats mStats;
-    private int[] mAllSubsystems = new int[NUMBER_SUBSYSTEMS];
-    private long[] mCurrentSubsystemEnergyUJ = new long[NUMBER_SUBSYSTEMS];
 
-    MeasuredEnergyArray mMeasuredEnergyArray = new MeasuredEnergyArray() {
-        @Override
-        public int getSubsystem(int index) {
-            return mAllSubsystems[index];
+    @Test
+    public void testConstruction() {
+        final boolean[] supportedEnergyBuckets = new boolean[NUMBER_ENERGY_BUCKETS];
+        supportedEnergyBuckets[ENERGY_BUCKET_SCREEN_ON] = true;
+        supportedEnergyBuckets[ENERGY_BUCKET_SCREEN_DOZE] = false;
+        supportedEnergyBuckets[ENERGY_BUCKET_SCREEN_OTHER] = true;
+
+        final MeasuredEnergyStats stats = new MeasuredEnergyStats(supportedEnergyBuckets);
+
+        for (int i = 0; i < NUMBER_ENERGY_BUCKETS; i++) {
+            if (supportedEnergyBuckets[i]) {
+                assertTrue(stats.isEnergyBucketSupported(i));
+                assertEquals(0L, stats.getAccumulatedBucketEnergy(i));
+            } else {
+                assertFalse(stats.isEnergyBucketSupported(i));
+                assertEquals(ENERGY_DATA_UNAVAILABLE, stats.getAccumulatedBucketEnergy(i));
+            }
         }
+    }
 
-        @Override
-        public long getEnergy(int index) {
-            return mCurrentSubsystemEnergyUJ[index];
+    @Test
+    public void testCreateFromTemplate() {
+        final boolean[] supportedEnergyBuckets = new boolean[NUMBER_ENERGY_BUCKETS];
+        supportedEnergyBuckets[ENERGY_BUCKET_SCREEN_ON] = true;
+        supportedEnergyBuckets[ENERGY_BUCKET_SCREEN_DOZE] = false;
+        supportedEnergyBuckets[ENERGY_BUCKET_SCREEN_OTHER] = true;
+
+        final MeasuredEnergyStats stats = new MeasuredEnergyStats(supportedEnergyBuckets);
+        stats.updateBucket(ENERGY_BUCKET_SCREEN_ON, 10, true);
+        stats.updateBucket(ENERGY_BUCKET_SCREEN_ON, 5, true);
+        stats.updateBucket(ENERGY_BUCKET_SCREEN_OTHER, 40, true);
+
+        final MeasuredEnergyStats newStats = MeasuredEnergyStats.createFromTemplate(stats);
+
+        for (int i = 0; i < NUMBER_ENERGY_BUCKETS; i++) {
+            if (supportedEnergyBuckets[i]) {
+                assertTrue(newStats.isEnergyBucketSupported(i));
+                assertEquals(0, newStats.getAccumulatedBucketEnergy(i));
+            } else {
+                assertFalse(newStats.isEnergyBucketSupported(i));
+                assertEquals(ENERGY_DATA_UNAVAILABLE, newStats.getAccumulatedBucketEnergy(i));
+            }
         }
-
-        @Override
-        public int size() {
-            return NUMBER_SUBSYSTEMS;
-        }
-    };
-
-    @Before
-    public void setUp() {
-        // Populate all supported subsystems indexes and arbitrary starting energy values.
-        mAllSubsystems[SUBSYSTEM_DISPLAY] = SUBSYSTEM_DISPLAY;
-        mCurrentSubsystemEnergyUJ[SUBSYSTEM_DISPLAY] = 111;
-
-        mStats = new MeasuredEnergyStats(mMeasuredEnergyArray, Display.STATE_UNKNOWN);
     }
 
     @Test
     public void testReadWriteParcel() {
-        // update with some arbitrary data
-        mCurrentSubsystemEnergyUJ[SUBSYSTEM_DISPLAY] += 222;
-        mStats.update(mMeasuredEnergyArray, Display.STATE_ON, true);
-        mCurrentSubsystemEnergyUJ[SUBSYSTEM_DISPLAY] += 321;
-        mStats.update(mMeasuredEnergyArray, Display.STATE_DOZE, true);
-        mCurrentSubsystemEnergyUJ[SUBSYSTEM_DISPLAY] += 456;
-        mStats.update(mMeasuredEnergyArray, Display.STATE_OFF, true);
+        final boolean[] supportedEnergyBuckets = new boolean[NUMBER_ENERGY_BUCKETS];
+        supportedEnergyBuckets[ENERGY_BUCKET_SCREEN_ON] = true;
+        supportedEnergyBuckets[ENERGY_BUCKET_SCREEN_DOZE] = false;
+        supportedEnergyBuckets[ENERGY_BUCKET_SCREEN_OTHER] = true;
+
+        final MeasuredEnergyStats stats = new MeasuredEnergyStats(supportedEnergyBuckets);
+        stats.updateBucket(ENERGY_BUCKET_SCREEN_ON, 10, true);
+        stats.updateBucket(ENERGY_BUCKET_SCREEN_ON, 5, true);
+        stats.updateBucket(ENERGY_BUCKET_SCREEN_OTHER, 40, true);
 
         final Parcel parcel = Parcel.obtain();
-        mStats.writeToParcel(parcel);
+        stats.writeToParcel(parcel);
 
         parcel.setDataPosition(0);
-        MeasuredEnergyStats stats = new MeasuredEnergyStats(parcel);
+        MeasuredEnergyStats newStats = new MeasuredEnergyStats(parcel);
 
         for (int i = 0; i < NUMBER_ENERGY_BUCKETS; i++) {
-            assertEquals(mStats.getAccumulatedBucketEnergy(i), stats.getAccumulatedBucketEnergy(i));
+            assertEquals(stats.getAccumulatedBucketEnergy(i),
+                    newStats.getAccumulatedBucketEnergy(i));
         }
         parcel.recycle();
     }
 
     @Test
     public void testReadWriteSummaryParcel() {
-        // update with some arbitrary data
-        mCurrentSubsystemEnergyUJ[SUBSYSTEM_DISPLAY] += 222;
-        mStats.update(mMeasuredEnergyArray, Display.STATE_ON, true);
-        mCurrentSubsystemEnergyUJ[SUBSYSTEM_DISPLAY] += 321;
-        mStats.update(mMeasuredEnergyArray, Display.STATE_DOZE, true);
-        mCurrentSubsystemEnergyUJ[SUBSYSTEM_DISPLAY] += 456;
-        mStats.update(mMeasuredEnergyArray, Display.STATE_OFF, true);
+        final boolean[] supportedEnergyBuckets = new boolean[NUMBER_ENERGY_BUCKETS];
+        supportedEnergyBuckets[ENERGY_BUCKET_SCREEN_ON] = true;
+        supportedEnergyBuckets[ENERGY_BUCKET_SCREEN_DOZE] = false;
+        supportedEnergyBuckets[ENERGY_BUCKET_SCREEN_OTHER] = true;
+
+        final MeasuredEnergyStats stats = new MeasuredEnergyStats(supportedEnergyBuckets);
+        stats.updateBucket(ENERGY_BUCKET_SCREEN_ON, 10, true);
+        stats.updateBucket(ENERGY_BUCKET_SCREEN_ON, 5, true);
+        stats.updateBucket(ENERGY_BUCKET_SCREEN_OTHER, 40, true);
 
         final Parcel parcel = Parcel.obtain();
-        MeasuredEnergyStats.writeSummaryToParcel(mStats, parcel);
+        MeasuredEnergyStats.writeSummaryToParcel(stats, parcel);
 
+
+        final boolean[] newSupportedEnergyBuckets = new boolean[NUMBER_ENERGY_BUCKETS];
+        newSupportedEnergyBuckets[ENERGY_BUCKET_SCREEN_ON] = true;
+        newSupportedEnergyBuckets[ENERGY_BUCKET_SCREEN_DOZE] = true; // switched from false to true
+        newSupportedEnergyBuckets[ENERGY_BUCKET_SCREEN_OTHER] = false; // switched true to false
+        MeasuredEnergyStats newStats = new MeasuredEnergyStats(newSupportedEnergyBuckets);
         parcel.setDataPosition(0);
-        MeasuredEnergyStats stats = new MeasuredEnergyStats(mMeasuredEnergyArray,
-                Display.STATE_UNKNOWN);
-        MeasuredEnergyStats.readSummaryFromParcel(stats, parcel);
+        MeasuredEnergyStats.readSummaryFromParcel(newStats, parcel);
 
         for (int i = 0; i < NUMBER_ENERGY_BUCKETS; i++) {
-            assertEquals(mStats.getAccumulatedBucketEnergy(i), stats.getAccumulatedBucketEnergy(i));
+            if (!newSupportedEnergyBuckets[i]) {
+                assertFalse(newStats.isEnergyBucketSupported(i));
+                assertEquals(ENERGY_DATA_UNAVAILABLE, newStats.getAccumulatedBucketEnergy(i));
+            } else if (!supportedEnergyBuckets[i]) {
+                assertTrue(newStats.isEnergyBucketSupported(i));
+                assertEquals(0L, newStats.getAccumulatedBucketEnergy(i));
+            } else {
+                assertTrue(newStats.isEnergyBucketSupported(i));
+                assertEquals(stats.getAccumulatedBucketEnergy(i),
+                        newStats.getAccumulatedBucketEnergy(i));
+            }
         }
         parcel.recycle();
     }
 
     @Test
-    public void testDisplayStateEnergyAttribution() {
-        long expectedScreenOnEnergy = 0;
-        long expectedScreenDozeEnergy = 0;
+    public void testCreateAndReadSummaryFromParcel() {
+        final boolean[] supportedEnergyBuckets = new boolean[NUMBER_ENERGY_BUCKETS];
+        supportedEnergyBuckets[ENERGY_BUCKET_SCREEN_ON] = true;
+        supportedEnergyBuckets[ENERGY_BUCKET_SCREEN_DOZE] = false;
+        supportedEnergyBuckets[ENERGY_BUCKET_SCREEN_OTHER] = true;
 
-        // Display energy should be attributed to the previous screen state.
-        mStats.update(mMeasuredEnergyArray, Display.STATE_UNKNOWN, true);
+        final MeasuredEnergyStats template = new MeasuredEnergyStats(supportedEnergyBuckets);
+        template.updateBucket(ENERGY_BUCKET_SCREEN_ON, 10, true);
+        template.updateBucket(ENERGY_BUCKET_SCREEN_ON, 5, true);
+        template.updateBucket(ENERGY_BUCKET_SCREEN_OTHER, 40, true);
 
-        incrementDisplayState(222, Display.STATE_ON, true, expectedScreenOnEnergy,
-                expectedScreenDozeEnergy);
+        final MeasuredEnergyStats stats = MeasuredEnergyStats.createFromTemplate(template);
+        stats.updateBucket(ENERGY_BUCKET_SCREEN_ON, 200, true);
+        stats.updateBucket(ENERGY_BUCKET_SCREEN_ON, 7, true);
+        stats.updateBucket(ENERGY_BUCKET_SCREEN_OTHER, 63, true);
 
-        expectedScreenOnEnergy += 321;
-        incrementDisplayState(321, Display.STATE_DOZE, true, expectedScreenOnEnergy,
-                expectedScreenDozeEnergy);
+        final Parcel parcel = Parcel.obtain();
+        MeasuredEnergyStats.writeSummaryToParcel(stats, parcel);
 
-        expectedScreenDozeEnergy += 456;
-        incrementDisplayState(456, Display.STATE_OFF, true, expectedScreenOnEnergy,
-                expectedScreenDozeEnergy);
+        final boolean[] newSupportedEnergyBuckets = new boolean[NUMBER_ENERGY_BUCKETS];
+        newSupportedEnergyBuckets[ENERGY_BUCKET_SCREEN_ON] = true;
+        newSupportedEnergyBuckets[ENERGY_BUCKET_SCREEN_DOZE] = true; // switched from false to true
+        newSupportedEnergyBuckets[ENERGY_BUCKET_SCREEN_OTHER] = false; // switched true to false
+        final MeasuredEnergyStats newTemplate = new MeasuredEnergyStats(newSupportedEnergyBuckets);
+        parcel.setDataPosition(0);
 
-        incrementDisplayState(1111, Display.STATE_DOZE_SUSPEND, true, expectedScreenOnEnergy,
-                expectedScreenDozeEnergy);
+        final MeasuredEnergyStats newStats =
+                MeasuredEnergyStats.createAndReadSummaryFromParcel(parcel, newTemplate);
 
-        expectedScreenDozeEnergy += 2345;
-        incrementDisplayState(2345, Display.STATE_ON_SUSPEND, true, expectedScreenOnEnergy,
-                expectedScreenDozeEnergy);
-
-        expectedScreenOnEnergy += 767;
-        incrementDisplayState(767, Display.STATE_VR, true, expectedScreenOnEnergy,
-                expectedScreenDozeEnergy);
-
-        expectedScreenOnEnergy += 999;
-        incrementDisplayState(999, Display.STATE_UNKNOWN, true, expectedScreenOnEnergy,
-                expectedScreenDozeEnergy);
+        for (int i = 0; i < NUMBER_ENERGY_BUCKETS; i++) {
+            if (!newSupportedEnergyBuckets[i]) {
+                assertFalse(newStats.isEnergyBucketSupported(i));
+                assertEquals(ENERGY_DATA_UNAVAILABLE, newStats.getAccumulatedBucketEnergy(i));
+            } else if (!supportedEnergyBuckets[i]) {
+                assertTrue(newStats.isEnergyBucketSupported(i));
+                assertEquals(0L, newStats.getAccumulatedBucketEnergy(i));
+            } else {
+                assertTrue(newStats.isEnergyBucketSupported(i));
+                assertEquals(stats.getAccumulatedBucketEnergy(i),
+                        newStats.getAccumulatedBucketEnergy(i));
+            }
+        }
+        parcel.recycle();
     }
 
     @Test
-    public void testDisplayStateEnergyAttribution_notRunning() {
-        long expectedScreenOnEnergy = 0;
-        long expectedScreenDozeEnergy = 0;
+    public void testUpdateBucket() {
+        final boolean[] supportedEnergyBuckets = new boolean[NUMBER_ENERGY_BUCKETS];
+        supportedEnergyBuckets[ENERGY_BUCKET_SCREEN_ON] = true;
+        supportedEnergyBuckets[ENERGY_BUCKET_SCREEN_DOZE] = false;
+        supportedEnergyBuckets[ENERGY_BUCKET_SCREEN_OTHER] = true;
 
-        // Display energy should be attributed to the previous screen state.
-        mStats.update(mMeasuredEnergyArray, Display.STATE_UNKNOWN, true);
+        final MeasuredEnergyStats stats = new MeasuredEnergyStats(supportedEnergyBuckets);
+        stats.updateBucket(ENERGY_BUCKET_SCREEN_ON, 10, true);
+        stats.updateBucket(ENERGY_BUCKET_SCREEN_DOZE, 30, true);
+        stats.updateBucket(ENERGY_BUCKET_SCREEN_OTHER, 40, true);
+        stats.updateBucket(ENERGY_BUCKET_SCREEN_ON, 5, true);
 
-        incrementDisplayState(222, Display.STATE_ON, true, expectedScreenOnEnergy,
-                expectedScreenDozeEnergy);
-
-        expectedScreenOnEnergy += 321;
-        incrementDisplayState(321, Display.STATE_DOZE, true, expectedScreenOnEnergy,
-                expectedScreenDozeEnergy);
-
-        // Updates after this point should not result in energy accumulation.
-        incrementDisplayState(456, Display.STATE_OFF, false, expectedScreenOnEnergy,
-                expectedScreenDozeEnergy);
-
-        incrementDisplayState(1111, Display.STATE_DOZE_SUSPEND, false, expectedScreenOnEnergy,
-                expectedScreenDozeEnergy);
-
-        incrementDisplayState(2345, Display.STATE_ON_SUSPEND, false, expectedScreenOnEnergy,
-                expectedScreenDozeEnergy);
-
-        incrementDisplayState(767, Display.STATE_VR, false, expectedScreenOnEnergy,
-                expectedScreenDozeEnergy);
-
-        // Resume energy accumulation.
-        expectedScreenOnEnergy += 999;
-        incrementDisplayState(999, Display.STATE_UNKNOWN, true, expectedScreenOnEnergy,
-                expectedScreenDozeEnergy);
+        assertEquals(15, stats.getAccumulatedBucketEnergy(ENERGY_BUCKET_SCREEN_ON));
+        assertEquals(ENERGY_DATA_UNAVAILABLE,
+                stats.getAccumulatedBucketEnergy(ENERGY_BUCKET_SCREEN_DOZE));
+        assertEquals(40, stats.getAccumulatedBucketEnergy(ENERGY_BUCKET_SCREEN_OTHER));
     }
 
     @Test
     public void testReset() {
-        // update with some arbitrary data.
-        mCurrentSubsystemEnergyUJ[SUBSYSTEM_DISPLAY] += 222;
-        mStats.update(mMeasuredEnergyArray, Display.STATE_ON, true);
-        mCurrentSubsystemEnergyUJ[SUBSYSTEM_DISPLAY] += 321;
-        mStats.update(mMeasuredEnergyArray, Display.STATE_DOZE, true);
-        mCurrentSubsystemEnergyUJ[SUBSYSTEM_DISPLAY] += 456;
-        mStats.update(mMeasuredEnergyArray, Display.STATE_OFF, true);
+        final boolean[] supportedEnergyBuckets = new boolean[NUMBER_ENERGY_BUCKETS];
+        supportedEnergyBuckets[ENERGY_BUCKET_SCREEN_ON] = true;
+        supportedEnergyBuckets[ENERGY_BUCKET_SCREEN_DOZE] = false;
+        supportedEnergyBuckets[ENERGY_BUCKET_SCREEN_OTHER] = true;
 
-        mStats.reset();
+        final MeasuredEnergyStats stats = new MeasuredEnergyStats(supportedEnergyBuckets);
+        stats.updateBucket(ENERGY_BUCKET_SCREEN_ON, 10, true);
+        stats.updateBucket(ENERGY_BUCKET_SCREEN_ON, 5, true);
+        stats.updateBucket(ENERGY_BUCKET_SCREEN_OTHER, 40, true);
+
+        MeasuredEnergyStats.resetIfNotNull(stats);
         // All energy should be reset to 0
         for (int i = 0; i < NUMBER_ENERGY_BUCKETS; i++) {
-            assertEquals(mStats.getAccumulatedBucketEnergy(i), 0);
+            if (supportedEnergyBuckets[i]) {
+                assertTrue(stats.isEnergyBucketSupported(i));
+                assertEquals(0, stats.getAccumulatedBucketEnergy(i));
+            } else {
+                assertFalse(stats.isEnergyBucketSupported(i));
+                assertEquals(ENERGY_DATA_UNAVAILABLE, stats.getAccumulatedBucketEnergy(i));
+            }
         }
 
-        // Increment all subsystem energy by some arbitrary amount and update
-        for (int i = 0; i < NUMBER_SUBSYSTEMS; i++) {
-            mCurrentSubsystemEnergyUJ[i] += 100 * i;
-        }
-        mStats.update(mMeasuredEnergyArray, Display.STATE_OFF, true);
-
-        // All energy should still be 0 after the first post-reset update.
-        for (int i = 0; i < NUMBER_ENERGY_BUCKETS; i++) {
-            assertEquals(mStats.getAccumulatedBucketEnergy(i), 0);
-        }
-
-        // Energy accumulation should continue like normal.
-        long expectedScreenOnEnergy = 0;
-        long expectedScreenDozeEnergy = 0;
-        incrementDisplayState(222, Display.STATE_ON, true, expectedScreenOnEnergy,
-                expectedScreenDozeEnergy);
-
-        expectedScreenOnEnergy += 321;
-        incrementDisplayState(321, Display.STATE_DOZE, true, expectedScreenOnEnergy,
-                expectedScreenDozeEnergy);
-
-        expectedScreenDozeEnergy += 456;
-        incrementDisplayState(456, Display.STATE_OFF, true, expectedScreenOnEnergy,
-                expectedScreenDozeEnergy);
+        // Values should increase as usual.
+        stats.updateBucket(ENERGY_BUCKET_SCREEN_ON, 70, true);
+        assertEquals(70L, stats.getAccumulatedBucketEnergy(ENERGY_BUCKET_SCREEN_ON));
     }
 
+    /** Test that states are mapped to the expected energy buckets. Beware of mapping changes. */
     @Test
-    public void testHasSubsystem() {
-        for (int i = 0; i < NUMBER_SUBSYSTEMS; i++) {
-            assertEquals(mStats.hasSubsystem(i), true);
-        }
-    }
+    public void testEnergyBucketMapping() {
+        int exp;
 
-    @Test
-    public void testHasSubsystem_unavailable() {
-        // Setup MeasuredEnergyStats with not available subsystems.
-        int[] subsystems = new int[0];
-        long[] energies = new long[0];
-        MeasuredEnergyArray measuredEnergyArray = new MeasuredEnergyArray() {
-            @Override
-            public int getSubsystem(int index) {
-                return subsystems[index];
-            }
+        exp = ENERGY_BUCKET_SCREEN_ON;
+        assertEquals(exp, MeasuredEnergyStats.getDisplayEnergyBucket(Display.STATE_ON));
+        assertEquals(exp, MeasuredEnergyStats.getDisplayEnergyBucket(Display.STATE_VR));
+        assertEquals(exp, MeasuredEnergyStats.getDisplayEnergyBucket(Display.STATE_ON_SUSPEND));
 
-            @Override
-            public long getEnergy(int index) {
-                return energies[index];
-            }
-
-            @Override
-            public int size() {
-                return 0;
-            }
-        };
-        MeasuredEnergyStats stats = new MeasuredEnergyStats(measuredEnergyArray,
-                Display.STATE_UNKNOWN);
-
-        for (int i = 0; i < NUMBER_SUBSYSTEMS; i++) {
-            assertEquals(stats.hasSubsystem(i), false);
-        }
-
-        stats.reset();
-        // a reset should not change the state of an unavailable subsystem.
-        for (int i = 0; i < NUMBER_SUBSYSTEMS; i++) {
-            assertEquals(stats.hasSubsystem(i), false);
-        }
-    }
-
-    private void incrementDisplayState(long deltaEnergy, int nextState, boolean accumulate,
-            long expectScreenEnergy, long expectedDozeEnergy) {
-        mCurrentSubsystemEnergyUJ[SUBSYSTEM_DISPLAY] += deltaEnergy;
-        mStats.update(mMeasuredEnergyArray, nextState, accumulate);
-        assertEquals(expectScreenEnergy,
-                mStats.getAccumulatedBucketEnergy(ENERGY_BUCKET_SCREEN_ON));
-        assertEquals(expectedDozeEnergy,
-                mStats.getAccumulatedBucketEnergy(ENERGY_BUCKET_SCREEN_DOZE));
+        exp = ENERGY_BUCKET_SCREEN_DOZE;
+        assertEquals(exp, MeasuredEnergyStats.getDisplayEnergyBucket(Display.STATE_DOZE));
+        assertEquals(exp, MeasuredEnergyStats.getDisplayEnergyBucket(Display.STATE_DOZE_SUSPEND));
     }
 }

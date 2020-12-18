@@ -33,17 +33,23 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
+import com.android.wm.shell.R;
+import com.android.wm.shell.animation.Interpolators;
 
 /**
  * Stack divider for app pair.
  */
-// TODO(b/172704238): add handle view to indicate touching status.
 public class DividerView extends FrameLayout implements View.OnTouchListener {
+    public static final long TOUCH_ANIMATION_DURATION = 150;
+    public static final long TOUCH_RELEASE_ANIMATION_DURATION = 200;
+
     private final int mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
 
     private SplitLayout mSplitLayout;
     private SurfaceControlViewHost mViewHost;
-    private DragListener mDragListener;
+    private DividerHandleView mHandle;
+    private View mBackground;
+    private int mTouchElevation;
 
     private VelocityTracker mVelocityTracker;
     private boolean mMoving;
@@ -70,16 +76,18 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
     /** Sets up essential dependencies of the divider bar. */
     public void setup(
             SplitLayout layout,
-            SurfaceControlViewHost viewHost,
-            @Nullable DragListener dragListener) {
+            SurfaceControlViewHost viewHost) {
         mSplitLayout = layout;
         mViewHost = viewHost;
-        mDragListener = dragListener;
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        mHandle = findViewById(R.id.docked_divider_handle);
+        mBackground = findViewById(R.id.docked_divider_background);
+        mTouchElevation = getResources().getDimensionPixelSize(
+                R.dimen.docked_stack_divider_lift_elevation);
         setOnTouchListener(this);
     }
 
@@ -97,7 +105,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
             case MotionEvent.ACTION_DOWN:
                 mVelocityTracker = VelocityTracker.obtain();
                 mVelocityTracker.addMovement(event);
-                setSlippery(false);
+                setTouching();
                 mStartPos = touchPos;
                 mMoving = false;
                 break;
@@ -106,9 +114,6 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
                 if (!mMoving && Math.abs(touchPos - mStartPos) > mTouchSlop) {
                     mStartPos = touchPos;
                     mMoving = true;
-                    if (mDragListener != null) {
-                        mDragListener.onDragStart();
-                    }
                 }
                 if (mMoving) {
                     final int position = mSplitLayout.getDividePosition() + touchPos - mStartPos;
@@ -122,11 +127,8 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
                 final float velocity = isLandscape
                         ? mVelocityTracker.getXVelocity()
                         : mVelocityTracker.getYVelocity();
-                setSlippery(true);
+                releaseTouching();
                 mMoving = false;
-                if (mDragListener != null) {
-                    mDragListener.onDragEnd();
-                }
 
                 final int position = mSplitLayout.getDividePosition() + touchPos - mStartPos;
                 final DividerSnapAlgorithm.SnapTarget snapTarget =
@@ -135,6 +137,45 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
                 break;
         }
         return true;
+    }
+
+    private void setTouching() {
+        setSlippery(false);
+        mHandle.setTouching(true, true);
+        if (isLandscape()) {
+            mBackground.animate().scaleX(1.4f);
+        } else {
+            mBackground.animate().scaleY(1.4f);
+        }
+        mBackground.animate()
+                .setInterpolator(Interpolators.TOUCH_RESPONSE)
+                .setDuration(TOUCH_ANIMATION_DURATION)
+                .translationZ(mTouchElevation)
+                .start();
+        // Lift handle as well so it doesn't get behind the background, even though it doesn't
+        // cast shadow.
+        mHandle.animate()
+                .setInterpolator(Interpolators.TOUCH_RESPONSE)
+                .setDuration(TOUCH_ANIMATION_DURATION)
+                .translationZ(mTouchElevation)
+                .start();
+    }
+
+    private void releaseTouching() {
+        setSlippery(true);
+        mHandle.setTouching(false, true);
+        mBackground.animate()
+                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                .setDuration(TOUCH_RELEASE_ANIMATION_DURATION)
+                .translationZ(0)
+                .scaleX(1f)
+                .scaleY(1f)
+                .start();
+        mHandle.animate()
+                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                .setDuration(TOUCH_RELEASE_ANIMATION_DURATION)
+                .translationZ(0)
+                .start();
     }
 
     private void setSlippery(boolean slippery) {
@@ -158,14 +199,5 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
 
     private boolean isLandscape() {
         return getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE;
-    }
-
-    /** Monitors dragging action of the divider bar. */
-    // TODO(b/172704238): add listeners to deal with resizing state of the app windows.
-    public interface DragListener {
-        /** Called when start dragging. */
-        void onDragStart();
-        /** Called when stop dragging. */
-        void onDragEnd();
     }
 }

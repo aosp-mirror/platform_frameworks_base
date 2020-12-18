@@ -72,6 +72,11 @@ public final class HdmiControlServiceWrapper {
         }
 
         @Override
+        public boolean shouldHandleTvPowerKey() {
+            return HdmiControlServiceWrapper.this.shouldHandleTvPowerKey();
+        }
+
+        @Override
         public void queryDisplayStatus(IHdmiControlCallback callback) {
             HdmiControlServiceWrapper.this.queryDisplayStatus(callback);
         }
@@ -366,6 +371,11 @@ public final class HdmiControlServiceWrapper {
 
     /** @hide */
     public void toggleAndFollowTvPower() {}
+
+    /** @hide */
+    public boolean shouldHandleTvPowerKey() {
+        return true;
+    }
 
     /** @hide */
     public void queryDisplayStatus(IHdmiControlCallback callback) {}

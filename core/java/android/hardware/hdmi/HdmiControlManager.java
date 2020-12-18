@@ -848,6 +848,20 @@ public final class HdmiControlManager {
     }
 
     /**
+     * Determines whether the HDMI CEC stack should handle KEYCODE_TV_POWER.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public boolean shouldHandleTvPowerKey() {
+        try {
+            return mService.shouldHandleTvPowerKey();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Controls whether volume control commands via HDMI CEC are enabled.
      *
      * <p>When disabled:

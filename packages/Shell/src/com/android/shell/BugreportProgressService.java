@@ -380,6 +380,11 @@ public class BugreportProgressService extends Service {
         public void onFinished() {
             mInfo.renameBugreportFile();
             mInfo.renameScreenshots();
+            if (mInfo.bugreportFile.length() == 0) {
+                Log.e(TAG, "Bugreport file empty. File path = " + mInfo.bugreportFile);
+                onError(BUGREPORT_ERROR_RUNTIME);
+                return;
+            }
             synchronized (mLock) {
                 sendBugreportFinishedBroadcastLocked();
                 mMainThreadHandler.post(() -> mInfoDialog.onBugreportFinished(mInfo));
@@ -408,10 +413,6 @@ public class BugreportProgressService extends Service {
         @GuardedBy("mLock")
         private void sendBugreportFinishedBroadcastLocked() {
             final String bugreportFilePath = mInfo.bugreportFile.getAbsolutePath();
-            if (mInfo.bugreportFile.length() == 0) {
-                Log.e(TAG, "Bugreport file empty. File path = " + bugreportFilePath);
-                return;
-            }
             if (mInfo.type == BugreportParams.BUGREPORT_MODE_REMOTE) {
                 sendRemoteBugreportFinishedBroadcast(mContext, bugreportFilePath,
                         mInfo.bugreportFile);
@@ -617,12 +618,21 @@ public class BugreportProgressService extends Service {
 
         BugreportInfo info = new BugreportInfo(mContext, baseName, name,
                 shareTitle, shareDescription, bugreportType, mBugreportsDir);
+        synchronized (mLock) {
+            if (info.bugreportFile.exists()) {
+                Log.e(TAG, "Failed to start bugreport generation, the requested bugreport file "
+                        + info.bugreportFile + " already exists");
+                return;
+            }
+            info.createBugreportFile();
+        }
         ParcelFileDescriptor bugreportFd = info.getBugreportFd();
         if (bugreportFd == null) {
             Log.e(TAG, "Failed to start bugreport generation as "
                     + " bugreport parcel file descriptor is null.");
             return;
         }
+        info.createScreenshotFile(mBugreportsDir);
         ParcelFileDescriptor screenshotFd = null;
         if (isDefaultScreenshotRequired(bugreportType, /* hasScreenshotButton= */ !mIsTv)) {
             screenshotFd = info.getDefaultScreenshotFd();
@@ -1919,12 +1929,10 @@ public class BugreportProgressService extends Service {
             this.shareDescription = shareDescription == null ? "" : shareDescription;
             this.type = type;
             this.baseName = baseName;
-            createBugreportFile(bugreportsDir);
-            createScreenshotFile(bugreportsDir);
+            this.bugreportFile = new File(bugreportsDir, getFileName(this, ".zip"));
         }
 
-        void createBugreportFile(File bugreportsDir) {
-            bugreportFile = new File(bugreportsDir, getFileName(this, ".zip"));
+        void createBugreportFile() {
             createReadWriteFile(bugreportFile);
         }
 

@@ -250,13 +250,10 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             return null;
         }
 
-
-        // TODO add modification time to key metadata.
-        return null;
-        // if (response.metadata.modificationTime == -1) {
-        //     return null;
-        // }
-        // return new Date(response.metadata.modificationTime);
+        if (response.metadata.modificationTimeMs == -1) {
+            return null;
+        }
+        return new Date(response.metadata.modificationTimeMs);
     }
 
     @Override

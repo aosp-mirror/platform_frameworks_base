@@ -192,4 +192,15 @@ public class HdmiCecLocalDeviceTvTest {
         assertThat(mHdmiControlService.getActiveSource().getPhysicalAddress()).isEqualTo(
                 externalDevice.getPhysicalAddress());
     }
+
+    @Test
+    public void shouldHandleTvPowerKey_CecEnabled_PowerControlModeTv() {
+        mHdmiCecLocalDeviceTv.mService.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+                HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiCecLocalDeviceTv.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
+                HdmiControlManager.POWER_CONTROL_MODE_TV);
+        assertThat(mHdmiControlService.shouldHandleTvPowerKey()).isFalse();
+    }
 }

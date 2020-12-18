@@ -15,7 +15,9 @@
  */
 package com.android.internal.os;
 
+import android.os.BatteryConsumer;
 import android.os.BatteryStats;
+import android.os.BatteryUsageStatsQuery;
 import android.os.UidBatteryConsumer;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -32,7 +34,9 @@ public class CpuPowerCalculator extends PowerCalculator {
 
     @Override
     protected void calculateApp(UidBatteryConsumer.Builder app, BatteryStats.Uid u,
-            long rawRealtimeUs, long rawUptimeUs, int statsType) {
+            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
+        final int statsType = BatteryStats.STATS_SINCE_CHARGED;
+
         long cpuTimeMs = (u.getUserCpuTimeUs(statsType) + u.getSystemCpuTimeUs(statsType)) / 1000;
         final int numClusters = mProfile.getNumCpuClusters();
 
@@ -114,10 +118,15 @@ public class CpuPowerCalculator extends PowerCalculator {
             cpuTimeMs = cpuFgTimeMs;
         }
 
-        app.setConsumedPower(UidBatteryConsumer.POWER_COMPONENT_CPU, cpuPowerMah)
-                .setUsageDurationMillis(UidBatteryConsumer.TIME_COMPONENT_CPU, cpuTimeMs)
-                .setUsageDurationMillis(UidBatteryConsumer.TIME_COMPONENT_CPU_FOREGROUND,
-                        cpuFgTimeMs)
+        app.setConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU, cpuPowerMah)
+                .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_CPU, cpuTimeMs)
+                .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_CPU_FOREGROUND, cpuFgTimeMs)
                 .setPackageWithHighestDrain(packageWithHighestDrain);
+
+        if ((query.getFlags()
+                & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_MODELED) != 0) {
+            app.setConsumedPowerForCustomComponent(BatteryConsumer.FIRST_MODELED_POWER_COMPONENT_ID
+                    + BatteryConsumer.POWER_COMPONENT_CPU, cpuPowerMah);
+        }
     }
 }

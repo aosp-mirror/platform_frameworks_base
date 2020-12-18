@@ -41,7 +41,7 @@ import org.junit.runners.Parameterized
 
 /**
  * Test Pip with split-screen.
- * To run this test: `atest WMShellFlickerTests:PipSplitScreenTest`
+ * To run this test: `atest WMShellFlickerTests:PipLegacySplitScreenTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)

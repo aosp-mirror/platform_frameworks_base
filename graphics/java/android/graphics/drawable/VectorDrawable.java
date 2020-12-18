@@ -84,10 +84,10 @@ import java.util.Stack;
  * <dd>Defines the name of this vector drawable.</dd>
  * <dt><code>android:width</code></dt>
  * <dd>Used to define the intrinsic width of the drawable.
- * This support all the dimension units, normally specified with dp.</dd>
+ * This supports all the dimension units, normally specified with dp.</dd>
  * <dt><code>android:height</code></dt>
- * <dd>Used to define the intrinsic height the drawable.
- * This support all the dimension units, normally specified with dp.</dd>
+ * <dd>Used to define the intrinsic height of the drawable.
+ * This supports all the dimension units, normally specified with dp.</dd>
  * <dt><code>android:viewportWidth</code></dt>
  * <dd>Used to define the width of the viewport space. Viewport is basically
  * the virtual canvas where the paths are drawn on.</dd>

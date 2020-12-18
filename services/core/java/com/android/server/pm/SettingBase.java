@@ -16,15 +16,69 @@
 
 package com.android.server.pm;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.permission.LegacyPermissionState;
+import com.android.server.utils.Watchable;
+import com.android.server.utils.WatchableImpl;
+import com.android.server.utils.Watcher;
 
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-public abstract class SettingBase {
+public abstract class SettingBase implements Watchable {
+    // TODO: make this variable protected, or even private with a getter and setter.
+    // Simply making it protected or private requires that the name be changed to conformm
+    // to the Android naming convention, and that touches quite a few files.
     int pkgFlags;
+
+    // TODO: make this variable protected, or even private with a getter and setter.
+    // Simply making it protected or private requires that the name be changed to conformm
+    // to the Android naming convention, and that touches quite a few files.
     int pkgPrivateFlags;
+
+    /**
+     * Watchable machinery
+     */
+    private final Watchable mWatchable = new WatchableImpl();
+
+    /**
+     * Ensures an observer is in the list, exactly once. The observer cannot be null.  The
+     * function quietly returns if the observer is already in the list.
+     *
+     * @param observer The {@link Watcher} to be notified when the {@link Watchable} changes.
+     */
+    public void registerObserver(@NonNull Watcher observer) {
+        mWatchable.registerObserver(observer);
+    }
+
+    /**
+     * Ensures an observer is not in the list. The observer must not be null.  The function
+     * quietly returns if the objserver is not in the list.
+     *
+     * @param observer The {@link Watcher} that should not be in the notification list.
+     */
+    public void unregisterObserver(@NonNull Watcher observer) {
+        mWatchable.unregisterObserver(observer);
+    }
+
+    /**
+     * Invokes {@link Watcher#onChange} on each registered observer.  The method can be called
+     * with the {@link Watchable} that generated the event.  In a tree of {@link Watchable}s, this
+     * is generally the first (deepest) {@link Watchable} to detect a change.
+     *
+     * @param what The {@link Watchable} that generated the event.
+     */
+    public void dispatchChange(@Nullable Watchable what) {
+        mWatchable.dispatchChange(what);
+    }
+    /**
+     * Notify listeners that this object has changed.
+     */
+    protected void onChanged() {
+        dispatchChange(this);
+    }
 
     /**
      * The legacy permission state that is read from package settings persistence for migration.
@@ -53,6 +107,7 @@ public abstract class SettingBase {
         pkgFlags = orig.pkgFlags;
         pkgPrivateFlags = orig.pkgPrivateFlags;
         mLegacyPermissionsState.copyFrom(orig.mLegacyPermissionsState);
+        onChanged();
     }
 
     @Deprecated
@@ -64,6 +119,7 @@ public abstract class SettingBase {
         this.pkgFlags = pkgFlags
                 & (ApplicationInfo.FLAG_SYSTEM
                         | ApplicationInfo.FLAG_EXTERNAL_STORAGE);
+        onChanged();
     }
 
     void setPrivateFlags(int pkgPrivateFlags) {
@@ -75,5 +131,6 @@ public abstract class SettingBase {
                 | ApplicationInfo.PRIVATE_FLAG_SYSTEM_EXT
                 | ApplicationInfo.PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER
                 | ApplicationInfo.PRIVATE_FLAG_ODM);
+        onChanged();
     }
 }

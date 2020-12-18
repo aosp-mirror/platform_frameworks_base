@@ -47,6 +47,8 @@ import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
+import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
+import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import org.junit.FixMethodOrder
 import org.junit.runner.RunWith
@@ -55,7 +57,7 @@ import org.junit.runners.Parameterized
 
 /**
  * Test split screen resizing window transitions.
- * To run this test: `atest WMShellFlickerTests:ResizeSplitScreenTest`
+ * To run this test: `atest WMShellFlickerTests:ResizeLegacySplitScreenTest`
  *
  * Currently it runs only in 0 degrees because of b/156100803
  */
@@ -131,6 +133,7 @@ class ResizeLegacySplitScreenTest(
                         windowManagerTrace {
                             navBarWindowIsAlwaysVisible()
                             statusBarWindowIsAlwaysVisible()
+                            visibleWindowsShownMoreThanOneConsecutiveEntry()
 
                             all("topAppWindowIsAlwaysVisible", bugId = 156223549) {
                                 this.showsAppWindow(sSimpleActivity)
@@ -147,6 +150,7 @@ class ResizeLegacySplitScreenTest(
                             noUncoveredRegions(configuration.endRotation)
                             navBarLayerRotatesAndScales(configuration.endRotation)
                             statusBarLayerRotatesScales(configuration.endRotation)
+                            visibleLayersShownMoreThanOneConsecutiveEntry()
 
                             all("topAppLayerIsAlwaysVisible") {
                                 this.showsLayer(sSimpleActivity)

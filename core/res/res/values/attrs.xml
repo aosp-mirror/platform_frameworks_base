@@ -3871,6 +3871,9 @@
         <!-- Component name of an activity that allows the user to modify
              the settings for this service. -->
         <attr name="settingsActivity"/>
+        <!-- Whether the device must be screen on before routing data to this service.
+             The default is true.-->
+        <attr name="requireDeviceScreenOn" format="boolean"/>
     </declare-styleable>
 
     <!-- Use <code>offhost-apdu-service</code> as the root tag of the XML resource that
@@ -3889,6 +3892,12 @@
         <attr name="settingsActivity"/>
         <!-- Secure Element which the AIDs should be routed to -->
         <attr name="secureElementName" format="string"/>
+        <!-- Whether the device must be unlocked before routing data to this service.
+             The default is false.-->
+        <attr name="requireDeviceUnlock"/>
+        <!-- Whether the device must be screen on before routing data to this service.
+             The default is false.-->
+        <attr name="requireDeviceScreenOn"/>
     </declare-styleable>
 
     <!-- Specify one or more <code>aid-group</code> elements inside a

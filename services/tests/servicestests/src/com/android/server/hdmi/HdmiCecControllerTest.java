@@ -30,6 +30,8 @@ import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.Constants.ADDR_UNREGISTERED;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
 
 import android.content.Context;
 import android.hardware.hdmi.HdmiControlManager;
@@ -256,5 +258,20 @@ public class HdmiCecControllerTest {
         mHdmiCecController.allocateLogicalAddress(DEVICE_PLAYBACK, ADDR_UNREGISTERED, mCallback);
         mTestLooper.dispatchAll();
         assertEquals(ADDR_UNREGISTERED, mLogicalAddress);
+    }
+
+    @Test
+    public void testIsLanguage() {
+        assertTrue(HdmiCecController.isLanguage("en"));
+        assertTrue(HdmiCecController.isLanguage("eng"));
+        assertTrue(HdmiCecController.isLanguage("ger"));
+        assertTrue(HdmiCecController.isLanguage("zh"));
+        assertTrue(HdmiCecController.isLanguage("zhi"));
+        assertTrue(HdmiCecController.isLanguage("zho"));
+
+        assertFalse(HdmiCecController.isLanguage(null));
+        assertFalse(HdmiCecController.isLanguage(""));
+        assertFalse(HdmiCecController.isLanguage("e"));
+        assertFalse(HdmiCecController.isLanguage("一")); // language code must be ASCII
     }
 }

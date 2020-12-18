@@ -912,8 +912,9 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                     break;
 
                     case "associate": {
-                        addAssociation(new Association(getNextArgInt(), getNextArgRequired(),
-                                getNextArgRequired(), null, false));
+                        String pkg = getNextArgRequired();
+                        String address = getNextArgRequired();
+                        addAssociation(new Association(getNextArgInt(), address, pkg, null, false));
                     }
                     break;
 

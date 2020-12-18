@@ -30,7 +30,7 @@ import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
 import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.focusDoesNotChange
-import com.android.server.wm.flicker.windowAlwaysVisible
+import com.android.server.wm.flicker.appWindowAlwaysVisibleOnTop
 import com.android.server.wm.flicker.layerAlwaysVisible
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.buildTestTag
@@ -146,7 +146,7 @@ class SeamlessAppRotationTest(
                         navBarWindowIsAlwaysVisible(bugId = 140855415)
                         statusBarWindowIsAlwaysVisible(bugId = 140855415)
                         visibleWindowsShownMoreThanOneConsecutiveEntry()
-                        windowAlwaysVisible(configuration.intentPackageName)
+                        appWindowAlwaysVisibleOnTop(configuration.intentPackageName)
                     }
 
                     layersTrace {

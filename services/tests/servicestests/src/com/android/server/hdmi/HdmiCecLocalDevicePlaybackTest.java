@@ -1334,4 +1334,31 @@ public class HdmiCecLocalDevicePlaybackTest {
         assertThat(mNativeWrapper.getResultMessages()).contains(userControlReleased);
         assertThat(mStandby).isFalse();
     }
+
+    @Test
+    public void shouldHandleTvPowerKey_CecDisabled() {
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+                HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        assertThat(mHdmiControlService.shouldHandleTvPowerKey()).isFalse();
+    }
+
+    @Test
+    public void shouldHandleTvPowerKey_PowerControlModeNone() {
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
+                HdmiControlManager.POWER_CONTROL_MODE_NONE);
+        assertThat(mHdmiControlService.shouldHandleTvPowerKey()).isFalse();
+    }
+
+    @Test
+    public void shouldHandleTvPowerKey_CecEnabled_PowerControlModeTv() {
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+                HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
+                HdmiControlManager.POWER_CONTROL_MODE_TV);
+        assertThat(mHdmiControlService.shouldHandleTvPowerKey()).isTrue();
+    }
 }

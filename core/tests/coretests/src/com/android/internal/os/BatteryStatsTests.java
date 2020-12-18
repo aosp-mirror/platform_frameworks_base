@@ -52,7 +52,9 @@ import org.junit.runners.Suite;
         LongSamplingCounterTest.class,
         LongSamplingCounterArrayTest.class,
         PowerCalculatorTest.class,
-        PowerProfileTest.class
+        PowerProfileTest.class,
+
+        com.android.internal.power.MeasuredEnergyStatsTest.class
     })
 public class BatteryStatsTests {
 }

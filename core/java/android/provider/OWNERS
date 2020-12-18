@@ -1,9 +1,17 @@
-per-file DeviceConfig.java = svetoslavganov@google.com
-per-file DeviceConfig.java = hackbod@google.com
-per-file DeviceConfig.java = schfan@google.com
+per-file *BlockedNumber* = file:/telephony/OWNERS
+per-file *Telephony* = file:/telephony/OWNERS
 
-per-file CallLog.java = file:/telephony/OWNERS
-per-file DocumentsContract.java = file:/core/java/android/os/storage/OWNERS
-per-file DocumentsProvider.java = file:/core/java/android/os/storage/OWNERS
-per-file MediaStore.java = file:/core/java/android/os/storage/OWNERS
-per-file Telephony.java = file:/telephony/OWNERS
+per-file *CallLog* = file:platform/packages/providers/ContactsProvider:/OWNERS
+per-file *Contacts* = file:platform/packages/providers/ContactsProvider:/OWNERS
+per-file *Voicemail* = file:platform/packages/providers/ContactsProvider:/OWNERS
+
+per-file *Calendar* = file:platform/packages/providers/CalendarProvider:/OWNERS
+
+per-file *Downloads* = file:platform/packages/providers/DownloadProvider:/OWNERS
+
+per-file *DeviceConfig* = file:/packages/SettingsProvider/OWNERS
+
+per-file *Documents* = file:/core/java/android/os/storage/OWNERS
+per-file *Documents* = file:platform/packages/apps/DocumentsUI:/OWNERS
+
+per-file *Slices* = file:/core/java/android/app/slice/OWNERS

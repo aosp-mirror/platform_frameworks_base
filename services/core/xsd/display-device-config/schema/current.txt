@@ -3,8 +3,15 @@ package com.android.server.display.config {
 
   public class DisplayConfiguration {
     ctor public DisplayConfiguration();
+    method public com.android.server.display.config.DisplayQuirks getQuirks();
     method @NonNull public final com.android.server.display.config.NitsMap getScreenBrightnessMap();
+    method public void setQuirks(com.android.server.display.config.DisplayQuirks);
     method public final void setScreenBrightnessMap(@NonNull com.android.server.display.config.NitsMap);
+  }
+
+  public class DisplayQuirks {
+    ctor public DisplayQuirks();
+    method public java.util.List<java.lang.String> getQuirk();
   }
 
   public class NitsMap {

@@ -18,89 +18,175 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
-    <LinearLayout
+    <RelativeLayout
         android:background="@drawable/people_space_tile_view_card"
-        android:id="@+id/item"
-        android:orientation="vertical"
-        android:paddingTop="6dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <LinearLayout
             android:orientation="horizontal"
-            android:paddingHorizontal="12dp"
-            android:paddingBottom="4dp"
-            android:gravity="top"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <ImageView
-                android:id="@+id/person_icon"
-                android:layout_width="34dp"
-                android:layout_height="34dp" />
-
+            android:layout_height="match_parent"
+            android:gravity="start">
+            <TextView
+                android:id="@+id/punctuation1"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+                android:textSize="36sp"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:maxLines="1"
+                android:alpha="0.2"
+                android:rotation="350" />
+            <TextView
+                android:id="@+id/punctuation2"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+                android:textSize="36sp"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="25dp"
+                android:maxLines="1"
+                android:alpha="0.2"
+                android:rotation="5" />
+            <TextView
+                android:id="@+id/punctuation3"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+                android:textSize="36sp"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginStart="25dp"
+                android:maxLines="1"
+                android:alpha="0.2"
+                android:rotation="355"/>
+            <TextView
+                android:id="@+id/punctuation4"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+                android:textSize="36sp"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-5dp"
+                android:layout_marginStart="25dp"
+                android:maxLines="1"
+                android:alpha="0.2"
+                android:rotation="10" />
+            <TextView
+                android:id="@+id/punctuation5"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+                android:textSize="36sp"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginStart="25dp"
+                android:maxLines="1"
+                android:alpha="0.2"
+                android:rotation="15" />
+            <TextView
+                android:id="@+id/punctuation6"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+                android:textSize="36sp"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-5dp"
+                android:layout_marginStart="25dp"
+                android:maxLines="1"
+                android:alpha="0.2"
+                android:rotation="345" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/item"
+            android:orientation="vertical"
+            android:paddingTop="6dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
             <LinearLayout
-                android:background="@drawable/people_space_rounded_border"
-                android:layout_marginStart="-5dp"
-                android:layout_marginTop="18dp"
-                android:layout_width="8dp"
-                android:layout_height="8dp">
-
-                <ImageView
-                    android:id="@+id/package_icon"
-                    android:layout_width="6dp"
-                    android:layout_marginEnd="1dp"
-                    android:layout_marginStart="1dp"
-                    android:layout_marginBottom="1dp"
-                    android:layout_marginTop="1dp"
-                    android:layout_height="6dp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:orientation="vertical"
-                android:paddingStart="6dp"
+                android:orientation="horizontal"
+                android:paddingHorizontal="12dp"
+                android:paddingBottom="4dp"
+                android:gravity="top"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <TextView
-                    android:id="@+id/name"
-                    android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
-                    android:textColor="?android:attr/textColorPrimary"
-                    android:textSize="14sp"
-                    android:maxLines="1"
-                    android:ellipsize="end"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                <ImageView
+                    android:id="@+id/person_icon"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp" />
 
+                <LinearLayout
+                    android:background="@drawable/people_space_rounded_border"
+                    android:layout_marginStart="-5dp"
+                    android:layout_marginTop="18dp"
+                    android:layout_width="8dp"
+                    android:layout_height="8dp">
+
+                    <ImageView
+                        android:id="@+id/package_icon"
+                        android:layout_width="6dp"
+                        android:layout_marginEnd="1dp"
+                        android:layout_marginStart="1dp"
+                        android:layout_marginBottom="1dp"
+                        android:layout_marginTop="1dp"
+                        android:layout_height="6dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:paddingStart="6dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/name"
+                        android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+                        android:textColor="?android:attr/textColorPrimary"
+                        android:textSize="14sp"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:id="@+id/time"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+                        android:textSize="10sp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout
+                android:background="@drawable/people_space_content_background"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
                 <TextView
-                    android:id="@+id/time"
-                    android:textColor="?android:attr/textColorSecondary"
+                    android:id="@+id/content"
+                    android:paddingVertical="3dp"
+                    android:paddingHorizontal="12dp"
                     android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
-                    android:textSize="10sp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:maxLines="1"
+                    android:textSize="14sp"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:maxLines="2"
                     android:ellipsize="end" />
+                <ImageView
+                    android:id="@+id/image"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"/>
             </LinearLayout>
         </LinearLayout>
-        <LinearLayout
-            android:background="@drawable/people_space_content_background"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <TextView
-                android:id="@+id/content"
-                android:paddingVertical="3dp"
-                android:paddingHorizontal="12dp"
-                android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
-                android:textSize="14sp"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:maxLines="2"
-                android:ellipsize="end" />
-            <ImageView
-                android:id="@+id/image"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone"/>
-        </LinearLayout>
-    </LinearLayout>
+    </RelativeLayout>
 </LinearLayout>

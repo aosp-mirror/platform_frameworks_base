@@ -21,6 +21,7 @@ import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
+import android.os.BatteryUsageStatsQuery;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -89,7 +90,7 @@ public class BatteryUsageStatsProvider {
     /**
      * Returns a snapshot of battery attribution data.
      */
-    public BatteryUsageStats getBatteryUsageStats() {
+    public BatteryUsageStats getBatteryUsageStats(BatteryUsageStatsQuery query) {
 
         // TODO(b/174186345): instead of BatteryStatsHelper, use PowerCalculators directly.
         final BatteryStatsHelper batteryStatsHelper = new BatteryStatsHelper(mContext,
@@ -109,8 +110,14 @@ public class BatteryUsageStatsProvider {
         // TODO(b/174186358): read extra power component number from configuration
         final int customPowerComponentCount = 0;
         final int customTimeComponentCount = 0;
+        final boolean includeModeledComponents =
+                (query.getFlags() & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_MODELED)
+                        != 0;
+
+
         final BatteryUsageStats.Builder batteryUsageStatsBuilder =
-                new BatteryUsageStats.Builder(customPowerComponentCount, customTimeComponentCount)
+                new BatteryUsageStats.Builder(customPowerComponentCount, customTimeComponentCount,
+                        includeModeledComponents)
                         .setDischargePercentage(batteryStatsHelper.getStats().getDischargeAmount(0))
                         .setConsumedPower(batteryStatsHelper.getTotalPower());
 
@@ -129,8 +136,8 @@ public class BatteryUsageStatsProvider {
 
         final List<PowerCalculator> powerCalculators = getPowerCalculators();
         for (PowerCalculator powerCalculator : powerCalculators) {
-            powerCalculator.calculate(batteryUsageStatsBuilder, mStats, realtimeUs, uptimeUs,
-                    BatteryStats.STATS_SINCE_CHARGED, users);
+            powerCalculator.calculate(batteryUsageStatsBuilder, mStats, realtimeUs, uptimeUs, query,
+                    users);
         }
 
         return batteryUsageStatsBuilder.build();

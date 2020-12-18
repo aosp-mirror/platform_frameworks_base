@@ -202,6 +202,8 @@ public class JobParameters implements Parcelable {
      * {@code true}. This will return {@code false} if the job that wasn't requested to run as a
      * expedited job, or if it was requested to run as an expedited job but the app didn't have
      * any remaining expedited job quota at the time of execution.
+     *
+     * @see JobInfo.Builder#setExpedited(boolean)
      */
     public boolean isExpeditedJob() {
         return mIsExpedited;
