@@ -136,6 +136,11 @@ public class StubTransaction extends SurfaceControl.Transaction {
     }
 
     @Override
+    public SurfaceControl.Transaction setBackgroundBlurRadius(SurfaceControl sc, int radius) {
+        return this;
+    }
+
+    @Override
     public SurfaceControl.Transaction setLayerStack(SurfaceControl sc, int layerStack) {
         return this;
     }
