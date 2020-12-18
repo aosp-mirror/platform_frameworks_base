@@ -40,7 +40,6 @@ import static com.android.server.wm.DisplayAreaPolicyBuilder.Feature;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
@@ -101,7 +100,6 @@ public class DisplayAreaPolicyBuilderTest {
         mRoot = new SurfacelessDisplayAreaRoot(mWms);
         mImeContainer = new DisplayArea.Tokens(mWms, ABOVE_TASKS, "ImeContainer");
         mDisplayContent = mock(DisplayContent.class);
-        doReturn(true).when(mDisplayContent).isTrusted();
         mDefaultTaskDisplayArea = new TaskDisplayArea(mDisplayContent, mWms, "Tasks",
                 FEATURE_DEFAULT_TASK_CONTAINER);
         mTaskDisplayAreaList = new ArrayList<>();

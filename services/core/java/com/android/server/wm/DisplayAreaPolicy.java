@@ -99,41 +99,23 @@ public abstract class DisplayAreaPolicy {
 
             // Define the features that will be supported under the root of the whole logical
             // display. The policy will build the DisplayArea hierarchy based on this.
-            final HierarchyBuilder rootHierarchy = new HierarchyBuilder(root);
-            if (content.isTrusted()) {
-                // Only trusted display can have system decorations.
-                configureTrustedHierarchyBuilder(rootHierarchy, wmService, content);
-            }
-            // Set the essential containers (even the display doesn't support IME).
-            rootHierarchy.setImeContainer(imeContainer).setTaskDisplayAreas(tdaList);
-
-            // Instantiate the policy with the hierarchy defined above. This will create and attach
-            // all the necessary DisplayAreas to the root.
-            return new DisplayAreaPolicyBuilder().setRootHierarchy(rootHierarchy).build(wmService);
-        }
-
-        private void configureTrustedHierarchyBuilder(HierarchyBuilder rootHierarchy,
-                WindowManagerService wmService, DisplayContent content) {
-            // WindowedMagnification should be on the top so that there is only one surface
-            // to be magnified.
-            rootHierarchy.addFeature(new Feature.Builder(wmService.mPolicy, "WindowedMagnification",
-                    FEATURE_WINDOWED_MAGNIFICATION)
-                    .upTo(TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY)
-                    .except(TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY)
-                    // Make the DA dimmable so that the magnify window also mirrors the dim layer.
-                    .setNewDisplayAreaSupplier(DisplayArea.Dimmable::new)
-                    .build());
-            if (content.isDefaultDisplay) {
-                // Only default display can have cutout.
-                // See LocalDisplayAdapter.LocalDisplayDevice#getDisplayDeviceInfoLocked.
-                rootHierarchy.addFeature(new Feature.Builder(wmService.mPolicy, "HideDisplayCutout",
-                        FEATURE_HIDE_DISPLAY_CUTOUT)
-                        .all()
-                        .except(TYPE_NAVIGATION_BAR, TYPE_NAVIGATION_BAR_PANEL,
-                                TYPE_STATUS_BAR, TYPE_NOTIFICATION_SHADE)
-                        .build());
-            }
-            rootHierarchy
+            HierarchyBuilder rootHierarchy = new HierarchyBuilder(root)
+                    // WindowedMagnification should be on the top so that there is only one surface
+                    // to be magnified.
+                    .addFeature(new Feature.Builder(wmService.mPolicy, "WindowedMagnification",
+                            FEATURE_WINDOWED_MAGNIFICATION)
+                            .upTo(TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY)
+                            .except(TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY)
+                            // Make the DA dimmable so that the magnify window also mirrors the dim
+                            // layer
+                            .setNewDisplayAreaSupplier(DisplayArea.Dimmable::new)
+                            .build())
+                    .addFeature(new Feature.Builder(wmService.mPolicy, "HideDisplayCutout",
+                            FEATURE_HIDE_DISPLAY_CUTOUT)
+                            .all()
+                            .except(TYPE_NAVIGATION_BAR, TYPE_NAVIGATION_BAR_PANEL, TYPE_STATUS_BAR,
+                                    TYPE_NOTIFICATION_SHADE)
+                            .build())
                     .addFeature(new Feature.Builder(wmService.mPolicy, "OneHanded",
                             FEATURE_ONE_HANDED)
                             .all()
@@ -149,7 +131,13 @@ public abstract class DisplayAreaPolicy {
                     .addFeature(new Feature.Builder(wmService.mPolicy, "ImePlaceholder",
                             FEATURE_IME_PLACEHOLDER)
                             .and(TYPE_INPUT_METHOD, TYPE_INPUT_METHOD_DIALOG)
-                            .build());
+                            .build())
+                    .setImeContainer(imeContainer)
+                    .setTaskDisplayAreas(tdaList);
+
+            // Instantiate the policy with the hierarchy defined above. This will create and attach
+            // all the necessary DisplayAreas to the root.
+            return new DisplayAreaPolicyBuilder().setRootHierarchy(rootHierarchy).build(wmService);
         }
     }
 
