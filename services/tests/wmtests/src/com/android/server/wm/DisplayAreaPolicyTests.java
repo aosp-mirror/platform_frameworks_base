@@ -22,18 +22,15 @@ import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.DisplayArea.Type.ABOVE_TASKS;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import android.platform.test.annotations.Presubmit;
-import android.util.Pair;
-import android.view.Display;
-import android.view.DisplayInfo;
 
 import androidx.test.filters.SmallTest;
 
@@ -41,8 +38,9 @@ import com.android.server.wm.DisplayAreaPolicyBuilderTest.SurfacelessDisplayArea
 
 import com.google.android.collect.Lists;
 
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -56,65 +54,78 @@ import java.util.List;
  */
 @SmallTest
 @Presubmit
-@RunWith(WindowTestRunner.class)
-public class DisplayAreaPolicyTests extends WindowTestsBase {
+public class DisplayAreaPolicyTests {
+
+    @Rule
+    public final SystemServicesTestRule mSystemServices = new SystemServicesTestRule();
+
+    private DisplayAreaPolicyBuilder.Result mPolicy;
+    private TaskDisplayArea mTaskDisplayArea1;
+    private TaskDisplayArea mTaskDisplayArea2;
+    private RootDisplayArea mRoot;
+
+    @Before
+    public void setUp() throws Exception {
+        WindowManagerService wms = mSystemServices.getWindowManagerService();
+        mRoot = new SurfacelessDisplayAreaRoot(wms);
+        spyOn(mRoot);
+        DisplayArea.Tokens ime = new DisplayArea.Tokens(wms, ABOVE_TASKS, "Ime");
+        DisplayContent displayContent = mock(DisplayContent.class);
+        doReturn(true).when(displayContent).isTrusted();
+        mTaskDisplayArea1 = new TaskDisplayArea(displayContent, wms, "Tasks1",
+                FEATURE_DEFAULT_TASK_CONTAINER);
+        mTaskDisplayArea2 = new TaskDisplayArea(displayContent, wms, "Tasks2",
+                FEATURE_VENDOR_FIRST);
+        List<TaskDisplayArea> taskDisplayAreaList = new ArrayList<>();
+        taskDisplayAreaList.add(mTaskDisplayArea1);
+        taskDisplayAreaList.add(mTaskDisplayArea2);
+
+        mPolicy = new DisplayAreaPolicyBuilder()
+                .setRootHierarchy(new DisplayAreaPolicyBuilder.HierarchyBuilder(mRoot)
+                        .setImeContainer(ime)
+                        .setTaskDisplayAreas(taskDisplayAreaList))
+                .build(wms);
+    }
 
     @Test
     public void testGetDefaultTaskDisplayArea() {
-        final Pair<DisplayAreaPolicy, List<TaskDisplayArea>> result =
-                createPolicyWith2TaskDisplayAreas();
-        final DisplayAreaPolicy policy = result.first;
-        final TaskDisplayArea taskDisplayArea1 = result.second.get(0);
-        assertEquals(taskDisplayArea1, policy.getDefaultTaskDisplayArea());
+        assertEquals(mTaskDisplayArea1, mPolicy.getDefaultTaskDisplayArea());
     }
 
     @Test
     public void testTaskDisplayArea_taskPositionChanged_updatesTaskDisplayAreaPosition() {
-        final Pair<DisplayAreaPolicy, List<TaskDisplayArea>> result =
-                createPolicyWith2TaskDisplayAreas();
-        final DisplayAreaPolicy policy = result.first;
-        final TaskDisplayArea taskDisplayArea1 = result.second.get(0);
-        final TaskDisplayArea taskDisplayArea2 = result.second.get(1);
-        final Task stack1 = taskDisplayArea1.createRootTask(
+        final Task stack1 = mTaskDisplayArea1.createRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        final Task stack2 = taskDisplayArea2.createRootTask(
+        final Task stack2 = mTaskDisplayArea2.createRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         // Initial order
-        assertTaskDisplayAreasOrder(policy, taskDisplayArea1, taskDisplayArea2);
+        assertTaskDisplayAreasOrder(mPolicy, mTaskDisplayArea1, mTaskDisplayArea2);
 
         // Move stack in tda1 to top
         stack1.getParent().positionChildAt(POSITION_TOP, stack1, true /* includingParents */);
 
-        assertTaskDisplayAreasOrder(policy, taskDisplayArea2, taskDisplayArea1);
+        assertTaskDisplayAreasOrder(mPolicy, mTaskDisplayArea2, mTaskDisplayArea1);
 
         // Move stack in tda2 to top, but not including parents
         stack2.getParent().positionChildAt(POSITION_TOP, stack2, false /* includingParents */);
 
-        assertTaskDisplayAreasOrder(policy, taskDisplayArea2, taskDisplayArea1);
+        assertTaskDisplayAreasOrder(mPolicy, mTaskDisplayArea2, mTaskDisplayArea1);
 
         // Move stack in tda1 to bottom
         stack1.getParent().positionChildAt(POSITION_BOTTOM, stack1, true /* includingParents */);
 
-        assertTaskDisplayAreasOrder(policy, taskDisplayArea1, taskDisplayArea2);
+        assertTaskDisplayAreasOrder(mPolicy, mTaskDisplayArea1, mTaskDisplayArea2);
 
         // Move stack in tda2 to bottom, but not including parents
         stack2.getParent().positionChildAt(POSITION_BOTTOM, stack2, false /* includingParents */);
 
-        assertTaskDisplayAreasOrder(policy, taskDisplayArea1, taskDisplayArea2);
-    }
-
-    @Test
-    public void testEmptyFeaturesOnUntrustedDisplay() {
-        final DisplayInfo info = new DisplayInfo(mDisplayInfo);
-        info.flags &= ~Display.FLAG_TRUSTED;
-        final DisplayContent untrustedDisplay = new TestDisplayContent.Builder(mAtm, info).build();
-        assertTrue(untrustedDisplay.mFeatures.isEmpty());
+        assertTaskDisplayAreasOrder(mPolicy, mTaskDisplayArea1, mTaskDisplayArea2);
     }
 
     @Test
     public void testDisplayAreaGroup_taskPositionChanged_updatesDisplayAreaGroupPosition() {
-        final WindowManagerService wms = mWm;
+        final WindowManagerService wms = mSystemServices.getWindowManagerService();
         final DisplayContent displayContent = mock(DisplayContent.class);
         doReturn(true).when(displayContent).isTrusted();
         final RootDisplayArea root = new SurfacelessDisplayAreaRoot(wms);
@@ -191,25 +202,5 @@ public class DisplayAreaPolicyTests extends WindowTestsBase {
             actualOrder.add(taskDisplayArea);
         }, false /* traverseTopToBottom */);
         assertEquals(expectOrder, actualOrder);
-    }
-
-    private Pair<DisplayAreaPolicy, List<TaskDisplayArea>> createPolicyWith2TaskDisplayAreas() {
-        final SurfacelessDisplayAreaRoot root = new SurfacelessDisplayAreaRoot(mWm);
-        final DisplayArea.Tokens ime = new DisplayArea.Tokens(mWm, ABOVE_TASKS, "Ime");
-        final DisplayContent displayContent = mock(DisplayContent.class);
-        doReturn(true).when(displayContent).isTrusted();
-        final TaskDisplayArea taskDisplayArea1 = new TaskDisplayArea(displayContent, mWm, "Tasks1",
-                FEATURE_DEFAULT_TASK_CONTAINER);
-        final TaskDisplayArea taskDisplayArea2 = new TaskDisplayArea(displayContent, mWm, "Tasks2",
-                FEATURE_VENDOR_FIRST);
-        final List<TaskDisplayArea> taskDisplayAreaList = new ArrayList<>();
-        taskDisplayAreaList.add(taskDisplayArea1);
-        taskDisplayAreaList.add(taskDisplayArea2);
-
-        return Pair.create(new DisplayAreaPolicyBuilder()
-                .setRootHierarchy(new DisplayAreaPolicyBuilder.HierarchyBuilder(root)
-                        .setImeContainer(ime)
-                        .setTaskDisplayAreas(taskDisplayAreaList))
-                .build(mWm), taskDisplayAreaList);
     }
 }
