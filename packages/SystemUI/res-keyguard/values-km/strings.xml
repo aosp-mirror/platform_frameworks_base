@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្មយឺត"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • បានបង្កើនប្រសិទ្ធភាពនៃការសាក ដើម្បីការពារថ្ម"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • បញ្ហាពាក់ព័ន្ធនឹងគ្រឿងសាកថ្ម"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"ចុចម៉ឺនុយ ​ដើម្បី​ដោះ​សោ។"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"បណ្ដាញ​ជាប់​សោ"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"គ្មានស៊ីមទេ"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"បញ្ចូល​ស៊ីម។"</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"បាត់ស៊ីម ឬមិនអាចអានស៊ីមបាន។ បញ្ចូល​ស៊ីម។"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"ស៊ីមមិនអាចប្រើបាន។"</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"ស៊ីមរបស់អ្នកត្រូវបានបិទដំណើរការជាអចិន្ត្រៃយ៍។\n ទាក់ទងទៅក្រុមហ៊ុនផ្ដល់សេវាឥតខ្សែរបស់អ្នក ដើម្បីទទួលបានស៊ីមមួយទៀត។"</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"ស៊ីម​ត្រូវបាន​ចាក់សោ។"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"ស៊ីមត្រូវបានចាក់សោដោយ PUK។"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"កំពុងដោះសោស៊ីម…"</string>

@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 저속 충전 중"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 배터리 보호를 위해 충전 최적화됨"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 충전 액세서리 문제"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"잠금 해제하려면 메뉴를 누르세요."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"네트워크 잠김"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"SIM 없음"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"SIM을 추가하세요."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM이 없거나 SIM을 읽을 수 없습니다. SIM을 추가하세요."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM을 사용할 수 없습니다."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"SIM이 영구적으로 비활성화되었습니다.\n 다른 SIM을 사용하려면 무선 서비스 제공업체에 문의하시기 바랍니다."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM이 잠김 상태입니다."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM이 PUK 잠김 상태입니다."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"SIM 잠금 해제 중…"</string>

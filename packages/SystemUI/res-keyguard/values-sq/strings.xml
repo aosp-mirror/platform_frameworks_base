@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Po karikohet ngadalë"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Karikimi u optimizua për të mbrojtur baterinë"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Problem me aksesorin e karikimit"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Shtyp \"Meny\" për të shkyçur."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Rrjeti është i kyçur"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Nuk ka kartë SIM"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Shto një kartë SIM."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"Karta SIM mungon ose është e palexueshme. Shto një kartë SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Kartë SIM e papërdorshme."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Karta jote SIM është çaktivizuar përgjithmonë.\n Kontakto me ofruesin e shërbimit wireless për një tjetër kartë SIM."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"Karta SIM është e kyçur."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"Karta SIM është e kyçur me PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Karta SIM po shkyçet…"</string>

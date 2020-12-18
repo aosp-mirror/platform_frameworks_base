@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ნელა იტენება"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • დატენვა ოპტიმიზირებულია ბატარეის დასაცავად"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • დამტენი დამხმარე მოწყობილობის პრობლემა"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"განსაბლოკად დააჭირეთ მენიუს."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ქსელი ჩაკეტილია"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"SIM არ არის"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"SIM-ის დამატება."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM აკლია ან არ იკითხება. SIM-ის დამატება."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"გამოუყენებელი SIM."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"თქვენი SIM სამუდამოდ გამორთულია.\n დაუკავშირდით თქვენს უკაბელო სერვისის პროვაიდერს სხვა SIM ბარათისთვის."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM-ბარათი ჩაკეტილია."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM დაბლოკილია PUK-ით."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"SIM-ის განბლოკვა…"</string>

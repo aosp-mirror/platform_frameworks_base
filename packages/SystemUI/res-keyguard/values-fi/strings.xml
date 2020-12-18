@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ladataan hitaasti"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Lataus optimoitu akun suojaamiseksi"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ongelma laturin kanssa"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Poista lukitus painamalla Valikkoa."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Verkko lukittu"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Ei SIM-korttia"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Lisää SIM-kortti."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM-korttia ei löydy tai ei voi lukea. Lisää SIM-kortti."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM-korttia ei voi käyttää."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Sim-kortti on poistettu käytöstä pysyvästi.\n Ota yhteyttä langattoman palvelun tarjoajaan ja pyydä uusi SIM-kortti."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM-kortti on lukittu."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM-kortti on lukittu PUK-koodilla."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"SIM-kortin lukitusta avataan…"</string>

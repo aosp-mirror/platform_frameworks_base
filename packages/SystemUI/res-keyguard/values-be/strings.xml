@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ідзе павольная зарадка"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • У мэтах зберажэння акумулятара зарадка аптымізавана"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Праблема з зараднай прыладай"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Націсніце кнопку \"Меню\", каб разблакіраваць."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Сетка заблакіравана"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Няма SIM-карты"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Дадайце SIM-карту."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM-карта адсутнічае ці не чытаецца. Дадайце SIM-карту."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Непрыдатная для выкарыстання SIM-карта."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Ваша SIM-карта адключана назаўсёды.\n Звяжыцеся з аператарам бесправадной сувязі, каб атрымаць іншую SIM-карту."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM-карта заблакіравана."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM-карта заблакіравана PUK-кодам."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Разблакіраванне SIM-карты…"</string>

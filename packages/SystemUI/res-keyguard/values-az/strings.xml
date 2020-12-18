@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Yavaş enerji yığır"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Batareyanı qorumaq üçün şarj optimallaşdırılıb"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Şarj aksesuarı ilə bağlı problem"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Kilidi açmaq üçün Menyu düyməsinə basın."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Şəbəkə kilidlidir"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"SIM yoxdur"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"SIM əlavə edin."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM kart yoxdur və ya oxuna bilinmir. SIM əlavə edin."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"İstifadəyə yararsız SIM."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"SIM kartınız həmişəlik deaktiv edilib.\n Başqa SIM kart üçün simsiz xidmət provayderinizə müraciət edin."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM kilidlənib."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM kart PUK ilə kilidlənib."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"SIM kiliddən çıxarılır…"</string>

@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Αργή φόρτιση"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Η φόρτιση βελτιστοποιήθηκε για την προστασία της μπαταρίας"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Πρόβλημα αξεσουάρ φόρτισης"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Πατήστε \"Μενού\" για ξεκλείδωμα."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Κλειδωμένο δίκτυο"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Δεν υπάρχει SIM"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Προσθέστε μια SIM."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"Η SIM λείπει ή δεν είναι δυνατή η ανάγνωσή της. Προσθέστε μια SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Η SIM δεν μπορεί να χρησιμοποιηθεί."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Η SIM απενεργοποιήθηκε οριστικά.\n Επικοινωνήστε με τον πάροχο υπηρεσιών ασύρματου δικτύου για μια νέα SIM."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"Η SIM είναι κλειδωμένη."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"Η SIM έχει κλειδωθεί με κωδικό PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Ξεκλείδωμα SIM…"</string>
