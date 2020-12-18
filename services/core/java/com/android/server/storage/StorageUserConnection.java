@@ -135,8 +135,6 @@ public final class StorageUserConnection {
      */
     public void freeCache(String volumeUuid, long bytes)
             throws ExternalStorageServiceException {
-        Objects.requireNonNull(volumeUuid);
-
         synchronized (mSessionsLock) {
             for (String sessionId : mSessions.keySet()) {
                 mActiveConnection.freeCache(sessionId, volumeUuid, bytes);
