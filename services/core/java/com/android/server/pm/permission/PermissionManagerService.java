@@ -4868,13 +4868,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
     }
 
-    private boolean canPropagatePermissionToInstantApp(@NonNull String permissionName) {
-        synchronized (mLock) {
-            final Permission bp = mRegistry.getPermission(permissionName);
-            return bp != null && (bp.isRuntime() || bp.isDevelopment()) && bp.isInstant();
-        }
-    }
-
     @NonNull
     private List<LegacyPermission> getLegacyPermissions() {
         synchronized (mLock) {
@@ -4954,7 +4947,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     private class PermissionManagerServiceInternalImpl implements PermissionManagerServiceInternal {
         @Override
-        public void systemReady() {
+        public void onSystemReady() {
             PermissionManagerService.this.systemReady();
         }
 
@@ -5011,11 +5004,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             Objects.requireNonNull(pkg, "pkg");
             Preconditions.checkArgumentNonNegative(userId, "userId");
             resetRuntimePermissionsInternal(pkg, userId);
-        }
-        @Override
-        public void resetAllRuntimePermissions(@UserIdInt int userId) {
-            Preconditions.checkArgumentNonNegative(userId, "userId");
-            mPackageManagerInt.forEachPackage(pkg -> resetRuntimePermissionsInternal(pkg, userId));
         }
 
         @Override
@@ -5155,11 +5143,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             Objects.requireNonNull(sharedUserPkgs, "sharedUserPkgs");
             Preconditions.checkArgumentNonNegative(userId, "userId");
             onPackageUninstalledInternal(packageName, appId, pkg, sharedUserPkgs, userId);
-        }
-
-        @Override
-        public boolean canPropagatePermissionToInstantApp(@NonNull String permissionName) {
-            return PermissionManagerService.this.canPropagatePermissionToInstantApp(permissionName);
         }
 
         @NonNull
