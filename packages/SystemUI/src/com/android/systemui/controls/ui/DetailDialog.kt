@@ -16,8 +16,12 @@
 
 package com.android.systemui.controls.ui
 
-import android.app.ActivityView
+import android.app.ActivityOptions
+import android.app.ActivityTaskManager
+import android.app.ActivityTaskManager.INVALID_TASK_ID
 import android.app.Dialog
+import android.app.PendingIntent
+import android.content.ComponentName
 import android.content.Intent
 import android.provider.Settings
 import android.view.View
@@ -26,9 +30,9 @@ import android.view.WindowInsets
 import android.view.WindowInsets.Type
 import android.view.WindowManager
 import android.widget.ImageView
-
 import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.systemui.R
+import com.android.wm.shell.TaskView
 
 /**
  * A dialog that provides an {@link ActivityView}, allowing the application to provide
@@ -37,6 +41,7 @@ import com.android.systemui.R
  */
 class DetailDialog(
     val cvh: ControlViewHolder,
+    val activityView: TaskView,
     val intent: Intent
 ) : Dialog(cvh.context, R.style.Theme_SystemUI_Dialog_Control_DetailPanel) {
 
@@ -49,10 +54,16 @@ class DetailDialog(
         private const val EXTRA_USE_PANEL = "controls.DISPLAY_IN_PANEL"
     }
 
-    var activityView = ActivityView(context)
+    var detailTaskId = INVALID_TASK_ID
 
-    val stateCallback: ActivityView.StateCallback = object : ActivityView.StateCallback() {
-        override fun onActivityViewReady(view: ActivityView) {
+    fun removeDetailTask() {
+        if (detailTaskId == INVALID_TASK_ID) return
+        ActivityTaskManager.getInstance().removeTask(detailTaskId)
+        detailTaskId = INVALID_TASK_ID
+    }
+
+    val stateCallback = object : TaskView.Listener {
+        override fun onInitialized() {
             val launchIntent = Intent(intent)
             launchIntent.putExtra(EXTRA_USE_PANEL, true)
 
@@ -60,18 +71,31 @@ class DetailDialog(
             launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT)
             launchIntent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
 
-            view.startActivity(launchIntent)
+            activityView.startActivity(
+                    PendingIntent.getActivity(context, 0, launchIntent,
+                            PendingIntent.FLAG_UPDATE_CURRENT), null, ActivityOptions.makeBasic())
         }
 
-        override fun onActivityViewDestroyed(view: ActivityView) {}
-
         override fun onTaskRemovalStarted(taskId: Int) {
+            detailTaskId = INVALID_TASK_ID
             dismiss()
+        }
+
+        override fun onTaskCreated(taskId: Int, name: ComponentName?) {
+            detailTaskId = taskId
+        }
+
+        override fun onReleased() {
+            removeDetailTask()
         }
     }
 
     init {
         window.setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY)
+        // To pass touches to the task inside TaskView.
+        window.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)
+        window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
+
         setContentView(R.layout.controls_detail_dialog)
 
         requireViewById<ViewGroup>(R.id.controls_activity_view).apply {
@@ -84,6 +108,9 @@ class DetailDialog(
 
         requireViewById<ImageView>(R.id.control_detail_open_in_app).apply {
             setOnClickListener { v: View ->
+                // Remove the task explicitly, since onRelease() callback will be executed after
+                // startActivity() below is called.
+                removeDetailTask()
                 dismiss()
                 context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
                 v.context.startActivity(intent)
@@ -126,7 +153,7 @@ class DetailDialog(
     }
 
     override fun show() {
-        activityView.setCallback(stateCallback)
+        activityView.setListener(cvh.uiExecutor, stateCallback)
 
         super.show()
     }

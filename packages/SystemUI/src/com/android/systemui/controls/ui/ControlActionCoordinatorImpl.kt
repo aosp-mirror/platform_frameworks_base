@@ -36,6 +36,8 @@ import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.wm.shell.TaskViewFactory
+import java.util.Optional
 import javax.inject.Inject
 
 @SysUISingleton
@@ -45,7 +47,8 @@ class ControlActionCoordinatorImpl @Inject constructor(
     @Main private val uiExecutor: DelayableExecutor,
     private val activityStarter: ActivityStarter,
     private val keyguardStateController: KeyguardStateController,
-    private val globalActionsComponent: GlobalActionsComponent
+    private val globalActionsComponent: GlobalActionsComponent,
+    private val taskViewFactory: Optional<TaskViewFactory>
 ) : ControlActionCoordinator {
     private var dialog: Dialog? = null
     private val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
@@ -163,11 +166,13 @@ class ControlActionCoordinatorImpl @Inject constructor(
 
             uiExecutor.execute {
                 // make sure the intent is valid before attempting to open the dialog
-                if (activities.isNotEmpty()) {
-                    dialog = DetailDialog(cvh, intent).also {
-                        it.setOnDismissListener { _ -> dialog = null }
-                        it.show()
-                    }
+                if (activities.isNotEmpty() && taskViewFactory.isPresent) {
+                    taskViewFactory.get().create(cvh.context, uiExecutor, {
+                        dialog = DetailDialog(cvh, it, intent).also {
+                            it.setOnDismissListener { _ -> dialog = null }
+                            it.show()
+                        }
+                    })
                 } else {
                     cvh.setErrorStatus()
                 }
