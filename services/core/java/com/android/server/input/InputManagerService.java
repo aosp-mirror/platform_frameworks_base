@@ -2066,8 +2066,7 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override // Binder call
     public InputSensorInfo[] getSensorList(int deviceId) {
-        InputSensorInfo[] sensors = nativeGetSensorList(mPtr, deviceId);
-        return sensors;
+        return nativeGetSensorList(mPtr, deviceId);
     }
 
     @Override // Binder call
