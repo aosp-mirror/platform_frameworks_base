@@ -56,13 +56,13 @@ interface IPermissionManager {
 
     void removeOnPermissionsChangeListener(in IOnPermissionsChangeListener listener);
 
-    List<String> getWhitelistedRestrictedPermissions(String packageName,
+    List<String> getAllowlistedRestrictedPermissions(String packageName,
             int flags, int userId);
 
-    boolean addWhitelistedRestrictedPermission(String packageName, String permName,
+    boolean addAllowlistedRestrictedPermission(String packageName, String permissionName,
             int flags, int userId);
 
-    boolean removeWhitelistedRestrictedPermission(String packageName, String permName,
+    boolean removeAllowlistedRestrictedPermission(String packageName, String permissionName,
             int flags, int userId);
 
     void grantRuntimePermission(String packageName, String permName, int userId);
@@ -87,7 +87,7 @@ interface IPermissionManager {
 
     List<String> getAutoRevokeExemptionGrantedPackages(int userId);
 
-    boolean setAutoRevokeWhitelisted(String packageName, boolean whitelisted, int userId);
+    boolean setAutoRevokeExempted(String packageName, boolean exempted, int userId);
 
-    boolean isAutoRevokeWhitelisted(String packageName, int userId);
+    boolean isAutoRevokeExempted(String packageName, int userId);
 }

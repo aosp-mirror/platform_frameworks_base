@@ -1117,8 +1117,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         mOnPermissionChangeListeners.removeListener(listener);
     }
 
+    @Nullable
     @Override
-    @Nullable public List<String> getWhitelistedRestrictedPermissions(@NonNull String packageName,
+    public List<String> getAllowlistedRestrictedPermissions(@NonNull String packageName,
             @PermissionWhitelistFlags int flags, @UserIdInt int userId) {
         Objects.requireNonNull(packageName);
         Preconditions.checkFlagsArgument(flags,
@@ -1131,7 +1132,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         if (UserHandle.getCallingUserId() != userId) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS,
-                    "getWhitelistedRestrictedPermissions for user " + userId);
+                    "getAllowlistedRestrictedPermissions for user " + userId);
         }
 
         final AndroidPackage pkg = mPackageManagerInt.getPackage(packageName);
@@ -1217,7 +1218,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     @Override
-    public boolean addWhitelistedRestrictedPermission(@NonNull String packageName,
+    public boolean addAllowlistedRestrictedPermission(@NonNull String packageName,
             @NonNull String permName, @PermissionWhitelistFlags int flags,
             @UserIdInt int userId) {
         // Other argument checks are done in get/setAllowlistedRestrictedPermissions
@@ -1228,7 +1229,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         List<String> permissions =
-                getWhitelistedRestrictedPermissions(packageName, flags, userId);
+                getAllowlistedRestrictedPermissions(packageName, flags, userId);
         if (permissions == null) {
             permissions = new ArrayList<>(1);
         }
@@ -1255,14 +1256,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         if (isImmutablyRestrictedPermission && mContext.checkCallingOrSelfPermission(
                 Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS)
                 != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Cannot modify whitelisting of an immutably "
+            throw new SecurityException("Cannot modify allowlisting of an immutably "
                     + "restricted permission: " + permName);
         }
         return true;
     }
 
     @Override
-    public boolean removeWhitelistedRestrictedPermission(@NonNull String packageName,
+    public boolean removeAllowlistedRestrictedPermission(@NonNull String packageName,
             @NonNull String permName, @PermissionWhitelistFlags int flags,
             @UserIdInt int userId) {
         // Other argument checks are done in get/setAllowlistedRestrictedPermissions
@@ -1273,7 +1274,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         final List<String> permissions =
-                getWhitelistedRestrictedPermissions(packageName, flags, userId);
+                getAllowlistedRestrictedPermissions(packageName, flags, userId);
         if (permissions != null && permissions.remove(permName)) {
             return setAllowlistedRestrictedPermissions(packageName, permissions,
                     flags, userId);
@@ -1328,20 +1329,20 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         + " being installer on record or "
                         + Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS);
             }
-            final List<String> whitelistedPermissions =
-                    getWhitelistedRestrictedPermissions(pkg.getPackageName(), flags, userId);
+            final List<String> allowlistedPermissions =
+                    getAllowlistedRestrictedPermissions(pkg.getPackageName(), flags, userId);
             if (permissions == null || permissions.isEmpty()) {
-                if (whitelistedPermissions == null || whitelistedPermissions.isEmpty()) {
+                if (allowlistedPermissions == null || allowlistedPermissions.isEmpty()) {
                     return true;
                 }
             } else {
                 // Only the system can add and remove while the installer can only remove.
                 final int permissionCount = permissions.size();
                 for (int i = 0; i < permissionCount; i++) {
-                    if ((whitelistedPermissions == null
-                            || !whitelistedPermissions.contains(permissions.get(i)))
+                    if ((allowlistedPermissions == null
+                            || !allowlistedPermissions.contains(permissions.get(i)))
                             && !isCallerPrivileged) {
-                        throw new SecurityException("Adding to upgrade whitelist requires"
+                        throw new SecurityException("Adding to upgrade allowlist requires"
                                 + Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS);
                     }
                 }
@@ -1349,7 +1350,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
             if ((flags & PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER) != 0) {
                 if (!isCallerPrivileged && !isCallerInstallerOnRecord) {
-                    throw new SecurityException("Modifying installer whitelist requires"
+                    throw new SecurityException("Modifying installer allowlist requires"
                             + " being installer on record or "
                             + Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS);
                 }
@@ -1367,8 +1368,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     @Override
-    public boolean setAutoRevokeWhitelisted(
-            @NonNull String packageName, boolean whitelisted, int userId) {
+    public boolean setAutoRevokeExempted(
+            @NonNull String packageName, boolean exempted, int userId) {
         Objects.requireNonNull(packageName);
 
         final AndroidPackage pkg = mPackageManagerInt.getPackage(packageName);
@@ -1378,7 +1379,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             return false;
         }
 
-        return setAutoRevokeExemptedInternal(pkg, whitelisted, userId);
+        return setAutoRevokeExemptedInternal(pkg, exempted, userId);
     }
 
     private boolean setAutoRevokeExemptedInternal(@NonNull AndroidPackage pkg, boolean exempted,
@@ -1386,7 +1387,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         final int packageUid = UserHandle.getUid(userId, pkg.getUid());
         if (mAppOpsManager.checkOpNoThrow(AppOpsManager.OP_AUTO_REVOKE_MANAGED_BY_INSTALLER,
                 packageUid, pkg.getPackageName()) != MODE_ALLOWED) {
-            // Whitelist user set - don't override
+            // Allowlist user set - don't override
             return false;
         }
 
@@ -1420,7 +1421,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     @Override
-    public boolean isAutoRevokeWhitelisted(@NonNull String packageName, int userId) {
+    public boolean isAutoRevokeExempted(@NonNull String packageName, int userId) {
         Objects.requireNonNull(packageName);
 
         final AndroidPackage pkg = mPackageManagerInt.getPackage(packageName);
@@ -2872,7 +2873,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         boolean softRestricted = bp.isSoftRestricted();
 
                         // If permission policy is not ready we don't deal with restricted
-                        // permissions as the policy may whitelist some permissions. Once
+                        // permissions as the policy may allowlist some permissions. Once
                         // the policy is initialized we would re-evaluate permissions.
                         final boolean permissionPolicyInitialized =
                                 isPermissionPolicyInitialized.get(userId);
@@ -3576,9 +3577,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         if (isInSystemConfigPrivAppPermissions(pkg, permissionName)) {
             return true;
         }
-        // Only enforce whitelist this on boot
+        // Only enforce the allowlist on boot
         if (!mSystemReady
-                // Updated system apps do not need to be whitelisted
+                // Updated system apps do not need to be allowlisted
                 && !isUpdatedSystemApp) {
             final ApexManager apexManager = ApexManager.getInstance();
             final String packageName = pkg.getPackageName();
@@ -3587,7 +3588,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             final boolean isInUpdatedApex = containingApexPackageName != null
                     && !apexManager.isFactory(apexManager.getPackageInfo(containingApexPackageName,
                     MATCH_ACTIVE_PACKAGE));
-            // Apps that are in updated apexs' do not need to be whitelisted
+            // Apps that are in updated apexs' do not need to be allowlisted
             if (!isInUpdatedApex) {
                 // it's only a reportable violation if the permission isn't explicitly
                 // denied
@@ -3596,7 +3597,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 }
                 Slog.w(TAG, "Privileged permission " + permissionName + " for package "
                         + packageName + " (" + pkg.getPath()
-                        + ") not in privapp-permissions whitelist");
+                        + ") not in privapp-permissions allowlist");
                 if (RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_ENFORCE) {
                     synchronized (mLock) {
                         if (mPrivappPermissionsViolations == null) {
@@ -3775,10 +3776,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
             int newFlags = oldFlags;
             int mask = 0;
-            int whitelistFlagsCopy = allowlistFlags;
-            while (whitelistFlagsCopy != 0) {
-                final int flag = 1 << Integer.numberOfTrailingZeros(whitelistFlagsCopy);
-                whitelistFlagsCopy &= ~flag;
+            int allowlistFlagsCopy = allowlistFlags;
+            while (allowlistFlagsCopy != 0) {
+                final int flag = 1 << Integer.numberOfTrailingZeros(allowlistFlagsCopy);
+                allowlistFlagsCopy &= ~flag;
                 switch (flag) {
                     case FLAG_PERMISSION_WHITELIST_SYSTEM: {
                         mask |= FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT;
@@ -3825,26 +3826,26 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
             updatePermissions = true;
 
-            final boolean wasWhitelisted = (oldFlags
+            final boolean wasAllowlisted = (oldFlags
                     & (PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT)) != 0;
-            final boolean isWhitelisted = (newFlags
+            final boolean isAllowlisted = (newFlags
                     & (PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT)) != 0;
 
             // If the permission is policy fixed as granted but it is no longer
-            // on any of the whitelists we need to clear the policy fixed flag
-            // as whitelisting trumps policy i.e. policy cannot grant a non
+            // on any of the allowlists we need to clear the policy fixed flag
+            // as allowlisting trumps policy i.e. policy cannot grant a non
             // grantable permission.
             if ((oldFlags & PackageManager.FLAG_PERMISSION_POLICY_FIXED) != 0) {
-                if (!isWhitelisted && isGranted) {
+                if (!isAllowlisted && isGranted) {
                     mask |= PackageManager.FLAG_PERMISSION_POLICY_FIXED;
                     newFlags &= ~PackageManager.FLAG_PERMISSION_POLICY_FIXED;
                 }
             }
 
-            // If we are whitelisting an app that does not support runtime permissions
+            // If we are allowlisting an app that does not support runtime permissions
             // we need to make sure it goes through the permission review UI at launch.
             if (pkg.getTargetSdkVersion() < Build.VERSION_CODES.M
-                    && !wasWhitelisted && isWhitelisted) {
+                    && !wasAllowlisted && isAllowlisted) {
                 mask |= PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
                 newFlags |= PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
             }
@@ -3854,7 +3855,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         if (updatePermissions) {
-            // Update permission of this app to take into account the new whitelist state.
+            // Update permission of this app to take into account the new allowlist state.
             restorePermissionState(pkg, false, pkg.getPackageName(), mDefaultPermissionCallback);
 
             // If this resulted in losing a permission we need to kill the app.
@@ -4487,7 +4488,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         synchronized (mLock) {
             if (mPrivappPermissionsViolations != null) {
                 throw new IllegalStateException("Signature|privileged permissions not in "
-                        + "privapp-permissions whitelist: " + mPrivappPermissionsViolations);
+                        + "privapp-permissions allowlist: " + mPrivappPermissionsViolations);
             }
         }
 

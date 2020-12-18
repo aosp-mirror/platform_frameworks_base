@@ -510,7 +510,7 @@ public final class PermissionManager {
     public Set<String> getAllowlistedRestrictedPermissions(@NonNull String packageName,
             @PackageManager.PermissionWhitelistFlags int allowlistFlag) {
         try {
-            final List<String> allowlist = mPermissionManager.getWhitelistedRestrictedPermissions(
+            final List<String> allowlist = mPermissionManager.getAllowlistedRestrictedPermissions(
                     packageName, allowlistFlag, mContext.getUserId());
             if (allowlist == null) {
                 return Collections.emptySet();
@@ -578,7 +578,7 @@ public final class PermissionManager {
             @NonNull String permissionName,
             @PackageManager.PermissionWhitelistFlags int allowlistFlags) {
         try {
-            return mPermissionManager.addWhitelistedRestrictedPermission(packageName,
+            return mPermissionManager.addAllowlistedRestrictedPermission(packageName,
                     permissionName, allowlistFlags, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -642,7 +642,7 @@ public final class PermissionManager {
             @NonNull String permissionName,
             @PackageManager.PermissionWhitelistFlags int allowlistFlags) {
         try {
-            return mPermissionManager.removeWhitelistedRestrictedPermission(packageName,
+            return mPermissionManager.removeAllowlistedRestrictedPermission(packageName,
                     permissionName, allowlistFlags, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -668,7 +668,7 @@ public final class PermissionManager {
             conditional = true)
     public boolean isAutoRevokeExempted(@NonNull String packageName) {
         try {
-            return mPermissionManager.isAutoRevokeWhitelisted(packageName, mContext.getUserId());
+            return mPermissionManager.isAutoRevokeExempted(packageName, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -697,7 +697,7 @@ public final class PermissionManager {
             conditional = true)
     public boolean setAutoRevokeExempted(@NonNull String packageName, boolean exempted) {
         try {
-            return mPermissionManager.setAutoRevokeWhitelisted(packageName, exempted,
+            return mPermissionManager.setAutoRevokeExempted(packageName, exempted,
                     mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
