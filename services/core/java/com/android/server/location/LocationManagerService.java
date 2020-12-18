@@ -47,7 +47,7 @@ import android.location.GeocoderParams;
 import android.location.Geofence;
 import android.location.GnssCapabilities;
 import android.location.GnssMeasurementCorrections;
-import android.location.GnssRequest;
+import android.location.GnssMeasurementRequest;
 import android.location.IGeocodeListener;
 import android.location.IGnssAntennaInfoListener;
 import android.location.IGnssMeasurementsListener;
@@ -859,7 +859,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public void addGnssMeasurementsListener(@Nullable GnssRequest request,
+    public void addGnssMeasurementsListener(@Nullable GnssMeasurementRequest request,
             IGnssMeasurementsListener listener, String packageName, String attributionTag) {
         if (mGnssManagerService != null) {
             mGnssManagerService.addGnssMeasurementsListener(request, listener, packageName,

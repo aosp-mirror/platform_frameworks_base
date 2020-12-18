@@ -21,9 +21,9 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.location.GnssAntennaInfo;
 import android.location.GnssMeasurementCorrections;
+import android.location.GnssMeasurementRequest;
 import android.location.GnssMeasurementsEvent;
 import android.location.GnssNavigationMessage;
-import android.location.GnssRequest;
 import android.location.IGnssAntennaInfoListener;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssNavigationMessageListener;
@@ -176,12 +176,10 @@ public class GnssManagerService implements GnssNative.Callbacks {
     /**
      * Adds a GNSS measurements listener.
      */
-    public void addGnssMeasurementsListener(GnssRequest request, IGnssMeasurementsListener listener,
-            String packageName, @Nullable String attributionTag) {
+    public void addGnssMeasurementsListener(GnssMeasurementRequest request,
+            IGnssMeasurementsListener listener, String packageName,
+            @Nullable String attributionTag) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
-        if (request.isFullTracking()) {
-            mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
-        }
 
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
         mGnssMeasurementsProvider.addListener(request, identity, listener);

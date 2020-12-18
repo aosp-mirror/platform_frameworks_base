@@ -21,8 +21,8 @@ import static com.android.server.location.gnss.GnssManagerService.TAG;
 
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
+import android.location.GnssMeasurementRequest;
 import android.location.GnssMeasurementsEvent;
-import android.location.GnssRequest;
 import android.location.IGnssMeasurementsListener;
 import android.location.util.identity.CallerIdentity;
 import android.os.IBinder;
@@ -47,18 +47,18 @@ import java.util.Objects;
  * @hide
  */
 public final class GnssMeasurementsProvider extends
-        GnssListenerMultiplexer<GnssRequest, IGnssMeasurementsListener, Boolean> implements
-        SettingsHelper.GlobalSettingChangedListener {
+        GnssListenerMultiplexer<GnssMeasurementRequest, IGnssMeasurementsListener, Boolean>
+        implements SettingsHelper.GlobalSettingChangedListener {
 
     private class GnssMeasurementListenerRegistration extends GnssListenerRegistration {
 
         private static final String GNSS_MEASUREMENTS_BUCKET = "gnss_measurement";
 
         protected GnssMeasurementListenerRegistration(
-                @Nullable GnssRequest gnssRequest,
+                @Nullable GnssMeasurementRequest request,
                 CallerIdentity callerIdentity,
                 IGnssMeasurementsListener iGnssMeasurementsListener) {
-            super(gnssRequest, callerIdentity, iGnssMeasurementsListener);
+            super(request, callerIdentity, iGnssMeasurementsListener);
         }
 
         @Nullable
@@ -100,13 +100,13 @@ public final class GnssMeasurementsProvider extends
     }
 
     @Override
-    public void addListener(GnssRequest request, CallerIdentity identity,
+    public void addListener(GnssMeasurementRequest request, CallerIdentity identity,
             IGnssMeasurementsListener listener) {
         super.addListener(request, identity, listener);
     }
 
     @Override
-    protected GnssListenerRegistration createRegistration(GnssRequest request,
+    protected GnssListenerRegistration createRegistration(GnssMeasurementRequest request,
             CallerIdentity callerIdentity, IGnssMeasurementsListener listener) {
         return new GnssMeasurementListenerRegistration(request, callerIdentity, listener);
     }
