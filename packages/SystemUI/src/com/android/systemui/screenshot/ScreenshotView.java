@@ -73,6 +73,7 @@ import android.widget.LinearLayout;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
+import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ShareTransition;
 import com.android.systemui.shared.system.QuickStepContract;
 
 import java.util.ArrayList;
@@ -104,6 +105,7 @@ public class ScreenshotView extends FrameLayout implements
     private static final long SCREENSHOT_DISMISS_Y_DURATION_MS = 350;
     private static final long SCREENSHOT_DISMISS_ALPHA_DURATION_MS = 183;
     private static final long SCREENSHOT_DISMISS_ALPHA_OFFSET_MS = 50; // delay before starting fade
+    private static final long SCREENSHOT_DISMISS_SHARE_OFFSET_MS = 300; // delay after share clicked
     private static final float SCREENSHOT_ACTIONS_START_SCALE_X = .7f;
     private static final float ROUNDED_CORNER_RADIUS = .05f;
     private static final int SWIPE_PADDING_DP = 12; // extra padding around views to allow swipe
@@ -138,6 +140,7 @@ public class ScreenshotView extends FrameLayout implements
     private UiEventLogger mUiEventLogger;
     private ScreenshotViewCallback mCallbacks;
     private Animator mDismissAnimation;
+    private boolean mIgnoreDismiss;
 
     private final ArrayList<ScreenshotActionChip> mSmartChips = new ArrayList<>();
     private PendingInteraction mPendingInteraction;
@@ -526,13 +529,31 @@ public class ScreenshotView extends FrameLayout implements
         });
         return animator;
     }
+    protected View getScreenshotPreview() {
+        return mScreenshotPreview;
+    }
 
     void setChipIntents(ScreenshotController.SavedImageData imageData) {
-        mShareChip.setPendingIntent(imageData.shareAction.actionIntent,
-                () -> {
-                    mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SHARE_TAPPED);
+        mShareChip.setOnClickListener(v -> {
+            ShareTransition transition = imageData.shareTransition.get();
+            try {
+                mIgnoreDismiss = true;
+                transition.shareAction.actionIntent.send();
+                mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SHARE_TAPPED);
+
+                // Ensures that we delay dismissing until transition has started.
+                postDelayed(() -> {
+                    mIgnoreDismiss = false;
                     animateDismissal();
-                });
+                }, SCREENSHOT_DISMISS_SHARE_OFFSET_MS);
+            } catch (PendingIntent.CanceledException e) {
+                mIgnoreDismiss = false;
+                if (transition.onCancelRunnable != null) {
+                    transition.onCancelRunnable.run();
+                }
+                Log.e(TAG, "Share intent cancelled", e);
+            }
+        });
         mEditChip.setPendingIntent(imageData.editAction.actionIntent,
                 () -> {
                     mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_EDIT_TAPPED);
@@ -589,6 +610,9 @@ public class ScreenshotView extends FrameLayout implements
     }
 
     private void animateDismissal(Animator dismissAnimation) {
+        if (mIgnoreDismiss) {
+            return;
+        }
         if (DEBUG_WINDOW) {
             Log.d(TAG, "removing OnComputeInternalInsetsListener");
         }

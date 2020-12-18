@@ -21,6 +21,12 @@
     android:orientation="vertical"
     android:background="@android:color/holo_blue_bright">
 
+    <!-- All the buttons (and other clickable elements) should be arranged in a way so that it is
+         possible to "cycle" over all them by clicking on the D-Pad DOWN button. The way we do it
+         here is by arranging them this vertical LL and by relying on the nextFocusDown attribute
+         where things are arranged differently and to circle back up to the top once we reach the
+         bottom. -->
+
     <Button
         android:id="@+id/enter_pip"
         android:layout_width="wrap_content"
@@ -87,12 +93,14 @@
             android:id="@+id/media_session_start"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:nextFocusDown="@id/media_session_stop"
             android:text="Start"/>
 
         <Button
             android:id="@+id/media_session_stop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:nextFocusDown="@id/enter_pip"
             android:text="Stop"/>
 
     </LinearLayout>

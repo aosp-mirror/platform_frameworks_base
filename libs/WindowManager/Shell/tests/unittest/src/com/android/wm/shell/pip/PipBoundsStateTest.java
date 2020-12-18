@@ -31,13 +31,12 @@ import android.util.Size;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.util.function.TriConsumer;
 import com.android.wm.shell.ShellTestCase;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.function.BiConsumer;
 
 /**
  * Tests for {@link PipBoundsState}.
@@ -117,23 +116,33 @@ public class PipBoundsStateTest extends ShellTestCase {
 
     @Test
     public void testSetShelfVisibility_changed_callbackInvoked() {
-        final BiConsumer<Boolean, Integer> callback = mock(BiConsumer.class);
+        final TriConsumer<Boolean, Integer, Boolean> callback = mock(TriConsumer.class);
         mPipBoundsState.setOnShelfVisibilityChangeCallback(callback);
 
         mPipBoundsState.setShelfVisibility(true, 100);
 
-        verify(callback).accept(true, 100);
+        verify(callback).accept(true, 100, true);
+    }
+
+    @Test
+    public void testSetShelfVisibility_changedWithoutUpdateMovBounds_callbackInvoked() {
+        final TriConsumer<Boolean, Integer, Boolean> callback = mock(TriConsumer.class);
+        mPipBoundsState.setOnShelfVisibilityChangeCallback(callback);
+
+        mPipBoundsState.setShelfVisibility(true, 100, false);
+
+        verify(callback).accept(true, 100, false);
     }
 
     @Test
     public void testSetShelfVisibility_notChanged_callbackNotInvoked() {
-        final BiConsumer<Boolean, Integer> callback = mock(BiConsumer.class);
+        final TriConsumer<Boolean, Integer, Boolean> callback = mock(TriConsumer.class);
         mPipBoundsState.setShelfVisibility(true, 100);
         mPipBoundsState.setOnShelfVisibilityChangeCallback(callback);
 
         mPipBoundsState.setShelfVisibility(true, 100);
 
-        verify(callback, never()).accept(true, 100);
+        verify(callback, never()).accept(true, 100, true);
     }
 
     @Test

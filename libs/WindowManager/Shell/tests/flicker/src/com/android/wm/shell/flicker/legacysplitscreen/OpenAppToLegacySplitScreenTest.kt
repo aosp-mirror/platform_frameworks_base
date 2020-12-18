@@ -17,10 +17,10 @@
 package com.android.wm.shell.flicker.legacysplitscreen
 
 import android.platform.test.annotations.Presubmit
+import android.support.test.launcherhelper.LauncherStrategyFactory
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.DOCKED_STACK_DIVIDER
 import com.android.server.wm.flicker.Flicker
 import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
@@ -35,12 +35,17 @@ import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
+import com.android.server.wm.flicker.appWindowBecomesVisible
+import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
+import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
+import com.android.server.wm.flicker.layerBecomesVisible
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.noUncoveredRegions
 import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
+import com.android.wm.shell.flicker.dockedStackDividerBecomesVisible
 import org.junit.FixMethodOrder
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -48,7 +53,7 @@ import org.junit.runners.Parameterized
 
 /**
  * Test open app to split screen.
- * To run this test: `atest WMShellFlickerTests:OpenAppToSplitScreenTest`
+ * To run this test: `atest WMShellFlickerTests:OpenAppToLegacySplitScreenTest`
  */
 @Presubmit
 @RequiresDevice
@@ -63,6 +68,8 @@ class OpenAppToLegacySplitScreenTest(
         @JvmStatic
         fun getParams(): Collection<Array<Any>> {
             val instrumentation = InstrumentationRegistry.getInstrumentation()
+            val launcherPackageName = LauncherStrategyFactory.getInstance(instrumentation)
+                    .launcherStrategy.supportedLauncherPackage
             val testApp = StandardAppHelper(instrumentation,
                 "com.android.wm.shell.flicker.testapp", "SimpleApp")
 
@@ -79,6 +86,7 @@ class OpenAppToLegacySplitScreenTest(
                         }
                         eachRun {
                             testApp.open()
+                            device.pressHome()
                             this.setRotation(configuration.endRotation)
                         }
                     }
@@ -99,6 +107,9 @@ class OpenAppToLegacySplitScreenTest(
                         windowManagerTrace {
                             navBarWindowIsAlwaysVisible()
                             statusBarWindowIsAlwaysVisible()
+                            visibleWindowsShownMoreThanOneConsecutiveEntry()
+
+                            appWindowBecomesVisible(testApp.getPackage())
                         }
 
                         layersTrace {
@@ -108,12 +119,11 @@ class OpenAppToLegacySplitScreenTest(
                             navBarLayerRotatesAndScales(configuration.endRotation,
                                 bugId = 140855415)
                             statusBarLayerRotatesScales(configuration.endRotation)
+                            visibleLayersShownMoreThanOneConsecutiveEntry(
+                                    listOf(launcherPackageName))
 
-                            all("dividerLayerBecomesVisible") {
-                                this.hidesLayer(DOCKED_STACK_DIVIDER)
-                                    .then()
-                                    .showsLayer(DOCKED_STACK_DIVIDER)
-                            }
+                            dockedStackDividerBecomesVisible()
+                            layerBecomesVisible(testApp.getPackage())
                         }
 
                         eventLog {

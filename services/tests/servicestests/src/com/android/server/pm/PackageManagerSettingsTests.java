@@ -62,6 +62,7 @@ import com.android.server.LocalServices;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.permission.LegacyPermissionDataProvider;
+import com.android.server.utils.WatchableTester;
 
 import com.google.common.truth.Truth;
 
@@ -178,6 +179,12 @@ public class PackageManagerSettingsTests {
         PackageSetting ps = settings.getPackageLPr(PACKAGE_NAME_2);
         assertThat(ps.getEnabled(0), is(COMPONENT_ENABLED_STATE_DISABLED_USER));
         assertThat(ps.getEnabled(1), is(COMPONENT_ENABLED_STATE_DEFAULT));
+
+        // Verify that the snapshot passes the same test
+        Settings snapshot = settings.snapshot();
+        ps = snapshot.getPackageLPr(PACKAGE_NAME_2);
+        assertThat(ps.getEnabled(0), is(COMPONENT_ENABLED_STATE_DISABLED_USER));
+        assertThat(ps.getEnabled(1), is(COMPONENT_ENABLED_STATE_DEFAULT));
     }
 
     private static PersistableBundle createPersistableBundle(String packageName, long longVal,
@@ -197,21 +204,41 @@ public class PackageManagerSettingsTests {
         final Context context = InstrumentationRegistry.getTargetContext();
         final Settings settingsUnderTest = new Settings(context.getFilesDir(), null, null,
                 lock);
+        final WatchableTester watcher =
+                new WatchableTester(settingsUnderTest, "noSuspendingPackage");
+        watcher.register();
         settingsUnderTest.mPackages.put(PACKAGE_NAME_1, createPackageSetting(PACKAGE_NAME_1));
+        watcher.verifyChangeReported("put package 1");
+        // Collect a snapshot at the midway point (package 2 has not been added)
+        final Settings snapshot = settingsUnderTest.snapshot();
+        watcher.verifyNoChangeReported("snapshot");
         settingsUnderTest.mPackages.put(PACKAGE_NAME_2, createPackageSetting(PACKAGE_NAME_2));
+        watcher.verifyChangeReported("put package 2");
         settingsUnderTest.readPackageRestrictionsLPr(0);
 
-        final PackageSetting ps1 = settingsUnderTest.mPackages.get(PACKAGE_NAME_1);
-        final PackageUserState packageUserState1 = ps1.readUserState(0);
+        PackageSetting ps1 = settingsUnderTest.mPackages.get(PACKAGE_NAME_1);
+        PackageUserState packageUserState1 = ps1.readUserState(0);
         assertThat(packageUserState1.suspended, is(true));
         assertThat(packageUserState1.suspendParams.size(), is(1));
         assertThat(packageUserState1.suspendParams.keyAt(0), is("android"));
         assertThat(packageUserState1.suspendParams.valueAt(0), is(nullValue()));
 
-        final PackageSetting ps2 = settingsUnderTest.mPackages.get(PACKAGE_NAME_2);
-        final PackageUserState packageUserState2 = ps2.readUserState(0);
+        // Verify that the snapshot returns the same answers
+        ps1 = snapshot.mPackages.get(PACKAGE_NAME_1);
+        packageUserState1 = ps1.readUserState(0);
+        assertThat(packageUserState1.suspended, is(true));
+        assertThat(packageUserState1.suspendParams.size(), is(1));
+        assertThat(packageUserState1.suspendParams.keyAt(0), is("android"));
+        assertThat(packageUserState1.suspendParams.valueAt(0), is(nullValue()));
+
+        PackageSetting ps2 = settingsUnderTest.mPackages.get(PACKAGE_NAME_2);
+        PackageUserState packageUserState2 = ps2.readUserState(0);
         assertThat(packageUserState2.suspended, is(false));
         assertThat(packageUserState2.suspendParams, is(nullValue()));
+
+        // Verify that the snapshot returns different answers
+        ps2 = snapshot.mPackages.get(PACKAGE_NAME_2);
+        assertTrue(ps2 == null);
     }
 
     @Test
@@ -221,15 +248,23 @@ public class PackageManagerSettingsTests {
         final Context context = InstrumentationRegistry.getTargetContext();
         final Settings settingsUnderTest = new Settings(context.getFilesDir(), null, null,
                 lock);
+        final WatchableTester watcher =
+                new WatchableTester(settingsUnderTest, "noSuspendParamsMap");
+        watcher.register();
         settingsUnderTest.mPackages.put(PACKAGE_NAME_1, createPackageSetting(PACKAGE_NAME_1));
+        watcher.verifyChangeReported("put package 1");
         settingsUnderTest.readPackageRestrictionsLPr(0);
+        watcher.verifyChangeReported("readPackageRestrictions");
 
         final PackageSetting ps1 = settingsUnderTest.mPackages.get(PACKAGE_NAME_1);
+        watcher.verifyNoChangeReported("get package 1");
         final PackageUserState packageUserState1 = ps1.readUserState(0);
+        watcher.verifyNoChangeReported("readUserState");
         assertThat(packageUserState1.suspended, is(true));
         assertThat(packageUserState1.suspendParams.size(), is(1));
         assertThat(packageUserState1.suspendParams.keyAt(0), is(PACKAGE_NAME_3));
         final PackageUserState.SuspendParams params = packageUserState1.suspendParams.valueAt(0);
+        watcher.verifyNoChangeReported("fetch user state");
         assertThat(params, is(notNullValue()));
         assertThat(params.appExtras.size(), is(1));
         assertThat(params.appExtras.getString("app_extra_string"), is("value"));
@@ -249,6 +284,8 @@ public class PackageManagerSettingsTests {
         final Context context = InstrumentationRegistry.getTargetContext();
         final Settings settingsUnderTest = new Settings(context.getFilesDir(), null, null,
                 new Object());
+        final WatchableTester watcher = new WatchableTester(settingsUnderTest, "suspendInfo");
+        watcher.register();
         final PackageSetting ps1 = createPackageSetting(PACKAGE_NAME_1);
         final PackageSetting ps2 = createPackageSetting(PACKAGE_NAME_2);
         final PackageSetting ps3 = createPackageSetting(PACKAGE_NAME_3);
@@ -283,33 +320,46 @@ public class PackageManagerSettingsTests {
         ps1.addOrUpdateSuspension("suspendingPackage2", dialogInfo2, appExtras2, launcherExtras2,
                 0);
         settingsUnderTest.mPackages.put(PACKAGE_NAME_1, ps1);
+        watcher.verifyChangeReported("put package 1");
 
         ps2.addOrUpdateSuspension("suspendingPackage3", null, appExtras1, null, 0);
         settingsUnderTest.mPackages.put(PACKAGE_NAME_2, ps2);
+        watcher.verifyChangeReported("put package 2");
 
         ps3.removeSuspension("irrelevant", 0);
         settingsUnderTest.mPackages.put(PACKAGE_NAME_3, ps3);
+        watcher.verifyChangeReported("put package 3");
 
         settingsUnderTest.writePackageRestrictionsLPr(0);
+        watcher.verifyChangeReported("writePackageRestrictions");
 
         settingsUnderTest.mPackages.clear();
+        watcher.verifyChangeReported("clear packages");
         settingsUnderTest.mPackages.put(PACKAGE_NAME_1, createPackageSetting(PACKAGE_NAME_1));
+        watcher.verifyChangeReported("put package 1");
         settingsUnderTest.mPackages.put(PACKAGE_NAME_2, createPackageSetting(PACKAGE_NAME_2));
+        watcher.verifyChangeReported("put package 2");
         settingsUnderTest.mPackages.put(PACKAGE_NAME_3, createPackageSetting(PACKAGE_NAME_3));
+        watcher.verifyChangeReported("put package 3");
         // now read and verify
         settingsUnderTest.readPackageRestrictionsLPr(0);
+        watcher.verifyChangeReported("readPackageRestrictions");
         final PackageUserState readPus1 = settingsUnderTest.mPackages.get(PACKAGE_NAME_1)
                 .readUserState(0);
+        watcher.verifyNoChangeReported("package get 1");
         assertThat(readPus1.suspended, is(true));
         assertThat(readPus1.suspendParams.size(), is(2));
+        watcher.verifyNoChangeReported("read package param");
 
         assertThat(readPus1.suspendParams.keyAt(0), is("suspendingPackage1"));
         final PackageUserState.SuspendParams params11 = readPus1.suspendParams.valueAt(0);
+        watcher.verifyNoChangeReported("read package param");
         assertThat(params11, is(notNullValue()));
         assertThat(params11.dialogInfo, is(dialogInfo1));
         assertThat(BaseBundle.kindofEquals(params11.appExtras, appExtras1), is(true));
         assertThat(BaseBundle.kindofEquals(params11.launcherExtras, launcherExtras1),
                 is(true));
+        watcher.verifyNoChangeReported("read package param");
 
         assertThat(readPus1.suspendParams.keyAt(1), is("suspendingPackage2"));
         final PackageUserState.SuspendParams params12 = readPus1.suspendParams.valueAt(1);
@@ -318,6 +368,7 @@ public class PackageManagerSettingsTests {
         assertThat(BaseBundle.kindofEquals(params12.appExtras, appExtras2), is(true));
         assertThat(BaseBundle.kindofEquals(params12.launcherExtras, launcherExtras2),
                 is(true));
+        watcher.verifyNoChangeReported("read package param");
 
         final PackageUserState readPus2 = settingsUnderTest.mPackages.get(PACKAGE_NAME_2)
                 .readUserState(0);
@@ -329,11 +380,13 @@ public class PackageManagerSettingsTests {
         assertThat(params21.dialogInfo, is(nullValue()));
         assertThat(BaseBundle.kindofEquals(params21.appExtras, appExtras1), is(true));
         assertThat(params21.launcherExtras, is(nullValue()));
+        watcher.verifyNoChangeReported("read package param");
 
         final PackageUserState readPus3 = settingsUnderTest.mPackages.get(PACKAGE_NAME_3)
                 .readUserState(0);
         assertThat(readPus3.suspended, is(false));
         assertThat(readPus3.suspendParams, is(nullValue()));
+        watcher.verifyNoChangeReported("package get 3");
     }
 
     @Test
@@ -467,14 +520,23 @@ public class PackageManagerSettingsTests {
         final Object lock = new Object();
         Settings settings = new Settings(context.getFilesDir(),
                 mRuntimePermissionsPersistence, mPermissionDataProvider, lock);
+        final WatchableTester watcher = new WatchableTester(settings, "testEnableDisable");
+        watcher.register();
         assertThat(settings.readLPw(createFakeUsers()), is(true));
+        watcher.verifyChangeReported("readLPw");
 
         // Enable/Disable a package
         PackageSetting ps = settings.getPackageLPr(PACKAGE_NAME_1);
+        watcher.verifyNoChangeReported("getPackageLPr");
+        assertThat(ps.getEnabled(0), is(not(COMPONENT_ENABLED_STATE_DISABLED)));
+        assertThat(ps.getEnabled(1), is(not(COMPONENT_ENABLED_STATE_ENABLED)));
         ps.setEnabled(COMPONENT_ENABLED_STATE_DISABLED, 0, null);
+        watcher.verifyChangeReported("setEnabled DISABLED");
         ps.setEnabled(COMPONENT_ENABLED_STATE_ENABLED, 1, null);
+        watcher.verifyChangeReported("setEnabled ENABLED");
         assertThat(ps.getEnabled(0), is(COMPONENT_ENABLED_STATE_DISABLED));
         assertThat(ps.getEnabled(1), is(COMPONENT_ENABLED_STATE_ENABLED));
+        watcher.verifyNoChangeReported("getEnabled");
 
         // Enable/Disable a component
         ArraySet<String> components = new ArraySet<String>();
@@ -1152,7 +1214,8 @@ public class PackageManagerSettingsTests {
 
     private void verifyKeySetMetaData(Settings settings)
             throws ReflectiveOperationException, IllegalAccessException {
-        ArrayMap<String, PackageSetting> packages = settings.mPackages;
+        ArrayMap<String, PackageSetting> packages =
+                settings.mPackages.untrackedMap();
         KeySetManagerService ksms = settings.mKeySetManagerService;
 
         /* verify keyset and public key ref counts */

@@ -168,6 +168,7 @@ public final class ActiveServices {
     public static final int FGS_FEATURE_ALLOWED_BY_FGS_BINDING = 17;
     public static final int FGS_FEATURE_ALLOWED_BY_DEVICE_DEMO_MODE = 18;
     public static final int FGS_FEATURE_ALLOWED_BY_PROCESS_RECORD = 19;
+    public static final int FGS_FEATURE_ALLOWED_BY_EXEMPTED_PACKAGES = 20;
 
     @IntDef(flag = true, prefix = { "FGS_FEATURE_" }, value = {
             FGS_FEATURE_DENIED,
@@ -188,7 +189,8 @@ public final class ActiveServices {
             FGS_FEATURE_ALLOWED_BY_SYSTEM_ALERT_WINDOW_PERMISSION,
             FGS_FEATURE_ALLOWED_BY_FGS_BINDING,
             FGS_FEATURE_ALLOWED_BY_DEVICE_DEMO_MODE,
-            FGS_FEATURE_ALLOWED_BY_PROCESS_RECORD
+            FGS_FEATURE_ALLOWED_BY_PROCESS_RECORD,
+            FGS_FEATURE_ALLOWED_BY_EXEMPTED_PACKAGES,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FgsFeatureRetCode {}
@@ -275,12 +277,38 @@ public final class ActiveServices {
     static final long FGS_BG_START_RESTRICTION_CHANGE_ID = 170668199L;
 
     /**
+     * If set to false for a package, the system will *not* exempt it from FGS-BG-start,
+     * even if it's in {#code ActiveServices.sFgsBgStartExemptedPackages}.
+     */
+    @ChangeId
+    static final long FGS_BG_START_USE_EXEMPTION_LIST_CHANGE_ID = 175801883;
+
+    /**
      * If a service can not become foreground service due to BG-FGS-launch restriction or other
      * reasons, throws an IllegalStateException.
      */
     @ChangeId
     @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.S)
     static final long FGS_START_EXCEPTION_CHANGE_ID = 174041399L;
+
+    /**
+     * Special allowlist that contains packages that are allowed to start FGS even if they target S,
+     * without using START_FOREGROUND_SERVICES_FROM_BACKGROUND.
+     *
+     * Note: we exempt FGS starts if either the "callee" or "caller" match any of the emempted
+     * packages. This means:
+     * - Exempted apps could call Context.startForegroundService() for services owned by any other
+     *   apps.
+     * - Any apps could call Context.startForegroundService() for services owned by any exempted
+     *   apps.
+     * And the call would succeed.
+     */
+    private static final ArraySet<String> sFgsBgStartExemptedPackages = new ArraySet<>();
+
+    static {
+        sFgsBgStartExemptedPackages.add("com.google.pixel.exo.bootstrapping"); //STOPSHIP Remove it.
+        sFgsBgStartExemptedPackages.add("com.android.chrome"); // STOPSHIP Remove it.
+    }
 
     final Runnable mLastAnrDumpClearer = new Runnable() {
         @Override public void run() {
@@ -5310,6 +5338,14 @@ public final class ActiveServices {
             }
         }
 
+        // NOTE this should always be the last check.
+        if (ret == FGS_FEATURE_DENIED) {
+            if (isPackageExemptedFromFgsRestriction(r.appInfo.packageName, r.appInfo.uid)
+                    || isPackageExemptedFromFgsRestriction(callingPackage, callingUid)) {
+                ret = FGS_FEATURE_ALLOWED_BY_EXEMPTED_PACKAGES;
+            }
+        }
+
         final String debugInfo =
                 "[callingPackage: " + callingPackage
                         + "; callingUid: " + callingUid
@@ -5325,6 +5361,13 @@ public final class ActiveServices {
         }
 
         return ret;
+    }
+
+    private boolean isPackageExemptedFromFgsRestriction(String packageName, int uid) {
+        if (!sFgsBgStartExemptedPackages.contains(packageName)) {
+            return false;
+        }
+        return CompatChanges.isChangeEnabled(FGS_BG_START_USE_EXEMPTION_LIST_CHANGE_ID, uid);
     }
 
     private static String fgsCodeToString(@FgsFeatureRetCode int code) {
@@ -5367,6 +5410,8 @@ public final class ActiveServices {
                 return "ALLOWED_BY_DEVICE_DEMO_MODE";
             case FGS_FEATURE_ALLOWED_BY_PROCESS_RECORD:
                 return "ALLOWED_BY_PROCESS_RECORD";
+            case FGS_FEATURE_ALLOWED_BY_EXEMPTED_PACKAGES:
+                return "FGS_FEATURE_ALLOWED_BY_EXEMPTED_PACKAGES";
             default:
                 return "";
         }

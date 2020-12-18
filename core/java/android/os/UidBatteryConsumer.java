@@ -86,8 +86,8 @@ public final class UidBatteryConsumer extends BatteryConsumer implements Parcela
         private String mPackageWithHighestDrain;
 
         public Builder(int customPowerComponentCount, int customTimeComponentCount,
-                BatteryStats.Uid batteryStatsUid) {
-            super(customPowerComponentCount, customTimeComponentCount);
+                boolean includeModeledComponents, BatteryStats.Uid batteryStatsUid) {
+            super(customPowerComponentCount, customTimeComponentCount, includeModeledComponents);
             mBatteryStatsUid = batteryStatsUid;
             mUid = batteryStatsUid.getUid();
         }

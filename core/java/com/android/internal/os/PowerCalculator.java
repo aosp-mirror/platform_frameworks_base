@@ -17,6 +17,7 @@ package com.android.internal.os;
 
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
+import android.os.BatteryUsageStatsQuery;
 import android.os.UidBatteryConsumer;
 import android.os.UserHandle;
 import android.util.SparseArray;
@@ -75,12 +76,13 @@ public abstract class PowerCalculator {
      *                      should be performed for all users.
      */
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
+            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query,
+            SparseArray<UserHandle> asUsers) {
         final SparseArray<UidBatteryConsumer.Builder> uidBatteryConsumerBuilders =
                 builder.getUidBatteryConsumerBuilders();
         for (int i = uidBatteryConsumerBuilders.size() - 1; i >= 0; i--) {
             final UidBatteryConsumer.Builder app = uidBatteryConsumerBuilders.valueAt(i);
-            calculateApp(app, app.getBatteryStatsUid(), rawRealtimeUs, rawUptimeUs, statsType);
+            calculateApp(app, app.getBatteryStatsUid(), rawRealtimeUs, rawUptimeUs, query);
         }
     }
 
@@ -100,8 +102,8 @@ public abstract class PowerCalculator {
 
         // TODO(b/175156498): Temporary code during the transition from BatterySippers to
         //  BatteryConsumers.
-        UidBatteryConsumer.Builder builder = new UidBatteryConsumer.Builder(0, 0, u);
-        calculateApp(builder, u, rawRealtimeUs, rawUptimeUs, statsType);
+        UidBatteryConsumer.Builder builder = new UidBatteryConsumer.Builder(0, 0, false, u);
+        calculateApp(builder, u, rawRealtimeUs, rawUptimeUs, BatteryUsageStatsQuery.DEFAULT);
         final UidBatteryConsumer uidBatteryConsumer = builder.build();
         app.cpuPowerMah = uidBatteryConsumer.getConsumedPower(
                 UidBatteryConsumer.POWER_COMPONENT_CPU);
@@ -118,13 +120,10 @@ public abstract class PowerCalculator {
      * @param u The recorded stats for the app.
      * @param rawRealtimeUs The raw system realtime in microseconds.
      * @param rawUptimeUs The raw system uptime in microseconds.
-     * @param statsType The type of stats. As of {@link android.os.Build.VERSION_CODES#Q}, this can
-     *                  only be {@link BatteryStats#STATS_SINCE_CHARGED}, since
-     *                  {@link BatteryStats#STATS_CURRENT} and
-     *                  {@link BatteryStats#STATS_SINCE_UNPLUGGED} are deprecated.
+     * @param query Power calculation parameters.
      */
     protected void calculateApp(UidBatteryConsumer.Builder app, BatteryStats.Uid u,
-            long rawRealtimeUs, long rawUptimeUs, int statsType) {
+            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
     }
 
     /**

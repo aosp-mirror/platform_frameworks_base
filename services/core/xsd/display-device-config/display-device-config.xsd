@@ -29,11 +29,18 @@
                     <xs:annotation name="nonnull"/>
                     <xs:annotation name="final"/>
                 </xs:element>
+                <xs:element type="displayQuirks" name="quirks" minOccurs="0" maxOccurs="1" />
             </xs:sequence>
         </xs:complexType>
     </xs:element>
 
     <!-- Type definitions -->
+
+    <xs:complexType name="displayQuirks">
+        <xs:sequence>
+            <xs:element name="quirk" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
 
     <xs:complexType name="nitsMap">
         <xs:sequence>

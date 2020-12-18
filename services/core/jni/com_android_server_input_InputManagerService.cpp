@@ -62,11 +62,11 @@
 #include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/ScopedUtfChars.h>
 
-#include "com_android_server_power_PowerManagerService.h"
+#include "android_hardware_display_DisplayViewport.h"
 #include "android_hardware_input_InputApplicationHandle.h"
 #include "android_hardware_input_InputWindowHandle.h"
-#include "android_hardware_display_DisplayViewport.h"
 #include "android_util_Binder.h"
+#include "com_android_server_power_PowerManagerService.h"
 
 #include <vector>
 
@@ -101,6 +101,8 @@ static struct {
     jmethodID notifyConnectionUnresponsive;
     jmethodID notifyConnectionResponsive;
     jmethodID notifyFocusChanged;
+    jmethodID notifySensorEvent;
+    jmethodID notifySensorAccuracy;
     jmethodID notifyUntrustedTouch;
     jmethodID filterInputEvent;
     jmethodID interceptKeyBeforeQueueing;
@@ -156,6 +158,29 @@ static struct {
     jmethodID valueAt;
     jmethodID size;
 } gSparseArrayClassInfo;
+
+struct InputSensorInfoOffsets {
+    jclass clazz;
+    // fields
+    jfieldID name;
+    jfieldID vendor;
+    jfieldID version;
+    jfieldID handle;
+    jfieldID maxRange;
+    jfieldID resolution;
+    jfieldID power;
+    jfieldID minDelay;
+    jfieldID fifoReservedEventCount;
+    jfieldID fifoMaxEventCount;
+    jfieldID stringType;
+    jfieldID requiredPermission;
+    jfieldID maxDelay;
+    jfieldID flags;
+    jfieldID type;
+    jfieldID id;
+    // methods
+    jmethodID init;
+} gInputSensorInfo;
 
 // --- Global functions ---
 
@@ -267,6 +292,11 @@ public:
     void notifyConnectionResponsive(const sp<IBinder>& token) override;
     void notifyInputChannelBroken(const sp<IBinder>& token) override;
     void notifyFocusChanged(const sp<IBinder>& oldToken, const sp<IBinder>& newToken) override;
+    void notifySensorEvent(int32_t deviceId, InputDeviceSensorType sensorType,
+                           InputDeviceSensorAccuracy accuracy, nsecs_t timestamp,
+                           const std::vector<float>& values) override;
+    void notifySensorAccuracy(int32_t deviceId, InputDeviceSensorType sensorType,
+                              InputDeviceSensorAccuracy accuracy) override;
     void notifyUntrustedTouch(const std::string& obscuringPackage) override;
     bool filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags) override;
     void getDispatcherConfiguration(InputDispatcherConfiguration* outConfig) override;
@@ -818,6 +848,35 @@ void NativeInputManager::notifyFocusChanged(const sp<IBinder>& oldToken,
     env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyFocusChanged,
             oldTokenObj, newTokenObj);
     checkAndClearExceptionFromCallback(env, "notifyFocusChanged");
+}
+
+void NativeInputManager::notifySensorEvent(int32_t deviceId, InputDeviceSensorType sensorType,
+                                           InputDeviceSensorAccuracy accuracy, nsecs_t timestamp,
+                                           const std::vector<float>& values) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+    ALOGD("notifySensorEvent");
+#endif
+    ATRACE_CALL();
+    JNIEnv* env = jniEnv();
+    ScopedLocalFrame localFrame(env);
+    jfloatArray arr = env->NewFloatArray(values.size());
+    env->SetFloatArrayRegion(arr, 0, values.size(), values.data());
+    env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifySensorEvent, deviceId,
+                        static_cast<jint>(sensorType), accuracy, timestamp, arr);
+    checkAndClearExceptionFromCallback(env, "notifySensorEvent");
+}
+
+void NativeInputManager::notifySensorAccuracy(int32_t deviceId, InputDeviceSensorType sensorType,
+                                              InputDeviceSensorAccuracy accuracy) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+    ALOGD("notifySensorAccuracy");
+#endif
+    ATRACE_CALL();
+    JNIEnv* env = jniEnv();
+    ScopedLocalFrame localFrame(env);
+    env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifySensorAccuracy, deviceId,
+                        static_cast<jint>(sensorType), accuracy);
+    checkAndClearExceptionFromCallback(env, "notifySensorAccuracy");
 }
 
 void NativeInputManager::getDispatcherConfiguration(InputDispatcherConfiguration* outConfig) {
@@ -1911,6 +1970,111 @@ static void nativeSetMotionClassifierEnabled(JNIEnv* /* env */, jclass /* clazz 
     im->setMotionClassifierEnabled(enabled);
 }
 
+static jobject createInputSensorInfo(JNIEnv* env, jstring name, jstring vendor, jint version,
+                                     jint handle, jint type, jfloat maxRange, jfloat resolution,
+                                     jfloat power, jfloat minDelay, jint fifoReservedEventCount,
+                                     jint fifoMaxEventCount, jstring stringType,
+                                     jstring requiredPermission, jint maxDelay, jint flags,
+                                     jint id) {
+    // SensorInfo sensorInfo = new Sensor();
+    jobject sensorInfo = env->NewObject(gInputSensorInfo.clazz, gInputSensorInfo.init, "");
+
+    if (sensorInfo != NULL) {
+        env->SetObjectField(sensorInfo, gInputSensorInfo.name, name);
+        env->SetObjectField(sensorInfo, gInputSensorInfo.vendor, vendor);
+        env->SetIntField(sensorInfo, gInputSensorInfo.version, version);
+        env->SetIntField(sensorInfo, gInputSensorInfo.handle, handle);
+        env->SetFloatField(sensorInfo, gInputSensorInfo.maxRange, maxRange);
+        env->SetFloatField(sensorInfo, gInputSensorInfo.resolution, resolution);
+        env->SetFloatField(sensorInfo, gInputSensorInfo.power, power);
+        env->SetIntField(sensorInfo, gInputSensorInfo.minDelay, minDelay);
+        env->SetIntField(sensorInfo, gInputSensorInfo.fifoReservedEventCount,
+                         fifoReservedEventCount);
+        env->SetIntField(sensorInfo, gInputSensorInfo.fifoMaxEventCount, fifoMaxEventCount);
+        env->SetObjectField(sensorInfo, gInputSensorInfo.requiredPermission, requiredPermission);
+        env->SetIntField(sensorInfo, gInputSensorInfo.maxDelay, maxDelay);
+        env->SetIntField(sensorInfo, gInputSensorInfo.flags, flags);
+        env->SetObjectField(sensorInfo, gInputSensorInfo.stringType, stringType);
+        env->SetIntField(sensorInfo, gInputSensorInfo.type, type);
+        env->SetIntField(sensorInfo, gInputSensorInfo.id, id);
+    }
+    return sensorInfo;
+}
+
+static jobjectArray nativeGetSensorList(JNIEnv* env, jclass /* clazz */, jlong ptr, jint deviceId) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+    std::vector<InputDeviceInfo> devices = im->getInputManager()->getReader()->getInputDevices();
+    // Find the input device by deviceId
+    auto it = std::find_if(devices.begin(), devices.end(),
+                           [deviceId](InputDeviceInfo& info) { return info.getId() == deviceId; });
+
+    if (it == devices.end()) {
+        // Return an array of size 0
+        return env->NewObjectArray(0, gInputSensorInfo.clazz, nullptr);
+    }
+
+    std::vector<InputDeviceSensorType> types = it->getSensorTypes();
+    jobjectArray arr = env->NewObjectArray(types.size(), gInputSensorInfo.clazz, nullptr);
+    for (int i = 0; i < types.size(); i++) {
+        const InputDeviceSensorInfo* sensorInfo = it->getSensorInfo(types[i]);
+        if (sensorInfo == nullptr) {
+            ALOGW("Failed to get input device %d sensor info for type %s", deviceId,
+                  NamedEnum::string(types[i]).c_str());
+            continue;
+        }
+
+        jobject info =
+                createInputSensorInfo(env, env->NewStringUTF(sensorInfo->name.c_str()),
+                                      env->NewStringUTF(sensorInfo->vendor.c_str()),
+                                      (jint)sensorInfo->version, 0 /* handle */,
+                                      (jint)sensorInfo->type, (jfloat)sensorInfo->maxRange,
+                                      (jfloat)sensorInfo->resolution, (jfloat)sensorInfo->power,
+                                      (jfloat)sensorInfo->minDelay,
+                                      (jint)sensorInfo->fifoReservedEventCount,
+                                      (jint)sensorInfo->fifoMaxEventCount,
+                                      env->NewStringUTF(sensorInfo->stringType.c_str()),
+                                      env->NewStringUTF("") /* requiredPermission */,
+                                      (jint)sensorInfo->maxDelay, (jint)sensorInfo->flags,
+                                      (jint)sensorInfo->id);
+        env->SetObjectArrayElement(arr, i, info);
+        env->DeleteLocalRef(info);
+    }
+    return arr;
+}
+
+static jboolean nativeEnableSensor(JNIEnv* env, jclass /* clazz */, jlong ptr, jint deviceId,
+                                   jint sensorType, jint samplingPeriodUs,
+                                   jint maxBatchReportLatencyUs) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    return im->getInputManager()
+            ->getReader()
+            ->enableSensor(deviceId, static_cast<InputDeviceSensorType>(sensorType),
+                           std::chrono::microseconds(samplingPeriodUs),
+                           std::chrono::microseconds(maxBatchReportLatencyUs));
+    return true;
+}
+
+static void nativeDisableSensor(JNIEnv* env, jclass /* clazz */, jlong ptr, jint deviceId,
+                                jint sensorType) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    im->getInputManager()->getReader()->disableSensor(deviceId,
+                                                      static_cast<InputDeviceSensorType>(
+                                                              sensorType));
+}
+
+static jboolean nativeFlushSensor(JNIEnv* env, jclass /* clazz */, jlong ptr, jint deviceId,
+                                  jint sensorType) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    im->getInputManager()->getReader()->flushSensor(deviceId,
+                                                    static_cast<InputDeviceSensorType>(sensorType));
+    return im->getInputManager()->getDispatcher()->flushSensor(deviceId,
+                                                               static_cast<InputDeviceSensorType>(
+                                                                       sensorType));
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
@@ -1976,6 +2140,11 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"nativeCanDispatchToDisplay", "(JII)Z", (void*)nativeCanDispatchToDisplay},
         {"nativeNotifyPortAssociationsChanged", "(J)V", (void*)nativeNotifyPortAssociationsChanged},
         {"nativeSetMotionClassifierEnabled", "(JZ)V", (void*)nativeSetMotionClassifierEnabled},
+        {"nativeGetSensorList", "(JI)[Landroid/hardware/input/InputSensorInfo;",
+         (void*)nativeGetSensorList},
+        {"nativeEnableSensor", "(JIIII)Z", (void*)nativeEnableSensor},
+        {"nativeDisableSensor", "(JII)V", (void*)nativeDisableSensor},
+        {"nativeFlushSensor", "(JII)Z", (void*)nativeFlushSensor},
 };
 
 #define FIND_CLASS(var, className) \
@@ -2020,6 +2189,10 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.notifyFocusChanged, clazz,
             "notifyFocusChanged", "(Landroid/os/IBinder;Landroid/os/IBinder;)V");
+
+    GET_METHOD_ID(gServiceClassInfo.notifySensorEvent, clazz, "notifySensorEvent", "(IIIJ[F)V");
+
+    GET_METHOD_ID(gServiceClassInfo.notifySensorAccuracy, clazz, "notifySensorAccuracy", "(III)V");
 
     GET_METHOD_ID(gServiceClassInfo.notifyUntrustedTouch, clazz, "notifyUntrustedTouch",
                   "(Ljava/lang/String;)V");
@@ -2145,6 +2318,33 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gSparseArrayClassInfo.valueAt, gSparseArrayClassInfo.clazz, "valueAt",
                   "(I)Ljava/lang/Object;");
     GET_METHOD_ID(gSparseArrayClassInfo.size, gSparseArrayClassInfo.clazz, "size", "()I");
+    // InputSensorInfo
+    // android.hardware.input.InputDeviceSensorInfo
+    FIND_CLASS(clazz, "android/hardware/input/InputSensorInfo");
+    gInputSensorInfo.clazz = reinterpret_cast<jclass>(env->NewGlobalRef(clazz));
+
+    GET_FIELD_ID(gInputSensorInfo.name, gInputSensorInfo.clazz, "mName", "Ljava/lang/String;");
+    GET_FIELD_ID(gInputSensorInfo.vendor, gInputSensorInfo.clazz, "mVendor", "Ljava/lang/String;");
+    GET_FIELD_ID(gInputSensorInfo.version, gInputSensorInfo.clazz, "mVersion", "I");
+    GET_FIELD_ID(gInputSensorInfo.handle, gInputSensorInfo.clazz, "mHandle", "I");
+    GET_FIELD_ID(gInputSensorInfo.maxRange, gInputSensorInfo.clazz, "mMaxRange", "F");
+    GET_FIELD_ID(gInputSensorInfo.resolution, gInputSensorInfo.clazz, "mResolution", "F");
+    GET_FIELD_ID(gInputSensorInfo.power, gInputSensorInfo.clazz, "mPower", "F");
+    GET_FIELD_ID(gInputSensorInfo.minDelay, gInputSensorInfo.clazz, "mMinDelay", "I");
+    GET_FIELD_ID(gInputSensorInfo.fifoReservedEventCount, gInputSensorInfo.clazz,
+                 "mFifoReservedEventCount", "I");
+    GET_FIELD_ID(gInputSensorInfo.fifoMaxEventCount, gInputSensorInfo.clazz, "mFifoMaxEventCount",
+                 "I");
+    GET_FIELD_ID(gInputSensorInfo.stringType, gInputSensorInfo.clazz, "mStringType",
+                 "Ljava/lang/String;");
+    GET_FIELD_ID(gInputSensorInfo.requiredPermission, gInputSensorInfo.clazz, "mRequiredPermission",
+                 "Ljava/lang/String;");
+    GET_FIELD_ID(gInputSensorInfo.maxDelay, gInputSensorInfo.clazz, "mMaxDelay", "I");
+    GET_FIELD_ID(gInputSensorInfo.flags, gInputSensorInfo.clazz, "mFlags", "I");
+    GET_FIELD_ID(gInputSensorInfo.type, gInputSensorInfo.clazz, "mType", "I");
+    GET_FIELD_ID(gInputSensorInfo.id, gInputSensorInfo.clazz, "mId", "I");
+
+    GET_METHOD_ID(gInputSensorInfo.init, gInputSensorInfo.clazz, "<init>", "()V");
 
     return 0;
 }

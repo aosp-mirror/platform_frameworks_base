@@ -259,6 +259,7 @@ public class VolumeDialogImpl implements VolumeDialog,
                 | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                 | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
                 | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
+        mWindow.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY);
         mWindow.setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
         mWindow.setWindowAnimations(com.android.internal.R.style.Animation_Toast);
         WindowManager.LayoutParams lp = mWindow.getAttributes();

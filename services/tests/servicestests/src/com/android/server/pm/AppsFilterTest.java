@@ -52,6 +52,7 @@ import com.android.server.om.OverlayReferenceMapper;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.utils.WatchableTester;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -882,6 +883,104 @@ public class AppsFilterTest {
                 appsFilter.getVisibilityAllowList(queriesProvider, USER_ARRAY, mExisting);
         assertThat(toList(queriesProviderFilter.get(SYSTEM_USER)),
                 contains(hasProviderAppId, queriesProviderAppId));
+    }
+
+    @Test
+    public void testOnChangeReport() throws Exception {
+        final AppsFilter appsFilter =
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
+                        mMockExecutor);
+        final WatchableTester watcher = new WatchableTester(appsFilter, "onChange");
+        watcher.register();
+        simulateAddBasicAndroid(appsFilter);
+        watcher.verifyChangeReported("addBasic");
+        appsFilter.onSystemReady();
+        watcher.verifyChangeReported("systemReady");
+
+        final int systemAppId = Process.FIRST_APPLICATION_UID - 1;
+        final int seesNothingAppId = Process.FIRST_APPLICATION_UID;
+        final int hasProviderAppId = Process.FIRST_APPLICATION_UID + 1;
+        final int queriesProviderAppId = Process.FIRST_APPLICATION_UID + 2;
+
+        PackageSetting system = simulateAddPackage(appsFilter, pkg("some.system.pkg"), systemAppId);
+        watcher.verifyChangeReported("addPackage");
+        PackageSetting seesNothing = simulateAddPackage(appsFilter, pkg("com.some.package"),
+                seesNothingAppId);
+        watcher.verifyChangeReported("addPackage");
+        PackageSetting hasProvider = simulateAddPackage(appsFilter,
+                pkgWithProvider("com.some.other.package", "com.some.authority"), hasProviderAppId);
+        watcher.verifyChangeReported("addPackage");
+        PackageSetting queriesProvider = simulateAddPackage(appsFilter,
+                pkgQueriesProvider("com.yet.some.other.package", "com.some.authority"),
+                queriesProviderAppId);
+        watcher.verifyChangeReported("addPackage");
+
+        final SparseArray<int[]> systemFilter =
+                appsFilter.getVisibilityAllowList(system, USER_ARRAY, mExisting);
+        assertThat(toList(systemFilter.get(SYSTEM_USER)),
+                contains(seesNothingAppId, hasProviderAppId, queriesProviderAppId));
+        watcher.verifyNoChangeReported("get");
+
+        final SparseArray<int[]> seesNothingFilter =
+                appsFilter.getVisibilityAllowList(seesNothing, USER_ARRAY, mExisting);
+        assertThat(toList(seesNothingFilter.get(SYSTEM_USER)),
+                contains(seesNothingAppId));
+        assertThat(toList(seesNothingFilter.get(SECONDARY_USER)),
+                contains(seesNothingAppId));
+        watcher.verifyNoChangeReported("get");
+
+        final SparseArray<int[]> hasProviderFilter =
+                appsFilter.getVisibilityAllowList(hasProvider, USER_ARRAY, mExisting);
+        assertThat(toList(hasProviderFilter.get(SYSTEM_USER)),
+                contains(hasProviderAppId, queriesProviderAppId));
+        watcher.verifyNoChangeReported("get");
+
+        SparseArray<int[]> queriesProviderFilter =
+                appsFilter.getVisibilityAllowList(queriesProvider, USER_ARRAY, mExisting);
+        assertThat(toList(queriesProviderFilter.get(SYSTEM_USER)),
+                contains(queriesProviderAppId));
+        watcher.verifyNoChangeReported("get");
+
+        // provider read
+        appsFilter.grantImplicitAccess(hasProviderAppId, queriesProviderAppId);
+        watcher.verifyChangeReported("grantImplicitAccess");
+
+        // ensure implicit access is included in the filter
+        queriesProviderFilter =
+                appsFilter.getVisibilityAllowList(queriesProvider, USER_ARRAY, mExisting);
+        assertThat(toList(queriesProviderFilter.get(SYSTEM_USER)),
+                contains(hasProviderAppId, queriesProviderAppId));
+        watcher.verifyNoChangeReported("get");
+
+        // remove a package
+        appsFilter.removePackage(seesNothing);
+        watcher.verifyChangeReported("removePackage");
+    }
+
+    @Test
+    public void testOnChangeReportedFilter() throws Exception {
+        final AppsFilter appsFilter =
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
+                        mMockExecutor);
+        simulateAddBasicAndroid(appsFilter);
+        appsFilter.onSystemReady();
+        final WatchableTester watcher = new WatchableTester(appsFilter, "onChange filter");
+        watcher.register();
+
+        PackageSetting target = simulateAddPackage(appsFilter, pkg("com.some.package"),
+                DUMMY_TARGET_APPID);
+        PackageSetting instrumentation = simulateAddPackage(appsFilter,
+                pkgWithInstrumentation("com.some.other.package", "com.some.package"),
+                DUMMY_CALLING_APPID);
+        watcher.verifyChangeReported("addPackage");
+
+        assertFalse(
+                appsFilter.shouldFilterApplication(DUMMY_CALLING_APPID, instrumentation, target,
+                        SYSTEM_USER));
+        assertFalse(
+                appsFilter.shouldFilterApplication(DUMMY_TARGET_APPID, target, instrumentation,
+                        SYSTEM_USER));
+        watcher.verifyNoChangeReported("shouldFilterApplication");
     }
 
     private List<Integer> toList(int[] array) {

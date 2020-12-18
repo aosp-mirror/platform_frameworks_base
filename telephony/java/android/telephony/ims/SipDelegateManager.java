@@ -18,7 +18,9 @@ package android.telephony.ims;
 
 import android.Manifest;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
@@ -366,6 +368,39 @@ public class SipDelegateManager {
                 } catch (RemoteException ignore) {
                     // Local to process.
                 }
+            }
+        } else {
+            throw new IllegalArgumentException("Unknown SipDelegateConnection implementation passed"
+                    + " into this method");
+        }
+    }
+
+    /**
+     * Trigger a full network registration as required by receiving a SIP message containing a
+     * permanent error from the network or never receiving a response to a SIP transaction request.
+     *
+     * @param connection The {@link SipDelegateConnection} that was being used when this error was
+     *         received.
+     * @param sipCode The SIP code response associated with the SIP message request that
+     *         triggered this condition.
+     * @param sipReason The SIP reason code associated with the SIP message request that triggered
+     *         this condition. May be {@code null} if there was no reason String provided from the
+     *         network.
+     */
+    public void triggerFullNetworkRegistration(@NonNull SipDelegateConnection connection,
+            @IntRange(from = 100, to = 699) int sipCode, @Nullable String sipReason) {
+        if (connection == null) {
+            throw new IllegalArgumentException("invalid connection.");
+        }
+        if (connection instanceof SipDelegateConnectionAidlWrapper) {
+            SipDelegateConnectionAidlWrapper w = (SipDelegateConnectionAidlWrapper) connection;
+            try {
+                IImsRcsController controller = mBinderCache.getBinder();
+                controller.triggerNetworkRegistration(mSubId, w.getSipDelegateBinder(), sipCode,
+                        sipReason);
+            } catch (RemoteException e) {
+                // Connection to telephony died, but this will signal destruction of SipDelegate
+                // eventually anyway, so return.
             }
         } else {
             throw new IllegalArgumentException("Unknown SipDelegateConnection implementation passed"

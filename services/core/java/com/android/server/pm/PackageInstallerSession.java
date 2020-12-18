@@ -429,30 +429,341 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private ArrayMap<String, List<CertifiedChecksum>> mChecksums = new ArrayMap<>();
 
-    @GuardedBy("mLock")
-    private boolean mStagedSessionApplied;
-    @GuardedBy("mLock")
-    private boolean mStagedSessionReady;
-    @GuardedBy("mLock")
-    private boolean mStagedSessionFailed;
-    @GuardedBy("mLock")
-    private int mStagedSessionErrorCode = SessionInfo.STAGED_SESSION_NO_ERROR;
-    @GuardedBy("mLock")
-    private String mStagedSessionErrorMessage;
-
-    /**
-     * The callback to run when pre-reboot verification has ended. Used by {@link #abandonStaged()}
-     * to delay session clean-up until it is safe to do so.
-     */
-    @GuardedBy("mLock")
     @Nullable
-    private Runnable mPendingAbandonCallback;
-    /**
-     * {@code true} if pre-reboot verification is ongoing which means it is not safe for
-     * {@link #abandon()} to clean up staging directories.
-     */
-    @GuardedBy("mLock")
-    private boolean mInPreRebootVerification;
+    final StagedSession mStagedSession;
+
+    @VisibleForTesting
+    public class StagedSession implements StagingManager.StagedSession {
+        @GuardedBy("mLock")
+        private boolean mSessionApplied;
+        @GuardedBy("mLock")
+        private boolean mSessionReady;
+        @GuardedBy("mLock")
+        private boolean mSessionFailed;
+        @GuardedBy("mLock")
+        private int mSessionErrorCode = SessionInfo.STAGED_SESSION_NO_ERROR;
+        @GuardedBy("mLock")
+        private String mSessionErrorMessage;
+
+        /**
+         * The callback to run when pre-reboot verification has ended. Used by {@link #abandon()}
+         * to delay session clean-up until it is safe to do so.
+         */
+        @GuardedBy("mLock")
+        @Nullable
+        private Runnable mPendingAbandonCallback;
+        /**
+         * {@code true} if pre-reboot verification is ongoing which means it is not safe for
+         * {@link #abandon()} to clean up staging directories.
+         */
+        @GuardedBy("mLock")
+        private boolean mInPreRebootVerification;
+
+        StagedSession(boolean isReady, boolean isApplied, boolean isFailed, int errorCode,
+                String errorMessage) {
+            mSessionReady = isReady;
+            mSessionApplied = isApplied;
+            mSessionFailed = isFailed;
+            mSessionErrorCode = errorCode;
+            mSessionErrorMessage = errorMessage != null ? errorMessage : "";
+        }
+
+        @Override
+        public List<StagingManager.StagedSession> getChildSessions() {
+            if (!params.isMultiPackage) {
+                return Collections.EMPTY_LIST;
+            }
+            synchronized (mLock) {
+                int size = mChildSessions.size();
+                List<StagingManager.StagedSession> childSessions = new ArrayList<>(size);
+                for (int i = 0; i < size; ++i) {
+                    childSessions.add(mChildSessions.valueAt(i).mStagedSession);
+                }
+                return childSessions;
+            }
+        }
+
+        @Override
+        public SessionParams sessionParams() {
+            return params;
+        }
+
+        @Override
+        public boolean isMultiPackage() {
+            return params.isMultiPackage;
+        }
+
+        @Override
+        public boolean isApexSession() {
+            return (params.installFlags & PackageManager.INSTALL_APEX) != 0;
+        }
+
+        @Override
+        public int sessionId() {
+            return sessionId;
+        }
+
+        @Override
+        public boolean containsApexSession() {
+            return sessionContains((s) -> s.isApexSession());
+        }
+
+        @Override
+        public String getPackageName() {
+            return PackageInstallerSession.this.getPackageName();
+        }
+
+        @Override
+        public void setSessionReady() {
+            synchronized (mLock) {
+                // Do not allow destroyed/failed staged session to change state
+                if (mDestroyed || mSessionFailed) return;
+                mSessionReady = true;
+                mSessionApplied = false;
+                mSessionFailed = false;
+                mSessionErrorCode = SessionInfo.STAGED_SESSION_NO_ERROR;
+                mSessionErrorMessage = "";
+            }
+            mCallback.onStagedSessionChanged(PackageInstallerSession.this);
+        }
+
+        @Override
+        public void setSessionFailed(int errorCode, String errorMessage) {
+            List<PackageInstallerSession> childSessions;
+            synchronized (mLock) {
+                // Do not allow destroyed/failed staged session to change state
+                if (mDestroyed || mSessionFailed) return;
+                mSessionReady = false;
+                mSessionApplied = false;
+                mSessionFailed = true;
+                mSessionErrorCode = errorCode;
+                mSessionErrorMessage = errorMessage;
+                Slog.d(TAG, "Marking session " + sessionId + " as failed: " + errorMessage);
+                childSessions = getChildSessionsLocked();
+            }
+            cleanStageDir(childSessions);
+            mCallback.onStagedSessionChanged(PackageInstallerSession.this);
+        }
+
+        @Override
+        public void setSessionApplied() {
+            List<PackageInstallerSession> childSessions;
+            synchronized (mLock) {
+                // Do not allow destroyed/failed staged session to change state
+                if (mDestroyed || mSessionFailed) return;
+                mSessionReady = false;
+                mSessionApplied = true;
+                mSessionFailed = false;
+                mSessionErrorCode = SessionInfo.STAGED_SESSION_NO_ERROR;
+                mSessionErrorMessage = "";
+                Slog.d(TAG, "Marking session " + sessionId + " as applied");
+                childSessions = getChildSessionsLocked();
+            }
+            cleanStageDir(childSessions);
+            mCallback.onStagedSessionChanged(PackageInstallerSession.this);
+        }
+
+        @Override
+        public boolean containsApkSession() {
+            return PackageInstallerSession.this.containsApkSession();
+        }
+
+        /**
+         * Installs apks of staged session while skipping the verification process for a committed
+         * and ready session.
+         */
+        @Override
+        public void installSession(IntentSender statusReceiver) {
+            assertCallerIsOwnerOrRootOrSystemLocked();
+            assertNotChildLocked("StagedSession#installSession");
+            Preconditions.checkArgument(isCommitted() && isSessionReady());
+
+            // Since staged sessions are installed during boot, the original reference to status
+            // receiver from the owner has already been lost. We can safely replace it with a
+            // status receiver from the system without effecting the flow.
+            updateRemoteStatusReceiver(statusReceiver);
+            install();
+        }
+
+        private void updateRemoteStatusReceiver(IntentSender remoteStatusReceiver) {
+            synchronized (mLock) {
+                mRemoteStatusReceiver = remoteStatusReceiver;
+                if (isMultiPackage()) {
+                    final IntentSender childIntentSender = new ChildStatusIntentReceiver(
+                            mChildSessions.clone(), remoteStatusReceiver).getIntentSender();
+                    for (int i = mChildSessions.size() - 1; i >= 0; --i) {
+                        mChildSessions.valueAt(i).mRemoteStatusReceiver = childIntentSender;
+                    }
+                }
+            }
+        }
+
+        @Override
+        public boolean hasParentSessionId() {
+            return PackageInstallerSession.this.hasParentSessionId();
+        }
+
+        @Override
+        public int getParentSessionId() {
+            return PackageInstallerSession.this.getParentSessionId();
+        }
+
+        @Override
+        public boolean isCommitted() {
+            return PackageInstallerSession.this.isCommitted();
+        }
+
+        @Override
+        public boolean isInTerminalState() {
+            synchronized (mLock) {
+                return mSessionApplied || mSessionFailed;
+            }
+        }
+
+        @Override
+        public boolean isDestroyed() {
+            return PackageInstallerSession.this.isDestroyed();
+        }
+
+        @Override
+        public long getCommittedMillis() {
+            return PackageInstallerSession.this.getCommittedMillis();
+        }
+
+        @Override
+        public boolean sessionContains(Predicate<StagingManager.StagedSession> filter) {
+            return PackageInstallerSession.this.sessionContains(s -> filter.test(s.mStagedSession));
+        }
+
+        @Override
+        public boolean isSessionReady() {
+            synchronized (mLock) {
+                return mSessionReady;
+            }
+        }
+
+        @Override
+        public boolean isSessionApplied() {
+            synchronized (mLock) {
+                return mSessionApplied;
+            }
+        }
+
+        @Override
+        public boolean isSessionFailed() {
+            synchronized (mLock) {
+                return mSessionFailed;
+            }
+        }
+
+        @StagedSessionErrorCode int getSessionErrorCode() {
+            synchronized (mLock) {
+                return mSessionErrorCode;
+            }
+        }
+
+        String getSessionErrorMessage() {
+            synchronized (mLock) {
+                return mSessionErrorMessage;
+            }
+        }
+
+        @Override
+        public void abandon() {
+            final Runnable r;
+            synchronized (mLock) {
+                assertNotChildLocked("StagedSession#abandon");
+                assertCallerIsOwnerOrRootLocked();
+                if (isInTerminalState()) {
+                    // We keep the session in the database if it's in a finalized state. It will be
+                    // removed by PackageInstallerService when the last update time is old enough.
+                    // Also, in such cases cleanStageDir() has already been executed so no need to
+                    // do it now.
+                    return;
+                }
+                mDestroyed = true;
+                boolean isCommitted = mCommitted;
+                List<PackageInstallerSession> childSessions = getChildSessionsLocked();
+                r = () -> {
+                    assertNotLocked("abandonStaged");
+                    if (isCommitted) {
+                        mStagingManager.abortCommittedSession(this);
+                    }
+                    cleanStageDir(childSessions);
+                    destroyInternal();
+                    dispatchSessionFinished(INSTALL_FAILED_ABORTED, "Session was abandoned", null);
+                    maybeCleanUpChildSessions();
+                };
+                if (mInPreRebootVerification) {
+                    // Pre-reboot verification is ongoing, not safe to clean up the session yet.
+                    mPendingAbandonCallback = r;
+                    mCallback.onStagedSessionChanged(PackageInstallerSession.this);
+                    return;
+                }
+            }
+            r.run();
+        }
+
+        /**
+         * Notified by the staging manager that pre-reboot verification is about to start. The
+         * return value should be checked to decide whether it is OK to start pre-reboot
+         * verification. In the case of a destroyed session, {@code false} is returned and there is
+         * no need to start pre-reboot verification.
+         */
+        @Override
+        public boolean notifyStartPreRebootVerification() {
+            synchronized (mLock) {
+                if (mInPreRebootVerification) {
+                    throw new IllegalStateException("Pre-reboot verification has started");
+                }
+                if (mDestroyed) {
+                    return false;
+                }
+                mInPreRebootVerification = true;
+                return true;
+            }
+        }
+
+        /**
+         * Notified by the staging manager that pre-reboot verification has ended. Now it is safe to
+         * clean up the session if {@link #abandon()} has been called previously.
+         */
+        @Override
+        public void notifyEndPreRebootVerification() {
+            synchronized (mLock) {
+                if (!mInPreRebootVerification) {
+                    throw new IllegalStateException("Pre-reboot verification not started");
+                }
+                mInPreRebootVerification = false;
+            }
+            dispatchPendingAbandonCallback();
+        }
+
+        /**
+         * Resumes verification process for non-final committed staged session.
+         *
+         * Useful if a device gets rebooted before verification is complete and we need to restart
+         * the verification.
+         */
+        @Override
+        public void verifySession() {
+            assertCallerIsOwnerOrRootOrSystemLocked();
+            Preconditions.checkArgument(isCommitted());
+            Preconditions.checkArgument(!mSessionApplied && !mSessionFailed);
+            verify();
+        }
+
+        private void dispatchPendingAbandonCallback() {
+            final Runnable callback;
+            synchronized (mLock) {
+                callback = mPendingAbandonCallback;
+                mPendingAbandonCallback = null;
+            }
+            if (callback != null) {
+                callback.run();
+            }
+        }
+    }
 
     /**
      * Path to the validated base APK for this session, which may point at an
@@ -691,12 +1002,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mPrepared = prepared;
         mCommitted = committed;
         mDestroyed = destroyed;
-        mStagedSessionReady = isReady;
-        mStagedSessionFailed = isFailed;
-        mStagedSessionApplied = isApplied;
-        mStagedSessionErrorCode = stagedSessionErrorCode;
-        mStagedSessionErrorMessage =
-                stagedSessionErrorMessage != null ? stagedSessionErrorMessage : "";
+        mStagedSession = params.isStaged ? new StagedSession(isReady, isApplied, isFailed,
+                stagedSessionErrorCode, stagedSessionErrorMessage) : null;
 
         if (isDataLoaderInstallation()) {
             if (isApexSession()) {
@@ -789,10 +1096,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             info.rollbackDataPolicy = params.rollbackDataPolicy;
             info.parentSessionId = mParentSessionId;
             info.childSessionIds = getChildSessionIdsLocked();
-            info.isStagedSessionApplied = mStagedSessionApplied;
-            info.isStagedSessionReady = mStagedSessionReady;
-            info.isStagedSessionFailed = mStagedSessionFailed;
-            info.setStagedSessionErrorCode(mStagedSessionErrorCode, mStagedSessionErrorMessage);
+            info.isStagedSessionApplied = isStagedSessionApplied();
+            info.isStagedSessionReady = isStagedSessionReady();
+            info.isStagedSessionFailed = isStagedSessionFailed();
+            info.setStagedSessionErrorCode(getStagedSessionErrorCode(),
+                    getStagedSessionErrorMessage());
             info.createdMillis = createdMillis;
             info.updatedMillis = updatedMillis;
         }
@@ -827,9 +1135,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     /** Returns true if a staged session has reached a final state and can be forgotten about  */
     public boolean isStagedAndInTerminalState() {
-        synchronized (mLock) {
-            return params.isStaged && (mStagedSessionApplied || mStagedSessionFailed);
-        }
+        return params.isStaged && mStagedSession.isInTerminalState();
     }
 
     private void assertNotLocked(String cookie) {
@@ -1724,11 +2030,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // Session is sealed and committed but could not be verified, we need to destroy it.
         destroyInternal();
         if (isStaged()) {
-            setStagedSessionFailed(
+            mStagedSession.setSessionFailed(
                     SessionInfo.STAGED_SESSION_VERIFICATION_FAILED, msgWithErrorCode);
             // TODO(b/136257624): Remove this once all verification logic has been transferred out
             //  of StagingManager.
-            mStagingManager.notifyVerificationComplete(this);
+            mStagingManager.notifyVerificationComplete(mStagedSession);
         } else {
             // Dispatch message to remove session from PackageInstallerService.
             dispatchSessionFinished(error, msg, null);
@@ -1847,7 +2153,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     .write();
         }
         if (params.isStaged) {
-            mStagingManager.commitSession(this);
+            mStagingManager.commitSession(mStagedSession);
             // TODO(b/136257624): CTS test fails if we don't send session finished broadcast, even
             //  though ideally, we just need to send session committed broadcast.
             dispatchSessionFinished(INSTALL_SUCCEEDED, "Session staged", null);
@@ -1860,21 +2166,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     "APEX packages can only be installed using staged sessions.", null);
             return;
         }
-        verify();
-    }
-
-    /**
-     * Resumes verification process for non-final committed staged session.
-     *
-     * Useful if a device gets rebooted before verification is complete and we need to restart the
-     * verification.
-     */
-    void verifyStagedSession() {
-        assertCallerIsOwnerOrRootOrSystemLocked();
-        Preconditions.checkArgument(isCommitted());
-        Preconditions.checkArgument(isStaged());
-        Preconditions.checkArgument(!mStagedSessionApplied && !mStagedSessionFailed);
-
         verify();
     }
 
@@ -1929,36 +2220,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mPm.verifyStage(verifyingSession, verifyingChildSessions);
         } else {
             mPm.verifyStage(verifyingSession);
-        }
-    }
-
-    /**
-     * Installs apks of staged session while skipping the verification process for a committed and
-     * ready session.
-     */
-    void installStagedSession(IntentSender statusReceiver) {
-        assertCallerIsOwnerOrRootOrSystemLocked();
-        Preconditions.checkArgument(!hasParentSessionId()); // Don't allow installing child sessions
-        Preconditions.checkArgument(isCommitted() && isStagedSessionReady());
-
-        // Since staged sessions are installed during boot, the original reference to status
-        // receiver from the owner has already been lost. We can safely replace it with a
-        // status receiver from the system without effecting the flow.
-        updateRemoteStatusReceiver(statusReceiver);
-        install();
-    }
-
-    private void updateRemoteStatusReceiver(IntentSender remoteStatusReceiver) {
-        synchronized (mLock) {
-            mRemoteStatusReceiver = remoteStatusReceiver;
-            if (isMultiPackage()) {
-                final IntentSender childIntentSender =
-                        new ChildStatusIntentReceiver(mChildSessions.clone(), remoteStatusReceiver)
-                                .getIntentSender();
-                for (int i = mChildSessions.size() - 1; i >= 0; --i) {
-                    mChildSessions.valueAt(i).mRemoteStatusReceiver = childIntentSender;
-                }
-            }
         }
     }
 
@@ -2188,7 +2449,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (isStaged()) {
             // TODO(b/136257624): Remove this once all verification logic has been transferred out
             //  of StagingManager.
-            mStagingManager.notifyPreRebootVerification_Apk_Complete(this);
+            mStagingManager.notifyPreRebootVerification_Apk_Complete(mStagedSession);
             // TODO(b/136257624): We also need to destroy internals for verified staged session,
             //  otherwise file descriptors are never closed for verified staged session until reboot
             return;
@@ -2368,10 +2629,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
         return false;
-    }
-
-    boolean containsApexSession() {
-        return sessionContains((s) -> s.isApexSession());
     }
 
     boolean containsApkSession() {
@@ -3195,6 +3452,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private void abandonNonStaged() {
         synchronized (mLock) {
+            assertNotChildLocked("abandonNonStaged");
             assertCallerIsOwnerOrRootLocked();
             if (mRelinquished) {
                 if (LOGD) Slog.d(TAG, "Ignoring abandon after commit relinquished control");
@@ -3206,96 +3464,21 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         maybeCleanUpChildSessions();
     }
 
-    private void abandonStaged() {
-        final Runnable r;
-        synchronized (mLock) {
-            assertCallerIsOwnerOrRootLocked();
-            if (isStagedAndInTerminalState()) {
-                // We keep the session in the database if it's in a finalized state. It will be
-                // removed by PackageInstallerService when the last update time is old enough.
-                // Also, in such cases cleanStageDir() has already been executed so no need to
-                // do it now.
-                return;
-            }
-            mDestroyed = true;
-            boolean isCommitted = mCommitted;
-            List<PackageInstallerSession> childSessions = getChildSessionsLocked();
-            r = () -> {
-                assertNotLocked("abandonStaged");
-                if (isCommitted) {
-                    mStagingManager.abortCommittedSession(this);
-                }
-                cleanStageDir(childSessions);
-                destroyInternal();
-                dispatchSessionFinished(INSTALL_FAILED_ABORTED, "Session was abandoned", null);
-                maybeCleanUpChildSessions();
-            };
-            if (mInPreRebootVerification) {
-                // Pre-reboot verification is ongoing. It is not safe to clean up the session yet.
-                mPendingAbandonCallback = r;
-                mCallback.onStagedSessionChanged(this);
-                return;
-            }
+    @GuardedBy("mLock")
+    private void assertNotChildLocked(String cookie) {
+        if (hasParentSessionId()) {
+            throw new IllegalStateException(cookie + " can't be called on a child session, id="
+                    + sessionId + " parentId=" + getParentSessionId());
         }
-        r.run();
     }
 
     @Override
     public void abandon() {
-        if (hasParentSessionId()) {
-            throw new IllegalStateException(
-                    "Session " + sessionId + " is a child of multi-package session "
-                            + getParentSessionId() +  " and may not be abandoned directly.");
-        }
         if (params.isStaged) {
-            abandonStaged();
+            mStagedSession.abandon();
         } else {
             abandonNonStaged();
         }
-    }
-
-    /**
-     * Notified by the staging manager that pre-reboot verification is about to start. The return
-     * value should be checked to decide whether it is OK to start pre-reboot verification. In
-     * the case of a destroyed session, {@code false} is returned and there is no need to start
-     * pre-reboot verification.
-     */
-    boolean notifyStagedStartPreRebootVerification() {
-        synchronized (mLock) {
-            if (mInPreRebootVerification) {
-                throw new IllegalStateException("Pre-reboot verification has started");
-            }
-            if (mDestroyed) {
-                return false;
-            }
-            mInPreRebootVerification = true;
-            return true;
-        }
-    }
-
-    private void dispatchPendingAbandonCallback() {
-        final Runnable callback;
-        synchronized (mLock) {
-            callback = mPendingAbandonCallback;
-            mPendingAbandonCallback = null;
-        }
-        if (callback != null) {
-            callback.run();
-        }
-    }
-
-    /**
-     * Notified by the staging manager that pre-reboot verification has ended. Now it is safe to
-     * clean up the session if {@link #abandon()} has been called previously.
-     */
-    void notifyStagedEndPreRebootVerification() {
-        synchronized (mLock) {
-            if (!mInPreRebootVerification) {
-                throw new IllegalStateException("Pre-reboot verification not started");
-            }
-            mInPreRebootVerification = false;
-        }
-        dispatchPendingAbandonCallback();
     }
 
     @Override
@@ -3783,88 +3966,29 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     /** {@hide} */
-    void setStagedSessionReady() {
-        synchronized (mLock) {
-            // Do not allow destroyed/failed staged session to change state
-            if (mDestroyed || mStagedSessionFailed) return;
-            mStagedSessionReady = true;
-            mStagedSessionApplied = false;
-            mStagedSessionFailed = false;
-            mStagedSessionErrorCode = SessionInfo.STAGED_SESSION_NO_ERROR;
-            mStagedSessionErrorMessage = "";
-        }
-        mCallback.onStagedSessionChanged(this);
-    }
-
-    /** {@hide} */
-    void setStagedSessionFailed(@StagedSessionErrorCode int errorCode, String errorMessage) {
-        List<PackageInstallerSession> childSessions;
-        synchronized (mLock) {
-            // Do not allow destroyed/failed staged session to change state
-            if (mDestroyed || mStagedSessionFailed) return;
-            mStagedSessionReady = false;
-            mStagedSessionApplied = false;
-            mStagedSessionFailed = true;
-            mStagedSessionErrorCode = errorCode;
-            mStagedSessionErrorMessage = errorMessage;
-            Slog.d(TAG, "Marking session " + sessionId + " as failed: " + errorMessage);
-            childSessions = getChildSessionsLocked();
-        }
-        cleanStageDir(childSessions);
-        mCallback.onStagedSessionChanged(this);
-    }
-
-    /** {@hide} */
-    void setStagedSessionApplied() {
-        List<PackageInstallerSession> childSessions;
-        synchronized (mLock) {
-            // Do not allow destroyed/failed staged session to change state
-            if (mDestroyed || mStagedSessionFailed) return;
-            mStagedSessionReady = false;
-            mStagedSessionApplied = true;
-            mStagedSessionFailed = false;
-            mStagedSessionErrorCode = SessionInfo.STAGED_SESSION_NO_ERROR;
-            mStagedSessionErrorMessage = "";
-            Slog.d(TAG, "Marking session " + sessionId + " as applied");
-            childSessions = getChildSessionsLocked();
-        }
-        cleanStageDir(childSessions);
-        mCallback.onStagedSessionChanged(this);
-    }
-
-    /** {@hide} */
     boolean isStagedSessionReady() {
-        synchronized (mLock) {
-            return mStagedSessionReady;
-        }
+        return params.isStaged && mStagedSession.isSessionReady();
     }
 
     /** {@hide} */
     boolean isStagedSessionApplied() {
-        synchronized (mLock) {
-            return mStagedSessionApplied;
-        }
+        return params.isStaged && mStagedSession.isSessionApplied();
     }
 
     /** {@hide} */
     boolean isStagedSessionFailed() {
-        synchronized (mLock) {
-            return mStagedSessionFailed;
-        }
+        return params.isStaged && mStagedSession.isSessionFailed();
     }
 
     /** {@hide} */
     @StagedSessionErrorCode int getStagedSessionErrorCode() {
-        synchronized (mLock) {
-            return mStagedSessionErrorCode;
-        }
+        return params.isStaged ? mStagedSession.getSessionErrorCode()
+                : SessionInfo.STAGED_SESSION_NO_ERROR;
     }
 
     /** {@hide} */
     String getStagedSessionErrorMessage() {
-        synchronized (mLock) {
-            return mStagedSessionErrorMessage;
-        }
+        return params.isStaged ? mStagedSession.getSessionErrorMessage() : "";
     }
 
     private void destroyInternal() {
@@ -3961,11 +4085,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         pw.printPair("params.isStaged", params.isStaged);
         pw.printPair("mParentSessionId", mParentSessionId);
         pw.printPair("mChildSessionIds", getChildSessionIdsLocked());
-        pw.printPair("mStagedSessionApplied", mStagedSessionApplied);
-        pw.printPair("mStagedSessionFailed", mStagedSessionFailed);
-        pw.printPair("mStagedSessionReady", mStagedSessionReady);
-        pw.printPair("mStagedSessionErrorCode", mStagedSessionErrorCode);
-        pw.printPair("mStagedSessionErrorMessage", mStagedSessionErrorMessage);
+        pw.printPair("mStagedSessionApplied", isStagedSessionApplied());
+        pw.printPair("mStagedSessionFailed", isStagedSessionFailed());
+        pw.printPair("mStagedSessionReady", isStagedSessionReady());
+        pw.printPair("mStagedSessionErrorCode", getStagedSessionErrorCode());
+        pw.printPair("mStagedSessionErrorMessage", getStagedSessionErrorMessage());
         pw.println();
 
         pw.decreaseIndent();
@@ -4131,12 +4255,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
             writeBooleanAttribute(out, ATTR_MULTI_PACKAGE, params.isMultiPackage);
             writeBooleanAttribute(out, ATTR_STAGED_SESSION, params.isStaged);
-            writeBooleanAttribute(out, ATTR_IS_READY, mStagedSessionReady);
-            writeBooleanAttribute(out, ATTR_IS_FAILED, mStagedSessionFailed);
-            writeBooleanAttribute(out, ATTR_IS_APPLIED, mStagedSessionApplied);
-            out.attributeInt(null, ATTR_STAGED_SESSION_ERROR_CODE, mStagedSessionErrorCode);
+            writeBooleanAttribute(out, ATTR_IS_READY, isStagedSessionReady());
+            writeBooleanAttribute(out, ATTR_IS_FAILED, isStagedSessionFailed());
+            writeBooleanAttribute(out, ATTR_IS_APPLIED, isStagedSessionApplied());
+            out.attributeInt(null, ATTR_STAGED_SESSION_ERROR_CODE, getStagedSessionErrorCode());
             writeStringAttribute(out, ATTR_STAGED_SESSION_ERROR_MESSAGE,
-                    mStagedSessionErrorMessage);
+                    getStagedSessionErrorMessage());
             // TODO(patb,109941548): avoid writing to xml and instead infer / validate this after
             //                       we've read all sessions.
             out.attributeInt(null, ATTR_PARENT_SESSION_ID, mParentSessionId);

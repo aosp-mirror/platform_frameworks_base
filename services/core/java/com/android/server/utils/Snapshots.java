@@ -48,7 +48,7 @@ public class Snapshots {
      * @param dst The destination array.  It must be empty.
      * @param src The source array
      */
-    public <E> void copy(@NonNull SparseArray<E> dst, @NonNull SparseArray<E> src) {
+    public static <E> void copy(@NonNull SparseArray<E> dst, @NonNull SparseArray<E> src) {
         if (dst.size() != 0) {
             throw new IllegalArgumentException("copy destination is not empty");
         }
@@ -83,7 +83,7 @@ public class Snapshots {
      * @param dst The destination array.  It must be empty.
      * @param src The source array
      */
-    public void snapshot(@NonNull SparseIntArray dst, @NonNull SparseIntArray src) {
+    public static void snapshot(@NonNull SparseIntArray dst, @NonNull SparseIntArray src) {
         if (dst.size() != 0) {
             throw new IllegalArgumentException("snapshot destination is not empty");
         }

@@ -1025,23 +1025,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mSafetyChecker = new OneTimeSafetyChecker(this, operation, safe);
     }
 
-    // TODO(b/175392542): remove if not needed by ManagedProvisioning app anymore
-    @Override
-    public void factoryReset(String reason) {
-        Preconditions.checkCallAuthorization(
-                hasCallingOrSelfPermission(permission.MASTER_CLEAR));
-        Slog.w(LOG_TAG, "factoryReset(): " + reason);
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            FactoryResetter.newBuilder(mContext).setReason(reason).build().factoryReset();
-        } catch (IOException e) {
-            // Shouldn't happen.
-            Slog.wtf(LOG_TAG, "Could not factory reset", e);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
-
     /**
      * Unit test will subclass it to inject mocks.
      */
@@ -6175,6 +6158,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 (admin != null) || hasCallingOrSelfPermission(permission.MASTER_CLEAR),
                 "No active admin for user %d and caller %d does not hold MASTER_CLEAR permission",
                 caller.getUserId(), caller.getUid());
+        checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_WIPE_DATA);
 
         if (TextUtils.isEmpty(wipeReasonForUser)) {
             if (calledByProfileOwnerOnOrgOwnedDevice && !calledOnParentInstance) {
@@ -9812,6 +9796,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Objects.requireNonNull(who, "ComponentName is null");
         final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(isProfileOwner(caller) || isDeviceOwner(caller));
+        checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_LOGOUT_USER);
 
         final int callingUserId = caller.getUserId();
         synchronized (getLockObject()) {
@@ -9997,6 +9982,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     throw new SecurityException("Profile owner cannot set user restriction " + key);
                 }
             }
+            checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_USER_RESTRICTION);
 
             // Save the restriction to ActiveAdmin.
             final Bundle restrictions = activeAdmin.ensureUserRestrictions();

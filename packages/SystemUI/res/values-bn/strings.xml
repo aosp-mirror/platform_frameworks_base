@@ -187,16 +187,6 @@
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"তিন দন্ড ব্যাটারি রয়েছে৷"</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"ব্যাটারি পূর্ণ রয়েছে৷"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ব্যাটারি কত শতাংশ আছে তা জানা যায়নি।"</string>
-    <string name="accessibility_no_phone" msgid="8828412144430247025">"কোনো ফোনের সংকেত নেই৷"</string>
-    <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"এক দন্ড ফোনের সংকেত রয়েছে৷"</string>
-    <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"দুই দন্ড ফোনের সংকেত রয়েছে৷"</string>
-    <string name="accessibility_phone_three_bars" msgid="5670937367300884534">"তিন দন্ড ফোনের সংকেত রয়েছে৷"</string>
-    <string name="accessibility_phone_signal_full" msgid="1103449569988869971">"ফোনের সংকেত পূর্ণ রয়েছে৷"</string>
-    <string name="accessibility_no_data" msgid="2124768255213392359">"কোনো ডেটা নেই৷"</string>
-    <string name="accessibility_data_one_bar" msgid="3226985124149387055">"এক দন্ড ডেটার সংকেত৷"</string>
-    <string name="accessibility_data_two_bars" msgid="4576231688545173059">"দুই দন্ড ডেটার সংকেত রয়েছে৷"</string>
-    <string name="accessibility_data_three_bars" msgid="3036562180893930325">"তিন দন্ড ডেটার সংকেত৷"</string>
-    <string name="accessibility_data_signal_full" msgid="283507058258113551">"পূর্ণ ডেটার সংকেত রয়েছে৷"</string>
     <string name="accessibility_wifi_name" msgid="4863440268606851734">"<xliff:g id="WIFI">%s</xliff:g> এর সাথে সংযুক্ত।"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g>এ সংযুক্ত হয়ে আছে।"</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> এর সাথে সংযুক্ত৷"</string>
@@ -205,8 +195,6 @@
     <string name="accessibility_wimax_two_bars" msgid="7335485192390018939">"WiMAX এ দুইটি দণ্ড৷"</string>
     <string name="accessibility_wimax_three_bars" msgid="2773714362377629938">"WiMAX এ তিনটি দণ্ড৷"</string>
     <string name="accessibility_wimax_signal_full" msgid="3101861561730624315">"WiMAX এ সম্পূর্ণ সিগন্যাল৷"</string>
-    <string name="accessibility_ethernet_disconnected" msgid="2097190491174968655">"ইথারনেটের সংযোগ বিচ্ছিন্ন হয়েছে৷"</string>
-    <string name="accessibility_ethernet_connected" msgid="3988347636883115213">"ইথারনেট সংযুক্ত হয়েছে৷"</string>
     <string name="accessibility_no_signal" msgid="1115622734914921920">"কোনো সিগন্যাল নেই৷"</string>
     <string name="accessibility_not_connected" msgid="4061305616351042142">"সংযুক্ত নয়৷"</string>
     <string name="accessibility_zero_bars" msgid="1364823964848784827">"কোনো দণ্ড নেই৷"</string>
@@ -218,30 +206,17 @@
     <string name="accessibility_desc_off" msgid="8055389500285421408">"বন্ধ৷"</string>
     <string name="accessibility_desc_connected" msgid="3082590384032624233">"সংযুক্ত৷"</string>
     <string name="accessibility_desc_connecting" msgid="8011433412112903614">"সংযুক্ত হচ্ছে৷"</string>
-    <string name="data_connection_gprs" msgid="2752584037409568435">"GPRS"</string>
     <string name="data_connection_hspa" msgid="6096234094857660873">"HSPA"</string>
-    <string name="data_connection_3g" msgid="1215807817895516914">"3G"</string>
-    <string name="data_connection_3_5g" msgid="4097346596394846450">"H"</string>
-    <string name="data_connection_3_5g_plus" msgid="8938598386721354697">"H+"</string>
-    <string name="data_connection_4g" msgid="5770196771037980730">"4G"</string>
-    <string name="data_connection_4g_plus" msgid="780615287092000279">"4G+"</string>
-    <string name="data_connection_lte" msgid="557021044282539923">"LTE"</string>
-    <string name="data_connection_lte_plus" msgid="4799302403782283178">"LTE+"</string>
-    <string name="data_connection_cdma" msgid="7678457855627313518">"1X"</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"রোমিং"</string>
-    <string name="data_connection_edge" msgid="6316755666481405762">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"ওয়াই-ফাই"</string>
     <string name="accessibility_no_sim" msgid="1140839832913084973">"কোনো সিম নেই৷"</string>
     <string name="accessibility_cell_data" msgid="172950885786007392">"মোবাইল ডেটা"</string>
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"মোবাইল ডেটা চালু আছে"</string>
-    <string name="cell_data_off_content_description" msgid="9165555931499878044">"মোবাইল ডেটা বন্ধ করা হয়েছে"</string>
-    <string name="not_default_data_content_description" msgid="6757881730711522517">"ডেটা ব্যবহার করার জন্য সেট করা নেই"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"বন্ধ"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"ব্লুটুথ টিথারিং৷"</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"বিমান মোড৷"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN চালু আছে।"</string>
     <string name="accessibility_no_sims" msgid="5711270400476534667">"কোনো সিম কার্ড নেই।"</string>
-    <string name="carrier_network_change_mode" msgid="5174141476991149918">"পরিষেবা প্রদানকারীর নেটওয়ার্ক পরিবর্তন করা হচ্ছে"</string>
     <string name="accessibility_battery_details" msgid="6184390274150865789">"ব্যাটারির বিশদ বিবরণ খুলুন"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"<xliff:g id="NUMBER">%d</xliff:g> শতাংশ ব্যাটারি রয়েছে৷"</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"ব্যাটারি <xliff:g id="PERCENTAGE">%1$s</xliff:g> শতাংশ, বর্তমান ব্যবহারের উপর ভিত্তি করে আর <xliff:g id="TIME">%2$s</xliff:g> চলবে"</string>
@@ -723,6 +698,14 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ফোনের সেটিংস অনুযায়ী ফোন রিং বা ভাইব্রেট হতে পারে। <xliff:g id="APP_NAME">%1$s</xliff:g>-এর কথোপকথন সাধারণত বাবলের মতো দেখাবে।"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ফ্লোটিং শর্টকাট ব্যবহার করে এই কন্টেন্টে আপনার দৃষ্টি আকর্ষণ করে রাখে।"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"এই বিজ্ঞপ্তি এলে ডিভাইস আওয়াজ করবে না ভাইব্রেট করবে তা সিস্টেমকে সেট করতে দিন"</string>
+    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
+    <skip />
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"কথোপকথন বিভাগের উপরে ভাসমান বাবলের মতো দেখা যাবে, লক স্ক্রিনে প্রোফাইল ছবি দেখাবে"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"সেটিংস"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"অগ্রাধিকার"</string>
@@ -741,9 +724,14 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"এই অ্যাপটি স্ক্রিনে অন্যান্য অ্যাপের উপরে দেখানো হচ্ছে এবং মাইক্রোফোন ও ক্যামেরা ব্যবহার করছে।"</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"সেটিংস"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"ঠিক আছে"</string>
-    <string name="feedback_silenced" msgid="5382212321253328247">"সিস্টেম এই বিজ্ঞপ্তি মিউট করে রেখেছিল।"</string>
-    <string name="feedback_promoted" msgid="8075757485407091976">"সিস্টেম এই বিজ্ঞপ্তি দেখাতে চেয়েছে।"</string>
-    <string name="feedback_demoted" msgid="5848066008939031913">"সিস্টেম এই বিজ্ঞপ্তি বন্ধ রেখেছে।"</string>
+    <!-- no translation found for feedback_alerted (5192459808484271208) -->
+    <skip />
+    <!-- no translation found for feedback_silenced (9116540317466126457) -->
+    <skip />
+    <!-- no translation found for feedback_promoted (2125562787759780807) -->
+    <skip />
+    <!-- no translation found for feedback_demoted (951884763467110604) -->
+    <skip />
     <string name="feedback_prompt" msgid="2278631214125128281">"এটি কি সঠিক ছিল?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"মতামতের জন্য ধন্যবাদ!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"বুঝেছি"</string>

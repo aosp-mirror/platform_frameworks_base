@@ -2615,6 +2615,15 @@ public class DevicePolicyManager {
     /** @hide */
     @TestApi
     public static final int OPERATION_REBOOT = 7;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_WIPE_DATA = 8;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_LOGOUT_USER = 9;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_SET_USER_RESTRICTION = 10;
 
     private static final String PREFIX_OPERATION = "OPERATION_";
 
@@ -2626,7 +2635,10 @@ public class DevicePolicyManager {
             OPERATION_STOP_USER,
             OPERATION_CREATE_AND_MANAGE_USER,
             OPERATION_REMOVE_USER,
-            OPERATION_REBOOT
+            OPERATION_REBOOT,
+            OPERATION_WIPE_DATA,
+            OPERATION_LOGOUT_USER,
+            OPERATION_SET_USER_RESTRICTION
     })
     @Retention(RetentionPolicy.SOURCE)
     public static @interface DevicePolicyOperation {
@@ -12672,23 +12684,6 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 mService.setNextOperationSafety(operation, safe);
-            } catch (RemoteException re) {
-                throw re.rethrowFromSystemServer();
-            }
-        }
-    }
-
-    // TODO(b/175392542): remove if not needed by ManagedProvisioning app anymore
-    /**
-     * Used by ManagedProvisioning app to factory reset the device when DO cannto be provisioned.
-     *
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.MASTER_CLEAR)
-    public void factoryReset(String reason) {
-        if (mService != null) {
-            try {
-                mService.factoryReset(reason);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }

@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
+import android.support.test.launcherhelper.LauncherStrategyFactory
 import com.android.wm.shell.flicker.NonRotationTestBase
 import com.android.wm.shell.flicker.TEST_APP_NONRESIZEABLE_LABEL
 import com.android.wm.shell.flicker.TEST_APP_SPLITSCREEN_PRIMARY_LABEL
@@ -36,4 +37,6 @@ abstract class SplitScreenTestBase(
     protected val nonResizeableApp = SplitScreenHelper(instrumentation,
             TEST_APP_NONRESIZEABLE_LABEL,
             Components.NonResizeableActivity())
+    protected val launcherPackageName = LauncherStrategyFactory.getInstance(instrumentation)
+            .launcherStrategy.supportedLauncherPackage
 }
