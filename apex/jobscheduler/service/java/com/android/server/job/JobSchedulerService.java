@@ -1502,11 +1502,14 @@ public class JobSchedulerService extends com.android.server.SystemService
         mControllers.add(mBatteryController);
         mStorageController = new StorageController(this);
         mControllers.add(mStorageController);
-        mControllers.add(new BackgroundJobsController(this));
+        final BackgroundJobsController backgroundJobsController =
+                new BackgroundJobsController(this);
+        mControllers.add(backgroundJobsController);
         mControllers.add(new ContentObserverController(this));
         mDeviceIdleJobsController = new DeviceIdleJobsController(this);
         mControllers.add(mDeviceIdleJobsController);
-        mQuotaController = new QuotaController(this);
+        mQuotaController =
+                new QuotaController(this, backgroundJobsController, connectivityController);
         mControllers.add(mQuotaController);
         mControllers.add(new ComponentController(this));
 
