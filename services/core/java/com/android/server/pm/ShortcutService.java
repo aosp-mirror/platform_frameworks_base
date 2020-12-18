@@ -2739,7 +2739,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
                 // Default launcher from role manager.
                 final long startGetHomeRoleHoldersAsUser = getStatStartTime();
-                final String defaultLauncher = injectGetHomeRoleHolderAsUser(userId);
+                final String defaultLauncher = injectGetHomeRoleHolderAsUser(
+                        getParentOrSelfUserId(userId));
                 logDurationStat(Stats.GET_DEFAULT_HOME, startGetHomeRoleHoldersAsUser);
 
                 if (defaultLauncher != null) {
@@ -4694,7 +4695,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 final List<ResolveInfo> allHomeCandidates = new ArrayList<>();
                 // Default launcher from package manager.
                 final ComponentName defaultLauncher = mPackageManagerInternal
-                        .getHomeActivitiesAsUser(allHomeCandidates, mUserId);
+                        .getHomeActivitiesAsUser(allHomeCandidates, getParentOrSelfUserId(mUserId));
                 getOutPrintWriter().println("Launcher: " + defaultLauncher);
             }
         }
