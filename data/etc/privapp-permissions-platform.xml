@@ -438,6 +438,9 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_TIME_AND_ZONE_DETECTION" />
         <!-- Permissions required for CTS test - CtsHdmiCecHostTestCases -->
         <permission name="android.permission.HDMI_CEC"/>
+        <!-- Permission needed for CTS test - WifiManagerTest -->
+        <permission name="android.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS" />
+        <permission name="android.permission.WIFI_UPDATE_COEX_UNSAFE_CHANNELS" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
