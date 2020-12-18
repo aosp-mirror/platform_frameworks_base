@@ -988,6 +988,7 @@ package android.media {
   }
 
   public class AudioManager {
+    method @Nullable public static android.media.AudioDeviceInfo getDeviceInfoFromType(int);
     method public boolean hasRegisteredDynamicPolicy();
   }
 
