@@ -22,6 +22,7 @@ import android.animation.RectEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.graphics.Rect;
+import android.view.Choreographer;
 import android.view.SurfaceControl;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -327,8 +328,14 @@ public class PipAnimationController {
             mEndValue = endValue;
         }
 
-        SurfaceControl.Transaction newSurfaceControlTransaction() {
-            return mSurfaceControlTransactionFactory.getTransaction();
+        /**
+         * @return {@link SurfaceControl.Transaction} instance with vsync-id.
+         */
+        protected SurfaceControl.Transaction newSurfaceControlTransaction() {
+            final SurfaceControl.Transaction tx =
+                    mSurfaceControlTransactionFactory.getTransaction();
+            tx.setFrameTimelineVsync(Choreographer.getSfInstance().getVsyncId());
+            return tx;
         }
 
         @VisibleForTesting
