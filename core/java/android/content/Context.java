@@ -4371,6 +4371,16 @@ public abstract class Context {
     public static final String BIOMETRIC_SERVICE = "biometric";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.media.MediaCommunicationManager}
+     * for managing {@link android.media.MediaSession2}.
+     *
+     * @see #getSystemService(String)
+     * @see android.media.MediaCommunicationManager
+     */
+    public static final String MEDIA_COMMUNICATION_SERVICE = "media_communication";
+
+    /**
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.media.MediaRouter} for controlling and managing
      * routing of media.
