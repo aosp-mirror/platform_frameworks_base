@@ -385,6 +385,7 @@ package android {
     field public static final int calendarViewShown = 16843596; // 0x101034c
     field public static final int calendarViewStyle = 16843613; // 0x101035d
     field public static final int canControlMagnification = 16844039; // 0x1010507
+    field public static final int canPauseRecording = 16844311; // 0x1010617
     field public static final int canPerformGestures = 16844045; // 0x101050d
     field public static final int canRecord = 16844060; // 0x101051c
     field @Deprecated public static final int canRequestEnhancedWebAccessibility = 16843736; // 0x10103d8
@@ -24265,6 +24266,7 @@ package android.media.tv {
   }
 
   public final class TvInputInfo implements android.os.Parcelable {
+    method public boolean canPauseRecording();
     method public boolean canRecord();
     method @Deprecated public android.content.Intent createSettingsIntent();
     method public android.content.Intent createSetupIntent();
@@ -24298,6 +24300,7 @@ package android.media.tv {
   public static final class TvInputInfo.Builder {
     ctor public TvInputInfo.Builder(android.content.Context, android.content.ComponentName);
     method public android.media.tv.TvInputInfo build();
+    method @NonNull public android.media.tv.TvInputInfo.Builder setCanPauseRecording(boolean);
     method public android.media.tv.TvInputInfo.Builder setCanRecord(boolean);
     method public android.media.tv.TvInputInfo.Builder setExtras(android.os.Bundle);
     method public android.media.tv.TvInputInfo.Builder setTunerCount(int);
@@ -24389,7 +24392,9 @@ package android.media.tv {
     method public void notifyRecordingStopped(android.net.Uri);
     method public void notifyTuned(android.net.Uri);
     method public void onAppPrivateCommand(@NonNull String, android.os.Bundle);
+    method public void onPauseRecording(@NonNull android.os.Bundle);
     method public abstract void onRelease();
+    method public void onResumeRecording(@NonNull android.os.Bundle);
     method public abstract void onStartRecording(@Nullable android.net.Uri);
     method public void onStartRecording(@Nullable android.net.Uri, @NonNull android.os.Bundle);
     method public abstract void onStopRecording();
@@ -24439,7 +24444,11 @@ package android.media.tv {
 
   public class TvRecordingClient {
     ctor public TvRecordingClient(android.content.Context, String, @NonNull android.media.tv.TvRecordingClient.RecordingCallback, android.os.Handler);
+    method public void pauseRecording();
+    method public void pauseRecording(@NonNull android.os.Bundle);
     method public void release();
+    method public void resumeRecording();
+    method public void resumeRecording(@NonNull android.os.Bundle);
     method public void sendAppPrivateCommand(@NonNull String, android.os.Bundle);
     method public void startRecording(@Nullable android.net.Uri);
     method public void startRecording(@Nullable android.net.Uri, @NonNull android.os.Bundle);
