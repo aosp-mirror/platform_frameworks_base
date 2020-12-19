@@ -933,6 +933,7 @@ package android.location {
     method public void resetFullInterSignalBiasUncertaintyNanos();
     method public void resetSatelliteInterSignalBiasNanos();
     method public void resetSatelliteInterSignalBiasUncertaintyNanos();
+    method public void resetSatellitePvt();
     method public void resetSnrInDb();
     method public void set(android.location.GnssMeasurement);
     method public void setAccumulatedDeltaRangeMeters(double);
@@ -956,6 +957,7 @@ package android.location {
     method public void setReceivedSvTimeUncertaintyNanos(long);
     method public void setSatelliteInterSignalBiasNanos(double);
     method public void setSatelliteInterSignalBiasUncertaintyNanos(@FloatRange(from=0.0) double);
+    method public void setSatellitePvt(@Nullable android.location.SatellitePvt);
     method public void setSnrInDb(double);
     method public void setState(int);
     method public void setSvid(int);
