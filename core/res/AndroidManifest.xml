@@ -377,6 +377,7 @@
     <protected-broadcast android:name="android.net.wifi.action.PASSPOINT_OSU_PROVIDERS_LIST" />
     <protected-broadcast android:name="android.net.wifi.action.PASSPOINT_SUBSCRIPTION_REMEDIATION" />
     <protected-broadcast android:name="android.net.wifi.action.PASSPOINT_LAUNCH_OSU_VIEW" />
+    <protected-broadcast android:name="android.net.wifi.action.REFRESH_USER_PROVISIONING" />
     <protected-broadcast android:name="android.net.wifi.action.WIFI_NETWORK_SUGGESTION_POST_CONNECTION" />
     <protected-broadcast android:name="android.net.wifi.action.WIFI_SCAN_AVAILABILITY_CHANGED" />
     <protected-broadcast android:name="android.net.wifi.supplicant.CONNECTION_CHANGE" />

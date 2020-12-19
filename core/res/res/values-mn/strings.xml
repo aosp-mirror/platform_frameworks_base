@@ -472,10 +472,10 @@
     <string name="permdesc_transmitIr" product="tablet" msgid="5884738958581810253">"Апп-д таблетын хэт улаан дамжуулагчийг ашиглахыг зөвшөөрнө."</string>
     <string name="permdesc_transmitIr" product="tv" msgid="3278506969529173281">"Аппад таны Android TV төхөөрөмжийн хэт улаан туяаны дамжуулагчийг ашиглахыг зөвшөөрнө."</string>
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Апп-д утасны хэт улаан дамжуулагчийг ашиглахыг зөвшөөрнө."</string>
-    <string name="permlab_setWallpaper" msgid="6959514622698794511">"ханын зургийг тохируулах"</string>
-    <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Апп нь системийн ханын зургийг тохируулах боломжтой."</string>
-    <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"Таны ханын зурагны хэмжээг тохируулах"</string>
-    <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Апп нь системийн ханын зургийн хэмжээний саналыг тохируулах боломжтой"</string>
+    <string name="permlab_setWallpaper" msgid="6959514622698794511">"дэлгэцийн зургийг тохируулах"</string>
+    <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Апп нь системийн дэлгэцийн зургийг тохируулах боломжтой."</string>
+    <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"Таны дэлгэцийн зургийн хэмжээг тохируулах"</string>
+    <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Апп нь системийн дэлгэцийн зургийн хэмжээний саналыг тохируулах боломжтой"</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"цагийн бүсийн тохиргоо"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1788868809638682503">"Апп нь таблетын цагийн бүсийг солих боломжтой."</string>
     <string name="permdesc_setTimeZone" product="tv" msgid="9069045914174455938">"Аппад таны Android TV төхөөрөмжийн цагийн бүсийг өөрчлөхийг зөвшөөрнө."</string>
@@ -1418,8 +1418,8 @@
     <string name="input_method_binding_label" msgid="1166731601721983656">"Оруулах арга"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"Синк"</string>
     <string name="accessibility_binding_label" msgid="1974602776545801715">"Хандалт"</string>
-    <string name="wallpaper_binding_label" msgid="1197440498000786738">"Ханын зураг"</string>
-    <string name="chooser_wallpaper" msgid="3082405680079923708">"Ханын зураг солих"</string>
+    <string name="wallpaper_binding_label" msgid="1197440498000786738">"Дэлгэцийн зураг"</string>
+    <string name="chooser_wallpaper" msgid="3082405680079923708">"Дэлгэцийн зураг солих"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"Мэдэгдэл сонсогч"</string>
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"VR сонсогч"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"Нөхцөл нийлүүлэгч"</string>
