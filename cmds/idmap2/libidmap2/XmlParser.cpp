@@ -98,7 +98,7 @@ Result<std::string> XmlParser::Node::GetAttributeStringValue(const std::string& 
 
   switch ((*value).dataType) {
     case Res_value::TYPE_STRING: {
-      if (auto str = parser_.getStrings().string8ObjectAt((*value).data)) {
+      if (auto str = parser_.getStrings().string8ObjectAt((*value).data); str.ok()) {
         return std::string(str->string());
       }
       break;
