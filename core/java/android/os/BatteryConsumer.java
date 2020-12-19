@@ -36,7 +36,9 @@ public abstract class BatteryConsumer {
      * @hide
      */
     @IntDef(prefix = {"POWER_COMPONENT_"}, value = {
+            POWER_COMPONENT_USAGE,
             POWER_COMPONENT_CPU,
+            POWER_COMPONENT_BLUETOOTH,
     })
     @Retention(RetentionPolicy.SOURCE)
     public static @interface PowerComponent {
@@ -44,8 +46,9 @@ public abstract class BatteryConsumer {
 
     public static final int POWER_COMPONENT_USAGE = 0;
     public static final int POWER_COMPONENT_CPU = 1;
+    public static final int POWER_COMPONENT_BLUETOOTH = 2;
 
-    public static final int POWER_COMPONENT_COUNT = 2;
+    public static final int POWER_COMPONENT_COUNT = 3;
 
     public static final int FIRST_CUSTOM_POWER_COMPONENT_ID = 1000;
     public static final int LAST_CUSTOM_POWER_COMPONENT_ID = 9999;
@@ -68,8 +71,10 @@ public abstract class BatteryConsumer {
      * @hide
      */
     @IntDef(prefix = {"TIME_COMPONENT_"}, value = {
+            TIME_COMPONENT_USAGE,
             TIME_COMPONENT_CPU,
             TIME_COMPONENT_CPU_FOREGROUND,
+            TIME_COMPONENT_BLUETOOTH,
     })
     @Retention(RetentionPolicy.SOURCE)
     public static @interface TimeComponent {
@@ -78,8 +83,9 @@ public abstract class BatteryConsumer {
     public static final int TIME_COMPONENT_USAGE = 0;
     public static final int TIME_COMPONENT_CPU = 1;
     public static final int TIME_COMPONENT_CPU_FOREGROUND = 2;
+    public static final int TIME_COMPONENT_BLUETOOTH = 3;
 
-    public static final int TIME_COMPONENT_COUNT = 3;
+    public static final int TIME_COMPONENT_COUNT = 4;
 
     public static final int FIRST_CUSTOM_TIME_COMPONENT_ID = 1000;
     public static final int LAST_CUSTOM_TIME_COMPONENT_ID = 9999;
