@@ -94,7 +94,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
     public MediaOutputController(@NonNull Context context, String packageName,
             boolean aboveStatusbar, MediaSessionManager mediaSessionManager, LocalBluetoothManager
             lbm, ShadeController shadeController, ActivityStarter starter,
-            NotificationEntryManager notificationEntryManager, UiEventLogger uiEventLogger) {
+            NotificationEntryManager notificationEntryManager, UiEventLogger uiEventLogger,
+            MediaRouter2Manager routerManager) {
         mContext = context;
         mPackageName = packageName;
         mMediaSessionManager = mediaSessionManager;
@@ -106,7 +107,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         mLocalMediaManager = new LocalMediaManager(mContext, lbm, imm, packageName);
         mMetricLogger = new MediaOutputMetricLogger(mContext, mPackageName);
         mUiEventLogger = uiEventLogger;
-        mRouterManager = MediaRouter2Manager.getInstance(mContext);
+        mRouterManager = routerManager;
     }
 
     void start(@NonNull Callback cb) {
@@ -137,7 +138,9 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         mLocalMediaManager.stopScan();
         mLocalMediaManager.registerCallback(this);
         mLocalMediaManager.startScan();
-        mRouterManager.startScan();
+        if (mRouterManager != null) {
+            mRouterManager.startScan();
+        }
     }
 
     void stop() {

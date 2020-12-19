@@ -43,9 +43,9 @@ import android.location.GnssAntennaInfo;
 import android.location.GnssAntennaInfo.SphericalCorrections;
 import android.location.GnssClock;
 import android.location.GnssMeasurementCorrections;
+import android.location.GnssMeasurementRequest;
 import android.location.GnssMeasurementsEvent;
 import android.location.GnssNavigationMessage;
-import android.location.GnssRequest;
 import android.location.GnssSingleSatCorrection;
 import android.location.IGnssAntennaInfoListener;
 import android.location.IGnssMeasurementsListener;
@@ -403,7 +403,7 @@ public class GnssManagerServiceTest {
 
         assertThrows(SecurityException.class,
                 () -> mGnssManagerService.addGnssMeasurementsListener(
-                        new GnssRequest.Builder().build(), mockGnssMeasurementsListener,
+                        new GnssMeasurementRequest.Builder().build(), mockGnssMeasurementsListener,
                         TEST_PACKAGE, null));
 
         mTestGnssMeasurementsProvider.onMeasurementsAvailable(gnssMeasurementsEvent);
@@ -422,7 +422,7 @@ public class GnssManagerServiceTest {
         enableLocationPermissions();
 
         mGnssManagerService.addGnssMeasurementsListener(
-                new GnssRequest.Builder().build(),
+                new GnssMeasurementRequest.Builder().build(),
                 mockGnssMeasurementsListener,
                 TEST_PACKAGE, null);
 
@@ -470,7 +470,8 @@ public class GnssManagerServiceTest {
 
         enableLocationPermissions();
 
-        mGnssManagerService.addGnssMeasurementsListener(new GnssRequest.Builder().build(),
+        mGnssManagerService.addGnssMeasurementsListener(
+                new GnssMeasurementRequest.Builder().build(),
                 mockGnssMeasurementsListener,
                 TEST_PACKAGE, null);
 
@@ -494,7 +495,8 @@ public class GnssManagerServiceTest {
 
         enableLocationPermissions();
 
-        mGnssManagerService.addGnssMeasurementsListener(new GnssRequest.Builder().build(),
+        mGnssManagerService.addGnssMeasurementsListener(
+                new GnssMeasurementRequest.Builder().build(),
                 mockGnssMeasurementsListener,
                 TEST_PACKAGE, null);
 

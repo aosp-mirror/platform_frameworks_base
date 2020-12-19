@@ -2371,7 +2371,7 @@ public class LocationManager {
             handler = new Handler();
         }
 
-        return registerGnssMeasurementsCallback(new GnssRequest.Builder().build(),
+        return registerGnssMeasurementsCallback(new GnssMeasurementRequest.Builder().build(),
                 new HandlerExecutor(handler), callback);
     }
 
@@ -2390,8 +2390,8 @@ public class LocationManager {
     public boolean registerGnssMeasurementsCallback(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull GnssMeasurementsEvent.Callback callback) {
-        return registerGnssMeasurementsCallback(new GnssRequest.Builder().build(), executor,
-                callback);
+        return registerGnssMeasurementsCallback(new GnssMeasurementRequest.Builder().build(),
+                executor, callback);
     }
 
     /**
@@ -2408,11 +2408,39 @@ public class LocationManager {
      * @throws IllegalArgumentException if callback is null
      * @throws SecurityException        if the ACCESS_FINE_LOCATION permission is not present
      * @hide
+     * @deprecated Use {@link #registerGnssMeasurementsCallback(GnssMeasurementRequest, Executor,
+     * GnssMeasurementsEvent.Callback)} instead.
      */
+    @Deprecated
     @SystemApi
-    @RequiresPermission(allOf = {ACCESS_FINE_LOCATION, LOCATION_HARDWARE})
+    @RequiresPermission(ACCESS_FINE_LOCATION)
     public boolean registerGnssMeasurementsCallback(
             @NonNull GnssRequest request,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull GnssMeasurementsEvent.Callback callback) {
+        Preconditions.checkArgument(request != null, "invalid null request");
+        getGnssMeasurementsTransportMultiplexer().addListener(request.toGnssMeasurementRequest(),
+                callback, executor);
+        return true;
+    }
+
+    /**
+     * Registers a GNSS measurement callback.
+     *
+     * @param request  extra parameters to pass to GNSS measurement provider. For example, if {@link
+     *                 GnssMeasurementRequest#isFullTracking()} is true, GNSS chipset switches off
+     *                 duty cycling.
+     * @param executor the executor that the callback runs on
+     * @param callback a {@link GnssMeasurementsEvent.Callback} object to register.
+     * @return {@code true} always if the callback was added successfully, {@code false} otherwise.
+     * @throws IllegalArgumentException if request is null
+     * @throws IllegalArgumentException if executor is null
+     * @throws IllegalArgumentException if callback is null
+     * @throws SecurityException        if the ACCESS_FINE_LOCATION permission is not present
+     */
+    @RequiresPermission(ACCESS_FINE_LOCATION)
+    public boolean registerGnssMeasurementsCallback(
+            @NonNull GnssMeasurementRequest request,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull GnssMeasurementsEvent.Callback callback) {
         Preconditions.checkArgument(request != null, "invalid null request");
@@ -2907,14 +2935,14 @@ public class LocationManager {
     }
 
     private class GnssMeasurementsTransportMultiplexer extends
-            ListenerTransportMultiplexer<GnssRequest, GnssMeasurementsEvent.Callback> {
+            ListenerTransportMultiplexer<GnssMeasurementRequest, GnssMeasurementsEvent.Callback> {
 
         private @Nullable IGnssMeasurementsListener mListenerTransport;
 
         GnssMeasurementsTransportMultiplexer() {}
 
         @Override
-        protected void registerWithServer(GnssRequest request) throws RemoteException {
+        protected void registerWithServer(GnssMeasurementRequest request) throws RemoteException {
             IGnssMeasurementsListener transport = mListenerTransport;
             if (transport == null) {
                 transport = new GnssMeasurementsListener();
@@ -2937,9 +2965,10 @@ public class LocationManager {
         }
 
         @Override
-        protected GnssRequest mergeRequests(Collection<GnssRequest> requests) {
-            GnssRequest.Builder builder = new GnssRequest.Builder();
-            for (GnssRequest request : requests) {
+        protected GnssMeasurementRequest mergeRequests(
+                Collection<GnssMeasurementRequest> requests) {
+            GnssMeasurementRequest.Builder builder = new GnssMeasurementRequest.Builder();
+            for (GnssMeasurementRequest request : requests) {
                 if (request.isFullTracking()) {
                     builder.setFullTracking(true);
                     break;

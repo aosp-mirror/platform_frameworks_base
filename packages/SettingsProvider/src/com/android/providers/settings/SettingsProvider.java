@@ -3342,7 +3342,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 196;
+            private static final int SETTINGS_VERSION = 197;
 
             private final int mUserId;
 
@@ -4784,6 +4784,35 @@ public class SettingsProvider extends ContentProvider {
                     getSecureSettingsLocked(userId).deleteSettingLocked(
                             Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES);
                     currentVersion = 196;
+                }
+
+                if (currentVersion == 196) {
+                    // Version 196: Set the default value for Secure Settings:
+                    // SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED & ONE_HANDED_MODE_ENABLED
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    final Setting swipeNotification = secureSettings.getSettingLocked(
+                            Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED);
+                    if (swipeNotification.isNull()) {
+                        final boolean defSwipeNotification = getContext().getResources()
+                                .getBoolean(R.bool.def_swipe_bottom_to_notification_enabled);
+                        secureSettings.insertSettingLocked(
+                                Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED,
+                                defSwipeNotification ? "1" : "0", null, true,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+
+                    final Setting oneHandedModeEnabled = secureSettings.getSettingLocked(
+                            Secure.ONE_HANDED_MODE_ENABLED);
+                    if (oneHandedModeEnabled.isNull()) {
+                        final boolean defOneHandedModeEnabled = getContext().getResources()
+                                .getBoolean(R.bool.def_one_handed_mode_enabled);
+                        secureSettings.insertSettingLocked(
+                                Secure.ONE_HANDED_MODE_ENABLED,
+                                defOneHandedModeEnabled ? "1" : "0", null, true,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+
+                    currentVersion = 197;
                 }
 
                 // vXXX: Add new settings above this point.

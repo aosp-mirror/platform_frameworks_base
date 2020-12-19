@@ -5229,14 +5229,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (!mAnimatingExit && mAppDied) {
             mIsDimming = true;
             getDimmer().dimAbove(getSyncTransaction(), this, DEFAULT_DIM_AMOUNT_DEAD_WINDOW);
-        } else if ((mAttrs.flags & FLAG_DIM_BEHIND) != 0 && isVisibleNow() && !mHidden) {
-            // Only show a dim behind when the following is satisfied:
-            // 1. The window has the flag FLAG_DIM_BEHIND
+        } else if (((mAttrs.flags & FLAG_DIM_BEHIND) != 0 || mAttrs.backgroundBlurRadius != 0)
+                   && isVisibleNow() && !mHidden) {
+            // Only show the Dimmer when the following is satisfied:
+            // 1. The window has the flag FLAG_DIM_BEHIND or background blur is requested
             // 2. The WindowToken is not hidden so dims aren't shown when the window is exiting.
             // 3. The WS is considered visible according to the isVisible() method
             // 4. The WS is not hidden.
             mIsDimming = true;
-            getDimmer().dimBelow(getSyncTransaction(), this, mAttrs.dimAmount);
+            final float dimAmount = (mAttrs.flags & FLAG_DIM_BEHIND) != 0 ? mAttrs.dimAmount : 0;
+            getDimmer().dimBelow(
+                    getSyncTransaction(), this, mAttrs.dimAmount, mAttrs.backgroundBlurRadius);
         }
     }
 

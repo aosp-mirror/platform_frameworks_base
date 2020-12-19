@@ -31,6 +31,7 @@ import android.media.AudioRoutesInfo;
 import android.media.AudioSystem;
 import android.media.IAudioRoutesObserver;
 import android.media.ICapturePresetDevicesRoleDispatcher;
+import android.media.ICommunicationDeviceDispatcher;
 import android.media.IStrategyPreferredDevicesDispatcher;
 import android.media.MediaMetrics;
 import android.os.Binder;
@@ -39,6 +40,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -233,6 +235,38 @@ import java.util.concurrent.atomic.AtomicBoolean;
         }
     }
 
+    /**
+     * Select device for use for communication use cases.
+     * @param cb Client binder for death detection
+     * @param pid Client pid
+     * @param device Device selected or null to unselect.
+     * @param eventSource for logging purposes
+     */
+    /*package*/ boolean setDeviceForCommunication(
+            IBinder cb, int pid, AudioDeviceInfo device, String eventSource) {
+
+        if (AudioService.DEBUG_COMM_RTE) {
+            Log.v(TAG, "setDeviceForCommunication, device: " + device + ", pid: " + pid);
+        }
+
+        synchronized (mSetModeLock) {
+            synchronized (mDeviceStateLock) {
+                AudioDeviceAttributes deviceAttr = null;
+                if (device != null) {
+                    deviceAttr = new AudioDeviceAttributes(device);
+                } else {
+                    CommunicationRouteClient client = getCommunicationRouteClientForPid(pid);
+                    if (client == null) {
+                        return false;
+                    }
+                }
+                setCommunicationRouteForClient(
+                        cb, pid, deviceAttr, BtHelper.SCO_MODE_UNDEFINED, eventSource);
+            }
+        }
+        return true;
+    }
+
     @GuardedBy("mDeviceStateLock")
     /*package*/ void setCommunicationRouteForClient(
                             IBinder cb, int pid, AudioDeviceAttributes device,
@@ -278,6 +312,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
                 } else {
                     removeCommunicationRouteClient(cb, true);
                 }
+                postBroadcastScoConnectionState(AudioManager.SCO_AUDIO_STATE_DISCONNECTED);
             }
         } else if (!isBtScoRequested && wasBtScoRequested) {
             mBtHelper.stopBluetoothSco(eventSource);
@@ -322,6 +357,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
                     + device + " mode owner pid: " + mModeOwnerPid);
         }
         return device;
+    }
+
+    /**
+     * Returns the device currently requested for communication use case.
+     * @return AudioDeviceInfo the requested device for communication.
+     */
+    AudioDeviceInfo getDeviceForCommunication() {
+        synchronized (mDeviceStateLock) {
+            AudioDeviceAttributes device = requestedCommunicationDevice();
+            if (device == null) {
+                return null;
+            }
+            return AudioManager.getDeviceInfoFromType(device.getType());
+        }
     }
 
     /**
@@ -566,11 +615,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
                 AudioDeviceAttributes device = new AudioDeviceAttributes(
                         AudioDeviceAttributes.ROLE_OUTPUT, AudioDeviceInfo.TYPE_BLUETOOTH_SCO, "");
                 setCommunicationRouteForClient(cb, pid, device, scoAudioMode, eventSource);
-                if (!isBluetoothScoRequested()) {
-                    Log.w(TAG, "startBluetoothScoForClient_Sync: rejected for pid: "
-                            + pid + " mode owner pid: " + mModeOwnerPid);
-                    postBroadcastScoConnectionState(AudioManager.SCO_AUDIO_STATE_DISCONNECTED);
-                }
             }
         }
     }
@@ -630,6 +674,45 @@ import java.util.concurrent.atomic.AtomicBoolean;
     /*package*/ void unregisterCapturePresetDevicesRoleDispatcher(
             @NonNull ICapturePresetDevicesRoleDispatcher dispatcher) {
         mDeviceInventory.unregisterCapturePresetDevicesRoleDispatcher(dispatcher);
+    }
+
+    /*package*/ void registerCommunicationDeviceDispatcher(
+            @NonNull ICommunicationDeviceDispatcher dispatcher) {
+        mCommDevDispatchers.register(dispatcher);
+    }
+
+    /*package*/ void unregisterCommunicationDeviceDispatcher(
+            @NonNull ICommunicationDeviceDispatcher dispatcher) {
+        mCommDevDispatchers.unregister(dispatcher);
+    }
+
+    // Monitoring of communication device
+    final RemoteCallbackList<ICommunicationDeviceDispatcher> mCommDevDispatchers =
+            new RemoteCallbackList<ICommunicationDeviceDispatcher>();
+
+    // portId of the device currently selected for communication: avoids broadcasting changes
+    // when same communication route is applied
+    @GuardedBy("mDeviceStateLock")
+    int mCurCommunicationPortId = -1;
+
+    @GuardedBy("mDeviceStateLock")
+    private void dispatchCommunicationDevice() {
+        AudioDeviceInfo device = getDeviceForCommunication();
+        int portId = (getDeviceForCommunication() == null) ? 0 : device.getId();
+        if (portId == mCurCommunicationPortId) {
+            return;
+        }
+        mCurCommunicationPortId = portId;
+
+        final int nbDispatchers = mCommDevDispatchers.beginBroadcast();
+        for (int i = 0; i < nbDispatchers; i++) {
+            try {
+                mCommDevDispatchers.getBroadcastItem(i)
+                        .dispatchCommunicationDeviceChanged(portId);
+            } catch (RemoteException e) {
+            }
+        }
+        mCommDevDispatchers.finishBroadcast();
     }
 
     //---------------------------------------------------------------------
@@ -1571,6 +1654,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
             }
         }
         mAudioService.postUpdateRingerModeServiceInt();
+        dispatchCommunicationDevice();
     }
 
     private CommunicationRouteClient removeCommunicationRouteClient(

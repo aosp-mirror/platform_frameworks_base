@@ -24,6 +24,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.InstantAppInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
+import android.content.pm.PermissionInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -36,6 +37,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
+import android.permission.PermissionManager;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
@@ -974,8 +976,7 @@ class InstantAppRegistry implements Watchable, Snappable {
         final long identity = Binder.clearCallingIdentity();
         try {
             for (String grantedPermission : appInfo.getGrantedPermissions()) {
-                final boolean propagatePermission =
-                        mPermissionManager.canPropagatePermissionToInstantApp(grantedPermission);
+                final boolean propagatePermission = canPropagatePermission(grantedPermission);
                 if (propagatePermission && pkg.getRequestedPermissions().contains(
                         grantedPermission)) {
                     mService.grantRuntimePermission(pkg.getPackageName(), grantedPermission,
@@ -985,6 +986,19 @@ class InstantAppRegistry implements Watchable, Snappable {
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    private boolean canPropagatePermission(@NonNull String permissionName) {
+        final PermissionManager permissionManager = mService.mContext.getSystemService(
+                PermissionManager.class);
+        final PermissionInfo permissionInfo = permissionManager.getPermissionInfo(permissionName,
+                0);
+        return permissionInfo != null
+                && (permissionInfo.getProtection() == PermissionInfo.PROTECTION_DANGEROUS
+                        || (permissionInfo.getProtectionFlags()
+                                & PermissionInfo.PROTECTION_FLAG_DEVELOPMENT) != 0)
+                && (permissionInfo.getProtectionFlags() & PermissionInfo.PROTECTION_FLAG_INSTANT)
+                        != 0;
     }
 
     private @NonNull

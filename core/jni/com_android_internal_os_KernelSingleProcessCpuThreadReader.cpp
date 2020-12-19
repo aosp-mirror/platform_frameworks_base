@@ -26,308 +26,244 @@
 #include <android_runtime/Log.h>
 
 #include <nativehelper/ScopedPrimitiveArray.h>
+#include <nativehelper/ScopedUtfChars.h>
 
 namespace android {
-
-static constexpr uint16_t DEFAULT_THREAD_AGGREGATION_KEY = 0;
-static constexpr uint16_t SELECTED_THREAD_AGGREGATION_KEY = 1;
-
-static constexpr uint64_t NSEC_PER_MSEC = 1000000;
 
 // Number of milliseconds in a jiffy - the unit of time measurement for processes and threads
 static const uint32_t gJiffyMillis = (uint32_t)(1000 / sysconf(_SC_CLK_TCK));
 
-// Abstract class for readers of CPU time-in-state. There are two implementations of
-// this class: BpfCpuTimeInStateReader and MockCpuTimeInStateReader.  The former is used
-// by the production code. The latter is used by unit tests to provide mock
-// CPU time-in-state data via a Java implementation.
-class ICpuTimeInStateReader {
-public:
-    virtual ~ICpuTimeInStateReader() {}
+// Given a PID, returns a vector of all TIDs for the process' tasks. Thread IDs are
+// file names in the /proc/<pid>/task directory.
+static bool getThreadIds(const std::string &procPath, const pid_t pid,
+                         std::vector<pid_t> &outThreadIds) {
+    std::string taskPath = android::base::StringPrintf("%s/%u/task", procPath.c_str(), pid);
 
-    // Returns the overall number of cluser-frequency combinations
-    virtual size_t getCpuFrequencyCount();
+    struct dirent **dirlist;
+    int threadCount = scandir(taskPath.c_str(), &dirlist, NULL, NULL);
+    if (threadCount == -1) {
+        ALOGE("Cannot read directory %s", taskPath.c_str());
+        return false;
+    }
 
-    // Marks the CPU time-in-state tracking for threads of the specified TGID
-    virtual bool startTrackingProcessCpuTimes(pid_t) = 0;
+    outThreadIds.reserve(threadCount);
 
-    // Marks the thread specified by its PID for CPU time-in-state tracking.
-    virtual bool startAggregatingTaskCpuTimes(pid_t, uint16_t) = 0;
+    for (int i = 0; i < threadCount; i++) {
+        pid_t tid;
+        if (android::base::ParseInt<pid_t>(dirlist[i]->d_name, &tid)) {
+            outThreadIds.push_back(tid);
+        }
+        free(dirlist[i]);
+    }
+    free(dirlist);
 
-    // Retrieves the accumulated time-in-state data, which is organized as a map
-    // from aggregation keys to vectors of vectors using the format:
-    // { aggKey0 -> [[t0_0_0, t0_0_1, ...], [t0_1_0, t0_1_1, ...], ...],
-    //   aggKey1 -> [[t1_0_0, t1_0_1, ...], [t1_1_0, t1_1_1, ...], ...], ... }
-    // where ti_j_k is the ns tid i spent running on the jth cluster at the cluster's kth lowest
-    // freq.
-    virtual std::optional<std::unordered_map<uint16_t, std::vector<std::vector<uint64_t>>>>
-    getAggregatedTaskCpuFreqTimes(pid_t, const std::vector<uint16_t> &);
-};
+    return true;
+}
 
-// ICpuTimeInStateReader that uses eBPF to provide a map of aggregated CPU time-in-state values.
-// See cputtimeinstate.h/.cpp
-class BpfCpuTimeInStateReader : public ICpuTimeInStateReader {
-public:
-    size_t getCpuFrequencyCount() {
-        std::optional<std::vector<std::vector<uint32_t>>> cpuFreqs = android::bpf::getCpuFreqs();
-        if (!cpuFreqs) {
-            ALOGE("Cannot obtain CPU frequency count");
-            return 0;
+// Reads contents of a time_in_state file and returns times as a vector of times per frequency
+// A time_in_state file contains pairs of frequency - time (in jiffies):
+//
+//    cpu0
+//    300000 30
+//    403200 0
+//    cpu4
+//    710400 10
+//    825600 20
+//    940800 30
+//
+static bool getThreadTimeInState(const std::string &procPath, const pid_t pid, const pid_t tid,
+                                 const size_t frequencyCount,
+                                 std::vector<uint64_t> &outThreadTimeInState) {
+    std::string timeInStateFilePath =
+            android::base::StringPrintf("%s/%u/task/%u/time_in_state", procPath.c_str(), pid, tid);
+    std::string data;
+
+    if (!android::base::ReadFileToString(timeInStateFilePath, &data)) {
+        ALOGE("Cannot read file: %s", timeInStateFilePath.c_str());
+        return false;
+    }
+
+    auto lines = android::base::Split(data, "\n");
+    size_t index = 0;
+    for (const auto &line : lines) {
+        if (line.empty()) {
+            continue;
         }
 
-        size_t freqCount = 0;
-        for (auto cluster : *cpuFreqs) {
-            freqCount += cluster.size();
+        auto numbers = android::base::Split(line, " ");
+        if (numbers.size() != 2) {
+            continue;
         }
-
-        return freqCount;
-    }
-
-    bool startTrackingProcessCpuTimes(pid_t tgid) {
-        return android::bpf::startTrackingProcessCpuTimes(tgid);
-    }
-
-    bool startAggregatingTaskCpuTimes(pid_t pid, uint16_t aggregationKey) {
-        return android::bpf::startAggregatingTaskCpuTimes(pid, aggregationKey);
-    }
-
-    std::optional<std::unordered_map<uint16_t, std::vector<std::vector<uint64_t>>>>
-    getAggregatedTaskCpuFreqTimes(pid_t pid, const std::vector<uint16_t> &aggregationKeys) {
-        return android::bpf::getAggregatedTaskCpuFreqTimes(pid, aggregationKeys);
-    }
-};
-
-// ICpuTimeInStateReader that uses JNI to provide a map of aggregated CPU time-in-state
-// values.
-// This version of CpuTimeInStateReader is used exclusively for providing mock data in tests.
-class MockCpuTimeInStateReader : public ICpuTimeInStateReader {
-private:
-    JNIEnv *mEnv;
-    jobject mCpuTimeInStateReader;
-
-public:
-    MockCpuTimeInStateReader(JNIEnv *env, jobject cpuTimeInStateReader)
-          : mEnv(env), mCpuTimeInStateReader(cpuTimeInStateReader) {}
-
-    size_t getCpuFrequencyCount();
-
-    bool startTrackingProcessCpuTimes(pid_t tgid);
-
-    bool startAggregatingTaskCpuTimes(pid_t pid, uint16_t aggregationKey);
-
-    std::optional<std::unordered_map<uint16_t, std::vector<std::vector<uint64_t>>>>
-    getAggregatedTaskCpuFreqTimes(pid_t tgid, const std::vector<uint16_t> &aggregationKeys);
-};
-
-static ICpuTimeInStateReader *getCpuTimeInStateReader(JNIEnv *env,
-                                                      jobject cpuTimeInStateReaderObject) {
-    if (cpuTimeInStateReaderObject) {
-        return new MockCpuTimeInStateReader(env, cpuTimeInStateReaderObject);
-    } else {
-        return new BpfCpuTimeInStateReader();
-    }
-}
-
-static jint getCpuFrequencyCount(JNIEnv *env, jclass, jobject cpuTimeInStateReaderObject) {
-    std::unique_ptr<ICpuTimeInStateReader> cpuTimeInStateReader(
-            getCpuTimeInStateReader(env, cpuTimeInStateReaderObject));
-    return cpuTimeInStateReader->getCpuFrequencyCount();
-}
-
-static jboolean startTrackingProcessCpuTimes(JNIEnv *env, jclass, jint tgid,
-                                             jobject cpuTimeInStateReaderObject) {
-    std::unique_ptr<ICpuTimeInStateReader> cpuTimeInStateReader(
-            getCpuTimeInStateReader(env, cpuTimeInStateReaderObject));
-    return cpuTimeInStateReader->startTrackingProcessCpuTimes(tgid);
-}
-
-static jboolean startAggregatingThreadCpuTimes(JNIEnv *env, jclass, jintArray selectedThreadIdArray,
-                                               jobject cpuTimeInStateReaderObject) {
-    ScopedIntArrayRO selectedThreadIds(env, selectedThreadIdArray);
-    std::unique_ptr<ICpuTimeInStateReader> cpuTimeInStateReader(
-            getCpuTimeInStateReader(env, cpuTimeInStateReaderObject));
-
-    for (int i = 0; i < selectedThreadIds.size(); i++) {
-        if (!cpuTimeInStateReader->startAggregatingTaskCpuTimes(selectedThreadIds[i],
-                                                                SELECTED_THREAD_AGGREGATION_KEY)) {
+        uint64_t timeInState;
+        if (!android::base::ParseUint<uint64_t>(numbers[1], &timeInState)) {
+            ALOGE("Invalid time_in_state file format: %s", timeInStateFilePath.c_str());
             return false;
         }
-    }
-    return true;
-}
-
-// Converts time-in-state data from a vector of vectors to a flat array.
-// Also converts from nanoseconds to milliseconds.
-static bool flattenTimeInStateData(ScopedLongArrayRW &cpuTimesMillis,
-                                   const std::vector<std::vector<uint64_t>> &data) {
-    size_t frequencyCount = cpuTimesMillis.size();
-    size_t index = 0;
-    for (const auto &cluster : data) {
-        for (const uint64_t &timeNanos : cluster) {
-            if (index < frequencyCount) {
-                cpuTimesMillis[index] = timeNanos / NSEC_PER_MSEC;
-            }
-            index++;
+        if (index < frequencyCount) {
+            outThreadTimeInState[index] = timeInState;
         }
+        index++;
     }
+
     if (index != frequencyCount) {
-        ALOGE("CPU time-in-state reader returned data for %zu frequencies; expected: %zu", index,
-              frequencyCount);
+        ALOGE("Incorrect number of frequencies %u in %s. Expected %u",
+              (uint32_t)outThreadTimeInState.size(), timeInStateFilePath.c_str(),
+              (uint32_t)frequencyCount);
         return false;
     }
 
     return true;
 }
 
-// Reads all CPU time-in-state data accumulated by BPF and aggregates per-frequency
+static int pidCompare(const void *a, const void *b) {
+    return (*(pid_t *)a - *(pid_t *)b);
+}
+
+static inline bool isSelectedThread(const pid_t tid, const pid_t *selectedThreadIds,
+                                    const size_t selectedThreadCount) {
+    return bsearch(&tid, selectedThreadIds, selectedThreadCount, sizeof(pid_t), pidCompare) != NULL;
+}
+
+// Reads all /proc/<pid>/task/*/time_in_state files and aggregates per-frequency
 // time in state data for all threads.  Also, separately aggregates time in state for
 // selected threads whose TIDs are passes as selectedThreadIds.
-static jboolean readProcessCpuUsage(JNIEnv *env, jclass, jint pid,
+static void aggregateThreadCpuTimes(const std::string &procPath, const pid_t pid,
+                                    const std::vector<pid_t> &threadIds,
+                                    const size_t frequencyCount, const pid_t *selectedThreadIds,
+                                    const size_t selectedThreadCount,
+                                    uint64_t *threadCpuTimesMillis,
+                                    uint64_t *selectedThreadCpuTimesMillis) {
+    for (size_t j = 0; j < frequencyCount; j++) {
+        threadCpuTimesMillis[j] = 0;
+        selectedThreadCpuTimesMillis[j] = 0;
+    }
+
+    for (size_t i = 0; i < threadIds.size(); i++) {
+        pid_t tid = threadIds[i];
+        std::vector<uint64_t> timeInState(frequencyCount);
+        if (!getThreadTimeInState(procPath, pid, tid, frequencyCount, timeInState)) {
+            continue;
+        }
+
+        bool selectedThread = isSelectedThread(tid, selectedThreadIds, selectedThreadCount);
+        for (size_t j = 0; j < frequencyCount; j++) {
+            threadCpuTimesMillis[j] += timeInState[j];
+            if (selectedThread) {
+                selectedThreadCpuTimesMillis[j] += timeInState[j];
+            }
+        }
+    }
+    for (size_t i = 0; i < frequencyCount; i++) {
+        threadCpuTimesMillis[i] *= gJiffyMillis;
+        selectedThreadCpuTimesMillis[i] *= gJiffyMillis;
+    }
+}
+
+// Reads process utime and stime from the /proc/<pid>/stat file.
+// Format of this file is described in https://man7.org/linux/man-pages/man5/proc.5.html.
+static bool getProcessCpuTime(const std::string &procPath, const pid_t pid,
+                              uint64_t &outTimeMillis) {
+    std::string statFilePath = android::base::StringPrintf("%s/%u/stat", procPath.c_str(), pid);
+    std::string data;
+    if (!android::base::ReadFileToString(statFilePath, &data)) {
+        return false;
+    }
+
+    auto fields = android::base::Split(data, " ");
+    uint64_t utime, stime;
+
+    // Field 14 (counting from 1) is utime - process time in user space, in jiffies
+    // Field 15 (counting from 1) is stime - process time in system space, in jiffies
+    if (fields.size() < 15 || !android::base::ParseUint(fields[13], &utime) ||
+        !android::base::ParseUint(fields[14], &stime)) {
+        ALOGE("Invalid file format %s", statFilePath.c_str());
+        return false;
+    }
+
+    outTimeMillis = (utime + stime) * gJiffyMillis;
+    return true;
+}
+
+// Estimates per cluster per frequency CPU time for the entire process
+// by distributing the total process CPU time proportionately to how much
+// CPU time its threads took on those clusters/frequencies.  This algorithm
+// works more accurately when when we have equally distributed concurrency.
+// TODO(b/169279846): obtain actual process CPU times from the kernel
+static void estimateProcessTimeInState(const uint64_t processCpuTimeMillis,
+                                       const uint64_t *threadCpuTimesMillis,
+                                       const size_t frequencyCount,
+                                       uint64_t *processCpuTimesMillis) {
+    uint64_t totalCpuTimeAllThreads = 0;
+    for (size_t i = 0; i < frequencyCount; i++) {
+        totalCpuTimeAllThreads += threadCpuTimesMillis[i];
+    }
+
+    if (totalCpuTimeAllThreads != 0) {
+        for (size_t i = 0; i < frequencyCount; i++) {
+            processCpuTimesMillis[i] =
+                    processCpuTimeMillis * threadCpuTimesMillis[i] / totalCpuTimeAllThreads;
+        }
+    } else {
+        for (size_t i = 0; i < frequencyCount; i++) {
+            processCpuTimesMillis[i] = 0;
+        }
+    }
+}
+
+static jboolean readProcessCpuUsage(JNIEnv *env, jclass, jstring procPath, jint pid,
+                                    jintArray selectedThreadIdArray,
+                                    jlongArray processCpuTimesMillisArray,
                                     jlongArray threadCpuTimesMillisArray,
-                                    jlongArray selectedThreadCpuTimesMillisArray,
-                                    jobject cpuTimeInStateReaderObject) {
+                                    jlongArray selectedThreadCpuTimesMillisArray) {
+    ScopedUtfChars procPathChars(env, procPath);
+    ScopedIntArrayRO selectedThreadIds(env, selectedThreadIdArray);
+    ScopedLongArrayRW processCpuTimesMillis(env, processCpuTimesMillisArray);
     ScopedLongArrayRW threadCpuTimesMillis(env, threadCpuTimesMillisArray);
     ScopedLongArrayRW selectedThreadCpuTimesMillis(env, selectedThreadCpuTimesMillisArray);
-    std::unique_ptr<ICpuTimeInStateReader> cpuTimeInStateReader(
-            getCpuTimeInStateReader(env, cpuTimeInStateReaderObject));
 
-    const size_t frequencyCount = cpuTimeInStateReader->getCpuFrequencyCount();
+    std::string procPathStr(procPathChars.c_str());
+
+    // Get all thread IDs for the process.
+    std::vector<pid_t> threadIds;
+    if (!getThreadIds(procPathStr, pid, threadIds)) {
+        ALOGE("Could not obtain thread IDs from: %s", procPathStr.c_str());
+        return false;
+    }
+
+    size_t frequencyCount = processCpuTimesMillis.size();
 
     if (threadCpuTimesMillis.size() != frequencyCount) {
-        ALOGE("Invalid threadCpuTimesMillis array length: %zu frequencies; expected: %zu",
-              threadCpuTimesMillis.size(), frequencyCount);
+        ALOGE("Invalid array length: threadCpuTimesMillis");
         return false;
     }
-
     if (selectedThreadCpuTimesMillis.size() != frequencyCount) {
-        ALOGE("Invalid selectedThreadCpuTimesMillis array length: %zu frequencies; expected: %zu",
-              selectedThreadCpuTimesMillis.size(), frequencyCount);
+        ALOGE("Invalid array length: selectedThreadCpuTimesMillisArray");
         return false;
     }
 
-    for (size_t i = 0; i < frequencyCount; i++) {
-        threadCpuTimesMillis[i] = 0;
-        selectedThreadCpuTimesMillis[i] = 0;
-    }
+    aggregateThreadCpuTimes(procPathStr, pid, threadIds, frequencyCount, selectedThreadIds.get(),
+                            selectedThreadIds.size(),
+                            reinterpret_cast<uint64_t *>(threadCpuTimesMillis.get()),
+                            reinterpret_cast<uint64_t *>(selectedThreadCpuTimesMillis.get()));
 
-    std::optional<std::unordered_map<uint16_t, std::vector<std::vector<uint64_t>>>> data =
-            cpuTimeInStateReader->getAggregatedTaskCpuFreqTimes(pid,
-                                                                {DEFAULT_THREAD_AGGREGATION_KEY,
-                                                                 SELECTED_THREAD_AGGREGATION_KEY});
-    if (!data) {
-        ALOGE("Cannot read thread CPU times for PID %d", pid);
-        return false;
+    uint64_t processCpuTime;
+    bool ret = getProcessCpuTime(procPathStr, pid, processCpuTime);
+    if (ret) {
+        estimateProcessTimeInState(processCpuTime,
+                                   reinterpret_cast<uint64_t *>(threadCpuTimesMillis.get()),
+                                   frequencyCount,
+                                   reinterpret_cast<uint64_t *>(processCpuTimesMillis.get()));
     }
-
-    if (!flattenTimeInStateData(threadCpuTimesMillis, (*data)[DEFAULT_THREAD_AGGREGATION_KEY])) {
-        return false;
-    }
-
-    if (!flattenTimeInStateData(selectedThreadCpuTimesMillis,
-                                (*data)[SELECTED_THREAD_AGGREGATION_KEY])) {
-        return false;
-    }
-
-    // threadCpuTimesMillis returns CPU times for _all_ threads, including the selected ones
-    for (size_t i = 0; i < frequencyCount; i++) {
-        threadCpuTimesMillis[i] += selectedThreadCpuTimesMillis[i];
-    }
-
-    return true;
+    return ret;
 }
 
 static const JNINativeMethod g_single_methods[] = {
-        {"getCpuFrequencyCount",
-         "(Lcom/android/internal/os/KernelSingleProcessCpuThreadReader$CpuTimeInStateReader;)I",
-         (void *)getCpuFrequencyCount},
-        {"startTrackingProcessCpuTimes",
-         "(ILcom/android/internal/os/KernelSingleProcessCpuThreadReader$CpuTimeInStateReader;)Z",
-         (void *)startTrackingProcessCpuTimes},
-        {"startAggregatingThreadCpuTimes",
-         "([ILcom/android/internal/os/KernelSingleProcessCpuThreadReader$CpuTimeInStateReader;)Z",
-         (void *)startAggregatingThreadCpuTimes},
-        {"readProcessCpuUsage",
-         "(I[J[J"
-         "Lcom/android/internal/os/KernelSingleProcessCpuThreadReader$CpuTimeInStateReader;)Z",
-         (void *)readProcessCpuUsage},
+        {"readProcessCpuUsage", "(Ljava/lang/String;I[I[J[J[J)Z", (void *)readProcessCpuUsage},
 };
 
 int register_com_android_internal_os_KernelSingleProcessCpuThreadReader(JNIEnv *env) {
     return RegisterMethodsOrDie(env, "com/android/internal/os/KernelSingleProcessCpuThreadReader",
                                 g_single_methods, NELEM(g_single_methods));
-}
-
-size_t MockCpuTimeInStateReader::getCpuFrequencyCount() {
-    jclass cls = mEnv->GetObjectClass(mCpuTimeInStateReader);
-    jmethodID mid = mEnv->GetMethodID(cls, "getCpuFrequencyCount", "()I");
-    if (mid == 0) {
-        ALOGE("Couldn't find the method getCpuFrequencyCount");
-        return false;
-    }
-    return (size_t)mEnv->CallIntMethod(mCpuTimeInStateReader, mid);
-}
-
-bool MockCpuTimeInStateReader::startTrackingProcessCpuTimes(pid_t tgid) {
-    jclass cls = mEnv->GetObjectClass(mCpuTimeInStateReader);
-    jmethodID mid = mEnv->GetMethodID(cls, "startTrackingProcessCpuTimes", "(I)Z");
-    if (mid == 0) {
-        ALOGE("Couldn't find the method startTrackingProcessCpuTimes");
-        return false;
-    }
-    return mEnv->CallBooleanMethod(mCpuTimeInStateReader, mid, tgid);
-}
-
-bool MockCpuTimeInStateReader::startAggregatingTaskCpuTimes(pid_t pid, uint16_t aggregationKey) {
-    jclass cls = mEnv->GetObjectClass(mCpuTimeInStateReader);
-    jmethodID mid = mEnv->GetMethodID(cls, "startAggregatingTaskCpuTimes", "(II)Z");
-    if (mid == 0) {
-        ALOGE("Couldn't find the method startAggregatingTaskCpuTimes");
-        return false;
-    }
-    return mEnv->CallBooleanMethod(mCpuTimeInStateReader, mid, pid, aggregationKey);
-}
-
-std::optional<std::unordered_map<uint16_t, std::vector<std::vector<uint64_t>>>>
-MockCpuTimeInStateReader::getAggregatedTaskCpuFreqTimes(
-        pid_t pid, const std::vector<uint16_t> &aggregationKeys) {
-    jclass cls = mEnv->GetObjectClass(mCpuTimeInStateReader);
-    jmethodID mid =
-            mEnv->GetMethodID(cls, "getAggregatedTaskCpuFreqTimes", "(I)[Ljava/lang/String;");
-    if (mid == 0) {
-        ALOGE("Couldn't find the method getAggregatedTaskCpuFreqTimes");
-        return {};
-    }
-
-    std::unordered_map<uint16_t, std::vector<std::vector<uint64_t>>> map;
-
-    jobjectArray stringArray =
-            (jobjectArray)mEnv->CallObjectMethod(mCpuTimeInStateReader, mid, pid);
-    int size = mEnv->GetArrayLength(stringArray);
-    for (int i = 0; i < size; i++) {
-        ScopedUtfChars line(mEnv, (jstring)mEnv->GetObjectArrayElement(stringArray, i));
-        uint16_t aggregationKey;
-        std::vector<std::vector<uint64_t>> times;
-
-        // Each string is formatted like this: "aggKey:t0_0 t0_1...:t1_0 t1_1..."
-        auto fields = android::base::Split(line.c_str(), ":");
-        android::base::ParseUint(fields[0], &aggregationKey);
-
-        for (int j = 1; j < fields.size(); j++) {
-            auto numbers = android::base::Split(fields[j], " ");
-
-            std::vector<uint64_t> chunk;
-            for (int k = 0; k < numbers.size(); k++) {
-                uint64_t time;
-                android::base::ParseUint(numbers[k], &time);
-                chunk.emplace_back(time);
-            }
-            times.emplace_back(chunk);
-        }
-
-        map.emplace(aggregationKey, times);
-    }
-
-    return map;
 }
 
 } // namespace android
