@@ -11763,13 +11763,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         @Override
-        public ComponentName getProfileOwnerAsUser(@UserIdInt int userId) {
-            return DevicePolicyManagerService.this.getProfileOwnerAsUser(userId);
-        }
-
-        @Override
-        public int getDeviceOwnerUserId() {
-            return DevicePolicyManagerService.this.getDeviceOwnerUserId();
+        public ComponentName getProfileOwnerAsUser(int userHandle) {
+            return DevicePolicyManagerService.this.getProfileOwnerAsUser(userHandle);
         }
 
         @Override
