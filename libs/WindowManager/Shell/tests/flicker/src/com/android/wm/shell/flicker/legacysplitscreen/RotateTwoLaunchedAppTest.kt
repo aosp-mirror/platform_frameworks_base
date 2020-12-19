@@ -23,6 +23,7 @@ import com.android.server.wm.flicker.dsl.runWithFlicker
 import com.android.server.wm.flicker.helpers.exitSplitScreen
 import com.android.server.wm.flicker.helpers.isInSplitScreen
 import com.android.server.wm.flicker.helpers.launchSplitScreen
+import com.android.server.wm.flicker.helpers.openQuickStepAndClearRecentAppsFromOverview
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
@@ -57,7 +58,8 @@ class RotateTwoLaunchedAppTest(
             }
             setup {
                 test {
-                    device.wakeUpAndGoToHomeScreen()
+                    uiDevice.wakeUpAndGoToHomeScreen()
+                    uiDevice.openQuickStepAndClearRecentAppsFromOverview()
                 }
             }
             teardown {
@@ -83,7 +85,7 @@ class RotateTwoLaunchedAppTest(
             transitions {
                 secondaryApp.launchViaIntent()
                 splitScreenApp.launchViaIntent()
-                device.launchSplitScreen()
+                uiDevice.launchSplitScreen()
                 splitScreenApp.reopenAppFromOverview()
                 setRotation(rotation)
             }
@@ -121,7 +123,7 @@ class RotateTwoLaunchedAppTest(
                 secondaryApp.launchViaIntent()
                 splitScreenApp.launchViaIntent()
                 setRotation(rotation)
-                device.launchSplitScreen()
+                uiDevice.launchSplitScreen()
                 splitScreenApp.reopenAppFromOverview()
             }
             assertions {
