@@ -254,13 +254,13 @@ class AndroidKeyStoreBCWorkaroundProvider extends Provider {
     private void putAsymmetricCipherImpl(String transformation, String implClass) {
         put("Cipher." + transformation, implClass);
         put("Cipher." + transformation + " SupportedKeyClasses",
-                KEYSTORE_PRIVATE_KEY_CLASS_NAME + "|" + KEYSTORE_PUBLIC_KEY_CLASS_NAME);
+                KEYSTORE_PRIVATE_KEY_CLASS_NAME);
     }
 
     private void putSignatureImpl(String algorithm, String implClass) {
         put("Signature." + algorithm, implClass);
         put("Signature." + algorithm + " SupportedKeyClasses",
-                KEYSTORE_PRIVATE_KEY_CLASS_NAME + "|" + KEYSTORE_PUBLIC_KEY_CLASS_NAME);
+                KEYSTORE_PRIVATE_KEY_CLASS_NAME);
     }
 
     public static String[] getSupportedEcdsaSignatureDigests() {

@@ -64,6 +64,11 @@ abstract class AndroidKeyStoreAuthenticatedAESCipherSpi extends AndroidKeyStoreC
         }
 
         @Override
+        protected final String getTransform() {
+            return "AES/GCM/NoPadding";
+        }
+
+        @Override
         protected final void resetAll() {
             mTagLengthBits = DEFAULT_TAG_LENGTH_BITS;
             super.resetAll();
