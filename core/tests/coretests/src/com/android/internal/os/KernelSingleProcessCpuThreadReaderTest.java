@@ -19,87 +19,122 @@ package com.android.internal.os;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertTrue;
+
+import android.content.Context;
+import android.os.FileUtils;
+
+import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class KernelSingleProcessCpuThreadReaderTest {
 
+    private File mProcDirectory;
+
+    @Before
+    public void setUp() {
+        Context context = InstrumentationRegistry.getContext();
+        mProcDirectory = context.getDir("proc", Context.MODE_PRIVATE);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        FileUtils.deleteContents(mProcDirectory);
+    }
+
     @Test
     public void getProcessCpuUsage() throws IOException {
-        // Units are nanoseconds
-        MockCpuTimeInStateReader mockReader = new MockCpuTimeInStateReader(4, new String[] {
-                "0:1000000000 2000000000 3000000000:4000000000",
-                "1:100000000 200000000 300000000:400000000",
-        });
+        setupDirectory(42,
+                new int[] {42, 1, 2, 3},
+                new int[] {1000, 2000},
+                // Units are 10ms aka 10000Us
+                new int[][] {{100, 200}, {0, 200}, {100, 300}, {0, 600}},
+                new int[] {4500, 500});
 
         KernelSingleProcessCpuThreadReader reader = new KernelSingleProcessCpuThreadReader(42,
-                mockReader);
-        reader.setSelectedThreadIds(new int[] {2, 3});
-        reader.startTrackingThreadCpuTimes();
+                mProcDirectory.toPath());
         KernelSingleProcessCpuThreadReader.ProcessCpuUsage processCpuUsage =
-                reader.getProcessCpuUsage();
-        assertThat(mockReader.mTrackedTgid).isEqualTo(42);
-        // The strings are formatted as <TID TGID AGG_KEY>, where AGG_KEY is 1 for binder
-        // threads and 0 for all other threads.
-        assertThat(mockReader.mTrackedTasks).containsExactly(
-                "2 1",
-                "3 1");
-        assertThat(processCpuUsage.threadCpuTimesMillis).isEqualTo(
-                new long[] {1100, 2200, 3300, 4400});
-        assertThat(processCpuUsage.selectedThreadCpuTimesMillis).isEqualTo(
-                new long[] {100, 200, 300, 400});
+                reader.getProcessCpuUsage(new int[] {2, 3});
+        assertThat(processCpuUsage.threadCpuTimesMillis).isEqualTo(new long[] {2000, 13000});
+        assertThat(processCpuUsage.selectedThreadCpuTimesMillis).isEqualTo(new long[] {1000, 9000});
+        assertThat(processCpuUsage.processCpuTimesMillis).isEqualTo(new long[] {6666, 43333});
     }
 
     @Test
     public void getCpuFrequencyCount() throws IOException {
-        MockCpuTimeInStateReader mockReader = new MockCpuTimeInStateReader(3, new String[0]);
+        setupDirectory(13,
+                new int[] {13},
+                new int[] {1000, 2000, 3000},
+                new int[][] {{100, 200, 300}},
+                new int[] {14, 15});
 
         KernelSingleProcessCpuThreadReader reader = new KernelSingleProcessCpuThreadReader(13,
-                mockReader);
+                mProcDirectory.toPath());
         int cpuFrequencyCount = reader.getCpuFrequencyCount();
         assertThat(cpuFrequencyCount).isEqualTo(3);
     }
 
-    public static class MockCpuTimeInStateReader implements
-            KernelSingleProcessCpuThreadReader.CpuTimeInStateReader {
-        private final int mCpuFrequencyCount;
-        private final String[] mAggregatedTaskCpuFreqTimes;
-        public int mTrackedTgid;
-        public List<String> mTrackedTasks = new ArrayList<>();
+    private void setupDirectory(int pid, int[] threadIds, int[] cpuFrequencies,
+            int[][] threadCpuTimes, int[] processCpuTimes)
+            throws IOException {
 
-        public MockCpuTimeInStateReader(int cpuFrequencyCount,
-                String[] aggregatedTaskCpuFreqTimes) {
-            mCpuFrequencyCount = cpuFrequencyCount;
-            mAggregatedTaskCpuFreqTimes = aggregatedTaskCpuFreqTimes;
+        assertTrue(mProcDirectory.toPath().resolve("self").toFile().mkdirs());
+
+        try (OutputStream timeInStateStream =
+                     Files.newOutputStream(
+                             mProcDirectory.toPath().resolve("self").resolve("time_in_state"))) {
+            for (int i = 0; i < cpuFrequencies.length; i++) {
+                final String line = cpuFrequencies[i] + " 0\n";
+                timeInStateStream.write(line.getBytes());
+            }
         }
 
-        @Override
-        public int getCpuFrequencyCount() {
-            return mCpuFrequencyCount;
+        Path processPath = mProcDirectory.toPath().resolve(String.valueOf(pid));
+
+        // Make /proc/$PID
+        assertTrue(processPath.toFile().mkdirs());
+
+        // Write /proc/$PID/stat. Only the fields 14-17 matter.
+        try (OutputStream timeInStateStream = Files.newOutputStream(processPath.resolve("stat"))) {
+            timeInStateStream.write(
+                    (pid + " (test) S 4 5 6 7 8 9 10 11 12 13 "
+                            + processCpuTimes[0] + " "
+                            + processCpuTimes[1] + " "
+                            + "16 17 18 19 20 ...").getBytes());
         }
 
-        @Override
-        public boolean startTrackingProcessCpuTimes(int tgid) {
-            mTrackedTgid = tgid;
-            return true;
-        }
+        // Make /proc/$PID/task
+        final Path selfThreadsPath = processPath.resolve("task");
+        assertTrue(selfThreadsPath.toFile().mkdirs());
 
-        public boolean startAggregatingTaskCpuTimes(int pid, int aggregationKey) {
-            mTrackedTasks.add(pid + " " + aggregationKey);
-            return true;
-        }
+        // Make thread directories
+        for (int i = 0; i < threadIds.length; i++) {
+            // Make /proc/$PID/task/$TID
+            final Path threadPath = selfThreadsPath.resolve(String.valueOf(threadIds[i]));
+            assertTrue(threadPath.toFile().mkdirs());
 
-        public String[] getAggregatedTaskCpuFreqTimes(int pid) {
-            return mAggregatedTaskCpuFreqTimes;
+            // Make /proc/$PID/task/$TID/time_in_state
+            try (OutputStream timeInStateStream =
+                         Files.newOutputStream(threadPath.resolve("time_in_state"))) {
+                for (int j = 0; j < cpuFrequencies.length; j++) {
+                    final String line = cpuFrequencies[j] + " " + threadCpuTimes[i][j] + "\n";
+                    timeInStateStream.write(line.getBytes());
+                }
+            }
         }
     }
 }

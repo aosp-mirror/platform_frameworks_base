@@ -6183,6 +6183,29 @@ public class AudioManager {
     }
 
     /**
+     * Returns an {@link AudioDeviceInfo} corresponding to the specified {@link AudioPort} ID.
+     * @param portId The audio port ID to look up for.
+     * @param flags A set of bitflags specifying the criteria to test.
+     * @see #GET_DEVICES_OUTPUTS
+     * @see #GET_DEVICES_INPUTS
+     * @see #GET_DEVICES_ALL
+     * @return An AudioDeviceInfo or null if no device with matching port ID is found.
+     * @hide
+     */
+    public static AudioDeviceInfo getDeviceForPortId(int portId, int flags) {
+        if (portId == 0) {
+            return null;
+        }
+        AudioDeviceInfo[] devices = getDevicesStatic(flags);
+        for (AudioDeviceInfo device : devices) {
+            if (device.getId() == portId) {
+                return device;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Registers an {@link AudioDeviceCallback} object to receive notifications of changes
      * to the set of connected audio devices.
      * @param callback The {@link AudioDeviceCallback} object to receive connect/disconnect
@@ -6867,6 +6890,297 @@ public class AudioManager {
             throw new UnsupportedOperationException("HW A/V synchronization is not supported.");
         }
         return hwSyncId;
+    }
+
+    /**
+     * Selects the audio device that should be used for communication use cases, for instance voice
+     * or video calls. This method can be used by voice or video chat applications to select a
+     * different audio device than the one selected by default by the platform.
+     * <p>The device selection is expressed as an {@link AudioDeviceInfo}, of role sink
+     * ({@link AudioDeviceInfo#isSink()} is <code>true</code>) and of one of the following types:
+     * <ul>
+     *   <li> {@link AudioDeviceInfo#TYPE_BUILTIN_EARPIECE}
+     *   <li> {@link AudioDeviceInfo#TYPE_BUILTIN_SPEAKER}
+     *   <li> {@link AudioDeviceInfo#TYPE_WIRED_HEADSET}
+     *   <li> {@link AudioDeviceInfo#TYPE_BLUETOOTH_SCO}
+     *   <li> {@link AudioDeviceInfo#TYPE_USB_HEADSET}
+     *   <li> {@link AudioDeviceInfo#TYPE_BLE_HEADSET}
+     * </ul>
+     * The selection is active as long as the requesting application lives, until
+     * {@link #clearDeviceForCommunication} is called or until the device is disconnected.
+     * It is therefore important for applications to clear the request when a call ends or the
+     * application is paused.
+     * <p>In case of simultaneous requests by multiple applications the priority is given to the
+     * application currently controlling the audio mode (see {@link #setMode(int)}). This is the
+     * latest application having selected mode {@link #MODE_IN_COMMUNICATION} or mode
+     * {@link #MODE_IN_CALL}. Note that <code>MODE_IN_CALL</code> can only be selected by the main
+     * telephony application with permission
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE}.
+     * <p> If the requested devices is not currently available, the request will be rejected and
+     * the method will return false.
+     * <p>This API replaces the following deprecated APIs:
+     * <ul>
+     *   <li> {@link #startBluetoothSco()}
+     *   <li> {@link #stopBluetoothSco()}
+     *   <li> {@link #setSpeakerphoneOn(boolean)}
+     * </ul>
+     * <h4>Example</h4>
+     * <p>The example below shows how to enable and disable speakerphone mode.
+     * <pre class="prettyprint">
+     * // Get an AudioManager instance
+     * AudioManager audioManager = Context.getSystemService(AudioManager.class);
+     * try {
+     *     AudioDeviceInfo speakerDevice = null;
+     *     AudioDeviceInfo[] devices = audioManager.getDevices(GET_DEVICES_OUTPUTS);
+     *     for (AudioDeviceInfo device : devices) {
+     *         if (device.getType() == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER) {
+     *             speakerDevice = device;
+     *             break;
+     *         }
+     *     }
+     *     if (speakerDevice != null) {
+     *         // Turn speakerphone ON.
+     *         boolean result = audioManager.setDeviceForCommunication(speakerDevice);
+     *         if (!result) {
+     *             // Handle error.
+     *         }
+     *         // Turn speakerphone OFF.
+     *         audioManager.clearDeviceForCommunication();
+     *     }
+     * } catch (IllegalArgumentException e) {
+     *     // Handle exception.
+     * }
+     * </pre>
+     * @param device the requested audio device.
+     * @return <code>true</code> if the request was accepted, <code>false</code> otherwise.
+     * @throws IllegalArgumentException If an invalid device is specified.
+     */
+    public boolean setDeviceForCommunication(@NonNull AudioDeviceInfo device) {
+        Objects.requireNonNull(device);
+        try {
+            if (device.getId() == 0) {
+                throw new IllegalArgumentException("In valid device: " + device);
+            }
+            return getService().setDeviceForCommunication(mICallBack, device.getId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Cancels previous communication device selection made with
+     * {@link #setDeviceForCommunication(AudioDeviceInfo)}.
+     */
+    public void clearDeviceForCommunication() {
+        try {
+            getService().setDeviceForCommunication(mICallBack, 0);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns currently selected audio device for communication.
+     * <p>This API replaces the following deprecated APIs:
+     * <ul>
+     *   <li> {@link #isBluetoothScoOn()}
+     *   <li> {@link #isSpeakerphoneOn()}
+     * </ul>
+     * @return an {@link AudioDeviceInfo} indicating which audio device is
+     * currently selected or communication use cases or null if default selection
+     * is used.
+     */
+    @Nullable
+    public AudioDeviceInfo getDeviceForCommunication() {
+        try {
+            return getDeviceForPortId(
+                    getService().getDeviceForCommunication(), GET_DEVICES_OUTPUTS);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Returns an {@link AudioDeviceInfo} corresponding to a connected device of the type provided.
+     * The type must be a valid output type defined in <code>AudioDeviceInfo</code> class,
+     * for instance {@link AudioDeviceInfo#TYPE_BUILTIN_SPEAKER}.
+     * The method will return null if no device of the provided type is connected.
+     * If more than one device of the provided type is connected, an object corresponding to the
+     * first device encountered in the enumeration list will be returned.
+     * @param deviceType The device device for which an <code>AudioDeviceInfo</code>
+     * object is queried.
+     * @return An AudioDeviceInfo object or null if no device with the requested type is connected.
+     * @throws IllegalArgumentException If an invalid device type is specified.
+     */
+    @TestApi
+    @Nullable
+    public static AudioDeviceInfo getDeviceInfoFromType(
+            @AudioDeviceInfo.AudioDeviceTypeOut int deviceType) {
+        AudioDeviceInfo[] devices = getDevicesStatic(GET_DEVICES_OUTPUTS);
+        for (AudioDeviceInfo device : devices) {
+            if (device.getType() == deviceType) {
+                return device;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Listener registered by client to be notified upon communication audio device change.
+     * See {@link #setDeviceForCommunication(AudioDeviceInfo)}.
+     */
+    public interface OnCommunicationDeviceChangedListener {
+        /**
+         * Callback method called upon communication audio device change.
+         * @param device the audio device selected for communication use cases
+         */
+        void onCommunicationDeviceChanged(@Nullable AudioDeviceInfo device);
+    }
+
+    /**
+     * Adds a listener for being notified of changes to the communication audio device.
+     * See {@link #setDeviceForCommunication(AudioDeviceInfo)}.
+     * @param executor
+     * @param listener
+     */
+    public void addOnCommunicationDeviceChangedListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnCommunicationDeviceChangedListener listener) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(listener);
+        synchronized (mCommDevListenerLock) {
+            if (hasCommDevListener(listener)) {
+                throw new IllegalArgumentException(
+                        "attempt to call addOnCommunicationDeviceChangedListener() "
+                                + "on a previously registered listener");
+            }
+            // lazy initialization of the list of strategy-preferred device listener
+            if (mCommDevListeners == null) {
+                mCommDevListeners = new ArrayList<>();
+            }
+            final int oldCbCount = mCommDevListeners.size();
+            mCommDevListeners.add(new CommDevListenerInfo(listener, executor));
+            if (oldCbCount == 0 && mCommDevListeners.size() > 0) {
+                // register binder for callbacks
+                if (mCommDevDispatcherStub == null) {
+                    mCommDevDispatcherStub = new CommunicationDeviceDispatcherStub();
+                }
+                try {
+                    getService().registerCommunicationDeviceDispatcher(mCommDevDispatcherStub);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+        }
+    }
+
+    /**
+     * Removes a previously added listener of changes to the communication audio device.
+     * See {@link #setDeviceForCommunication(AudioDeviceInfo)}.
+     * @param listener
+     */
+    public void removeOnCommunicationDeviceChangedListener(
+            @NonNull OnCommunicationDeviceChangedListener listener) {
+        Objects.requireNonNull(listener);
+        synchronized (mCommDevListenerLock) {
+            if (!removeCommDevListener(listener)) {
+                throw new IllegalArgumentException(
+                        "attempt to call removeOnCommunicationDeviceChangedListener() "
+                                + "on an unregistered listener");
+            }
+            if (mCommDevListeners.size() == 0) {
+                // unregister binder for callbacks
+                try {
+                    getService().unregisterCommunicationDeviceDispatcher(
+                            mCommDevDispatcherStub);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                } finally {
+                    mCommDevDispatcherStub = null;
+                    mCommDevListeners = null;
+                }
+            }
+        }
+    }
+
+    private final Object mCommDevListenerLock = new Object();
+    /**
+     * List of listeners for preferred device for strategy and their associated Executor.
+     * List is lazy-initialized on first registration
+     */
+    @GuardedBy("mCommDevListenerLock")
+    private @Nullable ArrayList<CommDevListenerInfo> mCommDevListeners;
+
+    private static class CommDevListenerInfo {
+        final @NonNull OnCommunicationDeviceChangedListener mListener;
+        final @NonNull Executor mExecutor;
+
+        CommDevListenerInfo(OnCommunicationDeviceChangedListener listener, Executor exe) {
+            mListener = listener;
+            mExecutor = exe;
+        }
+    }
+
+    @GuardedBy("mCommDevListenerLock")
+    private CommunicationDeviceDispatcherStub mCommDevDispatcherStub;
+
+    private final class CommunicationDeviceDispatcherStub
+            extends ICommunicationDeviceDispatcher.Stub {
+
+        @Override
+        public void dispatchCommunicationDeviceChanged(int portId) {
+            // make a shallow copy of listeners so callback is not executed under lock
+            final ArrayList<CommDevListenerInfo> commDevListeners;
+            synchronized (mCommDevListenerLock) {
+                if (mCommDevListeners == null || mCommDevListeners.size() == 0) {
+                    return;
+                }
+                commDevListeners = (ArrayList<CommDevListenerInfo>) mCommDevListeners.clone();
+            }
+            AudioDeviceInfo device = getDeviceForPortId(portId, GET_DEVICES_OUTPUTS);
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                for (CommDevListenerInfo info : commDevListeners) {
+                    info.mExecutor.execute(() ->
+                            info.mListener.onCommunicationDeviceChanged(device));
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    @GuardedBy("mCommDevListenerLock")
+    private @Nullable CommDevListenerInfo getCommDevListenerInfo(
+            OnCommunicationDeviceChangedListener listener) {
+        if (mCommDevListeners == null) {
+            return null;
+        }
+        for (CommDevListenerInfo info : mCommDevListeners) {
+            if (info.mListener == listener) {
+                return info;
+            }
+        }
+        return null;
+    }
+
+    @GuardedBy("mCommDevListenerLock")
+    private boolean hasCommDevListener(OnCommunicationDeviceChangedListener listener) {
+        return getCommDevListenerInfo(listener) != null;
+    }
+
+    @GuardedBy("mCommDevListenerLock")
+    /**
+     * @return true if the listener was removed from the list
+     */
+    private boolean removeCommDevListener(OnCommunicationDeviceChangedListener listener) {
+        final CommDevListenerInfo infoToRemove = getCommDevListenerInfo(listener);
+        if (infoToRemove != null) {
+            mCommDevListeners.remove(infoToRemove);
+            return true;
+        }
+        return false;
     }
 
     //---------------------------------------------------------

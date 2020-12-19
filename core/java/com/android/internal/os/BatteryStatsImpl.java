@@ -1106,6 +1106,16 @@ public class BatteryStatsImpl extends BatteryStats {
     private long[] mCpuFreqs;
 
     /**
+     * Times spent by the system server process grouped by cluster and CPU speed.
+     */
+    private LongSamplingCounterArray mSystemServerCpuTimesUs;
+
+    /**
+     * Times spent by the system server threads grouped by cluster and CPU speed.
+     */
+    private LongSamplingCounterArray mSystemServerThreadCpuTimesUs;
+
+    /**
      * Times spent by the system server threads handling incoming binder requests.
      */
     private LongSamplingCounterArray mBinderThreadCpuTimesUs;
@@ -10844,14 +10854,6 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    /**
-     * Starts tracking CPU time-in-state for threads of the system server process,
-     * keeping a separate account of threads receiving incoming binder calls.
-     */
-    public void startTrackingSystemServerCpuTime() {
-        mSystemServerCpuThreadReader.startTrackingThreadCpuTime();
-    }
-
     public void setCallback(BatteryCallback cb) {
         mCallback = cb;
     }
@@ -11504,6 +11506,8 @@ public class BatteryStatsImpl extends BatteryStats {
 
         MeasuredEnergyStats.resetIfNotNull(mGlobalMeasuredEnergyStats);
 
+        resetIfNotNull(mSystemServerCpuTimesUs, false, elapsedRealtimeUs);
+        resetIfNotNull(mSystemServerThreadCpuTimesUs, false, elapsedRealtimeUs);
         resetIfNotNull(mBinderThreadCpuTimesUs, false, elapsedRealtimeUs);
 
         mLastHistoryStepDetails = null;
@@ -12703,17 +12707,27 @@ public class BatteryStatsImpl extends BatteryStats {
             return;
         }
 
-        if (mBinderThreadCpuTimesUs == null) {
+        if (mSystemServerCpuTimesUs == null) {
+            mSystemServerCpuTimesUs = new LongSamplingCounterArray(mOnBatteryTimeBase);
+            mSystemServerThreadCpuTimesUs = new LongSamplingCounterArray(mOnBatteryTimeBase);
             mBinderThreadCpuTimesUs = new LongSamplingCounterArray(mOnBatteryTimeBase);
         }
+        mSystemServerCpuTimesUs.addCountLocked(systemServiceCpuThreadTimes.processCpuTimesUs);
+        mSystemServerThreadCpuTimesUs.addCountLocked(systemServiceCpuThreadTimes.threadCpuTimesUs);
         mBinderThreadCpuTimesUs.addCountLocked(systemServiceCpuThreadTimes.binderThreadCpuTimesUs);
 
         if (DEBUG_BINDER_STATS) {
-            Slog.d(TAG, "System server threads per CPU cluster (incoming binder threads)");
+            Slog.d(TAG, "System server threads per CPU cluster (binder threads/total threads/%)");
+            long totalCpuTimeMs = 0;
+            long totalThreadTimeMs = 0;
             long binderThreadTimeMs = 0;
             int cpuIndex = 0;
-            final long[] binderThreadCpuTimesUs = mBinderThreadCpuTimesUs.getCountsLocked(
-                    BatteryStats.STATS_SINCE_CHARGED);
+            final long[] systemServerCpuTimesUs =
+                    mSystemServerCpuTimesUs.getCountsLocked(0);
+            final long[] systemServerThreadCpuTimesUs =
+                    mSystemServerThreadCpuTimesUs.getCountsLocked(0);
+            final long[] binderThreadCpuTimesUs =
+                    mBinderThreadCpuTimesUs.getCountsLocked(0);
             int index = 0;
             int numCpuClusters = mPowerProfile.getNumCpuClusters();
             for (int cluster = 0; cluster < numCpuClusters; cluster++) {
@@ -12724,15 +12738,28 @@ public class BatteryStatsImpl extends BatteryStats {
                     if (speed != 0) {
                         sb.append(", ");
                     }
+                    long totalCountMs = systemServerThreadCpuTimesUs[index] / 1000;
                     long binderCountMs = binderThreadCpuTimesUs[index] / 1000;
-                    sb.append(TextUtils.formatSimple("%10d", binderCountMs));
+                    sb.append(String.format("%d/%d(%.1f%%)",
+                            binderCountMs,
+                            totalCountMs,
+                            totalCountMs != 0 ? (double) binderCountMs * 100 / totalCountMs : 0));
 
+                    totalCpuTimeMs += systemServerCpuTimesUs[index] / 1000;
+                    totalThreadTimeMs += totalCountMs;
                     binderThreadTimeMs += binderCountMs;
                     index++;
                 }
                 cpuIndex += mPowerProfile.getNumCoresInCpuCluster(cluster);
                 Slog.d(TAG, sb.toString());
             }
+
+            Slog.d(TAG, "Total system server CPU time (ms): " + totalCpuTimeMs);
+            Slog.d(TAG, "Total system server thread time (ms): " + totalThreadTimeMs);
+            Slog.d(TAG, String.format("Total Binder thread time (ms): %d (%.1f%%)",
+                    binderThreadTimeMs,
+                    binderThreadTimeMs != 0
+                            ? (double) binderThreadTimeMs * 100 / totalThreadTimeMs : 0));
         }
     }
 
@@ -14007,16 +14034,60 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
 
-    /**
-     * Estimates the time spent by the system server handling incoming binder requests.
-     */
     @Override
     public long[] getSystemServiceTimeAtCpuSpeeds() {
-        if (mBinderThreadCpuTimesUs == null) {
+        // Estimates the time spent by the system server handling incoming binder requests.
+        //
+        // The data that we can get from the kernel is this:
+        //   - CPU duration for a (thread - cluster - CPU speed) combination
+        //   - CPU duration for a (UID - cluster - CPU speed) combination
+        //
+        // The configuration we have in the Power Profile is this:
+        //   - Average CPU power for a (cluster - CPU speed) combination.
+        //
+        // The model used by BatteryStats can be illustrated with this example:
+        //
+        // - Let's say the system server has 10 threads.
+        // - These 10 threads spent 1000 ms of CPU time in aggregate
+        // - Of the 10 threads 4 were execute exclusively incoming binder calls.
+        // - These 4 "binder" threads consumed 600 ms of CPU time in aggregate
+        // - The real time spent by the system server process doing all of this is, say, 200 ms.
+        //
+        // We will assume that power consumption is proportional to the time spent by the CPU
+        // across all threads.  This is a crude assumption, but we don't have more detailed data.
+        // Thus,
+        //   binderRealTime = realTime * aggregateBinderThreadTime / aggregateAllThreadTime
+        //
+        // In our example,
+        //   binderRealTime = 200 * 600 / 1000 = 120ms
+        //
+        // We can then multiply this estimated time by the average power to obtain an estimate
+        // of the total power consumed by incoming binder calls for the given cluster/speed
+        // combination.
+
+        if (mSystemServerCpuTimesUs == null) {
             return null;
         }
 
-        return mBinderThreadCpuTimesUs.getCountsLocked(BatteryStats.STATS_SINCE_CHARGED);
+        final long[] systemServerCpuTimesUs = mSystemServerCpuTimesUs.getCountsLocked(
+                BatteryStats.STATS_SINCE_CHARGED);
+        final long [] systemServerThreadCpuTimesUs = mSystemServerThreadCpuTimesUs.getCountsLocked(
+                BatteryStats.STATS_SINCE_CHARGED);
+        final long[] binderThreadCpuTimesUs = mBinderThreadCpuTimesUs.getCountsLocked(
+                BatteryStats.STATS_SINCE_CHARGED);
+
+        final int size = systemServerCpuTimesUs.length;
+        final long[] results = new long[size];
+
+        for (int i = 0; i < size; i++) {
+            if (systemServerThreadCpuTimesUs[i] == 0) {
+                continue;
+            }
+
+            results[i] = systemServerCpuTimesUs[i] * binderThreadCpuTimesUs[i]
+                    / systemServerThreadCpuTimesUs[i];
+        }
+        return results;
     }
 
     /**
@@ -14412,7 +14483,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         updateSystemServiceCallStats();
-        if (mBinderThreadCpuTimesUs != null) {
+        if (mSystemServerThreadCpuTimesUs != null) {
             pw.println("Per UID System server binder time in ms:");
             long[] systemServiceTimeAtCpuSpeeds = getSystemServiceTimeAtCpuSpeeds();
             for (int i = 0; i < size; i++) {
@@ -15999,6 +16070,9 @@ public class BatteryStatsImpl extends BatteryStats {
             mUidStats.append(uid, u);
         }
 
+        mSystemServerCpuTimesUs = LongSamplingCounterArray.readFromParcel(in, mOnBatteryTimeBase);
+        mSystemServerThreadCpuTimesUs = LongSamplingCounterArray.readFromParcel(in,
+                mOnBatteryTimeBase);
         mBinderThreadCpuTimesUs = LongSamplingCounterArray.readFromParcel(in, mOnBatteryTimeBase);
     }
 
@@ -16207,6 +16281,8 @@ public class BatteryStatsImpl extends BatteryStats {
         } else {
             out.writeInt(0);
         }
+        LongSamplingCounterArray.writeToParcel(out, mSystemServerCpuTimesUs);
+        LongSamplingCounterArray.writeToParcel(out, mSystemServerThreadCpuTimesUs);
         LongSamplingCounterArray.writeToParcel(out, mBinderThreadCpuTimesUs);
     }
 

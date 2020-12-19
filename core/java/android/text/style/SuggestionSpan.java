@@ -402,6 +402,10 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
             }
         } else if (autoCorrection) {
             tp.setUnderlineText(mAutoCorrectionUnderlineColor, mAutoCorrectionUnderlineThickness);
+        } else if (misspelled) {
+            tp.setUnderlineText(mMisspelledUnderlineColor, mMisspelledUnderlineThickness);
+        } else if (grammarError) {
+            tp.setUnderlineText(mGrammarErrorUnderlineColor, mGrammarErrorUnderlineThickness);
         }
     }
 
@@ -425,6 +429,10 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
             }
         } else if (autoCorrection) {
             return mAutoCorrectionUnderlineColor;
+        } else if (misspelled) {
+            return mMisspelledUnderlineColor;
+        } else if (grammarError) {
+            return mGrammarErrorUnderlineColor;
         }
         return 0;
     }

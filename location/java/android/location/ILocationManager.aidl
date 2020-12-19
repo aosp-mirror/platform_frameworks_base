@@ -22,7 +22,7 @@ import android.location.Criteria;
 import android.location.GeocoderParams;
 import android.location.Geofence;
 import android.location.GnssMeasurementCorrections;
-import android.location.GnssRequest;
+import android.location.GnssMeasurementRequest;
 import android.location.IGeocodeListener;
 import android.location.IGnssAntennaInfoListener;
 import android.location.IGnssMeasurementsListener;
@@ -78,7 +78,7 @@ interface ILocationManager
     void registerGnssStatusCallback(in IGnssStatusListener callback, String packageName, String attributionTag);
     void unregisterGnssStatusCallback(in IGnssStatusListener callback);
 
-    void addGnssMeasurementsListener(in GnssRequest request, in IGnssMeasurementsListener listener, String packageName, String attributionTag);
+    void addGnssMeasurementsListener(in GnssMeasurementRequest request, in IGnssMeasurementsListener listener, String packageName, String attributionTag);
     void removeGnssMeasurementsListener(in IGnssMeasurementsListener listener);
     void injectGnssMeasurementCorrections(in GnssMeasurementCorrections corrections);
 

@@ -249,7 +249,8 @@ public:
                                                                    const std::string& name);
     base::Result<std::unique_ptr<InputChannel>> createInputMonitor(JNIEnv* env, int32_t displayId,
                                                                    bool isGestureMonitor,
-                                                                   const std::string& name);
+                                                                   const std::string& name,
+                                                                   int32_t pid);
     status_t removeInputChannel(JNIEnv* env, const sp<IBinder>& connectionToken);
     status_t pilferPointers(const sp<IBinder>& token);
 
@@ -487,9 +488,11 @@ base::Result<std::unique_ptr<InputChannel>> NativeInputManager::createInputChann
 }
 
 base::Result<std::unique_ptr<InputChannel>> NativeInputManager::createInputMonitor(
-        JNIEnv* /* env */, int32_t displayId, bool isGestureMonitor, const std::string& name) {
+        JNIEnv* /* env */, int32_t displayId, bool isGestureMonitor, const std::string& name,
+        int32_t pid) {
     ATRACE_CALL();
-    return mInputManager->getDispatcher()->createInputMonitor(displayId, isGestureMonitor, name);
+    return mInputManager->getDispatcher()->createInputMonitor(displayId, isGestureMonitor, name,
+                                                              pid);
 }
 
 status_t NativeInputManager::removeInputChannel(JNIEnv* /* env */,
@@ -1503,7 +1506,7 @@ static jobject nativeCreateInputChannel(JNIEnv* env, jclass /* clazz */, jlong p
 }
 
 static jobject nativeCreateInputMonitor(JNIEnv* env, jclass /* clazz */, jlong ptr, jint displayId,
-                                        jboolean isGestureMonitor, jstring nameObj) {
+                                        jboolean isGestureMonitor, jstring nameObj, jint pid) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
     if (displayId == ADISPLAY_ID_NONE) {
@@ -1516,7 +1519,7 @@ static jobject nativeCreateInputMonitor(JNIEnv* env, jclass /* clazz */, jlong p
     std::string name = nameChars.c_str();
 
     base::Result<std::unique_ptr<InputChannel>> inputChannel =
-            im->createInputMonitor(env, displayId, isGestureMonitor, name);
+            im->createInputMonitor(env, displayId, isGestureMonitor, name, pid);
 
     if (!inputChannel) {
         std::string message = inputChannel.error().message();
@@ -2092,7 +2095,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"nativeHasKeys", "(JII[I[Z)Z", (void*)nativeHasKeys},
         {"nativeCreateInputChannel", "(JLjava/lang/String;)Landroid/view/InputChannel;",
          (void*)nativeCreateInputChannel},
-        {"nativeCreateInputMonitor", "(JIZLjava/lang/String;)Landroid/view/InputChannel;",
+        {"nativeCreateInputMonitor", "(JIZLjava/lang/String;I)Landroid/view/InputChannel;",
          (void*)nativeCreateInputMonitor},
         {"nativeRemoveInputChannel", "(JLandroid/os/IBinder;)V", (void*)nativeRemoveInputChannel},
         {"nativePilferPointers", "(JLandroid/os/IBinder;)V", (void*)nativePilferPointers},

@@ -53,6 +53,16 @@ public final class SuggestionsInfo implements Parcelable {
      */
     public static final int RESULT_ATTR_LOOKS_LIKE_GRAMMAR_ERROR = 0x0008;
 
+    /**
+     * Flag of the attributes of the suggestions that can be obtained by
+     * {@link #getSuggestionsAttributes}: this tells that the text service has an alternative way to
+     * show UI for the list of correction suggestions to the user. When this flag is set, the
+     * receiver of the result suggestions should mark the erroneous part of the text with a text
+     * signifier (for example, underline), but should not show any UI for the list of correction
+     * suggestions to the user (for example, in a popup window).
+     */
+    public static final int RESULT_ATTR_DONT_SHOW_UI_FOR_SUGGESTIONS = 0x0010;
+
     private final int mSuggestionsAttributes;
     private final String[] mSuggestions;
     private final boolean mSuggestionsAvailable;
