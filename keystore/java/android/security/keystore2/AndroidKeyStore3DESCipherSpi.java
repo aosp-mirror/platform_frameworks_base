@@ -41,7 +41,7 @@ import javax.crypto.spec.IvParameterSpec;
  *
  * @hide
  */
-public class AndroidKeyStore3DESCipherSpi extends AndroidKeyStoreCipherSpiBase {
+public abstract class AndroidKeyStore3DESCipherSpi extends AndroidKeyStoreCipherSpiBase {
 
     private static final int BLOCK_SIZE_BYTES = 8;
 
@@ -73,11 +73,21 @@ public class AndroidKeyStore3DESCipherSpi extends AndroidKeyStoreCipherSpiBase {
             public NoPadding() {
                 super(KeymasterDefs.KM_PAD_NONE);
             }
+
+            @Override
+            protected final String getTransform() {
+                return "DESede/ECB/NoPadding";
+            }
         }
 
         public static class PKCS7Padding extends ECB {
             public PKCS7Padding() {
                 super(KeymasterDefs.KM_PAD_PKCS7);
+            }
+
+            @Override
+            protected final String getTransform() {
+                return "DESede/ECB/PKCS7Padding";
             }
         }
     }
@@ -91,11 +101,22 @@ public class AndroidKeyStore3DESCipherSpi extends AndroidKeyStoreCipherSpiBase {
             public NoPadding() {
                 super(KeymasterDefs.KM_PAD_NONE);
             }
+
+            @Override
+            protected final String getTransform() {
+                return "DESede/CBC/NoPadding";
+            }
+
         }
 
         public static class PKCS7Padding extends CBC {
             public PKCS7Padding() {
                 super(KeymasterDefs.KM_PAD_PKCS7);
+            }
+
+            @Override
+            protected final String getTransform() {
+                return "DESede/CBC/PKCS7Padding";
             }
         }
     }

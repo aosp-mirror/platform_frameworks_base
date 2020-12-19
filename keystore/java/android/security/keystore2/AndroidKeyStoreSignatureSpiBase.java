@@ -30,10 +30,12 @@ import libcore.util.EmptyArray;
 import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.ProviderException;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.Signature;
 import java.security.SignatureException;
 import java.security.SignatureSpi;
 import java.util.ArrayList;
@@ -76,6 +78,13 @@ abstract class AndroidKeyStoreSignatureSpiBase extends SignatureSpi
      */
     private Exception mCachedException;
 
+    /**
+     * This signature object is used for public key operations, i.e, signatrue verification.
+     * The Android Keystore backend does not perform public key operations and defers to the
+     * Highest priority provider.
+     */
+    private Signature mSignature;
+
     AndroidKeyStoreSignatureSpiBase() {
         mOperation = null;
         mOperationChallenge = 0;
@@ -84,6 +93,7 @@ abstract class AndroidKeyStoreSignatureSpiBase extends SignatureSpi
         appRandom = null;
         mMessageStreamer = null;
         mCachedException = null;
+        mSignature = null;
     }
 
     @Override
@@ -123,27 +133,13 @@ abstract class AndroidKeyStoreSignatureSpiBase extends SignatureSpi
     protected final void engineInitVerify(PublicKey publicKey) throws InvalidKeyException {
         resetAll();
 
-        boolean success = false;
         try {
-            if (publicKey == null) {
-                throw new InvalidKeyException("Unsupported key: null");
-            }
-            AndroidKeyStoreKey keystoreKey;
-            if (publicKey instanceof AndroidKeyStorePublicKey) {
-                keystoreKey = (AndroidKeyStorePublicKey) publicKey;
-            } else {
-                throw new InvalidKeyException("Unsupported public key type: " + publicKey);
-            }
-            mSigning = false;
-            initKey(keystoreKey);
-            appRandom = null;
-            ensureKeystoreOperationInitialized();
-            success = true;
-        } finally {
-            if (!success) {
-                resetAll();
-            }
+            mSignature = Signature.getInstance(getAlgorithm());
+        } catch (NoSuchAlgorithmException e) {
+            throw new InvalidKeyException(e);
         }
+
+        mSignature.initVerify(publicKey);
     }
 
     /**
@@ -251,6 +247,11 @@ abstract class AndroidKeyStoreSignatureSpiBase extends SignatureSpi
 
     @Override
     protected final void engineUpdate(byte[] b, int off, int len) throws SignatureException {
+        if (mSignature != null) {
+            mSignature.update(b, off, len);
+            return;
+        }
+
         if (mCachedException != null) {
             throw new SignatureException(mCachedException);
         }
@@ -337,39 +338,10 @@ abstract class AndroidKeyStoreSignatureSpiBase extends SignatureSpi
 
     @Override
     protected final boolean engineVerify(byte[] signature) throws SignatureException {
-        if (mCachedException != null) {
-            throw new SignatureException(mCachedException);
+        if (mSignature != null) {
+            return mSignature.verify(signature);
         }
-
-        try {
-            ensureKeystoreOperationInitialized();
-        } catch (InvalidKeyException e) {
-            throw new SignatureException(e);
-        }
-
-        boolean verified;
-        try {
-            byte[] output = mMessageStreamer.doFinal(
-                    EmptyArray.BYTE, 0, 0,
-                    signature);
-            if (output.length != 0) {
-                throw new ProviderException(
-                        "Signature verification unexpected produced output: " + output.length
-                        + " bytes");
-            }
-            verified = true;
-        } catch (KeyStoreException e) {
-            switch (e.getErrorCode()) {
-                case KeymasterDefs.KM_ERROR_VERIFICATION_FAILED:
-                    verified = false;
-                    break;
-                default:
-                    throw new SignatureException(e);
-            }
-        }
-
-        resetWhilePreservingInitState();
-        return verified;
+        throw new IllegalStateException("Not initialised.");
     }
 
     @Override
@@ -390,6 +362,13 @@ abstract class AndroidKeyStoreSignatureSpiBase extends SignatureSpi
             throws InvalidParameterException {
         throw new InvalidParameterException();
     }
+
+    /**
+     * Implementations need to report the algorithm they implement so that we can delegate to the
+     * highest priority provider.
+     * @return Algorithm string.
+     */
+    protected abstract String getAlgorithm();
 
     /**
      * Returns {@code true} if this signature is initialized for signing, {@code false} if this
