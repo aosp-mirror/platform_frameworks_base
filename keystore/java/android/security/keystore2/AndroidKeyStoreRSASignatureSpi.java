@@ -48,11 +48,19 @@ abstract class AndroidKeyStoreRSASignatureSpi extends AndroidKeyStoreSignatureSp
         public NONEWithPKCS1Padding() {
             super(KeymasterDefs.KM_DIGEST_NONE);
         }
+        @Override
+        protected String getAlgorithm() {
+            return "NONEwithRSA";
+        }
     }
 
     public static final class MD5WithPKCS1Padding extends PKCS1Padding {
         public MD5WithPKCS1Padding() {
             super(KeymasterDefs.KM_DIGEST_MD5);
+        }
+        @Override
+        protected String getAlgorithm() {
+            return "MD5withRSA";
         }
     }
 
@@ -60,11 +68,19 @@ abstract class AndroidKeyStoreRSASignatureSpi extends AndroidKeyStoreSignatureSp
         public SHA1WithPKCS1Padding() {
             super(KeymasterDefs.KM_DIGEST_SHA1);
         }
+        @Override
+        protected String getAlgorithm() {
+            return "SHA1withRSA";
+        }
     }
 
     public static final class SHA224WithPKCS1Padding extends PKCS1Padding {
         public SHA224WithPKCS1Padding() {
             super(KeymasterDefs.KM_DIGEST_SHA_2_224);
+        }
+        @Override
+        protected String getAlgorithm() {
+            return "SHA224withRSA";
         }
     }
 
@@ -72,17 +88,29 @@ abstract class AndroidKeyStoreRSASignatureSpi extends AndroidKeyStoreSignatureSp
         public SHA256WithPKCS1Padding() {
             super(KeymasterDefs.KM_DIGEST_SHA_2_256);
         }
+        @Override
+        protected String getAlgorithm() {
+            return "SHA256withRSA";
+        }
     }
 
     public static final class SHA384WithPKCS1Padding extends PKCS1Padding {
         public SHA384WithPKCS1Padding() {
             super(KeymasterDefs.KM_DIGEST_SHA_2_384);
         }
+        @Override
+        protected String getAlgorithm() {
+            return "SHA384withRSA";
+        }
     }
 
     public static final class SHA512WithPKCS1Padding extends PKCS1Padding {
         public SHA512WithPKCS1Padding() {
             super(KeymasterDefs.KM_DIGEST_SHA_2_512);
+        }
+        @Override
+        protected String getAlgorithm() {
+            return "SHA512withRSA";
         }
     }
 
@@ -103,11 +131,19 @@ abstract class AndroidKeyStoreRSASignatureSpi extends AndroidKeyStoreSignatureSp
         public SHA1WithPSSPadding() {
             super(KeymasterDefs.KM_DIGEST_SHA1);
         }
+        @Override
+        protected String getAlgorithm() {
+            return "SHA1withRSA/PSS";
+        }
     }
 
     public static final class SHA224WithPSSPadding extends PSSPadding {
         public SHA224WithPSSPadding() {
             super(KeymasterDefs.KM_DIGEST_SHA_2_224);
+        }
+        @Override
+        protected String getAlgorithm() {
+            return "SHA224withRSA/PSS";
         }
     }
 
@@ -115,17 +151,29 @@ abstract class AndroidKeyStoreRSASignatureSpi extends AndroidKeyStoreSignatureSp
         public SHA256WithPSSPadding() {
             super(KeymasterDefs.KM_DIGEST_SHA_2_256);
         }
+        @Override
+        protected String getAlgorithm() {
+            return "SHA256withRSA/PSS";
+        }
     }
 
     public static final class SHA384WithPSSPadding extends PSSPadding {
         public SHA384WithPSSPadding() {
             super(KeymasterDefs.KM_DIGEST_SHA_2_384);
         }
+        @Override
+        protected String getAlgorithm() {
+            return "SHA384withRSA/PSS";
+        }
     }
 
     public static final class SHA512WithPSSPadding extends PSSPadding {
         public SHA512WithPSSPadding() {
             super(KeymasterDefs.KM_DIGEST_SHA_2_512);
+        }
+        @Override
+        protected String getAlgorithm() {
+            return "SHA512withRSA/PSS";
         }
     }
 
