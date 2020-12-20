@@ -28,7 +28,7 @@
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"Échec de configuration de l\'adresse IP"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Non connecté en raison de la faible qualité du réseau"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Échec de la connexion Wi-Fi"</string>
-    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Problème d\'authentification."</string>
+    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Problème d\'authentification"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Connexion impossible"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"Impossible de se connecter au réseau \"<xliff:g id="AP_NAME">%1$s</xliff:g>\""</string>
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Vérifiez le mot de passe et réessayez"</string>
@@ -251,7 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certification affichage sans fil"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Autoriser l\'enregistrement d\'infos Wi-Fi détaillées"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Limiter la recherche Wi‑Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Chgt aléatoire d\'adresse MAC en Wi-Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Changement aléatoire d\'adresse MAC en Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Données mobiles toujours actives"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Accélération matérielle pour le partage de connexion"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Afficher les appareils Bluetooth sans nom"</string>
@@ -488,7 +488,6 @@
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"La sélection des adresses MAC est aléatoire"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
       <item quantity="one">%1$d appareil connecté</item>
-      <item quantity="many">%1$d devices connected</item>
       <item quantity="other">%1$d appareils connectés</item>
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Plus longtemps."</string>
