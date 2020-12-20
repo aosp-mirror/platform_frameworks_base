@@ -28,7 +28,7 @@
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP manzilini sozlab bo‘lmadi"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Sifatsiz tarmoq sababli ulanib bo‘lmadi"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Wi-Fi ulanishini o‘rnatib bo‘lmadi"</string>
-    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Tasdiqdan o‘tishda muammo"</string>
+    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Tekshiruvda muammo"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Tarmoqqa ulanilmadi"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"“<xliff:g id="AP_NAME">%1$s</xliff:g>” nomli tarmoqqa ulanilmadi"</string>
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Parolni tekshirib, qaytadan urining"</string>
