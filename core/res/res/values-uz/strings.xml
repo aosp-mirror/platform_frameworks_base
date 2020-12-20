@@ -1765,7 +1765,7 @@
     <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"Yangi PIN kodni tasdiqlash"</string>
     <string name="restr_pin_create_pin" msgid="917067613896366033">"Cheklovlarni o‘zgartirish uchun PIN-kod yaratish"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN-kod mos kelmadi. Qayta urinib ko‘ring."</string>
-    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN kod kamida 4 ta raqamdan iborat bo‘lishi shart."</string>
+    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN kod juda qisqa, kamida 4 ta raqam kiriting."</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> soniyadan so‘ng qayta urinib ko‘ring</item>
       <item quantity="one">1 soniyadan so‘ng qayta urinib ko‘ring</item>
