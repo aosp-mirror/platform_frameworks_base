@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.Nullable;
@@ -50,6 +52,8 @@ import android.view.OnReceiveContentListener;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
+import android.view.WindowInsetsAnimation;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.EditorInfo;
@@ -60,6 +64,8 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
@@ -76,6 +82,7 @@ import com.android.systemui.statusbar.phone.LightBarController;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -135,6 +142,27 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
         mEditText = (RemoteEditText) getChildAt(0);
         mEditText.setInnerFocusable(false);
+        mEditText.setWindowInsetsAnimationCallback(
+                new WindowInsetsAnimation.Callback(DISPATCH_MODE_STOP) {
+            @NonNull
+            @Override
+            public WindowInsets onProgress(@NonNull WindowInsets insets,
+                    @NonNull List<WindowInsetsAnimation> runningAnimations) {
+                return insets;
+            }
+
+            @Override
+            public void onEnd(@NonNull WindowInsetsAnimation animation) {
+                super.onEnd(animation);
+                if (animation.getTypeMask() == WindowInsets.Type.ime()) {
+                    mEntry.mRemoteEditImeVisible =
+                            mEditText.getRootWindowInsets().isVisible(WindowInsets.Type.ime());
+                    if (!mEntry.mRemoteEditImeVisible && !mEditText.mShowImeOnInputConnection) {
+                        mController.removeRemoteInput(mEntry, mToken);
+                    }
+                }
+            }
+        });
     }
 
     protected Intent prepareRemoteInputFromText() {
