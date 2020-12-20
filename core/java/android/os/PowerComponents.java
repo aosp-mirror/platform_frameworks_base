@@ -289,6 +289,15 @@ class PowerComponents {
             return this;
         }
 
+        public void addPowerAndDuration(Builder other) {
+            for (int i = 0; i < mPowerComponents.length; i++) {
+                mPowerComponents[i] += other.mPowerComponents[i];
+            }
+            for (int i = 0; i < mTimeComponents.length; i++) {
+                mTimeComponents[i] += other.mTimeComponents[i];
+            }
+        }
+
         /**
          * Creates a read-only object out of the Builder values.
          */

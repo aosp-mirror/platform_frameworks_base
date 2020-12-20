@@ -47,6 +47,7 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         mScreenDozeTimer = new BatteryStatsImpl.StopwatchTimer(clocks, null, -1, null,
                 mOnBatteryTimeBase);
         mBluetoothScanTimer = new StopwatchTimer(mClocks, null, -14, null, mOnBatteryTimeBase);
+        mBluetoothActivity = new ControllerActivityCounterImpl(mOnBatteryTimeBase, 1);
         setExternalStatsSyncLocked(new DummyExternalStatsSync());
 
         for (int i = 0; i < GnssSignalQuality.NUM_GNSS_SIGNAL_QUALITY_LEVELS; i++) {
