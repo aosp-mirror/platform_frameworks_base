@@ -8109,7 +8109,16 @@ public class ConnectivityServiceTest {
 
     @Test
     public void testDumpDoesNotCrash() {
-        StringWriter stringWriter = new StringWriter();
+        // Filing a couple requests prior to testing the dump.
+        final TestNetworkCallback genericNetworkCallback = new TestNetworkCallback();
+        final TestNetworkCallback wifiNetworkCallback = new TestNetworkCallback();
+        final NetworkRequest genericRequest = new NetworkRequest.Builder()
+                .clearCapabilities().build();
+        final NetworkRequest wifiRequest = new NetworkRequest.Builder()
+                .addTransportType(TRANSPORT_WIFI).build();
+        mCm.registerNetworkCallback(genericRequest, genericNetworkCallback);
+        mCm.registerNetworkCallback(wifiRequest, wifiNetworkCallback);
+        final StringWriter stringWriter = new StringWriter();
 
         mService.dump(new FileDescriptor(), new PrintWriter(stringWriter), new String[0]);
 
@@ -8131,11 +8140,11 @@ public class ConnectivityServiceTest {
         mCm.registerNetworkCallback(wifiRequest, wifiNetworkCallback);
         mCm.registerNetworkCallback(cellRequest, cellNetworkCallback);
 
-        ConnectivityService.NetworkRequestInfo[] nriOutput = mService.requestsSortedById();
+        final ConnectivityService.NetworkRequestInfo[] nriOutput = mService.requestsSortedById();
 
         assertTrue(nriOutput.length > 1);
         for (int i = 0; i < nriOutput.length - 1; i++) {
-            boolean isRequestIdInOrder =
+            final boolean isRequestIdInOrder =
                     nriOutput[i].mRequests.get(0).requestId
                             < nriOutput[i + 1].mRequests.get(0).requestId;
             assertTrue(isRequestIdInOrder);
