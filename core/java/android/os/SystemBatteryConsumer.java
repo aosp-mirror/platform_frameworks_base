@@ -21,6 +21,8 @@ import android.annotation.NonNull;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -118,6 +120,7 @@ public class SystemBatteryConsumer extends BatteryConsumer implements Parcelable
     public static final class Builder extends BaseBuilder<Builder> {
         @DrainType
         private final int mDrainType;
+        private List<UidBatteryConsumer.Builder> mUidBatteryConsumers;
 
         Builder(int customPowerComponentCount, int customTimeComponentCount,
                 boolean includeModeledComponents, @DrainType int drainType) {
@@ -126,10 +129,35 @@ public class SystemBatteryConsumer extends BatteryConsumer implements Parcelable
         }
 
         /**
+         * Add a UidBatteryConsumer to this SystemBatteryConsumer. For example,
+         * the UidBatteryConsumer with the UID == {@link Process#BLUETOOTH_UID} should
+         * be added to the SystemBatteryConsumer with the drain type == {@link
+         * #DRAIN_TYPE_BLUETOOTH}.
+         * <p>
+         * Calculated power and duration components of the added battery consumers
+         * are aggregated at the time the SystemBatteryConsumer is built by the {@link #build()}
+         * method.
+         * </p>
+         */
+        public void addUidBatteryConsumer(UidBatteryConsumer.Builder uidBatteryConsumerBuilder) {
+            if (mUidBatteryConsumers == null) {
+                mUidBatteryConsumers = new ArrayList<>();
+            }
+            mUidBatteryConsumers.add(uidBatteryConsumerBuilder);
+        }
+
+        /**
          * Creates a read-only object out of the Builder values.
          */
         @NonNull
         public SystemBatteryConsumer build() {
+            if (mUidBatteryConsumers != null) {
+                for (int i = mUidBatteryConsumers.size() - 1; i >= 0; i--) {
+                    UidBatteryConsumer.Builder uidBatteryConsumer = mUidBatteryConsumers.get(i);
+                    mPowerComponentsBuilder.addPowerAndDuration(
+                            uidBatteryConsumer.mPowerComponentsBuilder);
+                }
+            }
             return new SystemBatteryConsumer(this);
         }
     }

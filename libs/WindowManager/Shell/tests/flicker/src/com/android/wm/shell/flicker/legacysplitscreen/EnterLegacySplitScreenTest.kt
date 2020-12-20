@@ -27,6 +27,7 @@ import com.android.server.wm.flicker.helpers.exitSplitScreen
 import com.android.server.wm.flicker.helpers.isInSplitScreen
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.openQuickstep
+import com.android.server.wm.flicker.helpers.openQuickStepAndClearRecentAppsFromOverview
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.wm.shell.flicker.dockedStackDividerIsInvisible
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper.Companion.TEST_REPETITIONS
@@ -67,6 +68,7 @@ class EnterLegacySplitScreenTest(
             setup {
                 eachRun {
                     uiDevice.wakeUpAndGoToHomeScreen()
+                    uiDevice.openQuickStepAndClearRecentAppsFromOverview()
                 }
             }
             teardown {
