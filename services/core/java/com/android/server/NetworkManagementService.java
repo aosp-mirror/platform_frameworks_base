@@ -423,7 +423,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
         final boolean active = isActive;
         invokeForAllObservers(o -> o.interfaceClassDataActivityChanged(
-                Integer.toString(type), active, tsNanos, uid));
+                type, active, tsNanos, uid));
 
         boolean report = false;
         synchronized (mIdleTimerLock) {
