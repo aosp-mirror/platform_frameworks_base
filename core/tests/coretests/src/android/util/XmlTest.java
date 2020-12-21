@@ -53,6 +53,14 @@ public class XmlTest {
     }
 
     @Test
+    public void testLargeValues_FastIndenting() throws Exception {
+        final TypedXmlSerializer out = Xml.newFastSerializer();
+        out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
+        doLargeValues(out,
+                Xml.newFastPullParser());
+    }
+
+    @Test
     public void testLargeValues_Binary() throws Exception {
         doLargeValues(Xml.newBinarySerializer(),
                 Xml.newBinaryPullParser());
@@ -81,7 +89,7 @@ public class XmlTest {
 
         final ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
         in.setInput(is, StandardCharsets.UTF_8.name());
-        assertNext(in, START_TAG, "tag", 1);
+        assertNext(in, START_TAG, "tag");
         assertEquals(2, in.getAttributeCount());
         assertEquals(string, in.getAttributeValue(null, "string"));
         assertArrayEquals(bytes, in.getAttributeBytesBase64(null, "bytes"));
@@ -96,6 +104,14 @@ public class XmlTest {
     @Test
     public void testPersistableBundle_Fast() throws Exception {
         doPersistableBundle(Xml.newFastSerializer(),
+                Xml.newFastPullParser());
+    }
+
+    @Test
+    public void testPersistableBundle_FastIndenting() throws Exception {
+        final TypedXmlSerializer out = Xml.newFastSerializer();
+        out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
+        doPersistableBundle(out,
                 Xml.newFastPullParser());
     }
 
@@ -180,6 +196,14 @@ public class XmlTest {
     }
 
     @Test
+    public void testVerify_FastIndenting() throws Exception {
+        final TypedXmlSerializer out = Xml.newFastSerializer();
+        out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
+        doVerify(out,
+                Xml.newFastPullParser());
+    }
+
+    @Test
     public void testVerify_Binary() throws Exception {
         doVerify(Xml.newBinarySerializer(),
                 Xml.newBinaryPullParser());
@@ -246,9 +270,12 @@ public class XmlTest {
 
     static void doVerifyRead(TypedXmlPullParser in) throws Exception {
         assertEquals(START_DOCUMENT, in.getEventType());
-        assertNext(in, START_TAG, "one", 1);
+        assertDepth(in, 0);
+        assertNext(in, START_TAG, "one");
+        assertDepth(in, 1);
         {
-            assertNext(in, START_TAG, "two", 2);
+            assertNext(in, START_TAG, "two");
+            assertDepth(in, 2);
             {
                 assertEquals(14, in.getAttributeCount());
                 assertEquals(TEST_STRING,
@@ -285,27 +312,36 @@ public class XmlTest {
                 assertEquals("49", in.getAttributeValue(null, "stringNumber"));
                 assertEquals(49, in.getAttributeInt(null, "stringNumber"));
             }
-            assertNext(in, END_TAG, "two", 2);
+            assertNext(in, END_TAG, "two");
+            assertDepth(in, 2);
 
-            assertNext(in, START_TAG, "three", 2);
+            assertNext(in, START_TAG, "three");
+            assertDepth(in, 2);
             {
-                assertNext(in, TEXT);
+                assertNext(in, TEXT, null);
+                assertDepth(in, 2);
                 assertEquals("foo", in.getText().trim());
-                assertNext(in, START_TAG, "four", 3);
+                assertNext(in, START_TAG, "four");
+                assertDepth(in, 3);
                 {
                     assertEquals(0, in.getAttributeCount());
                 }
-                assertNext(in, END_TAG, "four", 3);
-                assertNext(in, TEXT);
+                assertNext(in, END_TAG, "four");
+                assertDepth(in, 3);
+                assertNext(in, TEXT, null);
+                assertDepth(in, 2);
                 assertEquals("barbaz", in.getText().trim());
             }
-            assertNext(in, END_TAG, "three", 2);
+            assertNext(in, END_TAG, "three");
+            assertDepth(in, 2);
         }
-        assertNext(in, END_TAG, "one", 1);
-        assertNext(in, END_DOCUMENT);
+        assertNext(in, END_TAG, "one");
+        assertDepth(in, 1);
+        assertNext(in, END_DOCUMENT, null);
+        assertDepth(in, 0);
     }
 
-    static void assertNext(TypedXmlPullParser in, int token) throws Exception {
+    static void assertNext(TypedXmlPullParser in, int token, String name) throws Exception {
         // We're willing to skip over empty text regions, which some
         // serializers emit transparently
         int event;
@@ -313,12 +349,10 @@ public class XmlTest {
         }
         assertEquals("next", token, event);
         assertEquals("getEventType", token, in.getEventType());
+        assertEquals("getName", name, in.getName());
     }
 
-    static void assertNext(TypedXmlPullParser in, int token, String name, int depth)
-            throws Exception {
-        assertNext(in, token);
-        assertEquals("getName", name, in.getName());
+    static void assertDepth(TypedXmlPullParser in, int depth) throws Exception {
         assertEquals("getDepth", depth, in.getDepth());
     }
 }
