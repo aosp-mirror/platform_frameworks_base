@@ -180,7 +180,7 @@ public final class MediaSessionManager {
      * be provided in priority order with the most important controller at index
      * 0.
      * <p>
-     * This requires the android.Manifest.permission.MEDIA_CONTENT_CONTROL
+     * This requires the {@link android.Manifest.permission#MEDIA_CONTENT_CONTROL}
      * permission be held by the calling app. You may also retrieve this list if
      * your app is an enabled notification listener using the
      * {@link NotificationListenerService} APIs, in which case you must pass the
@@ -196,14 +196,18 @@ public final class MediaSessionManager {
     }
 
     /**
-     * Get active sessions for a specific user. To retrieve actions for a user
-     * other than your own you must hold the
-     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permission
-     * in addition to any other requirements. If you are an enabled notification
-     * listener you may only get sessions for the users you are enabled for.
+     * Get active sessions for the given user.
+     * <p>
+     * This requires the {@link android.Manifest.permission#MEDIA_CONTENT_CONTROL} permission be
+     * held by the calling app. You may also retrieve this list if your app is an enabled
+     * notification listener using the {@link NotificationListenerService} APIs, in which case you
+     * must pass the {@link ComponentName} of your enabled listener.
+     * <p>
+     * The calling application needs to hold the
+     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permission in order to
+     * retrieve sessions for user ids that do not belong to current process.
      *
-     * @param notificationListener The enabled notification listener component.
-     *            May be null.
+     * @param notificationListener The enabled notification listener component. May be null.
      * @param userId The user id to fetch sessions for.
      * @return A list of controllers for ongoing sessions.
      * @hide
@@ -248,8 +252,9 @@ public final class MediaSessionManager {
      * Gets a list of {@link Session2Token} with type {@link Session2Token#TYPE_SESSION} for the
      * given user.
      * <p>
-     * If you want to get tokens for another user, you must hold the
-     * android.Manifest.permission#INTERACT_ACROSS_USERS_FULL permission.
+     * The calling application needs to hold the
+     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permission in order to
+     * retrieve session tokens for user ids that do not belong to current process.
      *
      * @param userId The user id to fetch sessions for.
      * @return A list of {@link Session2Token}
@@ -267,11 +272,12 @@ public final class MediaSessionManager {
     }
 
     /**
-     * Add a listener to be notified when the list of active sessions changes. This requires the
-     * {@link android.Manifest.permission#MEDIA_CONTENT_CONTROL} permission be held by the calling
-     * app. You may also retrieve this list if your app is an enabled notification listener using
-     * the {@link NotificationListenerService} APIs, in which case you must pass the
-     * {@link ComponentName} of your enabled listener.
+     * Add a listener to be notified when the list of active sessions changes.
+     * <p>
+     * This requires the {@link android.Manifest.permission#MEDIA_CONTENT_CONTROL} permission be
+     * held by the calling app. You may also retrieve this list if your app is an enabled
+     * notificationlistener using the {@link NotificationListenerService} APIs, in which case you
+     * must pass the {@link ComponentName} of your enabled listener.
      *
      * @param sessionListener The listener to add.
      * @param notificationListener The enabled notification listener component. May be null.
@@ -283,12 +289,13 @@ public final class MediaSessionManager {
     }
 
     /**
-     * Add a listener to be notified when the list of active sessions changes. This requires the
-     * {@link android.Manifest.permission#MEDIA_CONTENT_CONTROL} permission be held by the calling
-     * app. You may also retrieve this list if your app is an enabled notification listener using
-     * the {@link NotificationListenerService} APIs, in which case you must pass the
-     * {@link ComponentName} of your enabled listener. Updates will be posted to the handler
-     * specified or to the caller's thread if the handler is null.
+     * Add a listener to be notified when the list of active sessions changes.
+     * <p>
+     * This requires the {@link android.Manifest.permission#MEDIA_CONTENT_CONTROL} permission be
+     * held by the calling app. You may also retrieve this list if your app is an enabled
+     * notification listener using the {@link NotificationListenerService} APIs, in which case you
+     * must pass the {@link ComponentName} of your enabled listener. Updates will be posted to the
+     * handler specified or to the caller's thread if the handler is null.
      *
      * @param sessionListener The listener to add.
      * @param notificationListener The enabled notification listener component. May be null.
@@ -302,15 +309,17 @@ public final class MediaSessionManager {
     }
 
     /**
-     * Add a listener to be notified when the list of active sessions changes for the given user.
-     * The calling app must have the {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL}
-     * permission if it wants to call this method for a user that is not running the app.
+     * Add a listener to be notified when the list of active sessions changes.
      * <p>
      * This requires the {@link android.Manifest.permission#MEDIA_CONTENT_CONTROL} permission be
      * held by the calling app. You may also retrieve this list if your app is an enabled
      * notification listener using the {@link NotificationListenerService} APIs, in which case you
      * must pass the {@link ComponentName} of your enabled listener. Updates will be posted to the
      * handler specified or to the caller's thread if the handler is null.
+     * <p>
+     * The calling application needs to hold the
+     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permission in order to
+     * add listeners for user ids that do not belong to current process.
      *
      * @param sessionListener The listener to add.
      * @param notificationListener The enabled notification listener component. May be null.
@@ -407,6 +416,10 @@ public final class MediaSessionManager {
      * Library</a> for consistent behavior across all devices.
      * <p>
      * Adds a listener to be notified when the {@link #getSession2Tokens()} changes.
+     * <p>
+     * The calling application needs to hold the
+     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permission in order to
+     * add listeners for user ids that do not belong to current process.
      *
      * @param userId The userId to listen for changes on
      * @param listener The listener to add
@@ -705,8 +718,9 @@ public final class MediaSessionManager {
     /**
      * Checks whether the remote user is a trusted app.
      * <p>
-     * An app is trusted if the app holds the android.Manifest.permission.MEDIA_CONTENT_CONTROL
-     * permission or has an enabled notification listener.
+     * An app is trusted if the app holds the
+     * {@link android.Manifest.permission#MEDIA_CONTENT_CONTROL} permission or has an enabled
+     * notification listener.
      *
      * @param userInfo The remote user info from either
      *            {@link MediaSession#getCurrentControllerInfo()} or
