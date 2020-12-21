@@ -68,10 +68,11 @@ import java.util.function.BiFunction;
 @SmallTest
 public class NetworkManagementServiceTest {
     private NetworkManagementService mNMService;
-
     @Mock private Context mContext;
     @Mock private IBatteryStats.Stub mBatteryStatsService;
     @Mock private INetd.Stub mNetdService;
+
+    private static final int TEST_UID = 111;
 
     @NonNull
     @Captor
@@ -165,14 +166,14 @@ public class NetworkManagementServiceTest {
         /**
          * Interface class activity.
          */
-        unsolListener.onInterfaceClassActivityChanged(true, 1, 1234, 0);
-        expectSoon(observer).interfaceClassDataActivityChanged("1", true, 1234);
+        unsolListener.onInterfaceClassActivityChanged(true, 1, 1234, TEST_UID);
+        expectSoon(observer).interfaceClassDataActivityChanged("1", true, 1234, TEST_UID);
 
-        unsolListener.onInterfaceClassActivityChanged(false, 9, 5678, 0);
-        expectSoon(observer).interfaceClassDataActivityChanged("9", false, 5678);
+        unsolListener.onInterfaceClassActivityChanged(false, 9, 5678, TEST_UID);
+        expectSoon(observer).interfaceClassDataActivityChanged("9", false, 5678, TEST_UID);
 
-        unsolListener.onInterfaceClassActivityChanged(false, 9, 4321, 0);
-        expectSoon(observer).interfaceClassDataActivityChanged("9", false, 4321);
+        unsolListener.onInterfaceClassActivityChanged(false, 9, 4321, TEST_UID);
+        expectSoon(observer).interfaceClassDataActivityChanged("9", false, 4321, TEST_UID);
 
         /**
          * IP address changes.
@@ -221,8 +222,6 @@ public class NetworkManagementServiceTest {
         mNMService.setFirewallEnabled(false);
         assertFalse(mNMService.isFirewallEnabled());
     }
-
-    private static final int TEST_UID = 111;
 
     @Test
     public void testNetworkRestrictedDefault() {
