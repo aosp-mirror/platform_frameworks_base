@@ -504,7 +504,7 @@ public class NotificationMediaManager implements Dumpable {
                 // TODO: Should this really be for all users? It appears that inactive users
                 //  can't have active sessions, which would mean it is fine.
                 final List<MediaController> sessions =
-                        mMediaSessionManager.getActiveSessionsForUser(null, UserHandle.USER_ALL);
+                        mMediaSessionManager.getActiveSessionsForUser(null, UserHandle.ALL);
 
                 for (MediaController aController : sessions) {
                     // now to see if we have one like this
