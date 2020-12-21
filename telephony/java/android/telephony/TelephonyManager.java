@@ -7735,21 +7735,13 @@ public class TelephonyManager {
      *
      * @return the preferred network type.
      * @hide
-     * @deprecated Use {@link #getPreferredNetworkTypeBitmask} instead.
+     * @deprecated Use {@link #getAllowedNetworkTypesBitmask} instead.
      */
     @Deprecated
     @RequiresPermission((android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE))
     @UnsupportedAppUsage
     public @PrefNetworkMode int getPreferredNetworkType(int subId) {
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null) {
-                return telephony.getPreferredNetworkType(subId);
-            }
-        } catch (RemoteException ex) {
-            Rlog.e(TAG, "getPreferredNetworkType RemoteException", ex);
-        }
-        return -1;
+        return RadioAccessFamily.getNetworkTypeFromRaf((int) getAllowedNetworkTypesBitmask());
     }
 
     /**
@@ -7765,24 +7757,47 @@ public class TelephonyManager {
      * @return The bitmask of preferred network types.
      *
      * @hide
+     * @deprecated Use {@link #getAllowedNetworkTypesBitmask} instead.
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @SystemApi
     public @NetworkTypeBitMask long getPreferredNetworkTypeBitmask() {
+        return getAllowedNetworkTypesBitmask();
+    }
+
+    /**
+     * Get the allowed network type bitmask.
+     * Note that the device can only register on the network of {@link NetworkTypeBitmask}
+     * (except for emergency call cases).
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @return The bitmask of allowed network types.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
+    public @NetworkTypeBitMask long getAllowedNetworkTypesBitmask() {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return (long) RadioAccessFamily.getRafFromNetworkType(
-                        telephony.getPreferredNetworkType(getSubId()));
+                return (long) telephony.getAllowedNetworkTypesBitmask(getSubId());
             }
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "getPreferredNetworkTypeBitmask RemoteException", ex);
+            Rlog.e(TAG, "getAllowedNetworkTypesBitmask RemoteException", ex);
         }
         return 0;
     }
 
     /**
-     * Get the allowed network types.
+     * Get the allowed network types by carriers.
      *
      * <p>Requires Permission:
      * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
@@ -7790,14 +7805,17 @@ public class TelephonyManager {
      *
      * @return the allowed network type bitmask
      * @hide
+     * @deprecated Use {@link #getAllowedNetworkTypesForReason} instead.
      */
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @SystemApi
+    @Deprecated
     public @NetworkTypeBitMask long getAllowedNetworkTypes() {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getAllowedNetworkTypes(getSubId());
+                return telephony.getAllowedNetworkTypesForReason(getSubId(),
+                        TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_CARRIER);
             }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "getAllowedNetworkTypes RemoteException", ex);
@@ -8019,7 +8037,7 @@ public class TelephonyManager {
         return false;
     }
 
-   /**
+    /**
      * Get the network selection mode.
      *
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
@@ -8116,7 +8134,7 @@ public class TelephonyManager {
      * @param networkType the preferred network type
      * @return true on success; false on any failure.
      * @hide
-     * @deprecated Use {@link #setPreferredNetworkTypeBitmask} instead.
+     * @deprecated Use {@link #setAllowedNetworkTypesForReason} instead.
      */
     @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -8124,7 +8142,9 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.setPreferredNetworkType(subId, networkType);
+                return telephony.setAllowedNetworkTypesForReason(subId,
+                        TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_USER,
+                        RadioAccessFamily.getRafFromNetworkType(networkType));
             }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "setPreferredNetworkType RemoteException", ex);
@@ -8151,16 +8171,17 @@ public class TelephonyManager {
      * @param networkTypeBitmask The bitmask of preferred network types.
      * @return true on success; false on any failure.
      * @hide
+     * @deprecated Use {@link #setAllowedNetworkTypesForReason} instead.
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
     public boolean setPreferredNetworkTypeBitmask(@NetworkTypeBitMask long networkTypeBitmask) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.setPreferredNetworkType(
-                        getSubId(), RadioAccessFamily.getNetworkTypeFromRaf(
-                                (int) networkTypeBitmask));
+                return telephony.setAllowedNetworkTypesForReason(getSubId(),
+                        TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_USER, networkTypeBitmask);
             }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "setPreferredNetworkTypeBitmask RemoteException", ex);
@@ -8181,7 +8202,9 @@ public class TelephonyManager {
      * @param allowedNetworkTypes The bitmask of allowed network types.
      * @return true on success; false on any failure.
      * @hide
+     * @deprecated Use {@link #setAllowedNetworkTypesForReason} instead.
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     @RequiresFeature(
             enforcement = "android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported",
@@ -8191,7 +8214,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.setAllowedNetworkTypes(getSubId(), allowedNetworkTypes);
+                return telephony.setAllowedNetworkTypesForReason(getSubId(),
+                        TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_CARRIER, allowedNetworkTypes);
             }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "setAllowedNetworkTypes RemoteException", ex);
@@ -8201,27 +8225,53 @@ public class TelephonyManager {
 
     /** @hide */
     @IntDef({
-            ALLOWED_NETWORK_TYPES_REASON_POWER
+            ALLOWED_NETWORK_TYPES_REASON_USER,
+            ALLOWED_NETWORK_TYPES_REASON_POWER,
+            ALLOWED_NETWORK_TYPES_REASON_CARRIER
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface AllowedNetworkTypesReason{}
+    public @interface AllowedNetworkTypesReason {
+    }
+
+    /**
+     * To indicate allowed network type change is requested by user.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ALLOWED_NETWORK_TYPES_REASON_USER = 0;
 
     /**
      * To indicate allowed network type change is requested by power manager.
      * Power Manger configuration won't affect the settings configured through
-     * {@link setAllowedNetworkTypes} and will result in allowing network types that are in both
+     * other reasons and will result in allowing network types that are in both
      * configurations (i.e intersection of both sets).
+     *
      * @hide
      */
-    public static final int ALLOWED_NETWORK_TYPES_REASON_POWER = 0;
+    @SystemApi
+    public static final int ALLOWED_NETWORK_TYPES_REASON_POWER = 1;
+
+    /**
+     * To indicate allowed network type change is requested by carrier.
+     * Carrier configuration won't affect the settings configured through
+     * other reasons and will result in allowing network types that are in both
+     * configurations (i.e intersection of both sets).
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ALLOWED_NETWORK_TYPES_REASON_CARRIER = 2;
 
     /**
      * Set the allowed network types of the device and
      * provide the reason triggering the allowed network change.
      * This can be called for following reasons
      * <ol>
+     * <li>Allowed network types control by USER {@link #ALLOWED_NETWORK_TYPES_REASON_USER}
      * <li>Allowed network types control by power manager
      * {@link #ALLOWED_NETWORK_TYPES_REASON_POWER}
+     * <li>Allowed network types control by carrier {@link #ALLOWED_NETWORK_TYPES_REASON_CARRIER}
      * </ol>
      * This API will result in allowing an intersection of allowed network types for all reasons,
      * including the configuration done through other reasons.
@@ -8237,15 +8287,17 @@ public class TelephonyManager {
      * @throws IllegalArgumentException if invalid AllowedNetworkTypesReason is passed.
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     @RequiresFeature(
             enforcement = "android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported",
             value = TelephonyManager.CAPABILITY_ALLOWED_NETWORK_TYPES_USED)
     public void setAllowedNetworkTypesForReason(@AllowedNetworkTypesReason int reason,
             @NetworkTypeBitMask long allowedNetworkTypes) {
-        if (reason != ALLOWED_NETWORK_TYPES_REASON_POWER) {
+        if (!isValidAllowedNetworkTypesReason(reason)) {
             throw new IllegalArgumentException("invalid AllowedNetworkTypesReason.");
         }
+
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
@@ -8264,28 +8316,29 @@ public class TelephonyManager {
      * Get the allowed network types for certain reason.
      *
      * {@link #getAllowedNetworkTypesForReason} returns allowed network type for a
-     * specific reason. For effective allowed network types configured on device,
-     * query {@link getEffectiveAllowedNetworkTypes}
+     * specific reason.
      *
      * <p>Requires Permission:
      * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
      * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
-     *s
+     *
      * @param reason the reason the allowed network type change is taking place
      * @return the allowed network type bitmask
-     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @throws IllegalStateException    if the Telephony process is not currently available.
      * @throws IllegalArgumentException if invalid AllowedNetworkTypesReason is passed.
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @RequiresFeature(
             enforcement = "android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported",
             value = TelephonyManager.CAPABILITY_ALLOWED_NETWORK_TYPES_USED)
     public @NetworkTypeBitMask long getAllowedNetworkTypesForReason(
             @AllowedNetworkTypesReason int reason) {
-        if (reason != ALLOWED_NETWORK_TYPES_REASON_POWER) {
+        if (!isValidAllowedNetworkTypesReason(reason)) {
             throw new IllegalArgumentException("invalid AllowedNetworkTypesReason.");
         }
+
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
@@ -8299,7 +8352,19 @@ public class TelephonyManager {
         }
         return -1;
     }
-
+    /**
+     * Verifies that the reason provided is valid.
+     * @hide
+     */
+    public static boolean isValidAllowedNetworkTypesReason(@AllowedNetworkTypesReason int reason) {
+        switch (reason) {
+            case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_USER:
+            case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_POWER:
+            case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_CARRIER:
+                return true;
+        }
+        return false;
+    }
     /**
      * Get bit mask of all network types.
      *
@@ -8308,35 +8373,6 @@ public class TelephonyManager {
      */
     public static @NetworkTypeBitMask long getAllNetworkTypesBitmask() {
         return NETWORK_STANDARDS_FAMILY_BITMASK_3GPP | NETWORK_STANDARDS_FAMILY_BITMASK_3GPP2;
-    }
-
-    /**
-     * Get the allowed network types configured on the device.
-     * This API will return an intersection of allowed network types for all reasons,
-     * including the configuration done through setAllowedNetworkTypes
-     *
-     * <p>Requires Permission:
-     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
-     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
-     *
-     * @return the allowed network type bitmask
-     * @throws IllegalStateException if the Telephony process is not currently available.
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public @NetworkTypeBitMask long getEffectiveAllowedNetworkTypes() {
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null) {
-                return telephony.getEffectiveAllowedNetworkTypes(getSubId());
-            } else {
-                throw new IllegalStateException("telephony service is null.");
-            }
-        } catch (RemoteException ex) {
-            Rlog.e(TAG, "getEffectiveAllowedNetworkTypes RemoteException", ex);
-            ex.rethrowFromSystemServer();
-        }
-        return -1;
     }
 
     /**

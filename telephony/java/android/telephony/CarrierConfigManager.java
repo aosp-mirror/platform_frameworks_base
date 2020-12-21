@@ -17,6 +17,7 @@
 package android.telephony;
 
 import android.Manifest;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -37,6 +38,8 @@ import android.telephony.ims.ImsSsData;
 import com.android.internal.telephony.ICarrierConfigLoader;
 import com.android.telephony.Rlog;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -102,6 +105,32 @@ public class CarrierConfigManager {
      * {@link #KEY_CARRIER_USSD_METHOD_INT}
      */
     public static final int USSD_OVER_IMS_ONLY       = 3;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "CARRIER_NR_AVAILABILITY_" }, value = {
+            CARRIER_NR_AVAILABILITY_NONE,
+            CARRIER_NR_AVAILABILITY_NSA,
+            CARRIER_NR_AVAILABILITY_SA,
+    })
+    public @interface DeviceNrCapability {}
+
+    /**
+     * Indicates CARRIER_NR_AVAILABILITY_NONE determine that the carrier does not enable 5G NR.
+     */
+    public static final int CARRIER_NR_AVAILABILITY_NONE = 0;
+
+    /**
+     * Indicates CARRIER_NR_AVAILABILITY_NSA determine that the carrier enable the non-standalone
+     * (NSA) mode of 5G NR.
+     */
+    public static final int CARRIER_NR_AVAILABILITY_NSA = 1 << 0;
+
+    /**
+     * Indicates CARRIER_NR_AVAILABILITY_SA determine that the carrier enable the standalone (SA)
+     * mode of 5G NR.
+     */
+    public static final int CARRIER_NR_AVAILABILITY_SA = 1 << 1;
 
     private final Context mContext;
 
@@ -1774,10 +1803,23 @@ public class CarrierConfigManager {
             "show_precise_failed_cause_bool";
 
     /**
-     * Boolean to decide whether NR is enabled.
-     * @hide
+     * Bit-field integer to determine whether the carrier enable the non-standalone (NSA) mode of
+     * 5G NR, standalone (SA) mode of 5G NR
+     *
+     * <UL>
+     *  <LI>CARRIER_NR_AVAILABILITY_NONE: non-NR = 0 </LI>
+     *  <LI>CARRIER_NR_AVAILABILITY_NSA: NSA = 1 << 0</LI>
+     *  <LI>CARRIER_NR_AVAILABILITY_SA: SA = 1 << 1</LI>
+     * </UL>
+     * <p> The value of this key must be bitwise OR of
+     * {@link #CARRIER_NR_AVAILABILITY_NONE}, {@link #CARRIER_NR_AVAILABILITY_NSA},
+     * {@link #CARRIER_NR_AVAILABILITY_SA}.
+     *
+     * <p> For example, if both NSA and SA are used, the value of key is 3 (1 << 0 | 1 << 1).
+     * If the carrier doesn't support 5G NR, the value of key is 0 (non-NR).
+     * If the key is invalid or not configured, a default value 3 (NSA|SA = 3) will apply.
      */
-    public static final String KEY_NR_ENABLED_BOOL = "nr_enabled_bool";
+    public static final String KEY_CARRIER_NR_AVAILABILITY_INT = "carrier_nr_availability_int";
 
     /**
      * Boolean to decide whether LTE is enabled.
@@ -4546,7 +4588,8 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_SHOW_CARRIER_DATA_ICON_PATTERN_STRING, "");
         sDefaults.putBoolean(KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL, true);
         sDefaults.putInt(KEY_LTE_PLUS_THRESHOLD_BANDWIDTH_KHZ_INT, 20000);
-        sDefaults.putBoolean(KEY_NR_ENABLED_BOOL, true);
+        sDefaults.putInt(KEY_CARRIER_NR_AVAILABILITY_INT,
+                CARRIER_NR_AVAILABILITY_NSA | CARRIER_NR_AVAILABILITY_SA);
         sDefaults.putBoolean(KEY_LTE_ENABLED_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_TDSCDMA_BOOL, false);
         sDefaults.putStringArray(KEY_SUPPORT_TDSCDMA_ROAMING_NETWORKS_STRING_ARRAY, null);
