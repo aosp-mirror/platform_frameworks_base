@@ -566,8 +566,25 @@ public class WifiConfiguration implements Parcelable {
      */
     public void setSecurityParams(@SecurityType int securityType) {
         // Clear existing data.
-        mSecurityParamsList = new ArrayList<>();
+        mSecurityParamsList.clear();
         addSecurityParams(securityType);
+    }
+
+    /**
+     * Set security params by the given key management mask.
+     *
+     * @param givenAllowedKeyManagement the given allowed key management mask.
+     * @hide
+     */
+    public void setSecurityParams(@NonNull BitSet givenAllowedKeyManagement) {
+        if (givenAllowedKeyManagement == null) {
+            throw new IllegalArgumentException("Invalid allowed key management mask.");
+        }
+        // Clear existing data.
+        mSecurityParamsList.clear();
+
+        allowedKeyManagement = (BitSet) givenAllowedKeyManagement.clone();
+        convertLegacyFieldsToSecurityParamsIfNeeded();
     }
 
     /**
@@ -578,8 +595,23 @@ public class WifiConfiguration implements Parcelable {
      */
     public void setSecurityParams(SecurityParams params) {
         // Clear existing data.
-        mSecurityParamsList = new ArrayList<>();
+        mSecurityParamsList.clear();
         addSecurityParams(params);
+    }
+
+    /**
+     * Set the security params by the given security params list.
+     *
+     * This will overwrite existing security params list directly.
+     *
+     * @param securityParamsList the desired security params list.
+     * @hide
+     */
+    public void setSecurityParams(@NonNull List<SecurityParams> securityParamsList) {
+        if (securityParamsList == null || securityParamsList.isEmpty()) {
+            throw new IllegalArgumentException("An empty security params list is invalid.");
+        }
+        mSecurityParamsList = new ArrayList<>(securityParamsList);
     }
 
     /**
