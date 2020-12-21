@@ -29,7 +29,6 @@ import android.net.NetworkSpecifier;
 import android.net.ProxyInfo;
 import android.net.StaticIpConfiguration;
 import android.net.Uri;
-import android.net.util.MacAddressUtils;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -41,6 +40,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.net.module.util.MacAddressUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
