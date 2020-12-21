@@ -115,14 +115,14 @@ public class DomainVerificationProxyV1 implements DomainVerificationProxy {
                 }
             }
         }
-        mConnection.schedule(DomainVerificationMessageCodes.SEND_REQUEST, packageNames);
+        mConnection.schedule(DomainVerificationMessageCodes.LEGACY_SEND_REQUEST, packageNames);
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public boolean runMessage(int messageCode, Object object) {
         switch (messageCode) {
-            case DomainVerificationMessageCodes.SEND_REQUEST:
+            case DomainVerificationMessageCodes.LEGACY_SEND_REQUEST:
                 @SuppressWarnings("unchecked") Set<String> packageNames = (Set<String>) object;
                 if (DEBUG_BROADCASTS) {
                     Slog.d(TAG, "Requesting domain verification for " + packageNames);

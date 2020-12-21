@@ -7073,25 +7073,21 @@ public class PackageManagerService extends IPackageManager.Stub
                 mRequiredVerifierPackage = getRequiredButNotReallyRequiredVerifierLPr();
                 mRequiredInstallerPackage = getRequiredInstallerLPr();
                 mRequiredUninstallerPackage = getRequiredUninstallerLPr();
+                ComponentName intentFilterVerifierComponent =
+                        getIntentFilterVerifierComponentNameLPr();
                 ComponentName domainVerificationAgent =
                         getDomainVerificationAgentComponentNameLPr();
-                if (domainVerificationAgent != null) {
-                    mDomainVerificationManager.setProxy(
-                            new DomainVerificationProxyV2(mContext, mDomainVerificationConnection,
-                                    domainVerificationAgent));
-                } else {
-                    // TODO(b/159952358): DomainVerificationProxyV1
-                    ComponentName intentFilterVerifierComponent =
-                            getIntentFilterVerifierComponentNameLPr();
-                    if (intentFilterVerifierComponent != null) {
-                        mDomainVerificationManager.setProxy(
-                                new DomainVerificationProxyV1(mContext, mDomainVerificationManager,
-                                        mDomainVerificationManager.getCollector(),
-                                        mDomainVerificationConnection,
-                                        intentFilterVerifierComponent));
-                        mIntentFilterVerificationManager.setVerifierComponent(
-                                intentFilterVerifierComponent);
-                    }
+
+                DomainVerificationProxy domainVerificationProxy = DomainVerificationProxy.makeProxy(
+                        intentFilterVerifierComponent, domainVerificationAgent, mContext,
+                        mDomainVerificationManager, mDomainVerificationManager.getCollector(),
+                        mDomainVerificationConnection);
+
+                mDomainVerificationManager.setProxy(domainVerificationProxy);
+
+                if (intentFilterVerifierComponent != null) {
+                    mIntentFilterVerificationManager.setVerifierComponent(
+                            intentFilterVerifierComponent);
                 }
 
                 mServicesExtensionPackageName = getRequiredServicesExtensionPackageLPr();

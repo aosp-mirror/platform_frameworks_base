@@ -1170,8 +1170,6 @@ public class DomainVerificationService extends SystemService
          */
         void schedule(int code, @Nullable Object object);
 
-        boolean isCallerPackage(int callingUid, @NonNull String packageName);
-
         /**
          * This can only be called when the internal {@link #mLock} is held. Otherwise it's possible
          * to deadlock with {@link PackageManagerService}.
