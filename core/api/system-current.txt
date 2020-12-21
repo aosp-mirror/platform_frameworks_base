@@ -3975,6 +3975,25 @@ package android.location {
     method public void onLocationBatch(java.util.List<android.location.Location>);
   }
 
+  public final class CorrelationVector implements android.os.Parcelable {
+    method public int describeContents();
+    method @IntRange(from=0) public int getFrequencyOffsetMetersPerSecond();
+    method @NonNull public int[] getMagnitude();
+    method @FloatRange(from=0.0f) public double getSamplingStartMeters();
+    method @FloatRange(from=0.0f, fromInclusive=false) public double getSamplingWidthMeters();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.CorrelationVector> CREATOR;
+  }
+
+  public static final class CorrelationVector.Builder {
+    ctor public CorrelationVector.Builder();
+    method @NonNull public android.location.CorrelationVector build();
+    method @NonNull public android.location.CorrelationVector.Builder setFrequencyOffsetMetersPerSecond(@IntRange(from=0) int);
+    method @NonNull public android.location.CorrelationVector.Builder setMagnitude(@NonNull int[]);
+    method @NonNull public android.location.CorrelationVector.Builder setSamplingStartMeters(@FloatRange(from=0.0f) double);
+    method @NonNull public android.location.CorrelationVector.Builder setSamplingWidthMeters(@FloatRange(from=0.0f, fromInclusive=false) double);
+  }
+
   public final class GnssCapabilities implements android.os.Parcelable {
     method public boolean hasGeofencing();
     method public boolean hasLowPowerMode();
@@ -3983,6 +4002,7 @@ package android.location {
     method public boolean hasMeasurementCorrectionsLosSats();
     method @Deprecated public boolean hasMeasurementCorrectionsReflectingPane();
     method public boolean hasMeasurementCorrectionsReflectingPlane();
+    method public boolean hasMeasurementCorrelationVectors();
     method @Deprecated public boolean hasNavMessages();
     method @Deprecated public boolean hasSatelliteBlacklist();
     method public boolean hasSatelliteBlocklist();
@@ -3996,12 +4016,15 @@ package android.location {
     method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrectionsExcessPathLength(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrectionsLosSats(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrectionsReflectingPlane(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrelationVectors(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasSatelliteBlocklist(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasSatellitePvt(boolean);
   }
 
   public final class GnssMeasurement implements android.os.Parcelable {
+    method @Nullable public java.util.Collection<android.location.CorrelationVector> getCorrelationVectors();
     method @Nullable public android.location.SatellitePvt getSatellitePvt();
+    method public boolean hasCorrelationVectors();
     method public boolean hasSatellitePvt();
   }
 
@@ -4033,6 +4056,14 @@ package android.location {
     method @NonNull public android.location.GnssMeasurementCorrections.Builder setSingleSatelliteCorrectionList(@NonNull java.util.List<android.location.GnssSingleSatCorrection>);
     method @NonNull public android.location.GnssMeasurementCorrections.Builder setToaGpsNanosecondsOfWeek(@IntRange(from=0) long);
     method @NonNull public android.location.GnssMeasurementCorrections.Builder setVerticalPositionUncertaintyMeters(@FloatRange(from=0.0f) double);
+  }
+
+  public final class GnssMeasurementRequest implements android.os.Parcelable {
+    method public boolean isCorrelationVectorOutputsEnabled();
+  }
+
+  public static final class GnssMeasurementRequest.Builder {
+    method @NonNull public android.location.GnssMeasurementRequest.Builder setCorrelationVectorOutputsEnabled(boolean);
   }
 
   public final class GnssReflectingPlane implements android.os.Parcelable {

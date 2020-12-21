@@ -193,7 +193,9 @@ public class GnssManagerService {
             IGnssMeasurementsListener listener, String packageName,
             @Nullable String attributionTag) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
-
+        if (request.isCorrelationVectorOutputsEnabled()) {
+            mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
+        }
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
         mGnssMeasurementsProvider.addListener(request, identity, listener);
     }

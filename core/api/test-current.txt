@@ -929,6 +929,7 @@ package android.location {
     method @Deprecated public void resetCarrierPhase();
     method @Deprecated public void resetCarrierPhaseUncertainty();
     method public void resetCodeType();
+    method public void resetCorrelationVectors();
     method public void resetFullInterSignalBiasNanos();
     method public void resetFullInterSignalBiasUncertaintyNanos();
     method public void resetSatelliteInterSignalBiasNanos();
@@ -948,6 +949,7 @@ package android.location {
     method public void setCn0DbHz(double);
     method public void setCodeType(@NonNull String);
     method public void setConstellationType(int);
+    method public void setCorrelationVectors(@Nullable java.util.Collection<android.location.CorrelationVector>);
     method public void setFullInterSignalBiasNanos(double);
     method public void setFullInterSignalBiasUncertaintyNanos(@FloatRange(from=0.0) double);
     method public void setMultipathIndicator(int);
