@@ -83,6 +83,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
+import android.util.TypedValue;
 import android.util.proto.ProtoOutputStream;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
@@ -4911,7 +4912,8 @@ public class Notification implements Parcelable
                 setTextViewColorPrimary(contentView, R.id.title, p);
                 contentView.setViewLayoutWidth(R.id.title, showProgress
                         ? ViewGroup.LayoutParams.WRAP_CONTENT
-                        : ViewGroup.LayoutParams.MATCH_PARENT);
+                        : ViewGroup.LayoutParams.MATCH_PARENT,
+                        TypedValue.COMPLEX_UNIT_PX);
             }
             if (p.text != null && p.text.length() != 0) {
                 int textId = showProgress ? com.android.internal.R.id.text_line_1
@@ -5356,8 +5358,9 @@ public class Notification implements Parcelable
             final boolean snoozeEnabled = mContext.getContentResolver() != null
                     && (Settings.Secure.getInt(mContext.getContentResolver(),
                         Settings.Secure.SHOW_NOTIFICATION_SNOOZE, 0) == 1);
-            big.setViewLayoutMarginBottomDimen(R.id.notification_action_list_margin_target,
-                    snoozeEnabled ? 0 : R.dimen.notification_content_margin);
+            int bottomMarginDimen = snoozeEnabled ? 0 : R.dimen.notification_content_margin;
+            big.setViewLayoutMarginDimen(R.id.notification_action_list_margin_target,
+                    RemoteViews.MARGIN_BOTTOM, bottomMarginDimen);
         }
 
         private static List<Notification.Action> filterOutContextualActions(
@@ -5389,7 +5392,8 @@ public class Notification implements Parcelable
             if (N > 0) {
                 big.setViewVisibility(R.id.actions_container, View.VISIBLE);
                 big.setViewVisibility(R.id.actions, View.VISIBLE);
-                big.setViewLayoutMarginBottomDimen(R.id.notification_action_list_margin_target, 0);
+                big.setViewLayoutMarginDimen(R.id.notification_action_list_margin_target,
+                        RemoteViews.MARGIN_BOTTOM, 0);
                 if (N>MAX_ACTION_BUTTONS) N=MAX_ACTION_BUTTONS;
                 for (int i=0; i<N; i++) {
                     Action action = nonContextualActions.get(i);
@@ -7788,8 +7792,8 @@ public class Notification implements Parcelable
                 // also update the end margin if there is an image
                 // NOTE: This template doesn't support moving this icon to the left, so we don't
                 // need to fully apply the MarginSet
-                contentView.setViewLayoutMarginEnd(R.id.notification_messaging,
-                        bindResult.mHeadingExtraMarginSet.getValue());
+                contentView.setViewLayoutMargin(R.id.notification_messaging, RemoteViews.MARGIN_END,
+                        bindResult.mHeadingExtraMarginSet.getValue(), TypedValue.COMPLEX_UNIT_PX);
             }
             contentView.setInt(R.id.status_bar_latest_event_content, "setLayoutColor",
                     mBuilder.isColorized(p)
@@ -8613,7 +8617,8 @@ public class Notification implements Parcelable
             if (mBuilder.mN.hasLargeIcon()) {
                 endMargin = R.dimen.notification_media_image_margin_end;
             }
-            view.setViewLayoutMarginEndDimen(R.id.notification_main_column, endMargin);
+            view.setViewLayoutMarginDimen(R.id.notification_main_column,
+                            RemoteViews.MARGIN_END, endMargin);
             return view;
         }
 
@@ -8650,8 +8655,8 @@ public class Notification implements Parcelable
 
         private void handleImage(RemoteViews contentView) {
             if (mBuilder.mN.hasLargeIcon()) {
-                contentView.setViewLayoutMarginEndDimen(R.id.line1, 0);
-                contentView.setViewLayoutMarginEndDimen(R.id.text, 0);
+                contentView.setViewLayoutMarginDimen(R.id.line1, RemoteViews.MARGIN_END, 0);
+                contentView.setViewLayoutMarginDimen(R.id.text, RemoteViews.MARGIN_END, 0);
             }
         }
 
@@ -11080,7 +11085,8 @@ public class Notification implements Parcelable
                 if (viewId == R.id.notification_header) {
                     views.setInt(R.id.notification_header, "setTopLineExtraMarginEnd", marginEnd);
                 } else {
-                    views.setViewLayoutMarginEnd(viewId, marginEnd);
+                    views.setViewLayoutMargin(viewId, RemoteViews.MARGIN_END,
+                                    marginEnd, TypedValue.COMPLEX_UNIT_PX);
                 }
                 if (mRightIconVisible) {
                     views.setIntTag(viewId, R.id.tag_margin_end_when_icon_visible,
