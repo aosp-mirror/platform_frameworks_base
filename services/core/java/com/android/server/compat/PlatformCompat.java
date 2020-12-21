@@ -107,17 +107,25 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     }
 
     /**
-     * Internal version of the above method. Does not perform costly permission check.
+     * Internal version of the above method, without logging. Does not perform costly permission
+     * check.
+     * TODO(b/167551701): Remove this method and add 'loggability' as a changeid property.
+     */
+    public boolean isChangeEnabledInternalNoLogging(long changeId, ApplicationInfo appInfo) {
+        return mCompatConfig.isChangeEnabled(changeId, appInfo);
+    }
+
+    /**
+     * Internal version of {@link #isChangeEnabled(long, ApplicationInfo)}. Does not perform costly
+     * permission check.
      */
     public boolean isChangeEnabledInternal(long changeId, ApplicationInfo appInfo) {
-        if (mCompatConfig.isChangeEnabled(changeId, appInfo)) {
+        boolean enabled = isChangeEnabledInternalNoLogging(changeId, appInfo);
+        if (appInfo != null) {
             reportChange(changeId, appInfo.uid,
-                    ChangeReporter.STATE_ENABLED);
-            return true;
+                    enabled ? ChangeReporter.STATE_ENABLED : ChangeReporter.STATE_DISABLED);
         }
-        reportChange(changeId, appInfo.uid,
-                ChangeReporter.STATE_DISABLED);
-        return false;
+        return enabled;
     }
 
     @Override
@@ -125,9 +133,6 @@ public class PlatformCompat extends IPlatformCompat.Stub {
             @UserIdInt int userId) {
         checkCompatChangeReadAndLogPermission();
         ApplicationInfo appInfo = getApplicationInfo(packageName, userId);
-        if (appInfo == null) {
-            return true;
-        }
         return isChangeEnabled(changeId, appInfo);
     }
 
@@ -136,7 +141,7 @@ public class PlatformCompat extends IPlatformCompat.Stub {
         checkCompatChangeReadAndLogPermission();
         String[] packages = mContext.getPackageManager().getPackagesForUid(uid);
         if (packages == null || packages.length == 0) {
-            return true;
+            return mCompatConfig.defaultChangeIdValue(changeId);
         }
         boolean enabled = true;
         for (String packageName : packages) {
