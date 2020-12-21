@@ -129,7 +129,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         setConnectivityViaBroadcast(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
 
         // Verify that a SignalDrawable with a cut out is used to display data disabled.
-        verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, 0,
+        verifyLastMobileDataIndicators(false, DEFAULT_SIGNAL_STRENGTH, 0,
                 true, DEFAULT_QS_SIGNAL_STRENGTH, 0, false,
                 false, true, NO_DATA_STRING, NO_DATA_STRING);
     }
@@ -143,7 +143,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         setConnectivityViaBroadcast(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
 
         // Verify that a SignalDrawable with a cut out is used to display data disabled.
-        verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, 0,
+        verifyLastMobileDataIndicators(false, DEFAULT_SIGNAL_STRENGTH, 0,
                 true, DEFAULT_QS_SIGNAL_STRENGTH, 0, false,
                 false, true, NO_DATA_STRING, NO_DATA_STRING);
     }
@@ -158,7 +158,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         setConnectivityViaBroadcast(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
 
         // Verify that a SignalDrawable with a cut out is used to display data disabled.
-        verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, 0,
+        verifyLastMobileDataIndicators(false, DEFAULT_SIGNAL_STRENGTH, 0,
                 true, DEFAULT_QS_SIGNAL_STRENGTH, 0, false,
                 false, false, NOT_DEFAULT_DATA_STRING, NOT_DEFAULT_DATA_STRING);
     }
@@ -173,7 +173,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         setConnectivityViaBroadcast(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
 
         // Verify that a SignalDrawable with a cut out is used to display data disabled.
-        verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, 0,
+        verifyLastMobileDataIndicators(false, DEFAULT_SIGNAL_STRENGTH, 0,
                 true, DEFAULT_QS_SIGNAL_STRENGTH, 0, false,
                 false, false, NOT_DEFAULT_DATA_STRING, NOT_DEFAULT_DATA_STRING);
     }
@@ -190,7 +190,8 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         TestableLooper.get(this).processAllMessages();
 
         // Don't show the X until the device is setup.
-        verifyDataIndicators(0);
+        verifyLastMobileDataIndicators(false, DEFAULT_SIGNAL_STRENGTH, 0,
+                true, DEFAULT_QS_SIGNAL_STRENGTH, 0, false, false);
     }
 
     @Test
@@ -205,7 +206,9 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         mConfig.alwaysShowDataRatIcon = true;
         mNetworkController.handleConfigurationChanged();
 
-        verifyDataIndicators(TelephonyIcons.ICON_G);
+        setConnectivityViaBroadcast(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
+        verifyLastMobileDataIndicators(false, DEFAULT_SIGNAL_STRENGTH, TelephonyIcons.ICON_G,
+                true, DEFAULT_QS_SIGNAL_STRENGTH, 0, false, false);
     }
 
     @Test

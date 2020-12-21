@@ -135,6 +135,17 @@ public class CallbackHandler extends Handler implements EmergencyListener, Signa
     }
 
     @Override
+    public void setConnectivityStatus(boolean noDefaultNetwork, boolean noValidatedNetwork,
+                boolean noNetworksAvailable) {
+        post(() -> {
+            for (SignalCallback signalCluster : mSignalCallbacks) {
+                signalCluster.setConnectivityStatus(
+                        noDefaultNetwork, noValidatedNetwork, noNetworksAvailable);
+            }
+        });
+    }
+
+    @Override
     public void setSubs(List<SubscriptionInfo> subs) {
         obtainMessage(MSG_SUBS_CHANGED, subs).sendToTarget();
     }

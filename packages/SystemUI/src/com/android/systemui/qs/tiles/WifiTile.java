@@ -305,6 +305,9 @@ public class WifiTile extends QSTileImpl<SignalState> {
                 boolean activityIn, boolean activityOut, String description, boolean isTransient,
                 String statusLabel) {
             if (DEBUG) Log.d(TAG, "onWifiSignalChanged enabled=" + enabled);
+            if (qsIcon == null) {
+                return;
+            }
             mInfo.enabled = enabled;
             mInfo.connected = qsIcon.visible;
             mInfo.wifiSignalIconId = qsIcon.icon;

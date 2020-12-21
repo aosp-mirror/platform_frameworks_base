@@ -83,6 +83,15 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
         default void setIsAirplaneMode(IconState icon) {}
 
         default void setMobileDataEnabled(boolean enabled) {}
+
+        /**
+         * Callback for listeners to be able to update the connectivity status
+         * @param noDefaultNetwork whether there is any default network.
+         * @param noValidatedNetwork whether there is any validated network.
+         * @param noNetworksAvailable whether there is any WiFi networks available.
+         */
+        default void setConnectivityStatus(boolean noDefaultNetwork, boolean noValidatedNetwork,
+                boolean noNetworksAvailable) {}
     }
 
     public interface EmergencyListener {
