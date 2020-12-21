@@ -57,7 +57,7 @@ abstract class KeyStoreCryptoOperationUtils {
         for (Authorization p : key.getAuthorizations()) {
             switch(p.keyParameter.tag) {
                 case KeymasterDefs.KM_TAG_USER_SECURE_ID:
-                    keySids.add(p.keyParameter.longInteger);
+                    keySids.add(p.keyParameter.value.getLongInteger());
                     break;
                 default:
                     break;
