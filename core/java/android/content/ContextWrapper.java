@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UiContext;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -1047,6 +1048,14 @@ public class ContextWrapper extends Context {
     @Override
     public Context createCredentialProtectedStorageContext() {
         return mBase.createCredentialProtectedStorageContext();
+    }
+
+    /** @hide */
+    @UiContext
+    @NonNull
+    @Override
+    public Context createTokenContext(@NonNull IBinder token, @NonNull Display display) {
+        return mBase.createTokenContext(token, display);
     }
 
     @Override
