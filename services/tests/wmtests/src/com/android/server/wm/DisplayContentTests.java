@@ -50,6 +50,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.window.DisplayAreaOrganizer.FEATURE_WINDOWED_MAGNIFICATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
@@ -106,6 +107,7 @@ import android.view.IWindowManager;
 import android.view.InsetsState;
 import android.view.MotionEvent;
 import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowManager;
 
@@ -1531,6 +1533,22 @@ public class DisplayContentTests extends WindowTestsBase {
 
         assertNull(taskDisplayArea.getRootHomeTask());
         assertNull(taskDisplayArea.getOrCreateRootHomeTask());
+    }
+
+    @Test
+    public void testValidWindowingLayer() {
+        final SurfaceControl windowingLayer = mDisplayContent.getWindowingLayer();
+        assertNotNull(windowingLayer);
+
+        final List<DisplayArea<?>> windowedMagnificationAreas =
+                mDisplayContent.mDisplayAreaPolicy.getDisplayAreas(FEATURE_WINDOWED_MAGNIFICATION);
+        if (windowedMagnificationAreas != null) {
+            assertEquals("There should be only one DisplayArea for FEATURE_WINDOWED_MAGNIFICATION",
+                    1, windowedMagnificationAreas.size());
+            assertEquals(windowedMagnificationAreas.get(0).mSurfaceControl, windowingLayer);
+        } else {
+            assertNotEquals(mDisplayContent.mSurfaceControl, windowingLayer);
+        }
     }
 
     @Test
