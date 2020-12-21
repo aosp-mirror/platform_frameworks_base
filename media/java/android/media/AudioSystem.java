@@ -1730,7 +1730,7 @@ public class AudioSystem
         int[] types = new int[devices.size()];
         String[] addresses = new String[devices.size()];
         for (int i = 0; i < devices.size(); ++i) {
-            types[i] = AudioDeviceInfo.convertDeviceTypeToInternalDevice(devices.get(i).getType());
+            types[i] = devices.get(i).getInternalType();
             addresses[i] = devices.get(i).getAddress();
         }
         return setDevicesRoleForStrategy(strategy, role, types, addresses);

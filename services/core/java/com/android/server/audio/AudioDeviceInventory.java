@@ -648,6 +648,10 @@ public class AudioDeviceInventory {
     /*package*/ int setPreferredDevicesForStrategySync(int strategy,
             @NonNull List<AudioDeviceAttributes> devices) {
         final long identity = Binder.clearCallingIdentity();
+
+        AudioService.sDeviceLogger.log((new AudioEventLogger.StringEvent(
+                                "setPreferredDevicesForStrategySync, strategy: " + strategy
+                                + " devices: " + devices)).printLog(TAG));
         final int status = mAudioSystem.setDevicesRoleForStrategy(
                 strategy, AudioSystem.DEVICE_ROLE_PREFERRED, devices);
         Binder.restoreCallingIdentity(identity);
