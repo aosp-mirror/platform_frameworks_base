@@ -65,7 +65,6 @@
     <string name="kg_wrong_pin" msgid="4160978845968732624">"Code incorrect"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="991400408675793914">
       <item quantity="one">Réessayez dans <xliff:g id="NUMBER">%d</xliff:g> seconde.</item>
-      <item quantity="many">Try again in <xliff:g id="NUMBER">%d</xliff:g> seconds.</item>
       <item quantity="other">Réessayez dans <xliff:g id="NUMBER">%d</xliff:g> secondes.</item>
     </plurals>
     <string name="kg_pattern_instructions" msgid="5376036737065051736">"Dessinez votre schéma"</string>
@@ -89,13 +88,11 @@
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Code PIN de la carte SIM incorrect. Vous devez désormais contacter votre opérateur pour déverrouiller votre appareil."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="one">Code PIN de la carte SIM incorrect. Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentative.</item>
-      <item quantity="many">Incorrect SIM PIN code, you have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts.</item>
       <item quantity="other">Code PIN de la carte SIM incorrect. Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentatives.</item>
     </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"La carte SIM est inutilisable. Contactez votre opérateur."</string>
     <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
       <item quantity="one">Clé PUK de la carte SIM incorrecte. Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentative avant que votre carte SIM ne devienne définitivement inutilisable.</item>
-      <item quantity="many">Incorrect SIM PUK code, you have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM becomes permanently unusable.</item>
       <item quantity="other">Clé PUK de la carte SIM incorrecte. Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentatives avant que votre carte SIM ne devienne définitivement inutilisable.</item>
     </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Échec du déverrouillage à l\'aide du code PIN de la carte SIM."</string>
@@ -117,29 +114,24 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Appareil verrouillé manuellement"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="1337428979661197957">
       <item quantity="one">L\'appareil n\'a pas été déverrouillé depuis <xliff:g id="NUMBER_1">%d</xliff:g> heure. Confirmez le schéma.</item>
-      <item quantity="many">Device hasn\'t been unlocked for <xliff:g id="NUMBER_1">%d</xliff:g> hours. Confirm pattern.</item>
       <item quantity="other">L\'appareil n\'a pas été déverrouillé depuis <xliff:g id="NUMBER_1">%d</xliff:g> heures. Confirmez le schéma.</item>
     </plurals>
     <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="6444519502336330270">
       <item quantity="one">L\'appareil n\'a pas été déverrouillé depuis <xliff:g id="NUMBER_1">%d</xliff:g> heure. Confirmez le code.</item>
-      <item quantity="many">Device hasn\'t been unlocked for <xliff:g id="NUMBER_1">%d</xliff:g> hours. Confirm PIN.</item>
       <item quantity="other">L\'appareil n\'a pas été déverrouillé depuis <xliff:g id="NUMBER_1">%d</xliff:g> heures. Confirmez le code.</item>
     </plurals>
     <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5343961527665116914">
       <item quantity="one">L\'appareil n\'a pas été déverrouillé depuis <xliff:g id="NUMBER_1">%d</xliff:g> heure. Confirmez le mot de passe.</item>
-      <item quantity="many">Device hasn\'t been unlocked for <xliff:g id="NUMBER_1">%d</xliff:g> hours. Confirm password.</item>
       <item quantity="other">L\'appareil n\'a pas été déverrouillé depuis <xliff:g id="NUMBER_1">%d</xliff:g> heures. Confirmez le mot de passe.</item>
     </plurals>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"Non reconnu"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Non reconnu"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="one">Saisissez le code de la carte SIM. <xliff:g id="NUMBER_1">%d</xliff:g> tentative restante.</item>
-      <item quantity="many">Enter SIM PIN. You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts.</item>
       <item quantity="other">Saisissez le code de la carte SIM. <xliff:g id="NUMBER_1">%d</xliff:g> tentatives restantes.</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
       <item quantity="one">La carte SIM est maintenant désactivée. Saisissez le code PUK pour continuer. Il vous reste <xliff:g id="_NUMBER_1">%d</xliff:g> tentative avant que votre carte SIM ne devienne définitivement inutilisable. Pour de plus amples informations, veuillez contacter votre opérateur.</item>
-      <item quantity="many">SIM is now disabled. Enter PUK code to continue. You have <xliff:g id="_NUMBER_1">%d</xliff:g> remaining attempts before SIM becomes permanently unusable. Contact carrier for details.</item>
       <item quantity="other">La carte SIM est maintenant désactivée. Saisissez le code PUK pour continuer. Il vous reste <xliff:g id="_NUMBER_1">%d</xliff:g> tentatives avant que votre carte SIM ne devienne définitivement inutilisable. Pour de plus amples informations, veuillez contacter votre opérateur.</item>
     </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"Par défaut"</string>
