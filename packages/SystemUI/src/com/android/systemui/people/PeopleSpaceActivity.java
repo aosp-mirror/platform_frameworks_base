@@ -44,7 +44,6 @@ import com.android.systemui.R;
 import com.android.systemui.people.widget.PeopleSpaceWidgetProvider;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Shows the user their tiles for their priority People (go/live-status).
@@ -96,13 +95,12 @@ public class PeopleSpaceActivity extends Activity {
      */
     private void setTileViewsWithPriorityConversations() {
         try {
-            List<Map.Entry<Long, PeopleSpaceTile>> tiles = PeopleSpaceUtils.getTiles(
+            List<PeopleSpaceTile> tiles = PeopleSpaceUtils.getTiles(
                     mContext, mNotificationManager, mPeopleManager, mLauncherApps);
-            for (Map.Entry<Long, PeopleSpaceTile> entry : tiles) {
-                PeopleSpaceTile tile = entry.getValue();
+            for (PeopleSpaceTile tile : tiles) {
                 PeopleSpaceTileView tileView = new PeopleSpaceTileView(mContext, mPeopleSpaceLayout,
                         tile.getId());
-                setTileView(tileView, tile, entry.getKey());
+                setTileView(tileView, tile);
             }
         } catch (Exception e) {
             Log.e(TAG, "Couldn't retrieve conversations", e);
@@ -110,12 +108,12 @@ public class PeopleSpaceActivity extends Activity {
     }
 
     /** Sets {@code tileView} with the data in {@code conversation}. */
-    private void setTileView(PeopleSpaceTileView tileView, PeopleSpaceTile tile,
-            long lastInteraction) {
+    private void setTileView(PeopleSpaceTileView tileView, PeopleSpaceTile tile) {
         try {
             String pkg = tile.getPackageName();
             String status =
-                    PeopleSpaceUtils.getLastInteractionString(mContext, lastInteraction);
+                    PeopleSpaceUtils.getLastInteractionString(mContext,
+                            tile.getLastInteractionTimestamp(), true);
             tileView.setStatus(status);
 
             tileView.setName(tile.getUserName().toString());
