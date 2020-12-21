@@ -183,7 +183,12 @@ public class BackupEligibilityRules {
                     } catch (PackageManager.NameNotFoundException e) {
                         Slog.w(TAG, "Failed to read allowAdbBackup property for + "
                                 + packageName);
-                        return false;
+
+                        // This temporarily falls back to the legacy allowBackup flag to
+                        // avoid breaking existing users of adb backup. Once they're able to use
+                        // the new ALLOW_ADB_BACKUP property, we'll return false here.
+                        // TODO(b/176088499): Return false here.
+                        return allowBackup;
                     }
                 } else {
                     // All other apps can use adb backup only when running in debuggable mode.
