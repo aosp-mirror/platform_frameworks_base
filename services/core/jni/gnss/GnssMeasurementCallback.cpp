@@ -21,21 +21,33 @@
 namespace android::gnss {
 
 using binder::Status;
+using hardware::gnss::CorrelationVector;
 using hardware::gnss::ElapsedRealtime;
 using hardware::gnss::GnssClock;
 using hardware::gnss::GnssData;
 using hardware::gnss::GnssMeasurement;
 using hardware::gnss::SatellitePvt;
 
+jclass class_arrayList;
+jclass class_clockInfo;
+jclass class_correlationVectorBuilder;
 jclass class_gnssMeasurementsEvent;
 jclass class_gnssMeasurement;
 jclass class_gnssClock;
-jclass class_satellitePvtBuilder;
 jclass class_positionEcef;
+jclass class_satellitePvtBuilder;
 jclass class_velocityEcef;
-jclass class_clockInfo;
 
+jmethodID method_arrayListAdd;
+jmethodID method_arrayListCtor;
+jmethodID method_correlationVectorBuilderBuild;
+jmethodID method_correlationVectorBuilderCtor;
+jmethodID method_correlationVectorBuilderSetFrequencyOffsetMetersPerSecond;
+jmethodID method_correlationVectorBuilderSetMagnitude;
+jmethodID method_correlationVectorBuilderSetSamplingStartMeters;
+jmethodID method_correlationVectorBuilderSetSamplingWidthMeters;
 jmethodID method_gnssMeasurementsEventCtor;
+jmethodID method_gnssMeasurementsSetCorrelationVectors;
 jmethodID method_gnssMeasurementsSetSatellitePvt;
 jmethodID method_gnssClockCtor;
 jmethodID method_gnssMeasurementCtor;
@@ -66,6 +78,9 @@ void GnssMeasurement_class_init_once(JNIEnv* env, jclass& clazz) {
     method_gnssMeasurementsSetSatellitePvt =
             env->GetMethodID(class_gnssMeasurement, "setSatellitePvt",
                              "(Landroid/location/SatellitePvt;)V");
+    method_gnssMeasurementsSetCorrelationVectors =
+            env->GetMethodID(class_gnssMeasurement, "setCorrelationVectors",
+                             "(Ljava/util/Collection;)V");
 
     jclass gnssClockClass = env->FindClass("android/location/GnssClock");
     class_gnssClock = (jclass)env->NewGlobalRef(gnssClockClass);
@@ -106,6 +121,31 @@ void GnssMeasurement_class_init_once(JNIEnv* env, jclass& clazz) {
     jclass clockInfoClass = env->FindClass("android/location/SatellitePvt$ClockInfo");
     class_clockInfo = (jclass)env->NewGlobalRef(clockInfoClass);
     method_clockInfo = env->GetMethodID(class_clockInfo, "<init>", "(DDD)V");
+
+    jclass correlationVectorBuilder = env->FindClass("android/location/CorrelationVector$Builder");
+    class_correlationVectorBuilder = (jclass)env->NewGlobalRef(correlationVectorBuilder);
+    method_correlationVectorBuilderCtor =
+            env->GetMethodID(class_correlationVectorBuilder, "<init>", "()V");
+    method_correlationVectorBuilderSetMagnitude =
+            env->GetMethodID(class_correlationVectorBuilder, "setMagnitude",
+                             "([I)Landroid/location/CorrelationVector$Builder;");
+    method_correlationVectorBuilderSetFrequencyOffsetMetersPerSecond =
+            env->GetMethodID(class_correlationVectorBuilder, "setFrequencyOffsetMetersPerSecond",
+                             "(I)Landroid/location/CorrelationVector$Builder;");
+    method_correlationVectorBuilderSetSamplingStartMeters =
+            env->GetMethodID(class_correlationVectorBuilder, "setSamplingStartMeters",
+                             "(D)Landroid/location/CorrelationVector$Builder;");
+    method_correlationVectorBuilderSetSamplingWidthMeters =
+            env->GetMethodID(class_correlationVectorBuilder, "setSamplingWidthMeters",
+                             "(D)Landroid/location/CorrelationVector$Builder;");
+    method_correlationVectorBuilderBuild =
+            env->GetMethodID(class_correlationVectorBuilder, "build",
+                             "()Landroid/location/CorrelationVector;");
+
+    jclass arrayListClass = env->FindClass("java/util/ArrayList");
+    class_arrayList = (jclass)env->NewGlobalRef(arrayListClass);
+    method_arrayListCtor = env->GetMethodID(class_arrayList, "<init>", "()V");
+    method_arrayListAdd = env->GetMethodID(class_arrayList, "add", "(Ljava/lang/Object;)Z");
 }
 
 void setMeasurementData(JNIEnv* env, jobject& callbacksObj, jobject clock,
@@ -308,6 +348,47 @@ void GnssMeasurementCallbackAidl::translateSingleGnssMeasurement(JNIEnv* env,
         env->DeleteLocalRef(clockInfo);
         env->DeleteLocalRef(satellitePvtBuilderObject);
         env->DeleteLocalRef(satellitePvtObject);
+    }
+
+    if (measurement.flags & static_cast<uint32_t>(GnssMeasurement::HAS_CORRELATION_VECTOR)) {
+        jobject correlationVectorList = env->NewObject(class_arrayList, method_arrayListCtor);
+        for (uint16_t i = 0; i < measurement.correlationVectors.size(); ++i) {
+            const CorrelationVector& correlationVector = measurement.correlationVectors[i];
+            const std::vector<int32_t>& magnitudeVector = correlationVector.magnitude;
+
+            jsize numMagnitude = magnitudeVector.size();
+            jintArray magnitudeArray = env->NewIntArray(numMagnitude);
+            env->SetIntArrayRegion(magnitudeArray, 0, numMagnitude,
+                                   reinterpret_cast<const jint*>(magnitudeVector.data()));
+
+            jobject correlationVectorBuilderObject =
+                    env->NewObject(class_correlationVectorBuilder,
+                                   method_correlationVectorBuilderCtor);
+            env->CallObjectMethod(correlationVectorBuilderObject,
+                                  method_correlationVectorBuilderSetMagnitude, magnitudeArray);
+            env->CallObjectMethod(correlationVectorBuilderObject,
+                                  method_correlationVectorBuilderSetFrequencyOffsetMetersPerSecond,
+                                  correlationVector.frequencyOffsetMps);
+            env->CallObjectMethod(correlationVectorBuilderObject,
+                                  method_correlationVectorBuilderSetSamplingStartMeters,
+                                  correlationVector.samplingStartM);
+            env->CallObjectMethod(correlationVectorBuilderObject,
+                                  method_correlationVectorBuilderSetSamplingWidthMeters,
+                                  correlationVector.samplingWidthM);
+            jobject correlationVectorObject =
+                    env->CallObjectMethod(correlationVectorBuilderObject,
+                                          method_correlationVectorBuilderBuild);
+
+            env->CallBooleanMethod(correlationVectorList, method_arrayListAdd,
+                                   correlationVectorObject);
+
+            env->DeleteLocalRef(magnitudeArray);
+            env->DeleteLocalRef(correlationVectorBuilderObject);
+            env->DeleteLocalRef(correlationVectorObject);
+        }
+        env->CallVoidMethod(object.get(), method_gnssMeasurementsSetCorrelationVectors,
+                            correlationVectorList);
+        env->DeleteLocalRef(correlationVectorList);
     }
 
     jstring codeType = env->NewStringUTF(measurement.signalType.codeType.c_str());
