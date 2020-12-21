@@ -89,7 +89,7 @@ public class WifiNetworkScoreCache extends INetworkScoreCache.Stub {
 
     @Override public final void updateScores(List<ScoredNetwork> networks) {
         if (networks == null || networks.isEmpty()) {
-           return;
+            return;
         }
         if (DBG) {
             Log.d(TAG, "updateScores list size=" + networks.size());
@@ -97,7 +97,7 @@ public class WifiNetworkScoreCache extends INetworkScoreCache.Stub {
 
         boolean changed = false;
 
-        synchronized(mLock) {
+        synchronized (mLock) {
             for (ScoredNetwork network : networks) {
                 String networkKey = buildNetworkKey(network);
                 if (networkKey == null) {
@@ -189,7 +189,7 @@ public class WifiNetworkScoreCache extends INetworkScoreCache.Stub {
         String key = buildNetworkKey(result);
         if (key == null) return null;
 
-        synchronized(mLock) {
+        synchronized (mLock) {
             ScoredNetwork network = mCache.get(key);
             return network;
         }
