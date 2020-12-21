@@ -6734,15 +6734,20 @@ class Task extends WindowContainer<WindowContainer> {
         if (taskDisplayArea == null) {
             return false;
         }
-        final int index = taskDisplayArea.getTaskIndexOf(this);
-        if (index == 0) {
-            return false;
-        }
-        final int[] indexCount = new int[1];
+        final boolean[] hasFound = new boolean[1];
         final Task rootTaskBehind = taskDisplayArea.getRootTask(
-                // From bottom to top, find the one behind this Task.
-                task -> ++indexCount[0] == index, false /* traverseTopToBottom */);
-        return rootTaskBehind.isActivityTypeStandard();
+                // From top to bottom, find the one behind this Task.
+                task -> {
+                    if (hasFound[0]) {
+                        return true;
+                    }
+                    if (task == this) {
+                        // The next one is our target.
+                        hasFound[0] = true;
+                    }
+                    return false;
+                });
+        return rootTaskBehind != null && rootTaskBehind.isActivityTypeStandard();
     }
 
     boolean shouldUpRecreateTaskLocked(ActivityRecord srec, String destAffinity) {
