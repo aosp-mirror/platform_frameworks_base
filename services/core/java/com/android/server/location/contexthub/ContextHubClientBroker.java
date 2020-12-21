@@ -39,6 +39,10 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.server.location.ClientBrokerProto;
 
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -119,6 +123,13 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     private final boolean mHasAccessContextHubPermission;
 
     /*
+     * The set of nanoapp IDs that represent the group of nanoapps this client has a messaging
+     * channel with, i.e. has sent or received messages from this particular nanoapp.
+     */
+    private final Set<Long> mMessageChannelNanoappIdSet =
+            Collections.newSetFromMap(new ConcurrentHashMap<Long, Boolean>());
+
+    /*
      * Helper class to manage registered PendingIntent requests from the client.
      */
     private class PendingIntentRequest {
@@ -134,7 +145,8 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
 
         private boolean mValid = false;
 
-        PendingIntentRequest() {}
+        PendingIntentRequest() {
+        }
 
         PendingIntentRequest(PendingIntent pendingIntent, long nanoAppId) {
             mPendingIntent = pendingIntent;
@@ -177,7 +189,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         mPackage = mContext.getPackageManager().getNameForUid(Binder.getCallingUid());
 
         mHasAccessContextHubPermission = context.checkCallingPermission(
-            Manifest.permission.ACCESS_CONTEXT_HUB) == PERMISSION_GRANTED;
+                Manifest.permission.ACCESS_CONTEXT_HUB) == PERMISSION_GRANTED;
     }
 
     /* package */ ContextHubClientBroker(
@@ -193,7 +205,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         mPackage = pendingIntent.getCreatorPackage();
 
         mHasAccessContextHubPermission = context.checkCallingPermission(
-            Manifest.permission.ACCESS_CONTEXT_HUB) == PERMISSION_GRANTED;
+                Manifest.permission.ACCESS_CONTEXT_HUB) == PERMISSION_GRANTED;
     }
 
     /**
@@ -209,6 +221,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
 
         int result;
         if (isRegistered()) {
+            mMessageChannelNanoappIdSet.add(message.getNanoAppId());
             ContextHubMsg messageToNanoApp =
                     ContextHubServiceUtil.createHidlContextHubMessage(mHostEndPointId, message);
 
@@ -269,6 +282,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * @param message the message that came from a nanoapp
      */
     /* package */ void sendMessageToClient(NanoAppMessage message) {
+        mMessageChannelNanoappIdSet.add(message.getNanoAppId());
         invokeCallback(callback -> callback.onMessageFromNanoApp(message));
 
         Supplier<Intent> supplier =
@@ -413,7 +427,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     /**
      * Sends an intent to any existing PendingIntent
      *
-     * @param supplier method to create the extra Intent
+     * @param supplier  method to create the extra Intent
      * @param nanoAppId the ID of the nanoapp which this event is for
      */
     private synchronized void sendPendingIntent(Supplier<Intent> supplier, long nanoAppId) {
@@ -427,7 +441,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * Sends a PendingIntent with extra Intent data
      *
      * @param pendingIntent the PendingIntent
-     * @param intent the extra Intent data
+     * @param intent        the extra Intent data
      */
     private void doSendPendingIntent(PendingIntent pendingIntent, Intent intent) {
         try {
@@ -499,6 +513,17 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
             out += "nanoAppId: 0x" + Long.toHexString(mPendingIntentRequest.getNanoAppId());
         } else {
             out += "package: " + mPackage;
+        }
+        if (mMessageChannelNanoappIdSet.size() > 0) {
+            out += " messageChannelNanoappSet: (";
+            Iterator<Long> it = mMessageChannelNanoappIdSet.iterator();
+            while (it.hasNext()) {
+                out += "0x" + Long.toHexString(it.next());
+                if (it.hasNext()) {
+                    out += ",";
+                }
+            }
+            out += ")";
         }
         out += "]";
 
