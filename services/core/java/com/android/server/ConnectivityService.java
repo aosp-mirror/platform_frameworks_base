@@ -146,6 +146,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.INetworkActivityListener;
 import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Message;
@@ -2337,6 +2338,31 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_CONFIGURE_ALWAYS_ON_NETWORKS));
 
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_SYSTEM_READY));
+    }
+
+    /**
+     * Start listening for default data network activity state changes.
+     */
+    @Override
+    public void registerNetworkActivityListener(@NonNull INetworkActivityListener l) {
+        // TODO: Replace network activity listener registry in ConnectivityManager from NMS to here
+    }
+
+    /**
+     * Stop listening for default data network activity state changes.
+     */
+    @Override
+    public void unregisterNetworkActivityListener(@NonNull INetworkActivityListener l) {
+        // TODO: Replace network activity listener registry in ConnectivityManager from NMS to here
+    }
+
+    /**
+     * Check whether the default network radio is currently active.
+     */
+    @Override
+    public boolean isDefaultNetworkActive() {
+        // TODO: Replace isNetworkActive() in NMS.
+        return false;
     }
 
     /**
