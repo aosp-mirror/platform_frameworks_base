@@ -255,6 +255,9 @@ public class StatsPullAtomService extends SystemService {
      */
     private static final int MIN_CPU_TIME_PER_UID_FREQ = 10;
 
+    /** Number of entries in CpuCyclesPerUidCluster atom stored in an array for each cluster. */
+    private static final int CPU_CYCLES_PER_UID_CLUSTER_VALUES = 3;
+
     private final Object mThermalLock = new Object();
     @GuardedBy("mThermalLock")
     private IThermalService mThermalService;
@@ -446,6 +449,12 @@ public class StatsPullAtomService extends SystemService {
                     case FrameworkStatsLog.CPU_TIME_PER_UID:
                         synchronized (mCpuTimePerUidLock) {
                             return pullCpuTimePerUidLocked(atomTag, data);
+                        }
+                    case FrameworkStatsLog.CPU_CYCLES_PER_UID_CLUSTER:
+                        // Use the same lock as CPU_TIME_PER_UID_FREQ because data is pulled from
+                        // the same source.
+                        synchronized (mCpuTimePerUidFreqLock) {
+                            return pullCpuCyclesPerUidClusterLocked(atomTag, data);
                         }
                     case FrameworkStatsLog.CPU_TIME_PER_UID_FREQ:
                         synchronized (mCpuTimePerUidFreqLock) {
@@ -785,6 +794,7 @@ public class StatsPullAtomService extends SystemService {
         registerKernelWakelock();
         registerCpuTimePerFreq();
         registerCpuTimePerUid();
+        registerCpuCyclesPerUidCluster();
         registerCpuTimePerUidFreq();
         registerCpuActiveTime();
         registerCpuClusterTime();
@@ -1499,6 +1509,97 @@ public class StatsPullAtomService extends SystemService {
             pulledData.add(
                     FrameworkStatsLog.buildStatsEvent(atomTag, uid, userTimeUs, systemTimeUs));
         });
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    private void registerCpuCyclesPerUidCluster() {
+        int tagId = FrameworkStatsLog.CPU_CYCLES_PER_UID_CLUSTER;
+        PullAtomMetadata metadata = new PullAtomMetadata.Builder()
+                .setAdditiveFields(new int[] {3, 4, 5})
+                .build();
+        mStatsManager.setPullAtomCallback(
+                tagId,
+                metadata,
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl
+        );
+    }
+
+    int pullCpuCyclesPerUidClusterLocked(int atomTag, List<StatsEvent> pulledData) {
+        PowerProfile powerProfile = new PowerProfile(mContext);
+        // Frequency index to frequency mapping.
+        long[] freqs = mCpuUidFreqTimeReader.readFreqs(powerProfile);
+        // Frequency index to cluster mapping.
+        int[] freqClusters = new int[freqs.length];
+        // Frequency index to power mapping.
+        double[] freqPowers = new double[freqs.length];
+        // Number of clusters.
+        int clusters;
+
+        // Initialize frequency mappings.
+        {
+            int cluster = 0;
+            int freqClusterIndex = 0;
+            long lastFreq = -1;
+            for (int freqIndex = 0; freqIndex < freqs.length; ++freqIndex, ++freqClusterIndex) {
+                long currFreq = freqs[freqIndex];
+                if (currFreq <= lastFreq) {
+                    cluster++;
+                    freqClusterIndex = 0;
+                }
+                freqClusters[freqIndex] = cluster;
+                freqPowers[freqIndex] =
+                        powerProfile.getAveragePowerForCpuCore(cluster, freqClusterIndex);
+                lastFreq = currFreq;
+            }
+
+            clusters = cluster + 1;
+        }
+
+        // Aggregate 0: mcycles, 1: runtime ms, 2: power profile estimate for the same uids for
+        // each cluster.
+        SparseArray<double[]> aggregated = new SparseArray<>();
+        mCpuUidFreqTimeReader.readAbsolute((uid, cpuFreqTimeMs) -> {
+            if (UserHandle.isIsolated(uid)) {
+                // Skip individual isolated uids because they are recycled and quickly removed from
+                // the underlying data source.
+                return;
+            } else if (UserHandle.isSharedAppGid(uid)) {
+                // All shared app gids are accounted together.
+                uid = LAST_SHARED_APPLICATION_GID;
+            } else {
+                // Everything else is accounted under their base uid.
+                uid = UserHandle.getAppId(uid);
+            }
+
+            double[] values = aggregated.get(uid);
+            if (values == null) {
+                values = new double[clusters * CPU_CYCLES_PER_UID_CLUSTER_VALUES];
+                aggregated.put(uid, values);
+            }
+
+            for (int freqIndex = 0; freqIndex < cpuFreqTimeMs.length; ++freqIndex) {
+                int cluster = freqClusters[freqIndex];
+                long timeMs = cpuFreqTimeMs[freqIndex];
+                values[cluster * CPU_CYCLES_PER_UID_CLUSTER_VALUES] += freqs[freqIndex] * timeMs;
+                values[cluster * CPU_CYCLES_PER_UID_CLUSTER_VALUES + 1] += timeMs;
+                values[cluster * CPU_CYCLES_PER_UID_CLUSTER_VALUES + 2] +=
+                        freqPowers[freqIndex] * timeMs;
+            }
+        });
+
+        int size = aggregated.size();
+        for (int i = 0; i < size; ++i) {
+            int uid = aggregated.keyAt(i);
+            double[] values = aggregated.valueAt(i);
+            for (int cluster = 0; cluster < clusters; ++cluster) {
+                pulledData.add(FrameworkStatsLog.buildStatsEvent(
+                        atomTag, uid, cluster,
+                        (long) (values[cluster * CPU_CYCLES_PER_UID_CLUSTER_VALUES] / 1e6),
+                        (long) values[cluster * CPU_CYCLES_PER_UID_CLUSTER_VALUES + 1],
+                        (long) (values[cluster * CPU_CYCLES_PER_UID_CLUSTER_VALUES + 2] / 1e3)));
+            }
+        }
         return StatsManager.PULL_SUCCESS;
     }
 
