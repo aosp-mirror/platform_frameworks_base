@@ -60,7 +60,6 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     private final CompatConfig mCompatConfig;
 
     private static int sMinTargetSdk = Build.VERSION_CODES.Q;
-    private static int sMaxTargetSdk = Build.VERSION_CODES.R;
 
     public PlatformCompat(Context context) {
         mContext = context;
@@ -379,8 +378,7 @@ public class PlatformCompat extends IPlatformCompat.Stub {
             return false;
         }
         if (change.getEnableSinceTargetSdk() > 0) {
-            if (change.getEnableSinceTargetSdk() < sMinTargetSdk
-                    || change.getEnableSinceTargetSdk() > sMaxTargetSdk) {
+            if (change.getEnableSinceTargetSdk() < sMinTargetSdk) {
                 return false;
             }
         }
