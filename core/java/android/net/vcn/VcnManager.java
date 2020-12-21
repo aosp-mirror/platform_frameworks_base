@@ -23,6 +23,9 @@ import android.annotation.SystemService;
 import android.content.Context;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
+import android.os.ServiceSpecificException;
+
+import java.io.IOException;
 
 /**
  * VcnManager publishes APIs for applications to configure and manage Virtual Carrier Networks.
@@ -63,15 +66,20 @@ public final class VcnManager {
      * @param config the configuration parameters for the VCN
      * @throws SecurityException if the caller does not have carrier privileges, or is not running
      *     as the primary user
+     * @throws IOException if the configuration failed to be persisted. A caller encountering this
+     *     exception should attempt to retry (possibly after a delay).
      * @hide
      */
     @RequiresPermission("carrier privileges") // TODO (b/72967236): Define a system-wide constant
-    public void setVcnConfig(@NonNull ParcelUuid subscriptionGroup, @NonNull VcnConfig config) {
+    public void setVcnConfig(@NonNull ParcelUuid subscriptionGroup, @NonNull VcnConfig config)
+            throws IOException {
         requireNonNull(subscriptionGroup, "subscriptionGroup was null");
         requireNonNull(config, "config was null");
 
         try {
             mService.setVcnConfig(subscriptionGroup, config);
+        } catch (ServiceSpecificException e) {
+            throw new IOException(e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -88,14 +96,18 @@ public final class VcnManager {
      * @param subscriptionGroup the subscription group that the configuration should be applied to
      * @throws SecurityException if the caller does not have carrier privileges, or is not running
      *     as the primary user
+     * @throws IOException if the configuration failed to be cleared. A caller encountering this
+     *     exception should attempt to retry (possibly after a delay).
      * @hide
      */
     @RequiresPermission("carrier privileges") // TODO (b/72967236): Define a system-wide constant
-    public void clearVcnConfig(@NonNull ParcelUuid subscriptionGroup) {
+    public void clearVcnConfig(@NonNull ParcelUuid subscriptionGroup) throws IOException {
         requireNonNull(subscriptionGroup, "subscriptionGroup was null");
 
         try {
             mService.clearVcnConfig(subscriptionGroup);
+        } catch (ServiceSpecificException e) {
+            throw new IOException(e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
