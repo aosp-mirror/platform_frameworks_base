@@ -40,8 +40,7 @@ import org.junit.Test
 @RequiresDevice
 class TvPipNotificationTests : TvPipTestBase() {
     @Before
-    override fun setUp() {
-        super.setUp()
+    fun tvPipNotificationTestsSetUp() {
         val started = startNotificationListener()
         if (!started) {
             error("NotificationListener hasn't started")
