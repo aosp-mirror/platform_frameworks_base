@@ -15,6 +15,8 @@ LIBJNIGRAPHICS {
     AImageDecoder_setCrop; # introduced=30
     AImageDecoder_isAnimated; # introduced=31
     AImageDecoder_getRepeatCount; # introduced=31
+    AImageDecoder_advanceFrame; # introduced=31
+    AImageDecoder_rewind; # introduced=31
     AImageDecoderHeaderInfo_getWidth; # introduced=30
     AImageDecoderHeaderInfo_getHeight; # introduced=30
     AImageDecoderHeaderInfo_getMimeType; # introduced=30
