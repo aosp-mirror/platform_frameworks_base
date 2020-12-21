@@ -75,6 +75,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.CallbackUtils;
 import com.android.internal.inputmethod.IBooleanResultCallback;
 import com.android.internal.inputmethod.IInputBindResultResultCallback;
+import com.android.internal.inputmethod.IInputMethodSubtypeListResultCallback;
+import com.android.internal.inputmethod.IInputMethodSubtypeResultCallback;
 import com.android.internal.inputmethod.IMultiClientInputMethod;
 import com.android.internal.inputmethod.IMultiClientInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.IMultiClientInputMethodSession;
@@ -1475,17 +1477,18 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
-        public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(String imiId,
-                boolean allowsImplicitlySelectedSubtypes) {
+        public void getEnabledInputMethodSubtypeList(String imiId,
+                boolean allowsImplicitlySelectedSubtypes,
+                IInputMethodSubtypeListResultCallback resultCallback) {
             reportNotSupported();
-            return Collections.emptyList();
+            CallbackUtils.onResult(resultCallback, Collections::emptyList);
         }
 
         @BinderThread
         @Override
-        public InputMethodSubtype getLastInputMethodSubtype() {
+        public void getLastInputMethodSubtype(IInputMethodSubtypeResultCallback resultCallback) {
             reportNotSupported();
-            return null;
+            CallbackUtils.onResult(resultCallback, () -> null);
         }
 
         @BinderThread
@@ -1793,9 +1796,9 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
-        public InputMethodSubtype getCurrentInputMethodSubtype() {
+        public void getCurrentInputMethodSubtype(IInputMethodSubtypeResultCallback resultCallback) {
             reportNotSupported();
-            return null;
+            CallbackUtils.onResult(resultCallback, () -> null);
         }
 
         @BinderThread

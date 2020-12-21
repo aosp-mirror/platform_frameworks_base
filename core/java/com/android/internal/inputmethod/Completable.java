@@ -23,10 +23,12 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.Log;
+import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.annotations.GuardedBy;
 
 import java.lang.annotation.Retention;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -373,6 +375,20 @@ public final class Completable {
     }
 
     /**
+     * @return an instance of {@link Completable.InputMethodSubtype}.
+     */
+    public static Completable.InputMethodSubtype createInputMethodSubtype() {
+        return new Completable.InputMethodSubtype();
+    }
+
+    /**
+     * @return an instance of {@link Completable.InputMethodSubtypeList}.
+     */
+    public static Completable.InputMethodSubtypeList createInputMethodSubtypeList() {
+        return new Completable.InputMethodSubtypeList();
+    }
+
+    /**
      * Completable object of {@link java.lang.Boolean}.
      */
     public static final class Boolean extends Values<java.lang.Boolean> { }
@@ -399,6 +415,18 @@ public final class Completable {
      */
     public static final class InputBindResult
             extends Values<com.android.internal.view.InputBindResult> { }
+
+    /**
+     * Completable object of {@link android.view.inputmethod.InputMethodSubtype}.
+     */
+    public static final class InputMethodSubtype
+            extends Values<android.view.inputmethod.InputMethodSubtype> { }
+
+    /**
+     * Completable object of {@link List<android.view.inputmethod.InputMethodSubtype>}.
+     */
+    public static final class InputMethodSubtypeList
+            extends Values<List<android.view.inputmethod.InputMethodSubtype>> { }
 
     /**
      * Await the result by the {@link Completable.Values}.

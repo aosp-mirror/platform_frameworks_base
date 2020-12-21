@@ -1430,8 +1430,13 @@ public final class InputMethodManager {
     public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(InputMethodInfo imi,
             boolean allowsImplicitlySelectedSubtypes) {
         try {
-            return mService.getEnabledInputMethodSubtypeList(
-                    imi == null ? null : imi.getId(), allowsImplicitlySelectedSubtypes);
+            final Completable.InputMethodSubtypeList value =
+                    Completable.createInputMethodSubtypeList();
+            mService.getEnabledInputMethodSubtypeList(
+                    imi == null ? null : imi.getId(),
+                    allowsImplicitlySelectedSubtypes,
+                    ResultCallbacks.of(value));
+            return Completable.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2970,7 +2975,9 @@ public final class InputMethodManager {
      */
     public InputMethodSubtype getCurrentInputMethodSubtype() {
         try {
-            return mService.getCurrentInputMethodSubtype();
+            final Completable.InputMethodSubtype value = Completable.createInputMethodSubtype();
+            mService.getCurrentInputMethodSubtype(ResultCallbacks.of(value));
+            return Completable.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3019,7 +3026,11 @@ public final class InputMethodManager {
         }
         final List<InputMethodSubtype> enabledSubtypes;
         try {
-            enabledSubtypes = mService.getEnabledInputMethodSubtypeList(imeId, true);
+            final Completable.InputMethodSubtypeList value =
+                    Completable.createInputMethodSubtypeList();
+            mService.getEnabledInputMethodSubtypeList(
+                    imeId, true, ResultCallbacks.of(value));
+            enabledSubtypes = Completable.getResult(value);
         } catch (RemoteException e) {
             return false;
         }
@@ -3214,7 +3225,9 @@ public final class InputMethodManager {
 
     public InputMethodSubtype getLastInputMethodSubtype() {
         try {
-            return mService.getLastInputMethodSubtype();
+            final Completable.InputMethodSubtype value = Completable.createInputMethodSubtype();
+            mService.getLastInputMethodSubtype(ResultCallbacks.of(value));
+            return Completable.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
