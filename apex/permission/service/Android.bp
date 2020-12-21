@@ -39,4 +39,6 @@ java_sdk_library {
         "test_com.android.permission",
     ],
     installable: true,
+    // We don't have last-api tracking files for the public part of this jar's API.
+    unsafe_ignore_missing_latest_api: true,
 }
