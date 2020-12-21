@@ -39,6 +39,7 @@ import android.util.Slog;
 import android.view.SurfaceControl;
 import android.window.ITaskOrganizer;
 import android.window.ITaskOrganizerController;
+import android.window.StartingWindowInfo;
 import android.window.TaskAppearedInfo;
 import android.window.WindowContainerToken;
 
@@ -116,10 +117,10 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         }
 
         void addStartingWindow(Task task, IBinder appToken) {
-            final RunningTaskInfo taskInfo = task.getTaskInfo();
+            final StartingWindowInfo info = task.getStartingWindowInfo();
             mDeferTaskOrgCallbacksConsumer.accept(() -> {
                 try {
-                    mTaskOrganizer.addStartingWindow(taskInfo, appToken);
+                    mTaskOrganizer.addStartingWindow(info, appToken);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Exception sending onTaskStart callback", e);
                 }
@@ -127,10 +128,9 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         }
 
         void removeStartingWindow(Task task) {
-            final RunningTaskInfo taskInfo = task.getTaskInfo();
             mDeferTaskOrgCallbacksConsumer.accept(() -> {
                 try {
-                    mTaskOrganizer.removeStartingWindow(taskInfo);
+                    mTaskOrganizer.removeStartingWindow(task.mTaskId);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Exception sending onStartTaskFinished callback", e);
                 }
