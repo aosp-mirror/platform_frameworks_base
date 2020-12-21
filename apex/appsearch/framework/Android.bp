@@ -33,4 +33,5 @@ java_sdk_library {
         include_dirs: ["frameworks/base/core/java"], // TODO(b/146218515) should be removed
     },
     apex_available: ["com.android.appsearch"],
+    unsafe_ignore_missing_latest_api: true, // TODO(b/146218515) should be removed
 }

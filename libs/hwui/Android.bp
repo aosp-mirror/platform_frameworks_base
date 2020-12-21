@@ -181,6 +181,8 @@ java_sdk_library {
     api_lint: {
         enabled: false,
     },
+    // TODO: remove this
+    unsafe_ignore_missing_latest_api: true,
 }
 
 filegroup {
