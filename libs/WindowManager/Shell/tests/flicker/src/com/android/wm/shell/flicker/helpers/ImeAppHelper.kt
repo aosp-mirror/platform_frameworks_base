@@ -20,7 +20,6 @@ import android.app.Instrumentation
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.helpers.FIND_TIMEOUT
-import com.android.server.wm.flicker.helpers.waitForIME
 import com.android.wm.shell.flicker.TEST_APP_IME_ACTIVITY_LABEL
 import com.android.wm.shell.flicker.testapp.Components
 import org.junit.Assert
@@ -39,14 +38,9 @@ open class ImeAppHelper(
         Assert.assertNotNull("Text field not found, this usually happens when the device " +
                 "was left in an unknown state (e.g. in split screen)", editText)
         editText.click()
-        if (!uiDevice.waitForIME()) {
-            Assert.fail("IME did not appear")
-        }
     }
 
     fun closeIME() {
         uiDevice.pressBack()
-        // Using only the AccessibilityInfo it is not possible to identify if the IME is active
-        uiDevice.waitForIdle(1000)
     }
 }
