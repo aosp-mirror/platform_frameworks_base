@@ -9275,6 +9275,35 @@ public class TelephonyManager {
     }
 
     /**
+     * Get the mobile provisioning url that is used to launch a browser to allow users to manage
+     * their mobile plan.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE}.
+     *
+     * TODO: The legacy design only supports single sim design. Ideally, this should support
+     * multi-sim design in current world.
+     *
+     * {@hide}
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @Nullable String getMobileProvisioningUrl() {
+        try {
+            final ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getMobileProvisioningUrl();
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            if (!isSystemProcess()) {
+                ex.rethrowAsRuntimeException();
+            }
+        }
+        return null;
+    }
+
+    /**
      * Turns mobile data on or off.
      * If this object has been created with {@link #createForSubscriptionId}, applies to the given
      * subId. Otherwise, applies to {@link SubscriptionManager#getDefaultDataSubscriptionId()}
