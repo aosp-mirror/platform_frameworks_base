@@ -310,7 +310,7 @@ static int _check_AudioSystem_Command(const char* caller, status_t status)
 
 static jint getVectorOfAudioDeviceTypeAddr(JNIEnv *env, jintArray deviceTypes,
                                            jobjectArray deviceAddresses,
-                                           Vector<AudioDeviceTypeAddr> &audioDeviceTypeAddrVector) {
+                                           AudioDeviceTypeAddrVector &audioDeviceTypeAddrVector) {
     if (deviceTypes == nullptr || deviceAddresses == nullptr) {
         return (jint)AUDIO_JAVA_BAD_VALUE;
     }
@@ -337,7 +337,7 @@ static jint getVectorOfAudioDeviceTypeAddr(JNIEnv *env, jintArray deviceTypes,
         }
         const char *address = env->GetStringUTFChars((jstring)addrJobj, NULL);
         AudioDeviceTypeAddr dev = AudioDeviceTypeAddr((audio_devices_t)typesPtr[i], address);
-        audioDeviceTypeAddrVector.add(dev);
+        audioDeviceTypeAddrVector.push_back(dev);
         env->ReleaseStringUTFChars((jstring)addrJobj, address);
     }
     env->ReleaseIntArrayElements(deviceTypes, typesPtr, 0);
@@ -2063,7 +2063,7 @@ exit:
 
 static jint android_media_AudioSystem_setUidDeviceAffinities(JNIEnv *env, jobject clazz,
         jint uid, jintArray deviceTypes, jobjectArray deviceAddresses) {
-    Vector<AudioDeviceTypeAddr> deviceVector;
+    AudioDeviceTypeAddrVector deviceVector;
     jint results = getVectorOfAudioDeviceTypeAddr(env, deviceTypes, deviceAddresses, deviceVector);
     if (results != NO_ERROR) {
         return results;
@@ -2081,7 +2081,7 @@ static jint android_media_AudioSystem_removeUidDeviceAffinities(JNIEnv *env, job
 static jint android_media_AudioSystem_setUserIdDeviceAffinities(JNIEnv *env, jobject clazz,
                                                                 jint userId, jintArray deviceTypes,
                                                                 jobjectArray deviceAddresses) {
-    Vector<AudioDeviceTypeAddr> deviceVector;
+    AudioDeviceTypeAddrVector deviceVector;
     jint results = getVectorOfAudioDeviceTypeAddr(env, deviceTypes, deviceAddresses, deviceVector);
     if (results != NO_ERROR) {
         return results;
