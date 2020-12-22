@@ -83,7 +83,7 @@ class FaceAuthScreenBrightnessControllerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         faceAuthScreenBrightnessController = object : FaceAuthScreenBrightnessController(
                 notificationShadeWindowController, keyguardUpdateMonitor, resources, globalSettings,
-                systemSettings, mainHandler, dumpManager) {
+                systemSettings, mainHandler, dumpManager, true) {
             override fun createAnimator(start: Float, end: Float) = animator
         }
         `when`(systemSettings.getFloat(eq(SCREEN_BRIGHTNESS_FLOAT))).thenReturn(INITIAL_BRIGHTNESS)
