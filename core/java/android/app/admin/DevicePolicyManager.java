@@ -2624,6 +2624,42 @@ public class DevicePolicyManager {
     /** @hide */
     @TestApi
     public static final int OPERATION_SET_USER_RESTRICTION = 10;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_SET_SYSTEM_SETTING = 11;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_SET_KEYGUARD_DISABLED = 12;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_SET_STATUS_BAR_DISABLED = 13;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_SET_SYSTEM_UPDATE_POLICY = 14;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_SET_APPLICATION_HIDDEN = 15;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_SET_APPLICATION_RESTRICTIONS = 16;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_SET_KEEP_UNINSTALLED_PACKAGES = 17;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_SET_LOCK_TASK_FEATURES = 18;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_SET_LOCK_TASK_PACKAGES = 19;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_SET_PACKAGES_SUSPENDED = 20;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_SET_TRUST_AGENT_CONFIGURATION = 21;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_SET_USER_CONTROL_DISABLED_PACKAGES = 22;
 
     private static final String PREFIX_OPERATION = "OPERATION_";
 
@@ -2638,7 +2674,19 @@ public class DevicePolicyManager {
             OPERATION_REBOOT,
             OPERATION_WIPE_DATA,
             OPERATION_LOGOUT_USER,
-            OPERATION_SET_USER_RESTRICTION
+            OPERATION_SET_USER_RESTRICTION,
+            OPERATION_SET_SYSTEM_SETTING,
+            OPERATION_SET_KEYGUARD_DISABLED,
+            OPERATION_SET_STATUS_BAR_DISABLED,
+            OPERATION_SET_SYSTEM_UPDATE_POLICY,
+            OPERATION_SET_APPLICATION_HIDDEN,
+            OPERATION_SET_APPLICATION_RESTRICTIONS,
+            OPERATION_SET_KEEP_UNINSTALLED_PACKAGES,
+            OPERATION_SET_LOCK_TASK_FEATURES,
+            OPERATION_SET_LOCK_TASK_PACKAGES,
+            OPERATION_SET_PACKAGES_SUSPENDED,
+            OPERATION_SET_TRUST_AGENT_CONFIGURATION,
+            OPERATION_SET_USER_CONTROL_DISABLED_PACKAGES
     })
     @Retention(RetentionPolicy.SOURCE)
     public static @interface DevicePolicyOperation {
