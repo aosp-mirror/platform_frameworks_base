@@ -476,9 +476,7 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
         return needClear ? ROR_REQUESTED_NEED_CLEAR : ROR_REQUESTED_SKIP_CLEAR;
     }
 
-    @Override // Binder call
-    public boolean rebootWithLskf(String packageName, String reason, boolean slotSwitch) {
-        enforcePermissionForResumeOnReboot();
+    private boolean rebootWithLskfImpl(String packageName, String reason, boolean slotSwitch) {
         if (packageName == null) {
             Slog.w(TAG, "Missing packageName when rebooting with lskf.");
             return false;
@@ -497,6 +495,18 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
         PowerManager pm = mInjector.getPowerManager();
         pm.reboot(reason);
         return true;
+    }
+
+    @Override // Binder call for the legacy rebootWithLskf
+    public boolean rebootWithLskfAssumeSlotSwitch(String packageName, String reason) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.RECOVERY, null);
+        return rebootWithLskfImpl(packageName, reason, true);
+    }
+
+    @Override // Binder call
+    public boolean rebootWithLskf(String packageName, String reason, boolean slotSwitch) {
+        enforcePermissionForResumeOnReboot();
+        return rebootWithLskfImpl(packageName, reason, slotSwitch);
     }
 
     @Override // Binder call
