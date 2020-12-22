@@ -46,7 +46,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.media.InfoMediaManager;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
-import com.android.settingslib.media.MediaOutputSliceConstants;
+import com.android.settingslib.media.MediaOutputConstants;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
@@ -449,8 +449,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         mCallback.dismissDialog();
         final ActivityStarter.OnDismissAction postKeyguardAction = () -> {
             mContext.sendBroadcast(new Intent()
-                    .setAction(MediaOutputSliceConstants.ACTION_LAUNCH_BLUETOOTH_PAIRING)
-                    .setPackage(MediaOutputSliceConstants.SETTINGS_PACKAGE_NAME));
+                    .setAction(MediaOutputConstants.ACTION_LAUNCH_BLUETOOTH_PAIRING)
+                    .setPackage(MediaOutputConstants.SETTINGS_PACKAGE_NAME));
             mShadeController.animateCollapsePanels();
             return true;
         };
