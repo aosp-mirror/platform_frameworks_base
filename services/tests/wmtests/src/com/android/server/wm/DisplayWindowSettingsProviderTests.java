@@ -312,8 +312,7 @@ public class DisplayWindowSettingsProviderTests extends WindowTestsBase {
     private String getStoredDisplayAttributeValue(TestStorage storage, String attr)
             throws Exception {
         try (InputStream stream = storage.openRead()) {
-            TypedXmlPullParser parser = Xml.newFastPullParser();
-            parser.setInput(stream, StandardCharsets.UTF_8.name());
+            TypedXmlPullParser parser = Xml.resolvePullParser(stream);
             int type;
             while ((type = parser.next()) != XmlPullParser.START_TAG
                     && type != XmlPullParser.END_DOCUMENT) {

@@ -847,6 +847,17 @@ static jlong android_os_Debug_getIonMappedSizeKb(JNIEnv* env, jobject clazz) {
     return ionPss;
 }
 
+static jlong android_os_Debug_getGpuTotalUsageKb(JNIEnv* env, jobject clazz) {
+    jlong sizeKb = -1;
+    uint64_t size;
+
+    if (meminfo::ReadGpuTotalUsageKb(&size)) {
+        sizeKb = size;
+    }
+
+    return sizeKb;
+}
+
 static jboolean android_os_Debug_isVmapStack(JNIEnv *env, jobject clazz)
 {
     static enum {
@@ -915,6 +926,8 @@ static const JNINativeMethod gMethods[] = {
             (void*)android_os_Debug_getIonPoolsSizeKb },
     { "getIonMappedSizeKb", "()J",
             (void*)android_os_Debug_getIonMappedSizeKb },
+    { "getGpuTotalUsageKb", "()J",
+            (void*)android_os_Debug_getGpuTotalUsageKb },
     { "isVmapStack", "()Z",
             (void*)android_os_Debug_isVmapStack },
 };

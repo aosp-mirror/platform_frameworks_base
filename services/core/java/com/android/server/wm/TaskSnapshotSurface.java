@@ -49,7 +49,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager.TaskDescription;
-import android.window.TaskSnapshot;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -78,6 +77,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.window.ClientWindowFrames;
+import android.window.TaskSnapshot;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -100,7 +100,7 @@ class TaskSnapshotSurface implements StartingSurface {
      * with a window with the exact same dimensions etc. However, these flags are not used in layout
      * and might cause other side effects so we exclude them.
      */
-    private static final int FLAG_INHERIT_EXCLUDES = FLAG_NOT_FOCUSABLE
+    static final int FLAG_INHERIT_EXCLUDES = FLAG_NOT_FOCUSABLE
             | FLAG_NOT_TOUCHABLE
             | FLAG_NOT_TOUCH_MODAL
             | FLAG_ALT_FOCUSABLE_IM
@@ -180,34 +180,10 @@ class TaskSnapshotSurface implements StartingSurface {
         synchronized (service.mGlobalLock) {
             final WindowState mainWindow = activity.findMainWindow();
             final Task task = activity.getTask();
-            if (task == null) {
-                Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find task for activity="
-                        + activity);
-                return null;
-            }
             final ActivityRecord topFullscreenActivity =
                     activity.getTask().getTopFullscreenActivity();
-            if (topFullscreenActivity == null) {
-                Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find top fullscreen for task="
-                        + task);
-                return null;
-            }
+            // Already check the nullity in StartingSurfaceController#createTaskSnapshotSurface
             topFullscreenOpaqueWindow = topFullscreenActivity.getTopFullscreenOpaqueWindow();
-            if (mainWindow == null || topFullscreenOpaqueWindow == null) {
-                Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find main window for activity="
-                        + activity);
-                return null;
-            }
-            if (topFullscreenActivity.getWindowConfiguration().getRotation()
-                    != snapshot.getRotation()) {
-                // The snapshot should have been checked by ActivityRecord#isSnapshotCompatible
-                // that the activity will be updated to the same rotation as the snapshot. Since
-                // the transition is not started yet, fixed rotation transform needs to be applied
-                // earlier to make the snapshot show in a rotated container.
-                activity.mDisplayContent.handleTopActivityLaunchingInDifferentOrientation(
-                        topFullscreenActivity, false /* checkOpening */);
-            }
-
             WindowManager.LayoutParams attrs = topFullscreenOpaqueWindow.mAttrs;
             appearance = attrs.insetsFlags.appearance;
             windowFlags = attrs.flags;

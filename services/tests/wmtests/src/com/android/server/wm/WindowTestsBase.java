@@ -84,6 +84,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
 import android.window.ITaskOrganizer;
+import android.window.StartingWindowInfo;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.server.AttributeCache;
@@ -1090,10 +1091,10 @@ class WindowTestsBase extends SystemServiceTestsBase {
             mMoveToSecondaryOnEnter = move;
         }
         @Override
-        public void addStartingWindow(ActivityManager.RunningTaskInfo info, IBinder appToken) {
+        public void addStartingWindow(StartingWindowInfo info, IBinder appToken) {
         }
         @Override
-        public void removeStartingWindow(ActivityManager.RunningTaskInfo info) {
+        public void removeStartingWindow(int taskId) {
         }
         @Override
         public void onTaskAppeared(ActivityManager.RunningTaskInfo info, SurfaceControl leash) {

@@ -16,9 +16,20 @@
 
 package com.android.server.wm;
 
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_CREATED;
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT;
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_NEW_TASK;
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_PROCESS_RUNNING;
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_TASK_SWITCH;
+
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.os.SystemProperties;
+import android.util.Slog;
+import android.window.TaskSnapshot;
 
 import com.android.server.policy.WindowManagerPolicy.StartingSurface;
 
@@ -26,7 +37,8 @@ import com.android.server.policy.WindowManagerPolicy.StartingSurface;
  * Managing to create and release a starting window surface.
  */
 public class StartingSurfaceController {
-
+    private static final String TAG = TAG_WITH_CLASS_NAME
+            ? StartingSurfaceController.class.getSimpleName() : TAG_WM;
     /** Set to {@code true} to enable shell starting surface drawer. */
     private static final boolean DEBUG_ENABLE_SHELL_DRAWER =
             SystemProperties.getBoolean("persist.debug.shell_starting_surface", false);
@@ -49,15 +61,79 @@ public class StartingSurfaceController {
         final Task task = activity.getTask();
         if (task != null && mService.mAtmService.mTaskOrganizerController.addStartingWindow(task,
                 activity.token)) {
-            return new SplashScreenContainerSurface(task);
+            return new ShellStartingSurface(task);
         }
         return null;
     }
 
-    private final class SplashScreenContainerSurface implements StartingSurface {
+    int makeStartingWindowTypeParameter(boolean newTask, boolean taskSwitch,
+            boolean processRunning, boolean allowTaskSnapshot, boolean activityCreated) {
+        int parameter = 0;
+        if (newTask) {
+            parameter |= TYPE_PARAMETER_NEW_TASK;
+        }
+        if (taskSwitch) {
+            parameter |= TYPE_PARAMETER_TASK_SWITCH;
+        }
+        if (processRunning) {
+            parameter |= TYPE_PARAMETER_PROCESS_RUNNING;
+        }
+        if (allowTaskSnapshot) {
+            parameter |= TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT;
+        }
+        if (activityCreated) {
+            parameter |= TYPE_PARAMETER_ACTIVITY_CREATED;
+        }
+        return parameter;
+    }
+
+    StartingSurface createTaskSnapshotSurface(ActivityRecord activity, TaskSnapshot taskSnapshot) {
+        final WindowState topFullscreenOpaqueWindow;
+        final Task task;
+        synchronized (mService.mGlobalLock) {
+            final WindowState mainWindow = activity.findMainWindow();
+            task = activity.getTask();
+            if (task == null) {
+                Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find task for activity="
+                        + activity);
+                return null;
+            }
+            final ActivityRecord topFullscreenActivity =
+                    activity.getTask().getTopFullscreenActivity();
+            if (topFullscreenActivity == null) {
+                Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find top fullscreen for task="
+                        + task);
+                return null;
+            }
+            topFullscreenOpaqueWindow = topFullscreenActivity.getTopFullscreenOpaqueWindow();
+            if (mainWindow == null || topFullscreenOpaqueWindow == null) {
+                Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find main window for activity="
+                        + activity);
+                return null;
+            }
+            if (topFullscreenActivity.getWindowConfiguration().getRotation()
+                    != taskSnapshot.getRotation()) {
+                // The snapshot should have been checked by ActivityRecord#isSnapshotCompatible
+                // that the activity will be updated to the same rotation as the snapshot. Since
+                // the transition is not started yet, fixed rotation transform needs to be applied
+                // earlier to make the snapshot show in a rotated container.
+                activity.mDisplayContent.handleTopActivityLaunchingInDifferentOrientation(
+                        topFullscreenActivity, false /* checkOpening */);
+            }
+        }
+        if (!DEBUG_ENABLE_SHELL_DRAWER) {
+            return mService.mTaskSnapshotController
+                    .createStartingSurface(activity, taskSnapshot);
+        }
+        mService.mAtmService.mTaskOrganizerController.addStartingWindow(task, activity.token);
+        return new ShellStartingSurface(task);
+    }
+
+
+    private final class ShellStartingSurface implements StartingSurface {
         private final Task mTask;
 
-        SplashScreenContainerSurface(Task task) {
+        ShellStartingSurface(Task task) {
             mTask = task;
         }
 

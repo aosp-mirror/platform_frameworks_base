@@ -38,8 +38,8 @@ class SplashScreenStartingData extends StartingData {
 
     SplashScreenStartingData(WindowManagerService service, String pkg, int theme,
             CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes, int icon,
-            int logo, int windowFlags, Configuration mergedOverrideConfiguration) {
-        super(service);
+            int logo, int windowFlags, Configuration mergedOverrideConfiguration, int typeParams) {
+        super(service, typeParams);
         mPkg = pkg;
         mTheme = theme;
         mCompatInfo = compatInfo;

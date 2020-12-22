@@ -37,7 +37,6 @@ import android.app.NotificationChannel;
 import android.app.Person;
 import android.app.people.PeopleSpaceTile;
 import android.appwidget.AppWidgetManager;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ParceledListSlice;
@@ -95,6 +94,21 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     private static final String OTHER_SHORTCUT_ID = "102";
     private static final String NOTIFICATION_KEY = "notification_key";
     private static final String NOTIFICATION_CONTENT = "notification_content";
+    private static final Uri URI = Uri.parse("fake_uri");
+    private static final Icon ICON = Icon.createWithResource("package", R.drawable.ic_android);
+    private static final Person PERSON = new Person.Builder()
+            .setName("name")
+            .setKey("abc")
+            .setUri(URI.toString())
+            .setBot(false)
+            .build();
+    private static final PeopleSpaceTile PERSON_TILE =
+            new PeopleSpaceTile
+                    .Builder(SHORTCUT_ID, "username", ICON, new Intent())
+                    .setNotificationKey(NOTIFICATION_KEY)
+                    .setNotificationContent(NOTIFICATION_CONTENT)
+                    .setNotificationDataUri(URI)
+                    .build();
 
     private PeopleSpaceWidgetManager mManager;
 
@@ -109,26 +123,6 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
 
     @Captor
     private ArgumentCaptor<NotificationHandler> mListenerCaptor;
-
-    private static Icon sIcon = Icon.createWithResource("package", R.drawable.ic_android);
-    private static Uri sUri = new Uri.Builder()
-            .scheme(ContentResolver.SCHEME_CONTENT)
-            .authority("something")
-            .path("test")
-            .build();
-    private static Person sPerson = new Person.Builder()
-            .setName("name")
-            .setKey("abc")
-            .setUri("uri")
-            .setBot(false)
-            .build();
-    private static PeopleSpaceTile sPeopleSpaceTile =
-            new PeopleSpaceTile
-                    .Builder(SHORTCUT_ID, "username", sIcon, new Intent())
-                    .setNotificationKey(NOTIFICATION_KEY)
-                    .setNotificationContent(NOTIFICATION_CONTENT)
-                    .setNotificationDataUri(sUri)
-                    .build();
 
     private final NoManSimulator mNoMan = new NoManSimulator();
     private final FakeSystemClock mClock = new FakeSystemClock();
@@ -150,9 +144,9 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
         SharedPreferences.Editor editor = sp.edit();
         editor.putString(String.valueOf(WIDGET_ID_WITH_SHORTCUT), SHORTCUT_ID);
-        editor.commit();
+        editor.apply();
         Bundle options = new Bundle();
-        options.putParcelable(OPTIONS_PEOPLE_SPACE_TILE, sPeopleSpaceTile);
+        options.putParcelable(OPTIONS_PEOPLE_SPACE_TILE, PERSON_TILE);
 
         when(mAppWidgetManager.getAppWidgetOptions(eq(WIDGET_ID_WITH_SHORTCUT)))
                 .thenReturn(options);
@@ -304,7 +298,6 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 UserHandle.getUserHandleForUid(0), channel, IMPORTANCE_HIGH);
         mClock.advanceTime(MIN_LINGER_DURATION);
 
-        verify(mIAppWidgetService, never()).getAppWidgetIds(any());
         verify(mIAppWidgetService, never()).notifyAppWidgetViewDataChanged(any(), any(), anyInt());
         verify(mAppWidgetManager, never()).updateAppWidget(anyInt(),
                 any(RemoteViews.class));
@@ -456,8 +449,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 .setContentTitle("TEST_TITLE")
                 .setContentText("TEST_TEXT")
                 .setShortcutId(shortcutId)
-                .setStyle(new Notification.MessagingStyle(sPerson)
-                        .addMessage(new Notification.MessagingStyle.Message("text3", 10, sPerson))
+                .setStyle(new Notification.MessagingStyle(PERSON)
+                        .addMessage(new Notification.MessagingStyle.Message("text3", 10, PERSON))
                 )
                 .build();
         return new SbnBuilder()
