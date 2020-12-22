@@ -233,25 +233,15 @@ public final class PlaybackActivityMonitor
         }
     }
 
-    /**
-     * Update player event
-     * @param piid Player id to update
-     * @param event The new player event
-     * @param deviceId The new player device id
-     * @param binderUid Calling binder uid
-     */
-    public void playerEvent(int piid, int event, int deviceId, int binderUid) {
-        if (DEBUG) {
-            Log.v(TAG, String.format("playerEvent(piid=%d, deviceId=%d, event=%d)",
-                    piid, deviceId, event));
-        }
+    public void playerEvent(int piid, int event, int binderUid) {
+        if (DEBUG) { Log.v(TAG, String.format("playerEvent(piid=%d, event=%d)", piid, event)); }
         final boolean change;
         synchronized(mPlayerLock) {
             final AudioPlaybackConfiguration apc = mPlayers.get(new Integer(piid));
             if (apc == null) {
                 return;
             }
-            sEventLogger.log(new PlayerEvent(piid, event, deviceId));
+            sEventLogger.log(new PlayerEvent(piid, event));
             if (event == AudioPlaybackConfiguration.PLAYER_STATE_STARTED) {
                 for (Integer uidInteger: mBannedUids) {
                     if (checkBanPlayer(apc, uidInteger.intValue())) {
@@ -269,7 +259,7 @@ public final class PlaybackActivityMonitor
             if (checkConfigurationCaller(piid, apc, binderUid)) {
                 //TODO add generation counter to only update to the latest state
                 checkVolumeForPrivilegedAlarm(apc, event);
-                change = apc.handleStateEvent(event, deviceId);
+                change = apc.handleStateEvent(event);
             } else {
                 Log.e(TAG, "Error handling event " + event);
                 change = false;
@@ -299,8 +289,7 @@ public final class PlaybackActivityMonitor
                 mPlayers.remove(new Integer(piid));
                 mDuckingManager.removeReleased(apc);
                 checkVolumeForPrivilegedAlarm(apc, AudioPlaybackConfiguration.PLAYER_STATE_RELEASED);
-                change = apc.handleStateEvent(AudioPlaybackConfiguration.PLAYER_STATE_RELEASED,
-                        AudioPlaybackConfiguration.PLAYER_DEVICEID_INVALID);
+                change = apc.handleStateEvent(AudioPlaybackConfiguration.PLAYER_STATE_RELEASED);
             }
         }
         if (change) {
@@ -879,19 +868,16 @@ public final class PlaybackActivityMonitor
         // only keeping the player interface ID as it uniquely identifies the player in the event
         final int mPlayerIId;
         final int mState;
-        final int mDeviceId;
 
-        PlayerEvent(int piid, int state, int deviceId) {
+        PlayerEvent(int piid, int state) {
             mPlayerIId = piid;
             mState = state;
-            mDeviceId = deviceId;
         }
 
         @Override
         public String eventToString() {
             return new StringBuilder("player piid:").append(mPlayerIId).append(" state:")
-                    .append(AudioPlaybackConfiguration.toLogFriendlyPlayerState(mState))
-                    .append(" DeviceId:").append(mDeviceId).toString();
+                    .append(AudioPlaybackConfiguration.toLogFriendlyPlayerState(mState)).toString();
         }
     }
 
