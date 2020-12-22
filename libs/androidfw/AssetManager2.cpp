@@ -670,7 +670,7 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntryInternal(
     }
 
     auto entry_flags = type_spec->GetFlagsForEntryIndex(entry_idx);
-    if (UNLIKELY(!entry_flags)) {
+    if (UNLIKELY(!entry_flags.has_value())) {
       return base::unexpected(entry_flags.error());
     }
     type_flags |= entry_flags.value();

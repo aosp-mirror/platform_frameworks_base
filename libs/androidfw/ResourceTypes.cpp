@@ -897,12 +897,12 @@ base::expected<StringPiece, NullOrIOError> ResStringPool::string8At(size_t idx) 
             // Decode the UTF-16 length. This is not used if we're not
             // converting to UTF-16 from UTF-8.
             const base::expected<size_t, IOError> u16len = decodeLength(&str);
-            if (UNLIKELY(!u16len)) {
+            if (UNLIKELY(!u16len.has_value())) {
                 return base::unexpected(u16len.error());
             }
 
             const base::expected<size_t, IOError> u8len = decodeLength(&str);
-            if (UNLIKELY(!u8len)) {
+            if (UNLIKELY(!u8len.has_value())) {
                 return base::unexpected(u8len.error());
             }
 

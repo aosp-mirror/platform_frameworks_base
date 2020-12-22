@@ -548,14 +548,14 @@ bool ExtractResFilePathParts(const StringPiece& path, StringPiece* out_prefix,
 }
 
 StringPiece16 GetString16(const android::ResStringPool& pool, size_t idx) {
-  if (auto str = pool.stringAt(idx)) {
+  if (auto str = pool.stringAt(idx); str.ok()) {
     return *str;
   }
   return StringPiece16();
 }
 
 std::string GetString(const android::ResStringPool& pool, size_t idx) {
-  if (auto str = pool.string8At(idx)) {
+  if (auto str = pool.string8At(idx); str.ok()) {
     return ModifiedUtf8ToUtf8(str->to_string());
   }
   return Utf16ToUtf8(GetString16(pool, idx));
