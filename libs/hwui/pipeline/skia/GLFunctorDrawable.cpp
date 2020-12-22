@@ -19,8 +19,6 @@
 #include <private/hwui/DrawGlInfo.h>
 #include "FunctorDrawable.h"
 #include "GrBackendSurface.h"
-#include "GrRenderTarget.h"
-#include "GrRenderTargetContext.h"
 #include "RenderNode.h"
 #include "SkAndroidFrameworkUtils.h"
 #include "SkClipStack.h"
@@ -40,19 +38,13 @@ static void setScissor(int viewportHeight, const SkIRect& clip) {
 }
 
 static void GetFboDetails(SkCanvas* canvas, GLuint* outFboID, SkISize* outFboSize) {
-    GrRenderTargetContext* renderTargetContext =
-            canvas->internal_private_accessTopLayerRenderTargetContext();
-    LOG_ALWAYS_FATAL_IF(!renderTargetContext, "Failed to retrieve GrRenderTargetContext");
-
-    GrRenderTarget* renderTarget = renderTargetContext->accessRenderTarget();
-    LOG_ALWAYS_FATAL_IF(!renderTarget, "accessRenderTarget failed");
-
+    GrBackendRenderTarget renderTarget = canvas->topLayerBackendRenderTarget();
     GrGLFramebufferInfo fboInfo;
-    LOG_ALWAYS_FATAL_IF(!renderTarget->getBackendRenderTarget().getGLFramebufferInfo(&fboInfo),
+    LOG_ALWAYS_FATAL_IF(!renderTarget.getGLFramebufferInfo(&fboInfo),
         "getGLFrameBufferInfo failed");
 
     *outFboID = fboInfo.fFBOID;
-    *outFboSize = SkISize::Make(renderTargetContext->width(), renderTargetContext->height());
+    *outFboSize = renderTarget.dimensions();
 }
 
 void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
@@ -75,7 +67,7 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
     SkISize fboSize;
     GetFboDetails(canvas, &fboID, &fboSize);
 
-    SkIRect surfaceBounds = canvas->internal_private_getTopLayerBounds();
+    SkIRect surfaceBounds = canvas->topLayerBounds();
     SkIRect clipBounds = canvas->getDeviceClipBounds();
     SkM44 mat4(canvas->getLocalToDevice());
     SkRegion clipRegion;

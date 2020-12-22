@@ -16,6 +16,7 @@
 
 package com.android.server.media;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.os.UserHandle.ALL;
 import static android.os.UserHandle.CURRENT;
 
@@ -1115,8 +1116,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             final long token = Binder.clearCallingIdentity();
             try {
                 enforcePackageName(packageName, uid);
-                int resolvedUserId = ActivityManager.handleIncomingUser(pid, uid, userId,
-                        false /* allowAll */, true /* requireFull */, "createSession", packageName);
+                int resolvedUserId = handleIncomingUser(pid, uid, userId, packageName);
                 if (cb == null) {
                     throw new IllegalArgumentException("Controller callback cannot be null");
                 }
@@ -1191,11 +1191,8 @@ public class MediaSessionService extends SystemService implements Monitor {
             final long token = Binder.clearCallingIdentity();
 
             try {
-                // Check that they can make calls on behalf of the user and
-                // get the final user id
-                int resolvedUserId = ActivityManager.handleIncomingUser(pid, uid, userId,
-                        true /* allowAll */, true /* requireFull */, "getSession2Tokens",
-                        null /* optional packageName */);
+                // Check that they can make calls on behalf of the user and get the final user id
+                int resolvedUserId = handleIncomingUser(pid, uid, userId, null);
                 List<Session2Token> result;
                 synchronized (mLock) {
                     FullUserRecord user = getFullUserRecordLocked(userId);
@@ -1262,9 +1259,7 @@ public class MediaSessionService extends SystemService implements Monitor {
 
             try {
                 // Check that they can make calls on behalf of the user and get the final user id.
-                int resolvedUserId = ActivityManager.handleIncomingUser(pid, uid, userId,
-                        true /* allowAll */, true /* requireFull */, "addSession2TokensListener",
-                        null /* optional packageName */);
+                int resolvedUserId = handleIncomingUser(pid, uid, userId, null);
                 synchronized (mLock) {
                     int index = findIndexOfSession2TokensListenerLocked(listener);
                     if (index >= 0) {
@@ -1981,14 +1976,38 @@ public class MediaSessionService extends SystemService implements Monitor {
                 packageName = componentName.getPackageName();
                 enforcePackageName(packageName, uid);
             }
-            // Check that they can make calls on behalf of the user and
-            // get the final user id
-            int resolvedUserId = ActivityManager.handleIncomingUser(pid, uid, userId,
-                    true /* allowAll */, true /* requireFull */, "getSessions", packageName);
-            // Check if they have the permissions or their component is
-            // enabled for the user they're calling from.
+            // Check that they can make calls on behalf of the user and get the final user id
+            int resolvedUserId = handleIncomingUser(pid, uid, userId, packageName);
+            // Check if they have the permissions or their component is enabled for the user
+            // they're calling from.
             enforceMediaPermissions(componentName, pid, uid, resolvedUserId);
             return resolvedUserId;
+        }
+
+        // Handles incoming user by checking whether the caller has permission to access the
+        // given user id's information or not. Permission is not necessary if the given user id is
+        // equal to the caller's user id, but if not, the caller needs to have the
+        // INTERACT_ACROSS_USERS_FULL permission. Otherwise, a security exception will be thrown.
+        // The return value will be the given user id, unless the given user id is
+        // UserHandle.CURRENT, which will return the ActivityManager.getCurrentUser() value instead.
+        private int handleIncomingUser(int pid, int uid, int userId, String packageName) {
+            int callingUserId = UserHandle.getUserHandleForUid(uid).getIdentifier();
+            if (userId == callingUserId) {
+                return userId;
+            }
+
+            boolean canInteractAcrossUsersFull = mContext.checkPermission(
+                    INTERACT_ACROSS_USERS_FULL, pid, uid) == PackageManager.PERMISSION_GRANTED;
+            if (canInteractAcrossUsersFull) {
+                if (userId == CURRENT.getIdentifier()) {
+                    return ActivityManager.getCurrentUser();
+                }
+                return userId;
+            }
+
+            throw new SecurityException("Permission denied while calling from " + packageName
+                    + " with user id: " + userId + "; Need to run as either the calling user id ("
+                    + callingUserId + "), or with " + INTERACT_ACROSS_USERS_FULL + " permission");
         }
 
         private boolean hasEnabledNotificationListener(int callingUserId,

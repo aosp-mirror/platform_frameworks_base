@@ -169,14 +169,16 @@
             </LinearLayout>
             <LinearLayout
                 android:background="@drawable/people_space_content_background"
+                android:layout_gravity="center"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
                 <TextView
                     android:id="@+id/content"
                     android:paddingVertical="3dp"
                     android:paddingHorizontal="12dp"
+                    android:gravity="center"
                     android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:maxLines="2"

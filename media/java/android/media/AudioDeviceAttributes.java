@@ -120,7 +120,13 @@ public final class AudioDeviceAttributes implements Parcelable {
         mAddress = address;
     }
 
-    /*package*/ AudioDeviceAttributes(int nativeType, @NonNull String address) {
+    /**
+     * @hide
+     * Constructor from internal device type and address
+     * @param type the internal device type, as defined in {@link AudioSystem}
+     * @param address the address of the device, or an empty string for devices without one
+     */
+    public AudioDeviceAttributes(int nativeType, @NonNull String address) {
         mRole = (nativeType & AudioSystem.DEVICE_BIT_IN) != 0 ? ROLE_INPUT : ROLE_OUTPUT;
         mType = AudioDeviceInfo.convertInternalDeviceToDeviceType(nativeType);
         mAddress = address;
@@ -191,10 +197,8 @@ public final class AudioDeviceAttributes implements Parcelable {
     public String toString() {
         return new String("AudioDeviceAttributes:"
                 + " role:" + roleToString(mRole)
-                + " type:" + (mRole == ROLE_OUTPUT ? AudioSystem.getOutputDeviceName(
-                        AudioDeviceInfo.convertDeviceTypeToInternalDevice(mType))
-                        : AudioSystem.getInputDeviceName(
-                                AudioDeviceInfo.convertDeviceTypeToInternalDevice(mType)))
+                + " type:" + (mRole == ROLE_OUTPUT ? AudioSystem.getOutputDeviceName(mNativeType)
+                        : AudioSystem.getInputDeviceName(mNativeType))
                 + " addr:" + mAddress);
     }
 

@@ -36,7 +36,6 @@ import android.os.HandlerThread;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import androidx.test.InstrumentationRegistry;
@@ -53,7 +52,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 
 /**
  * Tests app ops version upgrades
@@ -183,8 +181,7 @@ public class AppOpsUpgradeTest {
 
         boolean parse() {
             try (FileInputStream stream = new FileInputStream(mFile)) {
-                TypedXmlPullParser parser = Xml.newFastPullParser();
-                parser.setInput(stream, StandardCharsets.UTF_8.name());
+                TypedXmlPullParser parser = Xml.resolvePullParser(stream);
                 int type;
                 while ((type = parser.next()) != XmlPullParser.START_TAG
                         && type != XmlPullParser.END_DOCUMENT) {

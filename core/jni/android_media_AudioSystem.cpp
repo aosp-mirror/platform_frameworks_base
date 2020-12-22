@@ -298,20 +298,25 @@ static sp<JNIAudioPortCallback> setJniCallback(JNIEnv* env,
     return old;
 }
 
-#define check_AudioSystem_Command(status) _check_AudioSystem_Command(__func__, (status))
+#define check_AudioSystem_Command(...) _check_AudioSystem_Command(__func__, __VA_ARGS__)
 
-static int _check_AudioSystem_Command(const char* caller, status_t status)
-{
-    ALOGE_IF(status, "Command failed for %s: %d", caller, status);
+static int _check_AudioSystem_Command(const char *caller, status_t status,
+                                      std::vector<status_t> ignoredErrors = {}) {
+    int jniStatus = kAudioStatusOk;
     switch (status) {
     case DEAD_OBJECT:
-        return kAudioStatusMediaServerDied;
+        jniStatus = kAudioStatusMediaServerDied;
+        break;
     case NO_ERROR:
-        return kAudioStatusOk;
+        break;
     default:
+        if (std::find(begin(ignoredErrors), end(ignoredErrors), status) == end(ignoredErrors)) {
+            jniStatus = kAudioStatusError;
+        }
         break;
     }
-    return kAudioStatusError;
+    ALOGE_IF(jniStatus != kAudioStatusOk, "Command failed for %s: %d", caller, status);
+    return jniStatus;
 }
 
 static jint getVectorOfAudioDeviceTypeAddr(JNIEnv *env, jintArray deviceTypes,
@@ -2350,9 +2355,12 @@ static jint android_media_AudioSystem_setDevicesRoleForStrategy(JNIEnv *env, job
 
 static jint android_media_AudioSystem_removeDevicesRoleForStrategy(JNIEnv *env, jobject thiz,
                                                                    jint strategy, jint role) {
-    return (jint)check_AudioSystem_Command(
-            AudioSystem::removeDevicesRoleForStrategy((product_strategy_t)strategy,
-                                                      (device_role_t)role));
+    return (jint)
+            check_AudioSystem_Command(AudioSystem::removeDevicesRoleForStrategy((product_strategy_t)
+                                                                                        strategy,
+                                                                                (device_role_t)
+                                                                                        role),
+                                      {NAME_NOT_FOUND});
 }
 
 static jint android_media_AudioSystem_getDevicesForRoleAndStrategy(JNIEnv *env, jobject thiz,

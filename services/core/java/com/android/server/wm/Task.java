@@ -156,7 +156,6 @@ import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
-import android.window.TaskSnapshot;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
@@ -207,6 +206,8 @@ import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.WindowManager.TransitionOldType;
 import android.window.ITaskOrganizer;
+import android.window.StartingWindowInfo;
+import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -4142,6 +4143,34 @@ class Task extends WindowContainer<WindowContainer> {
     ActivityManager.RunningTaskInfo getTaskInfo() {
         ActivityManager.RunningTaskInfo info = new ActivityManager.RunningTaskInfo();
         fillTaskInfo(info);
+        return info;
+    }
+
+    StartingWindowInfo getStartingWindowInfo() {
+        final StartingWindowInfo info = new StartingWindowInfo();
+        info.taskInfo = getTaskInfo();
+
+        final ActivityRecord topActivity = getTopMostActivity();
+        if (topActivity != null) {
+            info.startingWindowTypeParameter =
+                    topActivity.mStartingData != null
+                            ? topActivity.mStartingData.mTypeParams
+                            : 0;
+            final WindowState mainWindow = topActivity.findMainWindow();
+            if (mainWindow != null) {
+                info.mainWindowLayoutParams = mainWindow.getAttrs();
+            }
+        }
+        final ActivityRecord topFullscreenActivity = getTopFullscreenActivity();
+        if (topFullscreenActivity != null) {
+            final WindowState topFullscreenOpaqueWindow =
+                    topFullscreenActivity.getTopFullscreenOpaqueWindow();
+            if (topFullscreenOpaqueWindow != null) {
+                info.topOpaqueWindowInsetsState =
+                        topFullscreenOpaqueWindow.getInsetsStateWithVisibilityOverride();
+                info.topOpaqueWindowLayoutParams = topFullscreenOpaqueWindow.getAttrs();
+            }
+        }
         return info;
     }
 

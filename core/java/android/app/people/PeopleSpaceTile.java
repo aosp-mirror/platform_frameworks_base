@@ -17,6 +17,7 @@
 package android.app.people;
 
 import android.annotation.NonNull;
+import android.app.Person;
 import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
@@ -44,6 +45,7 @@ public class PeopleSpaceTile implements Parcelable {
     private int mUid;
     private Uri mContactUri;
     private String mPackageName;
+    private String mStatusText;
     private long mLastInteractionTimestamp;
     private boolean mIsImportantConversation;
     private boolean mIsHiddenConversation;
@@ -61,6 +63,7 @@ public class PeopleSpaceTile implements Parcelable {
         mContactUri = b.mContactUri;
         mUid = b.mUid;
         mPackageName = b.mPackageName;
+        mStatusText = b.mStatusText;
         mLastInteractionTimestamp = b.mLastInteractionTimestamp;
         mIsImportantConversation = b.mIsImportantConversation;
         mIsHiddenConversation = b.mIsHiddenConversation;
@@ -93,6 +96,10 @@ public class PeopleSpaceTile implements Parcelable {
 
     public String getPackageName() {
         return mPackageName;
+    }
+
+    public String getStatusText() {
+        return mStatusText;
     }
 
     /** Returns the timestamp of the last interaction. */
@@ -148,6 +155,7 @@ public class PeopleSpaceTile implements Parcelable {
         builder.setContactUri(mContactUri);
         builder.setUid(mUid);
         builder.setPackageName(mPackageName);
+        builder.setStatusText(mStatusText);
         builder.setLastInteractionTimestamp(mLastInteractionTimestamp);
         builder.setIsImportantConversation(mIsImportantConversation);
         builder.setIsHiddenConversation(mIsHiddenConversation);
@@ -165,6 +173,7 @@ public class PeopleSpaceTile implements Parcelable {
         private Uri mContactUri;
         private int mUid;
         private String mPackageName;
+        private String mStatusText;
         private long mLastInteractionTimestamp;
         private boolean mIsImportantConversation;
         private boolean mIsHiddenConversation;
@@ -188,6 +197,16 @@ public class PeopleSpaceTile implements Parcelable {
             mUserIcon = convertDrawableToIcon(launcherApps.getShortcutIconDrawable(info, 0));
             mUid = info.getUserId();
             mPackageName = info.getPackage();
+            mContactUri = getContactUri(info);
+        }
+
+        private Uri getContactUri(ShortcutInfo info) {
+            if (info.getPersons() == null || info.getPersons().length != 1) {
+                return null;
+            }
+            // TODO(b/175584929): Update to use the Uri from PeopleService directly
+            Person person = info.getPersons()[0];
+            return person.getUri() == null ? null : Uri.parse(person.getUri());
         }
 
         /** Sets the ID for the tile. */
@@ -223,6 +242,12 @@ public class PeopleSpaceTile implements Parcelable {
         /** Sets the package shown that provided the information. */
         public Builder setPackageName(String packageName) {
             mPackageName = packageName;
+            return this;
+        }
+
+        /** Sets the status text. */
+        public Builder setStatusText(String statusText) {
+            mStatusText = statusText;
             return this;
         }
 
@@ -279,8 +304,10 @@ public class PeopleSpaceTile implements Parcelable {
         mId = in.readString();
         mUserName = in.readCharSequence();
         mUserIcon = in.readParcelable(Icon.class.getClassLoader());
+        mContactUri = in.readParcelable(Uri.class.getClassLoader());
         mUid = in.readInt();
         mPackageName = in.readString();
+        mStatusText = in.readString();
         mLastInteractionTimestamp = in.readLong();
         mIsImportantConversation = in.readBoolean();
         mIsHiddenConversation = in.readBoolean();
@@ -300,8 +327,10 @@ public class PeopleSpaceTile implements Parcelable {
         dest.writeString(mId);
         dest.writeCharSequence(mUserName);
         dest.writeParcelable(mUserIcon, flags);
+        dest.writeParcelable(mContactUri, flags);
         dest.writeInt(mUid);
         dest.writeString(mPackageName);
+        dest.writeString(mStatusText);
         dest.writeLong(mLastInteractionTimestamp);
         dest.writeBoolean(mIsImportantConversation);
         dest.writeBoolean(mIsHiddenConversation);

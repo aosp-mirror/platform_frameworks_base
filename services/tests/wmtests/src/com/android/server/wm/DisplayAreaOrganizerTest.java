@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
 import static android.window.DisplayAreaOrganizer.FEATURE_ROOT;
 import static android.window.DisplayAreaOrganizer.FEATURE_RUNTIME_TASK_CONTAINER_FIRST;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
@@ -117,7 +118,7 @@ public class DisplayAreaOrganizerTest extends WindowTestsBase {
     }
 
     @Test
-    public void testCreateTaskDisplayArea() {
+    public void testCreateTaskDisplayArea_topBelowRoot() {
         final String newTdaName = "testTda";
         final IDisplayAreaOrganizer organizer = createMockOrganizer(new Binder());
         final DisplayAreaAppearedInfo tdaInfo = mOrganizerController.createTaskDisplayArea(
@@ -126,6 +127,30 @@ public class DisplayAreaOrganizerTest extends WindowTestsBase {
         final int newTdaIndex =
                 mTestDisplayArea.getParent().mChildren.indexOf(mTestDisplayArea) + 1;
         final WindowContainer wc = mTestDisplayArea.getParent().getChildAt(newTdaIndex);
+
+        // A new TaskDisplayArea is created on the top.
+        assertThat(wc).isInstanceOf(TaskDisplayArea.class);
+        assertThat(tdaInfo.getDisplayAreaInfo().displayId).isEqualTo(DEFAULT_DISPLAY);
+        assertThat(tdaInfo.getDisplayAreaInfo().token)
+                .isEqualTo(wc.mRemoteToken.toWindowContainerToken());
+
+        final TaskDisplayArea tda = wc.asTaskDisplayArea();
+
+        assertThat(tda.getName()).isEqualTo(newTdaName);
+        assertThat(tda.mFeatureId).isEqualTo(tdaInfo.getDisplayAreaInfo().featureId);
+        assertThat(tda.mCreatedByOrganizer).isTrue();
+        assertThat(tda.mOrganizer).isEqualTo(organizer);
+    }
+
+    @Test
+    public void testCreateTaskDisplayArea_topBelowAnotherTaskDisplayArea() {
+        final String newTdaName = "testTda";
+        final TaskDisplayArea parentTda = mDisplayContent.getDefaultTaskDisplayArea();
+        final IDisplayAreaOrganizer organizer = createMockOrganizer(new Binder());
+        final DisplayAreaAppearedInfo tdaInfo = mOrganizerController.createTaskDisplayArea(
+                organizer, DEFAULT_DISPLAY, FEATURE_DEFAULT_TASK_CONTAINER, newTdaName);
+
+        final WindowContainer wc = parentTda.getChildAt(parentTda.getChildCount() - 1);
 
         // A new TaskDisplayArea is created on the top.
         assertThat(wc).isInstanceOf(TaskDisplayArea.class);
