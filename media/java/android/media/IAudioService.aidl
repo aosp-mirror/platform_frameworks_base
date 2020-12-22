@@ -29,7 +29,7 @@ import android.media.IAudioServerStateDispatcher;
 import android.media.IPlaybackConfigDispatcher;
 import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
-import android.media.IStrategyPreferredDeviceDispatcher;
+import android.media.IStrategyPreferredDevicesDispatcher;
 import android.media.IVolumeController;
 import android.media.IVolumeController;
 import android.media.PlayerBase;
@@ -279,11 +279,11 @@ interface IAudioService {
 
     boolean isCallScreeningModeSupported();
 
-    int setPreferredDeviceForStrategy(in int strategy, in AudioDeviceAttributes device);
+    int setPreferredDevicesForStrategy(in int strategy, in List<AudioDeviceAttributes> device);
 
-    int removePreferredDeviceForStrategy(in int strategy);
+    int removePreferredDevicesForStrategy(in int strategy);
 
-    AudioDeviceAttributes getPreferredDeviceForStrategy(in int strategy);
+    List<AudioDeviceAttributes> getPreferredDevicesForStrategy(in int strategy);
 
     List<AudioDeviceAttributes> getDevicesForAttributes(in AudioAttributes attributes);
 
@@ -291,10 +291,10 @@ interface IAudioService {
 
     int getAllowedCapturePolicy();
 
-    void registerStrategyPreferredDeviceDispatcher(IStrategyPreferredDeviceDispatcher dispatcher);
+    void registerStrategyPreferredDevicesDispatcher(IStrategyPreferredDevicesDispatcher dispatcher);
 
-    oneway void unregisterStrategyPreferredDeviceDispatcher(
-            IStrategyPreferredDeviceDispatcher dispatcher);
+    oneway void unregisterStrategyPreferredDevicesDispatcher(
+            IStrategyPreferredDevicesDispatcher dispatcher);
 
     oneway void setRttEnabled(in boolean rttEnabled);
 

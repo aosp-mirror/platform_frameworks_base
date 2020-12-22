@@ -28,7 +28,7 @@ import android.media.AudioDeviceAttributes;
 import android.media.AudioRoutesInfo;
 import android.media.AudioSystem;
 import android.media.IAudioRoutesObserver;
-import android.media.IStrategyPreferredDeviceDispatcher;
+import android.media.IStrategyPreferredDevicesDispatcher;
 import android.media.MediaMetrics;
 import android.os.Binder;
 import android.os.Handler;
@@ -47,6 +47,7 @@ import com.android.internal.annotations.GuardedBy;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -526,23 +527,23 @@ import java.util.concurrent.atomic.AtomicBoolean;
         }
     }
 
-    /*package*/ int setPreferredDeviceForStrategySync(int strategy,
-                                                      @NonNull AudioDeviceAttributes device) {
-        return mDeviceInventory.setPreferredDeviceForStrategySync(strategy, device);
+    /*package*/ int setPreferredDevicesForStrategySync(int strategy,
+            @NonNull List<AudioDeviceAttributes> devices) {
+        return mDeviceInventory.setPreferredDevicesForStrategySync(strategy, devices);
     }
 
-    /*package*/ int removePreferredDeviceForStrategySync(int strategy) {
-        return mDeviceInventory.removePreferredDeviceForStrategySync(strategy);
+    /*package*/ int removePreferredDevicesForStrategySync(int strategy) {
+        return mDeviceInventory.removePreferredDevicesForStrategySync(strategy);
     }
 
-    /*package*/ void registerStrategyPreferredDeviceDispatcher(
-            @NonNull IStrategyPreferredDeviceDispatcher dispatcher) {
-        mDeviceInventory.registerStrategyPreferredDeviceDispatcher(dispatcher);
+    /*package*/ void registerStrategyPreferredDevicesDispatcher(
+            @NonNull IStrategyPreferredDevicesDispatcher dispatcher) {
+        mDeviceInventory.registerStrategyPreferredDevicesDispatcher(dispatcher);
     }
 
-    /*package*/ void unregisterStrategyPreferredDeviceDispatcher(
-            @NonNull IStrategyPreferredDeviceDispatcher dispatcher) {
-        mDeviceInventory.unregisterStrategyPreferredDeviceDispatcher(dispatcher);
+    /*package*/ void unregisterStrategyPreferredDevicesDispatcher(
+            @NonNull IStrategyPreferredDevicesDispatcher dispatcher) {
+        mDeviceInventory.unregisterStrategyPreferredDevicesDispatcher(dispatcher);
     }
 
     //---------------------------------------------------------------------
@@ -683,14 +684,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
         sendLMsgNoDelay(MSG_L_SPEAKERPHONE_CLIENT_DIED, SENDMSG_QUEUE, obj);
     }
 
-    /*package*/ void postSaveSetPreferredDeviceForStrategy(int strategy,
-                                                           AudioDeviceAttributes device)
+    /*package*/ void postSaveSetPreferredDevicesForStrategy(int strategy,
+                                                            List<AudioDeviceAttributes> devices)
     {
-        sendILMsgNoDelay(MSG_IL_SAVE_PREF_DEVICE_FOR_STRATEGY, SENDMSG_QUEUE, strategy, device);
+        sendILMsgNoDelay(MSG_IL_SAVE_PREF_DEVICES_FOR_STRATEGY, SENDMSG_QUEUE, strategy, devices);
     }
 
-    /*package*/ void postSaveRemovePreferredDeviceForStrategy(int strategy) {
-        sendIMsgNoDelay(MSG_I_SAVE_REMOVE_PREF_DEVICE_FOR_STRATEGY, SENDMSG_QUEUE, strategy);
+    /*package*/ void postSaveRemovePreferredDevicesForStrategy(int strategy) {
+        sendIMsgNoDelay(MSG_I_SAVE_REMOVE_PREF_DEVICES_FOR_STRATEGY, SENDMSG_QUEUE, strategy);
     }
 
     //---------------------------------------------------------------------
@@ -1084,14 +1085,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
                                 info.mDevice, info.mState, info.mSupprNoisy, info.mMusicDevice);
                     }
                 } break;
-                case MSG_IL_SAVE_PREF_DEVICE_FOR_STRATEGY: {
+                case MSG_IL_SAVE_PREF_DEVICES_FOR_STRATEGY: {
                     final int strategy = msg.arg1;
-                    final AudioDeviceAttributes device = (AudioDeviceAttributes) msg.obj;
-                    mDeviceInventory.onSaveSetPreferredDevice(strategy, device);
+                    final List<AudioDeviceAttributes> devices =
+                            (List<AudioDeviceAttributes>) msg.obj;
+                    mDeviceInventory.onSaveSetPreferredDevices(strategy, devices);
                 } break;
-                case MSG_I_SAVE_REMOVE_PREF_DEVICE_FOR_STRATEGY: {
+                case MSG_I_SAVE_REMOVE_PREF_DEVICES_FOR_STRATEGY: {
                     final int strategy = msg.arg1;
-                    mDeviceInventory.onSaveRemovePreferredDevice(strategy);
+                    mDeviceInventory.onSaveRemovePreferredDevices(strategy);
                 } break;
                 case MSG_CHECK_MUTE_MUSIC:
                     checkMessagesMuteMusic(0);
@@ -1165,8 +1167,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
     // a ScoClient died in BtHelper
     private static final int MSG_L_SCOCLIENT_DIED = 32;
-    private static final int MSG_IL_SAVE_PREF_DEVICE_FOR_STRATEGY = 33;
-    private static final int MSG_I_SAVE_REMOVE_PREF_DEVICE_FOR_STRATEGY = 34;
+    private static final int MSG_IL_SAVE_PREF_DEVICES_FOR_STRATEGY = 33;
+    private static final int MSG_I_SAVE_REMOVE_PREF_DEVICES_FOR_STRATEGY = 34;
 
     private static final int MSG_L_SPEAKERPHONE_CLIENT_DIED = 35;
     private static final int MSG_CHECK_MUTE_MUSIC = 36;

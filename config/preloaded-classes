@@ -3716,9 +3716,9 @@ android.media.IRemoteVolumeObserver
 android.media.IRingtonePlayer$Stub$Proxy
 android.media.IRingtonePlayer$Stub
 android.media.IRingtonePlayer
-android.media.IStrategyPreferredDeviceDispatcher$Stub$Proxy
-android.media.IStrategyPreferredDeviceDispatcher$Stub
-android.media.IStrategyPreferredDeviceDispatcher
+android.media.IStrategyPreferredDevicesDispatcher$Stub$Proxy
+android.media.IStrategyPreferredDevicesDispatcher$Stub
+android.media.IStrategyPreferredDevicesDispatcher
 android.media.IVolumeController$Stub$Proxy
 android.media.IVolumeController$Stub
 android.media.IVolumeController
