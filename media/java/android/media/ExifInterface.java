@@ -83,6 +83,10 @@ import java.util.zip.CRC32;
  * <p>
  * Supported for writing: JPEG, PNG, WebP.
  * <p>
+ * Note: JPEG and HEIF files may contain XMP data either inside the Exif data chunk or outside of
+ * it. This class will search both locations for XMP data, but if XMP data exist both inside and
+ * outside Exif, will favor the XMP data inside Exif over the one outside.
+ * <p>
  * Note: It is recommended to use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
  * <a href="{@docRoot}reference/androidx/exifinterface/media/ExifInterface.html">ExifInterface
  * Library</a> since it is a superset of this class. In addition to the functionalities of this
@@ -3183,6 +3187,24 @@ public class ExifInterface {
                 // Save offset values for handling thumbnail and attribute offsets.
                 mExifOffset = offset;
                 readExifSegment(bytes, IFD_TYPE_PRIMARY);
+            }
+
+            String xmpOffsetStr = retriever.extractMetadata(
+                    MediaMetadataRetriever.METADATA_KEY_XMP_OFFSET);
+            String xmpLengthStr = retriever.extractMetadata(
+                    MediaMetadataRetriever.METADATA_KEY_XMP_LENGTH);
+            if (xmpOffsetStr != null && xmpLengthStr != null) {
+                int offset = Integer.parseInt(xmpOffsetStr);
+                int length = Integer.parseInt(xmpLengthStr);
+                in.seek(offset);
+                byte[] xmpBytes = new byte[length];
+                if (in.read(xmpBytes) != length) {
+                    throw new IOException("Failed to read XMP from HEIF");
+                }
+                if (getAttribute(TAG_XMP) == null) {
+                    mAttributes[IFD_TYPE_PRIMARY].put(TAG_XMP, new ExifAttribute(
+                            IFD_FORMAT_BYTE, xmpBytes.length, offset, xmpBytes));
+                }
             }
 
             if (DEBUG) {
