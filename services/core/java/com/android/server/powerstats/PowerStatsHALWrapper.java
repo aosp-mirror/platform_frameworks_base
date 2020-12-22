@@ -16,7 +16,11 @@
 
 package com.android.server.powerstats;
 
+import android.hardware.power.stats.ChannelInfo;
+import android.hardware.power.stats.EnergyMeasurement;
 import android.hardware.power.stats.IPowerStats;
+import android.hardware.power.stats.PowerEntityInfo;
+import android.hardware.power.stats.StateResidencyResult;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -32,6 +36,7 @@ import java.util.function.Supplier;
  */
 public final class PowerStatsHALWrapper {
     private static final String TAG = PowerStatsHALWrapper.class.getSimpleName();
+    private static final boolean DEBUG = false;
 
     /**
      * IPowerStatsHALWrapper defines the interface to the PowerStatsHAL.
@@ -122,16 +127,29 @@ public final class PowerStatsHALWrapper {
          *
          * @return true if connection to power stats HAL was correctly established.
          */
-        boolean initialize();
+        boolean isInitialized();
     }
 
     /**
-     * PowerStatsHALWrapperImpl is the implementation of the IPowerStatsHALWrapper
-     * used by the PowerStatsService.  Other implementations will be used by the testing
-     * framework and will be passed into the PowerStatsService through an injector.
+     * PowerStatsHALWrapper20Impl is the implementation of the IPowerStatsHALWrapper
+     * used by the PowerStatsService on devices that support only PowerStats HAL 2.0.
+     * Other implementations will be used by the testing framework and will be passed
+     * into the PowerStatsService through an injector.
      */
-    public static final class PowerStatsHALWrapperImpl implements IPowerStatsHALWrapper {
+    public static final class PowerStatsHAL20WrapperImpl implements IPowerStatsHALWrapper {
         private static Supplier<IPowerStats> sVintfPowerStats;
+
+        public PowerStatsHAL20WrapperImpl() {
+            Supplier<IPowerStats> service = new VintfHalCache();
+            sVintfPowerStats = null;
+
+            if (service.get() == null) {
+                if (DEBUG) Slog.d(TAG, "PowerStats HAL 2.0 not available on this device.");
+                sVintfPowerStats = null;
+            } else {
+                sVintfPowerStats = service;
+            }
+        }
 
         @Override
         public android.hardware.power.stats.PowerEntityInfo[] getPowerEntityInfo() {
@@ -141,7 +159,7 @@ public final class PowerStatsHALWrapper {
                 try {
                     powerEntityInfoHAL = sVintfPowerStats.get().getPowerEntityInfo();
                 } catch (RemoteException e) {
-                    Slog.e(TAG, "Failed to get power entity info from PowerStats HAL");
+                    if (DEBUG) Slog.d(TAG, "Failed to get power entity info from PowerStats HAL");
                 }
             }
 
@@ -158,7 +176,7 @@ public final class PowerStatsHALWrapper {
                     stateResidencyResultHAL =
                         sVintfPowerStats.get().getStateResidency(powerEntityIds);
                 } catch (RemoteException e) {
-                    Slog.e(TAG, "Failed to get state residency from PowerStats HAL");
+                    if (DEBUG) Slog.d(TAG, "Failed to get state residency from PowerStats HAL");
                 }
             }
 
@@ -173,7 +191,9 @@ public final class PowerStatsHALWrapper {
                 try {
                     energyConsumerInfoHAL = sVintfPowerStats.get().getEnergyConsumerInfo();
                 } catch (RemoteException e) {
-                    Slog.e(TAG, "Failed to get energy consumer info from PowerStats HAL");
+                    if (DEBUG) {
+                        Slog.d(TAG, "Failed to get energy consumer info from PowerStats HAL");
+                    }
                 }
             }
 
@@ -190,7 +210,9 @@ public final class PowerStatsHALWrapper {
                     energyConsumedHAL =
                         sVintfPowerStats.get().getEnergyConsumed(energyConsumerIds);
                 } catch (RemoteException e) {
-                    Slog.e(TAG, "Failed to get energy consumer results from PowerStats HAL");
+                    if (DEBUG) {
+                        Slog.d(TAG, "Failed to get energy consumer results from PowerStats HAL");
+                    }
                 }
             }
 
@@ -205,7 +227,7 @@ public final class PowerStatsHALWrapper {
                 try {
                     energyMeterInfoHAL = sVintfPowerStats.get().getEnergyMeterInfo();
                 } catch (RemoteException e) {
-                    Slog.e(TAG, "Failed to get energy meter info from PowerStats HAL");
+                    if (DEBUG) Slog.d(TAG, "Failed to get energy meter info from PowerStats HAL");
                 }
             }
 
@@ -221,7 +243,7 @@ public final class PowerStatsHALWrapper {
                     energyMeasurementHAL =
                         sVintfPowerStats.get().readEnergyMeters(channelIds);
                 } catch (RemoteException e) {
-                    Slog.e(TAG, "Failed to get energy measurements from PowerStats HAL");
+                    if (DEBUG) Slog.d(TAG, "Failed to get energy measurements from PowerStats HAL");
                 }
             }
 
@@ -229,16 +251,89 @@ public final class PowerStatsHALWrapper {
         }
 
         @Override
-        public boolean initialize() {
-            Supplier<IPowerStats> service = new VintfHalCache();
+        public boolean isInitialized() {
+            return (sVintfPowerStats != null);
+        }
+    }
 
-            if (service.get() == null) {
-                sVintfPowerStats = null;
-                return false;
+    /**
+     * PowerStatsHALWrapper10Impl is the implementation of the IPowerStatsHALWrapper
+     * used by the PowerStatsService on devices that support only PowerStats HAL 1.0.
+     * Other implementations will be used by the testing framework and will be passed
+     * into the PowerStatsService through an injector.
+     */
+    public static final class PowerStatsHAL10WrapperImpl implements IPowerStatsHALWrapper {
+        private boolean mIsInitialized;
+
+        // PowerStatsHAL 1.0 native functions exposed by JNI layer.
+        private static native boolean nativeInit();
+        private static native PowerEntityInfo[] nativeGetPowerEntityInfo();
+        private static native StateResidencyResult[] nativeGetStateResidency(int[] powerEntityIds);
+        private static native ChannelInfo[] nativeGetEnergyMeterInfo();
+        private static native EnergyMeasurement[] nativeReadEnergyMeters(int[] channelIds);
+
+        public PowerStatsHAL10WrapperImpl() {
+            if (nativeInit()) {
+                mIsInitialized = true;
             } else {
-                sVintfPowerStats = service;
-                return true;
+                if (DEBUG) Slog.d(TAG, "PowerStats HAL 1.0 not available on this device.");
+                mIsInitialized = false;
             }
+        }
+
+        @Override
+        public android.hardware.power.stats.PowerEntityInfo[] getPowerEntityInfo() {
+            return nativeGetPowerEntityInfo();
+        }
+
+        @Override
+        public android.hardware.power.stats.StateResidencyResult[] getStateResidency(
+                int[] powerEntityIds) {
+            return nativeGetStateResidency(powerEntityIds);
+        }
+
+        @Override
+        public int[] getEnergyConsumerInfo() {
+            if (DEBUG) Slog.d(TAG, "Energy consumer info is not supported");
+            return null;
+        }
+
+        @Override
+        public android.hardware.power.stats.EnergyConsumerResult[] getEnergyConsumed(
+                int[] energyConsumerIds) {
+            if (DEBUG) Slog.d(TAG, "Energy consumer results are not supported");
+            return null;
+        }
+
+        @Override
+        public android.hardware.power.stats.ChannelInfo[] getEnergyMeterInfo() {
+            return nativeGetEnergyMeterInfo();
+        }
+
+        @Override
+        public android.hardware.power.stats.EnergyMeasurement[] readEnergyMeters(int[] channelIds) {
+            return nativeReadEnergyMeters(channelIds);
+        }
+
+        @Override
+        public boolean isInitialized() {
+            return mIsInitialized;
+        }
+    }
+
+    /**
+     * Returns an instance of an IPowerStatsHALWrapper.  If PowerStats HAL 2.0 is supported on the
+     * device, return a PowerStatsHAL20WrapperImpl, else return a PowerStatsHAL10WrapperImpl.
+     *
+     * @return an instance of an IPowerStatsHALWrapper where preference is given to PowerStats HAL
+     *         2.0.
+     */
+    public static IPowerStatsHALWrapper getPowerStatsHalImpl() {
+        PowerStatsHAL20WrapperImpl powerStatsHAL20WrapperImpl = new PowerStatsHAL20WrapperImpl();
+        if (powerStatsHAL20WrapperImpl.isInitialized()) {
+            return powerStatsHAL20WrapperImpl;
+        } else {
+            return new PowerStatsHAL10WrapperImpl();
         }
     }
 
