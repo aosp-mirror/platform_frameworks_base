@@ -9338,10 +9338,9 @@ public class TelephonyManager {
      * @return true if mobile data is enabled.
      */
     @RequiresPermission(anyOf = {android.Manifest.permission.ACCESS_NETWORK_STATE,
-            android.Manifest.permission.MODIFY_PHONE_STATE,
-            android.Manifest.permission.READ_PHONE_STATE})
+            android.Manifest.permission.MODIFY_PHONE_STATE})
     public boolean isDataEnabled() {
-        return isDataEnabledForReason(DATA_ENABLED_REASON_USER);
+        return getDataEnabled(getSubId(SubscriptionManager.getDefaultDataSubscriptionId()));
     }
 
     /**
@@ -9586,7 +9585,7 @@ public class TelephonyManager {
     @SystemApi
     public boolean getDataEnabled(int subId) {
         try {
-            return isDataEnabledForReason(subId, DATA_ENABLED_REASON_USER);
+            return isDataEnabledForReason(DATA_ENABLED_REASON_USER);
         } catch (RuntimeException e) {
             Log.e(TAG, "Error calling isDataEnabledForReason e:" + e);
         }
