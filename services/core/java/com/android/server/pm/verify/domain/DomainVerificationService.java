@@ -70,7 +70,7 @@ public class DomainVerificationService extends SystemService
 
     private static final String TAG = "DomainVerificationService";
 
-    public static final boolean DEBUG_APPROVAL = true;
+    public static final boolean DEBUG_APPROVAL = DomainVerificationDebug.DEBUG_APPROVAL;
 
     /**
      * The new user preference API for verifying domains marked autoVerify=true in

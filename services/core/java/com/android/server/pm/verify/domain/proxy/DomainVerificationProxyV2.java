@@ -28,6 +28,7 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.util.Slog;
 
+import com.android.server.pm.verify.domain.DomainVerificationDebug;
 import com.android.server.pm.verify.domain.DomainVerificationMessageCodes;
 
 import java.util.Set;
@@ -36,7 +37,7 @@ public class DomainVerificationProxyV2 implements DomainVerificationProxy {
 
     private static final String TAG = "DomainVerificationProxyV2";
 
-    private static final boolean DEBUG_BROADCASTS = true;
+    private static final boolean DEBUG_BROADCASTS = DomainVerificationDebug.DEBUG_BROADCASTS;
 
     @NonNull
     private final Context mContext;
