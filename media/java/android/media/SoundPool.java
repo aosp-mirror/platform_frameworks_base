@@ -302,8 +302,7 @@ public class SoundPool extends PlayerBase {
      */
     public final int play(int soundID, float leftVolume, float rightVolume,
             int priority, int loop, float rate) {
-        // FIXME: b/174876164 implement device id for soundpool
-        baseStart(0);
+        baseStart();
         return _play(soundID, leftVolume, rightVolume, priority, loop, rate);
     }
 

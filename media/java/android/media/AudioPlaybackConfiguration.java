@@ -21,7 +21,6 @@ import static android.media.AudioAttributes.ALLOW_CAPTURE_BY_NONE;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Binder;
 import android.os.IBinder;
@@ -48,8 +47,6 @@ public final class AudioPlaybackConfiguration implements Parcelable {
     public static final int PLAYER_PIID_INVALID = -1;
     /** @hide */
     public static final int PLAYER_UPID_INVALID = -1;
-    /** @hide */
-    public static final int PLAYER_DEVICEID_INVALID = 0;
 
     // information about the implementation
     /**
@@ -161,11 +158,6 @@ public final class AudioPlaybackConfiguration implements Parcelable {
      */
     @SystemApi
     public static final int PLAYER_STATE_STOPPED = 4;
-    /**
-     * @hide
-     * The state used to update device id, does not actually change the state of the player
-     */
-    public static final int PLAYER_UPDATE_DEVICE_ID = 5;
 
     /** @hide */
     @IntDef({
@@ -174,8 +166,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
         PLAYER_STATE_IDLE,
         PLAYER_STATE_STARTED,
         PLAYER_STATE_PAUSED,
-        PLAYER_STATE_STOPPED,
-        PLAYER_UPDATE_DEVICE_ID
+        PLAYER_STATE_STOPPED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PlayerState {}
@@ -192,8 +183,6 @@ public final class AudioPlaybackConfiguration implements Parcelable {
 
     private int mPlayerState;
     private AudioAttributes mPlayerAttr; // never null
-
-    private int mDeviceId;
 
     /**
      * Never use without initializing parameters afterwards
@@ -212,7 +201,6 @@ public final class AudioPlaybackConfiguration implements Parcelable {
         mPlayerType = pic.mPlayerType;
         mClientUid = uid;
         mClientPid = pid;
-        mDeviceId = PLAYER_DEVICEID_INVALID;
         mPlayerState = PLAYER_STATE_IDLE;
         mPlayerAttr = pic.mAttributes;
         if ((sPlayerDeathMonitor != null) && (pic.mIPlayer != null)) {
@@ -253,7 +241,6 @@ public final class AudioPlaybackConfiguration implements Parcelable {
                         in.mPlayerAttr.getAllowedCapturePolicy() == ALLOW_CAPTURE_BY_ALL
                         ? ALLOW_CAPTURE_BY_ALL : ALLOW_CAPTURE_BY_NONE)
                 .build();
-        anonymCopy.mDeviceId = in.mDeviceId;
         // anonymized data
         anonymCopy.mPlayerType = PLAYER_TYPE_UNKNOWN;
         anonymCopy.mClientUid = PLAYER_UPID_INVALID;
@@ -288,25 +275,6 @@ public final class AudioPlaybackConfiguration implements Parcelable {
     @SystemApi
     public int getClientPid() {
         return mClientPid;
-    }
-
-    /**
-     * Returns information about the {@link AudioDeviceInfo} used for this playback.
-     * @return the audio playback device or null if the device is not available at the time of query
-     */
-    public @Nullable AudioDeviceInfo getAudioDevice() {
-        if (mDeviceId == PLAYER_DEVICEID_INVALID) {
-            return null;
-        }
-        // TODO(175802592): change this to AudioManager.getDeviceForPortId() when available
-        AudioDeviceInfo[] devices =
-                AudioManager.getDevicesStatic(AudioManager.GET_DEVICES_OUTPUTS);
-        for (int i = 0; i < devices.length; i++) {
-            if (devices[i].getId() == mDeviceId) {
-                return devices[i];
-            }
-        }
-        return null;
     }
 
     /**
@@ -391,29 +359,13 @@ public final class AudioPlaybackConfiguration implements Parcelable {
      * @hide
      * Handle a player state change
      * @param event
-     * @param deviceId active device id or {@Code PLAYER_DEVICEID_INVALID}
-     * <br>Note device id is valid for {@code PLAYER_UPDATE_DEVICE_ID} or
-     * <br>{@code PLAYER_STATE_STARTED} events, as the device id will be reset to none when
-     * <br>pausing or stopping playback. It will be set to active device when playback starts or
-     * <br>it will be changed when PLAYER_UPDATE_DEVICE_ID is sent. The latter can happen if the
-     * <br>device changes in the middle of playback.
      * @return true if the state changed, false otherwise
      */
-    public boolean handleStateEvent(int event, int deviceId) {
-        boolean changed = false;
+    public boolean handleStateEvent(int event) {
+        final boolean changed;
         synchronized (this) {
-
-            // Do not update if it is only device id update
-            if (event != PLAYER_UPDATE_DEVICE_ID) {
-                changed = (mPlayerState != event);
-                mPlayerState = event;
-            }
-
-            if (event == PLAYER_STATE_STARTED || event == PLAYER_UPDATE_DEVICE_ID) {
-                changed = changed || (mDeviceId != deviceId);
-                mDeviceId = deviceId;
-            }
-
+            changed = (mPlayerState != event);
+            mPlayerState = event;
             if (changed && (event == PLAYER_STATE_RELEASED) && (mIPlayerShell != null)) {
                 mIPlayerShell.release();
                 mIPlayerShell = null;
@@ -484,7 +436,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mPlayerIId, mDeviceId, mPlayerType, mClientUid, mClientPid);
+        return Objects.hash(mPlayerIId, mPlayerType, mClientUid, mClientPid);
     }
 
     @Override
@@ -495,7 +447,6 @@ public final class AudioPlaybackConfiguration implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mPlayerIId);
-        dest.writeInt(mDeviceId);
         dest.writeInt(mPlayerType);
         dest.writeInt(mClientUid);
         dest.writeInt(mClientPid);
@@ -510,7 +461,6 @@ public final class AudioPlaybackConfiguration implements Parcelable {
 
     private AudioPlaybackConfiguration(Parcel in) {
         mPlayerIId = in.readInt();
-        mDeviceId = in.readInt();
         mPlayerType = in.readInt();
         mClientUid = in.readInt();
         mClientPid = in.readInt();
@@ -528,7 +478,6 @@ public final class AudioPlaybackConfiguration implements Parcelable {
         AudioPlaybackConfiguration that = (AudioPlaybackConfiguration) o;
 
         return ((mPlayerIId == that.mPlayerIId)
-                && (mDeviceId == that.mDeviceId)
                 && (mPlayerType == that.mPlayerType)
                 && (mClientUid == that.mClientUid)
                 && (mClientPid == that.mClientPid));
@@ -537,7 +486,6 @@ public final class AudioPlaybackConfiguration implements Parcelable {
     @Override
     public String toString() {
         return "AudioPlaybackConfiguration piid:" + mPlayerIId
-                + " deviceId:" + mDeviceId
                 + " type:" + toLogFriendlyPlayerType(mPlayerType)
                 + " u/pid:" + mClientUid + "/" + mClientPid
                 + " state:" + toLogFriendlyPlayerState(mPlayerState)
@@ -623,7 +571,6 @@ public final class AudioPlaybackConfiguration implements Parcelable {
             case PLAYER_STATE_STARTED: return "started";
             case PLAYER_STATE_PAUSED: return "paused";
             case PLAYER_STATE_STOPPED: return "stopped";
-            case PLAYER_UPDATE_DEVICE_ID: return "device";
             default:
                 return "unknown player state - FIXME";
         }
