@@ -16,8 +16,6 @@
 
 package android.app.role;
 
-import static java.util.Collections.emptyList;
-
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -34,7 +32,6 @@ import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.UserHandle;
 
-import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
 
@@ -180,20 +177,6 @@ public abstract class RoleControllerService extends Service {
                 boolean visible = onIsRoleVisible(roleName);
                 callback.sendResult(visible ? Bundle.EMPTY : null);
             }
-
-            @Override
-            public void getRolePrivileges(String roleName, AndroidFuture<RolePrivileges> callback) {
-                enforceCallingPermission(Manifest.permission.MANAGE_ROLE_HOLDERS, null);
-
-                Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
-                Objects.requireNonNull(callback, "callback cannot be null");
-
-                try {
-                    callback.complete(RoleControllerService.this.getRolePrivileges(roleName));
-                } catch (Throwable t) {
-                    callback.completeExceptionally(t);
-                }
-            }
         };
     }
 
@@ -319,14 +302,4 @@ public abstract class RoleControllerService extends Service {
      * @return whether the role should be visible to user
      */
     public abstract boolean onIsRoleVisible(@NonNull String roleName);
-
-    /**
-     * Queries the {@link RolePrivileges privileges} that the given role grants.
-     *
-     * @param roleName name of the role to quey for
-     * @return the {@link RolePrivileges} for the role
-     */
-    public @NonNull RolePrivileges getRolePrivileges(@NonNull String roleName) {
-        return new RolePrivileges(emptyList(), emptyList(), emptyList(), emptyList());
-    }
 }

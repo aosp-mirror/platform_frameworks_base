@@ -1346,7 +1346,6 @@ package android.app.role {
 
   public abstract class RoleControllerService extends android.app.Service {
     ctor public RoleControllerService();
-    method @NonNull public android.app.role.RolePrivileges getRolePrivileges(@NonNull String);
     method @WorkerThread public abstract boolean onAddRoleHolder(@NonNull String, @NonNull String, int);
     method @Nullable public final android.os.IBinder onBind(@Nullable android.content.Intent);
     method @WorkerThread public abstract boolean onClearRoleHolders(@NonNull String, int);
@@ -1371,18 +1370,6 @@ package android.app.role {
     method @RequiresPermission("com.android.permissioncontroller.permission.MANAGE_ROLES_FROM_CONTROLLER") public boolean removeRoleHolderFromController(@NonNull String, @NonNull String);
     method @RequiresPermission("com.android.permissioncontroller.permission.MANAGE_ROLES_FROM_CONTROLLER") public void setRoleNamesFromController(@NonNull java.util.List<java.lang.String>);
     field public static final int MANAGE_HOLDERS_FLAG_DONT_KILL_APP = 1; // 0x1
-  }
-
-  public final class RolePrivileges implements android.os.Parcelable {
-    ctor public RolePrivileges(@NonNull java.util.List<java.lang.String>, @NonNull java.util.List<java.lang.String>, @NonNull java.util.List<java.lang.String>, @NonNull java.util.List<java.lang.String>);
-    method public int describeContents();
-    method @NonNull public java.util.List<java.lang.String> getAppOpPermissions();
-    method @NonNull public java.util.List<java.lang.String> getAppOps();
-    method @NonNull public java.util.List<java.lang.String> getCapabilities();
-    method @NonNull public java.util.List<java.lang.String> getPermissions();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field public static final String CAPABILITY_NOTIFICATION_LISTENER = "android.app.role.capability.NOTIFICATION_LISTENER";
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.role.RolePrivileges> CREATOR;
   }
 
 }
