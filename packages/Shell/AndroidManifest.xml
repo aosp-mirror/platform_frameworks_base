@@ -371,10 +371,6 @@
     <!-- Permission required for CTS test - CtsHdmiCecHostTestCases -->
     <uses-permission android:name="android.permission.HDMI_CEC" />
 
-    <!-- Permission needed for CTS test - WifiManagerTest -->
-    <uses-permission android:name="android.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS" />
-    <uses-permission android:name="android.permission.WIFI_UPDATE_COEX_UNSAFE_CHANNELS" />
-
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"
