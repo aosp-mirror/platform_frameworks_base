@@ -1374,7 +1374,6 @@ filegroup {
 
 // TODO(b/145644363): move this to under StubLibraries.bp or ApiDocs.bp
 metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.xml) " +
-    "--ignore-classes-on-classpath " +
     "--hide-package com.android.server " +
     "--hide-package android.audio.policy.configuration.V7_0 " +
     "--error UnhiddenSystemApi " +
