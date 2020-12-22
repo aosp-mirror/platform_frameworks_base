@@ -389,6 +389,13 @@ public final class Completable {
     }
 
     /**
+     * @return an instance of {@link Completable.InputMethodInfoList}.
+     */
+    public static Completable.InputMethodInfoList createInputMethodInfoList() {
+        return new Completable.InputMethodInfoList();
+    }
+
+    /**
      * Completable object of {@link java.lang.Boolean}.
      */
     public static final class Boolean extends Values<java.lang.Boolean> { }
@@ -429,6 +436,12 @@ public final class Completable {
             extends Values<List<android.view.inputmethod.InputMethodSubtype>> { }
 
     /**
+     * Completable object of {@link List<android.view.inputmethod.InputMethodInfo>}.
+     */
+    public static final class InputMethodInfoList
+            extends Values<List<android.view.inputmethod.InputMethodInfo>> { }
+
+    /**
      * Await the result by the {@link Completable.Values}.
      *
      * @return the result once {@link ValueBase#onComplete()}
@@ -436,6 +449,17 @@ public final class Completable {
     @AnyThread
     @Nullable
     public static <T> T getResult(@NonNull Completable.Values<T> value) {
+        value.await();
+        return value.getValue();
+    }
+
+    /**
+     * Await the int result by the {@link Completable.Int}.
+     *
+     * @return the result once {@link ValueBase#onComplete()}
+     */
+    @AnyThread
+    public static int getIntResult(@NonNull Completable.Int value) {
         value.await();
         return value.getValue();
     }

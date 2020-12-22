@@ -20,6 +20,7 @@ import android.annotation.AnyThread;
 import android.annotation.BinderThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.view.InputBindResult;
@@ -74,6 +75,16 @@ public final class ResultCallbacks {
                     return;
                 }
                 value.onComplete(result);
+            }
+
+            @BinderThread
+            @Override
+            public void onError(ThrowableHolder throwableHolder) {
+                final Completable.Int value = unwrap(atomicRef);
+                if (value == null) {
+                    return;
+                }
+                value.onError(throwableHolder);
             }
         };
     }
@@ -297,6 +308,43 @@ public final class ResultCallbacks {
             @Override
             public void onError(ThrowableHolder throwableHolder) {
                 final Completable.InputMethodSubtypeList value = unwrap(atomicRef);
+                if (value == null) {
+                    return;
+                }
+                value.onError(throwableHolder);
+            }
+        };
+    }
+
+    /**
+     * Creates {@link IInputMethodInfoListResultCallback.Stub} that is to set
+     * {@link Completable.InputMethodInfoList} when receiving the result.
+     *
+     * @param value {@link Completable.InputMethodInfoList} to be set when receiving the result.
+     * @return {@link IInputMethodInfoListResultCallback.Stub} that can be passed as a binder
+     * IPC parameter.
+     */
+    @AnyThread
+    public static IInputMethodInfoListResultCallback.Stub of(
+            @NonNull Completable.InputMethodInfoList value) {
+        final AtomicReference<WeakReference<Completable.InputMethodInfoList>>
+                atomicRef = new AtomicReference<>(new WeakReference<>(value));
+
+        return new IInputMethodInfoListResultCallback.Stub() {
+            @BinderThread
+            @Override
+            public void onResult(List<InputMethodInfo> result) {
+                final Completable.InputMethodInfoList value = unwrap(atomicRef);
+                if (value == null) {
+                    return;
+                }
+                value.onComplete(result);
+            }
+
+            @BinderThread
+            @Override
+            public void onError(ThrowableHolder throwableHolder) {
+                final Completable.InputMethodInfoList value = unwrap(atomicRef);
                 if (value == null) {
                     return;
                 }

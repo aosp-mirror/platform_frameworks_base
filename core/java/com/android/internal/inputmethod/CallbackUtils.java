@@ -19,12 +19,14 @@ package com.android.internal.inputmethod;
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.os.RemoteException;
+import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.view.InputBindResult;
 
 import java.util.List;
 import java.util.function.BooleanSupplier;
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 /**
@@ -133,6 +135,59 @@ public final class CallbackUtils {
 
         try {
             result = resultSupplier.get();
+        } catch (Throwable throwable) {
+            exception = throwable;
+        }
+
+        try {
+            if (exception != null) {
+                callback.onError(ThrowableHolder.of(exception));
+                return;
+            }
+            callback.onResult(result);
+        } catch (RemoteException ignored) { }
+    }
+
+    /**
+     * A utility method using given {@link IInputMethodInfoListResultCallback} to callback the
+     * result.
+     *
+     * @param callback {@link IInputMethodInfoListResultCallback} to be called back.
+     * @param resultSupplier the supplier from which the result is provided.
+     */
+    public static void onResult(@NonNull IInputMethodInfoListResultCallback callback,
+            @NonNull Supplier<List<InputMethodInfo>> resultSupplier) {
+        List<InputMethodInfo> result = null;
+        Throwable exception = null;
+
+        try {
+            result = resultSupplier.get();
+        } catch (Throwable throwable) {
+            exception = throwable;
+        }
+
+        try {
+            if (exception != null) {
+                callback.onError(ThrowableHolder.of(exception));
+                return;
+            }
+            callback.onResult(result);
+        } catch (RemoteException ignored) { }
+    }
+
+    /**
+     * A utility method using given {@link IIntResultCallback} to callback the result.
+     *
+     * @param callback {@link IIntResultCallback} to be called back.
+     * @param resultSupplier the supplier from which the result is provided.
+     */
+    public static void onResult(@NonNull IIntResultCallback callback,
+            @NonNull IntSupplier resultSupplier) {
+        int result = 0;
+        Throwable exception = null;
+
+        try {
+            result = resultSupplier.getAsInt();
         } catch (Throwable throwable) {
             exception = throwable;
         }

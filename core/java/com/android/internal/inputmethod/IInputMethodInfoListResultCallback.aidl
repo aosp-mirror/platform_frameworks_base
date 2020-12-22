@@ -16,9 +16,10 @@
 
 package com.android.internal.inputmethod;
 
+import android.view.inputmethod.InputMethodInfo;
 import com.android.internal.inputmethod.ThrowableHolder;
 
-oneway interface IIntResultCallback {
-    void onResult(int result);
+oneway interface IInputMethodInfoListResultCallback {
+    void onResult(in List<InputMethodInfo> result);
     void onError(in ThrowableHolder exception);
 }
