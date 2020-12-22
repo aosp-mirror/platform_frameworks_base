@@ -57,12 +57,12 @@ import java.util.Map.Entry;
  *
  * <pre>The internal structure of the VCN Management subsystem is as follows:
  *
- * +------------------------+ 1:1                                 +--------------------------------+
- * |  VcnManagementService  | ------------ Creates -------------> |  TelephonySubscriptionManager  |
- * |                        |                                     |                                |
- * | Manages configs and    |                                     | Tracks subscriptions, carrier  |
- * | VcnInstance lifecycles | <--- Notifies of subscription & --- | privilege changes, caches maps |
- * +------------------------+      carrier privilege changes      +--------------------------------+
+ * +-------------------------+ 1:1                                +--------------------------------+
+ * |  VcnManagementService   | ------------ Creates ------------> |  TelephonySubscriptionManager  |
+ * |                         |                                    |                                |
+ * |   Manages configs and   |                                    | Tracks subscriptions, carrier  |
+ * | Vcn instance lifecycles | <--- Notifies of subscription & -- | privilege changes, caches maps |
+ * +-------------------------+      carrier privilege changes     +--------------------------------+
  *      | 1:N          ^
  *      |              |
  *      |              +-------------------------------+
@@ -74,19 +74,19 @@ import java.util.Map.Entry;
  *                      |                      mode state changes
  *                      v                              |
  * +-----------------------------------------------------------------------+
- * |                              VcnInstance                              |
+ * |                                  Vcn                                  |
  * |                                                                       |
- * |   Manages tunnel lifecycles based on fulfillable NetworkRequest(s)    |
- * |                        and overall safe-mode                          |
+ * |       Manages GatewayConnection lifecycles based on fulfillable       |
+ * |                NetworkRequest(s) and overall safe-mode                |
  * +-----------------------------------------------------------------------+
  *                      | 1:N                          ^
  *              Creates to fulfill                     |
- *           NetworkRequest(s), tears        Notifies of VcnTunnel
+ *           NetworkRequest(s), tears   Notifies of VcnGatewayConnection
  *          down when no longer needed   teardown (e.g. Network reaped)
  *                      |                 and safe-mode timer changes
  *                      v                              |
  * +-----------------------------------------------------------------------+
- * |                               VcnTunnel                               |
+ * |                          VcnGatewayConnection                         |
  * |                                                                       |
  * |       Manages a single (IKEv2) tunnel session and NetworkAgent,       |
  * |  handles mobility events, (IPsec) Tunnel setup and safe-mode timers   |
