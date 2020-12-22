@@ -309,7 +309,7 @@ public abstract class AndroidKeyStore3DESCipherSpi extends AndroidKeyStoreCipher
         if (parameters != null) {
             for (KeyParameter p : parameters) {
                 if (p.tag == KeymasterDefs.KM_TAG_NONCE) {
-                    returnedIv = p.blob;
+                    returnedIv = p.value.getBlob();
                     break;
                 }
             }
