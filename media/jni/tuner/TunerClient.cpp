@@ -25,6 +25,8 @@
 using ::android::hardware::tv::tuner::V1_0::FrontendId;
 using ::android::hardware::tv::tuner::V1_0::FrontendType;
 
+using ::aidl::android::media::tv::tunerresourcemanager::TunerFrontendInfo;
+
 namespace android {
 
 sp<ITuner> TunerClient::mTuner;
@@ -37,6 +39,7 @@ int TunerClient::mTunerVersion;
 TunerClient::TunerClient() {
     // Get HIDL Tuner in migration stage.
     getHidlTuner();
+    updateTunerResources();
     // Connect with Tuner Service.
     ::ndk::SpAIBinder binder(AServiceManager_getService("media.tuner"));
     mTunerService = ITunerService::fromBinder(binder);
@@ -259,6 +262,49 @@ sp<LnbClient> TunerClient::openLnbByName(string lnbName) {
 
 /////////////// TunerClient Helper Methods ///////////////////////
 
+void TunerClient::updateTunerResources() {
+    if (mTuner == NULL) {
+        return;
+    }
+
+    // Connect with Tuner Resource Manager.
+    ::ndk::SpAIBinder binder(AServiceManager_getService("tv_tuner_resource_mgr"));
+    mTunerResourceManager = ITunerResourceManager::fromBinder(binder);
+
+    updateFrontendResources();
+    updateLnbResources();
+    // TODO: update Demux, Descrambler.
+}
+
+void TunerClient::updateFrontendResources() {
+    vector<FrontendId> ids = getFrontendIds();
+    if (ids.size() == 0) {
+        return;
+    }
+    vector<TunerFrontendInfo> infos;
+    for (int i = 0; i < ids.size(); i++) {
+        shared_ptr<FrontendInfo> frontendInfo = getFrontendInfo((int)ids[i]);
+        if (frontendInfo == NULL) {
+            continue;
+        }
+        TunerFrontendInfo tunerFrontendInfo{
+            .handle = getResourceHandleFromId((int)ids[i], FRONTEND),
+            .frontendType = static_cast<int>(frontendInfo->type),
+            .exclusiveGroupId = static_cast<int>(frontendInfo->exclusiveGroupId),
+        };
+        infos.push_back(tunerFrontendInfo);
+    }
+    mTunerResourceManager->setFrontendInfoList(infos);
+}
+
+void TunerClient::updateLnbResources() {
+    vector<int> handles = getLnbHandles();
+    if (handles.size() == 0) {
+        return;
+    }
+    mTunerResourceManager->setLnbInfoList(handles);
+}
+
 sp<ITuner> TunerClient::getHidlTuner() {
     if (mTuner == NULL) {
         mTunerVersion = 0;
@@ -364,6 +410,32 @@ sp<IDescrambler> TunerClient::openHidlDescrambler() {
     }
 
     return descrambler;
+}
+
+vector<int> TunerClient::getLnbHandles() {
+    vector<int> lnbHandles;
+
+    if (mTunerService != NULL) {
+        // TODO: pending hidl interface
+    }
+
+    if (mTuner != NULL) {
+        Result res;
+        vector<LnbId> lnbIds;
+        mTuner->getLnbIds([&](Result r, const hardware::hidl_vec<LnbId>& ids) {
+            lnbIds = ids;
+            res = r;
+        });
+        if (res != Result::SUCCESS || lnbIds.size() == 0) {
+            ALOGW("Lnb isn't available");
+        } else {
+            for (int i = 0; i < lnbIds.size(); i++) {
+                lnbHandles.push_back(getResourceHandleFromId((int)lnbIds[i], LNB));
+            }
+        }
+    }
+
+    return lnbHandles;
 }
 
 FrontendInfo TunerClient::FrontendInfoAidlToHidl(TunerServiceFrontendInfo aidlFrontendInfo) {

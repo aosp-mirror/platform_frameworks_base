@@ -86,9 +86,9 @@ public class TunerResourceManagerServiceTest {
                     return (actual == null) && (expected == null);
                 }
 
-                return actual.getHandle() == expected.getHandle()
-                        && actual.getType() == expected.getFrontendType()
-                        && actual.getExclusiveGroupId() == expected.getExclusiveGroupId();
+                return actual.getHandle() == expected.handle
+                        && actual.getType() == expected.frontendType
+                        && actual.getExclusiveGroupId() == expected.exclusiveGroupId;
             },  "is correctly configured from ");
 
     @Before
@@ -111,19 +111,19 @@ public class TunerResourceManagerServiceTest {
         // Init frontend resources.
         TunerFrontendInfo[] infos = new TunerFrontendInfo[2];
         infos[0] =
-                new TunerFrontendInfo(0 /*id*/, FrontendSettings.TYPE_DVBT, 0 /*exclusiveGroupId*/);
+                tunerFrontendInfo(0 /*handle*/, FrontendSettings.TYPE_DVBT, 0 /*exclusiveGroupId*/);
         infos[1] =
-                new TunerFrontendInfo(1 /*id*/, FrontendSettings.TYPE_DVBT, 1 /*exclusiveGroupId*/);
+                tunerFrontendInfo(1 /*handle*/, FrontendSettings.TYPE_DVBT, 1 /*exclusiveGroupId*/);
         mTunerResourceManagerService.setFrontendInfoListInternal(infos);
 
         Map<Integer, FrontendResource> resources =
                 mTunerResourceManagerService.getFrontendResources();
         for (int id = 0; id < infos.length; id++) {
-            assertThat(resources.get(infos[id].getHandle())
+            assertThat(resources.get(infos[id].handle)
                     .getExclusiveGroupMemberFeHandles().size()).isEqualTo(0);
         }
         for (int id = 0; id < infos.length; id++) {
-            assertThat(resources.get(infos[id].getHandle())
+            assertThat(resources.get(infos[id].handle)
                     .getExclusiveGroupMemberFeHandles().size()).isEqualTo(0);
         }
         assertThat(resources.values()).comparingElementsUsing(FR_TFI_COMPARE)
@@ -135,13 +135,13 @@ public class TunerResourceManagerServiceTest {
         // Init frontend resources.
         TunerFrontendInfo[] infos = new TunerFrontendInfo[4];
         infos[0] =
-                new TunerFrontendInfo(0 /*id*/, FrontendSettings.TYPE_DVBT, 0 /*exclusiveGroupId*/);
+                tunerFrontendInfo(0 /*handle*/, FrontendSettings.TYPE_DVBT, 0 /*exclusiveGroupId*/);
         infos[1] =
-                new TunerFrontendInfo(1 /*id*/, FrontendSettings.TYPE_DVBT, 1 /*exclusiveGroupId*/);
+                tunerFrontendInfo(1 /*handle*/, FrontendSettings.TYPE_DVBT, 1 /*exclusiveGroupId*/);
         infos[2] =
-                new TunerFrontendInfo(2 /*id*/, FrontendSettings.TYPE_DVBS, 1 /*exclusiveGroupId*/);
+                tunerFrontendInfo(2 /*handle*/, FrontendSettings.TYPE_DVBS, 1 /*exclusiveGroupId*/);
         infos[3] =
-                new TunerFrontendInfo(3 /*id*/, FrontendSettings.TYPE_ATSC, 1 /*exclusiveGroupId*/);
+                tunerFrontendInfo(3 /*handle*/, FrontendSettings.TYPE_ATSC, 1 /*exclusiveGroupId*/);
         mTunerResourceManagerService.setFrontendInfoListInternal(infos);
 
         Map<Integer, FrontendResource> resources =
@@ -160,9 +160,9 @@ public class TunerResourceManagerServiceTest {
         // Init frontend resources.
         TunerFrontendInfo[] infos = new TunerFrontendInfo[2];
         infos[0] =
-                new TunerFrontendInfo(0 /*id*/, FrontendSettings.TYPE_DVBT, 1 /*exclusiveGroupId*/);
+                tunerFrontendInfo(0 /*handle*/, FrontendSettings.TYPE_DVBT, 1 /*exclusiveGroupId*/);
         infos[1] =
-                new TunerFrontendInfo(1 /*id*/, FrontendSettings.TYPE_DVBS, 1 /*exclusiveGroupId*/);
+                tunerFrontendInfo(1 /*handle*/, FrontendSettings.TYPE_DVBS, 1 /*exclusiveGroupId*/);
 
         mTunerResourceManagerService.setFrontendInfoListInternal(infos);
         Map<Integer, FrontendResource> resources0 =
@@ -180,22 +180,22 @@ public class TunerResourceManagerServiceTest {
         // Init frontend resources.
         TunerFrontendInfo[] infos0 = new TunerFrontendInfo[3];
         infos0[0] =
-                new TunerFrontendInfo(0 /*id*/, FrontendSettings.TYPE_DVBT, 0 /*exclusiveGroupId*/);
+                tunerFrontendInfo(0 /*handle*/, FrontendSettings.TYPE_DVBT, 0 /*exclusiveGroupId*/);
         infos0[1] =
-                new TunerFrontendInfo(1 /*id*/, FrontendSettings.TYPE_DVBT, 1 /*exclusiveGroupId*/);
+                tunerFrontendInfo(1 /*handle*/, FrontendSettings.TYPE_DVBT, 1 /*exclusiveGroupId*/);
         infos0[2] =
-                new TunerFrontendInfo(2 /*id*/, FrontendSettings.TYPE_DVBS, 2 /*exclusiveGroupId*/);
+                tunerFrontendInfo(2 /*handle*/, FrontendSettings.TYPE_DVBS, 2 /*exclusiveGroupId*/);
         mTunerResourceManagerService.setFrontendInfoListInternal(infos0);
 
         TunerFrontendInfo[] infos1 = new TunerFrontendInfo[1];
         infos1[0] =
-                new TunerFrontendInfo(1 /*id*/, FrontendSettings.TYPE_DVBT, 1 /*exclusiveGroupId*/);
+                tunerFrontendInfo(1 /*handle*/, FrontendSettings.TYPE_DVBT, 1 /*exclusiveGroupId*/);
         mTunerResourceManagerService.setFrontendInfoListInternal(infos1);
 
         Map<Integer, FrontendResource> resources =
                 mTunerResourceManagerService.getFrontendResources();
         for (int id = 0; id < infos1.length; id++) {
-            assertThat(resources.get(infos1[id].getHandle())
+            assertThat(resources.get(infos1[id].handle)
                     .getExclusiveGroupMemberFeHandles().size()).isEqualTo(0);
         }
         assertThat(resources.values()).comparingElementsUsing(FR_TFI_COMPARE)
@@ -207,22 +207,22 @@ public class TunerResourceManagerServiceTest {
         // Init frontend resources.
         TunerFrontendInfo[] infos0 = new TunerFrontendInfo[3];
         infos0[0] =
-                new TunerFrontendInfo(0 /*id*/, FrontendSettings.TYPE_DVBT, 0 /*exclusiveGroupId*/);
+                tunerFrontendInfo(0 /*handle*/, FrontendSettings.TYPE_DVBT, 0 /*exclusiveGroupId*/);
         infos0[1] =
-                new TunerFrontendInfo(1 /*id*/, FrontendSettings.TYPE_DVBT, 1 /*exclusiveGroupId*/);
+                tunerFrontendInfo(1 /*handle*/, FrontendSettings.TYPE_DVBT, 1 /*exclusiveGroupId*/);
         infos0[2] =
-                new TunerFrontendInfo(2 /*id*/, FrontendSettings.TYPE_DVBS, 1 /*exclusiveGroupId*/);
+                tunerFrontendInfo(2 /*handle*/, FrontendSettings.TYPE_DVBS, 1 /*exclusiveGroupId*/);
         mTunerResourceManagerService.setFrontendInfoListInternal(infos0);
 
         TunerFrontendInfo[] infos1 = new TunerFrontendInfo[1];
         infos1[0] =
-                new TunerFrontendInfo(1 /*id*/, FrontendSettings.TYPE_DVBT, 1 /*exclusiveGroupId*/);
+                tunerFrontendInfo(1 /*handle*/, FrontendSettings.TYPE_DVBT, 1 /*exclusiveGroupId*/);
         mTunerResourceManagerService.setFrontendInfoListInternal(infos1);
 
         Map<Integer, FrontendResource> resources =
                 mTunerResourceManagerService.getFrontendResources();
         for (int id = 0; id < infos1.length; id++) {
-            assertThat(resources.get(infos1[id].getHandle())
+            assertThat(resources.get(infos1[id].handle)
                     .getExclusiveGroupMemberFeHandles().size()).isEqualTo(0);
         }
         assertThat(resources.values()).comparingElementsUsing(FR_TFI_COMPARE)
@@ -232,7 +232,7 @@ public class TunerResourceManagerServiceTest {
     @Test
     public void requestFrontendTest_ClientNotRegistered() {
         TunerFrontendRequest request =
-                new TunerFrontendRequest(0 /*clientId*/, FrontendSettings.TYPE_DVBT);
+                tunerFrontendRequest(0 /*clientId*/, FrontendSettings.TYPE_DVBT);
         int[] frontendHandle = new int[1];
         assertThat(mTunerResourceManagerService
                 .requestFrontendInternal(request, frontendHandle)).isFalse();
@@ -241,7 +241,7 @@ public class TunerResourceManagerServiceTest {
 
     @Test
     public void requestFrontendTest_NoFrontendWithGiveTypeAvailable() {
-        ResourceClientProfile profile = new ResourceClientProfile("0" /*sessionId*/,
+        ResourceClientProfile profile = resourceClientProfile("0" /*sessionId*/,
                 TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
         int[] clientId = new int[1];
         mTunerResourceManagerService.registerClientProfileInternal(
@@ -251,11 +251,11 @@ public class TunerResourceManagerServiceTest {
         // Init frontend resources.
         TunerFrontendInfo[] infos = new TunerFrontendInfo[1];
         infos[0] =
-                new TunerFrontendInfo(0 /*id*/, FrontendSettings.TYPE_DVBS, 0 /*exclusiveGroupId*/);
+                tunerFrontendInfo(0 /*handle*/, FrontendSettings.TYPE_DVBS, 0 /*exclusiveGroupId*/);
         mTunerResourceManagerService.setFrontendInfoListInternal(infos);
 
         TunerFrontendRequest request =
-                new TunerFrontendRequest(clientId[0] /*clientId*/, FrontendSettings.TYPE_DVBT);
+                tunerFrontendRequest(clientId[0] /*clientId*/, FrontendSettings.TYPE_DVBT);
         int[] frontendHandle = new int[1];
         assertThat(mTunerResourceManagerService
                 .requestFrontendInternal(request, frontendHandle)).isFalse();
@@ -264,7 +264,7 @@ public class TunerResourceManagerServiceTest {
 
     @Test
     public void requestFrontendTest_FrontendWithNoExclusiveGroupAvailable() {
-        ResourceClientProfile profile = new ResourceClientProfile("0" /*sessionId*/,
+        ResourceClientProfile profile = resourceClientProfile("0" /*sessionId*/,
                 TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
         int[] clientId = new int[1];
         mTunerResourceManagerService.registerClientProfileInternal(
@@ -273,22 +273,22 @@ public class TunerResourceManagerServiceTest {
 
         // Init frontend resources.
         TunerFrontendInfo[] infos = new TunerFrontendInfo[3];
-        infos[0] = new TunerFrontendInfo(
+        infos[0] = tunerFrontendInfo(
                 0 /*handle*/,
                 FrontendSettings.TYPE_DVBT,
                 0 /*exclusiveGroupId*/);
-        infos[1] = new TunerFrontendInfo(
+        infos[1] = tunerFrontendInfo(
                 1 /*handle*/,
                 FrontendSettings.TYPE_DVBT,
                 1 /*exclusiveGroupId*/);
-        infos[2] = new TunerFrontendInfo(
+        infos[2] = tunerFrontendInfo(
                 2 /*handle*/,
                 FrontendSettings.TYPE_DVBS,
                 1 /*exclusiveGroupId*/);
         mTunerResourceManagerService.setFrontendInfoListInternal(infos);
 
         TunerFrontendRequest request =
-                new TunerFrontendRequest(clientId[0] /*clientId*/, FrontendSettings.TYPE_DVBT);
+                tunerFrontendRequest(clientId[0] /*clientId*/, FrontendSettings.TYPE_DVBT);
         int[] frontendHandle = new int[1];
         assertThat(mTunerResourceManagerService
                 .requestFrontendInternal(request, frontendHandle)).isTrue();
@@ -297,9 +297,9 @@ public class TunerResourceManagerServiceTest {
 
     @Test
     public void requestFrontendTest_FrontendWithExclusiveGroupAvailable() {
-        ResourceClientProfile profile0 = new ResourceClientProfile("0" /*sessionId*/,
+        ResourceClientProfile profile0 = resourceClientProfile("0" /*sessionId*/,
                 TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
-        ResourceClientProfile profile1 = new ResourceClientProfile("1" /*sessionId*/,
+        ResourceClientProfile profile1 = resourceClientProfile("1" /*sessionId*/,
                 TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
         int[] clientId0 = new int[1];
         int[] clientId1 = new int[1];
@@ -312,15 +312,15 @@ public class TunerResourceManagerServiceTest {
 
         // Init frontend resources.
         TunerFrontendInfo[] infos = new TunerFrontendInfo[3];
-        infos[0] = new TunerFrontendInfo(
+        infos[0] = tunerFrontendInfo(
                 0 /*handle*/,
                 FrontendSettings.TYPE_DVBT,
                 0 /*exclusiveGroupId*/);
-        infos[1] = new TunerFrontendInfo(
+        infos[1] = tunerFrontendInfo(
                 1 /*handle*/,
                 FrontendSettings.TYPE_DVBT,
                 1 /*exclusiveGroupId*/);
-        infos[2] = new TunerFrontendInfo(
+        infos[2] = tunerFrontendInfo(
                 2 /*handle*/,
                 FrontendSettings.TYPE_DVBS,
                 1 /*exclusiveGroupId*/);
@@ -328,19 +328,19 @@ public class TunerResourceManagerServiceTest {
 
         int[] frontendHandle = new int[1];
         TunerFrontendRequest request =
-                new TunerFrontendRequest(clientId1[0] /*clientId*/, FrontendSettings.TYPE_DVBT);
+                tunerFrontendRequest(clientId1[0] /*clientId*/, FrontendSettings.TYPE_DVBT);
         assertThat(mTunerResourceManagerService
                 .requestFrontendInternal(request, frontendHandle)).isTrue();
-        assertThat(frontendHandle[0]).isEqualTo(infos[0].getHandle());
+        assertThat(frontendHandle[0]).isEqualTo(infos[0].handle);
 
         request =
-                new TunerFrontendRequest(clientId0[0] /*clientId*/, FrontendSettings.TYPE_DVBT);
+                tunerFrontendRequest(clientId0[0] /*clientId*/, FrontendSettings.TYPE_DVBT);
         assertThat(mTunerResourceManagerService
                 .requestFrontendInternal(request, frontendHandle)).isTrue();
-        assertThat(frontendHandle[0]).isEqualTo(infos[1].getHandle());
-        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].getHandle()).isInUse())
+        assertThat(frontendHandle[0]).isEqualTo(infos[1].handle);
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].handle).isInUse())
                 .isTrue();
-        assertThat(mTunerResourceManagerService.getFrontendResource(infos[2].getHandle()).isInUse())
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[2].handle).isInUse())
                 .isTrue();
     }
 
@@ -348,9 +348,9 @@ public class TunerResourceManagerServiceTest {
     public void requestFrontendTest_NoFrontendAvailable_RequestWithLowerPriority() {
         // Register clients
         ResourceClientProfile[] profiles = new ResourceClientProfile[2];
-        profiles[0] = new ResourceClientProfile("0" /*sessionId*/,
+        profiles[0] = resourceClientProfile("0" /*sessionId*/,
                 TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
-        profiles[1] = new ResourceClientProfile("1" /*sessionId*/,
+        profiles[1] = resourceClientProfile("1" /*sessionId*/,
                 TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
         int[] clientPriorities = {100, 50};
         int[] clientId0 = new int[1];
@@ -371,25 +371,25 @@ public class TunerResourceManagerServiceTest {
         // Init frontend resources.
         TunerFrontendInfo[] infos = new TunerFrontendInfo[2];
         infos[0] =
-                new TunerFrontendInfo(0 /*id*/, FrontendSettings.TYPE_DVBT, 1 /*exclusiveGroupId*/);
+                tunerFrontendInfo(0 /*handle*/, FrontendSettings.TYPE_DVBT, 1 /*exclusiveGroupId*/);
         infos[1] =
-                new TunerFrontendInfo(1 /*id*/, FrontendSettings.TYPE_DVBS, 1 /*exclusiveGroupId*/);
+                tunerFrontendInfo(1 /*handle*/, FrontendSettings.TYPE_DVBS, 1 /*exclusiveGroupId*/);
         mTunerResourceManagerService.setFrontendInfoListInternal(infos);
 
         TunerFrontendRequest request =
-                new TunerFrontendRequest(clientId0[0] /*clientId*/, FrontendSettings.TYPE_DVBT);
+                tunerFrontendRequest(clientId0[0] /*clientId*/, FrontendSettings.TYPE_DVBT);
         int[] frontendHandle = new int[1];
         assertThat(mTunerResourceManagerService
                 .requestFrontendInternal(request, frontendHandle)).isTrue();
 
         request =
-                new TunerFrontendRequest(clientId1[0] /*clientId*/, FrontendSettings.TYPE_DVBT);
+                tunerFrontendRequest(clientId1[0] /*clientId*/, FrontendSettings.TYPE_DVBT);
         assertThat(mTunerResourceManagerService
                 .requestFrontendInternal(request, frontendHandle)).isFalse();
         assertThat(listener.isReclaimed()).isFalse();
 
         request =
-                new TunerFrontendRequest(clientId1[0] /*clientId*/, FrontendSettings.TYPE_DVBS);
+                tunerFrontendRequest(clientId1[0] /*clientId*/, FrontendSettings.TYPE_DVBS);
         assertThat(mTunerResourceManagerService
                 .requestFrontendInternal(request, frontendHandle)).isFalse();
         assertThat(listener.isReclaimed()).isFalse();
@@ -399,9 +399,9 @@ public class TunerResourceManagerServiceTest {
     public void requestFrontendTest_NoFrontendAvailable_RequestWithHigherPriority() {
         // Register clients
         ResourceClientProfile[] profiles = new ResourceClientProfile[2];
-        profiles[0] = new ResourceClientProfile("0" /*sessionId*/,
+        profiles[0] = resourceClientProfile("0" /*sessionId*/,
                 TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
-        profiles[1] = new ResourceClientProfile("1" /*sessionId*/,
+        profiles[1] = resourceClientProfile("1" /*sessionId*/,
                 TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
         int[] clientPriorities = {100, 500};
         int[] clientId0 = new int[1];
@@ -421,33 +421,33 @@ public class TunerResourceManagerServiceTest {
         // Init frontend resources.
         TunerFrontendInfo[] infos = new TunerFrontendInfo[2];
         infos[0] =
-                new TunerFrontendInfo(0 /*id*/, FrontendSettings.TYPE_DVBT, 1 /*exclusiveGroupId*/);
+                tunerFrontendInfo(0 /*handle*/, FrontendSettings.TYPE_DVBT, 1 /*exclusiveGroupId*/);
         infos[1] =
-                new TunerFrontendInfo(1 /*id*/, FrontendSettings.TYPE_DVBS, 1 /*exclusiveGroupId*/);
+                tunerFrontendInfo(1 /*handle*/, FrontendSettings.TYPE_DVBS, 1 /*exclusiveGroupId*/);
         mTunerResourceManagerService.setFrontendInfoListInternal(infos);
 
         TunerFrontendRequest request =
-                new TunerFrontendRequest(clientId0[0] /*clientId*/, FrontendSettings.TYPE_DVBT);
+                tunerFrontendRequest(clientId0[0] /*clientId*/, FrontendSettings.TYPE_DVBT);
         int[] frontendHandle = new int[1];
         assertThat(mTunerResourceManagerService
                 .requestFrontendInternal(request, frontendHandle)).isTrue();
-        assertThat(frontendHandle[0]).isEqualTo(infos[0].getHandle());
+        assertThat(frontendHandle[0]).isEqualTo(infos[0].handle);
         assertThat(mTunerResourceManagerService.getClientProfile(clientId0[0])
                 .getInUseFrontendHandles()).isEqualTo(new HashSet<Integer>(Arrays.asList(
-                        infos[0].getHandle(), infos[1].getHandle())));
+                        infos[0].handle, infos[1].handle)));
 
         request =
-                new TunerFrontendRequest(clientId1[0] /*clientId*/, FrontendSettings.TYPE_DVBS);
+                tunerFrontendRequest(clientId1[0] /*clientId*/, FrontendSettings.TYPE_DVBS);
         assertThat(mTunerResourceManagerService
                 .requestFrontendInternal(request, frontendHandle)).isTrue();
-        assertThat(frontendHandle[0]).isEqualTo(infos[1].getHandle());
-        assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].getHandle())
+        assertThat(frontendHandle[0]).isEqualTo(infos[1].handle);
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].handle)
                 .isInUse()).isTrue();
-        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].getHandle())
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].handle)
                 .isInUse()).isTrue();
-        assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].getHandle())
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].handle)
                 .getOwnerClientId()).isEqualTo(clientId1[0]);
-        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].getHandle())
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].handle)
                 .getOwnerClientId()).isEqualTo(clientId1[0]);
         assertThat(listener.isReclaimed()).isTrue();
     }
@@ -456,7 +456,7 @@ public class TunerResourceManagerServiceTest {
     public void releaseFrontendTest_UnderTheSameExclusiveGroup() {
         // Register clients
         ResourceClientProfile[] profiles = new ResourceClientProfile[1];
-        profiles[0] = new ResourceClientProfile("0" /*sessionId*/,
+        profiles[0] = resourceClientProfile("0" /*sessionId*/,
                 TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
         int[] clientId = new int[1];
         TestResourcesReclaimListener listener = new TestResourcesReclaimListener();
@@ -466,19 +466,19 @@ public class TunerResourceManagerServiceTest {
         // Init frontend resources.
         TunerFrontendInfo[] infos = new TunerFrontendInfo[2];
         infos[0] =
-                new TunerFrontendInfo(0 /*id*/, FrontendSettings.TYPE_DVBT, 1 /*exclusiveGroupId*/);
+                tunerFrontendInfo(0 /*handle*/, FrontendSettings.TYPE_DVBT, 1 /*exclusiveGroupId*/);
         infos[1] =
-                new TunerFrontendInfo(1 /*id*/, FrontendSettings.TYPE_DVBS, 1 /*exclusiveGroupId*/);
+                tunerFrontendInfo(1 /*handle*/, FrontendSettings.TYPE_DVBS, 1 /*exclusiveGroupId*/);
         mTunerResourceManagerService.setFrontendInfoListInternal(infos);
 
         TunerFrontendRequest request =
-                new TunerFrontendRequest(clientId[0] /*clientId*/, FrontendSettings.TYPE_DVBT);
+                tunerFrontendRequest(clientId[0] /*clientId*/, FrontendSettings.TYPE_DVBT);
         int[] frontendHandle = new int[1];
         assertThat(mTunerResourceManagerService
                 .requestFrontendInternal(request, frontendHandle)).isTrue();
-        assertThat(frontendHandle[0]).isEqualTo(infos[0].getHandle());
+        assertThat(frontendHandle[0]).isEqualTo(infos[0].handle);
         assertThat(mTunerResourceManagerService
-                .getFrontendResource(infos[1].getHandle()).isInUse()).isTrue();
+                .getFrontendResource(infos[1].handle).isInUse()).isTrue();
 
         // Release frontend
         mTunerResourceManagerService.releaseFrontendInternal(mTunerResourceManagerService
@@ -486,7 +486,7 @@ public class TunerResourceManagerServiceTest {
         assertThat(mTunerResourceManagerService
                 .getFrontendResource(frontendHandle[0]).isInUse()).isFalse();
         assertThat(mTunerResourceManagerService
-                .getFrontendResource(infos[1].getHandle()).isInUse()).isFalse();
+                .getFrontendResource(infos[1].handle).isInUse()).isFalse();
         assertThat(mTunerResourceManagerService
                 .getClientProfile(clientId[0]).getInUseFrontendHandles().size()).isEqualTo(0);
     }
@@ -495,9 +495,9 @@ public class TunerResourceManagerServiceTest {
     public void requestCasTest_NoCasAvailable_RequestWithHigherPriority() {
         // Register clients
         ResourceClientProfile[] profiles = new ResourceClientProfile[2];
-        profiles[0] = new ResourceClientProfile("0" /*sessionId*/,
+        profiles[0] = resourceClientProfile("0" /*sessionId*/,
                 TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
-        profiles[1] = new ResourceClientProfile("1" /*sessionId*/,
+        profiles[1] = resourceClientProfile("1" /*sessionId*/,
                 TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
         int[] clientPriorities = {100, 500};
         int[] clientId0 = new int[1];
@@ -517,7 +517,7 @@ public class TunerResourceManagerServiceTest {
         // Init cas resources.
         mTunerResourceManagerService.updateCasInfoInternal(1 /*casSystemId*/, 2 /*maxSessionNum*/);
 
-        CasSessionRequest request = new CasSessionRequest(clientId0[0], 1 /*casSystemId*/);
+        CasSessionRequest request = casSessionRequest(clientId0[0], 1 /*casSystemId*/);
         int[] casSessionHandle = new int[1];
         // Request for 2 cas sessions.
         assertThat(mTunerResourceManagerService
@@ -532,7 +532,7 @@ public class TunerResourceManagerServiceTest {
                 .getOwnerClientIds()).isEqualTo(new HashSet<Integer>(Arrays.asList(clientId0[0])));
         assertThat(mTunerResourceManagerService.getCasResource(1).isFullyUsed()).isTrue();
 
-        request = new CasSessionRequest(clientId1[0], 1);
+        request = casSessionRequest(clientId1[0], 1);
         assertThat(mTunerResourceManagerService
                 .requestCasSessionInternal(request, casSessionHandle)).isTrue();
         assertThat(mTunerResourceManagerService.getResourceIdFromHandle(casSessionHandle[0]))
@@ -551,7 +551,7 @@ public class TunerResourceManagerServiceTest {
     public void releaseCasTest() {
         // Register clients
         ResourceClientProfile[] profiles = new ResourceClientProfile[1];
-        profiles[0] = new ResourceClientProfile("0" /*sessionId*/,
+        profiles[0] = resourceClientProfile("0" /*sessionId*/,
                 TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
         int[] clientId = new int[1];
         TestResourcesReclaimListener listener = new TestResourcesReclaimListener();
@@ -561,7 +561,7 @@ public class TunerResourceManagerServiceTest {
         // Init cas resources.
         mTunerResourceManagerService.updateCasInfoInternal(1 /*casSystemId*/, 2 /*maxSessionNum*/);
 
-        CasSessionRequest request = new CasSessionRequest(clientId[0], 1 /*casSystemId*/);
+        CasSessionRequest request = casSessionRequest(clientId[0], 1 /*casSystemId*/);
         int[] casSessionHandle = new int[1];
         // Request for 1 cas sessions.
         assertThat(mTunerResourceManagerService
@@ -588,9 +588,9 @@ public class TunerResourceManagerServiceTest {
     public void requestLnbTest_NoLnbAvailable_RequestWithHigherPriority() {
         // Register clients
         ResourceClientProfile[] profiles = new ResourceClientProfile[2];
-        profiles[0] = new ResourceClientProfile("0" /*sessionId*/,
+        profiles[0] = resourceClientProfile("0" /*sessionId*/,
                 TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
-        profiles[1] = new ResourceClientProfile("1" /*sessionId*/,
+        profiles[1] = resourceClientProfile("1" /*sessionId*/,
                 TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
         int[] clientPriorities = {100, 500};
         int[] clientId0 = new int[1];
@@ -611,7 +611,8 @@ public class TunerResourceManagerServiceTest {
         int[] lnbHandles = {1};
         mTunerResourceManagerService.setLnbInfoListInternal(lnbHandles);
 
-        TunerLnbRequest request = new TunerLnbRequest(clientId0[0]);
+        TunerLnbRequest request = new TunerLnbRequest();
+        request.clientId = clientId0[0];
         int[] lnbHandle = new int[1];
         assertThat(mTunerResourceManagerService
                 .requestLnbInternal(request, lnbHandle)).isTrue();
@@ -619,7 +620,9 @@ public class TunerResourceManagerServiceTest {
         assertThat(mTunerResourceManagerService.getClientProfile(clientId0[0]).getInUseLnbHandles())
                 .isEqualTo(new HashSet<Integer>(Arrays.asList(lnbHandles[0])));
 
-        request = new TunerLnbRequest(clientId1[0]);
+        request = new TunerLnbRequest();
+        request.clientId = clientId1[0];
+
         assertThat(mTunerResourceManagerService
                 .requestLnbInternal(request, lnbHandle)).isTrue();
         assertThat(lnbHandle[0]).isEqualTo(lnbHandles[0]);
@@ -636,7 +639,7 @@ public class TunerResourceManagerServiceTest {
     public void releaseLnbTest() {
         // Register clients
         ResourceClientProfile[] profiles = new ResourceClientProfile[1];
-        profiles[0] = new ResourceClientProfile("0" /*sessionId*/,
+        profiles[0] = resourceClientProfile("0" /*sessionId*/,
                 TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
         int[] clientId = new int[1];
         TestResourcesReclaimListener listener = new TestResourcesReclaimListener();
@@ -647,7 +650,8 @@ public class TunerResourceManagerServiceTest {
         int[] lnbHandles = {0};
         mTunerResourceManagerService.setLnbInfoListInternal(lnbHandles);
 
-        TunerLnbRequest request = new TunerLnbRequest(clientId[0]);
+        TunerLnbRequest request = new TunerLnbRequest();
+        request.clientId = clientId[0];
         int[] lnbHandle = new int[1];
         assertThat(mTunerResourceManagerService
                 .requestLnbInternal(request, lnbHandle)).isTrue();
@@ -665,7 +669,7 @@ public class TunerResourceManagerServiceTest {
     @Test
     public void unregisterClientTest_usingFrontend() {
         // Register client
-        ResourceClientProfile profile = new ResourceClientProfile("0" /*sessionId*/,
+        ResourceClientProfile profile = resourceClientProfile("0" /*sessionId*/,
                 TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
         int[] clientId = new int[1];
         mTunerResourceManagerService.registerClientProfileInternal(
@@ -675,27 +679,27 @@ public class TunerResourceManagerServiceTest {
         // Init frontend resources.
         TunerFrontendInfo[] infos = new TunerFrontendInfo[2];
         infos[0] =
-                new TunerFrontendInfo(0 /*id*/, FrontendSettings.TYPE_DVBT, 1 /*exclusiveGroupId*/);
+                tunerFrontendInfo(0 /*handle*/, FrontendSettings.TYPE_DVBT, 1 /*exclusiveGroupId*/);
         infos[1] =
-                new TunerFrontendInfo(1 /*id*/, FrontendSettings.TYPE_DVBS, 1 /*exclusiveGroupId*/);
+                tunerFrontendInfo(1 /*handle*/, FrontendSettings.TYPE_DVBS, 1 /*exclusiveGroupId*/);
         mTunerResourceManagerService.setFrontendInfoListInternal(infos);
 
         TunerFrontendRequest request =
-                new TunerFrontendRequest(clientId[0] /*clientId*/, FrontendSettings.TYPE_DVBT);
+                tunerFrontendRequest(clientId[0] /*clientId*/, FrontendSettings.TYPE_DVBT);
         int[] frontendHandle = new int[1];
         assertThat(mTunerResourceManagerService
                 .requestFrontendInternal(request, frontendHandle)).isTrue();
-        assertThat(frontendHandle[0]).isEqualTo(infos[0].getHandle());
-        assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].getHandle())
+        assertThat(frontendHandle[0]).isEqualTo(infos[0].handle);
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].handle)
                 .isInUse()).isTrue();
-        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].getHandle())
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].handle)
                 .isInUse()).isTrue();
 
         // Unregister client when using frontend
         mTunerResourceManagerService.unregisterClientProfileInternal(clientId[0]);
-        assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].getHandle())
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].handle)
                 .isInUse()).isFalse();
-        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].getHandle())
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].handle)
                 .isInUse()).isFalse();
         assertThat(mTunerResourceManagerService.checkClientExists(clientId[0])).isFalse();
 
@@ -704,7 +708,7 @@ public class TunerResourceManagerServiceTest {
     @Test
     public void requestDemuxTest() {
         // Register client
-        ResourceClientProfile profile = new ResourceClientProfile("0" /*sessionId*/,
+        ResourceClientProfile profile = resourceClientProfile("0" /*sessionId*/,
                 TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
         int[] clientId = new int[1];
         mTunerResourceManagerService.registerClientProfileInternal(
@@ -712,7 +716,8 @@ public class TunerResourceManagerServiceTest {
         assertThat(clientId[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
 
         int[] demuxHandle = new int[1];
-        TunerDemuxRequest request = new TunerDemuxRequest(clientId[0]);
+        TunerDemuxRequest request = new TunerDemuxRequest();
+        request.clientId = clientId[0];
         assertThat(mTunerResourceManagerService.requestDemuxInternal(request, demuxHandle))
                 .isTrue();
         assertThat(mTunerResourceManagerService.getResourceIdFromHandle(demuxHandle[0]))
@@ -722,7 +727,7 @@ public class TunerResourceManagerServiceTest {
     @Test
     public void requestDescramblerTest() {
         // Register client
-        ResourceClientProfile profile = new ResourceClientProfile("0" /*sessionId*/,
+        ResourceClientProfile profile = resourceClientProfile("0" /*sessionId*/,
                 TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
         int[] clientId = new int[1];
         mTunerResourceManagerService.registerClientProfileInternal(
@@ -730,7 +735,8 @@ public class TunerResourceManagerServiceTest {
         assertThat(clientId[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
 
         int[] desHandle = new int[1];
-        TunerDescramblerRequest request = new TunerDescramblerRequest(clientId[0]);
+        TunerDescramblerRequest request = new TunerDescramblerRequest();
+        request.clientId = clientId[0];
         assertThat(mTunerResourceManagerService.requestDescramblerInternal(request, desHandle))
                 .isTrue();
         assertThat(mTunerResourceManagerService.getResourceIdFromHandle(desHandle[0])).isEqualTo(0);
@@ -740,10 +746,10 @@ public class TunerResourceManagerServiceTest {
     public void isHigherPriorityTest() {
         mIsForeground = false;
         ResourceClientProfile backgroundPlaybackProfile =
-                new ResourceClientProfile(null /*sessionId*/,
+                resourceClientProfile(null /*sessionId*/,
                         TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
         ResourceClientProfile backgroundRecordProfile =
-                new ResourceClientProfile(null /*sessionId*/,
+                resourceClientProfile(null /*sessionId*/,
                         TvInputService.PRIORITY_HINT_USE_CASE_TYPE_RECORD);
         int backgroundPlaybackPriority = mTunerResourceManagerService.getClientPriority(
                 TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK, 0);
@@ -767,16 +773,16 @@ public class TunerResourceManagerServiceTest {
         // Predefined client profiles
         ResourceClientProfile[] ownerProfiles = new ResourceClientProfile[2];
         ResourceClientProfile[] shareProfiles = new ResourceClientProfile[2];
-        ownerProfiles[0] = new ResourceClientProfile(
+        ownerProfiles[0] = resourceClientProfile(
                 "0" /*sessionId*/,
                 TvInputService.PRIORITY_HINT_USE_CASE_TYPE_LIVE);
-        ownerProfiles[1] = new ResourceClientProfile(
+        ownerProfiles[1] = resourceClientProfile(
                 "1" /*sessionId*/,
                 TvInputService.PRIORITY_HINT_USE_CASE_TYPE_LIVE);
-        shareProfiles[0] = new ResourceClientProfile(
+        shareProfiles[0] = resourceClientProfile(
                 "2" /*sessionId*/,
                 TvInputService.PRIORITY_HINT_USE_CASE_TYPE_RECORD);
-        shareProfiles[1] = new ResourceClientProfile(
+        shareProfiles[1] = resourceClientProfile(
                 "3" /*sessionId*/,
                 TvInputService.PRIORITY_HINT_USE_CASE_TYPE_RECORD);
 
@@ -828,12 +834,12 @@ public class TunerResourceManagerServiceTest {
 
         // Predefined frontend info
         TunerFrontendInfo[] infos = new TunerFrontendInfo[2];
-        infos[0] = new TunerFrontendInfo(
-                0 /*id*/,
+        infos[0] = tunerFrontendInfo(
+                0 /*handle*/,
                 FrontendSettings.TYPE_DVBT,
                 1 /*exclusiveGroupId*/);
-        infos[1] = new TunerFrontendInfo(
-                1 /*id*/,
+        infos[1] = tunerFrontendInfo(
+                1 /*handle*/,
                 FrontendSettings.TYPE_DVBS,
                 1 /*exclusiveGroupId*/);
 
@@ -848,7 +854,7 @@ public class TunerResourceManagerServiceTest {
 
         // Predefined frontend request and array to save returned frontend handle
         int[] frontendHandle = new int[1];
-        TunerFrontendRequest request = new TunerFrontendRequest(
+        TunerFrontendRequest request = tunerFrontendRequest(
                 ownerClientId0[0] /*clientId*/,
                 FrontendSettings.TYPE_DVBT);
 
@@ -856,13 +862,13 @@ public class TunerResourceManagerServiceTest {
         assertThat(mTunerResourceManagerService
                 .requestFrontendInternal(request, frontendHandle))
                 .isTrue();
-        assertThat(frontendHandle[0]).isEqualTo(infos[0].getHandle());
+        assertThat(frontendHandle[0]).isEqualTo(infos[0].handle);
         assertThat(mTunerResourceManagerService
                 .getClientProfile(ownerClientId0[0])
                 .getInUseFrontendHandles())
                 .isEqualTo(new HashSet<Integer>(Arrays.asList(
-                        infos[0].getHandle(),
-                        infos[1].getHandle())));
+                        infos[0].handle,
+                        infos[1].handle)));
 
         /**** Share Frontend ****/
 
@@ -874,14 +880,14 @@ public class TunerResourceManagerServiceTest {
                 shareClientId1[0]/*selfClientId*/,
                 ownerClientId0[0]/*targetClientId*/);
         // Verify fe in use status
-        assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].getHandle())
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].handle)
                 .isInUse()).isTrue();
-        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].getHandle())
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].handle)
                 .isInUse()).isTrue();
         // Verify fe owner status
-        assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].getHandle())
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].handle)
                 .getOwnerClientId()).isEqualTo(ownerClientId0[0]);
-        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].getHandle())
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].handle)
                 .getOwnerClientId()).isEqualTo(ownerClientId0[0]);
         // Verify share fe client status in the primary owner client
         assertThat(mTunerResourceManagerService.getClientProfile(ownerClientId0[0])
@@ -894,20 +900,20 @@ public class TunerResourceManagerServiceTest {
                 .getClientProfile(ownerClientId0[0])
                 .getInUseFrontendHandles())
                 .isEqualTo(new HashSet<Integer>(Arrays.asList(
-                        infos[0].getHandle(),
-                        infos[1].getHandle())));
+                        infos[0].handle,
+                        infos[1].handle)));
         assertThat(mTunerResourceManagerService
                 .getClientProfile(shareClientId0[0])
                 .getInUseFrontendHandles())
                 .isEqualTo(new HashSet<Integer>(Arrays.asList(
-                        infos[0].getHandle(),
-                        infos[1].getHandle())));
+                        infos[0].handle,
+                        infos[1].handle)));
         assertThat(mTunerResourceManagerService
                 .getClientProfile(shareClientId1[0])
                 .getInUseFrontendHandles())
                 .isEqualTo(new HashSet<Integer>(Arrays.asList(
-                        infos[0].getHandle(),
-                        infos[1].getHandle())));
+                        infos[0].handle,
+                        infos[1].handle)));
 
         /**** Remove Frontend Share Owner ****/
 
@@ -923,19 +929,19 @@ public class TunerResourceManagerServiceTest {
                 .getClientProfile(ownerClientId0[0])
                 .getInUseFrontendHandles())
                 .isEqualTo(new HashSet<Integer>(Arrays.asList(
-                        infos[0].getHandle(),
-                        infos[1].getHandle())));
+                        infos[0].handle,
+                        infos[1].handle)));
         assertThat(mTunerResourceManagerService
                 .getClientProfile(shareClientId0[0])
                 .getInUseFrontendHandles())
                 .isEqualTo(new HashSet<Integer>(Arrays.asList(
-                        infos[0].getHandle(),
-                        infos[1].getHandle())));
+                        infos[0].handle,
+                        infos[1].handle)));
 
         /**** Request Shared Frontend with Higher Priority Client ****/
 
         // Predefined second frontend request
-        request = new TunerFrontendRequest(
+        request = tunerFrontendRequest(
                 ownerClientId1[0] /*clientId*/,
                 FrontendSettings.TYPE_DVBT);
 
@@ -945,17 +951,17 @@ public class TunerResourceManagerServiceTest {
                 .isTrue();
 
         // Validate granted resource and internal mapping
-        assertThat(frontendHandle[0]).isEqualTo(infos[0].getHandle());
-        assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].getHandle())
+        assertThat(frontendHandle[0]).isEqualTo(infos[0].handle);
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].handle)
                 .getOwnerClientId()).isEqualTo(ownerClientId1[0]);
-        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].getHandle())
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].handle)
                 .getOwnerClientId()).isEqualTo(ownerClientId1[0]);
         assertThat(mTunerResourceManagerService
                 .getClientProfile(ownerClientId1[0])
                 .getInUseFrontendHandles())
                 .isEqualTo(new HashSet<Integer>(Arrays.asList(
-                        infos[0].getHandle(),
-                        infos[1].getHandle())));
+                        infos[0].handle,
+                        infos[1].handle)));
         assertThat(mTunerResourceManagerService
                 .getClientProfile(ownerClientId0[0])
                 .getInUseFrontendHandles()
@@ -983,12 +989,12 @@ public class TunerResourceManagerServiceTest {
 
         // Release the frontend resource from the primary owner
         mTunerResourceManagerService.releaseFrontendInternal(mTunerResourceManagerService
-                .getFrontendResource(infos[0].getHandle()), ownerClientId1[0]);
+                .getFrontendResource(infos[0].handle), ownerClientId1[0]);
 
         // Validate the internal mapping
-        assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].getHandle())
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].handle)
                 .isInUse()).isFalse();
-        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].getHandle())
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].handle)
                 .isInUse()).isFalse();
         // Verify client status
         assertThat(mTunerResourceManagerService
@@ -1010,7 +1016,8 @@ public class TunerResourceManagerServiceTest {
         /**** Unregister Primary Owner when the Share owner owns an Lnb ****/
 
         // Predefined Lnb request and handle array
-        TunerLnbRequest requestLnb = new TunerLnbRequest(shareClientId0[0]);
+        TunerLnbRequest requestLnb = new TunerLnbRequest();
+        requestLnb.clientId = shareClientId0[0];
         int[] lnbHandle = new int[1];
 
         // Request for an Lnb
@@ -1030,9 +1037,9 @@ public class TunerResourceManagerServiceTest {
         mTunerResourceManagerService.unregisterClientProfileInternal(ownerClientId1[0]);
 
         // Validate the internal mapping
-        assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].getHandle())
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].handle)
                 .isInUse()).isFalse();
-        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].getHandle())
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].handle)
                 .isInUse()).isFalse();
         // Verify client status
         assertThat(mTunerResourceManagerService
@@ -1045,5 +1052,35 @@ public class TunerResourceManagerServiceTest {
                 .getInUseLnbHandles())
                 .isEqualTo(new HashSet<Integer>(Arrays.asList(
                         lnbHandles[0])));
+    }
+
+    private TunerFrontendInfo tunerFrontendInfo(
+            int handle, int frontendType, int exclusiveGroupId) {
+        TunerFrontendInfo info = new TunerFrontendInfo();
+        info.handle = handle;
+        info.frontendType = frontendType;
+        info.exclusiveGroupId = exclusiveGroupId;
+        return info;
+    }
+
+    private TunerFrontendRequest tunerFrontendRequest(int clientId, int frontendType) {
+        TunerFrontendRequest request = new TunerFrontendRequest();
+        request.clientId = clientId;
+        request.frontendType = frontendType;
+        return request;
+    }
+
+    private ResourceClientProfile resourceClientProfile(String sessionId, int useCase) {
+        ResourceClientProfile profile = new ResourceClientProfile();
+        profile.tvInputSessionId = sessionId;
+        profile.useCase = useCase;
+        return profile;
+    }
+
+    private CasSessionRequest casSessionRequest(int clientId, int casSystemId) {
+        CasSessionRequest request = new CasSessionRequest();
+        request.clientId = clientId;
+        request.casSystemId = casSystemId;
+        return request;
     }
 }

@@ -17,8 +17,10 @@
 package android.media.tv.tunerresourcemanager;
 
 /**
- * Information required to request a Tuner Frontend.
+ * Information required to request a Tuner Lnb.
  *
  * @hide
  */
-parcelable TunerFrontendRequest;
+parcelable TunerLnbRequest {
+    int clientId;
+}

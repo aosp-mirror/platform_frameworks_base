@@ -46,7 +46,6 @@ import android.media.tv.tuner.frontend.ScanCallback;
 import android.media.tv.tunerresourcemanager.ResourceClientProfile;
 import android.media.tv.tunerresourcemanager.TunerDemuxRequest;
 import android.media.tv.tunerresourcemanager.TunerDescramblerRequest;
-import android.media.tv.tunerresourcemanager.TunerFrontendInfo;
 import android.media.tv.tunerresourcemanager.TunerFrontendRequest;
 import android.media.tv.tunerresourcemanager.TunerLnbRequest;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
@@ -343,33 +342,14 @@ public class Tuner implements AutoCloseable  {
 
         mHandler = createEventHandler();
         int[] clientId = new int[1];
-        ResourceClientProfile profile = new ResourceClientProfile(tvInputSessionId, useCase);
+        ResourceClientProfile profile = new ResourceClientProfile();
+        profile.tvInputSessionId = tvInputSessionId;
+        profile.useCase = useCase;
         mTunerResourceManager.registerClientProfile(
                 profile, new HandlerExecutor(mHandler), mResourceListener, clientId);
         mClientId = clientId[0];
 
         mUserId = ActivityManager.getCurrentUser();
-
-        setFrontendInfoList();
-    }
-
-    private void setFrontendInfoList() {
-        List<Integer> ids = getFrontendIds();
-        if (ids == null) {
-            return;
-        }
-        TunerFrontendInfo[] infos = new TunerFrontendInfo[ids.size()];
-        for (int i = 0; i < ids.size(); i++) {
-            int id = ids.get(i);
-            FrontendInfo frontendInfo = getFrontendInfoById(id);
-            if (frontendInfo == null) {
-                continue;
-            }
-            TunerFrontendInfo tunerFrontendInfo = new TunerFrontendInfo(
-                    id, frontendInfo.getType(), frontendInfo.getExclusiveGroupId());
-            infos[i] = tunerFrontendInfo;
-        }
-        mTunerResourceManager.setFrontendInfoList(infos);
     }
 
     /**
@@ -804,7 +784,9 @@ public class Tuner implements AutoCloseable  {
 
     private boolean requestFrontend() {
         int[] feHandle = new int[1];
-        TunerFrontendRequest request = new TunerFrontendRequest(mClientId, mFrontendType);
+        TunerFrontendRequest request = new TunerFrontendRequest();
+        request.clientId = mClientId;
+        request.frontendType = mFrontendType;
         boolean granted = mTunerResourceManager.requestFrontend(request, feHandle);
         if (granted) {
             mFrontendHandle = feHandle[0];
@@ -1258,7 +1240,8 @@ public class Tuner implements AutoCloseable  {
 
     private boolean requestLnb() {
         int[] lnbHandle = new int[1];
-        TunerLnbRequest request = new TunerLnbRequest(mClientId);
+        TunerLnbRequest request = new TunerLnbRequest();
+        request.clientId = mClientId;
         boolean granted = mTunerResourceManager.requestLnb(request, lnbHandle);
         if (granted) {
             mLnbHandle = lnbHandle[0];
@@ -1346,7 +1329,8 @@ public class Tuner implements AutoCloseable  {
 
     private boolean requestDemux() {
         int[] demuxHandle = new int[1];
-        TunerDemuxRequest request = new TunerDemuxRequest(mClientId);
+        TunerDemuxRequest request = new TunerDemuxRequest();
+        request.clientId = mClientId;
         boolean granted = mTunerResourceManager.requestDemux(request, demuxHandle);
         if (granted) {
             mDemuxHandle = demuxHandle[0];
@@ -1357,7 +1341,8 @@ public class Tuner implements AutoCloseable  {
 
     private Descrambler requestDescrambler() {
         int[] descramblerHandle = new int[1];
-        TunerDescramblerRequest request = new TunerDescramblerRequest(mClientId);
+        TunerDescramblerRequest request = new TunerDescramblerRequest();
+        request.clientId = mClientId;
         boolean granted = mTunerResourceManager.requestDescrambler(request, descramblerHandle);
         if (!granted) {
             return null;

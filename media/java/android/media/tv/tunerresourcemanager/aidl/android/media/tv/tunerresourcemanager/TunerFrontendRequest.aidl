@@ -17,8 +17,12 @@
 package android.media.tv.tunerresourcemanager;
 
 /**
- * A wrapper of a cas session requests that contains all the request info of the client.
+ * Information required to request a Tuner Frontend.
  *
  * @hide
  */
-parcelable CasSessionRequest;
+parcelable TunerFrontendRequest {
+    int clientId;
+
+    int frontendType;
+}

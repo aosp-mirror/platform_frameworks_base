@@ -17,8 +17,14 @@
 package android.media.tv.tunerresourcemanager;
 
 /**
- * Information required to request a Tuner Descrambler.
+ * Simple container of the FrontendInfo struct defined in the TunerHAL 1.0 interface.
  *
  * @hide
  */
-parcelable TunerDescramblerRequest;
+parcelable TunerFrontendInfo {
+    int handle;
+
+    int frontendType;
+
+    int exclusiveGroupId;
+}
