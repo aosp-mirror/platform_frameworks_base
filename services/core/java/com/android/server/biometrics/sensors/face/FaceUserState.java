@@ -133,7 +133,7 @@ public class FaceUserState extends BiometricUserState<Face> {
             if (tagName.equals(TAG_FACE)) {
                 String name = parser.getAttributeValue(null, ATTR_NAME);
                 int faceId = parser.getAttributeInt(null, ATTR_FACE_ID);
-                int deviceId = parser.getAttributeInt(null, ATTR_DEVICE_ID);
+                long deviceId = parser.getAttributeLong(null, ATTR_DEVICE_ID);
                 mBiometrics.add(new Face(name, faceId, deviceId));
             }
         }
