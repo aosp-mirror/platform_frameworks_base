@@ -139,8 +139,8 @@ public final class WifiMigration {
     /**
      * Load data from legacy shared wifi config store file.
      * <p>
-     * Expected AOSP format is available in the sample files under {@code /frameworks/base/wifi/
-     * java/android/net/wifi/migration_samples}.
+     * Expected AOSP format is available in the sample files under {@code
+     * frameworks/base/wifi/non-updatable/migration_samples/}.
      * </p>
      * <p>
      * Note:
@@ -218,8 +218,8 @@ public final class WifiMigration {
     /**
      * Load data from legacy user wifi config store file.
      * <p>
-     * Expected AOSP format is available in the sample files under {@code /frameworks/base/wifi/
-     * java/android/net/wifi/migration_samples}.
+     * Expected AOSP format is available in the sample files under {@code
+     * frameworks/base/wifi/non-updatable/migration_samples/}.
      * </p>
      * <p>
      * Note:
