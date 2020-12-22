@@ -219,7 +219,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         return null;
     }
 
-    private static X509Certificate toCertificate(byte[] bytes) {
+    static X509Certificate toCertificate(byte[] bytes) {
         try {
             final CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
             return (X509Certificate) certFactory.generateCertificate(

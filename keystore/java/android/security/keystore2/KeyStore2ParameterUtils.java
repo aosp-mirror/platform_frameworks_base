@@ -177,7 +177,7 @@ public abstract class KeyStore2ParameterUtils {
     static void forEachSetFlag(int flags, Consumer<Integer> consumer) {
         int offset = 0;
         while (flags != 0) {
-            if ((flags & 1) == 0) {
+            if ((flags & 1) == 1) {
                 consumer.accept(1 << offset);
             }
             offset += 1;
