@@ -96,7 +96,7 @@ static bool validateFile(const char* filename) {
 
         case FileType::KEY_LAYOUT: {
             base::Result<std::shared_ptr<KeyLayoutMap>> ret = KeyLayoutMap::load(filename);
-            if (!ret) {
+            if (!ret.ok()) {
                 error("Error %s parsing key layout file.\n\n", ret.error().message().c_str());
                 return false;
             }
@@ -106,7 +106,7 @@ static bool validateFile(const char* filename) {
         case FileType::KEY_CHARACTER_MAP: {
             base::Result<std::shared_ptr<KeyCharacterMap>> ret =
                     KeyCharacterMap::load(filename, KeyCharacterMap::Format::ANY);
-            if (!ret) {
+            if (!ret.ok()) {
                 error("Error %s parsing key character map file.\n\n",
                       ret.error().message().c_str());
                 return false;
