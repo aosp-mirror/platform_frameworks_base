@@ -48,6 +48,10 @@ public final class EpsQos extends Qos implements Parcelable {
         qosClassId = source.readInt();
     }
 
+    public int getQci() {
+        return qosClassId;
+    }
+
     public static @NonNull EpsQos createFromParcelBody(@NonNull Parcel in) {
         return new EpsQos(in);
     }
