@@ -59,7 +59,7 @@
                 android:layout_marginTop="@dimen/notification_progress_margin_top"
                 />
 
-            <include layout="@layout/notification_template_text" />
+            <include layout="@layout/notification_template_text_multiline" />
         </LinearLayout>
 
         <ImageView
