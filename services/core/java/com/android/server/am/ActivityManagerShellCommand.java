@@ -2928,6 +2928,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         final PlatformCompat platformCompat = (PlatformCompat)
                 ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE);
         String toggleValue = getNextArgRequired();
+        boolean killPackage = !"--no-kill".equals(getNextOption());
         boolean toggleAll = false;
         int targetSdkVersion = -1;
         long changeId = -1;
@@ -2979,7 +2980,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
                         CompatibilityChangeConfig overrides =
                                 new CompatibilityChangeConfig(
                                         new Compatibility.ChangeConfig(enabled, disabled));
-                        platformCompat.setOverrides(overrides, packageName);
+                        if (killPackage) {
+                            platformCompat.setOverrides(overrides, packageName);
+                        } else {
+                            platformCompat.setOverridesForTest(overrides, packageName);
+                        }
                         pw.println("Enabled change " + changeId + " for " + packageName + ".");
                     }
                     return 0;
@@ -2998,13 +3003,21 @@ final class ActivityManagerShellCommand extends ShellCommand {
                         CompatibilityChangeConfig overrides =
                                 new CompatibilityChangeConfig(
                                         new Compatibility.ChangeConfig(enabled, disabled));
-                        platformCompat.setOverrides(overrides, packageName);
+                        if (killPackage) {
+                            platformCompat.setOverrides(overrides, packageName);
+                        } else {
+                            platformCompat.setOverridesForTest(overrides, packageName);
+                        }
                         pw.println("Disabled change " + changeId + " for " + packageName + ".");
                     }
                     return 0;
                 case "reset":
                     if (toggleAll) {
-                        platformCompat.clearOverrides(packageName);
+                        if (killPackage) {
+                            platformCompat.clearOverrides(packageName);
+                        } else {
+                            platformCompat.clearOverridesForTest(packageName);
+                        }
                         pw.println("Reset all changes for " + packageName + " to default value.");
                         return 0;
                     }
@@ -3410,15 +3423,18 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  write");
             pw.println("      Write all pending state to storage.");
             pw.println("  compat [COMMAND] [...]: sub-commands for toggling app-compat changes.");
-            pw.println("         enable|disable|reset <CHANGE_ID|CHANGE_NAME> <PACKAGE_NAME>");
+            pw.println("         enable|disable [--no-kill] <CHANGE_ID|CHANGE_NAME> <PACKAGE_NAME>");
+            pw.println("            Toggles a change either by id or by name for <PACKAGE_NAME>.");
+            pw.println("            It kills <PACKAGE_NAME> (to allow the toggle to take effect) unless --no-kill is provided.");
+            pw.println("         reset <CHANGE_ID|CHANGE_NAME> <PACKAGE_NAME>");
             pw.println("            Toggles a change either by id or by name for <PACKAGE_NAME>.");
             pw.println("            It kills <PACKAGE_NAME> (to allow the toggle to take effect).");
-            pw.println("         enable-all|disable-all <targetSdkVersion> <PACKAGE_NAME");
+            pw.println("         enable-all|disable-all <targetSdkVersion> <PACKAGE_NAME>");
             pw.println("            Toggles all changes that are gated by <targetSdkVersion>.");
-            pw.println("         reset-all <PACKAGE_NAME>");
+            pw.println("         reset-all [--no-kill] <PACKAGE_NAME>");
             pw.println("            Removes all existing overrides for all changes for ");
             pw.println("            <PACKAGE_NAME> (back to default behaviour).");
-            pw.println("            It kills <PACKAGE_NAME> (to allow the toggle to take effect).");
+            pw.println("            It kills <PACKAGE_NAME> (to allow the toggle to take effect) unless --no-kill is provided.");
             pw.println("  memory-factor [command] [...]: sub-commands for overriding memory pressure factor");
             pw.println("         set <NORMAL|MODERATE|LOW|CRITICAL>");
             pw.println("            Overrides memory pressure factor. May also supply a raw int level");
