@@ -87,7 +87,7 @@ import android.media.IAudioService;
 import android.media.IPlaybackConfigDispatcher;
 import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
-import android.media.IStrategyPreferredDeviceDispatcher;
+import android.media.IStrategyPreferredDevicesDispatcher;
 import android.media.IVolumeController;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
@@ -171,6 +171,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 /**
  * The implementation of the audio service for volume, audio focus, device management...
@@ -1850,22 +1851,28 @@ public class AudioService extends IAudioService.Stub
     ///////////////////////////////////////////////////////////////////////////
     // IPC methods
     ///////////////////////////////////////////////////////////////////////////
-    /** @see AudioManager#setPreferredDeviceForStrategy(AudioProductStrategy, AudioDeviceInfo) */
-    public int setPreferredDeviceForStrategy(int strategy, AudioDeviceAttributes device) {
-        if (device == null) {
+    /**
+     * @see AudioManager#setPreferredDeviceForStrategy(AudioProductStrategy, AudioDeviceAttributes)
+     * @see AudioManager#setPreferredDevicesForStrategy(AudioProductStrategy,
+     *                                                  List<AudioDeviceAttributes>)
+     */
+    public int setPreferredDevicesForStrategy(int strategy, List<AudioDeviceAttributes> devices) {
+        if (devices == null) {
             return AudioSystem.ERROR;
         }
         enforceModifyAudioRoutingPermission();
         final String logString = String.format(
                 "setPreferredDeviceForStrategy u/pid:%d/%d strat:%d dev:%s",
-                Binder.getCallingUid(), Binder.getCallingPid(), strategy, device.toString());
+                Binder.getCallingUid(), Binder.getCallingPid(), strategy,
+                devices.stream().map(e -> e.toString()).collect(Collectors.joining(",")));
         sDeviceLogger.log(new AudioEventLogger.StringEvent(logString).printLog(TAG));
-        if (device.getRole() == AudioDeviceAttributes.ROLE_INPUT) {
+        if (devices.stream().anyMatch(device ->
+                device.getRole() == AudioDeviceAttributes.ROLE_INPUT)) {
             Log.e(TAG, "Unsupported input routing in " + logString);
             return AudioSystem.ERROR;
         }
 
-        final int status = mDeviceBroker.setPreferredDeviceForStrategySync(strategy, device);
+        final int status = mDeviceBroker.setPreferredDevicesForStrategySync(strategy, devices);
         if (status != AudioSystem.SUCCESS) {
             Log.e(TAG, String.format("Error %d in %s)", status, logString));
         }
@@ -1874,53 +1881,61 @@ public class AudioService extends IAudioService.Stub
     }
 
     /** @see AudioManager#removePreferredDeviceForStrategy(AudioProductStrategy) */
-    public int removePreferredDeviceForStrategy(int strategy) {
+    public int removePreferredDevicesForStrategy(int strategy) {
         enforceModifyAudioRoutingPermission();
         final String logString =
                 String.format("removePreferredDeviceForStrategy strat:%d", strategy);
         sDeviceLogger.log(new AudioEventLogger.StringEvent(logString).printLog(TAG));
 
-        final int status = mDeviceBroker.removePreferredDeviceForStrategySync(strategy);
+        final int status = mDeviceBroker.removePreferredDevicesForStrategySync(strategy);
         if (status != AudioSystem.SUCCESS) {
             Log.e(TAG, String.format("Error %d in %s)", status, logString));
         }
         return status;
     }
 
-    /** @see AudioManager#getPreferredDeviceForStrategy(AudioProductStrategy) */
-    public AudioDeviceAttributes getPreferredDeviceForStrategy(int strategy) {
+    /**
+     * @see AudioManager#getPreferredDeviceForStrategy(AudioProductStrategy)
+     * @see AudioManager#getPreferredDevicesForStrategy(AudioProductStrategy)
+     */
+    public List<AudioDeviceAttributes> getPreferredDevicesForStrategy(int strategy) {
         enforceModifyAudioRoutingPermission();
-        AudioDeviceAttributes[] devices = new AudioDeviceAttributes[1];
+        List<AudioDeviceAttributes> devices = new ArrayList<>();
         final long identity = Binder.clearCallingIdentity();
-        final int status = AudioSystem.getPreferredDeviceForStrategy(strategy, devices);
+        final int status = AudioSystem.getDevicesForRoleAndStrategy(
+                strategy, AudioSystem.DEVICE_ROLE_PREFERRED, devices);
         Binder.restoreCallingIdentity(identity);
         if (status != AudioSystem.SUCCESS) {
             Log.e(TAG, String.format("Error %d in getPreferredDeviceForStrategy(%d)",
                     status, strategy));
-            return null;
+            return new ArrayList<AudioDeviceAttributes>();
         } else {
-            return devices[0];
+            return devices;
         }
     }
 
-    /** @see AudioManager#addOnPreferredDeviceForStrategyChangedListener(Executor, AudioManager.OnPreferredDeviceForStrategyChangedListener) */
-    public void registerStrategyPreferredDeviceDispatcher(
-            @Nullable IStrategyPreferredDeviceDispatcher dispatcher) {
+    /** @see AudioManager#addOnPreferredDevicesForStrategyChangedListener(
+     *               Executor, AudioManager.OnPreferredDevicesForStrategyChangedListener)
+     */
+    public void registerStrategyPreferredDevicesDispatcher(
+            @Nullable IStrategyPreferredDevicesDispatcher dispatcher) {
         if (dispatcher == null) {
             return;
         }
         enforceModifyAudioRoutingPermission();
-        mDeviceBroker.registerStrategyPreferredDeviceDispatcher(dispatcher);
+        mDeviceBroker.registerStrategyPreferredDevicesDispatcher(dispatcher);
     }
 
-    /** @see AudioManager#removeOnPreferredDeviceForStrategyChangedListener(AudioManager.OnPreferredDeviceForStrategyChangedListener) */
-    public void unregisterStrategyPreferredDeviceDispatcher(
-            @Nullable IStrategyPreferredDeviceDispatcher dispatcher) {
+    /** @see AudioManager#removeOnPreferredDevicesForStrategyChangedListener(
+     *               AudioManager.OnPreferredDevicesForStrategyChangedListener)
+     */
+    public void unregisterStrategyPreferredDevicesDispatcher(
+            @Nullable IStrategyPreferredDevicesDispatcher dispatcher) {
         if (dispatcher == null) {
             return;
         }
         enforceModifyAudioRoutingPermission();
-        mDeviceBroker.unregisterStrategyPreferredDeviceDispatcher(dispatcher);
+        mDeviceBroker.unregisterStrategyPreferredDevicesDispatcher(dispatcher);
     }
 
     /** @see AudioManager#getDevicesForAttributes(AudioAttributes) */
