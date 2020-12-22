@@ -45,6 +45,7 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
+import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.ModeSwitchesController;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
@@ -212,6 +213,7 @@ public class DependencyProvider {
             MetricsLogger metricsLogger,
             OverviewProxyService overviewProxyService,
             NavigationModeController navigationModeController,
+            AccessibilityButtonModeObserver accessibilityButtonModeObserver,
             StatusBarStateController statusBarStateController,
             SysUiState sysUiFlagsContainer,
             BroadcastDispatcher broadcastDispatcher,
@@ -236,6 +238,7 @@ public class DependencyProvider {
                 metricsLogger,
                 overviewProxyService,
                 navigationModeController,
+                accessibilityButtonModeObserver,
                 statusBarStateController,
                 sysUiFlagsContainer,
                 broadcastDispatcher,
