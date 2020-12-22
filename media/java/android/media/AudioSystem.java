@@ -33,6 +33,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -1371,6 +1372,11 @@ public class AudioSystem
     /** @hide */ public static final int FOR_VIBRATE_RINGING = 7;
     private static final int NUM_FORCE_USE = 8;
 
+    // Device role in audio policy
+    public static final int DEVICE_ROLE_NONE = 0;
+    public static final int DEVICE_ROLE_PREFERRED = 1;
+    public static final int DEVICE_ROLE_DISABLED = 2;
+
     /** @hide */
     public static String forceUseUsageToString(int usage) {
         switch (usage) {
@@ -1691,47 +1697,58 @@ public class AudioSystem
 
     /**
      * @hide
-     * Sets the preferred device to use for a given audio strategy in the audio policy engine
+     * Set device as role for product strategy.
      * @param strategy the id of the strategy to configure
-     * @param device the device type and address to route to when available
+     * @param role the role of the devices
+     * @param devices the list of devices to be set as role for the given strategy
      * @return {@link #SUCCESS} if successfully set
      */
-    public static int setPreferredDeviceForStrategy(
-            int strategy, @NonNull AudioDeviceAttributes device) {
-        return setPreferredDeviceForStrategy(strategy,
-                AudioDeviceInfo.convertDeviceTypeToInternalDevice(device.getType()),
-                device.getAddress());
+    public static int setDevicesRoleForStrategy(
+            int strategy, int role, @NonNull List<AudioDeviceAttributes> devices) {
+        if (devices.isEmpty()) {
+            return BAD_VALUE;
+        }
+        int[] types = new int[devices.size()];
+        String[] addresses = new String[devices.size()];
+        for (int i = 0; i < devices.size(); ++i) {
+            types[i] = AudioDeviceInfo.convertDeviceTypeToInternalDevice(devices.get(i).getType());
+            addresses[i] = devices.get(i).getAddress();
+        }
+        return setDevicesRoleForStrategy(strategy, role, types, addresses);
     }
-    /**
-     * @hide
-     * Set device routing per product strategy.
-     * @param strategy the id of the strategy to configure
-     * @param deviceType the native device type, NOT AudioDeviceInfo types
-     * @param deviceAddress the address of the device
-     * @return {@link #SUCCESS} if successfully set
-     */
-    private static native int setPreferredDeviceForStrategy(
-            int strategy, int deviceType, String deviceAddress);
 
     /**
      * @hide
-     * Remove preferred routing for the strategy
+     * Set device as role for product strategy.
      * @param strategy the id of the strategy to configure
+     * @param role the role of the devices
+     * @param types all device types
+     * @param addresses all device addresses
+     * @return {@link #SUCCESS} if successfully set
+     */
+    private static native int setDevicesRoleForStrategy(
+            int strategy, int role, @NonNull int[] types, @NonNull String[] addresses);
+
+    /**
+     * @hide
+     * Remove devices as role for the strategy
+     * @param strategy the id of the strategy to configure
+     * @param role the role of the devices
      * @return {@link #SUCCESS} if successfully removed
      */
-    public static native int removePreferredDeviceForStrategy(int strategy);
+    public static native int removeDevicesRoleForStrategy(int strategy, int role);
 
     /**
      * @hide
-     * Query previously set preferred device for a strategy
+     * Query previously set devices as role for a strategy
      * @param strategy the id of the strategy to query for
-     * @param device an array of size 1 that will contain the preferred device, or null if
-     *               none was set
+     * @param role the role of the devices
+     * @param devices a list that will contain the devices of role
      * @return {@link #SUCCESS} if there is a preferred device and it was successfully retrieved
      *     and written to the array
      */
-    public static native int getPreferredDeviceForStrategy(int strategy,
-                                                           AudioDeviceAttributes[] device);
+    public static native int getDevicesForRoleAndStrategy(
+            int strategy, int role, @NonNull List<AudioDeviceAttributes> devices);
 
     // Items shared with audio service
 
