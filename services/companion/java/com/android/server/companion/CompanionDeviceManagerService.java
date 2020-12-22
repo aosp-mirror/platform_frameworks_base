@@ -612,20 +612,25 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                         + " for " + association
                         + " - profile still present in " + otherAssociationWithDeviceProfile);
             } else {
-                mRoleManager.removeRoleHolderAsUser(
-                        association.getDeviceProfile(),
-                        association.getPackageName(),
-                        RoleManager.MANAGE_HOLDERS_FLAG_DONT_KILL_APP,
-                        UserHandle.of(association.getUserId()),
-                        getContext().getMainExecutor(),
-                        success -> {
-                            if (!success) {
-                                Log.e(LOG_TAG, "Failed to revoke device profile role "
-                                        + association.getDeviceProfile()
-                                        + " to " + association.getPackageName()
-                                        + " for user " + association.getUserId());
-                            }
-                        });
+                long identity = Binder.clearCallingIdentity();
+                try {
+                    mRoleManager.removeRoleHolderAsUser(
+                            association.getDeviceProfile(),
+                            association.getPackageName(),
+                            RoleManager.MANAGE_HOLDERS_FLAG_DONT_KILL_APP,
+                            UserHandle.of(association.getUserId()),
+                            getContext().getMainExecutor(),
+                            success -> {
+                                if (!success) {
+                                    Log.e(LOG_TAG, "Failed to revoke device profile role "
+                                            + association.getDeviceProfile()
+                                            + " to " + association.getPackageName()
+                                            + " for user " + association.getUserId());
+                                }
+                            });
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
             }
         }
     }
