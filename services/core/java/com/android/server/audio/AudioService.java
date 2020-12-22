@@ -8454,28 +8454,29 @@ public class AudioService extends IAudioService.Stub
         }
         for (AudioMix mix : policyConfig.getMixes()) {
             // If mix is requesting privileged capture
-            if (mix.getRule().allowPrivilegedPlaybackCapture()) {
-                // then it must have CAPTURE_MEDIA_OUTPUT or CAPTURE_AUDIO_OUTPUT permission
-                requireCaptureAudioOrMediaOutputPerm |= true;
-
-                // and its format must be low quality enough
-                String error = mix.canBeUsedForPrivilegedCapture(mix.getFormat());
-                if (error != null) {
-                    Log.e(TAG, error);
+            if (mix.getRule().allowPrivilegedMediaPlaybackCapture()) {
+                // then its format must be low quality enough
+                String privilegedMediaCaptureError =
+                        mix.canBeUsedForPrivilegedMediaCapture(mix.getFormat());
+                if (privilegedMediaCaptureError != null) {
+                    Log.e(TAG, privilegedMediaCaptureError);
                     return false;
                 }
+                // and it must have CAPTURE_MEDIA_OUTPUT or CAPTURE_AUDIO_OUTPUT permission
+                requireCaptureAudioOrMediaOutputPerm |= true;
 
-                // If mix is trying to excplicitly capture USAGE_VOICE_COMMUNICATION
-                if (mix.containsMatchAttributeRuleForUsage(
-                        AudioAttributes.USAGE_VOICE_COMMUNICATION)) {
-                    // then it must have CAPTURE_USAGE_VOICE_COMMUNICATION_OUTPUT permission
-                    // Note that for UID, USERID or EXCLDUE rules, the capture will be silenced
-                    // in AudioPolicyMix
-                    if (voiceCommunicationCaptureMixes == null) {
-                        voiceCommunicationCaptureMixes = new ArrayList<AudioMix>();
-                    }
-                    voiceCommunicationCaptureMixes.add(mix);
+            }
+            // If mix is trying to explicitly capture USAGE_VOICE_COMMUNICATION
+            if (mix.containsMatchAttributeRuleForUsage(
+                    AudioAttributes.USAGE_VOICE_COMMUNICATION)
+                    && (mix.getRouteFlags() == mix.ROUTE_FLAG_LOOP_BACK_RENDER)) {
+                // It must have CAPTURE_USAGE_VOICE_COMMUNICATION_OUTPUT permission
+                // Note that for UID, USERID or EXCLDUE rules, the capture will be silenced
+                // in AudioPolicyMix
+                if (voiceCommunicationCaptureMixes == null) {
+                    voiceCommunicationCaptureMixes = new ArrayList<AudioMix>();
                 }
+                voiceCommunicationCaptureMixes.add(mix);
             }
 
             // If mix is RENDER|LOOPBACK, then an audio MediaProjection is enough
@@ -8498,7 +8499,7 @@ public class AudioService extends IAudioService.Stub
         if (voiceCommunicationCaptureMixes != null && voiceCommunicationCaptureMixes.size() > 0) {
             if (!callerHasPermission(
                     android.Manifest.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT)) {
-                Log.e(TAG, "Privileged audio capture for voice communication requires "
+                Log.e(TAG, "Audio capture for voice communication requires "
                         + "CAPTURE_VOICE_COMMUNICATION_OUTPUT system permission");
                 return false;
             }
