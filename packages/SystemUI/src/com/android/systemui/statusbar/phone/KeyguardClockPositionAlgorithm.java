@@ -164,10 +164,10 @@ public class KeyguardClockPositionAlgorithm {
     public void setup(int statusBarMinHeight, int maxShadeBottom, int notificationStackHeight,
             float panelExpansion, int parentHeight, int keyguardStatusHeight, int clockPreferredY,
             boolean hasCustomClock, boolean hasVisibleNotifs, float dark, float emptyDragAmount,
-            boolean bypassEnabled, int unlockedStackScrollerPadding, boolean udfpsEnrolled,
+            boolean bypassEnabled, int unlockedStackScrollerPadding, boolean showLockIcon,
             float qsExpansion) {
-        mMinTopMargin = statusBarMinHeight + (udfpsEnrolled ? mContainerTopPaddingWithoutLockIcon :
-                mContainerTopPaddingWithLockIcon);
+        mMinTopMargin = statusBarMinHeight + (showLockIcon
+                ? mContainerTopPaddingWithLockIcon : mContainerTopPaddingWithoutLockIcon);
         mMaxShadeBottom = maxShadeBottom;
         mNotificationStackHeight = notificationStackHeight;
         mPanelExpansion = panelExpansion;
