@@ -37,6 +37,7 @@ import com.android.internal.annotations.GuardedBy;
 
 import libcore.io.IoUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -44,6 +45,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.security.MessageDigest;
@@ -103,6 +105,8 @@ import java.util.concurrent.TimeUnit;
 public class PersistentDataBlockService extends SystemService {
     private static final String TAG = PersistentDataBlockService.class.getSimpleName();
 
+    private static final String GSI_RUNNING_PROP = "ro.gsid.image_running";
+
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
     private static final int HEADER_SIZE = 8;
     // Magic number to mark block device as adhering to the format consumed by this service
@@ -128,6 +132,7 @@ public class PersistentDataBlockService extends SystemService {
 
     private final Context mContext;
     private final String mDataBlockFile;
+    private final boolean mIsRunningDSU;
     private final Object mLock = new Object();
     private final CountDownLatch mInitDoneSignal = new CountDownLatch(1);
 
@@ -141,6 +146,7 @@ public class PersistentDataBlockService extends SystemService {
         super(context);
         mContext = context;
         mDataBlockFile = SystemProperties.get(PERSISTENT_DATA_BLOCK_PROP);
+        mIsRunningDSU = SystemProperties.getBoolean(GSI_RUNNING_PROP, false);
         mBlockDeviceSize = -1; // Load lazily
     }
 
@@ -284,14 +290,22 @@ public class PersistentDataBlockService extends SystemService {
         return true;
     }
 
+    private OutputStream getBlockOutputStream() throws IOException {
+        if (mIsRunningDSU) {
+            Slog.i(TAG, "data is read-only when running a DSU");
+            return new ByteArrayOutputStream();
+        } else {
+            return new FileOutputStream(new File(mDataBlockFile));
+        }
+    }
+
     private boolean computeAndWriteDigestLocked() {
         byte[] digest = computeDigestLocked(null);
         if (digest != null) {
             DataOutputStream outputStream;
             try {
-                outputStream = new DataOutputStream(
-                        new FileOutputStream(new File(mDataBlockFile)));
-            } catch (FileNotFoundException e) {
+                outputStream = new DataOutputStream(getBlockOutputStream());
+            } catch (IOException e) {
                 Slog.e(TAG, "partition not available?", e);
                 return false;
             }
@@ -356,8 +370,8 @@ public class PersistentDataBlockService extends SystemService {
     private void formatPartitionLocked(boolean setOemUnlockEnabled) {
         DataOutputStream outputStream;
         try {
-            outputStream = new DataOutputStream(new FileOutputStream(new File(mDataBlockFile)));
-        } catch (FileNotFoundException e) {
+            outputStream = new DataOutputStream(getBlockOutputStream());
+        } catch (IOException e) {
             Slog.e(TAG, "partition not available?", e);
             return;
         }
@@ -381,6 +395,10 @@ public class PersistentDataBlockService extends SystemService {
 
     private void doSetOemUnlockEnabledLocked(boolean enabled) {
         FileOutputStream outputStream;
+        if (mIsRunningDSU) {
+            Slog.i(TAG, "data is read-only when running a DSU");
+            return;
+        }
         try {
             outputStream = new FileOutputStream(new File(mDataBlockFile));
         } catch (FileNotFoundException e) {
@@ -459,8 +477,8 @@ public class PersistentDataBlockService extends SystemService {
 
             DataOutputStream outputStream;
             try {
-                outputStream = new DataOutputStream(new FileOutputStream(new File(mDataBlockFile)));
-            } catch (FileNotFoundException e) {
+                outputStream = new DataOutputStream(getBlockOutputStream());
+            } catch (IOException e) {
                 Slog.e(TAG, "partition not available?", e);
                 return -1;
             }
@@ -545,6 +563,10 @@ public class PersistentDataBlockService extends SystemService {
         public void wipe() {
             enforceOemUnlockWritePermission();
 
+            if (mIsRunningDSU) {
+                Slog.i(TAG, "data is read-only when running a DSU");
+                return;
+            }
             synchronized (mLock) {
                 int ret = nativeWipe(mDataBlockFile);
 
@@ -703,6 +725,10 @@ public class PersistentDataBlockService extends SystemService {
 
         private void writeDataBuffer(long offset, ByteBuffer dataBuffer) {
             FileOutputStream outputStream;
+            if (mIsRunningDSU) {
+                Slog.i(TAG, "data is read-only when running a DSU");
+                return;
+            }
             try {
                 outputStream = new FileOutputStream(new File(mDataBlockFile));
             } catch (FileNotFoundException e) {

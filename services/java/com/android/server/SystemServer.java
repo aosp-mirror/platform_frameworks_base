@@ -331,8 +331,6 @@ public final class SystemServer {
     private static final String UNCRYPT_PACKAGE_FILE = "/cache/recovery/uncrypt_file";
     private static final String BLOCK_MAP_FILE = "/cache/recovery/block.map";
 
-    private static final String GSI_RUNNING_PROP = "ro.gsid.image_running";
-
     // maximum number of binder threads used for system_server
     // will be higher than the system default
     private static final int sMaxBinderThreads = 31;
@@ -1441,8 +1439,7 @@ public final class SystemServer {
             t.traceEnd();
 
             final boolean hasPdb = !SystemProperties.get(PERSISTENT_DATA_BLOCK_PROP).equals("");
-            final boolean hasGsi = SystemProperties.getInt(GSI_RUNNING_PROP, 0) > 0;
-            if (hasPdb && !hasGsi) {
+            if (hasPdb) {
                 t.traceBegin("StartPersistentDataBlock");
                 mSystemServiceManager.startService(PersistentDataBlockService.class);
                 t.traceEnd();
