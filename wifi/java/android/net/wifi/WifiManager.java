@@ -2897,13 +2897,6 @@ public class WifiManager {
      * <li>Apps can continue using this API, however newer features
      * such as ability to mask out location sensitive data in WifiInfo will not be supported
      * via this API. </li>
-     * <li>On devices supporting concurrent connections (indicated via
-     * {@link #isMultiStaConcurrencySupported()}), this API will return the details
-     * of the internet providing connection (if any) to all apps, except for the apps that triggered
-     * the creation of the concurrent connection. For such apps, this API will return the details of
-     * the connection they created. For ex: apps using {@link WifiNetworkSpecifier} will
-     * will trigger a concurrent connection on supported devices and hence this API will provide
-     * details of their peer to peer connection (not the internet providing connection). </li>
      * </p>
      */
     @Deprecated
