@@ -454,10 +454,12 @@ public class Tuner implements AutoCloseable  {
      *
      * <p>Tuner resource manager (TRM) uses the client priority value to decide whether it is able
      * to reclaim insufficient resources from another client.
+     *
      * <p>The nice value represents how much the client intends to give up the resource when an
      * insufficient resource situation happens.
      *
-     * @param priority the new priority.
+     * @param priority the new priority. Any negative value would cause no-op on priority setting
+     *                 and the API would only process nice value setting in that case.
      * @param niceValue the nice value.
      */
     public void updateResourcePriority(int priority, int niceValue) {

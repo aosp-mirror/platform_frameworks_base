@@ -126,6 +126,9 @@ public final class ClientProfile {
     }
 
     public void setPriority(int priority) {
+        if (priority < 0) {
+            return;
+        }
         mPriority = priority;
     }
 
