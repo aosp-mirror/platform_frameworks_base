@@ -21,9 +21,13 @@ import android.media.AudioAttributes;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioSystem;
 import android.media.audiopolicy.AudioMix;
+import android.os.SystemClock;
+import android.util.Log;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Provides an adapter to access functionality of the android.media.AudioSystem class for device
@@ -31,15 +35,79 @@ import java.util.List;
  * Use the "real" AudioSystem through the default adapter.
  * Use the "always ok" adapter to avoid dealing with the APM behaviors during a test.
  */
-public class AudioSystemAdapter {
+public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback {
+
+    private static final String TAG = "AudioSystemAdapter";
+
+    // initialized in factory getDefaultAdapter()
+    private static AudioSystemAdapter sSingletonDefaultAdapter;
+
+    /**
+     * should be false by default unless enabling measurements of method call counts and time spent
+     * in measured methods
+     */
+    private static final boolean ENABLE_GETDEVICES_STATS = false;
+    private static final int NB_MEASUREMENTS = 2;
+    private static final int METHOD_GETDEVICESFORSTREAM = 0;
+    private static final int METHOD_GETDEVICESFORATTRIBUTES = 1;
+    private long[] mMethodTimeNs;
+    private int[] mMethodCallCounter;
+    private String[] mMethodNames = {"getDevicesForStream", "getDevicesForAttributes"};
+
+    private static final boolean USE_CACHE_FOR_GETDEVICES = true;
+    private ConcurrentHashMap<Integer, Integer> mDevicesForStreamCache;
+    private int[] mMethodCacheHit;
+
+    /**
+     * should be false except when trying to debug caching errors. When true, the value retrieved
+     * from the cache will be compared against the real queried value, which defeats the purpose of
+     * the cache in terms of performance.
+     */
+    private static final boolean DEBUG_CACHE = false;
+
+    /**
+     * Implementation of AudioSystem.RoutingUpdateCallback
+     */
+    @Override
+    public void onRoutingUpdated() {
+        if (DEBUG_CACHE) {
+            Log.d(TAG, "---- onRoutingUpdated (from native) ----------");
+        }
+        invalidateRoutingCache();
+    }
 
     /**
      * Create a wrapper around the {@link AudioSystem} static methods, all functions are directly
      * forwarded to the AudioSystem class.
      * @return an adapter around AudioSystem
      */
-    static final @NonNull AudioSystemAdapter getDefaultAdapter() {
-        return new AudioSystemAdapter();
+    static final synchronized @NonNull AudioSystemAdapter getDefaultAdapter() {
+        if (sSingletonDefaultAdapter == null) {
+            sSingletonDefaultAdapter = new AudioSystemAdapter();
+            AudioSystem.setRoutingCallback(sSingletonDefaultAdapter);
+            if (USE_CACHE_FOR_GETDEVICES) {
+                sSingletonDefaultAdapter.mDevicesForStreamCache =
+                        new ConcurrentHashMap<Integer, Integer>(AudioSystem.getNumStreamTypes());
+                sSingletonDefaultAdapter.mMethodCacheHit = new int[NB_MEASUREMENTS];
+            }
+            if (ENABLE_GETDEVICES_STATS) {
+                sSingletonDefaultAdapter.mMethodCallCounter = new int[NB_MEASUREMENTS];
+                sSingletonDefaultAdapter.mMethodTimeNs = new long[NB_MEASUREMENTS];
+            }
+        }
+        return sSingletonDefaultAdapter;
+    }
+
+    private void invalidateRoutingCache() {
+        if (DEBUG_CACHE) {
+            Log.d(TAG, "---- clearing cache ----------");
+        }
+        if (mDevicesForStreamCache == null) {
+            return;
+        }
+        synchronized (mDevicesForStreamCache) {
+            mDevicesForStreamCache.clear();
+        }
     }
 
     /**
@@ -48,6 +116,44 @@ public class AudioSystemAdapter {
      * @return a mask of device types
      */
     public int getDevicesForStream(int stream) {
+        if (!ENABLE_GETDEVICES_STATS) {
+            return getDevicesForStreamImpl(stream);
+        }
+        mMethodCallCounter[METHOD_GETDEVICESFORSTREAM]++;
+        final long startTime = SystemClock.uptimeNanos();
+        final int res = getDevicesForStreamImpl(stream);
+        mMethodTimeNs[METHOD_GETDEVICESFORSTREAM] += SystemClock.uptimeNanos() - startTime;
+        return res;
+    }
+
+    private int getDevicesForStreamImpl(int stream) {
+        if (USE_CACHE_FOR_GETDEVICES) {
+            Integer res;
+            synchronized (mDevicesForStreamCache) {
+                res = mDevicesForStreamCache.get(stream);
+                if (res == null) {
+                    res = AudioSystem.getDevicesForStream(stream);
+                    mDevicesForStreamCache.put(stream, res);
+                    if (DEBUG_CACHE) {
+                        Log.d(TAG, " stream=" + stream + " dev=0x" + Integer.toHexString(res));
+                    }
+                    return res;
+                }
+                // cache hit
+                mMethodCacheHit[METHOD_GETDEVICESFORSTREAM]++;
+                if (DEBUG_CACHE) {
+                    final int real = AudioSystem.getDevicesForStream(stream);
+                    if (res == real) {
+                        Log.d(TAG, " stream=" + stream + " dev=0x" + Integer.toHexString(res)
+                                + " CACHE");
+                    } else {
+                        Log.e(TAG, " stream=" + stream + " dev=0x" + Integer.toHexString(res)
+                                + " CACHE ERROR real dev=0x" + Integer.toHexString(real));
+                    }
+                }
+            }
+            return res;
+        }
         return AudioSystem.getDevicesForStream(stream);
     }
 
@@ -58,6 +164,19 @@ public class AudioSystemAdapter {
      */
     public @NonNull ArrayList<AudioDeviceAttributes> getDevicesForAttributes(
             @NonNull AudioAttributes attributes) {
+        if (!ENABLE_GETDEVICES_STATS) {
+            return getDevicesForAttributesImpl(attributes);
+        }
+        mMethodCallCounter[METHOD_GETDEVICESFORATTRIBUTES]++;
+        final long startTime = SystemClock.uptimeNanos();
+        final ArrayList<AudioDeviceAttributes> res = getDevicesForAttributesImpl(attributes);
+        mMethodTimeNs[METHOD_GETDEVICESFORATTRIBUTES] += SystemClock.uptimeNanos() - startTime;
+        return res;
+    }
+
+    private @NonNull ArrayList<AudioDeviceAttributes> getDevicesForAttributesImpl(
+            @NonNull AudioAttributes attributes) {
+        // TODO implement caching for attributes-based routing
         return AudioSystem.getDevicesForAttributes(attributes);
     }
 
@@ -72,6 +191,7 @@ public class AudioSystemAdapter {
      */
     public int setDeviceConnectionState(int device, int state, String deviceAddress,
                                         String deviceName, int codecFormat) {
+        invalidateRoutingCache();
         return AudioSystem.setDeviceConnectionState(device, state, deviceAddress, deviceName,
                 codecFormat);
     }
@@ -96,6 +216,7 @@ public class AudioSystemAdapter {
      */
     public int handleDeviceConfigChange(int device, String deviceAddress,
                                                String deviceName, int codecFormat) {
+        invalidateRoutingCache();
         return AudioSystem.handleDeviceConfigChange(device, deviceAddress, deviceName,
                 codecFormat);
     }
@@ -109,6 +230,7 @@ public class AudioSystemAdapter {
      */
     public int setDevicesRoleForStrategy(int strategy, int role,
                                          @NonNull List<AudioDeviceAttributes> devices) {
+        invalidateRoutingCache();
         return AudioSystem.setDevicesRoleForStrategy(strategy, role, devices);
     }
 
@@ -119,6 +241,7 @@ public class AudioSystemAdapter {
      * @return
      */
     public int removeDevicesRoleForStrategy(int strategy, int role) {
+        invalidateRoutingCache();
         return AudioSystem.removeDevicesRoleForStrategy(strategy, role);
     }
 
@@ -131,11 +254,12 @@ public class AudioSystemAdapter {
      */
     public int setDevicesRoleForCapturePreset(int capturePreset, int role,
                                               @NonNull List<AudioDeviceAttributes> devices) {
+        invalidateRoutingCache();
         return AudioSystem.setDevicesRoleForCapturePreset(capturePreset, role, devices);
     }
 
     /**
-     * Same as {@link AudioSystem#removeDevicesRoleForCapturePreset(int, int)}
+     * Same as {@link AudioSystem#removeDevicesRoleForCapturePreset(int, int, int[], String[])}
      * @param capturePreset
      * @param role
      * @param devicesToRemove
@@ -143,6 +267,7 @@ public class AudioSystemAdapter {
      */
     public int removeDevicesRoleForCapturePreset(
             int capturePreset, int role, @NonNull List<AudioDeviceAttributes> devicesToRemove) {
+        invalidateRoutingCache();
         return AudioSystem.removeDevicesRoleForCapturePreset(capturePreset, role, devicesToRemove);
     }
 
@@ -153,6 +278,7 @@ public class AudioSystemAdapter {
      * @return
      */
     public int clearDevicesRoleForCapturePreset(int capturePreset, int role) {
+        invalidateRoutingCache();
         return AudioSystem.clearDevicesRoleForCapturePreset(capturePreset, role);
     }
 
@@ -218,6 +344,7 @@ public class AudioSystemAdapter {
      * @return
      */
     public int setPhoneState(int state, int uid) {
+        invalidateRoutingCache();
         return AudioSystem.setPhoneState(state, uid);
     }
 
@@ -238,6 +365,7 @@ public class AudioSystemAdapter {
      * @return
      */
     public int setForceUse(int usage, int config) {
+        invalidateRoutingCache();
         return AudioSystem.setForceUse(usage, config);
     }
 
@@ -257,6 +385,7 @@ public class AudioSystemAdapter {
      * @return
      */
     public int registerPolicyMixes(ArrayList<AudioMix> mixes, boolean register) {
+        invalidateRoutingCache();
         return AudioSystem.registerPolicyMixes(mixes, register);
     }
 
@@ -268,6 +397,7 @@ public class AudioSystemAdapter {
      * @return
      */
     public int setUidDeviceAffinities(int uid, @NonNull int[] types,  @NonNull String[] addresses) {
+        invalidateRoutingCache();
         return AudioSystem.setUidDeviceAffinities(uid, types, addresses);
     }
 
@@ -277,6 +407,7 @@ public class AudioSystemAdapter {
      * @return
      */
     public int removeUidDeviceAffinities(int uid) {
+        invalidateRoutingCache();
         return AudioSystem.removeUidDeviceAffinities(uid);
     }
 
@@ -289,6 +420,7 @@ public class AudioSystemAdapter {
      */
     public int setUserIdDeviceAffinities(int userId, @NonNull int[] types,
             @NonNull String[] addresses) {
+        invalidateRoutingCache();
         return AudioSystem.setUserIdDeviceAffinities(userId, types, addresses);
     }
 
@@ -298,6 +430,27 @@ public class AudioSystemAdapter {
      * @return
      */
     public int removeUserIdDeviceAffinities(int userId) {
+        invalidateRoutingCache();
         return AudioSystem.removeUserIdDeviceAffinities(userId);
+    }
+
+    /**
+     * Part of AudioService dump
+     * @param pw
+     */
+    public void dump(PrintWriter pw) {
+        if (!ENABLE_GETDEVICES_STATS) {
+            // only stats in this dump
+            return;
+        }
+        pw.println("\nAudioSystemAdapter:");
+        for (int i = 0; i < NB_MEASUREMENTS; i++) {
+            pw.println(mMethodNames[i]
+                    + ": counter=" + mMethodCallCounter[i]
+                    + " time(ms)=" + (mMethodTimeNs[i] / 1E6)
+                    + (USE_CACHE_FOR_GETDEVICES
+                        ? (" FScacheHit=" + mMethodCacheHit[METHOD_GETDEVICESFORSTREAM]) : ""));
+        }
+        pw.println("\n");
     }
 }
