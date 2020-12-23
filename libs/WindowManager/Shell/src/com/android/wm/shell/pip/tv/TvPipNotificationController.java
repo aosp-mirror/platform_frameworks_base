@@ -44,7 +44,7 @@ import java.util.Objects;
  */
 public class TvPipNotificationController {
     private static final String TAG = "TvPipNotification";
-    private static final boolean DEBUG = PipController.DEBUG;
+    private static final boolean DEBUG = TvPipController.DEBUG;
 
     // Referenced in com.android.systemui.util.NotificationChannels.
     public static final String NOTIFICATION_CHANNEL = "TVPIP";

@@ -32,7 +32,7 @@ import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipUiEventLogger;
-import com.android.wm.shell.pip.tv.PipController;
+import com.android.wm.shell.pip.tv.TvPipController;
 import com.android.wm.shell.pip.tv.TvPipMenuController;
 import com.android.wm.shell.pip.tv.TvPipNotificationController;
 
@@ -59,7 +59,7 @@ public abstract class TvPipModule {
             TaskStackListenerImpl taskStackListener,
             WindowManagerShellWrapper windowManagerShellWrapper) {
         return Optional.of(
-                new PipController(
+                new TvPipController(
                         context,
                         pipBoundsState,
                         pipBoundsAlgorithm,
