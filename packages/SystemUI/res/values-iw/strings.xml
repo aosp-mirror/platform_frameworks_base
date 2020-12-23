@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"לא ניתן היה לשמור צילום מסך"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"כדי שצילום המסך יישמר, צריך לבטל את הנעילה של המכשיר"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"יש לנסות שוב לבצע צילום מסך"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"לא היה מספיק מקום לשמור את צילום המסך"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"לא ניתן לשמור את צילום המסך"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"האפליקציה או הארגון שלך אינם מתירים ליצור צילומי מסך"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"עריכה"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"עריכת צילום מסך"</string>
@@ -704,14 +704,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ייתכן שיופעל צלצול או רטט בהתאם להגדרות הטלפון. שיחות מהאפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> מופיעות בבועות כברירת מחדל."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"מעוררת תשומת לב באמצעות קיצור דרך צף לתוכן הזה."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"אפשר לתת למערכת לקבוע אם ההתראה הזאת צריכה להיות מלווה בצליל או ברטט"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"‏&lt;b&gt;הסטטוס:&lt;/b&gt; הועלה בדרגה ל\'ברירת מחדל\'"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"‏&lt;b&gt;הסטטוס:&lt;/b&gt; הורד בדרגה ל\'שקט\'"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"‏&lt;b&gt;הסטטוס:&lt;/b&gt; דורג גבוה יותר"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"‏&lt;b&gt;הסטטוס:&lt;/b&gt; דורג נמוך יותר"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"מוצגת בחלק העליון של קטע התראות השיחה, מופיעה בבועה צפה, תוצג תמונת פרופיל במסך הנעילה"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"הגדרות"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"עדיפות"</string>
@@ -730,14 +726,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"האפליקציה הזו מוצגת מעל אפליקציות אחרות במסך, ומשתמשת במיקרופון ובמצלמה."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"הגדרות"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"אישור"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"‏ההתראה הזו &lt;b&gt;שודרגה ל\'ברירת מחדל\'&lt;/b&gt; באופן אוטומטי על-ידי המערכת."</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"‏ההתראה הזו &lt;b&gt;הורדה בדרגה ל\'שקט\'&lt;/b&gt; באופן אוטומטי על-ידי המערכת."</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"‏ההתראה הזו &lt;b&gt;דורגה גבוה יותר&lt;/b&gt; באופן אוטומטי בהתראות שלך."</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"‏ההתראה הזו &lt;b&gt;דורגה נמוך יותר&lt;/b&amp;gt באופן אוטומטי בהתראות שלך."</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"האם פעולה זו הייתה נכונה?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"תודה על המשוב!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"אישור"</string>

@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"No se pudo guardar la captura de pantalla"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"El dispositivo debe estar desbloqueado para poder guardar la captura de pantalla"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Vuelve a hacer una captura de pantalla"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"No se puede guardar la captura de pantalla debido a que no hay suficiente espacio de almacenamiento"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"No se pudo guardar la captura de pantalla"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"La app o tu organización no permiten las capturas de pantalla"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Editar"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Editar captura de pantalla"</string>
@@ -524,7 +524,7 @@
     <string name="disable_vpn" msgid="482685974985502922">"Inhabilitar VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Desconectar VPN"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Ver políticas"</string>
-    <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Controles de vista"</string>
+    <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Ver controles"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"Este dispositivo pertenece a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nTu administrador de TI puede controlar y administrar la configuración, el acceso corporativo, las apps, los datos asociados al dispositivo y la información de ubicación.\n\nPara obtener más información, comunícate con el administrador de TI."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"Este dispositivo pertenece a tu organización.\n\nTu administrador de TI puede controlar y administrar la configuración, el acceso corporativo, las apps, los datos asociados al dispositivo y la información de ubicación.\n\nPara obtener más información, comunícate con el administrador de TI."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Tu organización instaló una autoridad de certificación en este dispositivo. Es posible que se controle o modifique el tráfico de tu red segura."</string>
@@ -698,14 +698,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Puede sonar o vibrar en función de la configuración del teléfono. Conversaciones de la burbuja de <xliff:g id="APP_NAME">%1$s</xliff:g> de forma predeterminada."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Retiene tu atención con un acceso directo flotante a este contenido."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Dejar que el sistema determine si esta notificación debe emitir un sonido o una vibración"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Estado:&lt;/b&gt; Se promovió a Predeterminada"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Estado:&lt;/b&gt; Descendió de nivel a Silenciada"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Estado:&lt;/b&gt; Se clasificó en una posición superior"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Estado:&lt;/b&gt; Se clasificó en una posición inferior"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Aparece en la parte superior de la sección de conversaciones, en forma de burbuja flotante, y muestra la foto de perfil en la pantalla de bloqueo."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Configuración"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritaria"</string>
@@ -724,14 +720,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"Esta app se muestra sobre otras apps en la pantalla y está usando el micrófono y la cámara."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"Configuración"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"Aceptar"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"El sistema &lt;b&gt;promovió esta notificación a Predeterminada&lt;/b&gt; de forma automática."</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"El sistema &lt;b&gt;descendió esta notificación a Silenciada&lt;/b&gt; de forma automática."</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"Se clasificó esta notificación &lt;b&gt;en una posición superior&lt;/b&gt; de forma automática en el panel."</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"Se clasificó esta notificación &lt;b&gt;en una posición inferior&lt;/b&gt; de forma automática en el panel."</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"¿Te parece bien?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Gracias por tus comentarios."</string>
     <string name="feedback_ok" msgid="6481426753298857144">"Aceptar"</string>

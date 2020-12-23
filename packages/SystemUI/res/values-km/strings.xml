@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"មិន​អាច​រក្សាទុក​រូបថត​អេក្រង់បានទេ"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"ត្រូវតែ​ដោះសោ​ឧបករណ៍​ជាមុនសិន ទើបអាច​រក្សាទុក​រូបថតអេក្រង់​បាន"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"សាកល្បង​ថតរូបថត​អេក្រង់​ម្តងទៀត"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"មិនអាច​រក្សាទុក​រូបថតអេក្រង់​បានទេ ​ដោយសារ​ទំហំផ្ទុក​មានកម្រិតទាប"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"មិនអាច​រក្សាទុករូបថត​អេក្រង់បានទេ"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ការថត​រូបអេក្រង់​មិនត្រូវ​បាន​អនុញ្ញាត​ដោយ​កម្មវិធី​នេះ ឬ​ស្ថាប័ន​របស់អ្នក"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"កែ"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"កែ​រូបថត​អេក្រង់"</string>
@@ -698,14 +698,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"អាចរោទ៍ ឬញ័រ ដោយផ្អែកលើ​ការកំណត់​ទូរសព្ទ។ ការសន្ទនា​ពី​ពពុះ <xliff:g id="APP_NAME">%1$s</xliff:g> តាម​លំនាំដើម​។"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ធ្វើឱ្យអ្នក​ចាប់អារម្មណ៍​ដោយប្រើ​ផ្លូវកាត់​អណ្ដែត​សម្រាប់ខ្លឹមសារនេះ។"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ឱ្យប្រព័ន្ធកំណត់ថាតើ​ការជូនដំណឹងនេះ​គួរតែបន្លឺសំឡេង ឬញ័រ"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;ស្ថានភាព៖&lt;/b&gt; បានដំឡើងទៅ​លំនាំដើម"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;ស្ថានភាព៖&lt;/b&gt; បានបញ្ចុះទៅស្ងាត់"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;ស្ថានភាព៖&lt;/b&gt; បានចាត់ថ្នាក់ខ្ពស់ជាងមុន"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;ស្ថានភាព៖&lt;/b&gt; បានចាត់ថ្នាក់ទាបជាងមុន"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"បង្ហាញនៅខាងលើ​ផ្នែកសន្ទនា បង្ហាញជា​ពពុះអណ្ដែត បង្ហាញ​រូបភាព​កម្រងព័ត៌មាន​នៅលើ​អេក្រង់ចាក់សោ"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ការកំណត់"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"អាទិភាព"</string>
@@ -724,14 +720,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"កម្មវិធីនេះ​កំពុងបង្ហាញ​ពីលើកម្មវិធី​ផ្សេងទៀត​នៅលើអេក្រង់​របស់អ្នក និងកំពុងប្រើ​មីក្រូហ្វូន ក៏​ដូចជា​​កាមេរ៉ា។"</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"ការកំណត់"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"យល់ព្រម"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"ការជូនដំណឹងនេះ​ត្រូវបាន&lt;b&gt;ដំឡើង​ទៅលំនាំដើម&lt;/b&gt;ដោយប្រព័ន្ធ​ដោយស្វ័យប្រវត្តិ។"</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"ការជូនដំណឹងនេះ​ត្រូវបាន&lt;b&gt;បញ្ចុះ​ទៅស្ងាត់&lt;/b&gt;ដោយប្រព័ន្ធដោយស្វ័យប្រវត្តិ។"</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"ការជូនដំណឹងនេះ​ត្រូវបាន&lt;b&gt;ចាត់ថ្នាក់ខ្ពស់ជាងមុន&lt;/b&gt;ដោយស្វ័យប្រវត្តិ នៅក្នុង​ផ្ទាំងជូនដំណឹង​របស់អ្នក។"</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"ការជូនដំណឹងនេះ​ត្រូវបាន&lt;b&gt;ចាត់ថ្នាក់​ទាបជាងមុន&lt;/b&gt;ដោយស្វ័យប្រវត្តិ នៅក្នុង​ផ្ទាំងជូនដំណឹង​របស់អ្នក។"</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"តើវា​ត្រឹមត្រូវទេ?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"សូមអរគុណចំពោះ​មតិកែលម្អ​របស់អ្នក!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"យល់ព្រម"</string>

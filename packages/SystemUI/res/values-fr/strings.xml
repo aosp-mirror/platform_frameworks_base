@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Impossible d\'enregistrer la capture d\'écran"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Vous devez déverrouiller l\'appareil pour que la capture d\'écran soit enregistrée"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Essayez de nouveau de faire une capture d\'écran"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Impossible d\'enregistrer la capture d\'écran, car l\'espace de stockage est limité"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Impossible d\'enregistrer la capture d\'écran"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Les captures d\'écran ne sont pas autorisées par l\'application ni par votre organisation"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Modifier"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Modifier la capture d\'écran"</string>
@@ -698,14 +698,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Peut sonner ou vibrer en fonction des paramètres du téléphone. Les conversations provenant de <xliff:g id="APP_NAME">%1$s</xliff:g> s\'affichent sous forme de bulles par défaut."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Attire votre attention à l\'aide d\'un raccourci flottant vers ce contenu."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Laisser le système déterminer si cette notification doit être accompagnée d\'un son ou d\'une vibration"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;État :&lt;/b&gt; Élevée à la catégorie \"Par défaut\""</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;État :&lt;/b&gt; Abaissée à la catégorie \"Silencieux\""</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;État :&lt;/b&gt; Élevée d\'un niveau"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;État ::&lt;/b&gt; Abaissée d\'un niveau"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"S\'affiche en haut de la section des conversations, apparaît sous forme de bulle flottante, affiche la photo de profil sur l\'écran de verrouillage"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Paramètres"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritaire"</string>
@@ -724,14 +720,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"Cette application se superpose aux autres applications sur l\'écran, et utilise le micro et la caméra."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"Paramètres"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"OK"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"La notification a été automatiquement &lt;b&gt;élevée à la catégorie \"Par défaut\"&lt;/b&gt; par le système."</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"La notification a été automatiquement &lt;b&gt;abaissée à la catégorie \"Silencieux\"&lt;/b&gt; par le système."</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"La notification a été automatiquement &lt;b&gt;élevée d\'un niveau&lt;/b&gt; dans votre volet."</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"La notification a été automatiquement &lt;b&gt;abaissée d\'un niveau&lt;/b&gt; dans votre volet."</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"Est-ce que c\'était correct ?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Merci de nous avoir envoyé vos commentaires."</string>
     <string name="feedback_ok" msgid="6481426753298857144">"OK"</string>

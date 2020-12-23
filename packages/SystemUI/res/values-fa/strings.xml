@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"نماگرفت ذخیره نشد"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"برای ذخیره کردن نماگرفت، قفل دستگاه باید باز باشد"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"دوباره نماگرفت بگیرید"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"به دلیل محدود بودن فضای ذخیره‌سازی نمی‌توان نماگرفت را ذخیره کرد"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"نماگرفت ذخیره نمی‌شود"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"برنامه یا سازمان شما اجازه نمی‌دهند نماگرفت بگیرید."</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"ویرایش"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"ویرایش نماگرفت"</string>
@@ -698,14 +698,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"بسته به تنظیمات ممکن است تلفن زنگ بزند یا لرزش داشته باشد. مکالمه‌های <xliff:g id="APP_NAME">%1$s</xliff:g> به‌طور پیش‌فرض در حبابک نشان داده می‌شوند."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"با میان‌بری شناور به این محتوا، توجه‌تان را جلب می‌کند."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"سیستم را تنظیم کنید که تشخیص دهد اعلان صدا و لرزش داشته باشد یا نه"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"‏&lt;b&gt;وضعیت:&lt;/b&gt; به «پیش‌فرض» ارتقا یافت"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"‏&lt;b&gt;وضعیت:&lt;/b&gt; به «بی‌صدا» تنزل یافت"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"‏&lt;b&gt;وضعیت:&lt;/b&gt; در رتبه‌بندی بالاتری قرار گرفت"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"‏&lt;b&gt;وضعیت:&lt;/b&gt; در رتبه‌بندی پایین‌تری قرار گرفت"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"در بالای بخش مکالمه به‌صورت حبابک شناور نشان داده می‌شود و تصویر نمایه را در صفحه قفل نمایش می‌دهد"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"تنظیمات"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"اولویت"</string>
@@ -724,14 +720,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"این برنامه روی برنامه‌های دیگر در صفحه‌نمایش نشان داده می‌شود و از میکروفون و دوربین استفاده می‌کند."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"تنظیمات"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"تأیید"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"‏سیستم این اعلان را به‌طور خودکار &lt;b&gt;به «پیش‌فرض» ارتقا داد&lt;/b&gt;."</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"‏سیستم این اعلان را به‌طور خودکار &lt;b&gt;به «بی‌صدا» تنزل داد&lt;/b&gt;."</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"‏این اعلان به‌طور خودکار در کشوی اعلانات &lt;b&gt;در رتبه‌بندی بالاتری قرار گرفت&lt;/b&gt;."</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"‏این اعلان به‌طور خودکار در کشوی اعلانات &lt;b&gt;در رتبه‌بندی پایین‌تری قرار گرفت&lt;/b&gt;."</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"این مورد درست بود؟"</string>
     <string name="feedback_response" msgid="4671729244976641339">"از بازخوردتان سپاس‌گزاریم!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"تأیید"</string>

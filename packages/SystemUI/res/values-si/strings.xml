@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"තිර රුව සුරැකිය නොහැකි විය"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"තිර රුව සුරැකීමට පෙර උපාංගය අගුලු හැරිය යුතුය"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"තිර රුව නැවත ගැනීමට උත්සාහ කරන්න"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"සීමිත ගබඩා ඉඩ නිසා තිර රුව සුරැකිය නොහැකිය"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"තිර රුව සුරැකීමට නොහැකිය"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"තිර රූ ගැනීමට යෙදුම හෝ ඔබගේ සංවිධානය ඉඩ නොදේ"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"සංස්කරණය කරන්න"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"තිර රුව සංස්කරණය කරන්න"</string>
@@ -698,14 +698,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"දුරකථන සැකසීම් මත පදනම්ව නාද කිරීමට හෝ කම්පනය කිරීමට හැකිය. <xliff:g id="APP_NAME">%1$s</xliff:g> වෙතින් සංවාද පෙරනිමියෙන් බුබුළු දමයි"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"පාවෙන කෙටිමගක් සමග ඔබේ අවධානය මෙම අන්තර්ගතය වෙත තබා ගන්න."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"මෙම දැනුම් දීම ශබ්දයක් හෝ කම්පනයක් ඇති කළ යුතු ද යන්න පද්ධතිය මගින් තීරණය කර තිබේද"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;තත්ත්වය:&lt;/b&gt; පෙරනිමි වෙත ප්‍රවර්ධනය කරන ලදි"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;තත්ත්වය:&lt;/b&gt; නිශ්ශබ්ද වෙත පහත දමන ලදි"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;තත්ත්වය:&lt;/b&gt; ඉහළට ශ්‍රේණිගත කරන ලදි"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;තත්ත්වය:&lt;/b&gt; පහළට ශ්‍රේණිගත කරන ලදි"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"සංවාද කොටසේ ඉහළම පෙන්වයි, බුබුළක් ලෙස දිස් වේ, අගුලු තිරයේ පැතිකඩ පින්තූරය සංදර්ශනය වේ"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"සැකසීම්"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ප්‍රමුඛතාව"</string>
@@ -724,14 +720,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"මෙම යෙදුම් ඔබගේ තිරය මත අනෙකුත් යෙදුම්වලට උඩින් සංදර්ශනය වන අතර මයික්‍රෆෝනය සහ කැමරාව භාවිතා කරයි."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"සැකසීම්"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"හරි"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"පද්ධතිය මගින් මෙම දැනුම්දීම ස්වයංක්‍රියව &lt;b&gt;පෙරනිමි වෙත ප්‍රවර්ධනය කරන ලදි&lt;/b&gt;."</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"පද්ධතිය මගින් මෙම දැනුම්දීම ස්වයංක්‍රියව &lt;b&gt;නිශ්ශබ්ද වෙත පහත දමන ලදි&lt;/b&gt;."</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"ඔබගේ වැස්ම තුළ මෙම දැනුම්දීම ස්වයංක්‍රියව &lt;b&gt;ඉහළට ශ්‍රේණිගත කරන ලදි&lt;/b&gt;."</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"ඔබගේ වැස්ම තුළ මෙම දැනුම්දීම ස්වයංක්‍රියව &lt;b&gt;පහළට ශ්‍රේණිගත කරන ලදි&lt;/b&gt;."</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"මෙය නිවැරදි වුයේද?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"ඔබේ ප්‍රතිපෝෂණයට ස්තූතියි!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"හරි"</string>
