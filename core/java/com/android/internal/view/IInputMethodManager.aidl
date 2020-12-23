@@ -26,6 +26,8 @@ import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 import com.android.internal.inputmethod.IBooleanResultCallback;
 import com.android.internal.inputmethod.IInputBindResultResultCallback;
+import com.android.internal.inputmethod.IInputMethodSubtypeResultCallback;
+import com.android.internal.inputmethod.IInputMethodSubtypeListResultCallback;
 
 /**
  * Public interface to the global input method manager, used by all client
@@ -39,9 +41,9 @@ interface IInputMethodManager {
     List<InputMethodInfo> getInputMethodList(int userId);
     // TODO: Use ParceledListSlice instead
     List<InputMethodInfo> getEnabledInputMethodList(int userId);
-    List<InputMethodSubtype> getEnabledInputMethodSubtypeList(in String imiId,
-            boolean allowsImplicitlySelectedSubtypes);
-    InputMethodSubtype getLastInputMethodSubtype();
+    void getEnabledInputMethodSubtypeList(in String imiId, boolean allowsImplicitlySelectedSubtypes,
+            in IInputMethodSubtypeListResultCallback resultCallback);
+    void getLastInputMethodSubtype(in IInputMethodSubtypeResultCallback resultCallback);
 
     void showSoftInput(in IInputMethodClient client, IBinder windowToken, int flags,
             in ResultReceiver resultReceiver, in IBooleanResultCallback resultCallback);
@@ -66,7 +68,7 @@ interface IInputMethodManager {
             int displayId);
     void showInputMethodAndSubtypeEnablerFromClient(in IInputMethodClient client, String topId);
     void isInputMethodPickerShownForTest(in IBooleanResultCallback resultCallback);
-    InputMethodSubtype getCurrentInputMethodSubtype();
+    void getCurrentInputMethodSubtype(in IInputMethodSubtypeResultCallback resultCallback);
     void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);
     // This is kept due to @UnsupportedAppUsage.
     // TODO(Bug 113914148): Consider removing this.
