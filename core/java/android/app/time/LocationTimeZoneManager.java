@@ -40,17 +40,58 @@ public final class LocationTimeZoneManager {
     public static final String SHELL_COMMAND_SERVICE_NAME = "location_time_zone_manager";
 
     /**
-     * Shell command that starts the service (after stop).
+     * A shell command that starts the service (after stop).
      */
     public static final String SHELL_COMMAND_START = "start";
 
     /**
-     * Shell command that stops the service.
+     * A shell command that stops the service.
      */
     public static final String SHELL_COMMAND_STOP = "stop";
 
     /**
-     * Shell command that sends test commands to a provider
+     * A shell command that can put providers into different modes. Takes effect next time the
+     * service is started.
+     */
+    public static final String SHELL_COMMAND_SET_PROVIDER_MODE_OVERRIDE =
+            "set_provider_mode_override";
+
+    /**
+     * The default provider mode.
+     * For use with {@link #SHELL_COMMAND_SET_PROVIDER_MODE_OVERRIDE}.
+     */
+    public static final String PROVIDER_MODE_OVERRIDE_NONE = "none";
+
+    /**
+     * The "simulated" provider mode.
+     * For use with {@link #SHELL_COMMAND_SET_PROVIDER_MODE_OVERRIDE}.
+     */
+    public static final String PROVIDER_MODE_OVERRIDE_SIMULATED = "simulated";
+
+    /**
+     * The "disabled" provider mode (equivalent to there being no provider configured).
+     * For use with {@link #SHELL_COMMAND_SET_PROVIDER_MODE_OVERRIDE}.
+     */
+    public static final String PROVIDER_MODE_OVERRIDE_DISABLED = "disabled";
+
+    /**
+     * A shell command that tells the service to record state information during tests. The next
+     * argument value is "true" or "false".
+     */
+    public static final String SHELL_COMMAND_RECORD_PROVIDER_STATES = "record_provider_states";
+
+    /**
+     * A shell command that tells the service to dump its current state.
+     */
+    public static final String SHELL_COMMAND_DUMP_STATE = "dump_state";
+
+    /**
+     * Option for {@link #SHELL_COMMAND_DUMP_STATE} that tells it to dump state as a binary proto.
+     */
+    public static final String DUMP_STATE_OPTION_PROTO = "--proto";
+
+    /**
+     * A shell command that sends test commands to a provider
      */
     public static final String SHELL_COMMAND_SEND_PROVIDER_TEST_COMMAND =
             "send_provider_test_command";
@@ -87,35 +128,6 @@ public final class LocationTimeZoneManager {
      * state.
      */
     public static final String SIMULATED_PROVIDER_TEST_COMMAND_UNCERTAIN = "uncertain";
-
-    private static final String SYSTEM_PROPERTY_KEY_PROVIDER_MODE_OVERRIDE_PREFIX =
-            "persist.sys.geotz.";
-
-    /**
-     * The name of the system property that can be used to set the primary provider into test mode
-     * (value = {@link #SYSTEM_PROPERTY_VALUE_PROVIDER_MODE_SIMULATED}) or disabled (value = {@link
-     * #SYSTEM_PROPERTY_VALUE_PROVIDER_MODE_DISABLED}).
-     */
-    public static final String SYSTEM_PROPERTY_KEY_PROVIDER_MODE_OVERRIDE_PRIMARY =
-            SYSTEM_PROPERTY_KEY_PROVIDER_MODE_OVERRIDE_PREFIX + PRIMARY_PROVIDER_NAME;
-
-    /**
-     * The name of the system property that can be used to set the secondary provider into test mode
-     * (value = {@link #SYSTEM_PROPERTY_VALUE_PROVIDER_MODE_SIMULATED}) or disabled (value = {@link
-     * #SYSTEM_PROPERTY_VALUE_PROVIDER_MODE_DISABLED}).
-     */
-    public static final String SYSTEM_PROPERTY_KEY_PROVIDER_MODE_OVERRIDE_SECONDARY =
-            SYSTEM_PROPERTY_KEY_PROVIDER_MODE_OVERRIDE_PREFIX + SECONDARY_PROVIDER_NAME;
-
-    /**
-     * The value of the provider mode system property to put a provider into test mode.
-     */
-    public static final String SYSTEM_PROPERTY_VALUE_PROVIDER_MODE_SIMULATED = "simulated";
-
-    /**
-     * The value of the provider mode system property to put a provider into disabled mode.
-     */
-    public static final String SYSTEM_PROPERTY_VALUE_PROVIDER_MODE_DISABLED = "disabled";
 
     private LocationTimeZoneManager() {
         // No need to instantiate.
