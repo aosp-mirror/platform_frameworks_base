@@ -493,6 +493,11 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     Bundle mCoreSettings = null;
 
+    /**
+     * The lock word for the {@link #mCoreSettings}.
+     */
+    private final Object mCoreSettingsLock = new Object();
+
     boolean mHasImeComponent = false;
 
     /** Activity client record, used for bookkeeping for the real {@link Activity} instance. */
@@ -4956,7 +4961,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     private void handleSetCoreSettings(Bundle coreSettings) {
-        synchronized (mResourcesManager) {
+        synchronized (mCoreSettingsLock) {
             mCoreSettings = coreSettings;
         }
         onCoreSettingsChange();
@@ -4972,6 +4977,8 @@ public final class ActivityThread extends ClientTransactionHandler {
     private boolean updateDebugViewAttributeState() {
         boolean previousState = View.sDebugViewAttributes;
 
+        // mCoreSettings is only updated from the main thread, while this function is only called
+        // from main thread as well, so no need to lock here.
         View.sDebugViewAttributesApplicationPackage = mCoreSettings.getString(
                 Settings.Global.DEBUG_VIEW_ATTRIBUTES_APPLICATION_PACKAGE, "");
         String currentPackage = (mBoundApplication != null && mBoundApplication.appInfo != null)
@@ -6268,6 +6275,8 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
         }
 
+        // mCoreSettings is only updated from the main thread, while this function is only called
+        // from main thread as well, so no need to lock here.
         GraphicsEnvironment.getInstance().setup(context, mCoreSettings);
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
@@ -6449,6 +6458,8 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
         updateDefaultDensity();
 
+        // mCoreSettings is only updated from the main thread, while this function is only called
+        // from main thread as well, so no need to lock here.
         final String use24HourSetting = mCoreSettings.getString(Settings.System.TIME_12_24);
         Boolean is24Hr = null;
         if (use24HourSetting != null) {
@@ -7469,12 +7480,17 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
-    public Bundle getCoreSettings() {
-        return mCoreSettings;
+    /**
+     * Caller should NEVER mutate the Bundle returned from here
+     */
+    Bundle getCoreSettings() {
+        synchronized (mCoreSettingsLock) {
+            return mCoreSettings;
+        }
     }
 
     public int getIntCoreSetting(String key, int defaultValue) {
-        synchronized (mResourcesManager) {
+        synchronized (mCoreSettingsLock) {
             if (mCoreSettings != null) {
                 return mCoreSettings.getInt(key, defaultValue);
             }
@@ -7486,7 +7502,7 @@ public final class ActivityThread extends ClientTransactionHandler {
      * Get the string value of the given key from core settings.
      */
     public String getStringCoreSetting(String key, String defaultValue) {
-        synchronized (mResourcesManager) {
+        synchronized (mCoreSettingsLock) {
             if (mCoreSettings != null) {
                 return mCoreSettings.getString(key, defaultValue);
             }
@@ -7495,7 +7511,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     float getFloatCoreSetting(String key, float defaultValue) {
-        synchronized (mResourcesManager) {
+        synchronized (mCoreSettingsLock) {
             if (mCoreSettings != null) {
                 return mCoreSettings.getFloat(key, defaultValue);
             }
