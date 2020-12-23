@@ -207,6 +207,9 @@ public class AudioService extends IAudioService.Stub
     /** debug calls to devices APIs */
     protected static final boolean DEBUG_DEVICES = false;
 
+    /** Debug communication route */
+    protected static final boolean DEBUG_COMM_RTE = false;
+
     /** How long to delay before persisting a change in volume/ringer mode. */
     private static final int PERSIST_DELAY = 500;
 
@@ -3689,7 +3692,7 @@ public class AudioService extends IAudioService.Stub
         final boolean ringerModeMute = ringerMode == AudioManager.RINGER_MODE_VIBRATE
                 || ringerMode == AudioManager.RINGER_MODE_SILENT;
         final boolean shouldRingSco = ringerMode == AudioManager.RINGER_MODE_VIBRATE
-                && isBluetoothScoOn();
+                && mDeviceBroker.isBluetoothScoOn();
         // Ask audio policy engine to force use Bluetooth SCO channel if needed
         final String eventSource = "muteRingerModeStreams() from u/pid:" + Binder.getCallingUid()
                 + "/" + Binder.getCallingPid();
@@ -4274,10 +4277,10 @@ public class AudioService extends IAudioService.Stub
         // for logging only
         final int uid = Binder.getCallingUid();
         final int pid = Binder.getCallingPid();
+
         final String eventSource = new StringBuilder("setSpeakerphoneOn(").append(on)
                 .append(") from u/pid:").append(uid).append("/")
                 .append(pid).toString();
-        final boolean stateChanged = mDeviceBroker.setSpeakerphoneOn(cb, pid, on, eventSource);
         new MediaMetrics.Item(MediaMetrics.Name.AUDIO_DEVICE
                 + MediaMetrics.SEPARATOR + "setSpeakerphoneOn")
                 .setUid(uid)
@@ -4285,23 +4288,20 @@ public class AudioService extends IAudioService.Stub
                 .set(MediaMetrics.Property.STATE, on
                         ? MediaMetrics.Value.ON : MediaMetrics.Value.OFF)
                 .record();
-
-        if (stateChanged) {
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                mContext.sendBroadcastAsUser(
-                        new Intent(AudioManager.ACTION_SPEAKERPHONE_STATE_CHANGED)
-                                .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY), UserHandle.ALL);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
+        final long ident = Binder.clearCallingIdentity();
+        mDeviceBroker.setSpeakerphoneOn(cb, pid, on, eventSource);
+        Binder.restoreCallingIdentity(ident);
     }
 
     /** @see AudioManager#isSpeakerphoneOn() */
     public boolean isSpeakerphoneOn() {
         return mDeviceBroker.isSpeakerphoneOn();
     }
+
+
+    /** BT SCO audio state seen by apps using the deprecated API setBluetoothScoOn().
+     * @see isBluetoothScoOn() */
+    private boolean mBtScoOnByApp;
 
     /** @see AudioManager#setBluetoothScoOn(boolean) */
     public void setBluetoothScoOn(boolean on) {
@@ -4311,7 +4311,7 @@ public class AudioService extends IAudioService.Stub
 
         // Only enable calls from system components
         if (UserHandle.getCallingAppId() >= FIRST_APPLICATION_UID) {
-            mDeviceBroker.setBluetoothScoOnByApp(on);
+            mBtScoOnByApp = on;
             return;
         }
 
@@ -4337,7 +4337,7 @@ public class AudioService extends IAudioService.Stub
      * Note that it doesn't report internal state, but state seen by apps (which may have
      * called setBluetoothScoOn() */
     public boolean isBluetoothScoOn() {
-        return mDeviceBroker.isBluetoothScoOnForApp();
+        return mBtScoOnByApp || mDeviceBroker.isBluetoothScoOn();
     }
 
     // TODO investigate internal users due to deprecation of SDK API
@@ -4384,7 +4384,7 @@ public class AudioService extends IAudioService.Stub
                 .set(MediaMetrics.Property.SCO_AUDIO_MODE,
                         BtHelper.scoAudioModeToString(scoAudioMode))
                 .record();
-        startBluetoothScoInt(cb, scoAudioMode, eventSource);
+        startBluetoothScoInt(cb, pid, scoAudioMode, eventSource);
 
     }
 
@@ -4403,10 +4403,10 @@ public class AudioService extends IAudioService.Stub
                 .set(MediaMetrics.Property.SCO_AUDIO_MODE,
                         BtHelper.scoAudioModeToString(BtHelper.SCO_MODE_VIRTUAL_CALL))
                 .record();
-        startBluetoothScoInt(cb, BtHelper.SCO_MODE_VIRTUAL_CALL, eventSource);
+        startBluetoothScoInt(cb, pid, BtHelper.SCO_MODE_VIRTUAL_CALL, eventSource);
     }
 
-    void startBluetoothScoInt(IBinder cb, int scoAudioMode, @NonNull String eventSource) {
+    void startBluetoothScoInt(IBinder cb, int pid, int scoAudioMode, @NonNull String eventSource) {
         MediaMetrics.Item mmi = new MediaMetrics.Item(MediaMetrics.Name.AUDIO_BLUETOOTH)
                 .set(MediaMetrics.Property.EVENT, "startBluetoothScoInt")
                 .set(MediaMetrics.Property.SCO_AUDIO_MODE,
@@ -4417,9 +4417,9 @@ public class AudioService extends IAudioService.Stub
             mmi.set(MediaMetrics.Property.EARLY_RETURN, "permission or systemReady").record();
             return;
         }
-        synchronized (mDeviceBroker.mSetModeLock) {
-            mDeviceBroker.startBluetoothScoForClient_Sync(cb, scoAudioMode, eventSource);
-        }
+        final long ident = Binder.clearCallingIdentity();
+        mDeviceBroker.startBluetoothScoForClient(cb, pid, scoAudioMode, eventSource);
+        Binder.restoreCallingIdentity(ident);
         mmi.record();
     }
 
@@ -4434,9 +4434,9 @@ public class AudioService extends IAudioService.Stub
         final String eventSource =  new StringBuilder("stopBluetoothSco()")
                 .append(") from u/pid:").append(uid).append("/")
                 .append(pid).toString();
-        synchronized (mDeviceBroker.mSetModeLock) {
-            mDeviceBroker.stopBluetoothScoForClient_Sync(cb, eventSource);
-        }
+        final long ident = Binder.clearCallingIdentity();
+        mDeviceBroker.stopBluetoothScoForClient(cb, pid, eventSource);
+        Binder.restoreCallingIdentity(ident);
         new MediaMetrics.Item(MediaMetrics.Name.AUDIO_BLUETOOTH)
                 .setUid(uid)
                 .setPid(pid)
@@ -7670,6 +7670,7 @@ public class AudioService extends IAudioService.Stub
         pw.print("  mHasVibrator="); pw.println(mHasVibrator);
         pw.print("  mVolumePolicy="); pw.println(mVolumePolicy);
         pw.print("  mAvrcpAbsVolSupported="); pw.println(mAvrcpAbsVolSupported);
+        pw.print("  mBtScoOnByApp="); pw.println(mBtScoOnByApp);
         pw.print("  mIsSingleVolume="); pw.println(mIsSingleVolume);
         pw.print("  mUseFixedVolume="); pw.println(mUseFixedVolume);
         pw.print("  mFixedVolumeDevices="); pw.println(dumpDeviceTypes(mFixedVolumeDevices));
