@@ -2408,6 +2408,79 @@ static jint android_media_AudioSystem_getDevicesForRoleAndStrategy(JNIEnv *env, 
     return AUDIO_JAVA_SUCCESS;
 }
 
+static jint android_media_AudioSystem_setDevicesRoleForCapturePreset(
+        JNIEnv *env, jobject thiz, jint capturePreset, jint role, jintArray jDeviceTypes,
+        jobjectArray jDeviceAddresses) {
+    AudioDeviceTypeAddrVector nDevices;
+    jint results = getVectorOfAudioDeviceTypeAddr(env, jDeviceTypes, jDeviceAddresses, nDevices);
+    if (results != NO_ERROR) {
+        return results;
+    }
+    int status = check_AudioSystem_Command(
+            AudioSystem::setDevicesRoleForCapturePreset((audio_source_t)capturePreset,
+                                                        (device_role_t)role, nDevices));
+    return (jint)status;
+}
+
+static jint android_media_AudioSystem_addDevicesRoleForCapturePreset(
+        JNIEnv *env, jobject thiz, jint capturePreset, jint role, jintArray jDeviceTypes,
+        jobjectArray jDeviceAddresses) {
+    AudioDeviceTypeAddrVector nDevices;
+    jint results = getVectorOfAudioDeviceTypeAddr(env, jDeviceTypes, jDeviceAddresses, nDevices);
+    if (results != NO_ERROR) {
+        return results;
+    }
+    int status = check_AudioSystem_Command(
+            AudioSystem::addDevicesRoleForCapturePreset((audio_source_t)capturePreset,
+                                                        (device_role_t)role, nDevices));
+    return (jint)status;
+}
+
+static jint android_media_AudioSystem_removeDevicesRoleForCapturePreset(
+        JNIEnv *env, jobject thiz, jint capturePreset, jint role, jintArray jDeviceTypes,
+        jobjectArray jDeviceAddresses) {
+    AudioDeviceTypeAddrVector nDevices;
+    jint results = getVectorOfAudioDeviceTypeAddr(env, jDeviceTypes, jDeviceAddresses, nDevices);
+    if (results != NO_ERROR) {
+        return results;
+    }
+    int status = check_AudioSystem_Command(
+            AudioSystem::removeDevicesRoleForCapturePreset((audio_source_t)capturePreset,
+                                                           (device_role_t)role, nDevices));
+    return (jint)status;
+}
+
+static jint android_media_AudioSystem_clearDevicesRoleForCapturePreset(JNIEnv *env, jobject thiz,
+                                                                       jint capturePreset,
+                                                                       jint role) {
+    return (jint)check_AudioSystem_Command(
+            AudioSystem::clearDevicesRoleForCapturePreset((audio_source_t)capturePreset,
+                                                          (device_role_t)role));
+}
+
+static jint android_media_AudioSystem_getDevicesForRoleAndCapturePreset(JNIEnv *env, jobject thiz,
+                                                                        jint capturePreset,
+                                                                        jint role,
+                                                                        jobject jDevices) {
+    AudioDeviceTypeAddrVector nDevices;
+    status_t status = check_AudioSystem_Command(
+            AudioSystem::getDevicesForRoleAndCapturePreset((audio_source_t)capturePreset,
+                                                           (device_role_t)role, nDevices));
+    if (status != NO_ERROR) {
+        return (jint)status;
+    }
+    for (const auto &device : nDevices) {
+        jobject jAudioDeviceAttributes = NULL;
+        jint jStatus = createAudioDeviceAttributesFromNative(env, &jAudioDeviceAttributes, &device);
+        if (jStatus != AUDIO_JAVA_SUCCESS) {
+            return jStatus;
+        }
+        env->CallBooleanMethod(jDevices, gListMethods.add, jAudioDeviceAttributes);
+        env->DeleteLocalRef(jAudioDeviceAttributes);
+    }
+    return AUDIO_JAVA_SUCCESS;
+}
+
 static jint
 android_media_AudioSystem_getDevicesForAttributes(JNIEnv *env, jobject thiz,
         jobject jaa, jobjectArray jDeviceArray)
@@ -2559,6 +2632,16 @@ static const JNINativeMethod gMethods[] =
           (void *)android_media_AudioSystem_removeDevicesRoleForStrategy},
          {"getDevicesForRoleAndStrategy", "(IILjava/util/List;)I",
           (void *)android_media_AudioSystem_getDevicesForRoleAndStrategy},
+         {"setDevicesRoleForCapturePreset", "(II[I[Ljava/lang/String;)I",
+          (void *)android_media_AudioSystem_setDevicesRoleForCapturePreset},
+         {"addDevicesRoleForCapturePreset", "(II[I[Ljava/lang/String;)I",
+          (void *)android_media_AudioSystem_addDevicesRoleForCapturePreset},
+         {"removeDevicesRoleForCapturePreset", "(II[I[Ljava/lang/String;)I",
+          (void *)android_media_AudioSystem_removeDevicesRoleForCapturePreset},
+         {"clearDevicesRoleForCapturePreset", "(II)I",
+          (void *)android_media_AudioSystem_clearDevicesRoleForCapturePreset},
+         {"getDevicesForRoleAndCapturePreset", "(IILjava/util/List;)I",
+          (void *)android_media_AudioSystem_getDevicesForRoleAndCapturePreset},
          {"getDevicesForAttributes",
           "(Landroid/media/AudioAttributes;[Landroid/media/AudioDeviceAttributes;)I",
           (void *)android_media_AudioSystem_getDevicesForAttributes},

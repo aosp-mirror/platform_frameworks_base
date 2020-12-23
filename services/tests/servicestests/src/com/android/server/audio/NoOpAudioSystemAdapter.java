@@ -79,6 +79,23 @@ public class NoOpAudioSystemAdapter extends AudioSystemAdapter {
     }
 
     @Override
+    public int setDevicesRoleForCapturePreset(int capturePreset, int role,
+                                              @NonNull List<AudioDeviceAttributes> devices) {
+        return AudioSystem.AUDIO_STATUS_OK;
+    }
+
+    @Override
+    public int removeDevicesRoleForCapturePreset(
+            int capturePreset, int role, @NonNull List<AudioDeviceAttributes> devicesToRemove) {
+        return AudioSystem.AUDIO_STATUS_OK;
+    }
+
+    @Override
+    public int clearDevicesRoleForCapturePreset(int capturePreset, int role) {
+        return AudioSystem.AUDIO_STATUS_OK;
+    }
+
+    @Override
     public int setParameters(String keyValuePairs) {
         return AudioSystem.AUDIO_STATUS_OK;
     }
