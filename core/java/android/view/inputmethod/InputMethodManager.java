@@ -1361,7 +1361,9 @@ public final class InputMethodManager {
             // We intentionally do not use UserHandle.getCallingUserId() here because for system
             // services InputMethodManagerInternal.getInputMethodListAsUser() should be used
             // instead.
-            return mService.getInputMethodList(UserHandle.myUserId());
+            final Completable.InputMethodInfoList value = Completable.createInputMethodInfoList();
+            mService.getInputMethodList(UserHandle.myUserId(), ResultCallbacks.of(value));
+            return Completable.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1377,7 +1379,9 @@ public final class InputMethodManager {
     @RequiresPermission(INTERACT_ACROSS_USERS_FULL)
     public List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId) {
         try {
-            return mService.getInputMethodList(userId);
+            final Completable.InputMethodInfoList value = Completable.createInputMethodInfoList();
+            mService.getInputMethodList(userId,  ResultCallbacks.of(value));
+            return Completable.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1395,7 +1399,9 @@ public final class InputMethodManager {
             // We intentionally do not use UserHandle.getCallingUserId() here because for system
             // services InputMethodManagerInternal.getEnabledInputMethodListAsUser() should be used
             // instead.
-            return mService.getEnabledInputMethodList(UserHandle.myUserId());
+            final Completable.InputMethodInfoList value = Completable.createInputMethodInfoList();
+            mService.getEnabledInputMethodList(UserHandle.myUserId(), ResultCallbacks.of(value));
+            return Completable.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1411,7 +1417,9 @@ public final class InputMethodManager {
     @RequiresPermission(INTERACT_ACROSS_USERS_FULL)
     public List<InputMethodInfo> getEnabledInputMethodListAsUser(@UserIdInt int userId) {
         try {
-            return mService.getEnabledInputMethodList(userId);
+            final Completable.InputMethodInfoList value = Completable.createInputMethodInfoList();
+            mService.getEnabledInputMethodList(userId, ResultCallbacks.of(value));
+            return Completable.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3098,7 +3106,9 @@ public final class InputMethodManager {
     @UnsupportedAppUsage
     public int getInputMethodWindowVisibleHeight() {
         try {
-            return mService.getInputMethodWindowVisibleHeight();
+            final Completable.Int value = Completable.createInt();
+            mService.getInputMethodWindowVisibleHeight(ResultCallbacks.of(value));
+            return Completable.getIntResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

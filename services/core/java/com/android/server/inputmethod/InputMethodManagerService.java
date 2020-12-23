@@ -162,9 +162,11 @@ import com.android.internal.inputmethod.CallbackUtils;
 import com.android.internal.inputmethod.IBooleanResultCallback;
 import com.android.internal.inputmethod.IInputBindResultResultCallback;
 import com.android.internal.inputmethod.IInputContentUriToken;
+import com.android.internal.inputmethod.IInputMethodInfoListResultCallback;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.IInputMethodSubtypeListResultCallback;
 import com.android.internal.inputmethod.IInputMethodSubtypeResultCallback;
+import com.android.internal.inputmethod.IIntResultCallback;
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.inputmethod.StartInputFlags;
@@ -1972,43 +1974,51 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public List<InputMethodInfo> getInputMethodList(@UserIdInt int userId) {
-        if (UserHandle.getCallingUserId() != userId) {
-            mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
-        }
-        synchronized (mMethodMap) {
-            final int[] resolvedUserIds = InputMethodUtils.resolveUserId(userId,
-                    mSettings.getCurrentUserId(), null);
-            if (resolvedUserIds.length != 1) {
-                return Collections.emptyList();
+    public void getInputMethodList(@UserIdInt int userId,
+            IInputMethodInfoListResultCallback resultCallback) {
+        CallbackUtils.onResult(resultCallback, () -> {
+            if (UserHandle.getCallingUserId() != userId) {
+                mContext.enforceCallingPermission(
+                        Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
             }
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                return getInputMethodListLocked(resolvedUserIds[0]);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
+            synchronized (mMethodMap) {
+                final int[] resolvedUserIds = InputMethodUtils.resolveUserId(userId,
+                        mSettings.getCurrentUserId(), null);
+                if (resolvedUserIds.length != 1) {
+                    return Collections.emptyList();
+                }
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    return getInputMethodListLocked(resolvedUserIds[0]);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
             }
-        }
+        });
     }
 
     @Override
-    public List<InputMethodInfo> getEnabledInputMethodList(@UserIdInt int userId) {
-        if (UserHandle.getCallingUserId() != userId) {
-            mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
-        }
-        synchronized (mMethodMap) {
-            final int[] resolvedUserIds = InputMethodUtils.resolveUserId(userId,
-                    mSettings.getCurrentUserId(), null);
-            if (resolvedUserIds.length != 1) {
-                return Collections.emptyList();
+    public void getEnabledInputMethodList(@UserIdInt int userId,
+            IInputMethodInfoListResultCallback resultCallback) {
+        CallbackUtils.onResult(resultCallback, () -> {
+            if (UserHandle.getCallingUserId() != userId) {
+                mContext.enforceCallingPermission(
+                        Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
             }
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                return getEnabledInputMethodListLocked(resolvedUserIds[0]);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
+            synchronized (mMethodMap) {
+                final int[] resolvedUserIds = InputMethodUtils.resolveUserId(userId,
+                        mSettings.getCurrentUserId(), null);
+                if (resolvedUserIds.length != 1) {
+                    return Collections.emptyList();
+                }
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    return getEnabledInputMethodListLocked(resolvedUserIds[0]);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
             }
-        }
+        });
     }
 
     @GuardedBy("mMethodMap")
@@ -3992,9 +4002,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * @return {@link WindowManagerInternal#getInputMethodWindowVisibleHeight(int)}
      */
     @Override
-    public int getInputMethodWindowVisibleHeight() {
-        // TODO(yukawa): Should we verify the display ID?
-        return mWindowManagerInternal.getInputMethodWindowVisibleHeight(mCurTokenDisplayId);
+    public void getInputMethodWindowVisibleHeight(IIntResultCallback resultCallback) {
+        CallbackUtils.onResult(resultCallback, () -> {
+            // TODO(yukawa): Should we verify the display ID?
+            return mWindowManagerInternal.getInputMethodWindowVisibleHeight(mCurTokenDisplayId);
+        });
     }
 
     @Override
