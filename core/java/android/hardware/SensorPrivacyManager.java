@@ -161,6 +161,37 @@ public final class SensorPrivacyManager {
     }
 
     /**
+     * Registers a new listener to receive notification when the state of sensor privacy
+     * changes.
+     *
+     * @param userId the user's id
+     * @param sensor the sensor to listen to changes to
+     * @param listener the OnSensorPrivacyChangedListener to be notified when the state of sensor
+     *                 privacy changes.
+     */
+    public void addSensorPrivacyListener(@UserIdInt int userId, @IndividualSensor int sensor,
+            final OnSensorPrivacyChangedListener listener) {
+        synchronized (mListeners) {
+            ISensorPrivacyListener iListener = mListeners.get(listener);
+            if (iListener == null) {
+                iListener = new ISensorPrivacyListener.Stub() {
+                    @Override
+                    public void onSensorPrivacyChanged(boolean enabled) {
+                        listener.onSensorPrivacyChanged(enabled);
+                    }
+                };
+                mListeners.put(listener, iListener);
+            }
+
+            try {
+                mService.addIndividualSensorPrivacyListener(userId, sensor, iListener);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
      * Unregisters the specified listener from receiving notifications when the state of sensor
      * privacy changes.
      *

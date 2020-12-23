@@ -291,6 +291,7 @@ public final class SensorPrivacyService extends SystemService {
                 }
                 persistSensorPrivacyState();
             }
+            mHandler.onSensorPrivacyChanged(userId, sensor, enable);
         }
 
         @Override
@@ -558,6 +559,18 @@ public final class SensorPrivacyService extends SystemService {
         }
 
         /**
+         * Registers a listener to be notified when the sensor privacy state changes.
+         */
+        @Override
+        public void addIndividualSensorPrivacyListener(int userId, int sensor,
+                ISensorPrivacyListener listener) {
+            if (listener == null) {
+                throw new NullPointerException("listener cannot be null");
+            }
+            mHandler.addListener(userId, sensor, listener);
+        }
+
+        /**
          * Unregisters a listener from sensor privacy state change notifications.
          */
         @Override
@@ -760,6 +773,9 @@ public final class SensorPrivacyService extends SystemService {
         @GuardedBy("mListenerLock")
         private final RemoteCallbackList<ISensorPrivacyListener> mListeners =
                 new RemoteCallbackList<>();
+        @GuardedBy("mListenerLock")
+        private final SparseArray<SparseArray<RemoteCallbackList<ISensorPrivacyListener>>>
+                mIndividualSensorListeners = new SparseArray<>();
         private final ArrayMap<ISensorPrivacyListener, DeathRecipient> mDeathRecipients;
         private final Context mContext;
 
@@ -777,11 +793,38 @@ public final class SensorPrivacyService extends SystemService {
                             mSensorPrivacyServiceImpl));
         }
 
+        public void onSensorPrivacyChanged(int userId, int sensor, boolean enabled) {
+            sendMessage(PooledLambda.obtainMessage(SensorPrivacyHandler::handleSensorPrivacyChanged,
+                    this, userId, sensor, enabled));
+            sendMessage(
+                    PooledLambda.obtainMessage(SensorPrivacyServiceImpl::persistSensorPrivacyState,
+                            mSensorPrivacyServiceImpl));
+        }
+
         public void addListener(ISensorPrivacyListener listener) {
             synchronized (mListenerLock) {
                 DeathRecipient deathRecipient = new DeathRecipient(listener);
                 mDeathRecipients.put(listener, deathRecipient);
                 mListeners.register(listener);
+            }
+        }
+
+        public void addListener(int userId, int sensor, ISensorPrivacyListener listener) {
+            synchronized (mListenerLock) {
+                DeathRecipient deathRecipient = new DeathRecipient(listener);
+                mDeathRecipients.put(listener, deathRecipient);
+                SparseArray<RemoteCallbackList<ISensorPrivacyListener>> listenersForUser =
+                        mIndividualSensorListeners.get(userId);
+                if (listenersForUser == null) {
+                    listenersForUser = new SparseArray<>();
+                    mIndividualSensorListeners.put(userId, listenersForUser);
+                }
+                RemoteCallbackList<ISensorPrivacyListener> listeners = listenersForUser.get(sensor);
+                if (listeners == null) {
+                    listeners = new RemoteCallbackList<>();
+                    listenersForUser.put(sensor, listeners);
+                }
+                listeners.register(listener);
             }
         }
 
@@ -792,6 +835,12 @@ public final class SensorPrivacyService extends SystemService {
                     deathRecipient.destroy();
                 }
                 mListeners.unregister(listener);
+                for (int i = 0, numUsers = mIndividualSensorListeners.size(); i < numUsers; i++) {
+                    for (int j = 0, numListeners = mIndividualSensorListeners.valueAt(i).size();
+                            j < numListeners; j++) {
+                        mIndividualSensorListeners.valueAt(i).valueAt(j).unregister(listener);
+                    }
+                }
             }
         }
 
@@ -806,6 +855,28 @@ public final class SensorPrivacyService extends SystemService {
                 }
             }
             mListeners.finishBroadcast();
+        }
+
+        public void handleSensorPrivacyChanged(int userId, int sensor, boolean enabled) {
+            SparseArray<RemoteCallbackList<ISensorPrivacyListener>> listenersForUser =
+                    mIndividualSensorListeners.get(userId);
+            if (listenersForUser == null) {
+                return;
+            }
+            RemoteCallbackList<ISensorPrivacyListener> listeners = listenersForUser.get(sensor);
+            if (listeners == null) {
+                return;
+            }
+            final int count = listeners.beginBroadcast();
+            for (int i = 0; i < count; i++) {
+                ISensorPrivacyListener listener = listeners.getBroadcastItem(i);
+                try {
+                    listener.onSensorPrivacyChanged(enabled);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Caught an exception notifying listener " + listener + ": ", e);
+                }
+            }
+            listeners.finishBroadcast();
         }
     }
 
