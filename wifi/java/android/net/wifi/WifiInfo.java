@@ -22,11 +22,13 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.NetworkInfo.DetailedState;
+import android.net.TransportInfo;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import com.android.modules.utils.build.SdkLevel;
 import com.android.net.module.util.Inet4AddressUtils;
 
 import java.net.Inet4Address;
@@ -34,12 +36,21 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.EnumMap;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * Describes the state of any Wi-Fi connection that is active or
  * is in the process of being set up.
+ *
+ * In the connected state, access to location sensitive fields requires
+ * the same permissions as {@link WifiManager#getScanResults}. If such access is not allowed,
+ * {@link #getSSID} will return {@link WifiManager#UNKNOWN_SSID} and
+ * {@link #getBSSID} will return {@code "02:00:00:00:00:00"}.
+ * {@link #getNetworkId()} will return {@code -1}.
+ * {@link #getPasspointFqdn()} will return null.
+ * {@link #getPasspointProviderFriendlyName()} will return null.
  */
-public class WifiInfo implements Parcelable {
+public class WifiInfo implements TransportInfo, Parcelable {
     private static final String TAG = "WifiInfo";
     /**
      * This is the map described in the Javadoc comment above. The positions
@@ -1047,5 +1058,89 @@ public class WifiInfo implements Parcelable {
      */
     public @Nullable String getPasspointUniqueId() {
         return mPasspointUniqueId;
+    }
+
+    @Override
+    public boolean equals(Object that) {
+        if (this == that) return true;
+
+        // Potential API behavior change, so don't change behavior on older devices.
+        if (!SdkLevel.isAtLeastS()) return false;
+
+        if (!(that instanceof WifiInfo)) return false;
+
+        WifiInfo thatWifiInfo = (WifiInfo) that;
+        return Objects.equals(mWifiSsid, thatWifiInfo.mWifiSsid)
+                && Objects.equals(mBSSID, thatWifiInfo.mBSSID)
+                && Objects.equals(mNetworkId, thatWifiInfo.mNetworkId)
+                && Objects.equals(mRssi, thatWifiInfo.mRssi)
+                && Objects.equals(mSupplicantState, thatWifiInfo.mSupplicantState)
+                && Objects.equals(mLinkSpeed, thatWifiInfo.mLinkSpeed)
+                && Objects.equals(mTxLinkSpeed, thatWifiInfo.mTxLinkSpeed)
+                && Objects.equals(mRxLinkSpeed, thatWifiInfo.mRxLinkSpeed)
+                && Objects.equals(mFrequency, thatWifiInfo.mFrequency)
+                && Objects.equals(mIpAddress, thatWifiInfo.mIpAddress)
+                && Objects.equals(mMacAddress, thatWifiInfo.mMacAddress)
+                && Objects.equals(mMeteredHint, thatWifiInfo.mMeteredHint)
+                && Objects.equals(mEphemeral, thatWifiInfo.mEphemeral)
+                && Objects.equals(mTrusted, thatWifiInfo.mTrusted)
+                && Objects.equals(mRequestingPackageName, thatWifiInfo.mRequestingPackageName)
+                && Objects.equals(mOsuAp, thatWifiInfo.mOsuAp)
+                && Objects.equals(mFqdn, thatWifiInfo.mFqdn)
+                && Objects.equals(mProviderFriendlyName, thatWifiInfo.mProviderFriendlyName)
+                && Objects.equals(txBad, thatWifiInfo.txBad)
+                && Objects.equals(txRetries, thatWifiInfo.txRetries)
+                && Objects.equals(txSuccess, thatWifiInfo.txSuccess)
+                && Objects.equals(rxSuccess, thatWifiInfo.rxSuccess)
+                && Objects.equals(mLostTxPacketsPerSecond, thatWifiInfo.mLostTxPacketsPerSecond)
+                && Objects.equals(mTxRetriedTxPacketsPerSecond,
+                thatWifiInfo.mTxRetriedTxPacketsPerSecond)
+                && Objects.equals(mSuccessfulTxPacketsPerSecond,
+                thatWifiInfo.mSuccessfulTxPacketsPerSecond)
+                && Objects.equals(mSuccessfulRxPacketsPerSecond,
+                thatWifiInfo.mSuccessfulRxPacketsPerSecond)
+                && Objects.equals(score, thatWifiInfo.score)
+                && Objects.equals(mWifiStandard, thatWifiInfo.mWifiStandard)
+                && Objects.equals(mMaxSupportedTxLinkSpeed, thatWifiInfo.mMaxSupportedTxLinkSpeed)
+                && Objects.equals(mMaxSupportedRxLinkSpeed, thatWifiInfo.mMaxSupportedRxLinkSpeed)
+                && Objects.equals(mPasspointUniqueId, thatWifiInfo.mPasspointUniqueId);
+    }
+
+    @Override
+    public int hashCode() {
+        // Potential API behavior change, so don't change behavior on older devices.
+        if (!SdkLevel.isAtLeastS()) return System.identityHashCode(this);
+
+        return Objects.hash(mWifiSsid,
+                mBSSID,
+                mNetworkId,
+                mRssi,
+                mSupplicantState,
+                mLinkSpeed,
+                mTxLinkSpeed,
+                mRxLinkSpeed,
+                mFrequency,
+                mIpAddress,
+                mMacAddress,
+                mMeteredHint,
+                mEphemeral,
+                mTrusted,
+                mRequestingPackageName,
+                mOsuAp,
+                mFqdn,
+                mProviderFriendlyName,
+                txBad,
+                txRetries,
+                txSuccess,
+                rxSuccess,
+                mLostTxPacketsPerSecond,
+                mTxRetriedTxPacketsPerSecond,
+                mSuccessfulTxPacketsPerSecond,
+                mSuccessfulRxPacketsPerSecond,
+                score,
+                mWifiStandard,
+                mMaxSupportedTxLinkSpeed,
+                mMaxSupportedRxLinkSpeed,
+                mPasspointUniqueId);
     }
 }
