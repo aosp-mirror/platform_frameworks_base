@@ -739,6 +739,12 @@ public class WindowStateTests extends WindowTestsBase {
         InputMonitor.setInputWindowInfoIfNeeded(transaction, sc, handleWrapper);
         verify(transaction, never()).setInputWindowInfo(any(), any());
 
+        // The rotated bounds have higher priority as the touchable region.
+        final Rect rotatedBounds = new Rect(0, 0, 123, 456);
+        doReturn(rotatedBounds).when(win.mToken).getFixedRotationTransformDisplayBounds();
+        mDisplayContent.getInputMonitor().populateInputWindowHandle(handleWrapper, win);
+        assertEquals(rotatedBounds, handle.touchableRegion.getBounds());
+
         // Populate as an overlay to disable the input of window.
         InputMonitor.populateOverlayInputInfo(handleWrapper, false /* isVisible */);
         // The overlay attributes should be set.
