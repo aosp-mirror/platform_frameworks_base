@@ -284,8 +284,10 @@ public class PackageInfoWithoutStateUtils {
             pi.applicationInfo.publicSourceDir = apexFile.getPath();
             if (apexInfo.isFactory) {
                 pi.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
+                pi.applicationInfo.flags &= ~ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
             } else {
                 pi.applicationInfo.flags &= ~ApplicationInfo.FLAG_SYSTEM;
+                pi.applicationInfo.flags |= ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
             }
             if (apexInfo.isActive) {
                 pi.applicationInfo.flags |= ApplicationInfo.FLAG_INSTALLED;
