@@ -333,6 +333,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.accessibility.AccessibilityManagerService$Lifecycle";
     private static final String ADB_SERVICE_CLASS =
             "com.android.server.adb.AdbService$Lifecycle";
+    private static final String SPEECH_RECOGNITION_MANAGER_SERVICE_CLASS =
+            "com.android.server.speech.SpeechRecognitionManagerService";
     private static final String APP_PREDICTION_MANAGER_SERVICE_CLASS =
             "com.android.server.appprediction.AppPredictionManagerService";
     private static final String CONTENT_SUGGESTIONS_SERVICE_CLASS =
@@ -1629,11 +1631,20 @@ public final class SystemServer implements Dumpable {
                         "MusicRecognitionManagerService not defined by OEM or disabled by flag");
             }
 
-
             startContentCaptureService(context, t);
             startAttentionService(context, t);
             startRotationResolverService(context, t);
             startSystemCaptionsManagerService(context, t);
+
+            // System Speech Recognition Service
+            if (deviceHasConfigString(context,
+                    R.string.config_defaultOnDeviceSpeechRecognitionService)) {
+                t.traceBegin("StartSpeechRecognitionManagerService");
+                mSystemServiceManager.startService(SPEECH_RECOGNITION_MANAGER_SERVICE_CLASS);
+                t.traceEnd();
+            } else {
+                Slog.d(TAG, "System speech recognition is not defined by OEM");
+            }
 
             // App prediction manager service
             if (deviceHasConfigString(context, R.string.config_defaultAppPredictionService)) {
