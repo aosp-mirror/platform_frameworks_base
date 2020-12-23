@@ -2009,6 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Խոսափող"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"ցուցադրվում է մյուս հավելվածների վրայից"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Կարծիք հայտնել"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Այս ծանուցման կարևորության մակարդակը բարձրացվել է և դարձել կանխադրված։ Հպեք՝ կարծիք հայտնելու համար։"</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Այս ծանուցման կարևորության մակարդակը իջեցվել է և դարձել անձայն։ Հպեք՝ կարծիք հայտնելու համար։"</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Այս ծանուցման կարևորության մակարդակը բարձրացվել է։ Հպեք՝ կարծիք հայտնելու համար։"</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Այս ծանուցման կարևորության մակարդակն իջեցվել է։ Հպեք՝ կարծիք հայտնելու համար։"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Ծանուցում լիցքավորման մասին"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Մարտկոցը կարող է սովորականից շուտ սպառվել"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Մարտկոցի կյանքը երկարացնելու համար ակտիվացվել է մարտկոցի տնտեսման ռեժիմը"</string>

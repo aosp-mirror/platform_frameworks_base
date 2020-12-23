@@ -2009,6 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Микрофон"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"се показва върху други приложения на екрана"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Предоставяне на отзиви"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Това известие бе повишено до основно. Докоснете, за да изпратите отзиви."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Това известие бе понижено до беззвучно. Докоснете, за да изпратите отзиви."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Това известие бе класирано по-високо. Докоснете, за да изпратите отзиви."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Това известие бе класирано по-ниско. Докоснете, за да изпратите отзиви."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Известие с информация за режима на поредица"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батерията може да се изтощи преди обичайното зареждане"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Режимът за запазване на батерията е активиран с цел удължаване на живота на батерията"</string>

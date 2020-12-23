@@ -2009,6 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Микрофон"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"экрандагы башка терезелердин үстүнөн көрсөтүлүүдө"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Пикир билдирүү"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Бул билдирменин маанилүүлүгү Демейки болуп жогорулатылды. Пикир билдирүү үчүн таптап коюңуз."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Бул билдирменин маанилүүлүгү Үнсүз болуп төмөндөтүлдү. Пикир билдирүү үчүн таптап коюңуз."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Бул билдирменин маанилүүлүгү жогорулатылды. Пикир билдирүү үчүн таптап коюңуз."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Бул билдирменин маанилүүлүгү төмөндөтүлдү. Пикир билдирүү үчүн таптап коюңуз."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Режимдин адаттагы билдирмеси"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батарея кубаттоого чейин отуруп калышы мүмкүн"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Батареянын отуруп калбашы үчүн Батареяны үнөмдөгүч режими иштетилди"</string>

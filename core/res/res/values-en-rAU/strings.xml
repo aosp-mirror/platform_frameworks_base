@@ -2009,6 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Microphone"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"displaying over other apps on your screen"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Provide feedback"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"This notification was promoted to default. Tap to provide feedback."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"This notification was demoted to silent. Tap to provide feedback."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"This notification was ranked higher. Tap to provide feedback."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"This notification was ranked lower. Tap to provide feedback."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Routine Mode info notification"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Battery may run out before usual charge"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Battery Saver activated to extend battery life"</string>

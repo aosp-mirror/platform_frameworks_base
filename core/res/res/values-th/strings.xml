@@ -2009,6 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"ไมโครโฟน"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"แสดงทับแอปอื่นๆ บนหน้าจอ"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"แสดงความคิดเห็น"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"การแจ้งเตือนนี้มีการเพิ่มระดับเป็นแบบค่าเริ่มต้น แตะเพื่อแสดงความคิดเห็น"</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"การแจ้งเตือนนี้มีการลดระดับเป็นแบบปิดเสียง แตะเพื่อแสดงความคิดเห็น"</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"การแจ้งเตือนนี้มีการเพิ่มระดับ แตะเพื่อแสดงความคิดเห็น"</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"การแจ้งเตือนนี้มีการลดระดับ แตะเพื่อแสดงความคิดเห็น"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"การแจ้งเตือนข้อมูลโหมดกิจวัตร"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"แบตเตอรี่อาจหมดก่อนการชาร์จปกติ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"เปิดใช้งานโหมดประหยัดแบตเตอรี่แล้วเพื่อยืดอายุการใช้งานแบตเตอรี่"</string>

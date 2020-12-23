@@ -2009,6 +2009,14 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"মাইক্রোফোন"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"স্ক্রিনে অন্যান্য অ্যাপের উপরে দেখানো হচ্ছে"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"মতামত জানান"</string>
+    <!-- no translation found for notification_feedback_indicator_alerted (6552871804121942099) -->
+    <skip />
+    <!-- no translation found for notification_feedback_indicator_silenced (3799442124723177262) -->
+    <skip />
+    <!-- no translation found for notification_feedback_indicator_promoted (9030204303764698640) -->
+    <skip />
+    <!-- no translation found for notification_feedback_indicator_demoted (8880309924296450875) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"রুটিন মোডের তথ্য সংক্রান্ত বিজ্ঞপ্তি"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"সাধারণত যখন চার্জ দেন, তার আগে চার্জ শেষ হয়ে যেতে পারে"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ডিভাইস বেশিক্ষণ চালু রাখতে ব্যাটারি সেভার চালু করা হয়েছে"</string>

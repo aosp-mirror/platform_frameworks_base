@@ -2009,6 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Mikrofon"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"teie ekraanil muude rakenduste peal kuvamine"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Andke tagasisidet"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Sellele märguandele määrati prioriteet Vaikimisi. Puudutage tagasiside andmiseks."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Sellele märguandele määrati prioriteet Vaikne. Puudutage tagasiside andmiseks."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Sellele märguandele määrati kõrgem prioriteet. Puudutage tagasiside andmiseks."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Sellele märguandele määrati madalam prioriteet. Puudutage tagasiside andmiseks."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Rutiinirežiimi teabe märguanne"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Aku võib enne tavapärast laadimist tühjaks saada"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Akusäästja aktiveeriti aku tööea pikendamiseks"</string>

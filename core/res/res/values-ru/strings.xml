@@ -2075,6 +2075,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Микрофон"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"показ поверх других окон"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Отправить отзыв"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Уровень важности этого уведомления был повышен до \"По умолчанию\". Нажмите, чтобы отправить отзыв."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Уровень важности этого уведомления был понижен до \"Без звука\". Нажмите, чтобы отправить отзыв."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Уровень важности этого уведомления был повышен. Нажмите, чтобы отправить отзыв."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Уровень важности этого уведомления был понижен. Нажмите, чтобы отправить отзыв."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Уведомление о батарее"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батарея может разрядиться"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Чтобы увеличить время работы от батареи, был включен режим энергосбережения."</string>

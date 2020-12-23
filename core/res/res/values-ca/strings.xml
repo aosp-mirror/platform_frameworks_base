@@ -2009,6 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Micròfon"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"es mostra sobre altres aplicacions a la pantalla"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Envia suggeriments"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"El sistema ha augmentat a Predeterminat el nivell d\'aquesta notificació. Toca per proporcionar suggeriments."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"El nivell d\'aquesta notificació s\'ha disminuït a Silenci. Toca per proporcionar suggeriments."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Aquesta notificació s\'ha classificat amb un nivell superior. Toca per proporcionar suggeriments."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Aquesta notificació s\'ha classificat amb un nivell inferior. Toca per proporcionar suggeriments."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificació d\'informació del mode de rutina"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"És possible que la bateria s\'esgoti abans de la càrrega habitual"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"S\'ha activat l\'estalvi de bateria per prolongar-ne la durada"</string>

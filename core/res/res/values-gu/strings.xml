@@ -2009,6 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"માઇક્રોફોન"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"આ તમારી સ્ક્રીન પર અન્ય ઍપની ઉપર દેખાશે"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"પ્રતિસાદ આપો"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"આ નોટિફિકેશનને ડિફૉલ્ટ તરીકે બઢતી આપવામાં આવી. પ્રતિસાદ આપવા માટે ટૅપ કરો."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"નોટિફિકેશનને સાઇલન્ટ પર અવનત કરવામાં આવ્યું. પ્રતિસાદ આપવા માટે ટૅપ કરો."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"આ નોટિફિકેશનને ઉપલી રેંક આપવામાં આવી. પ્રતિસાદ આપવા માટે ટૅપ કરો."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"આ નોટિફિકેશનને નીચલી રેંક આપવામાં આવી. પ્રતિસાદ આપવા માટે ટૅપ કરો."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"રૂટિન મોડની માહિતીનું નોટિફિકેશન"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"સામાન્ય રીતે ચાર્જ કરવાના સમય પહેલાં બૅટરી સમાપ્ત થઈ શકે છે"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"બૅટરી આવરદા વધારવા માટે બૅટરી સેવર ચાલુ કર્યું"</string>

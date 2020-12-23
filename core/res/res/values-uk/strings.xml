@@ -2075,6 +2075,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Мікрофон"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"показ поверх інших додатків на екрані"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Надати відгук"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Важливість цього сповіщення підвищено до рівня \"За умовчанням\". Натисніть, щоб надіслати відгук."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Важливість цього сповіщення знижено до рівня \"Без звуку\". Натисніть, щоб надіслати відгук."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Важливість цього сповіщення підвищено. Натисніть, щоб надіслати відгук."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Важливість цього сповіщення знижено. Натисніть, щоб надіслати відгук."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Сповіщення про послідовнсть дій"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Акумулятор може розрядитися раніше ніж зазвичай"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Режим енергозбереження активовано для збільшення часу роботи акумулятора"</string>
