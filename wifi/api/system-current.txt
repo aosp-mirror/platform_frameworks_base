@@ -441,7 +441,7 @@ package android.net.wifi {
     method public static void registerServiceWrappers();
   }
 
-  public class WifiInfo implements android.os.Parcelable {
+  public class WifiInfo implements android.os.Parcelable android.net.TransportInfo {
     method public double getLostTxPacketsPerSecond();
     method @Nullable public String getRequestingPackageName();
     method public double getRetriedTxPacketsPerSecond();
