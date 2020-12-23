@@ -1,5 +1,5 @@
 /*
- * Copyright 2008, The Android Open Source Project
+ * Copyright 2020, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@
 #include <netinet/udp.h>
 
 #include <DnsProxydProtocol.h> // NETID_USE_LOCAL_NAMESERVERS
-#include <android_runtime/AndroidRuntime.h>
 #include <cutils/properties.h>
 #include <nativehelper/JNIPlatformHelp.h>
 #include <nativehelper/ScopedLocalRef.h>
@@ -226,11 +225,6 @@ static jobject android_net_utils_getDnsNetwork(JNIEnv *env, jobject thiz) {
             class_Network, ctor, dnsNetId & ~NETID_USE_LOCAL_NAMESERVERS, privateDnsBypass);
 }
 
-static void android_net_utils_setAllowNetworkingForProcess(JNIEnv *env, jobject thiz,
-                                                           jboolean hasConnectivity) {
-    setAllowNetworkingForProcess(hasConnectivity == JNI_TRUE);
-}
-
 static jobject android_net_utils_getTcpRepairWindow(JNIEnv *env, jobject thiz, jobject javaFd) {
     if (javaFd == NULL) {
         jniThrowNullPointerException(env, NULL);
@@ -288,7 +282,6 @@ static const JNINativeMethod gNetworkUtilMethods[] = {
     { "resNetworkResult", "(Ljava/io/FileDescriptor;)Landroid/net/DnsResolver$DnsResponse;", (void*) android_net_utils_resNetworkResult },
     { "resNetworkCancel", "(Ljava/io/FileDescriptor;)V", (void*) android_net_utils_resNetworkCancel },
     { "getDnsNetwork", "()Landroid/net/Network;", (void*) android_net_utils_getDnsNetwork },
-    { "setAllowNetworkingForProcess", "(Z)V", (void *)android_net_utils_setAllowNetworkingForProcess },
 };
 // clang-format on
 
