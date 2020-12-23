@@ -36,6 +36,7 @@ interface IAppSearchManager {
      *     surfaces.
      * @param forceOverride Whether to apply the new schema even if it is incompatible. All
      *     incompatible documents will be deleted.
+     * @param userId Id of the calling user
      * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
      *     {@link AppSearchResult}&lt;{@link Void}&gt;.
      */
@@ -44,6 +45,7 @@ interface IAppSearchManager {
         in List<Bundle> schemaBundles,
         in List<String> schemasNotPlatformSurfaceable,
         boolean forceOverride,
+        in int userId,
         in IAppSearchResultCallback callback);
 
 
@@ -51,17 +53,19 @@ interface IAppSearchManager {
      * Retrieves the AppSearch schema for this database.
      *
      * @param databaseName  The name of the database to retrieve.
+     * @param userId Id of the calling user
      * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
      *     {@link AppSearchResult}&lt;{@link List}&lt;{@link Bundle}&gt;&gt;, where the value are
      *     AppSearchSchema bundle.
      */
-    void getSchema(in String databaseName, in IAppSearchResultCallback callback);
+    void getSchema(in String databaseName, in int userId, in IAppSearchResultCallback callback);
 
     /**
      * Inserts documents into the index.
      *
      * @param databaseName  The name of the database where this document lives.
      * @param documentBundes List of GenericDocument bundles.
+     * @param userId Id of the calling user
      * @param callback
      *     If the call fails to start, {@link IAppSearchBatchResultCallback#onSystemError}
      *     will be called with the cause throwable. Otherwise,
@@ -72,6 +76,7 @@ interface IAppSearchManager {
     void putDocuments(
         in String databaseName,
         in List<Bundle> documentBundles,
+        in int userId,
         in IAppSearchBatchResultCallback callback);
 
     /**
@@ -80,6 +85,7 @@ interface IAppSearchManager {
      * @param databaseName  The databaseName this document resides in.
      * @param namespace    The namespace this document resides in.
      * @param uris The URIs of the documents to retrieve
+     * @param userId Id of the calling user
      * @param callback
      *     If the call fails to start, {@link IAppSearchBatchResultCallback#onSystemError}
      *     will be called with the cause throwable. Otherwise,
@@ -91,6 +97,7 @@ interface IAppSearchManager {
         in String databaseName,
         in String namespace,
         in List<String> uris,
+        in int userId,
         in IAppSearchBatchResultCallback callback);
 
     /**
@@ -99,6 +106,7 @@ interface IAppSearchManager {
      * @param databaseName The databaseName this query for.
      * @param queryExpression String to search for
      * @param searchSpecBundle SearchSpec bundle
+     * @param userId Id of the calling user
      * @param callback {@link AppSearchResult}&lt;{@link Bundle}&gt; of performing this
      *         operation.
      */
@@ -106,6 +114,7 @@ interface IAppSearchManager {
         in String databaseName,
         in String queryExpression,
         in Bundle searchSpecBundle,
+        in int userId,
         in IAppSearchResultCallback callback);
 
     /**
@@ -114,12 +123,14 @@ interface IAppSearchManager {
      *
      * @param queryExpression String to search for
      * @param searchSpecBundle SearchSpec bundle
+     * @param userId Id of the calling user
      * @param callback {@link AppSearchResult}&lt;{@link Bundle}&gt; of performing this
      *         operation.
      */
     void globalQuery(
         in String queryExpression,
         in Bundle searchSpecBundle,
+        in int userId,
         in IAppSearchResultCallback callback);
 
     /**
@@ -127,18 +138,20 @@ interface IAppSearchManager {
      * next-page token is invalid or all pages have been returned.
      *
      * @param nextPageToken The token of pre-loaded results of previously executed query.
+     * @param userId Id of the calling user
      * @param callback {@link AppSearchResult}&lt;{@link Bundle}&gt; of performing this
      *                  operation.
      */
-    void getNextPage(in long nextPageToken, in IAppSearchResultCallback callback);
+    void getNextPage(in long nextPageToken, in int userId, in IAppSearchResultCallback callback);
 
     /**
      * Invalidates the next-page token so that no more results of the related query can be returned.
      *
      * @param nextPageToken The token of pre-loaded results of previously executed query to be
      *                      Invalidated.
+     * @param userId Id of the calling user
      */
-    void invalidateNextPageToken(in long nextPageToken);
+    void invalidateNextPageToken(in long nextPageToken, in int userId);
 
     /**
      * Removes documents by URI.
@@ -146,6 +159,7 @@ interface IAppSearchManager {
      * @param databaseName The databaseName the document is in.
      * @param namespace    Namespace of the document to remove.
      * @param uris The URIs of the documents to delete
+     * @param userId Id of the calling user
      * @param callback
      *     If the call fails to start, {@link IAppSearchBatchResultCallback#onSystemError}
      *     will be called with the cause throwable. Otherwise,
@@ -158,6 +172,7 @@ interface IAppSearchManager {
         in String databaseName,
         in String namespace,
         in List<String> uris,
+        in int userId,
         in IAppSearchBatchResultCallback callback);
 
     /**
@@ -166,6 +181,7 @@ interface IAppSearchManager {
      * @param databaseName The databaseName this query for.
      * @param queryExpression String to search for
      * @param searchSpecBundle SearchSpec bundle
+     * @param userId Id of the calling user
      * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
      *     {@link AppSearchResult}&lt;{@link Void}&gt;.
      */
@@ -173,13 +189,15 @@ interface IAppSearchManager {
         in String databaseName,
         in String queryExpression,
         in Bundle searchSpecBundle,
+        in int userId,
         in IAppSearchResultCallback callback);
 
     /**
      * Creates and initializes AppSearchImpl for the calling app.
      *
+     * @param userId Id of the calling user
      * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
      *     {@link AppSearchResult}&lt;{@link Void}&gt;.
      */
-    void initialize(in IAppSearchResultCallback callback);
+    void initialize(in int userId, in IAppSearchResultCallback callback);
 }
