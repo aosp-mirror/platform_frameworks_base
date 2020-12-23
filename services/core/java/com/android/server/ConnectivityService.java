@@ -1779,12 +1779,28 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private INetworkManagementEventObserver mDataActivityObserver = new BaseNetworkObserver() {
         @Override
-        public void interfaceClassDataActivityChanged(int networkType, boolean active, long tsNanos,
-                int uid) {
-            sendDataActivityBroadcast(networkType, active, tsNanos);
+        public void interfaceClassDataActivityChanged(int transportType, boolean active,
+                long tsNanos, int uid) {
+            sendDataActivityBroadcast(transportTypeToLegacyType(transportType), active, tsNanos);
         }
     };
 
+    // This is deprecated and only to support legacy use cases.
+    private int transportTypeToLegacyType(int type) {
+        switch (type) {
+            case NetworkCapabilities.TRANSPORT_CELLULAR:
+                return ConnectivityManager.TYPE_MOBILE;
+            case NetworkCapabilities.TRANSPORT_WIFI:
+                return ConnectivityManager.TYPE_WIFI;
+            case NetworkCapabilities.TRANSPORT_BLUETOOTH:
+                return ConnectivityManager.TYPE_BLUETOOTH;
+            case NetworkCapabilities.TRANSPORT_ETHERNET:
+                return ConnectivityManager.TYPE_ETHERNET;
+            default:
+                loge("Unexpected transport in transportTypeToLegacyType: " + type);
+        }
+        return ConnectivityManager.TYPE_NONE;
+    }
     /**
      * Ensures that the system cannot call a particular method.
      */
@@ -2368,13 +2384,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
             timeout = Settings.Global.getInt(mContext.getContentResolver(),
                                              Settings.Global.DATA_ACTIVITY_TIMEOUT_MOBILE,
                                              10);
-            type = ConnectivityManager.TYPE_MOBILE;
+            type = NetworkCapabilities.TRANSPORT_CELLULAR;
         } else if (networkAgent.networkCapabilities.hasTransport(
                 NetworkCapabilities.TRANSPORT_WIFI)) {
             timeout = Settings.Global.getInt(mContext.getContentResolver(),
                                              Settings.Global.DATA_ACTIVITY_TIMEOUT_WIFI,
                                              15);
-            type = ConnectivityManager.TYPE_WIFI;
+            type = NetworkCapabilities.TRANSPORT_WIFI;
         } else {
             return; // do not track any other networks
         }

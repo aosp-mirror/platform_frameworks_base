@@ -7202,7 +7202,7 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.connect(true);
         networkCallback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
         verify(mNetworkManagementService, times(1)).addIdleTimer(eq(MOBILE_IFNAME), anyInt(),
-                eq(ConnectivityManager.TYPE_MOBILE));
+                eq(NetworkCapabilities.TRANSPORT_CELLULAR));
 
         mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
         final LinkProperties wifiLp = new LinkProperties();
@@ -7216,7 +7216,7 @@ public class ConnectivityServiceTest {
         networkCallback.expectCallback(CallbackEntry.LOSING, mCellNetworkAgent);
         networkCallback.expectCapabilitiesWith(NET_CAPABILITY_VALIDATED, mWiFiNetworkAgent);
         verify(mNetworkManagementService, times(1)).addIdleTimer(eq(WIFI_IFNAME), anyInt(),
-                eq(ConnectivityManager.TYPE_WIFI));
+                eq(NetworkCapabilities.TRANSPORT_WIFI));
         verify(mNetworkManagementService, times(1)).removeIdleTimer(eq(MOBILE_IFNAME));
 
         // Disconnect wifi and switch back to cell
@@ -7226,7 +7226,7 @@ public class ConnectivityServiceTest {
         assertNoCallbacks(networkCallback);
         verify(mNetworkManagementService, times(1)).removeIdleTimer(eq(WIFI_IFNAME));
         verify(mNetworkManagementService, times(1)).addIdleTimer(eq(MOBILE_IFNAME), anyInt(),
-                eq(ConnectivityManager.TYPE_MOBILE));
+                eq(NetworkCapabilities.TRANSPORT_CELLULAR));
 
         // reconnect wifi
         mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
