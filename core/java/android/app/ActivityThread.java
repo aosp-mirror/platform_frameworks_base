@@ -90,6 +90,7 @@ import android.graphics.Typeface;
 import android.hardware.display.DisplayManagerGlobal;
 import android.inputmethodservice.InputMethodService;
 import android.media.MediaFrameworkInitializer;
+import android.media.MediaFrameworkPlatformInitializer;
 import android.media.MediaServiceManager;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
@@ -7701,6 +7702,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     public static void initializeMainlineModules() {
         TelephonyFrameworkInitializer.setTelephonyServiceManager(new TelephonyServiceManager());
         StatsFrameworkInitializer.setStatsServiceManager(new StatsServiceManager());
+        MediaFrameworkPlatformInitializer.setMediaServiceManager(new MediaServiceManager());
         MediaFrameworkInitializer.setMediaServiceManager(new MediaServiceManager());
     }
 

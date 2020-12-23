@@ -4593,68 +4593,6 @@ package android.media {
     field @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_OUTPUT) public static final int RADIO_TUNER = 1998; // 0x7ce
   }
 
-  public final class MediaTranscodeManager {
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingSession enqueueRequest(@NonNull android.media.MediaTranscodeManager.TranscodingRequest, @NonNull java.util.concurrent.Executor, @NonNull android.media.MediaTranscodeManager.OnTranscodingFinishedListener) throws java.io.FileNotFoundException, android.media.MediaTranscodingException.ServiceNotAvailableException;
-    field public static final int PRIORITY_REALTIME = 1; // 0x1
-    field public static final int TRANSCODING_TYPE_VIDEO = 1; // 0x1
-  }
-
-  @java.lang.FunctionalInterface public static interface MediaTranscodeManager.OnTranscodingFinishedListener {
-    method public void onTranscodingFinished(@NonNull android.media.MediaTranscodeManager.TranscodingSession);
-  }
-
-  public static final class MediaTranscodeManager.TranscodingRequest {
-    method public int getClientPid();
-    method public int getClientUid();
-    method @NonNull public android.net.Uri getDestinationUri();
-    method public int getPriority();
-    method @NonNull public android.net.Uri getSourceUri();
-    method public int getType();
-    method @Nullable public android.media.MediaFormat getVideoTrackFormat();
-  }
-
-  public static final class MediaTranscodeManager.TranscodingRequest.Builder {
-    ctor public MediaTranscodeManager.TranscodingRequest.Builder();
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest build();
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setClientPid(int);
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setClientUid(int);
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setDestinationUri(@NonNull android.net.Uri);
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setPriority(int);
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setSourceUri(@NonNull android.net.Uri);
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setType(int);
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setVideoTrackFormat(@NonNull android.media.MediaFormat);
-  }
-
-  public static class MediaTranscodeManager.TranscodingRequest.MediaFormatResolver {
-    ctor public MediaTranscodeManager.TranscodingRequest.MediaFormatResolver();
-    method @Nullable public android.media.MediaFormat resolveVideoFormat();
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.MediaFormatResolver setClientCapabilities(@NonNull android.media.ApplicationMediaCapabilities);
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.MediaFormatResolver setSourceVideoFormatHint(@NonNull android.media.MediaFormat);
-    method public boolean shouldTranscode();
-  }
-
-  public static final class MediaTranscodeManager.TranscodingSession {
-    method public void cancel();
-    method @IntRange(from=0, to=100) public int getProgress();
-    method public int getResult();
-    method public int getSessionId();
-    method public int getStatus();
-    method public void setOnProgressUpdateListener(@NonNull java.util.concurrent.Executor, @Nullable android.media.MediaTranscodeManager.TranscodingSession.OnProgressUpdateListener);
-    method public void setOnProgressUpdateListener(int, @NonNull java.util.concurrent.Executor, @Nullable android.media.MediaTranscodeManager.TranscodingSession.OnProgressUpdateListener);
-    field public static final int RESULT_CANCELED = 4; // 0x4
-    field public static final int RESULT_ERROR = 3; // 0x3
-    field public static final int RESULT_NONE = 1; // 0x1
-    field public static final int RESULT_SUCCESS = 2; // 0x2
-    field public static final int STATUS_FINISHED = 3; // 0x3
-    field public static final int STATUS_PAUSED = 4; // 0x4
-    field public static final int STATUS_PENDING = 1; // 0x1
-    field public static final int STATUS_RUNNING = 2; // 0x2
-  }
-
-  @java.lang.FunctionalInterface public static interface MediaTranscodeManager.TranscodingSession.OnProgressUpdateListener {
-    method public void onProgressUpdate(@NonNull android.media.MediaTranscodeManager.TranscodingSession, @IntRange(from=0, to=100) int);
-  }
-
   public class PlayerProxy {
     method public void pause();
     method public void setPan(float);

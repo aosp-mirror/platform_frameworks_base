@@ -36,7 +36,8 @@ java_library {
         "framework_media_annotation",
     ],
     static_libs: [
-        "exoplayer2-extractor"
+        "exoplayer2-extractor",
+        "mediatranscoding_aidl_interface-java",
     ],
     jarjar_rules: "jarjar_rules.txt",
 
@@ -57,10 +58,12 @@ java_library {
 filegroup {
     name: "updatable-media-srcs",
     srcs: [
+        "java/android/media/MediaFrameworkInitializer.java",
         ":media-aidl-srcs",
         ":mediaparceledlistslice-java-srcs",
         ":mediaparser-srcs",
         ":mediasession2-java-srcs",
+        ":mediatranscoding-srcs",
     ],
     visibility: ["//frameworks/base"],
 }
@@ -94,6 +97,17 @@ filegroup {
     name: "mediaparser-srcs",
     srcs: [
         "java/android/media/MediaParser.java"
+    ],
+    path: "java",
+}
+
+filegroup {
+    name: "mediatranscoding-srcs",
+    srcs: [
+        "java/android/media/ApplicationMediaCapabilities.java",
+        "java/android/media/MediaFeature.java",
+        "java/android/media/MediaTranscodeManager.java",
+        "java/android/media/MediaTranscodingException.java",
     ],
     path: "java",
 }
