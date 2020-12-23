@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.collection.legacy;
 
 import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
 
+import android.annotation.Nullable;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
 
@@ -60,11 +61,16 @@ public class OnUserInteractionCallbackImplLegacy implements OnUserInteractionCal
      * 1. Manually dismisses a notification {@see ExpandableNotificationRow}.
      * 2. Clicks on a notification with flag {@link android.app.Notification#FLAG_AUTO_CANCEL}.
      * {@see StatusBarNotificationActivityStarter}
+     *
+     * @param groupSummaryToDismiss the group summary that should be dismissed
+     *                              along with this dismissal. If null, does not additionally
+     *                              dismiss any notifications.
      */
     @Override
     public void onDismiss(
             NotificationEntry entry,
-            @NotificationListenerService.NotificationCancelReason int cancellationReason
+            @NotificationListenerService.NotificationCancelReason int cancellationReason,
+            @Nullable NotificationEntry groupSummaryToDismiss
     ) {
         int dismissalSurface = NotificationStats.DISMISSAL_SHADE;
         if (mHeadsUpManager.isAlerting(entry.getKey())) {
@@ -73,11 +79,8 @@ public class OnUserInteractionCallbackImplLegacy implements OnUserInteractionCal
             dismissalSurface = NotificationStats.DISMISSAL_AOD;
         }
 
-        if (mGroupMembershipManager.isOnlyChildInGroup(entry)) {
-            NotificationEntry groupSummary = mGroupMembershipManager.getLogicalGroupSummary(entry);
-            if (groupSummary.isClearable()) {
-                onDismiss(groupSummary, cancellationReason);
-            }
+        if (groupSummaryToDismiss != null) {
+            onDismiss(groupSummaryToDismiss, cancellationReason, null);
         }
 
         mNotificationEntryManager.performRemoveNotification(
@@ -99,6 +102,21 @@ public class OnUserInteractionCallbackImplLegacy implements OnUserInteractionCal
     @Override
     public void onImportanceChanged(NotificationEntry entry) {
         mVisualStabilityManager.temporarilyAllowReordering();
+    }
+
+    /**
+     * @param entry that is being dismissed
+     * @return the group summary to dismiss along with this entry if this is the last entry in
+     * the group. Else, returns null.
+     */
+    @Override
+    @Nullable
+    public NotificationEntry getGroupSummaryToDismiss(NotificationEntry entry) {
+        if (mGroupMembershipManager.isOnlyChildInGroup(entry)) {
+            NotificationEntry groupSummary = mGroupMembershipManager.getLogicalGroupSummary(entry);
+            return groupSummary.isClearable() ? groupSummary : null;
+        }
+        return null;
     }
 }
 

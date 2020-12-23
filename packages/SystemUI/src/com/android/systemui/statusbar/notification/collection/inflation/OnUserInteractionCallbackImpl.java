@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.collection.inflation;
 
 import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
 
+import android.annotation.Nullable;
 import android.os.SystemClock;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
@@ -29,6 +30,7 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.coordinator.VisualStabilityCoordinator;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
+import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -43,19 +45,22 @@ public class OnUserInteractionCallbackImpl implements OnUserInteractionCallback 
     private final HeadsUpManager mHeadsUpManager;
     private final StatusBarStateController mStatusBarStateController;
     private final VisualStabilityCoordinator mVisualStabilityCoordinator;
+    private final GroupMembershipManager mGroupMembershipManager;
 
     public OnUserInteractionCallbackImpl(
             NotifPipeline notifPipeline,
             NotifCollection notifCollection,
             HeadsUpManager headsUpManager,
             StatusBarStateController statusBarStateController,
-            VisualStabilityCoordinator visualStabilityCoordinator
+            VisualStabilityCoordinator visualStabilityCoordinator,
+            GroupMembershipManager groupMembershipManager
     ) {
         mNotifPipeline = notifPipeline;
         mNotifCollection = notifCollection;
         mHeadsUpManager = headsUpManager;
         mStatusBarStateController = statusBarStateController;
         mVisualStabilityCoordinator = visualStabilityCoordinator;
+        mGroupMembershipManager = groupMembershipManager;
     }
 
     /**
@@ -67,13 +72,18 @@ public class OnUserInteractionCallbackImpl implements OnUserInteractionCallback 
     @Override
     public void onDismiss(
             NotificationEntry entry,
-            @NotificationListenerService.NotificationCancelReason int cancellationReason
+            @NotificationListenerService.NotificationCancelReason int cancellationReason,
+            @Nullable NotificationEntry groupSummaryToDismiss
     ) {
         int dismissalSurface = NotificationStats.DISMISSAL_SHADE;
         if (mHeadsUpManager.isAlerting(entry.getKey())) {
             dismissalSurface = NotificationStats.DISMISSAL_PEEK;
         } else if (mStatusBarStateController.isDozing()) {
             dismissalSurface = NotificationStats.DISMISSAL_AOD;
+        }
+
+        if (groupSummaryToDismiss != null) {
+            onDismiss(groupSummaryToDismiss, cancellationReason, null);
         }
 
         mNotifCollection.dismissNotification(
@@ -95,5 +105,22 @@ public class OnUserInteractionCallbackImpl implements OnUserInteractionCallback 
         mVisualStabilityCoordinator.temporarilyAllowSectionChanges(
                 entry,
                 SystemClock.uptimeMillis());
+    }
+
+    /**
+     * @param entry that is being dismissed
+     * @return the group summary to dismiss along with this entry if this is the last entry in
+     * the group. Else, returns null.
+     */
+    @Override
+    @Nullable
+    public NotificationEntry getGroupSummaryToDismiss(NotificationEntry entry) {
+        if (entry.getParent() != null
+                && entry.getParent().getSummary() != null
+                && mGroupMembershipManager.isOnlyChildInGroup(entry)) {
+            NotificationEntry groupSummary = entry.getParent().getSummary();
+            return groupSummary.isClearable() ? groupSummary : null;
+        }
+        return null;
     }
 }

@@ -179,6 +179,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         when(mEntryManager.getVisibleNotifications()).thenReturn(mActiveNotifications);
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
         when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
+        when(mOnUserInteractionCallback.getGroupSummaryToDismiss(mNotificationRow.getEntry()))
+                .thenReturn(null);
 
         mNotificationActivityStarter =
                 new StatusBarNotificationActivityStarter.Builder(
@@ -268,7 +270,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                 eq(sbn.getKey()), any(NotificationVisibility.class));
         // Notification calls dismiss callback to remove notification due to FLAG_AUTO_CANCEL
         orderVerifier.verify(mOnUserInteractionCallback).onDismiss(mNotificationRow.getEntry(),
-                REASON_CLICK);
+                REASON_CLICK, null);
     }
 
     @Test
@@ -298,7 +300,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
 
         // Notification should not be cancelled.
         verify(mOnUserInteractionCallback, never()).onDismiss(eq(mNotificationRow.getEntry()),
-                anyInt());
+                anyInt(), eq(null));
     }
 
     @Test
