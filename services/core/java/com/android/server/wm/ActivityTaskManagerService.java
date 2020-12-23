@@ -183,6 +183,7 @@ import android.os.IUserManager;
 import android.os.LocaleList;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.Process;
@@ -4936,6 +4937,21 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             return false;
         }
         return allUids.contains(uid);
+    }
+
+    @Override
+    public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
+            throws RemoteException {
+        try {
+            return super.onTransact(code, data, reply, flags);
+        } catch (RuntimeException e) {
+            if (!(e instanceof SecurityException)) {
+                Slog.w(TAG, "Activity Task Manager onTransact aborts "
+                        + " UID:" + Binder.getCallingUid()
+                        + " PID:" + Binder.getCallingPid(), e);
+            }
+            throw e;
+        }
     }
 
     final class H extends Handler {
