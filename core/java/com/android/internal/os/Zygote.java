@@ -24,7 +24,6 @@ import android.content.pm.ApplicationInfo;
 import android.net.Credentials;
 import android.net.LocalServerSocket;
 import android.net.LocalSocket;
-import android.net.NetworkUtils;
 import android.os.FactoryTest;
 import android.os.IVold;
 import android.os.Process;
@@ -34,6 +33,8 @@ import android.provider.DeviceConfig;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
+
+import com.android.internal.net.NetworkUtilsInternal;
 
 import dalvik.annotation.optimization.FastNative;
 import dalvik.system.ZygoteHooks;
@@ -352,7 +353,7 @@ public final class Zygote {
 
             // If no GIDs were specified, don't make any permissions changes based on groups.
             if (gids != null && gids.length > 0) {
-                NetworkUtils.setAllowNetworkingForProcess(containsInetGid(gids));
+                NetworkUtilsInternal.setAllowNetworkingForProcess(containsInetGid(gids));
             }
         }
 
