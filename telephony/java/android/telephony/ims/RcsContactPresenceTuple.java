@@ -39,6 +39,10 @@ public class RcsContactPresenceTuple implements Parcelable {
     /** The service id of the MMTEL */
     public static final String SERVICE_ID_MMTEL = "org.3gpp.urn:urn-7:3gpp-service.ims.icsi.mmtel";
 
+    /** The service id of the Call Composer */
+    public static final String SERVICE_ID_CALL_COMPOSER =
+            "org.3gpp.urn:urn-7:3gppservice.ims.icsi.gsma.callcomposer";
+
     /** The service capabilities is available. */
     public static final String TUPLE_BASIC_STATUS_OPEN = "open";
 
