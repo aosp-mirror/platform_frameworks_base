@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Ekran görüntüsü kaydedilemedi"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Ekran görüntüsünün kaydedilebilmesi için cihazın kilidi açık olmalıdır"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Tekrar ekran görüntüsü almayı deneyin"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Depolama alanı sınırlı olduğundan ekran görüntüsü kaydedilemiyor"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Ekran görüntüsü kaydedilemiyor"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Uygulama veya kuruluşunuz, ekran görüntüsü alınmasına izin vermiyor."</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Düzenle"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Ekran görüntüsünü düzenle"</string>
@@ -548,7 +548,7 @@
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"Yöneticiniz,cihazınızdaki trafiği izleyen ağ günlük kaydını açtı.\n\nDaha fazla bilgi için yöneticinizle iletişim kurun."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"VPN bağlantısı kurması için bir uygulamaya izin verdiniz.\n\nBu uygulama, cihazınızın yanı sıra e-postalarınız, uygulamalarınız ve web siteleriniz dahil olmak üzere ağ etkinliğinizi izleyebilir."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"İş profiliniz <xliff:g id="ORGANIZATION">%1$s</xliff:g> tarafından yönetiliyor.\n\nYöneticiniz e-postalar, uygulamalar ve web siteleri de dahil olmak üzere ağ etkinliğinizi izleyebilir.\n\nDaha fazla bilgi için yöneticinizle iletişim kurun.\n\nAyrıca, ağ etkinliğinizi izleyebilen bir VPN\'ye de bağlısınız."</string>
-    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Bu cihaz ebeveyniniz tarafından yönetiliyor. Kullandığınız uygulamalar, konumunuz ve ekran başında kalma süreniz gibi bilgiler ebeveyniniz tarafından görülüp yönetebilir."</string>
+    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Bu cihaz ebeveyniniz tarafından yönetiliyor. Kullandığınız uygulamalar, konumunuz ve ekran başında kalma süreniz gibi bilgiler ebeveyniniz tarafından görülüp yönetilebilir."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="monitoring_description_app" msgid="376868879287922929">"E-postalarınız, uygulamalarınız ve web siteleriniz dahil olmak üzere ağ etkinliğinizi izleyebilen <xliff:g id="APPLICATION">%1$s</xliff:g> uygulamasına bağlısınız."</string>
     <string name="monitoring_description_app_personal" msgid="1970094872688265987">"E-postalarınız, uygulamalarınız ve web siteleriniz dahil olmak üzere kişisel ağ etkinliğinizi izleyebilen <xliff:g id="APPLICATION">%1$s</xliff:g> uygulamasına bağlısınız."</string>
@@ -698,14 +698,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Telefon ayarlarına bağlı olarak zili çalabilir veya titreyebilir <xliff:g id="APP_NAME">%1$s</xliff:g> adlı uygulamadan görüşmeler varsayılan olarak baloncukla gösterilir."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Kayan kısayolla dikkatinizi bu içerik üzerinde tutar."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Bu bildirimin ses çıkarması veya titreşmesi gerekip gerekmediğine sistem karar versin"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Durum:&lt;/b&gt; Varsayılana yükseltildi"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Durum:&lt;/b&gt; Sessize Düşürüldü"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Durum:&lt;/b&gt; Daha Yüksek Sıralandı"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Durum:&lt;/b&gt; Daha Düşük Sıralandı"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Görüşme bölümünün üstünde gösterilir, kayan baloncuk olarak görünür, kilit ekranında profil resmini görüntüler"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ayarlar"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Öncelik"</string>
@@ -724,14 +720,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"Bu uygulama, ekranınızdaki diğer uygulamaların üzerinde görüntüleniyor ve mikrofon ile kamerayı kullanıyor."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"Ayarlar"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"Tamam"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"Bu bildirim, sistem tarafından otomatik olarak &lt;b&gt;Varsayılana yükseltildi&lt;/b&gt;."</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"Bu bildirim, sistem tarafından otomatik olarak &lt;b&gt;Sessize düşürüldü&lt;/b&gt;."</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"Bu bildirim, gölgenizde otomatik olarak &lt;b&gt;daha yüksek sıralandı&lt;/b&gt;."</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"Bu bildirim, gölgenizde otomatik olarak &lt;b&gt;daha düşük sıralandı&lt;/b&gt;."</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"Bu doğru muydu?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Geri bildiriminiz için teşekkürler!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"Tamam"</string>

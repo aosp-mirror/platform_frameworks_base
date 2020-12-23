@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Impossibile salvare lo screenshot"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"È necessario sbloccare il dispositivo per poter salvare lo screenshot"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Riprova ad acquisire lo screenshot"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Impossibile salvare lo screenshot a causa dello spazio di archiviazione limitato"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Impossibile salvare lo screenshot"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"L\'acquisizione di screenshot non è consentita dall\'app o dall\'organizzazione"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Modifica"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Modifica screenshot"</string>
@@ -499,7 +499,7 @@
     <string name="profile_owned_footer" msgid="2756770645766113964">"Il profilo potrebbe essere monitorato"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"La rete potrebbe essere monitorata"</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"La rete potrebbe essere monitorata"</string>
-    <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Questo dispositivo è gestito da uno dei tuoi genitori"</string>
+    <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Questo dispositivo è gestito dai tuoi genitori"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Questo dispositivo appartiene alla tua organizzazione, che potrebbe monitorare il traffico di rete"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Questo dispositivo appartiene a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, che potrebbe monitorare il traffico di rete"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Questo dispositivo appartiene alla tua organizzazione ed è collegato a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
@@ -548,7 +548,7 @@
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"L\'amministratore ha attivato i log di rete, che consentono di monitorare il traffico sul dispositivo.\n\nPer ulteriori informazioni, contatta l\'amministratore."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"Hai autorizzato l\'app a configurare una connessione VPN.\n\nQuesta app può monitorare il tuo dispositivo e l\'attività di rete, inclusi email, app e siti web."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"Il tuo profilo di lavoro è gestito da <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nL\'amministratore può monitorare la tua attività di rete, inclusi siti web, email e app.\n\nPer ulteriori informazioni, contatta l\'amministratore.\n\nSei inoltre connesso a una VPN, da cui è possibile monitorare la tua attività di rete."</string>
-    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Questo dispositivo è gestito da uno dei tuoi genitori. Il genitore può visualizzare e gestire informazioni quali le app che usi, la tua posizione e il tuo tempo di utilizzo."</string>
+    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Questo dispositivo è gestito da uno dei tuoi genitori, il quale può visualizzare e gestire informazioni come le app che usi, la tua posizione e il tuo tempo di utilizzo."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="monitoring_description_app" msgid="376868879287922929">"Sei collegato a <xliff:g id="APPLICATION">%1$s</xliff:g>, da cui è possibile monitorare la tua attività di rete, inclusi siti web, email e app."</string>
     <string name="monitoring_description_app_personal" msgid="1970094872688265987">"Sei connesso a <xliff:g id="APPLICATION">%1$s</xliff:g>, da cui è possibile monitorare la tua attività di rete personale, inclusi email, app e siti web."</string>
@@ -698,14 +698,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Può suonare o vibrare in base alle impostazioni del telefono. Conversazioni dalla bolla <xliff:g id="APP_NAME">%1$s</xliff:g> per impostazione predefinita."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Mantiene la tua attenzione con una scorciatoia mobile a questi contenuti."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Fai stabilire al sistema se questa notifica deve emettere suoni o vibrazioni"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Stato:&lt;/b&gt; promossa a Predefinita"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Stato:&lt;/b&gt; retrocessa a Silenziosa"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Stato:&lt;/b&gt; posizionata più in alto"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Stato:&lt;/b&gt; posizionata più in basso"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Appare in cima alla sezione delle conversazioni e sotto forma di bolla mobile, mostra l\'immagine del profilo nella schermata di blocco"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Impostazioni"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorità"</string>
@@ -724,14 +720,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"Questa app è visualizzata sopra altre app sullo schermo e sta utilizzando il microfono e la fotocamera."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"Impostazioni"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"Ok"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"Questa notifica è stata &lt;b&gt;promossa automaticamente a Predefinita&lt;/b&gt; dal sistema."</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"Questa notifica è stata &lt;b&gt;retrocessa automaticamente a Silenziosa&lt;/b&gt; dal sistema."</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"Questa notifica è stata &lt;b&gt;posizionata automaticamente più in alto&lt;/b&gt; nell\'area notifiche."</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"Questa notifica è stata &lt;b&gt;posizionata automaticamente più in basso&lt;/b&gt; nell\'area notifiche."</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"Era corretto?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Grazie per il feedback."</string>
     <string name="feedback_ok" msgid="6481426753298857144">"OK"</string>

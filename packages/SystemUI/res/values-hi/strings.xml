@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"स्क्रीनशॉट सेव नहीं किया जा सका"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"स्क्रीनशॉट सेव करने के लिए डिवाइस का अनलॉक होना ज़रूरी है"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"स्क्रीनशॉट दोबारा लेने की कोशिश करें"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"मेमोरी कम होने की वजह से स्क्रीनशॉट सेव नहीं किया जा सका"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"स्क्रीनशॉट को सेव नहीं किया जा सका"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ऐप्लिकेशन या आपका संगठन स्क्रीनशॉट लेने की अनुमति नहीं देता"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"बदलाव करें"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"स्क्रीनशॉट में बदलाव करें"</string>
@@ -550,7 +550,7 @@
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"आपके एडमिन ने नेटवर्क लॉग करना चालू कर दिया है, जो आपके डिवाइस पर ट्रैफ़िक की निगरानी करता है.\n\nज़्यादा जानकारी के लिए अपने एडमिन से संपर्क करें."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"आपने किसी ऐप को VPN कनेक्‍शन सेट करने की अनुमति दी है.\n\nयह ऐप ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपके डिवाइस और नेटवर्क की गतिविधि की निगरानी कर सकता है."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> आपकी वर्क प्रोफ़ाइल को प्रबंधित करता है.\n\n आपका एडमिन ईमेल, ऐप्लिकेशन और वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकता है.\n\nऔर जानकारी के लिए अपने एडमिन से संपर्क करें.\n\nआप ऐसे VPN से भी कनेक्‍ट हैं, जो आपकी नेटवर्क गतिविधि की निगरानी कर सकता है."</string>
-    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"इस डिवाइस का प्रबंधन आपके अभिभावक करते हैं. अभिभावक आपके डिवाइस से जुड़ी जानकारी देख सकते हैं और उसे प्रबंधित कर सकते हैं. इनमें, आपके इस्तेमाल किए गए ऐप्लिकेशन, जगह की जानकारी, और डिवाइस के इस्तेमाल में बिताए गए समय जैसी जानकारी शामिल है."</string>
+    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"इस डिवाइस का प्रबंधन आपके अभिभावक करते हैं. अभिभावक आपके डिवाइस से जुड़ी जानकारी देख सकते हैं. साथ ही, इसे प्रबंधित कर सकते हैं. इनमें आपके इस्तेमाल किए गए ऐप्लिकेशन, जगह की जानकारी, और डिवाइस के इस्तेमाल में बिताए गए समय जैसी जानकारी शामिल है."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"वीपीएन"</string>
     <string name="monitoring_description_app" msgid="376868879287922929">"आप <xliff:g id="APPLICATION">%1$s</xliff:g> से कनेक्ट हैं, जो ईमेल, ऐप्लिकेशन और वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकता है."</string>
     <string name="monitoring_description_app_personal" msgid="1970094872688265987">"आप <xliff:g id="APPLICATION">%1$s</xliff:g> से कनेक्‍ट हैं, जो ईमेल, ऐप्‍स और वेबसाइटों सहित आपकी व्‍यक्‍तिगत नेटवर्क गतिविधि की निगरानी कर सकता है."</string>
@@ -700,14 +700,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"फ़ोन की सेटिंग के आधार पर, सूचना आने पर घंटी बज सकती है या वाइब्रेशन हो सकता है. <xliff:g id="APP_NAME">%1$s</xliff:g> में होने वाली बातचीत, डिफ़ॉल्ट रूप से बबल के तौर पर दिखती है."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"फ़्लोट करने वाले शॉर्टकट की मदद से इस सामग्री पर आपका ध्यान बना रहता है."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"सिस्टम को यह तय करने की अनुमति दें कि इस सूचना के मिलने पर आवाज़ हो या वाइब्रेशन हो"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;स्थिति:&lt;/b&gt; लेवल बढ़ाकर, डिफ़ॉल्ट के तौर पर सेट किया गया"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;स्थिति:&lt;/b&gt; लेवल घटाकर, साइलेंट पर सेट किया गया"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;स्थिति:&lt;/b&gt; रैंकिंग में ऊपर किया गया"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;स्थिति:&lt;/b&gt; रैंकिंग में नीचे किया गया"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"इससे बातचीत, सेक्शन में सबसे ऊपर और फ़्लोटिंग बबल के तौर पर दिखती है. साथ ही, लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो दिखती है"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"सेटिंग"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राथमिकता"</string>
@@ -726,14 +722,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"यह ऐप्लिकेशन आपकी स्क्रीन पर इस्तेमाल हो रहे दूसरे ऐप्लिकेशन के ऊपर दिखाया जा रहा है. इसके साथ ही यह माइक्रोफ़ोन और कैमरे का भी इस्तेमाल कर रहा है."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"सेटिंग"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"ठीक है"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"सिस्टम ने अपने-आप इस सूचना का &lt;b&gt;लेवल बढ़ाकर, इसे डिफ़ॉल्ट&lt;/b&gt; के तौर पर सेट किया था."</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"सिस्टम ने अपने-आप &lt;b&gt;इस सूचना का लेवल घटाकर, इसे साइलेंट&lt;/b&gt; पर सेट किया था."</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"आपकी शेड में, इस सूचना को अपने-आप &lt;b&gt;रैंकिंग में ऊपर&lt;/b&gt; किया गया था."</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"आपकी शेड में, इस सूचना को अपने-आप &lt;b&gt;रैंकिंग में नीचे&lt;/b&gt; किया गया था."</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"आपको यह सुविधा कैसी लगी?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"सुझाव या शिकायत के लिए धन्यवाद!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"ठीक है"</string>

@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Не удалось сохранить скриншот"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Чтобы сохранить скриншот, разблокируйте устройство."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Попробуйте сделать скриншот снова."</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Не удалось сохранить скриншот: недостаточно места."</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Не удалось сохранить скриншот."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Не удалось сделать скриншот: нет разрешения от приложения или организации."</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Изменить"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Изменить скриншот"</string>
@@ -505,7 +505,7 @@
     <string name="profile_owned_footer" msgid="2756770645766113964">"Действия в профиле могут отслеживаться"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"Сеть может отслеживаться"</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"Сеть может отслеживаться"</string>
-    <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Этим устройством управляет один из твоих родителей."</string>
+    <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Устройством управляет один из родителей."</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Ваша организация управляет этим устройством и может отслеживать сетевой трафик"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Организация \"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>\" управляет этим устройством и может отслеживать сетевой трафик"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Это устройство принадлежит вашей организации и подключено к приложению \"<xliff:g id="VPN_APP">%1$s</xliff:g>\""</string>
@@ -554,7 +554,7 @@
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"Администратор включил ведение сетевого журнала, чтобы отслеживать трафик на вашем устройстве.\n\nДля получения подробной информации обращайтесь к администратору."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"Вы разрешили приложению подключаться к сети VPN.\n\nОно может отслеживать ваши действия на устройстве и в Интернете, включая работу с электронной почтой, приложениями и веб-сайтами."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"Вашим рабочим профилем управляет <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдминистратор может отслеживать ваши действия в сети, в том числе работу с электронной почтой, приложениями и веб-сайтами.\n\nДля получения подробной информации обращайтесь к администратору.\n\nВы также подключены к сети VPN, в которой можно отслеживать ваши действия."</string>
-    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Этим устройством управляет один из твоих родителей. Он может видеть определенные сведения (например, какие приложения ты используешь и где находишься), а также устанавливать определенные настройки (например, ограничивать время использования устройства)."</string>
+    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Этим устройством управляет один из твоих родителей. Он может видеть, например, какими приложениями ты пользуешься и где находишься, а также задавать определенные настройки (например, ограничивать время использования устройства)."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"Сеть VPN"</string>
     <string name="monitoring_description_app" msgid="376868879287922929">"Запущено приложение \"<xliff:g id="APPLICATION">%1$s</xliff:g>\", которое может отслеживать ваши действия в сети, включая работу с электронной почтой, приложениями и веб-сайтами."</string>
     <string name="monitoring_description_app_personal" msgid="1970094872688265987">"Запущено приложение \"<xliff:g id="APPLICATION">%1$s</xliff:g>\", которое может отслеживать ваши действия в Интернете (выполняемые в личном профиле), включая работу с электронной почтой, приложениями и веб-сайтами."</string>
@@ -704,14 +704,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Звонок или вибрация в зависимости от настроек телефона. Разговоры из приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" по умолчанию появляются в виде всплывающего чата."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Привлекает ваше внимание к контенту с помощью плавающего ярлыка"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Система будет сама определять, включать ли звуковой сигнал или вибрацию для уведомления"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Статус:&lt;/b&gt; повышено до уровня \"По умолчанию\""</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Статус:&lt;/b&gt; понижено до уровня \"Без звука\""</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Статус:&lt;/b&gt; уровень важности повышен"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Статус:&lt;/b&gt; уровень важности понижен"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Появляется в верхней части списка разговоров и как всплывающий чат, фото профиля показывается на заблок. экране"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Настройки"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Приоритет"</string>
@@ -730,14 +726,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"Это приложение располагается поверх других приложений, а также использует микрофон и камеру."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"Настройки"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"ОК"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"Уровень важности этого уведомления был автоматически &lt;b&gt;повышен до \"По умолчанию\"&lt;/b&gt;."</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"Уровень важности этого уведомления был автоматически &lt;/b&gt;понижен до \"Без звука\"&lt;/b&gt;."</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"Уровень важности этого уведомления на панели был автоматически &lt;b&gt;повышен&lt;/b&gt;."</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"Уровень важности этого уведомления на панели был автоматически &lt;b&gt;понижен&lt;/b&gt;."</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"Все верно?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Спасибо!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"ОК"</string>

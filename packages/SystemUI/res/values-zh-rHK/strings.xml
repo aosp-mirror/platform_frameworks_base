@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"無法儲存螢幕擷取畫面"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"必須先解鎖裝置，才能儲存螢幕截圖"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"請再嘗試拍攝螢幕擷取畫面"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"由於儲存空間有限，因此無法儲存螢幕擷取畫面"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"無法儲存螢幕截圖"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"應用程式或您的機構不允許擷取螢幕畫面"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"編輯"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"編輯螢幕截圖"</string>
@@ -698,14 +698,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"可能會根據手機設定發出鈴聲或震動。「<xliff:g id="APP_NAME">%1$s</xliff:g>」的對話會預設以對話氣泡顯示。"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"為此內容建立浮動捷徑以保持注意力。"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"由系統判斷是否要讓此通知發出音效或震動"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;狀態：&lt;/b&gt;已提升為預設"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;狀態：&lt;/b&gt;已降低為靜音"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;狀態：&lt;/b&gt;已提高次序"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;狀態：&lt;/b&gt;已調低次序"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"以浮動對話泡顯示在對話部分的頂部，並在上鎖畫面顯示個人檔案相片"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"設定"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"重要"</string>
@@ -724,14 +720,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"此應用程式目前透過其他應用程式在畫面上顯示內容，且正在使用麥克風和相機。"</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"設定"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"確定"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"系統已自動將此通知的重要性&lt;b&gt;提升為預設&lt;/b&gt;。"</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"系統已自動將此通知的重要性&lt;b&gt;降低為靜音&lt;/b&gt;。"</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"系統已自動&lt;b&gt;提高&lt;/b&gt;此通知在通知欄中的次序。"</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"系統已自動&lt;b&gt;調低&lt;/b&gt;此通知在通知欄中的次序。"</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"是否正確？"</string>
     <string name="feedback_response" msgid="4671729244976641339">"多謝您提供意見！"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"確定"</string>

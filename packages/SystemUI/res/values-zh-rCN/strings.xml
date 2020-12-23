@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"无法保存屏幕截图"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"必须先解锁设备，然后才能保存屏幕截图"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"请再次尝试截屏"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"由于存储空间有限，无法保存屏幕截图"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"无法保存屏幕截图"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"此应用或您所在的单位不允许进行屏幕截图"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"编辑"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"编辑屏幕截图"</string>
@@ -698,14 +698,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"可能会响铃或振动（取决于手机设置）。默认情况下，来自<xliff:g id="APP_NAME">%1$s</xliff:g>的对话会以对话泡的形式显示。"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"通过可链接到这项内容的浮动快捷方式吸引您的注意。"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"让系统决定是否应让设备在收到此通知时发出提示音或振动"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;状态&lt;/b&gt;：已提升为“默认”"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;状态&lt;/b&gt;：已降低为“静音”"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;状态&lt;/b&gt;：已调高顺序"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;状态&lt;/b&gt;：已调低顺序"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"以悬浮对话泡形式显示在对话部分顶部，如果设备处于锁定状态，在锁定屏幕上显示个人资料照片"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"设置"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"优先"</string>
@@ -724,14 +720,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"此应用正显示在屏幕上其他应用的上层，并且正在使用麦克风和摄像头。"</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"设置"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"确定"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"系统已自动将此通知的重要性&lt;b&gt;提升为“默认”&lt;/b&gt;。"</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"系统已自动将此通知的重要性&lt;b&gt;降低为“静音”&lt;/b&gt;。"</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"系统已自动&lt;b&gt;调高&lt;/b&gt;此通知在通知栏中的顺序。"</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"系统已自动&lt;b&gt;调低&lt;/b&gt;此通知在通知栏中的顺序。"</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"是否正确？"</string>
     <string name="feedback_response" msgid="4671729244976641339">"感谢您提供反馈！"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"确定"</string>

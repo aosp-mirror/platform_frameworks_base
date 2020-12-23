@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Skrinşotu yadda saxlamaq alınmadı"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Skrinşotu saxlamazdan əvvəl cihaz kiliddən çıxarılmalıdır"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Skrinşotu yenidən çəkin"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Yaddaş ehtiyatının az olması səbəbindən skrinşotu yadda saxlamaq olmur"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Skrinşotu yadda saxlamaq mümkün olmadı"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Skrinşot çəkməyə tətbiq və ya təşkilat tərəfindən icazə verilmir"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Redaktə edin"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Skrinşota düzəliş edin"</string>
@@ -548,7 +548,7 @@
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"Admin, cihazdakı trafikə nəzarət edən şəbəkə loqlarını aktiv etdi.\n\nƏtraflı məlumat üçün administrator ilə əlaqə saxlayın."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"VPN bağlantısı quraşdırmağa icazə vermisiniz.\n\nBu tətbiq cihazınızı və şəbəkə fəaliyyətinizi, həmçinin, e-məktubları, tətbiq və veb saytları izləyə bilər."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"İş profiliniz <xliff:g id="ORGANIZATION">%1$s</xliff:g> tərəfindən idarə olunur.\n\nAdmin e-poçt, tətbiq və veb saytlar daxil olmaqla şəbəkə fəaliyətinizə nəzarət etməyə qadirdir.\n\nƏtraflı məlumat üçün administrator ilə əlaqə saxlayın.\n\nEyni zamanda, şəbəkə fəaliyyətinizə nəzarət edən VPN\'ə qoşulusunuz."</string>
-    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Bu cihaz valideyniniz tərəfindən idarə olunur. Valideyniniz istifadə etdiyiniz tətbiqlər, məkanınız və ekran vaxtınız kimi məlumatları görə və idarə edə bilər."</string>
+    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Bu cihaz valideyniniz tərəfindən idarə olunur. Valideyniniz işlətdiyiniz tətbiqlər, məkanınız və ekran vaxtınız kimi bilgiləri görə və idarə edə bilər."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN (Virtual Şəxsi Şəbəkələr)"</string>
     <string name="monitoring_description_app" msgid="376868879287922929">"E-poçt, tətbiq və veb saytlar da daxil olmaqla şəbəkə fəaliyyətinə nəzarət edən <xliff:g id="APPLICATION">%1$s</xliff:g> tətbiqinə qoşulusunuz."</string>
     <string name="monitoring_description_app_personal" msgid="1970094872688265987">"<xliff:g id="APPLICATION">%1$s</xliff:g> tətbiqinə qoşulmusunuz və o, e-məktublar, tətbiq və veb saytlar daxil olmaqla şəxsi şəbəkə fəaliyyətinizə nəzarət edə bilər."</string>
@@ -698,14 +698,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Telefon ayarlarına əsasən zəng çala və ya vibrasiya edə bilər. <xliff:g id="APP_NAME">%1$s</xliff:g> tətbiqindən söhbətlərdə defolt olaraq qabarcıq çıxır."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Bu məzmuna üzən qısayol ilə diqqətinizi cəlb edir."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Bu bildirişin səs çıxarması və ya vibrasiya etməsi sistem tərəfindən təyin edilsin"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Status:&lt;/b&gt; Defolt ayara keçirilib"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Status:&lt;/b&gt; Səssiz rejimə keçirilib"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Status:&lt;/b&gt; Yuxarı sıraya keçirilib"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Status:&lt;/b&gt; Aşağı sıraya keçirilib"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Söhbət bölməsinin yuxarısında göstərilir, üzən qabarcıq kimi görünür, kilid ekranında profil şəkli göstərir"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ayarlar"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
@@ -724,14 +720,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"Bu tətbiq ekranda digər tətbiqlərin üzərində göstərilir və mikrofon ilə kameradan istifadə edir."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"Ayarlar"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"OK"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"Bu bildiriş sistem tərəfindən avtomatik olaraq &lt;b&gt;Defolt ayara keçirilib&lt;/b&gt;."</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"Bu bildiriş sistem tərəfindən avtomatik olaraq &lt;b&gt;Səssiz rejimə keçirilib&lt;/b&gt;."</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"Bu bildiriş avtomatik olaraq siyahıda &lt;b&gt;yuxarı sıraya keçirilib&lt;/b&gt;."</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"Bu bildiriş avtomatik olaraq siyahıda &lt;b&gt;aşağı sıraya keçirilib&lt;/b&gt;."</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"Bu, doğru oldu?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Rəyiniz üçün təşəkkür edirik!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"OK"</string>

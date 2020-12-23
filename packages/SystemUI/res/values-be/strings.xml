@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Не атрымалася зрабіць здымак экрана"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Перад захаваннем здымка экрана трэба разблакіраваць прыладу"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Паспрабуйце зрабіць здымак экрана яшчэ раз"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Немагчыма захаваць здымак экрана, бо мала месца ў сховішчы"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Не ўдалося захаваць здымак экрана"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Рабіць здымкі экрана не дазваляе праграма ці ваша арганізацыя"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Змяніць"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Змяніць здымак экрана"</string>
@@ -704,14 +704,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"У залежнасці ад налад тэлефона магчымы званок або вібрацыя. Размовы ў праграме \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" стандартна паяўляюцца ў выглядзе ўсплывальных апавяшчэнняў."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Прыцягвае ўвагу да гэтага змесціва ўсплывальнай кнопкай."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Сістэма сама будзе вызначаць, ці трэба для гэтага апавяшчэння ўключаць гук або вібрацыю"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Стан:&lt;/b&gt; Пазначана як стандартнае"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Стан:&lt;/b&gt; Пераведзена ў рэжым \"Без гуку\""</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Стан:&lt;/b&gt; Ацэнена як важнае"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Стан:&lt;/b&gt; Ацэнена як няважнае"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Паказваецца ўверсе раздзела размоў, як усплывальнае апавяшчэнне, паказвае фота профілю на экране блакіроўкі"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Налады"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Прыярытэт"</string>
@@ -730,14 +726,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"Гэта праграма паказваецца на экране паверх іншых праграм. Яна выкарыстоўвае мікрафон і камеру."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"Налады"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"ОК"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"Гэта апавяшчэнне аўтаматычна пазначана сістэмай як &lt;b&gt;Стандартнае&lt;/b&gt;."</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"Гэта апавяшчэнне аўтаматычна пераведзена сістэмай у &lt;b&gt;рэжым \"Без гуку\"&lt;/b&gt;."</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"Гэта апавяшчэнне аўтаматычна ацэнена як &lt;b&gt;важнае&lt;/b&gt; для вас."</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"Гэта апавяшчэнне аўтаматычна ацэнена як &lt;b&gt;няважнае&lt;/b&gt; для вас."</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"Усё правільна?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Дзякуй за водгук!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"ОК"</string>

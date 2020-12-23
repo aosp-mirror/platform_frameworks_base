@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Nu s-a putut salva captura de ecran"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Pentru a salva captura de ecran, trebuie să deblocați dispozitivul"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Încercați să faceți din nou o captură de ecran"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Captura de ecran nu poate fi salvată din cauza spațiului de stocare limitat"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Nu se poate salva captura de ecran"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Crearea capturilor de ecran nu este permisă de aplicație sau de organizația dvs."</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Editați"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Editați captura de ecran"</string>
@@ -701,14 +701,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Poate să sune sau să vibreze, în funcție de setările telefonului. Conversațiile din balonul <xliff:g id="APP_NAME">%1$s</xliff:g> în mod prestabilit."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Vă atrage atenția printr-o comandă rapidă flotantă la acest conținut."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Solicitați-i sistemului să stabilească dacă această notificare este sonoră sau cu vibrații."</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Stare:&lt;/b&gt; promovată la prestabilită"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Stare:&lt;/b&gt; setată ca Silențioasă"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Stare:&lt;/b&gt; clasificată mai sus"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Stare:&lt;/b&gt; clasificată mai jos"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Se afișează în partea de sus a secțiunii de conversație, apare ca un balon flotant, afișează fotografia de profil pe ecranul de blocare"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Setări"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritate"</string>
@@ -727,14 +723,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"Această aplicație se afișează peste alte aplicații de pe ecran și folosește microfonul și camera foto."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"Setări"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"OK"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"Notificarea a fost &lt;b&gt;promovată automat la Prestabilită&lt;/b&gt; de sistem."</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"Notificarea a fost &lt;b&gt;setată automat ca Silențioasă&lt;/b&gt; de sistem."</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"Notificarea a fost &lt;b&gt;clasificată automat mai sus&lt;/b&gt; în umbră."</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"Notificarea a fost &lt;b&gt;clasificată automat mai jos&lt;/b&gt; în umbră."</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"Este corect?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Mulțumim pentru feedback!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"OK"</string>

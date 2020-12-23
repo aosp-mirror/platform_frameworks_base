@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Nie udało się zapisać zrzutu ekranu"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Przed zapisaniem zrzutu ekranu musisz odblokować urządzenie"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Spróbuj jeszcze raz wykonać zrzut ekranu"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Nie można zapisać zrzutu ekranu, bo brakuje miejsca w pamięci"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Nie można zapisać zrzutu ekranu."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Nie możesz wykonać zrzutu ekranu, bo nie zezwala na to aplikacja lub Twoja organizacja."</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Edytuj"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Edytuj zrzut ekranu"</string>
@@ -402,7 +402,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Do wschodu słońca"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Włącz o <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Do <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Tryb ciemny"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Ciemny motyw"</string>
     <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Oszczędzanie baterii"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Włącz o zachodzie"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Do wschodu słońca"</string>
@@ -704,14 +704,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Może włączyć dzwonek lub wibracje w zależności od ustawień telefonu. Rozmowy z aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g> są domyślnie wyświetlane jako dymki."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Przyciąga uwagę dzięki pływającym skrótom do treści."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Pozwól systemowi decydować, czy o powiadomieniu powinien informować dźwięk czy wibracja"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Stan:&lt;/b&gt; zmieniony na Domyślny"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Stan:&lt;/b&gt; zmieniono na Ciche"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Stan:&lt;/b&gt; podniesiono ważność"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Stan:&lt;/b&gt; obniżono ważność"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Wyświetla się jako pływający dymek u góry sekcji rozmów, pokazuje zdjęcie profilowe na ekranie blokady"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ustawienia"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorytet"</string>
@@ -730,14 +726,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"Ta aplikacja wyświetla się nad innymi aplikacjami na ekranie i używa mikrofonu oraz aparatu."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"Ustawienia"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"OK"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"To powiadomienie zostało automatycznie &lt;b&gt;zmienione na Domyślne&lt;/b&gt; przez system."</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"To powiadomienie zostało automatycznie &lt;b&gt;zmienione na Ciche&lt;/b&gt; przez system."</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"Ważność tego powiadomienia została automatycznie &lt;b&gt;podniesiona&lt;/b&gt; przez system."</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"Ważność tego powiadomienia została automatycznie &lt;b&gt;obniżona&lt;/b&gt; przez system."</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"Czy to było prawidłowe?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Dziękujemy za opinię"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"OK"</string>
