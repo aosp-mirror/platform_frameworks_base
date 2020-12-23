@@ -323,9 +323,9 @@ public abstract class ApexManager {
      * Copies the CE apex data directory for the given {@code userId} to a backup location, for use
      * in case of rollback.
      *
-     * @return long inode for the snapshot directory if the snapshot was successful, or -1 if not
+     * @return boolean true if the snapshot was successful
      */
-    public abstract long snapshotCeData(int userId, int rollbackId, String apexPackageName);
+    public abstract boolean snapshotCeData(int userId, int rollbackId, String apexPackageName);
 
     /**
      * Restores the snapshot of the CE apex data directory for the given {@code userId}.
@@ -826,7 +826,7 @@ public abstract class ApexManager {
         }
 
         @Override
-        public long snapshotCeData(int userId, int rollbackId, String apexPackageName) {
+        public boolean snapshotCeData(int userId, int rollbackId, String apexPackageName) {
             String apexModuleName;
             synchronized (mLock) {
                 Preconditions.checkState(mPackageNameToApexModuleName != null,
@@ -835,13 +835,14 @@ public abstract class ApexManager {
             }
             if (apexModuleName == null) {
                 Slog.e(TAG, "Invalid apex package name: " + apexPackageName);
-                return -1;
+                return false;
             }
             try {
-                return waitForApexService().snapshotCeData(userId, rollbackId, apexModuleName);
+                waitForApexService().snapshotCeData(userId, rollbackId, apexModuleName);
+                return true;
             } catch (Exception e) {
                 Slog.e(TAG, e.getMessage(), e);
-                return -1;
+                return false;
             }
         }
 
@@ -1124,7 +1125,7 @@ public abstract class ApexManager {
         }
 
         @Override
-        public long snapshotCeData(int userId, int rollbackId, String apexPackageName) {
+        public boolean snapshotCeData(int userId, int rollbackId, String apexPackageName) {
             throw new UnsupportedOperationException();
         }
 
