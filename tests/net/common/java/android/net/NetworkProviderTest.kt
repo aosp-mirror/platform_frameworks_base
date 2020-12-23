@@ -29,6 +29,7 @@ import androidx.test.InstrumentationRegistry
 import com.android.net.module.util.ArrayTrackRecord
 import com.android.testutils.DevSdkIgnoreRule.IgnoreUpTo
 import com.android.testutils.DevSdkIgnoreRunner
+import com.android.testutils.isDevSdkInRange
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -173,10 +174,12 @@ class NetworkProviderTest {
     @Test
     fun testDeclareNetworkRequestUnfulfillable() {
         val mockContext = mock(Context::class.java)
-        val provider = createNetworkProvider(mockContext)
-        // ConnectivityManager not required at creation time
-        verifyNoMoreInteractions(mockContext)
         doReturn(mCm).`when`(mockContext).getSystemService(Context.CONNECTIVITY_SERVICE)
+        val provider = createNetworkProvider(mockContext)
+        // ConnectivityManager not required at creation time after R
+        if (!isDevSdkInRange(0, Build.VERSION_CODES.R)) {
+            verifyNoMoreInteractions(mockContext)
+        }
 
         mCm.registerNetworkProvider(provider)
 
