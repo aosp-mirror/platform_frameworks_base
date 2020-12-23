@@ -5260,11 +5260,6 @@ public class SettingsProvider extends ContentProvider {
                     initGlobalSettingsDefaultValForWearLocked(
                             Global.Wearable.WEAR_OS_VERSION_STRING, "");
                     initGlobalSettingsDefaultValForWearLocked(
-                            Global.Wearable.ALTERNATE_LAUNCHER_ENABLED,
-                            getContext()
-                                    .getResources()
-                                    .getBoolean(R.bool.def_wearable_alternateLauncherEnabled));
-                    initGlobalSettingsDefaultValForWearLocked(
                             Global.Wearable.CORNER_ROUNDNESS,
                             getContext()
                                     .getResources()

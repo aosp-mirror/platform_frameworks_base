@@ -16622,12 +16622,6 @@ public final class Settings {
             public static final String WEAR_OS_VERSION_STRING = "wear_os_version_string";
 
             /**
-             * If an alternate launcher is enabled.
-             * @hide
-             */
-            public static final String ALTERNATE_LAUNCHER_ENABLED = "alternate_launcher_enabled";
-
-            /**
              * How round the corners of square screens are.
              * @hide
              */
