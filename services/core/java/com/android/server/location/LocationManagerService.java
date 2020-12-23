@@ -64,6 +64,7 @@ import android.location.LocationManagerInternal;
 import android.location.LocationProvider;
 import android.location.LocationRequest;
 import android.location.LocationTime;
+import android.location.ProviderProperties;
 import android.location.util.identity.CallerIdentity;
 import android.os.Binder;
 import android.os.Bundle;
@@ -80,7 +81,6 @@ import android.util.IndentingPrintWriter;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.location.ProviderProperties;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
@@ -414,7 +414,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                     Boolean.parseBoolean(fragments[5]) /* supportsAltitude */,
                     Boolean.parseBoolean(fragments[6]) /* supportsSpeed */,
                     Boolean.parseBoolean(fragments[7]) /* supportsBearing */,
-                    Integer.parseInt(fragments[8]) /* powerRequirement */,
+                    Integer.parseInt(fragments[8]) /* powerUsage */,
                     Integer.parseInt(fragments[9]) /* accuracy */);
             getOrAddLocationProviderManager(name).setMockProvider(
                     new MockLocationProvider(properties, CallerIdentity.fromContext(mContext)));
@@ -513,6 +513,11 @@ public class LocationManagerService extends ILocationManager.Stub {
                 unregisterLocationListener(listener);
             }
         }
+    }
+
+    @Override
+    public boolean hasProvider(String provider) {
+        return getLocationProviderManager(provider) != null;
     }
 
     @Override
@@ -944,11 +949,10 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public ProviderProperties getProviderProperties(String providerName) {
-        LocationProviderManager manager = getLocationProviderManager(providerName);
-        if (manager == null) {
-            return null;
-        }
+    public ProviderProperties getProviderProperties(String provider) {
+        LocationProviderManager manager = getLocationProviderManager(provider);
+        Preconditions.checkArgument(manager != null,
+                "provider \"" + provider + "\" does not exist");
         return manager.getProperties();
     }
 

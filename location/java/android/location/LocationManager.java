@@ -61,7 +61,6 @@ import android.os.UserHandle;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.listeners.ListenerExecutor;
 import com.android.internal.listeners.ListenerTransportMultiplexer;
-import com.android.internal.location.ProviderProperties;
 import com.android.internal.util.Preconditions;
 
 import java.lang.ref.WeakReference;
@@ -1616,6 +1615,25 @@ public class LocationManager {
     }
 
     /**
+     * Returns true if the given location provider exists on this device, irrespective of whether
+     * it is currently enabled or not.
+     *
+     * @param provider a potential location provider
+     * @return true if the location provider exists, false otherwise
+     *
+     * @throws IllegalArgumentException if provider is null
+     */
+    public boolean hasProvider(@NonNull String provider) {
+        Preconditions.checkArgument(provider != null, "invalid null provider");
+
+        try {
+            return mService.hasProvider(provider);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns a list of the names of all available location providers. All providers are returned,
      * including those that are currently disabled.
      *
@@ -1703,7 +1721,12 @@ public class LocationManager {
      * @return location provider information, or null if provider does not exist
      *
      * @throws IllegalArgumentException if provider is null
+     *
+     * @deprecated This method has no way to indicate that a provider's properties are unknown, and
+     * so may return incorrect results on rare occasions. Use {@link #getProviderProperties(String)}
+     * instead.
      */
+    @Deprecated
     public @Nullable LocationProvider getProvider(@NonNull String provider) {
         Preconditions.checkArgument(provider != null, "invalid null provider");
 
@@ -1723,11 +1746,33 @@ public class LocationManager {
         }
 
         try {
+
             ProviderProperties properties = mService.getProviderProperties(provider);
-            if (properties == null) {
-                return null;
-            }
             return new LocationProvider(provider, properties);
+        } catch (IllegalArgumentException e) {
+            // provider does not exist
+            return null;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the properties of the given provider, or null if the properties are currently
+     * unknown. Provider properties may change over time, although this is discouraged, and should
+     * be rare. The most common transition is when provider properties go from being unknown to
+     * known, which is most common near boot time.
+     *
+     * @param provider a provider listed by {@link #getAllProviders()}
+     * @return location provider properties, or null if properties are currently unknown
+     *
+     * @throws IllegalArgumentException if provider is null or does not exist
+     */
+    public @Nullable ProviderProperties getProviderProperties(@NonNull String provider) {
+        Preconditions.checkArgument(provider != null, "invalid null provider");
+
+        try {
+            return mService.getProviderProperties(provider);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1826,12 +1871,14 @@ public class LocationManager {
     public void addTestProvider(
             @NonNull String provider, boolean requiresNetwork, boolean requiresSatellite,
             boolean requiresCell, boolean hasMonetaryCost, boolean supportsAltitude,
-            boolean supportsSpeed, boolean supportsBearing, int powerRequirement, int accuracy) {
+            boolean supportsSpeed, boolean supportsBearing,
+            @ProviderProperties.PowerUsage int powerUsage,
+            @ProviderProperties.Accuracy int accuracy) {
         Preconditions.checkArgument(provider != null, "invalid null provider");
 
         ProviderProperties properties = new ProviderProperties(requiresNetwork,
                 requiresSatellite, requiresCell, hasMonetaryCost, supportsAltitude, supportsSpeed,
-                supportsBearing, powerRequirement, accuracy);
+                supportsBearing, powerUsage, accuracy);
         try {
             mService.addTestProvider(provider, properties, mContext.getOpPackageName(),
                     mContext.getFeatureId());

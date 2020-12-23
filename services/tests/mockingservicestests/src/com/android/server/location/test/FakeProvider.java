@@ -40,7 +40,7 @@ public class FakeProvider extends AbstractLocationProvider {
     private final FakeProviderInterface mFakeInterface;
 
     public FakeProvider(FakeProviderInterface fakeInterface) {
-        super(Runnable::run);
+        super(Runnable::run, null, null);
         mFakeInterface = fakeInterface;
     }
 

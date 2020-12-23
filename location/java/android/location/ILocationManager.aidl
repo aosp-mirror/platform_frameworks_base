@@ -34,10 +34,9 @@ import android.location.LastLocationRequest;
 import android.location.Location;
 import android.location.LocationRequest;
 import android.location.LocationTime;
+import android.location.ProviderProperties;
 import android.os.Bundle;
 import android.os.ICancellationSignal;
-
-import com.android.internal.location.ProviderProperties;
 
 /**
  * System private API for talking with the location service.
@@ -93,6 +92,7 @@ interface ILocationManager
     void flushGnssBatch();
     void stopGnssBatch();
 
+    boolean hasProvider(String provider);
     List<String> getAllProviders();
     List<String> getProviders(in Criteria criteria, boolean enabledOnly);
     String getBestProvider(in Criteria criteria, boolean enabledOnly);

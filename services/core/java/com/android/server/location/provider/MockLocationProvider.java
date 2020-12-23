@@ -21,10 +21,10 @@ import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import android.annotation.Nullable;
 import android.location.Location;
 import android.location.LocationResult;
+import android.location.ProviderProperties;
 import android.location.util.identity.CallerIdentity;
 import android.os.Bundle;
 
-import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 
 import java.io.FileDescriptor;
@@ -41,8 +41,7 @@ public class MockLocationProvider extends AbstractLocationProvider {
 
     public MockLocationProvider(ProviderProperties properties, CallerIdentity identity) {
         // using a direct executor is ok because this class has no locks that could deadlock
-        super(DIRECT_EXECUTOR, identity);
-        setProperties(properties);
+        super(DIRECT_EXECUTOR, identity, properties);
     }
 
     /** Sets the allowed state of this mock provider. */
