@@ -50,7 +50,9 @@ stubs_defaults {
         ":art.module.public.api{.public.stubs.source}",
         "**/package.html",
     ],
-    sdk_version: "core_platform",
+    sdk_version: "none",
+    system_modules: "none",
+    java_version: "1.8",
     arg_files: ["core/res/AndroidManifest.xml"],
     // TODO(b/147699819, b/169090544): remove below aidl includes.
     aidl: {
@@ -80,6 +82,7 @@ stubs_defaults {
         "android.hardware.usb.gadget-V1.0-java",
         "android.hardware.vibrator-V1.3-java",
         "framework-protos",
+        "stable.core.platform.api.stubs",
         // There are a few classes from modules used as type arguments that
         // need to be resolved by metalava. For now, we can use a previously
         // finalized stub library to resolve them. If a new class gets added,

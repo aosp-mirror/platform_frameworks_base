@@ -31,9 +31,7 @@ import android.system.keystore2.KeyEntryResponse;
 import android.system.keystore2.KeyMetadata;
 import android.system.keystore2.ResponseCode;
 
-import java.security.KeyFactory;
 import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.ProviderException;
 import java.security.PublicKey;
@@ -42,8 +40,6 @@ import java.security.Signature;
 import java.security.UnrecoverableKeyException;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
 
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
@@ -237,28 +233,11 @@ public class AndroidKeyStoreProvider extends Provider {
             throw new UnrecoverableKeyException("Failed to obtain X.509 form of public key."
                     + " Keystore has no public certificate stored.");
         }
-        final byte[] x509EncodedPublicKey = metadata.certificate;
+        final byte[] x509PublicCert = metadata.certificate;
 
-        String jcaKeyAlgorithm;
-        try {
-            jcaKeyAlgorithm = KeyProperties.KeyAlgorithm.fromKeymasterAsymmetricKeyAlgorithm(
-                    algorithm);
-        } catch (IllegalArgumentException e) {
-            throw (UnrecoverableKeyException)
-                    new UnrecoverableKeyException("Failed to load private key")
-                            .initCause(e);
-        }
+        PublicKey publicKey = AndroidKeyStoreSpi.toCertificate(x509PublicCert).getPublicKey();
 
-        PublicKey publicKey;
-        try {
-            KeyFactory keyFactory = KeyFactory.getInstance(jcaKeyAlgorithm);
-            publicKey = keyFactory.generatePublic(new X509EncodedKeySpec(x509EncodedPublicKey));
-        } catch (NoSuchAlgorithmException e) {
-            throw new ProviderException(
-                    "Failed to obtain " + jcaKeyAlgorithm + " KeyFactory", e);
-        } catch (InvalidKeySpecException e) {
-            throw new ProviderException("Invalid X.509 encoding of public key", e);
-        }
+        String jcaKeyAlgorithm = publicKey.getAlgorithm();
 
         KeyStoreSecurityLevel securityLevel = iSecurityLevel;
         if (KeyProperties.KEY_ALGORITHM_EC.equalsIgnoreCase(jcaKeyAlgorithm)) {
@@ -358,7 +337,7 @@ public class AndroidKeyStoreProvider extends Provider {
 
         KeyDescriptor descriptor = new KeyDescriptor();
         if (namespace == KeyProperties.NAMESPACE_APPLICATION) {
-            descriptor.nspace = 0; // ignored;
+            descriptor.nspace = KeyProperties.NAMESPACE_APPLICATION; // ignored;
             descriptor.domain = Domain.APP;
         } else {
             descriptor.nspace = namespace;
@@ -387,10 +366,10 @@ public class AndroidKeyStoreProvider extends Provider {
         for (Authorization a : response.metadata.authorizations) {
             switch (a.keyParameter.tag) {
                 case KeymasterDefs.KM_TAG_ALGORITHM:
-                    keymasterAlgorithm = a.keyParameter.integer;
+                    keymasterAlgorithm = a.keyParameter.value.getAlgorithm();
                     break;
                 case KeymasterDefs.KM_TAG_DIGEST:
-                    if (keymasterDigest == -1) keymasterDigest = a.keyParameter.integer;
+                    if (keymasterDigest == -1) keymasterDigest = a.keyParameter.value.getDigest();
                     break;
             }
         }
@@ -407,7 +386,7 @@ public class AndroidKeyStoreProvider extends Provider {
                 keymasterAlgorithm == KeymasterDefs.KM_ALGORITHM_EC) {
             return makeAndroidKeyStorePublicKeyFromKeyEntryResponse(descriptor, response.metadata,
                     new KeyStoreSecurityLevel(response.iSecurityLevel),
-                    keymasterAlgorithm);
+                    keymasterAlgorithm).getPrivateKey();
         } else {
             throw new UnrecoverableKeyException("Key algorithm unknown");
         }

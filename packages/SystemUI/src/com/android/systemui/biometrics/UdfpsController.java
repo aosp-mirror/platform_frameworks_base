@@ -135,7 +135,7 @@ class UdfpsController implements DozeReceiver {
     @SuppressLint("ClickableViewAccessibility")
     private final UdfpsView.OnTouchListener mOnTouchListener = (v, event) -> {
         UdfpsView view = (UdfpsView) v;
-        final boolean isFingerDown = view.isScrimShowing();
+        final boolean isFingerDown = view.isShowScrimAndDot();
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_MOVE:

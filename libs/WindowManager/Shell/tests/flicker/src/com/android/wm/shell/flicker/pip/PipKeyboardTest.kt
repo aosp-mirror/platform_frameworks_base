@@ -25,8 +25,10 @@ import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.closePipWindow
 import com.android.server.wm.flicker.helpers.hasPipWindow
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.IME_WINDOW_NAME
 import com.android.wm.shell.flicker.helpers.ImeAppHelper
+import com.android.wm.shell.flicker.testapp.Components
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -46,6 +48,8 @@ class PipKeyboardTest(
     rotation: Int
 ) : PipTestBase(rotationName, rotation) {
     private val keyboardApp = ImeAppHelper(instrumentation)
+    private val keyboardComponent = Components.ImeActivity().componentName
+    private val helper = WindowManagerStateHelper()
 
     private val keyboardScenario: FlickerBuilder
         get() = FlickerBuilder(instrumentation).apply {
@@ -64,6 +68,8 @@ class PipKeyboardTest(
                     // UiAutomator doesn't support to launch the multiple Activities in a task.
                     // So use launchActivity() for the Keyboard Activity.
                     keyboardApp.launchViaIntent()
+                    helper.waitForAppTransitionIdle()
+                    helper.waitForFullScreenApp(keyboardComponent)
                 }
             }
             teardown {
@@ -88,9 +94,11 @@ class PipKeyboardTest(
             transitions {
                 // open the soft keyboard
                 keyboardApp.openIME()
+                helper.waitImeWindowShown()
 
                 // then close it again
                 keyboardApp.closeIME()
+                helper.waitImeWindowGone()
             }
             assertions {
                 windowManagerTrace {
@@ -112,11 +120,13 @@ class PipKeyboardTest(
             transitions {
                 // open the soft keyboard
                 keyboardApp.openIME()
+                helper.waitImeWindowShown()
             }
             teardown {
                 eachRun {
                     // close the keyboard
                     keyboardApp.closeIME()
+                    helper.waitImeWindowGone()
                 }
             }
             assertions {

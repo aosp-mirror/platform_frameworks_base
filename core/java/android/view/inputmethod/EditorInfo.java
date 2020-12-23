@@ -28,6 +28,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.content.res.Configuration;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.LocaleList;
@@ -293,6 +294,13 @@ public class EditorInfo implements InputType, Parcelable {
     public static final int IME_FLAG_FORCE_ASCII = 0x80000000;
 
     /**
+     * Flag of {@link #internalImeOptions}: flag is set when app window containing this
+     * {@link EditorInfo} is using {@link Configuration#ORIENTATION_PORTRAIT} mode.
+     * @hide
+     */
+    public static final int IME_FLAG_APP_WINDOW_PORTRAIT = 0x80000000;
+
+    /**
      * Generic unspecified type for {@link #imeOptions}.
      */
     public static final int IME_NULL = 0x00000000;
@@ -312,6 +320,7 @@ public class EditorInfo implements InputType, Parcelable {
      *                               1 1 IME_ACTION_NEXT
      *                               11  IME_ACTION_DONE
      *                               111 IME_ACTION_PREVIOUS
+     *          1                        IME_FLAG_APP_WINDOW_PORTRAIT
      *         1                         IME_FLAG_NO_PERSONALIZED_LEARNING
      *        1                          IME_FLAG_NO_FULLSCREEN
      *       1                           IME_FLAG_NAVIGATE_PREVIOUS
@@ -341,6 +350,20 @@ public class EditorInfo implements InputType, Parcelable {
      * attribute of a TextView.
      */
     public String privateImeOptions = null;
+
+    /**
+     * Masks for {@link internalImeOptions}
+     *
+     * <pre>
+     *  1                                IME_FLAG_APP_WINDOW_PORTRAIT
+     * |-------|-------|-------|-------|</pre>
+     */
+
+    /**
+     * Same as {@link android.R.attr#imeOptions} but for framework's internal-use only.
+     * @hide
+     */
+    public int internalImeOptions = IME_NULL;
 
     /**
      * In some cases an IME may be able to display an arbitrary label for

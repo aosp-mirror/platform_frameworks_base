@@ -22,6 +22,9 @@
 #include "FilterClient.h"
 
 using ::android::hardware::tv::tuner::V1_0::DemuxQueueNotifyBits;
+using ::android::hardware::tv::tuner::V1_0::DemuxFilterMainType;
+using ::android::hardware::tv::tuner::V1_0::DemuxMmtpFilterType;
+using ::android::hardware::tv::tuner::V1_0::DemuxTsFilterType;
 
 namespace android {
 
@@ -29,20 +32,25 @@ namespace android {
 
 // TODO: pending aidl interface
 // TODO: add filter callback
-FilterClient::FilterClient() {
+FilterClient::FilterClient(DemuxFilterType type) {
     //mTunerFilter = tunerFilter;
+    mAvSharedHandle = NULL;
+    checkIsMediaFilter(type);
 }
 
 FilterClient::~FilterClient() {
     //mTunerFilter = NULL;
     mFilter = NULL;
     mFilter_1_1 = NULL;
+    mAvSharedHandle = NULL;
+    mAvSharedMemSize = 0;
 }
 
 // TODO: remove after migration to Tuner Service is done.
 void FilterClient::setHidlFilter(sp<IFilter> filter) {
     mFilter = filter;
     mFilter_1_1 = ::android::hardware::tv::tuner::V1_1::IFilter::castFrom(mFilter);
+    handleAvShareMemory();
 }
 
 int FilterClient::read(uint8_t* buffer, int size) {
@@ -57,6 +65,22 @@ int FilterClient::read(uint8_t* buffer, int size) {
     }
 
     return -1;
+}
+
+SharedHandleInfo FilterClient::getAvSharedHandleInfo() {
+    SharedHandleInfo info{
+        .sharedHandle = NULL,
+        .size = 0,
+    };
+
+    // TODO: pending aidl interface
+
+    if (mFilter_1_1 != NULL) {
+        info.sharedHandle = mAvSharedHandle;
+        info.size = mAvSharedMemSize;
+    }
+
+    return info;
 }
 
 Result FilterClient::configure(DemuxFilterSettings configure) {
@@ -187,7 +211,11 @@ Result FilterClient::close() {
     // TODO: pending aidl interface
 
     if (mFilter != NULL) {
-        return mFilter->close();
+        Result res = mFilter->close();
+        if (res == Result::SUCCESS) {
+            mFilter = NULL;
+        }
+        return res;
     }
 
     return Result::INVALID_STATE;
@@ -260,5 +288,32 @@ int FilterClient::copyData(uint8_t* buffer, int size) {
     }
 
     return size;
+}
+
+void FilterClient::checkIsMediaFilter(DemuxFilterType type) {
+    if (type.mainType == DemuxFilterMainType::MMTP) {
+        if (type.subType.mmtpFilterType() == DemuxMmtpFilterType::AUDIO ||
+                type.subType.mmtpFilterType() == DemuxMmtpFilterType::VIDEO) {
+            mIsMediaFilter = true;
+        }
+    }
+
+    if (type.mainType == DemuxFilterMainType::TS) {
+        if (type.subType.tsFilterType() == DemuxTsFilterType::AUDIO ||
+                type.subType.tsFilterType() == DemuxTsFilterType::VIDEO) {
+            mIsMediaFilter = true;
+        }
+    }
+}
+
+void FilterClient::handleAvShareMemory() {
+    if (mFilter_1_1 != NULL && mIsMediaFilter) {
+        mFilter_1_1->getAvSharedHandle([&](Result r, hidl_handle avMemory, uint64_t avMemSize) {
+            if (r == Result::SUCCESS) {
+                mAvSharedHandle = native_handle_clone(avMemory.getNativeHandle());
+                mAvSharedMemSize = avMemSize;
+            }
+        });
+    }
 }
 }  // namespace android

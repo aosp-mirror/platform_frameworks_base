@@ -254,9 +254,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         mHandler = new Handler(mHandlerThread.getLooper());
 
         // TODO(b/173077356): Replace directly calling the HAL with PowerStatsService queries
-        // Make sure to init Hal Wrapper before creating BatteryStatsImpl.
-        mPowerStatsHALWrapper = new PowerStatsHALWrapper.PowerStatsHALWrapperImpl();
-        mPowerStatsHALWrapper.initialize();
+        mPowerStatsHALWrapper = PowerStatsHALWrapper.getPowerStatsHalImpl();
 
         final MeasuredEnergyArray initialEnergies = getEnergyConsumptionData();
         final boolean[] supportedBuckets = getSupportedEnergyBuckets(initialEnergies);

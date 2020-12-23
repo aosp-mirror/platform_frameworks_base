@@ -17,6 +17,7 @@
 package android.widget;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.ContentInfo.FLAG_CONVERT_TO_PLAIN_TEXT;
 import static android.view.ContentInfo.SOURCE_AUTOFILL;
 import static android.view.ContentInfo.SOURCE_CLIPBOARD;
@@ -8737,6 +8738,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (!shouldAdvanceFocusOnEnter()) {
                     outAttrs.imeOptions |= EditorInfo.IME_FLAG_NO_ENTER_ACTION;
                 }
+            }
+            if (getResources().getConfiguration().orientation == ORIENTATION_PORTRAIT) {
+                outAttrs.internalImeOptions |= EditorInfo.IME_FLAG_APP_WINDOW_PORTRAIT;
             }
             if (isMultilineInputType(outAttrs.inputType)) {
                 // Multi-line text editors should always show an enter key.

@@ -91,6 +91,7 @@ public class LockscreenIconControllerTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
+        when(mKeyguardUpdateMonitor.shouldShowLockIcon()).thenReturn(true);
         when(mLockIcon.getContext()).thenReturn(mContext);
         mLockIconController = new LockscreenLockIconController(
                 mLockscreenGestureLogger, mKeyguardUpdateMonitor, mLockPatternUtils,
@@ -145,12 +146,10 @@ public class LockscreenIconControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testVisibility_noBouncer() {
-        // no security (ie: no lock screen OR swipe to unlock)
-        when(mKeyguardSecurityModel.getSecurityMode(anyInt())).thenReturn(
-                KeyguardSecurityModel.SecurityMode.None);
+    public void testVisibility_doNotShowLockIcon() {
+        when(mKeyguardUpdateMonitor.shouldShowLockIcon()).thenReturn(false);
 
         mOnAttachStateChangeListener.onViewAttachedToWindow(mLockIcon);
-        verify(mLockIcon).updateIconVisibility(false);
+        verify(mLockIcon).setVisibility(View.GONE);
     }
 }

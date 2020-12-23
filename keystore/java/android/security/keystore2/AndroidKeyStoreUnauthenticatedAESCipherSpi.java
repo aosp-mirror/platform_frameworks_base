@@ -42,7 +42,7 @@ import javax.crypto.spec.IvParameterSpec;
  *
  * @hide
  */
-class AndroidKeyStoreUnauthenticatedAESCipherSpi extends AndroidKeyStoreCipherSpiBase {
+abstract class AndroidKeyStoreUnauthenticatedAESCipherSpi extends AndroidKeyStoreCipherSpiBase {
 
     abstract static class ECB extends AndroidKeyStoreUnauthenticatedAESCipherSpi {
         protected ECB(int keymasterPadding) {
@@ -53,11 +53,21 @@ class AndroidKeyStoreUnauthenticatedAESCipherSpi extends AndroidKeyStoreCipherSp
             public NoPadding() {
                 super(KeymasterDefs.KM_PAD_NONE);
             }
+
+            @Override
+            protected final String getTransform() {
+                return "AES/ECB/NoPadding";
+            }
         }
 
         public static class PKCS7Padding extends ECB {
             public PKCS7Padding() {
                 super(KeymasterDefs.KM_PAD_PKCS7);
+            }
+
+            @Override
+            protected final String getTransform() {
+                return "AES/ECB/PKCS7Padding";
             }
         }
     }
@@ -71,11 +81,21 @@ class AndroidKeyStoreUnauthenticatedAESCipherSpi extends AndroidKeyStoreCipherSp
             public NoPadding() {
                 super(KeymasterDefs.KM_PAD_NONE);
             }
+
+            @Override
+            protected final String getTransform() {
+                return "AES/CBC/NoPadding";
+            }
         }
 
         public static class PKCS7Padding extends CBC {
             public PKCS7Padding() {
                 super(KeymasterDefs.KM_PAD_PKCS7);
+            }
+
+            @Override
+            protected final String getTransform() {
+                return "AES/CBC/PKCS7Padding";
             }
         }
     }
@@ -88,6 +108,11 @@ class AndroidKeyStoreUnauthenticatedAESCipherSpi extends AndroidKeyStoreCipherSp
         public static class NoPadding extends CTR {
             public NoPadding() {
                 super(KeymasterDefs.KM_PAD_NONE);
+            }
+
+            @Override
+            protected final String getTransform() {
+                return "AES/CTR/NoPadding";
             }
         }
     }
@@ -275,7 +300,7 @@ class AndroidKeyStoreUnauthenticatedAESCipherSpi extends AndroidKeyStoreCipherSp
         if (parameters != null) {
             for (KeyParameter p : parameters) {
                 if (p.tag == KeymasterDefs.KM_TAG_NONCE) {
-                    returnedIv = p.blob;
+                    returnedIv = p.value.getBlob();
                     break;
                 }
             }

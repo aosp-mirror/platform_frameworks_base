@@ -1352,6 +1352,7 @@ public class MediaPlayer extends PlayerBase
     }
 
     private void startImpl() {
+        baseStart();
         stayAwake(true);
         _start();
     }
@@ -1377,6 +1378,7 @@ public class MediaPlayer extends PlayerBase
     public void stop() throws IllegalStateException {
         stayAwake(false);
         _stop();
+        baseStop();
     }
 
     private native void _stop() throws IllegalStateException;
@@ -1390,6 +1392,7 @@ public class MediaPlayer extends PlayerBase
     public void pause() throws IllegalStateException {
         stayAwake(false);
         _pause();
+        basePause();
     }
 
     private native void _pause() throws IllegalStateException;
@@ -1494,60 +1497,13 @@ public class MediaPlayer extends PlayerBase
         return null;
     }
 
-
-    /**
-     * Sends device list change notification to all listeners.
-     */
-    private void broadcastRoutingChange() {
-        AudioManager.resetAudioPortGeneration();
-        synchronized (mRoutingChangeListeners) {
-            // Prevent the case where an event is triggered by registering a routing change
-            // listener via the media player.
-            if (mEnableSelfRoutingMonitor) {
-                baseUpdateDeviceId(getRoutedDevice());
-            }
-            for (NativeRoutingEventHandlerDelegate delegate
-                    : mRoutingChangeListeners.values()) {
-                delegate.notifyClient();
-            }
-        }
-    }
-
     /*
-     * Call BEFORE adding a routing callback handler.
+     * Call BEFORE adding a routing callback handler or AFTER removing a routing callback handler.
      */
     @GuardedBy("mRoutingChangeListeners")
-    private void testEnableNativeRoutingCallbacksLocked() {
-        if (mRoutingChangeListeners.size() == 0 && !mEnableSelfRoutingMonitor) {
-            native_enableDeviceCallback(true);
-        }
-    }
-
-    private void tryToEnableNativeRoutingCallback() {
-        synchronized (mRoutingChangeListeners) {
-            if (!mEnableSelfRoutingMonitor) {
-                testEnableNativeRoutingCallbacksLocked();
-                mEnableSelfRoutingMonitor = true;
-            }
-        }
-    }
-
-    private void tryToDisableNativeRoutingCallback() {
-        synchronized (mRoutingChangeListeners) {
-            if (mEnableSelfRoutingMonitor) {
-                mEnableSelfRoutingMonitor = false;
-                testDisableNativeRoutingCallbacksLocked();
-            }
-        }
-    }
-
-    /*
-     * Call AFTER removing a routing callback handler.
-     */
-    @GuardedBy("mRoutingChangeListeners")
-    private void testDisableNativeRoutingCallbacksLocked() {
-        if (mRoutingChangeListeners.size() == 0 && !mEnableSelfRoutingMonitor) {
-            native_enableDeviceCallback(false);
+    private void enableNativeRoutingCallbacksLocked(boolean enabled) {
+        if (mRoutingChangeListeners.size() == 0) {
+            native_enableDeviceCallback(enabled);
         }
     }
 
@@ -1559,9 +1515,6 @@ public class MediaPlayer extends PlayerBase
     @GuardedBy("mRoutingChangeListeners")
     private ArrayMap<AudioRouting.OnRoutingChangedListener,
             NativeRoutingEventHandlerDelegate> mRoutingChangeListeners = new ArrayMap<>();
-
-    @GuardedBy("mRoutingChangeListeners")
-    private boolean mEnableSelfRoutingMonitor;
 
     /**
      * Adds an {@link AudioRouting.OnRoutingChangedListener} to receive notifications of routing
@@ -1576,7 +1529,7 @@ public class MediaPlayer extends PlayerBase
             Handler handler) {
         synchronized (mRoutingChangeListeners) {
             if (listener != null && !mRoutingChangeListeners.containsKey(listener)) {
-                testEnableNativeRoutingCallbacksLocked();
+                enableNativeRoutingCallbacksLocked(true);
                 mRoutingChangeListeners.put(
                         listener, new NativeRoutingEventHandlerDelegate(this, listener,
                                 handler != null ? handler : mEventHandler));
@@ -1595,8 +1548,8 @@ public class MediaPlayer extends PlayerBase
         synchronized (mRoutingChangeListeners) {
             if (mRoutingChangeListeners.containsKey(listener)) {
                 mRoutingChangeListeners.remove(listener);
+                enableNativeRoutingCallbacksLocked(false);
             }
-            testDisableNativeRoutingCallbacksLocked();
         }
     }
 
@@ -3348,7 +3301,6 @@ public class MediaPlayer extends PlayerBase
 
     @Override
     protected void finalize() {
-        tryToDisableNativeRoutingCallback();
         baseRelease();
         native_finalize();
     }
@@ -3463,8 +3415,6 @@ public class MediaPlayer extends PlayerBase
 
             case MEDIA_STOPPED:
                 {
-                    tryToDisableNativeRoutingCallback();
-                    baseStop();
                     TimeProvider timeProvider = mTimeProvider;
                     if (timeProvider != null) {
                         timeProvider.onStopped();
@@ -3473,16 +3423,8 @@ public class MediaPlayer extends PlayerBase
                 break;
 
             case MEDIA_STARTED:
-                {
-                    baseStart(native_getRoutedDeviceId());
-                    tryToEnableNativeRoutingCallback();
-                }
-                // fall through
             case MEDIA_PAUSED:
                 {
-                    if (msg.what == MEDIA_PAUSED) {
-                        basePause();
-                    }
                     TimeProvider timeProvider = mTimeProvider;
                     if (timeProvider != null) {
                         timeProvider.onPaused(msg.what == MEDIA_PAUSED);
@@ -3648,8 +3590,14 @@ public class MediaPlayer extends PlayerBase
                 break;
 
             case MEDIA_AUDIO_ROUTING_CHANGED:
-                    broadcastRoutingChange();
-                    return;
+                AudioManager.resetAudioPortGeneration();
+                synchronized (mRoutingChangeListeners) {
+                    for (NativeRoutingEventHandlerDelegate delegate
+                            : mRoutingChangeListeners.values()) {
+                        delegate.notifyClient();
+                    }
+                }
+                return;
 
             case MEDIA_TIME_DISCONTINUITY:
                 final OnMediaTimeDiscontinuityListener mediaTimeListener;
@@ -3855,7 +3803,6 @@ public class MediaPlayer extends PlayerBase
         @Override
         public void onCompletion(MediaPlayer mp) {
             baseStop();
-            tryToDisableNativeRoutingCallback();
         }
     };
 

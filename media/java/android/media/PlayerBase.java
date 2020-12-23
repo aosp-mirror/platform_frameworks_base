@@ -90,8 +90,6 @@ public abstract class PlayerBase {
     private float mPanMultiplierR = 1.0f;
     @GuardedBy("mLock")
     private float mVolMultiplier = 1.0f;
-    @GuardedBy("mLock")
-    private int mDeviceId;
 
     /**
      * Constructor. Must be given audio attributes, as they are required for AppOps.
@@ -154,35 +152,14 @@ public abstract class PlayerBase {
         }
     }
 
-    void baseUpdateDeviceId(@Nullable AudioDeviceInfo deviceInfo) {
-        int deviceId = 0;
-        if (deviceInfo != null) {
-            deviceId = deviceInfo.getId();
-        }
-        int piid;
-        synchronized (mLock) {
-            piid = mPlayerIId;
-            mDeviceId = deviceId;
-        }
-        try {
-            getService().playerEvent(piid,
-                    AudioPlaybackConfiguration.PLAYER_UPDATE_DEVICE_ID, deviceId);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error talking to audio service, "
-                    + deviceId
-                    + " device id will not be tracked for piid=" + piid, e);
-        }
-    }
-
-    private void updateState(int state, int deviceId) {
+    private void updateState(int state) {
         final int piid;
         synchronized (mLock) {
             mState = state;
             piid = mPlayerIId;
-            mDeviceId = deviceId;
         }
         try {
-            getService().playerEvent(piid, state, deviceId);
+            getService().playerEvent(piid, state);
         } catch (RemoteException e) {
             Log.e(TAG, "Error talking to audio service, "
                     + AudioPlaybackConfiguration.toLogFriendlyPlayerState(state)
@@ -190,11 +167,9 @@ public abstract class PlayerBase {
         }
     }
 
-    void baseStart(int deviceId) {
-        if (DEBUG) {
-            Log.v(TAG, "baseStart() piid=" + mPlayerIId + " deviceId=" + deviceId);
-        }
-        updateState(AudioPlaybackConfiguration.PLAYER_STATE_STARTED, deviceId);
+    void baseStart() {
+        if (DEBUG) { Log.v(TAG, "baseStart() piid=" + mPlayerIId); }
+        updateState(AudioPlaybackConfiguration.PLAYER_STATE_STARTED);
         synchronized (mLock) {
             if (isRestricted_sync()) {
                 playerSetVolume(true/*muting*/,0, 0);
@@ -216,12 +191,12 @@ public abstract class PlayerBase {
 
     void basePause() {
         if (DEBUG) { Log.v(TAG, "basePause() piid=" + mPlayerIId); }
-        updateState(AudioPlaybackConfiguration.PLAYER_STATE_PAUSED, 0);
+        updateState(AudioPlaybackConfiguration.PLAYER_STATE_PAUSED);
     }
 
     void baseStop() {
         if (DEBUG) { Log.v(TAG, "baseStop() piid=" + mPlayerIId); }
-        updateState(AudioPlaybackConfiguration.PLAYER_STATE_STOPPED, 0);
+        updateState(AudioPlaybackConfiguration.PLAYER_STATE_STOPPED);
     }
 
     void baseSetPan(float pan) {

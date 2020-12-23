@@ -44,6 +44,11 @@ abstract class AndroidKeyStoreECDSASignatureSpi extends AndroidKeyStoreSignature
         }
 
         @Override
+        protected String getAlgorithm() {
+            return "NONEwithECDSA";
+        }
+
+        @Override
         protected KeyStoreCryptoOperationStreamer createMainDataStreamer(
                 KeyStoreOperation operation) {
             return new TruncateToFieldSizeMessageStreamer(
@@ -113,11 +118,19 @@ abstract class AndroidKeyStoreECDSASignatureSpi extends AndroidKeyStoreSignature
         public SHA1() {
             super(KeymasterDefs.KM_DIGEST_SHA1);
         }
+        @Override
+        protected String getAlgorithm() {
+            return "SHA1withECDSA";
+        }
     }
 
     public final static class SHA224 extends AndroidKeyStoreECDSASignatureSpi {
         public SHA224() {
             super(KeymasterDefs.KM_DIGEST_SHA_2_224);
+        }
+        @Override
+        protected String getAlgorithm() {
+            return "SHA224withECDSA";
         }
     }
 
@@ -125,17 +138,29 @@ abstract class AndroidKeyStoreECDSASignatureSpi extends AndroidKeyStoreSignature
         public SHA256() {
             super(KeymasterDefs.KM_DIGEST_SHA_2_256);
         }
+        @Override
+        protected String getAlgorithm() {
+            return "SHA256withECDSA";
+        }
     }
 
     public final static class SHA384 extends AndroidKeyStoreECDSASignatureSpi {
         public SHA384() {
             super(KeymasterDefs.KM_DIGEST_SHA_2_384);
         }
+        @Override
+        protected String getAlgorithm() {
+            return "SHA384withECDSA";
+        }
     }
 
     public final static class SHA512 extends AndroidKeyStoreECDSASignatureSpi {
         public SHA512() {
             super(KeymasterDefs.KM_DIGEST_SHA_2_512);
+        }
+        @Override
+        protected String getAlgorithm() {
+            return "SHA512withECDSA";
         }
     }
 

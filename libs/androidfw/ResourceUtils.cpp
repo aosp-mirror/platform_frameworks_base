@@ -56,7 +56,8 @@ base::expected<AssetManager2::ResourceName, NullOrIOError> ToResourceName(
     .package_len = package_name.size(),
   };
 
-  if (base::expected<StringPiece, NullOrIOError> type_str = type_string_ref.string8()) {
+  if (base::expected<StringPiece, NullOrIOError> type_str = type_string_ref.string8();
+      type_str.ok()) {
     name.type = type_str->data();
     name.type_len = type_str->size();
   } else if (UNLIKELY(IsIOError(type_str))) {
@@ -64,7 +65,8 @@ base::expected<AssetManager2::ResourceName, NullOrIOError> ToResourceName(
   }
 
   if (name.type == nullptr) {
-    if (base::expected<StringPiece16, NullOrIOError> type16_str = type_string_ref.string16()) {
+    if (base::expected<StringPiece16, NullOrIOError> type16_str = type_string_ref.string16();
+        type16_str.ok()) {
       name.type16 = type16_str->data();
       name.type_len = type16_str->size();
     } else if (!type16_str.has_value()) {
@@ -72,7 +74,8 @@ base::expected<AssetManager2::ResourceName, NullOrIOError> ToResourceName(
     }
   }
 
-  if (base::expected<StringPiece, NullOrIOError> entry_str = entry_string_ref.string8()) {
+  if (base::expected<StringPiece, NullOrIOError> entry_str = entry_string_ref.string8();
+      entry_str.ok()) {
     name.entry = entry_str->data();
     name.entry_len = entry_str->size();
   } else if (UNLIKELY(IsIOError(entry_str))) {
@@ -80,7 +83,8 @@ base::expected<AssetManager2::ResourceName, NullOrIOError> ToResourceName(
   }
 
   if (name.entry == nullptr) {
-    if (base::expected<StringPiece16, NullOrIOError> entry16_str = entry_string_ref.string16()) {
+    if (base::expected<StringPiece16, NullOrIOError> entry16_str = entry_string_ref.string16();
+        entry16_str.ok()) {
       name.entry16 = entry16_str->data();
       name.entry_len = entry16_str->size();
     } else if (!entry16_str.has_value()) {

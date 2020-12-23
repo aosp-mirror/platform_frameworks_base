@@ -19,7 +19,9 @@ package android.security.keystore2;
 import android.annotation.NonNull;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.security.keymint.KeyParameter;
+import android.hardware.security.keymint.KeyParameterValue;
 import android.hardware.security.keymint.SecurityLevel;
+import android.hardware.security.keymint.Tag;
 import android.security.GateKeeper;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keystore.KeyProperties;
@@ -50,7 +52,7 @@ public abstract class KeyStore2ParameterUtils {
         }
         KeyParameter p = new KeyParameter();
         p.tag = tag;
-        p.boolValue = true;
+        p.value = KeyParameterValue.boolValue(true);
         return p;
     }
 
@@ -62,14 +64,40 @@ public abstract class KeyStore2ParameterUtils {
      * @hide
      */
     static @NonNull KeyParameter makeEnum(int tag, int v) {
-        int type = KeymasterDefs.getTagType(tag);
-        if (type != KeymasterDefs.KM_ENUM && type != KeymasterDefs.KM_ENUM_REP) {
-            throw new IllegalArgumentException("Not an enum or repeatable enum tag: " + tag);
+        KeyParameter kp = new KeyParameter();
+        kp.tag = tag;
+        switch (tag) {
+            case Tag.PURPOSE:
+                kp.value = KeyParameterValue.keyPurpose(v);
+                break;
+            case Tag.ALGORITHM:
+                kp.value = KeyParameterValue.algorithm(v);
+                break;
+            case Tag.BLOCK_MODE:
+                kp.value = KeyParameterValue.blockMode(v);
+                break;
+            case Tag.DIGEST:
+                kp.value = KeyParameterValue.digest(v);
+                break;
+            case Tag.EC_CURVE:
+                kp.value = KeyParameterValue.ecCurve(v);
+                break;
+            case Tag.ORIGIN:
+                kp.value = KeyParameterValue.origin(v);
+                break;
+            case Tag.PADDING:
+                kp.value = KeyParameterValue.paddingMode(v);
+                break;
+            case Tag.USER_AUTH_TYPE:
+                kp.value = KeyParameterValue.hardwareAuthenticatorType(v);
+                break;
+            case Tag.HARDWARE_TYPE:
+                kp.value = KeyParameterValue.securityLevel(v);
+                break;
+            default:
+                throw new IllegalArgumentException("Not an enum or repeatable enum tag: " + tag);
         }
-        KeyParameter p = new KeyParameter();
-        p.tag = tag;
-        p.integer = v;
-        return p;
+        return kp;
     }
 
     /**
@@ -86,7 +114,7 @@ public abstract class KeyStore2ParameterUtils {
         }
         KeyParameter p = new KeyParameter();
         p.tag = tag;
-        p.integer = v;
+        p.value = KeyParameterValue.integer(v);
         return p;
     }
 
@@ -104,7 +132,7 @@ public abstract class KeyStore2ParameterUtils {
         }
         KeyParameter p = new KeyParameter();
         p.tag = tag;
-        p.longInteger = v;
+        p.value = KeyParameterValue.longInteger(v);
         return p;
     }
 
@@ -121,7 +149,7 @@ public abstract class KeyStore2ParameterUtils {
         }
         KeyParameter p = new KeyParameter();
         p.tag = tag;
-        p.blob = b;
+        p.value = KeyParameterValue.blob(b);
         return p;
     }
 
@@ -138,9 +166,10 @@ public abstract class KeyStore2ParameterUtils {
         }
         KeyParameter p = new KeyParameter();
         p.tag = tag;
-        p.longInteger = date.getTime();
-        if (p.longInteger < 0) {
-            throw new IllegalArgumentException("Date tag value out of range: " + p.longInteger);
+        p.value = KeyParameterValue.dateTime(date.getTime());
+        if (p.value.getDateTime() < 0) {
+            throw new IllegalArgumentException("Date tag value out of range: "
+                    + p.value.getDateTime());
         }
         return p;
     }
@@ -160,24 +189,24 @@ public abstract class KeyStore2ParameterUtils {
             throw new IllegalArgumentException("Not an int tag: " + param.keyParameter.tag);
         }
         // KM_UINT is 32 bits wide so we must suppress sign extension.
-        return ((long) param.keyParameter.integer) & 0xffffffffL;
+        return ((long) param.keyParameter.value.getInteger()) & 0xffffffffL;
     }
 
     static @NonNull Date getDate(@NonNull Authorization param) {
         if (KeymasterDefs.getTagType(param.keyParameter.tag) != KeymasterDefs.KM_DATE) {
             throw new IllegalArgumentException("Not a date tag: " + param.keyParameter.tag);
         }
-        if (param.keyParameter.longInteger < 0) {
+        if (param.keyParameter.value.getDateTime() < 0) {
             throw new IllegalArgumentException("Date Value too large: "
-                    + param.keyParameter.longInteger);
+                    + param.keyParameter.value.getDateTime());
         }
-        return new Date(param.keyParameter.longInteger);
+        return new Date(param.keyParameter.value.getDateTime());
     }
 
     static void forEachSetFlag(int flags, Consumer<Integer> consumer) {
         int offset = 0;
         while (flags != 0) {
-            if ((flags & 1) == 0) {
+            if ((flags & 1) == 1) {
                 consumer.accept(1 << offset);
             }
             offset += 1;

@@ -71,7 +71,7 @@ Result<ResourceId> WARN_UNUSED ParseResReference(const AssetManager2& am, const 
   }
 
   // next, try to parse as a package:type/name string
-  if (auto resid = am.GetResourceId(res, "", fallback_package)) {
+  if (auto resid = am.GetResourceId(res, "", fallback_package); resid.ok()) {
     return *resid;
   }
 
@@ -94,7 +94,7 @@ void PrintValue(AssetManager2* const am, const AssetManager2::SelectedValue& val
     case Res_value::TYPE_STRING: {
       const ResStringPool* pool = am->GetStringPoolForCookie(value.cookie);
       out->append("\"");
-      if (auto str = pool->string8ObjectAt(value.data)) {
+      if (auto str = pool->string8ObjectAt(value.data); str.ok()) {
         out->append(*str);
       }
     } break;

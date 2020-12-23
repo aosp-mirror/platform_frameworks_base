@@ -289,8 +289,6 @@ public class KeyguardBouncer {
                     SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__HIDDEN);
             mDismissCallbackRegistry.notifyDismissCancelled();
         }
-        mExpansion = EXPANSION_HIDDEN;
-        dispatchExpansionChanged();
         mIsScrimmed = false;
         mFalsingCollector.onBouncerHidden();
         mCallback.onBouncerVisiblityChanged(false /* shown */);

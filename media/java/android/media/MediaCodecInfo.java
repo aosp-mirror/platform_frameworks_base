@@ -1865,10 +1865,6 @@ public final class MediaCodecInfo {
                         && aligned.mMaxMacroBlockRate >= otherAligned.mMaxMacroBlockRate);
             }
 
-            /* package private */ boolean isEqualDimension(@NonNull PerformancePoint other) {
-                return mWidth == other.mWidth && mHeight == other.mHeight;
-            }
-
             private @NonNull Size getCommonBlockSize(@NonNull PerformancePoint other) {
                 return new Size(
                         Math.max(mBlockSize.getWidth(), other.mBlockSize.getWidth()) * 16,
@@ -2010,8 +2006,11 @@ public final class MediaCodecInfo {
          * codecs are active, should use that highest pixel count, and add the frame rates of
          * each individual codec.
          * <p class=note>
-         * Supported resolution could be further restricted for 32-bit processes due to
-         * the limited virtual memory space.
+         * 32-bit processes will not support resolutions larger than 4096x4096 due to
+         * the limited address space, but performance points will be presented as is.
+         * In other words, even though a component publishes a performance point for
+         * a resolution higher than 4096x4096, it does not mean that the resolution is supported
+         * for 32-bit processes.
          */
         @Nullable
         public List<PerformancePoint> getSupportedPerformancePoints() {
@@ -2214,28 +2213,6 @@ public final class MediaCodecInfo {
                                (a.getMaxMacroBlockRate() < b.getMaxMacroBlockRate() ? -1 : 1) :
                        (a.getMaxFrameRate() != b.getMaxFrameRate()) ?
                                (a.getMaxFrameRate() < b.getMaxFrameRate() ? -1 : 1) : 0));
-
-            // remove redundant points
-            for (int i = 1; i < ret.size(); ++i) {
-                PerformancePoint a = ret.get(i);
-                for (int j = 0; j < i; ++j) {
-                    PerformancePoint b = ret.get(j);
-                    if (b.isEqualDimension(a) && b.covers(a)) {
-                        ret.set(i, null);
-                        break;
-                    }
-                }
-            }
-            int newSize = 0;
-            for (int i = 0; i < ret.size(); ++i) {
-                PerformancePoint a = ret.get(i);
-                if (a == null) {
-                    continue;
-                }
-                ret.set(newSize, a);
-                ++newSize;
-            }
-            ret.setSize(newSize);
 
             return Collections.unmodifiableList(ret);
         }

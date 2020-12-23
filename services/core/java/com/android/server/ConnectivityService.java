@@ -144,6 +144,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.INetworkActivityListener;
 import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Message;
@@ -1380,8 +1381,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return;
         }
         final String action = blocked ? "BLOCKED" : "UNBLOCKED";
+        final NetworkRequest satisfiedRequest = nri.getSatisfiedRequest();
+        final int requestId =  satisfiedRequest != null
+                ? satisfiedRequest.requestId : nri.mRequests.get(0).requestId;
         mNetworkInfoBlockingLogs.log(String.format(
-                "%s %d(%d) on netId %d", action, nri.mUid, nri.request.requestId, net.getNetId()));
+                "%s %d(%d) on netId %d", action, nri.mUid, requestId, net.getNetId()));
     }
 
     /**
@@ -1709,16 +1713,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return newNc;
         }
 
-        Binder.withCleanCallingIdentity(
-                () -> {
-                    if (!mLocationPermissionChecker.checkLocationPermission(
-                            callerPkgName, null /* featureId */, callerUid, null /* message */)) {
-                        // Caller does not have the requisite location permissions. Reset the
-                        // owner's UID in the NetworkCapabilities.
-                        newNc.setOwnerUid(INVALID_UID);
-                    }
-                }
-        );
+        final long token = Binder.clearCallingIdentity();
+        try {
+            if (!mLocationPermissionChecker.checkLocationPermission(
+                    callerPkgName, null /* featureId */, callerUid, null /* message */)) {
+                // Caller does not have the requisite location permissions. Reset the
+                // owner's UID in the NetworkCapabilities.
+                newNc.setOwnerUid(INVALID_UID);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
 
         return newNc;
     }
@@ -2336,6 +2341,31 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     /**
+     * Start listening for default data network activity state changes.
+     */
+    @Override
+    public void registerNetworkActivityListener(@NonNull INetworkActivityListener l) {
+        // TODO: Replace network activity listener registry in ConnectivityManager from NMS to here
+    }
+
+    /**
+     * Stop listening for default data network activity state changes.
+     */
+    @Override
+    public void unregisterNetworkActivityListener(@NonNull INetworkActivityListener l) {
+        // TODO: Replace network activity listener registry in ConnectivityManager from NMS to here
+    }
+
+    /**
+     * Check whether the default network radio is currently active.
+     */
+    @Override
+    public boolean isDefaultNetworkActive() {
+        // TODO: Replace isNetworkActive() in NMS.
+        return false;
+    }
+
+    /**
      * Setup data activity tracking for the given network.
      *
      * Every {@code setupDataActivityTracking} should be paired with a
@@ -2705,7 +2735,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * Return an array of all current NetworkRequest sorted by request id.
      */
     @VisibleForTesting
-    protected NetworkRequestInfo[] requestsSortedById() {
+    NetworkRequestInfo[] requestsSortedById() {
         NetworkRequestInfo[] requests = new NetworkRequestInfo[0];
         requests = mNetworkRequests.values().toArray(requests);
         // Sort the array based off the NRI containing the min requestId in its requests.
@@ -3555,28 +3585,56 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return false;
         }
         for (NetworkRequestInfo nri : mNetworkRequests.values()) {
-            if (reason == UnneededFor.LINGER && nri.request.isBackgroundRequest()) {
+            if (reason == UnneededFor.LINGER
+                    && !nri.isMultilayerRequest()
+                    && nri.mRequests.get(0).isBackgroundRequest()) {
                 // Background requests don't affect lingering.
                 continue;
             }
 
-            // If this Network is already the highest scoring Network for a request, or if
-            // there is hope for it to become one if it validated, then it is needed.
-            if (nri.request.isRequest() && nai.satisfies(nri.request) &&
-                    (nai.isSatisfyingRequest(nri.request.requestId) ||
-                    // Note that this catches two important cases:
-                    // 1. Unvalidated cellular will not be reaped when unvalidated WiFi
-                    //    is currently satisfying the request.  This is desirable when
-                    //    cellular ends up validating but WiFi does not.
-                    // 2. Unvalidated WiFi will not be reaped when validated cellular
-                    //    is currently satisfying the request.  This is desirable when
-                    //    WiFi ends up validating and out scoring cellular.
-                    nri.mSatisfier.getCurrentScore()
-                            < nai.getCurrentScoreAsValidated())) {
+            if (isNetworkPotentialSatisfier(nai, nri)) {
                 return false;
             }
         }
         return true;
+    }
+
+    private boolean isNetworkPotentialSatisfier(
+            @NonNull final NetworkAgentInfo candidate, @NonNull final NetworkRequestInfo nri) {
+        // listen requests won't keep up a network satisfying it. If this is not a multilayer
+        // request, we can return immediately. For multilayer requests, we have to check to see if
+        // any of the multilayer requests may have a potential satisfier.
+        if (!nri.isMultilayerRequest() && nri.mRequests.get(0).isListen()) {
+            return false;
+        }
+        for (final NetworkRequest req : nri.mRequests) {
+            // As non-multilayer listen requests have already returned, the below would only happen
+            // for a multilayer request therefore continue to the next request if available.
+            if (req.isListen()) {
+                continue;
+            }
+            // If this Network is already the highest scoring Network for a request, or if
+            // there is hope for it to become one if it validated, then it is needed.
+            if (candidate.satisfies(req)) {
+                // As soon as a network is found that satisfies a request, return. Specifically for
+                // multilayer requests, returning as soon as a NetworkAgentInfo satisfies a request
+                // is important so as to not evaluate lower priority requests further in
+                // nri.mRequests.
+                final boolean isNetworkNeeded = candidate.isSatisfyingRequest(req.requestId)
+                        // Note that this catches two important cases:
+                        // 1. Unvalidated cellular will not be reaped when unvalidated WiFi
+                        //    is currently satisfying the request.  This is desirable when
+                        //    cellular ends up validating but WiFi does not.
+                        // 2. Unvalidated WiFi will not be reaped when validated cellular
+                        //    is currently satisfying the request.  This is desirable when
+                        //    WiFi ends up validating and out scoring cellular.
+                        || nri.mSatisfier.getCurrentScore()
+                        < candidate.getCurrentScoreAsValidated();
+                return isNetworkNeeded;
+            }
+        }
+
+        return false;
     }
 
     private NetworkRequestInfo getNriForAppRequest(
@@ -3875,8 +3933,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 new CaptivePortal(new CaptivePortalImpl(network).asBinder()));
         appIntent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
 
-        Binder.withCleanCallingIdentity(() ->
-                mContext.startActivityAsUser(appIntent, UserHandle.CURRENT));
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mContext.startActivityAsUser(appIntent, UserHandle.CURRENT);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     private class CaptivePortalImpl extends ICaptivePortal.Stub {
@@ -5464,6 +5526,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             this(r, null);
         }
 
+        boolean isMultilayerRequest() {
+            return mRequests.size() > 1;
+        }
+
         private List<NetworkRequest> initializeRequests(NetworkRequest r) {
             final ArrayList<NetworkRequest> tempRequests = new ArrayList<>();
             tempRequests.add(new NetworkRequest(r));
@@ -5505,7 +5571,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         public void binderDied() {
             log("ConnectivityService NetworkRequestInfo binderDied(" +
                     mRequests + ", " + mBinder + ")");
-            releaseNetworkRequest(mRequests);
+            releaseNetworkRequests(mRequests);
         }
 
         @Override
@@ -5538,13 +5604,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mAppOpsManager.checkPackage(callerUid, callerPackageName);
     }
 
-    private ArrayList<Integer> getSignalStrengthThresholds(NetworkAgentInfo nai) {
+    private ArrayList<Integer> getSignalStrengthThresholds(@NonNull final NetworkAgentInfo nai) {
         final SortedSet<Integer> thresholds = new TreeSet<>();
         synchronized (nai) {
-            for (NetworkRequestInfo nri : mNetworkRequests.values()) {
-                if (nri.request.networkCapabilities.hasSignalStrength() &&
-                        nai.satisfiesImmutableCapabilitiesOf(nri.request)) {
-                    thresholds.add(nri.request.networkCapabilities.getSignalStrength());
+            for (final NetworkRequestInfo nri : mNetworkRequests.values()) {
+                for (final NetworkRequest req : nri.mRequests) {
+                    if (req.networkCapabilities.hasSignalStrength()
+                            && nai.satisfiesImmutableCapabilitiesOf(req)) {
+                        thresholds.add(req.networkCapabilities.getSignalStrength());
+                    }
                 }
             }
         }
@@ -5831,7 +5899,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return mNextNetworkProviderId.getAndIncrement();
     }
 
-    private void releaseNetworkRequest(List<NetworkRequest> networkRequests) {
+    private void releaseNetworkRequests(List<NetworkRequest> networkRequests) {
         for (int i = 0; i < networkRequests.size(); i++) {
             releaseNetworkRequest(networkRequests.get(i));
         }
@@ -7763,10 +7831,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         final int userId = UserHandle.getCallingUserId();
 
-        Binder.withCleanCallingIdentity(() -> {
+        final long token = Binder.clearCallingIdentity();
+        try {
             final IpMemoryStore ipMemoryStore = IpMemoryStore.getMemoryStore(mContext);
             ipMemoryStore.factoryReset();
-        });
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
 
         // Turn airplane mode off
         setAirplaneMode(false);
