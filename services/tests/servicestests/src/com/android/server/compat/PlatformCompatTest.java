@@ -107,18 +107,20 @@ public class PlatformCompatTest {
         mCompatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
                 .addEnabledChangeWithId(1L)
                 .addDisabledChangeWithIdAndName(2L, "change2")
-                .addEnableAfterSdkChangeWithIdAndDescription(Build.VERSION_CODES.O, 3L, "desc")
-                .addEnableAfterSdkChangeWithId(Build.VERSION_CODES.P, 4L)
-                .addEnableAfterSdkChangeWithId(Build.VERSION_CODES.Q, 5L)
-                .addEnableAfterSdkChangeWithId(Build.VERSION_CODES.R, 6L)
+                .addEnableSinceSdkChangeWithIdAndDescription(Build.VERSION_CODES.O, 3L, "desc")
+                .addEnableSinceSdkChangeWithId(Build.VERSION_CODES.P, 4L)
+                .addEnableSinceSdkChangeWithId(Build.VERSION_CODES.Q, 5L)
+                .addEnableSinceSdkChangeWithId(Build.VERSION_CODES.R, 6L)
                 .addLoggingOnlyChangeWithId(7L)
                 .build();
         mPlatformCompat = new PlatformCompat(mContext, mCompatConfig);
         assertThat(mPlatformCompat.listUIChanges()).asList().containsExactly(
                 new CompatibilityChangeInfo(1L, "", -1, -1, false, false, ""),
                 new CompatibilityChangeInfo(2L, "change2", -1, -1, true, false, ""),
-                new CompatibilityChangeInfo(4L, "", Build.VERSION_CODES.P, -1, false, false, ""),
-                new CompatibilityChangeInfo(5L, "", Build.VERSION_CODES.Q, -1, false, false, ""));
+                new CompatibilityChangeInfo(5L, "", /*enableAfter*/ -1,
+                        /*enableSince*/ Build.VERSION_CODES.Q, false, false, ""),
+                new CompatibilityChangeInfo(6L, "", /*enableAfter*/ -1,
+                        /*enableSince*/ Build.VERSION_CODES.R, false, false, ""));
     }
 
     @Test
