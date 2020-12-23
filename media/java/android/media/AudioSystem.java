@@ -28,6 +28,7 @@ import android.media.audiopolicy.AudioMix;
 import android.os.Build;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.util.Pair;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -1749,6 +1750,134 @@ public class AudioSystem
      */
     public static native int getDevicesForRoleAndStrategy(
             int strategy, int role, @NonNull List<AudioDeviceAttributes> devices);
+
+    // use case routing by capture preset
+
+    private static Pair<int[], String[]> populateInputDevicesTypeAndAddress(
+            @NonNull List<AudioDeviceAttributes> devices) {
+        int[] types = new int[devices.size()];
+        String[] addresses = new String[devices.size()];
+        for (int i = 0; i < devices.size(); ++i) {
+            types[i] = devices.get(i).getInternalType();
+            if (types[i] == AudioSystem.DEVICE_NONE) {
+                types[i] = AudioDeviceInfo.convertDeviceTypeToInternalInputDevice(
+                        devices.get(i).getType());
+            }
+            addresses[i] = devices.get(i).getAddress();
+        }
+        return new Pair<int[], String[]>(types, addresses);
+    }
+
+    /**
+     * @hide
+     * Set devices as role for capture preset.
+     * @param capturePreset the capture preset to configure
+     * @param role the role of the devices
+     * @param devices the list of devices to be set as role for the given capture preset
+     * @return {@link #SUCCESS} if successfully set
+     */
+    public static int setDevicesRoleForCapturePreset(
+            int capturePreset, int role, @NonNull List<AudioDeviceAttributes> devices) {
+        if (devices.isEmpty()) {
+            return BAD_VALUE;
+        }
+        Pair<int[], String[]> typeAddresses = populateInputDevicesTypeAndAddress(devices);
+        return setDevicesRoleForCapturePreset(
+                capturePreset, role, typeAddresses.first, typeAddresses.second);
+    }
+
+    /**
+     * @hide
+     * Set devices as role for capture preset.
+     * @param capturePreset the capture preset to configure
+     * @param role the role of the devices
+     * @param types all device types
+     * @param addresses all device addresses
+     * @return {@link #SUCCESS} if successfully set
+     */
+    private static native int setDevicesRoleForCapturePreset(
+            int capturePreset, int role, @NonNull int[] types, @NonNull String[] addresses);
+
+    /**
+     * @hide
+     * Add devices as role for capture preset.
+     * @param capturePreset the capture preset to configure
+     * @param role the role of the devices
+     * @param devices the list of devices to be added as role for the given capture preset
+     * @return {@link #SUCCESS} if successfully add
+     */
+    public static int addDevicesRoleForCapturePreset(
+            int capturePreset, int role, @NonNull List<AudioDeviceAttributes> devices) {
+        if (devices.isEmpty()) {
+            return BAD_VALUE;
+        }
+        Pair<int[], String[]> typeAddresses = populateInputDevicesTypeAndAddress(devices);
+        return addDevicesRoleForCapturePreset(
+                capturePreset, role, typeAddresses.first, typeAddresses.second);
+    }
+
+    /**
+     * @hide
+     * Add devices as role for capture preset.
+     * @param capturePreset the capture preset to configure
+     * @param role the role of the devices
+     * @param types all device types
+     * @param addresses all device addresses
+     * @return {@link #SUCCESS} if successfully set
+     */
+    private static native int addDevicesRoleForCapturePreset(
+            int capturePreset, int role, @NonNull int[] types, @NonNull String[] addresses);
+
+    /**
+     * @hide
+     * Remove devices as role for the capture preset
+     * @param capturePreset the capture preset to configure
+     * @param role the role of the devices
+     * @param devices the devices to be removed
+     * @return {@link #SUCCESS} if successfully removed
+     */
+    public static int removeDevicesRoleForCapturePreset(
+            int capturePreset, int role, @NonNull List<AudioDeviceAttributes> devices) {
+        if (devices.isEmpty()) {
+            return BAD_VALUE;
+        }
+        Pair<int[], String[]> typeAddresses = populateInputDevicesTypeAndAddress(devices);
+        return removeDevicesRoleForCapturePreset(
+                capturePreset, role, typeAddresses.first, typeAddresses.second);
+    }
+
+    /**
+     * @hide
+     * Remove devices as role for capture preset.
+     * @param capturePreset the capture preset to configure
+     * @param role the role of the devices
+     * @param types all device types
+     * @param addresses all device addresses
+     * @return {@link #SUCCESS} if successfully set
+     */
+    private static native int removeDevicesRoleForCapturePreset(
+            int capturePreset, int role, @NonNull int[] types, @NonNull String[] addresses);
+
+    /**
+     * @hide
+     * Remove all devices as role for the capture preset
+     * @param capturePreset the capture preset to configure
+     * @param role the role of the devices
+     * @return {@link #SUCCESS} if successfully removed
+     */
+    public static native int clearDevicesRoleForCapturePreset(int capturePreset, int role);
+
+    /**
+     * @hide
+     * Query previously set devices as role for a capture preset
+     * @param capturePreset the capture preset to query for
+     * @param role the role of the devices
+     * @param devices a list that will contain the devices of role
+     * @return {@link #SUCCESS} if there is a preferred device and it was successfully retrieved
+     *     and written to the array
+     */
+    public static native int getDevicesForRoleAndCapturePreset(
+            int capturePreset, int role, @NonNull List<AudioDeviceAttributes> devices);
 
     // Items shared with audio service
 

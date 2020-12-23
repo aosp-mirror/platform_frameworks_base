@@ -404,6 +404,32 @@ public class MediaRecorder implements AudioRouting,
         }
     }
 
+    /**
+     * @hide
+     * @param source An audio source to test
+     * @return true if the source is a valid one
+     */
+    public static boolean isValidAudioSource(int source) {
+        switch(source) {
+            case AudioSource.MIC:
+            case AudioSource.VOICE_UPLINK:
+            case AudioSource.VOICE_DOWNLINK:
+            case AudioSource.VOICE_CALL:
+            case AudioSource.CAMCORDER:
+            case AudioSource.VOICE_RECOGNITION:
+            case AudioSource.VOICE_COMMUNICATION:
+            case AudioSource.REMOTE_SUBMIX:
+            case AudioSource.UNPROCESSED:
+            case AudioSource.VOICE_PERFORMANCE:
+            case AudioSource.ECHO_REFERENCE:
+            case AudioSource.RADIO_TUNER:
+            case AudioSource.HOTWORD:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     /** @hide */
     public static final String toLogFriendlyAudioSource(int source) {
         switch(source) {
