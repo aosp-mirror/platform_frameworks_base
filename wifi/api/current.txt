@@ -264,7 +264,7 @@ package android.net.wifi {
     field public static final int SIM = 5; // 0x5
   }
 
-  public class WifiInfo implements android.os.Parcelable {
+  public class WifiInfo implements android.os.Parcelable android.net.TransportInfo {
     method public int describeContents();
     method public String getBSSID();
     method public static android.net.NetworkInfo.DetailedState getDetailedStateOf(android.net.wifi.SupplicantState);
@@ -315,7 +315,7 @@ package android.net.wifi {
     method @Deprecated public boolean disconnect();
     method @Deprecated public boolean enableNetwork(int, boolean);
     method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_WIFI_STATE}) public java.util.List<android.net.wifi.WifiConfiguration> getConfiguredNetworks();
-    method public android.net.wifi.WifiInfo getConnectionInfo();
+    method @Deprecated public android.net.wifi.WifiInfo getConnectionInfo();
     method public android.net.DhcpInfo getDhcpInfo();
     method public int getMaxNumberOfNetworkSuggestionsPerApp();
     method @IntRange(from=0) public int getMaxSignalLevel();
