@@ -2720,8 +2720,7 @@ public class AudioTrack extends PlayerBase
     private void startImpl() {
         synchronized (mRoutingChangeListeners) {
             if (!mEnableSelfRoutingMonitor) {
-                testEnableNativeRoutingCallbacksLocked();
-                mEnableSelfRoutingMonitor = true;
+                mEnableSelfRoutingMonitor = testEnableNativeRoutingCallbacksLocked();
             }
         }
         synchronized(mPlayStateLock) {
@@ -3513,23 +3512,36 @@ public class AudioTrack extends PlayerBase
         }
     }
 
-    /*
-     * Call BEFORE adding a routing callback handler.
+    /**
+     * Call BEFORE adding a routing callback handler and when enabling self routing listener
+     * @return returns true for success, false otherwise.
      */
     @GuardedBy("mRoutingChangeListeners")
-    private void testEnableNativeRoutingCallbacksLocked() {
+    private boolean testEnableNativeRoutingCallbacksLocked() {
         if (mRoutingChangeListeners.size() == 0 && !mEnableSelfRoutingMonitor) {
-            native_enableDeviceCallback();
+            try {
+                native_enableDeviceCallback();
+                return true;
+            } catch (IllegalStateException e) {
+                // Fail silently as track state could have changed in between start
+                // and enabling routing callback, return false to indicate not enabled
+            }
         }
+        return false;
     }
 
     /*
-     * Call AFTER removing a routing callback handler.
+     * Call AFTER removing a routing callback handler and when disabling self routing listener.
      */
     @GuardedBy("mRoutingChangeListeners")
     private void testDisableNativeRoutingCallbacksLocked() {
         if (mRoutingChangeListeners.size() == 0 && !mEnableSelfRoutingMonitor) {
-            native_disableDeviceCallback();
+            try {
+                native_disableDeviceCallback();
+            } catch (IllegalStateException e) {
+                // Fail silently as track state could have changed in between stop
+                // and disabling routing callback
+            }
         }
     }
 

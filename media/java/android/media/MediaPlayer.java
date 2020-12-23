@@ -1513,21 +1513,28 @@ public class MediaPlayer extends PlayerBase
         }
     }
 
-    /*
-     * Call BEFORE adding a routing callback handler.
+    /**
+     * Call BEFORE adding a routing callback handler and when enabling self routing listener
+     * @return returns true for success, false otherwise.
      */
     @GuardedBy("mRoutingChangeListeners")
-    private void testEnableNativeRoutingCallbacksLocked() {
+    private boolean testEnableNativeRoutingCallbacksLocked() {
         if (mRoutingChangeListeners.size() == 0 && !mEnableSelfRoutingMonitor) {
-            native_enableDeviceCallback(true);
+            try {
+                native_enableDeviceCallback(true);
+                return true;
+            } catch (IllegalStateException e) {
+                // Fail silently as media player state could have changed in between start
+                // and enabling routing callback, return false to indicate not enabled
+            }
         }
+        return false;
     }
 
-    private void tryToEnableNativeRoutingCallback() {
+    private void  tryToEnableNativeRoutingCallback() {
         synchronized (mRoutingChangeListeners) {
             if (!mEnableSelfRoutingMonitor) {
-                testEnableNativeRoutingCallbacksLocked();
-                mEnableSelfRoutingMonitor = true;
+                mEnableSelfRoutingMonitor = testEnableNativeRoutingCallbacksLocked();
             }
         }
     }
@@ -1542,12 +1549,17 @@ public class MediaPlayer extends PlayerBase
     }
 
     /*
-     * Call AFTER removing a routing callback handler.
+     * Call AFTER removing a routing callback handler and when disabling self routing listener
      */
     @GuardedBy("mRoutingChangeListeners")
     private void testDisableNativeRoutingCallbacksLocked() {
         if (mRoutingChangeListeners.size() == 0 && !mEnableSelfRoutingMonitor) {
-            native_enableDeviceCallback(false);
+            try {
+                native_enableDeviceCallback(false);
+            } catch (IllegalStateException e) {
+                // Fail silently as media player state could have changed in between stop
+                // and disabling routing callback
+            }
         }
     }
 
@@ -3854,8 +3866,8 @@ public class MediaPlayer extends PlayerBase
     private final OnCompletionListener mOnCompletionInternalListener = new OnCompletionListener() {
         @Override
         public void onCompletion(MediaPlayer mp) {
-            baseStop();
             tryToDisableNativeRoutingCallback();
+            baseStop();
         }
     };
 
