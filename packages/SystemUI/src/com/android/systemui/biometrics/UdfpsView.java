@@ -27,6 +27,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -70,6 +71,7 @@ public class UdfpsView extends View implements DozeReceiver,
     // mInsetsListener to restrict the touchable region and allow the touches outside of the sensor
     // to propagate to the rest of the UI.
     @NonNull private final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsListener;
+    @NonNull private final Drawable mFingerprintDrawable;
 
     // Used to obtain the sensor location.
     @NonNull private FingerprintSensorPropertiesInternal mSensorProps;
@@ -79,7 +81,7 @@ public class UdfpsView extends View implements DozeReceiver,
     private float mBurnInOffsetX;
     private float mBurnInOffsetY;
 
-    private boolean mIsScrimShowing;
+    private boolean mShowScrimAndDot;
     private boolean mIsHbmSupported;
     @Nullable private String mDebugMessage;
 
@@ -112,14 +114,15 @@ public class UdfpsView extends View implements DozeReceiver,
         mSensorPaint = new Paint(0 /* flags */);
         mSensorPaint.setAntiAlias(true);
         mSensorPaint.setColor(Color.WHITE);
-        mSensorPaint.setStyle(Paint.Style.STROKE);
-        mSensorPaint.setStrokeWidth(SENSOR_OUTLINE_WIDTH);
         mSensorPaint.setShadowLayer(SENSOR_SHADOW_RADIUS, 0, 0, Color.BLACK);
+        mSensorPaint.setStyle(Paint.Style.FILL);
 
         mDebugTextPaint = new Paint();
         mDebugTextPaint.setAntiAlias(true);
         mDebugTextPaint.setColor(Color.BLUE);
         mDebugTextPaint.setTextSize(DEBUG_TEXT_SIZE_PX);
+
+        mFingerprintDrawable = getResources().getDrawable(R.drawable.ic_fingerprint, null);
 
         mTouchableRegion = new Rect();
         // When the device is rotated, it's important that mTouchableRegion is updated before
@@ -130,7 +133,7 @@ public class UdfpsView extends View implements DozeReceiver,
             internalInsetsInfo.touchableRegion.set(mTouchableRegion);
         };
 
-        mIsScrimShowing = false;
+        mShowScrimAndDot = false;
     }
 
     void setSensorProperties(@NonNull FingerprintSensorPropertiesInternal properties) {
@@ -181,6 +184,13 @@ public class UdfpsView extends View implements DozeReceiver,
             default:
                 // Do nothing to stay in portrait mode.
         }
+
+        int margin =  (int) (mSensorRect.bottom - mSensorRect.top) / 5;
+        mFingerprintDrawable.setBounds(
+                (int) mSensorRect.left + margin,
+                (int) mSensorRect.top + margin,
+                (int) mSensorRect.right - margin,
+                (int) mSensorRect.bottom - margin);
     }
 
     @Override
@@ -198,6 +208,8 @@ public class UdfpsView extends View implements DozeReceiver,
         // is finished, mTouchableRegion will be used by mInsetsListener to compute the touch
         // insets.
         mSensorRect.roundOut(mTouchableRegion);
+
+
     }
 
     @Override
@@ -218,7 +230,7 @@ public class UdfpsView extends View implements DozeReceiver,
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        if (mIsScrimShowing && mIsHbmSupported) {
+        if (mShowScrimAndDot && mIsHbmSupported) {
             // Only draw the scrim if HBM is supported.
             canvas.drawRect(mScrimRect, mScrimPaint);
         }
@@ -229,7 +241,15 @@ public class UdfpsView extends View implements DozeReceiver,
         if (!TextUtils.isEmpty(mDebugMessage)) {
             canvas.drawText(mDebugMessage, 0, 160, mDebugTextPaint);
         }
-        canvas.drawOval(mSensorRect, mSensorPaint);
+
+        if (mShowScrimAndDot) {
+            // draw dot (white circle)
+            canvas.drawOval(mSensorRect, mSensorPaint);
+        } else {
+            // draw fingerprint icon
+            mFingerprintDrawable.draw(canvas);
+        }
+
         canvas.restore();
     }
 
@@ -264,19 +284,17 @@ public class UdfpsView extends View implements DozeReceiver,
         mScrimPaint.setAlpha(alpha);
     }
 
-    boolean isScrimShowing() {
-        return mIsScrimShowing;
+    boolean isShowScrimAndDot() {
+        return mShowScrimAndDot;
     }
 
     void showScrimAndDot() {
-        mIsScrimShowing = true;
-        mSensorPaint.setStyle(Paint.Style.FILL);
+        mShowScrimAndDot = true;
         invalidate();
     }
 
     void hideScrimAndDot() {
-        mIsScrimShowing = false;
-        mSensorPaint.setStyle(Paint.Style.STROKE);
+        mShowScrimAndDot = false;
         invalidate();
     }
 }

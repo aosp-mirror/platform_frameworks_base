@@ -501,7 +501,7 @@ public class LockscreenLockIconController {
         if (mBlockUpdates && canBlockUpdates()) {
             shouldUpdate = false;
         }
-        if (shouldUpdate && mLockIcon != null) {
+        if (shouldUpdate && mLockIcon != null && mLockIcon.getVisibility() != GONE) {
             mLockIcon.update(state,
                     mStatusBarStateController.isDozing(), mKeyguardJustShown);
         }
@@ -549,16 +549,14 @@ public class LockscreenLockIconController {
             return false;
         }
 
-        if (mKeyguardUpdateMonitor.isUdfpsEnrolled()) {
-            boolean changed = mLockIcon.getVisibility() == GONE;
+        if (!mKeyguardUpdateMonitor.shouldShowLockIcon()) {
+            boolean changed = mLockIcon.getVisibility() != GONE;
             mLockIcon.setVisibility(GONE);
             return changed;
         }
 
         boolean onAodOrDocked = mStatusBarStateController.isDozing() || mDocked;
-        boolean invisible = onAodOrDocked || mWakeAndUnlockRunning || mShowingLaunchAffordance
-                || (mKeyguardSecurityModel.getSecurityMode(KeyguardUpdateMonitor.getCurrentUser())
-                == KeyguardSecurityModel.SecurityMode.None);
+        boolean invisible = onAodOrDocked || mWakeAndUnlockRunning || mShowingLaunchAffordance;
         boolean fingerprintOrBypass = mFingerprintUnlock
                 || mKeyguardBypassController.getBypassEnabled();
         if (fingerprintOrBypass && !mBouncerShowingScrimmed) {

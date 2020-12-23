@@ -19,6 +19,13 @@ android_app {
     sdk_version: "core_platform",
     certificate: "platform",
 
+    // Disable dexpreopt and verify_uses_libraries check as the app
+    // contains no Java code to be dexpreopted.
+    enforce_uses_libs: false,
+    dex_preopt: {
+        enabled: false,
+    },
+
     // Soong special-cases framework-res to install this alongside
     // the libraries at /system/framework/framework-res.apk.
 

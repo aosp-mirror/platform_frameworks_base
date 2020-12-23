@@ -64,7 +64,8 @@ open class FaceAuthScreenBrightnessController(
     private val globalSettings: GlobalSettings,
     private val systemSettings: SystemSettings,
     private val mainHandler: Handler,
-    private val dumpManager: DumpManager
+    private val dumpManager: DumpManager,
+    private val enabled: Boolean
 ) : Dumpable {
 
     private var userDefinedBrightness: Float = 1f
@@ -86,7 +87,7 @@ open class FaceAuthScreenBrightnessController(
                 return
             }
             // TODO enable only when receiving a low-light error
-            overridingBrightness = running
+            overridingBrightness = if (enabled) running else false
         }
     }
     private lateinit var whiteOverlay: View
@@ -188,6 +189,7 @@ open class FaceAuthScreenBrightnessController(
             println("brightnessAnimationDuration: $brightnessAnimationDuration")
             println("maxScreenBrightness: $maxScreenBrightness")
             println("userDefinedBrightness: $userDefinedBrightness")
+            println("enabled: $enabled")
         }
     }
 }

@@ -687,8 +687,8 @@ public class RecoverySystem {
     }
 
     /**
-     * Request that the device reboot and apply the update that has been prepared. Callers are
-     * recommended to use {@link #rebootAndApply(Context, String, boolean)} instead.
+     * Request that the device reboot and apply the update that has been prepared. This API is
+     * deprecated, and is expected to be used by OTA only on devices running Android 11.
      *
      * @param context the Context to use.
      * @param updateToken this parameter is deprecated and won't be used. See details in
@@ -699,18 +699,18 @@ public class RecoverySystem {
      *               unattended reboot or if the {@code updateToken} did not match the previously
      *               given token
      * @hide
+     * @deprecated Use {@link #rebootAndApply(Context, String, boolean)} instead
      */
     @SystemApi
-    @RequiresPermission(anyOf = {android.Manifest.permission.RECOVERY,
-            android.Manifest.permission.REBOOT})
+    @RequiresPermission(android.Manifest.permission.RECOVERY)
     public static void rebootAndApply(@NonNull Context context, @NonNull String updateToken,
             @NonNull String reason) throws IOException {
         if (updateToken == null) {
             throw new NullPointerException("updateToken == null");
         }
         RecoverySystem rs = (RecoverySystem) context.getSystemService(Context.RECOVERY_SERVICE);
-        // OTA is the sole user before S, and a slot switch is required for ota update.
-        if (!rs.rebootWithLskf(context.getPackageName(), reason, true)) {
+        // OTA is the sole user, who expects a slot switch.
+        if (!rs.rebootWithLskfAssumeSlotSwitch(context.getPackageName(), reason)) {
             throw new IOException("system not prepared to apply update");
         }
     }
@@ -738,7 +738,7 @@ public class RecoverySystem {
      *
      * @param context the Context to use.
      * @param reason the reboot reason to give to the {@link PowerManager}
-     * @param slotSwitch true if the caller intends to switch the slot on an A/B device.
+     * @param slotSwitch true if the caller expects the slot to be switched on A/B devices.
      * @throws IOException if the reboot couldn't proceed because the device wasn't ready for an
      *               unattended reboot.
      * @hide
@@ -1390,6 +1390,21 @@ public class RecoverySystem {
             throws IOException {
         try {
             return mService.rebootWithLskf(packageName, reason, slotSwitch);
+        } catch (RemoteException e) {
+            throw new IOException("could not reboot for update");
+        }
+    }
+
+
+    /**
+     * Calls the recovery system service to reboot and apply update. This is the legacy API and
+     * expects a slot switch for A/B devices.
+     *
+     */
+    private boolean rebootWithLskfAssumeSlotSwitch(String packageName, String reason)
+            throws IOException {
+        try {
+            return mService.rebootWithLskfAssumeSlotSwitch(packageName, reason);
         } catch (RemoteException e) {
             throw new IOException("could not reboot for update");
         }

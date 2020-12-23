@@ -817,6 +817,11 @@ public class MockContext extends Context {
     }
 
     @Override
+    public @NonNull Context createWindowContext(Display display, int type, Bundle options) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean isRestricted() {
         throw new UnsupportedOperationException();
     }

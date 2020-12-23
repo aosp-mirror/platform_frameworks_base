@@ -988,6 +988,13 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    @NonNull
+    public Context createWindowContext(@NonNull Display display, @WindowType int type,
+            @Nullable Bundle options) {
+        return mBase.createWindowContext(display, type, options);
+    }
+
+    @Override
     public @NonNull Context createAttributionContext(@Nullable String attributionTag) {
         return mBase.createAttributionContext(attributionTag);
     }

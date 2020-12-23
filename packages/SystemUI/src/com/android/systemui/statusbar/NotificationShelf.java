@@ -197,7 +197,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
             viewState.hasItemsInStableShelf = lastViewState.inShelf;
             viewState.hidden = !mAmbientState.isShadeExpanded()
                     || mAmbientState.isQsCustomizerShowing();
-            viewState.maxShelfEnd = maxShelfEnd;
         } else {
             viewState.hidden = true;
             viewState.location = ExpandableViewState.LOCATION_GONE;
@@ -823,10 +822,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
         return - (getIntrinsicHeight() - mStatusBarHeight) / 2;
     }
 
-    public int getNotificationMergeSize() {
-        return getIntrinsicHeight();
-    }
-
     @Override
     public boolean hasNoContentHeight() {
         return true;
@@ -1018,7 +1013,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private class ShelfState extends ExpandableViewState {
         private float openedAmount;
         private boolean hasItemsInStableShelf;
-        private float maxShelfEnd;
 
         @Override
         public void applyToView(View view) {

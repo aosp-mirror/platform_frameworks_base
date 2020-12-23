@@ -34,6 +34,11 @@
 #include <utils/Mutex.h>
 #include <utils/RefBase.h>
 
+#include "tuner/DemuxClient.h"
+#include "tuner/FilterClient.h"
+#include "tuner/FilterClientCallback.h"
+#include "tuner/FrontendClient.h"
+#include "tuner/FrontendClientCallback.h"
 #include "tuner/TunerClient.h"
 #include "jni.h"
 
@@ -95,6 +100,7 @@ struct Lnb : public RefBase {
     Lnb(sp<ILnb> sp, jobject obj);
     ~Lnb();
     sp<ILnb> getILnb();
+    // TODO: remove after migrate to client lib
     sp<ILnb> mLnbSp;
     jweak mLnbObj;
 };
@@ -115,6 +121,7 @@ struct Dvr : public RefBase {
     jint close();
     MQ& getDvrMQ();
     sp<IDvr> getIDvr();
+    // TODO: remove after migrate to client lib
     sp<IDvr> mDvrSp;
     jweak mDvrObj;
     std::unique_ptr<MQ> mDvrMQ;
@@ -123,29 +130,15 @@ struct Dvr : public RefBase {
     int mFd;
 };
 
-struct Filter : public RefBase {
-    Filter(sp<IFilter> sp, jobject obj);
-    ~Filter();
-    int close();
-    sp<IFilter> getIFilter();
-    sp<IFilter> mFilterSp;
-    std::unique_ptr<MQ> mFilterMQ;
-    EventFlag* mFilterMQEventFlag;
-    jweak mFilterObj;
-    native_handle_t* mAvSharedHandle;
-    uint64_t mAvSharedMemSize;
-    bool mIsMediaFilter;
-};
-
 struct MediaEvent : public RefBase {
-    MediaEvent(sp<Filter> filter, hidl_handle avHandle, uint64_t dataId,
+    MediaEvent(sp<FilterClient> filterClient, hidl_handle avHandle, uint64_t dataId,
         uint64_t dataSize, jobject obj);
     ~MediaEvent();
     jobject getLinearBlock();
     uint64_t getAudioHandle();
     void finalize();
 
-    sp<Filter> mFilter;
+    sp<FilterClient> mFilterClient;
     native_handle_t* mAvHandle;
     uint64_t mDataId;
     uint64_t mDataSize;
@@ -159,16 +152,16 @@ struct MediaEvent : public RefBase {
     std::weak_ptr<C2Buffer> mC2Buffer;
 };
 
-struct FilterCallback : public IFilterCallback {
-    ~FilterCallback();
-    virtual Return<void> onFilterEvent_1_1(const DemuxFilterEvent& filterEvent,
+struct FilterClientCallbackImpl : public FilterClientCallback {
+    virtual void onFilterEvent_1_1(const DemuxFilterEvent& filterEvent,
             const DemuxFilterEventExt& filterEventExt);
-    virtual Return<void> onFilterEvent(const DemuxFilterEvent& filterEvent);
-    virtual Return<void> onFilterStatus(const DemuxFilterStatus status);
+    virtual void onFilterEvent(const DemuxFilterEvent& filterEvent);
+    virtual void onFilterStatus(const DemuxFilterStatus status);
 
-    void setFilter(const sp<Filter> filter);
+    void setFilter(jweak filterObj, sp<FilterClient> filterClient);
 private:
-    sp<Filter> mFilter;
+    jweak mFilterObj;
+    sp<FilterClient> mFilterClient;
     jobjectArray getSectionEvent(
             jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>& events);
     jobjectArray getMediaEvent(
@@ -195,13 +188,13 @@ private:
             jobjectArray& arr, const std::vector<DemuxFilterEventExt::Event>& eventsExt);
 };
 
-struct FrontendCallback : public IFrontendCallback {
-    FrontendCallback(jweak tunerObj, FrontendId id);
+struct FrontendClientCallbackImpl : public FrontendClientCallback {
+    FrontendClientCallbackImpl(jweak tunerObj, FrontendId id);
 
-    virtual Return<void> onEvent(FrontendEventType frontendEventType);
-    virtual Return<void> onScanMessage(
+    virtual void onEvent(FrontendEventType frontendEventType);
+    virtual void onScanMessage(
             FrontendScanMessageType type, const FrontendScanMessage& message);
-    virtual Return<void> onScanMessageExt1_1(
+    virtual void onScanMessageExt1_1(
             FrontendScanMessageTypeExt1_1 type, const FrontendScanMessageExt1_1& messageExt);
 
     jweak mObject;
@@ -212,22 +205,24 @@ struct TimeFilter : public RefBase {
     TimeFilter(sp<ITimeFilter> sp, jweak obj);
     ~TimeFilter();
     sp<ITimeFilter> getITimeFilter();
+    // TODO: remove after migrate to client lib
     sp<ITimeFilter> mTimeFilterSp;
     jweak mTimeFilterObj;
 };
 
 struct JTuner : public RefBase {
     JTuner(JNIEnv *env, jobject thiz);
+    // TODO: modify after migrate to client lib
     sp<ITuner> getTunerService();
     int getTunerVersion();
-    jobject getAvSyncHwId(sp<Filter> filter);
+    jobject getAvSyncHwId(sp<FilterClient> filter);
     jobject getAvSyncTime(jint id);
     int connectCiCam(jint id);
     int linkCiCam(jint id);
     int disconnectCiCam();
     int unlinkCiCam(jint id);
     jobject getFrontendIds();
-    jobject openFrontendById(int id);
+    jobject openFrontendByHandle(int feHandle);
     jint closeFrontendById(int id);
     jobject getFrontendInfo(int id);
     int tune(const FrontendSettings& settings, const FrontendSettingsExt1_1& settingsExt1_1);
@@ -257,15 +252,22 @@ protected:
 private:
     jclass mClass;
     jweak mObject;
+    // TODO: remove after migrate to client lib
     static sp<ITuner> mTuner;
     static sp<::android::hardware::tv::tuner::V1_1::ITuner> mTuner_1_1;
     static sp<TunerClient> mTunerClient;
+    // TODO: remove after migrate to client lib
     sp<IFrontend> mFe;
+    // TODO: remove after migrate to client lib
     sp<::android::hardware::tv::tuner::V1_1::IFrontend> mFe_1_1;
+    sp<FrontendClient> mFeClient;
     int mFeId;
     hidl_vec<LnbId> mLnbIds;
+    // TODO: remove after migrate to client lib
     sp<ILnb> mLnb;
+    // TODO: remove after migrate to client lib
     sp<IDemux> mDemux;
+    sp<DemuxClient> mDemuxClient;
     uint32_t mDemuxId;
     static jobject getAnalogFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
     static jobject getAtsc3FrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
@@ -279,6 +281,9 @@ private:
     static jobject getDtmbFrontendCaps(JNIEnv *env, int id);
 
     bool isV1_1ExtendedStatusType(jint type);
+    static uint32_t getResourceIdFromHandle(jint handle) {
+        return (handle & 0x00ff0000) >> 16;
+    }
 };
 
 class C2DataIdInfo : public C2Param {

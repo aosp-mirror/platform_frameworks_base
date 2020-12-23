@@ -26,6 +26,7 @@ import android.content.ContextWrapper;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.view.Display;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerImpl;
@@ -59,13 +60,27 @@ public class WindowContext extends ContextWrapper {
      * @hide
      */
     public WindowContext(@NonNull Context base, int type, @Nullable Bundle options) {
+        this(base, null /* display */, type, options);
+    }
+
+    /**
+     * Default constructor. Will generate a {@link WindowTokenClient} and attach this context to
+     * the token.
+     *
+     * @param base Base {@link Context} for this new instance.
+     * @param display the {@link Display} to override.
+     * @param type Window type to be used with this context.
+     * @hide
+     */
+    public WindowContext(@NonNull Context base, @Nullable Display display, int type,
+            @Nullable Bundle options) {
         // Correct base context will be built once the token is resolved, so passing 'null' here.
         super(null /* base */);
 
         mWms = WindowManagerGlobal.getWindowManagerService();
         mToken = new WindowTokenClient();
 
-        final ContextImpl contextImpl = createBaseWindowContext(base, mToken);
+        final ContextImpl contextImpl = createBaseWindowContext(base, mToken, display);
         attachBaseContext(contextImpl);
         contextImpl.setOuterContext(this);
 
@@ -93,9 +108,10 @@ public class WindowContext extends ContextWrapper {
         Reference.reachabilityFence(this);
     }
 
-    private static ContextImpl createBaseWindowContext(Context outer, IBinder token) {
+    private static ContextImpl createBaseWindowContext(Context outer, IBinder token,
+            Display display) {
         final ContextImpl contextImpl = ContextImpl.getImpl(outer);
-        return contextImpl.createBaseWindowContext(token);
+        return contextImpl.createBaseWindowContext(token, display);
     }
 
     @Override

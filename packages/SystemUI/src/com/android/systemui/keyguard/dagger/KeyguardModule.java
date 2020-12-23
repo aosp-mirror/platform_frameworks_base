@@ -142,8 +142,9 @@ public class KeyguardModule {
             return Optional.empty();
         }
 
+        // currently disabled (doesn't ramp up brightness or use scrim) see b/175918367
         return Optional.of(new FaceAuthScreenBrightnessController(
                 notificationShadeWindowController, keyguardUpdateMonitor, resources,
-                globalSetting, systemSettings, handler, dumpManager));
+                globalSetting, systemSettings, handler, dumpManager, false));
     }
 }

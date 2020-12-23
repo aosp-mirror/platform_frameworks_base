@@ -32,6 +32,8 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.SystemProperties;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -49,10 +51,6 @@ import java.io.FileDescriptor;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * The recovery system service is responsible for coordinating recovery related
@@ -84,9 +82,9 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
     private final Context mContext;
 
     @GuardedBy("this")
-    private final Map<String, IntentSender> mCallerPendingRequest = new HashMap<>();
+    private final ArrayMap<String, IntentSender> mCallerPendingRequest = new ArrayMap<>();
     @GuardedBy("this")
-    private final Set<String> mCallerPreparedForReboot = new HashSet<>();
+    private final ArraySet<String> mCallerPreparedForReboot = new ArraySet<>();
 
     /**
      * Need to prepare for resume on reboot.
@@ -121,7 +119,7 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
     @IntDef({ ROR_NEED_PREPARATION,
             ROR_SKIP_PREPARATION_AND_NOTIFY,
             ROR_SKIP_PREPARATION_NOT_NOTIFY })
-    @interface ResumeOnRebootActionsOnRequest {}
+    private @interface ResumeOnRebootActionsOnRequest {}
 
     /**
      * The action to perform upon resume on reboot clear request for a given client.
@@ -129,7 +127,7 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
     @IntDef({ROR_NOT_REQUESTED,
             ROR_REQUESTED_NEED_CLEAR,
             ROR_REQUESTED_SKIP_CLEAR})
-    @interface ResumeOnRebootActionsOnClear{}
+    private @interface ResumeOnRebootActionsOnClear{}
 
     static class Injector {
         protected final Context mContext;
@@ -342,9 +340,8 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
                 != PackageManager.PERMISSION_GRANTED
                 && mContext.checkCallingOrSelfPermission(android.Manifest.permission.REBOOT)
                         != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Caller or self must have "
-                    + android.Manifest.permission.RECOVERY + " or "
-                    + android.Manifest.permission.REBOOT + " for resume on reboot.");
+            throw new SecurityException("Caller must have " + android.Manifest.permission.RECOVERY
+                    + " or " + android.Manifest.permission.REBOOT + " for resume on reboot.");
         }
     }
 
@@ -414,10 +411,14 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
             Slog.w(TAG, "onPreparedForReboot called when some clients have prepared.");
         }
 
+        if (mCallerPendingRequest.isEmpty()) {
+            Slog.w(TAG, "onPreparedForReboot called but no client has requested.");
+        }
+
         // Send intents to notify callers
-        for (Map.Entry<String, IntentSender> entry : mCallerPendingRequest.entrySet()) {
-            sendPreparedForRebootIntentIfNeeded(entry.getValue());
-            mCallerPreparedForReboot.add(entry.getKey());
+        for (int i = 0; i < mCallerPendingRequest.size(); i++) {
+            sendPreparedForRebootIntentIfNeeded(mCallerPendingRequest.valueAt(i));
+            mCallerPreparedForReboot.add(mCallerPendingRequest.keyAt(i));
         }
         mCallerPendingRequest.clear();
     }
@@ -475,9 +476,7 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
         return needClear ? ROR_REQUESTED_NEED_CLEAR : ROR_REQUESTED_SKIP_CLEAR;
     }
 
-    @Override // Binder call
-    public boolean rebootWithLskf(String packageName, String reason, boolean slotSwitch) {
-        enforcePermissionForResumeOnReboot();
+    private boolean rebootWithLskfImpl(String packageName, String reason, boolean slotSwitch) {
         if (packageName == null) {
             Slog.w(TAG, "Missing packageName when rebooting with lskf.");
             return false;
@@ -498,11 +497,29 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
         return true;
     }
 
+    @Override // Binder call for the legacy rebootWithLskf
+    public boolean rebootWithLskfAssumeSlotSwitch(String packageName, String reason) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.RECOVERY, null);
+        return rebootWithLskfImpl(packageName, reason, true);
+    }
+
     @Override // Binder call
-    public synchronized boolean isLskfCaptured(String packageName) {
+    public boolean rebootWithLskf(String packageName, String reason, boolean slotSwitch) {
         enforcePermissionForResumeOnReboot();
-        if (!mCallerPreparedForReboot.contains(packageName)) {
-            Slog.i(TAG, "Reboot requested before prepare completed for caller " + packageName);
+        return rebootWithLskfImpl(packageName, reason, slotSwitch);
+    }
+
+    @Override // Binder call
+    public boolean isLskfCaptured(String packageName) {
+        enforcePermissionForResumeOnReboot();
+        boolean captured;
+        synchronized (this) {
+            captured = mCallerPreparedForReboot.contains(packageName);
+        }
+
+        if (!captured) {
+            Slog.i(TAG, "Reboot requested before prepare completed for caller "
+                    + packageName);
             return false;
         }
         return true;

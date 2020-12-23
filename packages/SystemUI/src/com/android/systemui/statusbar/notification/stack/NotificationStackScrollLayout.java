@@ -632,10 +632,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
         if (DEBUG) {
             int y = mTopPadding;
+            mDebugPaint.setColor(Color.RED);
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
+
             y = getLayoutHeight();
+            mDebugPaint.setColor(Color.YELLOW);
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
+
             y = getHeight() - getEmptyBottomMargin();
+            mDebugPaint.setColor(Color.GREEN);
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
         }
     }

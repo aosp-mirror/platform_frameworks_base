@@ -143,6 +143,9 @@ public final class CompatChange extends CompatibilityChangeInfo {
      * @return {@code true} if the change should be enabled for the package.
      */
     boolean isEnabled(ApplicationInfo app) {
+        if (app == null) {
+            return defaultValue();
+        }
         if (mPackageOverrides != null && mPackageOverrides.containsKey(app.packageName)) {
             return mPackageOverrides.get(app.packageName);
         }
@@ -153,6 +156,15 @@ public final class CompatChange extends CompatibilityChangeInfo {
             return app.targetSdkVersion >= getEnableSinceTargetSdk();
         }
         return true;
+    }
+
+    /**
+     * Returns the default value for the change id, assuming there are no overrides.
+     *
+     * @return {@code false} if it's a default disabled change, {@code true} otherwise.
+     */
+    boolean defaultValue() {
+        return !getDisabled();
     }
 
     /**
