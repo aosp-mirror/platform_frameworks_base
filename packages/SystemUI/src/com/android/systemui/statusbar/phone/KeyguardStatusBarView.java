@@ -53,7 +53,6 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
-import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
@@ -75,7 +74,6 @@ public class KeyguardStatusBarView extends RelativeLayout
 
     private boolean mShowPercentAvailable;
     private boolean mBatteryCharging;
-    private boolean mKeyguardUserSwitcherShowing;
     private boolean mBatteryListening;
 
     private TextView mCarrierLabel;
@@ -84,7 +82,7 @@ public class KeyguardStatusBarView extends RelativeLayout
     private StatusIconContainer mStatusIconContainer;
 
     private BatteryController mBatteryController;
-    private KeyguardUserSwitcher mKeyguardUserSwitcher;
+    private boolean mKeyguardUserSwitcherEnabled;
     private final UserManager mUserManager;
 
     private int mSystemIconsSwitcherHiddenExpandedMargin;
@@ -184,16 +182,17 @@ public class KeyguardStatusBarView extends RelativeLayout
     }
 
     private void updateVisibilities() {
-        if (mMultiUserAvatar.getParent() != mStatusIconArea && !mKeyguardUserSwitcherShowing) {
+        if (mMultiUserAvatar.getParent() != mStatusIconArea
+                && !mKeyguardUserSwitcherEnabled) {
             if (mMultiUserAvatar.getParent() != null) {
                 getOverlay().remove(mMultiUserAvatar);
             }
             mStatusIconArea.addView(mMultiUserAvatar, 0);
         } else if (mMultiUserAvatar.getParent() == mStatusIconArea
-                && mKeyguardUserSwitcherShowing) {
+                && mKeyguardUserSwitcherEnabled) {
             mStatusIconArea.removeView(mMultiUserAvatar);
         }
-        if (mKeyguardUserSwitcher == null) {
+        if (!mKeyguardUserSwitcherEnabled) {
             // If we have no keyguard switcher, the screen width is under 600dp. In this case,
             // we only show the multi-user switch if it's enabled through UserManager as well as
             // by the user.
@@ -218,8 +217,9 @@ public class KeyguardStatusBarView extends RelativeLayout
         int baseMarginEnd = mMultiUserAvatar.getVisibility() == View.GONE
                 ? mSystemIconsBaseMargin
                 : 0;
-        int marginEnd = mKeyguardUserSwitcherShowing ? mSystemIconsSwitcherHiddenExpandedMargin :
-                baseMarginEnd;
+        int marginEnd =
+                mKeyguardUserSwitcherEnabled ? mSystemIconsSwitcherHiddenExpandedMargin
+                        : baseMarginEnd;
         marginEnd = calculateMargin(marginEnd, mPadding.second);
         if (marginEnd != lp.getMarginEnd()) {
             lp.setMarginEnd(marginEnd);
@@ -368,18 +368,8 @@ public class KeyguardStatusBarView extends RelativeLayout
         // could not care less
     }
 
-    public void setKeyguardUserSwitcher(KeyguardUserSwitcher keyguardUserSwitcher) {
-        mKeyguardUserSwitcher = keyguardUserSwitcher;
-    }
-
-    public void setKeyguardUserSwitcherShowing(boolean showing, boolean animate) {
-        mKeyguardUserSwitcherShowing = showing;
-        if (animate) {
-            animateNextLayoutChange();
-        }
-        updateVisibilities();
-        updateLayoutConsideringCutout();
-        updateSystemIconsLayoutParams();
+    public void setKeyguardUserSwitcherEnabled(boolean enabled) {
+        mKeyguardUserSwitcherEnabled = enabled;
     }
 
     private void animateNextLayoutChange() {
@@ -502,9 +492,9 @@ public class KeyguardStatusBarView extends RelativeLayout
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("KeyguardStatusBarView:");
         pw.println("  mBatteryCharging: " + mBatteryCharging);
-        pw.println("  mKeyguardUserSwitcherShowing: " + mKeyguardUserSwitcherShowing);
         pw.println("  mBatteryListening: " + mBatteryListening);
         pw.println("  mLayoutState: " + mLayoutState);
+        pw.println("  mKeyguardUserSwitcherEnabled: " + mKeyguardUserSwitcherEnabled);
         if (mBatteryView != null) {
             mBatteryView.dump(fd, pw, args);
         }

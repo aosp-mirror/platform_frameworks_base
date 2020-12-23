@@ -37,6 +37,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.hardware.biometrics.BiometricSourceType;
 import android.os.PowerManager;
+import android.os.UserManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.DisplayMetrics;
@@ -58,6 +59,7 @@ import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardStatusViewController;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
+import com.android.keyguard.dagger.KeyguardUserSwitcherComponent;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
@@ -192,6 +194,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
     @Mock
+    private KeyguardUserSwitcherComponent.Factory mKeyguardUserSwitcherComponent;
+    @Mock
     private KeyguardStatusViewComponent mKeyguardStatusViewComponent;
     @Mock
     private KeyguardClockSwitchController mKeyguardClockSwitchController;
@@ -215,6 +219,9 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private NotificationsQuickSettingsContainer mNotificationContainerParent;
     @Mock
     private AmbientState mAmbientState;
+    @Mock
+    private UserManager mUserManager;
+
     private NotificationPanelViewController mNotificationPanelViewController;
     private View.AccessibilityDelegate mAccessibiltyDelegate;
 
@@ -298,10 +305,12 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mBiometricUnlockController, mStatusBarKeyguardViewManager,
                 mNotificationStackScrollLayoutController,
                 mKeyguardStatusViewComponentFactory,
+                mKeyguardUserSwitcherComponent,
                 mGroupManager,
                 mNotificationAreaController,
                 mAuthController,
                 mScrimController,
+                mUserManager,
                 mMediaDataManager,
                 mAmbientState,
                 mFeatureFlags,
