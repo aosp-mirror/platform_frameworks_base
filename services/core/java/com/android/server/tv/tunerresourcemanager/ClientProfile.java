@@ -50,6 +50,8 @@ public final class ClientProfile {
      */
     private final int mProcessId;
 
+    private boolean mIsForeground;
+
     /**
      * All the clients that share the same resource would be under the same group id.
      *
@@ -111,6 +113,20 @@ public final class ClientProfile {
 
     public int getProcessId() {
         return mProcessId;
+    }
+
+    /**
+     * Set the current isForeground status.
+     */
+    public void setForeground(boolean isForeground) {
+        mIsForeground = isForeground;
+    }
+
+    /**
+     * Get the previous recorded isForeground status.
+     */
+    public boolean isForeground() {
+        return mIsForeground;
     }
 
     public int getGroupId() {

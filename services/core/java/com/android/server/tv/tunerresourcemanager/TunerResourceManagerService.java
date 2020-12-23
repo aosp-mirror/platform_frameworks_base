@@ -460,7 +460,9 @@ public class TunerResourceManagerService extends SystemService implements IBinde
                                               .useCase(profile.useCase)
                                               .processId(pid)
                                               .build();
-        clientProfile.setPriority(getClientPriority(profile.useCase, pid));
+        clientProfile.setForeground(checkIsForeground(pid));
+        clientProfile.setPriority(
+                getClientPriority(profile.useCase, clientProfile.isForeground()));
 
         addClientProfile(clientId[0], clientProfile, listener);
     }
@@ -498,6 +500,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             return false;
         }
 
+        profile.setForeground(checkIsForeground(profile.getProcessId()));
         profile.setPriority(priority);
         profile.setNiceValue(niceValue);
 
@@ -611,6 +614,10 @@ public class TunerResourceManagerService extends SystemService implements IBinde
 
         frontendHandle[0] = TunerResourceManager.INVALID_RESOURCE_HANDLE;
         ClientProfile requestClient = getClientProfile(request.clientId);
+        if (requestClient == null) {
+            return false;
+        }
+        clientPriorityUpdateOnRequest(requestClient);
         int grantingFrontendHandle = TunerResourceManager.INVALID_RESOURCE_HANDLE;
         int inUseLowestPriorityFrHandle = TunerResourceManager.INVALID_RESOURCE_HANDLE;
         // Priority max value is 1000
@@ -684,6 +691,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
 
         lnbHandle[0] = TunerResourceManager.INVALID_RESOURCE_HANDLE;
         ClientProfile requestClient = getClientProfile(request.clientId);
+        clientPriorityUpdateOnRequest(requestClient);
         int grantingLnbHandle = TunerResourceManager.INVALID_RESOURCE_HANDLE;
         int inUseLowestPriorityLnbHandle = TunerResourceManager.INVALID_RESOURCE_HANDLE;
         // Priority max value is 1000
@@ -742,6 +750,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         }
         casSessionHandle[0] = TunerResourceManager.INVALID_RESOURCE_HANDLE;
         ClientProfile requestClient = getClientProfile(request.clientId);
+        clientPriorityUpdateOnRequest(requestClient);
         int lowestPriorityOwnerId = -1;
         // Priority max value is 1000
         int currentLowestPriority = MAX_CLIENT_PRIORITY + 1;
@@ -797,8 +806,9 @@ public class TunerResourceManagerService extends SystemService implements IBinde
                 ? Binder.getCallingPid() /*callingPid*/
                 : mTvInputManager.getClientPid(holderProfile.tvInputSessionId); /*tvAppId*/
 
-        int challengerPriority = getClientPriority(challengerProfile.useCase, challengerPid);
-        int holderPriority = getClientPriority(holderProfile.useCase, holderPid);
+        int challengerPriority = getClientPriority(
+                challengerProfile.useCase, checkIsForeground(challengerPid));
+        int holderPriority = getClientPriority(holderProfile.useCase, checkIsForeground(holderPid));
         return challengerPriority > holderPriority;
     }
 
@@ -840,6 +850,21 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         // There are enough Demux resources, so we don't manage Demux in R.
         demuxHandle[0] = generateResourceHandle(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX, 0);
         return true;
+    }
+
+    @VisibleForTesting
+    // This mothod is to sync up the request client's foreground/background status and update
+    // the client priority accordingly whenever new resource request comes in.
+    protected void clientPriorityUpdateOnRequest(ClientProfile requestProfile) {
+        int pid = requestProfile.getProcessId();
+        boolean currentIsForeground = checkIsForeground(pid);
+        if (requestProfile.isForeground() == currentIsForeground) {
+            // To avoid overriding the priority set through updateClientPriority API.
+            return;
+        }
+        requestProfile.setForeground(currentIsForeground);
+        requestProfile.setPriority(
+                getClientPriority(requestProfile.getUseCase(), currentIsForeground));
     }
 
     @VisibleForTesting
@@ -933,20 +958,20 @@ public class TunerResourceManagerService extends SystemService implements IBinde
     }
 
     @VisibleForTesting
-    protected int getClientPriority(int useCase, int pid) {
+    protected int getClientPriority(int useCase, boolean isForeground) {
         if (DEBUG) {
             Slog.d(TAG, "getClientPriority useCase=" + useCase
-                    + ", pid=" + pid + ")");
+                    + ", isForeground=" + isForeground + ")");
         }
 
-        if (isForeground(pid)) {
+        if (isForeground) {
             return mPriorityCongfig.getForegroundPriority(useCase);
         }
         return mPriorityCongfig.getBackgroundPriority(useCase);
     }
 
     @VisibleForTesting
-    protected boolean isForeground(int pid) {
+    protected boolean checkIsForeground(int pid) {
         if (mActivityManager == null) {
             return false;
         }

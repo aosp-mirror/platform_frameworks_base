@@ -99,7 +99,7 @@ public class TunerResourceManagerServiceTest {
         when(mContextSpy.getSystemService(Context.TV_INPUT_SERVICE)).thenReturn(tvInputManager);
         mTunerResourceManagerService = new TunerResourceManagerService(mContextSpy) {
             @Override
-            protected boolean isForeground(int pid) {
+            protected boolean checkIsForeground(int pid) {
                 return mIsForeground;
             }
         };
@@ -231,6 +231,10 @@ public class TunerResourceManagerServiceTest {
 
     @Test
     public void requestFrontendTest_ClientNotRegistered() {
+        TunerFrontendInfo[] infos0 = new TunerFrontendInfo[1];
+        infos0[0] =
+                tunerFrontendInfo(0 /*id*/, FrontendSettings.TYPE_DVBT, 0 /*exclusiveGroupId*/);
+        mTunerResourceManagerService.setFrontendInfoListInternal(infos0);
         TunerFrontendRequest request =
                 tunerFrontendRequest(0 /*clientId*/, FrontendSettings.TYPE_DVBT);
         int[] frontendHandle = new int[1];
@@ -752,9 +756,9 @@ public class TunerResourceManagerServiceTest {
                 resourceClientProfile(null /*sessionId*/,
                         TvInputService.PRIORITY_HINT_USE_CASE_TYPE_RECORD);
         int backgroundPlaybackPriority = mTunerResourceManagerService.getClientPriority(
-                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK, 0);
+                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK, mIsForeground);
         int backgroundRecordPriority = mTunerResourceManagerService.getClientPriority(
-                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_RECORD, 0);
+                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_RECORD, mIsForeground);
         assertThat(mTunerResourceManagerService.isHigherPriorityInternal(backgroundPlaybackProfile,
                 backgroundRecordProfile)).isEqualTo(
                         (backgroundPlaybackPriority > backgroundRecordPriority));
