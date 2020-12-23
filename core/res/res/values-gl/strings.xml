@@ -2009,6 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Micrófono"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"mostrando outras aplicacións na pantalla"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Enviar comentarios"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"O nivel desta notificación subiu a Predeterminado. Toca para compartir a túa opinión."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"O nivel desta notificación diminuíu a Silenciosa. Toca para compartir a túa opinión."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Esta notificación clasificouse nun nivel superior. Toca para compartir a túa opinión."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Esta notificación clasificouse nun nivel inferior. Toca para compartir a túa opinión."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificación da información do modo de rutina"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"A batería pode esgotarse antes do habitual"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Para ampliar a duración da batería activouse a función Aforro de batería"</string>

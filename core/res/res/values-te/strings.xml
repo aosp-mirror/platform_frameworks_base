@@ -2009,6 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"మైక్రోఫోన్"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"మీ స్క్రీన్‌పై ఇతర యాప్‌ల ద్వారా ప్రదర్శించబడుతోంది"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"ఫీడ్‌బ్యాక్‌ను అందించండి"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"ఈ నోటిఫికేషన్, ఆటోమేటిక్ సెట్టింగ్‌కు ప్రమోట్ చేయబడింది. ఫీడ్‌బ్యాక్‌ను అందించడానికి ట్యాప్ చేయండి."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ఈ నోటిఫికేషన్ స్థాయి నిశ్శబ్దంగా ఉండేలా తగ్గించబడింది. ఫీడ్‌బ్యాక్‌ను అందించడానికి ట్యాప్ చేయండి."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"ఈ నోటిఫికేషన్‌కు ఎక్కువ ర్యాంక్ ఇవ్వబడింది. ఫీడ్‌బ్యాక్‌ను అందించడానికి ట్యాప్ చేయండి."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"ఈ నోటిఫికేషన్‌కు తక్కువ ర్యాంక్ ఇవ్వబడింది. ఫీడ్‌బ్యాక్‌ను అందించడానికి ట్యాప్ చేయండి."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"రొటీన్ మోడ్ సమాచార నోటిఫికేషన్"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"మామూలుగా ఛార్జ్ చేసేలోపు బ్యాటరీ ఖాళీ కావచ్చు"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"బ్యాటరీ జీవితకాలాన్ని పెంచడానికి బ్యాటరీ సేవర్ యాక్టివేట్ చేయబడింది"</string>

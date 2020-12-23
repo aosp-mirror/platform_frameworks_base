@@ -2009,6 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"माइक्रोफ़ोन"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"आपकी स्क्रीन पर, इस्तेमाल हो रहे दूसरे ऐप्लिकेशन के ऊपर दिखाया जा रहा है"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"सुझाव दें या शिकायत करें"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"यह सूचना अब आपको, डिफ़ॉल्ट रूप से आवाज़ या वाइब्रेशन के साथ मिलेगी. सुझाव/शिकायत/राय देने के लिए टैप करें."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"इस सूचना के मिलने पर होने वाली आवाज़ बंद कर दी गई है. सुझाव/शिकायत/राय देने के लिए टैप करें."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"इस सूचना को रैंकिंग में ऊपर किया गया था. सुझाव/शिकायत/राय देने के लिए टैप करें."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"इस सूचना को रैंकिंग में नीचे किया गया था. सुझाव/शिकायत/राय देने के लिए टैप करें."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"रूटीन मोड जानकारी की सूचना"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"बैटरी आम तौर पर जितने समय चलती है, उससे पहले खत्म हो सकती है"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"बैटरी लाइफ़ बढ़ाने के लिए \'बैटरी सेवर\' चालू हो गया है"</string>

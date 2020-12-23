@@ -2042,6 +2042,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Микрофон"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"приказује се на екрану док користите друге апликације"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Пошаљите повратне информације"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Ово обавештење је унапређено у Подразумевано. Додирните да бисте навели повратне информације."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Ово обавештење је деградирано у Нечујно. Додирните да бисте навели повратне информације."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Ово обавештење је рангирано више. Додирните да бисте навели повратне информације."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Ово обавештење је рангирано ниже. Додирните да бисте навели повратне информације."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Обавештење о информацијама Рутинског режима"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батерија ће се можда испразнити пре уобичајеног пуњења"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Уштеда батерије је активирана да би се продужило трајање батерије"</string>
