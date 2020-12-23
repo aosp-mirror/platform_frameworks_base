@@ -192,6 +192,15 @@ public class SecurityParams {
     }
 
     /**
+     * Get the security type of this params.
+     *
+     * @return The security type defined in {@link WifiConfiguration}.
+     */
+    public @SecurityType int getSecurityType() {
+        return mSecurityType;
+    }
+
+    /**
      * Check the security type of this params.
      *
      * @param type the testing security type.
@@ -563,9 +572,64 @@ public class SecurityParams {
     }
 
     /**
+     * Create a params according to the security type.
+     *
+     * @param securityType One of the following security types:
+     * {@link WifiConfiguration#SECURITY_TYPE_OPEN},
+     * {@link WifiConfiguration#SECURITY_TYPE_WEP},
+     * {@link WifiConfiguration#SECURITY_TYPE_PSK},
+     * {@link WifiConfiguration#SECURITY_TYPE_EAP},
+     * {@link WifiConfiguration#SECURITY_TYPE_SAE},
+     * {@link WifiConfiguration#SECURITY_TYPE_OWE},
+     * {@link WifiConfiguration#SECURITY_TYPE_WAPI_PSK},
+     * {@link WifiConfiguration#SECURITY_TYPE_WAPI_CERT},
+     * {@link WifiConfiguration#SECURITY_TYPE_EAP_WPA3_ENTERPRISE},
+     * {@link WifiConfiguration#SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT},
+     *
+     * @return the corresponding security params if the security type is valid;
+     *         otherwise, throw IllegalArgumentException.
+     */
+    public static @NonNull SecurityParams createSecurityParamsBySecurityType(
+            @WifiConfiguration.SecurityType int securityType) {
+        switch (securityType) {
+            case WifiConfiguration.SECURITY_TYPE_OPEN:
+                return createOpenParams();
+            case WifiConfiguration.SECURITY_TYPE_WEP:
+                return createWepParams();
+            case WifiConfiguration.SECURITY_TYPE_PSK:
+                return createWpaWpa2PersonalParams();
+            case WifiConfiguration.SECURITY_TYPE_EAP:
+                return createWpaWpa2EnterpriseParams();
+            case WifiConfiguration.SECURITY_TYPE_SAE:
+                return createWpa3PersonalParams();
+            // The value of {@link WifiConfiguration.SECURITY_TYPE_EAP_SUITE_B} is the same as
+            // {@link #WifiConfiguration.SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT}, remove it
+            // to avoid duplicate case label errors.
+            case WifiConfiguration.SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT:
+                return createWpa3Enterprise192BitParams();
+            case WifiConfiguration.SECURITY_TYPE_OWE:
+                return createEnhancedOpenParams();
+            case WifiConfiguration.SECURITY_TYPE_WAPI_PSK:
+                return createWapiPskParams();
+            case WifiConfiguration.SECURITY_TYPE_WAPI_CERT:
+                return createWapiCertParams();
+            case WifiConfiguration.SECURITY_TYPE_EAP_WPA3_ENTERPRISE:
+                return createWpa3EnterpriseParams();
+            case WifiConfiguration.SECURITY_TYPE_OSEN:
+                return createOsenParams();
+            case WifiConfiguration.SECURITY_TYPE_PASSPOINT_R1_R2:
+                return SecurityParams.createPasspointParams(PASSPOINT_R2);
+            case WifiConfiguration.SECURITY_TYPE_PASSPOINT_R3:
+                return SecurityParams.createPasspointParams(PASSPOINT_R3);
+            default:
+                throw new IllegalArgumentException("unknown security type " + securityType);
+        }
+    }
+
+    /**
      * Create EAP security params.
      */
-    public static @NonNull SecurityParams createWpaWpa2EnterpriseParams() {
+    private static @NonNull SecurityParams createWpaWpa2EnterpriseParams() {
         SecurityParams params = new SecurityParams();
         params.mSecurityType = WifiConfiguration.SECURITY_TYPE_EAP;
 
@@ -586,7 +650,7 @@ public class SecurityParams {
     /**
      * Create Passpoint security params.
      */
-    public static @NonNull SecurityParams createPasspointParams(@PasspointRelease int release) {
+    private static @NonNull SecurityParams createPasspointParams(@PasspointRelease int release) {
         SecurityParams params = new SecurityParams();
         switch (release) {
             case PASSPOINT_R1:
@@ -616,7 +680,7 @@ public class SecurityParams {
     /**
      * Create Enhanced Open params.
      */
-    public static @NonNull SecurityParams createEnhancedOpenParams() {
+    private static @NonNull SecurityParams createEnhancedOpenParams() {
         SecurityParams params = new SecurityParams();
         params.mSecurityType = WifiConfiguration.SECURITY_TYPE_OWE;
 
@@ -639,7 +703,7 @@ public class SecurityParams {
     /**
      * Create Open params.
      */
-    public static @NonNull SecurityParams createOpenParams() {
+    private static @NonNull SecurityParams createOpenParams() {
         SecurityParams params = new SecurityParams();
         params.mSecurityType = WifiConfiguration.SECURITY_TYPE_OPEN;
 
@@ -653,7 +717,7 @@ public class SecurityParams {
     /**
      * Create OSEN params.
      */
-    public static @NonNull SecurityParams createOsenParams() {
+    private static @NonNull SecurityParams createOsenParams() {
         SecurityParams params = new SecurityParams();
         params.mSecurityType = WifiConfiguration.SECURITY_TYPE_OSEN;
 
@@ -672,7 +736,7 @@ public class SecurityParams {
     /**
      * Create WAPI-CERT params.
      */
-    public static @NonNull SecurityParams createWapiCertParams() {
+    private static @NonNull SecurityParams createWapiCertParams() {
         SecurityParams params = new SecurityParams();
         params.mSecurityType = WifiConfiguration.SECURITY_TYPE_WAPI_CERT;
 
@@ -689,7 +753,7 @@ public class SecurityParams {
     /**
      * Create WAPI-PSK params.
      */
-    public static @NonNull SecurityParams createWapiPskParams() {
+    private static @NonNull SecurityParams createWapiPskParams() {
         SecurityParams params = new SecurityParams();
         params.mSecurityType = WifiConfiguration.SECURITY_TYPE_WAPI_PSK;
 
@@ -706,7 +770,7 @@ public class SecurityParams {
     /**
      * Create WEP params.
      */
-    public static @NonNull SecurityParams createWepParams() {
+    private static @NonNull SecurityParams createWepParams() {
         SecurityParams params = new SecurityParams();
         params.mSecurityType = WifiConfiguration.SECURITY_TYPE_WEP;
 
@@ -730,7 +794,7 @@ public class SecurityParams {
     /**
      * Create WPA3 Enterprise 192-bit params.
      */
-    public static @NonNull SecurityParams createWpa3Enterprise192BitParams() {
+    private static @NonNull SecurityParams createWpa3Enterprise192BitParams() {
         SecurityParams params = new SecurityParams();
         params.mSecurityType = WifiConfiguration.SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT;
 
@@ -758,7 +822,7 @@ public class SecurityParams {
     /**
      * Create WPA3 Enterprise params.
      */
-    public static @NonNull SecurityParams createWpa3EnterpriseParams() {
+    private static @NonNull SecurityParams createWpa3EnterpriseParams() {
         SecurityParams params = new SecurityParams();
         params.mSecurityType = WifiConfiguration.SECURITY_TYPE_EAP_WPA3_ENTERPRISE;
 
@@ -780,7 +844,7 @@ public class SecurityParams {
     /**
      * Create WPA3 Personal params.
      */
-    public static @NonNull SecurityParams createWpa3PersonalParams() {
+    private static @NonNull SecurityParams createWpa3PersonalParams() {
         SecurityParams params = new SecurityParams();
         params.mSecurityType = WifiConfiguration.SECURITY_TYPE_SAE;
 
@@ -803,7 +867,7 @@ public class SecurityParams {
     /**
      * Create WPA/WPA2 Personal params.
      */
-    public static @NonNull SecurityParams createWpaWpa2PersonalParams() {
+    private static @NonNull SecurityParams createWpaWpa2PersonalParams() {
         SecurityParams params = new SecurityParams();
         params.mSecurityType = WifiConfiguration.SECURITY_TYPE_PSK;
 
