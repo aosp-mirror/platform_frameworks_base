@@ -26,6 +26,7 @@ import android.annotation.SystemService;
 import android.content.Context;
 import android.os.connectivity.CellularBatteryStats;
 import android.os.connectivity.WifiBatteryStats;
+import android.telephony.DataConnectionRealTimeInfo;
 
 import com.android.internal.app.IBatteryStats;
 
@@ -404,5 +405,51 @@ public final class BatteryStatsManager {
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Indicates that the radio power state has changed.
+     *
+     * @param isActive indicates if the mobile radio is powered.
+     * @param uid Uid of this event. For the active state it represents the uid that was responsible
+     *            for waking the radio, or -1 if the system was responsible for waking the radio.
+     *            For inactive state, the UID should always be -1.
+     * @throws RuntimeException if there are binder remote-invocation errors.
+     */
+    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
+    public void reportMobileRadioPowerState(boolean isActive, int uid) throws RuntimeException {
+        try {
+            mBatteryStats.noteMobileRadioPowerState(getDataConnectionPowerState(isActive),
+                    SystemClock.elapsedRealtimeNanos(), uid);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Indicates that the wifi power state has changed.
+     *
+     * @param isActive indicates if the wifi radio is powered.
+     * @param uid Uid of this event. For the active state it represents the uid that was responsible
+     *            for waking the radio, or -1 if the system was responsible for waking the radio.
+     *            For inactive state, the UID should always be -1.
+     * @throws RuntimeException if there are binder remote-invocation errors.
+     */
+    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
+    public void reportWifiRadioPowerState(boolean isActive, int uid) throws RuntimeException {
+        try {
+            mBatteryStats.noteWifiRadioPowerState(getDataConnectionPowerState(isActive),
+                    SystemClock.elapsedRealtimeNanos(), uid);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    private static int getDataConnectionPowerState(boolean isActive) {
+        // TODO: DataConnectionRealTimeInfo is under telephony package but the constants are used
+        // for both Wifi and mobile. It would make more sense to separate the constants to a generic
+        // class or move it to generic package.
+        return isActive ? DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH
+                : DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
     }
 }
