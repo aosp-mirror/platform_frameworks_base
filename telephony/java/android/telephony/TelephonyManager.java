@@ -13997,7 +13997,8 @@ public class TelephonyManager {
 
     /**
      * Get carrier bandwidth. In case of Dual connected network this will report
-     * bandwidth per primary and secondary network.
+     * bandwidth per primary and secondary network. It is possible that
+     * some modems may not fill secondary carrier bandwidth.
      * @return CarrierBandwidth with bandwidth of both primary and secondary carrier.
      * @throws IllegalStateException if the Telephony process is not currently available.
      * @hide
