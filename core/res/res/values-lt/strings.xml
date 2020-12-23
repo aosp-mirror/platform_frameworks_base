@@ -2075,6 +2075,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Mikrofonas"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"rodo virš kitų programų jūsų ekrane"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Pateikti atsiliepimą"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Šio pranešimo svarba padidinta iki numatytojo lygio. Palieskite, kad pateiktumėte atsiliepimą."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Šio pranešimo svarba sumažinta iki begarsio lygio. Palieskite, kad pateiktumėte atsiliepimą."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Šio pranešimo svarba padidinta. Palieskite, kad pateiktumėte atsiliepimą."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Šio pranešimo svarba sumažinta. Palieskite, kad pateiktumėte atsiliepimą."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Veiksmų sekos režimo informacijos pranešimas"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Akumuliatoriaus energija gali išsekti prieš įprastą įkrovimą"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Akumuliatoriaus tausojimo priemonė suaktyvinta, kad akumuliatorius veiktų ilgiau"</string>

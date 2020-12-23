@@ -2075,6 +2075,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Mikrofon"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"wyświetla się nad innymi aplikacjami na ekranie"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Prześlij opinię"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"To powiadomienie zostało zmienione na Domyślne. Kliknij, by przesłać opinię."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"To powiadomienie zostało zmienione na Ciche. Kliknij, by przesłać opinię."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Podniesiono ważność tego powiadomienia. Kliknij, by przesłać opinię."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Obniżono ważność tego powiadomienia. Kliknij, by przesłać opinię."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Powiadomienie z informacją o trybie rutynowym"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateria może się wyczerpać przed zwykłą porą ładowania"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Włączono Oszczędzanie baterii, by wydłużyć czas pracy na baterii"</string>

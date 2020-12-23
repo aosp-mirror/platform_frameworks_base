@@ -2009,6 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Μικρόφωνο"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"εμφανίζεται πάνω σε άλλες εφαρμογές στην οθόνη σας"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Υποβολή σχολίων"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Αυτή η ειδοποίηση προωθήθηκε στις Προεπιλεγμένες. Πατήστε για να υποβάλετε σχόλια."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Αυτή η ειδοποίηση υποβιβάστηκε στις Αθόρυβες. Πατήστε για να υποβάλετε σχόλια."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Αυτή η ειδοποίηση κατατάχθηκε ψηλότερα. Πατήστε για να υποβάλετε σχόλια."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Αυτή η ειδοποίηση κατατάχθηκε χαμηλότερα. Πατήστε για να υποβάλετε σχόλια."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Ειδοποίηση πληροφοριών λειτουργίας Ρουτίνας"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Η μπαταρία μπορεί να εξαντληθεί πριν από τη συνηθισμένη φόρτιση"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Η Εξοικονόμηση μπαταρίας ενεργοποιήθηκε για την επέκταση της διάρκειας ζωής της μπαταρίας"</string>

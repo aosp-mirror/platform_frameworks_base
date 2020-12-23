@@ -2075,6 +2075,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Mikrofon"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"prekriva druge aplikacije na zaslonu"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Pošlji povratne informacije"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"To obvestilo je bilo uvrščeno višje – med privzeta obvestila. Dotaknite se, če želite poslati povratne informacije."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"To obvestilo je bilo uvrščeno nižje – med obvestila brez zvoka. Dotaknite se, če želite poslati povratne informacije."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"To obvestilo je bilo uvrščeno višje. Dotaknite se, če želite poslati povratne informacije."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"To obvestilo je bilo uvrščeno nižje. Dotaknite se, če želite poslati povratne informacije."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Rutinsko informativno obvestilo o načinu delovanja"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Baterija se bo morda izpraznila, preden jo običajno priključite na polnjenje"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Vklopilo se je varčevanje z energijo baterije za podaljšanje časa delovanja baterije"</string>

@@ -2011,6 +2011,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Mikrofon"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"vises over andre apps på din skærm"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Giv feedback"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Denne notifikation blev angivet som Standard. Tryk for at give feedback."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Denne notifikation blev angivet som Lydløs. Tryk for at give feedback."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Denne notifikation blev placeret højere. Tryk for at give feedback."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Denne notifikation blev placeret lavere. Tryk for at give feedback."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notifikation med oplysninger om rutinetilstand"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Enheden løber muligvis tør for batteri, inden du normalt oplader den"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batterisparefunktion er aktiveret for at forlænge batteritiden"</string>

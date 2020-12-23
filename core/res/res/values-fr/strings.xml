@@ -2009,6 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Micro"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"se superpose aux autres applications sur l\'écran"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Envoyer des commentaires"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Cette notification a été élevée à la catégorie \"Par défaut\". Appuyez ici pour donner votre avis."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Cette notification a été abaissée à la catégorie \"Silencieux\". Appuyez ici pour donner votre avis."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Cette notification a été élevée d\'un niveau. Appuyez ici pour donner votre avis."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Cette notification a été abaissée d\'un niveau. Appuyez ici pour donner votre avis."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notification d\'information du mode Routine"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Vous risquez d\'être à court de batterie plus tôt que prévu"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Économiseur de batterie activé pour prolonger l\'autonomie"</string>

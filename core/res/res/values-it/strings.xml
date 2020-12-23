@@ -2009,6 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Microfono"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"si sovrappone ad altre app sullo schermo"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Fornisci feedback"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Questa notifica è stata promossa a Predefinita. Tocca per dare un feedback."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Questa notifica è stata retrocessa a Silenziosa. Tocca per dare un feedback."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Questa notifica è stata posizionata più in alto. Tocca per dare un feedback."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Questa notifica è stata posizionata più in basso. Tocca per dare un feedback."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notifica di informazioni sulla modalità Routine"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"La batteria potrebbe esaurirsi prima della ricarica abituale"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Risparmio energetico attivo per far durare di più la batteria"</string>

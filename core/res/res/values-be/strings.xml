@@ -2075,6 +2075,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Мікрафон"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"паказваецца паверх іншых праграм на экране"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Даць водгук"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Гэта апавяшчэнне пазначана сістэмай як стандартнае. Націсніце тут і дайце водгук."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Гэта апавяшчэнне пераведзена ў рэжым \"Без гуку\". Націсніце тут і дайце водгук."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Гэта апавяшчэнне ацэнена як важнае. Націсніце тут і дайце водгук."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Гэта апавяшчэнне ацэнена як няважнае. Націсніце тут і дайце водгук."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Апавяшчэнне з інфармацыяй пра ўсталяваны рэжым"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Акумулятар можа разрадзіцца хутчэй, чым прыйдзе час звычайнай зарадкі"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Каб павялічыць тэрмін работы акумулятара, уключаны рэжым эканоміі зараду"</string>

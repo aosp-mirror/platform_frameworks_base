@@ -2009,6 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"ማይክሮፎን"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"በማያዎ ላይ በሌሎች መተግበሪያዎች ላይ በማሳየት ላይ"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"ግብረመልስ ይስጡ"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"ይህ ማሳወቂያ ወደ ነባሪ ከፍ ተደርጓል። ግብረመልስ ለመስጠት መታ ያድርጉ።"</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ይህ ማሳወቂያ ወደ ዝምታ ዝቅ ብሏል። ግብረመልስ ለመስጠት መታ ያድርጉ።"</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"ይህ ማሳወቂያ ከፍተኛ ደረጃ ተሰጥቶታል። ግብረመልስ ለመስጠት መታ ያድርጉ።"</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"ይህ ማሳወቂያ ዝቅተኛ ደረጃ ተሰጥቶታል። ግብረመልስ ለመስጠት መታ ያድርጉ።"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"የዕለት ተዕለት ሁነታ መረጃ ማሳወቂያዎች"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ባትሪ ከተለመደው ኃይል መሙላት በፊት ሊያልቅ ይችላል"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"የባትሪ ቆጣቢ የባትሪ ዕድሜን ለማራዘም ገብሯል።"</string>

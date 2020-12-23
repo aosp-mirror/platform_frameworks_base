@@ -2009,6 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Maikrofoni"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"inachomoza kwenye programu zingine katika skrini yako"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Toa Maoni"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Arifa hii ilipandishwa hadhi kuwa Chaguomsingi. Gusa ili utoe maoni."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Arifa hii ilishushwa hadhi kuwa Kimya. Gusa ili utoe maoni."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Arifa hii imeorodheshwa katika nafasi ya juu. Gusa ili utoe maoni."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Arifa hii imeorodheshwa katika nafasi ya chini. Gusa ili utoe maoni."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Arifa ya maelezo ya Hali ya Kawaida"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Huenda betri itakwisha chaji mapema"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Imewasha Kiokoa Betri ili kurefusha muda wa matumizi ya betri"</string>

@@ -353,10 +353,8 @@
     <string name="permdesc_receiveMms" msgid="958102423732219710">"ਐਪ ਨੂੰ MMS ਸੁਨੇਹੇ ਪ੍ਰਾਪਤ ਕਰਨ ਅਤੇ ਉਹਨਾਂ ਦੀ ਪ੍ਰਕਿਰਿਆ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਸਦਾ ਮਤਲਬ ਹੈ ਕਿ ਐਪ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਤੇ ਭੇਜੇ ਗਏ ਸੁਨੇਹਿਆਂ ਨੂੰ ਤੁਹਾਨੂੰ ਦਿਖਾਏ ਬਿਨਾਂ ਨਿਰੀਖਣ ਕਰ ਸਕਦੀ ਹੈ ਜਾਂ ਮਿਟਾ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"ਸੈੱਲ ਪ੍ਰਸਾਰਨ ਸੁਨੇਹਿਆਂ ਨੂੰ ਅੱਗੇ ਭੇਜੋ"</string>
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"ਐਪ ਨੂੰ ਸੈੱਲ ਪ੍ਰਸਾਰਨ ਸੁਨੇਹਿਆਂ ਦੇ ਪ੍ਰਾਪਤ ਹੁੰਦੇ ਹੀ ਉਹਨਾਂ ਨੂੰ ਅੱਗੇ ਭੇਜਣ ਲਈ ਸੈੱਲ ਪ੍ਰਸਾਰਨ ਮਾਡਿਊਲ ਨਾਲ ਜੋੜਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ। ਸੈੱਲ ਪ੍ਰਸਾਰਨ ਸੁਚੇਤਨਾਵਾਂ ਤੁਹਾਨੂੰ ਸੰਕਟਕਾਲੀ ਸਥਿਤੀਆਂ ਦੀ ਚਿਤਾਵਨੀ ਦੇਣ ਲਈ ਕੁਝ ਟਿਕਾਣਿਆਂ \'ਤੇ ਪ੍ਰਦਾਨ ਕੀਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ। ਭੈੜੀਆਂ ਐਪਾਂ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦੀ ਕਾਰਗੁਜ਼ਾਰੀ ਜਾਂ ਓਪਰੇਸ਼ਨ ਵਿੱਚ ਵਿਘਨ ਪਾ ਸਕਦੀਆਂ ਹਨ ਜਦੋਂ ਇੱਕ ਸੰਕਟਕਾਲੀ ਸੈੱਲ ਪ੍ਰਸਾਰਨ ਪ੍ਰਾਪਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।"</string>
-    <!-- no translation found for permlab_manageOngoingCalls (281244770664231782) -->
-    <skip />
-    <!-- no translation found for permdesc_manageOngoingCalls (7003138133829915265) -->
-    <skip />
+    <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"ਜਾਰੀ ਕਾਲਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
+    <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"ਐਪ ਨੂੰ ਆਪਣੇ ਡੀਵਾਈਸ \'ਤੇ ਜਾਰੀ ਕਾਲਾਂ ਬਾਰੇ ਵੇਰਵੇ ਦੇਖਣ ਅਤੇ ਇਹਨਾਂ ਕਾਲਾਂ ਨੂੰ ਕੰਟਰੋਲ ਕਰਨ ਦਿਓ।"</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"ਸੈਲ ਪ੍ਰਸਾਰਨ ਸੁਨੇਹੇ ਪੜ੍ਹੋ"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"ਐਪ ਨੂੰ ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਵੱਲੋਂ ਪ੍ਰਾਪਤ ਕੀਤੇ ਸੈੱਲ ਪ੍ਰਸਾਰਣ ਸੁਨੇਹੇ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਸੈੱਲ ਪ੍ਰਸਾਰਣ ਚਿਤਾਵਨੀਆਂ ਤੁਹਾਨੂੰ ਸੰਕਟਕਾਲੀਨ ਸਥਿਤੀਆਂ ਦੀ ਚਿਤਾਵਨੀ ਦੇਣ ਲਈ ਕੁਝ ਨਿਰਧਾਰਤ ਟਿਕਾਣਿਆਂ ਤੇ ਪ੍ਰਦਾਨ ਕੀਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ। ਖਰਾਬ ਐਪਾਂ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦੇ ਪ੍ਰਦਰਸ਼ਨ ਜਾਂ ਓਪਰੇਸ਼ਨ ਵਿੱਚ ਵਿਘਨ ਪਾ ਸਕਦੀਆਂ ਹਨ ਜਦੋਂ ਇੱਕ ਸੰਕਟਕਾਲੀਨ ਸੈੱਲ ਪ੍ਰਸਾਰਣ ਪ੍ਰਾਪਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।"</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"ਸਬਸਕ੍ਰਾਈਬ ਕੀਤੇ ਫੀਡਸ ਪੜ੍ਹੋ"</string>
@@ -2011,6 +2009,14 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"ਮਾਈਕ੍ਰੋਫ਼ੋਨ"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ \'ਤੇ ਹੋਰਾਂ ਐਪਾਂ ਉੱਪਰ ਦਿਖਾਇਆ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"ਵਿਚਾਰ ਦਿਓ"</string>
+    <!-- no translation found for notification_feedback_indicator_alerted (6552871804121942099) -->
+    <skip />
+    <!-- no translation found for notification_feedback_indicator_silenced (3799442124723177262) -->
+    <skip />
+    <!-- no translation found for notification_feedback_indicator_promoted (9030204303764698640) -->
+    <skip />
+    <!-- no translation found for notification_feedback_indicator_demoted (8880309924296450875) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ਨਿਯਮਬੱਧ ਮੋਡ ਦੀ ਜਾਣਕਾਰੀ ਵਾਲੀ ਸੂਚਨਾ"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ਬੈਟਰੀ ਚਾਰਜ ਕਰਨ ਦੇ ਮਿੱਥੇ ਸਮੇਂ ਤੋਂ ਪਹਿਲਾਂ ਸ਼ਾਇਦ ਬੈਟਰੀ ਖਤਮ ਹੋ ਜਾਵੇ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ਬੈਟਰੀ ਲਾਈਫ਼ ਵਧਾਉਣ ਲਈ ਬੈਟਰੀ ਸੇਵਰ ਚਾਲੂ ਕੀਤਾ ਗਿਆ"</string>
