@@ -68,7 +68,6 @@ import com.android.systemui.controls.dagger.ControlsComponent;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
-import com.android.systemui.qs.QSDetailDisplayer;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
@@ -302,7 +301,6 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mGroupManager,
                 mNotificationAreaController,
                 mAuthController,
-                new QSDetailDisplayer(),
                 mScrimController,
                 mMediaDataManager,
                 mAmbientState,

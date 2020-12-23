@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.ScreenDecorations.DisplayCutoutView.boundsFromDirection;
 
 import android.annotation.ColorInt;
@@ -25,6 +26,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.UserManager;
 import android.util.AttributeSet;
 import android.util.Pair;
 import android.util.TypedValue;
@@ -45,7 +47,6 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
-import com.android.systemui.qs.QSDetailDisplayer;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -56,7 +57,6 @@ import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
-import com.android.systemui.statusbar.policy.UserSwitcherController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -79,14 +79,13 @@ public class KeyguardStatusBarView extends RelativeLayout
     private boolean mBatteryListening;
 
     private TextView mCarrierLabel;
-    private MultiUserSwitch mMultiUserSwitch;
     private ImageView mMultiUserAvatar;
     private BatteryMeterView mBatteryView;
     private StatusIconContainer mStatusIconContainer;
 
     private BatteryController mBatteryController;
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
-    private UserSwitcherController mUserSwitcherController;
+    private final UserManager mUserManager;
 
     private int mSystemIconsSwitcherHiddenExpandedMargin;
     private int mSystemIconsBaseMargin;
@@ -109,13 +108,13 @@ public class KeyguardStatusBarView extends RelativeLayout
 
     public KeyguardStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mUserManager = UserManager.get(getContext());
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
         mSystemIconsContainer = findViewById(R.id.system_icons_container);
-        mMultiUserSwitch = findViewById(R.id.multi_user_switch);
         mMultiUserAvatar = findViewById(R.id.multi_user_avatar);
         mCarrierLabel = findViewById(R.id.keyguard_carrier_text);
         mBatteryView = mSystemIconsContainer.findViewById(R.id.battery);
@@ -124,7 +123,6 @@ public class KeyguardStatusBarView extends RelativeLayout
         mStatusIconContainer = findViewById(R.id.statusIcons);
 
         loadDimens();
-        updateUserSwitcher();
         mBatteryController = Dependency.get(BatteryController.class);
     }
 
@@ -136,14 +134,6 @@ public class KeyguardStatusBarView extends RelativeLayout
         lp.width = lp.height = getResources().getDimensionPixelSize(
                 R.dimen.multi_user_avatar_keyguard_size);
         mMultiUserAvatar.setLayoutParams(lp);
-
-        // Multi-user switch
-        lp = (MarginLayoutParams) mMultiUserSwitch.getLayoutParams();
-        lp.width = getResources().getDimensionPixelSize(
-                R.dimen.multi_user_switch_width_keyguard);
-        lp.setMarginEnd(getResources().getDimensionPixelSize(
-                R.dimen.multi_user_switch_keyguard_margin));
-        mMultiUserSwitch.setLayoutParams(lp);
 
         // System icons
         lp = (MarginLayoutParams) mSystemIconsContainer.getLayoutParams();
@@ -194,22 +184,27 @@ public class KeyguardStatusBarView extends RelativeLayout
     }
 
     private void updateVisibilities() {
-        if (mMultiUserSwitch.getParent() != mStatusIconArea && !mKeyguardUserSwitcherShowing) {
-            if (mMultiUserSwitch.getParent() != null) {
-                getOverlay().remove(mMultiUserSwitch);
+        if (mMultiUserAvatar.getParent() != mStatusIconArea && !mKeyguardUserSwitcherShowing) {
+            if (mMultiUserAvatar.getParent() != null) {
+                getOverlay().remove(mMultiUserAvatar);
             }
-            mStatusIconArea.addView(mMultiUserSwitch, 0);
-        } else if (mMultiUserSwitch.getParent() == mStatusIconArea && mKeyguardUserSwitcherShowing) {
-            mStatusIconArea.removeView(mMultiUserSwitch);
+            mStatusIconArea.addView(mMultiUserAvatar, 0);
+        } else if (mMultiUserAvatar.getParent() == mStatusIconArea
+                && mKeyguardUserSwitcherShowing) {
+            mStatusIconArea.removeView(mMultiUserAvatar);
         }
         if (mKeyguardUserSwitcher == null) {
             // If we have no keyguard switcher, the screen width is under 600dp. In this case,
             // we only show the multi-user switch if it's enabled through UserManager as well as
             // by the user.
-            if (mMultiUserSwitch.isMultiUserEnabled()) {
-                mMultiUserSwitch.setVisibility(View.VISIBLE);
+            // TODO(b/138661450) Move IPC calls to background
+            boolean isMultiUserEnabled = whitelistIpcs(() -> mUserManager.isUserSwitcherEnabled(
+                    mContext.getResources().getBoolean(
+                            R.bool.qs_show_user_switcher_for_single_user)));
+            if (isMultiUserEnabled) {
+                mMultiUserAvatar.setVisibility(View.VISIBLE);
             } else {
-                mMultiUserSwitch.setVisibility(View.GONE);
+                mMultiUserAvatar.setVisibility(View.GONE);
             }
         }
         mBatteryView.setForceShowPercent(mBatteryCharging && mShowPercentAvailable);
@@ -220,7 +215,7 @@ public class KeyguardStatusBarView extends RelativeLayout
                 (LinearLayout.LayoutParams) mSystemIconsContainer.getLayoutParams();
         // If the avatar icon is gone, we need to have some end margin to display the system icons
         // correctly.
-        int baseMarginEnd = mMultiUserSwitch.getVisibility() == View.GONE
+        int baseMarginEnd = mMultiUserAvatar.getVisibility() == View.GONE
                 ? mSystemIconsBaseMargin
                 : 0;
         int marginEnd = mKeyguardUserSwitcherShowing ? mSystemIconsSwitcherHiddenExpandedMargin :
@@ -334,20 +329,11 @@ public class KeyguardStatusBarView extends RelativeLayout
         }
     }
 
-    private void updateUserSwitcher() {
-        boolean keyguardSwitcherAvailable = mKeyguardUserSwitcher != null;
-        mMultiUserSwitch.setClickable(keyguardSwitcherAvailable);
-        mMultiUserSwitch.setFocusable(keyguardSwitcherAvailable);
-        mMultiUserSwitch.setKeyguardMode(keyguardSwitcherAvailable);
-    }
-
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         UserInfoController userInfoController = Dependency.get(UserInfoController.class);
         userInfoController.addCallback(this);
-        mUserSwitcherController = Dependency.get(UserSwitcherController.class);
-        mMultiUserSwitch.setUserSwitcherController(mUserSwitcherController);
         userInfoController.reloadUserInfo();
         Dependency.get(ConfigurationController.class).addCallback(this);
         mIconManager = new TintedIconManager(findViewById(R.id.statusIcons),
@@ -369,11 +355,6 @@ public class KeyguardStatusBarView extends RelativeLayout
         mMultiUserAvatar.setImageDrawable(picture);
     }
 
-    /** */
-    public void setQSDetailDisplayer(QSDetailDisplayer detailDisplayer) {
-        mMultiUserSwitch.setQSDetailDisplayer(detailDisplayer);
-    }
-
     @Override
     public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
         if (mBatteryCharging != charging) {
@@ -389,8 +370,6 @@ public class KeyguardStatusBarView extends RelativeLayout
 
     public void setKeyguardUserSwitcher(KeyguardUserSwitcher keyguardUserSwitcher) {
         mKeyguardUserSwitcher = keyguardUserSwitcher;
-        mMultiUserSwitch.setKeyguardUserSwitcher(keyguardUserSwitcher);
-        updateUserSwitcher();
     }
 
     public void setKeyguardUserSwitcherShowing(boolean showing, boolean animate) {
@@ -405,36 +384,36 @@ public class KeyguardStatusBarView extends RelativeLayout
 
     private void animateNextLayoutChange() {
         final int systemIconsCurrentX = mSystemIconsContainer.getLeft();
-        final boolean userSwitcherVisible = mMultiUserSwitch.getParent() == mStatusIconArea;
+        final boolean userAvatarVisible = mMultiUserAvatar.getParent() == mStatusIconArea;
         getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
                 getViewTreeObserver().removeOnPreDrawListener(this);
-                boolean userSwitcherHiding = userSwitcherVisible
-                        && mMultiUserSwitch.getParent() != mStatusIconArea;
+                boolean userAvatarHiding = userAvatarVisible
+                        && mMultiUserAvatar.getParent() != mStatusIconArea;
                 mSystemIconsContainer.setX(systemIconsCurrentX);
                 mSystemIconsContainer.animate()
                         .translationX(0)
                         .setDuration(400)
-                        .setStartDelay(userSwitcherHiding ? 300 : 0)
+                        .setStartDelay(userAvatarHiding ? 300 : 0)
                         .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                         .start();
-                if (userSwitcherHiding) {
-                    getOverlay().add(mMultiUserSwitch);
-                    mMultiUserSwitch.animate()
+                if (userAvatarHiding) {
+                    getOverlay().add(mMultiUserAvatar);
+                    mMultiUserAvatar.animate()
                             .alpha(0f)
                             .setDuration(300)
                             .setStartDelay(0)
                             .setInterpolator(Interpolators.ALPHA_OUT)
                             .withEndAction(() -> {
-                                mMultiUserSwitch.setAlpha(1f);
-                                getOverlay().remove(mMultiUserSwitch);
+                                mMultiUserAvatar.setAlpha(1f);
+                                getOverlay().remove(mMultiUserAvatar);
                             })
                             .start();
 
                 } else {
-                    mMultiUserSwitch.setAlpha(0f);
-                    mMultiUserSwitch.animate()
+                    mMultiUserAvatar.setAlpha(0f);
+                    mMultiUserAvatar.animate()
                             .alpha(1f)
                             .setDuration(300)
                             .setStartDelay(200)
@@ -452,8 +431,8 @@ public class KeyguardStatusBarView extends RelativeLayout
         if (visibility != View.VISIBLE) {
             mSystemIconsContainer.animate().cancel();
             mSystemIconsContainer.setTranslationX(0);
-            mMultiUserSwitch.animate().cancel();
-            mMultiUserSwitch.setAlpha(1f);
+            mMultiUserAvatar.animate().cancel();
+            mMultiUserAvatar.setAlpha(1f);
         } else {
             updateVisibilities();
             updateSystemIconsLayoutParams();

@@ -95,7 +95,6 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
-import com.android.systemui.qs.QSDetailDisplayer;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.GestureRecorder;
@@ -295,7 +294,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private final MediaHierarchyManager mMediaHierarchyManager;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
-    private final QSDetailDisplayer mQSDetailDisplayer;
     private final FeatureFlags mFeatureFlags;
     private final ScrimController mScrimController;
     private final ControlsComponent mControlsComponent;
@@ -559,7 +557,6 @@ public class NotificationPanelViewController extends PanelViewController {
             NotificationGroupManagerLegacy groupManager,
             NotificationIconAreaController notificationIconAreaController,
             AuthController authController,
-            QSDetailDisplayer qsDetailDisplayer,
             ScrimController scrimController,
             MediaDataManager mediaDataManager,
             AmbientState ambientState,
@@ -581,7 +578,6 @@ public class NotificationPanelViewController extends PanelViewController {
         mGroupManager = groupManager;
         mNotificationIconAreaController = notificationIconAreaController;
         mKeyguardStatusViewComponentFactory = keyguardStatusViewComponentFactory;
-        mQSDetailDisplayer = qsDetailDisplayer;
         mFeatureFlags = featureFlags;
         mView.setWillNotDraw(!DEBUG);
         mLayoutInflater = layoutInflater;
@@ -660,7 +656,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private void onFinishInflate() {
         loadDimens();
         mKeyguardStatusBar = mView.findViewById(R.id.keyguard_header);
-        mKeyguardStatusBar.setQSDetailDisplayer(mQSDetailDisplayer);
         mBigClockContainer = mView.findViewById(R.id.big_clock_container);
         updateViewControllers(mView.findViewById(R.id.keyguard_status_view));
         mNotificationContainerParent = mView.findViewById(R.id.notification_container_parent);
