@@ -21,9 +21,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.Intent.ACTION_MEDIA_RESOURCE_GRANTED;
 
-import static com.android.wm.shell.pip.tv.PipNotification.ACTION_CLOSE;
-import static com.android.wm.shell.pip.tv.PipNotification.ACTION_MENU;
-
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.ActivityTaskManager.RootTaskInfo;
@@ -61,7 +58,7 @@ import java.util.Objects;
  * Manages the picture-in-picture (PIP) UI and states.
  */
 public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallback,
-        TvPipMenuController.Delegate {
+        TvPipMenuController.Delegate, TvPipNotificationController.Delegate {
     private static final String TAG = "TvPipController";
     static final boolean DEBUG = false;
 
@@ -91,7 +88,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     private final PipTaskOrganizer mPipTaskOrganizer;
     private final PipMediaController mPipMediaController;
     private final TvPipMenuController mTvPipMenuController;
-    private final PipNotification mPipNotification;
+    private final TvPipNotificationController mPipNotificationController;
 
     private IActivityTaskManager mActivityTaskManager;
     private int mState = STATE_NO_PIP;
@@ -120,12 +117,6 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
                 Log.d(TAG, "mBroadcastReceiver, action: " + intent.getAction());
             }
             switch (intent.getAction()) {
-                case ACTION_MENU:
-                    showPictureInPictureMenu();
-                    break;
-                case ACTION_CLOSE:
-                    closePip();
-                    break;
                 case ACTION_MEDIA_RESOURCE_GRANTED:
                     String[] packageNames = intent.getStringArrayExtra(Intent.EXTRA_PACKAGES);
                     int resourceType = intent.getIntExtra(Intent.EXTRA_MEDIA_RESOURCE_TYPE,
@@ -190,12 +181,13 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             PipTaskOrganizer pipTaskOrganizer,
             TvPipMenuController tvPipMenuController,
             PipMediaController pipMediaController,
-            PipNotification pipNotification,
+            TvPipNotificationController tvPipNotificationController,
             TaskStackListenerImpl taskStackListener,
             WindowManagerShellWrapper windowManagerShellWrapper) {
         mContext = context;
         mPipBoundsState = pipBoundsState;
-        mPipNotification = pipNotification;
+        mPipNotificationController = tvPipNotificationController;
+        mPipNotificationController.setDelegate(this);
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
         mPipMediaController = pipMediaController;
         mTvPipMenuController = tvPipMenuController;
@@ -213,8 +205,6 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         mActivityTaskManager = ActivityTaskManager.getService();
 
         final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(ACTION_CLOSE);
-        intentFilter.addAction(ACTION_MENU);
         intentFilter.addAction(ACTION_MEDIA_RESOURCE_GRANTED);
         mContext.registerReceiver(mBroadcastReceiver, intentFilter, UserHandle.USER_ALL);
 
@@ -273,7 +263,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         loadConfigurationsAndApply(newConfig);
-        mPipNotification.onConfigurationChanged(mContext);
+        mPipNotificationController.onConfigurationChanged(mContext);
     }
 
     /**
@@ -315,7 +305,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
                 mPinnedStackId = INVALID_STACK_ID;
             }
         }
-        mPipNotification.dismiss();
+        mPipNotificationController.dismiss();
         mTvPipMenuController.hideMenu();
         mHandler.removeCallbacks(mClosePipRunnable);
     }
@@ -334,7 +324,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
 
         mPipTaskId = TASK_ID_NO_PIP;
         mTvPipMenuController.hideMenu();
-        mPipNotification.dismiss();
+        mPipNotificationController.dismiss();
 
         resizePinnedStack(STATE_NO_PIP);
     }
@@ -359,7 +349,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         // Set state to STATE_PIP so we show it when the pinned stack animation ends.
         mState = STATE_PIP;
         mPipMediaController.onActivityPinned();
-        mPipNotification.show(packageName);
+        mPipNotificationController.show(packageName);
     }
 
     private void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
