@@ -262,18 +262,15 @@ public final class WindowManagerImpl implements WindowManager {
 
     private WindowInsets getWindowInsetsFromServer(WindowManager.LayoutParams attrs, Rect bounds) {
         try {
-            final DisplayCutout.ParcelableWrapper displayCutout =
-                    new DisplayCutout.ParcelableWrapper();
             final InsetsState insetsState = new InsetsState();
             final boolean alwaysConsumeSystemBars = WindowManagerGlobal.getWindowManagerService()
-                    .getWindowInsets(attrs, mContext.getDisplayId(), displayCutout, insetsState);
+                    .getWindowInsets(attrs, mContext.getDisplayId(), insetsState);
             final Configuration config = mContext.getResources().getConfiguration();
             final boolean isScreenRound = config.isScreenRound();
             final int windowingMode = config.windowConfiguration.getWindowingMode();
             return insetsState.calculateInsets(bounds, null /* ignoringVisibilityState*/,
-                    isScreenRound, alwaysConsumeSystemBars, displayCutout.get(),
-                    SOFT_INPUT_ADJUST_NOTHING, attrs.flags, SYSTEM_UI_FLAG_VISIBLE, attrs.type,
-                    windowingMode, null /* typeSideMap */);
+                    isScreenRound, alwaysConsumeSystemBars, SOFT_INPUT_ADJUST_NOTHING, attrs.flags,
+                    SYSTEM_UI_FLAG_VISIBLE, attrs.type, windowingMode, null /* typeSideMap */);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

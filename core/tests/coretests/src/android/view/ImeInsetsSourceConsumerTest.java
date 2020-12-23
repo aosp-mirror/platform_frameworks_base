@@ -78,11 +78,11 @@ public class ImeInsetsSourceConsumerTest {
             mController = Mockito.spy(new InsetsController(
                     new ViewRootInsetsControllerHost(viewRootImpl)));
             final Rect rect = new Rect(5, 5, 5, 5);
+            mController.getState().setDisplayCutout(new DisplayCutout(
+                    Insets.of(10, 10, 10, 10), rect, rect, rect, rect));
             mController.calculateInsets(
                     false,
                     false,
-                    new DisplayCutout(
-                            Insets.of(10, 10, 10, 10), rect, rect, rect, rect),
                     TYPE_APPLICATION, WINDOWING_MODE_UNDEFINED,
                     SOFT_INPUT_ADJUST_RESIZE, 0, 0);
             mImeConsumer = (ImeInsetsSourceConsumer) mController.getSourceConsumer(ITYPE_IME);

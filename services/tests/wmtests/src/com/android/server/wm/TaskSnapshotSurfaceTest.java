@@ -37,7 +37,6 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 
 import android.app.ActivityManager.TaskDescription;
-import android.window.TaskSnapshot;
 import android.content.ComponentName;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -52,6 +51,7 @@ import android.view.InsetsState;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+import android.window.TaskSnapshot;
 
 import androidx.test.filters.SmallTest;
 
@@ -145,7 +145,7 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
 
         assertThat(surface).isNotNull();
         verify(session).addToDisplay(any(), argThat(this::isTrustedOverlay), anyInt(), anyInt(),
-                any(), any(), any(), any(), any(), any());
+                any(), any(), any(), any(), any());
     }
 
     @Test

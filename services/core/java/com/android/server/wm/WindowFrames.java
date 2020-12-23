@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import static com.android.server.wm.WindowFramesProto.CONTAINING_FRAME;
-import static com.android.server.wm.WindowFramesProto.CUTOUT;
 import static com.android.server.wm.WindowFramesProto.DISPLAY_FRAME;
 import static com.android.server.wm.WindowFramesProto.FRAME;
 import static com.android.server.wm.WindowFramesProto.PARENT_FRAME;
@@ -25,9 +24,6 @@ import static com.android.server.wm.WindowFramesProto.PARENT_FRAME;
 import android.annotation.NonNull;
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
-import android.view.DisplayCutout;
-
-import com.android.server.wm.utils.WmDisplayCutout;
 
 import java.io.PrintWriter;
 
@@ -96,29 +92,10 @@ public class WindowFrames {
      */
     private boolean mParentFrameWasClippedByDisplayCutout;
 
-    /**
-     * Part of the display that has been cut away. See {@link DisplayCutout}.
-     */
-    WmDisplayCutout mDisplayCutout = WmDisplayCutout.NO_CUTOUT;
-
-    /**
-     * The last cutout that has been reported to the client.
-     */
-    private WmDisplayCutout mLastDisplayCutout = WmDisplayCutout.NO_CUTOUT;
-
-    private boolean mDisplayCutoutChanged;
-
     boolean mLastForceReportingResized = false;
     boolean mForceReportingResized = false;
 
     private boolean mContentChanged;
-
-    public WindowFrames() {
-    }
-
-    public WindowFrames(Rect parentFrame, Rect displayFrame) {
-        setFrames(parentFrame, displayFrame);
-    }
 
     public void setFrames(Rect parentFrame, Rect displayFrame) {
         mParentFrame.set(parentFrame);
@@ -132,10 +109,6 @@ public class WindowFrames {
 
     boolean parentFrameWasClippedByDisplayCutout() {
         return mParentFrameWasClippedByDisplayCutout;
-    }
-
-    public void setDisplayCutout(WmDisplayCutout displayCutout) {
-        mDisplayCutout = displayCutout;
     }
 
     /**
@@ -157,8 +130,7 @@ public class WindowFrames {
     boolean setReportResizeHints() {
         mLastForceReportingResized |= mForceReportingResized;
         mFrameSizeChanged |= didFrameSizeChange();
-        mDisplayCutoutChanged |= !mLastDisplayCutout.equals(mDisplayCutout);
-        return mLastForceReportingResized || mFrameSizeChanged || mDisplayCutoutChanged;
+        return mLastForceReportingResized || mFrameSizeChanged;
     }
 
     /**
@@ -168,7 +140,6 @@ public class WindowFrames {
     void clearReportResizeHints() {
         mLastForceReportingResized = false;
         mFrameSizeChanged = false;
-        mDisplayCutoutChanged = false;
     }
 
     /**
@@ -176,7 +147,6 @@ public class WindowFrames {
      */
     void onResizeHandled() {
         mForceReportingResized = false;
-        mLastDisplayCutout = mDisplayCutout;
     }
 
     /**
@@ -207,7 +177,6 @@ public class WindowFrames {
         mDisplayFrame.dumpDebug(proto, DISPLAY_FRAME);
         mContainingFrame.dumpDebug(proto, CONTAINING_FRAME);
         mFrame.dumpDebug(proto, FRAME);
-        mDisplayCutout.getDisplayCutout().dumpDebug(proto, CUTOUT);
 
         proto.end(token);
     }
@@ -219,12 +188,9 @@ public class WindowFrames {
                 + " display=" + mDisplayFrame.toShortString(sTmpSB));
         pw.println(prefix + "mFrame=" + mFrame.toShortString(sTmpSB)
                 + " last=" + mLastFrame.toShortString(sTmpSB));
-        pw.println(prefix + " cutout=" + mDisplayCutout.getDisplayCutout()
-                + " last=" + mLastDisplayCutout.getDisplayCutout());
     }
 
     String getInsetsChangedInfo() {
-        return "forceReportingResized=" + mLastForceReportingResized
-                + " displayCutoutChanged=" + mDisplayCutoutChanged;
+        return "forceReportingResized=" + mLastForceReportingResized;
     }
 }

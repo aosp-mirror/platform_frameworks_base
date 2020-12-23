@@ -334,8 +334,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     private Insets getInsetsFromState(InsetsState state, Rect frame,
             @Nullable @InternalInsetsSide SparseIntArray typeSideMap) {
         return state.calculateInsets(frame, null /* ignoringVisibilityState */,
-                false /* isScreenRound */,
-                false /* alwaysConsumeSystemBars */, null /* displayCutout */,
+                false /* isScreenRound */, false /* alwaysConsumeSystemBars */,
                 LayoutParams.SOFT_INPUT_ADJUST_RESIZE /* legacySoftInputMode*/,
                 0 /* legacyWindowFlags */, 0 /* legacySystemUiFlags */, TYPE_APPLICATION,
                 WINDOWING_MODE_UNDEFINED, typeSideMap).getInsets(mTypes);
