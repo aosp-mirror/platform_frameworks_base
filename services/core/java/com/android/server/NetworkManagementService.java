@@ -438,7 +438,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             // the radio is the authority for the current state.
             final boolean active = isActive;
             invokeForAllObservers(o -> o.interfaceClassDataActivityChanged(
-                    Integer.toString(type), active, tsNanos));
+                    Integer.toString(type), active, tsNanos, uid));
         }
 
         boolean report = false;
