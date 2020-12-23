@@ -84,6 +84,7 @@ import android.media.IAudioFocusDispatcher;
 import android.media.IAudioRoutesObserver;
 import android.media.IAudioServerStateDispatcher;
 import android.media.IAudioService;
+import android.media.ICapturePresetDevicesRoleDispatcher;
 import android.media.IPlaybackConfigDispatcher;
 import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
@@ -1936,6 +1937,94 @@ public class AudioService extends IAudioService.Stub
         }
         enforceModifyAudioRoutingPermission();
         mDeviceBroker.unregisterStrategyPreferredDevicesDispatcher(dispatcher);
+    }
+
+    /**
+     * @see AudioManager#setPreferredDeviceForCapturePreset(int, AudioDeviceAttributes)
+     */
+    public int setPreferredDevicesForCapturePreset(
+            int capturePreset, List<AudioDeviceAttributes> devices) {
+        if (devices == null) {
+            return AudioSystem.ERROR;
+        }
+        enforceModifyAudioRoutingPermission();
+        final String logString = String.format(
+                "setPreferredDevicesForCapturePreset u/pid:%d/%d source:%d dev:%s",
+                Binder.getCallingUid(), Binder.getCallingPid(), capturePreset,
+                devices.stream().map(e -> e.toString()).collect(Collectors.joining(",")));
+        sDeviceLogger.log(new AudioEventLogger.StringEvent(logString).printLog(TAG));
+        if (devices.stream().anyMatch(device ->
+                device.getRole() == AudioDeviceAttributes.ROLE_OUTPUT)) {
+            Log.e(TAG, "Unsupported output routing in " + logString);
+            return AudioSystem.ERROR;
+        }
+
+        final int status = mDeviceBroker.setPreferredDevicesForCapturePresetSync(
+                capturePreset, devices);
+        if (status != AudioSystem.SUCCESS) {
+            Log.e(TAG, String.format("Error %d in %s)", status, logString));
+        }
+
+        return status;
+    }
+
+    /** @see AudioManager#clearPreferredDevicesForCapturePreset(int) */
+    public int clearPreferredDevicesForCapturePreset(int capturePreset) {
+        enforceModifyAudioRoutingPermission();
+        final String logString = String.format(
+                "removePreferredDeviceForCapturePreset source:%d", capturePreset);
+        sDeviceLogger.log(new AudioEventLogger.StringEvent(logString).printLog(TAG));
+
+        final int status = mDeviceBroker.clearPreferredDevicesForCapturePresetSync(capturePreset);
+        if (status != AudioSystem.SUCCESS) {
+            Log.e(TAG, String.format("Error %d in %s", status, logString));
+        }
+        return status;
+    }
+
+    /**
+     * @see AudioManager#getPreferredDevicesForCapturePreset(int)
+     */
+    public List<AudioDeviceAttributes> getPreferredDevicesForCapturePreset(int capturePreset) {
+        enforceModifyAudioRoutingPermission();
+        List<AudioDeviceAttributes> devices = new ArrayList<>();
+        final long identity = Binder.clearCallingIdentity();
+        final int status = AudioSystem.getDevicesForRoleAndCapturePreset(
+                capturePreset, AudioSystem.DEVICE_ROLE_PREFERRED, devices);
+        Binder.restoreCallingIdentity(identity);
+        if (status != AudioSystem.SUCCESS) {
+            Log.e(TAG, String.format("Error %d in getPreferredDeviceForCapturePreset(%d)",
+                    status, capturePreset));
+            return new ArrayList<AudioDeviceAttributes>();
+        } else {
+            return devices;
+        }
+    }
+
+    /**
+     * @see AudioManager#addOnPreferredDevicesForCapturePresetChangedListener(
+     *              Executor, OnPreferredDevicesForCapturePresetChangedListener)
+     */
+    public void registerCapturePresetDevicesRoleDispatcher(
+            @Nullable ICapturePresetDevicesRoleDispatcher dispatcher) {
+        if (dispatcher == null) {
+            return;
+        }
+        enforceModifyAudioRoutingPermission();
+        mDeviceBroker.registerCapturePresetDevicesRoleDispatcher(dispatcher);
+    }
+
+    /**
+     * @see AudioManager#removeOnPreferredDevicesForCapturePresetChangedListener(
+     *              AudioManager.OnPreferredDevicesForCapturePresetChangedListener)
+     */
+    public void unregisterCapturePresetDevicesRoleDispatcher(
+            @Nullable ICapturePresetDevicesRoleDispatcher dispatcher) {
+        if (dispatcher == null) {
+            return;
+        }
+        enforceModifyAudioRoutingPermission();
+        mDeviceBroker.unregisterCapturePresetDevicesRoleDispatcher(dispatcher);
     }
 
     /** @see AudioManager#getDevicesForAttributes(AudioAttributes) */
