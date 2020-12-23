@@ -85,6 +85,7 @@ import android.media.IAudioRoutesObserver;
 import android.media.IAudioServerStateDispatcher;
 import android.media.IAudioService;
 import android.media.ICapturePresetDevicesRoleDispatcher;
+import android.media.ICommunicationDeviceDispatcher;
 import android.media.IPlaybackConfigDispatcher;
 import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
@@ -4266,6 +4267,115 @@ public class AudioService extends IAudioService.Stub
             Log.d(TAG, "Restoring device volume behavior");
         }
         restoreDeviceVolumeBehavior();
+    }
+
+    private static final int[] VALID_COMMUNICATION_DEVICE_TYPES = {
+        AudioDeviceInfo.TYPE_BUILTIN_SPEAKER,
+        AudioDeviceInfo.TYPE_BLUETOOTH_SCO,
+        AudioDeviceInfo.TYPE_WIRED_HEADSET,
+        AudioDeviceInfo.TYPE_USB_HEADSET,
+        AudioDeviceInfo.TYPE_BUILTIN_EARPIECE,
+        AudioDeviceInfo.TYPE_WIRED_HEADPHONES,
+        AudioDeviceInfo.TYPE_HEARING_AID,
+        AudioDeviceInfo.TYPE_BLE_HEADSET,
+        AudioDeviceInfo.TYPE_USB_DEVICE,
+        AudioDeviceInfo.TYPE_BLE_SPEAKER,
+        AudioDeviceInfo.TYPE_LINE_ANALOG,
+        AudioDeviceInfo.TYPE_HDMI,
+        AudioDeviceInfo.TYPE_AUX_LINE
+    };
+
+    private boolean isValidCommunicationDevice(AudioDeviceInfo device) {
+        for (int type : VALID_COMMUNICATION_DEVICE_TYPES) {
+            if (device.getType() == type) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** @see AudioManager#setDeviceForCommunication(int) */
+    public boolean setDeviceForCommunication(IBinder cb, int portId) {
+        final int uid = Binder.getCallingUid();
+        final int pid = Binder.getCallingPid();
+
+        AudioDeviceInfo device = null;
+        if (portId != 0) {
+            device = AudioManager.getDeviceForPortId(portId, AudioManager.GET_DEVICES_OUTPUTS);
+            if (device == null) {
+                throw new IllegalArgumentException("invalid portID " + portId);
+            }
+            if (!isValidCommunicationDevice(device)) {
+                throw new IllegalArgumentException("invalid device type " + device.getType());
+            }
+        }
+        final String eventSource = new StringBuilder("setDeviceForCommunication(")
+                .append(") from u/pid:").append(uid).append("/")
+                .append(pid).toString();
+
+        int deviceType = AudioSystem.DEVICE_OUT_DEFAULT;
+        String deviceAddress = null;
+        if (device != null) {
+            deviceType = device.getPort().type();
+            deviceAddress = device.getAddress();
+        } else {
+            AudioDeviceInfo curDevice = mDeviceBroker.getDeviceForCommunication();
+            if (curDevice != null) {
+                deviceType = curDevice.getPort().type();
+                deviceAddress = curDevice.getAddress();
+            }
+        }
+        // do not log metrics if clearing communication device while no communication device
+        // was selected
+        if (deviceType != AudioSystem.DEVICE_OUT_DEFAULT) {
+            new MediaMetrics.Item(MediaMetrics.Name.AUDIO_DEVICE
+                    + MediaMetrics.SEPARATOR + "setDeviceForCommunication")
+                    .set(MediaMetrics.Property.DEVICE,
+                            AudioSystem.getDeviceName(deviceType))
+                    .set(MediaMetrics.Property.ADDRESS, deviceAddress)
+                    .set(MediaMetrics.Property.STATE, device != null
+                            ? MediaMetrics.Value.CONNECTED : MediaMetrics.Value.DISCONNECTED)
+                    .record();
+        }
+
+        final long ident = Binder.clearCallingIdentity();
+        boolean status =
+                mDeviceBroker.setDeviceForCommunication(cb, pid, device, eventSource);
+        Binder.restoreCallingIdentity(ident);
+        return status;
+    }
+
+    /** @see AudioManager#getDeviceForCommunication() */
+    public int getDeviceForCommunication() {
+        final long ident = Binder.clearCallingIdentity();
+        AudioDeviceInfo device = mDeviceBroker.getDeviceForCommunication();
+        Binder.restoreCallingIdentity(ident);
+        if (device == null) {
+            return 0;
+        }
+        return device.getId();
+    }
+
+    /** @see AudioManager#addOnCommunicationDeviceChangedListener(
+     *               Executor, AudioManager.OnCommunicationDeviceChangedListener)
+     */
+    public void registerCommunicationDeviceDispatcher(
+            @Nullable ICommunicationDeviceDispatcher dispatcher) {
+        if (dispatcher == null) {
+            return;
+        }
+        mDeviceBroker.registerCommunicationDeviceDispatcher(dispatcher);
+    }
+
+    /** @see AudioManager#removeOnCommunicationDeviceChangedListener(
+     *               AudioManager.OnCommunicationDeviceChangedListener)
+     */
+    public void unregisterCommunicationDeviceDispatcher(
+            @Nullable ICommunicationDeviceDispatcher dispatcher) {
+        if (dispatcher == null) {
+            return;
+        }
+        mDeviceBroker.unregisterCommunicationDeviceDispatcher(dispatcher);
     }
 
     /** @see AudioManager#setSpeakerphoneOn(boolean) */

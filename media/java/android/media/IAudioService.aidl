@@ -27,6 +27,7 @@ import android.media.IAudioFocusDispatcher;
 import android.media.IAudioRoutesObserver;
 import android.media.IAudioServerStateDispatcher;
 import android.media.ICapturePresetDevicesRoleDispatcher;
+import android.media.ICommunicationDeviceDispatcher;
 import android.media.IPlaybackConfigDispatcher;
 import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
@@ -320,4 +321,13 @@ interface IAudioService {
 
     oneway void unregisterCapturePresetDevicesRoleDispatcher(
             ICapturePresetDevicesRoleDispatcher dispatcher);
+
+    boolean setDeviceForCommunication(IBinder cb, int portId);
+
+    int getDeviceForCommunication();
+
+    void registerCommunicationDeviceDispatcher(ICommunicationDeviceDispatcher dispatcher);
+
+    oneway void unregisterCommunicationDeviceDispatcher(
+            ICommunicationDeviceDispatcher dispatcher);
 }
