@@ -133,10 +133,26 @@ public final class ImsCallProfile implements Parcelable {
      *      the video during voice call.
      *  conference_avail : Indicates if the session can be extended to the conference.
      */
+
     /**
+     * Indicates if the session is for a conference call or not. If not defined, should be
+     * considered {@code false}.
+     * Boolean extra properties - {@code true} / {@code false}.
      * @hide
      */
-    public static final String EXTRA_CONFERENCE = "conference";
+    @SystemApi
+    public static final String EXTRA_CONFERENCE = "android.telephony.ims.extra.CONFERENCE";
+
+    /**
+     * The previous string of EXTRA_CONFERENCE. Use EXTRA_CONFERENCE whenever possible.
+     * For external app or vendor code backward compatibility, we should always set value for both
+     * EXTRA_CONFERENCE_DEPRECATED and EXTRA_CONFERENCE.
+     *
+     * @deprecated Remove when not needed anymore.
+     *
+     * @hide
+     */
+    public static final String EXTRA_CONFERENCE_DEPRECATED = "conference";
 
     /**
      * Boolean extra property set on an {@link ImsCallProfile} to indicate that this call is an
@@ -153,7 +169,25 @@ public final class ImsCallProfile implements Parcelable {
      * @hide
      */
     public static final String EXTRA_CALL_MODE_CHANGEABLE = "call_mode_changeable";
+
     /**
+     * Indicates if the session can be extended to a conference call. If not defined, should be
+     * considered {@code false}.
+     * Boolean extra properties - {@code true} / {@code false}.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_EXTENDING_TO_CONFERENCE_SUPPORTED =
+            "android.telephony.ims.extra.EXTENDING_TO_CONFERENCE_SUPPORTED";
+
+    /**
+     * The previous string of EXTRA_EXTENDING_TO_CONFERENCE_SUPPORTED.
+     * Use EXTRA_EXTENDING_TO_CONFERENCE_SUPPORTED whenever possible.
+     * For backward compatibility, we should always set value for both
+     * EXTRA_EXTENDING_TO_CONFERENCE_SUPPORTED and EXTRA_CONFERENCE_AVAIL.
+     *
+     * @deprecated Remove when not needed anymore.
+     *
      * @hide
      */
     public static final String EXTRA_CONFERENCE_AVAIL = "conference_avail";
