@@ -17,10 +17,11 @@
 package com.android.wm.shell.flicker
 
 import android.graphics.Region
-import com.android.server.wm.flicker.DOCKED_STACK_DIVIDER
+import android.view.Surface
 import com.android.server.wm.flicker.dsl.EventLogAssertion
 import com.android.server.wm.flicker.dsl.LayersAssertion
 import com.android.server.wm.flicker.helpers.WindowUtils
+import com.android.wm.shell.flicker.FlickerTestBase.Companion.DOCKED_STACK_DIVIDER
 
 @JvmOverloads
 fun LayersAssertion.appPairsDividerIsVisible(
@@ -87,6 +88,36 @@ fun LayersAssertion.dockedStackDividerIsInvisible(
 }
 
 @JvmOverloads
+fun LayersAssertion.appPairsPrimaryBoundsIsVisible(
+    rotation: Int,
+    primaryLayerName: String,
+    bugId: Int = 0,
+    enabled: Boolean = bugId == 0
+) {
+    end("PrimaryAppBounds", bugId, enabled) {
+        val entry = this.trace.entries.firstOrNull()
+                ?: throw IllegalStateException("Trace is empty")
+        val dividerRegion = entry.getVisibleBounds(FlickerTestBase.SPLIT_DIVIDER)
+        this.hasVisibleRegion(primaryLayerName, getPrimaryRegion(dividerRegion, rotation))
+    }
+}
+
+@JvmOverloads
+fun LayersAssertion.appPairsSecondaryBoundsIsVisible(
+    rotation: Int,
+    secondaryLayerName: String,
+    bugId: Int = 0,
+    enabled: Boolean = bugId == 0
+) {
+    end("SecondaryAppBounds", bugId, enabled) {
+        val entry = this.trace.entries.firstOrNull()
+                ?: throw IllegalStateException("Trace is empty")
+        val dividerRegion = entry.getVisibleBounds(FlickerTestBase.SPLIT_DIVIDER)
+        this.hasVisibleRegion(secondaryLayerName, getSecondaryRegion(dividerRegion, rotation))
+    }
+}
+
+@JvmOverloads
 fun LayersAssertion.dockedStackPrimaryBoundsIsVisible(
     rotation: Int,
     primaryLayerName: String,
@@ -118,16 +149,27 @@ fun LayersAssertion.dockedStackSecondaryBoundsIsVisible(
 
 fun getPrimaryRegion(dividerRegion: Region, rotation: Int): Region {
     val displayBounds = WindowUtils.getDisplayBounds(rotation)
-    return Region(0, 0, displayBounds.getBounds().right,
-            dividerRegion.getBounds().bottom - WindowUtils.dockedStackDividerInset)
+    return if (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180) {
+        Region(0, 0, displayBounds.getBounds().right,
+                dividerRegion.getBounds().bottom - WindowUtils.dockedStackDividerInset)
+    } else {
+        Region(0, 0, dividerRegion.getBounds().left,
+                dividerRegion.getBounds().right - WindowUtils.dockedStackDividerInset)
+    }
 }
 
 fun getSecondaryRegion(dividerRegion: Region, rotation: Int): Region {
     val displayBounds = WindowUtils.getDisplayBounds(rotation)
-    return Region(0,
-            dividerRegion.getBounds().bottom - WindowUtils.dockedStackDividerInset,
-            displayBounds.getBounds().right,
-            displayBounds.getBounds().bottom - WindowUtils.navigationBarHeight)
+    return if (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180) {
+        Region(0,
+                dividerRegion.getBounds().bottom - WindowUtils.dockedStackDividerInset,
+                displayBounds.getBounds().right,
+                displayBounds.getBounds().bottom - WindowUtils.dockedStackDividerInset)
+    } else {
+        Region(dividerRegion.getBounds().right, 0,
+                displayBounds.getBounds().right,
+                displayBounds.getBounds().bottom - WindowUtils.dockedStackDividerInset)
+    }
 }
 
 fun EventLogAssertion.focusChanges(
