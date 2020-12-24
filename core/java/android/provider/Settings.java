@@ -16667,12 +16667,6 @@ public final class Settings {
             public static final String AMBIENT_FORCE_WHEN_DOCKED = "ambient_force_when_docked";
 
             /**
-             * The id of the gesture sensor.
-             * @hide
-             */
-            public static final String AMBIENT_GESTURE_SENSOR_ID = "ambient_gesture_sensor_id";
-
-            /**
              * Whether the ambient low bit mode is enabled.
              * @hide
              */

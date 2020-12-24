@@ -640,7 +640,6 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.AMBIENT_TILT_TO_BRIGHT,
                     Settings.Global.Wearable.DECOMPOSABLE_WATCHFACE,
                     Settings.Global.Wearable.AMBIENT_FORCE_WHEN_DOCKED,
-                    Settings.Global.Wearable.AMBIENT_GESTURE_SENSOR_ID,
                     Settings.Global.Wearable.AMBIENT_LOW_BIT_ENABLED,
                     Settings.Global.Wearable.AMBIENT_PLUGGED_TIMEOUT_MIN,
                     Settings.Global.Wearable.PAIRED_DEVICE_OS_TYPE,
