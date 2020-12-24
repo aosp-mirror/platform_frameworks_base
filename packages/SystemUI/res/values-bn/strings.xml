@@ -85,7 +85,8 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"স্ক্রিনশট সেভ করা যায়নি"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"স্ক্রিনশট সেভ করার আগে ডিভাইসটি অবশ্যই আনলক করতে হবে"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"আবার স্ক্রিনশট নেওয়ার চেষ্টা করুন"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"বেশি জায়গা নেই তাই স্ক্রিনশটটি সেভ করা যাবে না৷"</string>
+    <!-- no translation found for screenshot_failed_to_save_text (7232739948999195960) -->
+    <skip />
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"এই অ্যাপ বা আপনার প্রতিষ্ঠান স্ক্রিনশট নেওয়ার অনুমতি দেয়নি"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"এডিট করুন"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"স্ক্রিনশট এডিট করুন"</string>
@@ -698,14 +699,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ফোনের সেটিংস অনুযায়ী ফোন রিং বা ভাইব্রেট হতে পারে। <xliff:g id="APP_NAME">%1$s</xliff:g>-এর কথোপকথন সাধারণত বাবলের মতো দেখাবে।"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ফ্লোটিং শর্টকাট ব্যবহার করে এই কন্টেন্টে আপনার দৃষ্টি আকর্ষণ করে রাখে।"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"এই বিজ্ঞপ্তি এলে ডিভাইস আওয়াজ করবে না ভাইব্রেট করবে তা সিস্টেমকে সেট করতে দিন"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;স্ট্যাটাস:&lt;/b&gt; লেভেল বাড়িয়ে ডিফল্ট করা হয়েছে"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;স্ট্যাটাস:&lt;/b&gt; লেভেল কমিয়ে সাইলেন্ করা হয়েছে"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;স্ট্যাটাস:&lt;/b&gt; র‍্যাঙ্ক বেড়ে গেছে"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;স্ট্যাটাস:&lt;/b&gt; র‍্যাঙ্ক কমে গেছে"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"কথোপকথন বিভাগের উপরে ভাসমান বাবলের মতো দেখা যাবে, লক স্ক্রিনে প্রোফাইল ছবি দেখাবে"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"সেটিংস"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"অগ্রাধিকার"</string>
@@ -724,14 +721,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"এই অ্যাপটি স্ক্রিনে অন্যান্য অ্যাপের উপরে দেখানো হচ্ছে এবং মাইক্রোফোন ও ক্যামেরা ব্যবহার করছে।"</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"সেটিংস"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"ঠিক আছে"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"সিস্টেম অটোমেটিক এই বিজ্ঞপ্তির &lt;b&gt;লেভেল বাড়িয়ে ডিফল্ট&lt;/b&gt; হিসেবে সেট করেছে।"</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"সিস্টেম অটোমেটিক এই বিজ্ঞপ্তির &lt;b&gt;লেভেল কমিয়ে সাইলেন্ট&lt;/b&gt; করে দিয়েছে।"</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"আপনার শেডে অটোমেটিক এই বিজ্ঞপ্তির &lt;b&gt;র‍্যাঙ্ক বাড়িয়ে&lt;/b&gt; দেওয়া হয়েছে।"</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"আপনার শেডে অটোমেটিক এই বিজ্ঞপ্তির &lt;b&gt;র‍্যাঙ্ক কমিয়ে&lt;/b&gt; দেওয়া হয়েছে।"</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"এটি কি সঠিক ছিল?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"মতামতের জন্য ধন্যবাদ!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"বুঝেছি"</string>

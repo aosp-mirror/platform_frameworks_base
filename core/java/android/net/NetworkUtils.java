@@ -16,14 +16,9 @@
 
 package android.net;
 
-import static android.system.OsConstants.AF_INET;
-import static android.system.OsConstants.AF_INET6;
-
-import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.system.ErrnoException;
-import android.system.Os;
 import android.util.Log;
 import android.util.Pair;
 
@@ -153,14 +148,6 @@ public class NetworkUtils {
      * Attempts to get network which resolver will use if no network is explicitly selected.
      */
     public static native Network getDnsNetwork() throws ErrnoException;
-
-    /**
-     * Allow/Disallow creating AF_INET/AF_INET6 sockets and DNS lookups for current process.
-     *
-     * @param allowNetworking whether to allow or disallow creating AF_INET/AF_INET6 sockets
-     *                        and DNS lookups.
-     */
-    public static native void setAllowNetworkingForProcess(boolean allowNetworking);
 
     /**
      * Get the tcp repair window associated with the {@code fd}.
@@ -437,60 +424,4 @@ public class NetworkUtils {
         return routedIPCount;
     }
 
-    private static final int[] ADDRESS_FAMILIES = new int[] {AF_INET, AF_INET6};
-
-    /**
-     * Returns true if the hostname is weakly validated.
-     * @param hostname Name of host to validate.
-     * @return True if it's a valid-ish hostname.
-     *
-     * @hide
-     */
-    public static boolean isWeaklyValidatedHostname(@NonNull String hostname) {
-        // TODO(b/34953048): Use a validation method that permits more accurate,
-        // but still inexpensive, checking of likely valid DNS hostnames.
-        final String weakHostnameRegex = "^[a-zA-Z0-9_.-]+$";
-        if (!hostname.matches(weakHostnameRegex)) {
-            return false;
-        }
-
-        for (int address_family : ADDRESS_FAMILIES) {
-            if (Os.inet_pton(address_family, hostname) != null) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Safely multiple a value by a rational.
-     * <p>
-     * Internally it uses integer-based math whenever possible, but switches
-     * over to double-based math if values would overflow.
-     * @hide
-     */
-    public static long multiplySafeByRational(long value, long num, long den) {
-        if (den == 0) {
-            throw new ArithmeticException("Invalid Denominator");
-        }
-        long x = value;
-        long y = num;
-
-        // Logic shamelessly borrowed from Math.multiplyExact()
-        long r = x * y;
-        long ax = Math.abs(x);
-        long ay = Math.abs(y);
-        if (((ax | ay) >>> 31 != 0)) {
-            // Some bits greater than 2^31 that might cause overflow
-            // Check the result using the divide operator
-            // and check for the special case of Long.MIN_VALUE * -1
-            if (((y != 0) && (r / y != x)) ||
-                    (x == Long.MIN_VALUE && y == -1)) {
-                // Use double math to avoid overflowing
-                return (long) (((double) num / den) * value);
-            }
-        }
-        return r / den;
-    }
 }

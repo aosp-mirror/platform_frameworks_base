@@ -84,6 +84,7 @@ interface IDevicePolicyManager {
     long getPasswordExpiration(in ComponentName who, int userHandle, boolean parent);
 
     boolean isActivePasswordSufficient(int userHandle, boolean parent);
+    boolean isActivePasswordSufficientForDeviceRequirement();
     boolean isProfileActivePasswordSufficientForParent(int userHandle);
     boolean isPasswordSufficientAfterProfileUnification(int userHandle, int profileUser);
     int getPasswordComplexity(boolean parent);

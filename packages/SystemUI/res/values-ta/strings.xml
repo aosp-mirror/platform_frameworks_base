@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"ஸ்கிரீன் ஷாட்டைச் சேமிக்க முடியவில்லை"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"ஸ்கிரீன்ஷாட் சேமிக்கப்படுவதற்கு முன்பு சாதனம் அன்லாக் செய்யப்பட வேண்டும்"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"ஸ்கிரீன் ஷாட்டை மீண்டும் எடுக்க முயலவும்"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"போதுமான சேமிப்பிடம் இல்லாததால் ஸ்கிரீன்ஷாட்டைச் சேமிக்க முடியவில்லை"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"ஸ்கிரீன்ஷாட்டைச் சேமிக்க முடியவில்லை"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ஸ்கிரீன் ஷாட்டுகளை எடுப்பதை, ஆப்ஸ் அல்லது உங்கள் நிறுவனம் அனுமதிக்கவில்லை"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"திருத்து"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"ஸ்கிரீன்ஷாட்டைத் திருத்தும்"</string>
@@ -698,14 +698,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"மொபைல் அமைப்புகளின் அடிப்படையில் ஒலிக்கவோ அதிரவோ செய்யும். <xliff:g id="APP_NAME">%1$s</xliff:g> இலிருந்து வரும் உரையாடல்கள் இயல்பாகவே குமிழாகத் தோன்றும்."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"இந்த உள்ளடக்கத்திற்கான மிதக்கும் ஷார்ட்கட் மூலம் உங்கள் கவனத்தைப் பெற்றிருக்கும்."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"இந்த அறிவிப்பு ஒலி எழுப்ப வேண்டுமா அதிர வேண்டுமா என்பதை சிஸ்டம் தீர்மானிக்கும்"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;நிலை:&lt;/b&gt; இயல்புநிலைக்கு உயர்த்தி அமைக்கப்பட்டது"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;நிலை:&lt;/b&gt; நிசப்த நிலைக்குக் குறைத்து அமைக்கப்பட்டது"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;நிலை:&lt;/b&gt; முக்கியத்துவம் உயர்த்தப்பட்டது"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;நிலை:&lt;/b&gt; முக்கியத்துவம் குறைக்கப்பட்டது"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"உரையாடல் பிரிவின் மேற்பகுதியில் மிதக்கும் குமிழாகத் தோன்றும். பூட்டுத் திரையின் மேல் சுயவிவரப் படத்தைக் காட்டும்"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"அமைப்புகள்"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"முன்னுரிமை"</string>
@@ -724,14 +720,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"இந்த ஆப்ஸானது, உங்கள் திரையில் பிற ஆப்ஸின் இடைமுகத்தின் மேல் தோன்றுவதுடன், மைக்ரோஃபோனையும் கேமராவையும் உபயோகிக்கிறது."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"அமைப்புகள்"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"சரி"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"சிஸ்டத்தால் தானாகவே இந்த அறிவிப்பு &lt;b&gt;இயல்பு நிலைக்கு உயர்த்தி அமைக்கப்பட்டது&lt;/b&gt;."</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"சிஸ்டத்தால் தானாகவே இந்த அறிவிப்பு &lt;b&gt;நிசப்த நிலைக்குக் குறைத்து அமைக்கப்பட்டது&lt;/b&gt;."</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"அறிவிப்பு விவரத்தில் தானாகவே இந்த அறிவிப்பின் &lt;b&gt;முக்கியத்துவம் உயர்த்தப்பட்டது&lt;/b&gt;."</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"அறிவிப்பு விவரத்தில் தானாகவே இந்த அறிவிப்பின் &lt;b&gt;முக்கியத்துவம் குறைக்கப்பட்டது&lt;/b&gt;."</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"இது சரியானதா?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"உங்கள் கருத்துக்கு நன்றி!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"சரி"</string>

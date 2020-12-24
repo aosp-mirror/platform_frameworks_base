@@ -2624,16 +2624,24 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // events can slip to activity from letterbox.
         mActivityRecord.getLetterboxInnerBounds(mTmpRect);
         if (mTmpRect.isEmpty()) {
-            // If this is a modal window we need to dismiss it if it's not full screen
-            // and the touch happens outside of the frame that displays the content. This
-            // means we need to intercept touches outside of that window. The dim layer
-            // user associated with the window (task or stack) will give us the good
-            // bounds, as they would be used to display the dim layer.
-            final Task task = getTask();
-            if (task != null) {
-                task.getDimBounds(mTmpRect);
-            } else if (getRootTask() != null) {
-                getRootTask().getDimBounds(mTmpRect);
+            final Rect transformedBounds = mActivityRecord.getFixedRotationTransformDisplayBounds();
+            if (transformedBounds != null) {
+                // Task is in the same orientation as display, so the rotated bounds should be
+                // chosen as the touchable region. Then when the surface layer transforms the
+                // region to display space, the orientation will be consistent.
+                mTmpRect.set(transformedBounds);
+            } else {
+                // If this is a modal window we need to dismiss it if it's not full screen
+                // and the touch happens outside of the frame that displays the content. This
+                // means we need to intercept touches outside of that window. The dim layer
+                // user associated with the window (task or stack) will give us the good
+                // bounds, as they would be used to display the dim layer.
+                final Task task = getTask();
+                if (task != null) {
+                    task.getDimBounds(mTmpRect);
+                } else if (getRootTask() != null) {
+                    getRootTask().getDimBounds(mTmpRect);
+                }
             }
         }
         adjustRegionInFreefromWindowMode(mTmpRect);

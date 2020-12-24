@@ -51,9 +51,11 @@ public class AppSearchManager {
     public static final String DEFAULT_DATABASE_NAME = "";
 
     private final IAppSearchManager mService;
+    private final Context mContext;
 
     /** @hide */
-    public AppSearchManager(@NonNull IAppSearchManager service) {
+    public AppSearchManager(@NonNull Context context, @NonNull IAppSearchManager service) {
+        mContext = Objects.requireNonNull(context);
         mService = Objects.requireNonNull(service);
     }
 
@@ -137,7 +139,8 @@ public class AppSearchManager {
         Objects.requireNonNull(searchContext);
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
-        AppSearchSession.createSearchSession(searchContext, mService, executor, callback);
+        AppSearchSession.createSearchSession(
+                searchContext, mService, mContext.getUserId(), executor, callback);
     }
 
     /**
@@ -158,7 +161,8 @@ public class AppSearchManager {
             @NonNull Consumer<AppSearchResult<GlobalSearchSession>> callback) {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
-        GlobalSearchSession.createGlobalSearchSession(mService, executor, callback);
+        GlobalSearchSession.createGlobalSearchSession(
+                mService, mContext.getUserId(), executor, callback);
     }
 
     /**
@@ -231,6 +235,7 @@ public class AppSearchManager {
                     schemaBundles,
                     new ArrayList<>(request.getSchemasNotPlatformSurfaceable()),
                     request.isForceOverride(),
+                    mContext.getUserId(),
                     new IAppSearchResultCallback.Stub() {
                         public void onResult(AppSearchResult result) {
                             future.complete(result);
@@ -271,7 +276,7 @@ public class AppSearchManager {
         }
         AndroidFuture<AppSearchBatchResult> future = new AndroidFuture<>();
         try {
-            mService.putDocuments(DEFAULT_DATABASE_NAME, documentBundles,
+            mService.putDocuments(DEFAULT_DATABASE_NAME, documentBundles, mContext.getUserId(),
                     new IAppSearchBatchResultCallback.Stub() {
                         public void onResult(AppSearchBatchResult result) {
                             future.complete(result);
@@ -312,6 +317,7 @@ public class AppSearchManager {
         AndroidFuture<AppSearchBatchResult> future = new AndroidFuture<>();
         try {
             mService.getDocuments(DEFAULT_DATABASE_NAME, request.getNamespace(), uris,
+                    mContext.getUserId(),
                     new IAppSearchBatchResultCallback.Stub() {
                         public void onResult(AppSearchBatchResult result) {
                             future.complete(result);
@@ -412,6 +418,7 @@ public class AppSearchManager {
         AndroidFuture<AppSearchResult> future = new AndroidFuture<>();
         try {
             mService.query(DEFAULT_DATABASE_NAME, queryExpression, searchSpec.getBundle(),
+                    mContext.getUserId(),
                     new IAppSearchResultCallback.Stub() {
                         public void onResult(AppSearchResult result) {
                             future.complete(result);
@@ -453,6 +460,7 @@ public class AppSearchManager {
         AndroidFuture<AppSearchBatchResult> future = new AndroidFuture<>();
         try {
             mService.removeByUri(DEFAULT_DATABASE_NAME, request.getNamespace(), uris,
+                    mContext.getUserId(),
                     new IAppSearchBatchResultCallback.Stub() {
                         public void onResult(AppSearchBatchResult result) {
                             future.complete(result);

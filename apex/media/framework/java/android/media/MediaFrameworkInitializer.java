@@ -17,20 +17,18 @@
 package android.media;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
+import android.annotation.SystemApi.Client;
+import android.media.MediaTranscodeManager;
 import android.app.SystemServiceRegistry;
 import android.content.Context;
-import android.media.session.MediaSessionManager;
-
-import com.android.internal.util.Preconditions;
-
-import java.util.Objects;
 
 /**
- * Class for performing registration for all media services
+ * Class for performing registration for all media services on com.android.media apex.
  *
- * TODO (b/160513103): Move this class when moving media service code to APEX
  * @hide
  */
+@SystemApi(client = Client.MODULE_LIBRARIES)
 public class MediaFrameworkInitializer {
     private MediaFrameworkInitializer() {
     }
@@ -47,9 +45,15 @@ public class MediaFrameworkInitializer {
      */
     public static void setMediaServiceManager(
             @NonNull MediaServiceManager mediaServiceManager) {
-        Preconditions.checkState(sMediaServiceManager == null,
-                "setMediaServiceManager called twice!");
-        sMediaServiceManager = Objects.requireNonNull(mediaServiceManager);
+        if (sMediaServiceManager != null) {
+            throw new IllegalStateException("setMediaServiceManager called twice!");
+        }
+
+        if (mediaServiceManager == null) {
+            throw new NullPointerException("mediaServiceManager is null!");
+        }
+
+        sMediaServiceManager = mediaServiceManager;
     }
 
     /** @hide */
@@ -66,9 +70,9 @@ public class MediaFrameworkInitializer {
      */
     public static void registerServiceWrappers() {
         SystemServiceRegistry.registerContextAwareService(
-                Context.MEDIA_SESSION_SERVICE,
-                MediaSessionManager.class,
-                context -> new MediaSessionManager(context)
+                Context.MEDIA_TRANSCODING_SERVICE,
+                MediaTranscodeManager.class,
+                context -> new MediaTranscodeManager(context)
         );
     }
 }

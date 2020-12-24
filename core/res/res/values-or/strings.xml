@@ -353,10 +353,8 @@
     <string name="permdesc_receiveMms" msgid="958102423732219710">"MMS ମେସେଜ୍‌ ପ୍ରାପ୍ତ କରିବାକୁ ତଥା ପ୍ରକ୍ରିୟା କରାଇବାକୁ ଆପ୍‍ଟିକୁ ଅନୁମତି ଦିଏ। ଏହାର ଅର୍ଥ, ଆପଣଙ୍କ ଡିଭାଇସ୍‍କୁ ପଠାଯାଇଥିବା ମେସେଜ୍‍ ଆପଣଙ୍କୁ ନଦେଖାଇ ଆପ୍‍ଟି ମନିଟର୍‍ କିମ୍ବା ଡିଲିଟ୍‍ କରିପାରେ।"</string>
     <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"ସେଲ୍ ପ୍ରସାରଣ ମେସେଜ୍ ଫର୍‍ୱାର୍ଡ କରନ୍ତୁ"</string>
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"ସେଲ୍ ପ୍ରସାରଣ ମେସେଜ୍ ପ୍ରାପ୍ତ ହେବା ପରେ ସେଗୁଡ଼ିକୁ ଫର୍‍ୱାର୍ଡ କରିବା ପାଇଁ ଆପ୍‍କୁ ସେଲ୍ ପ୍ରସାରଣ ମଡ୍ୟୁଲ୍ ସହିତ ସଂଯୁକ୍ତ କରିବାକୁ ଅନୁମତି ଦିଏ। ଜରୁରୀକାଳୀନ ପରିସ୍ଥିତିରେ ଆପଣଙ୍କୁ ଚେତାବନୀ ଦେବା ପାଇଁ କିଛି ଲୋକେସନ୍‍‍ରେ ସେଲ୍ ପ୍ରସାରଣ ଆଲର୍ଟ ବିତରଣ କରାଯାଇଥାଏ। ଏକ ଜରୁରୀକାଳୀନ ସେଲ୍ ପ୍ରସାରଣ ପ୍ରାପ୍ତ ହେବା ସମୟରେ କିଛି କ୍ଷତିକାରକ ଆପ୍ସ ହୁଏତ ଆପଣଙ୍କର ଡିଭାଇସ୍‍ର କାର୍ଯ୍ୟଦକ୍ଷତା କିମ୍ବା କାର୍ଯ୍ୟ ପ୍ରକ୍ରିୟାରେ ହସ୍ତକ୍ଷେପ କରିପାରେ।"</string>
-    <!-- no translation found for permlab_manageOngoingCalls (281244770664231782) -->
-    <skip />
-    <!-- no translation found for permdesc_manageOngoingCalls (7003138133829915265) -->
-    <skip />
+    <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"ଚାଲୁଥିବା କଲଗୁଡ଼ିକୁ ପରିଚାଳନା କରନ୍ତୁ"</string>
+    <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"ଏକ ଆପକୁ ଆପଣଙ୍କ ଡିଭାଇସରେ ଚାଲୁଥିବା କଲଗୁଡ଼ିକର ବିବରଣୀ ଦେଖିବା ଓ ଏହି କଲଗୁଡ଼ିକୁ ନିୟନ୍ତ୍ରଣ କରିବା ପାଇଁ ଅନୁମତି ଦେଇଥାଏ।"</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"ସେଲ୍‍ ବ୍ରଡ୍‍କାଷ୍ଟ ମେସେଜ୍‍ ପଢ଼ନ୍ତୁ"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"ଆପଣଙ୍କ ଡିଭାଇସ୍‍ରେ ପ୍ରାପ୍ତ ହୋଇଥିବା ସେଲ୍‍ ବ୍ରଡ୍‍କାଷ୍ଟ ମେସେଜ୍‍ ପଢିବାକୁ ଆପ୍‍କୁ ଅନୁମତି ଦିଏ। ଜରୁରୀକାଳୀନ ଅବସ୍ଥା ବିଷୟରେ ଆପଣଙ୍କୁ ସତର୍କ କରାଇବାକୁ କିଛି ଲୋକେଶନ୍‍ରେ ସେଲ୍‍ ବ୍ରଡ୍‍କାଷ୍ଟ ସତର୍କ ଡେଲିଭର୍ କରାଯାଇଥାଏ। ଏକ ଜରୁରୀକାଳୀନ ସେଲ୍‍ ବ୍ରଡ୍‍କାଷ୍ଟ ପ୍ରାପ୍ତ ହେବାପରେ ହାନୀକାରକ ଆପ୍‍ ଆପଣଙ୍କ ଡିଭାଇସ୍‍ର କାର୍ଯ୍ୟକ୍ଷମତା କିମ୍ବା ସଞ୍ଚାଳନାରେ ବାଧା ପହଞ୍ଚାଇପାରନ୍ତି।"</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"ସବସ୍କ୍ରାଇବ୍ ହୋଇଥିବା ଫୀଡ୍‌କୁ ପଢ଼ନ୍ତୁ"</string>
@@ -2011,6 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"ମାଇକ୍ରୋଫୋନ୍"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"ଆପଣଙ୍କ ସ୍କ୍ରୀନ୍ ଉପରେ ଥିବା ଅନ୍ୟ ଆପ୍‌ ଉପରେ ଦେଖାଦେବ"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"ମତାମତ ଦିଅନ୍ତୁ"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"ଏହି ବିଜ୍ଞପ୍ତିକୁ ଡିଫଲ୍ଟ ଭାବେ ପ୍ରମୋଟ୍ କରାଯାଇଛି। ମତାମତ ପ୍ରଦାନ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ।"</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ଏହି ବିଜ୍ଞପ୍ତିକୁ ନୀରବ ଭାବେ ଡିମୋଟ୍ କରାଯାଇଛି। ମତାମତ ପ୍ରଦାନ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ।"</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"ଏହି ବିଜ୍ଞପ୍ତିର ରେଙ୍କ ଉପରକୁ କରାଯାଇଛି। ମତାମତ ପ୍ରଦାନ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ।"</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"ଏହି ବିଜ୍ଞପ୍ତିର ରେଙ୍କ ତଳକୁ କରାଯାଇଛି। ମତାମତ ପ୍ରଦାନ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ।"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ନିୟମିତ ମୋଡ୍‍ ସୂଚନା ବିଜ୍ଞପ୍ତି"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ସାଧାରଣ ଭାବରେ ଚାର୍ଜ୍ କରିବା ପୂର୍ବରୁ ବ୍ୟାଟେରୀ ସରିଯାଇପାରେ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ବ୍ୟାଟେରୀର ସମୟକୁ ବଢ଼ାଇବା ପାଇଁ ବ୍ୟଟେରୀ ସେଭର୍‍କୁ କାର୍ଯ୍ୟକାରୀ କରାଯାଇଛି"</string>

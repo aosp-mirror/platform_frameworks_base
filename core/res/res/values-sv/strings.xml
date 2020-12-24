@@ -2009,6 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Mikrofon"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"visar över andra appar på mobilen"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Lämna feedback"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Den här aviseringen har ändrats till Standard. Tryck för att lämna feedback."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Den här aviseringen har ändrats till Tyst. Tryck för att lämna feedback."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Den här aviseringen har fått högre rankning. Tryck för att lämna feedback."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Den här aviseringen har fått lägre rankning. Tryck för att lämna feedback."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Avisering om rutinläge"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Batteriet kan ta slut innan du brukar ladda det"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batterisparläget har aktiverats för att utöka batteritiden"</string>

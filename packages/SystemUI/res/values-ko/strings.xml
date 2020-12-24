@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"스크린샷을 저장할 수 없음"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"스크린샷을 저장하려면 기기를 잠금 해제해야 합니다."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"스크린샷을 다시 찍어 보세요."</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"저장용량이 부족하여 스크린샷을 저장할 수 없습니다"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"스크린샷을 저장할 수 없습니다."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"앱이나 조직에서 스크린샷 촬영을 허용하지 않습니다."</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"수정"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"스크린샷 수정"</string>
@@ -548,7 +548,7 @@
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"관리자가 기기에서 발생하는 트래픽을 모니터링하는 네트워크 로깅을 사용 설정했습니다.\n\n자세한 정보는 관리자에게 문의하세요."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"VPN 연결을 설정할 수 있는 권한을 앱에 부여했습니다.\n\n이 앱에서 이메일, 앱, 웹사이트와 같은 내 네트워크 활동 및 기기를 모니터링할 수 있습니다."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"<xliff:g id="ORGANIZATION">%1$s</xliff:g>에서 직장 프로필을 관리합니다.\n\n관리자가 이메일, 앱, 웹사이트를 비롯한 네트워크 활동을 모니터링할 수 있습니다.\n\n자세한 정보는 관리자에게 문의하세요.\n\n또한 VPN에 연결되어 있으며, VPN에서 네트워크 활동을 모니터링할 수 있습니다."</string>
-    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"부모님이 관리하는 기기입니다. 부모님이 내가 사용하는 앱, 위치, 기기 사용 시간과 같은 정보를 보고 관리할 수 있습니다."</string>
+    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"부모님이 관리하는 기기입니다. 부모님이 내가 사용하는 앱, 내 위치, 기기 사용 시간과 같은 정보를 보고 관리할 수 있습니다."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="monitoring_description_app" msgid="376868879287922929">"<xliff:g id="APPLICATION">%1$s</xliff:g>에 연결되었습니다. 이 앱은 이메일, 앱, 웹사이트와 같은 내 네트워크 활동을 모니터링할 수 있습니다."</string>
     <string name="monitoring_description_app_personal" msgid="1970094872688265987">"<xliff:g id="APPLICATION">%1$s</xliff:g>에 연결되었습니다. 이 앱은 이메일, 앱, 웹사이트와 같은 내 네트워크 활동을 모니터링할 수 있습니다."</string>
@@ -698,14 +698,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"휴대전화 설정에 따라 벨소리나 진동이 울릴 수 있습니다. 기본적으로 <xliff:g id="APP_NAME">%1$s</xliff:g>의 대화는 대화창으로 표시됩니다."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"이 콘텐츠로 연결되는 플로팅 바로가기로 사용자의 주의를 끕니다."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"시스템에서 알림 시 소리 또는 진동을 사용할지 결정하도록 허용합니다."</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;상태:&lt;/b&gt; 기본으로 높임"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;상태:&lt;/b&gt; 무음으로 낮춤"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;상태:&lt;/b&gt; 순위 높임"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;상태:&lt;/b&gt; 순위 낮춤"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"대화 섹션 상단에 표시, 플로팅 대화창으로 표시, 그리고 잠금 화면에 프로필 사진이 표시됨"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"설정"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"우선순위"</string>
@@ -724,14 +720,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"앱이 화면의 다른 앱 위에 표시되고 있으며, 마이크와 카메라를 사용 중입니다.."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"설정"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"확인"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"시스템에서 자동으로 이 알림의 순위를 &lt;b&gt;기본으로 높였&lt;/b&gt;습니다."</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"시스템에서 자동으로 이 알림의 순위를 &lt;b&gt;무음으로 낮췄&lt;/b&gt;습니다."</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"알림 창에서 자동으로 이 알림의 순위를 &lt;b&gt;높였&lt;/b&gt;습니다."</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"알림 창에서 자동으로 이 알림의 순위를 &lt;b&gt;낮췄&lt;/b&gt;습니다."</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"맞나요?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"의견을 보내 주셔서 감사합니다."</string>
     <string name="feedback_ok" msgid="6481426753298857144">"확인"</string>

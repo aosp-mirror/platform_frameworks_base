@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"မျက်နှာပြင်ပုံကို သိမ်း၍မရပါ"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"ဖန်သားပြင်ဓာတ်ပုံကို မသိမ်းမီ စက်ပစ္စည်းကို လော့ခ်ဖွင့်ထားရမည်"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"မျက်နှာပြင်ပုံကို ထပ်ရိုက်ကြည့်ပါ"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"သိုလှောင်ခန်းနေရာ အကန့်အသတ်ရှိသောကြောင့် ဖန်သားပြင်ဓာတ်ပုံကို သိမ်းဆည်း၍မရပါ"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"ဖန်သားပြင်ဓာတ်ပုံကို သိမ်း၍မရပါ"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ဖန်သားပြင်ဓာတ်ပုံရိုက်ကူးခြင်းကို ဤအက်ပ် သို့မဟုတ် သင်၏အဖွဲ့အစည်းက ခွင့်မပြုပါ"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"တည်းဖြတ်ရန်"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"ဖန်သားပြင်ဓာတ်ပုံကို တည်းဖြတ်သည်"</string>
@@ -698,14 +698,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ဖုန်းဆက်တင်များပေါ် အခြေခံပြီး အသံမြည်နိုင်သည် သို့မဟုတ် တုန်ခါနိုင်သည်။ မူရင်းသတ်မှတ်ချက်အဖြစ် <xliff:g id="APP_NAME">%1$s</xliff:g> မှ စကားဝိုင်းများကို ပူဖောင်းကွက်ဖြင့် ပြသည်။"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"အကြောင်းအရာကို floating shortcut ကိုသုံး၍ အာရုံစိုက်လာအောင်လုပ်ပါ။"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ဤအကြောင်းကြားချက်က အသံ သို့မဟုတ် တုန်ခါမှု ပေးရန် သင့်/မသင့်ကို စနစ်က ဆုံးဖြတ်ပါစေ"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;အခြေအနေ-&lt;/b&gt; မူရင်းသို့ ချိန်ညှိထားသည်"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;အခြေအနေ-&lt;/b&gt; အသံတိတ်ခြင်းသို့ ပြန်ချိန်ညှိထားသည်"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;အခြေအနေ-&lt;/b&gt; အဆင့်တိုးထားသည်"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;အခြေအနေ-&lt;/b&gt; အဆင့်လျှော့ထားသည်"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"စကားဝိုင်းကဏ္ဍ၏ ထိပ်ပိုင်းတွင် ပြပြီး ပူဖောင်းကွက်အဖြစ် မြင်ရသည်၊ လော့ခ်ချထားချိန် မျက်နှာပြင်တွင် ပရိုဖိုင်ပုံကို ပြသည်"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ဆက်တင်များ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ဦးစားပေး"</string>
@@ -724,14 +720,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"ဤအက်ပ်က မိုက်ခရိုဖုန်းနှင့် ကင်မရာကို အသုံးပြု၍ ဖန်သားမျက်နှာပြင်ပေါ်ရှိ အခြားအက်ပ်များ အပေါ်မှ ထပ်ပြီး ပြသနေပါသည်။"</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"ဆက်တင်များ"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"OK"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"ဤအကြောင်းကြားချက်ကို စနစ်က အလိုအလျောက် &lt;b&gt;မူရင်းသို့ ချိန်ညှိထားသည်&lt;/b&gt;။"</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"ဤအကြောင်းကြားချက်ကို စနစ်က အလိုအလျောက် &lt;b&gt;အသံတိတ်ခြင်းသို့ ပြန်ချိန်ညှိထားသည်&lt;/b&gt;။"</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"ဤအကြောင်းကြားချက်ကို သင့်အကြောင်းကြားစာအကွက်တွင် အလိုအလျောက် &lt;b&gt;အဆင့်တိုးထားသည်&lt;/b&gt;။"</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"ဤအကြောင်းကြားချက်ကို သင့်အကြောင်းကြားစာအကွက်တွင် အလိုအလျောက် &lt;b&gt;အဆင့်လျှော့ထားသည်&lt;/b&gt;။"</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"ဤအရာက မှန်ပါသလား။"</string>
     <string name="feedback_response" msgid="4671729244976641339">"အကြံပြုချက်အတွက် ကျေးဇူးတင်ပါသည်"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"OK"</string>

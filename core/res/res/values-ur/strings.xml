@@ -353,10 +353,8 @@
     <string name="permdesc_receiveMms" msgid="958102423732219710">"‏ایپ کو MMS پیغامات حاصل اور ان پر کارروائی کرنے کی اجازت دیتا ہے۔ اس کا مطلب ہے کہ ایپ آپ کے آلے پر مرسلہ پیغامات آپ کو دکھائے بغیر ان پر نگاہ رکھ یا انہیں حذف کرسکتی ہے۔"</string>
     <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"سیل کے نشریاتی پیغامات فارورڈ کریں"</string>
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"سیل کی نشریاتی پیغامات کے موصول ہوتے ہی فارورڈ کرنے کے لیے ایپ کو سیل کے نشریاتی ماڈیول میں پابندی لگانے کی اجازت دیں۔ سیل کی نشریاتی الرٹس آپ کو ہنگامی حالات سے مطلع کرنے کیلئے کچھ مقامات میں مہیا کی جاتی ہیں۔ نقصان دہ ایپس کوئی ہنگامی سیل براڈ کاسٹ موصول ہونے پر آپ کے آلے کی کارکردگی یا عمل میں مداخلت کر سکتی ہیں۔"</string>
-    <!-- no translation found for permlab_manageOngoingCalls (281244770664231782) -->
-    <skip />
-    <!-- no translation found for permdesc_manageOngoingCalls (7003138133829915265) -->
-    <skip />
+    <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"جاری کالز کا نظم کریں"</string>
+    <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"اس سے ایپ کو آپ کے آلے پر جاری کالز کے بارے میں تفصیلات دیکھنے اور ان کالز کو کنٹرول کرنے کی اجازت ملتی ہے۔"</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"سیل کے نشریاتی پیغامات پڑھیں"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"ایپ کو آپ کے آلے کو موصولہ سیل کے نشریاتی پیغامات پڑھنے کی اجازت دیتا ہے۔ سیل کی نشریاتی الرٹس آپ کو ہنگامی حالات سے مطلع کرنے کیلئے کچھ مقامات میں مہیا کی جاتی ہیں۔ نقصان دہ ایپس کوئی ہنگامی سیل کا نشریہ موصول ہونے پر آپ کے آلے کی کارکردگی یا عمل میں خلل ڈال سکتی ہیں۔"</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"سبسکرائب کردہ فیڈز پڑھیں"</string>
@@ -2011,6 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"مائیکروفون"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"آپ کی اسکرین پر دیگر ایپس پر دکھایا جا رہا ہے"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"تاثرات فراہم کریں"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"اس اطلاع کو ڈیفالٹ پر پروموٹ کیا گيا۔ تاثرات فراہم کرنے کے ليے تھپتھپائیں۔"</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"اس اطلاع کو خاموش پر ڈیموٹ کیا گيا۔ تاثرات فراہم کرنے کے ليے تھپتھپائیں۔"</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"اس اطلاع کو اعلی درجہ دیا گیا۔ تاثرات فراہم کرنے کے ليے تھپتھپائیں۔"</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"اس اطلاع کو کم درجہ دیا گیا۔ تاثرات فراہم کرنے کے ليے تھپتھپائیں۔"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"روٹین موڈ معلومات کی اطلاع"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"معمول چارج سے پہلے بیٹری ختم ہو سکتی ہے"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"بیٹری لائف کو بڑھانے کے لیے بیٹری سیور کو فعال کر دیا گیا ہے"</string>

@@ -28,7 +28,6 @@ import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.system.Os;
 import android.util.Log;
@@ -103,8 +102,6 @@ import java.util.concurrent.Executors;
 @SystemApi
 public final class MediaTranscodeManager {
     private static final String TAG = "MediaTranscodeManager";
-
-    private static final String MEDIA_TRANSCODING_SERVICE = "media.transcoding";
 
     /** Maximum number of retry to connect to the service. */
     private static final int CONNECT_SERVICE_RETRY_COUNT = 100;
@@ -281,7 +278,10 @@ public final class MediaTranscodeManager {
         for (int count = 1;  count <= retryCount; count++) {
             Log.d(TAG, "Trying to connect to service. Try count: " + count);
             IMediaTranscodingService service = IMediaTranscodingService.Stub.asInterface(
-                    ServiceManager.getService(MEDIA_TRANSCODING_SERVICE));
+                    MediaFrameworkInitializer
+                    .getMediaServiceManager()
+                    .getMediaTranscodingServiceRegisterer()
+                    .get());
             if (service != null) {
                 return service;
             }

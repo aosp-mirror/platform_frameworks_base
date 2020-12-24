@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Hindi ma-save ang screenshot"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Dapat naka-unlock ang device bago ma-save ang screenshot"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Subukang kumuhang muli ng screenshot"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Hindi ma-save ang screenshot dahil sa limitadong espasyo ng storage"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Hindi ma-save ang screenshot"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Hindi pinahihintulutan ng app o ng iyong organisasyon ang pagkuha ng mga screenshot"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"I-edit"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"I-edit ang screenshot"</string>
@@ -499,7 +499,7 @@
     <string name="profile_owned_footer" msgid="2756770645766113964">"Maaaring subaybayan ang profile"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"Maaaring sinusubaybayan ang network"</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"Maaaring sinusubaybayan ang network"</string>
-    <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Pinapamahalaan ng iyong magulang ang device na ito"</string>
+    <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Pinapamahalaan ng magulang mo itong device"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Pagmamay-ari ng organisasyon mo ang device na ito at puwede nitong subaybayan ang trapiko sa network"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Pagmamay-ari ng <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ang device na ito at puwede nitong subaybayan ang trapiko sa network"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Pagmamay-ari ng iyong organisasyon ang device na ito at nakakonekta ito sa <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
@@ -698,14 +698,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Puwedeng mag-ring o mag-vibrate batay sa mga setting ng telepono. Mga pag-uusap mula sa <xliff:g id="APP_NAME">%1$s</xliff:g> bubble bilang default."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Pinapanatili ang iyong atensyon sa pamamagitan ng lumulutang na shortcut sa content na ito."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Ipatukoy sa system kung dapat gumawa ng tunog o pag-vibrate ang notification na ito"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Status:&lt;/b&gt; Na-promote sa Default"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Status:&lt;/b&gt; Na-demote sa Naka-silent"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Status:&lt;/b&gt; Ranked nang Mas Mataas"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Status:&lt;/b&gt; Na-rank nang Mas Mababa"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Makikita sa itaas ng seksyon ng pag-uusap, lumalabas bilang floating bubble, ipinapakita sa lock screen ang larawan sa profile"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Mga Setting"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priyoridad"</string>
@@ -724,14 +720,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"Ipinapakita ang app na ito sa ibabaw ng iba pang app sa iyong screen at ginagamit nito ang mikropono at camera."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"Mga Setting"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"OK"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"Awtomatikong &lt;b&gt;na-promote sa Default&lt;/b&gt; ng system ang notification na ito."</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"Awtomatikong &lt;b&gt;na-demote sa Naka-silent&lt;/b&gt; ng system ang notification na ito."</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"Awtomatikong &lt;b&gt;na-rank nang mas mataas&lt;/b&gt; ang notification na ito sa iyong shade."</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"Awtomatikong &lt;b&gt;na-rank nang mas mababa&lt;/b&gt; ang notification na ito sa iyong shade."</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"Tama ba ito?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Salamat sa iyong feedback!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"OK"</string>

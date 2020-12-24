@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"スクリーンショット保存エラー"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"スクリーンショットを保存するには、デバイスのロックを解除する必要があります"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"スクリーンショットを撮り直してください"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"空き容量が足りないため、スクリーンショットを保存できません"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"スクリーンショットを保存できません"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"スクリーンショットの作成はアプリまたは組織で許可されていません"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"編集"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"スクリーンショットを編集します"</string>
@@ -548,7 +548,7 @@
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"管理者がネットワーク ログを有効にしているため、このデバイスのトラフィックは監視されています。\n\n詳しくは管理者にお問い合わせください。"</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"アプリにVPN接続の設定を許可しました。\n\nこのアプリはあなたのデバイスやネットワークアクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。"</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"この仕事用プロファイルは、<xliff:g id="ORGANIZATION">%1$s</xliff:g> により管理されています。\n\n管理者は、このプロファイルでのネットワーク アクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。\n\n詳しくは管理者にお問い合わせください。\n\nまた、VPN に接続しているため、このネットワークでのあなたのネットワーク アクティビティも監視されます。"</string>
-    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"このデバイスは保護者によって管理されています。使用しているアプリ、現在地、利用時間などの情報を保護者が確認、管理できます。"</string>
+    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"このデバイスは保護者によって管理されています。保護者は、あなたが使用するアプリ、あなたの現在地、デバイスの利用時間などの情報を確認したり、管理したりできます。"</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="monitoring_description_app" msgid="376868879287922929">"<xliff:g id="APPLICATION">%1$s</xliff:g> に接続しています。このアプリはあなたのネットワーク アクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。"</string>
     <string name="monitoring_description_app_personal" msgid="1970094872688265987">"<xliff:g id="APPLICATION">%1$s</xliff:g>に接続しています。このアプリはあなたの個人のネットワークアクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。"</string>
@@ -698,14 +698,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"スマートフォンの設定を基に着信音またはバイブレーションが有効になります。デフォルトでは <xliff:g id="APP_NAME">%1$s</xliff:g> からの会話がバブルとして表示されます。"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"このコンテンツのフローティング ショートカットで通知をお知らせします。"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"この通知を音またはバイブレーションで知らせるかどうかの自動判断"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;ステータス:&lt;/b&gt; ランクがデフォルトに上がりました"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;ステータス:&lt;/b&gt; ランクがサイレントに下がりました"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;ステータス:&lt;/b&gt; ランクが上がりました"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;ステータス:&lt;/b&gt; ランクが下がりました"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"会話セクションの一番上にバブルとして表示され、プロフィール写真がロック画面に表示されます"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"設定"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"優先"</string>
@@ -724,14 +720,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"このアプリは画面上で他のアプリの上に重ねて表示されます。また、マイクとカメラを使用しています。"</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"設定"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"OK"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"この通知は、システムによって自動的に&lt;b&gt;ランクがデフォルトに上がり&lt;/b&gt;ました。"</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"この通知は、システムによって自動的に&lt;b&gt;ランクがサイレントに下がり&lt;/b&gt;ました。"</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"この通知は、自動的にシェード内の&lt;b&gt;ランクが上がり&lt;/b&gt;ました。"</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"この通知は、自動的にシェード内の&lt;b&gt;ランクが下がり&lt;/b&gt;ました。"</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"間違いありませんか？"</string>
     <string name="feedback_response" msgid="4671729244976641339">"フィードバックをお寄せいただきありがとうございます。"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"OK"</string>

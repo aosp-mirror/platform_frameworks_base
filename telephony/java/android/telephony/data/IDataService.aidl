@@ -19,6 +19,7 @@ package android.telephony.data;
 import android.net.LinkProperties;
 import android.telephony.data.DataProfile;
 import android.telephony.data.IDataServiceCallback;
+import android.telephony.data.SliceInfo;
 
 /**
  * {@hide}
@@ -29,7 +30,7 @@ oneway interface IDataService
     void removeDataServiceProvider(int slotId);
     void setupDataCall(int slotId, int accessNetwork, in DataProfile dataProfile, boolean isRoaming,
                        boolean allowRoaming, int reason, in LinkProperties linkProperties,
-                       int pduSessionId, IDataServiceCallback callback);
+                       int pduSessionId, in SliceInfo sliceInfo, IDataServiceCallback callback);
     void deactivateDataCall(int slotId, int cid, int reason, IDataServiceCallback callback);
     void setInitialAttachApn(int slotId, in DataProfile dataProfile, boolean isRoaming,
                              IDataServiceCallback callback);

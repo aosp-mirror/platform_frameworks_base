@@ -2009,6 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Микрофон"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"се прикажува преку други апликации на вашиот екран"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Испратете повратни информации"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Приоритетноста на известувањево е зголемена на „Стандардно“. Допрете за да дадете повратни информации."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Приоритетноста на известувањево е намалена на „Тивко“. Допрете за да дадете повратни информации."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Известувањево е рангирано повисоко. Допрете за да дадете повратни информации."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Известувањево е рангирано пониско. Допрете за да дадете повратни информации."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Известување за информации за режимот за рутини"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батеријата може да се потроши пред вообичаеното време за полнење"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Активиран е „Штедачот на батерија“ за да се продолжи траењето на батеријата"</string>

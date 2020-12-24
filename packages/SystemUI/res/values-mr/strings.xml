@@ -63,7 +63,7 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"अनुमती द्या"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB डीबग करण्‍यास अनुमती नाही"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"सध्‍या या डीव्हाइसमध्‍ये साइन इन केलेला वापरकर्ता USB डीबग करणे सुरू करू शकत नाही. हे वैशिष्‍ट्य वापरण्‍यासाठी, प्राथमिक वापरकर्त्‍यावर स्विच करा."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"या नेटवर्कवर वायरलेस डीबगिंग करण्याला अनुमती द्यायची का?"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"या नेटवर्कवर वायरलेस डीबगिंग करण्यासाठी अनुमती द्यायची का?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"नेटवर्कचे नाव (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nवाय-फाय ॲड्रेस (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"या नेटवर्कवर नेहमी अनुमती द्या"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"अनुमती द्या"</string>
@@ -85,7 +85,8 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"स्क्रीनशॉट सेव्ह करू शकलो नाही"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"स्क्रीनशॉट सेव्ह करण्याआधी डिव्हाइस अनलॉक करणे आवश्यक आहे"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"स्क्रीनशॉट पुन्हा घेण्याचा प्रयत्न करा"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"मर्यादित स्टोरेज जागेमुळे स्क्रीनशॉट सेव्ह करू शकत नाही"</string>
+    <!-- no translation found for screenshot_failed_to_save_text (7232739948999195960) -->
+    <skip />
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"अ‍ॅप किंवा आपल्या संस्थेद्वारे स्क्रीनशॉट घेण्याची अनुमती नाही"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"संपादित करा"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"स्क्रीनशॉट संपादित करा"</string>
@@ -698,14 +699,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"फोन सेटिंग्जच्या आधारावर रिंग किंवा व्हायब्रेट होऊ शकतो. <xliff:g id="APP_NAME">%1$s</xliff:g> मधील संभाषणे बाय डीफॉल्ट बबल होतात."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"या आशयाच्या फ्लोटिंग शॉर्टकटसह तुमचे लक्ष केंद्रित करते."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ही सूचना मिळाल्‍यावर आवाज व्‍हावा की व्हायब्रेशन व्‍हावे ते सिस्‍टममध्ये नमूद करा"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;स्थिती&lt;/b&gt; ही डीफॉल्ट म्हणून प्रमोट केली गेली"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;स्थिती&lt;/b&gt; ला सायलंट म्हणून डीमोट केले गेले"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;स्थिती&lt;/b&gt; ला थोडे जास्त म्हणून रँक केले गेले"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;स्थिती&lt;/b&gt; ला थोडी कमी म्हणून रँक केले गेले"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"संभाषण विभागात सर्वात वरती फ्लोटिंग बबल म्हणून दिसते, लॉक स्क्रीनवर प्रोफाइल पिक्चर दाखवते"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"सेटिंग्ज"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राधान्य"</string>
@@ -724,14 +721,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"हे अ‍ॅप तुमच्या स्क्रीनवरील इतर अ‍ॅप्स वर प्रदर्शित होत आहे आणि मायक्रोफोन आणि कॅमेरा वापरत आहे."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"सेटिंग्ज"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"ओके"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"सिस्टमद्वारे ही सूचना आपोआप &lt;b&gt;डीफॉल्ट वर प्रमोट केली&lt;/b&gt; गेली."</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"सिस्टमद्वारे या सूचनेला आपोआप &lt;b&gt;सायलंट म्हणून डीमोट केले&lt;/b&gt; गेले."</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"तुमच्या रंगछटेमध्ये या सूचनेला आपोआप &lt;b&gt;थोडी जास्त&lt;/b&gt; म्हणून रँक केले गेले."</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"तुमच्या रंगछटेमध्ये या सूचनेला आपोआप &lt;b&gt;थोडी कमी&lt;/b&gt; म्हणून रँक केले गेले."</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"हे बरोबर होते का?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"तुमच्‍या फीडबॅकबद्दल धन्यवाद!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"ओके"</string>

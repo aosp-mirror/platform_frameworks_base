@@ -396,22 +396,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
      * Notify our observers of a change in the data activity state of the interface
      */
     private void notifyInterfaceClassActivity(int type, boolean isActive, long tsNanos,
-            int uid, boolean fromRadio) {
+            int uid) {
         final boolean isMobile = ConnectivityManager.isNetworkTypeMobile(type);
         int powerState = isActive
                 ? DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH
                 : DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
         if (isMobile) {
-            if (!fromRadio) {
-                if (mMobileActivityFromRadio) {
-                    // If this call is not coming from a report from the radio itself, but we
-                    // have previously received reports from the radio, then we will take the
-                    // power state to just be whatever the radio last reported.
-                    powerState = mLastPowerStateFromRadio;
-                }
-            } else {
-                mMobileActivityFromRadio = true;
-            }
             if (mLastPowerStateFromRadio != powerState) {
                 mLastPowerStateFromRadio = powerState;
                 try {
@@ -431,15 +421,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             }
         }
 
-        if (!isMobile || fromRadio || !mMobileActivityFromRadio) {
-            // Report the change in data activity.  We don't do this if this is a change
-            // on the mobile network, that is not coming from the radio itself, and we
-            // have previously seen change reports from the radio.  In that case only
-            // the radio is the authority for the current state.
-            final boolean active = isActive;
-            invokeForAllObservers(o -> o.interfaceClassDataActivityChanged(
-                    Integer.toString(type), active, tsNanos));
-        }
+        final boolean active = isActive;
+        invokeForAllObservers(o -> o.interfaceClassDataActivityChanged(
+                Integer.toString(type), active, tsNanos, uid));
 
         boolean report = false;
         synchronized (mIdleTimerLock) {
@@ -671,7 +655,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                 timestampNanos = timestamp;
             }
             mDaemonHandler.post(() ->
-                    notifyInterfaceClassActivity(label, isActive, timestampNanos, uid, false));
+                    notifyInterfaceClassActivity(label, isActive, timestampNanos, uid));
         }
 
         @Override
@@ -1157,7 +1141,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                 mNetworkActive = false;
             }
             mDaemonHandler.post(() -> notifyInterfaceClassActivity(type, true,
-                    SystemClock.elapsedRealtimeNanos(), -1, false));
+                    SystemClock.elapsedRealtimeNanos(), -1));
         }
     }
 
@@ -1181,7 +1165,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             }
             mActiveIdleTimers.remove(iface);
             mDaemonHandler.post(() -> notifyInterfaceClassActivity(params.type, false,
-                    SystemClock.elapsedRealtimeNanos(), -1, false));
+                    SystemClock.elapsedRealtimeNanos(), -1));
         }
     }
 

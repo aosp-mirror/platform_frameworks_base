@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Không thể lưu ảnh chụp màn hình"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Bạn phải mở khóa thiết bị để chúng tôi có thể lưu ảnh chụp màn hình"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Hãy thử chụp lại màn hình"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Không thể lưu ảnh chụp màn hình do giới hạn dung lượng bộ nhớ"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Không thể lưu ảnh chụp màn hình"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Ứng dụng hoặc tổ chức của bạn không cho phép chụp ảnh màn hình"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Chỉnh sửa"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Chỉnh sửa ảnh chụp màn hình"</string>
@@ -698,14 +698,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Có thể đổ chuông hoặc rung tùy theo chế độ cài đặt trên điện thoại. Theo mặc định, các cuộc trò chuyện từ <xliff:g id="APP_NAME">%1$s</xliff:g> được phép hiển thị dưới dạng bong bóng."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Luôn chú ý vào nội dung này bằng phím tắt nổi."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Cho phép hệ thống quyết định xem thông báo này phát âm thanh hay rung"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Trạng thái:&lt;/b&gt; Đã thay đổi thành Mặc định"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Trạng thái:&lt;/b&gt; Đã thay đổi thành Im lặng"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Trạng thái:&lt;/b&gt; Đã tăng mức độ quan trọng"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Trạng thái:&lt;/b&gt; Đã giảm mức độ quan trọng"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Hiển thị cuộc trò chuyện ở đầu phần cuộc trò chuyện và dưới dạng bong bóng nổi, hiển thị ảnh hồ sơ trên màn hình khóa"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Cài đặt"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Mức độ ưu tiên"</string>
@@ -724,14 +720,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"Ứng dụng này đang hiển thị chồng lên các ứng dụng khác trên màn hình, đồng thời đang sử dụng micrô và máy ảnh."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"Cài đặt"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"OK"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"Hệ thống đã tự động &lt;b&gt;thay đổi thành Mặc định&lt;/b&gt; theo tầm quan trọng của thông báo này."</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"Hệ thống đã tự động &lt;b&gt;thay đổi thành Im lặng&lt;/b&gt; theo tầm quan trọng của thông báo này."</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"Hệ thống đã tự động &lt;b&gt;tăng mức độ quan trọng&lt;/b&gt; của thông báo này trong ngăn thông báo."</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"Hệ thống đã tự động &lt;b&gt;giảm mức độ quan trọng&lt;/b&gt; của thông báo này trong ngăn thông báo."</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"Thông tin này có chính xác không?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Cảm ơn bạn đã phản hồi!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"OK"</string>

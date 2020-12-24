@@ -26,6 +26,10 @@ import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 import com.android.internal.inputmethod.IBooleanResultCallback;
 import com.android.internal.inputmethod.IInputBindResultResultCallback;
+import com.android.internal.inputmethod.IInputMethodInfoListResultCallback;
+import com.android.internal.inputmethod.IInputMethodSubtypeResultCallback;
+import com.android.internal.inputmethod.IInputMethodSubtypeListResultCallback;
+import com.android.internal.inputmethod.IIntResultCallback;
 
 /**
  * Public interface to the global input method manager, used by all client
@@ -36,12 +40,13 @@ interface IInputMethodManager {
             int untrustedDisplayId);
 
     // TODO: Use ParceledListSlice instead
-    List<InputMethodInfo> getInputMethodList(int userId);
+    void getInputMethodList(int userId, in IInputMethodInfoListResultCallback resultCallback);
     // TODO: Use ParceledListSlice instead
-    List<InputMethodInfo> getEnabledInputMethodList(int userId);
-    List<InputMethodSubtype> getEnabledInputMethodSubtypeList(in String imiId,
-            boolean allowsImplicitlySelectedSubtypes);
-    InputMethodSubtype getLastInputMethodSubtype();
+    void getEnabledInputMethodList(int userId,
+            in IInputMethodInfoListResultCallback resultCallback);
+    void getEnabledInputMethodSubtypeList(in String imiId, boolean allowsImplicitlySelectedSubtypes,
+            in IInputMethodSubtypeListResultCallback resultCallback);
+    void getLastInputMethodSubtype(in IInputMethodSubtypeResultCallback resultCallback);
 
     void showSoftInput(in IInputMethodClient client, IBinder windowToken, int flags,
             in ResultReceiver resultReceiver, in IBooleanResultCallback resultCallback);
@@ -66,11 +71,11 @@ interface IInputMethodManager {
             int displayId);
     void showInputMethodAndSubtypeEnablerFromClient(in IInputMethodClient client, String topId);
     void isInputMethodPickerShownForTest(in IBooleanResultCallback resultCallback);
-    InputMethodSubtype getCurrentInputMethodSubtype();
+    void getCurrentInputMethodSubtype(in IInputMethodSubtypeResultCallback resultCallback);
     void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);
     // This is kept due to @UnsupportedAppUsage.
     // TODO(Bug 113914148): Consider removing this.
-    int getInputMethodWindowVisibleHeight();
+    void getInputMethodWindowVisibleHeight(IIntResultCallback resultCallback);
 
     void reportActivityView(in IInputMethodClient parentClient, int childDisplayId,
             in float[] matrixValues);

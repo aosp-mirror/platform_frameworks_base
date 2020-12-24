@@ -1433,7 +1433,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         dismiss(fromAccessibility);
         if (mEntry.isClearable()) {
             if (mOnUserInteractionCallback != null) {
-                mOnUserInteractionCallback.onDismiss(mEntry, REASON_CANCEL);
+                mOnUserInteractionCallback.onDismiss(mEntry, REASON_CANCEL,
+                        mOnUserInteractionCallback.getGroupSummaryToDismiss(mEntry));
             }
         }
     }

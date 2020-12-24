@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"സ്‌ക്രീൻഷോട്ട് സംരക്ഷിക്കാനായില്ല"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"സ്ക്രീൻഷോട്ട് സംരക്ഷിക്കുന്നതിന് മുമ്പ് ഉപകരണം അൺലോക്ക് ചെയ്തിരിക്കണം"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"സ്‌ക്രീൻഷോട്ട് എടുക്കാൻ വീണ്ടും ശ്രമിക്കുക"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"സ്‌റ്റോറേജ് ഇടം പരിമിതമായതിനാൽ സ്‌ക്രീൻഷോട്ട് സംരക്ഷിക്കാനാകുന്നില്ല"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"സ്‌ക്രീൻഷോട്ട് സംരക്ഷിക്കാനാകുന്നില്ല"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"സ്ക്രീൻഷോട്ടുകൾ എടുക്കുന്നത് ആപ്പോ നിങ്ങളുടെ സ്ഥാപനമോ അനുവദിക്കുന്നില്ല"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"എഡിറ്റ് ചെയ്യുക"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"സ്ക്രീൻഷോട്ട് എഡിറ്റ് ചെയ്യുക"</string>
@@ -548,7 +548,7 @@
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"നിങ്ങളുടെ ഉപകരണത്തിലെ ട്രാഫിക്ക് നിരീക്ഷിക്കുന്ന നെറ്റ്‌വർക്ക് ലോഗിംഗ് അഡ്‌മിൻ ഓണാക്കിയിട്ടുണ്ട്.\n\nകൂടുതൽ ‌വിവരങ്ങൾക്ക് അഡ്‌മിനുമായി‌ ബന്ധപ്പെടുക."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"VPN കണക്ഷൻ സജ്ജീകരിക്കാൻ നിങ്ങൾ ഒരു ആപ്പിന് അനുമതി നൽകി.\n\nഈ ആപ്പിന് നിങ്ങളുടെ ഇമെയിലുകളും ആപ്സും വെബ്‌സൈറ്റുകളും ഉൾപ്പെടെ, ഉപകരണവും നെറ്റ്‌വർക്ക് പ്രവർത്തനവും നിരീക്ഷിക്കാൻ കഴിയും."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ നിയന്ത്രിക്കുന്നത് <xliff:g id="ORGANIZATION">%1$s</xliff:g> ആണ്.\n\nഇമെയിലുകൾ, ആപ്‌സ്, വെബ്‌സൈറ്റുകൾ എന്നിവയടങ്ങുന്ന നിങ്ങളുടെ നെറ്റ്‌വർക്ക് ആക്റ്റിവിറ്റി നിരീക്ഷിക്കാൻ അഡ്‌മിന് കഴിയും.\n\nകൂടുതൽ ‌വിവരങ്ങൾക്ക് അഡ്‌മിനുമായി‌ ബന്ധപ്പെടുക.\n\nനെറ്റ്‌വർക്ക് ആക്റ്റിവിറ്റി ‌നിരീക്ഷിക്കാൻ സാധിക്കുന്ന ഒരു VPN-ലേക്ക് കൂടി നിങ്ങൾ കണക്റ്റ് ‌ചെയ്യപ്പെട്ടിരിക്കുന്നു."</string>
-    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"ഈ ഉപകരണം മാനേജ് ചെയ്യുന്നത് നിങ്ങളുടെ രക്ഷിതാവാണ്. നിങ്ങൾ ഉപയോഗിക്കുന്ന ആപ്പുകൾ, സ്‌ക്രീൻ സമയം, ലൊക്കേഷൻ എന്നിവ പോലുള്ള വിവരങ്ങൾ നിങ്ങളുടെ രക്ഷിതാവിന് കാണാം, നിയന്ത്രിക്കാം."</string>
+    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"ഈ ഉപകരണം മാനേജ് ചെയ്യുന്നത് നിങ്ങളുടെ രക്ഷിതാവാണ്. നിങ്ങൾ ഉപയോഗിക്കുന്ന ആപ്പുകൾ, സ്‌ക്രീൻ സമയം, ലൊക്കേഷൻ എന്നിവ പോലുള്ള വിവരങ്ങൾ നിങ്ങളുടെ രക്ഷിതാവിന് കാണാനും നിയന്ത്രിക്കാനുമാകും."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="monitoring_description_app" msgid="376868879287922929">"നിങ്ങൾ <xliff:g id="APPLICATION">%1$s</xliff:g> ആപ്പിലേക്ക് കണക്റ്റുചെയ്‌തിരിക്കുന്നു, അതിന് ഇമെയിലുകൾ, ആപ്പുകൾ, വെബ്‌സൈറ്റുകൾ എന്നിവ ഉൾപ്പെടെ നിങ്ങളുടെ നെറ്റ്‌വർക്ക് ആക്റ്റിവിറ്റി നിരീക്ഷിക്കാനാകും."</string>
     <string name="monitoring_description_app_personal" msgid="1970094872688265987">"നിങ്ങൾ <xliff:g id="APPLICATION">%1$s</xliff:g> എന്നതിലേക്ക് കണക്റ്റുചെയ്‌തിരിക്കുന്നു, അതിന് ഇമെയിലുകൾ, ആപ്സ്, വെബ്‌സൈറ്റുകൾ എന്നിവ ഉൾപ്പെടെ നിങ്ങളുടെ സ്വകാര്യ നെറ്റ്‌വർക്ക് പ്രവർത്തനം നിരീക്ഷിക്കാനാകും."</string>
@@ -698,14 +698,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ഫോൺ ക്രമീകരണം അടിസ്ഥാനമാക്കി റിംഗ് ചെയ്‌തേക്കാം അല്ലെങ്കിൽ വൈബ്രേറ്റ് ചെയ്‌തേക്കാം. <xliff:g id="APP_NAME">%1$s</xliff:g>-ൽ നിന്നുള്ള സംഭാഷണങ്ങൾ ഡിഫോൾട്ടായി ബബ്ൾ ആവുന്നു."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ഈ ഉള്ളടക്കത്തിലേക്ക് ഒരു ഫ്ലോട്ടിംഗ് കുറുക്കുവഴി ഉപയോഗിച്ച് നിങ്ങളുടെ ശ്രദ്ധ നിലനിർത്തുന്നു."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ഈ അറിയിപ്പ് വരുമ്പോൾ ശബ്‌ദിക്കുകയാണോ വൈബ്രേറ്റ് ചെയ്യുകയാണോ വേണ്ടതെന്ന് നിർണ്ണയിക്കാൻ സിസ്‌റ്റത്തെ അനുവദിക്കുക"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;നില:&lt;/b&gt; ഡിഫോൾട്ടാക്കി പ്രമോട്ട് ചെയ്‌തു"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;നില:&lt;/b&gt; നിശബ്‌ദമാക്കി തരം താഴ്ത്തി"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;നില:&lt;/b&gt; ഉയർന്ന റാങ്കിംഗ് നൽകി"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;നില:&lt;/b&gt; താഴ്ന്ന റാങ്കിംഗ് നൽകി"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"സംഭാഷണ വിഭാഗത്തിന് മുകളിലായി കാണിക്കുന്നു, ഫ്ലോട്ടിംഗ് ബബിളായി ദൃശ്യമാകുന്നു, ലോക്ക് സ്ക്രീനിൽ പ്രൊഫൈൽ ചിത്രം പ്രദർശിപ്പിക്കുന്നു"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ക്രമീകരണം"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"മുൻഗണന"</string>
@@ -724,14 +720,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"ഈ ആപ്പ് നിങ്ങളുടെ സ്‌ക്രീനിലെ മറ്റ് ആപ്പുകൾക്ക് മുകളിൽ പ്രദർശിപ്പിക്കുന്നു, മൈക്രോഫോണും ക്യാമറയും ഉപയോഗിക്കുകയും ചെയ്യുന്നു."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"ക്രമീകരണം"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"ശരി"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"ഈ അറിയിപ്പ്, സിസ്‌റ്റം സ്വയമേവ &lt;b&gt;ഡിഫോൾട്ടാക്കി പ്രമോട്ട് ചെയ്‌തു&lt;/b&gt;."</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"ഈ അറിയിപ്പ്, സിസ്‌റ്റം സ്വയമേവ &lt;b&gt;നിശബ്‌ദമാക്കി തരം താഴ്ത്തി&lt;/b&gt;."</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"ഈ അറിയിപ്പിന് നിങ്ങളുടെ ഷെയ്‌ഡിൽ സ്വയമേവ &lt;b&gt;ഉയർന്ന റാങ്കിംഗ് നൽകി&lt;/b&gt;."</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"ഈ അറിയിപ്പിന് നിങ്ങളുടെ ഷെയ്‌ഡിൽ സ്വയമേവ &lt;b&gt;താഴ്ന്ന റാങ്കിംഗ് നൽകി&lt;/b&gt;."</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"ഇത് ശരിയായിരുന്നോ?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"നിങ്ങളുടെ ഫീഡ്‌ബാക്കിന് നന്ദി!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"ശരി"</string>

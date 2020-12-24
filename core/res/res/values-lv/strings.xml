@@ -2042,6 +2042,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Mikrofons"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"rāda pāri citām lietotnēm jūsu ekrānā"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Sniegt atsauksmes"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Šī paziņojuma svarīgums tika paaugstināts līdz noklusējumam. Lai sniegtu atsauksmes, pieskarieties."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Šī paziņojuma svarīgums tika pazemināts, un paziņojums tiks rādīts bez skaņas. Lai sniegtu atsauksmes, pieskarieties."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Šī paziņojuma rangs tika paaugstināts. Lai sniegtu atsauksmes, pieskarieties."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Šī paziņojuma rangs tika pazemināts. Lai sniegtu atsauksmes, pieskarieties."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Informatīvs paziņojums par akumulatoru"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Akumulators var izlādēties pirms parastā uzlādes laika"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Aktivizēts akumulatora enerģijas taupīšanas režīms, lai palielinātu akumulatora darbības ilgumu"</string>

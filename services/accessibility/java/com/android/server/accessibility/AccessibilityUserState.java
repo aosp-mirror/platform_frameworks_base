@@ -194,7 +194,8 @@ class AccessibilityUserState {
         mUserNonInteractiveUiTimeout = 0;
         mUserInteractiveUiTimeout = 0;
         mMagnificationMode = ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
-        resetFocusAppearanceLocked();
+        mFocusStrokeWidth = mFocusStrokeWidthDefaultValue;
+        mFocusColor = mFocusColorDefaultValue;
     }
 
     void addServiceLocked(AccessibilityServiceConnection serviceConnection) {
@@ -923,14 +924,5 @@ class AccessibilityUserState {
     public void setFocusAppearanceLocked(int strokeWidth, int color) {
         mFocusStrokeWidth = strokeWidth;
         mFocusColor = color;
-    }
-
-    /**
-     * Resets the stroke width and color of the focus rectangle to the default value.
-     *
-     */
-    public void resetFocusAppearanceLocked() {
-        mFocusStrokeWidth = mFocusStrokeWidthDefaultValue;
-        mFocusColor = mFocusColorDefaultValue;
     }
 }

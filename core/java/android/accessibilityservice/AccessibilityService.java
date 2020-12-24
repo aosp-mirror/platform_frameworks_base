@@ -2120,6 +2120,10 @@ public abstract class AccessibilityService extends Service {
 
     /**
      * Sets the strokeWidth and color of the accessibility focus rectangle.
+     * <p>
+     * <strong>Note:</strong> This setting persists until this or another active
+     * AccessibilityService changes it or the device reboots.
+     * </p>
      *
      * @param strokeWidth The stroke width of the rectangle in pixels.
      *                    Setting this value to zero results in no focus rectangle being drawn.

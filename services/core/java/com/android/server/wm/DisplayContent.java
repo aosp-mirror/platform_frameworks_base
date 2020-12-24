@@ -283,6 +283,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     private SurfaceControl mOverlayLayer;
 
+    /**
+     * The direct child layer of the display to put all non-overlay windows. This is also used for
+     * screen rotation animation so that there is a parent layer to put the animation leash.
+     */
+    private final SurfaceControl mWindowingLayer;
+
     // Contains all IME window containers. Note that the z-ordering of the IME windows will depend
     // on the IME target. We mainly have this container grouping so we can keep track of all the IME
     // window containers together and move them in-sync if/when needed. We use a subclass of
@@ -294,7 +300,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     final DisplayAreaPolicy mDisplayAreaPolicy;
 
     private WindowState mTmpWindow;
-    private WindowState mTmpWindow2;
     private boolean mUpdateImeTarget;
     private boolean mTmpInitial;
     private int mMaxUiWidth;
@@ -458,10 +463,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             new TaskForResizePointSearchResult();
     private final ApplySurfaceChangesTransactionState mTmpApplySurfaceChangesTransactionState =
             new ApplySurfaceChangesTransactionState();
-
-    // True if this display is in the process of being removed. Used to determine if the removal of
-    // the display's direct children should be allowed.
-    private boolean mRemovingDisplay = false;
 
     // {@code false} if this display is in the processing of being created.
     private boolean mDisplayReady = false;
@@ -1023,6 +1024,27 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 .setContainerLayer()
                 .setCallsite("DisplayContent");
         mSurfaceControl = b.setName("Root").setContainerLayer().build();
+
+        // Setup the policy and build the display area hierarchy.
+        mDisplayAreaPolicy = mWmService.getDisplayAreaPolicyProvider().instantiate(
+                mWmService, this /* content */, this /* root */, mImeWindowsContainers);
+
+        final List<DisplayArea<? extends WindowContainer>> areas =
+                mDisplayAreaPolicy.getDisplayAreas(FEATURE_WINDOWED_MAGNIFICATION);
+        final DisplayArea<?> area = areas.size() == 1 ? areas.get(0) : null;
+        if (area != null && area.getParent() == this) {
+            // The windowed magnification area should contain all non-overlay windows, so just use
+            // it as the windowing layer.
+            mWindowingLayer = area.mSurfaceControl;
+        } else {
+            // Need an additional layer for screen level animation, so move the layer containing
+            // the windows to the new root.
+            mWindowingLayer = mSurfaceControl;
+            mSurfaceControl = b.setName("RootWrapper").build();
+            getPendingTransaction().reparent(mWindowingLayer, mSurfaceControl)
+                    .show(mWindowingLayer);
+        }
+
         mOverlayLayer = b.setName("Display Overlays").setParent(mSurfaceControl).build();
 
         getPendingTransaction()
@@ -1032,10 +1054,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 .setLayer(mOverlayLayer, Integer.MAX_VALUE)
                 .show(mOverlayLayer);
         getPendingTransaction().apply();
-
-        // Setup the policy and build the display area hierarchy.
-        mDisplayAreaPolicy = mWmService.getDisplayAreaPolicyProvider().instantiate(
-                mWmService, this /* content */, this /* root */, mImeWindowsContainers);
 
         // Sets the display content for the children.
         onDisplayChanged(this);
@@ -2796,7 +2814,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     @Override
     void removeImmediately() {
-        mRemovingDisplay = true;
         mDeferredRemoval = false;
         try {
             if (mParentWindow != null) {
@@ -2820,7 +2837,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mWmService.mDisplayNotificationController.dispatchDisplayRemoved(this);
         } finally {
             mDisplayReady = false;
-            mRemovingDisplay = false;
         }
 
         // Apply the pending transaction here since we may not be able to reach the DisplayContent
@@ -4190,7 +4206,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         // Used to indicate that we have processed the dream window and all additional attached
         // windows are behind it.
-        mTmpWindow2 = mTmpWindow;
         mTmpWindow = null;
 
         // Now perform layout of attached windows, which usually depend on the position of the
@@ -4860,19 +4875,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }, false /* traverseTopToBottom */);
     }
 
-    private DisplayArea getWindowContainers() {
-        List<DisplayArea<? extends WindowContainer>> windowContainers =
-                mDisplayAreaPolicy.getDisplayAreas(FEATURE_WINDOWED_MAGNIFICATION);
-        if (windowContainers.size() != 1) {
-            throw new IllegalStateException("There should be only one DisplayArea for "
-                    + "FEATURE_WINDOWED_MAGNIFICATION");
-        }
-        return windowContainers.get(0);
-    }
-
-    @VisibleForTesting
     SurfaceControl getWindowingLayer() {
-        return getWindowContainers().getSurfaceControl();
+        return mWindowingLayer;
     }
 
     DisplayArea.Tokens getImeContainer() {

@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Дэлгэцээс дарсан зургийг хадгалж чадсангүй"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Дэлгэцийн агшныг хадгалах боломжтой болохоос өмнө төхөөрөмжийн түгжээг тайлах ёстой"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Дэлгэцийн зургийг дахин дарж үзнэ үү"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Сангийн багтаамж бага байгаа тул дэлгэцээс дарсан зургийг хадгалах боломжгүй байна"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Дэлгэцийн агшныг хадгалах боломжгүй"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Таны апп, байгууллагад дэлгэцийн зураг авахыг зөвшөөрдөггүй"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Засах"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Дэлгэцийн агшныг засах"</string>
@@ -698,14 +698,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Утасны тохиргоонд тулгуурлан хонх дуугаргах эсвэл чичирхийлж болзошгүй. <xliff:g id="APP_NAME">%1$s</xliff:g>-н харилцан яриаг өгөгдмөл тохиргооны дагуу бөмбөлөг болгоно."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Энэ контентын хөвөн гарч ирэх товчлолтойгоор таны анхаарлыг татдаг."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Энэ мэдэгдэл дуу гаргах эсвэл чичрэх эсэхийг системээр тодорхойлуулаарай"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Төлөв:&lt;/b&gt; Өгөгдмөл болгож дэвшүүлсэн"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Төлөв:&lt;/b&gt; Чимээгүй болгож зэрэглэлийг нь бууруулсан"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Төлөв:&lt;/b&gt; Дээгүүр зэрэглэл хийсэн"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Төлөв:&lt;/b&gt; Доогуур зэрэглэл хийсэн"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Харилцан ярианы хэсгийн дээд талд хөвж буй бөмбөлөг хэлбэрээр харагдах бөгөөд профайлын зургийг түгжигдсэн дэлгэцэд үзүүлнэ"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Тохиргоо"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Ач холбогдол"</string>
@@ -724,14 +720,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"Энэ аппыг таны дэлгэцэд бусад аппын дээр харуулж байгаа бөгөөд микрофон болон камерыг ашиглаж байна."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"Тохиргоо"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"ОК"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"Энэ мэдэгдлийг систем автоматаар &lt;b&gt;Өгөгдмөл болгож дэвшүүлсэн&lt;/b&gt; байна."</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"Энэ мэдэгдлийг систем автоматаар &lt;b&gt;Чимээгүй болгож зэрэглэлийг нь бууруулсан&lt;/b&gt; байна."</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"Энэ мэдэгдлийг таны хураангуй самбарт автоматаар &lt;b&gt;дээгүүр зэрэглэл хийсэн&lt;/b&gt; байна."</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"Энэ мэдэгдлийг таны хураангуй самбарт автоматаар &lt;b&gt;доогуур зэрэглэл хийсэн&lt;/b&gt; байна."</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"Энэ зөв байсан уу?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Санал хүсэлтээ илгээсэнд баярлалаа!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"ОК"</string>

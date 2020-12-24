@@ -84,6 +84,15 @@ package android.media {
     field public static final int METADATA_KEY_XMP_OFFSET = 41; // 0x29
   }
 
+  public class MediaServiceManager {
+    method @NonNull public android.media.MediaServiceManager.ServiceRegisterer getMediaSessionServiceRegisterer();
+    method @NonNull public android.media.MediaServiceManager.ServiceRegisterer getMediaTranscodingServiceRegisterer();
+  }
+
+  public static final class MediaServiceManager.ServiceRegisterer {
+    method @Nullable public android.os.IBinder get();
+  }
+
 }
 
 package android.media.session {

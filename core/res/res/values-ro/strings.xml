@@ -2042,6 +2042,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Microfon"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"se afișează peste alte aplicații de pe ecran"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Oferiți feedback"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Notificarea a fost promovată la Prestabilită. Atingeți pentru a oferi feedback."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Notificarea a fost mutată în jos la Silențioasă. Atingeți pentru a oferi feedback."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Notificarea a fost mutată la un nivel superior. Atingeți pentru a oferi feedback."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Notificarea a fost mutată la un nivel inferior. Atingeți pentru a oferi feedback."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificare pentru informații despre modul Rutină"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateria se poate descărca înainte de încărcarea obișnuită"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Economisirea bateriei este activată pentru a prelungi durata de funcționare a bateriei"</string>

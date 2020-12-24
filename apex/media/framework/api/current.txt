@@ -1,6 +1,26 @@
 // Signature format: 2.0
 package android.media {
 
+  public final class ApplicationMediaCapabilities implements android.os.Parcelable {
+    method @NonNull public static android.media.ApplicationMediaCapabilities createFromXml(@NonNull org.xmlpull.v1.XmlPullParser);
+    method public int describeContents();
+    method @NonNull public java.util.List<java.lang.String> getSupportedHdrTypes();
+    method @NonNull public java.util.List<java.lang.String> getSupportedVideoMimeTypes();
+    method public boolean isHdrTypeSupported(@NonNull String);
+    method public boolean isSlowMotionSupported();
+    method public boolean isVideoMimeTypeSupported(@NonNull String);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.ApplicationMediaCapabilities> CREATOR;
+  }
+
+  public static final class ApplicationMediaCapabilities.Builder {
+    ctor public ApplicationMediaCapabilities.Builder();
+    method @NonNull public android.media.ApplicationMediaCapabilities.Builder addSupportedHdrType(@NonNull String);
+    method @NonNull public android.media.ApplicationMediaCapabilities.Builder addSupportedVideoMimeType(@NonNull String);
+    method @NonNull public android.media.ApplicationMediaCapabilities build();
+    method @NonNull public android.media.ApplicationMediaCapabilities.Builder setSlowMotionSupported(boolean);
+  }
+
   public class MediaController2 implements java.lang.AutoCloseable {
     method public void cancelSessionCommand(@NonNull Object);
     method public void close();
@@ -23,6 +43,17 @@ package android.media {
     method public void onDisconnected(@NonNull android.media.MediaController2);
     method public void onPlaybackActiveChanged(@NonNull android.media.MediaController2, boolean);
     method @Nullable public android.media.Session2Command.Result onSessionCommand(@NonNull android.media.MediaController2, @NonNull android.media.Session2Command, @Nullable android.os.Bundle);
+  }
+
+  public final class MediaFeature {
+    ctor public MediaFeature();
+  }
+
+  public static final class MediaFeature.HdrType {
+    field public static final String DOLBY_VISION = "android.media.feature.hdr.dolby_vision";
+    field public static final String HDR10 = "android.media.feature.hdr.hdr10";
+    field public static final String HDR10_PLUS = "android.media.feature.hdr.hdr10_plus";
+    field public static final String HLG = "android.media.feature.hdr.hlg";
   }
 
   public final class MediaParser {
@@ -168,6 +199,12 @@ package android.media {
     ctor public MediaSession2Service.MediaNotification(int, @NonNull android.app.Notification);
     method @NonNull public android.app.Notification getNotification();
     method public int getNotificationId();
+  }
+
+  public class MediaTranscodingException extends java.lang.Exception {
+  }
+
+  public static final class MediaTranscodingException.ServiceNotAvailableException extends android.media.MediaTranscodingException {
   }
 
   public final class Session2Command implements android.os.Parcelable {

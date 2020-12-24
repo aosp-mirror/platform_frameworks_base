@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"اسکرین شاٹ کو محفوظ نہیں کیا جا سکا"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"اسکرین شاٹ محفوظ کرنے سے پہلے آلے کو غیر مقفل کرنا ضروری ہے"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"دوبارہ اسکرین شاٹ لینے کی کوشش کریں"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"اسٹوریج کی محدود جگہ کی وجہ سے اسکرین شاٹ کو محفوظ نہیں کیا جا سکتا"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"اسکرین شاٹ کو محفوظ نہیں کیا جا سکتا"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ایپ یا آپ کی تنظیم کی جانب سے اسکرین شاٹس لینے کی اجازت نہیں ہے"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"ترمیم کریں"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"اسکرین شاٹ میں ترمیم کریں"</string>
@@ -698,14 +698,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"فون کی ترتیبات کے مطابق وائبریٹ یا گھنٹی بج سکتی ہے۔ بذریعہ ڈیفالٹ <xliff:g id="APP_NAME">%1$s</xliff:g> بلبلہ سے گفتگوئیں۔"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"اس مواد کے فلوٹنگ شارٹ کٹ کے ساتھ آپ کی توجہ دیتی ہے۔"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"سسٹم کو اس بات کا تعین کرنے دیں کہ آیا اس اطلاع کی آواز ہو یا وائبریٹ ہونا چاہیے"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"‏&lt;b&gt;Status:&lt;/b&gt; ڈیفالٹ پر درجہ بند کیا گیا"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"‏&lt;b&gt;اسٹیٹس:&lt;/b&gt; کو خاموش پر درجہ بند کیا گیا"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"‏&lt;b&gt;اسٹیٹس:&lt;/b&gt; کو اعلی درجہ دیا گیا"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"‏&lt;b&gt;اسٹیٹس:&lt;/b&gt; کو کم درجہ دیا گیا"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"گفتگو کے سیکشن کے اوپری حصے پر دکھاتا ہے، تیرتے بلبلے کی طرح ظاہر ہوتا ہے، لاک اسکرین پر پروفائل تصویر دکھاتا ہے"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ترتیبات"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ترجیح"</string>
@@ -724,14 +720,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"یہ ایپ آپ کی اسکرین پر دیگر ایپس پر ڈسپلے کر رہی ہے اور مائیکروفون اور کیمرے کا استعمال کر رہی ہے۔"</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"ترتیبات"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"ٹھیک ہے"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"‏اس اطلاع کو خودکار طور پر سسٹم کے ذریعے &lt;b&gt;ڈیفالٹ پر پروموٹ&lt;/b&gt; کیا گیا۔"</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"‏اس اطلاع کو خودکار طور پر سسٹم کے ذریعے &lt;b&gt;خاموش پر درجہ بند&lt;b&gt; کیا گیا۔"</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"‏اس اطلاع کو آپ کے شیڈ میں خودکار طور پر &lt;b&gt;اعلی درجہ&lt;/b&gt; دیا گیا۔"</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"‏اس اطلاع کو آپ کے شیڈ میں خودکار طور پر &lt;b&gt;کم درجہ&lt;/b&gt; دیا گیا۔"</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"کیا یہ درست تھا؟"</string>
     <string name="feedback_response" msgid="4671729244976641339">"آپ کے تاثرات کا شکریہ!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"ٹھیک ہے"</string>

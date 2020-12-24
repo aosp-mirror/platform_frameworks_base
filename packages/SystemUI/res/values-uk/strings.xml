@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Не вдалося зберегти знімок екрана"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Щоб зберегти знімок екрана, розблокуйте пристрій"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Спробуйте зробити знімок екрана ще раз"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Не вдалося зберегти знімок екрана через обмежений обсяг пам’яті"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Не вдалося зберегти знімок екрана"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Додаток або адміністратор вашої організації не дозволяють робити знімки екрана"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Редагувати"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Редагувати знімок екрана"</string>
@@ -554,7 +554,7 @@
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"Ваш адміністратор увімкнув реєстрацію в мережі, під час якої на вашому пристрої відстежується трафік.\n\nЩоб дізнатися більше, зв’яжіться з адміністратором."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"Ви дозволили додатку під’єднуватися до мережі VPN.\n\nЦей додаток може відстежувати вашу активність на пристрої та в мережі, зокрема в електронній пошті, додатках і на веб-сайтах."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"Вашим робочим профілем керує адміністратор організації <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nВін може відстежувати ваші дії в мережі, зокрема електронні листи, додатки та веб-сайти.\n\nЩоб дізнатися більше, зв’яжіться з адміністратором.\n\nВаш пристрій також під’єднано до мережі VPN, у якій можна відстежувати ваші дії в мережі."</string>
-    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Цим пристроєм керує батько або мати. Вони можуть бачити та контролювати, якими додатками ви користуєтесь, де перебуваєте й скільки часу проводите за пристроєм."</string>
+    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Цим пристроєм керують твої батьки. Вони можуть бачити та контролювати, якими додатками ти користуєшся, де перебуваєш і скільки часу проводиш за пристроєм."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="monitoring_description_app" msgid="376868879287922929">"Ваш профіль під’єднано до додатка <xliff:g id="APPLICATION">%1$s</xliff:g>, який може відстежувати вашу активність у мережі, зокрема в електронній пошті, додатках і на веб-сайтах."</string>
     <string name="monitoring_description_app_personal" msgid="1970094872688265987">"Ваш профіль під’єднано до додатка <xliff:g id="APPLICATION">%1$s</xliff:g>, який може відстежувати вашу особисту активність у мережі, зокрема в електронній пошті, додатках і на веб-сайтах."</string>
@@ -704,14 +704,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Може дзвонити або вібрувати залежно від налаштувань телефона. Показує спливаючі розмови з додатка <xliff:g id="APP_NAME">%1$s</xliff:g> за умовчанням."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Привертає увагу до контенту плаваючим ярликом."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Дозволити системі визначати, чи має сповіщення супроводжуватися звуком або вібрацією"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Статус&lt;/b&gt;: підвищено до \"За умовчанням\""</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Статус&lt;/b&gt;: знижено до \"Без звуку\""</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Статус&lt;/b&gt;: пріоритет підвищено"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Статус&lt;/b&gt;: пріоритет знижено"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"З\'являється вгорі розділу розмов у спливаючому сповіщенні та показує зображення профілю на заблокованому екрані"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Налаштування"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Пріоритет"</string>
@@ -730,14 +726,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"Цей додаток відображається поверх інших додатків на екрані та використовує мікрофон і камеру."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"Налаштування"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"OK"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"Пріоритет цього сповіщення автоматично &lt;b&gt;підвищено до \"За умовчанням\"&lt;/b&gt; у системі."</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"Пріоритет цього сповіщення автоматично &lt;b&gt;знижено до \"Без звуку\"&lt;/b&gt; в системі."</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"Пріоритет цього сповіщення на панелі сповіщень автоматично &lt;b&gt;підвищено&lt;/b&gt;."</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"Пріоритет цього сповіщення на панелі сповіщень автоматично &lt;b&gt;знижено&lt;/b&gt;."</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"Правильно?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Дякуємо за відгук!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"OK"</string>
