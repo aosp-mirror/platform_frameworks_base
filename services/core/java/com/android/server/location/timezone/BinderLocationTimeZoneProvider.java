@@ -162,11 +162,6 @@ class BinderLocationTimeZoneProvider extends LocationTimeZoneProvider {
     }
 
     @Override
-    void logWarn(String msg) {
-        Slog.w(TAG, msg);
-    }
-
-    @Override
     public void dump(@NonNull IndentingPrintWriter ipw, @Nullable String[] args) {
         synchronized (mSharedLock) {
             ipw.println("{BinderLocationTimeZoneProvider}");

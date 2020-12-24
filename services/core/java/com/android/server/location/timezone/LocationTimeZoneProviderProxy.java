@@ -79,8 +79,8 @@ abstract class LocationTimeZoneProviderProxy implements Dumpable {
                 throw new IllegalStateException("listener already set");
             }
             this.mListener = listener;
+            onInitialize();
         }
-        onInitialize();
     }
 
     /**
