@@ -40,25 +40,16 @@ oneway interface ISoftApCallback
     void onStateChanged(int state, int failureReason);
 
     /**
-     * Service to manager callback providing connected client's information.
-     *
-     * @param clients the currently connected clients
-     */
-    void onConnectedClientsChanged(in List<WifiClient> clients);
-
-    /**
-     * Service to manager callback providing information of softap.
-     *
-     * @param softApInfo is the softap information. {@link SoftApInfo}
-     */
-    void onInfoChanged(in SoftApInfo softApInfo);
-
-    /**
      * Service to manager callback providing informations of softap.
      *
-     * @param softApInfoList is the list of the softap informations. {@link SoftApInfo}
+     * @param infos The currently {@link SoftApInfo} in each AP instance.
+     * @param clients The currently connected clients in each AP instance.
+     * @param isBridged whether or not the current AP enabled on bridged mode.
+     * @param isRegistration whether or not the callbackk was triggered when register.
      */
-    void onInfoListChanged(in List<SoftApInfo> softApInfoList);
+    void onConnectedClientsOrInfoChanged(in Map<String, SoftApInfo> infos,
+            in Map<String, List<WifiClient>> clients, boolean isBridged,
+	    boolean isRegistration);
 
     /**
      * Service to manager callback providing capability of softap.

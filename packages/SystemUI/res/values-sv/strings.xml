@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Det gick inte att spara skärmdumpen"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Skärmdumpen kan bara sparas om enheten är upplåst"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Testa att ta en skärmdump igen"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Det går inte att spara skärmdumpen eftersom lagringsutrymmet inte räcker"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Det gick inte att spara skärmdumpen"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Appen eller organisationen tillåter inte att du tar skärmdumpar"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Redigera"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Redigera skärmdump"</string>
@@ -698,14 +698,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Kan ringa eller vibrera beroende på inställningarna på telefonen. Konversationer från <xliff:g id="APP_NAME">%1$s</xliff:g> visas i bubblor som standard."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Behåller din uppmärksamhet med en flytande genväg till innehållet."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Låt systemet avgöra om den här aviseringen ska låta eller vibrera"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Status:&lt;/b&gt; Ändrad till Standard"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Status:&lt;/b&gt; Ändrad till Tyst"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Status:&lt;/b&gt; Höjd"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Status:&lt;/b&gt; Sänkt"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Visas högst upp bland konversationerna som en flytande bubbla, visar profilbilden på låsskärmen"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Inställningar"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
@@ -724,14 +720,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"Appen visas över andra appar på skärmen och den använder mikrofonen och kameran."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"Inställningar"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"OK"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"Aviseringens relevans &lt;b&gt;ändrades till Standard&lt;/b&gt; automatiskt av systemet."</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"Aviseringens relevans &lt;b&gt;ändrades till Tyst&lt;/b&gt; automatiskt av systemet."</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"Aviseringens relevans i meddelandepanelen &lt;b&gt;höjdes&lt;/b&gt; automatiskt."</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"Aviseringens relevans i meddelandepanelen &lt;b&gt;sänktes&lt;/b&gt; automatiskt."</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"Stämmer detta?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Tack för din feedback!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"OK"</string>

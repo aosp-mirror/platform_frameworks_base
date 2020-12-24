@@ -441,7 +441,7 @@ package android.net.wifi {
     method public static void registerServiceWrappers();
   }
 
-  public class WifiInfo implements android.os.Parcelable {
+  public class WifiInfo implements android.os.Parcelable android.net.TransportInfo {
     method public double getLostTxPacketsPerSecond();
     method @Nullable public String getRequestingPackageName();
     method public double getRetriedTxPacketsPerSecond();
@@ -639,8 +639,9 @@ package android.net.wifi {
     method public default void onBlockedClientConnecting(@NonNull android.net.wifi.WifiClient, int);
     method public default void onCapabilityChanged(@NonNull android.net.wifi.SoftApCapability);
     method public default void onConnectedClientsChanged(@NonNull java.util.List<android.net.wifi.WifiClient>);
+    method public default void onConnectedClientsChanged(@NonNull android.net.wifi.SoftApInfo, @NonNull java.util.List<android.net.wifi.WifiClient>);
     method public default void onInfoChanged(@NonNull android.net.wifi.SoftApInfo);
-    method public default void onInfoListChanged(@NonNull java.util.List<android.net.wifi.SoftApInfo>);
+    method public default void onInfoChanged(@NonNull java.util.List<android.net.wifi.SoftApInfo>);
     method public default void onStateChanged(int, int);
   }
 

@@ -2009,6 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"මයික්‍රෆෝනය"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"ඔබගේ තිරය මත වෙනත් යෙදුම්වලට උඩින් සංදර්ශනය කරමින්"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"ප්‍රතිපෝෂණ සපයන්න"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"මෙම දැනුම් දීම පෙරනිමි වෙත ප්‍රවර්ධනය කරන ලදී. ප්‍රතිපෝෂණය ලබා දීමට තට්ටු කරන්න."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"මෙම දැනුම්දීම නිහඬ වෙත පහත දමන ලදී. ප්‍රතිපෝෂණය ලබා දීමට තට්ටු කරන්න."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"මෙම දැනුම්දීම ඉහළට ශ්‍රේණිගත කරන ලදී. ප්‍රතිපෝෂණය ලබා දීමට තට්ටු කරන්න."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"මෙම දැනුම්දීම පහළට ශ්‍රේණිගත කරන ලදී. ප්‍රතිපෝෂණය ලබා දීමට තට්ටු කරන්න."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"දිනචරියා ප්‍රකාර තතු දැනුම්දීම"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"බැටරිය සුපුරුදු ආරෝපණයට පෙර ඉවර විය හැක"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"බැටරි සුරැකුම බැටරි ආයු කාලය දීර්ඝ කිරීමට සක්‍රිය කෙරිණි"</string>

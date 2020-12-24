@@ -20,6 +20,7 @@ package android.app.appsearch;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.UserIdInt;
 import android.os.RemoteException;
 
 import java.util.Objects;
@@ -36,12 +37,15 @@ import java.util.function.Consumer;
 public class GlobalSearchSession {
 
     private final IAppSearchManager mService;
+    @UserIdInt
+    private final int mUserId;
 
     static void createGlobalSearchSession(
             @NonNull IAppSearchManager service,
+            @UserIdInt int userId,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<AppSearchResult<GlobalSearchSession>> callback) {
-        GlobalSearchSession globalSearchSession = new GlobalSearchSession(service);
+        GlobalSearchSession globalSearchSession = new GlobalSearchSession(service, userId);
         globalSearchSession.initialize(executor, callback);
     }
 
@@ -51,7 +55,7 @@ public class GlobalSearchSession {
             @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<AppSearchResult<GlobalSearchSession>> callback) {
         try {
-            mService.initialize(new IAppSearchResultCallback.Stub() {
+            mService.initialize(mUserId, new IAppSearchResultCallback.Stub() {
                 public void onResult(AppSearchResult result) {
                     executor.execute(() -> {
                         if (result.isSuccess()) {
@@ -68,8 +72,9 @@ public class GlobalSearchSession {
         }
     }
 
-    private GlobalSearchSession(@NonNull IAppSearchManager service) {
+    private GlobalSearchSession(@NonNull IAppSearchManager service, @UserIdInt int userId) {
         mService = service;
+        mUserId = userId;
     }
 
     /**
@@ -125,6 +130,6 @@ public class GlobalSearchSession {
         Objects.requireNonNull(searchSpec);
         Objects.requireNonNull(executor);
         return new SearchResults(mService, /*databaseName=*/null, queryExpression,
-                searchSpec, executor);
+                searchSpec, mUserId, executor);
     }
 }

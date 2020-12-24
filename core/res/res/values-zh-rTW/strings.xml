@@ -2009,6 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"麥克風"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"顯示在畫面上的其他應用程式上層"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"提供意見"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"這則通知的重要性已提升為「預設」。輕觸即可提供意見。"</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"這則通知的重要性已降低為「靜音」。輕觸即可提供意見。"</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"這則通知的重要性順序已調高。輕觸即可提供意見。"</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"這則通知的重要性順序已調降。輕觸即可提供意見。"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"日常安排模式資訊通知"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"電池電力可能會在你平常的充電時間前耗盡"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"已啟用省電模式以延長電池續航力"</string>

@@ -36,8 +36,9 @@ public class AppSearchManagerFrameworkInitializer {
      *     {@link SystemServiceRegistry}
      */
     public static void initialize() {
-        SystemServiceRegistry.registerStaticService(
+        SystemServiceRegistry.registerContextAwareService(
                 Context.APP_SEARCH_SERVICE, AppSearchManager.class,
-                (service) -> new AppSearchManager(IAppSearchManager.Stub.asInterface(service)));
+                (context, service) ->
+                        new AppSearchManager(context, IAppSearchManager.Stub.asInterface(service)));
     }
 }

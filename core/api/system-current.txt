@@ -4593,68 +4593,6 @@ package android.media {
     field @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_OUTPUT) public static final int RADIO_TUNER = 1998; // 0x7ce
   }
 
-  public final class MediaTranscodeManager {
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingSession enqueueRequest(@NonNull android.media.MediaTranscodeManager.TranscodingRequest, @NonNull java.util.concurrent.Executor, @NonNull android.media.MediaTranscodeManager.OnTranscodingFinishedListener) throws java.io.FileNotFoundException, android.media.MediaTranscodingException.ServiceNotAvailableException;
-    field public static final int PRIORITY_REALTIME = 1; // 0x1
-    field public static final int TRANSCODING_TYPE_VIDEO = 1; // 0x1
-  }
-
-  @java.lang.FunctionalInterface public static interface MediaTranscodeManager.OnTranscodingFinishedListener {
-    method public void onTranscodingFinished(@NonNull android.media.MediaTranscodeManager.TranscodingSession);
-  }
-
-  public static final class MediaTranscodeManager.TranscodingRequest {
-    method public int getClientPid();
-    method public int getClientUid();
-    method @NonNull public android.net.Uri getDestinationUri();
-    method public int getPriority();
-    method @NonNull public android.net.Uri getSourceUri();
-    method public int getType();
-    method @Nullable public android.media.MediaFormat getVideoTrackFormat();
-  }
-
-  public static final class MediaTranscodeManager.TranscodingRequest.Builder {
-    ctor public MediaTranscodeManager.TranscodingRequest.Builder();
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest build();
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setClientPid(int);
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setClientUid(int);
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setDestinationUri(@NonNull android.net.Uri);
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setPriority(int);
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setSourceUri(@NonNull android.net.Uri);
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setType(int);
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setVideoTrackFormat(@NonNull android.media.MediaFormat);
-  }
-
-  public static class MediaTranscodeManager.TranscodingRequest.MediaFormatResolver {
-    ctor public MediaTranscodeManager.TranscodingRequest.MediaFormatResolver();
-    method @Nullable public android.media.MediaFormat resolveVideoFormat();
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.MediaFormatResolver setClientCapabilities(@NonNull android.media.ApplicationMediaCapabilities);
-    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.MediaFormatResolver setSourceVideoFormatHint(@NonNull android.media.MediaFormat);
-    method public boolean shouldTranscode();
-  }
-
-  public static final class MediaTranscodeManager.TranscodingSession {
-    method public void cancel();
-    method @IntRange(from=0, to=100) public int getProgress();
-    method public int getResult();
-    method public int getSessionId();
-    method public int getStatus();
-    method public void setOnProgressUpdateListener(@NonNull java.util.concurrent.Executor, @Nullable android.media.MediaTranscodeManager.TranscodingSession.OnProgressUpdateListener);
-    method public void setOnProgressUpdateListener(int, @NonNull java.util.concurrent.Executor, @Nullable android.media.MediaTranscodeManager.TranscodingSession.OnProgressUpdateListener);
-    field public static final int RESULT_CANCELED = 4; // 0x4
-    field public static final int RESULT_ERROR = 3; // 0x3
-    field public static final int RESULT_NONE = 1; // 0x1
-    field public static final int RESULT_SUCCESS = 2; // 0x2
-    field public static final int STATUS_FINISHED = 3; // 0x3
-    field public static final int STATUS_PAUSED = 4; // 0x4
-    field public static final int STATUS_PENDING = 1; // 0x1
-    field public static final int STATUS_RUNNING = 2; // 0x2
-  }
-
-  @java.lang.FunctionalInterface public static interface MediaTranscodeManager.TranscodingSession.OnProgressUpdateListener {
-    method public void onProgressUpdate(@NonNull android.media.MediaTranscodeManager.TranscodingSession, @IntRange(from=0, to=100) int);
-  }
-
   public class PlayerProxy {
     method public void pause();
     method public void setPan(float);
@@ -7670,12 +7608,14 @@ package android.os {
     method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public android.os.connectivity.WifiBatteryStats getWifiBatteryStats();
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportFullWifiLockAcquiredFromSource(@NonNull android.os.WorkSource);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportFullWifiLockReleasedFromSource(@NonNull android.os.WorkSource);
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportMobileRadioPowerState(boolean, int) throws java.lang.RuntimeException;
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportWifiBatchedScanStartedFromSource(@NonNull android.os.WorkSource, @IntRange(from=0) int);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportWifiBatchedScanStoppedFromSource(@NonNull android.os.WorkSource);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportWifiMulticastDisabled(@NonNull android.os.WorkSource);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportWifiMulticastEnabled(@NonNull android.os.WorkSource);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportWifiOff();
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportWifiOn();
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportWifiRadioPowerState(boolean, int) throws java.lang.RuntimeException;
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportWifiRssiChanged(@IntRange(from=0xffffff81, to=0) int);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportWifiScanStartedFromSource(@NonNull android.os.WorkSource);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportWifiScanStoppedFromSource(@NonNull android.os.WorkSource);
@@ -11527,6 +11467,7 @@ package android.telephony.data {
     method public int getPduSessionId();
     method public int getProtocolType();
     method public long getRetryDurationMillis();
+    method @Nullable public android.telephony.data.SliceInfo getSliceInfo();
     method @Deprecated public int getSuggestedRetryTime();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.DataCallResponse> CREATOR;
@@ -11561,6 +11502,7 @@ package android.telephony.data {
     method @NonNull public android.telephony.data.DataCallResponse.Builder setPduSessionId(int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setProtocolType(int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setRetryDurationMillis(long);
+    method @NonNull public android.telephony.data.DataCallResponse.Builder setSliceInfo(@Nullable android.telephony.data.SliceInfo);
     method @Deprecated @NonNull public android.telephony.data.DataCallResponse.Builder setSuggestedRetryTime(int);
   }
 
@@ -11633,7 +11575,7 @@ package android.telephony.data {
     method public void setDataProfile(@NonNull java.util.List<android.telephony.data.DataProfile>, boolean, @NonNull android.telephony.data.DataServiceCallback);
     method public void setInitialAttachApn(@NonNull android.telephony.data.DataProfile, boolean, @NonNull android.telephony.data.DataServiceCallback);
     method public void setupDataCall(int, @NonNull android.telephony.data.DataProfile, boolean, boolean, int, @Nullable android.net.LinkProperties, @NonNull android.telephony.data.DataServiceCallback);
-    method public void setupDataCall(int, @NonNull android.telephony.data.DataProfile, boolean, boolean, int, @Nullable android.net.LinkProperties, @IntRange(from=0, to=15) int, @NonNull android.telephony.data.DataServiceCallback);
+    method public void setupDataCall(int, @NonNull android.telephony.data.DataProfile, boolean, boolean, int, @Nullable android.net.LinkProperties, @IntRange(from=0, to=15) int, @Nullable android.telephony.data.SliceInfo, @NonNull android.telephony.data.DataServiceCallback);
     method public void startHandover(int, @NonNull android.telephony.data.DataServiceCallback);
   }
 
@@ -11666,6 +11608,32 @@ package android.telephony.data {
     method public final int getSlotIndex();
     method public void reportApnThrottleStatusChanged(@NonNull java.util.List<android.telephony.data.ApnThrottleStatus>);
     method public final void updateQualifiedNetworkTypes(int, @NonNull java.util.List<java.lang.Integer>);
+  }
+
+  public final class SliceInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @IntRange(from=android.telephony.data.SliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.SliceInfo.MAX_SLICE_DIFFERENTIATOR) public int getMappedHplmnSliceDifferentiator();
+    method public int getMappedHplmnSliceServiceType();
+    method @IntRange(from=android.telephony.data.SliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.SliceInfo.MAX_SLICE_DIFFERENTIATOR) public int getSliceDifferentiator();
+    method public int getSliceServiceType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.SliceInfo> CREATOR;
+    field public static final int MAX_SLICE_DIFFERENTIATOR = 16777214; // 0xfffffe
+    field public static final int MIN_SLICE_DIFFERENTIATOR = -1; // 0xffffffff
+    field public static final int SLICE_DIFFERENTIATOR_NO_SLICE = -1; // 0xffffffff
+    field public static final int SLICE_SERVICE_TYPE_EMBB = 1; // 0x1
+    field public static final int SLICE_SERVICE_TYPE_MIOT = 3; // 0x3
+    field public static final int SLICE_SERVICE_TYPE_NONE = 0; // 0x0
+    field public static final int SLICE_SERVICE_TYPE_URLLC = 2; // 0x2
+  }
+
+  public static final class SliceInfo.Builder {
+    ctor public SliceInfo.Builder();
+    method @NonNull public android.telephony.data.SliceInfo build();
+    method @NonNull public android.telephony.data.SliceInfo.Builder setMappedHplmnSliceDifferentiator(@IntRange(from=android.telephony.data.SliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.SliceInfo.MAX_SLICE_DIFFERENTIATOR) int);
+    method @NonNull public android.telephony.data.SliceInfo.Builder setMappedHplmnSliceServiceType(int);
+    method @NonNull public android.telephony.data.SliceInfo.Builder setSliceDifferentiator(@IntRange(from=android.telephony.data.SliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.SliceInfo.MAX_SLICE_DIFFERENTIATOR) int);
+    method @NonNull public android.telephony.data.SliceInfo.Builder setSliceServiceType(int);
   }
 
 }

@@ -194,13 +194,19 @@ public abstract class DataService extends Service {
          *                     The standard range of values are 1-15 while 0 means no pdu session id
          *                     was attached to this call.  Reference: 3GPP TS 24.007 section
          *                     11.2.3.1b.
+         * @param sliceInfo used within the data connection when a handover occurs from EPDG to 5G.
+         *        The value is null unless the access network is
+         *        {@link android.telephony.AccessNetworkConstants.AccessNetworkType#NGRAN} and a
+         *        handover is occurring from EPDG to 5G.  If the slice passed is rejected, then
+         *        {@link DataCallResponse#getCause()} is
+         *        {@link android.telephony.DataFailCause#SLICE_REJECTED}.
          * @param callback The result callback for this request.
          */
         public void setupDataCall(int accessNetworkType, @NonNull DataProfile dataProfile,
                 boolean isRoaming, boolean allowRoaming,
                 @SetupDataReason int reason,
                 @Nullable LinkProperties linkProperties,
-                @IntRange(from = 0, to = 15) int pduSessionId,
+                @IntRange(from = 0, to = 15) int pduSessionId, @Nullable SliceInfo sliceInfo,
                 @NonNull DataServiceCallback callback) {
             /* Call the old version since the new version isn't supported */
             setupDataCall(accessNetworkType, dataProfile, isRoaming, allowRoaming, reason,
@@ -392,10 +398,11 @@ public abstract class DataService extends Service {
         public final int reason;
         public final LinkProperties linkProperties;
         public final int pduSessionId;
+        public final SliceInfo sliceInfo;
         public final IDataServiceCallback callback;
         SetupDataCallRequest(int accessNetworkType, DataProfile dataProfile, boolean isRoaming,
                              boolean allowRoaming, int reason, LinkProperties linkProperties,
-                             int pduSessionId, IDataServiceCallback callback) {
+                             int pduSessionId, SliceInfo sliceInfo, IDataServiceCallback callback) {
             this.accessNetworkType = accessNetworkType;
             this.dataProfile = dataProfile;
             this.isRoaming = isRoaming;
@@ -403,6 +410,7 @@ public abstract class DataService extends Service {
             this.linkProperties = linkProperties;
             this.reason = reason;
             this.pduSessionId = pduSessionId;
+            this.sliceInfo = sliceInfo;
             this.callback = callback;
         }
     }
@@ -513,6 +521,7 @@ public abstract class DataService extends Service {
                             setupDataCallRequest.dataProfile, setupDataCallRequest.isRoaming,
                             setupDataCallRequest.allowRoaming, setupDataCallRequest.reason,
                             setupDataCallRequest.linkProperties, setupDataCallRequest.pduSessionId,
+                            setupDataCallRequest.sliceInfo,
                             (setupDataCallRequest.callback != null)
                                     ? new DataServiceCallback(setupDataCallRequest.callback)
                                     : null);
@@ -676,10 +685,12 @@ public abstract class DataService extends Service {
         @Override
         public void setupDataCall(int slotIndex, int accessNetworkType, DataProfile dataProfile,
                 boolean isRoaming, boolean allowRoaming, int reason,
-                LinkProperties linkProperties, int pduSessionId, IDataServiceCallback callback) {
+                LinkProperties linkProperties, int pduSessionId, SliceInfo sliceInfo,
+                IDataServiceCallback callback) {
             mHandler.obtainMessage(DATA_SERVICE_REQUEST_SETUP_DATA_CALL, slotIndex, 0,
                     new SetupDataCallRequest(accessNetworkType, dataProfile, isRoaming,
-                            allowRoaming, reason, linkProperties, pduSessionId, callback))
+                            allowRoaming, reason, linkProperties, pduSessionId, sliceInfo,
+                            callback))
                     .sendToTarget();
         }
 

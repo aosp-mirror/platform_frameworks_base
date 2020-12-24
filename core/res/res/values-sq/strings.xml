@@ -2009,6 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Mikrofoni"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"po shfaqet mbi aplikacionet e tjera në ekranin tënd"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Jep komentet"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Ky njoftim është promovuar si parazgjedhje. Trokit për të dhënë komente."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Ky njoftim është ulur në nivel si në heshtje. Trokit për të dhënë komente."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Ky njoftim është renditur më lart. Trokit për të dhënë komente."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Ky njoftim është renditur më poshtë. Trokit për të dhënë komente."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Njoftimi i informacionit të \"Modalitetit rutinë\""</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateria mund të mbarojë përpara ngarkimit të zakonshëm"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"\"Kursyesi i baterisë\" u aktivizua për të zgjatur jetëgjatësinë e baterisë"</string>

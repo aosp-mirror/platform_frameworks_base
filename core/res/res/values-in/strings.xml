@@ -2009,6 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Mikrofon"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"ditampilkan di atas aplikasi lain di layar"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Beri Masukan"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Notifikasi ini dipromosikan menjadi Default. Ketuk untuk memberikan masukan."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Notifikasi ini didemosikan menjadi Senyap. Ketuk untuk memberikan masukan."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Notifikasi ini diberi peringkat lebih tinggi. Ketuk untuk memberikan masukan."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Notifikasi ini diberi peringkat lebih rendah. Ketuk untuk memberikan masukan."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notifikasi info Mode Rutinitas"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Baterai mungkin habis sebelum pengisian daya biasanya"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Penghemat Baterai diaktifkan untuk memperpanjang masa pakai baterai"</string>

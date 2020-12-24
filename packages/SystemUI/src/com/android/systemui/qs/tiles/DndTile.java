@@ -20,10 +20,8 @@ import static android.provider.Settings.Global.ZEN_MODE_ALARMS;
 import static android.provider.Settings.Global.ZEN_MODE_OFF;
 
 import android.app.Dialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.ApplicationInfo;
@@ -53,7 +51,6 @@ import com.android.settingslib.notification.EnableZenModeDialog;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SysUIToast;
-import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -78,17 +75,12 @@ public class DndTile extends QSTileImpl<BooleanState> {
     private static final Intent ZEN_PRIORITY_SETTINGS =
             new Intent(Settings.ACTION_ZEN_MODE_PRIORITY_SETTINGS);
 
-    private static final String ACTION_SET_VISIBLE = "com.android.systemui.dndtile.SET_VISIBLE";
-    private static final String EXTRA_VISIBLE = "visible";
-
     private final ZenModeController mController;
     private final DndDetailAdapter mDetailAdapter;
     private final SharedPreferences mSharedPreferences;
-    private final BroadcastDispatcher mBroadcastDispatcher;
 
     private boolean mListening;
     private boolean mShowingDetail;
-    private boolean mReceiverRegistered;
 
     @Inject
     public DndTile(
@@ -100,7 +92,6 @@ public class DndTile extends QSTileImpl<BooleanState> {
             ActivityStarter activityStarter,
             QSLogger qsLogger,
             ZenModeController zenModeController,
-            BroadcastDispatcher broadcastDispatcher,
             @Main SharedPreferences sharedPreferences
     ) {
         super(host, backgroundLooper, mainHandler, metricsLogger, statusBarStateController,
@@ -108,19 +99,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
         mController = zenModeController;
         mSharedPreferences = sharedPreferences;
         mDetailAdapter = new DndDetailAdapter();
-        mBroadcastDispatcher = broadcastDispatcher;
-        broadcastDispatcher.registerReceiver(mReceiver, new IntentFilter(ACTION_SET_VISIBLE));
-        mReceiverRegistered = true;
         mController.observe(getLifecycle(), mZenCallback);
-    }
-
-    @Override
-    protected void handleDestroy() {
-        super.handleDestroy();
-        if (mReceiverRegistered) {
-            mBroadcastDispatcher.unregisterReceiver(mReceiver);
-            mReceiverRegistered = false;
-        }
     }
 
     public static void setVisible(Context context, boolean visible) {
@@ -345,15 +324,6 @@ public class DndTile extends QSTileImpl<BooleanState> {
             if (isShowingDetail()) {
                 mDetailAdapter.updatePanel();
             }
-        }
-    };
-
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final boolean visible = intent.getBooleanExtra(EXTRA_VISIBLE, false);
-            setVisible(mContext, visible);
-            refreshState();
         }
     };
 

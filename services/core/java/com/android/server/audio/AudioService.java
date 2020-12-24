@@ -3467,6 +3467,8 @@ public class AudioService extends IAudioService.Stub
     /** @see AudioManager#getStreamVolume(int) */
     public int getStreamVolume(int streamType) {
         ensureValidStreamType(streamType);
+        Log.e(TAG, "AudioSystem.getDevicesForStream In AudioService from u/pid"
+                + Binder.getCallingUid() + "/" + Binder.getCallingPid());
         int device = getDeviceForStream(streamType);
         synchronized (VolumeStreamState.class) {
             int index = mStreamStates[streamType].getIndex(device);
@@ -7950,6 +7952,8 @@ public class AudioService extends IAudioService.Stub
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
+
+        mAudioSystem.dump(pw);
 
         sLifecycleLogger.dump(pw);
         if (mAudioHandler != null) {

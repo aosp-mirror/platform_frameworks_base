@@ -342,20 +342,6 @@ java_library_static {
     },
 }
 
-java_library_static {
-    name: "android_non_updatable_stubs_current",
-    srcs: [":api-stubs-docs-non-updatable"],
-    defaults: ["android_defaults_stubs_current"],
-    libs: ["sdk_system_29_android"],
-}
-
-java_library_static {
-    name: "android_system_non_updatable_stubs_current",
-    srcs: [":system-api-stubs-docs-non-updatable"],
-    defaults: ["android_defaults_stubs_current"],
-    libs: ["sdk_system_29_android"],
-}
-
 /////////////////////////////////////////////////////////////////////
 // hwbinder.stubs provides APIs required for building HIDL Java
 // libraries.

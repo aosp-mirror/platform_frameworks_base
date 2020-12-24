@@ -181,6 +181,7 @@ cc_library_shared {
                 "android_content_res_Configuration.cpp",
                 "android_security_Scrypt.cpp",
                 "com_android_internal_content_om_OverlayConfig.cpp",
+                "com_android_internal_net_NetworkUtilsInternal.cpp",
                 "com_android_internal_os_ClassLoaderFactory.cpp",
                 "com_android_internal_os_FuseAppLoop.cpp",
                 "com_android_internal_os_KernelCpuUidBpfMapReader.cpp",

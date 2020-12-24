@@ -2009,6 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Mikrofon"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"vises over andre apper på skjermen"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Gi tilbakemelding"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Dette varselet ble oppgradert til standard. Trykk for å gi tilbakemelding."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Dette varselet ble nedgradert til lydløst. Trykk for å gi tilbakemelding."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Dette varselet ble rangert høyere. Trykk for å gi tilbakemelding."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Dette varselet ble rangert lavere. Trykk for å gi tilbakemelding."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Varsel med informasjon om rutinemodus"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Batteriet kan gå tomt før den vanlige ladingen"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batterisparing er aktivert for å forlenge batterilevetiden"</string>

@@ -57,8 +57,6 @@ public interface GroupMembershipManager {
 
     /**
      * Whether this is the only child in a group
-     * TODO: remove this when migrating to the new pipeline, this is taken care of in the
-     * dismissal logic built into NotifCollection
      */
     boolean isOnlyChildInGroup(NotificationEntry entry);
 

@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Kuvakaappauksen tallennus epäonnistui"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Laitteen lukitus täytyy avata ennen kuin kuvakaappaus voidaan tallentaa"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Yritä ottaa kuvakaappaus uudelleen."</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Kuvakaappauksen tallennus epäonnistui, sillä tallennustilaa ei ole riittävästi"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Kuvakaappausta ei voi tallentaa"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Sovellus tai organisaatio ei salli kuvakaappauksien tallentamista."</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Muuta"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Muokkaa kuvakaappausta"</string>
@@ -698,14 +698,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Voi soida tai väristä puhelimen asetuksista riippuen. Näistä keskusteluista (<xliff:g id="APP_NAME">%1$s</xliff:g>) syntyy oletuksena kuplia."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Kelluva sisällön pikakuvake säilyttää huomiosi"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Järjestelmä valitsee, kuuluuko tästä ilmoituksesta ääntä tai väriseekö se"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Tila:&lt;/b&gt; valittu oletusarvoiseksi"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Tila:&lt;/b&gt; hiljennetty"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Tila:&lt;/b&gt; valittu tärkeämmäksi"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Tila:&lt;/b&gt; valittu vähemmän tärkeäksi"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Näkyy keskusteluosion yläosassa kelluvana kuplana, profiilikuva näkyy lukitusnäytöllä"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Asetukset"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Tärkeä"</string>
@@ -724,14 +720,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"Tämä sovellus näkyy näytöllä muiden sovellusten päällä ja käyttää mikrofonia sekä kameraa."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"Asetukset"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"OK"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"Järjestelmä valitsi tämän ilmoituksen automaattisesti &lt;b&gt;oletusarvoiseksi&lt;/b&gt;."</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"Järjestelmä &lt;b&gt;hiljensi&lt;/b&gt; tämän ilmoituksen automaattisesti."</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"Tämä ilmoitus valittiin automaattisesti &lt;b&gt;tärkeämmäksi&lt;/b&gt; ilmoitusalueella."</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"Tämä ilmoitus valittiin automaattisesti &lt;b&gt;vähemmän tärkeäksi&lt;/b&gt; ilmoitusalueella."</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"Oliko tämä oikein?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Kiitos palautteesta!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"OK"</string>

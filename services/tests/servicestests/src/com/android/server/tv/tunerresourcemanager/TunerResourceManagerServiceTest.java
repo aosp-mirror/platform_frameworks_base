@@ -815,6 +815,14 @@ public class TunerResourceManagerServiceTest {
                 shareClientId1[0],
                 400/*priority*/,
                 0/*niceValue*/);
+        mTunerResourceManagerService.updateClientPriorityInternal(
+                shareClientId1[0],
+                -1/*invalid priority*/,
+                0/*niceValue*/);
+        assertThat(mTunerResourceManagerService
+                .getClientProfile(shareClientId1[0])
+                .getPriority())
+                .isEqualTo(400);
 
         /**** Init Frontend Resources ****/
 

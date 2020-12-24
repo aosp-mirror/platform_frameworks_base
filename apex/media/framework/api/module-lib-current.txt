@@ -1,6 +1,11 @@
 // Signature format: 2.0
 package android.media {
 
+  public class MediaFrameworkInitializer {
+    method public static void registerServiceWrappers();
+    method public static void setMediaServiceManager(@NonNull android.media.MediaServiceManager);
+  }
+
   @Deprecated public final class MediaParceledListSlice<T extends android.os.Parcelable> implements android.os.Parcelable {
     ctor @Deprecated public MediaParceledListSlice(@NonNull java.util.List<T>);
     method @Deprecated public int describeContents();

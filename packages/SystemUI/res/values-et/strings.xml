@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Ekraanipilti ei õnnestunud salvestada"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Enne ekraanipildi salvestamist tuleb seade avada"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Proovige ekraanipilt uuesti jäädvustada"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Piiratud salvestusruumi tõttu ei saa ekraanipilti salvestada"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Ekraanipilti ei saa salvestada"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Rakendus või teie organisatsioon ei luba ekraanipilte jäädvustada"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Muutmine"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Ekraanipildi muutmine"</string>
@@ -524,7 +524,7 @@
     <string name="disable_vpn" msgid="482685974985502922">"Keela VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Katkesta VPN-i ühendus"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Kuva eeskirjad"</string>
-    <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Kuva järelevalve haldamine"</string>
+    <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Kuva haldusvalikud"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"See seade kuulub organisatsioonile <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nIT-administraator saab jälgida ning hallata seadeid, ettevõttesisest juurdepääsu, rakendusi, seadmega seotud andmeid ja seadme asukohateavet.\n\nLisateabe saamiseks võtke ühendust IT-administraatoriga."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"See seade kuulub teie organisatsioonile.\n\nIT-administraator saab jälgida ning hallata seadeid, ettevõttesisest juurdepääsu, rakendusi, seadmega seotud andmeid ja seadme asukohateavet.\n\nLisateabe saamiseks võtke ühendust IT-administraatoriga."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Teie organisatsioon installis sellesse seadmesse sertifikaadi volituse. Teie turvalist võrguliiklust võidakse jälgida ja muuta."</string>
@@ -548,7 +548,7 @@
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"Teie administraator on sisse lülitanud võrgu logimise funktsiooni, mis jälgib teie seadmes liiklust.\n\nLisateabe saamiseks võtke ühendust administraatoriga."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"Andsite rakendusele loa VPN-i ühenduse seadistamiseks.\n\nSee rakendus võib jälgida teie seadet ja võrgutegevusi, sh meile, rakendusi ja veebisaite."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"Teie tööprofiili haldab <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministraator saab jälgida teie töökoha võrgutegevusi, sh meile, rakendusi ja veebisaite.\n\nLisateabe saamiseks võtke ühendust administraatoriga.\n\nTeil on ühendus ka VPN-iga, mis saab teie võrgutegevusi jälgida."</string>
-    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Seda seadet haldab sinu vanem. Sinu vanem näeb ja saab hallata teavet, näiteks kasutatavaid rakendusi, asukohta ja ekraaniaega."</string>
+    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Seda seadet haldab sinu vanem. Sinu vanem näeb ja saab hallata teavet, näiteks kasutatavaid rakendusi, sinu asukohta ja ekraaniaega."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="monitoring_description_app" msgid="376868879287922929">"Olete ühendatud rakendusega <xliff:g id="APPLICATION">%1$s</xliff:g>, mis võib jälgida teie võrgutegevusi, sh meile, rakendusi ja veebisaite."</string>
     <string name="monitoring_description_app_personal" msgid="1970094872688265987">"Teie seade on ühendatud rakendusega <xliff:g id="APPLICATION">%1$s</xliff:g>, mis võib jälgida teie isiklikke võrgutegevusi, sh meile, rakendusi ja veebisaite."</string>
@@ -698,14 +698,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Võib telefoni seadete põhjal heliseda või vibreerida. Rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> vestlused kuvatakse vaikimisi mullis."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Hoiab teie tähelepanu hõljuva otseteega selle sisu juurde."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Laske süsteemil määrata, kas selle märguande puhul peaks esitama heli või vibreerima"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Olek:&lt;/b&gt; määrati prioriteet Vaikimisi"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Olek:&lt;/b&gt; määrati prioriteet Vaikne"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Olek:&lt;/b&gt; määrati kõrgem prioriteet"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Olek:&lt;/b&gt; määrati madalam prioriteet"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Kuvatakse vestluste jaotise ülaosas hõljuva mullina ja lukustuskuval kuvatakse profiilipilt"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Seaded"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioriteetne"</string>
@@ -724,14 +720,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"See rakendus kuvatakse teie ekraanil muude rakenduste peal ning see kasutab mikrofoni ja kaamerat."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"Seaded"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"OK"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"Süsteem määras sellele märguandele automaatselt prioriteedi &lt;b&gt;Vaikimisi&lt;/b&gt;."</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"Süsteem määras sellele märguandele automaatselt prioriteedi &lt;b&gt;Vaikne&lt;/b&gt;."</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"Sellele märguandele määrati teie märguandealas automaatselt &lt;b&gt;kõrgem prioriteet&lt;/b&gt;."</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"Sellele märguandele määrati teie märguandealas automaatselt &lt;b&gt;madalam prioriteet&lt;/b&gt;."</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"Kas see oli õige?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Täname tagasiside eest!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"OK"</string>

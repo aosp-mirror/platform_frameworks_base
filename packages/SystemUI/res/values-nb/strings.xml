@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Kunne ikke lagre skjermdump"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Enheten må være låst opp før skjermdumpen kan lagres"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Prøv å ta skjermdump på nytt"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Kan ikke lagre skjermdumpen på grunn av begrenset lagringsplass"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Kan ikke lagre skjermdumpen"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Appen eller organisasjonen din tillater ikke at du tar skjermdumper"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Rediger"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Rediger skjermdumpen"</string>
@@ -698,14 +698,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Kan ringe eller vibrere basert på telefoninnstillingene. Samtaler fra <xliff:g id="APP_NAME">%1$s</xliff:g> lager bobler som standard."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Holder deg oppmerksom med en svevende snarvei til dette innholdet."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"La systemet velge om dette varselet skal lage lyd eller vibrere"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Status:&lt;/b&gt; Oppgradert til standard"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Status:&lt;/b&gt; Nedgradert til lydløst"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Status:&lt;/b&gt; Rangert høyere"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Status:&lt;/b&gt; Rangert lavere"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Vises øverst i samtaledelen, vises som en flytende boble, viser profilbildet på låseskjermen"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Innstillinger"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
@@ -724,14 +720,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"Denne appen vises over andre apper på skjermen, og bruker mikrofonen og kameraet."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"Innstillinger"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"OK"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"Dette varselet ble automatisk &lt;b&gt;oppgradert til standard&lt;/b&gt; av systemet."</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"Dette varselet ble automatisk &lt;b&gt;nedgradert til lydløst&lt;/b&gt; av systemet."</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"Dette varselet ble automatisk &lt;b&gt;rangert høyere&lt;/b&gt; i panelet."</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"Dette varselet ble automatisk &lt;b&gt;rangert lavere&lt;/b&gt; i panelet."</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"Var det riktig?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Takk for tilbakemeldingen!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"OK"</string>

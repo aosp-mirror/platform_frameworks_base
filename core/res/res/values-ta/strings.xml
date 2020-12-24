@@ -2009,6 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"மைக்ரோஃபோன்"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"உங்கள் திரையில் உள்ள பிற ஆப்ஸின் மேல் காட்டுகிறது"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"கருத்து தெரிவியுங்கள்"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"இந்த அறிவிப்பின் முக்கியத்துவம் இயல்புநிலைக்கு உயர்த்தி அமைக்கப்பட்டது. கருத்து தெரிவிக்க தட்டவும்."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"இந்த அறிவிப்பின் முக்கியத்துவம் நிசப்த நிலைக்குக் குறைத்து அமைக்கப்பட்டது. கருத்து தெரிவிக்க தட்டவும்."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"இந்த அறிவிப்பின் முக்கியத்துவம் உயர்த்தப்பட்டது. கருத்து தெரிவிக்க தட்டவும்."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"இந்த அறிவிப்பின் முக்கியத்துவம் குறைக்கப்பட்டது. கருத்து தெரிவிக்க தட்டவும்."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"வழக்கமான பேட்டரி சேமிப்பானுக்கான விவர அறிவிப்பு"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"வழக்கமாகச் சார்ஜ் செய்வதற்கு முன்பே பேட்டரி தீர்ந்துபோகக்கூடும்"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"பேட்டரி நிலையை நீட்டிக்க பேட்டரி சேமிப்பான் இயக்கப்பட்டுள்ளது"</string>

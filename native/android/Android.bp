@@ -103,7 +103,7 @@ cc_library_shared {
     version_script: "libandroid.map.txt",
     stubs: {
         symbol_file: "libandroid.map.txt",
-        versions: ["29"],
+        versions: ["29", "31"],
     },
 }
 

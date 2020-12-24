@@ -2009,6 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Imakrofoni"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"iboniswa ngaphezulu kwezinye izinhlelo zokusebenza kusikrini sakho"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Nikeza impendulo"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Lesi saziso siphromothelwe Kokuzenzakalelayo. Thepha ukuze unikeze impendulo."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Lesi saziso sehliselwe esikhundleni Sokuthula. Thepha ukuze unikeze impendulo."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Lesi saziso sibekwe ezingeni eliphakeme. Thepha ukuze unikeze impendulo."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Lesi saziso sibekwe ezingeni eliphansi. Thepha ukuze unikeze impendulo."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Isaziso solwazi lwe-Routine Mode"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Ibhethri lingaphela ngaphambi kokushaja okuvamile"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Isilondolozi sebhethri siyasebenza ngaphandle kwempilo yebhethri"</string>

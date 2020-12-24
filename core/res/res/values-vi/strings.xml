@@ -2009,6 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Micrô"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"hiển thị qua các ứng dụng khác trên màn hình của bạn"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Gửi ý kiến phản hồi"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Hệ thống đã nâng mức ưu tiên của thông báo này lên thành Mặc định. Hãy nhấn để chia sẻ ý kiến phản hồi."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Hệ thống đã hạ mức ưu tiên của thông báo này xuống thành Im lặng. Hãy nhấn để chia sẻ ý kiến phản hồi."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Hệ thống đã nâng mức ưu tiên của thông báo này. Hãy nhấn để chia sẻ ý kiến phản hồi."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Hệ thống đã hạ mức ưu tiên của thông báo này. Hãy nhấn để chia sẻ ý kiến phản hồi."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Thông báo cung cấp thông tin về chế độ sạc thông thường"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Pin có thể hết trước khi sạc bình thường"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Trình tiết kiệm pin được kích hoạt để kéo dài thời lượng pin"</string>

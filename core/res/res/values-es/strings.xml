@@ -2009,6 +2009,14 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Micrófono"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"se muestra sobre otras aplicaciones que haya en la pantalla"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Enviar comentarios"</string>
+    <!-- no translation found for notification_feedback_indicator_alerted (6552871804121942099) -->
+    <skip />
+    <!-- no translation found for notification_feedback_indicator_silenced (3799442124723177262) -->
+    <skip />
+    <!-- no translation found for notification_feedback_indicator_promoted (9030204303764698640) -->
+    <skip />
+    <!-- no translation found for notification_feedback_indicator_demoted (8880309924296450875) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificación sobre el modo rutina"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Quizás se agote la batería antes de lo habitual"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Se ha activado el modo Ahorro de batería para aumentar la duración de la batería"</string>

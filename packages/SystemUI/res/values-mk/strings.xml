@@ -85,7 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Не може да се зачува слика од екранот"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Уредот мора да биде отклучен за да може да се зачува слика од екранот"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Повторно обидете се да направите слика од екранот"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Сликата од екранот не може да се зачува поради ограничена меморија"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Не може да се зачува слика од екранот"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Апликацијата или вашата организација не дозволува снимање слики од екранот"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Измени"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Изменете ја сликата од екранот"</string>
@@ -548,7 +548,7 @@
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"Вашиот администратор вклучил евиденција на мрежата, што подразбира следење на сообраќајот на вашиот уред.\n\nЗа повеќе информации, контактирајте со администраторот."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"Дозволивте апликацијата да постави поврзување преку ВПН.\n\nАпликацијата може да го следи уредот и активноста на мрежата, вклучувајќи ги е-пораките, апликациите и веб-локациите."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> управува со вашиот работен профил.\n\nАдминистратор е во можност да ја следи вашата активност на мрежата, вклучувајќи ги е-пораките, апликациите и веб-локациите.\n\nЗа повеќе информации, контактирајте со администраторот.\n\nYИсто така, поврзани сте на VPN којашто може да ја следи вашата активност на мрежата."</string>
-    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Родителот управува со уредов. Родителот може да прегледува и управува со податоците, како што се апликациите што ги користите, вашата локација и време поминато на уредот."</string>
+    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Родителот управува со уредов. Родителот може да прегледува и управува со податоците, како што се апликациите што ги користиш, твојата локација и времето поминато на уредот."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"ВПН"</string>
     <string name="monitoring_description_app" msgid="376868879287922929">"Поврзани сте на <xliff:g id="APPLICATION">%1$s</xliff:g>, што може да ја следи вашата активност на мрежата, заедно со е-пораките, апликациите и веб-сајтовите."</string>
     <string name="monitoring_description_app_personal" msgid="1970094872688265987">"Поврзани сте на <xliff:g id="APPLICATION">%1$s</xliff:g>, којашто може да ја следи вашата лична активност на мрежата, вклучувајќи ги е-пораките, апликациите и веб-локациите."</string>
@@ -698,14 +698,10 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Може да ѕвони или вибрира во зависност од поставките на телефонот Стандардно, разговорите од <xliff:g id="APP_NAME">%1$s</xliff:g> се во балончиња."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Ви го задржува вниманието со лебдечка кратенка на содржинава."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Дозволете системот да определи дали известувањево треба да испушти звук или да вибрира"</string>
-    <!-- no translation found for notification_channel_summary_automatic_alerted (954166812246932240) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_silenced (7403004439649872047) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_promoted (1301710305149590426) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_automatic_demoted (1831303964660807700) -->
-    <skip />
+    <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Статус:&lt;/b&gt; поставено на „Стандардно“"</string>
+    <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Статус:&lt;/b&gt; намалено на „Тивко“"</string>
+    <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Статус:&lt;/b&gt; рангирано повисоко"</string>
+    <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Статус:&lt;/b&gt; рангирано пониско"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Се појавува на горниот дел од секцијата на разговорот во вид на лебдечко меурче, покажувајќи ја профилната слика на заклучениот екран"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Поставки"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Приоритетно"</string>
@@ -724,14 +720,10 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"Апликацијава се прикажува врз други апликации на вашиот екран и ги користи микрофонот и камерата."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"Поставки"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"Во ред"</string>
-    <!-- no translation found for feedback_alerted (5192459808484271208) -->
-    <skip />
-    <!-- no translation found for feedback_silenced (9116540317466126457) -->
-    <skip />
-    <!-- no translation found for feedback_promoted (2125562787759780807) -->
-    <skip />
-    <!-- no translation found for feedback_demoted (951884763467110604) -->
-    <skip />
+    <string name="feedback_alerted" msgid="5192459808484271208">"Известувањево беше автоматски &lt;b&gt;поставено на „Стандардно“&lt;/b&gt; од страна на системот."</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"Известувањево беше автоматски &lt;b&gt;намалено на „Тивко“&lt;/b&gt; од страна на системот."</string>
+    <string name="feedback_promoted" msgid="2125562787759780807">"Известувањево беше автоматски &lt;b&gt;рангирано повисоко&lt;/b&gt; во нијансите за известувања."</string>
+    <string name="feedback_demoted" msgid="951884763467110604">"Известувањево беше автоматски &lt;b&gt;рангирано пониско&lt;/b&gt; во нијансите за известувања."</string>
     <string name="feedback_prompt" msgid="2278631214125128281">"Дали ова беше точно?"</string>
     <string name="feedback_response" msgid="4671729244976641339">"Фала за повратните информации!"</string>
     <string name="feedback_ok" msgid="6481426753298857144">"Во ред"</string>
