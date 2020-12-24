@@ -242,6 +242,13 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     }
 
     /**
+     * Implement this to know when a notification is clicked by user.
+     * @param key the notification key
+     */
+    public void onNotificationClicked(@NonNull String key) {
+    }
+
+    /**
      * Implement this to know when a user has changed which features of
      * their notifications the assistant can modify.
      * <p> Query {@link NotificationManager#getAllowedAssistantAdjustments()} to see what
@@ -422,6 +429,13 @@ public abstract class NotificationAssistantService extends NotificationListenerS
         }
 
         @Override
+        public void onNotificationClicked(String key) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = key;
+            mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATION_CLICKED, args).sendToTarget();
+        }
+
+        @Override
         public void onAllowedAdjustmentsChanged() {
             mHandler.obtainMessage(MyHandler.MSG_ON_ALLOWED_ADJUSTMENTS_CHANGED).sendToTarget();
         }
@@ -445,6 +459,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
         public static final int MSG_ON_PANEL_REVEALED = 9;
         public static final int MSG_ON_PANEL_HIDDEN = 10;
         public static final int MSG_ON_NOTIFICATION_VISIBILITY_CHANGED = 11;
+        public static final int MSG_ON_NOTIFICATION_CLICKED = 12;
 
         public MyHandler(Looper looper) {
             super(looper, null, false);
@@ -548,6 +563,13 @@ public abstract class NotificationAssistantService extends NotificationListenerS
                     boolean isVisible = args.argi1 == 1;
                     args.recycle();
                     onNotificationVisibilityChanged(key, isVisible);
+                    break;
+                }
+                case MSG_ON_NOTIFICATION_CLICKED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    String key = (String) args.arg1;
+                    args.recycle();
+                    onNotificationClicked(key);
                     break;
                 }
             }
