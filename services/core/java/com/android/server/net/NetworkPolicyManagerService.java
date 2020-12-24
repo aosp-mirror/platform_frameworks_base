@@ -236,6 +236,7 @@ import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
+import com.android.server.connectivity.MultipathPolicyTracker;
 import com.android.server.usage.AppStandbyInternal;
 import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
@@ -413,6 +414,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private final Clock mClock;
     private final UserManager mUserManager;
     private final CarrierConfigManager mCarrierConfigManager;
+    private final MultipathPolicyTracker mMultipathPolicyTracker;
 
     private IConnectivityManager mConnManager;
     private PowerManagerInternal mPowerManagerInternal;
@@ -653,7 +655,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mPolicyFile = new AtomicFile(new File(systemDir, "netpolicy.xml"), "net-policy");
 
         mAppOps = context.getSystemService(AppOpsManager.class);
-
+        mMultipathPolicyTracker = new MultipathPolicyTracker(mContext, mHandler);
         // Expose private service for system components to use.
         LocalServices.addService(NetworkPolicyManagerInternal.class,
                 new NetworkPolicyManagerInternalImpl());
@@ -921,6 +923,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             if (!initCompleteSignal.await(30, TimeUnit.SECONDS)) {
                 throw new IllegalStateException("Service " + TAG +" init timeout");
             }
+            mMultipathPolicyTracker.start();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Service " + TAG + " init interrupted", e);
@@ -3454,6 +3457,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    /**
+     * Get multipath preference value for the given network.
+     */
+    public int getMultipathPreference(Network network) {
+        final Integer preference = mMultipathPolicyTracker.getMultipathPreference(network);
+        if (preference != null) {
+            return preference;
+        }
+        return 0;
+    }
+
     @Override
     protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, writer)) return;
@@ -3674,6 +3688,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 mLogger.dumpLogs(fout);
             }
         }
+        fout.println();
+        mMultipathPolicyTracker.dump(fout);
     }
 
     @Override
