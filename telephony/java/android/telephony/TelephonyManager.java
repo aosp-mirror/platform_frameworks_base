@@ -564,9 +564,10 @@ public class TelephonyManager {
     /**
      * Indicates the maximum size of the call composure picture.
      *
-     * Pictures sent via {@link #uploadCallComposerPicture(InputStream, Executor, OutcomeReceiver)}
-     * or {@link #uploadCallComposerPicture(Path, Executor, OutcomeReceiver)} must not exceed this
-     * size, or an error will be returned via the callback in those methods.
+     * Pictures sent via
+     * {@link #uploadCallComposerPicture(InputStream, String, Executor, OutcomeReceiver)}
+     * or {@link #uploadCallComposerPicture(Path, String, Executor, OutcomeReceiver)} must not
+     * exceed this size, or an error will be returned via the callback in those methods.
      *
      * @return Maximum file size in bytes.
      */
@@ -4310,6 +4311,15 @@ public class TelephonyManager {
          */
         public static final int ERROR_IO_EXCEPTION = 5;
 
+        /**
+         * Indicates that the device is currently not connected to a network that's capable of
+         * reaching a carrier's RCS servers.
+         *
+         * Clients should prompt the user to remedy the issue by moving to an area with better
+         * signal, by connecting to a different network, or to retry at another time.
+         */
+        public static final int ERROR_NETWORK_UNAVAILABLE = 6;
+
         /** @hide */
         @IntDef(prefix = {"ERROR_"}, value = {
                 ERROR_UNKNOWN,
@@ -4318,7 +4328,9 @@ public class TelephonyManager {
                 ERROR_AUTHENTICATION_FAILED,
                 ERROR_INPUT_CLOSED,
                 ERROR_IO_EXCEPTION,
+                ERROR_NETWORK_UNAVAILABLE,
         })
+
         @Retention(RetentionPolicy.SOURCE)
         public @interface CallComposerError {}
 
@@ -4355,14 +4367,16 @@ public class TelephonyManager {
     /**
      * Uploads a picture to the carrier network for use with call composer.
      *
-     * @see #uploadCallComposerPicture(InputStream, Executor, OutcomeReceiver)
+     * @see #uploadCallComposerPicture(InputStream, String, Executor, OutcomeReceiver)
      * @param pictureToUpload Path to a local file containing the picture to upload.
+     * @param contentType The MIME type of the picture you're uploading (e.g. image/jpeg)
      * @param executor The {@link Executor} on which the {@code pictureToUpload} file will be read
      *                 from disk, as well as on which {@code callback} will be called.
      * @param callback A callback called when the upload operation terminates, either in success
      *                 or in error.
      */
     public void uploadCallComposerPicture(@NonNull Path pictureToUpload,
+            @NonNull String contentType,
             @CallbackExecutor @NonNull Executor executor,
             @NonNull OutcomeReceiver<ParcelUuid, CallComposerException> callback) {
         Objects.requireNonNull(pictureToUpload);
@@ -4390,7 +4404,7 @@ public class TelephonyManager {
                 }
                 InputStream fileStream = Files.newInputStream(pictureToUpload);
                 try {
-                    uploadCallComposerPicture(fileStream, executor,
+                    uploadCallComposerPicture(fileStream, contentType, executor,
                             new OutcomeReceiver<ParcelUuid, CallComposerException>() {
                                 @Override
                                 public void onResult(ParcelUuid result) {
@@ -4455,12 +4469,14 @@ public class TelephonyManager {
      *                        of {@link #getMaximumCallComposerPictureSize()}, the upload will be
      *                        aborted and the callback will be called with an exception containing
      *                        {@link CallComposerException#ERROR_FILE_TOO_LARGE}.
+     * @param contentType The MIME type of the picture you're uploading (e.g. image/jpeg)
      * @param executor The {@link Executor} on which the {@code pictureToUpload} stream will be
      *                 read, as well as on which the callback will be called.
      * @param callback A callback called when the upload operation terminates, either in success
      *                 or in error.
      */
     public void uploadCallComposerPicture(@NonNull InputStream pictureToUpload,
+            @NonNull String contentType,
             @CallbackExecutor @NonNull Executor executor,
             @NonNull OutcomeReceiver<ParcelUuid, CallComposerException> callback) {
         Objects.requireNonNull(pictureToUpload);
@@ -4488,7 +4504,7 @@ public class TelephonyManager {
 
         try {
             telephony.uploadCallComposerPicture(getSubId(), mContext.getOpPackageName(),
-                    readFd, new ResultReceiver(null) {
+                    contentType, readFd, new ResultReceiver(null) {
                         @Override
                         protected void onReceiveResult(int resultCode, Bundle result) {
                             if (resultCode != CallComposerException.SUCCESS) {
