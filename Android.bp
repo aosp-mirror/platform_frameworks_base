@@ -1217,7 +1217,10 @@ filegroup {
         "core/java/com/android/internal/util/StateMachine.java",
         "core/java/com/android/internal/util/WakeupMessage.java",
     ],
-    visibility: ["//frameworks/opt/net/wifi/service"],
+    visibility: [
+        "//frameworks/opt/net/wifi/service",
+        "//packages/modules/Wifi/service",
+    ],
 }
 
 // TODO(b/145644363): move this to under StubLibraries.bp or ApiDocs.bp
