@@ -201,7 +201,6 @@ import com.android.server.connectivity.IpConnectivityMetrics;
 import com.android.server.connectivity.KeepaliveTracker;
 import com.android.server.connectivity.LingerMonitor;
 import com.android.server.connectivity.MockableSystemProperties;
-import com.android.server.connectivity.MultipathPolicyTracker;
 import com.android.server.connectivity.NetworkAgentInfo;
 import com.android.server.connectivity.NetworkDiagnostics;
 import com.android.server.connectivity.NetworkNotificationManager;
@@ -442,11 +441,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private static final int EVENT_EXPIRE_NET_TRANSITION_WAKELOCK = 24;
 
     /**
-     * Used internally to indicate the system is ready.
-     */
-    private static final int EVENT_SYSTEM_READY = 25;
-
-    /**
      * used to add a network request with a pending intent
      * obj = NetworkRequestInfo
      */
@@ -659,9 +653,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     @VisibleForTesting
     final MultinetworkPolicyTracker mMultinetworkPolicyTracker;
-
-    @VisibleForTesting
-    final MultipathPolicyTracker mMultipathPolicyTracker;
 
     @VisibleForTesting
     final Map<IBinder, ConnectivityDiagnosticsCallbackInfo> mConnectivityDiagnosticsCallbacks =
@@ -1166,8 +1157,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mMultinetworkPolicyTracker = mDeps.makeMultinetworkPolicyTracker(
                 mContext, mHandler, () -> rematchForAvoidBadWifiUpdate());
         mMultinetworkPolicyTracker.start();
-
-        mMultipathPolicyTracker = new MultipathPolicyTracker(mContext, mHandler);
 
         mDnsManager = new DnsManager(mContext, mDnsResolver);
         registerPrivateDnsSettingsCallbacks();
@@ -2315,10 +2304,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
      */
     @VisibleForTesting
     public void systemReadyInternal() {
-        // Let PermissionMonitor#startMonitoring() running in the beginning of the systemReady
-        // before MultipathPolicyTracker.start(). Since mApps in PermissionMonitor needs to be
-        // populated first to ensure that listening network request which is sent by
-        // MultipathPolicyTracker won't be added NET_CAPABILITY_FOREGROUND capability.
+        // Since mApps in PermissionMonitor needs to be populated first to ensure that
+        // listening network request which is sent by MultipathPolicyTracker won't be added
+        // NET_CAPABILITY_FOREGROUND capability. Thus, MultipathPolicyTracker.start() must
+        // be called after PermissionMonitor#startMonitoring().
+        // Calling PermissionMonitor#startMonitoring() in systemReadyInternal() and the
+        // MultipathPolicyTracker.start() is called in NetworkPolicyManagerService#systemReady()
+        // to ensure the tracking will be initialized correctly.
         mPermissionMonitor.startMonitoring();
         mProxyTracker.loadGlobalProxy();
         registerNetdEventCallback();
@@ -2337,8 +2329,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         // Create network requests for always-on networks.
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_CONFIGURE_ALWAYS_ON_NETWORKS));
-
-        mHandler.sendMessage(mHandler.obtainMessage(EVENT_SYSTEM_READY));
     }
 
     /**
@@ -2638,7 +2628,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         dumpAvoidBadWifiSettings(pw);
 
         pw.println();
-        mMultipathPolicyTracker.dump(pw);
 
         if (ArrayUtils.contains(args, SHORT_ARG) == false) {
             pw.println();
@@ -4186,11 +4175,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return ConnectivityManager.MULTIPATH_PREFERENCE_UNMETERED;
         }
 
-        Integer networkPreference = mMultipathPolicyTracker.getMultipathPreference(network);
-        if (networkPreference != null) {
+        final NetworkPolicyManager netPolicyManager =
+                 mContext.getSystemService(NetworkPolicyManager.class);
+
+        final int networkPreference = netPolicyManager.getMultipathPreference(network);
+        if (networkPreference != 0) {
             return networkPreference;
         }
-
         return mMultinetworkPolicyTracker.getMeteredMultipathPreference();
     }
 
@@ -4292,10 +4283,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     int slot = msg.arg1;
                     int reason = msg.arg2;
                     mKeepaliveTracker.handleStopKeepalive(nai, slot, reason);
-                    break;
-                }
-                case EVENT_SYSTEM_READY: {
-                    mMultipathPolicyTracker.start();
                     break;
                 }
                 case EVENT_REVALIDATE_NETWORK: {
