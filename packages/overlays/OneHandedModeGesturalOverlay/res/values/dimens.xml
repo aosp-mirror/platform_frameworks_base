@@ -18,5 +18,5 @@
 -->
 <resources>
     <!-- The height of the bottom navigation gesture area. -->
-    <dimen name="navigation_bar_gesture_height">80dp</dimen>
+    <dimen name="navigation_bar_gesture_larger_height">80dp</dimen>
 </resources>
