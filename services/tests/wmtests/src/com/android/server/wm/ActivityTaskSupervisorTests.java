@@ -31,13 +31,17 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 
 import android.app.WaitResult;
+import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
+import android.os.ConditionVariable;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
 
@@ -58,6 +62,7 @@ import java.util.concurrent.TimeUnit;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class ActivityTaskSupervisorTests extends WindowTestsBase {
+    private static final long TIMEOUT_MS = TimeUnit.SECONDS.toMillis(10);
 
     /**
      * Ensures that an activity is removed from the stopping activities list once it is resumed.
@@ -74,30 +79,72 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
     }
 
     /**
-     * Ensures that waiting results are notified of launches.
+     * Assume an activity has been started with result code START_SUCCESS. And before it is drawn,
+     * it launches another existing activity. This test ensures that waiting results are notified
+     * or updated while the result code of next launch is TASK_TO_FRONT or DELIVERED_TO_TOP.
      */
     @Test
-    public void testReportWaitingActivityLaunchedIfNeeded() {
+    public void testReportWaitingActivityLaunched() {
         final ActivityRecord firstActivity = new ActivityBuilder(mAtm)
                 .setCreateTask(true).build();
-
+        final ActivityRecord secondActivity = new ActivityBuilder(mAtm)
+                .setCreateTask(true).build();
+        final ConditionVariable condition = new ConditionVariable();
         final WaitResult taskToFrontWait = new WaitResult();
-        mSupervisor.mWaitingActivityLaunched.add(taskToFrontWait);
-        // #notifyAll will be called on the ActivityTaskManagerService#mGlobalLock. The lock is hold
-        // implicitly by WindowManagerGlobalLockRule.
-        mSupervisor.reportWaitingActivityLaunchedIfNeeded(firstActivity, START_TASK_TO_FRONT);
+        final ComponentName[] launchedComponent = { null };
+        // Create a new thread so the waiting method in test can be notified.
+        new Thread(() -> {
+            synchronized (mAtm.mGlobalLock) {
+                // Note that TASK_TO_FRONT doesn't unblock the waiting thread.
+                mSupervisor.reportWaitingActivityLaunchedIfNeeded(firstActivity,
+                        START_TASK_TO_FRONT);
+                launchedComponent[0] = taskToFrontWait.who;
+                // Assume that another task is brought to front because first activity launches it.
+                mSupervisor.reportActivityLaunched(false /* timeout */, secondActivity,
+                        100 /* totalTime */, WaitResult.LAUNCH_STATE_HOT);
+            }
+            condition.open();
+        }).start();
+        final ActivityMetricsLogger.LaunchingState launchingState =
+                new ActivityMetricsLogger.LaunchingState();
+        spyOn(launchingState);
+        doReturn(true).when(launchingState).contains(eq(secondActivity));
+        // The test case already runs inside global lock, so above thread can only execute after
+        // this waiting method that releases the lock.
+        mSupervisor.waitActivityVisibleOrLaunched(taskToFrontWait, firstActivity, launchingState);
 
-        assertThat(mSupervisor.mWaitingActivityLaunched).isEmpty();
+        // Assert that the thread is finished.
+        assertTrue(condition.block(TIMEOUT_MS));
         assertEquals(taskToFrontWait.result, START_TASK_TO_FRONT);
-        assertNull(taskToFrontWait.who);
+        assertEquals(taskToFrontWait.who, secondActivity.mActivityComponent);
+        assertEquals(taskToFrontWait.launchState, WaitResult.LAUNCH_STATE_HOT);
+        // START_TASK_TO_FRONT means that another component will be visible, so the component
+        // should not be assigned as the first activity.
+        assertNull(launchedComponent[0]);
 
+        condition.close();
         final WaitResult deliverToTopWait = new WaitResult();
-        mSupervisor.mWaitingActivityLaunched.add(deliverToTopWait);
-        mSupervisor.reportWaitingActivityLaunchedIfNeeded(firstActivity, START_DELIVERED_TO_TOP);
+        new Thread(() -> {
+            synchronized (mAtm.mGlobalLock) {
+                // Put a noise which isn't tracked by the current wait result. The waiting procedure
+                // should ignore it and keep waiting for the target activity.
+                mSupervisor.reportActivityLaunched(false /* timeout */, mock(ActivityRecord.class),
+                        1000 /* totalTime */, WaitResult.LAUNCH_STATE_COLD);
+                // Assume that the first activity launches an existing top activity, so the waiting
+                // thread should be unblocked.
+                mSupervisor.reportWaitingActivityLaunchedIfNeeded(secondActivity,
+                        START_DELIVERED_TO_TOP);
+            }
+            condition.open();
+        }).start();
+        mSupervisor.waitActivityVisibleOrLaunched(deliverToTopWait, firstActivity, launchingState);
 
-        assertThat(mSupervisor.mWaitingActivityLaunched).isEmpty();
+        assertTrue(condition.block(TIMEOUT_MS));
         assertEquals(deliverToTopWait.result, START_DELIVERED_TO_TOP);
-        assertEquals(deliverToTopWait.who, firstActivity.mActivityComponent);
+        assertEquals(deliverToTopWait.who, secondActivity.mActivityComponent);
+        // The result state must be unknown because DELIVERED_TO_TOP means that the target activity
+        // is already visible so there is no valid launch time.
+        assertEquals(deliverToTopWait.launchState, WaitResult.LAUNCH_STATE_UNKNOWN);
     }
 
     /**
@@ -202,7 +249,6 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
     public void testStartHomeAfterUserUnlocked() {
         mSupervisor.onUserUnlocked(0);
         waitHandlerIdle(mAtm.mH);
-        verify(mRootWindowContainer, timeout(TimeUnit.SECONDS.toMillis(10)))
-                .startHomeOnEmptyDisplays("userUnlocked");
+        verify(mRootWindowContainer, timeout(TIMEOUT_MS)).startHomeOnEmptyDisplays("userUnlocked");
     }
 }

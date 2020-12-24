@@ -707,8 +707,12 @@ class ActivityStarter {
                 // WaitResult.
                 mSupervisor.getActivityMetricsLogger().notifyActivityLaunched(launchingState, res,
                         mLastStartActivityRecord, originalOptions);
-                return getExternalResult(mRequest.waitResult == null ? res
-                        : waitForResult(res, mLastStartActivityRecord));
+                if (mRequest.waitResult != null) {
+                    mRequest.waitResult.result = res;
+                    res = waitResultIfNeeded(mRequest.waitResult, mLastStartActivityRecord,
+                            launchingState);
+                }
+                return getExternalResult(res);
             }
         } finally {
             onExecutionComplete();
@@ -793,48 +797,21 @@ class ActivityStarter {
     /**
      * Wait for activity launch completes.
      */
-    private int waitForResult(int res, ActivityRecord r) {
-        mRequest.waitResult.result = res;
-        switch(res) {
-            case START_SUCCESS: {
-                mSupervisor.mWaitingActivityLaunched.add(mRequest.waitResult);
-                do {
-                    try {
-                        mService.mGlobalLock.wait();
-                    } catch (InterruptedException e) {
-                    }
-                } while (mRequest.waitResult.result != START_TASK_TO_FRONT
-                        && !mRequest.waitResult.timeout && mRequest.waitResult.who == null);
-                if (mRequest.waitResult.result == START_TASK_TO_FRONT) {
-                    res = START_TASK_TO_FRONT;
-                }
-                break;
-            }
-            case START_DELIVERED_TO_TOP: {
-                mRequest.waitResult.timeout = false;
-                mRequest.waitResult.who = r.mActivityComponent;
-                mRequest.waitResult.totalTime = 0;
-                break;
-            }
-            case START_TASK_TO_FRONT: {
-                // ActivityRecord may represent a different activity, but it should not be
-                // in the resumed state.
-                if (r.nowVisible && r.isState(RESUMED)) {
-                    mRequest.waitResult.timeout = false;
-                    mRequest.waitResult.who = r.mActivityComponent;
-                    mRequest.waitResult.totalTime = 0;
-                } else {
-                    mSupervisor.waitActivityVisible(r.mActivityComponent, mRequest.waitResult);
-                    // Note: the timeout variable is not currently not ever set.
-                    do {
-                        try {
-                            mService.mGlobalLock.wait();
-                        } catch (InterruptedException e) {
-                        }
-                    } while (!mRequest.waitResult.timeout && mRequest.waitResult.who == null);
-                }
-                break;
-            }
+    private int waitResultIfNeeded(WaitResult waitResult, ActivityRecord r,
+            LaunchingState launchingState) {
+        final int res = waitResult.result;
+        if (res == START_DELIVERED_TO_TOP
+                || (res == START_TASK_TO_FRONT && r.nowVisible && r.isState(RESUMED))) {
+            // The activity should already be visible, so nothing to wait.
+            waitResult.timeout = false;
+            waitResult.who = r.mActivityComponent;
+            waitResult.totalTime = 0;
+            return res;
+        }
+        mSupervisor.waitActivityVisibleOrLaunched(waitResult, r, launchingState);
+        if (res == START_SUCCESS && waitResult.result == START_TASK_TO_FRONT) {
+            // A trampoline activity is launched and it brings another existing activity to front.
+            return START_TASK_TO_FRONT;
         }
         return res;
     }

@@ -5421,7 +5421,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final TransitionInfoSnapshot info = mTaskSupervisor
             .getActivityMetricsLogger().logAppTransitionReportedDrawn(this, restoredFromBundle);
         if (info != null) {
-            mTaskSupervisor.reportActivityLaunchedLocked(false /* timeout */, this,
+            mTaskSupervisor.reportActivityLaunched(false /* timeout */, this,
                     info.windowsFullyDrawnDelayMs, info.getLaunchState());
         }
     }
@@ -5462,9 +5462,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // so there is no valid info. But if it is the current top activity (e.g. sleeping), the
         // invalid state is still reported to make sure the waiting result is notified.
         if (validInfo || this == getDisplayArea().topRunningActivity()) {
-            mTaskSupervisor.reportActivityLaunchedLocked(false /* timeout */, this,
+            mTaskSupervisor.reportActivityLaunched(false /* timeout */, this,
                     windowsDrawnDelayMs, launchState);
-            mTaskSupervisor.stopWaitingForActivityVisible(this, windowsDrawnDelayMs, launchState);
         }
         finishLaunchTickingLocked();
         if (task != null) {

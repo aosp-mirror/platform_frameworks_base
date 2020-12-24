@@ -266,11 +266,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
      */
     private final SparseIntArray mCurTaskIdForUser = new SparseIntArray(20);
 
-    /** List of processes waiting to find out when a specific activity becomes visible. */
-    private final ArrayList<WaitInfo> mWaitingForActivityVisible = new ArrayList<>();
-
-    /** List of processes waiting to find out about the next launched activity. */
-    final ArrayList<WaitResult> mWaitingActivityLaunched = new ArrayList<>();
+    /** List of requests waiting for the target activity to be launched or visible. */
+    private final ArrayList<WaitInfo> mWaitingActivityLaunched = new ArrayList<>();
 
     /** List of activities that are ready to be stopped, but waiting for the next activity to
      * settle down before doing so. */
@@ -552,9 +549,21 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         return candidateTaskId;
     }
 
-    void waitActivityVisible(ComponentName name, WaitResult result) {
-        final WaitInfo waitInfo = new WaitInfo(name, result);
-        mWaitingForActivityVisible.add(waitInfo);
+    void waitActivityVisibleOrLaunched(WaitResult w, ActivityRecord r,
+            LaunchingState launchingState) {
+        if (w.result != ActivityManager.START_TASK_TO_FRONT
+                && w.result != ActivityManager.START_SUCCESS) {
+            // Not a result code that can make activity visible or launched.
+            return;
+        }
+        final WaitInfo waitInfo = new WaitInfo(w, r.mActivityComponent, launchingState);
+        mWaitingActivityLaunched.add(waitInfo);
+        do {
+            try {
+                mService.mGlobalLock.wait();
+            } catch (InterruptedException ignored) {
+            }
+        } while (mWaitingActivityLaunched.contains(waitInfo));
     }
 
     void cleanupActivity(ActivityRecord r) {
@@ -568,23 +577,25 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
     /** There is no valid launch time, just stop waiting. */
     void stopWaitingForActivityVisible(ActivityRecord r) {
-        stopWaitingForActivityVisible(r, WaitResult.INVALID_DELAY, WaitResult.LAUNCH_STATE_UNKNOWN);
+        reportActivityLaunched(false /* timeout */, r, WaitResult.INVALID_DELAY,
+                WaitResult.LAUNCH_STATE_UNKNOWN);
     }
 
-    void stopWaitingForActivityVisible(ActivityRecord r, long totalTime,
+    void reportActivityLaunched(boolean timeout, ActivityRecord r, long totalTime,
             @WaitResult.LaunchState int launchState) {
         boolean changed = false;
-        for (int i = mWaitingForActivityVisible.size() - 1; i >= 0; --i) {
-            final WaitInfo w = mWaitingForActivityVisible.get(i);
-            if (w.matches(r.mActivityComponent)) {
-                final WaitResult result = w.getResult();
-                changed = true;
-                result.timeout = false;
-                result.who = w.getComponent();
-                result.totalTime = totalTime;
-                result.launchState = launchState;
-                mWaitingForActivityVisible.remove(w);
+        for (int i = mWaitingActivityLaunched.size() - 1; i >= 0; i--) {
+            final WaitInfo info = mWaitingActivityLaunched.get(i);
+            if (!info.matches(r)) {
+                continue;
             }
+            final WaitResult w = info.mResult;
+            w.timeout = timeout;
+            w.who = r.mActivityComponent;
+            w.totalTime = totalTime;
+            w.launchState = launchState;
+            mWaitingActivityLaunched.remove(i);
+            changed = true;
         }
         if (changed) {
             mService.mGlobalLock.notifyAll();
@@ -603,38 +614,18 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         boolean changed = false;
 
         for (int i = mWaitingActivityLaunched.size() - 1; i >= 0; i--) {
-            WaitResult w = mWaitingActivityLaunched.remove(i);
-            if (w.who == null) {
-                changed = true;
-                w.result = result;
-
+            final WaitInfo info = mWaitingActivityLaunched.get(i);
+            if (!info.matches(r)) {
+                continue;
+            }
+            final WaitResult w = info.mResult;
+            w.result = result;
+            if (result == START_DELIVERED_TO_TOP) {
                 // Unlike START_TASK_TO_FRONT, When an intent is delivered to top, there
                 // will be no followup launch signals. Assign the result and launched component.
-                if (result == START_DELIVERED_TO_TOP) {
-                    w.who = r.mActivityComponent;
-                }
-            }
-        }
-
-        if (changed) {
-            mService.mGlobalLock.notifyAll();
-        }
-    }
-
-    void reportActivityLaunchedLocked(boolean timeout, ActivityRecord r, long totalTime,
-            @WaitResult.LaunchState int launchState) {
-        boolean changed = false;
-        for (int i = mWaitingActivityLaunched.size() - 1; i >= 0; i--) {
-            WaitResult w = mWaitingActivityLaunched.remove(i);
-            if (w.who == null) {
+                w.who = r.mActivityComponent;
+                mWaitingActivityLaunched.remove(i);
                 changed = true;
-                w.timeout = timeout;
-                if (r != null) {
-                    w.who = new ComponentName(r.info.packageName, r.info.name);
-                }
-                w.totalTime = totalTime;
-                w.launchState = launchState;
-                // Do not modify w.result.
             }
         }
         if (changed) {
@@ -1295,8 +1286,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             mHandler.removeMessages(IDLE_TIMEOUT_MSG, r);
             r.finishLaunchTickingLocked();
             if (fromTimeout) {
-                reportActivityLaunchedLocked(fromTimeout, r, INVALID_DELAY,
-                        -1 /* launchState */);
+                reportActivityLaunched(fromTimeout, r, INVALID_DELAY, -1 /* launchState */);
             }
 
             // This is a hack to semi-deal with a race condition
@@ -1940,14 +1930,14 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         pw.println("mCurTaskIdForUser=" + mCurTaskIdForUser);
         pw.println(prefix + "mUserRootTaskInFront=" + mRootWindowContainer.mUserRootTaskInFront);
         pw.println(prefix + "mVisibilityTransactionDepth=" + mVisibilityTransactionDepth);
-        if (!mWaitingForActivityVisible.isEmpty()) {
-            pw.println(prefix + "mWaitingForActivityVisible=");
-            for (int i = 0; i < mWaitingForActivityVisible.size(); ++i) {
-                pw.print(prefix + prefix); mWaitingForActivityVisible.get(i).dump(pw, prefix);
-            }
-        }
         pw.print(prefix); pw.print("isHomeRecentsComponent=");
         pw.println(mRecentTasks.isRecentsComponentHomeActivity(mRootWindowContainer.mCurrentUser));
+        if (!mWaitingActivityLaunched.isEmpty()) {
+            pw.println(prefix + "mWaitingActivityLaunched=");
+            for (int i = mWaitingActivityLaunched.size() - 1; i >= 0; i--) {
+                mWaitingActivityLaunched.get(i).dump(pw, prefix + "  ");
+            }
+        }
         pw.println();
     }
 
@@ -2602,32 +2592,30 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     /**
      * Internal container to store a match qualifier alongside a WaitResult.
      */
-    static class WaitInfo {
-        private final ComponentName mTargetComponent;
-        private final WaitResult mResult;
+    private static class WaitInfo {
+        final WaitResult mResult;
+        final ComponentName mTargetComponent;
+        /**
+         * The target component may not be the final drawn activity. The launching state is managed
+         * by {@link ActivityMetricsLogger} that can track consecutive launching sequence.
+         */
+        final LaunchingState mLaunchingState;
 
-        WaitInfo(ComponentName targetComponent, WaitResult result) {
-            this.mTargetComponent = targetComponent;
-            this.mResult = result;
+        WaitInfo(WaitResult result, ComponentName component, LaunchingState launchingState) {
+            mResult = result;
+            mTargetComponent = component;
+            mLaunchingState = launchingState;
         }
 
-        public boolean matches(ComponentName targetComponent) {
-            return mTargetComponent == null || mTargetComponent.equals(targetComponent);
+        boolean matches(ActivityRecord r) {
+            return mTargetComponent.equals(r.mActivityComponent) || mLaunchingState.contains(r);
         }
 
-        public WaitResult getResult() {
-            return mResult;
-        }
-
-        public ComponentName getComponent() {
-            return mTargetComponent;
-        }
-
-        public void dump(PrintWriter pw, String prefix) {
+        void dump(PrintWriter pw, String prefix) {
             pw.println(prefix + "WaitInfo:");
             pw.println(prefix + "  mTargetComponent=" + mTargetComponent);
             pw.println(prefix + "  mResult=");
-            mResult.dump(pw, prefix);
+            mResult.dump(pw, prefix + "    ");
         }
     }
 }

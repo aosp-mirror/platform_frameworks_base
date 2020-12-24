@@ -5440,14 +5440,6 @@ class Task extends WindowContainer<WindowContainer> {
         r.completeResumeLocked();
     }
 
-    private void clearLaunchTime(ActivityRecord r) {
-        // Make sure that there is no activity waiting for this to launch.
-        if (!mTaskSupervisor.mWaitingActivityLaunched.isEmpty()) {
-            mTaskSupervisor.removeIdleTimeoutForActivity(r);
-            mTaskSupervisor.scheduleIdleTimeout(r);
-        }
-    }
-
     void awakeFromSleepingLocked() {
         if (!isLeafTask()) {
             forAllLeafTasks((task) -> task.awakeFromSleepingLocked(),
@@ -5590,7 +5582,6 @@ class Task extends WindowContainer<WindowContainer> {
         mLastNoHistoryActivity = prev.isNoHistory() ? prev : null;
         prev.setState(PAUSING, "startPausingLocked");
         prev.getTask().touchActiveTime();
-        clearLaunchTime(prev);
 
         mAtmService.updateCpuStats();
 
