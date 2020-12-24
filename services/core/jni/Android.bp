@@ -43,7 +43,6 @@ cc_library_static {
         "com_android_server_stats_pull_StatsPullAtomService.cpp",
         "com_android_server_storage_AppFuseBridge.cpp",
         "com_android_server_SystemServer.cpp",
-        "com_android_server_TestNetworkService.cpp",
         "com_android_server_tv_TvUinputBridge.cpp",
         "com_android_server_tv_TvInputHal.cpp",
         "com_android_server_vr_VrManagerService.cpp",
@@ -59,8 +58,6 @@ cc_library_static {
         "com_android_server_pm_PackageManagerShellCommandDataLoader.cpp",
         "onload.cpp",
         ":lib_networkStatsFactory_native",
-        // TODO: move the file below to the connectivity APEX
-        "com_android_server_connectivity_Vpn.cpp",
     ],
 
     include_dirs: [
@@ -171,6 +168,7 @@ cc_defaults {
 
     static_libs: [
         "android.hardware.broadcastradio@common-utils-1x-lib",
+        "libservice-connectivity-static",
     ],
 
     product_variables: {
