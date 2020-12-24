@@ -234,23 +234,23 @@ public class NetworkManagementServiceTest {
         doReturn(true).when(mNetdService).bandwidthEnableDataSaver(anyBoolean());
 
         // Restrict usage of mobile data in background
-        mNMService.setUidMeteredNetworkDenylist(TEST_UID, true);
+        mNMService.setUidOnMeteredNetworkDenylist(TEST_UID, true);
         assertTrue("Should be true since mobile data usage is restricted",
                 mNMService.isNetworkRestricted(TEST_UID));
 
         mNMService.setDataSaverModeEnabled(true);
         verify(mNetdService).bandwidthEnableDataSaver(true);
 
-        mNMService.setUidMeteredNetworkDenylist(TEST_UID, false);
+        mNMService.setUidOnMeteredNetworkDenylist(TEST_UID, false);
         assertTrue("Should be true since data saver is on and the uid is not allowlisted",
                 mNMService.isNetworkRestricted(TEST_UID));
 
-        mNMService.setUidMeteredNetworkAllowlist(TEST_UID, true);
+        mNMService.setUidOnMeteredNetworkAllowlist(TEST_UID, true);
         assertFalse("Should be false since data saver is on and the uid is allowlisted",
                 mNMService.isNetworkRestricted(TEST_UID));
 
         // remove uid from allowlist and turn datasaver off again
-        mNMService.setUidMeteredNetworkAllowlist(TEST_UID, false);
+        mNMService.setUidOnMeteredNetworkAllowlist(TEST_UID, false);
         mNMService.setDataSaverModeEnabled(false);
         verify(mNetdService).bandwidthEnableDataSaver(false);
         assertFalse("Network should not be restricted when data saver is off",
