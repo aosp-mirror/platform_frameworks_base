@@ -36,7 +36,7 @@ import android.location.LastLocationRequest;
 import android.location.Location;
 import android.location.LocationRequest;
 import android.location.LocationTime;
-import android.location.ProviderProperties;
+import android.location.provider.ProviderProperties;
 import android.os.Bundle;
 import android.os.ICancellationSignal;
 

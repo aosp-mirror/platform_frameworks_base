@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.internal.location;
+package android.location.provider;
 
 import android.location.LocationResult;
-import android.location.ProviderProperties;
+import android.location.provider.ProviderProperties;
 
 /**
  * Binder interface for manager of all location providers.

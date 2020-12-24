@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.location;
+package android.location.provider;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -78,10 +78,7 @@ public final class ProviderProperties implements Parcelable {
     private final @PowerUsage int mPowerUsage;
     private final @Accuracy int mAccuracy;
 
-    /**
-     * @hide
-     */
-    public ProviderProperties(boolean hasNetworkRequirement, boolean hasSatelliteRequirement,
+    private ProviderProperties(boolean hasNetworkRequirement, boolean hasSatelliteRequirement,
             boolean hasCellRequirement, boolean hasMonetaryCost, boolean hasAltitudeSupport,
             boolean hasSpeedSupport, boolean hasBearingSupport,
             @PowerUsage int powerUsage, @Accuracy int accuracy) {
@@ -92,10 +89,8 @@ public final class ProviderProperties implements Parcelable {
         mHasAltitudeSupport = hasAltitudeSupport;
         mHasSpeedSupport = hasSpeedSupport;
         mHasBearingSupport = hasBearingSupport;
-        mPowerUsage = Preconditions.checkArgumentInRange(powerUsage, POWER_USAGE_LOW,
-                POWER_USAGE_HIGH, "powerUsage");
-        mAccuracy = Preconditions.checkArgumentInRange(accuracy, ACCURACY_FINE,
-                ACCURACY_COARSE, "locationAccuracy");
+        mPowerUsage = powerUsage;
+        mAccuracy = accuracy;
     }
 
     /**
@@ -233,7 +228,7 @@ public final class ProviderProperties implements Parcelable {
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder("ProviderProperties[");
-        b.append("power=").append(powerToString(mPowerUsage)).append(", ");
+        b.append("powerUsage=").append(powerToString(mPowerUsage)).append(", ");
         b.append("accuracy=").append(accuracyToString(mAccuracy));
         if (mHasNetworkRequirement || mHasSatelliteRequirement || mHasCellRequirement) {
             b.append(", requires=");
@@ -290,6 +285,130 @@ public final class ProviderProperties implements Parcelable {
                 return "Fine";
             default:
                 throw new AssertionError();
+        }
+    }
+
+    /**
+     * Builder for ProviderProperties.
+     */
+    public static final class Builder {
+
+        private boolean mHasNetworkRequirement;
+        private boolean mHasSatelliteRequirement;
+        private boolean mHasCellRequirement;
+        private boolean mHasMonetaryCost;
+        private boolean mHasAltitudeSupport;
+        private boolean mHasSpeedSupport;
+        private boolean mHasBearingSupport;
+        private @PowerUsage int mPowerUsage;
+        private @Accuracy int mAccuracy;
+
+        public Builder() {
+            mHasNetworkRequirement = false;
+            mHasSatelliteRequirement = false;
+            mHasCellRequirement = false;
+            mHasMonetaryCost = false;
+            mHasAltitudeSupport = false;
+            mHasSpeedSupport = false;
+            mHasBearingSupport = false;
+            mPowerUsage = POWER_USAGE_HIGH;
+            mAccuracy = ACCURACY_COARSE;
+        }
+
+        public Builder(@NonNull ProviderProperties providerProperties) {
+            mHasNetworkRequirement = providerProperties.mHasNetworkRequirement;
+            mHasSatelliteRequirement = providerProperties.mHasSatelliteRequirement;
+            mHasCellRequirement = providerProperties.mHasCellRequirement;
+            mHasMonetaryCost = providerProperties.mHasMonetaryCost;
+            mHasAltitudeSupport = providerProperties.mHasAltitudeSupport;
+            mHasSpeedSupport = providerProperties.mHasSpeedSupport;
+            mHasBearingSupport = providerProperties.mHasBearingSupport;
+            mPowerUsage = providerProperties.mPowerUsage;
+            mAccuracy = providerProperties.mAccuracy;
+        }
+
+        /**
+         * Sets whether a provider requires network access. False by default.
+         */
+        public @NonNull Builder setHasNetworkRequirement(boolean requiresNetwork) {
+            mHasNetworkRequirement = requiresNetwork;
+            return this;
+        }
+
+        /**
+         * Sets whether a provider requires satellite access. False by default.
+         */
+        public @NonNull Builder setHasSatelliteRequirement(boolean requiresSatellite) {
+            mHasSatelliteRequirement = requiresSatellite;
+            return this;
+        }
+
+        /**
+         * Sets whether a provider requires cell tower access. False by default.
+         */
+        public @NonNull Builder setHasCellRequirement(boolean requiresCell) {
+            mHasCellRequirement = requiresCell;
+            return this;
+        }
+
+        /**
+         * Sets whether a provider has a monetary cost. False by default.
+         */
+        public @NonNull Builder setHasMonetaryCost(boolean monetaryCost) {
+            mHasMonetaryCost = monetaryCost;
+            return this;
+        }
+
+        /**
+         * Sets whether a provider can provide altitude information. False by default.
+         */
+        public @NonNull Builder setHasAltitudeSupport(boolean supportsAltitude) {
+            mHasAltitudeSupport = supportsAltitude;
+            return this;
+        }
+
+        /**
+         * Sets whether a provider can provide speed information. False by default.
+         */
+        public @NonNull Builder setHasSpeedSupport(boolean supportsSpeed) {
+            mHasSpeedSupport = supportsSpeed;
+            return this;
+        }
+
+        /**
+         * Sets whether a provider can provide bearing information. False by default.
+         */
+        public @NonNull Builder setHasBearingSupport(boolean supportsBearing) {
+            mHasBearingSupport = supportsBearing;
+            return this;
+        }
+
+        /**
+         * Sets a very rough bucket of provider power usage. {@link #POWER_USAGE_HIGH} by default.
+         */
+        public @NonNull Builder setPowerUsage(@PowerUsage int powerUsage) {
+            mPowerUsage = Preconditions.checkArgumentInRange(powerUsage, POWER_USAGE_LOW,
+                    POWER_USAGE_HIGH, "powerUsage");
+            return this;
+        }
+
+        /**
+         * Sets a very rough bucket of provider location accuracy. {@link #ACCURACY_COARSE} by
+         * default.
+         */
+        public @NonNull Builder setAccuracy(@Accuracy int accuracy) {
+            mAccuracy = Preconditions.checkArgumentInRange(accuracy, ACCURACY_FINE,
+                    ACCURACY_COARSE, "accuracy");
+            return this;
+        }
+
+        /**
+         * Builds a new ProviderProperties.
+         */
+        public @NonNull ProviderProperties build() {
+            return new ProviderProperties(mHasNetworkRequirement, mHasSatelliteRequirement,
+                    mHasCellRequirement, mHasMonetaryCost, mHasAltitudeSupport, mHasSpeedSupport,
+                    mHasBearingSupport, mPowerUsage, mAccuracy);
         }
     }
 }

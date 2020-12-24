@@ -1,1 +1,62 @@
 // Signature format: 2.0
+package com.android.location.provider {
+
+  @Deprecated public final class FusedLocationHardware {
+    method @Deprecated public void flushBatchedLocations();
+    method @Deprecated public int getSupportedBatchSize();
+    method @Deprecated public int getVersion();
+    method @Deprecated public void injectDeviceContext(int);
+    method @Deprecated public void injectDiagnosticData(String);
+    method @Deprecated public void registerSink(com.android.location.provider.FusedLocationHardwareSink, android.os.Looper);
+    method @Deprecated public void requestBatchOfLocations(int);
+    method @Deprecated public void startBatching(int, com.android.location.provider.GmsFusedBatchOptions);
+    method @Deprecated public void stopBatching(int);
+    method @Deprecated public boolean supportsDeviceContextInjection();
+    method @Deprecated public boolean supportsDiagnosticDataInjection();
+    method @Deprecated public void unregisterSink(com.android.location.provider.FusedLocationHardwareSink);
+    method @Deprecated public void updateBatchingOptions(int, com.android.location.provider.GmsFusedBatchOptions);
+  }
+
+  @Deprecated public class FusedLocationHardwareSink {
+    ctor @Deprecated public FusedLocationHardwareSink();
+    method @Deprecated public void onCapabilities(int);
+    method @Deprecated public void onDiagnosticDataAvailable(String);
+    method @Deprecated public void onLocationAvailable(android.location.Location[]);
+    method @Deprecated public void onStatusChanged(int);
+  }
+
+  @Deprecated public class GmsFusedBatchOptions {
+    ctor @Deprecated public GmsFusedBatchOptions();
+    method @Deprecated public int getFlags();
+    method @Deprecated public double getMaxPowerAllocationInMW();
+    method @Deprecated public long getPeriodInNS();
+    method @Deprecated public float getSmallestDisplacementMeters();
+    method @Deprecated public int getSourcesToUse();
+    method @Deprecated public boolean isFlagSet(int);
+    method @Deprecated public boolean isSourceToUseSet(int);
+    method @Deprecated public void resetFlag(int);
+    method @Deprecated public void resetSourceToUse(int);
+    method @Deprecated public void setFlag(int);
+    method @Deprecated public void setMaxPowerAllocationInMW(double);
+    method @Deprecated public void setPeriodInNS(long);
+    method @Deprecated public void setSmallestDisplacementMeters(float);
+    method @Deprecated public void setSourceToUse(int);
+  }
+
+  @Deprecated public static final class GmsFusedBatchOptions.BatchFlags {
+    ctor @Deprecated public GmsFusedBatchOptions.BatchFlags();
+    field @Deprecated public static int CALLBACK_ON_LOCATION_FIX;
+    field @Deprecated public static int WAKEUP_ON_FIFO_FULL;
+  }
+
+  @Deprecated public static final class GmsFusedBatchOptions.SourceTechnologies {
+    ctor @Deprecated public GmsFusedBatchOptions.SourceTechnologies();
+    field @Deprecated public static int BLUETOOTH;
+    field @Deprecated public static int CELL;
+    field @Deprecated public static int GNSS;
+    field @Deprecated public static int SENSORS;
+    field @Deprecated public static int WIFI;
+  }
+
+}
+

@@ -17,6 +17,7 @@
 package android.location;
 
 import android.annotation.Nullable;
+import android.location.provider.ProviderProperties;
 
 /**
  * Information about the properties of a location provider.
@@ -200,10 +201,8 @@ public class LocationProvider {
     }
 
     /**
-     * Returns the power requirement for this provider.
-     *
-     * @return the power requirement for this provider, as one of the
-     * constants ProviderProperties.POWER_USAGE_*.
+     * Returns the power requirement for this provider, one of the ProviderProperties.POWER_USAGE_*
+     * constants.
      */
     public int getPowerRequirement() {
         if (mProperties == null) {
@@ -214,11 +213,8 @@ public class LocationProvider {
     }
 
     /**
-     * Returns a constant describing horizontal accuracy of this provider.
-     * If the provider returns finer grain or exact location,
-     * {@link ProviderProperties#ACCURACY_FINE} is returned, otherwise if the
-     * location is only approximate then {@link ProviderProperties#ACCURACY_COARSE}
-     * is returned.
+     * Returns the rough accuracy of this provider, one of the ProviderProperties.ACCURACY_*
+     * constants.
      */
     public int getAccuracy() {
         if (mProperties == null) {

@@ -26,11 +26,11 @@ import static com.android.server.location.LocationManagerService.D;
 
 import android.annotation.Nullable;
 import android.location.LocationRequest;
+import android.location.provider.ProviderRequest;
 import android.location.util.identity.CallerIdentity;
 import android.os.Build;
 import android.os.PowerManager.LocationPowerSaveMode;
 
-import com.android.internal.location.ProviderRequest;
 import com.android.server.utils.eventlog.LocalEventLog;
 
 /** In memory event log for location events. */

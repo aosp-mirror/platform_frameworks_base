@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.location;
+package android.location.provider;
 
 import static android.location.LocationRequest.QUALITY_BALANCED_POWER_ACCURACY;
 import static android.location.LocationRequest.QUALITY_HIGH_ACCURACY;
@@ -22,10 +22,9 @@ import static android.location.LocationRequest.QUALITY_LOW_POWER;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
-import android.compat.annotation.UnsupportedAppUsage;
+import android.annotation.SystemApi;
 import android.location.LocationRequest;
 import android.location.LocationRequest.Quality;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.WorkSource;
@@ -33,34 +32,25 @@ import android.util.TimeUtils;
 
 import com.android.internal.util.Preconditions;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 
 /**
  * Location provider request.
  * @hide
  */
+@SystemApi
 public final class ProviderRequest implements Parcelable {
 
     public static final long INTERVAL_DISABLED = Long.MAX_VALUE;
 
-    public static final ProviderRequest EMPTY_REQUEST = new ProviderRequest(
+    public static final @NonNull ProviderRequest EMPTY_REQUEST = new ProviderRequest(
             INTERVAL_DISABLED, QUALITY_BALANCED_POWER_ACCURACY, 0, false, false, new WorkSource());
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, publicAlternatives = "{@link "
-            + "ProviderRequest}")
-    public final boolean reportLocation;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, publicAlternatives = "{@link "
-            + "ProviderRequest}")
-    public final long interval;
+    private final long mIntervalMillis;
     private final @Quality int mQuality;
     private final long mMaxUpdateDelayMillis;
     private final boolean mLowPower;
     private final boolean mLocationSettingsIgnored;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, publicAlternatives = "{@link "
-            + "ProviderRequest}")
-    public final List<LocationRequest> locationRequests;
     private final WorkSource mWorkSource;
 
     private ProviderRequest(
@@ -70,22 +60,11 @@ public final class ProviderRequest implements Parcelable {
             boolean lowPower,
             boolean locationSettingsIgnored,
             @NonNull WorkSource workSource) {
-        reportLocation = intervalMillis != INTERVAL_DISABLED;
-        interval = intervalMillis;
+        mIntervalMillis = intervalMillis;
         mQuality = quality;
         mMaxUpdateDelayMillis = maxUpdateDelayMillis;
         mLowPower = lowPower;
         mLocationSettingsIgnored = locationSettingsIgnored;
-        if (intervalMillis != INTERVAL_DISABLED) {
-            locationRequests = Collections.singletonList(new LocationRequest.Builder(intervalMillis)
-                    .setQuality(quality)
-                    .setLowPower(lowPower)
-                    .setLocationSettingsIgnored(locationSettingsIgnored)
-                    .setWorkSource(workSource)
-                    .build());
-        } else {
-            locationRequests = Collections.emptyList();
-        }
         mWorkSource = Objects.requireNonNull(workSource);
     }
 
@@ -94,7 +73,7 @@ public final class ProviderRequest implements Parcelable {
      * request is inactive and does not require any locations to be reported.
      */
     public boolean isActive() {
-        return interval != INTERVAL_DISABLED;
+        return mIntervalMillis != INTERVAL_DISABLED;
     }
 
     /**
@@ -102,7 +81,7 @@ public final class ProviderRequest implements Parcelable {
      * {@link #INTERVAL_DISABLED} for an inactive request.
      */
     public @IntRange(from = 0) long getIntervalMillis() {
-        return interval;
+        return mIntervalMillis;
     }
 
     /**
@@ -148,29 +127,28 @@ public final class ProviderRequest implements Parcelable {
         return mWorkSource;
     }
 
-    public static final Parcelable.Creator<ProviderRequest> CREATOR =
-            new Parcelable.Creator<ProviderRequest>() {
-                @Override
-                public ProviderRequest createFromParcel(Parcel in) {
-                    long intervalMillis = in.readLong();
-                    if (intervalMillis == INTERVAL_DISABLED) {
-                        return EMPTY_REQUEST;
-                    } else {
-                        return new ProviderRequest(
-                                intervalMillis,
-                                /* quality= */ in.readInt(),
-                                /* maxUpdateDelayMillis= */ in.readLong(),
-                                /* lowPower= */ in.readBoolean(),
-                                /* locationSettingsIgnored= */ in.readBoolean(),
-                                /* workSource= */ in.readTypedObject(WorkSource.CREATOR));
-                    }
-                }
+    public static final @NonNull Creator<ProviderRequest> CREATOR = new Creator<ProviderRequest>() {
+        @Override
+        public ProviderRequest createFromParcel(Parcel in) {
+            long intervalMillis = in.readLong();
+            if (intervalMillis == INTERVAL_DISABLED) {
+                return EMPTY_REQUEST;
+            } else {
+                return new ProviderRequest(
+                        intervalMillis,
+                        /* quality= */ in.readInt(),
+                        /* maxUpdateDelayMillis= */ in.readLong(),
+                        /* lowPower= */ in.readBoolean(),
+                        /* locationSettingsIgnored= */ in.readBoolean(),
+                        /* workSource= */ in.readTypedObject(WorkSource.CREATOR));
+            }
+        }
 
-                @Override
-                public ProviderRequest[] newArray(int size) {
-                    return new ProviderRequest[size];
-                }
-            };
+        @Override
+        public ProviderRequest[] newArray(int size) {
+            return new ProviderRequest[size];
+        }
+    };
 
     @Override
     public int describeContents() {
@@ -178,9 +156,9 @@ public final class ProviderRequest implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeLong(interval);
-        if (interval != INTERVAL_DISABLED) {
+    public void writeToParcel(@NonNull Parcel parcel, int flags) {
+        parcel.writeLong(mIntervalMillis);
+        if (mIntervalMillis != INTERVAL_DISABLED) {
             parcel.writeInt(mQuality);
             parcel.writeLong(mMaxUpdateDelayMillis);
             parcel.writeBoolean(mLowPower);
@@ -199,10 +177,10 @@ public final class ProviderRequest implements Parcelable {
         }
 
         ProviderRequest that = (ProviderRequest) o;
-        if (interval == INTERVAL_DISABLED) {
-            return that.interval == INTERVAL_DISABLED;
+        if (mIntervalMillis == INTERVAL_DISABLED) {
+            return that.mIntervalMillis == INTERVAL_DISABLED;
         } else {
-            return interval == that.interval
+            return mIntervalMillis == that.mIntervalMillis
                     && mQuality == that.mQuality
                     && mMaxUpdateDelayMillis == that.mMaxUpdateDelayMillis
                     && mLowPower == that.mLowPower
@@ -213,16 +191,16 @@ public final class ProviderRequest implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(interval, mQuality, mWorkSource);
+        return Objects.hash(mIntervalMillis, mQuality, mWorkSource);
     }
 
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder();
         s.append("ProviderRequest[");
-        if (interval != INTERVAL_DISABLED) {
+        if (mIntervalMillis != INTERVAL_DISABLED) {
             s.append("@");
-            TimeUtils.formatDuration(interval, s);
+            TimeUtils.formatDuration(mIntervalMillis, s);
             if (mQuality != QUALITY_BALANCED_POWER_ACCURACY) {
                 if (mQuality == QUALITY_HIGH_ACCURACY) {
                     s.append(", HIGH_ACCURACY");
@@ -230,7 +208,7 @@ public final class ProviderRequest implements Parcelable {
                     s.append(", LOW_POWER");
                 }
             }
-            if (mMaxUpdateDelayMillis / 2 > interval) {
+            if (mMaxUpdateDelayMillis / 2 > mIntervalMillis) {
                 s.append(", maxUpdateDelay=");
                 TimeUtils.formatDuration(mMaxUpdateDelayMillis, s);
             }
@@ -253,7 +231,7 @@ public final class ProviderRequest implements Parcelable {
     /**
      * A Builder for {@link ProviderRequest}s.
      */
-    public static class Builder {
+    public static final class Builder {
         private long mIntervalMillis = INTERVAL_DISABLED;
         private int mQuality = QUALITY_BALANCED_POWER_ACCURACY;
         private long mMaxUpdateDelayMillis = 0;
