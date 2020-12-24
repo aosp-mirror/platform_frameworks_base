@@ -4742,11 +4742,9 @@ public class ConnectivityServiceTest {
 
     @Test
     public void testNetworkCallbackMaximum() {
-        // We can only have 99 callbacks, because MultipathPolicyTracker is
-        // already one of them.
-        final int MAX_REQUESTS = 99;
+        final int MAX_REQUESTS = 100;
         final int CALLBACKS = 89;
-        final int INTENTS = 10;
+        final int INTENTS = 11;
         assertEquals(MAX_REQUESTS, CALLBACKS + INTENTS);
 
         NetworkRequest networkRequest = new NetworkRequest.Builder().build();
