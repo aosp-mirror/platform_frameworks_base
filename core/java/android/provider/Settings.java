@@ -9109,8 +9109,8 @@ public final class Settings {
          * Controls magnification mode when magnification is enabled via a system-wide triple tap
          * gesture or the accessibility shortcut.
          *
-         * @see#ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN
-         * @see#ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
+         * @see #ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN
+         * @see #ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
          * @hide
          */
         @TestApi
@@ -9143,9 +9143,9 @@ public final class Settings {
          * Controls magnification capability. Accessibility magnification is capable of at least one
          * of the magnification modes.
          *
-         * @see#ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN
-         * @see#ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
-         * @see#ACCESSIBILITY_MAGNIFICATION_MODE_ALL
+         * @see #ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN
+         * @see #ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
+         * @see #ACCESSIBILITY_MAGNIFICATION_MODE_ALL
          * @hide
          */
         @TestApi
@@ -9154,12 +9154,44 @@ public final class Settings {
 
         /**
          *  Whether to show the window magnification prompt dialog when the user uses full-screen
-         *  magnification first time after database is upgraded .
+         *  magnification first time after database is upgraded.
          *
          * @hide
          */
         public static final String ACCESSIBILITY_SHOW_WINDOW_MAGNIFICATION_PROMPT =
                 "accessibility_show_window_magnification_prompt";
+
+        /**
+         * Controls the accessibility button mode. System will force-set the value to {@link
+         * #ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU} if {@link #NAVIGATION_MODE} is fully
+         * gestural.
+         * <ul>
+         *    <li> 0 = button in navigation bar </li>
+         *    <li> 1 = button floating on the display </li>
+         * </ul>
+         *
+         * @see #ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR
+         * @see #ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU
+         * @hide
+         */
+        public static final String ACCESSIBILITY_BUTTON_MODE =
+                "accessibility_button_mode";
+
+        /**
+         * Accessibility button mode value that specifying the accessibility service or feature to
+         * be toggled via the button in the navigation bar.
+         *
+         * @hide
+         */
+        public static final int ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR = 0x0;
+
+        /**
+         * Accessibility button mode value that specifying the accessibility service or feature to
+         * be toggled via the button floating on the display.
+         *
+         * @hide
+         */
+        public static final int ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU = 0x1;
 
         /**
          * Whether the Adaptive connectivity option is enabled.
