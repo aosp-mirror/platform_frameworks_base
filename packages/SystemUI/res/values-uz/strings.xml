@@ -26,7 +26,7 @@
     <string name="status_bar_latest_events_title" msgid="202755896454005436">"Eslatmalar"</string>
     <string name="battery_low_title" msgid="6891106956328275225">"Batareya tez orada tugaydi"</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> qoldi"</string>
-    <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> (joriy holatda taxminan <xliff:g id="TIME">%2$s</xliff:g> qoldi)"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"Batareya qivvati – <xliff:g id="PERCENTAGE">%1$s</xliff:g>, tugashiga taxminan <xliff:g id="TIME">%2$s</xliff:g> qoldi"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="5917433188456218857">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> (taxminan <xliff:g id="TIME">%2$s</xliff:g> qoldi)"</string>
     <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"<xliff:g id="PERCENTAGE">%s</xliff:g> qoldi. Quvvat tejash rejimi yoniq."</string>
     <string name="invalid_charger" msgid="4370074072117767416">"USB orqali quvvatlash imkonsiz. Qurilmangiz bilan kelgan quvvatlash moslamasidan foydalaning."</string>
@@ -700,13 +700,13 @@
     <string name="inline_block_button" msgid="479892866568378793">"Bloklash"</string>
     <string name="inline_keep_button" msgid="299631874103662170">"Ha"</string>
     <string name="inline_minimize_button" msgid="1474436209299333445">"Kichraytirish"</string>
-    <string name="inline_silent_button_silent" msgid="525243786649275816">"Tovushsiz"</string>
+    <string name="inline_silent_button_silent" msgid="525243786649275816">"Sokin"</string>
     <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"Ovozsiz qolsin"</string>
     <string name="inline_silent_button_alert" msgid="5705343216858250354">"Ogohlantirish"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"Signal berishda davom etilsin"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Bildirishnoma kelmasin"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Bu ilovadan keladigan bildirishnomalar chiqaversinmi?"</string>
-    <string name="notification_silence_title" msgid="8608090968400832335">"Tovushsiz"</string>
+    <string name="notification_silence_title" msgid="8608090968400832335">"Sokin"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Standart"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Pufaklar"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Tovush yoki tebranishsiz"</string>
@@ -718,8 +718,8 @@
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Sozlamalar"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Muhim"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ilovasida suhbat funksiyalari ishlamaydi"</string>
-    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Avvalgi bulutchalar topilmadi"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Bu yerda oxirgi va yopilgan bulutcha shaklidagi bildirishnomalar chiqadi"</string>
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Hech qanday bulutcha topilmadi"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Eng oxirgi va yopilgan bulutchali chatlar shu yerda chiqadi"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Bu bildirishnomalarni tahrirlash imkonsiz."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ushbu bildirishnomalar guruhi bu yerda sozlanmaydi"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Ishonchli bildirishnoma"</string>
