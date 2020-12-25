@@ -13,7 +13,7 @@ java_library_static {
         ":services.net-sources",
     ],
     static_libs: [
-        "netd_aidl_interfaces-platform-java",
+        "netd-client",
         "netlink-client",
         "networkstack-client",
         "net-utils-services-common",
