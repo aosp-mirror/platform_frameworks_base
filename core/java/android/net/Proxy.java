@@ -24,6 +24,8 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.net.module.util.ProxyUtils;
+
 import java.net.InetSocketAddress;
 import java.net.ProxySelector;
 import java.net.URI;
@@ -251,7 +253,7 @@ public final class Proxy {
         if (p != null) {
             host = p.getHost();
             port = Integer.toString(p.getPort());
-            exclList = p.getExclusionListAsString();
+            exclList = ProxyUtils.exclusionListAsString(p.getExclusionList());
             pacFileUrl = p.getPacFileUrl();
         }
         setHttpProxySystemProperty(host, port, exclList, pacFileUrl);
