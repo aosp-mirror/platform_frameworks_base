@@ -390,7 +390,7 @@ public class PacManager {
             return;
         }
         if (!mHasSentBroadcast) {
-            sendPacBroadcast(new ProxyInfo(mPacUrl, mLastPort));
+            sendPacBroadcast(ProxyInfo.buildPacProxy(mPacUrl, mLastPort));
             mHasSentBroadcast = true;
         }
     }
