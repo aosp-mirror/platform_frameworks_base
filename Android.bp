@@ -1350,6 +1350,7 @@ java_library {
     visibility: [
         "//frameworks/base/wifi",
         "//frameworks/base/services/net",
+        "//packages/modules/Wifi/framework",
     ],
 }
 

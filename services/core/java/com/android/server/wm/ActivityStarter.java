@@ -279,6 +279,9 @@ class ActivityStarter {
             ActivityStarter starter = mStarterPool.acquire();
 
             if (starter == null) {
+                if (mService.mRootWindowContainer == null) {
+                    throw new IllegalStateException("Too early to start activity.");
+                }
                 starter = new ActivityStarter(mController, mService, mSupervisor, mInterceptor);
             }
 

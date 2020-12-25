@@ -695,7 +695,7 @@ std::shared_ptr<KeyCharacterMap> NativeInputManager::getKeyboardLayoutOverlay(
         base::Result<std::shared_ptr<KeyCharacterMap>> ret =
                 KeyCharacterMap::loadContents(filenameChars.c_str(), contentsChars.c_str(),
                                               KeyCharacterMap::Format::OVERLAY);
-        if (ret) {
+        if (ret.ok()) {
             result = *ret;
         }
     }
@@ -1487,7 +1487,7 @@ static jobject nativeCreateInputChannel(JNIEnv* env, jclass /* clazz */, jlong p
 
     base::Result<std::unique_ptr<InputChannel>> inputChannel = im->createInputChannel(env, name);
 
-    if (!inputChannel) {
+    if (!inputChannel.ok()) {
         std::string message = inputChannel.error().message();
         message += StringPrintf(" Status=%d", inputChannel.error().code());
         jniThrowRuntimeException(env, message.c_str());
@@ -1521,7 +1521,7 @@ static jobject nativeCreateInputMonitor(JNIEnv* env, jclass /* clazz */, jlong p
     base::Result<std::unique_ptr<InputChannel>> inputChannel =
             im->createInputMonitor(env, displayId, isGestureMonitor, name, pid);
 
-    if (!inputChannel) {
+    if (!inputChannel.ok()) {
         std::string message = inputChannel.error().message();
         message += StringPrintf(" Status=%d", inputChannel.error().code());
         jniThrowRuntimeException(env, message.c_str());

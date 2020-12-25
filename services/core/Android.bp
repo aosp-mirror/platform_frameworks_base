@@ -233,17 +233,3 @@ filegroup {
         "java/com/android/server/net/LockdownVpnTracker.java",
     ],
 }
-
-java_library {
-    name: "service-connectivity",
-    srcs: [
-        ":connectivity-service-srcs",
-    ],
-    installable: true,
-    libs: [
-        "android.net.ipsec.ike",
-        "services.core",
-        "services.net",
-        "unsupportedappusage",
-    ],
-}
