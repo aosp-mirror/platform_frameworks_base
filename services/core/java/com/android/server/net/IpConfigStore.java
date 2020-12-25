@@ -30,6 +30,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.net.module.util.ProxyUtils;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -123,7 +124,8 @@ public class IpConfigStore {
             switch (config.proxySettings) {
                 case STATIC:
                     ProxyInfo proxyProperties = config.httpProxy;
-                    String exclusionList = proxyProperties.getExclusionListAsString();
+                    String exclusionList = ProxyUtils.exclusionListAsString(
+                            proxyProperties.getExclusionList());
                     out.writeUTF(PROXY_SETTINGS_KEY);
                     out.writeUTF(config.proxySettings.toString());
                     out.writeUTF(PROXY_HOST_KEY);
@@ -370,13 +372,14 @@ public class IpConfigStore {
 
                     switch (proxySettings) {
                         case STATIC:
-                            ProxyInfo proxyInfo =
-                                    new ProxyInfo(proxyHost, proxyPort, exclusionList);
+                            ProxyInfo proxyInfo = ProxyInfo.buildDirectProxy(proxyHost, proxyPort,
+                                    ProxyUtils.exclusionStringAsList(exclusionList));
                             config.proxySettings = proxySettings;
                             config.httpProxy = proxyInfo;
                             break;
                         case PAC:
-                            ProxyInfo proxyPacProperties = new ProxyInfo(Uri.parse(pacFileUrl));
+                            ProxyInfo proxyPacProperties =
+                                    ProxyInfo.buildPacProxy(Uri.parse(pacFileUrl));
                             config.proxySettings = proxySettings;
                             config.httpProxy = proxyPacProperties;
                             break;
