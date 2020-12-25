@@ -64,6 +64,18 @@ jboolean checkHidlReturn(hardware::Return<T>& result, const char* errorMessage) 
 }
 
 template <class T>
+jboolean checkHidlReturn(hardware::Return<sp<T>>& result, const char* errorMessage) {
+    if (!result.isOk()) {
+        logHidlError(result, errorMessage);
+        return JNI_FALSE;
+    } else if ((sp<T>)result == nullptr) {
+        return JNI_FALSE;
+    } else {
+        return JNI_TRUE;
+    }
+}
+
+template <class T>
 class JavaMethodHelper {
 public:
     // Helper function to call setter on a Java object.
