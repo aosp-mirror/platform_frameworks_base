@@ -227,12 +227,6 @@ public abstract class NetworkAgent {
      */
     public static final String REDIRECT_URL_KEY = "redirect URL";
 
-    /**
-     * Bundle key for the underlying networks in {@code EVENT_UNDERLYING_NETWORKS_CHANGED}.
-     * @hide
-     */
-    public static final String UNDERLYING_NETWORKS_KEY = "underlyingNetworks";
-
      /**
      * Sent by the NetworkAgent to ConnectivityService to indicate this network was
      * explicitly selected.  This should be sent before the NetworkInfo is marked
