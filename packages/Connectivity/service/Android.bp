@@ -1,0 +1,79 @@
+//
+// Copyright (C) 2020 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+cc_defaults {
+    name: "libservice-connectivity-defaults",
+    // TODO: build against the NDK (sdk_version: "30" for example)
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+        "-Wthread-safety",
+    ],
+    srcs: [
+        "jni/com_android_server_TestNetworkService.cpp",
+        "jni/com_android_server_connectivity_Vpn.cpp",
+    ],
+    shared_libs: [
+        "libbase",
+        "liblog",
+        "libnativehelper",
+        // TODO: remove dependency on ifc_[add/del]_address by having Java code to add/delete
+        // addresses, and remove dependency on libnetutils.
+        "libnetutils",
+    ],
+}
+
+cc_library_shared {
+    name: "libservice-connectivity",
+    defaults: ["libservice-connectivity-defaults"],
+    srcs: [
+        "jni/onload.cpp",
+    ],
+    apex_available: [
+        // TODO: move this library to the tethering APEX and remove libservice-connectivity-static
+        // "com.android.tethering",
+    ],
+}
+
+// Static library linked into libservices.core until libservice-connectivity can be loaded from
+// the tethering APEX instead.
+cc_library_static {
+    name: "libservice-connectivity-static",
+    defaults: ["libservice-connectivity-defaults"],
+}
+
+java_library {
+    name: "service-connectivity",
+    srcs: [
+        ":connectivity-service-srcs",
+    ],
+    installable: true,
+    jarjar_rules: "jarjar-rules.txt",
+    libs: [
+        "android.net.ipsec.ike",
+        "services.core",
+        "services.net",
+        "unsupportedappusage",
+    ],
+    static_libs: [
+        "net-utils-device-common",
+        "net-utils-framework-common",
+    ],
+    apex_available: [
+        "//apex_available:platform",
+    ],
+}
