@@ -1295,6 +1295,7 @@ package android {
     field public static final int spinnerMode = 16843505; // 0x10102f1
     field public static final int spinnerStyle = 16842881; // 0x1010081
     field public static final int spinnersShown = 16843595; // 0x101034b
+    field public static final int splashScreenTheme = 16844336; // 0x1010630
     field public static final int splitMotionEvents = 16843503; // 0x10102ef
     field public static final int splitName = 16844105; // 0x1010549
     field public static final int splitTrack = 16843852; // 0x101044c
@@ -12783,6 +12784,7 @@ package android.content.pm {
     method @NonNull public android.content.pm.ShortcutInfo.Builder setPersons(@NonNull android.app.Person[]);
     method @NonNull public android.content.pm.ShortcutInfo.Builder setRank(int);
     method @NonNull public android.content.pm.ShortcutInfo.Builder setShortLabel(@NonNull CharSequence);
+    method @NonNull public android.content.pm.ShortcutInfo.Builder setStartingTheme(int);
   }
 
   public class ShortcutManager {

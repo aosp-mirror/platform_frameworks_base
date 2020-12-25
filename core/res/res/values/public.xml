@@ -3070,6 +3070,7 @@
     <public name="windowSplashScreenAnimatedIcon"/>
     <public name="windowSplashScreenAnimationDuration"/>
     <public name="windowSplashScreenBrandingImage"/>
+    <public name="splashScreenTheme" />
   </public-group>
 
   <public-group type="drawable" first-id="0x010800b5">

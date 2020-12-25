@@ -9277,6 +9277,7 @@
         <attr name="shortcutShortLabel" format="reference" />
         <attr name="shortcutLongLabel" format="reference" />
         <attr name="shortcutDisabledMessage" format="reference" />
+        <attr name="splashScreenTheme" format="reference"/>
     </declare-styleable>
 
     <declare-styleable name="ShortcutCategories">

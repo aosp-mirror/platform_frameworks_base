@@ -2028,8 +2028,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
                 // We are reshowing a task, use a starting window to hide the initial draw delay
                 // so the transition can start earlier.
-                topActivity.showStartingWindow(null /* prev */, false /* newTask */,
-                        true /* taskSwitch */);
+                topActivity.showStartingWindow(true /* taskSwitch */);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

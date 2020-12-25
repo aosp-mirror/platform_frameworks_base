@@ -1835,7 +1835,85 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return hasProcess() && app.hasThread();
     }
 
-    boolean addStartingWindow(String pkg, int theme, CompatibilityInfo compatInfo,
+    /**
+     * Evaluate the theme for a starting window.
+     * @param originalTheme The original theme which read from activity or application.
+     * @param replaceTheme The replace theme which requested from starter.
+     * @return Resolved theme.
+     */
+    private int evaluateStartingWindowTheme(String pkg, int originalTheme, int replaceTheme) {
+        // Skip if the package doesn't want a starting window.
+        if (!validateStartingWindowTheme(pkg, originalTheme)) {
+            return 0;
+        }
+        int selectedTheme = originalTheme;
+        if (replaceTheme != 0 && validateStartingWindowTheme(pkg, replaceTheme)) {
+            // allow to replace theme
+            selectedTheme = replaceTheme;
+        }
+        return selectedTheme;
+    }
+
+    private boolean validateStartingWindowTheme(String pkg, int theme) {
+        // If this is a translucent window, then don't show a starting window -- the current
+        // effect (a full-screen opaque starting window that fades away to the real contents
+        // when it is ready) does not work for this.
+        ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Checking theme of starting window: 0x%x", theme);
+        if (theme != 0) {
+            AttributeCache.Entry ent = AttributeCache.instance().get(pkg, theme,
+                    com.android.internal.R.styleable.Window,
+                    mWmService.mCurrentUserId);
+            if (ent == null) {
+                // Whoops!  App doesn't exist. Um. Okay. We'll just pretend like we didn't
+                // see that.
+                return false;
+            }
+            final boolean windowIsTranslucent = ent.array.getBoolean(
+                    com.android.internal.R.styleable.Window_windowIsTranslucent, false);
+            final boolean windowIsFloating = ent.array.getBoolean(
+                    com.android.internal.R.styleable.Window_windowIsFloating, false);
+            final boolean windowShowWallpaper = ent.array.getBoolean(
+                    com.android.internal.R.styleable.Window_windowShowWallpaper, false);
+            final boolean windowDisableStarting = ent.array.getBoolean(
+                    com.android.internal.R.styleable.Window_windowDisablePreview, false);
+            ProtoLog.v(WM_DEBUG_STARTING_WINDOW,
+                    "Translucent=%s Floating=%s ShowWallpaper=%s Disable=%s",
+                    windowIsTranslucent, windowIsFloating, windowShowWallpaper,
+                    windowDisableStarting);
+            if (windowIsTranslucent || windowIsFloating || windowDisableStarting) {
+                return false;
+            }
+            if (windowShowWallpaper
+                    && getDisplayContent().mWallpaperController.getWallpaperTarget() != null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void applyStartingWindowTheme(String pkg, int theme) {
+        if (theme != 0) {
+            AttributeCache.Entry ent = AttributeCache.instance().get(pkg, theme,
+                    com.android.internal.R.styleable.Window,
+                    mWmService.mCurrentUserId);
+            if (ent == null) {
+                return;
+            }
+            final boolean windowShowWallpaper = ent.array.getBoolean(
+                    com.android.internal.R.styleable.Window_windowShowWallpaper, false);
+            if (windowShowWallpaper && getDisplayContent().mWallpaperController
+                    .getWallpaperTarget() == null) {
+                // If this theme is requesting a wallpaper, and the wallpaper
+                // is not currently visible, then this effectively serves as
+                // an opaque window and our starting window transition animation
+                // can still work.  We just need to make sure the starting window
+                // is also showing the wallpaper.
+                windowFlags |= FLAG_SHOW_WALLPAPER;
+            }
+        }
+    }
+
+    boolean addStartingWindow(String pkg, int resolvedTheme, CompatibilityInfo compatInfo,
             CharSequence nonLocalizedLabel, int labelRes, int icon, int logo, int windowFlags,
             IBinder transferFrom, boolean newTask, boolean taskSwitch, boolean processRunning,
             boolean allowTaskSnapshot, boolean activityCreated) {
@@ -1878,49 +1956,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return createSnapshot(snapshot, typeParameter);
         }
 
-        // If this is a translucent window, then don't show a starting window -- the current
-        // effect (a full-screen opaque starting window that fades away to the real contents
-        // when it is ready) does not work for this.
-        ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Checking theme of starting window: 0x%x", theme);
-        if (theme != 0) {
-            AttributeCache.Entry ent = AttributeCache.instance().get(pkg, theme,
-                    com.android.internal.R.styleable.Window,
-                    mWmService.mCurrentUserId);
-            if (ent == null) {
-                // Whoops!  App doesn't exist. Um. Okay. We'll just pretend like we didn't
-                // see that.
-                return false;
-            }
-            final boolean windowIsTranslucent = ent.array.getBoolean(
-                    com.android.internal.R.styleable.Window_windowIsTranslucent, false);
-            final boolean windowIsFloating = ent.array.getBoolean(
-                    com.android.internal.R.styleable.Window_windowIsFloating, false);
-            final boolean windowShowWallpaper = ent.array.getBoolean(
-                    com.android.internal.R.styleable.Window_windowShowWallpaper, false);
-            final boolean windowDisableStarting = ent.array.getBoolean(
-                    com.android.internal.R.styleable.Window_windowDisablePreview, false);
-            ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Translucent=%s Floating=%s ShowWallpaper=%s",
-                    windowIsTranslucent, windowIsFloating, windowShowWallpaper);
-            if (windowIsTranslucent) {
-                return false;
-            }
-            if (windowIsFloating || windowDisableStarting) {
-                return false;
-            }
-            if (windowShowWallpaper) {
-                if (getDisplayContent().mWallpaperController
-                        .getWallpaperTarget() == null) {
-                    // If this theme is requesting a wallpaper, and the wallpaper
-                    // is not currently visible, then this effectively serves as
-                    // an opaque window and our starting window transition animation
-                    // can still work.  We just need to make sure the starting window
-                    // is also showing the wallpaper.
-                    windowFlags |= FLAG_SHOW_WALLPAPER;
-                } else {
-                    return false;
-                }
-            }
+        // Original theme can be 0 if developer doesn't request any theme. So if resolved theme is 0
+        // but original theme is not 0, means this package doesn't want a starting window.
+        if (resolvedTheme == 0 && theme != 0) {
+            return false;
         }
+        applyStartingWindowTheme(pkg, resolvedTheme);
 
         if (transferStartingWindow(transferFrom)) {
             return true;
@@ -1934,7 +1975,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Creating SplashScreenStartingData");
         mStartingData = new SplashScreenStartingData(mWmService, pkg,
-                theme, compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
+                resolvedTheme, compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
                 getMergedOverrideConfiguration(), typeParameter);
         scheduleAddStartingWindow();
         return true;
@@ -6080,7 +6121,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         pendingVoiceInteractionStart = false;
     }
 
-    void showStartingWindow(ActivityRecord prev, boolean newTask, boolean taskSwitch) {
+    void showStartingWindow(boolean taskSwitch) {
+        showStartingWindow(null /* prev */, false /* newTask */, taskSwitch,
+                0 /* splashScreenTheme */);
+    }
+
+    void showStartingWindow(ActivityRecord prev, boolean newTask, boolean taskSwitch,
+            int splashScreenTheme) {
         if (mTaskOverlay) {
             // We don't show starting window for overlay activities.
             return;
@@ -6093,7 +6140,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final CompatibilityInfo compatInfo =
                 mAtmService.compatibilityInfoForPackageLocked(info.applicationInfo);
-        final boolean shown = addStartingWindow(packageName, theme,
+
+        final int resolvedTheme = evaluateStartingWindowTheme(packageName, theme,
+                splashScreenTheme);
+        final boolean shown = addStartingWindow(packageName, resolvedTheme,
                 compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
                 prev != null ? prev.appToken : null, newTask, taskSwitch, isProcessRunning(),
                 allowTaskSnapshot(),

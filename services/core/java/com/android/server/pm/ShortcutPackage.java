@@ -112,6 +112,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     private static final String ATTR_BITMAP_PATH = "bitmap-path";
     private static final String ATTR_ICON_URI = "icon-uri";
     private static final String ATTR_LOCUS_ID = "locus-id";
+    private static final String ATTR_SPLASH_SCREEN_THEME_ID = "splash-screen-theme-id";
 
     private static final String ATTR_PERSON_NAME = "name";
     private static final String ATTR_PERSON_URI = "uri";
@@ -1654,6 +1655,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         ShortcutService.writeAttr(out, ATTR_TITLE, si.getTitle());
         ShortcutService.writeAttr(out, ATTR_TITLE_RES_ID, si.getTitleResId());
         ShortcutService.writeAttr(out, ATTR_TITLE_RES_NAME, si.getTitleResName());
+        ShortcutService.writeAttr(out, ATTR_SPLASH_SCREEN_THEME_ID, si.getStartingThemeResId());
         ShortcutService.writeAttr(out, ATTR_TEXT, si.getText());
         ShortcutService.writeAttr(out, ATTR_TEXT_RES_ID, si.getTextResId());
         ShortcutService.writeAttr(out, ATTR_TEXT_RES_NAME, si.getTextResName());
@@ -1861,6 +1863,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         String bitmapPath;
         String iconUri;
         final String locusIdString;
+        int splashScreenThemeResId;
         int backupVersionCode;
         ArraySet<String> categories = null;
         ArrayList<Person> persons = new ArrayList<>();
@@ -1871,6 +1874,8 @@ class ShortcutPackage extends ShortcutPackageItem {
         title = ShortcutService.parseStringAttribute(parser, ATTR_TITLE);
         titleResId = ShortcutService.parseIntAttribute(parser, ATTR_TITLE_RES_ID);
         titleResName = ShortcutService.parseStringAttribute(parser, ATTR_TITLE_RES_NAME);
+        splashScreenThemeResId = ShortcutService.parseIntAttribute(parser,
+                ATTR_SPLASH_SCREEN_THEME_ID);
         text = ShortcutService.parseStringAttribute(parser, ATTR_TEXT);
         textResId = ShortcutService.parseIntAttribute(parser, ATTR_TEXT_RES_ID);
         textResName = ShortcutService.parseStringAttribute(parser, ATTR_TEXT_RES_NAME);
@@ -1964,7 +1969,8 @@ class ShortcutPackage extends ShortcutPackageItem {
                 intents.toArray(new Intent[intents.size()]),
                 rank, extras, lastChangedTimestamp, flags,
                 iconResId, iconResName, bitmapPath, iconUri,
-                disabledReason, persons.toArray(new Person[persons.size()]), locusId);
+                disabledReason, persons.toArray(new Person[persons.size()]), locusId,
+                splashScreenThemeResId);
     }
 
     private static Intent parseIntent(TypedXmlPullParser parser)

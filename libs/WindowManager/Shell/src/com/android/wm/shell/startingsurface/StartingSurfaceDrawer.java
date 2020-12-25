@@ -199,9 +199,8 @@ public class StartingSurfaceDrawer {
     public void addStartingWindow(StartingWindowInfo windowInfo, IBinder appToken) {
         final PreferredStartingTypeHelper helper =
                 new PreferredStartingTypeHelper(windowInfo);
-        final RunningTaskInfo runningTaskInfo = windowInfo.taskInfo;
         if (helper.mPreferredType == PreferredStartingTypeHelper.STARTING_TYPE_SPLASH_SCREEN) {
-            addSplashScreenStartingWindow(runningTaskInfo, appToken);
+            addSplashScreenStartingWindow(windowInfo, appToken);
         } else if (helper.mPreferredType == PreferredStartingTypeHelper.STARTING_TYPE_SNAPSHOT) {
             final TaskSnapshot snapshot = helper.mSnapshot;
             makeTaskSnapshotWindow(windowInfo, appToken, snapshot);
@@ -209,11 +208,13 @@ public class StartingSurfaceDrawer {
         // If prefer don't show, then don't show!
     }
 
-    private void addSplashScreenStartingWindow(RunningTaskInfo taskInfo, IBinder appToken) {
+    private void addSplashScreenStartingWindow(StartingWindowInfo windowInfo, IBinder appToken) {
+        final RunningTaskInfo taskInfo = windowInfo.taskInfo;
         final ActivityInfo activityInfo = taskInfo.topActivityInfo;
         if (activityInfo == null) {
             return;
         }
+
         final int displayId = taskInfo.displayId;
         if (activityInfo.packageName == null) {
             return;
@@ -228,11 +229,11 @@ public class StartingSurfaceDrawer {
         }
 
         Context context = mContext;
-        int theme = activityInfo.getThemeResource();
-        if (theme == 0) {
-            // replace with the default theme if the application didn't set
-            theme = com.android.internal.R.style.Theme_DeviceDefault_DayNight;
-        }
+        // replace with the default theme if the application didn't set
+        final int theme = windowInfo.splashScreenThemeResId != 0
+                ? windowInfo.splashScreenThemeResId
+                : activityInfo.getThemeResource() != 0 ? activityInfo.getThemeResource()
+                        : com.android.internal.R.style.Theme_DeviceDefault_DayNight;
         if (DEBUG_SPLASH_SCREEN) {
             Slog.d(TAG, "addSplashScreen " + activityInfo.packageName
                     + ": nonLocalizedLabel=" + nonLocalizedLabel + " theme="
