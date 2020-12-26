@@ -38,7 +38,9 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.net.module.util.ProxyUtils;
 
+import java.util.Collections;
 import java.util.Objects;
 
 /**
@@ -163,9 +165,10 @@ public class ProxyTracker {
         if (!TextUtils.isEmpty(host) || !TextUtils.isEmpty(pacFileUrl)) {
             ProxyInfo proxyProperties;
             if (!TextUtils.isEmpty(pacFileUrl)) {
-                proxyProperties = new ProxyInfo(Uri.parse(pacFileUrl));
+                proxyProperties = ProxyInfo.buildPacProxy(Uri.parse(pacFileUrl));
             } else {
-                proxyProperties = new ProxyInfo(host, port, exclList);
+                proxyProperties = ProxyInfo.buildDirectProxy(host, port,
+                        ProxyUtils.exclusionStringAsList(exclList));
             }
             if (!proxyProperties.isValid()) {
                 if (DBG) Log.d(TAG, "Invalid proxy properties, ignoring: " + proxyProperties);
@@ -204,7 +207,8 @@ public class ProxyTracker {
                     return false;
                 }
             }
-            final ProxyInfo p = new ProxyInfo(proxyHost, proxyPort, "");
+            final ProxyInfo p = ProxyInfo.buildDirectProxy(proxyHost, proxyPort,
+                    Collections.emptyList());
             setGlobalProxy(p);
             return true;
         }
@@ -219,7 +223,8 @@ public class ProxyTracker {
      */
     public void sendProxyBroadcast() {
         final ProxyInfo defaultProxy = getDefaultProxy();
-        final ProxyInfo proxyInfo = null != defaultProxy ? defaultProxy : new ProxyInfo("", 0, "");
+        final ProxyInfo proxyInfo = null != defaultProxy ?
+                defaultProxy : ProxyInfo.buildDirectProxy("", 0, Collections.emptyList());
         if (mPacManager.setCurrentProxyScriptUrl(proxyInfo) == PacManager.DONT_SEND_BROADCAST) {
             return;
         }
@@ -261,7 +266,7 @@ public class ProxyTracker {
                 mGlobalProxy = new ProxyInfo(proxyInfo);
                 host = mGlobalProxy.getHost();
                 port = mGlobalProxy.getPort();
-                exclList = mGlobalProxy.getExclusionListAsString();
+                exclList = ProxyUtils.exclusionListAsString(mGlobalProxy.getExclusionList());
                 pacFileUrl = Uri.EMPTY.equals(proxyInfo.getPacFileUrl())
                         ? "" : proxyInfo.getPacFileUrl().toString();
             } else {
