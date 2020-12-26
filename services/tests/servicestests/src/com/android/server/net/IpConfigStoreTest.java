@@ -39,6 +39,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 /**
  * Unit tests for {@link IpConfigStore}
@@ -82,7 +83,8 @@ public class IpConfigStoreTest {
         staticIpConfiguration.dnsServers.add(InetAddresses.parseNumericAddress(DNS_IP_ADDR_1));
         staticIpConfiguration.dnsServers.add(InetAddresses.parseNumericAddress(DNS_IP_ADDR_2));
 
-        ProxyInfo proxyInfo = new ProxyInfo("10.10.10.10", 88, "host1,host2");
+        ProxyInfo proxyInfo =
+                ProxyInfo.buildDirectProxy("10.10.10.10", 88, Arrays.asList("host1", "host2"));
 
         IpConfiguration expectedConfig1 = new IpConfiguration(IpAssignment.STATIC,
                 ProxySettings.STATIC, staticIpConfiguration, proxyInfo);

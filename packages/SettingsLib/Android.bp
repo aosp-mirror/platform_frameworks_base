@@ -43,6 +43,7 @@ java_defaults {
         "SettingsLibSearchWidget",
         "SettingsLibSettingsSpinner",
         "SettingsLibLayoutPreference",
+        "SettingsLibMainSwitchPreference",
         "SettingsLibActionButtonsPreference",
         "SettingsLibEntityHeaderWidgets",
         "SettingsLibBarChartPreference",

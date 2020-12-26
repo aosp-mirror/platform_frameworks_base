@@ -1,0 +1,14 @@
+android_library {
+    name: "SettingsLibMainSwitchPreference",
+
+    srcs: ["src/**/*.java"],
+    resource_dirs: ["res"],
+
+    static_libs: [
+          "androidx.preference_preference",
+          "SettingsLibRestrictedLockUtils",
+    ],
+
+    sdk_version: "system_current",
+    min_sdk_version: "21",
+}
