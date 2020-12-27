@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.service.timezone.ITimeZoneProvider;
@@ -43,20 +44,20 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
 
     @NonNull private final ServiceWatcher mServiceWatcher;
 
-    @GuardedBy("mProxyLock")
+    @GuardedBy("mSharedLock")
     @Nullable private ManagerProxy mManagerProxy;
 
-    @GuardedBy("mProxyLock")
+    @GuardedBy("mSharedLock")
     @NonNull private TimeZoneProviderRequest mRequest;
 
     RealLocationTimeZoneProviderProxy(
-            @NonNull Context context, @NonNull ThreadingDomain threadingDomain,
-            @NonNull String action, int enableOverlayResId,
-            int nonOverlayPackageResId) {
+            @NonNull Context context, @NonNull Handler handler,
+            @NonNull ThreadingDomain threadingDomain, @NonNull String action,
+            int enableOverlayResId, int nonOverlayPackageResId) {
         super(context, threadingDomain);
         mManagerProxy = null;
         mRequest = TimeZoneProviderRequest.createStopUpdatesRequest();
-        mServiceWatcher = new ServiceWatcher(context, action, this::onBind, this::onUnbind,
+        mServiceWatcher = new ServiceWatcher(context, handler, action, this::onBind, this::onUnbind,
                 enableOverlayResId, nonOverlayPackageResId);
     }
 
@@ -76,21 +77,6 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
     }
 
     private void onBind(IBinder binder, ComponentName componentName) {
-        processServiceWatcherCallbackOnThreadingDomainThread(() -> onBindOnHandlerThread(binder));
-    }
-
-    private void onUnbind() {
-        processServiceWatcherCallbackOnThreadingDomainThread(this::onUnbindOnHandlerThread);
-    }
-
-    private void processServiceWatcherCallbackOnThreadingDomainThread(@NonNull Runnable runnable) {
-        // For simplicity, this code just post()s the runnable to the mThreadingDomain Thread in all
-        // cases. This adds a delay if ServiceWatcher and ThreadingDomain happen to be using the
-        // same thread, but nothing here should be performance critical.
-        mThreadingDomain.post(runnable);
-    }
-
-    private void onBindOnHandlerThread(@NonNull IBinder binder) {
         mThreadingDomain.assertCurrentThread();
 
         ITimeZoneProvider provider = ITimeZoneProvider.Stub.asInterface(binder);
@@ -108,7 +94,7 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
         }
     }
 
-    private void onUnbindOnHandlerThread() {
+    private void onUnbind() {
         mThreadingDomain.assertCurrentThread();
 
         synchronized (mSharedLock) {
@@ -129,7 +115,7 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
         }
     }
 
-    @GuardedBy("mProxyLock")
+    @GuardedBy("mSharedLock")
     private void trySendCurrentRequest() {
         TimeZoneProviderRequest request = mRequest;
         mServiceWatcher.runOnBinder(binder -> {
