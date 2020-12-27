@@ -341,7 +341,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     @Test
     public void testSetActivityWindowingMode() {
         final ActivityRecord record = makePipableActivity();
-        final Task stack = record.getStack();
+        final Task stack = record.getRootTask();
         final WindowContainerTransaction t = new WindowContainerTransaction();
 
         t.setWindowingMode(stack.mRemoteToken.toWindowContainerToken(), WINDOWING_MODE_PINNED);

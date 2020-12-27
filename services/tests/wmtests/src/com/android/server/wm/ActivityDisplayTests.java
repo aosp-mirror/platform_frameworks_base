@@ -72,7 +72,7 @@ public class ActivityDisplayTests extends WindowTestsBase {
 
         stack.moveToFront("moveStackToFront");
         // After moving the stack to front, the previous focused should be the last focused.
-        assertTrue(stack.isFocusedStackOnDisplay());
+        assertTrue(stack.isFocusedRootTaskOnDisplay());
         assertEquals(prevFocusedStack, taskDisplayAreas.getLastFocusedRootTask());
 
         stack.moveToBack("moveStackToBack", null /* task */);
@@ -96,7 +96,7 @@ public class ActivityDisplayTests extends WindowTestsBase {
         pinnedStack.moveToFront("movePinnedStackToFront");
 
         // The focused stack should be the pinned stack.
-        assertTrue(pinnedStack.isFocusedStackOnDisplay());
+        assertTrue(pinnedStack.isFocusedRootTaskOnDisplay());
 
         // Create a fullscreen stack and move to front.
         final Task fullscreenStack = createFullscreenStackWithSimpleActivityAt(
@@ -104,7 +104,7 @@ public class ActivityDisplayTests extends WindowTestsBase {
         fullscreenStack.moveToFront("moveFullscreenStackToFront");
 
         // The focused stack should be the fullscreen stack.
-        assertTrue(fullscreenStack.isFocusedStackOnDisplay());
+        assertTrue(fullscreenStack.isFocusedRootTaskOnDisplay());
     }
 
     /**
@@ -121,15 +121,15 @@ public class ActivityDisplayTests extends WindowTestsBase {
         // Put stack1 and stack2 on top.
         stack1.moveToFront("moveStack1ToFront");
         stack2.moveToFront("moveStack2ToFront");
-        assertTrue(stack2.isFocusedStackOnDisplay());
+        assertTrue(stack2.isFocusedRootTaskOnDisplay());
 
         // Stack1 should be focused after moving stack2 to back.
         stack2.moveToBack("moveStack2ToBack", null /* task */);
-        assertTrue(stack1.isFocusedStackOnDisplay());
+        assertTrue(stack1.isFocusedRootTaskOnDisplay());
 
         // Stack2 should be focused after removing stack1.
         stack1.getDisplayArea().removeRootTask(stack1);
-        assertTrue(stack2.isFocusedStackOnDisplay());
+        assertTrue(stack2.isFocusedRootTaskOnDisplay());
     }
 
     /**

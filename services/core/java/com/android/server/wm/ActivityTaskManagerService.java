@@ -1154,7 +1154,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         SafeActivityOptions options = SafeActivityOptions.fromBundle(bOptions);
 
         synchronized (mGlobalLock) {
-            final ActivityRecord r = ActivityRecord.isInStackLocked(callingActivity);
+            final ActivityRecord r = ActivityRecord.isInRootTaskLocked(callingActivity);
             if (r == null) {
                 SafeActivityOptions.abort(options);
                 return false;
@@ -1812,7 +1812,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final long callingId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                final ActivityRecord r = ActivityRecord.isInStackLocked(activityToken);
+                final ActivityRecord r = ActivityRecord.isInRootTaskLocked(activityToken);
                 if (r == null) {
                     return;
                 }
@@ -2653,7 +2653,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         try {
             synchronized (mGlobalLock) {
-                ActivityRecord r = ActivityRecord.isInStackLocked(activityToken);
+                ActivityRecord r = ActivityRecord.isInRootTaskLocked(activityToken);
                 if (r == null) {
                     throw new IllegalArgumentException("Activity does not exist; token="
                             + activityToken);
@@ -3483,7 +3483,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     @Override
     public void invalidateHomeTaskSnapshot(IBinder token) {
         synchronized (mGlobalLock) {
-            final ActivityRecord r = ActivityRecord.isInStackLocked(token);
+            final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
             if (r == null || !r.isActivityTypeHome()) {
                 return;
             }
@@ -4634,7 +4634,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         ActivityRecord activity = null;
         if (type == ActivityManager.INTENT_SENDER_ACTIVITY_RESULT) {
-            activity = ActivityRecord.isInStackLocked(token);
+            activity = ActivityRecord.isInRootTaskLocked(token);
             if (activity == null) {
                 Slog.w(TAG, "Failed createPendingResult: activity " + token + " not in any stack");
                 return null;
@@ -5488,7 +5488,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 int requestCode, int resultCode, Intent data) {
             final ActivityRecord r;
             synchronized (mGlobalLock) {
-                r = ActivityRecord.isInStackLocked(activityToken);
+                r = ActivityRecord.isInRootTaskLocked(activityToken);
                 if (r == null || r.getRootTask() == null) {
                     return;
                 }
@@ -5506,7 +5506,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void clearPendingResultForActivity(IBinder activityToken,
                 WeakReference<PendingIntentRecord> pir) {
             synchronized (mGlobalLock) {
-                final ActivityRecord r = ActivityRecord.isInStackLocked(activityToken);
+                final ActivityRecord r = ActivityRecord.isInRootTaskLocked(activityToken);
                 if (r != null && r.pendingResults != null) {
                     r.pendingResults.remove(pir);
                 }
@@ -5516,7 +5516,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public ComponentName getActivityName(IBinder activityToken) {
             synchronized (mGlobalLock) {
-                final ActivityRecord r = ActivityRecord.isInStackLocked(activityToken);
+                final ActivityRecord r = ActivityRecord.isInRootTaskLocked(activityToken);
                 return r != null ? r.intent.getComponent() : null;
             }
         }
@@ -5560,7 +5560,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public ActivityServiceConnectionsHolder getServiceConnectionsHolder(IBinder token) {
             synchronized (mGlobalLock) {
-                final ActivityRecord r = ActivityRecord.isInStackLocked(token);
+                final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
                 if (r == null) {
                     return null;
                 }
