@@ -2607,11 +2607,6 @@ class ActivityStarter {
                 final Task launchStack = getLaunchStack(mStartActivity, mLaunchFlags, intentTask,
                         mOptions);
                 if (launchStack == null || launchStack == mTargetStack) {
-                    // Do not set mMovedToFront to true below for split-screen-top stack, or
-                    // START_TASK_TO_FRONT will be returned and trigger unexpected animations when a
-                    // new intent has delivered.
-                    final boolean isSplitScreenTopStack = mTargetStack.isTopSplitScreenStack();
-
                     // TODO(b/151572268): Figure out a better way to move tasks in above 2-levels
                     //  tasks hierarchies.
                     if (mTargetStack != intentTask
@@ -2620,6 +2615,11 @@ class ActivityStarter {
                                 false /* includingParents */);
                         intentTask = intentTask.getParent().asTask();
                     }
+                    // If the task is in multi-windowing mode, the activity may already be on
+                    // the top (visible to user but not the global top), then the result code
+                    // should be START_DELIVERED_TO_TOP instead of START_TASK_TO_FRONT.
+                    final boolean wasTopOfVisibleRootTask = intentActivity.mVisibleRequested
+                            && intentActivity == mTargetStack.topRunningActivity();
                     // We only want to move to the front, if we aren't going to launch on a
                     // different stack. If we launch on a different stack, we will put the
                     // task on top there.
@@ -2628,7 +2628,7 @@ class ActivityStarter {
                     mTargetStack.moveTaskToFront(intentTask, mNoAnimation, mOptions,
                             mStartActivity.appTimeTracker, DEFER_RESUME,
                             "bringingFoundTaskToFront");
-                    mMovedToFront = !isSplitScreenTopStack;
+                    mMovedToFront = !wasTopOfVisibleRootTask;
                 } else {
                     intentTask.reparent(launchStack, ON_TOP, REPARENT_MOVE_ROOT_TASK_TO_FRONT,
                             ANIMATE, DEFER_RESUME, "reparentToTargetStack");
