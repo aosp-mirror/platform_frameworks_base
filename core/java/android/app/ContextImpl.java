@@ -1996,8 +1996,7 @@ class ContextImpl extends Context {
     }
 
     private static boolean isUiComponent(String name) {
-        return WINDOW_SERVICE.equals(name) || LAYOUT_INFLATER_SERVICE.equals(name)
-                || WALLPAPER_SERVICE.equals(name);
+        return WINDOW_SERVICE.equals(name) || LAYOUT_INFLATER_SERVICE.equals(name);
     }
 
     @Override
