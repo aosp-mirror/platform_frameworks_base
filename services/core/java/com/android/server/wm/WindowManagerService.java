@@ -682,7 +682,7 @@ public class WindowManagerService extends IWindowManager.Stub
     // Whether the system should use BLAST for ViewRootImpl
     final boolean mUseBLAST;
     // Whether to enable BLASTSyncEngine Transaction passing.
-    final boolean mUseBLASTSync = false;
+    final boolean mUseBLASTSync = true;
 
     final BLASTSyncEngine mSyncEngine;
 
