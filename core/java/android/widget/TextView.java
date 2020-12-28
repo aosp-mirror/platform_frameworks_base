@@ -11862,16 +11862,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             Log.w(LOG_TAG, "cannot autofill non-editable TextView: " + this);
             return;
         }
-        final ClipData clip;
-        if (value.isRichContent()) {
-            clip = value.getRichContentValue();
-        } else if (value.isText()) {
-            clip = ClipData.newPlainText("", value.getTextValue());
-        } else {
+        if (!value.isText()) {
             Log.w(LOG_TAG, "value of type " + value.describeContents()
                     + " cannot be autofilled into " + this);
             return;
         }
+        final ClipData clip = ClipData.newPlainText("", value.getTextValue());
         final ContentInfo payload = new ContentInfo.Builder(clip, SOURCE_AUTOFILL).build();
         performReceiveContent(payload);
     }
