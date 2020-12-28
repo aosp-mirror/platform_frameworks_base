@@ -2927,7 +2927,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     /**
      * Returns {@code true} if this window has been shown on screen at some time in the past.
      *
-     * @deprecated Use {@link #isDrawnLw} or any of the other drawn/visibility methods.
+     * @deprecated Use {@link #isDrawn} or any of the other drawn/visibility methods.
      */
     @Deprecated
     boolean hasDrawn() {

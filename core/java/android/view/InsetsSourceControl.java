@@ -41,6 +41,7 @@ public class InsetsSourceControl implements Parcelable {
     private final @InternalInsetsType int mType;
     private final @Nullable SurfaceControl mLeash;
     private final Point mSurfacePosition;
+    private boolean mSkipAnimationOnce;
 
     public InsetsSourceControl(@InternalInsetsType int type, @Nullable SurfaceControl leash,
             Point surfacePosition) {
@@ -57,6 +58,7 @@ public class InsetsSourceControl implements Parcelable {
             mLeash = null;
         }
         mSurfacePosition = new Point(other.mSurfacePosition);
+        mSkipAnimationOnce = other.getAndClearSkipAnimationOnce();
     }
 
     public int getType() {
@@ -77,6 +79,7 @@ public class InsetsSourceControl implements Parcelable {
         mType = in.readInt();
         mLeash = in.readParcelable(null /* loader */);
         mSurfacePosition = in.readParcelable(null /* loader */);
+        mSkipAnimationOnce = in.readBoolean();
     }
 
     public boolean setSurfacePosition(int left, int top) {
@@ -87,8 +90,25 @@ public class InsetsSourceControl implements Parcelable {
         return true;
     }
 
+    public void setSkipAnimationOnce(boolean skipAnimation) {
+        mSkipAnimationOnce = skipAnimation;
+    }
+
     public Point getSurfacePosition() {
         return mSurfacePosition;
+    }
+
+    /**
+     * Get the state whether the current control needs to skip animation or not.
+     *
+     * Note that this is a one-time check that the state is only valid and can be called when
+     * {@link InsetsController#applyAnimation} to check if the current control can skip animation
+     * at this time, and then will clear the state value.
+     */
+    public boolean getAndClearSkipAnimationOnce() {
+        final boolean result = mSkipAnimationOnce;
+        mSkipAnimationOnce = false;
+        return result;
     }
 
     @Override
@@ -101,6 +121,7 @@ public class InsetsSourceControl implements Parcelable {
         dest.writeInt(mType);
         dest.writeParcelable(mLeash, 0 /* flags*/);
         dest.writeParcelable(mSurfacePosition, 0 /* flags*/);
+        dest.writeBoolean(mSkipAnimationOnce);
     }
 
     public void release(Consumer<SurfaceControl> surfaceReleaseConsumer) {
@@ -114,6 +135,7 @@ public class InsetsSourceControl implements Parcelable {
         pw.print("InsetsSourceControl type="); pw.print(InsetsState.typeToString(mType));
         pw.print(" mLeash="); pw.print(mLeash);
         pw.print(" mSurfacePosition="); pw.print(mSurfacePosition);
+        pw.print(" mSkipAnimationOnce="); pw.print(mSkipAnimationOnce);
         pw.println();
     }
 

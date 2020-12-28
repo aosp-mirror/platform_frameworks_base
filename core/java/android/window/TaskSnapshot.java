@@ -60,6 +60,7 @@ public class TaskSnapshot implements Parcelable {
     private final @WindowInsetsController.Appearance
     int mAppearance;
     private final boolean mIsTranslucent;
+    private final boolean mHasImeSurface;
     // Must be one of the named color spaces, otherwise, always use SRGB color space.
     private final ColorSpace mColorSpace;
 
@@ -68,7 +69,7 @@ public class TaskSnapshot implements Parcelable {
             @NonNull ColorSpace colorSpace, int orientation, int rotation, Point taskSize,
             Rect contentInsets, boolean isLowResolution, boolean isRealSnapshot,
             int windowingMode, @WindowInsetsController.Appearance int appearance,
-            boolean isTranslucent) {
+            boolean isTranslucent, boolean hasImeSurface) {
         mId = id;
         mTopActivityComponent = topActivityComponent;
         mSnapshot = snapshot;
@@ -83,6 +84,7 @@ public class TaskSnapshot implements Parcelable {
         mWindowingMode = windowingMode;
         mAppearance = appearance;
         mIsTranslucent = isTranslucent;
+        mHasImeSurface = hasImeSurface;
     }
 
     private TaskSnapshot(Parcel source) {
@@ -102,6 +104,7 @@ public class TaskSnapshot implements Parcelable {
         mWindowingMode = source.readInt();
         mAppearance = source.readInt();
         mIsTranslucent = source.readBoolean();
+        mHasImeSurface = source.readBoolean();
     }
 
     /**
@@ -201,6 +204,13 @@ public class TaskSnapshot implements Parcelable {
     }
 
     /**
+     * @return Whether or not the snapshot has the IME surface.
+     */
+    public boolean hasImeSurface() {
+        return mHasImeSurface;
+    }
+
+    /**
      * @return The windowing mode of the task when this snapshot was taken.
      */
     public int getWindowingMode() {
@@ -237,6 +247,7 @@ public class TaskSnapshot implements Parcelable {
         dest.writeInt(mWindowingMode);
         dest.writeInt(mAppearance);
         dest.writeBoolean(mIsTranslucent);
+        dest.writeBoolean(mHasImeSurface);
     }
 
     @Override
@@ -256,7 +267,8 @@ public class TaskSnapshot implements Parcelable {
                 + " mIsRealSnapshot=" + mIsRealSnapshot
                 + " mWindowingMode=" + mWindowingMode
                 + " mAppearance=" + mAppearance
-                + " mIsTranslucent=" + mIsTranslucent;
+                + " mIsTranslucent=" + mIsTranslucent
+                + " mHasImeSurface=" + mHasImeSurface;
     }
 
     public static final @NonNull Creator<TaskSnapshot> CREATOR = new Creator<TaskSnapshot>() {
@@ -283,6 +295,7 @@ public class TaskSnapshot implements Parcelable {
         private @WindowInsetsController.Appearance
         int mAppearance;
         private boolean mIsTranslucent;
+        private boolean mHasImeSurface;
         private int mPixelFormat;
 
         public Builder setId(long id) {
@@ -290,8 +303,7 @@ public class TaskSnapshot implements Parcelable {
             return this;
         }
 
-        public Builder setTopActivityComponent(
-                ComponentName name) {
+        public Builder setTopActivityComponent(ComponentName name) {
             mTopActivity = name;
             return this;
         }
@@ -329,8 +341,7 @@ public class TaskSnapshot implements Parcelable {
             return this;
         }
 
-        public Builder setIsRealSnapshot(
-                boolean realSnapshot) {
+        public Builder setIsRealSnapshot(boolean realSnapshot) {
             mIsRealSnapshot = realSnapshot;
             return this;
         }
@@ -340,15 +351,21 @@ public class TaskSnapshot implements Parcelable {
             return this;
         }
 
-        public Builder setAppearance(
-                @WindowInsetsController.Appearance int appearance) {
+        public Builder setAppearance(@WindowInsetsController.Appearance int appearance) {
             mAppearance = appearance;
             return this;
         }
 
-        public Builder setIsTranslucent(
-                boolean isTranslucent) {
+        public Builder setIsTranslucent(boolean isTranslucent) {
             mIsTranslucent = isTranslucent;
+            return this;
+        }
+
+        /**
+         * Sets the IME visibility when taking the snapshot of the task.
+         */
+        public Builder setHasImeSurface(boolean hasImeSurface) {
+            mHasImeSurface = hasImeSurface;
             return this;
         }
 
@@ -378,7 +395,8 @@ public class TaskSnapshot implements Parcelable {
                     mIsRealSnapshot,
                     mWindowingMode,
                     mAppearance,
-                    mIsTranslucent);
+                    mIsTranslucent,
+                    mHasImeSurface);
 
         }
     }
