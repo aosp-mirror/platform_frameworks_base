@@ -17,4 +17,4 @@
 /** @hide */
 package android.telephony.data;
 
-parcelable ApnThrottleStatus;
+parcelable ThrottleStatus;
