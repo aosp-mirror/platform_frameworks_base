@@ -505,7 +505,7 @@ public abstract class ActivityManagerInternal {
     public abstract int broadcastIntent(Intent intent,
             IIntentReceiver resultTo,
             String[] requiredPermissions, boolean serialized,
-            int userId, int[] appIdAllowList);
+            int userId, int[] appIdAllowList, @Nullable Bundle bOptions);
 
     /**
      * Add uid to the ActivityManagerService PendingStartActivityUids list.

@@ -16462,7 +16462,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         public int broadcastIntent(Intent intent,
                 IIntentReceiver resultTo,
                 String[] requiredPermissions,
-                boolean serialized, int userId, int[] appIdAllowList) {
+                boolean serialized, int userId, int[] appIdAllowList, @Nullable Bundle bOptions) {
             synchronized (ActivityManagerService.this) {
                 intent = verifyBroadcastLocked(intent);
 
@@ -16474,10 +16474,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                             null /*callerPackage*/, null /*callingFeatureId*/, intent,
                             null /*resolvedType*/, resultTo, 0 /*resultCode*/, null /*resultData*/,
                             null /*resultExtras*/, requiredPermissions, AppOpsManager.OP_NONE,
-                            null /*options*/, serialized, false /*sticky*/, callingPid, callingUid,
-                            callingUid, callingPid, userId, false /*allowBackgroundStarts*/,
-                            null /*tokenNeededForBackgroundActivityStarts*/,
-                            appIdAllowList);
+                            bOptions /*options*/, serialized, false /*sticky*/, callingPid,
+                            callingUid, callingUid, callingPid, userId,
+                            false /*allowBackgroundStarts*/,
+                            null /*tokenNeededForBackgroundActivityStarts*/, appIdAllowList);
                 } finally {
                     Binder.restoreCallingIdentity(origId);
                 }

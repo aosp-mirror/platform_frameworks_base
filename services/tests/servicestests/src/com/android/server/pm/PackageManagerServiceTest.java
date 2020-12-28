@@ -22,6 +22,7 @@ import static java.lang.reflect.Modifier.isFinal;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 
+import android.annotation.Nullable;
 import android.content.IIntentReceiver;
 import android.content.pm.PackageManagerInternal;
 import android.os.Bundle;
@@ -68,7 +69,8 @@ public class PackageManagerServiceTest {
             public void sendPackageBroadcast(final String action, final String pkg,
                     final Bundle extras, final int flags, final String targetPkg,
                     final IIntentReceiver finishedReceiver, final int[] userIds,
-                    int[] instantUserIds, SparseArray<int[]> broadcastAllowList) {
+                    int[] instantUserIds, SparseArray<int[]> broadcastAllowList,
+                    @Nullable Bundle bOptions) {
             }
 
             public void sendPackageAddedForNewUsers(String packageName,
