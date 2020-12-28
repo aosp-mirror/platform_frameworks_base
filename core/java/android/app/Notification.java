@@ -37,6 +37,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.LocusId;
@@ -5146,6 +5147,11 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(R.id.right_icon, View.VISIBLE);
                 contentView.setImageViewIcon(R.id.right_icon, mN.mLargeIcon);
                 processLargeLegacyIcon(mN.mLargeIcon, contentView, p);
+            } else {
+                // The "reset" doesn't clear the drawable, so we do it here.  This clear is
+                // important because the presence of a drawable in this view (regardless of the
+                // visibility) is used by NotificationGroupingUtil to set the visibility.
+                contentView.setImageViewIcon(R.id.right_icon, null);
             }
             return showLargeIcon;
         }
@@ -5525,9 +5531,17 @@ public class Notification implements Parcelable
             return result;
         }
 
+        // This code is executed on behalf of other apps' notifications, sometimes even by 3p apps,
+        // a use case that is not supported by the Compat Framework library.  Workarounds to resolve
+        // the change's state in NotificationManagerService were very complex. While it's possible
+        // apps can detect the change, it's most likely that the changes will simply result in
+        // visual regressions.
+        @SuppressWarnings("AndroidFrameworkCompatChange")
         private boolean bigContentViewRequired() {
+            if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.S) {
+                return true;
+            }
             // If the big content view has no content, we can exempt the app from having to show it.
-            // TODO(b/173550917): add an UNDO style then force this requirement on apps targeting S
             boolean exempt = mN.contentView != null && mN.bigContentView == null
                     && mStyle == null && mActions.size() == 0
                     && mN.extras.getCharSequence(EXTRA_TITLE) == null
@@ -11196,6 +11210,35 @@ public class Notification implements Parcelable
         public StandardTemplateParams setMaxRemoteInputHistory(int maxRemoteInputHistory) {
             this.maxRemoteInputHistory = maxRemoteInputHistory;
             return this;
+        }
+    }
+
+    /**
+     * A class to centrally access various developer flags related to notifications.
+     * This class is a non-final wrapper around Settings.Global which allows mocking for unit tests.
+     * TODO(b/176239013): Try to remove this before shipping S
+     * @hide
+     */
+    public static class DevFlags {
+        private static final boolean DEFAULT_BACKPORT_S_NOTIF_RULES = false;
+
+        /**
+         * Used by unit tests to force that this class returns its default values, which is required
+         * in cases where the ContentResolver instance is a mock.
+         * @hide
+         */
+        public static boolean sForceDefaults;
+
+        /**
+         * @return if the S notification rules should be backported to apps not yet targeting S
+         * @hide
+         */
+        public static boolean shouldBackportSNotifRules(@NonNull ContentResolver contentResolver) {
+            if (sForceDefaults) {
+                return DEFAULT_BACKPORT_S_NOTIF_RULES;
+            }
+            return Settings.Global.getInt(contentResolver, Settings.Global.BACKPORT_S_NOTIF_RULES,
+                        DEFAULT_BACKPORT_S_NOTIF_RULES ? 1 : 0) == 1;
         }
     }
 }
