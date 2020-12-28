@@ -6224,6 +6224,7 @@ package android.net {
     method @NonNull public android.net.NetworkAgentConfig.Builder setLegacyType(int);
     method @NonNull public android.net.NetworkAgentConfig.Builder setLegacyTypeName(@NonNull String);
     method @NonNull public android.net.NetworkAgentConfig.Builder setPartialConnectivityAcceptable(boolean);
+    method @NonNull public android.net.NetworkAgentConfig.Builder setSubscriberId(@Nullable String);
     method @NonNull public android.net.NetworkAgentConfig.Builder setUnvalidatedConnectivityAcceptable(boolean);
   }
 
