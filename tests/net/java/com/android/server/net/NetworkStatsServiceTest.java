@@ -23,6 +23,7 @@ import static android.net.ConnectivityManager.TYPE_VPN;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.TYPE_WIMAX;
 import static android.net.NetworkStats.DEFAULT_NETWORK_ALL;
+import static android.net.NetworkStats.DEFAULT_NETWORK_NO;
 import static android.net.NetworkStats.DEFAULT_NETWORK_YES;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.INTERFACES_ALL;
@@ -917,7 +918,8 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
     public void testMetered() throws Exception {
         // pretend that network comes online
         expectDefaultSettings();
-        NetworkState[] states = new NetworkState[] {buildWifiState(true /* isMetered */)};
+        NetworkState[] states =
+                new NetworkState[] {buildWifiState(true /* isMetered */, TEST_IFACE)};
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
 
@@ -1146,7 +1148,8 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
     public void testStatsProviderUpdateStats() throws Exception {
         // Pretend that network comes online.
         expectDefaultSettings();
-        final NetworkState[] states = new NetworkState[]{buildWifiState(true /* isMetered */)};
+        final NetworkState[] states =
+                new NetworkState[]{buildWifiState(true /* isMetered */, TEST_IFACE)};
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
 
@@ -1206,7 +1209,8 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
     public void testStatsProviderSetAlert() throws Exception {
         // Pretend that network comes online.
         expectDefaultSettings();
-        NetworkState[] states = new NetworkState[]{buildWifiState(true /* isMetered */)};
+        NetworkState[] states =
+                new NetworkState[]{buildWifiState(true /* isMetered */, TEST_IFACE)};
         mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states), new VpnInfo[0]);
 
         // Register custom provider and retrieve callback.
@@ -1317,6 +1321,47 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         assertUidTotal(template3g, UID_RED, 6L + 12L , 4L + 18L, 2L + 14L, 3L + 1L, 0);
         assertUidTotal(templateUnknown, UID_RED, 4L + 35L, 4L + 29L, 3L + 7L, 1L + 11L, 1);
         assertUidTotal(templateAll, UID_RED, 22L + 35L, 26L + 29L, 19L + 7L, 5L + 11L, 1);
+    }
+
+    @Test
+    public void testOperationCount_nonDefault_traffic() throws Exception {
+        // Pretend mobile network comes online, but wifi is the default network.
+        expectDefaultSettings();
+        NetworkState[] states = new NetworkState[]{
+                buildWifiState(true /*isMetered*/, TEST_IFACE2), buildMobile3gState(IMSI_1)};
+        expectNetworkStatsUidDetail(buildEmptyStats());
+        mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states), new VpnInfo[0]);
+
+        // Create some traffic on mobile network.
+        incrementCurrentTime(HOUR_IN_MILLIS);
+        expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 4)
+                .insertEntry(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                        DEFAULT_NETWORK_NO, 2L, 1L, 3L, 4L, 0L)
+                .insertEntry(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                        DEFAULT_NETWORK_YES, 1L, 3L, 2L, 1L, 0L)
+                .insertEntry(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, 5L, 4L, 1L, 4L, 0L));
+        // Increment operation count, which must have a specific tag.
+        mService.incrementOperationCount(UID_RED, 0xF00D, 2);
+        forcePollAndWaitForIdle();
+
+        // Verify mobile summary is not changed by the operation count.
+        final NetworkTemplate templateMobile =
+                buildTemplateMobileWithRatType(null, NETWORK_TYPE_ALL);
+        final NetworkStats statsMobile = mSession.getSummaryForAllUid(
+                templateMobile, Long.MIN_VALUE, Long.MAX_VALUE, true);
+        assertValues(statsMobile, IFACE_ALL, UID_RED, SET_ALL, TAG_NONE, METERED_ALL, ROAMING_ALL,
+                DEFAULT_NETWORK_ALL, 3L, 4L, 5L, 5L, 0);
+        assertValues(statsMobile, IFACE_ALL, UID_RED, SET_ALL, 0xF00D, METERED_ALL, ROAMING_ALL,
+                DEFAULT_NETWORK_ALL, 5L, 4L, 1L, 4L, 0);
+
+        // Verify the operation count is blamed onto the default network.
+        // TODO: Blame onto the default network is not very reasonable. Consider blame onto the
+        //  network that generates the traffic.
+        final NetworkTemplate templateWifi = buildTemplateWifiWildcard();
+        final NetworkStats statsWifi = mSession.getSummaryForAllUid(
+                templateWifi, Long.MIN_VALUE, Long.MAX_VALUE, true);
+        assertValues(statsWifi, IFACE_ALL, UID_RED, SET_ALL, 0xF00D, METERED_ALL, ROAMING_ALL,
+                DEFAULT_NETWORK_ALL, 0L, 0L, 0L, 0L, 2);
     }
 
     private static File getBaseDir(File statsDir) {
@@ -1446,14 +1491,14 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
     }
 
     private static NetworkState buildWifiState() {
-        return buildWifiState(false);
+        return buildWifiState(false, TEST_IFACE);
     }
 
-    private static NetworkState buildWifiState(boolean isMetered) {
+    private static NetworkState buildWifiState(boolean isMetered, @NonNull String iface) {
         final NetworkInfo info = new NetworkInfo(TYPE_WIFI, 0, null, null);
         info.setDetailedState(DetailedState.CONNECTED, null, null);
         final LinkProperties prop = new LinkProperties();
-        prop.setInterfaceName(TEST_IFACE);
+        prop.setInterfaceName(iface);
         final NetworkCapabilities capabilities = new NetworkCapabilities();
         capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED, !isMetered);
         capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING, true);
