@@ -1574,7 +1574,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     void getVisibleBounds(Rect bounds) {
         final Task task = getTask();
-        boolean intersectWithStackBounds = task != null && task.cropWindowsToStackBounds();
+        boolean intersectWithStackBounds = task != null && task.cropWindowsToRootTaskBounds();
         bounds.setEmpty();
         mTmpRect.setEmpty();
         if (intersectWithStackBounds) {
@@ -3472,7 +3472,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     private void cropRegionToStackBoundsIfNeeded(Region region) {
         final Task task = getTask();
-        if (task == null || !task.cropWindowsToStackBounds()) {
+        if (task == null || !task.cropWindowsToRootTaskBounds()) {
             return;
         }
 

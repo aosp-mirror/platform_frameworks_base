@@ -844,7 +844,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         ArrayList<ActivityRecord> activities = new ArrayList<>(mActivities);
         for (int i = 0; i < activities.size(); i++) {
             final ActivityRecord r = activities.get(i);
-            if (!r.finishing && r.isInStackLocked()) {
+            if (!r.finishing && r.isInRootTaskLocked()) {
                 r.finishIfPossible("finish-heavy", true /* oomAdj */);
             }
         }

@@ -330,7 +330,7 @@ final class InputMonitor {
                 inputWindowHandle.setTouchableRegionCrop(null /* Use this surfaces crop */);
                 inputWindowHandle.setReplaceTouchableRegionWithCrop(true);
                 useSurfaceCrop = true;
-            } else if (task.cropWindowsToStackBounds() && !w.inFreeformWindowingMode()) {
+            } else if (task.cropWindowsToRootTaskBounds() && !w.inFreeformWindowingMode()) {
                 inputWindowHandle.setTouchableRegionCrop(task.getRootTask().getSurfaceControl());
                 inputWindowHandle.setReplaceTouchableRegionWithCrop(false);
                 useSurfaceCrop = true;
