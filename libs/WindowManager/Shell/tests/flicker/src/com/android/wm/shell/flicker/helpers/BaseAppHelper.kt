@@ -62,8 +62,9 @@ abstract class BaseAppHelper(
     val ui: UiObject2?
         get() = uiDevice.findObject(appSelector)
 
-    fun launchViaIntent(stringExtras: Map<String, String> = mapOf()) {
+    fun launchViaIntent(action: String? = null, stringExtras: Map<String, String> = mapOf()) {
         val intent = openAppIntent
+        intent.action = action
         stringExtras.forEach() {
             intent.putExtra(it.key, it.value)
         }
