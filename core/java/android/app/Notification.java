@@ -6701,8 +6701,7 @@ public class Notification implements Parcelable
             customContent = customContent.clone();
             if (p.mHeaderless) {
                 if (decorationType <= DevFlags.DECORATION_PARTIAL) {
-                    template.removeAllViewsExceptId(R.id.notification_top_line_container,
-                            R.id.notification_main_column);
+                    template.removeFromParent(R.id.notification_top_line);
                 }
                 if (decorationType != DevFlags.DECORATION_FULL_COMPATIBLE) {
                     // Change the max content size from 60dp (the compatible size) to 48dp

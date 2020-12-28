@@ -2876,7 +2876,6 @@
   <java-symbol type="id" name="alternate_expand_target" />
   <java-symbol type="id" name="notification_header" />
   <java-symbol type="id" name="notification_top_line" />
-  <java-symbol type="id" name="notification_top_line_container" />
   <java-symbol type="id" name="notification_headerless_margin_extra_top" />
   <java-symbol type="id" name="notification_headerless_margin_extra_bottom" />
   <java-symbol type="id" name="time_divider" />
