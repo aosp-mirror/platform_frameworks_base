@@ -57,6 +57,8 @@ java_library {
     visibility: [
         "//frameworks/opt/net/wifi/service",
         "//frameworks/opt/net/wifi/tests/wifitests",
+        "//packages/modules/Wifi/service",
+        "//packages/modules/Wifi/service/tests/wifitests",
     ],
 }
 
