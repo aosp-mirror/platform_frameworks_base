@@ -2202,7 +2202,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 win.mPendingPositionChanged = null;
             }
 
-            if (mUseBLASTSync && win.useBLASTSync()) {
+            if (mUseBLASTSync && win.useBLASTSync() && viewVisibility != View.GONE) {
                 result |= RELAYOUT_RES_BLAST_SYNC;
             }
 
