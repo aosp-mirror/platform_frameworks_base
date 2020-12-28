@@ -71,6 +71,8 @@ public:
     bool isAnimated();
     int currentFrame() const;
 
+    SkCodec::FrameInfo getCurrentFrameInfo();
+
 private:
     // State machine for keeping track of how to handle RestorePrevious (RP)
     // frames in decode().

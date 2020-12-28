@@ -429,3 +429,78 @@ int AImageDecoder_rewind(AImageDecoder* decoder) {
     return imageDecoder->rewind() ? ANDROID_IMAGE_DECODER_SUCCESS
                                   : ANDROID_IMAGE_DECODER_SEEK_ERROR;
 }
+
+AImageDecoderFrameInfo* AImageDecoderFrameInfo_create() {
+    return reinterpret_cast<AImageDecoderFrameInfo*>(new SkCodec::FrameInfo);
+}
+
+static SkCodec::FrameInfo* toFrameInfo(AImageDecoderFrameInfo* info) {
+    return reinterpret_cast<SkCodec::FrameInfo*>(info);
+}
+
+static const SkCodec::FrameInfo* toFrameInfo(const AImageDecoderFrameInfo* info) {
+    return reinterpret_cast<const SkCodec::FrameInfo*>(info);
+}
+
+void AImageDecoderFrameInfo_delete(AImageDecoderFrameInfo* info) {
+    delete toFrameInfo(info);
+}
+
+int AImageDecoder_getFrameInfo(AImageDecoder* decoder,
+        AImageDecoderFrameInfo* info) {
+    if (!decoder || !info) {
+        return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
+    }
+
+    auto* imageDecoder = toDecoder(decoder);
+    if (imageDecoder->finished()) {
+        return ANDROID_IMAGE_DECODER_FINISHED;
+    }
+
+    *toFrameInfo(info) = imageDecoder->getCurrentFrameInfo();
+    return ANDROID_IMAGE_DECODER_SUCCESS;
+}
+
+int64_t AImageDecoderFrameInfo_getDuration(const AImageDecoderFrameInfo* info) {
+    if (!info) return 0;
+
+    return toFrameInfo(info)->fDuration * 1'000'000;
+}
+
+ARect AImageDecoderFrameInfo_getFrameRect(const AImageDecoderFrameInfo* info) {
+    if (!info) {
+        return { 0, 0, 0, 0};
+    }
+
+    const SkIRect& r = toFrameInfo(info)->fFrameRect;
+    return { r.left(), r.top(), r.right(), r.bottom() };
+}
+
+bool AImageDecoderFrameInfo_hasAlphaWithinBounds(const AImageDecoderFrameInfo* info) {
+    if (!info) return false;
+
+    return toFrameInfo(info)->fHasAlphaWithinBounds;
+}
+
+int32_t AImageDecoderFrameInfo_getDisposeOp(const AImageDecoderFrameInfo* info) {
+    if (!info) return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
+
+    static_assert(static_cast<int>(SkCodecAnimation::DisposalMethod::kKeep)
+                  == ANDROID_IMAGE_DECODER_DISPOSE_OP_NONE);
+    static_assert(static_cast<int>(SkCodecAnimation::DisposalMethod::kRestoreBGColor)
+                  == ANDROID_IMAGE_DECODER_DISPOSE_OP_BACKGROUND);
+    static_assert(static_cast<int>(SkCodecAnimation::DisposalMethod::kRestorePrevious)
+                  == ANDROID_IMAGE_DECODER_DISPOSE_OP_PREVIOUS);
+    return static_cast<int>(toFrameInfo(info)->fDisposalMethod);
+}
+
+int32_t AImageDecoderFrameInfo_getBlendOp(const AImageDecoderFrameInfo* info) {
+    if (!info) return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
+
+    switch (toFrameInfo(info)->fBlend) {
+        case SkCodecAnimation::Blend::kSrc:
+            return ANDROID_IMAGE_DECODER_BLEND_OP_SRC;
+        case SkCodecAnimation::Blend::kSrcOver:
+            return ANDROID_IMAGE_DECODER_BLEND_OP_SRC_OVER;
+    }
+}

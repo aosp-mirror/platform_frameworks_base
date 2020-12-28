@@ -282,6 +282,35 @@ bool ImageDecoder::advanceFrame() {
     return true;
 }
 
+SkCodec::FrameInfo ImageDecoder::getCurrentFrameInfo() {
+    LOG_ALWAYS_FATAL_IF(finished());
+
+    auto dims = mCodec->codec()->dimensions();
+    SkCodec::FrameInfo info;
+    if (!mCodec->codec()->getFrameInfo(mOptions.fFrameIndex, &info)) {
+        // SkCodec may return false for a non-animated image. Provide defaults.
+        info.fRequiredFrame = SkCodec::kNoFrame;
+        info.fDuration = 0;
+        info.fFullyReceived = true;
+        info.fAlphaType = mCodec->codec()->getInfo().alphaType();
+        info.fHasAlphaWithinBounds = info.fAlphaType != kOpaque_SkAlphaType;
+        info.fDisposalMethod = SkCodecAnimation::DisposalMethod::kKeep;
+        info.fBlend = SkCodecAnimation::Blend::kSrc;
+        info.fFrameRect = SkIRect::MakeSize(dims);
+    }
+
+    if (auto origin = mCodec->codec()->getOrigin(); origin != kDefault_SkEncodedOrigin) {
+        if (SkEncodedOriginSwapsWidthHeight(origin)) {
+            dims = swapped(dims);
+        }
+        auto matrix = SkEncodedOriginToMatrix(origin, dims.width(), dims.height());
+        auto rect = SkRect::Make(info.fFrameRect);
+        LOG_ALWAYS_FATAL_IF(!matrix.mapRect(&rect));
+        rect.roundIn(&info.fFrameRect);
+    }
+    return info;
+}
+
 bool ImageDecoder::finished() const {
     return mOptions.fFrameIndex >= mCodec->codec()->getFrameCount();
 }
