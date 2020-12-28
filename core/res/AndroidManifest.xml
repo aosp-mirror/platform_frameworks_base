@@ -3598,6 +3598,14 @@
     <permission android:name="android.permission.BIND_VOICE_INTERACTION"
         android:protectionLevel="signature" />
 
+    <!-- @SystemApi Must be required by a {@link android.service.voice.HotwordDetectionService},
+         to ensure that only the system can bind to it.
+         <p>Protection level: signature
+         @hide This is not a third-party API (intended for OEMs and system apps).
+    -->
+    <permission android:name="android.permission.BIND_HOTWORD_DETECTION_SERVICE"
+        android:protectionLevel="signature" />
+
     <!-- Must be required by a {@link android.service.autofill.AutofillService},
          to ensure that only the system can bind to it.
          <p>Protection level: signature

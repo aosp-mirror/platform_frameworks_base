@@ -37,6 +37,7 @@ package android {
     field public static final String BIND_EUICC_SERVICE = "android.permission.BIND_EUICC_SERVICE";
     field public static final String BIND_EXTERNAL_STORAGE_SERVICE = "android.permission.BIND_EXTERNAL_STORAGE_SERVICE";
     field public static final String BIND_GBA_SERVICE = "android.permission.BIND_GBA_SERVICE";
+    field public static final String BIND_HOTWORD_DETECTION_SERVICE = "android.permission.BIND_HOTWORD_DETECTION_SERVICE";
     field public static final String BIND_IMS_SERVICE = "android.permission.BIND_IMS_SERVICE";
     field public static final String BIND_KEYGUARD_APPWIDGET = "android.permission.BIND_KEYGUARD_APPWIDGET";
     field public static final String BIND_MUSIC_RECOGNITION_SERVICE = "android.permission.BIND_MUSIC_RECOGNITION_SERVICE";
@@ -10208,6 +10209,7 @@ package android.service.voice {
     method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public boolean stopRecognition();
     field public static final int AUDIO_CAPABILITY_ECHO_CANCELLATION = 1; // 0x1
     field public static final int AUDIO_CAPABILITY_NOISE_SUPPRESSION = 2; // 0x2
+    field public static final int HOTWORD_DETECTION_FALSE_ALERT = 0; // 0x0
     field public static final int MODEL_PARAM_THRESHOLD_FACTOR = 0; // 0x0
     field public static final int RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS = 2; // 0x2
     field public static final int RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO = 1; // 0x1
@@ -10230,6 +10232,7 @@ package android.service.voice {
     method public abstract void onError();
     method public abstract void onRecognitionPaused();
     method public abstract void onRecognitionResumed();
+    method public void onRejected(int);
   }
 
   public static class AlwaysOnHotwordDetector.EventPayload {
@@ -10242,9 +10245,24 @@ package android.service.voice {
     method public int getStart();
   }
 
+  public abstract class HotwordDetectionService extends android.app.Service {
+    ctor public HotwordDetectionService();
+    method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method public void onDetectFromDspSource(int, @NonNull android.service.voice.HotwordDetectionService.DspHotwordDetectionCallback);
+    field public static final String SERVICE_INTERFACE = "android.service.voice.HotwordDetectionService";
+  }
+
+  public static final class HotwordDetectionService.DspHotwordDetectionCallback {
+    method public void onDetected();
+    method public void onRejected();
+  }
+
   public class VoiceInteractionService extends android.app.Service {
     method @NonNull public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(String, java.util.Locale, android.service.voice.AlwaysOnHotwordDetector.Callback);
     method @NonNull @RequiresPermission("android.permission.MANAGE_VOICE_KEYPHRASES") public final android.media.voice.KeyphraseModelManager createKeyphraseModelManager();
+    method public final int setHotwordDetectionConfig(@Nullable android.os.Bundle);
+    field public static final int HOTWORD_CONFIG_FAILURE = 1; // 0x1
+    field public static final int HOTWORD_CONFIG_SUCCESS = 0; // 0x0
   }
 
 }
