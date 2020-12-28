@@ -200,4 +200,29 @@ public final class CallbackUtils {
             callback.onResult(result);
         } catch (RemoteException ignored) { }
     }
+
+    /**
+     * A utility method using given {@link IVoidResultCallback} to callback the result.
+     *
+     * @param callback {@link IVoidResultCallback} to be called back.
+     * @param resultSupplier the supplier from which the result is provided.
+     */
+    public static void onResult(@NonNull IVoidResultCallback callback,
+            @NonNull Supplier<Void> resultSupplier) {
+        Throwable exception = null;
+
+        try {
+            resultSupplier.get();
+        } catch (Throwable throwable) {
+            exception = throwable;
+        }
+
+        try {
+            if (exception != null) {
+                callback.onError(ThrowableHolder.of(exception));
+                return;
+            }
+            callback.onResult();
+        } catch (RemoteException ignored) { }
+    }
 }
