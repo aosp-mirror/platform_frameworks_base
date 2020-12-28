@@ -27,6 +27,8 @@ import static android.Manifest.permission.OBSERVE_NETWORK_POLICY;
 import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE;
+import static android.app.PendingIntent.FLAG_IMMUTABLE;
+import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.content.Intent.ACTION_PACKAGE_ADDED;
 import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.ACTION_USER_ADDED;
@@ -1429,17 +1431,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
                 final Intent snoozeIntent = buildSnoozeWarningIntent(policy.template);
                 builder.setDeleteIntent(PendingIntent.getBroadcast(
-                        mContext, 0, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT));
+                        mContext, 0, snoozeIntent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
 
                 final Intent viewIntent = buildViewDataUsageIntent(res, policy.template);
                 // TODO: Resolve to single code path.
                 if (UserManager.isHeadlessSystemUserMode()) {
                     builder.setContentIntent(PendingIntent.getActivityAsUser(
-                            mContext, 0, viewIntent, PendingIntent.FLAG_UPDATE_CURRENT,
+                            mContext, 0, viewIntent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE,
                             /* options= */ null, UserHandle.CURRENT));
                 } else {
                     builder.setContentIntent(PendingIntent.getActivity(
-                            mContext, 0, viewIntent, PendingIntent.FLAG_UPDATE_CURRENT));
+                            mContext, 0, viewIntent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
                 }
                 break;
             }
@@ -1463,11 +1465,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 // TODO: Resolve to single code path.
                 if (UserManager.isHeadlessSystemUserMode()) {
                     builder.setContentIntent(PendingIntent.getActivityAsUser(
-                            mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT,
+                            mContext, 0, intent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE,
                             /* options= */ null, UserHandle.CURRENT));
                 } else {
                     builder.setContentIntent(PendingIntent.getActivity(
-                            mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
+                            mContext, 0, intent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
                 }
                 break;
             }
@@ -1494,11 +1496,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 // TODO: Resolve to single code path.
                 if (UserManager.isHeadlessSystemUserMode()) {
                     builder.setContentIntent(PendingIntent.getActivityAsUser(
-                            mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT,
+                            mContext, 0, intent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE,
                             /* options= */ null, UserHandle.CURRENT));
                 } else {
                     builder.setContentIntent(PendingIntent.getActivity(
-                            mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
+                            mContext, 0, intent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
                 }
                 break;
             }
@@ -1515,17 +1517,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
                 final Intent snoozeIntent = buildSnoozeRapidIntent(policy.template);
                 builder.setDeleteIntent(PendingIntent.getBroadcast(
-                        mContext, 0, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT));
+                        mContext, 0, snoozeIntent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
 
                 final Intent viewIntent = buildViewDataUsageIntent(res, policy.template);
                 // TODO: Resolve to single code path.
                 if (UserManager.isHeadlessSystemUserMode()) {
                     builder.setContentIntent(PendingIntent.getActivityAsUser(
-                            mContext, 0, viewIntent, PendingIntent.FLAG_UPDATE_CURRENT,
+                            mContext, 0, viewIntent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE,
                             /* options= */ null, UserHandle.CURRENT));
                 } else {
                     builder.setContentIntent(PendingIntent.getActivity(
-                            mContext, 0, viewIntent, PendingIntent.FLAG_UPDATE_CURRENT));
+                            mContext, 0, viewIntent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
                 }
                 break;
             }
