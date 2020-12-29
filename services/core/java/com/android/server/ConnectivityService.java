@@ -95,7 +95,6 @@ import android.net.INetworkManagementEventObserver;
 import android.net.INetworkMonitor;
 import android.net.INetworkMonitorCallbacks;
 import android.net.INetworkPolicyListener;
-import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
 import android.net.ISocketKeepaliveCallback;
 import android.net.InetAddresses;
@@ -336,7 +335,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @VisibleForTesting
     protected INetd mNetd;
     private INetworkStatsService mStatsService;
-    private INetworkPolicyManager mPolicyManager;
+    private NetworkPolicyManager mPolicyManager;
     private NetworkPolicyManagerInternal mPolicyManagerInternal;
 
     /**
@@ -945,15 +944,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     public ConnectivityService(Context context, INetworkManagementService netManager,
-            INetworkStatsService statsService, INetworkPolicyManager policyManager) {
-        this(context, netManager, statsService, policyManager, getDnsResolver(context),
-                new IpConnectivityLog(), NetdService.getInstance(), new Dependencies());
+            INetworkStatsService statsService) {
+        this(context, netManager, statsService, getDnsResolver(context), new IpConnectivityLog(),
+                NetdService.getInstance(), new Dependencies());
     }
 
     @VisibleForTesting
     protected ConnectivityService(Context context, INetworkManagementService netManager,
-            INetworkStatsService statsService, INetworkPolicyManager policyManager,
-            IDnsResolver dnsresolver, IpConnectivityLog logger, INetd netd, Dependencies deps) {
+            INetworkStatsService statsService, IDnsResolver dnsresolver, IpConnectivityLog logger,
+            INetd netd, Dependencies deps) {
         if (DBG) log("ConnectivityService starting up");
 
         mDeps = Objects.requireNonNull(deps, "missing Dependencies");
@@ -991,7 +990,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         mNMS = Objects.requireNonNull(netManager, "missing INetworkManagementService");
         mStatsService = Objects.requireNonNull(statsService, "missing INetworkStatsService");
-        mPolicyManager = Objects.requireNonNull(policyManager, "missing INetworkPolicyManager");
+        mPolicyManager = mContext.getSystemService(NetworkPolicyManager.class);
         mPolicyManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(NetworkPolicyManagerInternal.class),
                 "missing NetworkPolicyManagerInternal");
@@ -1007,12 +1006,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // To ensure uid rules are synchronized with Network Policy, register for
         // NetworkPolicyManagerService events must happen prior to NetworkPolicyManagerService
         // reading existing policy from disk.
-        try {
-            mPolicyManager.registerListener(mPolicyListener);
-        } catch (RemoteException e) {
-            // ouch, no rules updates means some processes may never get network
-            loge("unable to register INetworkPolicyListener" + e);
-        }
+        mPolicyManager.registerListener(mPolicyListener);
 
         final PowerManager powerManager = (PowerManager) context.getSystemService(
                 Context.POWER_SERVICE);

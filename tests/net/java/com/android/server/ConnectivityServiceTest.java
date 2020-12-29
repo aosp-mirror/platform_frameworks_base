@@ -166,7 +166,6 @@ import android.net.INetd;
 import android.net.INetworkMonitor;
 import android.net.INetworkMonitorCallbacks;
 import android.net.INetworkPolicyListener;
-import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
 import android.net.InetAddresses;
 import android.net.InterfaceConfigurationParcel;
@@ -183,6 +182,7 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkFactory;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
+import android.net.NetworkPolicyManager;
 import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
 import android.net.NetworkStack;
@@ -365,7 +365,6 @@ public class ConnectivityServiceTest {
     @Mock INetworkManagementService mNetworkManagementService;
     @Mock INetworkStatsService mStatsService;
     @Mock IBatteryStats mBatteryStatsService;
-    @Mock INetworkPolicyManager mNpm;
     @Mock IDnsResolver mMockDnsResolver;
     @Mock INetd mMockNetd;
     @Mock NetworkStackClient mNetworkStack;
@@ -380,6 +379,7 @@ public class ConnectivityServiceTest {
     @Mock TelephonyManager mTelephonyManager;
     @Mock MockableSystemProperties mSystemProperties;
     @Mock EthernetManager mEthernetManager;
+    @Mock NetworkPolicyManager mNetworkPolicyManager;
 
     private ArgumentCaptor<ResolverParamsParcel> mResolverParamsParcelCaptor =
             ArgumentCaptor.forClass(ResolverParamsParcel.class);
@@ -477,6 +477,7 @@ public class ConnectivityServiceTest {
             if (Context.APP_OPS_SERVICE.equals(name)) return mAppOpsManager;
             if (Context.TELEPHONY_SERVICE.equals(name)) return mTelephonyManager;
             if (Context.ETHERNET_SERVICE.equals(name)) return mEthernetManager;
+            if (Context.NETWORK_POLICY_SERVICE.equals(name)) return mNetworkPolicyManager;
             return super.getSystemService(name);
         }
 
@@ -1326,7 +1327,6 @@ public class ConnectivityServiceTest {
         mService = new ConnectivityService(mServiceContext,
                 mNetworkManagementService,
                 mStatsService,
-                mNpm,
                 mMockDnsResolver,
                 mock(IpConnectivityLog.class),
                 mMockNetd,
@@ -1336,7 +1336,7 @@ public class ConnectivityServiceTest {
 
         final ArgumentCaptor<INetworkPolicyListener> policyListenerCaptor =
                 ArgumentCaptor.forClass(INetworkPolicyListener.class);
-        verify(mNpm).registerListener(policyListenerCaptor.capture());
+        verify(mNetworkPolicyManager).registerListener(policyListenerCaptor.capture());
         mPolicyListener = policyListenerCaptor.getValue();
 
         // Create local CM before sending system ready so that we can answer
