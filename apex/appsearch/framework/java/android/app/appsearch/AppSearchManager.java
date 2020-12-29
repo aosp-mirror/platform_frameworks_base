@@ -229,7 +229,7 @@ public class AppSearchManager {
             mService.setSchema(
                     DEFAULT_DATABASE_NAME,
                     schemaBundles,
-                    new ArrayList<>(request.getSchemasNotPlatformSurfaceable()),
+                    new ArrayList<>(request.getSchemasNotVisibleToSystemUi()),
                     request.isForceOverride(),
                     new IAppSearchResultCallback.Stub() {
                         public void onResult(AppSearchResult result) {
