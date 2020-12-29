@@ -211,10 +211,10 @@ public class DynamicSystemInstallationService extends Service
 
     @Override
     public void onProgressUpdate(InstallationAsyncTask.Progress progress) {
-        mCurrentPartitionName = progress.mPartitionName;
-        mCurrentPartitionSize = progress.mPartitionSize;
-        mCurrentPartitionInstalledSize = progress.mInstalledSize;
-        mNumInstalledPartitions = progress.mNumInstalledPartitions;
+        mCurrentPartitionName = progress.partitionName;
+        mCurrentPartitionSize = progress.partitionSize;
+        mCurrentPartitionInstalledSize = progress.installedSize;
+        mNumInstalledPartitions = progress.numInstalledPartitions;
 
         postStatus(STATUS_IN_PROGRESS, CAUSE_NOT_SPECIFIED, null);
     }
