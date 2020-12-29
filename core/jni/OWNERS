@@ -27,6 +27,18 @@ per-file android_util_StringBlock* = file:/core/java/android/content/res/OWNERS
 per-file android_util_XmlBlock* = file:/core/java/android/content/res/OWNERS
 per-file com_android_internal_content_om_OverlayConfig* = file:/core/java/android/content/res/OWNERS
 
+# Binder related things
+per-file android_os_Parcel* = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file android_os_ServiceManager* = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file android_util_Binder* = file:platform/frameworks/native:/libs/binder/OWNERS
+
+# HwBinder related things
+per-file android_os_HwBinder* = file:platform/system/libhwbinder:/OWNERS
+per-file android_os_HwBlob* = file:platform/system/libhwbinder:/OWNERS
+per-file android_os_HwParcel* = file:platform/system/libhwbinder:/OWNERS
+per-file android_os_HwRemoteBinder* = file:platform/system/libhwbinder:/OWNERS
+per-file EphemeralStorage* = file:platform/system/libhwbinder:/OWNERS
+
 per-file *Zygote* = file:/ZYGOTE_OWNERS
 per-file Android.bp = file:platform/build/soong:/OWNERS
 per-file android_animation_* = file:/core/java/android/animation/OWNERS
