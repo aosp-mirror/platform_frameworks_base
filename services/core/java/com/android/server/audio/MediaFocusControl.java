@@ -288,6 +288,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
     @GuardedBy("mAudioFocusLock")
     private void removeFocusStackEntry(String clientToRemove, boolean signal,
             boolean notifyFocusFollowers) {
+        AudioFocusInfo abandonSource = null;
         // is the current top of the focus stack abandoning focus? (because of request, not death)
         if (!mFocusStack.empty() && mFocusStack.peek().hasSameClient(clientToRemove))
         {
@@ -295,9 +296,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
             FocusRequester fr = mFocusStack.pop();
             fr.release();
             if (notifyFocusFollowers) {
-                final AudioFocusInfo afi = fr.toAudioFocusInfo();
-                afi.clearLossReceived();
-                notifyExtPolicyFocusLoss_syncAf(afi, false);
+                abandonSource = fr.toAudioFocusInfo();
             }
             if (signal) {
                 // notify the new top of the stack it gained focus
@@ -315,10 +314,18 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
                     Log.i(TAG, "AudioFocus  removeFocusStackEntry(): removing entry for "
                             + clientToRemove);
                     stackIterator.remove();
+                    if (notifyFocusFollowers) {
+                        abandonSource = fr.toAudioFocusInfo();
+                    }
                     // stack entry not used anymore, clear references
                     fr.release();
                 }
             }
+        }
+        // focus followers still want to know focus was abandoned, handled as a loss
+        if (abandonSource != null) {
+            abandonSource.clearLossReceived();
+            notifyExtPolicyFocusLoss_syncAf(abandonSource, false);
         }
 
         if (mMultiAudioFocusEnabled && !mMultiAudioFocusList.isEmpty()) {
