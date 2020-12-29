@@ -1329,15 +1329,20 @@ public class ConnectivityService extends IConnectivityManager.Stub
     /**
      * Check if UID should be blocked from using the specified network.
      */
-    private boolean isNetworkWithLinkPropertiesBlocked(LinkProperties lp, int uid,
-            boolean ignoreBlocked) {
+    private boolean isNetworkWithCapabilitiesBlocked(@Nullable final NetworkCapabilities nc,
+            final int uid, final boolean ignoreBlocked) {
         // Networks aren't blocked when ignoring blocked status
         if (ignoreBlocked) {
             return false;
         }
         if (isUidBlockedByVpn(uid, mVpnBlockedUidRanges)) return true;
-        final String iface = (lp == null ? "" : lp.getInterfaceName());
-        return mPolicyManagerInternal.isUidNetworkingBlocked(uid, iface);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            final boolean metered = nc == null ? true : nc.isMetered();
+            return mPolicyManager.isUidNetworkingBlocked(uid, metered);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     private void maybeLogBlockedNetworkInfo(NetworkInfo ni, int uid) {
@@ -1375,12 +1380,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
     /**
      * Apply any relevant filters to {@link NetworkState} for the given UID. For
      * example, this may mark the network as {@link DetailedState#BLOCKED} based
-     * on {@link #isNetworkWithLinkPropertiesBlocked}.
+     * on {@link #isNetworkWithCapabilitiesBlocked}.
      */
     private void filterNetworkStateForUid(NetworkState state, int uid, boolean ignoreBlocked) {
         if (state == null || state.networkInfo == null || state.linkProperties == null) return;
 
-        if (isNetworkWithLinkPropertiesBlocked(state.linkProperties, uid, ignoreBlocked)) {
+        if (isNetworkWithCapabilitiesBlocked(state.networkCapabilities, uid,
+                ignoreBlocked)) {
             state.networkInfo.setDetailedState(DetailedState.BLOCKED, null, null);
         }
         synchronized (mVpns) {
@@ -1440,8 +1446,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
         nai = getDefaultNetwork();
-        if (nai != null
-                && isNetworkWithLinkPropertiesBlocked(nai.linkProperties, uid, ignoreBlocked)) {
+        if (nai != null && isNetworkWithCapabilitiesBlocked(
+                nai.networkCapabilities, uid, ignoreBlocked)) {
             nai = null;
         }
         return nai != null ? nai.network : null;
@@ -1513,7 +1519,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         enforceAccessPermission();
         final int uid = mDeps.getCallingUid();
         NetworkState state = getFilteredNetworkState(networkType, uid);
-        if (!isNetworkWithLinkPropertiesBlocked(state.linkProperties, uid, false)) {
+        if (!isNetworkWithCapabilitiesBlocked(state.networkCapabilities, uid, false)) {
             return state.network;
         }
         return null;
@@ -4471,7 +4477,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (!nai.everConnected) {
             return;
         }
-        if (isNetworkWithLinkPropertiesBlocked(nai.linkProperties, uid, false)) {
+        final NetworkCapabilities nc = getNetworkCapabilitiesInternal(nai);
+        if (isNetworkWithCapabilitiesBlocked(nc, uid, false)) {
             return;
         }
         nai.networkMonitor().forceReevaluation(uid);
