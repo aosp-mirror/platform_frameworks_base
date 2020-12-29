@@ -31,6 +31,8 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.WindowConfiguration;
@@ -196,8 +198,37 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         mDisplayContent.mInputMethodWindow.setSurfaceControl(null);
         // Verify no NPE happens when calling createTaskSnapshot.
         try {
+            final TaskSnapshot.Builder builder = new TaskSnapshot.Builder();
             mWm.mTaskSnapshotController.createTaskSnapshot(mAppWindow.mActivityRecord.getTask(),
-                    1f /* scaleFraction */, PixelFormat.UNKNOWN, null /* outTaskSize */);
+                    1f /* scaleFraction */, PixelFormat.UNKNOWN, null /* outTaskSize */, builder);
+        } catch (NullPointerException e) {
+            fail("There should be no exception when calling createTaskSnapshot");
+        }
+    }
+
+    @UseTestDisplay(addWindows = {W_ACTIVITY, W_INPUT_METHOD})
+    @Test
+    public void testCreateTaskSnapshotWithIncludingIme() {
+        Task task = mAppWindow.mActivityRecord.getTask();
+        spyOn(task);
+        spyOn(mDisplayContent);
+        spyOn(mDisplayContent.mInputMethodWindow);
+        when(task.getDisplayContent().isImeAttachedToApp()).thenReturn(true);
+        // Intentionally set the IME window is in drawn state.
+        doReturn(true).when(mDisplayContent.mInputMethodWindow).isDrawn();
+        // Verify no NPE happens when calling createTaskSnapshot.
+        try {
+            final TaskSnapshot.Builder builder = new TaskSnapshot.Builder();
+            spyOn(builder);
+            mWm.mTaskSnapshotController.createTaskSnapshot(
+                    mAppWindow.mActivityRecord.getTask(), 1f /* scaleFraction */,
+                    PixelFormat.UNKNOWN, null /* outTaskSize */, builder);
+            // Verify the builder should includes IME surface.
+            verify(builder).setHasImeSurface(eq(true));
+            builder.setColorSpace(ColorSpace.get(ColorSpace.Named.SRGB));
+            builder.setTaskSize(new Point(100, 100));
+            final TaskSnapshot snapshot = builder.build();
+            assertTrue(snapshot.hasImeSurface());
         } catch (NullPointerException e) {
             fail("There should be no exception when calling createTaskSnapshot");
         }

@@ -1445,7 +1445,7 @@ public class ActivityStackTests extends WindowTestsBase {
         task.mDisplayContent = display;
         doReturn(keyguardGoingAway).when(keyguardController).isKeyguardGoingAway();
         doReturn(displaySleeping).when(display).isSleeping();
-        doReturn(focusedStack).when(task).isFocusedStackOnDisplay();
+        doReturn(focusedStack).when(task).isFocusedRootTaskOnDisplay();
 
         assertEquals(expected, task.shouldSleepActivities());
     }

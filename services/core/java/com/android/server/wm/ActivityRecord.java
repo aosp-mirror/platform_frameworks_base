@@ -1217,10 +1217,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return task;
     }
 
-    Task getStack() {
-        return task != null ? task.getRootTask() : null;
-    }
-
     @Override
     void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent) {
         final Task oldTask = oldParent != null ? (Task) oldParent : null;
@@ -1268,14 +1264,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else if (mLastParent != null && mLastParent.getRootTask() != null) {
             task.getRootTask().mExitingActivities.remove(this);
         }
-        final Task stack = getStack();
+        final Task rootTask = getRootTask();
 
         // If we reparent, make sure to remove ourselves from the old animation registry.
         if (mAnimatingActivityRegistry != null) {
             mAnimatingActivityRegistry.notifyFinished(this);
         }
-        mAnimatingActivityRegistry = stack != null
-                ? stack.getAnimatingActivityRegistry()
+        mAnimatingActivityRegistry = rootTask != null
+                ? rootTask.getAnimatingActivityRegistry()
                 : null;
 
         mLastParent = task;
@@ -1289,10 +1285,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             newTask.setResumedActivity(this, "onParentChanged");
         }
 
-        if (stack != null && stack.topRunningActivity() == this) {
+        if (rootTask != null && rootTask.topRunningActivity() == this) {
             // make ensure the TaskOrganizer still works after re-parenting
             if (firstWindowDrawn) {
-                stack.setHasBeenVisible(true);
+                rootTask.setHasBeenVisible(true);
             }
         }
     }
@@ -2218,9 +2214,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return inHistory;
     }
 
-    boolean isInStackLocked() {
-        final Task stack = getRootTask();
-        return stack != null && stack.isInTask(this) != null;
+    boolean isInRootTaskLocked() {
+        final Task rootTask = getRootTask();
+        return rootTask != null && rootTask.isInTask(this) != null;
     }
 
     boolean isPersistable() {
@@ -2552,14 +2548,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return FINISH_RESULT_CANCELLED;
         }
 
-        if (!isInStackLocked()) {
+        if (!isInRootTaskLocked()) {
             Slog.w(TAG, "Finish request when not in stack for r=" + this);
             return FINISH_RESULT_CANCELLED;
         }
 
         final Task rootTask = getRootTask();
         final boolean mayAdjustTop = (isState(RESUMED) || rootTask.getResumedActivity() == null)
-                && rootTask.isFocusedStackOnDisplay()
+                && rootTask.isFocusedRootTaskOnDisplay()
                 // Do not adjust focus task because the task will be reused to launch new activity.
                 && !task.isClearingToReuseTask();
         final boolean shouldAdjustGlobalFocus = mayAdjustTop
@@ -2722,8 +2718,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final boolean isCurrentVisible = mVisibleRequested || isState(PAUSED);
         if (isCurrentVisible) {
-            final Task stack = getStack();
-            final ActivityRecord activity = stack.getResumedActivity();
+            final Task rootTask = getRootTask();
+            final ActivityRecord activity = rootTask.getResumedActivity();
             boolean ensureVisibility = false;
             if (activity != null && !activity.occludesParent()) {
                 // If the resume activity is not opaque, we need to make sure the visibilities of
@@ -2813,7 +2809,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // DisplayContent#topRunningActivity().
         final ActivityRecord next = taskDisplayArea.topRunningActivity();
         final boolean isLastStackOverEmptyHome =
-                next == null && stack.isFocusedStackOnDisplay()
+                next == null && stack.isFocusedRootTaskOnDisplay()
                         && taskDisplayArea.getOrCreateRootHomeTask() != null;
         if (isLastStackOverEmptyHome) {
             // Don't destroy activity immediately if this is the last activity on the display and
@@ -3016,7 +3012,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     "Reported destroyed for activity that is not destroying: r=" + this);
         }
 
-        if (isInStackLocked()) {
+        if (isInRootTaskLocked()) {
             cleanUp(true /* cleanServices */, false /* setState */);
             removeFromHistory(reason);
         }
@@ -3312,21 +3308,21 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             getDisplayContent().mNoAnimationNotifyOnTransitionFinished.add(token);
         }
 
-        final Task stack = getStack();
+        final Task rootTask = getRootTask();
         if (delayed && !isEmpty()) {
             // set the token aside because it has an active animation to be finished
             ProtoLog.v(WM_DEBUG_ADD_REMOVE,
                     "removeAppToken make exiting: %s", this);
-            if (stack != null) {
-                stack.mExitingActivities.add(this);
+            if (rootTask != null) {
+                rootTask.mExitingActivities.add(this);
             }
             mIsExiting = true;
         } else {
             // Make sure there is no animation running on this token, so any windows associated
             // with it will be removed as soon as their animations are complete
             cancelAnimation();
-            if (stack != null) {
-                stack.mExitingActivities.remove(this);
+            if (rootTask != null) {
+                rootTask.mExitingActivities.remove(this);
             }
             removeIfPossible();
         }
@@ -5765,13 +5761,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return task.mTaskId;
     }
 
-    static ActivityRecord isInStackLocked(IBinder token) {
+    static ActivityRecord isInRootTaskLocked(IBinder token) {
         final ActivityRecord r = ActivityRecord.forTokenLocked(token);
         return (r != null) ? r.getRootTask().isInTask(r) : null;
     }
 
-    static Task getStackLocked(IBinder token) {
-        final ActivityRecord r = ActivityRecord.isInStackLocked(token);
+    static Task getRootTask(IBinder token) {
+        final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
         if (r != null) {
             return r.getRootTask();
         }
@@ -6034,7 +6030,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // a new hierarchical animation is enabled, we just let them occur as a child of the parent
         // stack, i.e. the hierarchy of the surfaces is unchanged.
         if (inPinnedWindowingMode()) {
-            return getStack().getSurfaceControl();
+            return getRootTask().getSurfaceControl();
         } else {
             return super.getAnimationLeashParent();
         }
@@ -6114,12 +6110,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     getTransit(), task)) {
                 task.getBounds(mTmpRect);
             } else {
-                final Task stack = getStack();
-                if (stack == null) {
+                final Task rootTask = getRootTask();
+                if (rootTask == null) {
                     return;
                 }
                 // Set clip rect to stack bounds.
-                stack.getBounds(mTmpRect);
+                rootTask.getBounds(mTmpRect);
             }
             mAnimationBoundsLayer = createAnimationBoundsLayer(t);
 
@@ -6860,9 +6856,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @VisibleForTesting
     @Override
     Rect getAnimationBounds(int appStackClipMode) {
-        if (appStackClipMode == STACK_CLIP_BEFORE_ANIM && getStack() != null) {
+        if (appStackClipMode == STACK_CLIP_BEFORE_ANIM && getRootTask() != null) {
             // Using the stack bounds here effectively applies the clipping before animation.
-            return getStack().getBounds();
+            return getRootTask().getBounds();
         }
         // Use task-bounds if available so that activity-level letterbox (maxAspectRatio) is
         // included in the animation.

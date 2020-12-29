@@ -16,13 +16,18 @@
 
 package com.android.server.net;
 
+import static android.Manifest.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS;
+import static android.Manifest.permission.NETWORK_STACK;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.TYPE_WIFI;
+import static android.net.INetd.FIREWALL_CHAIN_RESTRICTED;
+import static android.net.INetd.FIREWALL_RULE_ALLOW;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.SNOOZE_NEVER;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
+import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
 import static android.net.NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
@@ -34,6 +39,7 @@ import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 import static android.net.NetworkPolicyManager.RULE_TEMPORARY_ALLOW_METERED;
 import static android.net.NetworkPolicyManager.uidPoliciesToString;
 import static android.net.NetworkPolicyManager.uidRulesToString;
+import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.TAG_ALL;
@@ -74,6 +80,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -97,6 +104,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+import android.content.pm.UserInfo;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
@@ -123,6 +131,7 @@ import android.os.RemoteException;
 import android.os.SimpleClock;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionInfo;
@@ -131,6 +140,7 @@ import android.telephony.SubscriptionPlan;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.DataUnit;
 import android.util.Log;
 import android.util.Pair;
@@ -187,6 +197,7 @@ import java.util.Calendar;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -240,6 +251,7 @@ public class NetworkPolicyManagerServiceTest {
     private @Mock SubscriptionManager mSubscriptionManager;
     private @Mock CarrierConfigManager mCarrierConfigManager;
     private @Mock TelephonyManager mTelephonyManager;
+    private @Mock UserManager mUserManager;
 
     private ArgumentCaptor<ConnectivityManager.NetworkCallback> mNetworkCallbackCaptor =
             ArgumentCaptor.forClass(ConnectivityManager.NetworkCallback.class);
@@ -351,6 +363,8 @@ public class NetworkPolicyManagerServiceTest {
                         return mNotifManager;
                     case Context.CONNECTIVITY_SERVICE:
                         return mConnectivityManager;
+                    case Context.USER_SERVICE:
+                        return mUserManager;
                     default:
                         return super.getSystemService(name);
                 }
@@ -407,11 +421,14 @@ public class NetworkPolicyManagerServiceTest {
         when(mPackageManager.getPackagesForUid(UID_B)).thenReturn(new String[] {PKG_NAME_B});
         when(mPackageManager.getPackagesForUid(UID_C)).thenReturn(new String[] {PKG_NAME_C});
         when(mPackageManager.getApplicationInfo(eq(PKG_NAME_A), anyInt()))
-                .thenReturn(buildApplicationInfo(PKG_NAME_A));
+                .thenReturn(buildApplicationInfo(PKG_NAME_A, UID_A));
         when(mPackageManager.getApplicationInfo(eq(PKG_NAME_B), anyInt()))
-                .thenReturn(buildApplicationInfo(PKG_NAME_B));
+                .thenReturn(buildApplicationInfo(PKG_NAME_B, UID_B));
         when(mPackageManager.getApplicationInfo(eq(PKG_NAME_C), anyInt()))
-                .thenReturn(buildApplicationInfo(PKG_NAME_C));
+                .thenReturn(buildApplicationInfo(PKG_NAME_C, UID_C));
+        when(mPackageManager.getInstalledApplications(anyInt())).thenReturn(
+                buildInstalledApplicationInfoList());
+        when(mUserManager.getUsers()).thenReturn(buildUserInfoList());
         when(mNetworkManager.isBandwidthControlEnabled()).thenReturn(true);
         when(mNetworkManager.setDataSaverModeEnabled(anyBoolean())).thenReturn(true);
         doNothing().when(mConnectivityManager)
@@ -1874,6 +1891,66 @@ public class NetworkPolicyManagerServiceTest {
         }
     }
 
+    private void enableRestrictedMode(boolean enable) throws Exception {
+        mService.mRestrictedNetworkingMode = enable;
+        mService.updateRestrictedModeAllowlistUL();
+        verify(mNetworkManager).setFirewallChainEnabled(FIREWALL_CHAIN_RESTRICTED,
+                enable);
+    }
+
+    @Test
+    public void testUpdateRestrictedModeAllowlist() throws Exception {
+        // initialization calls setFirewallChainEnabled, so we want to reset the invocations.
+        clearInvocations(mNetworkManager);
+        expectHasUseRestrictedNetworksPermission(UID_A, true);
+        expectHasUseRestrictedNetworksPermission(UID_B, false);
+
+        Map<Integer, Integer> firewallUidRules = new ArrayMap<>();
+        doAnswer(arg -> {
+            int[] uids = arg.getArgument(1);
+            int[] rules = arg.getArgument(2);
+            assertTrue(uids.length == rules.length);
+
+            for (int i = 0; i < uids.length; ++i) {
+                firewallUidRules.put(uids[i], rules[i]);
+            }
+            return null;
+        }).when(mNetworkManager).setFirewallUidRules(eq(FIREWALL_CHAIN_RESTRICTED),
+                any(int[].class), any(int[].class));
+
+        enableRestrictedMode(true);
+        assertEquals(FIREWALL_RULE_ALLOW, firewallUidRules.get(UID_A).intValue());
+        assertFalse(mService.isUidNetworkingBlocked(UID_A, false));
+        assertTrue(mService.isUidNetworkingBlocked(UID_B, false));
+
+        enableRestrictedMode(false);
+        assertFalse(mService.isUidNetworkingBlocked(UID_A, false));
+        assertFalse(mService.isUidNetworkingBlocked(UID_B, false));
+    }
+
+    @Test
+    public void testUpdateRestrictedModeForUid() throws Exception {
+        // initialization calls setFirewallChainEnabled, so we want to reset the invocations.
+        clearInvocations(mNetworkManager);
+        expectHasUseRestrictedNetworksPermission(UID_A, true);
+        expectHasUseRestrictedNetworksPermission(UID_B, false);
+        enableRestrictedMode(true);
+
+        // UID_D and UID_E are not part of installed applications list, so it won't have any
+        // firewall rules set yet
+        expectHasUseRestrictedNetworksPermission(UID_D, false);
+        mService.updateRestrictedModeForUidUL(UID_D);
+        verify(mNetworkManager).setFirewallUidRule(FIREWALL_CHAIN_RESTRICTED, UID_D,
+                FIREWALL_RULE_DEFAULT);
+        assertTrue(mService.isUidNetworkingBlocked(UID_D, false));
+
+        expectHasUseRestrictedNetworksPermission(UID_E, true);
+        mService.updateRestrictedModeForUidUL(UID_E);
+        verify(mNetworkManager).setFirewallUidRule(FIREWALL_CHAIN_RESTRICTED, UID_E,
+                FIREWALL_RULE_ALLOW);
+        assertFalse(mService.isUidNetworkingBlocked(UID_E, false));
+    }
+
     private String formatBlockedStateError(int uid, int rule, boolean metered,
             boolean backgroundRestricted) {
         return String.format(
@@ -1888,10 +1965,25 @@ public class NetworkPolicyManagerServiceTest {
                 .build();
     }
 
-    private ApplicationInfo buildApplicationInfo(String label) {
+    private ApplicationInfo buildApplicationInfo(String label, int uid) {
         final ApplicationInfo ai = new ApplicationInfo();
         ai.nonLocalizedLabel = label;
+        ai.uid = uid;
         return ai;
+    }
+
+    private List<ApplicationInfo> buildInstalledApplicationInfoList() {
+        final List<ApplicationInfo> installedApps = new ArrayList<>();
+        installedApps.add(buildApplicationInfo(PKG_NAME_A, UID_A));
+        installedApps.add(buildApplicationInfo(PKG_NAME_B, UID_B));
+        installedApps.add(buildApplicationInfo(PKG_NAME_C, UID_C));
+        return installedApps;
+    }
+
+    private List<UserInfo> buildUserInfoList() {
+        final List<UserInfo> users = new ArrayList<>();
+        users.add(new UserInfo(USER_ID, "user1", 0));
+        return users;
     }
 
     private NetworkInfo buildNetworkInfo() {
@@ -1965,6 +2057,15 @@ public class NetworkPolicyManagerServiceTest {
     private void expectHasInternetPermission(int uid, boolean hasIt) throws Exception {
         when(mIpm.checkUidPermission(Manifest.permission.INTERNET, uid)).thenReturn(
                 hasIt ? PackageManager.PERMISSION_GRANTED : PackageManager.PERMISSION_DENIED);
+    }
+
+    private void expectHasUseRestrictedNetworksPermission(int uid, boolean hasIt) throws Exception {
+        when(mIpm.checkUidPermission(CONNECTIVITY_USE_RESTRICTED_NETWORKS, uid)).thenReturn(
+                hasIt ? PackageManager.PERMISSION_GRANTED : PackageManager.PERMISSION_DENIED);
+        when(mIpm.checkUidPermission(NETWORK_STACK, uid)).thenReturn(
+                PackageManager.PERMISSION_DENIED);
+        when(mIpm.checkUidPermission(PERMISSION_MAINLINE_NETWORK_STACK, uid)).thenReturn(
+                PackageManager.PERMISSION_DENIED);
     }
 
     private void expectNetworkState(boolean roaming) throws Exception {

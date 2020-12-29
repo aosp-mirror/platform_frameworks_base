@@ -367,7 +367,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
                         // type being disturbed if the visibility is updated after setting the next
                         // transition (the target activity will be one of closing apps).
                         if (!controller.shouldDeferCancelWithScreenshot()
-                                && !targetStack.isFocusedStackOnDisplay()) {
+                                && !targetStack.isFocusedRootTaskOnDisplay()) {
                             targetStack.ensureActivitiesVisible(null /* starting */,
                                     0 /* starting */, false /* preserveWindows */);
                         }

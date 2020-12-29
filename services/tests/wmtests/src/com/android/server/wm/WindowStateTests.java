@@ -696,8 +696,8 @@ public class WindowStateTests extends WindowTestsBase {
     @Test
     public void testCantReceiveTouchWhenNotFocusable() {
         final WindowState win0 = createWindow(null, TYPE_APPLICATION, "win0");
-        win0.mActivityRecord.getStack().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-        win0.mActivityRecord.getStack().setFocusable(false);
+        win0.mActivityRecord.getRootTask().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        win0.mActivityRecord.getRootTask().setFocusable(false);
         assertFalse(win0.canReceiveTouchInput());
     }
 
@@ -796,7 +796,7 @@ public class WindowStateTests extends WindowTestsBase {
         WindowState sameTokenWindow = createWindow(null, TYPE_BASE_APPLICATION, mAppWindow.mToken,
                 "SameTokenWindow");
         mDisplayContent.setImeLayeringTarget(mAppWindow);
-        sameTokenWindow.mActivityRecord.getStack().setWindowingMode(
+        sameTokenWindow.mActivityRecord.getRootTask().setWindowingMode(
                 WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         assertTrue(sameTokenWindow.needsRelativeLayeringToIme());
         sameTokenWindow.removeImmediately();
@@ -809,7 +809,7 @@ public class WindowStateTests extends WindowTestsBase {
         WindowState sameTokenWindow = createWindow(null, TYPE_APPLICATION_STARTING,
                 mAppWindow.mToken, "SameTokenWindow");
         mDisplayContent.setImeLayeringTarget(mAppWindow);
-        sameTokenWindow.mActivityRecord.getStack().setWindowingMode(
+        sameTokenWindow.mActivityRecord.getRootTask().setWindowingMode(
                 WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         assertFalse(sameTokenWindow.needsRelativeLayeringToIme());
     }

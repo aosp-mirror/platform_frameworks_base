@@ -66,7 +66,7 @@ public class AnimatingActivityRegistryTest extends WindowTestsBase {
         final ActivityRecord activity2 = createAppWindow(activity1.getTask(), ACTIVITY_TYPE_STANDARD,
                 "activity2").mActivityRecord;
         final AnimatingActivityRegistry registry =
-                activity1.getStack().getAnimatingActivityRegistry();
+                activity1.getRootTask().getAnimatingActivityRegistry();
 
         activity1.startAnimation(activity1.getPendingTransaction(), mAdapter, false /* hidden */,
                 ANIMATION_TYPE_APP_TRANSITION);
@@ -89,7 +89,7 @@ public class AnimatingActivityRegistryTest extends WindowTestsBase {
         final ActivityRecord window2 = createAppWindow(window1.getTask(), ACTIVITY_TYPE_STANDARD,
                 "window2").mActivityRecord;
         final AnimatingActivityRegistry registry =
-                window1.getStack().getAnimatingActivityRegistry();
+                window1.getRootTask().getAnimatingActivityRegistry();
 
         window1.startAnimation(window1.getPendingTransaction(), mAdapter, false /* hidden */,
                 ANIMATION_TYPE_APP_TRANSITION);
