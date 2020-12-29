@@ -563,8 +563,13 @@ public abstract class ActivityTaskManagerInternal {
      */
     public abstract void setDeviceOwnerUid(int uid);
 
-    /** Set all associated companion app that belongs to an userId. */
-    public abstract void setCompanionAppPackages(int userId, Set<String> companionAppPackages);
+    /**
+     * Set all associated companion app that belongs to a userId.
+     * @param userId
+     * @param companionAppUids ActivityTaskManager will take ownership of this Set, the caller
+     *                         shouldn't touch the Set after calling this interface.
+     */
+    public abstract void setCompanionAppUids(int userId, Set<Integer> companionAppUids);
 
     /**
      * @param packageName The package to check
