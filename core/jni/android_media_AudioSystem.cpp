@@ -544,12 +544,12 @@ static void
 android_media_AudioSystem_routing_callback()
 {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    // callback into java
-    jclass clazz = env->FindClass(kClassPathName);
-
     if (env == NULL) {
         return;
     }
+
+    // callback into java
+    jclass clazz = env->FindClass(kClassPathName);
     env->CallStaticVoidMethod(clazz,
                               gAudioPolicyEventHandlerMethods.postRoutingUpdatedFromNative);
     env->DeleteLocalRef(clazz);
