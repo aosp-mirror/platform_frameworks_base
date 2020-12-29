@@ -31,6 +31,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.StringDef;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
@@ -14344,9 +14345,22 @@ public class TelephonyManager {
         return Collections.emptyList();
     }
 
+    /**
+     * Indicates whether {@link CarrierBandwidth#getSecondaryDownlinkCapacityKbps()} and
+     * {@link CarrierBandwidth#getSecondaryUplinkCapacityKbps()} are visible.  See comments
+     * on respective methods for more information.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE =
+            "CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE";
+
     /** @hide */
-    @IntDef(prefix = {"RADIO_INTERFACE_CAPABILITY_"},
-            value = {})
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef(prefix = "CAPABILITY_", value = {
+            CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE,
+    })
     public @interface RadioInterfaceCapability {}
 
     /**
@@ -14359,6 +14373,7 @@ public class TelephonyManager {
      *
      * @hide
      */
+    @SystemApi
     public boolean isRadioInterfaceCapabilitySupported(
             @NonNull @RadioInterfaceCapability String capability) {
         try {
