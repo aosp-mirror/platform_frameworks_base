@@ -527,7 +527,7 @@ class RecentTasks {
      */
     void notifyTaskPersisterLocked(Task task, boolean flush) {
         final Task rootTask = task != null ? task.getRootTask() : null;
-        if (rootTask != null && rootTask.isHomeOrRecentsStack()) {
+        if (rootTask != null && rootTask.isHomeOrRecentsRootTask()) {
             // Never persist the home or recents task.
             return;
         }
@@ -561,7 +561,7 @@ class RecentTasks {
 
     private static boolean shouldPersistTaskLocked(Task task) {
         final Task rootTask = task.getRootTask();
-        return task.isPersistable && (rootTask == null || !rootTask.isHomeOrRecentsStack());
+        return task.isPersistable && (rootTask == null || !rootTask.isHomeOrRecentsRootTask());
     }
 
     void onSystemReadyLocked() {
@@ -992,7 +992,7 @@ class RecentTasks {
             }
             final Task rootTask = task.getRootTask();
             if ((task.isPersistable || task.inRecents)
-                    && (rootTask == null || !rootTask.isHomeOrRecentsStack())) {
+                    && (rootTask == null || !rootTask.isHomeOrRecentsRootTask())) {
                 if (TaskPersister.DEBUG) Slog.d(TAG, "adding to persistentTaskIds task=" + task);
                 persistentTaskIds.add(task.mTaskId);
             } else {

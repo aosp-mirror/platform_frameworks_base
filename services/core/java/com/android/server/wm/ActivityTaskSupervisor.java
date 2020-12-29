@@ -1394,7 +1394,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 // task.reparent() should already placed the task on top,
                 // still need moveTaskToFrontLocked() below for any transition settings.
             }
-            if (stack.shouldResizeStackWithLaunchBounds()) {
+            if (stack.shouldResizeRootTaskWithLaunchBounds()) {
                 stack.resize(bounds, !PRESERVE_WINDOWS, !DEFER_RESUME);
             } else {
                 // WM resizeTask must be done after the task is moved to the correct stack,
@@ -2237,13 +2237,13 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     }
 
     void activityRelaunchedLocked(IBinder token) {
-        final ActivityRecord r = ActivityRecord.isInStackLocked(token);
+        final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
         if (r != null) {
             r.finishRelaunching();
             if (r.getRootTask().shouldSleepOrShutDownActivities()) {
                 // Activity is always relaunched to either resumed or paused state. If it was
                 // relaunched while hidden (by keyguard or smth else), it should be stopped.
-                r.getStack().ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
+                r.getRootTask().ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
                         false /* preserveWindows */);
             }
         }

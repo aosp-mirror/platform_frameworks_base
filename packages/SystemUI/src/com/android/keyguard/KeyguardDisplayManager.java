@@ -37,8 +37,11 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarView;
+
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -46,7 +49,7 @@ public class KeyguardDisplayManager {
     protected static final String TAG = "KeyguardDisplayManager";
     private static boolean DEBUG = KeyguardConstants.DEBUG;
 
-    private final MediaRouter mMediaRouter;
+    private MediaRouter mMediaRouter = null;
     private final DisplayManager mDisplayService;
     private final KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
     private final Context mContext;
@@ -90,10 +93,11 @@ public class KeyguardDisplayManager {
 
     @Inject
     public KeyguardDisplayManager(Context context,
-            KeyguardStatusViewComponent.Factory keyguardStatusViewComponentFactory) {
+            KeyguardStatusViewComponent.Factory keyguardStatusViewComponentFactory,
+            @UiBackground Executor uiBgExecutor) {
         mContext = context;
         mKeyguardStatusViewComponentFactory = keyguardStatusViewComponentFactory;
-        mMediaRouter = mContext.getSystemService(MediaRouter.class);
+        uiBgExecutor.execute(() -> mMediaRouter = mContext.getSystemService(MediaRouter.class));
         mDisplayService = mContext.getSystemService(DisplayManager.class);
         mDisplayService.registerDisplayListener(mDisplayListener, null /* handler */);
     }
@@ -162,8 +166,12 @@ public class KeyguardDisplayManager {
     public void show() {
         if (!mShowing) {
             if (DEBUG) Log.v(TAG, "show");
-            mMediaRouter.addCallback(MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY,
-                    mMediaRouterCallback, MediaRouter.CALLBACK_FLAG_PASSIVE_DISCOVERY);
+            if (mMediaRouter != null) {
+                mMediaRouter.addCallback(MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY,
+                        mMediaRouterCallback, MediaRouter.CALLBACK_FLAG_PASSIVE_DISCOVERY);
+            } else {
+                Log.w(TAG, "MediaRouter not yet initialized");
+            }
             updateDisplays(true /* showing */);
         }
         mShowing = true;
@@ -172,7 +180,9 @@ public class KeyguardDisplayManager {
     public void hide() {
         if (mShowing) {
             if (DEBUG) Log.v(TAG, "hide");
-            mMediaRouter.removeCallback(mMediaRouterCallback);
+            if (mMediaRouter != null) {
+                mMediaRouter.removeCallback(mMediaRouterCallback);
+            }
             updateDisplays(false /* showing */);
         }
         mShowing = false;

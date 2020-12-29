@@ -1334,6 +1334,23 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @VisibleForTesting
     public void applyAnimation(@InsetsType final int types, boolean show, boolean fromIme) {
+        // TODO(b/166736352): We should only skip the animation of specific types, not all types.
+        boolean skipAnim = false;
+        if ((types & ime()) != 0) {
+            final InsetsSourceConsumer consumer = mSourceConsumers.get(ITYPE_IME);
+            final InsetsSourceControl imeControl = consumer != null ? consumer.getControl() : null;
+            // Skip showing animation once that made by system for some reason.
+            // (e.g. starting window with IME snapshot)
+            if (imeControl != null && show) {
+                skipAnim = imeControl.getAndClearSkipAnimationOnce();
+            }
+        }
+        applyAnimation(types, show, fromIme, skipAnim);
+    }
+
+    @VisibleForTesting
+    public void applyAnimation(@InsetsType final int types, boolean show, boolean fromIme,
+            boolean skipAnim) {
         if (types == 0) {
             // nothing to animate.
             if (DEBUG) Log.d(TAG, "applyAnimation, nothing to animate");
@@ -1342,7 +1359,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
         boolean hasAnimationCallbacks = mHost.hasAnimationCallbacks();
         final InternalAnimationControlListener listener = new InternalAnimationControlListener(
-                show, hasAnimationCallbacks, types, mAnimationsDisabled,
+                show, hasAnimationCallbacks, types, skipAnim || mAnimationsDisabled,
                 mHost.dipToPx(InternalAnimationControlListener.FLOATING_IME_BOTTOM_INSET));
 
         // Show/hide animations always need to be relative to the display frame, in order that shown

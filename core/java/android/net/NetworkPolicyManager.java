@@ -122,17 +122,26 @@ public class NetworkPolicyManager {
      * @hide
      */
     public static final int RULE_REJECT_ALL = 1 << 6;
+    /**
+     * Reject traffic on all networks for restricted networking mode.
+     */
+    public static final int RULE_REJECT_RESTRICTED_MODE = 1 << 10;
 
     /**
      * Mask used to get the {@code RULE_xxx_METERED} rules
      * @hide
      */
-    public static final int MASK_METERED_NETWORKS = 0b00001111;
+    public static final int MASK_METERED_NETWORKS = 0b000000001111;
     /**
      * Mask used to get the {@code RULE_xxx_ALL} rules
      * @hide
      */
-    public static final int MASK_ALL_NETWORKS     = 0b11110000;
+    public static final int MASK_ALL_NETWORKS     = 0b000011110000;
+    /**
+     * Mask used to get the {@code RULE_xxx_RESTRICTED_MODE} rules
+     * @hide
+     */
+    public static final int MASK_RESTRICTED_MODE_NETWORKS     = 0b111100000000;
 
     /** @hide */
     public static final int FIREWALL_RULE_DEFAULT = 0;

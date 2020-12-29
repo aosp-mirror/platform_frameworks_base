@@ -236,7 +236,7 @@ public class RootActivityContainerTests extends WindowTestsBase {
         doReturn(displaySleeping).when(display).isSleeping();
         doReturn(keyguardShowing).when(keyguard).isKeyguardOrAodShowing(anyInt());
 
-        doReturn(isFocusedStack).when(stack).isFocusedStackOnDisplay();
+        doReturn(isFocusedStack).when(stack).isFocusedRootTaskOnDisplay();
         doReturn(isFocusedStack ? stack : null).when(display).getFocusedRootTask();
         TaskDisplayArea defaultTaskDisplayArea = display.getDefaultTaskDisplayArea();
         doReturn(isFocusedStack ? stack : null).when(defaultTaskDisplayArea).getFocusedRootTask();
@@ -251,7 +251,7 @@ public class RootActivityContainerTests extends WindowTestsBase {
         final DisplayContent display = mRootWindowContainer.getDefaultDisplay();
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
         activity.moveFocusableActivityToTop("test");
-        assertTrue(activity.getStack().isFocusedStackOnDisplay());
+        assertTrue(activity.getRootTask().isFocusedRootTaskOnDisplay());
         ActivityRecordTests.setRotatedScreenOrientationSilently(activity);
 
         final Configuration rotatedConfig = new Configuration();
@@ -454,7 +454,7 @@ public class RootActivityContainerTests extends WindowTestsBase {
 
         // Assume the task is not at the topmost position (e.g. behind always-on-top stacks) but it
         // is the current top focused task.
-        assertFalse(rootTask.isTopStackInDisplayArea());
+        assertFalse(rootTask.isTopRootTaskInDisplayArea());
         doReturn(rootTask).when(mRootWindowContainer).getTopDisplayFocusedRootTask();
 
         // Use the task as target to resume.
@@ -530,7 +530,7 @@ public class RootActivityContainerTests extends WindowTestsBase {
         activity.setState(ActivityState.RESUMED, "test");
 
         // Assume the task is at the topmost position
-        assertTrue(rootTask.isTopStackInDisplayArea());
+        assertTrue(rootTask.isTopRootTaskInDisplayArea());
 
         // Use the task as target to resume.
         mRootWindowContainer.resumeFocusedTasksTopActivities();
@@ -551,7 +551,7 @@ public class RootActivityContainerTests extends WindowTestsBase {
         taskDisplayArea.positionChildAt(POSITION_BOTTOM, rootTask, false /*includingParents*/);
 
         // Assume the task is at the topmost position
-        assertFalse(rootTask.isTopStackInDisplayArea());
+        assertFalse(rootTask.isTopRootTaskInDisplayArea());
         doReturn(rootTask).when(mRootWindowContainer).getTopDisplayFocusedRootTask();
 
         // Use the task as target to resume.

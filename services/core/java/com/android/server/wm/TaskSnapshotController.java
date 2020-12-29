@@ -24,7 +24,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.window.TaskSnapshot;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
@@ -43,6 +42,7 @@ import android.view.ThreadedRenderer;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowManager.LayoutParams;
+import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
@@ -344,20 +344,20 @@ class TaskSnapshotController {
             TaskSnapshot.Builder builder) {
         Point taskSize = new Point();
         final SurfaceControl.ScreenshotHardwareBuffer taskSnapshot = createTaskSnapshot(task,
-                mHighResTaskSnapshotScale, builder.getPixelFormat(), taskSize);
+                mHighResTaskSnapshotScale, builder.getPixelFormat(), taskSize, builder);
         builder.setTaskSize(taskSize);
         return taskSnapshot;
     }
 
     @Nullable
     SurfaceControl.ScreenshotHardwareBuffer createTaskSnapshot(@NonNull Task task,
-            float scaleFraction) {
-        return createTaskSnapshot(task, scaleFraction, PixelFormat.RGBA_8888, null);
+            float scaleFraction, TaskSnapshot.Builder builder) {
+        return createTaskSnapshot(task, scaleFraction, PixelFormat.RGBA_8888, null, builder);
     }
 
     @Nullable
     SurfaceControl.ScreenshotHardwareBuffer createTaskSnapshot(@NonNull Task task,
-            float scaleFraction, int pixelFormat, Point outTaskSize) {
+            float scaleFraction, int pixelFormat, Point outTaskSize, TaskSnapshot.Builder builder) {
         if (task.getSurfaceControl() == null) {
             if (DEBUG_SCREENSHOT) {
                 Slog.w(TAG_WM, "Failed to take screenshot. No surface control for " + task);
@@ -376,6 +376,7 @@ class TaskSnapshotController {
             excludeLayers[0] = imeWindow.getSurfaceControl();
         } else {
             excludeLayers = new SurfaceControl[0];
+            builder.setHasImeSurface(imeWindow != null && imeWindow.isDrawn());
         }
         final SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
                 SurfaceControl.captureLayersExcluding(
@@ -510,7 +511,8 @@ class TaskSnapshotController {
                 hwBitmap.getColorSpace(), mainWindow.getConfiguration().orientation,
                 mainWindow.getWindowConfiguration().getRotation(), new Point(taskWidth, taskHeight),
                 contentInsets, false /* isLowResolution */, false /* isRealSnapshot */,
-                task.getWindowingMode(), getAppearance(task), false);
+                task.getWindowingMode(), getAppearance(task), false /* isTranslucent */,
+                false /* hasImeSurface */);
     }
 
     /**
