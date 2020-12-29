@@ -5566,7 +5566,9 @@ public class AudioService extends IAudioService.Stub
                 profile, suppressNoisyIntent, a2dpVolume);
     }
 
-    /*package*/ void setMusicMute(boolean mute) {
+    /** only public for mocking/spying, do not call outside of AudioService */
+    @VisibleForTesting
+    public void setMusicMute(boolean mute) {
         mStreamStates[AudioSystem.STREAM_MUSIC].muteInternally(mute);
     }
 
@@ -7046,7 +7048,9 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    /*package*/ void checkMusicActive(int deviceType, String caller) {
+    /** only public for mocking/spying, do not call outside of AudioService */
+    @VisibleForTesting
+    public void checkMusicActive(int deviceType, String caller) {
         if (mSafeMediaVolumeDevices.contains(deviceType)) {
             sendMsg(mAudioHandler,
                     MSG_CHECK_MUSIC_ACTIVE,
