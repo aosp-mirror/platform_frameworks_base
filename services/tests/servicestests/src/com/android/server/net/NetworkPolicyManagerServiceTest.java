@@ -24,6 +24,7 @@ import static android.net.INetd.FIREWALL_CHAIN_RESTRICTED;
 import static android.net.INetd.FIREWALL_RULE_ALLOW;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.SNOOZE_NEVER;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
@@ -2051,6 +2052,7 @@ public class NetworkPolicyManagerServiceTest {
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(TEST_IFACE);
         final NetworkCapabilities networkCapabilities = new NetworkCapabilities();
+        networkCapabilities.addTransportType(TRANSPORT_WIFI);
         networkCapabilities.setSSID(TEST_SSID);
         return new NetworkState(info, prop, networkCapabilities, null, null, TEST_SSID);
     }

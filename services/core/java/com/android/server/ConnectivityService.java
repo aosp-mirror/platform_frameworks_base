@@ -1854,7 +1854,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final ArrayList<NetworkState> result = new ArrayList<>();
         for (Network network : getAllNetworks()) {
             final NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
-            if (nai != null) {
+            // TODO: Consider include SUSPENDED networks.
+            if (nai != null && nai.networkInfo.isConnected()) {
                 // TODO (b/73321673) : NetworkState contains a copy of the
                 // NetworkCapabilities, which may contain UIDs of apps to which the
                 // network applies. Should the UIDs be cleared so as not to leak or

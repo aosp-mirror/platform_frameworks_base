@@ -62,7 +62,6 @@ class NetworkTemplateTest {
     ): NetworkState {
         val info = mock(NetworkInfo::class.java)
         doReturn(type).`when`(info).type
-        doReturn(NetworkInfo.State.CONNECTED).`when`(info).state
         val lp = LinkProperties()
         val caps = NetworkCapabilities().apply {
             setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED, false)
