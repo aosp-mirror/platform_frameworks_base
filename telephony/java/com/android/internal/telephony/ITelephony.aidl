@@ -2352,4 +2352,10 @@ interface ITelephony {
      * Gets the config of RCS VoLTE single registration enabled for the carrier/subscription.
      */
     boolean getCarrierSingleRegistrationEnabled(int subId);
+
+    /**
+     *  Return the mobile provisioning url that is used to launch a browser to allow users to manage
+     *  their mobile plan.
+     */
+    String getMobileProvisioningUrl();
 }
