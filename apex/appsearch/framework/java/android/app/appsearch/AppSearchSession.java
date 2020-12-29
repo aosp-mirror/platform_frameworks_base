@@ -158,7 +158,7 @@ public final class AppSearchSession {
             mService.setSchema(
                     mDatabaseName,
                     schemaBundles,
-                    new ArrayList<>(request.getSchemasNotPlatformSurfaceable()),
+                    new ArrayList<>(request.getSchemasNotVisibleToSystemUi()),
                     request.isForceOverride(),
                     mUserId,
                     new IAppSearchResultCallback.Stub() {

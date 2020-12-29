@@ -19,15 +19,11 @@ package com.android.server.appsearch.testing;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.app.appsearch.AppSearchBatchResult;
-import android.app.appsearch.AppSearchManager;
-import android.app.appsearch.AppSearchResult;
+import android.app.appsearch.AppSearchSessionShim;
 import android.app.appsearch.GenericDocument;
 import android.app.appsearch.GetByUriRequest;
 import android.app.appsearch.SearchResult;
-import android.app.appsearch.SetSchemaRequest;
-import android.content.Context;
-
-import com.google.common.collect.ImmutableList;
+import android.app.appsearch.SearchResultsShim;
 
 import junit.framework.AssertionFailedError;
 
@@ -36,32 +32,6 @@ import java.util.List;
 import java.util.concurrent.Future;
 
 public class AppSearchTestUtils {
-
-    // List of databases that may be used in tests. Keeping them in a centralized location helps
-    // #cleanup know which databases to clear.
-    public static final String DEFAULT_DATABASE = AppSearchManager.DEFAULT_DATABASE_NAME;
-    public static final String DB_1 = "testDb1";
-    public static final String DB_2 = "testDb2";
-
-    public static void cleanup(Context context) throws Exception {
-        List<String> databases = ImmutableList.of(DEFAULT_DATABASE, DB_1, DB_2);
-        for (String database : databases) {
-            AppSearchSessionShim session = checkIsResultSuccess(
-                    AppSearchSessionShim.createSearchSession(
-                            new AppSearchManager.SearchContext.Builder()
-                                    .setDatabaseName(database).build()));
-            checkIsResultSuccess(session.setSchema(
-                    new SetSchemaRequest.Builder().setForceOverride(true).build()));
-        }
-    }
-
-    public static <V> V checkIsResultSuccess(Future<AppSearchResult<V>> future) throws Exception {
-        AppSearchResult<V> result = future.get();
-        if (!result.isSuccess()) {
-            throw new AssertionFailedError("AppSearchResult not successful: " + result);
-        }
-        return result.getResultValue();
-    }
 
     public static <K, V> AppSearchBatchResult<K, V> checkIsBatchResultSuccess(
             Future<AppSearchBatchResult<K, V>> future) throws Exception {
@@ -74,10 +44,13 @@ public class AppSearchTestUtils {
 
     public static List<GenericDocument> doGet(
             AppSearchSessionShim session, String namespace, String... uris) throws Exception {
-        AppSearchBatchResult<String, GenericDocument> result = checkIsBatchResultSuccess(
-                session.getByUri(
-                        new GetByUriRequest.Builder()
-                                .setNamespace(namespace).addUri(uris).build()));
+        AppSearchBatchResult<String, GenericDocument> result =
+                checkIsBatchResultSuccess(
+                        session.getByUri(
+                                new GetByUriRequest.Builder()
+                                        .setNamespace(namespace)
+                                        .addUri(uris)
+                                        .build()));
         assertThat(result.getSuccesses()).hasSize(uris.length);
         assertThat(result.getFailures()).isEmpty();
         List<GenericDocument> list = new ArrayList<>(uris.length);
@@ -89,13 +62,13 @@ public class AppSearchTestUtils {
 
     public static List<GenericDocument> convertSearchResultsToDocuments(
             SearchResultsShim searchResults) throws Exception {
-        List<SearchResult> results = checkIsResultSuccess(searchResults.getNextPage());
+        List<SearchResult> results = searchResults.getNextPage().get();
         List<GenericDocument> documents = new ArrayList<>();
         while (results.size() > 0) {
             for (SearchResult result : results) {
                 documents.add(result.getDocument());
             }
-            results = checkIsResultSuccess(searchResults.getNextPage());
+            results = searchResults.getNextPage().get();
         }
         return documents;
     }
