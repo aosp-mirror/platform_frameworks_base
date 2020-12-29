@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.app.appsearch.AppSearchManager;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.GlobalSearchSession;
+import android.app.appsearch.GlobalSearchSessionShim;
 import android.app.appsearch.SearchResults;
 import android.app.appsearch.SearchResultsShim;
 import android.app.appsearch.SearchSpec;
@@ -40,7 +41,7 @@ import java.util.concurrent.Executors;
  * a consistent interface.
  * @hide
  */
-public class GlobalSearchSessionShimImpl {
+public class GlobalSearchSessionShimImpl implements GlobalSearchSessionShim {
     private final GlobalSearchSession mGlobalSearchSession;
     private final ExecutorService mExecutor;
 
@@ -64,6 +65,7 @@ public class GlobalSearchSessionShimImpl {
     }
 
     @NonNull
+    @Override
     public SearchResultsShim query(
             @NonNull String queryExpression, @NonNull SearchSpec searchSpec) {
         SearchResults searchResults =
