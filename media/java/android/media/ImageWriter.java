@@ -130,7 +130,59 @@ public class ImageWriter implements AutoCloseable {
      */
     public static @NonNull ImageWriter newInstance(@NonNull Surface surface,
             @IntRange(from = 1) int maxImages) {
-        return new ImageWriter(surface, maxImages, ImageFormat.UNKNOWN);
+        return new ImageWriter(surface, maxImages, ImageFormat.UNKNOWN, -1 /*width*/,
+                -1 /*height*/);
+    }
+
+    /**
+     * <p>
+     * Create a new ImageWriter with given number of max Images, format and producer dimension.
+     * </p>
+     * <p>
+     * The {@code maxImages} parameter determines the maximum number of
+     * {@link Image} objects that can be be dequeued from the
+     * {@code ImageWriter} simultaneously. Requesting more buffers will use up
+     * more memory, so it is important to use only the minimum number necessary.
+     * </p>
+     * <p>
+     * The format specifies the image format of this ImageWriter. The format
+     * from the {@code surface} will be overridden with this format. For example,
+     * if the surface is obtained from a {@link android.graphics.SurfaceTexture}, the default
+     * format may be {@link PixelFormat#RGBA_8888}. If the application creates an ImageWriter
+     * with this surface and {@link ImageFormat#PRIVATE}, this ImageWriter will be able to operate
+     * with {@link ImageFormat#PRIVATE} Images.
+     * </p>
+     * <p>
+     * Note that the consumer end-point may or may not be able to support Images with different
+     * format, for such case, the application should only use this method if the consumer is able
+     * to consume such images.
+     * </p>
+     * <p> The input Image size can also be set by the client. </p>
+     *
+     * @param surface The destination Surface this writer produces Image data
+     *            into.
+     * @param maxImages The maximum number of Images the user will want to
+     *            access simultaneously for producing Image data. This should be
+     *            as small as possible to limit memory use. Once maxImages
+     *            Images are dequeued by the user, one of them has to be queued
+     *            back before a new Image can be dequeued for access via
+     *            {@link #dequeueInputImage()}.
+     * @param format The format of this ImageWriter. It can be any valid format specified by
+     *            {@link ImageFormat} or {@link PixelFormat}.
+     *
+     * @param width Input size width.
+     * @param height Input size height.
+     *
+     * @return a new ImageWriter instance.
+     *
+     * @hide
+     */
+    public static @NonNull ImageWriter newInstance(@NonNull Surface surface,
+            @IntRange(from = 1) int maxImages, @Format int format, int width, int height) {
+        if (!ImageFormat.isPublicFormat(format) && !PixelFormat.isPublicFormat(format)) {
+            throw new IllegalArgumentException("Invalid format is specified: " + format);
+        }
+        return new ImageWriter(surface, maxImages, format, width, height);
     }
 
     /**
@@ -179,13 +231,13 @@ public class ImageWriter implements AutoCloseable {
         if (!ImageFormat.isPublicFormat(format) && !PixelFormat.isPublicFormat(format)) {
             throw new IllegalArgumentException("Invalid format is specified: " + format);
         }
-        return new ImageWriter(surface, maxImages, format);
+        return new ImageWriter(surface, maxImages, format, -1 /*width*/, -1 /*height*/);
     }
 
     /**
      * @hide
      */
-    protected ImageWriter(Surface surface, int maxImages, int format) {
+    protected ImageWriter(Surface surface, int maxImages, int format, int width, int height) {
         if (surface == null || maxImages < 1) {
             throw new IllegalArgumentException("Illegal input argument: surface " + surface
                     + ", maxImages: " + maxImages);
@@ -195,7 +247,8 @@ public class ImageWriter implements AutoCloseable {
 
         // Note that the underlying BufferQueue is working in synchronous mode
         // to avoid dropping any buffers.
-        mNativeContext = nativeInit(new WeakReference<>(this), surface, maxImages, format);
+        mNativeContext = nativeInit(new WeakReference<>(this), surface, maxImages, format, width,
+                height);
 
         // nativeInit internally overrides UNKNOWN format. So does surface format query after
         // nativeInit and before getEstimatedNativeAllocBytes().
@@ -899,7 +952,7 @@ public class ImageWriter implements AutoCloseable {
 
     // Native implemented ImageWriter methods.
     private synchronized native long nativeInit(Object weakSelf, Surface surface, int maxImgs,
-            int format);
+            int format, int width, int height);
 
     private synchronized native void nativeClose(long nativeCtx);
 

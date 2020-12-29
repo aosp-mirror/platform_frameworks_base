@@ -91,6 +91,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     private ImageReader mStubCaptureImageReader = null;
     private ImageWriter mRepeatingRequestImageWriter = null;
 
+    private CameraExtensionJpegProcessor mImageJpegProcessor = null;
     private ICaptureProcessorImpl mImageProcessor = null;
     private CameraExtensionForwardProcessor mPreviewImageProcessor = null;
     private IRequestUpdateProcessorImpl mPreviewRequestUpdateProcessor = null;
@@ -413,6 +414,10 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         if (mImageProcessor != null) {
             if (mClientCaptureSurface != null) {
                 SurfaceInfo surfaceInfo = querySurface(mClientCaptureSurface);
+                if (surfaceInfo.mFormat == ImageFormat.JPEG) {
+                    mImageJpegProcessor = new CameraExtensionJpegProcessor(mImageProcessor);
+                    mImageProcessor = mImageJpegProcessor;
+                }
                 mBurstCaptureImageReader = ImageReader.newInstance(surfaceInfo.mWidth,
                         surfaceInfo.mHeight, CameraExtensionCharacteristics.PROCESSING_INPUT_FORMAT,
                         mImageExtender.getMaxCaptureStage());
@@ -570,14 +575,16 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 return null;
             }
 
-            // Set user supported jpeg quality and rotation parameters
+            // This will override the extension capture stage jpeg parameters with the user set
+            // jpeg quality and rotation. This will guarantee that client configured jpeg
+            // parameters always have highest priority.
             Integer jpegRotation = clientRequest.get(CaptureRequest.JPEG_ORIENTATION);
             if (jpegRotation != null) {
-                requestBuilder.set(CaptureRequest.JPEG_ORIENTATION, jpegRotation);
+                captureStage.parameters.set(CaptureRequest.JPEG_ORIENTATION, jpegRotation);
             }
             Byte jpegQuality = clientRequest.get(CaptureRequest.JPEG_QUALITY);
             if (jpegQuality != null) {
-                requestBuilder.set(CaptureRequest.JPEG_QUALITY, jpegQuality);
+                captureStage.parameters.set(CaptureRequest.JPEG_QUALITY, jpegQuality);
             }
 
             requestBuilder.addTarget(target);
@@ -751,6 +758,11 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             if (mPreviewImageProcessor != null) {
                 mPreviewImageProcessor.close();
                 mPreviewImageProcessor = null;
+            }
+
+            if (mImageJpegProcessor != null) {
+                mImageJpegProcessor.close();
+                mImageJpegProcessor = null;
             }
 
             mCaptureSession = null;
@@ -1014,7 +1026,10 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 mCaptureRequestMap.clear();
                 mCapturePendingMap.clear();
                 boolean processStatus = true;
-                List<CaptureBundle> captureList = initializeParcelable(mCaptureStageMap);
+                Byte jpegQuality = mClientRequest.get(CaptureRequest.JPEG_QUALITY);
+                Integer jpegOrientation = mClientRequest.get(CaptureRequest.JPEG_ORIENTATION);
+                List<CaptureBundle> captureList = initializeParcelable(mCaptureStageMap,
+                        jpegOrientation, jpegQuality);
                 try {
                     mImageProcessor.process(captureList);
                 } catch (RemoteException e) {
@@ -1437,10 +1452,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             }
             for (int i = idx; i >= 0; i--) {
                 if (previewMap.valueAt(i).first != null) {
-                    Log.w(TAG, "Discard pending buffer with timestamp: " + previewMap.keyAt(i));
                     previewMap.valueAt(i).first.close();
                 } else {
-                    Log.w(TAG, "Discard pending result with timestamp: " + previewMap.keyAt(i));
                     if (mClientNotificationsEnabled && ((i != idx) || notifyCurrentIndex)) {
                         Log.w(TAG, "Preview frame drop with timestamp: " + previewMap.keyAt(i));
                         final long ident = Binder.clearCallingIdentity();
@@ -1632,7 +1645,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     }
 
     private static List<CaptureBundle> initializeParcelable(
-            HashMap<Integer, Pair<Image, TotalCaptureResult>> captureMap) {
+            HashMap<Integer, Pair<Image, TotalCaptureResult>> captureMap, Integer jpegOrientation,
+            Byte jpegQuality) {
         ArrayList<CaptureBundle> ret = new ArrayList<>();
         for (Integer stagetId : captureMap.keySet()) {
             Pair<Image, TotalCaptureResult> entry = captureMap.get(stagetId);
@@ -1641,6 +1655,12 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             bundle.captureImage = initializeParcelImage(entry.first);
             bundle.sequenceId = entry.second.getSequenceId();
             bundle.captureResult = entry.second.getNativeMetadata();
+            if (jpegOrientation != null) {
+                bundle.captureResult.set(CaptureResult.JPEG_ORIENTATION, jpegOrientation);
+            }
+            if (jpegQuality != null) {
+                bundle.captureResult.set(CaptureResult.JPEG_QUALITY, jpegQuality);
+            }
             ret.add(bundle);
         }
 
