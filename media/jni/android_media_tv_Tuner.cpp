@@ -3509,6 +3509,10 @@ static jlong android_media_tv_Tuner_read_dvr(JNIEnv *env, jobject dvr, jlong siz
     } else {
         ALOGE("dvrMq.beginWrite failed");
     }
+
+    if (ret > 0) {
+        dvrSp->mDvrMQEventFlag->wake(static_cast<uint32_t>(DemuxQueueNotifyBits::DATA_READY));
+    }
     return (jlong) ret;
 }
 
@@ -3536,7 +3540,7 @@ static jlong android_media_tv_Tuner_read_dvr_from_array(
 
     if (dvrSp->mDvrMQ->write(reinterpret_cast<unsigned char*>(src) + offset, size)) {
         env->ReleaseByteArrayElements(buffer, src, 0);
-        dvrSp->mDvrMQEventFlag->wake(static_cast<uint32_t>(DemuxQueueNotifyBits::DATA_CONSUMED));
+        dvrSp->mDvrMQEventFlag->wake(static_cast<uint32_t>(DemuxQueueNotifyBits::DATA_READY));
     } else {
         ALOGD("Failed to write FMQ");
         env->ReleaseByteArrayElements(buffer, src, 0);
@@ -3596,6 +3600,9 @@ static jlong android_media_tv_Tuner_write_dvr(JNIEnv *env, jobject dvr, jlong si
 
     } else {
         ALOGE("dvrMq.beginRead failed");
+    }
+    if (ret > 0) {
+        dvrSp->mDvrMQEventFlag->wake(static_cast<uint32_t>(DemuxQueueNotifyBits::DATA_CONSUMED));
     }
 
     return (jlong) ret;
