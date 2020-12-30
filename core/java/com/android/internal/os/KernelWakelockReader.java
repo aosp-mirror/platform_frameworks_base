@@ -190,7 +190,6 @@ public class KernelWakelockReader {
 
         try {
             wlStats = mSuspendControlService.getWakeLockStats();
-            Slog.i(TAG, "Number of wakelock obtained from SystemSuspend: " + wlStats.length);
             updateWakelockStats(wlStats, staleStats);
         } catch (RemoteException e) {
             Slog.wtf(TAG, "Failed to obtain wakelock stats from ISuspendControlService", e);
