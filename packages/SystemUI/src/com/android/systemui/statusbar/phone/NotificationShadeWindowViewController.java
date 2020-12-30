@@ -348,6 +348,11 @@ public class NotificationShadeWindowViewController {
             }
 
             @Override
+            public boolean dispatchKeyEventPreIme(KeyEvent event) {
+                return mService.dispatchKeyEventPreIme(event);
+            }
+
+            @Override
             public boolean dispatchKeyEvent(KeyEvent event) {
                 boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
                 switch (event.getKeyCode()) {

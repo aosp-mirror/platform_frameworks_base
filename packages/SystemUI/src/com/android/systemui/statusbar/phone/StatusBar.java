@@ -3520,6 +3520,23 @@ public class StatusBar extends SystemUI implements DemoMode,
                 && mStatusBarKeyguardViewManager.interceptMediaKey(event);
     }
 
+    /**
+     * While IME is active and a BACK event is detected, check with
+     * {@link StatusBarKeyguardViewManager#dispatchBackKeyEventPreIme(KeyEvent)} to see if the event
+     * should be handled before routing to IME, in order to prevent the user having to hit back
+     * twice to exit bouncer.
+     */
+    public boolean dispatchKeyEventPreIme(KeyEvent event) {
+        switch (event.getKeyCode()) {
+            case KeyEvent.KEYCODE_BACK:
+                if (mState == StatusBarState.KEYGUARD
+                        && mStatusBarKeyguardViewManager.dispatchBackKeyEventPreIme()) {
+                    return onBackPressed();
+                }
+        }
+        return false;
+    }
+
     protected boolean shouldUnlockOnMenuPressed() {
         return mDeviceInteractive && mState != StatusBarState.SHADE
             && mStatusBarKeyguardViewManager.shouldDismissOnMenuPressed();

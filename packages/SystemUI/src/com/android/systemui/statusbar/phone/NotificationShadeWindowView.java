@@ -162,6 +162,11 @@ public class NotificationShadeWindowView extends FrameLayout {
         return mInteractionEventHandler.dispatchKeyEvent(event);
     }
 
+    @Override
+    public boolean dispatchKeyEventPreIme(KeyEvent event) {
+        return mInteractionEventHandler.dispatchKeyEventPreIme(event);
+    }
+
     protected void setInteractionEventHandler(InteractionEventHandler listener) {
         mInteractionEventHandler = listener;
     }
@@ -361,6 +366,8 @@ public class NotificationShadeWindowView extends FrameLayout {
         boolean interceptMediaKey(KeyEvent event);
 
         boolean dispatchKeyEvent(KeyEvent event);
+
+        boolean dispatchKeyEventPreIme(KeyEvent event);
     }
 
     /**
