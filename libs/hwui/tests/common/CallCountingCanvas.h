@@ -108,27 +108,27 @@ public:
     }
 
     int drawImageCount = 0;
-    void onDrawImage(const SkImage* image, SkScalar dx, SkScalar dy,
+    void onDrawImage2(const SkImage* image, SkScalar dx, SkScalar dy, const SkSamplingOptions&,
                      const SkPaint* paint) override {
         drawImageCount++;
     }
 
     int drawImageRectCount = 0;
-    void onDrawImageRect(const SkImage* image, const SkRect* src, const SkRect& dst,
-                         const SkPaint* paint, SkCanvas::SrcRectConstraint constraint) override {
+    void onDrawImageRect2(const SkImage*, const SkRect&, const SkRect&, const SkSamplingOptions&,
+                          const SkPaint*, SkCanvas::SrcRectConstraint) override {
         drawImageRectCount++;
     }
 
     int drawImageLatticeCount = 0;
-    void onDrawImageLattice(const SkImage* image, const SkCanvas::Lattice& lattice,
-                            const SkRect& dst, const SkPaint* paint) override {
+    void onDrawImageLattice2(const SkImage* image, const SkCanvas::Lattice& lattice,
+                             const SkRect& dst, SkFilterMode, const SkPaint* paint) override {
         drawImageLatticeCount++;
     }
 
     int drawAtlasCount = 0;
-    void onDrawAtlas(const SkImage* atlas, const SkRSXform xform[], const SkRect rect[],
-                     const SkColor colors[], int count, SkBlendMode mode, const SkRect* cull,
-                     const SkPaint* paint) override {
+    void onDrawAtlas2(const SkImage* atlas, const SkRSXform xform[], const SkRect rect[],
+                      const SkColor colors[], int count, SkBlendMode mode, const SkSamplingOptions&,
+                      const SkRect* cull, const SkPaint* paint) override {
         drawAtlasCount++;
     }
 
