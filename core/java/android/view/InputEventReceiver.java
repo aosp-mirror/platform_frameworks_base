@@ -159,6 +159,16 @@ public abstract class InputEventReceiver {
     }
 
     /**
+     * Called when a drag event is received, from native code.
+     *
+     * @param isExiting if false, the window associated with this input channel has just received
+     *                 drag
+     *                 if true, the window associated with this input channel has just lost drag
+     */
+    public void onDragEvent(boolean isExiting, float x, float y) {
+    }
+
+    /**
      * Called when a batched input event is pending.
      *
      * The batched input event will continue to accumulate additional movement

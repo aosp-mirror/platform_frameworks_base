@@ -57,6 +57,7 @@ static struct {
     jmethodID dispatchInputEvent;
     jmethodID onFocusEvent;
     jmethodID onPointerCaptureEvent;
+    jmethodID onDragEvent;
     jmethodID onBatchedInputEventPending;
 } gInputEventReceiverClassInfo;
 
@@ -400,6 +401,18 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                 finishInputEvent(seq, true /* handled */);
                 continue;
             }
+            case AINPUT_EVENT_TYPE_DRAG: {
+                const DragEvent* dragEvent = static_cast<DragEvent*>(inputEvent);
+                if (kDebugDispatchCycle) {
+                    ALOGD("channel '%s' ~ Received drag event: isExiting=%s",
+                          getInputChannelName().c_str(), toString(dragEvent->isExiting()));
+                }
+                env->CallVoidMethod(receiverObj.get(), gInputEventReceiverClassInfo.onDragEvent,
+                                    jboolean(dragEvent->isExiting()), dragEvent->getX(),
+                                    dragEvent->getY());
+                finishInputEvent(seq, true /* handled */);
+                continue;
+            }
 
             default:
                 assert(false); // InputConsumer should prevent this from ever happening
@@ -547,6 +560,8 @@ int register_android_view_InputEventReceiver(JNIEnv* env) {
     gInputEventReceiverClassInfo.onPointerCaptureEvent =
             GetMethodIDOrDie(env, gInputEventReceiverClassInfo.clazz, "onPointerCaptureEvent",
                              "(Z)V");
+    gInputEventReceiverClassInfo.onDragEvent =
+            GetMethodIDOrDie(env, gInputEventReceiverClassInfo.clazz, "onDragEvent", "(ZFF)V");
     gInputEventReceiverClassInfo.onBatchedInputEventPending =
             GetMethodIDOrDie(env, gInputEventReceiverClassInfo.clazz, "onBatchedInputEventPending",
                              "(I)V");
