@@ -337,33 +337,44 @@ jobject MediaEvent::getLinearBlock() {
     }
     mIonHandle = new C2HandleIon(dup(mAvHandle->data[0]), mDataLength);
     std::shared_ptr<C2LinearBlock> block = _C2BlockFactory::CreateLinearBlock(mIonHandle);
-
-    JNIEnv *env = AndroidRuntime::getJNIEnv();
-    std::unique_ptr<JMediaCodecLinearBlock> context{new JMediaCodecLinearBlock};
-    context->mBlock = block;
-    std::shared_ptr<C2Buffer> pC2Buffer = context->toC2Buffer(0, mDataLength);
-    context->mBuffer = pC2Buffer;
-    mC2Buffer = pC2Buffer;
-    if (mAvHandle->numInts > 0) {
-        // use first int in the native_handle as the index
-        int index = mAvHandle->data[mAvHandle->numFds];
-        std::shared_ptr<C2Param> c2param = std::make_shared<C2DataIdInfo>(index, mDataId);
-        std::shared_ptr<C2Info> info(std::static_pointer_cast<C2Info>(c2param));
-        pC2Buffer->setInfo(info);
+    if (block != nullptr) {
+        // CreateLinearBlock delete mIonHandle after it create block successfully.
+        // ToDo: coordinate who is response to delete mIonHandle
+        mIonHandle = NULL;
+        JNIEnv *env = AndroidRuntime::getJNIEnv();
+        std::unique_ptr<JMediaCodecLinearBlock> context{new JMediaCodecLinearBlock};
+        context->mBlock = block;
+        std::shared_ptr<C2Buffer> pC2Buffer = context->toC2Buffer(0, mDataLength);
+        context->mBuffer = pC2Buffer;
+        mC2Buffer = pC2Buffer;
+        if (mAvHandle->numInts > 0) {
+            // use first int in the native_handle as the index
+            int index = mAvHandle->data[mAvHandle->numFds];
+            std::shared_ptr<C2Param> c2param = std::make_shared<C2DataIdInfo>(index, mDataId);
+            std::shared_ptr<C2Info> info(std::static_pointer_cast<C2Info>(c2param));
+            pC2Buffer->setInfo(info);
+        }
+        pC2Buffer->registerOnDestroyNotify(&DestroyCallback, this);
+        jobject linearBlock =
+                env->NewObject(
+                        env->FindClass("android/media/MediaCodec$LinearBlock"),
+                        gFields.linearBlockInitID);
+        env->CallVoidMethod(
+                linearBlock,
+                gFields.linearBlockSetInternalStateID,
+                (jlong)context.release(),
+                true);
+        mLinearBlockObj = env->NewWeakGlobalRef(linearBlock);
+        mAvHandleRefCnt++;
+        return mLinearBlockObj;
+    } else {
+        native_handle_close(const_cast<native_handle_t*>(
+                    reinterpret_cast<const native_handle_t*>(mIonHandle)));
+        native_handle_delete(const_cast<native_handle_t*>(
+                    reinterpret_cast<const native_handle_t*>(mIonHandle)));
+        mIonHandle = NULL;
+        return NULL;
     }
-    pC2Buffer->registerOnDestroyNotify(&DestroyCallback, this);
-    jobject linearBlock =
-            env->NewObject(
-                    env->FindClass("android/media/MediaCodec$LinearBlock"),
-                    gFields.linearBlockInitID);
-    env->CallVoidMethod(
-            linearBlock,
-            gFields.linearBlockSetInternalStateID,
-            (jlong)context.release(),
-            true);
-    mLinearBlockObj = env->NewWeakGlobalRef(linearBlock);
-    mAvHandleRefCnt++;
-    return mLinearBlockObj;
 }
 
 uint64_t MediaEvent::getAudioHandle() {
