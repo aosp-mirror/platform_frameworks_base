@@ -17,6 +17,7 @@
 package android.net;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
@@ -53,7 +54,23 @@ public class NetworkState implements Parcelable {
         legacyNetworkType = 0;
     }
 
+    public NetworkState(int legacyNetworkType, @NonNull LinkProperties linkProperties,
+            @NonNull NetworkCapabilities networkCapabilities, @NonNull Network network,
+            @Nullable String subscriberId, @Nullable String networkId) {
+        this(legacyNetworkType, new NetworkInfo(legacyNetworkType, 0, null, null), linkProperties,
+                networkCapabilities, network, subscriberId, networkId);
+    }
+
+    // Constructor that used internally in ConnectivityService mainline module.
     public NetworkState(@NonNull NetworkInfo networkInfo, @NonNull LinkProperties linkProperties,
+            @NonNull NetworkCapabilities networkCapabilities, @NonNull Network network,
+            String subscriberId, String networkId) {
+        this(networkInfo.getType(), networkInfo, linkProperties,
+                networkCapabilities, network, subscriberId, networkId);
+    }
+
+    public NetworkState(int legacyNetworkType, @NonNull NetworkInfo networkInfo,
+            @NonNull LinkProperties linkProperties,
             @NonNull NetworkCapabilities networkCapabilities, @NonNull Network network,
             String subscriberId, String networkId) {
         this.networkInfo = networkInfo;
@@ -62,8 +79,7 @@ public class NetworkState implements Parcelable {
         this.network = network;
         this.subscriberId = subscriberId;
         this.networkId = networkId;
-        // TODO: Pass legacyNetworkType directly from parameters and remove NetworkInfo.
-        this.legacyNetworkType = this.networkInfo.getType();
+        this.legacyNetworkType = legacyNetworkType;
 
         // This object is an atomic view of a network, so the various components
         // should always agree on roaming state.
