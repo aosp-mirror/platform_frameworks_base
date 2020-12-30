@@ -1832,30 +1832,42 @@ public class ConnectivityManager {
             mCallback = new ISocketKeepaliveCallback.Stub() {
                 @Override
                 public void onStarted(int slot) {
-                    Binder.withCleanCallingIdentity(() ->
-                            mExecutor.execute(() -> {
-                                mSlot = slot;
-                                callback.onStarted();
-                            }));
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        mExecutor.execute(() -> {
+                            mSlot = slot;
+                            callback.onStarted();
+                        });
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
                 }
 
                 @Override
                 public void onStopped() {
-                    Binder.withCleanCallingIdentity(() ->
-                            mExecutor.execute(() -> {
-                                mSlot = null;
-                                callback.onStopped();
-                            }));
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        mExecutor.execute(() -> {
+                            mSlot = null;
+                            callback.onStopped();
+                        });
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
                     mExecutor.shutdown();
                 }
 
                 @Override
                 public void onError(int error) {
-                    Binder.withCleanCallingIdentity(() ->
-                            mExecutor.execute(() -> {
-                                mSlot = null;
-                                callback.onError(error);
-                            }));
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        mExecutor.execute(() -> {
+                            mSlot = null;
+                            callback.onError(error);
+                        });
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
                     mExecutor.shutdown();
                 }
 
