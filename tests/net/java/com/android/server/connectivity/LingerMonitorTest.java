@@ -353,7 +353,7 @@ public class LingerMonitorTest {
         NetworkCapabilities caps = new NetworkCapabilities();
         caps.addCapability(0);
         caps.addTransportType(transport);
-        NetworkAgentInfo nai = new NetworkAgentInfo(null, null, new Network(netId), info, null,
+        NetworkAgentInfo nai = new NetworkAgentInfo(null, new Network(netId), info, null,
                 caps, 50, mCtx, null, null /* config */, mConnService, mNetd, mDnsResolver, mNMS,
                 NetworkProvider.ID_NONE, Binder.getCallingUid());
         nai.everValidated = true;

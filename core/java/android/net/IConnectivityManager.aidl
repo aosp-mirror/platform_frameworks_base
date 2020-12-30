@@ -37,6 +37,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.ResultReceiver;
 
+import com.android.connectivity.aidl.INetworkAgent;
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnInfo;
@@ -164,7 +165,7 @@ interface IConnectivityManager
 
     void declareNetworkRequestUnfulfillable(in NetworkRequest request);
 
-    Network registerNetworkAgent(in Messenger messenger, in NetworkInfo ni, in LinkProperties lp,
+    Network registerNetworkAgent(in INetworkAgent na, in NetworkInfo ni, in LinkProperties lp,
             in NetworkCapabilities nc, int score, in NetworkAgentConfig config,
             in int factorySerialNumber);
 

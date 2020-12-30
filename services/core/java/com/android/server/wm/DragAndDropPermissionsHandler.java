@@ -128,7 +128,7 @@ class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
     private IBinder getUriPermissionOwnerForActivity(IBinder activityToken) {
         ActivityTaskManagerService.enforceNotIsolatedCaller("getUriPermissionOwnerForActivity");
         synchronized (mGlobalLock) {
-            ActivityRecord r = ActivityRecord.isInStackLocked(activityToken);
+            ActivityRecord r = ActivityRecord.isInRootTaskLocked(activityToken);
             if (r == null) {
                 throw new IllegalArgumentException("Activity does not exist; token="
                         + activityToken);

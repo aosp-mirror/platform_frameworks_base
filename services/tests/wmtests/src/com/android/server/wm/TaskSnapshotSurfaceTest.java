@@ -102,7 +102,7 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
                 ColorSpace.get(ColorSpace.Named.SRGB), ORIENTATION_PORTRAIT,
                 Surface.ROTATION_0, taskSize, contentInsets, false,
                 true /* isRealSnapshot */, WINDOWING_MODE_FULLSCREEN,
-                0 /* systemUiVisibility */, false /* isTranslucent */);
+                0 /* systemUiVisibility */, false /* isTranslucent */, false /* hasImeSurface */);
     }
 
     private static TaskDescription createTaskDescription(int background, int statusBar,

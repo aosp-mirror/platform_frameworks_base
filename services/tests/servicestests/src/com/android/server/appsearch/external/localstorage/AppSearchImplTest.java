@@ -75,6 +75,8 @@ public class AppSearchImplTest {
                 SchemaToProtoConverter.toSchemaTypeConfigProto(rewrittenVisibilitySchema.build());
     }
 
+    // TODO(b/175430168) add test to verify reset is working properly.
+
     /**
      * Ensure that we can rewrite an incoming schema type by adding the database as a prefix. While
      * also keeping any other existing schema types that may already be part of Icing's persisted

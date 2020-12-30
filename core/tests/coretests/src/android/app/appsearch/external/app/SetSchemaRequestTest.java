@@ -16,9 +16,6 @@
 
 package android.app.appsearch;
 
-import static android.app.appsearch.AppSearchSchema.PropertyConfig.INDEXING_TYPE_PREFIXES;
-import static android.app.appsearch.AppSearchSchema.PropertyConfig.TOKENIZER_TYPE_PLAIN;
-
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.testng.Assert.expectThrows;
@@ -27,11 +24,21 @@ import android.util.ArrayMap;
 
 import org.junit.Test;
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 public class SetSchemaRequestTest {
+
+    private static Collection<String> getSchemaTypesFromSetSchemaRequest(SetSchemaRequest request) {
+        HashSet<String> schemaTypes = new HashSet<>();
+        for (AppSearchSchema schema : request.getSchemas()) {
+            schemaTypes.add(schema.getSchemaType());
+        }
+        return schemaTypes;
+    }
 
     @Test
     public void testInvalidSchemaReferences_fromSystemUiVisibility() {
@@ -57,7 +64,7 @@ public class SetSchemaRequestTest {
                                                 /*visible=*/ true,
                                                 new PackageIdentifier(
                                                         "com.foo.package",
-                                                        /*certificate=*/ new byte[] {}))
+                                                        /*sha256Certificate=*/ new byte[] {}))
                                         .build());
         assertThat(expected).hasMessageThat().contains("referenced, but were not added");
     }
@@ -68,14 +75,14 @@ public class SetSchemaRequestTest {
 
         // By default, the schema is visible.
         SetSchemaRequest request = new SetSchemaRequest.Builder().addSchema(schema).build();
-        assertThat(request.getSchemasNotPlatformSurfaceable()).isEmpty();
+        assertThat(request.getSchemasNotVisibleToSystemUi()).isEmpty();
 
         request =
                 new SetSchemaRequest.Builder()
                         .addSchema(schema)
                         .setSchemaTypeVisibilityForSystemUi("Schema", true)
                         .build();
-        assertThat(request.getSchemasNotPlatformSurfaceable()).isEmpty();
+        assertThat(request.getSchemasNotVisibleToSystemUi()).isEmpty();
     }
 
     @Test
@@ -86,7 +93,7 @@ public class SetSchemaRequestTest {
                         .addSchema(schema)
                         .setSchemaTypeVisibilityForSystemUi("Schema", false)
                         .build();
-        assertThat(request.getSchemasNotPlatformSurfaceable()).containsExactly("Schema");
+        assertThat(request.getSchemasNotVisibleToSystemUi()).containsExactly("Schema");
     }
 
     @Test
@@ -95,12 +102,12 @@ public class SetSchemaRequestTest {
 
         // By default, the schema is not visible.
         SetSchemaRequest request = new SetSchemaRequest.Builder().addSchema(schema).build();
-        assertThat(request.getSchemasPackageAccessible()).isEmpty();
+        assertThat(request.getSchemasVisibleToPackages()).isEmpty();
 
         PackageIdentifier packageIdentifier =
                 new PackageIdentifier("com.package.foo", new byte[] {100});
-        Map<String, Set<PackageIdentifier>> expectedPackageVisibleMap = new ArrayMap<>();
-        expectedPackageVisibleMap.put("Schema", Collections.singleton(packageIdentifier));
+        Map<String, Set<PackageIdentifier>> expectedVisibleToPackagesMap = new ArrayMap<>();
+        expectedVisibleToPackagesMap.put("Schema", Collections.singleton(packageIdentifier));
 
         request =
                 new SetSchemaRequest.Builder()
@@ -108,8 +115,8 @@ public class SetSchemaRequestTest {
                         .setSchemaTypeVisibilityForPackage(
                                 "Schema", /*visible=*/ true, packageIdentifier)
                         .build();
-        assertThat(request.getSchemasPackageAccessible())
-                .containsExactlyEntriesIn(expectedPackageVisibleMap);
+        assertThat(request.getSchemasVisibleToPackages())
+                .containsExactlyEntriesIn(expectedVisibleToPackagesMap);
     }
 
     @Test
@@ -123,9 +130,9 @@ public class SetSchemaRequestTest {
                                 "Schema",
                                 /*visible=*/ false,
                                 new PackageIdentifier(
-                                        "com.package.foo", /*certificate=*/ new byte[] {}))
+                                        "com.package.foo", /*sha256Certificate=*/ new byte[] {}))
                         .build();
-        assertThat(request.getSchemasPackageAccessible()).isEmpty();
+        assertThat(request.getSchemasVisibleToPackages()).isEmpty();
     }
 
     @Test
@@ -134,8 +141,8 @@ public class SetSchemaRequestTest {
 
         PackageIdentifier packageIdentifier =
                 new PackageIdentifier("com.package.foo", new byte[] {100});
-        Map<String, Set<PackageIdentifier>> expectedPackageVisibleMap = new ArrayMap<>();
-        expectedPackageVisibleMap.put("Schema", Collections.singleton(packageIdentifier));
+        Map<String, Set<PackageIdentifier>> expectedVisibleToPackagesMap = new ArrayMap<>();
+        expectedVisibleToPackagesMap.put("Schema", Collections.singleton(packageIdentifier));
 
         SetSchemaRequest request =
                 new SetSchemaRequest.Builder()
@@ -147,8 +154,8 @@ public class SetSchemaRequestTest {
                         .setSchemaTypeVisibilityForPackage(
                                 "Schema", /*visible=*/ true, packageIdentifier)
                         .build();
-        assertThat(request.getSchemasPackageAccessible())
-                .containsExactlyEntriesIn(expectedPackageVisibleMap);
+        assertThat(request.getSchemasVisibleToPackages())
+                .containsExactlyEntriesIn(expectedVisibleToPackagesMap);
     }
 
     @Test
@@ -163,16 +170,16 @@ public class SetSchemaRequestTest {
                                 "Schema",
                                 /*visible=*/ true,
                                 new PackageIdentifier(
-                                        "com.package.foo", /*certificate=*/ new byte[] {100}))
+                                        "com.package.foo", /*sha256Certificate=*/ new byte[] {100}))
                         // Then make it not visible
                         .setSchemaTypeVisibilityForPackage(
                                 "Schema",
                                 /*visible=*/ false,
                                 new PackageIdentifier(
-                                        "com.package.foo", /*certificate=*/ new byte[] {100}))
+                                        "com.package.foo", /*sha256Certificate=*/ new byte[] {100}))
                         .build();
 
         // Nothing should be visible.
-        assertThat(request.getSchemasPackageAccessible()).isEmpty();
+        assertThat(request.getSchemasVisibleToPackages()).isEmpty();
     }
 }

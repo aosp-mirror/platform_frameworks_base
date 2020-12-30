@@ -103,8 +103,7 @@ class InsetsSourceProvider {
         mSource = source;
         mDisplayContent = displayContent;
         mStateController = stateController;
-        mFakeControl = new InsetsSourceControl(source.getType(), null /* leash */,
-                new Point());
+        mFakeControl = new InsetsSourceControl(source.getType(), null /* leash */, new Point());
 
         switch (source.getType()) {
             case ITYPE_STATUS_BAR:

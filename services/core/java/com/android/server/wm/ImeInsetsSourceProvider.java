@@ -30,7 +30,9 @@ import android.annotation.NonNull;
 import android.os.Trace;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsSource;
+import android.view.InsetsSourceControl;
 import android.view.WindowInsets;
+import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
@@ -51,6 +53,26 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
     ImeInsetsSourceProvider(InsetsSource source,
             InsetsStateController stateController, DisplayContent displayContent) {
         super(source, stateController, displayContent);
+    }
+
+    @Override
+    InsetsSourceControl getControl(InsetsControlTarget target) {
+        final InsetsSourceControl control = super.getControl(target);
+        if (control != null && target != null && target.getWindow() != null) {
+            final WindowState targetWin = target.getWindow();
+            // If the control target changes during the app transition with the task snapshot
+            // starting window and the IME snapshot is visible, in case not have duplicated IME
+            // showing animation during transitioning, use a flag to inform IME source control to
+            // skip showing animation once.
+            final TaskSnapshot snapshot = targetWin.getRootTask() != null
+                    ? targetWin.mWmService.getTaskSnapshot(targetWin.getRootTask().mTaskId,
+                        0 /* userId */, false /* isLowResolution */, false /* restoreFromDisk */)
+                    : null;
+            control.setSkipAnimationOnce(targetWin.mActivityRecord != null
+                    && targetWin.mActivityRecord.hasStartingWindow()
+                    && snapshot != null && snapshot.hasImeSurface());
+        }
+        return control;
     }
 
     /**

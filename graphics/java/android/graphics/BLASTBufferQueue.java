@@ -34,6 +34,21 @@ public final class BLASTBufferQueue {
     private static native void nativeSetNextTransaction(long ptr, long transactionPtr);
     private static native void nativeUpdate(long ptr, long surfaceControl, long width, long height);
     private static native void nativeFlushShadowQueue(long ptr);
+    private static native void nativeMergeWithNextTransaction(long ptr, long transactionPtr,
+                                                              long frameNumber);
+    private static native void nativeSetTransactionCompleteCallback(long ptr, long frameNumber,
+            TransactionCompleteCallback callback);
+
+    /**
+     * Callback sent to {@link #setTransactionCompleteCallback(long, TransactionCompleteCallback)}
+     */
+    public interface TransactionCompleteCallback {
+        /**
+         * Invoked when the transaction has completed.
+         * @param frameNumber The frame number of the buffer that was in that transaction
+         */
+        void onTransactionComplete(long frameNumber);
+    }
 
     /** Create a new connection with the surface flinger. */
     public BLASTBufferQueue(String name, SurfaceControl sc, int width, int height,
@@ -74,6 +89,16 @@ public final class BLASTBufferQueue {
         nativeUpdate(mNativeObject, sc.mNativeObject, width, height);
     }
 
+    /**
+     * Set a callback when the transaction with the frame number has been completed.
+     * @param frameNumber The frame number to get the transaction complete callback for
+     * @param completeCallback The callback that should be invoked.
+     */
+    public void setTransactionCompleteCallback(long frameNumber,
+            @Nullable TransactionCompleteCallback completeCallback) {
+        nativeSetTransactionCompleteCallback(mNativeObject, frameNumber, completeCallback);
+    }
+
     @Override
     protected void finalize() throws Throwable {
         try {
@@ -88,4 +113,14 @@ public final class BLASTBufferQueue {
     public void flushShadowQueue() {
         nativeFlushShadowQueue(mNativeObject);
     }
+
+    /**
+     * Merge the transaction passed in to the next transaction in BlastBufferQueue. The next
+     * transaction will be applied or merged when the next frame with specified frame number
+     * is available.
+     */
+    public void mergeWithNextTransaction(SurfaceControl.Transaction t, long frameNumber) {
+        nativeMergeWithNextTransaction(mNativeObject, t.mNativeObject, frameNumber);
+    }
+
 }

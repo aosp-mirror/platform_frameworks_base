@@ -1045,6 +1045,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
             spyOn(task);
             task.mUserId = mUserId;
             Task rootTask = task.getRootTask();
+            if (task != rootTask && !Mockito.mockingDetails(rootTask).isSpy()) {
+                spyOn(rootTask);
+            }
             doNothing().when(rootTask).startActivityLocked(
                     any(), any(), anyBoolean(), anyBoolean(), any());
 

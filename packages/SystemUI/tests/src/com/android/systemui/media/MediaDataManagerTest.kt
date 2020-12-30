@@ -2,6 +2,7 @@ package com.android.systemui.media
 
 import android.app.Notification.MediaStyle
 import android.app.PendingIntent
+import android.graphics.Bitmap
 import android.media.MediaDescription
 import android.media.MediaMetadata
 import android.media.session.MediaController
@@ -297,5 +298,27 @@ class MediaDataManagerTest : SysuiTestCase() {
         foregroundExecutor.runAllReady()
 
         verify(listener).onMediaDataRemoved(eq(KEY))
+    }
+
+    @Test
+    fun testBadArtwork_doesNotUse() {
+        // WHEN notification has a too-small artwork
+        val artwork = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+        val notif = SbnBuilder().run {
+            setPkg(PACKAGE_NAME)
+            modifyNotification(context).also {
+                it.setSmallIcon(android.R.drawable.ic_media_pause)
+                it.setStyle(MediaStyle().apply { setMediaSession(session.sessionToken) })
+                it.setLargeIcon(artwork)
+            }
+            build()
+        }
+        mediaDataManager.onNotificationAdded(KEY, notif)
+
+        // THEN it loads and uses the default background color
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        verify(listener).onMediaDataLoaded(eq(KEY), eq(null), capture(mediaDataCaptor))
+        assertThat(mediaDataCaptor.value!!.backgroundColor).isEqualTo(DEFAULT_COLOR)
     }
 }

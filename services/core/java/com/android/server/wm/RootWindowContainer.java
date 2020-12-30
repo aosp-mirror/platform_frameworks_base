@@ -2299,7 +2299,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
 
         boolean result = false;
-        if (targetRootTask != null && (targetRootTask.isTopStackInDisplayArea()
+        if (targetRootTask != null && (targetRootTask.isTopRootTaskInDisplayArea()
                 || getTopDisplayFocusedRootTask() == targetRootTask)) {
             result = targetRootTask.resumeTopActivityUncheckedLocked(target, targetOptions);
         }
@@ -2370,7 +2370,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     rootTask.goToSleepIfPossible(false /* shuttingDown */);
                 } else {
                     rootTask.awakeFromSleepingLocked();
-                    if (rootTask.isFocusedStackOnDisplay()
+                    if (rootTask.isFocusedRootTaskOnDisplay()
                             && !mTaskSupervisor.getKeyguardController()
                             .isKeyguardOrAodShowing(display.mDisplayId)) {
                         // If the keyguard is unlocked - resume immediately.

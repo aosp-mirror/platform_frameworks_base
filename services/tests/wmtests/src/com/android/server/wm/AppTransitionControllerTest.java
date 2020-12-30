@@ -188,11 +188,11 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         // The visibility are already updated, but since forced transition is requested, it will
         // be included.
         assertEquals(
-                new ArraySet<>(new WindowContainer[]{activity1.getStack()}),
+                new ArraySet<>(new WindowContainer[]{activity1.getRootTask()}),
                 AppTransitionController.getAnimationTargets(
                         opening, closing, true /* visible */));
         assertEquals(
-                new ArraySet<>(new WindowContainer[]{activity2.getStack()}),
+                new ArraySet<>(new WindowContainer[]{activity2.getRootTask()}),
                 AppTransitionController.getAnimationTargets(
                         opening, closing, false /* visible */));
     }

@@ -82,7 +82,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -138,13 +137,13 @@ public class TaskRecordTests extends WindowTestsBase {
         final Task task = createTask(1);
         spyOn(task);
         doReturn(true).when(task).hasChild();
-        assertFalse(task.returnsToHomeStack());
+        assertFalse(task.returnsToHomeRootTask());
         task.intent = null;
-        assertFalse(task.returnsToHomeStack());
+        assertFalse(task.returnsToHomeRootTask());
         task.intent = new Intent();
-        assertFalse(task.returnsToHomeStack());
+        assertFalse(task.returnsToHomeRootTask());
         task.intent.addFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME);
-        assertTrue(task.returnsToHomeStack());
+        assertTrue(task.returnsToHomeRootTask());
     }
 
     /** Ensures that empty bounds cause appBounds to inherit from parent. */
