@@ -21,6 +21,7 @@ import android.app.appsearch.AppSearchManager;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.GlobalSearchSession;
 import android.app.appsearch.SearchResults;
+import android.app.appsearch.SearchResultsShim;
 import android.app.appsearch.SearchSpec;
 import android.content.Context;
 
@@ -39,30 +40,24 @@ import java.util.concurrent.Executors;
  * a consistent interface.
  * @hide
  */
-public class GlobalSearchSessionShim {
+public class GlobalSearchSessionShimImpl {
     private final GlobalSearchSession mGlobalSearchSession;
     private final ExecutorService mExecutor;
 
     @NonNull
-    public static ListenableFuture<AppSearchResult<GlobalSearchSessionShim>>
-            createGlobalSearchSession() {
+    public static ListenableFuture<GlobalSearchSessionShimImpl> createGlobalSearchSession() {
         Context context = ApplicationProvider.getApplicationContext();
         AppSearchManager appSearchManager = context.getSystemService(AppSearchManager.class);
         SettableFuture<AppSearchResult<GlobalSearchSession>> future = SettableFuture.create();
         ExecutorService executor = Executors.newCachedThreadPool();
         appSearchManager.createGlobalSearchSession(executor, future::set);
-        return Futures.transform(future, (instance) -> {
-            if (!instance.isSuccess()) {
-                return AppSearchResult.newFailedResult(
-                        instance.getResultCode(), instance.getErrorMessage());
-            }
-            GlobalSearchSession searchSession = instance.getResultValue();
-            GlobalSearchSessionShim shim = new GlobalSearchSessionShim(searchSession, executor);
-            return AppSearchResult.newSuccessfulResult(shim);
-        }, executor);
+        return Futures.transform(
+                future,
+                instance -> new GlobalSearchSessionShimImpl(instance.getResultValue(), executor),
+                executor);
     }
 
-    private GlobalSearchSessionShim(
+    private GlobalSearchSessionShimImpl(
             @NonNull GlobalSearchSession session, @NonNull ExecutorService executor) {
         mGlobalSearchSession = Preconditions.checkNotNull(session);
         mExecutor = Preconditions.checkNotNull(executor);
@@ -73,6 +68,6 @@ public class GlobalSearchSessionShim {
             @NonNull String queryExpression, @NonNull SearchSpec searchSpec) {
         SearchResults searchResults =
                 mGlobalSearchSession.query(queryExpression, searchSpec, mExecutor);
-        return new SearchResultsShim(searchResults);
+        return new SearchResultsShimImpl(searchResults, mExecutor);
     }
 }

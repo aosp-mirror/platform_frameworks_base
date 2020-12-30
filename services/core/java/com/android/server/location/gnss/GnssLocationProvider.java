@@ -616,7 +616,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         // permanently passively listen to all network locations
         LocationManager locationManager = Objects.requireNonNull(
                 mContext.getSystemService(LocationManager.class));
-        if (locationManager.getProvider(LocationManager.NETWORK_PROVIDER) != null) {
+        if (locationManager.getAllProviders().contains(LocationManager.NETWORK_PROVIDER)) {
             locationManager.requestLocationUpdates(
                     LocationManager.NETWORK_PROVIDER,
                     new LocationRequest.Builder(LocationRequest.PASSIVE_INTERVAL)

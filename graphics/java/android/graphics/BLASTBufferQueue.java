@@ -34,6 +34,8 @@ public final class BLASTBufferQueue {
     private static native void nativeSetNextTransaction(long ptr, long transactionPtr);
     private static native void nativeUpdate(long ptr, long surfaceControl, long width, long height);
     private static native void nativeFlushShadowQueue(long ptr);
+    private static native void nativeMergeWithNextTransaction(long ptr, long transactionPtr,
+                                                              long frameNumber);
     private static native void nativeSetTransactionCompleteCallback(long ptr, long frameNumber,
             TransactionCompleteCallback callback);
 
@@ -111,4 +113,14 @@ public final class BLASTBufferQueue {
     public void flushShadowQueue() {
         nativeFlushShadowQueue(mNativeObject);
     }
+
+    /**
+     * Merge the transaction passed in to the next transaction in BlastBufferQueue. The next
+     * transaction will be applied or merged when the next frame with specified frame number
+     * is available.
+     */
+    public void mergeWithNextTransaction(SurfaceControl.Transaction t, long frameNumber) {
+        nativeMergeWithNextTransaction(mNativeObject, t.mNativeObject, frameNumber);
+    }
+
 }

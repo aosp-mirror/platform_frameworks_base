@@ -18,27 +18,38 @@ package android.app.appsearch;
 
 import android.annotation.NonNull;
 
+import com.android.internal.util.Preconditions;
+
 import java.util.Arrays;
 import java.util.Objects;
 
 /**
  * This class represents a uniquely identifiable package.
- *
  * @hide
  */
 public class PackageIdentifier {
-    public final String packageName;
-    public final byte[] certificate;
+    private final String mPackageName;
+    private final byte[] mSha256Certificate;
 
     /**
      * Creates a unique identifier for a package.
      *
      * @param packageName Name of the package.
-     * @param certificate SHA256 certificate digest of the package.
+     * @param sha256Certificate SHA256 certificate digest of the package.
      */
-    public PackageIdentifier(@NonNull String packageName, @NonNull byte[] certificate) {
-        this.packageName = packageName;
-        this.certificate = certificate;
+    public PackageIdentifier(@NonNull String packageName, @NonNull byte[] sha256Certificate) {
+        mPackageName = Preconditions.checkNotNull(packageName);
+        mSha256Certificate = Preconditions.checkNotNull(sha256Certificate);
+    }
+
+    @NonNull
+    public String getPackageName() {
+        return mPackageName;
+    }
+
+    @NonNull
+    public byte[] getSha256Certificate() {
+        return mSha256Certificate;
     }
 
     @Override
@@ -50,12 +61,12 @@ public class PackageIdentifier {
             return false;
         }
         final PackageIdentifier other = (PackageIdentifier) obj;
-        return this.packageName.equals(other.packageName)
-                && Arrays.equals(this.certificate, other.certificate);
+        return this.mPackageName.equals(other.mPackageName)
+                && Arrays.equals(this.mSha256Certificate, other.mSha256Certificate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(packageName, Arrays.hashCode(certificate));
+        return Objects.hash(mPackageName, Arrays.hashCode(mSha256Certificate));
     }
 }
