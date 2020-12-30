@@ -182,8 +182,6 @@ class DragDropController {
                     if (SHOW_LIGHT_TRANSACTIONS) {
                         Slog.i(TAG_WM, "<<< CLOSE TRANSACTION performDrag");
                     }
-
-                    mDragState.notifyLocationLocked(touchX, touchY);
                 } finally {
                     if (surface != null) {
                         surface.release();

@@ -8572,6 +8572,17 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         @Override
+        public void onDragEvent(boolean isExiting, float x, float y) {
+            // force DRAG_EXITED_EVENT if appropriate
+            DragEvent event = DragEvent.obtain(
+                    isExiting ? DragEvent.ACTION_DRAG_EXITED : DragEvent.ACTION_DRAG_LOCATION,
+                    x, y, 0 /* offsetX */, 0 /* offsetY */, null/* localState */,
+                    null/* description */, null /* data */, null /* dragSurface */,
+                    null /* dragAndDropPermissions */, false /* result */);
+            dispatchDragEvent(event);
+        }
+
+        @Override
         public void dispose() {
             unscheduleConsumeBatchedInput();
             super.dispose();

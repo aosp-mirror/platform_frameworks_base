@@ -515,50 +515,6 @@ class DragState {
         mTransaction.setPosition(mSurfaceControl, x - mThumbOffsetX, y - mThumbOffsetY).apply();
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "DRAG %s: pos=(%d,%d)", mSurfaceControl,
                 (int) (x - mThumbOffsetX), (int) (y - mThumbOffsetY));
-
-        notifyLocationLocked(x, y);
-    }
-
-    void notifyLocationLocked(float x, float y) {
-        // Tell the affected window
-        WindowState touchedWin = mDisplayContent.getTouchableWinAtPointLocked(x, y);
-        if (touchedWin != null && !isWindowNotified(touchedWin)) {
-            // The drag point is over a window which was not notified about a drag start.
-            // Pretend it's over empty space.
-            touchedWin = null;
-        }
-
-        try {
-            final int myPid = Process.myPid();
-
-            // have we dragged over a new window?
-            if ((touchedWin != mTargetWindow) && (mTargetWindow != null)) {
-                if (DEBUG_DRAG) {
-                    Slog.d(TAG_WM, "sending DRAG_EXITED to " + mTargetWindow);
-                }
-                // force DRAG_EXITED_EVENT if appropriate
-                DragEvent evt = obtainDragEvent(mTargetWindow, DragEvent.ACTION_DRAG_EXITED,
-                        0, 0, 0, 0, null, null, null, null, null, false);
-                mTargetWindow.mClient.dispatchDragEvent(evt);
-                if (myPid != mTargetWindow.mSession.mPid) {
-                    evt.recycle();
-                }
-            }
-            if (touchedWin != null) {
-                if (false && DEBUG_DRAG) {
-                    Slog.d(TAG_WM, "sending DRAG_LOCATION to " + touchedWin);
-                }
-                DragEvent evt = obtainDragEvent(touchedWin, DragEvent.ACTION_DRAG_LOCATION,
-                        x, y, mThumbOffsetX, mThumbOffsetY, null, null, null, null, null, false);
-                touchedWin.mClient.dispatchDragEvent(evt);
-                if (myPid != touchedWin.mSession.mPid) {
-                    evt.recycle();
-                }
-            }
-        } catch (RemoteException e) {
-            Slog.w(TAG_WM, "can't send drag notification to windows");
-        }
-        mTargetWindow = touchedWin;
     }
 
     /**

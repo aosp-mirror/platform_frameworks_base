@@ -304,7 +304,7 @@ public class InputManagerService extends IInputManager.Stub
             int displayId, InputApplicationHandle application);
     private static native void nativeSetFocusedDisplay(long ptr, int displayId);
     private static native boolean nativeTransferTouchFocus(long ptr,
-            IBinder fromChannelToken, IBinder toChannelToken);
+            IBinder fromChannelToken, IBinder toChannelToken, boolean isDragDrop);
     private static native void nativeSetPointerSpeed(long ptr, int speed);
     private static native void nativeSetShowTouches(long ptr, boolean enabled);
     private static native void nativeSetInteractive(long ptr, boolean interactive);
@@ -1732,12 +1732,14 @@ public class InputManagerService extends IInputManager.Stub
      * @param fromChannel The channel of a window that currently has touch focus.
      * @param toChannel The channel of the window that should receive touch focus in
      * place of the first.
+     * @param isDragDrop True if transfer touch focus for drag and drop.
      * @return True if the transfer was successful.  False if the window with the
      * specified channel did not actually have touch focus at the time of the request.
      */
     public boolean transferTouchFocus(@NonNull InputChannel fromChannel,
-            @NonNull InputChannel toChannel) {
-        return nativeTransferTouchFocus(mPtr, fromChannel.getToken(), toChannel.getToken());
+            @NonNull InputChannel toChannel, boolean isDragDrop) {
+        return nativeTransferTouchFocus(mPtr, fromChannel.getToken(), toChannel.getToken(),
+                isDragDrop);
     }
 
     /**
@@ -1757,7 +1759,8 @@ public class InputManagerService extends IInputManager.Stub
             @NonNull IBinder toChannelToken) {
         Objects.nonNull(fromChannelToken);
         Objects.nonNull(toChannelToken);
-        return nativeTransferTouchFocus(mPtr, fromChannelToken, toChannelToken);
+        return nativeTransferTouchFocus(mPtr, fromChannelToken, toChannelToken,
+                false /* isDragDrop */);
     }
 
     @Override // Binder call
