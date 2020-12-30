@@ -28,6 +28,8 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.settingslib.RestrictedLockUtils;
 
 import java.util.ArrayList;
@@ -105,6 +107,20 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
         if (mSwitch != null) {
             mSwitch.setChecked(checked);
         }
+    }
+
+    /**
+     * Return the status of the Switch
+     */
+    public boolean isChecked() {
+        return mSwitch.isChecked();
+    }
+
+    /**
+     * Return the Switch
+     */
+    public final Switch getSwitch() {
+        return mSwitch;
     }
 
     /**
@@ -202,7 +218,8 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
     protected void onRestrictedIconClick() {
     }
 
-    private View getDelegatingView() {
+    @VisibleForTesting
+    View getDelegatingView() {
         return mDisabledByAdmin ? mRestrictedIcon : mSwitch;
     }
 
