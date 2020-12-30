@@ -48,6 +48,7 @@ import com.android.systemui.qs.tiles.UserTile;
 import com.android.systemui.qs.tiles.WifiTile;
 import com.android.systemui.qs.tiles.WorkModeTile;
 import com.android.systemui.util.leak.GarbageMonitor;
+import com.android.systemui.util.settings.SecureSettings;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -84,9 +85,12 @@ public class QSFactoryImpl implements QSFactory {
     private final Lazy<QSHost> mQsHostLazy;
     private final Provider<CustomTile.Builder> mCustomTileBuilderProvider;
 
+    private final boolean mSideLabels;
+
     @Inject
     public QSFactoryImpl(
             Lazy<QSHost> qsHostLazy,
+            SecureSettings settings,
             Provider<CustomTile.Builder> customTileBuilderProvider,
             Provider<WifiTile> wifiTileProvider,
             Provider<BluetoothTile> bluetoothTileProvider,
@@ -111,6 +115,8 @@ public class QSFactoryImpl implements QSFactory {
             Provider<ReduceBrightColorsTile> reduceBrightColorsTileProvider) {
         mQsHostLazy = qsHostLazy;
         mCustomTileBuilderProvider = customTileBuilderProvider;
+
+        mSideLabels = settings.getInt("sysui_side_labels", 0) != 0;
 
         mWifiTileProvider = wifiTileProvider;
         mBluetoothTileProvider = bluetoothTileProvider;
@@ -212,6 +218,8 @@ public class QSFactoryImpl implements QSFactory {
         QSIconView icon = tile.createTileView(context);
         if (collapsedView) {
             return new QSTileBaseView(context, icon, collapsedView);
+        } else if (mSideLabels) {
+            return new QSTileViewHorizontal(context, icon);
         } else {
             return new com.android.systemui.qs.tileimpl.QSTileView(context, icon);
         }

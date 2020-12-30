@@ -37,7 +37,6 @@ import java.util.Objects;
 /** View that represents a standard quick settings tile. **/
 public class QSTileView extends QSTileBaseView {
     private static final int MAX_LABEL_LINES = 2;
-    private static final boolean DUAL_TARGET_ALLOWED = false;
     private View mDivider;
     protected TextView mLabel;
     protected TextView mSecondLine;
@@ -46,8 +45,10 @@ public class QSTileView extends QSTileBaseView {
     protected ViewGroup mLabelContainer;
     private View mExpandIndicator;
     private View mExpandSpace;
-    private ColorStateList mColorLabelDefault;
+    protected ColorStateList mColorLabelActive;
+    protected ColorStateList mColorLabelInactive;
     private ColorStateList mColorLabelUnavailable;
+    protected boolean mDualTargetAllowed = false;
 
     public QSTileView(Context context, QSIconView icon) {
         this(context, icon, false);
@@ -64,7 +65,8 @@ public class QSTileView extends QSTileBaseView {
         createLabel();
         setOrientation(VERTICAL);
         setGravity(Gravity.CENTER_HORIZONTAL | Gravity.TOP);
-        mColorLabelDefault = Utils.getColorAttr(getContext(), android.R.attr.textColorPrimary);
+        mColorLabelActive = Utils.getColorAttr(getContext(), android.R.attr.textColorPrimary);
+        mColorLabelInactive = mColorLabelActive;
         // The text color for unavailable tiles is textColorSecondary, same as secondaryLabel for
         // contrast purposes
         mColorLabelUnavailable = Utils.getColorAttr(getContext(),
@@ -118,8 +120,15 @@ public class QSTileView extends QSTileBaseView {
     protected void handleStateChanged(QSTile.State state) {
         super.handleStateChanged(state);
         if (!Objects.equals(mLabel.getText(), state.label) || mState != state.state) {
-            mLabel.setTextColor(state.state == Tile.STATE_UNAVAILABLE ? mColorLabelUnavailable
-                    : mColorLabelDefault);
+            ColorStateList labelColor;
+            if (state.state == Tile.STATE_ACTIVE) {
+                labelColor = mColorLabelActive;
+            } else if (state.state == Tile.STATE_INACTIVE) {
+                labelColor = mColorLabelInactive;
+            } else {
+                labelColor = mColorLabelUnavailable;
+            }
+            mLabel.setTextColor(labelColor);
             mState = state.state;
             mLabel.setText(state.label);
         }
@@ -128,9 +137,8 @@ public class QSTileView extends QSTileBaseView {
             mSecondLine.setVisibility(TextUtils.isEmpty(state.secondaryLabel) ? View.GONE
                     : View.VISIBLE);
         }
-        boolean dualTarget = DUAL_TARGET_ALLOWED && state.dualTarget;
-        mExpandIndicator.setVisibility(dualTarget ? View.VISIBLE : View.GONE);
-        mExpandSpace.setVisibility(dualTarget ? View.VISIBLE : View.GONE);
+        boolean dualTarget = mDualTargetAllowed && state.dualTarget;
+        handleExpand(dualTarget);
         mLabelContainer.setContentDescription(dualTarget ? state.dualLabelContentDescription
                 : null);
         if (dualTarget != mLabelContainer.isClickable()) {
@@ -140,6 +148,11 @@ public class QSTileView extends QSTileBaseView {
         }
         mLabel.setEnabled(!state.disabledByPolicy);
         mPadLock.setVisibility(state.disabledByPolicy ? View.VISIBLE : View.GONE);
+    }
+
+    protected void handleExpand(boolean dualTarget) {
+        mExpandIndicator.setVisibility(dualTarget ? View.VISIBLE : View.GONE);
+        mExpandSpace.setVisibility(dualTarget ? View.VISIBLE : View.GONE);
     }
 
     @Override

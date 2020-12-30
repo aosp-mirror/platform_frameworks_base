@@ -519,6 +519,7 @@
          Scaled @dimen/qs_page_indicator-width by .4f.
     -->
     <dimen name="qs_page_indicator_dot_width">6.4dp</dimen>
+    <dimen name="qs_tile_side_label_padding">6dp</dimen>
     <dimen name="qs_tile_icon_size">24dp</dimen>
     <dimen name="qs_tile_text_size">12sp</dimen>
     <dimen name="qs_tile_divider_height">1dp</dimen>
