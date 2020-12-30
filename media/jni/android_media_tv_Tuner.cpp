@@ -459,7 +459,7 @@ jobjectArray FilterCallback::getMediaEvent(
         if (mediaEvent.avMemory.getNativeHandle() != NULL || mediaEvent.avDataId != 0) {
             sp<MediaEvent> mediaEventSp =
                            new MediaEvent(mIFilter, mediaEvent.avMemory,
-                               mediaEvent.avDataId, dataLength, obj);
+                               mediaEvent.avDataId, dataLength + offset, obj);
             mediaEventSp->mAvHandleRefCnt++;
             env->SetLongField(obj, eventContext, (jlong) mediaEventSp.get());
             mediaEventSp->incStrong(obj);
