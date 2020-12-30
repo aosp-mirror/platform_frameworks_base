@@ -97,6 +97,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -1176,7 +1177,8 @@ public final class TvInputManagerService extends SystemService {
             final int resolvedUserId = resolveCallingUserId(callingPid, callingUid,
                     userId, "createSession");
             final long identity = Binder.clearCallingIdentity();
-            StringBuilder sessionId = new StringBuilder();
+            // Generate a unique session id with a random UUID.
+            String uniqueSessionId = UUID.randomUUID().toString();
             try {
                 synchronized (mLock) {
                     if (userId != mCurrentUserId && !isRecordingSession) {
@@ -1205,20 +1207,17 @@ public final class TvInputManagerService extends SystemService {
                         return;
                     }
 
-                    // Create a unique session id with pid, uid and resolved user id
-                    sessionId.append(callingUid).append(callingPid).append(resolvedUserId);
-
                     // Create a new session token and a session state.
                     IBinder sessionToken = new Binder();
                     SessionState sessionState = new SessionState(sessionToken, info.getId(),
                             info.getComponent(), isRecordingSession, client, seq, callingUid,
-                            callingPid, resolvedUserId, sessionId.toString());
+                            callingPid, resolvedUserId, uniqueSessionId);
 
                     // Add them to the global session state map of the current user.
                     userState.sessionStateMap.put(sessionToken, sessionState);
 
                     // Map the session id to the sessionStateMap in the user state
-                    mSessionIdToSessionStateMap.put(sessionId.toString(), sessionState);
+                    mSessionIdToSessionStateMap.put(uniqueSessionId, sessionState);
 
                     // Also, add them to the session state map of the current service.
                     serviceState.sessionTokens.add(sessionToken);
