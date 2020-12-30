@@ -156,7 +156,6 @@ public final class AppSearchImpl {
     }
 
     private AppSearchImpl(@NonNull File icingDir) throws AppSearchException {
-        boolean isReset = false;
         mReadWriteLock.writeLock().lock();
 
         try {
@@ -168,9 +167,11 @@ public final class AppSearchImpl {
                             .build();
             mIcingSearchEngineLocked = new IcingSearchEngine(options);
 
+            mVisibilityStoreLocked = new VisibilityStore(this);
+
             InitializeResultProto initializeResultProto = mIcingSearchEngineLocked.initialize();
-            SchemaProto schemaProto = null;
-            GetAllNamespacesResultProto getAllNamespacesResultProto = null;
+            SchemaProto schemaProto;
+            GetAllNamespacesResultProto getAllNamespacesResultProto;
             try {
                 checkSuccess(initializeResultProto.getStatus());
                 schemaProto = getSchemaProtoLocked();
@@ -180,7 +181,7 @@ public final class AppSearchImpl {
                 Log.w(TAG, "Error initializing, resetting IcingSearchEngine.", e);
                 // Some error. Reset and see if it fixes it.
                 reset();
-                isReset = true;
+                return;
             }
 
             // Populate schema map
@@ -196,11 +197,8 @@ public final class AppSearchImpl {
 
             // TODO(b/155939114): It's possible to optimize after init, which would reduce the time
             //   to when we're able to serve queries. Consider moving this optimize call out.
-            if (!isReset) {
-                checkForOptimizeLocked(/* force= */ true);
-            }
+            checkForOptimizeLocked(/* force= */ true);
 
-            mVisibilityStoreLocked = new VisibilityStore(this);
         } finally {
             mReadWriteLock.writeLock().unlock();
         }
@@ -634,6 +632,9 @@ public final class AppSearchImpl {
 
     /**
      * Clears documents and schema across all packages and databaseNames.
+     *
+     * <p>This method also clear all data in {@link VisibilityStore}, an {@link
+     * #initializeVisibilityStore()} must be called after this.
      *
      * <p>This method belongs to mutate group.
      *

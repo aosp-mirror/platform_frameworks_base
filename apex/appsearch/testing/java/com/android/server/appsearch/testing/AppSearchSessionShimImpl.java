@@ -20,15 +20,19 @@ import android.annotation.NonNull;
 import android.app.appsearch.AppSearchBatchResult;
 import android.app.appsearch.AppSearchManager;
 import android.app.appsearch.AppSearchResult;
+import android.app.appsearch.AppSearchSchema;
 import android.app.appsearch.AppSearchSession;
+import android.app.appsearch.AppSearchSessionShim;
 import android.app.appsearch.BatchResultCallback;
 import android.app.appsearch.GenericDocument;
 import android.app.appsearch.GetByUriRequest;
 import android.app.appsearch.PutDocumentsRequest;
 import android.app.appsearch.RemoveByUriRequest;
 import android.app.appsearch.SearchResults;
+import android.app.appsearch.SearchResultsShim;
 import android.app.appsearch.SearchSpec;
 import android.app.appsearch.SetSchemaRequest;
+import android.app.appsearch.exceptions.AppSearchException;
 import android.content.Context;
 
 import androidx.test.core.app.ApplicationProvider;
@@ -38,6 +42,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -46,42 +51,47 @@ import java.util.concurrent.Executors;
  * a consistent interface.
  * @hide
  */
-public class AppSearchSessionShim {
+public class AppSearchSessionShimImpl implements AppSearchSessionShim {
     private final AppSearchSession mAppSearchSession;
     private final ExecutorService mExecutor;
 
     @NonNull
-    public static ListenableFuture<AppSearchResult<AppSearchSessionShim>> createSearchSession(
+    public static ListenableFuture<AppSearchSessionShim> createSearchSession(
             @NonNull AppSearchManager.SearchContext searchContext) {
         Context context = ApplicationProvider.getApplicationContext();
         AppSearchManager appSearchManager = context.getSystemService(AppSearchManager.class);
         SettableFuture<AppSearchResult<AppSearchSession>> future = SettableFuture.create();
         ExecutorService executor = Executors.newCachedThreadPool();
         appSearchManager.createSearchSession(searchContext, executor, future::set);
-        return Futures.transform(future, (instance) -> {
-            if (!instance.isSuccess()) {
-                return AppSearchResult.newFailedResult(
-                        instance.getResultCode(), instance.getErrorMessage());
-            }
-            AppSearchSession searchSession = instance.getResultValue();
-            AppSearchSessionShim shim = new AppSearchSessionShim(searchSession, executor);
-            return AppSearchResult.newSuccessfulResult(shim);
-        }, executor);
+        return Futures.transform(
+                future,
+                instance -> new AppSearchSessionShimImpl(instance.getResultValue(), executor),
+                executor);
     }
 
-    private AppSearchSessionShim(
+    private AppSearchSessionShimImpl(
             @NonNull AppSearchSession session, @NonNull ExecutorService executor) {
         mAppSearchSession = Preconditions.checkNotNull(session);
         mExecutor = Preconditions.checkNotNull(executor);
     }
 
+    @Override
     @NonNull
-    public ListenableFuture<AppSearchResult<Void>> setSchema(@NonNull SetSchemaRequest request) {
+    public ListenableFuture<Void> setSchema(@NonNull SetSchemaRequest request) {
         SettableFuture<AppSearchResult<Void>> future = SettableFuture.create();
         mAppSearchSession.setSchema(request, mExecutor, future::set);
-        return future;
+        return Futures.transformAsync(future, this::transformResult, mExecutor);
     }
 
+    @Override
+    @NonNull
+    public ListenableFuture<Set<AppSearchSchema>> getSchema() {
+        SettableFuture<AppSearchResult<Set<AppSearchSchema>>> future = SettableFuture.create();
+        mAppSearchSession.getSchema(mExecutor, future::set);
+        return Futures.transformAsync(future, this::transformResult, mExecutor);
+    }
+
+    @Override
     @NonNull
     public ListenableFuture<AppSearchBatchResult<String, Void>> putDocuments(
             @NonNull PutDocumentsRequest request) {
@@ -91,6 +101,7 @@ public class AppSearchSessionShim {
         return future;
     }
 
+    @Override
     @NonNull
     public ListenableFuture<AppSearchBatchResult<String, GenericDocument>> getByUri(
             @NonNull GetByUriRequest request) {
@@ -100,14 +111,16 @@ public class AppSearchSessionShim {
         return future;
     }
 
+    @Override
     @NonNull
     public SearchResultsShim query(
             @NonNull String queryExpression, @NonNull SearchSpec searchSpec) {
         SearchResults searchResults =
                 mAppSearchSession.query(queryExpression, searchSpec, mExecutor);
-        return new SearchResultsShim(searchResults);
+        return new SearchResultsShimImpl(searchResults, mExecutor);
     }
 
+    @Override
     @NonNull
     public ListenableFuture<AppSearchBatchResult<String, Void>> removeByUri(
             @NonNull RemoveByUriRequest request) {
@@ -116,12 +129,21 @@ public class AppSearchSessionShim {
         return future;
     }
 
+    @Override
     @NonNull
-    public ListenableFuture<AppSearchResult<Void>> removeByQuery(
+    public ListenableFuture<Void> removeByQuery(
             @NonNull String queryExpression, @NonNull SearchSpec searchSpec) {
         SettableFuture<AppSearchResult<Void>> future = SettableFuture.create();
         mAppSearchSession.removeByQuery(queryExpression, searchSpec, mExecutor, future::set);
-        return future;
+        return Futures.transformAsync(future, this::transformResult, mExecutor);
+    }
+
+    private <T> ListenableFuture<T> transformResult(
+            @NonNull AppSearchResult<T> result) throws AppSearchException {
+        if (!result.isSuccess()) {
+            throw new AppSearchException(result.getResultCode(), result.getErrorMessage());
+        }
+        return Futures.immediateFuture(result.getResultValue());
     }
 
     private static final class BatchResultCallbackAdapter<K, V>

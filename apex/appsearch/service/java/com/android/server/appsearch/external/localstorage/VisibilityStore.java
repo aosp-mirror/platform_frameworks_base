@@ -213,14 +213,12 @@ class VisibilityStore {
     }
 
     /**
-     * Handles an {@link AppSearchImpl#reset()} by clearing any cached state and resetting to a
-     * first-initialized state.
+     * Handles an {@code AppSearchImpl#reset()} by clearing any cached state.
      *
-     * @throws AppSearchException on AppSearchImpl error.
+     * <p>{@link #initialize()} must be called after this.
      */
-    public void handleReset() throws AppSearchException {
+    void handleReset() {
         mNotPlatformSurfaceableMap.clear();
-        initialize();
     }
 
     /**

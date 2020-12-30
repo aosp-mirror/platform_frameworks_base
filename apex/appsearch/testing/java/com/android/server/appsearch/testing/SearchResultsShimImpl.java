@@ -20,31 +20,35 @@ import android.annotation.NonNull;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.SearchResult;
 import android.app.appsearch.SearchResults;
+import android.app.appsearch.SearchResultsShim;
 
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
-import java.io.Closeable;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * This test class adapts the AppSearch Framework API to ListenableFuture, so it can be tested via
  * a consistent interface.
  * @hide
  */
-public class SearchResultsShim implements Closeable {
+public class SearchResultsShimImpl implements SearchResultsShim {
+    private final Executor mExecutor;
     private final SearchResults mSearchResults;
 
-    SearchResultsShim(@NonNull SearchResults searchResults) {
+    SearchResultsShimImpl(@NonNull SearchResults searchResults, @NonNull Executor executor) {
+        mExecutor = Preconditions.checkNotNull(executor);
         mSearchResults = Preconditions.checkNotNull(searchResults);
     }
 
     @NonNull
-    public ListenableFuture<AppSearchResult<List<SearchResult>>> getNextPage() {
+    public ListenableFuture<List<SearchResult>> getNextPage() {
         SettableFuture<AppSearchResult<List<SearchResult>>> future = SettableFuture.create();
         mSearchResults.getNextPage(future::set);
-        return future;
+        return Futures.transform(future, AppSearchResult::getResultValue, mExecutor);
     }
 
     @Override

@@ -484,7 +484,7 @@ public final class OomAdjuster {
                 ActiveUids uids = mTmpUidRecords;
                 uids.clear();
                 uids.put(uidRec.uid, uidRec);
-                updateUidsLocked(uids, now);
+                updateUidsLocked(uids, SystemClock.elapsedRealtime());
                 mProcessList.incrementProcStateSeqAndNotifyAppsLocked(uids);
             }
         }

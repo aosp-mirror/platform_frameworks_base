@@ -23,6 +23,34 @@ per-file BatteryStats* = file:/BATTERY_STATS_OWNERS
 per-file BatteryUsageStats* = file:/BATTERY_STATS_OWNERS
 per-file PowerComponents.java = file:/BATTERY_STATS_OWNERS
 
+# Binder
+per-file BadParcelableException.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file Binder.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file BinderProxy.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file DeadObjectException.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file IBinder.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file Parcel.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file ParcelFileDescriptor.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file ParcelFormatException.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file Parcelable.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file ParcelableException.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file ParcelableHolder.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file ParcelableParcel.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file RemoteException.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file ServiceManager.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file ServiceManagerNative.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file ServiceSpecificException.java = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file TransactionTooLargeException.java = file:platform/frameworks/native:/libs/binder/OWNERS
+
+# HwBinder
+per-file HwBinder.java = file:platform/system/libhwbinder:/OWNERS
+per-file HwBlob.java = file:platform/system/libhwbinder:/OWNERS
+per-file HwParcel.java = file:platform/system/libhwbinder:/OWNERS
+per-file HwParcel.java = file:platform/system/libhwbinder:/OWNERS
+per-file HwRemoteBinder.java = file:platform/system/libhwbinder:/OWNERS
+per-file IHwBinder.java = file:platform/system/libhwbinder:/OWNERS
+per-file IHwInterface.java = file:platform/system/libhwbinder:/OWNERS
+
 per-file GraphicsEnvironment.java = chrisforbes@google.com, cnorthrop@google.com, lpy@google.com, timvp@google.com, zzyiwei@google.com
 
 per-file *Network* = file:/services/core/java/com/android/server/net/OWNERS
