@@ -7620,10 +7620,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         + " as profile owner on user " + currentForegroundUser);
                 // Sets profile owner on current foreground user since
                 // the human user will complete the DO setup workflow from there.
-                mInjector.binderWithCleanCallingIdentity(() ->
-                        manageUserUnchecked(/* deviceOwner= */ admin, /* profileOwner= */ admin,
-                                /* managedUser= */ currentForegroundUser,
-                                /* adminExtras= */ null));
+                manageUserUnchecked(/* deviceOwner= */ admin, /* profileOwner= */ admin,
+                            /* managedUser= */ currentForegroundUser,
+                            /* adminExtras= */ null);
             }
             return true;
         }
