@@ -54,10 +54,21 @@ TunerClient::~TunerClient() {
 
 vector<FrontendId> TunerClient::getFrontendIds() {
     vector<FrontendId> ids;
-    // TODO: pending aidl interface
-    /*if (mTunerService != NULL) {
-        return mTunerService->getFrontendIds();
-    }*/
+
+    if (mTunerService != NULL) {
+        vector<int32_t> v;
+        int aidl_return;
+        Status s = mTunerService->getFrontendIds(&v, &aidl_return);
+        if (!s.isOk() || aidl_return != (int) Result::SUCCESS
+                || v.size() == 0) {
+            ids.clear();
+            return ids;
+        }
+        for (int32_t id : v) {
+            ids.push_back(static_cast<FrontendId>(id));
+        }
+        return ids;
+    }
 
     if (mTuner != NULL) {
         Result res;
