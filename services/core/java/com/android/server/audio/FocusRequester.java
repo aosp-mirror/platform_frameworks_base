@@ -140,6 +140,10 @@ public class FocusRequester {
         return (mFocusDispatcher != null) && mFocusDispatcher.equals(fd);
     }
 
+    @NonNull String getPackageName() {
+        return mPackageName;
+    }
+
     boolean hasSamePackage(@NonNull String pack) {
         return mPackageName.compareTo(pack) == 0;
     }

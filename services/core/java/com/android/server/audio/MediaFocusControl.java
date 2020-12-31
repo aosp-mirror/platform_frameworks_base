@@ -353,6 +353,13 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
             FocusRequester fr = stackIterator.next();
             if(fr.hasSameBinder(cb)) {
                 Log.i(TAG, "AudioFocus  removeFocusStackEntryOnDeath(): removing entry for " + cb);
+                mEventLogger.log(new AudioEventLogger.StringEvent(
+                        "focus requester:" + fr.getClientId()
+                                + " in uid:" + fr.getClientUid()
+                                + " pack:" + fr.getPackageName()
+                                + " died"));
+                notifyExtPolicyFocusLoss_syncAf(fr.toAudioFocusInfo(), false);
+
                 stackIterator.remove();
                 // stack entry not used anymore, clear references
                 fr.release();
@@ -371,7 +378,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
      * it has died.
      */
     @GuardedBy("mAudioFocusLock")
-    private void removeFocusEntryForExtPolicy(IBinder cb) {
+    private void removeFocusEntryForExtPolicyOnDeath(IBinder cb) {
         if (mFocusOwnersForFocusPolicy.isEmpty()) {
             return;
         }
@@ -383,6 +390,11 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
             final FocusRequester fr = owner.getValue();
             if (fr.hasSameBinder(cb)) {
                 ownerIterator.remove();
+                mEventLogger.log(new AudioEventLogger.StringEvent(
+                        "focus requester:" + fr.getClientId()
+                                + " in uid:" + fr.getClientUid()
+                                + " pack:" + fr.getPackageName()
+                                + " died"));
                 fr.release();
                 notifyExtFocusPolicyFocusAbandon_syncAf(fr.toAudioFocusInfo());
                 break;
@@ -456,7 +468,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
         public void binderDied() {
             synchronized(mAudioFocusLock) {
                 if (mFocusPolicy != null) {
-                    removeFocusEntryForExtPolicy(mCb);
+                    removeFocusEntryForExtPolicyOnDeath(mCb);
                 } else {
                     removeFocusStackEntryOnDeath(mCb);
                     if (mMultiAudioFocusEnabled && !mMultiAudioFocusList.isEmpty()) {

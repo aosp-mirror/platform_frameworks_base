@@ -115,6 +115,7 @@ public class SurfaceControlViewHost {
         public void writeToParcel(@NonNull Parcel out, int flags) {
             mSurfaceControl.writeToParcel(out, flags);
             out.writeStrongBinder(mAccessibilityEmbeddedConnection.asBinder());
+            out.writeStrongBinder(mInputToken);
         }
 
         /**
