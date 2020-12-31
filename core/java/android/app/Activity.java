@@ -2669,6 +2669,10 @@ public class Activity extends ContextThemeWrapper
         dispatchActivityDestroyed();
 
         notifyContentCaptureManagerIfNeeded(CONTENT_CAPTURE_STOP);
+
+        if (mUiTranslationController != null) {
+            mUiTranslationController.onActivityDestroyed();
+        }
     }
 
     /**
@@ -8475,9 +8479,8 @@ public class Activity extends ContextThemeWrapper
     }
 
     /** @hide */
-    @Override
     @Nullable
-    public final View autofillClientFindViewByAutofillIdTraversal(AutofillId autofillId) {
+    public View findViewByAutofillIdTraversal(@NonNull AutofillId autofillId) {
         final ArrayList<ViewRootImpl> roots =
                 WindowManagerGlobal.getInstance().getRootViews(getActivityToken());
         for (int rootNum = 0; rootNum < roots.size(); rootNum++) {
@@ -8490,8 +8493,14 @@ public class Activity extends ContextThemeWrapper
                 }
             }
         }
-
         return null;
+    }
+
+    /** @hide */
+    @Override
+    @Nullable
+    public final View autofillClientFindViewByAutofillIdTraversal(AutofillId autofillId) {
+        return findViewByAutofillIdTraversal(autofillId);
     }
 
     /** @hide */
