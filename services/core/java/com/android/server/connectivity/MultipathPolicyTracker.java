@@ -27,6 +27,7 @@ import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
 import static android.net.NetworkTemplate.NETWORK_TYPE_ALL;
 import static android.net.NetworkTemplate.OEM_MANAGED_ALL;
+import static android.net.NetworkTemplate.SUBSCRIBER_ID_MATCH_RULE_EXACT;
 import static android.provider.Settings.Global.NETWORK_DEFAULT_DAILY_MULTIPATH_QUOTA_BYTES;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
@@ -227,7 +228,8 @@ public class MultipathPolicyTracker {
             mNetworkTemplate = new NetworkTemplate(
                     NetworkTemplate.MATCH_MOBILE, subscriberId, new String[] { subscriberId },
                     null, NetworkStats.METERED_ALL, NetworkStats.ROAMING_ALL,
-                    NetworkStats.DEFAULT_NETWORK_NO, NETWORK_TYPE_ALL, OEM_MANAGED_ALL);
+                    NetworkStats.DEFAULT_NETWORK_NO, NETWORK_TYPE_ALL, OEM_MANAGED_ALL,
+                    SUBSCRIBER_ID_MATCH_RULE_EXACT);
             mUsageCallback = new UsageCallback() {
                 @Override
                 public void onThresholdReached(int networkType, String subscriberId) {
