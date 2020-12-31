@@ -21,16 +21,15 @@ import android.annotation.Nullable;
 import android.app.role.IRoleManager;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
-import android.os.ShellCommand;
 import android.os.UserHandle;
-import android.util.Log;
+
+import com.android.modules.utils.BasicShellCommandHandler;
 
 import java.io.PrintWriter;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-class RoleManagerShellCommand extends ShellCommand {
-
+class RoleManagerShellCommand extends BasicShellCommandHandler {
     @NonNull
     private final IRoleManager mRoleManager;
 
@@ -39,7 +38,6 @@ class RoleManagerShellCommand extends ShellCommand {
     }
 
     private class CallbackFuture extends CompletableFuture<Void> {
-
         @NonNull
         public RemoteCallback createCallback() {
             return new RemoteCallback(result -> {
@@ -57,8 +55,7 @@ class RoleManagerShellCommand extends ShellCommand {
                 get(5, TimeUnit.SECONDS);
                 return 0;
             } catch (Exception e) {
-                getErrPrintWriter().println("Error: see logcat for details.\n"
-                        + Log.getStackTraceString(e));
+                getErrPrintWriter().println("Error: see logcat for details.\n" + e);
                 return -1;
             }
         }
@@ -92,7 +89,7 @@ class RoleManagerShellCommand extends ShellCommand {
         int userId = UserHandle.USER_SYSTEM;
         String option = getNextOption();
         if (option != null && option.equals("--user")) {
-            userId = UserHandle.parseUserArg(getNextArgRequired());
+            userId = Integer.parseInt(getNextArgRequired());
         }
         return userId;
     }
@@ -143,7 +140,7 @@ class RoleManagerShellCommand extends ShellCommand {
     public void onHelp() {
         PrintWriter pw = getOutPrintWriter();
         pw.println("Role manager (role) commands:");
-        pw.println("  help");
+        pw.println("  help or -h");
         pw.println("    Print this help text.");
         pw.println();
         pw.println("  add-role-holder [--user USER_ID] ROLE PACKAGE [FLAGS]");
