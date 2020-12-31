@@ -627,10 +627,14 @@ public class Tuner implements AutoCloseable  {
     @Result
     public int scan(@NonNull FrontendSettings settings, @ScanType int scanType,
             @NonNull @CallbackExecutor Executor executor, @NonNull ScanCallback scanCallback) {
-        if (mScanCallback != null || mScanCallbackExecutor != null) {
+        /**
+         * Scan can be called again for blink scan if scanCallback and executor are same as before.
+         */
+        if (((mScanCallback != null) && (mScanCallback != scanCallback))
+                || ((mScanCallbackExecutor != null) && (mScanCallbackExecutor != executor))) {
             throw new IllegalStateException(
-                    "Scan already in progress.  stopScan must be called before a new scan can be "
-                            + "started.");
+                    "Different Scan session already in progress.  stopScan must be called "
+                        + "before a new scan session can be " + "started.");
         }
         mFrontendType = settings.getType();
         if (checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND)) {
