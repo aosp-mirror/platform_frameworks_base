@@ -102,20 +102,16 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
     static final int RESULT_ERROR_UNSUPPORTED_FORMAT = 5;
     static final int RESULT_ERROR_EXCEPTION = 6;
 
-    class Progress {
-        String mPartitionName;
-        long mPartitionSize;
-        long mInstalledSize;
+    static class Progress {
+        public final String partitionName;
+        public final long partitionSize;
+        public final int numInstalledPartitions;
+        public long installedSize;
 
-        int mNumInstalledPartitions;
-
-        Progress(String partitionName, long partitionSize, long installedSize,
-                int numInstalled) {
-            mPartitionName = partitionName;
-            mPartitionSize = partitionSize;
-            mInstalledSize = installedSize;
-
-            mNumInstalledPartitions = numInstalled;
+        Progress(String partitionName, long partitionSize, int numInstalledPartitions) {
+            this.partitionName = partitionName;
+            this.partitionSize = partitionSize;
+            this.numInstalledPartitions = numInstalledPartitions;
         }
     }
 
@@ -140,6 +136,8 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
 
     private boolean mIsZip;
     private boolean mIsCompleted;
+
+    private int mNumInstalledPartitions;
 
     private InputStream mStream;
     private ZipFile mZipFile;
@@ -312,18 +310,17 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
         Log.d(TAG, "Creating partition: userdata");
         thread.start();
 
-        long installedSize = 0;
-        Progress progress = new Progress("userdata", mUserdataSize, installedSize, 0);
+        Progress progress = new Progress("userdata", mUserdataSize, mNumInstalledPartitions++);
 
         while (thread.isAlive()) {
             if (isCancelled()) {
                 return;
             }
 
-            installedSize = mDynSystem.getInstallationProgress().bytes_processed;
+            final long installedSize = mDynSystem.getInstallationProgress().bytes_processed;
 
-            if (installedSize > progress.mInstalledSize + MIN_PROGRESS_TO_PUBLISH) {
-                progress.mInstalledSize = installedSize;
+            if (installedSize > progress.installedSize + MIN_PROGRESS_TO_PUBLISH) {
+                progress.installedSize = installedSize;
                 publishProgress(progress);
             }
 
@@ -357,7 +354,7 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
     private void installStreamingGzUpdate()
             throws IOException, InterruptedException, ImageValidationException {
         Log.d(TAG, "To install a streaming GZ update");
-        installImage("system", mSystemSize, new GZIPInputStream(mStream), 1);
+        installImage("system", mSystemSize, new GZIPInputStream(mStream));
     }
 
     private void installStreamingZipUpdate()
@@ -367,12 +364,8 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
         ZipInputStream zis = new ZipInputStream(mStream);
         ZipEntry zipEntry = null;
 
-        int numInstalledPartitions = 1;
-
         while ((zipEntry = zis.getNextEntry()) != null) {
-            if (installImageFromAnEntry(zipEntry, zis, numInstalledPartitions)) {
-                numInstalledPartitions++;
-            }
+            installImageFromAnEntry(zipEntry, zis);
 
             if (isCancelled()) {
                 break;
@@ -385,14 +378,10 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
         Log.d(TAG, "To install a local ZIP update");
 
         Enumeration<? extends ZipEntry> entries = mZipFile.entries();
-        int numInstalledPartitions = 1;
 
         while (entries.hasMoreElements()) {
             ZipEntry entry = entries.nextElement();
-            if (installImageFromAnEntry(
-                    entry, mZipFile.getInputStream(entry), numInstalledPartitions)) {
-                numInstalledPartitions++;
-            }
+            installImageFromAnEntry(entry, mZipFile.getInputStream(entry));
 
             if (isCancelled()) {
                 break;
@@ -400,8 +389,7 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
         }
     }
 
-    private boolean installImageFromAnEntry(
-            ZipEntry entry, InputStream is, int numInstalledPartitions)
+    private boolean installImageFromAnEntry(ZipEntry entry, InputStream is)
             throws IOException, InterruptedException, ImageValidationException {
         String name = entry.getName();
 
@@ -420,13 +408,12 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
 
         long uncompressedSize = entry.getSize();
 
-        installImage(partitionName, uncompressedSize, is, numInstalledPartitions);
+        installImage(partitionName, uncompressedSize, is);
 
         return true;
     }
 
-    private void installImage(
-            String partitionName, long uncompressedSize, InputStream is, int numInstalledPartitions)
+    private void installImage(String partitionName, long uncompressedSize, InputStream is)
             throws IOException, InterruptedException, ImageValidationException {
 
         SparseInputStream sis = new SparseInputStream(new BufferedInputStream(is));
@@ -473,10 +460,9 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
 
         mInstallationSession.setAshmem(pfd, READ_BUFFER_SIZE);
 
-        long installedSize = 0;
-        Progress progress = new Progress(
-                partitionName, partitionSize, installedSize, numInstalledPartitions);
+        Progress progress = new Progress(partitionName, partitionSize, mNumInstalledPartitions++);
 
+        long installedSize = 0;
         byte[] bytes = new byte[READ_BUFFER_SIZE];
         int numBytesRead;
 
@@ -493,8 +479,8 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
 
             installedSize += numBytesRead;
 
-            if (installedSize > progress.mInstalledSize + MIN_PROGRESS_TO_PUBLISH) {
-                progress.mInstalledSize = installedSize;
+            if (installedSize > progress.installedSize + MIN_PROGRESS_TO_PUBLISH) {
+                progress.installedSize = installedSize;
                 publishProgress(progress);
             }
         }
