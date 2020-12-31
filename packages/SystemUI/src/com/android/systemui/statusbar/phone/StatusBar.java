@@ -34,7 +34,6 @@ import static com.android.systemui.charging.WirelessChargingLayout.UNKNOWN_BATTE
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
-import static com.android.systemui.shared.system.WindowManagerWrapper.NAV_BAR_POS_INVALID;
 import static com.android.systemui.statusbar.LightRevealScrimKt.getEnableLightReveal;
 import static com.android.systemui.statusbar.NotificationLockscreenUserManager.PERMISSION_SELF;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
@@ -176,7 +175,6 @@ import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.settings.brightness.BrightnessSlider;
 import com.android.systemui.shared.plugins.PluginManager;
-import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.CommandQueue;
@@ -1580,11 +1578,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mMetricsLogger.action(metricsUndockAction);
             }
             return true;
-        }
-
-        final int navbarPos = WindowManagerWrapper.getInstance().getNavBarPosition(mDisplayId);
-        if (navbarPos == NAV_BAR_POS_INVALID) {
-            return false;
         }
 
         if (legacySplitScreen.splitPrimaryTask()) {

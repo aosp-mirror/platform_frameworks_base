@@ -27,7 +27,6 @@ import static android.Manifest.permission.STATUS_BAR_SERVICE;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
-import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.StatusBarManager.DISABLE_MASK;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
@@ -689,9 +688,6 @@ public class WindowManagerService extends IWindowManager.Stub
     final boolean mUseBLASTSync = false;
 
     final BLASTSyncEngine mSyncEngine;
-
-    int mDockedStackCreateMode = SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
-    Rect mDockedStackCreateBounds;
 
     boolean mIsPc;
     /**
