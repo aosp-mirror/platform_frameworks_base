@@ -363,6 +363,33 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
     }
 
+    /**
+     * Gets the order of the given {@link Task} as its z-order in the hierarchy below this TDA.
+     * The Task can be a direct child of a child TaskDisplayArea. {@code -1} if not found.
+     */
+    static int getTaskIndexOf(TaskDisplayArea taskDisplayArea, Task task) {
+        int index = 0;
+        final int childCount = taskDisplayArea.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            final WindowContainer wc = taskDisplayArea.getChildAt(i);
+            if (wc.asTask() != null) {
+                if (wc.asTask() == task) {
+                    return index;
+                }
+                index++;
+            } else {
+                final TaskDisplayArea tda = wc.asTaskDisplayArea();
+                final int subIndex = getTaskIndexOf(tda, task);
+                if (subIndex > -1) {
+                    return index + subIndex;
+                } else {
+                    index += tda.getRootTaskCount();
+                }
+            }
+        }
+        return -1;
+    }
+
     /** Creates a {@link TaskDisplayArea} right above the default one. */
     static TaskDisplayArea createTaskDisplayArea(DisplayContent displayContent,
             WindowManagerService service, String name, int displayAreaFeature) {

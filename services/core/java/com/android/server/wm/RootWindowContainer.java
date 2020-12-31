@@ -2422,12 +2422,27 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     private RootTaskInfo getRootTaskInfo(Task task) {
-        final TaskDisplayArea taskDisplayArea = task.getDisplayArea();
         RootTaskInfo info = new RootTaskInfo();
         task.fillTaskInfo(info);
 
-        // A task might be not attached to a display.
-        info.position = taskDisplayArea != null ? taskDisplayArea.getTaskIndexOf(task) : 0;
+        final DisplayContent displayContent = task.getDisplayContent();
+        if (displayContent == null) {
+            // A task might be not attached to a display.
+            info.position = -1;
+        } else {
+            // Find the task z-order among all root tasks on the display from bottom to top.
+            final int[] taskIndex = new int[1];
+            final boolean[] hasFound = new boolean[1];
+            displayContent.forAllRootTasks(rootTask -> {
+                if (task == rootTask) {
+                    hasFound[0] = true;
+                    return true;
+                }
+                taskIndex[0]++;
+                return false;
+            }, false /* traverseTopToBottom */);
+            info.position = hasFound[0] ? taskIndex[0] : -1;
+        }
         info.visible = task.shouldBeVisible(null);
         task.getBounds(info.bounds);
 

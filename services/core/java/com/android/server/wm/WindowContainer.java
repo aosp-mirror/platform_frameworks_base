@@ -1677,13 +1677,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         int count = mChildren.size();
         if (traverseTopToBottom) {
             for (int i = count - 1; i >= 0; --i) {
-                if (mChildren.get(i).forAllRootTasks(callback)) {
+                if (mChildren.get(i).forAllRootTasks(callback, traverseTopToBottom)) {
                     return true;
                 }
             }
         } else {
             for (int i = 0; i < count; i++) {
-                if (mChildren.get(i).forAllRootTasks(callback)) {
+                if (mChildren.get(i).forAllRootTasks(callback, traverseTopToBottom)) {
                     return true;
                 }
                 // Root tasks may be removed from this display. Ensure each task will be processed
