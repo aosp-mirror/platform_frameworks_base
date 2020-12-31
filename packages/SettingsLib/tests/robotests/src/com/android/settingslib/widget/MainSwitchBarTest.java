@@ -20,9 +20,10 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
 import android.view.View;
+import android.widget.Switch;
 import android.widget.TextView;
 
-import androidx.preference.PreferenceViewHolder;
+import com.android.settingslib.RestrictedLockUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -31,48 +32,59 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
 @RunWith(RobolectricTestRunner.class)
-public class MainSwitchPreferenceTest {
+public class MainSwitchBarTest {
 
     private Context mContext;
-    private View mRootView;
-    private PreferenceViewHolder mHolder;
-    private MainSwitchPreference mPreference;
+    private MainSwitchBar mBar;
 
     @Before
     public void setUp() {
         mContext = RuntimeEnvironment.application;
-        mRootView = View.inflate(mContext, R.layout.main_switch_layout, null /* parent */);
-        mHolder = PreferenceViewHolder.createInstanceForTests(mRootView);
-        mPreference = new MainSwitchPreference(mContext);
+        mBar = new MainSwitchBar(mContext);
+    }
+
+    @Test
+    public void setChecked_true_shouldChecked() {
+        mBar.setChecked(true);
+
+        assertThat(mBar.isChecked()).isTrue();
     }
 
     @Test
     public void setTitle_shouldUpdateTitle() {
-        final String defaultOnText = "Test title";
+        final String title = "title";
 
-        mPreference.onBindViewHolder(mHolder);
-        mPreference.setTitle(defaultOnText);
-        mPreference.updateStatus(true /* checked */);
+        mBar.setTitle(title);
+        final TextView textView = ((TextView) mBar.findViewById(R.id.switch_text));
 
-        assertThat(((TextView) mRootView.findViewById(R.id.switch_text)).getText())
-                .isEqualTo(defaultOnText);
+        assertThat(textView.getText()).isEqualTo(title);
     }
 
     @Test
-    public void shouldAllowDividerBelow() {
-        mPreference.onBindViewHolder(mHolder);
+    public void getSwitch_shouldNotNull() {
+        final Switch switchObj = mBar.getSwitch();
 
-        View divider = mRootView.findViewById(R.id.below_divider);
-
-        assertThat(divider.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(switchObj).isNotNull();
     }
 
     @Test
-    public void updateStatus_shouldMatchTheStatus() {
-        mPreference.onBindViewHolder(mHolder);
-        mPreference.updateStatus(true);
+    public void show_shouldVisible() {
+        mBar.show();
 
-        assertThat(mPreference.isChecked()).isTrue();
+        assertThat(mBar.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
+    @Test
+    public void hide_shouldNotVisible() {
+        mBar.hide();
+
+        assertThat(mBar.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void disabledByAdmin_shouldDelegateToRestrictedIcon() {
+        mBar.setDisabledByAdmin(new RestrictedLockUtils.EnforcedAdmin());
+
+        assertThat(mBar.getDelegatingView().getId()).isEqualTo(R.id.restricted_icon);
+    }
 }

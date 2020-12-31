@@ -1246,12 +1246,19 @@ final class AutofillManagerServiceImpl
                             mRemoteAugmentedAutofillService = null;
                         }
                     };
+            final int serviceUid = mRemoteAugmentedAutofillServiceInfo.applicationInfo.uid;
             mRemoteAugmentedAutofillService = new RemoteAugmentedAutofillService(getContext(),
-                    componentName, mUserId, callbacks, mMaster.isInstantServiceAllowed(),
+                    serviceUid, componentName,
+                    mUserId, callbacks, mMaster.isInstantServiceAllowed(),
                     mMaster.verbose, mMaster.mAugmentedServiceIdleUnbindTimeoutMs,
                     mMaster.mAugmentedServiceRequestTimeoutMs);
         }
 
+        return mRemoteAugmentedAutofillService;
+    }
+
+    @GuardedBy("mLock")
+    @Nullable RemoteAugmentedAutofillService getRemoteAugmentedAutofillServiceIfCreatedLocked() {
         return mRemoteAugmentedAutofillService;
     }
 

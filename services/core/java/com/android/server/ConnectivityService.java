@@ -83,6 +83,7 @@ import android.net.ConnectivityDiagnosticsManager.ConnectivityReport;
 import android.net.ConnectivityDiagnosticsManager.DataStallReport;
 import android.net.ConnectivityManager;
 import android.net.DataStallReportParcelable;
+import android.net.DnsResolverServiceManager;
 import android.net.ICaptivePortal;
 import android.net.IConnectivityDiagnosticsCallback;
 import android.net.IConnectivityManager;
@@ -572,9 +573,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return sMagicDecoderRing.get(what, Integer.toString(what));
     }
 
-    private static IDnsResolver getDnsResolver() {
-        return IDnsResolver.Stub
-                .asInterface(ServiceManager.getService("dnsresolver"));
+    private static IDnsResolver getDnsResolver(Context context) {
+        return IDnsResolver.Stub.asInterface(DnsResolverServiceManager.getService(context));
     }
 
     /** Handler thread used for all of the handlers below. */
@@ -947,7 +947,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     public ConnectivityService(Context context, INetworkManagementService netManager,
             INetworkStatsService statsService, INetworkPolicyManager policyManager) {
-        this(context, netManager, statsService, policyManager, getDnsResolver(),
+        this(context, netManager, statsService, policyManager, getDnsResolver(context),
                 new IpConnectivityLog(), NetdService.getInstance(), new Dependencies());
     }
 
