@@ -211,6 +211,7 @@ public class Tuner implements AutoCloseable  {
     @Nullable
     private FrontendInfo mFrontendInfo;
     private Integer mFrontendHandle;
+    private Boolean mIsSharedFrontend = false;
     private int mFrontendType = FrontendSettings.TYPE_UNDEFINED;
     private int mUserId;
     private Lnb mLnb;
@@ -338,8 +339,11 @@ public class Tuner implements AutoCloseable  {
      */
     public void shareFrontendFromTuner(@NonNull Tuner tuner) {
         mTunerResourceManager.shareFrontend(mClientId, tuner.mClientId);
-        mFrontendHandle = tuner.mFrontendHandle;
-        mFrontend = nativeOpenFrontendByHandle(mFrontendHandle);
+        synchronized (mIsSharedFrontend) {
+            mFrontendHandle = tuner.mFrontendHandle;
+            mFrontend = tuner.mFrontend;
+            mIsSharedFrontend = true;
+        }
     }
 
     /**
@@ -370,14 +374,19 @@ public class Tuner implements AutoCloseable  {
 
     private void releaseAll() {
         if (mFrontendHandle != null) {
-            int res = nativeCloseFrontend(mFrontendHandle);
-            if (res != Tuner.RESULT_SUCCESS) {
-                TunerUtils.throwExceptionForResult(res, "failed to close frontend");
+            synchronized (mIsSharedFrontend) {
+                if (!mIsSharedFrontend) {
+                    int res = nativeCloseFrontend(mFrontendHandle);
+                    if (res != Tuner.RESULT_SUCCESS) {
+                        TunerUtils.throwExceptionForResult(res, "failed to close frontend");
+                    }
+                }
+                mIsSharedFrontend = false;
             }
             mTunerResourceManager.releaseFrontend(mFrontendHandle, mClientId);
             FrameworkStatsLog
                     .write(FrameworkStatsLog.TV_TUNER_STATE_CHANGED, mUserId,
-                        FrameworkStatsLog.TV_TUNER_STATE_CHANGED__STATE__UNKNOWN);
+                    FrameworkStatsLog.TV_TUNER_STATE_CHANGED__STATE__UNKNOWN);
             mFrontendHandle = null;
             mFrontend = null;
         }
