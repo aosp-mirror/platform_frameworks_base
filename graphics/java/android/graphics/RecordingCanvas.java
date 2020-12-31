@@ -17,6 +17,7 @@
 package android.graphics;
 
 import android.annotation.NonNull;
+import android.os.SystemProperties;
 import android.util.Pools.SynchronizedPool;
 
 import dalvik.annotation.optimization.CriticalNative;
@@ -36,7 +37,15 @@ public final class RecordingCanvas extends BaseRecordingCanvas {
     // view hierarchy because display lists are generated recursively.
     private static final int POOL_LIMIT = 25;
 
-    private static final int MAX_BITMAP_SIZE = 100 * 1024 * 1024; // 100 MB
+    /** @hide */
+    private static int getPanelFrameSize() {
+        final int DefaultSize = 100 * 1024 * 1024; // 100 MB;
+        return Math.max(SystemProperties.getInt("ro.hwui.max_texture_allocation_size", DefaultSize),
+                DefaultSize);
+    }
+
+    /** @hide */
+    public static final int MAX_BITMAP_SIZE = getPanelFrameSize();
 
     private static final SynchronizedPool<RecordingCanvas> sPool =
             new SynchronizedPool<>(POOL_LIMIT);
