@@ -212,9 +212,9 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"ניפוי באגים אלחוטי"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"כדי להציג את המכשירים הזמינים ולהשתמש בהם, יש להפעיל ניפוי באגים אלחוטי"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"‏התאמת מכשיר באמצעות קוד QR"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"‏התאמת מכשירים חדשים באמצעות סורק של קודי QR"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"‏התאמת מכשירים חדשים באמצעות סורק קודי QR"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"התאמת מכשיר באמצעות קוד התאמה"</string>
-    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"התאמת מכשירים חדשים באמצעות קוד בן שש ספרות"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"התאמת מכשירים חדשים באמצעות קוד בן 6 ספרות"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"מכשירים מותאמים"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"מחובר עכשיו"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"פרטי מכשיר"</string>
@@ -226,12 +226,12 @@
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"‏קוד התאמה של Wi-Fi"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"ההתאמה נכשלה"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"יש לוודא שהמכשיר מחובר לאותה רשת."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"‏יש לסרוק קוד QR כדי להתאים מכשיר באמצעות Wi‑Fi"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"‏כדי להתאים מכשיר דרך Wi‑Fi, יש לסרוק קוד QR"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"המכשיר בתהליך התאמה…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"‏התאמת המכשיר נכשלה. קוד ה-QR היה שגוי או שהמכשיר לא מחובר לאותה רשת."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"‏יציאה וכתובת IP"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"‏סריקת קוד QR"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"‏יש לסרוק קוד QR כדי להתאים מכשיר באמצעות Wi‑Fi"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"‏כדי להתאים מכשיר דרך Wi‑Fi, יש לסרוק קוד QR"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"‏יש להתחבר לרשת Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"‏adb, ניפוי באגים, פיתוח"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"קיצור של דוח באגים"</string>
