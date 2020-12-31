@@ -1096,13 +1096,13 @@
     <string name="user_new_user_name">New user</string>
 
     <!-- Title of the confirmation dialog when exiting guest session [CHAR LIMIT=NONE] -->
-    <string name="guest_exit_guest_dialog_title">Remove guest?</string>
+    <string name="guest_exit_guest_dialog_title">End guest session?</string>
 
     <!-- Message of the confirmation dialog when exiting guest session [CHAR LIMIT=NONE] -->
     <string name="guest_exit_guest_dialog_message">All apps and data in this session will be deleted.</string>
 
     <!-- Label for button in confirmation dialog when exiting guest session [CHAR LIMIT=35] -->
-    <string name="guest_exit_guest_dialog_remove">Remove</string>
+    <string name="guest_exit_guest_dialog_remove">End session</string>
 
     <!-- Title of the notification when resuming an existing guest session [CHAR LIMIT=NONE] -->
     <string name="guest_wipe_session_title">Welcome back, guest!</string>

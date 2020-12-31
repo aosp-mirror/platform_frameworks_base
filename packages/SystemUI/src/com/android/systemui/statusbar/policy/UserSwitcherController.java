@@ -691,7 +691,11 @@ public class UserSwitcherController implements Dumpable {
             if (item.isAddUser) {
                 iconRes = R.drawable.ic_add_circle;
             } else if (item.isGuest) {
-                iconRes = R.drawable.ic_avatar_guest_user;
+                if (item.isCurrent) {
+                    iconRes = R.drawable.ic_exit_to_app;
+                } else {
+                    iconRes = R.drawable.ic_avatar_guest_user;
+                }
             } else {
                 iconRes = R.drawable.ic_avatar_user;
             }
