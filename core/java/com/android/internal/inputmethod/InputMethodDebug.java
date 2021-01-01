@@ -226,6 +226,8 @@ public final class InputMethodDebug {
                 return "HIDE_RECENTS_ANIMATION";
             case SoftInputShowHideReason.HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR:
                 return "HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR";
+            case SoftInputShowHideReason.HIDE_REMOVE_CLIENT:
+                return "HIDE_REMOVE_CLIENT";
             default:
                 return "Unknown=" + reason;
         }

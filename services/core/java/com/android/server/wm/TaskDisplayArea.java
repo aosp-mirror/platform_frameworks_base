@@ -212,34 +212,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         return getRootTask(t -> true);
     }
 
-    // TODO(b/175832855): Figure-out a way to remove since it might be a source of confusion.
-    /**
-     * Gets the order of the given {@link Task} as its z-order in the hierarchy below this TDA.
-     * The Task can be a direct child of a child TaskDisplayArea. {@code -1} if not found.
-     */
-    int getTaskIndexOf(Task task) {
-        int index = 0;
-        final int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            final WindowContainer wc = getChildAt(i);
-            if (wc.asTask() != null) {
-                if (wc.asTask() == task) {
-                    return index;
-                }
-                index++;
-            } else {
-                final TaskDisplayArea tda = wc.asTaskDisplayArea();
-                final int subIndex = tda.getTaskIndexOf(task);
-                if (subIndex > -1) {
-                    return index + subIndex;
-                } else {
-                    index += tda.getRootTaskCount();
-                }
-            }
-        }
-        return -1;
-    }
-
     @Nullable
     Task getRootHomeTask() {
         return mRootHomeTask;
