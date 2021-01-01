@@ -28,7 +28,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -55,8 +54,7 @@ import java.util.Set;
 /**
  * Stores the state of roles for a user.
  */
-public class RoleUserState {
-
+class RoleUserState {
     private static final String LOG_TAG = RoleUserState.class.getSimpleName();
 
     public static final int VERSION_UNDEFINED = -1;
@@ -104,7 +102,7 @@ public class RoleUserState {
     private boolean mDestroyed;
 
     @NonNull
-    private final Handler mWriteHandler = new Handler(BackgroundThread.getHandler().getLooper());
+    private final Handler mWriteHandler = new Handler(BackgroundThread.get().getLooper());
 
     /**
      * Create a new user state, and read its state from disk if previously persisted.
@@ -392,7 +390,8 @@ public class RoleUserState {
     private void readLegacyFileLocked() {
         File file = getFile(mUserId);
         try (FileInputStream in = new AtomicFile(file).openRead()) {
-            TypedXmlPullParser parser = Xml.resolvePullParser(in);
+            XmlPullParser parser = Xml.newPullParser();
+            parser.setInput(in, null);
             parseXmlLocked(parser);
             Slog.i(LOG_TAG, "Read roles.xml successfully");
         } catch (FileNotFoundException e) {
@@ -402,7 +401,7 @@ public class RoleUserState {
         }
     }
 
-    private void parseXmlLocked(@NonNull TypedXmlPullParser parser) throws IOException,
+    private void parseXmlLocked(@NonNull XmlPullParser parser) throws IOException,
             XmlPullParserException {
         int type;
         int depth;
@@ -421,9 +420,9 @@ public class RoleUserState {
         Slog.w(LOG_TAG, "Missing <" + TAG_ROLES + "> in roles.xml");
     }
 
-    private void parseRolesLocked(@NonNull TypedXmlPullParser parser) throws IOException,
+    private void parseRolesLocked(@NonNull XmlPullParser parser) throws IOException,
             XmlPullParserException {
-        mVersion = parser.getAttributeInt(null, ATTRIBUTE_VERSION);
+        mVersion = Integer.parseInt(parser.getAttributeValue(null, ATTRIBUTE_VERSION));
         mPackagesHash = parser.getAttributeValue(null, ATTRIBUTE_PACKAGES_HASH);
         mRoles.clear();
 
@@ -445,7 +444,7 @@ public class RoleUserState {
     }
 
     @NonNull
-    private ArraySet<String> parseRoleHoldersLocked(@NonNull TypedXmlPullParser parser)
+    private ArraySet<String> parseRoleHoldersLocked(@NonNull XmlPullParser parser)
             throws IOException, XmlPullParserException {
         ArraySet<String> roleHolders = new ArraySet<>();
 
