@@ -409,7 +409,7 @@
     <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"El fitxer ja està encriptat"</string>
     <string name="title_convert_fbe" msgid="5780013350366495149">"S\'està convertint en l\'encriptació basada en fitxers"</string>
     <string name="convert_to_fbe_warning" msgid="34294381569282109">"Converteix la partició de dades en una encriptació basada en fitxers.\n Advertiment: s\'esborraran totes les teves dades.\n Aquesta funció és alfa i és possible que no funcioni correctament.\n Per continuar, prem Esborra i converteix…"</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Esborra i converteix…"</string>
+    <string name="button_convert_fbe" msgid="1159861795137727671">"Neteja i converteix…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Mode de color de la imatge"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Utilitza sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Desactivat"</string>
