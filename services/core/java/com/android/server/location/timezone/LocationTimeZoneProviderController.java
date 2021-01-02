@@ -94,6 +94,9 @@ abstract class LocationTimeZoneProviderController implements Dumpable {
     @DurationMillisLong
     abstract long getUncertaintyTimeoutDelayMillis();
 
+    /** Called if the geolocation time zone detection is being reconfigured. */
+    abstract void destroy();
+
     /**
      * Used by {@link LocationTimeZoneProviderController} to obtain information from the surrounding
      * service. It can easily be faked for tests.
@@ -107,6 +110,9 @@ abstract class LocationTimeZoneProviderController implements Dumpable {
             mThreadingDomain = Objects.requireNonNull(threadingDomain);
             mSharedLock = threadingDomain.getLockObject();
         }
+
+        /** Destroys the environment, i.e. deregisters listeners, etc. */
+        abstract void destroy();
 
         /** Returns the {@link ConfigurationInternal} for the current user of the device. */
         abstract ConfigurationInternal getCurrentUserConfigurationInternal();
