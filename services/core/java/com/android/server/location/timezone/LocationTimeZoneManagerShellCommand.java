@@ -15,8 +15,15 @@
  */
 package com.android.server.location.timezone;
 
-import static com.android.server.location.timezone.LocationTimeZoneManagerService.PRIMARY_PROVIDER_NAME;
-import static com.android.server.location.timezone.LocationTimeZoneManagerService.SECONDARY_PROVIDER_NAME;
+import static android.app.time.LocationTimeZoneManager.PRIMARY_PROVIDER_NAME;
+import static android.app.time.LocationTimeZoneManager.SECONDARY_PROVIDER_NAME;
+import static android.app.time.LocationTimeZoneManager.SHELL_COMMAND_SEND_PROVIDER_TEST_COMMAND;
+import static android.app.time.LocationTimeZoneManager.SHELL_COMMAND_START;
+import static android.app.time.LocationTimeZoneManager.SHELL_COMMAND_STOP;
+import static android.app.time.LocationTimeZoneManager.SYSTEM_PROPERTY_KEY_PROVIDER_MODE_OVERRIDE_PRIMARY;
+import static android.app.time.LocationTimeZoneManager.SYSTEM_PROPERTY_KEY_PROVIDER_MODE_OVERRIDE_SECONDARY;
+import static android.app.time.LocationTimeZoneManager.SYSTEM_PROPERTY_VALUE_PROVIDER_MODE_DISABLED;
+import static android.app.time.LocationTimeZoneManager.SYSTEM_PROPERTY_VALUE_PROVIDER_MODE_SIMULATED;
 
 import android.annotation.NonNull;
 import android.os.Bundle;
@@ -32,10 +39,6 @@ class LocationTimeZoneManagerShellCommand extends ShellCommand {
     private static final List<String> VALID_PROVIDER_NAMES =
             Arrays.asList(PRIMARY_PROVIDER_NAME, SECONDARY_PROVIDER_NAME);
 
-    private static final String CMD_START = "start";
-    private static final String CMD_STOP = "stop";
-    private static final String CMD_SEND_PROVIDER_TEST_COMMAND = "send_provider_test_command";
-
     private final LocationTimeZoneManagerService mService;
 
     LocationTimeZoneManagerShellCommand(LocationTimeZoneManagerService service) {
@@ -49,13 +52,13 @@ class LocationTimeZoneManagerShellCommand extends ShellCommand {
         }
 
         switch (cmd) {
-            case CMD_START: {
+            case SHELL_COMMAND_START: {
                 return runStart();
             }
-            case CMD_STOP: {
+            case SHELL_COMMAND_STOP: {
                 return runStop();
             }
-            case CMD_SEND_PROVIDER_TEST_COMMAND: {
+            case SHELL_COMMAND_SEND_PROVIDER_TEST_COMMAND: {
                 return runSendProviderTestCommand();
             }
             default: {
@@ -70,15 +73,15 @@ class LocationTimeZoneManagerShellCommand extends ShellCommand {
         pw.println("Location Time Zone Manager (location_time_zone_manager) commands:");
         pw.println("  help");
         pw.println("    Print this help text.");
-        pw.printf("  %s\n", CMD_START);
+        pw.printf("  %s\n", SHELL_COMMAND_START);
         pw.println("    Starts the location_time_zone_manager, creating time zone providers.");
-        pw.printf("  %s\n", CMD_STOP);
+        pw.printf("  %s\n", SHELL_COMMAND_STOP);
         pw.println("    Stops the location_time_zone_manager, destroying time zone providers.");
         pw.printf("  %s <provider name> <test command>\n",
-                CMD_SEND_PROVIDER_TEST_COMMAND);
+                SHELL_COMMAND_SEND_PROVIDER_TEST_COMMAND);
         pw.println("    Passes a test command to the named provider.");
         pw.println();
-        pw.printf("%s details:\n", CMD_SEND_PROVIDER_TEST_COMMAND);
+        pw.printf("%s details:\n", SHELL_COMMAND_SEND_PROVIDER_TEST_COMMAND);
         pw.println();
         pw.printf("<provider name> = One of %s\n", VALID_PROVIDER_NAMES);
         pw.println();
@@ -86,13 +89,14 @@ class LocationTimeZoneManagerShellCommand extends ShellCommand {
         pw.println();
         TestCommand.printShellCommandEncodingHelp(pw);
         pw.println();
-        pw.printf("Provider modes can be modified by setting the \"%s<provider name>\" system"
+        pw.printf("Provider modes can be modified by setting the \"%s\" or \"%s\"\n system"
                         + " property and restarting the service or rebooting the device.\n",
-                LocationTimeZoneManagerService.PROVIDER_MODE_OVERRIDE_SYSTEM_PROPERTY_PREFIX);
+                SYSTEM_PROPERTY_KEY_PROVIDER_MODE_OVERRIDE_PRIMARY,
+                SYSTEM_PROPERTY_KEY_PROVIDER_MODE_OVERRIDE_SECONDARY);
         pw.println("Values are:");
         pw.printf("  %s - simulation mode (see below for commands)\n",
-                LocationTimeZoneManagerService.PROVIDER_MODE_SIMULATED);
-        pw.printf("  %s - disabled mode\n", LocationTimeZoneManagerService.PROVIDER_MODE_DISABLED);
+                SYSTEM_PROPERTY_VALUE_PROVIDER_MODE_SIMULATED);
+        pw.printf("  %s - disabled mode\n", SYSTEM_PROPERTY_VALUE_PROVIDER_MODE_DISABLED);
         pw.println();
         pw.println("Simulated providers can be used to test the system server behavior or to"
                 + " reproduce bugs without the complexity of using real providers.");

@@ -29,6 +29,13 @@ import android.content.Context;
 @SystemService(Context.TIME_ZONE_DETECTOR_SERVICE)
 public interface TimeZoneDetector {
 
+    /** @hide */
+    String SHELL_COMMAND_SUGGEST_GEO_LOCATION_TIME_ZONE = "suggest_geo_location_time_zone";
+    /** @hide */
+    String SHELL_COMMAND_SUGGEST_MANUAL_TIME_ZONE = "suggest_manual_time_zone";
+    /** @hide */
+    String SHELL_COMMAND_SUGGEST_TELEPHONY_TIME_ZONE = "suggest_telephony_time_zone";
+
     /**
      * A shared utility method to create a {@link ManualTimeZoneSuggestion}.
      *
