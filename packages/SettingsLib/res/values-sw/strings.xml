@@ -488,8 +488,8 @@
     <string name="status_unavailable" msgid="5279036186589861608">"Hamna"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"Imechagua anwani ya MAC kwa nasibu"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
-      <item quantity="other">Imeunganisha vifaa %1$d</item>
-      <item quantity="one">Imeunganisha kifaa %1$d</item>
+      <item quantity="other">Vifaa %1$d vimeunganishwa</item>
+      <item quantity="one">Kifaa %1$d kimeunganishwa</item>
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Muda zaidi."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Muda kidogo."</string>
