@@ -64,9 +64,9 @@ import com.android.internal.os.SomeArgs;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.pip.phone.PipUpdateThread;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -251,7 +251,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      * If set to {@code true}, the entering animation will be skipped and we will wait for
      * {@link #onFixedRotationFinished(int)} callback to actually enter PiP.
      */
-    private boolean mShouldDeferEnteringPip;
+    private boolean mWaitForFixedRotation;
 
     /**
      * If set to {@code true}, no entering PiP transition would be kicked off and most likely
@@ -259,7 +259,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      * auto PiP-able Activity to home.
      * See also {@link #startSwipePipToHome(ComponentName, ActivityInfo, PictureInPictureParams)}.
      */
-    private boolean mShouldIgnoreEnteringPipTransition;
+    private boolean mInSwipePipToHomeTransition;
 
     public PipTaskOrganizer(Context context, @NonNull PipBoundsState pipBoundsState,
             @NonNull PipBoundsAlgorithm boundsHandler,
@@ -304,7 +304,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     }
 
     public boolean isDeferringEnterPipAnimation() {
-        return mState.isInPip() && mShouldDeferEnteringPip;
+        return mState.isInPip() && mWaitForFixedRotation;
     }
 
     /**
@@ -336,9 +336,12 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      */
     public Rect startSwipePipToHome(ComponentName componentName, ActivityInfo activityInfo,
             PictureInPictureParams pictureInPictureParams) {
-        mShouldIgnoreEnteringPipTransition = true;
+        mInSwipePipToHomeTransition = true;
         sendOnPipTransitionStarted(componentName, TRANSITION_DIRECTION_TO_PIP);
         setBoundsStateForEntry(componentName, pictureInPictureParams, activityInfo);
+        // disable the conflicting transaction from fixed rotation, see also
+        // onFixedRotationStarted and onFixedRotationFinished
+        mWaitForFixedRotation = false;
         return mPipBoundsAlgorithm.getEntryDestinationBounds();
     }
 
@@ -348,7 +351,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      */
     public void stopSwipePipToHome(ComponentName componentName, Rect destinationBounds) {
         // do nothing if there is no startSwipePipToHome being called before
-        if (mShouldIgnoreEnteringPipTransition) {
+        if (mInSwipePipToHomeTransition) {
             mPipBoundsState.setBounds(destinationBounds);
         }
     }
@@ -502,7 +505,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
         mPipMenuController.attach(leash);
 
-        if (mShouldIgnoreEnteringPipTransition) {
+        if (mInSwipePipToHomeTransition) {
             final Rect destinationBounds = mPipBoundsState.getBounds();
             // animation is finished in the Launcher and here we directly apply the final touch.
             applyEnterPipSyncTransaction(destinationBounds, () -> {
@@ -510,11 +513,11 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 finishResizeForMenu(destinationBounds);
                 sendOnPipTransitionFinished(TRANSITION_DIRECTION_TO_PIP);
             });
-            mShouldIgnoreEnteringPipTransition = false;
+            mInSwipePipToHomeTransition = false;
             return;
         }
 
-        if (mShouldDeferEnteringPip) {
+        if (mWaitForFixedRotation) {
             if (DEBUG) Log.d(TAG, "Defer entering PiP animation, fixed rotation is ongoing");
             // if deferred, hide the surface till fixed rotation is completed
             final SurfaceControl.Transaction tx =
@@ -666,8 +669,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             Log.wtf(TAG, "Unrecognized token: " + token);
             return;
         }
-        mShouldDeferEnteringPip = false;
-        mShouldIgnoreEnteringPipTransition = false;
+        mWaitForFixedRotation = false;
+        mInSwipePipToHomeTransition = false;
         mPictureInPictureParams = null;
         mState = State.UNDEFINED;
         mPipUiEventLoggerLogger.setTaskInfo(null);
@@ -694,17 +697,17 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
     @Override
     public void onFixedRotationStarted(int displayId, int newRotation) {
-        mShouldDeferEnteringPip = true;
+        mWaitForFixedRotation = true;
     }
 
     @Override
     public void onFixedRotationFinished(int displayId) {
-        if (mShouldDeferEnteringPip && mState.isInPip()) {
+        if (mWaitForFixedRotation && mState.isInPip()) {
             final Rect destinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
             // schedule a regular animation to ensure all the callbacks are still being sent
             enterPipWithAlphaAnimation(destinationBounds, 0 /* durationMs */);
         }
-        mShouldDeferEnteringPip = false;
+        mWaitForFixedRotation = false;
     }
 
     /**
@@ -723,6 +726,12 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     public void onMovementBoundsChanged(Rect destinationBoundsOut, boolean fromRotation,
             boolean fromImeAdjustment, boolean fromShelfAdjustment,
             WindowContainerTransaction wct) {
+        // note that this can be called when swiping pip to home is happening. For instance,
+        // swiping an app in landscape to portrait home. skip this entirely if that's the case.
+        if (mInSwipePipToHomeTransition && fromRotation) {
+            if (DEBUG) Log.d(TAG, "skip onMovementBoundsChanged due to swipe-pip-to-home");
+            return;
+        }
         final PipAnimationController.PipTransitionAnimator animator =
                 mPipAnimationController.getCurrentAnimator();
         if (animator == null || !animator.isRunning()
@@ -806,7 +815,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      */
     public void scheduleAnimateResizePip(Rect toBounds, int duration,
             Consumer<Rect> updateBoundsCallback) {
-        if (mShouldDeferEnteringPip) {
+        if (mWaitForFixedRotation) {
             Log.d(TAG, "skip scheduleAnimateResizePip, entering pip deferred");
             return;
         }
@@ -820,7 +829,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      */
     public void scheduleAnimateResizePip(Rect fromBounds, Rect toBounds, int duration,
             Consumer<Rect> updateBoundsCallback) {
-        if (mShouldDeferEnteringPip) {
+        if (mWaitForFixedRotation) {
             Log.d(TAG, "skip scheduleAnimateResizePip, entering pip deferred");
             return;
         }
@@ -922,7 +931,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         if (mState.shouldBlockResizeRequest()) {
             return;
         }
-        if (mShouldDeferEnteringPip) {
+        if (mWaitForFixedRotation) {
             Log.d(TAG, "skip scheduleOffsetPip, entering pip deferred");
             return;
         }
