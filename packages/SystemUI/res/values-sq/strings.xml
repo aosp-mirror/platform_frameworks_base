@@ -57,15 +57,15 @@
     <string name="label_view" msgid="6815442985276363364">"Pamje"</string>
     <string name="always_use_device" msgid="210535878779644679">"Hap gjithmonë <xliff:g id="APPLICATION">%1$s</xliff:g> kur lidhet <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"Hap gjithmonë <xliff:g id="APPLICATION">%1$s</xliff:g> kur lidhet <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
-    <string name="usb_debugging_title" msgid="8274884945238642726">"Të lejohet korrigjimi i USB-së?"</string>
+    <string name="usb_debugging_title" msgid="8274884945238642726">"Të lejohet korrigjimi përmes USB-së?"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"Gjurma e gishtit të tastit \"RSA\" së kompjuterit është:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"Lejo gjithmonë nga ky kompjuter"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Lejo"</string>
-    <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Korrigjimi i USB-së nuk lejohet"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Përdoruesi i identifikuar aktualisht në këtë pajisje nuk mund ta aktivizojë korrigjimin e USB-së. Për ta përdorur këtë funksion, kalo te përdoruesi parësor."</string>
+    <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Korrigjimi përmes USB-së nuk lejohet"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Përdoruesi i identifikuar aktualisht në këtë pajisje nuk mund ta aktivizojë korrigjimin përmes USB-së. Për ta përdorur këtë veçori, kalo te përdoruesi parësor."</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Do ta lejosh korrigjimin përmes Wi-Fi në këtë rrjet?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Emri i rrjetit (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nAdresa Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
-    <string name="wifi_debugging_always" msgid="2968383799517975155">"Shfaq gjithmonë në këtë rrjet"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"Lejo gjithmonë në këtë rrjet"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Lejo"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Korrigjimi përmes Wi-Fi nuk lejohet"</string>
     <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Përdoruesi i identifikuar aktualisht në këtë pajisje nuk mund ta aktivizojë korrigjimin përmes Wi-Fi. Për ta përdorur këtë veçori, kalo te përdoruesi parësor."</string>
