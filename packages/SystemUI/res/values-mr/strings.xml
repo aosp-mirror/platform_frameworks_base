@@ -63,7 +63,7 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"अनुमती द्या"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB डीबग करण्‍यास अनुमती नाही"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"सध्‍या या डीव्हाइसमध्‍ये साइन इन केलेला वापरकर्ता USB डीबग करणे सुरू करू शकत नाही. हे वैशिष्‍ट्य वापरण्‍यासाठी, प्राथमिक वापरकर्त्‍यावर स्विच करा."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"या नेटवर्कवर वायरलेस डीबगिंग करण्याला अनुमती द्यायची का?"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"या नेटवर्कवर वायरलेस डीबगिंग करण्यासाठी अनुमती द्यायची का?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"नेटवर्कचे नाव (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nवाय-फाय ॲड्रेस (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"या नेटवर्कवर नेहमी अनुमती द्या"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"अनुमती द्या"</string>
