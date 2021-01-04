@@ -119,12 +119,6 @@ public:
         drawImageRectCount++;
     }
 
-    int drawImageNineCount = 0;
-    void onDrawImageNine(const SkImage* image, const SkIRect& center, const SkRect& dst,
-                         const SkPaint* paint) override {
-        drawImageNineCount++;
-    }
-
     int drawImageLatticeCount = 0;
     void onDrawImageLattice(const SkImage* image, const SkCanvas::Lattice& lattice,
                             const SkRect& dst, const SkPaint* paint) override {
