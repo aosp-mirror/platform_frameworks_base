@@ -49,6 +49,11 @@ class SimpleSwipe extends GestureMatcher {
     }
 
     @Override
+    protected void onPointerDown(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+        cancelGesture(event, rawEvent, policyFlags);
+    }
+
+    @Override
     protected void onMove(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         if (gestureMatched(event, rawEvent, policyFlags)) {
             completeGesture(event, rawEvent, policyFlags);
@@ -65,7 +70,7 @@ class SimpleSwipe extends GestureMatcher {
     }
 
     private boolean gestureMatched(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
-        return mLastDown != null && (distance(mLastDown, event) >= mSwipeMinDistance);
+        return mLastDown != null && (distance(mLastDown, event) > mSwipeMinDistance);
     }
 
     @Override
