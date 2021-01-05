@@ -938,7 +938,8 @@ RENDERTHREAD_TEST(RenderNodeDrawable, simple) {
         void onDrawRect(const SkRect& rect, const SkPaint& paint) override {
             EXPECT_EQ(0, mDrawCounter++);
         }
-        void onDrawImage(const SkImage*, SkScalar dx, SkScalar dy, const SkPaint*) override {
+        void onDrawImage2(const SkImage*, SkScalar dx, SkScalar dy, const SkSamplingOptions&,
+                          const SkPaint*) override {
             EXPECT_EQ(1, mDrawCounter++);
         }
     };
@@ -1047,7 +1048,7 @@ TEST(RenderNodeDrawable, renderNode) {
     EXPECT_EQ(2, canvas.mDrawCounter);
 }
 
-// Verify that layers are composed with kLow_SkFilterQuality filter quality.
+// Verify that layers are composed with linear filtering.
 RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, layerComposeQuality) {
     static const int CANVAS_WIDTH = 1;
     static const int CANVAS_HEIGHT = 1;
@@ -1056,10 +1057,12 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, layerComposeQuality) {
     class FrameTestCanvas : public TestCanvasBase {
     public:
         FrameTestCanvas() : TestCanvasBase(CANVAS_WIDTH, CANVAS_HEIGHT) {}
-        void onDrawImageRect(const SkImage* image, const SkRect* src, const SkRect& dst,
-                             const SkPaint* paint, SrcRectConstraint constraint) override {
+        void onDrawImageRect2(const SkImage* image, const SkRect& src, const SkRect& dst,
+                              const SkSamplingOptions& sampling, const SkPaint* paint,
+                              SrcRectConstraint constraint) override {
             mDrawCounter++;
-            EXPECT_EQ(kLow_SkFilterQuality, paint->getFilterQuality());
+            EXPECT_FALSE(sampling.useCubic);
+            EXPECT_EQ(SkFilterMode::kLinear, sampling.filter);
         }
     };
 
@@ -1169,8 +1172,9 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaRecordingCanvas, drawVectorDrawable) {
     class VectorDrawableTestCanvas : public TestCanvasBase {
     public:
         VectorDrawableTestCanvas() : TestCanvasBase(CANVAS_WIDTH, CANVAS_HEIGHT) {}
-        void onDrawImageRect(const SkImage*, const SkRect* src, const SkRect& dst,
-                              const SkPaint* paint, SrcRectConstraint constraint) override {
+        void onDrawImageRect2(const SkImage*, const SkRect& src, const SkRect& dst,
+                              const SkSamplingOptions&, const SkPaint* paint,
+                              SrcRectConstraint constraint) override {
             const int index = mDrawCounter++;
             switch (index) {
                 case 0:
