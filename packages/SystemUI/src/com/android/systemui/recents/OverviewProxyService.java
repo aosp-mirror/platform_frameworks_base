@@ -93,7 +93,6 @@ import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.onehanded.OneHanded;
-import com.android.wm.shell.onehanded.OneHandedEvents;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
 
@@ -463,8 +462,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             }
             final long token = Binder.clearCallingIdentity();
             try {
-                mOneHandedOptional.ifPresent(oneHanded -> oneHanded.stopOneHanded(
-                                OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_GESTURE_OUT));
+                mOneHandedOptional.ifPresent(oneHanded -> oneHanded.stopOneHanded());
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

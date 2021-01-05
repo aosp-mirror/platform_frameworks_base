@@ -21,7 +21,6 @@ import static org.mockito.Mockito.verify;
 import android.content.om.IOverlayManager;
 import android.os.Handler;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
@@ -58,6 +57,9 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
     ShellExecutor mMockShellMainExecutor;
     @Mock
     Handler mMockShellMainHandler;
+    @Mock
+    OneHandedUiEventLogger mMockUiEventLogger;
+
 
     @Before
     public void setUp() {
@@ -75,6 +77,7 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
                 mTutorialHandler,
                 mGestureHandler,
                 mTimeoutHandler,
+                mMockUiEventLogger,
                 mMockOverlayManager,
                 mMockTaskStackListener,
                 mMockShellMainExecutor,
