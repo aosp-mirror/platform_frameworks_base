@@ -474,8 +474,10 @@ public class BubbleExpandedView extends LinearLayout {
         Bundle extras = new Bundle();
         extras.putBinder(EXTRA_BUBBLE_CONTROLLER, ObjectWrapper.wrap(mController));
         target.putExtras(extras);
+        // TODO(b/175352055) Please replace FLAG_MUTABLE_UNAUDITED below
+        // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
         mPendingIntent = PendingIntent.getActivity(mContext, 0 /* requestCode */,
-                target, PendingIntent.FLAG_UPDATE_CURRENT);
+                target, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
         mSettingsIcon.setVisibility(GONE);
     }
 
