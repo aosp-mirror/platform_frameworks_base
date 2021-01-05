@@ -23,9 +23,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.app.ActivityThread;
-import android.bluetooth.BluetoothA2dp;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothHearingAid;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -102,7 +99,6 @@ public class MediaRouter {
 
         RouteInfo mDefaultAudioVideo;
         RouteInfo mBluetoothA2dpRoute;
-        volatile boolean mHasActiveBluetoothDevices;
 
         RouteInfo mSelectedRoute;
 
@@ -176,20 +172,14 @@ public class MediaRouter {
                     new IntentFilter(DisplayManager.ACTION_WIFI_DISPLAY_STATUS_CHANGED));
             appContext.registerReceiver(new VolumeChangeReceiver(),
                     new IntentFilter(AudioManager.VOLUME_CHANGED_ACTION));
-            IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(BluetoothA2dp.ACTION_ACTIVE_DEVICE_CHANGED);
-            intentFilter.addAction(BluetoothHearingAid.ACTION_ACTIVE_DEVICE_CHANGED);
-            appContext.registerReceiver(new BluetoothStateChangedReceiver(), intentFilter);
 
             mDisplayService.registerDisplayListener(this, mHandler);
 
             AudioRoutesInfo newAudioRoutes = null;
             try {
                 newAudioRoutes = mAudioService.startWatchingRoutes(mAudioRoutesObserver);
-                mHasActiveBluetoothDevices = mAudioService.isBluetoothA2dpOn();
             } catch (RemoteException e) {
             }
-
             if (newAudioRoutes != null) {
                 // This will select the active BT route if there is one and the current
                 // selected route is the default system route, or if there is no selected
@@ -263,8 +253,7 @@ public class MediaRouter {
             }
 
             if (audioRoutesChanged) {
-                Log.v(TAG, "Audio routes updated: " + newRoutes + ", hasActiveBTDevices="
-                        + mHasActiveBluetoothDevices);
+                Log.v(TAG, "Audio routes updated: " + newRoutes + ", a2dp=" + isBluetoothA2dpOn());
                 if (mSelectedRoute == null || mSelectedRoute == mDefaultAudioVideo
                         || mSelectedRoute == mBluetoothA2dpRoute) {
                     if (forceUseDefaultRoute || mBluetoothA2dpRoute == null) {
@@ -286,6 +275,15 @@ public class MediaRouter {
                 }
             }
             return mStreamVolume.get(streamType);
+        }
+
+        boolean isBluetoothA2dpOn() {
+            try {
+                return mBluetoothA2dpRoute != null && mAudioService.isBluetoothA2dpOn();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error querying Bluetooth A2DP state", e);
+                return false;
+            }
         }
 
         void updateDiscoveryRequest() {
@@ -396,7 +394,7 @@ public class MediaRouter {
         }
 
         void updateSelectedRouteForId(String routeId) {
-            RouteInfo selectedRoute = sStatic.mHasActiveBluetoothDevices
+            RouteInfo selectedRoute = isBluetoothA2dpOn()
                     ? mBluetoothA2dpRoute : mDefaultAudioVideo;
             final int count = mRoutes.size();
             for (int i = 0; i < count; i++) {
@@ -1045,7 +1043,7 @@ public class MediaRouter {
         Log.v(TAG, "Selecting route: " + route);
         assert(route != null);
         final RouteInfo oldRoute = sStatic.mSelectedRoute;
-        final RouteInfo currentSystemRoute = sStatic.mHasActiveBluetoothDevices
+        final RouteInfo currentSystemRoute = sStatic.isBluetoothA2dpOn()
                 ? sStatic.mBluetoothA2dpRoute : sStatic.mDefaultAudioVideo;
         boolean wasDefaultOrBluetoothRoute = (oldRoute == sStatic.mDefaultAudioVideo
                 || oldRoute == sStatic.mBluetoothA2dpRoute);
@@ -1108,8 +1106,7 @@ public class MediaRouter {
 
     static void selectDefaultRouteStatic() {
         // TODO: Be smarter about the route types here; this selects for all valid.
-        if (sStatic.mSelectedRoute != sStatic.mBluetoothA2dpRoute
-                && sStatic.mHasActiveBluetoothDevices) {
+        if (sStatic.mSelectedRoute != sStatic.mBluetoothA2dpRoute && sStatic.isBluetoothA2dpOn()) {
             selectRouteStatic(ROUTE_TYPE_ANY, sStatic.mBluetoothA2dpRoute, false);
         } else {
             selectRouteStatic(ROUTE_TYPE_ANY, sStatic.mDefaultAudioVideo, false);
@@ -1446,8 +1443,13 @@ public class MediaRouter {
         if (selectedRoute == sStatic.mBluetoothA2dpRoute ||
                 selectedRoute == sStatic.mDefaultAudioVideo) {
             dispatchRouteVolumeChanged(selectedRoute);
-        } else if (sStatic.mHasActiveBluetoothDevices) {
-            dispatchRouteVolumeChanged(sStatic.mBluetoothA2dpRoute);
+        } else if (sStatic.mBluetoothA2dpRoute != null) {
+            try {
+                dispatchRouteVolumeChanged(sStatic.mAudioService.isBluetoothA2dpOn() ?
+                        sStatic.mBluetoothA2dpRoute : sStatic.mDefaultAudioVideo);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error checking Bluetooth A2DP state to report volume change", e);
+            }
         } else {
             dispatchRouteVolumeChanged(sStatic.mDefaultAudioVideo);
         }
@@ -3167,19 +3169,6 @@ public class MediaRouter {
             if (intent.getAction().equals(DisplayManager.ACTION_WIFI_DISPLAY_STATUS_CHANGED)) {
                 updateWifiDisplayStatus((WifiDisplayStatus) intent.getParcelableExtra(
                         DisplayManager.EXTRA_WIFI_DISPLAY_STATUS));
-            }
-        }
-    }
-
-    static class BluetoothStateChangedReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()) {
-                case BluetoothA2dp.ACTION_ACTIVE_DEVICE_CHANGED:
-                case BluetoothHearingAid.ACTION_ACTIVE_DEVICE_CHANGED:
-                    sStatic.mHasActiveBluetoothDevices =
-                            intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE) != null;
-                    break;
             }
         }
     }
