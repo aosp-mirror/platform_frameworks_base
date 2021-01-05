@@ -18,7 +18,7 @@ package android.security;
 
 import android.annotation.NonNull;
 import android.hardware.security.keymint.HardwareAuthToken;
-import android.hardware.security.keymint.Timestamp;
+import android.hardware.security.secureclock.Timestamp;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
