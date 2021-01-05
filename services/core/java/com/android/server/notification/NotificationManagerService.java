@@ -68,6 +68,7 @@ import static android.os.UserHandle.USER_NULL;
 import static android.os.UserHandle.USER_SYSTEM;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_CONVERSATIONS;
+import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ONGOING;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_SILENT;
 import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_CALL_EFFECTS;
 import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_EFFECTS;
@@ -9497,7 +9498,7 @@ public class NotificationManagerService extends SystemService {
 
     public class NotificationListeners extends ManagedServices {
         static final String TAG_ENABLED_NOTIFICATION_LISTENERS = "enabled_listeners";
-        static final String TAG_REQUESTED_LISTENERS = "requested_listeners";
+        static final String TAG_REQUESTED_LISTENERS = "req_listeners";
         static final String TAG_REQUESTED_LISTENER = "listener";
         static final String ATT_COMPONENT = "component";
         static final String ATT_TYPES = "types";
@@ -9686,7 +9687,7 @@ public class NotificationManagerService extends SystemService {
                     final ComponentName cn = ComponentName.unflattenFromString(
                             XmlUtils.readStringAttribute(parser, ATT_COMPONENT));
                     int approved = FLAG_FILTER_TYPE_CONVERSATIONS | FLAG_FILTER_TYPE_ALERTING
-                            | FLAG_FILTER_TYPE_SILENT;
+                            | FLAG_FILTER_TYPE_SILENT | FLAG_FILTER_TYPE_ONGOING;
 
                     ArraySet<String> disallowedPkgs = new ArraySet<>();
                     final int listenerOuterDepth = parser.getDepth();
