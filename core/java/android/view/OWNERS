@@ -33,6 +33,9 @@ per-file SimulatedDpad.java = file:/services/core/java/com/android/server/input/
 per-file InputWindowHandle.java  = file:/services/core/java/com/android/server/input/OWNERS
 per-file InputWindowHandle.java  = file:/services/core/java/com/android/server/wm/OWNERS
 
+# Notifications
+per-file Notification*.java = file:/services/core/java/com/android/server/notification/OWNERS
+
 # Surface
 per-file Surface.java = file:/graphics/java/android/graphics/OWNERS
 per-file Surface.java = file:/services/core/java/com/android/server/wm/OWNERS
