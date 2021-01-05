@@ -74,9 +74,6 @@ public:
                          SrcRectConstraint) {
         ADD_FAILURE() << "onDrawImageRect not expected in this test";
     }
-    void onDrawImageNine(const SkImage*, const SkIRect& center, const SkRect& dst, const SkPaint*) {
-        ADD_FAILURE() << "onDrawImageNine not expected in this test";
-    }
     void onDrawImageLattice(const SkImage*, const Lattice& lattice, const SkRect& dst,
                             const SkPaint*) {
         ADD_FAILURE() << "onDrawImageLattice not expected in this test";

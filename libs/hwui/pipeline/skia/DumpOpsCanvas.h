@@ -90,11 +90,6 @@ protected:
         mOutput << mIdent << "drawImage" << std::endl;
     }
 
-    void onDrawImageNine(const SkImage*, const SkIRect& center, const SkRect& dst,
-                         const SkPaint*) override {
-        mOutput << mIdent << "drawImageNine" << std::endl;
-    }
-
     void onDrawImageRect(const SkImage*, const SkRect*, const SkRect&, const SkPaint*,
                          SrcRectConstraint) override {
         mOutput << mIdent << "drawImageRect" << std::endl;

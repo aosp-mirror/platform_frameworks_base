@@ -319,23 +319,6 @@ struct DrawImage final : Op {
     BitmapPalette palette;
     void draw(SkCanvas* c, const SkMatrix&) const { c->drawImage(image.get(), x, y, &paint); }
 };
-struct DrawImageNine final : Op {
-    static const auto kType = Type::DrawImageNine;
-    DrawImageNine(sk_sp<const SkImage>&& image, const SkIRect& center, const SkRect& dst,
-                  const SkPaint* paint)
-            : image(std::move(image)), center(center), dst(dst) {
-        if (paint) {
-            this->paint = *paint;
-        }
-    }
-    sk_sp<const SkImage> image;
-    SkIRect center;
-    SkRect dst;
-    SkPaint paint;
-    void draw(SkCanvas* c, const SkMatrix&) const {
-        c->drawImageNine(image.get(), center, dst, &paint);
-    }
-};
 struct DrawImageRect final : Op {
     static const auto kType = Type::DrawImageRect;
     DrawImageRect(sk_sp<const SkImage>&& image, const SkRect* src, const SkRect& dst,
@@ -632,10 +615,6 @@ void DisplayListData::drawPicture(const SkPicture* picture, const SkMatrix* matr
 void DisplayListData::drawImage(sk_sp<const SkImage> image, SkScalar x, SkScalar y,
                                 const SkPaint* paint, BitmapPalette palette) {
     this->push<DrawImage>(0, std::move(image), x, y, paint, palette);
-}
-void DisplayListData::drawImageNine(sk_sp<const SkImage> image, const SkIRect& center,
-                                    const SkRect& dst, const SkPaint* paint) {
-    this->push<DrawImageNine>(0, std::move(image), center, dst, paint);
 }
 void DisplayListData::drawImageRect(sk_sp<const SkImage> image, const SkRect* src,
                                     const SkRect& dst, const SkPaint* paint,
@@ -943,10 +922,6 @@ void RecordingCanvas::drawImageLattice(const sk_sp<SkImage>& image, const Lattic
 void RecordingCanvas::onDrawImage(const SkImage* img, SkScalar x, SkScalar y,
                                   const SkPaint* paint) {
     fDL->drawImage(sk_ref_sp(img), x, y, paint, BitmapPalette::Unknown);
-}
-void RecordingCanvas::onDrawImageNine(const SkImage* img, const SkIRect& center, const SkRect& dst,
-                                      const SkPaint* paint) {
-    fDL->drawImageNine(sk_ref_sp(img), center, dst, paint);
 }
 void RecordingCanvas::onDrawImageRect(const SkImage* img, const SkRect* src, const SkRect& dst,
                                       const SkPaint* paint, SrcRectConstraint constraint) {
