@@ -630,9 +630,14 @@ class WindowToken extends WindowContainer<WindowState> {
     void updateSurfacePosition(SurfaceControl.Transaction t) {
         super.updateSurfacePosition(t);
         if (isFixedRotationTransforming()) {
-            // The window is layouted in a simulated rotated display but the real display hasn't
-            // rotated, so here transforms its surface to fit in the real display.
-            mFixedRotationTransformState.transform(this);
+            final ActivityRecord r = asActivityRecord();
+            final Task rootTask = r != null ? r.getRootTask() : null;
+            // Don't transform the activity in PiP because the PiP task organizer will handle it.
+            if (rootTask == null || !rootTask.inPinnedWindowingMode()) {
+                // The window is laid out in a simulated rotated display but the real display hasn't
+                // rotated, so here transforms its surface to fit in the real display.
+                mFixedRotationTransformState.transform(this);
+            }
         }
     }
 

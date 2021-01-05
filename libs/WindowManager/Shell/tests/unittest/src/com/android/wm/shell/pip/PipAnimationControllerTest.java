@@ -16,6 +16,9 @@
 
 package com.android.wm.shell.pip;
 
+import static android.view.Surface.ROTATION_0;
+import static android.view.Surface.ROTATION_90;
+
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_TO_PIP;
 
@@ -34,6 +37,7 @@ import android.view.SurfaceControl;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.ShellTestCase;
+import com.android.wm.shell.common.DisplayLayout;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -84,7 +88,7 @@ public class PipAnimationControllerTest extends ShellTestCase {
     public void getAnimator_withBounds_returnBoundsAnimator() {
         final PipAnimationController.PipTransitionAnimator animator = mPipAnimationController
                 .getAnimator(mTaskInfo, mLeash, new Rect(), new Rect(), new Rect(), null,
-                        TRANSITION_DIRECTION_TO_PIP, 0);
+                        TRANSITION_DIRECTION_TO_PIP, 0, ROTATION_0);
 
         assertEquals("Expect ANIM_TYPE_BOUNDS animation",
                 animator.getAnimationType(), PipAnimationController.ANIM_TYPE_BOUNDS);
@@ -98,13 +102,13 @@ public class PipAnimationControllerTest extends ShellTestCase {
         final Rect endValue2 = new Rect(200, 200, 300, 300);
         final PipAnimationController.PipTransitionAnimator oldAnimator = mPipAnimationController
                 .getAnimator(mTaskInfo, mLeash, baseValue, startValue, endValue1, null,
-                        TRANSITION_DIRECTION_TO_PIP, 0);
+                        TRANSITION_DIRECTION_TO_PIP, 0, ROTATION_0);
         oldAnimator.setSurfaceControlTransactionFactory(DummySurfaceControlTx::new);
         oldAnimator.start();
 
         final PipAnimationController.PipTransitionAnimator newAnimator = mPipAnimationController
                 .getAnimator(mTaskInfo, mLeash, baseValue, startValue, endValue2, null,
-                        TRANSITION_DIRECTION_TO_PIP, 0);
+                        TRANSITION_DIRECTION_TO_PIP, 0, ROTATION_0);
 
         assertEquals("getAnimator with same type returns same animator",
                 oldAnimator, newAnimator);
@@ -128,6 +132,21 @@ public class PipAnimationControllerTest extends ShellTestCase {
     }
 
     @Test
+    public void pipTransitionAnimator_rotatedEndValue() {
+        final Rect startBounds = new Rect(200, 700, 400, 800);
+        final Rect endBounds = new Rect(0, 0, 500, 1000);
+        final PipAnimationController.PipTransitionAnimator<?> animator = mPipAnimationController
+                .getAnimator(mTaskInfo, mLeash, null, startBounds, endBounds, null,
+                        TRANSITION_DIRECTION_TO_PIP, 0, ROTATION_90);
+        // Apply fraction 1 to compute the end value.
+        animator.applySurfaceControlTransaction(mLeash, new DummySurfaceControlTx(), 1);
+        final Rect rotatedEndBounds = new Rect(endBounds);
+        DisplayLayout.rotateBounds(rotatedEndBounds, endBounds, ROTATION_90);
+
+        assertEquals("Expect 90 degree rotated bounds", rotatedEndBounds, animator.mCurrentValue);
+    }
+
+    @Test
     @SuppressWarnings("unchecked")
     public void pipTransitionAnimator_updateEndValue() {
         final Rect baseValue = new Rect(0, 0, 100, 100);
@@ -136,7 +155,7 @@ public class PipAnimationControllerTest extends ShellTestCase {
         final Rect endValue2 = new Rect(200, 200, 300, 300);
         final PipAnimationController.PipTransitionAnimator animator = mPipAnimationController
                 .getAnimator(mTaskInfo, mLeash, baseValue, startValue, endValue1, null,
-                        TRANSITION_DIRECTION_TO_PIP, 0);
+                        TRANSITION_DIRECTION_TO_PIP, 0, ROTATION_0);
 
         animator.updateEndValue(endValue2);
 
@@ -150,7 +169,7 @@ public class PipAnimationControllerTest extends ShellTestCase {
         final Rect endValue = new Rect(100, 100, 200, 200);
         final PipAnimationController.PipTransitionAnimator animator = mPipAnimationController
                 .getAnimator(mTaskInfo, mLeash, baseValue, startValue, endValue, null,
-                        TRANSITION_DIRECTION_TO_PIP, 0);
+                        TRANSITION_DIRECTION_TO_PIP, 0, ROTATION_0);
         animator.setSurfaceControlTransactionFactory(DummySurfaceControlTx::new);
 
         animator.setPipAnimationCallback(mPipAnimationCallback);

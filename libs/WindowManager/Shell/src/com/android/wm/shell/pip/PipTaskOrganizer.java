@@ -48,13 +48,12 @@ import android.app.TaskInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Rational;
 import android.view.Display;
+import android.view.Surface;
 import android.view.SurfaceControl;
 import android.window.TaskOrganizer;
 import android.window.WindowContainerToken;
@@ -72,8 +71,6 @@ import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -134,7 +131,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private final PipUiEventLogger mPipUiEventLoggerLogger;
     private final int mEnterExitAnimationDuration;
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
-    private final Map<IBinder, Configuration> mInitialState = new HashMap<>();
     private final Optional<LegacySplitScreen> mSplitScreenOptional;
     protected final ShellTaskOrganizer mTaskOrganizer;
     protected final ShellExecutor mMainExecutor;
@@ -190,6 +186,12 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      * {@link #onFixedRotationFinished(int)} callback to actually enter PiP.
      */
     private boolean mWaitForFixedRotation;
+
+    /**
+     * The rotation that the display will apply after expanding PiP to fullscreen. This is only
+     * meaningful if {@link #mWaitForFixedRotation} is true.
+     */
+    private @Surface.Rotation int mNextRotation;
 
     /**
      * If set to {@code true}, no entering PiP transition would be kicked off and most likely
@@ -313,61 +315,40 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             return;
         }
 
-        final Configuration initialConfig = mInitialState.remove(mToken.asBinder());
-        if (initialConfig == null) {
-            Log.wtf(TAG, "Token not in record, this should not happen mToken=" + mToken);
-            return;
-        }
         mPipUiEventLoggerLogger.log(
                 PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_EXPAND_TO_FULLSCREEN);
-        final boolean orientationDiffers = initialConfig.windowConfiguration.getRotation()
-                != mPipBoundsState.getDisplayLayout().rotation();
         final WindowContainerTransaction wct = new WindowContainerTransaction();
-        final Rect destinationBounds = initialConfig.windowConfiguration.getBounds();
+        final Rect destinationBounds = mPipBoundsState.getDisplayBounds();
         final int direction = syncWithSplitScreenBounds(destinationBounds)
                 ? TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN
                 : TRANSITION_DIRECTION_LEAVE_PIP;
-        if (orientationDiffers) {
-            mState = State.EXITING_PIP;
-            // Send started callback though animation is ignored.
-            sendOnPipTransitionStarted(direction);
-            // Don't bother doing an animation if the display rotation differs or if it's in
-            // a non-supported windowing mode
-            applyWindowingModeChangeOnExit(wct, direction);
-            mTaskOrganizer.applyTransaction(wct);
-            // Send finished callback though animation is ignored.
-            sendOnPipTransitionFinished(direction);
-        } else {
-            final SurfaceControl.Transaction tx =
-                    mSurfaceControlTransactionFactory.getTransaction();
-            mSurfaceTransactionHelper.scale(tx, mLeash, destinationBounds,
-                    mPipBoundsState.getBounds());
-            tx.setWindowCrop(mLeash, destinationBounds.width(), destinationBounds.height());
-            // We set to fullscreen here for now, but later it will be set to UNDEFINED for
-            // the proper windowing mode to take place. See #applyWindowingModeChangeOnExit.
-            wct.setActivityWindowingMode(mToken,
-                    direction == TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN
-                    ? WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
-                    : WINDOWING_MODE_FULLSCREEN);
-            wct.setBounds(mToken, destinationBounds);
-            wct.setBoundsChangeTransaction(mToken, tx);
-            mTaskOrganizer.applySyncTransaction(wct, new WindowContainerTransactionCallback() {
-                @Override
-                public void onTransactionReady(int id, SurfaceControl.Transaction t) {
-                    mMainExecutor.execute(() -> {
-                        t.apply();
-                        // Make sure to grab the latest source hint rect as it could have been
-                        // updated right after applying the windowing mode change.
-                        final Rect sourceHintRect = PipBoundsAlgorithm.getValidSourceHintRect(
-                                mPictureInPictureParams, destinationBounds);
-                        scheduleAnimateResizePip(mPipBoundsState.getBounds(), destinationBounds,
-                                0 /* startingAngle */, sourceHintRect, direction,
-                                animationDurationMs, null /* updateBoundsCallback */);
-                        mState = State.EXITING_PIP;
-                    });
-                }
-            });
-        }
+        final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
+        mSurfaceTransactionHelper.scale(tx, mLeash, destinationBounds, mPipBoundsState.getBounds());
+        tx.setWindowCrop(mLeash, destinationBounds.width(), destinationBounds.height());
+        // We set to fullscreen here for now, but later it will be set to UNDEFINED for
+        // the proper windowing mode to take place. See #applyWindowingModeChangeOnExit.
+        wct.setActivityWindowingMode(mToken,
+                direction == TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN
+                        ? WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
+                        : WINDOWING_MODE_FULLSCREEN);
+        wct.setBounds(mToken, destinationBounds);
+        wct.setBoundsChangeTransaction(mToken, tx);
+        mTaskOrganizer.applySyncTransaction(wct, new WindowContainerTransactionCallback() {
+            @Override
+            public void onTransactionReady(int id, SurfaceControl.Transaction t) {
+                mMainExecutor.execute(() -> {
+                    t.apply();
+                    // Make sure to grab the latest source hint rect as it could have been
+                    // updated right after applying the windowing mode change.
+                    final Rect sourceHintRect = PipBoundsAlgorithm.getValidSourceHintRect(
+                            mPictureInPictureParams, destinationBounds);
+                    scheduleAnimateResizePip(mPipBoundsState.getBounds(), destinationBounds,
+                            0 /* startingAngle */, sourceHintRect, direction,
+                            animationDurationMs, null /* updateBoundsCallback */);
+                    mState = State.EXITING_PIP;
+                });
+            }
+        });
     }
 
     private void applyWindowingModeChangeOnExit(WindowContainerTransaction wct, int direction) {
@@ -399,7 +380,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 .setPipAnimationCallback(mPipAnimationCallback)
                 .setDuration(mEnterExitAnimationDuration)
                 .start();
-        mInitialState.remove(mToken.asBinder());
         mState = State.EXITING_PIP;
     }
 
@@ -424,7 +404,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mToken = mTaskInfo.token;
         mState = State.TASK_APPEARED;
         mLeash = leash;
-        mInitialState.put(mToken.asBinder(), new Configuration(mTaskInfo.configuration));
         mPictureInPictureParams = mTaskInfo.pictureInPictureParams;
         setBoundsStateForEntry(mTaskInfo.topActivity, mPictureInPictureParams,
                 mTaskInfo.topActivityInfo);
@@ -606,6 +585,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
     @Override
     public void onFixedRotationStarted(int displayId, int newRotation) {
+        mNextRotation = newRotation;
         mWaitForFixedRotation = true;
     }
 
@@ -645,7 +625,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 mPipAnimationController.getCurrentAnimator();
         if (animator == null || !animator.isRunning()
                 || animator.getTransitionDirection() != TRANSITION_DIRECTION_TO_PIP) {
-            if (mState.isInPip() && fromRotation) {
+            if (mState.isInPip() && fromRotation && !mWaitForFixedRotation) {
                 // Update bounds state to final destination first. It's important to do this
                 // before finishing & cancelling the transition animation so that the MotionHelper
                 // bounds are synchronized to the destination bounds when the animation ends.
@@ -1052,11 +1032,14 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             Log.w(TAG, "Abort animation, invalid leash");
             return;
         }
+        final int rotationDelta = mWaitForFixedRotation
+                ? ((mNextRotation - mPipBoundsState.getDisplayLayout().rotation()) + 4) % 4
+                : Surface.ROTATION_0;
         Rect baseBounds = direction == TRANSITION_DIRECTION_SNAP_AFTER_RESIZE
                 ? mPipBoundsState.getBounds() : currentBounds;
         mPipAnimationController
                 .getAnimator(mTaskInfo, mLeash, baseBounds, currentBounds, destinationBounds,
-                        sourceHintRect, direction, startingAngle)
+                        sourceHintRect, direction, startingAngle, rotationDelta)
                 .setTransitionDirection(direction)
                 .setPipAnimationCallback(mPipAnimationCallback)
                 .setDuration(durationMs)
@@ -1101,11 +1084,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         pw.println(innerPrefix + "mState=" + mState);
         pw.println(innerPrefix + "mOneShotAnimationType=" + mOneShotAnimationType);
         pw.println(innerPrefix + "mPictureInPictureParams=" + mPictureInPictureParams);
-        pw.println(innerPrefix + "mInitialState:");
-        for (Map.Entry<IBinder, Configuration> e : mInitialState.entrySet()) {
-            pw.println(innerPrefix + "  binder=" + e.getKey()
-                    + " winConfig=" + e.getValue().windowConfiguration);
-        }
     }
 
     @Override

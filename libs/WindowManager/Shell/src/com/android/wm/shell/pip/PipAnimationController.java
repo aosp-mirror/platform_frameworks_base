@@ -16,6 +16,9 @@
 
 package com.android.wm.shell.pip;
 
+import static android.view.Surface.ROTATION_270;
+import static android.view.Surface.ROTATION_90;
+
 import android.animation.AnimationHandler;
 import android.animation.Animator;
 import android.animation.RectEvaluator;
@@ -24,11 +27,13 @@ import android.annotation.IntDef;
 import android.app.TaskInfo;
 import android.graphics.Rect;
 import android.view.Choreographer;
+import android.view.Surface;
 import android.view.SurfaceControl;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.wm.shell.animation.Interpolators;
+import com.android.wm.shell.common.DisplayLayout;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -132,15 +137,21 @@ public class PipAnimationController {
      * leash bounds before transformation/any animation. This is so when we try to construct
      * the different transformation matrices for the animation, we are constructing this based off
      * the PiP original bounds, rather than the {@param startBounds}, which is post-transformed.
+     *
+     * If non-zero {@param rotationDelta} is given, it means that the display will be rotated by
+     * leaving PiP to fullscreen, and the {@param endBounds} is the fullscreen bounds before the
+     * rotation change.
      */
     @VisibleForTesting
     public PipTransitionAnimator getAnimator(TaskInfo taskInfo, SurfaceControl leash,
             Rect baseBounds, Rect startBounds, Rect endBounds, Rect sourceHintRect,
-            @PipAnimationController.TransitionDirection int direction, float startingAngle) {
+            @PipAnimationController.TransitionDirection int direction, float startingAngle,
+            @Surface.Rotation int rotationDelta) {
         if (mCurrentAnimator == null) {
             mCurrentAnimator = setupPipTransitionAnimator(
                     PipTransitionAnimator.ofBounds(taskInfo, leash, startBounds, startBounds,
-                            endBounds, sourceHintRect, direction, 0 /* startingAngle */));
+                            endBounds, sourceHintRect, direction, 0 /* startingAngle */,
+                            rotationDelta));
         } else if (mCurrentAnimator.getAnimationType() == ANIM_TYPE_ALPHA
                 && mCurrentAnimator.isRunning()) {
             // If we are still animating the fade into pip, then just move the surface and ensure
@@ -156,7 +167,7 @@ public class PipAnimationController {
             mCurrentAnimator.cancel();
             mCurrentAnimator = setupPipTransitionAnimator(
                     PipTransitionAnimator.ofBounds(taskInfo, leash, baseBounds, startBounds,
-                            endBounds, sourceHintRect, direction, startingAngle));
+                            endBounds, sourceHintRect, direction, startingAngle, rotationDelta));
         }
         return mCurrentAnimator;
     }
@@ -410,7 +421,8 @@ public class PipAnimationController {
 
         static PipTransitionAnimator<Rect> ofBounds(TaskInfo taskInfo, SurfaceControl leash,
                 Rect baseValue, Rect startValue, Rect endValue, Rect sourceHintRect,
-                @PipAnimationController.TransitionDirection int direction, float startingAngle) {
+                @PipAnimationController.TransitionDirection int direction, float startingAngle,
+                @Surface.Rotation int rotationDelta) {
             // Just for simplicity we'll interpolate between the source rect hint insets and empty
             // insets to calculate the window crop
             final Rect initialSourceValue;
@@ -431,6 +443,16 @@ public class PipAnimationController {
             }
             final Rect sourceInsets = new Rect(0, 0, 0, 0);
 
+            final Rect rotatedEndRect;
+            if (rotationDelta == ROTATION_90 || rotationDelta == ROTATION_270) {
+                // Rotate the end bounds according to the rotation delta because the display will
+                // be rotated to the same orientation.
+                rotatedEndRect = new Rect(endValue);
+                DisplayLayout.rotateBounds(rotatedEndRect, endValue, rotationDelta);
+            } else {
+                rotatedEndRect = null;
+            }
+
             // construct new Rect instances in case they are recycled
             return new PipTransitionAnimator<Rect>(taskInfo, leash, ANIM_TYPE_BOUNDS,
                     endValue, new Rect(baseValue), new Rect(startValue), new Rect(endValue),
@@ -444,6 +466,12 @@ public class PipAnimationController {
                     final Rect base = getBaseValue();
                     final Rect start = getStartValue();
                     final Rect end = getEndValue();
+                    if (rotatedEndRect != null) {
+                        // Animate the bounds in a different orientation. It only happens when
+                        // leaving PiP to fullscreen.
+                        applyRotation(tx, leash, fraction, start, end, rotatedEndRect);
+                        return;
+                    }
                     Rect bounds = mRectEvaluator.evaluate(fraction, start, end);
                     float angle = (1.0f - fraction) * startingAngle;
                     setCurrentValue(bounds);
@@ -466,6 +494,25 @@ public class PipAnimationController {
                         getSurfaceTransactionHelper().scaleAndCrop(tx, leash,
                                 initialSourceValue, bounds, insets);
                     }
+                    tx.apply();
+                }
+
+                private void applyRotation(SurfaceControl.Transaction tx, SurfaceControl leash,
+                        float fraction, Rect start, Rect end, Rect rotatedEndRect) {
+                    final Rect bounds = mRectEvaluator.evaluate(fraction, start, rotatedEndRect);
+                    setCurrentValue(bounds);
+                    final float degree, x, y;
+                    if (rotationDelta == ROTATION_90) {
+                        degree = 90 * fraction;
+                        x = fraction * (end.right - start.left) + start.left;
+                        y = fraction * (end.top - start.top) + start.top;
+                    } else {
+                        degree = -90 * fraction;
+                        x = fraction * (end.left - start.left) + start.left;
+                        y = fraction * (end.bottom - start.top) + start.top;
+                    }
+                    getSurfaceTransactionHelper().rotateAndScaleWithCrop(tx, leash, bounds,
+                            rotatedEndRect, degree, x, y);
                     tx.apply();
                 }
 

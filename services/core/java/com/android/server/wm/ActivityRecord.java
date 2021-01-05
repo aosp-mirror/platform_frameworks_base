@@ -7005,7 +7005,32 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 return;
             }
         }
-        super.onConfigurationChanged(newParentConfig);
+
+        final DisplayContent display = mDisplayContent;
+        if (inPinnedWindowingMode() && attachedToProcess() && display != null) {
+            // If the PIP activity is changing to fullscreen with display orientation change, the
+            // fixed rotation will take effect that requires to send fixed rotation adjustments
+            // before the process configuration (if the process is a configuration listener of the
+            // activity). So when performing process configuration on client side, it can apply
+            // the adjustments (see WindowToken#onFixedRotationStatePrepared).
+            try {
+                app.pauseConfigurationDispatch();
+                super.onConfigurationChanged(newParentConfig);
+                if (mVisibleRequested && !inMultiWindowMode()) {
+                    final int rotation = display.rotationForActivityInDifferentOrientation(this);
+                    if (rotation != ROTATION_UNDEFINED) {
+                        app.resumeConfigurationDispatch();
+                        display.setFixedRotationLaunchingApp(this, rotation);
+                    }
+                }
+            } finally {
+                if (app.resumeConfigurationDispatch()) {
+                    app.dispatchConfiguration(app.getConfiguration());
+                }
+            }
+        } else {
+            super.onConfigurationChanged(newParentConfig);
+        }
 
         // Configuration's equality doesn't consider seq so if only seq number changes in resolved
         // override configuration. Therefore ConfigurationContainer doesn't change merged override
@@ -7014,7 +7039,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             onMergedOverrideConfigurationChanged();
         }
 
-        final DisplayContent display = mDisplayContent;
         if (display == null) {
             return;
         }
