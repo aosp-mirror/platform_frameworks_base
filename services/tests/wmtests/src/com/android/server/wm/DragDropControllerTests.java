@@ -134,6 +134,7 @@ public class DragDropControllerTests extends WindowTestsBase {
                 null, TYPE_BASE_APPLICATION, activity, name, ownerId, false, new TestIWindow());
         window.mInputChannel = new InputChannel();
         window.mHasSurface = true;
+        mWm.mInputToWindowMap.put(window.mInputChannelToken, window);
         return window;
     }
 
@@ -226,7 +227,7 @@ public class DragDropControllerTests extends WindowTestsBase {
                     // Verify after consuming that the drag surface is relinquished
                     try {
                         mTarget.mDeferDragStateClosed = true;
-
+                        mTarget.reportDropWindow(mWindow.mInputChannelToken, 0, 0);
                         // Verify the drop event includes the drag surface
                         mTarget.handleMotionEvent(false, 0, 0);
                         final DragEvent dropEvent = dragEvents.get(dragEvents.size() - 1);
@@ -355,6 +356,7 @@ public class DragDropControllerTests extends WindowTestsBase {
 
     private void doDragAndDrop(int flags, ClipData data, float dropX, float dropY) {
         startDrag(flags, data, () -> {
+            mTarget.reportDropWindow(mWindow.mInputChannelToken, dropX, dropY);
             mTarget.handleMotionEvent(false, dropX, dropY);
             mToken = mWindow.mClient.asBinder();
         });
