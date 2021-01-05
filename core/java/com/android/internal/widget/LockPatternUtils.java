@@ -307,8 +307,24 @@ public class LockPatternUtils {
         return getDevicePolicyManager().getPasswordMaximumLength(quality);
     }
 
+    /**
+     * Returns aggregated (legacy) password quality requirement on the target user from all admins.
+     */
     public PasswordMetrics getRequestedPasswordMetrics(int userId) {
-        return getDevicePolicyManager().getPasswordMinimumMetrics(userId);
+        return getRequestedPasswordMetrics(userId, false);
+    }
+
+    /**
+     * Returns aggregated (legacy) password quality requirement on the target user from all admins,
+     * optioanlly disregarding policies set on the managed profile as if the  profile had separate
+     * work challenge.
+     */
+    public PasswordMetrics getRequestedPasswordMetrics(int userId, boolean deviceWideOnly) {
+        return getDevicePolicyManager().getPasswordMinimumMetrics(userId, deviceWideOnly);
+    }
+
+    private int getRequestedPasswordHistoryLength(int userId) {
+        return getDevicePolicyManager().getPasswordHistoryLength(null, userId);
     }
 
     /**
@@ -317,39 +333,21 @@ public class LockPatternUtils {
      * @return complexity level for the user.
      */
     public @DevicePolicyManager.PasswordComplexity int getRequestedPasswordComplexity(int userId) {
-        return getDevicePolicyManager().getAggregatedPasswordComplexityForUser(userId);
+        return getRequestedPasswordComplexity(userId, false);
     }
 
-    public int getRequestedPasswordQuality(int userId) {
-        return getDevicePolicyManager().getPasswordQuality(null, userId);
-    }
+    /**
+     * Returns the effective complexity for the user, optioanlly disregarding complexity set on the
+     * managed profile as if the  profile had separate work challenge.
 
-    private int getRequestedPasswordHistoryLength(int userId) {
-        return getDevicePolicyManager().getPasswordHistoryLength(null, userId);
-    }
-
-    public int getRequestedPasswordMinimumLetters(int userId) {
-        return getDevicePolicyManager().getPasswordMinimumLetters(null, userId);
-    }
-
-    public int getRequestedPasswordMinimumUpperCase(int userId) {
-        return getDevicePolicyManager().getPasswordMinimumUpperCase(null, userId);
-    }
-
-    public int getRequestedPasswordMinimumLowerCase(int userId) {
-        return getDevicePolicyManager().getPasswordMinimumLowerCase(null, userId);
-    }
-
-    public int getRequestedPasswordMinimumNumeric(int userId) {
-        return getDevicePolicyManager().getPasswordMinimumNumeric(null, userId);
-    }
-
-    public int getRequestedPasswordMinimumSymbols(int userId) {
-        return getDevicePolicyManager().getPasswordMinimumSymbols(null, userId);
-    }
-
-    public int getRequestedPasswordMinimumNonLetter(int userId) {
-        return getDevicePolicyManager().getPasswordMinimumNonLetter(null, userId);
+     * @param userId  The user to return the complexity for.
+     * @param deviceWideOnly  whether to ignore complexity set on the managed profile.
+     * @return complexity level for the user.
+     */
+    public @DevicePolicyManager.PasswordComplexity int getRequestedPasswordComplexity(int userId,
+            boolean deviceWideOnly) {
+        return getDevicePolicyManager().getAggregatedPasswordComplexityForUser(userId,
+                deviceWideOnly);
     }
 
     @UnsupportedAppUsage
