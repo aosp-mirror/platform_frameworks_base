@@ -451,10 +451,6 @@ public class KeyguardBouncer {
         }
     }
 
-    public boolean onBackPressed() {
-        return mKeyguardViewController != null && mKeyguardViewController.handleBackKey();
-    }
-
     /**
      * @return True if and only if the security method should be shown before showing the
      * notifications on Keyguard, like SIM PIN/PUK.
