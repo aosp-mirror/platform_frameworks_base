@@ -40,6 +40,7 @@ import java.util.Vector;
  *  index sets or primitive types.
  * </p>
  **/
+@Deprecated
 public class Mesh extends BaseObj {
 
     /**

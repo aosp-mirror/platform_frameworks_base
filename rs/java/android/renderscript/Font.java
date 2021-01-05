@@ -45,6 +45,7 @@ import java.util.Map;
  * them in the script to suit the user's rendering needs. Font colors work as a state machine.
  * Every new call to draw text uses the last color set in the script.</p>
  **/
+@Deprecated
 public class Font extends BaseObj {
 
     //These help us create a font by family name

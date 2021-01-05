@@ -34,7 +34,6 @@
  * The signatures don't have to be exact or in any strict order. As long as the input name in the shader
  * matches a channel name and size available on the mesh, the runtime takes care of connecting the
  * two. Unlike OpenGL, there is no need to link the vertex and fragment programs.</p>
- *
  **/
 package android.renderscript;
 
@@ -49,6 +48,7 @@ import android.compat.annotation.UnsupportedAppUsage;
  * geometric data in a user-defined way.
  *
  **/
+@Deprecated
 public class ProgramVertex extends Program {
 
     ProgramVertex(long id, RenderScript rs) {
