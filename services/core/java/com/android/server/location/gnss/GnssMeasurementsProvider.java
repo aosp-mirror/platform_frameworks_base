@@ -21,7 +21,6 @@ import static com.android.server.location.gnss.GnssManagerService.TAG;
 
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
-import android.location.GnssCapabilities;
 import android.location.GnssMeasurementRequest;
 import android.location.GnssMeasurementsEvent;
 import android.location.IGnssMeasurementsListener;
@@ -58,8 +57,14 @@ public final class GnssMeasurementsProvider extends
         protected GnssMeasurementListenerRegistration(
                 @Nullable GnssMeasurementRequest request,
                 CallerIdentity callerIdentity,
-                IGnssMeasurementsListener iGnssMeasurementsListener) {
-            super(request, callerIdentity, iGnssMeasurementsListener);
+                IGnssMeasurementsListener listener) {
+            super(request, callerIdentity, listener);
+        }
+
+        @Override
+        protected void onGnssListenerRegister() {
+            executeOperation(listener -> listener.onStatusChanged(
+                    GnssMeasurementsEvent.Callback.STATUS_READY));
         }
 
         @Nullable
@@ -199,10 +204,6 @@ public final class GnssMeasurementsProvider extends
     public void onHalRestarted() {
         resetService();
     }
-
-    @Override
-    public void onCapabilitiesChanged(GnssCapabilities oldCapabilities,
-            GnssCapabilities newCapabilities) {}
 
     @Override
     public void onReportMeasurements(GnssMeasurementsEvent event) {
