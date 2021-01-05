@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.SystemProperties;
@@ -129,13 +130,16 @@ public class LocationTimeZoneManagerService extends Binder {
     @NonNull private final Context mContext;
 
     /**
-     * The {@link ThreadingDomain} used to supply the {@link android.os.Handler} and shared lock
-     * object used by the controller and related components.
+     * The {@link ThreadingDomain} used to supply the shared lock object used by the controller and
+     * related components.
      *
      * <p>Most operations are executed on the associated handler thread <em>but not all</em>, hence
      * the requirement for additional synchronization using a shared lock.
      */
     @NonNull private final ThreadingDomain mThreadingDomain;
+
+    /** A handler associated with the {@link #mThreadingDomain}. */
+    @NonNull private final Handler mHandler;
 
     /** The shared lock from {@link #mThreadingDomain}. */
     @NonNull private final Object mSharedLock;
@@ -146,7 +150,8 @@ public class LocationTimeZoneManagerService extends Binder {
 
     LocationTimeZoneManagerService(Context context) {
         mContext = context.createAttributionContext(ATTRIBUTION_TAG);
-        mThreadingDomain = new HandlerThreadingDomain(FgThread.getHandler());
+        mHandler = FgThread.getHandler();
+        mThreadingDomain = new HandlerThreadingDomain(mHandler);
         mSharedLock = mThreadingDomain.getLockObject();
     }
 
@@ -193,6 +198,7 @@ public class LocationTimeZoneManagerService extends Binder {
         } else {
             proxy = new RealLocationTimeZoneProviderProxy(
                     mContext,
+                    mHandler,
                     mThreadingDomain,
                     PRIMARY_LOCATION_TIME_ZONE_SERVICE_ACTION,
                     R.bool.config_enablePrimaryLocationTimeZoneOverlay,
@@ -214,6 +220,7 @@ public class LocationTimeZoneManagerService extends Binder {
         } else {
             proxy = new RealLocationTimeZoneProviderProxy(
                     mContext,
+                    mHandler,
                     mThreadingDomain,
                     SECONDARY_LOCATION_TIME_ZONE_SERVICE_ACTION,
                     R.bool.config_enableSecondaryLocationTimeZoneOverlay,
