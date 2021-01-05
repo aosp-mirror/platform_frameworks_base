@@ -119,21 +119,24 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 @Override
                 public WindowInsets onProgress(WindowInsets windowInsets,
                         List<WindowInsetsAnimation> list) {
-                    int translationY = 0;
                     if (mDisappearAnimRunning) {
                         mSecurityViewFlipper.setTranslationY(
                                 mInitialBounds.bottom - mFinalBounds.bottom);
                     } else {
+                        int translationY = 0;
+                        float interpolatedFraction = 1f;
                         for (WindowInsetsAnimation animation : list) {
                             if ((animation.getTypeMask() & WindowInsets.Type.ime()) == 0) {
                                 continue;
                             }
+                            interpolatedFraction = animation.getInterpolatedFraction();
+
                             final int paddingBottom = (int) MathUtils.lerp(
                                     mInitialBounds.bottom - mFinalBounds.bottom, 0,
-                                    animation.getInterpolatedFraction());
+                                    interpolatedFraction);
                             translationY += paddingBottom;
                         }
-                        mSecurityViewFlipper.setTranslationY(translationY);
+                        mSecurityViewFlipper.animateForIme(translationY, interpolatedFraction);
                     }
                     return windowInsets;
                 }
@@ -141,7 +144,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 @Override
                 public void onEnd(WindowInsetsAnimation animation) {
                     if (!mDisappearAnimRunning) {
-                        mSecurityViewFlipper.setTranslationY(0);
+                        mSecurityViewFlipper.animateForIme(0, /* interpolatedFraction */ 1f);
                     }
                 }
             };

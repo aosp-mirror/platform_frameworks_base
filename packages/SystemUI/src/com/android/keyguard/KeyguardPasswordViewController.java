@@ -194,14 +194,18 @@ public class KeyguardPasswordViewController
     @Override
     public void onResume(int reason) {
         super.onResume(reason);
-        // Wait a bit to focus the field so the focusable flag on the window is already set then.
-        mMainExecutor.execute(() -> {
-            if (mView.isShown() && mPasswordEntry.isEnabled()) {
-                mPasswordEntry.requestFocus();
-                if (reason != KeyguardSecurityView.SCREEN_ON || mShowImeAtScreenOn) {
-                    mInputMethodManager.showSoftInput(
-                            mPasswordEntry, InputMethodManager.SHOW_IMPLICIT);
-                }
+
+        mPasswordEntry.requestFocus();
+        if (reason != KeyguardSecurityView.SCREEN_ON || mShowImeAtScreenOn) {
+            showInput();
+        }
+    }
+
+    private void showInput() {
+        mPasswordEntry.post(() -> {
+            if (mPasswordEntry.isFocused() && mView.isShown()) {
+                mInputMethodManager.showSoftInput(
+                        mPasswordEntry, InputMethodManager.SHOW_IMPLICIT);
             }
         });
     }
