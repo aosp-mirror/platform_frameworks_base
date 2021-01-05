@@ -283,11 +283,16 @@ public final class SensorPrivacyService extends SystemService {
                 mIndividualEnabled.put(userId, userIndividualEnabled);
 
                 if (!enable) {
-                    // Remove any notifications prompting the user to disable sensory privacy
-                    NotificationManager notificationManager =
-                            mContext.getSystemService(NotificationManager.class);
+                    long token = Binder.clearCallingIdentity();
+                    try {
+                        // Remove any notifications prompting the user to disable sensory privacy
+                        NotificationManager notificationManager =
+                                mContext.getSystemService(NotificationManager.class);
 
-                    notificationManager.cancel(sensor);
+                        notificationManager.cancel(sensor);
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
                 }
                 persistSensorPrivacyState();
             }

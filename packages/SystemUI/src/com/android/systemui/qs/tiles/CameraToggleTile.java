@@ -16,11 +16,12 @@
 
 package com.android.systemui.qs.tiles;
 
-import android.content.Context;
+import static com.android.systemui.DejankUtils.whitelistIpcs;
+
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.DeviceConfig;
 import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
@@ -38,7 +39,8 @@ import com.android.systemui.statusbar.policy.CameraToggleController;
 
 import javax.inject.Inject;
 
-public class CameraToggleTile extends QSTileImpl<QSTile.BooleanState> {
+public class CameraToggleTile extends QSTileImpl<QSTile.BooleanState> implements
+        CameraToggleController.Callback {
 
     private CameraToggleController mCameraToggleController;
 
@@ -54,7 +56,15 @@ public class CameraToggleTile extends QSTileImpl<QSTile.BooleanState> {
         super(host, backgroundLooper, mainHandler, metricsLogger, statusBarStateController,
                 activityStarter, qsLogger);
         mCameraToggleController = cameraToggleController;
-        mCameraToggleController.addCallback((b) -> refreshState());
+        mCameraToggleController.observe(getLifecycle(), this);
+    }
+
+    @Override
+    public boolean isAvailable() {
+        return /*getHost().getContext().getPackageManager().hasSystemFeature(FEATURE_CAMERA_TOGGLE)
+                && */whitelistIpcs(() -> DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
+                "camera_toggle_enabled",
+                false));
     }
 
     @Override
@@ -64,21 +74,18 @@ public class CameraToggleTile extends QSTileImpl<QSTile.BooleanState> {
 
     @Override
     protected void handleClick() {
-        mCameraToggleController.setCameraEnabled(!mCameraToggleController.isCameraEnabled());
+        mCameraToggleController.setCameraBlocked(!mCameraToggleController.isCameraBlocked());
     }
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
-        state.icon = new CameraToggleTileIcon();
-        state.state = mCameraToggleController.isCameraEnabled()
-                ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
-        state.value = mCameraToggleController.isCameraEnabled();
-        state.label = "Camera";
-        if (!mCameraToggleController.isCameraAvailable()) {
-            state.secondaryLabel = "Currently in use";
-        } else {
-            state.secondaryLabel = null;
-        }
+        boolean isBlocked = arg == null ? mCameraToggleController.setCameraBlocked()
+                : (boolean) arg;
+
+        state.icon = ResourceIcon.get(R.drawable.ic_camera_blocked);
+        state.state = isBlocked ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
+        state.value = isBlocked;
+        state.label = getTileLabel();
         state.handlesLongClick = false;
         state.contentDescription = state.label;
         state.expandedAccessibilityClassName = Switch.class.getName();
@@ -96,14 +103,11 @@ public class CameraToggleTile extends QSTileImpl<QSTile.BooleanState> {
 
     @Override
     public CharSequence getTileLabel() {
-        return "Camera";
+        return mContext.getString(R.string.quick_settings_camera_label);
     }
 
-    class CameraToggleTileIcon extends Icon {
-
-        @Override
-        public Drawable getDrawable(Context context) {
-            return context.getDrawable(R.drawable.ic_camera);
-        }
+    @Override
+    public void onCameraBlockedChanged(boolean enable) {
+        refreshState(enable);
     }
 }

@@ -16,18 +16,14 @@
 
 package com.android.systemui.statusbar.policy;
 
-import com.android.systemui.Dumpable;
+public interface CameraToggleController extends
+        CallbackController<CameraToggleController.Callback> {
 
-public interface CameraToggleController extends CallbackController<CameraToggleController.Callback>,
-        Dumpable {
+    boolean isCameraBlocked();
 
-    boolean isCameraEnabled();
-    void setCameraEnabled(boolean enabled);
-
-    boolean isCameraAvailable();
+    void setCameraBlocked(boolean blocked);
 
     interface Callback {
-        void onCameraEnabledChanged(boolean enable);
+        void onCameraBlockedChanged(boolean blocked);
     }
-
 }
