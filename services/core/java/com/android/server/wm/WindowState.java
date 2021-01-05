@@ -131,6 +131,7 @@ import static com.android.server.wm.MoveAnimationSpecProto.DURATION_MS;
 import static com.android.server.wm.MoveAnimationSpecProto.FROM;
 import static com.android.server.wm.MoveAnimationSpecProto.TO;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
@@ -2281,7 +2282,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         mWmService.mAccessibilityController.onWindowTransitionLocked(this, transit);
                     }
                 }
-                final boolean isAnimating = isAnimating(TRANSITION | PARENTS)
+                final boolean isAnimating = mAnimatingExit || isAnimating(TRANSITION | PARENTS,
+                        ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_WINDOW_ANIMATION)
                         && (mActivityRecord == null || !mActivityRecord.isWaitingForTransitionStart());
                 final boolean lastWindowIsStartingWindow = startingWindow && mActivityRecord != null
                         && mActivityRecord.isLastWindow(this);
@@ -2290,8 +2292,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 // Also, If isn't the an animating starting window that is the last window in the app.
                 // We allow the removal of the non-animating starting window now as there is no
                 // additional window or animation that will trigger its removal.
-                if (mWinAnimator.getShown() && mAnimatingExit
-                        && (!lastWindowIsStartingWindow || isAnimating)) {
+                if (mWinAnimator.getShown() && !lastWindowIsStartingWindow && isAnimating) {
+                    // Make isSelfOrAncestorWindowAnimatingExit return true so onExitAnimationDone
+                    // can proceed to remove this window.
+                    mAnimatingExit = true;
                     // The exit animation is running or should run... wait for it!
                     ProtoLog.v(WM_DEBUG_ADD_REMOVE,
                             "Not removing %s due to exit animation", this);
