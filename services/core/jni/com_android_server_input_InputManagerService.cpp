@@ -2055,7 +2055,6 @@ static jboolean nativeEnableSensor(JNIEnv* env, jclass /* clazz */, jlong ptr, j
             ->enableSensor(deviceId, static_cast<InputDeviceSensorType>(sensorType),
                            std::chrono::microseconds(samplingPeriodUs),
                            std::chrono::microseconds(maxBatchReportLatencyUs));
-    return true;
 }
 
 static void nativeDisableSensor(JNIEnv* env, jclass /* clazz */, jlong ptr, jint deviceId,
