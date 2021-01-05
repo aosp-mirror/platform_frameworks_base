@@ -30,7 +30,6 @@ import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.hardware.location.GeofenceHardware;
 import android.hardware.location.GeofenceHardwareImpl;
-import android.location.Criteria;
 import android.location.FusedBatchOptions;
 import android.location.GnssAntennaInfo;
 import android.location.GnssMeasurementsEvent;
@@ -43,6 +42,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationRequest;
 import android.location.LocationResult;
+import android.location.ProviderProperties;
 import android.location.util.identity.CallerIdentity;
 import android.os.AsyncTask;
 import android.os.BatteryStats;
@@ -72,7 +72,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.location.GpsNetInitiatedHandler;
 import com.android.internal.location.GpsNetInitiatedHandler.GpsNiNotification;
-import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 import com.android.internal.location.gnssmetrics.GnssMetrics;
 import com.android.internal.util.FrameworkStatsLog;
@@ -113,8 +112,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             /* supportAltitude = */true,
             /* supportsSpeed = */true,
             /* supportsBearing = */true,
-            Criteria.POWER_HIGH,
-            Criteria.ACCURACY_FINE);
+            ProviderProperties.POWER_USAGE_HIGH,
+            ProviderProperties.ACCURACY_FINE);
 
     // these need to match GnssPositionMode enum in IGnss.hal
     private static final int GPS_POSITION_MODE_STANDALONE = 0;
@@ -487,7 +486,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     }
 
     public GnssLocationProvider(Context context, Injector injector) {
-        super(FgThread.getExecutor(), CallerIdentity.fromContext(context));
+        super(FgThread.getExecutor(), CallerIdentity.fromContext(context), PROPERTIES);
 
         mContext = context;
 
@@ -544,7 +543,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                         mHandler.getLooper(), this);
         mGnssGeofenceProvider = new GnssGeofenceProvider();
 
-        setProperties(PROPERTIES);
         setAllowed(true);
     }
 

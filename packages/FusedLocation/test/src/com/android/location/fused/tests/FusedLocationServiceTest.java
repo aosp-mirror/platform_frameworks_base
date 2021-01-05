@@ -27,6 +27,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationRequest;
 import android.location.LocationResult;
+import android.location.ProviderProperties;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.os.WorkSource;
@@ -37,7 +38,6 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.location.ILocationProvider;
 import com.android.internal.location.ILocationProviderManager;
-import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 import com.android.location.fused.FusedLocationProvider;
 
@@ -153,7 +153,8 @@ public class FusedLocationServiceTest {
         }
 
         @Override
-        public void onSetIdentity(String packageName, String attributionTag) {
+        public void onInitialize(boolean allowed, ProviderProperties properties, String packageName,
+                String attributionTag) {
 
         }
 
