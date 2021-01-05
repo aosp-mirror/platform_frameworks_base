@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.hardware.biometrics.SensorProperties;
+import android.hardware.display.DisplayManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
@@ -84,7 +85,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private FingerprintManager mFingerprintManager;
     @Mock
-    private PowerManager mPowerManager;
+    private DisplayManager mDisplayManager;
     @Mock
     private WindowManager mWindowManager;
     @Mock
@@ -124,7 +125,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mResources,
                 mLayoutInflater,
                 mFingerprintManager,
-                mPowerManager,
+                mDisplayManager,
                 mWindowManager,
                 mSystemSettings,
                 mStatusBarStateController,

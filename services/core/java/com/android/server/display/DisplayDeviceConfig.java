@@ -16,10 +16,13 @@
 
 package com.android.server.display;
 
+import android.content.Context;
 import android.os.Environment;
+import android.os.PowerManager;
 import android.util.Slog;
 import android.view.DisplayAddress;
 
+import com.android.internal.BrightnessSynchronizer;
 import com.android.server.display.config.DisplayConfiguration;
 import com.android.server.display.config.DisplayQuirks;
 import com.android.server.display.config.NitsMap;
@@ -33,6 +36,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -49,6 +53,7 @@ public class DisplayDeviceConfig {
 
     public static final String QUIRK_CAN_SET_BRIGHTNESS_VIA_HWC = "canSetBrightnessViaHwc";
 
+    private static final float BRIGHTNESS_DEFAULT = 0.5f;
     private static final String ETC_DIR = "etc";
     private static final String DISPLAY_CONFIG_DIR = "displayconfig";
     private static final String CONFIG_FILE_FORMAT = "display_%s.xml";
@@ -57,11 +62,21 @@ public class DisplayDeviceConfig {
     private static final String NO_SUFFIX_FORMAT = "%d";
     private static final long STABLE_FLAG = 1L << 62;
 
+    // Float.NaN (used as invalid for brightness) cannot be stored in config.xml
+    // so -2 is used instead
+    private static final float INVALID_BRIGHTNESS_IN_CONFIG = -2f;
+
     private float[] mNits;
     private float[] mBrightness;
+    private float mBrightnessMinimum = Float.NaN;
+    private float mBrightnessMaximum = Float.NaN;
+    private float mBrightnessDefault = Float.NaN;
     private List<String> mQuirks;
 
-    private DisplayDeviceConfig() {
+    private final Context mContext;
+
+    private DisplayDeviceConfig(Context context) {
+        mContext = context;
     }
 
     /**
@@ -72,37 +87,50 @@ public class DisplayDeviceConfig {
      *     <li>physicalDisplayId without a stable flag (old system)</li>
      *     <li>portId</li>
      * </ol>
+     *
      * @param physicalDisplayId The display ID for which to load the configuration.
      * @return A configuration instance for the specified display.
      */
-    public static DisplayDeviceConfig create(long physicalDisplayId) {
+    public static DisplayDeviceConfig create(Context context, long physicalDisplayId,
+            boolean isDefaultDisplay) {
         DisplayDeviceConfig config;
 
-        config = loadConfigFromDirectory(Environment.getProductDirectory(), physicalDisplayId);
+        config = loadConfigFromDirectory(context, Environment.getProductDirectory(),
+                physicalDisplayId);
         if (config != null) {
             return config;
         }
 
-        config = loadConfigFromDirectory(Environment.getVendorDirectory(), physicalDisplayId);
+        config = loadConfigFromDirectory(context, Environment.getVendorDirectory(),
+                physicalDisplayId);
         if (config != null) {
             return config;
         }
 
-        return null;
+        // If no config can be loaded from any ddc xml at all,
+        // prepare a whole config using the global config.xml.
+        // Guaranteed not null
+        if (isDefaultDisplay) {
+            config = getConfigFromGlobalXml(context);
+        } else {
+            config = getConfigFromPmValues(context);
+        }
+        return config;
     }
 
-    private static DisplayDeviceConfig loadConfigFromDirectory(
+    private static DisplayDeviceConfig loadConfigFromDirectory(Context context,
             File baseDirectory, long physicalDisplayId) {
         DisplayDeviceConfig config;
         // Create config using filename from physical ID (including "stable" bit).
-        config = getConfigFromSuffix(baseDirectory, STABLE_ID_SUFFIX_FORMAT, physicalDisplayId);
+        config = getConfigFromSuffix(context, baseDirectory, STABLE_ID_SUFFIX_FORMAT,
+                physicalDisplayId);
         if (config != null) {
             return config;
         }
 
         // Create config using filename from physical ID (excluding "stable" bit).
         final long withoutStableFlag = physicalDisplayId & ~STABLE_FLAG;
-        config = getConfigFromSuffix(baseDirectory, NO_SUFFIX_FORMAT, withoutStableFlag);
+        config = getConfigFromSuffix(context, baseDirectory, NO_SUFFIX_FORMAT, withoutStableFlag);
         if (config != null) {
             return config;
         }
@@ -111,14 +139,8 @@ public class DisplayDeviceConfig {
         final DisplayAddress.Physical physicalAddress =
                 DisplayAddress.fromPhysicalDisplayId(physicalDisplayId);
         int port = physicalAddress.getPort();
-        config = getConfigFromSuffix(baseDirectory, PORT_SUFFIX_FORMAT, port);
-        if (config != null) {
-            return config;
-        }
-
-        // None of these files exist.
-        return null;
-
+        config = getConfigFromSuffix(context, baseDirectory, PORT_SUFFIX_FORMAT, port);
+        return config;
     }
 
     /**
@@ -139,6 +161,18 @@ public class DisplayDeviceConfig {
         return mBrightness;
     }
 
+    public float getBrightnessMinimum() {
+        return mBrightnessMinimum;
+    }
+
+    public float getBrightnessMaximum() {
+        return mBrightnessMaximum;
+    }
+
+    public float getBrightnessDefault() {
+        return mBrightnessDefault;
+    }
+
     /**
      * @param quirkValue The quirk to test.
      * @return {@code true} if the specified quirk is present in this configuration,
@@ -153,12 +187,15 @@ public class DisplayDeviceConfig {
         String str = "DisplayDeviceConfig{"
                 + "mBrightness=" + Arrays.toString(mBrightness)
                 + ", mNits=" + Arrays.toString(mNits)
+                + ", mBrightnessMinimum=" + mBrightnessMinimum
+                + ", mBrightnessMaximum=" + mBrightnessMaximum
+                + ", mBrightnessDefault=" + mBrightnessDefault
                 + ", mQuirks=" + mQuirks
                 + "}";
         return str;
     }
 
-    private static DisplayDeviceConfig getConfigFromSuffix(File baseDirectory,
+    private static DisplayDeviceConfig getConfigFromSuffix(Context context, File baseDirectory,
             String suffixFormat, long idNumber) {
 
         final String suffix = String.format(suffixFormat, idNumber);
@@ -167,11 +204,23 @@ public class DisplayDeviceConfig {
                 baseDirectory, ETC_DIR, DISPLAY_CONFIG_DIR, filename);
 
         if (filePath.exists()) {
-            final DisplayDeviceConfig config = new DisplayDeviceConfig();
+            final DisplayDeviceConfig config = new DisplayDeviceConfig(context);
             config.initFromFile(filePath);
             return config;
         }
         return null;
+    }
+
+    private static DisplayDeviceConfig getConfigFromGlobalXml(Context context) {
+        DisplayDeviceConfig config = new DisplayDeviceConfig(context);
+        config.initFromGlobalXml();
+        return config;
+    }
+
+    private static DisplayDeviceConfig getConfigFromPmValues(Context context) {
+        DisplayDeviceConfig config = new DisplayDeviceConfig(context);
+        config.initFromPmValues();
+        return config;
     }
 
     private void initFromFile(File configFile) {
@@ -187,16 +236,87 @@ public class DisplayDeviceConfig {
 
         try (InputStream in = new BufferedInputStream(new FileInputStream(configFile))) {
             final DisplayConfiguration config = XmlParser.read(in);
-            loadBrightnessMap(config);
-            loadQuirks(config);
+            if (config != null) {
+                loadBrightnessMap(config);
+                loadBrightnessDefaultFromDdcXml(config);
+                loadBrightnessConstraintsFromConfigXml();
+                loadQuirks(config);
+            } else {
+                Slog.w(TAG, "DisplayDeviceConfig file is null");
+            }
         } catch (IOException | DatatypeConfigurationException | XmlPullParserException e) {
             Slog.e(TAG, "Encountered an error while reading/parsing display config file: "
                     + configFile, e);
         }
     }
 
+    private void initFromGlobalXml() {
+        // If no ddc exists, use config.xml
+        loadBrightnessDefaultFromConfigXml();
+        loadBrightnessConstraintsFromConfigXml();
+    }
+
+    private void initFromPmValues() {
+        mBrightnessMinimum = PowerManager.BRIGHTNESS_MIN;
+        mBrightnessMaximum = PowerManager.BRIGHTNESS_MAX;
+        mBrightnessDefault = BRIGHTNESS_DEFAULT;
+    }
+
+    private void loadBrightnessDefaultFromDdcXml(DisplayConfiguration config) {
+        // Default brightness values are stored in the displayDeviceConfig file,
+        // Or we fallback standard values if not.
+        // Priority 1: Value in the displayDeviceConfig
+        // Priority 2: Value in the config.xml (float)
+        // Priority 3: Value in the config.xml (int)
+        if (config != null) {
+            BigDecimal configBrightnessDefault = config.getScreenBrightnessDefault();
+            if (configBrightnessDefault != null) {
+                mBrightnessDefault = configBrightnessDefault.floatValue();
+            } else {
+                mBrightnessDefault = BRIGHTNESS_DEFAULT;
+            }
+        }
+    }
+
+    private void loadBrightnessDefaultFromConfigXml() {
+        // Priority 1: Value in the config.xml (float)
+        // Priority 2: Value in the config.xml (int)
+        final float def = mContext.getResources().getFloat(com.android.internal.R.dimen
+                .config_screenBrightnessSettingDefaultFloat);
+        if (def == INVALID_BRIGHTNESS_IN_CONFIG) {
+            mBrightnessDefault = BrightnessSynchronizer.brightnessIntToFloat(
+                    mContext.getResources().getInteger(com.android.internal.R.integer
+                            .config_screenBrightnessSettingDefault));
+        } else {
+            mBrightnessDefault = def;
+        }
+    }
+
+    private void loadBrightnessConstraintsFromConfigXml() {
+        // TODO(b/175373898) add constraints (min / max) to ddc.
+        final float min = mContext.getResources().getFloat(com.android.internal.R.dimen
+                .config_screenBrightnessSettingMinimumFloat);
+        final float max = mContext.getResources().getFloat(com.android.internal.R.dimen
+                .config_screenBrightnessSettingMaximumFloat);
+        if (min == INVALID_BRIGHTNESS_IN_CONFIG || max == INVALID_BRIGHTNESS_IN_CONFIG) {
+            mBrightnessMinimum = BrightnessSynchronizer.brightnessIntToFloat(
+                    mContext.getResources().getInteger(com.android.internal.R.integer
+                            .config_screenBrightnessSettingMinimum));
+            mBrightnessMaximum = BrightnessSynchronizer.brightnessIntToFloat(
+                    mContext.getResources().getInteger(com.android.internal.R.integer
+                            .config_screenBrightnessSettingMaximum));
+        } else {
+            mBrightnessMinimum = min;
+            mBrightnessMaximum = max;
+        }
+    }
+
     private void loadBrightnessMap(DisplayConfiguration config) {
         final NitsMap map = config.getScreenBrightnessMap();
+        // Map may not exist in config file
+        if (map == null) {
+            return;
+        }
         final List<Point> points = map.getPoint();
         final int size = points.size();
 
