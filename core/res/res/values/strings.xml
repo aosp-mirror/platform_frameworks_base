@@ -110,7 +110,7 @@
     <!-- Displayed as the title for a success/failure report enabling/disabling caller ID. -->
     <string name="ClipMmi">Incoming Caller ID</string>
     <!-- Displayed as the title for a success/failure report enabling/disabling caller ID. -->
-    <string name="ClirMmi">Outgoing Caller ID</string>
+    <string name="ClirMmi">Hide Outgoing Caller ID</string>
     <!-- Displayed as the title for a success/failure report enabling/disabling connected line ID. -->
     <string name="ColpMmi">Connected Line ID</string>
     <!-- Displayed as the title for a success/failure report enabling/disabling connected line ID restriction. -->
