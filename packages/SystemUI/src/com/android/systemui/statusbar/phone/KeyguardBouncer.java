@@ -494,6 +494,14 @@ public class KeyguardBouncer {
         return mKeyguardViewController.interceptMediaKey(event);
     }
 
+    /**
+     * @return true if the pre IME back event should be handled
+     */
+    public boolean dispatchBackKeyEventPreIme() {
+        ensureView();
+        return mKeyguardViewController.dispatchBackKeyEventPreIme();
+    }
+
     public void notifyKeyguardAuthenticated(boolean strongAuth) {
         ensureView();
         mKeyguardViewController.finish(strongAuth, KeyguardUpdateMonitor.getCurrentUser());
