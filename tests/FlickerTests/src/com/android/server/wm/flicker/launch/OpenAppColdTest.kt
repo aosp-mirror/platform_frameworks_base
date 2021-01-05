@@ -107,7 +107,7 @@ class OpenAppColdTest(
                                 configuration.endRotation)
                             navBarLayerIsAlwaysVisible(enabled = false)
                             statusBarLayerIsAlwaysVisible(enabled = false)
-                            visibleLayersShownMoreThanOneConsecutiveEntry(bugId = 174541970)
+                            visibleLayersShownMoreThanOneConsecutiveEntry()
 
                             appLayerReplacesWallpaperLayer(testApp.`package`)
                         }
