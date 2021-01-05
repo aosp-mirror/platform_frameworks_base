@@ -3868,8 +3868,6 @@ public final class ViewRootImpl implements ViewParent,
     private HardwareRenderer.FrameCompleteCallback createFrameCompleteCallback(Handler handler,
             boolean reportNextDraw, ArrayList<Runnable> commitCallbacks) {
         return frameNr -> {
-            mBlurRegionAggregator.dispatchBlurTransactionIfNeeded(frameNr);
-
             if (DEBUG_BLAST) {
                 Log.d(mTag, "Received frameCompleteCallback frameNum=" + frameNr);
             }
@@ -3903,8 +3901,7 @@ public final class ViewRootImpl implements ViewParent,
                 .captureFrameCommitCallbacks();
         final boolean needFrameCompleteCallback =
                 mNextDrawUseBLASTSyncTransaction || mReportNextDraw
-                        || (commitCallbacks != null && commitCallbacks.size() > 0)
-                        || mBlurRegionAggregator.hasRegions();
+                        || (commitCallbacks != null && commitCallbacks.size() > 0);
         if (needFrameCompleteCallback) {
             if (DEBUG_BLAST) {
                 Log.d(mTag, "Creating frameCompleteCallback"
@@ -3921,75 +3918,80 @@ public final class ViewRootImpl implements ViewParent,
         return false;
     }
 
-    /**
-     * The callback will run on a worker thread pool from the render thread.
-     */
-    private HardwareRenderer.FrameDrawingCallback createFrameDrawingCallback(
-            boolean addTransactionComplete) {
-        return frame -> {
+    private void addFrameCallbackIfNeeded() {
+        boolean nextDrawUseBlastSync = mNextDrawUseBLASTSyncTransaction;
+        boolean hasBlur = mBlurRegionAggregator.hasRegions();
+        boolean reportNextDraw = mReportNextDraw;
+        boolean addTransactionComplete = mSendNextFrameToWm;
+
+        if (!nextDrawUseBlastSync && !reportNextDraw && !hasBlur) {
+            return;
+        }
+
+        mNextDrawUseBLASTSyncTransaction = false;
+
+        if (DEBUG_BLAST) {
+            Log.d(mTag, "Creating frameDrawingCallback"
+                    + " nextDrawUseBlastSync=" + nextDrawUseBlastSync
+                    + " reportNextDraw=" + reportNextDraw
+                    + " hasBlur=" + hasBlur);
+        }
+
+        // The callback will run on a worker thread pool from the render thread.
+        HardwareRenderer.FrameDrawingCallback frameDrawingCallback = frame -> {
             if (DEBUG_BLAST) {
                 Log.d(mTag, "Received frameDrawingCallback frameNum=" + frame + "."
                         + " Creating transactionCompleteCallback=" + addTransactionComplete);
             }
-            mRtNextFrameReportedConsumeWithBlast = true;
+
+            if (hasBlur) {
+                mBlurRegionAggregator.dispatchBlurTransactionIfNeeded(frame);
+            }
+
             if (mBlastBufferQueue == null) {
                 return;
             }
 
-            // We don't need to synchronize mRtBLASTSyncTransaction here since it's not
-            // being modified and only sent to BlastBufferQueue.
-            mBlastBufferQueue.setNextTransaction(mRtBLASTSyncTransaction);
-            if (!addTransactionComplete) {
-                return;
+            if (nextDrawUseBlastSync) {
+                // Frame callbacks will always occur after submitting draw requests and before
+                // the draw actually occurs. This will ensure that we set the next transaction
+                // for the frame that's about to get drawn and not on a previous frame that.
+                //
+                // This is thread safe since mRtNextFrameReportConsumeWithBlast will only be
+                // modified in onFrameDraw and then again in onFrameComplete. This is to ensure the
+                // next frame completed should be reported with the blast sync transaction.
+                mRtNextFrameReportedConsumeWithBlast = true;
+
+                // We don't need to synchronize mRtBLASTSyncTransaction here since it's not
+                // being modified and only sent to BlastBufferQueue.
+                mBlastBufferQueue.setNextTransaction(mRtBLASTSyncTransaction);
+            } else if (reportNextDraw) {
+                // If we need to report next draw, wait for adapter to flush its shadow queue
+                // by processing previously queued buffers so that we can submit the
+                // transaction a timely manner.
+                mBlastBufferQueue.flushShadowQueue();
             }
 
-            mBlastBufferQueue.setTransactionCompleteCallback(frame, frameNumber -> {
-                if (DEBUG_BLAST) {
-                    Log.d(mTag, "Received transactionCompleteCallback frameNum=" + frame);
-                }
-                mHandler.postAtFrontOfQueue(() -> {
-                    mSendNextFrameToWm = false;
+            if (addTransactionComplete) {
+                mBlastBufferQueue.setTransactionCompleteCallback(frame, frameNumber -> {
                     if (DEBUG_BLAST) {
-                        Log.d(mTag, "Scheduling a traversal=" + mRequestedTraverseWhilePaused
-                                + " due to a previous skipped traversal.");
+                        Log.d(mTag, "Received transactionCompleteCallback frameNum=" + frame);
                     }
-                    if (mRequestedTraverseWhilePaused) {
-                        mRequestedTraverseWhilePaused = false;
-                        scheduleTraversals();
-                    }
+                    mHandler.postAtFrontOfQueue(() -> {
+                        mSendNextFrameToWm = false;
+                        if (DEBUG_BLAST) {
+                            Log.d(mTag, "Scheduling a traversal=" + mRequestedTraverseWhilePaused
+                                    + " due to a previous skipped traversal.");
+                        }
+                        if (mRequestedTraverseWhilePaused) {
+                            mRequestedTraverseWhilePaused = false;
+                            scheduleTraversals();
+                        }
+                    });
                 });
-            });
-        };
-    }
-
-    private void addFrameCallbackIfNeeded() {
-        if (DEBUG_BLAST) {
-            if (mNextDrawUseBLASTSyncTransaction || mReportNextDraw) {
-                Log.d(mTag, "Creating frameDrawingCallback mNextDrawUseBLASTSyncTransaction="
-                        + mNextDrawUseBLASTSyncTransaction + " mReportNextDraw=" + mReportNextDraw);
             }
-        }
-
-        if (mNextDrawUseBLASTSyncTransaction) {
-            // Frame callbacks will always occur after submitting draw requests and before
-            // the draw actually occurs. This will ensure that we set the next transaction
-            // for the frame that's about to get drawn and not on a previous frame that.
-            //
-            // This is thread safe since mRtNextFrameReportConsumeWithBlast will only be
-            // modified in onFrameDraw and then again in onFrameComplete. This is to ensure the
-            // next frame completed should be reported with the blast sync transaction.
-            registerRtFrameCallback(createFrameDrawingCallback(mSendNextFrameToWm));
-            mNextDrawUseBLASTSyncTransaction = false;
-        } else if (mReportNextDraw) {
-            registerRtFrameCallback(frame -> {
-                if (mBlastBufferQueue != null) {
-                    // If we need to report next draw, wait for adapter to flush its shadow queue
-                    // by processing previously queued buffers so that we can submit the
-                    // transaction a timely manner.
-                    mBlastBufferQueue.flushShadowQueue();
-                }
-            });
-        }
+        };
+        registerRtFrameCallback(frameDrawingCallback);
     }
 
     private void performDraw() {
@@ -10070,14 +10072,14 @@ public final class ViewRootImpl implements ViewParent,
         if (!surfaceControl.isValid()) {
             return;
         }
-        if (useBLAST()) {
-            synchronized (getBlastTransactionLock()) {
-                getBLASTSyncTransaction().setBlurRegions(surfaceControl, regionCopy);
-            }
+
+        SurfaceControl.Transaction transaction = new SurfaceControl.Transaction();
+        transaction.setBlurRegions(surfaceControl, regionCopy);
+
+        if (useBLAST() && mBlastBufferQueue != null) {
+            mBlastBufferQueue.mergeWithNextTransaction(transaction, frameNumber);
         } else {
-            SurfaceControl.Transaction transaction = new SurfaceControl.Transaction();
-            transaction.setBlurRegions(surfaceControl, regionCopy);
-            transaction.deferTransactionUntil(surfaceControl, getSurfaceControl(), frameNumber);
+            transaction.deferTransactionUntil(surfaceControl, surfaceControl, frameNumber);
             transaction.apply();
         }
     }
