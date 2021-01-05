@@ -64,8 +64,8 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
-import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
+import com.android.wm.shell.pip.Pip;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -107,6 +107,7 @@ public class NavigationBarController implements Callbacks,
     private final UiEventLogger mUiEventLogger;
     private final Handler mHandler;
     private final DisplayManager mDisplayManager;
+    private final NavigationBarOverlayController mNavBarOverlayController;
 
     /** A displayId - nav bar maps. */
     @VisibleForTesting
@@ -141,6 +142,7 @@ public class NavigationBarController implements Callbacks,
             SystemActions systemActions,
             @Main Handler mainHandler,
             UiEventLogger uiEventLogger,
+            NavigationBarOverlayController navBarOverlayController,
             ConfigurationController configurationController) {
         mContext = context;
         mWindowManager = windowManager;
@@ -168,6 +170,7 @@ public class NavigationBarController implements Callbacks,
         commandQueue.addCallback(this);
         configurationController.addCallback(this);
         mConfigChanges.applyNewConfig(mContext.getResources());
+        mNavBarOverlayController = navBarOverlayController;
     }
 
     @Override
@@ -290,6 +293,7 @@ public class NavigationBarController implements Callbacks,
                 mNotificationRemoteInputManager,
                 mSystemActions,
                 mHandler,
+                mNavBarOverlayController,
                 mUiEventLogger);
 
         View navigationBarView = navBar.createView(savedState);

@@ -136,8 +136,8 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
-import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
+import com.android.wm.shell.pip.Pip;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -185,6 +185,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private final Optional<Recents> mRecentsOptional;
     private final SystemActions mSystemActions;
     private final Handler mHandler;
+    private final NavigationBarOverlayController mNavbarOverlayController;
     private final UiEventLogger mUiEventLogger;
 
     private Bundle mSavedState;
@@ -415,6 +416,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             NotificationRemoteInputManager notificationRemoteInputManager,
             SystemActions systemActions,
             @Main Handler mainHandler,
+            NavigationBarOverlayController navbarOverlayController,
             UiEventLogger uiEventLogger) {
         mContext = context;
         mWindowManager = windowManager;
@@ -438,6 +440,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mRecentsOptional = recentsOptional;
         mSystemActions = systemActions;
         mHandler = mainHandler;
+        mNavbarOverlayController = navbarOverlayController;
         mUiEventLogger = uiEventLogger;
     }
 
@@ -860,6 +863,13 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         if (rotateSuggestionsDisabled) return;
 
         rotationButtonController.onRotationProposal(rotation, winRotation, isValid);
+    }
+
+    @Override
+    public void onRecentsAnimationStateChanged(boolean running) {
+        if (running) {
+            mNavbarOverlayController.setButtonState(/* visible */false, /* force */true);
+        }
     }
 
     /** Restores the appearance and the transient saved state to {@link NavigationBar}. */

@@ -76,8 +76,8 @@ import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
-import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
+import com.android.wm.shell.pip.Pip;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -232,6 +232,7 @@ public class NavigationBarTest extends SysuiTestCase {
                 mock(NotificationRemoteInputManager.class),
                 mock(SystemActions.class),
                 mHandler,
+                mock(NavigationBarOverlayController.class),
                 mUiEventLogger));
     }
 
