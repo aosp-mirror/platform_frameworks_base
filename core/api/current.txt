@@ -16244,7 +16244,7 @@ package android.graphics.drawable {
     method public static android.graphics.drawable.Icon createWithResource(android.content.Context, @DrawableRes int);
     method public static android.graphics.drawable.Icon createWithResource(String, @DrawableRes int);
     method public int describeContents();
-    method @IdRes public int getResId();
+    method @DrawableRes public int getResId();
     method @NonNull public String getResPackage();
     method public int getType();
     method @NonNull public android.net.Uri getUri();
