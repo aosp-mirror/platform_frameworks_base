@@ -91,6 +91,7 @@ public class TvNotificationPanel extends SystemUI implements CommandQueue.Callba
 
     private void openInternalNotificationPanel(String action) {
         Intent intent = new Intent(mContext, TvNotificationPanelActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         intent.setAction(action);
         mContext.startActivityAsUser(intent, UserHandle.SYSTEM);
     }
@@ -113,6 +114,7 @@ public class TvNotificationPanel extends SystemUI implements CommandQueue.Callba
         if (ri != null && ri.activityInfo != null) {
             if (ri.activityInfo.permission != null && ri.activityInfo.permission.equals(
                     Manifest.permission.STATUS_BAR_SERVICE)) {
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 mContext.startActivityAsUser(intent, UserHandle.CURRENT);
             } else {
                 Log.e(TAG,
