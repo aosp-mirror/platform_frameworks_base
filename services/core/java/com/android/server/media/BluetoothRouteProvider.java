@@ -439,7 +439,6 @@ class BluetoothRouteProvider {
             }
         }
     }
-
     private class BluetoothBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
