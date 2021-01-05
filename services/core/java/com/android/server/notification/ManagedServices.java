@@ -73,7 +73,6 @@ import com.android.server.utils.TimingsTraceAndSlog;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -544,7 +543,8 @@ abstract public class ManagedServices {
     /**
      * This is called to process tags other than {@link #TAG_MANAGED_SERVICES}.
      */
-    protected void readExtraTag(String tag, TypedXmlPullParser parser) throws IOException {}
+    protected void readExtraTag(String tag, TypedXmlPullParser parser)
+            throws IOException, XmlPullParserException {}
 
     protected final void migrateToXml() {
         for (UserInfo user : mUm.getUsers()) {
@@ -1613,6 +1613,7 @@ abstract public class ManagedServices {
         public boolean isSystem;
         public ServiceConnection connection;
         public int targetSdkVersion;
+        public Pair<ComponentName, Integer> mKey;
 
         public ManagedServiceInfo(IInterface service, ComponentName component,
                 int userid, boolean isSystem, ServiceConnection connection, int targetSdkVersion) {
@@ -1622,6 +1623,7 @@ abstract public class ManagedServices {
             this.isSystem = isSystem;
             this.connection = connection;
             this.targetSdkVersion = targetSdkVersion;
+            mKey = Pair.create(component, userid);
         }
 
         public boolean isGuest(ManagedServices host) {
