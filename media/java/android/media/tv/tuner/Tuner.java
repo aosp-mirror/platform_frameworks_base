@@ -44,6 +44,7 @@ import android.media.tv.tuner.frontend.FrontendStatus.FrontendStatusType;
 import android.media.tv.tuner.frontend.OnTuneEventListener;
 import android.media.tv.tuner.frontend.ScanCallback;
 import android.media.tv.tunerresourcemanager.ResourceClientProfile;
+import android.media.tv.tunerresourcemanager.TunerCiCamRequest;
 import android.media.tv.tunerresourcemanager.TunerDemuxRequest;
 import android.media.tv.tunerresourcemanager.TunerDescramblerRequest;
 import android.media.tv.tunerresourcemanager.TunerFrontendRequest;
@@ -297,6 +298,8 @@ public class Tuner implements AutoCloseable  {
     private Executor mOnResourceLostListenerExecutor;
 
     private Integer mDemuxHandle;
+    private Integer mFrontendCiCamHandle;
+    private Integer mFrontendCiCamId;
     private Map<Integer, WeakReference<Descrambler>> mDescramblers = new HashMap<>();
     private List<WeakReference<Filter>> mFilters = new ArrayList<WeakReference<Filter>>();
 
@@ -468,6 +471,14 @@ public class Tuner implements AutoCloseable  {
         }
         if (mLnb != null) {
             mLnb.close();
+        }
+        if (mFrontendCiCamHandle != null) {
+            int result = nativeUnlinkCiCam(mFrontendCiCamId);
+            if (result == RESULT_SUCCESS) {
+                mTunerResourceManager.releaseCiCam(mFrontendCiCamHandle, mClientId);
+                mFrontendCiCamId = null;
+                mFrontendCiCamHandle = null;
+            }
         }
         synchronized (mDescramblers) {
             if (!mDescramblers.isEmpty()) {
@@ -917,7 +928,8 @@ public class Tuner implements AutoCloseable  {
     public int connectFrontendToCiCam(int ciCamId) {
         if (TunerVersionChecker.checkHigherOrEqualVersionTo(TunerVersionChecker.TUNER_VERSION_1_1,
                 "linkFrontendToCiCam")) {
-            if (checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND)) {
+            if (checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND)
+                    && checkCiCamResource(ciCamId)) {
                 return nativeLinkCiCam(ciCamId);
             }
         }
@@ -936,7 +948,7 @@ public class Tuner implements AutoCloseable  {
      */
     @Result
     public int disconnectCiCam() {
-        if (checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX)) {
+        if (mDemuxHandle != null) {
             return nativeDisconnectCiCam();
         }
         return RESULT_UNAVAILABLE;
@@ -962,8 +974,14 @@ public class Tuner implements AutoCloseable  {
     public int disconnectFrontendToCiCam(int ciCamId) {
         if (TunerVersionChecker.checkHigherOrEqualVersionTo(TunerVersionChecker.TUNER_VERSION_1_1,
                 "unlinkFrontendToCiCam")) {
-            if (checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND)) {
-                return nativeUnlinkCiCam(ciCamId);
+            if (mFrontendCiCamHandle != null && mFrontendCiCamId == ciCamId) {
+                int result = nativeUnlinkCiCam(ciCamId);
+                if (result == RESULT_SUCCESS) {
+                    mTunerResourceManager.releaseCiCam(mFrontendCiCamHandle, mClientId);
+                    mFrontendCiCamId = null;
+                    mFrontendCiCamHandle = null;
+                }
+                return result;
             }
         }
         return RESULT_UNAVAILABLE;
@@ -1360,6 +1378,18 @@ public class Tuner implements AutoCloseable  {
         return descrambler;
     }
 
+    private boolean requestFrontendCiCam(int ciCamId) {
+        int[] ciCamHandle = new int[1];
+        TunerCiCamRequest request = new TunerCiCamRequest();
+        request.clientId = mClientId;
+        request.ciCamId = ciCamId;
+        boolean granted = mTunerResourceManager.requestCiCam(request, ciCamHandle);
+        if (granted) {
+            mFrontendCiCamHandle = ciCamHandle[0];
+        }
+        return granted;
+    }
+
     private boolean checkResource(int resourceType)  {
         switch (resourceType) {
             case TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND: {
@@ -1382,6 +1412,13 @@ public class Tuner implements AutoCloseable  {
             }
             default:
                 return false;
+        }
+        return true;
+    }
+
+    private boolean checkCiCamResource(int ciCamId) {
+        if (mFrontendCiCamHandle == null && !requestFrontendCiCam(ciCamId)) {
+            return false;
         }
         return true;
     }

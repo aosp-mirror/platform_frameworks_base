@@ -29,6 +29,7 @@ import android.media.tv.tuner.frontend.FrontendSettings;
 import android.media.tv.tunerresourcemanager.CasSessionRequest;
 import android.media.tv.tunerresourcemanager.IResourcesReclaimListener;
 import android.media.tv.tunerresourcemanager.ResourceClientProfile;
+import android.media.tv.tunerresourcemanager.TunerCiCamRequest;
 import android.media.tv.tunerresourcemanager.TunerDemuxRequest;
 import android.media.tv.tunerresourcemanager.TunerDescramblerRequest;
 import android.media.tv.tunerresourcemanager.TunerFrontendInfo;
@@ -552,6 +553,62 @@ public class TunerResourceManagerServiceTest {
     }
 
     @Test
+    public void requestCiCamTest_NoCiCamAvailable_RequestWithHigherPriority() {
+        // Register clients
+        ResourceClientProfile[] profiles = new ResourceClientProfile[2];
+        profiles[0] = resourceClientProfile("0" /*sessionId*/,
+                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
+        profiles[1] = resourceClientProfile("1" /*sessionId*/,
+                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
+        int[] clientPriorities = {100, 500};
+        int[] clientId0 = new int[1];
+        int[] clientId1 = new int[1];
+        TestResourcesReclaimListener listener = new TestResourcesReclaimListener();
+        mTunerResourceManagerService.registerClientProfileInternal(
+                profiles[0], listener, clientId0);
+        assertThat(clientId0[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
+        mTunerResourceManagerService.getClientProfile(clientId0[0])
+                .setPriority(clientPriorities[0]);
+        mTunerResourceManagerService.registerClientProfileInternal(
+                profiles[1], new TestResourcesReclaimListener(), clientId1);
+        assertThat(clientId1[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
+        mTunerResourceManagerService.getClientProfile(clientId1[0])
+                .setPriority(clientPriorities[1]);
+
+        // Init cicam/cas resources.
+        mTunerResourceManagerService.updateCasInfoInternal(1 /*casSystemId*/, 2 /*maxSessionNum*/);
+
+        TunerCiCamRequest request = tunerCiCamRequest(clientId0[0], 1 /*ciCamId*/);
+        int[] ciCamHandle = new int[1];
+        // Request for 2 ciCam sessions.
+        assertThat(mTunerResourceManagerService
+                .requestCiCamInternal(request, ciCamHandle)).isTrue();
+        assertThat(mTunerResourceManagerService
+                .requestCiCamInternal(request, ciCamHandle)).isTrue();
+        assertThat(mTunerResourceManagerService.getResourceIdFromHandle(ciCamHandle[0]))
+                .isEqualTo(1);
+        assertThat(mTunerResourceManagerService.getClientProfile(clientId0[0])
+                .getInUseCiCamId()).isEqualTo(1);
+        assertThat(mTunerResourceManagerService.getCiCamResource(1)
+                .getOwnerClientIds()).isEqualTo(new HashSet<Integer>(Arrays.asList(clientId0[0])));
+        assertThat(mTunerResourceManagerService.getCiCamResource(1).isFullyUsed()).isTrue();
+
+        request = tunerCiCamRequest(clientId1[0], 1);
+        assertThat(mTunerResourceManagerService
+                .requestCiCamInternal(request, ciCamHandle)).isTrue();
+        assertThat(mTunerResourceManagerService.getResourceIdFromHandle(ciCamHandle[0]))
+                .isEqualTo(1);
+        assertThat(mTunerResourceManagerService.getClientProfile(clientId1[0])
+                .getInUseCiCamId()).isEqualTo(1);
+        assertThat(mTunerResourceManagerService.getClientProfile(clientId0[0])
+                .getInUseCiCamId()).isEqualTo(ClientProfile.INVALID_RESOURCE_ID);
+        assertThat(mTunerResourceManagerService.getCiCamResource(1)
+                .getOwnerClientIds()).isEqualTo(new HashSet<Integer>(Arrays.asList(clientId1[0])));
+        assertThat(mTunerResourceManagerService.getCiCamResource(1).isFullyUsed()).isFalse();
+        assertThat(listener.isReclaimed()).isTrue();
+    }
+
+    @Test
     public void releaseCasTest() {
         // Register clients
         ResourceClientProfile[] profiles = new ResourceClientProfile[1];
@@ -585,6 +642,43 @@ public class TunerResourceManagerServiceTest {
                 .getInUseCasSystemId()).isEqualTo(ClientProfile.INVALID_RESOURCE_ID);
         assertThat(mTunerResourceManagerService.getCasResource(1).isFullyUsed()).isFalse();
         assertThat(mTunerResourceManagerService.getCasResource(1)
+                .getOwnerClientIds()).isEmpty();
+    }
+
+    @Test
+    public void releaseCiCamTest() {
+        // Register clients
+        ResourceClientProfile[] profiles = new ResourceClientProfile[1];
+        profiles[0] = resourceClientProfile("0" /*sessionId*/,
+                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
+        int[] clientId = new int[1];
+        TestResourcesReclaimListener listener = new TestResourcesReclaimListener();
+        mTunerResourceManagerService.registerClientProfileInternal(profiles[0], listener, clientId);
+        assertThat(clientId[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
+
+        // Init cas resources.
+        mTunerResourceManagerService.updateCasInfoInternal(1 /*casSystemId*/, 2 /*maxSessionNum*/);
+
+        TunerCiCamRequest request = tunerCiCamRequest(clientId[0], 1 /*ciCamId*/);
+        int[] ciCamHandle = new int[1];
+        // Request for 1 ciCam sessions.
+        assertThat(mTunerResourceManagerService
+                .requestCiCamInternal(request, ciCamHandle)).isTrue();
+        assertThat(mTunerResourceManagerService.getResourceIdFromHandle(ciCamHandle[0]))
+                .isEqualTo(1);
+        assertThat(mTunerResourceManagerService.getClientProfile(clientId[0])
+                .getInUseCiCamId()).isEqualTo(1);
+        assertThat(mTunerResourceManagerService.getCiCamResource(1)
+                .getOwnerClientIds()).isEqualTo(new HashSet<Integer>(Arrays.asList(clientId[0])));
+        assertThat(mTunerResourceManagerService.getCiCamResource(1).isFullyUsed()).isFalse();
+
+        // Release ciCam
+        mTunerResourceManagerService.releaseCiCamInternal(mTunerResourceManagerService
+                .getCiCamResource(1), clientId[0]);
+        assertThat(mTunerResourceManagerService.getClientProfile(clientId[0])
+                .getInUseCiCamId()).isEqualTo(ClientProfile.INVALID_RESOURCE_ID);
+        assertThat(mTunerResourceManagerService.getCiCamResource(1).isFullyUsed()).isFalse();
+        assertThat(mTunerResourceManagerService.getCiCamResource(1)
                 .getOwnerClientIds()).isEmpty();
     }
 
@@ -1085,6 +1179,13 @@ public class TunerResourceManagerServiceTest {
         CasSessionRequest request = new CasSessionRequest();
         request.clientId = clientId;
         request.casSystemId = casSystemId;
+        return request;
+    }
+
+    private TunerCiCamRequest tunerCiCamRequest(int clientId, int ciCamId) {
+        TunerCiCamRequest request = new TunerCiCamRequest();
+        request.clientId = clientId;
+        request.ciCamId = ciCamId;
         return request;
     }
 }

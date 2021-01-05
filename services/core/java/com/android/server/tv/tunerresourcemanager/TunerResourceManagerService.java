@@ -27,6 +27,7 @@ import android.media.tv.tunerresourcemanager.CasSessionRequest;
 import android.media.tv.tunerresourcemanager.IResourcesReclaimListener;
 import android.media.tv.tunerresourcemanager.ITunerResourceManager;
 import android.media.tv.tunerresourcemanager.ResourceClientProfile;
+import android.media.tv.tunerresourcemanager.TunerCiCamRequest;
 import android.media.tv.tunerresourcemanager.TunerDemuxRequest;
 import android.media.tv.tunerresourcemanager.TunerDescramblerRequest;
 import android.media.tv.tunerresourcemanager.TunerFrontendInfo;
@@ -71,6 +72,8 @@ public class TunerResourceManagerService extends SystemService implements IBinde
     private Map<Integer, LnbResource> mLnbResources = new HashMap<>();
     // Map of the current available Cas resources
     private Map<Integer, CasResource> mCasResources = new HashMap<>();
+    // Map of the current available CiCam resources
+    private Map<Integer, CiCamResource> mCiCamResources = new HashMap<>();
 
     @GuardedBy("mLock")
     private Map<Integer, ResourcesReclaimListenerRecord> mListeners = new HashMap<>();
@@ -294,6 +297,22 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         }
 
         @Override
+        public boolean requestCiCam(@NonNull TunerCiCamRequest request,
+                @NonNull int[] ciCamHandle) throws RemoteException {
+            enforceTrmAccessPermission("requestCiCam");
+            if (ciCamHandle == null) {
+                throw new RemoteException("ciCamHandle can't be null");
+            }
+            synchronized (mLock) {
+                if (!checkClientExists(request.clientId)) {
+                    throw new RemoteException("Request ciCam from unregistered client:"
+                            + request.clientId);
+                }
+                return requestCiCamInternal(request, ciCamHandle);
+            }
+        }
+
+        @Override
         public boolean requestLnb(@NonNull TunerLnbRequest request, @NonNull int[] lnbHandle)
                 throws RemoteException {
             enforceTunerAccessPermission("requestLnb");
@@ -374,6 +393,34 @@ public class TunerResourceManagerService extends SystemService implements IBinde
                             "Client is not the current owner of the releasing cas.");
                 }
                 releaseCasSessionInternal(cas, clientId);
+            }
+        }
+
+        @Override
+        public void releaseCiCam(int ciCamHandle, int clientId) throws RemoteException {
+            enforceTrmAccessPermission("releaseCiCam");
+            if (!validateResourceHandle(
+                    TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND_CICAM, ciCamHandle)) {
+                throw new RemoteException("ciCamHandle can't be invalid");
+            }
+            synchronized (mLock) {
+                if (!checkClientExists(clientId)) {
+                    throw new RemoteException("Release ciCam from unregistered client:" + clientId);
+                }
+                int ciCamId = getClientProfile(clientId).getInUseCiCamId();
+                if (ciCamId != getResourceIdFromHandle(ciCamHandle)) {
+                    throw new RemoteException("The client " + clientId + " is not the owner of "
+                            + "the releasing ciCam.");
+                }
+                CiCamResource ciCam = getCiCamResource(ciCamId);
+                if (ciCam == null) {
+                    throw new RemoteException("Releasing ciCam does not exist.");
+                }
+                if (!ciCam.getOwnerClientIds().contains(clientId)) {
+                    throw new RemoteException(
+                            "Client is not the current owner of the releasing ciCam.");
+                }
+                releaseCiCamInternal(ciCam, clientId);
             }
         }
 
@@ -586,24 +633,33 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         // If maxSessionNum is 0, removing the Cas Resource.
         if (maxSessionNum == 0) {
             removeCasResource(casSystemId);
+            removeCiCamResource(casSystemId);
             return;
         }
         // If the Cas exists, updates the Cas Resource accordingly.
         CasResource cas = getCasResource(casSystemId);
+        CiCamResource ciCam = getCiCamResource(casSystemId);
         if (cas != null) {
             if (cas.getUsedSessionNum() > maxSessionNum) {
                 // Sort and release the short number of Cas resources.
                 int releasingCasResourceNum = cas.getUsedSessionNum() - maxSessionNum;
-                releaseLowerPriorityClientCasResources(releasingCasResourceNum);
+                // TODO: handle CiCam session update.
             }
             cas.updateMaxSessionNum(maxSessionNum);
+            if (ciCam != null) {
+                ciCam.updateMaxSessionNum(maxSessionNum);
+            }
             return;
         }
         // Add the new Cas Resource.
         cas = new CasResource.Builder(casSystemId)
                              .maxSessionNum(maxSessionNum)
                              .build();
+        ciCam = new CiCamResource.Builder(casSystemId)
+                             .maxSessionNum(maxSessionNum)
+                             .build();
         addCasResource(cas);
+        addCiCamResource(ciCam);
     }
 
     @VisibleForTesting
@@ -785,6 +841,55 @@ public class TunerResourceManagerService extends SystemService implements IBinde
     }
 
     @VisibleForTesting
+    protected boolean requestCiCamInternal(TunerCiCamRequest request, int[] ciCamHandle) {
+        if (DEBUG) {
+            Slog.d(TAG, "requestCiCamInternal(TunerCiCamRequest=" + request + ")");
+        }
+        CiCamResource ciCam = getCiCamResource(request.ciCamId);
+        // Unregistered Cas System is treated as having unlimited sessions.
+        if (ciCam == null) {
+            ciCam = new CiCamResource.Builder(request.ciCamId)
+                                     .maxSessionNum(Integer.MAX_VALUE)
+                                     .build();
+            addCiCamResource(ciCam);
+        }
+        ciCamHandle[0] = TunerResourceManager.INVALID_RESOURCE_HANDLE;
+        ClientProfile requestClient = getClientProfile(request.clientId);
+        clientPriorityUpdateOnRequest(requestClient);
+        int lowestPriorityOwnerId = -1;
+        // Priority max value is 1000
+        int currentLowestPriority = MAX_CLIENT_PRIORITY + 1;
+        if (!ciCam.isFullyUsed()) {
+            ciCamHandle[0] = generateResourceHandle(
+                    TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND_CICAM, ciCam.getCiCamId());
+            updateCiCamClientMappingOnNewGrant(request.ciCamId, request.clientId);
+            return true;
+        }
+        for (int ownerId : ciCam.getOwnerClientIds()) {
+            // Record the client id with lowest priority that is using the current Cas system.
+            int priority = getOwnerClientPriority(ownerId);
+            if (currentLowestPriority > priority) {
+                lowestPriorityOwnerId = ownerId;
+                currentLowestPriority = priority;
+            }
+        }
+
+        // When all the CiCam sessions are occupied, reclaim the lowest priority client if the
+        // request client has higher priority.
+        if (lowestPriorityOwnerId > -1 && (requestClient.getPriority() > currentLowestPriority)) {
+            if (!reclaimResource(lowestPriorityOwnerId,
+                    TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND_CICAM)) {
+                return false;
+            }
+            ciCamHandle[0] = generateResourceHandle(
+                    TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND_CICAM, ciCam.getCiCamId());
+            updateCiCamClientMappingOnNewGrant(request.ciCamId, request.clientId);
+            return true;
+        }
+        return false;
+    }
+
+    @VisibleForTesting
     protected boolean isHigherPriorityInternal(ResourceClientProfile challengerProfile,
             ResourceClientProfile holderProfile) {
         if (DEBUG) {
@@ -840,6 +945,14 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             Slog.d(TAG, "releaseCasSession(sessionResourceId=" + cas.getSystemId() + ")");
         }
         updateCasClientMappingOnRelease(cas, ownerClientId);
+    }
+
+    @VisibleForTesting
+    protected void releaseCiCamInternal(CiCamResource ciCam, int ownerClientId) {
+        if (DEBUG) {
+            Slog.d(TAG, "releaseCiCamInternal(ciCamId=" + ciCam.getCiCamId() + ")");
+        }
+        updateCiCamClientMappingOnRelease(ciCam, ownerClientId);
     }
 
     @VisibleForTesting
@@ -1019,11 +1132,25 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         ownerProfile.useCas(grantingId);
     }
 
+    private void updateCiCamClientMappingOnNewGrant(int grantingId, int ownerClientId) {
+        CiCamResource grantingCiCam = getCiCamResource(grantingId);
+        ClientProfile ownerProfile = getClientProfile(ownerClientId);
+        grantingCiCam.setOwner(ownerClientId);
+        ownerProfile.useCiCam(grantingId);
+    }
+
     private void updateCasClientMappingOnRelease(
             @NonNull CasResource releasingCas, int ownerClientId) {
         ClientProfile ownerProfile = getClientProfile(ownerClientId);
         releasingCas.removeOwner(ownerClientId);
         ownerProfile.releaseCas();
+    }
+
+    private void updateCiCamClientMappingOnRelease(
+            @NonNull CiCamResource releasingCiCam, int ownerClientId) {
+        ClientProfile ownerProfile = getClientProfile(ownerClientId);
+        releasingCiCam.removeOwner(ownerClientId);
+        ownerProfile.releaseCiCam();
     }
 
     /**
@@ -1118,13 +1245,29 @@ public class TunerResourceManagerService extends SystemService implements IBinde
     }
 
     @VisibleForTesting
+    @Nullable
+    protected CiCamResource getCiCamResource(int ciCamId) {
+        return mCiCamResources.get(ciCamId);
+    }
+
+    @VisibleForTesting
     protected Map<Integer, CasResource> getCasResources() {
         return mCasResources;
+    }
+
+    @VisibleForTesting
+    protected Map<Integer, CiCamResource> getCiCamResources() {
+        return mCiCamResources;
     }
 
     private void addCasResource(CasResource newCas) {
         // Update resource list and available id list
         mCasResources.put(newCas.getSystemId(), newCas);
+    }
+
+    private void addCiCamResource(CiCamResource newCiCam) {
+        // Update resource list and available id list
+        mCiCamResources.put(newCiCam.getCiCamId(), newCiCam);
     }
 
     private void removeCasResource(int removingId) {
@@ -1136,6 +1279,17 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             getClientProfile(ownerId).releaseCas();
         }
         mCasResources.remove(removingId);
+    }
+
+    private void removeCiCamResource(int removingId) {
+        CiCamResource ciCam = getCiCamResource(removingId);
+        if (ciCam == null) {
+            return;
+        }
+        for (int ownerId : ciCam.getOwnerClientIds()) {
+            getClientProfile(ownerId).releaseCiCam();
+        }
+        mCiCamResources.remove(removingId);
     }
 
     private void releaseLowerPriorityClientCasResources(int releasingCasResourceNum) {
@@ -1185,6 +1339,10 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         // Clear Cas
         if (profile.getInUseCasSystemId() != ClientProfile.INVALID_RESOURCE_ID) {
             getCasResource(profile.getInUseCasSystemId()).removeOwner(profile.getId());
+        }
+        // Clear CiCam
+        if (profile.getInUseCiCamId() != ClientProfile.INVALID_RESOURCE_ID) {
+            getCiCamResource(profile.getInUseCiCamId()).removeOwner(profile.getId());
         }
         // Clear Frontend
         clearFrontendAndClientMapping(profile);

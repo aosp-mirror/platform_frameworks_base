@@ -85,6 +85,11 @@ public final class ClientProfile {
     private int mUsingCasSystemId = INVALID_RESOURCE_ID;
 
     /**
+     * CiCam id that is used by the client.
+     */
+    private int mUsingCiCamId = INVALID_RESOURCE_ID;
+
+    /**
      * Optional arbitrary priority value given by the client.
      *
      * <p>This value can override the default priorotiy calculated from
@@ -238,6 +243,26 @@ public final class ClientProfile {
     }
 
     /**
+     * Set when the client starts to connect to a CiCam.
+     *
+     * @param ciCamId ciCam being used.
+     */
+    public void useCiCam(int ciCamId) {
+        mUsingCiCamId = ciCamId;
+    }
+
+    public int getInUseCiCamId() {
+        return mUsingCiCamId;
+    }
+
+    /**
+     * Called when the client disconnect to a CiCam.
+     */
+    public void releaseCiCam() {
+        mUsingCiCamId = INVALID_RESOURCE_ID;
+    }
+
+    /**
      * Called to reclaim all the resources being used by the current client.
      */
     public void reclaimAllResources() {
@@ -245,6 +270,7 @@ public final class ClientProfile {
         mShareFeClientIds.clear();
         mUsingLnbHandles.clear();
         mUsingCasSystemId = INVALID_RESOURCE_ID;
+        mUsingCiCamId = INVALID_RESOURCE_ID;
     }
 
     @Override
