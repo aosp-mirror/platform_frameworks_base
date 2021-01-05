@@ -40,6 +40,7 @@ import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.Build;
 import android.os.RemoteException;
+import android.os.StrictMode;
 import android.text.format.DateUtils;
 import android.text.format.TimeMigrationUtils;
 import android.util.Log;
@@ -2619,7 +2620,13 @@ public final class CalendarContract {
             intent.setData(ContentUris.withAppendedId(CalendarContract.CONTENT_URI, alarmTime));
             intent.putExtra(ALARM_TIME, alarmTime);
             intent.setFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+
+            // Disable strict mode VM policy violations temporarily for intents that contain a
+            // content URI but don't have FLAG_GRANT_READ_URI_PERMISSION.
+            StrictMode.VmPolicy oldVmPolicy = StrictMode.allowVmViolations();
             PendingIntent pi = PendingIntent.getBroadcast(context, 0, intent, 0);
+            StrictMode.setVmPolicy(oldVmPolicy);
+
             manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmTime, pi);
         }
 
