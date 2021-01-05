@@ -2601,6 +2601,9 @@ public class LocationManager {
      * Returns the batch size (in number of Location objects) that are supported by the batching
      * interface.
      *
+     * Prior to Android S this call requires the {@link Manifest.permission#LOCATION_HARDWARE}
+     * permission.
+     *
      * @return Maximum number of location objects that can be returned
      * @deprecated Do not use
      * @hide
