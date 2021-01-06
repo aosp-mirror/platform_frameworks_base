@@ -18,6 +18,7 @@ package android.telephony.ims;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -207,6 +208,42 @@ public final class ImsCallProfile implements Parcelable {
             "android.telephony.ims.extra.RETRY_CALL_FAIL_NETWORKTYPE";
 
     /**
+     * Extra for the call composer call priority, either {@link ImsCallProfile#PRIORITY_NORMAL} or
+     * {@link ImsCallProfile#PRIORITY_URGENT}. It can be set via
+     * {@link #setCallExtraInt(String, int)}.
+     *
+     * Reference: RCC.20 Section 2.4.4.2
+     */
+    public static final String EXTRA_PRIORITY = "android.telephony.ims.extra.PRIORITY";
+
+    // TODO(hallliu) remove the reference to the maximum length and update it later.
+    /**
+     * Extra for the call composer call subject, a string of maximum length 60 characters.
+     * It can be set via {@link #setCallExtra(String, String)}.
+     *
+     * Reference: RCC.20 Section 2.4.3.2
+     */
+    public static final String EXTRA_CALL_SUBJECT = "android.telephony.ims.extra.CALL_SUBJECT";
+
+    /**
+     * Extra for the call composer call location, an {@Link android.location.Location} parcelable
+     * class to represent the geolocation as a latitude and longitude pair. It can be set via
+     * {@link #setCallExtraParcelable(String, Parcelable)}.
+     *
+     * Reference: RCC.20 Section 2.4.3.2
+     */
+    public static final String EXTRA_LOCATION = "android.telephony.ims.extra.LOCATION";
+
+    /**
+     * Extra for the call composer picture URL, a String that indicates the URL on the carrier’s
+     * server infrastructure to get the picture. It can be set via
+     * {@link #setCallExtra(String, String)}.
+     *
+     * Reference: RCC.20 Section 2.4.3.2
+     */
+    public static final String EXTRA_PICTURE_URL = "android.telephony.ims.extra.PICTURE_URL";
+
+    /**
      * Values for EXTRA_OIR / EXTRA_CNAP
      */
     /**
@@ -243,6 +280,21 @@ public final class ImsCallProfile implements Parcelable {
      * Call for USSD message
      */
     public static final int DIALSTRING_USSD = 2;
+
+    // Values for EXTRA_PRIORITY
+    /**
+     * Indicates the call composer call priority is normal.
+     *
+     * Reference: RCC.20 Section 2.4.4.2
+     */
+    public static final int PRIORITY_NORMAL = 0;
+
+    /**
+     * Indicates the call composer call priority is urgent.
+     *
+     * Reference: RCC.20 Section 2.4.4.2
+     */
+    public static final int PRIORITY_URGENT = 1;
 
     /**
      * Call is not restricted on peer side and High Definition media is supported
@@ -588,6 +640,19 @@ public final class ImsCallProfile implements Parcelable {
         return mCallExtras.getInt(name, defaultValue);
     }
 
+    /**
+     * Get the call extras (Parcelable), given the extra name.
+     * @param name call extra name
+     * @return the corresponding call extra Parcelable or null if not applicable
+     */
+    @Nullable
+    public <T extends Parcelable> T getCallExtraParcelable(@Nullable String name) {
+        if (mCallExtras != null) {
+            return mCallExtras.getParcelable(name);
+        }
+        return null;
+    }
+
     public void setCallExtra(String name, String value) {
         if (mCallExtras != null) {
             mCallExtras.putString(name, value);
@@ -603,6 +668,17 @@ public final class ImsCallProfile implements Parcelable {
     public void setCallExtraInt(String name, int value) {
         if (mCallExtras != null) {
             mCallExtras.putInt(name, value);
+        }
+    }
+
+    /**
+     * Set the call extra value (Parcelable), given the call extra name.
+     * @param name call extra name
+     * @param parcelable call extra value
+     */
+    public void setCallExtraParcelable(@NonNull String name, @NonNull Parcelable parcelable) {
+        if (mCallExtras != null) {
+            mCallExtras.putParcelable(name, parcelable);
         }
     }
 
