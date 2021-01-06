@@ -650,6 +650,10 @@ package android.app {
     field public static final int FLAG_AUTOGROUP_SUMMARY = 1024; // 0x400
   }
 
+  public static class Notification.Action implements android.os.Parcelable {
+    field public static final int SEMANTIC_ACTION_MARK_CONVERSATION_AS_PRIORITY = 11; // 0xb
+  }
+
   public static final class Notification.TvExtender implements android.app.Notification.Extender {
     ctor public Notification.TvExtender();
     ctor public Notification.TvExtender(android.app.Notification);
