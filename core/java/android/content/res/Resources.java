@@ -2057,7 +2057,7 @@ public class Resources {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage(trackingBug = 176190631)
     public DisplayAdjustments getDisplayAdjustments() {
         final DisplayAdjustments overrideDisplayAdjustments = mOverrideDisplayAdjustments;
         if (overrideDisplayAdjustments != null) {
