@@ -19961,6 +19961,7 @@ package android.media {
   public final class AudioPlaybackConfiguration implements android.os.Parcelable {
     method public int describeContents();
     method public android.media.AudioAttributes getAudioAttributes();
+    method @Nullable public android.media.AudioDeviceInfo getAudioDeviceInfo();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.AudioPlaybackConfiguration> CREATOR;
   }
