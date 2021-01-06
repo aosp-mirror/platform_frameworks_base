@@ -17,10 +17,13 @@
 package com.android.systemui.statusbar.policy;
 
 import static android.service.SensorPrivacyIndividualEnabledSensorProto.CAMERA;
+import static android.service.SensorPrivacyIndividualEnabledSensorProto.MICROPHONE;
 
 import android.content.Context;
 import android.hardware.SensorPrivacyManager;
+import android.hardware.SensorPrivacyManager.IndividualSensor;
 import android.util.ArraySet;
+import android.util.SparseBooleanArray;
 
 import androidx.annotation.NonNull;
 
@@ -28,30 +31,36 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-public class CameraToggleControllerImpl implements CameraToggleController {
+public class IndividualSensorPrivacyControllerImpl implements IndividualSensorPrivacyController {
+
+    private static final int[] SENSORS = new int[] {CAMERA, MICROPHONE};
 
     private final @NonNull Context mContext;
     private final @NonNull SensorPrivacyManager mSensorPrivacyManager;
-    private boolean mState;
-    private Set<Callback> mCallbacks = new ArraySet<>();
+    private final SparseBooleanArray mState = new SparseBooleanArray();
+    private final Set<Callback> mCallbacks = new ArraySet<>();
 
     @Inject
-    public CameraToggleControllerImpl(@NonNull Context context) {
+    public IndividualSensorPrivacyControllerImpl(@NonNull Context context) {
         mContext = context;
         mSensorPrivacyManager = context.getSystemService(SensorPrivacyManager.class);
-        mSensorPrivacyManager.addSensorPrivacyListener(CAMERA, this::onCameraPrivacyChanged);
 
-        mState = mSensorPrivacyManager.isIndividualSensorPrivacyEnabled(CAMERA);
+        for (int sensor : SENSORS) {
+            mSensorPrivacyManager.addSensorPrivacyListener(sensor,
+                    (enabled) -> onSensorPrivacyChanged(sensor, enabled));
+
+            mState.put(sensor, mSensorPrivacyManager.isIndividualSensorPrivacyEnabled(sensor));
+        }
     }
 
     @Override
-    public boolean isCameraBlocked() {
-        return mState;
+    public boolean isSensorBlocked(@IndividualSensor int sensor) {
+        return mState.get(sensor, false);
     }
 
     @Override
-    public void setCameraBlocked(boolean blocked) {
-        mSensorPrivacyManager.setIndividualSensorPrivacyForProfileGroup(CAMERA, blocked);
+    public void setSensorBlocked(@IndividualSensor int sensor, boolean blocked) {
+        mSensorPrivacyManager.setIndividualSensorPrivacyForProfileGroup(sensor, blocked);
     }
 
     @Override
@@ -64,10 +73,11 @@ public class CameraToggleControllerImpl implements CameraToggleController {
         mCallbacks.remove(listener);
     }
 
-    private void onCameraPrivacyChanged(boolean state) {
-        mState = state;
+    private void onSensorPrivacyChanged(@IndividualSensor int sensor, boolean blocked) {
+        mState.put(sensor, blocked);
+
         for (Callback callback : mCallbacks) {
-            callback.onCameraBlockedChanged(mState);
+            callback.onSensorBlockedChanged(sensor, blocked);
         }
     }
 }

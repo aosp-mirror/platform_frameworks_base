@@ -24,8 +24,6 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.AccessPointControllerImpl;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.BluetoothControllerImpl;
-import com.android.systemui.statusbar.policy.CameraToggleController;
-import com.android.systemui.statusbar.policy.CameraToggleControllerImpl;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastControllerImpl;
 import com.android.systemui.statusbar.policy.ExtensionController;
@@ -34,6 +32,8 @@ import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.FlashlightControllerImpl;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.HotspotControllerImpl;
+import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
+import com.android.systemui.statusbar.policy.IndividualSensorPrivacyControllerImpl;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.KeyguardStateControllerImpl;
 import com.android.systemui.statusbar.policy.LocationController;
@@ -122,7 +122,8 @@ public interface StatusBarPolicyModule {
 
     /** */
     @Binds
-    CameraToggleController provideCameraToggleController(CameraToggleControllerImpl controllerImpl);
+    IndividualSensorPrivacyController provideIndividualSensorPrivacyController(
+            IndividualSensorPrivacyControllerImpl controllerImpl);
 
     /** */
     @SysUISingleton

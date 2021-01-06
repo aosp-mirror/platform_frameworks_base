@@ -16,11 +16,10 @@
 
 package com.android.systemui.qs.tiles;
 
-import static android.service.SensorPrivacyIndividualEnabledSensorProto.CAMERA;
+import static android.service.SensorPrivacyIndividualEnabledSensorProto.MICROPHONE;
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 
-import android.annotation.StringRes;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.DeviceConfig;
@@ -40,10 +39,10 @@ import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
 
 import javax.inject.Inject;
 
-public class CameraToggleTile extends SensorPrivacyToggleTile {
+public class MicrophoneToggleTile extends SensorPrivacyToggleTile {
 
     @Inject
-    protected CameraToggleTile(QSHost host,
+    protected MicrophoneToggleTile(QSHost host,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             MetricsLogger metricsLogger,
@@ -57,24 +56,23 @@ public class CameraToggleTile extends SensorPrivacyToggleTile {
 
     @Override
     public boolean isAvailable() {
-        return /*getHost().getContext().getPackageManager().hasSystemFeature(FEATURE_CAMERA_TOGGLE)
-                && */whitelistIpcs(() -> DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
-                "camera_toggle_enabled",
+        return whitelistIpcs(() -> DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
+                "mic_toggle_enabled",
                 false));
     }
 
     @Override
     public @DrawableRes int getIconRes() {
-        return R.drawable.ic_camera_blocked;
+        return R.drawable.ic_mic_blocked;
     }
 
     @Override
     public @NonNull CharSequence getTileLabel() {
-        return mContext.getString(R.string.quick_settings_camera_label);
+        return mContext.getString(R.string.quick_settings_mic_label);
     }
 
     @Override
     public int getSensorId() {
-        return CAMERA;
+        return MICROPHONE;
     }
 }

@@ -16,14 +16,16 @@
 
 package com.android.systemui.statusbar.policy;
 
-public interface CameraToggleController extends
-        CallbackController<CameraToggleController.Callback> {
+import android.hardware.SensorPrivacyManager.IndividualSensor;
 
-    boolean isCameraBlocked();
+public interface IndividualSensorPrivacyController extends
+        CallbackController<IndividualSensorPrivacyController.Callback> {
 
-    void setCameraBlocked(boolean blocked);
+    boolean isSensorBlocked(@IndividualSensor int sensor);
+
+    void setSensorBlocked(@IndividualSensor int sensor, boolean blocked);
 
     interface Callback {
-        void onCameraBlockedChanged(boolean blocked);
+        void onSensorBlockedChanged(@IndividualSensor int sensor, boolean blocked);
     }
 }
