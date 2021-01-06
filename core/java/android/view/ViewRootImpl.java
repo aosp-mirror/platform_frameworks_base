@@ -1389,7 +1389,8 @@ public final class ViewRootImpl implements ViewParent,
         return mLocation;
     }
 
-    void setLayoutParams(WindowManager.LayoutParams attrs, boolean newView) {
+    @VisibleForTesting
+    public void setLayoutParams(WindowManager.LayoutParams attrs, boolean newView) {
         synchronized (this) {
             final int oldInsetLeft = mWindowAttributes.surfaceInsets.left;
             final int oldInsetTop = mWindowAttributes.surfaceInsets.top;
@@ -1411,13 +1412,15 @@ public final class ViewRootImpl implements ViewParent,
             final int compatibleWindowFlag = mWindowAttributes.privateFlags
                     & WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
 
-            // Transfer over system UI visibility values as they carry current state.
-            attrs.systemUiVisibility = mWindowAttributes.systemUiVisibility;
-            attrs.subtreeSystemUiVisibility = mWindowAttributes.subtreeSystemUiVisibility;
+            // Preserve system UI visibility.
+            final int systemUiVisibility = mWindowAttributes.systemUiVisibility;
+            final int subtreeSystemUiVisibility = mWindowAttributes.subtreeSystemUiVisibility;
 
-            // Transfer over appearance and behavior values as they carry current state.
-            attrs.insetsFlags.appearance = mWindowAttributes.insetsFlags.appearance;
-            attrs.insetsFlags.behavior = mWindowAttributes.insetsFlags.behavior;
+            // Preserve appearance and behavior.
+            final int appearance = mWindowAttributes.insetsFlags.appearance;
+            final int behavior = mWindowAttributes.insetsFlags.behavior;
+            final int appearanceAndBehaviorPrivateFlags = mWindowAttributes.privateFlags
+                    & (PRIVATE_FLAG_APPEARANCE_CONTROLLED | PRIVATE_FLAG_BEHAVIOR_CONTROLLED);
 
             final int changes = mWindowAttributes.copyFrom(attrs);
             if ((changes & WindowManager.LayoutParams.TRANSLUCENT_FLAGS_CHANGED) != 0) {
@@ -1431,10 +1434,15 @@ public final class ViewRootImpl implements ViewParent,
             if (mWindowAttributes.packageName == null) {
                 mWindowAttributes.packageName = mBasePackageName;
             }
-            mWindowAttributes.privateFlags |= compatibleWindowFlag;
 
-            mWindowAttributes.privateFlags |=
-                    WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST;
+            // Restore preserved flags.
+            mWindowAttributes.systemUiVisibility = systemUiVisibility;
+            mWindowAttributes.subtreeSystemUiVisibility = subtreeSystemUiVisibility;
+            mWindowAttributes.insetsFlags.appearance = appearance;
+            mWindowAttributes.insetsFlags.behavior = behavior;
+            mWindowAttributes.privateFlags |= compatibleWindowFlag
+                    | appearanceAndBehaviorPrivateFlags
+                    | WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST;
 
             if (mWindowAttributes.preservePreviousSurfaceInsets) {
                 // Restore old surface insets.

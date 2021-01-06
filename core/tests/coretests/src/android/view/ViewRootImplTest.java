@@ -22,7 +22,8 @@ import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
 import static android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
 import static android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
 import static android.view.View.SYSTEM_UI_FLAG_LOW_PROFILE;
-import static android.view.WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_TOUCH;
+import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_STATUS_BARS;
+import static android.view.WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
@@ -153,7 +154,7 @@ public class ViewRootImplTest {
     public void adjustLayoutParamsForCompatibility_noAdjustAppearance() {
         final WindowInsetsController controller = mViewRootImpl.getInsetsController();
         final WindowManager.LayoutParams attrs = mViewRootImpl.mWindowAttributes;
-        final int appearance = 0;
+        final int appearance = APPEARANCE_OPAQUE_STATUS_BARS;
         controller.setSystemBarsAppearance(appearance, 0xffffffff);
         attrs.systemUiVisibility = SYSTEM_UI_FLAG_LOW_PROFILE
                 | SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
@@ -163,19 +164,29 @@ public class ViewRootImplTest {
         // Appearance must not be adjusted due to legacy system UI visibility after calling
         // setSystemBarsAppearance.
         assertEquals(appearance, controller.getSystemBarsAppearance());
+
+        mViewRootImpl.setLayoutParams(new WindowManager.LayoutParams(), false);
+
+        // Appearance must not be adjusted due to setting new LayoutParams.
+        assertEquals(appearance, controller.getSystemBarsAppearance());
     }
 
     @Test
     public void adjustLayoutParamsForCompatibility_noAdjustBehavior() {
         final WindowInsetsController controller = mViewRootImpl.getInsetsController();
         final WindowManager.LayoutParams attrs = mViewRootImpl.mWindowAttributes;
-        final int behavior = BEHAVIOR_SHOW_BARS_BY_TOUCH;
+        final int behavior = BEHAVIOR_SHOW_BARS_BY_SWIPE;
         controller.setSystemBarsBehavior(behavior);
         attrs.systemUiVisibility = SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
 
         // Behavior must not be adjusted due to legacy system UI visibility after calling
         // setSystemBarsBehavior.
+        assertEquals(behavior, controller.getSystemBarsBehavior());
+
+        mViewRootImpl.setLayoutParams(new WindowManager.LayoutParams(), false);
+
+        // Behavior must not be adjusted due to setting new LayoutParams.
         assertEquals(behavior, controller.getSystemBarsBehavior());
     }
 }
