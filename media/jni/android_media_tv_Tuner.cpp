@@ -261,68 +261,36 @@ sp<ILnb> Lnb::getILnb() {
     return mLnbSp;
 }
 
-/////////////// DvrCallback ///////////////////////
-Return<void> DvrCallback::onRecordStatus(RecordStatus status) {
-    ALOGD("DvrCallback::onRecordStatus");
+/////////////// DvrClientCallbackImpl ///////////////////////
+void DvrClientCallbackImpl::onRecordStatus(RecordStatus status) {
+    ALOGD("DvrClientCallbackImpl::onRecordStatus");
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     env->CallVoidMethod(
-            mDvr,
+            mDvrObj,
             gFields.onDvrRecordStatusID,
             (jint) status);
-    return Void();
 }
 
-Return<void> DvrCallback::onPlaybackStatus(PlaybackStatus status) {
-    ALOGD("DvrCallback::onPlaybackStatus");
+void DvrClientCallbackImpl::onPlaybackStatus(PlaybackStatus status) {
+    ALOGD("DvrClientCallbackImpl::onPlaybackStatus");
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     env->CallVoidMethod(
-            mDvr,
+            mDvrObj,
             gFields.onDvrPlaybackStatusID,
             (jint) status);
-    return Void();
 }
 
-void DvrCallback::setDvr(const jobject dvr) {
-    ALOGD("DvrCallback::setDvr");
-    JNIEnv *env = AndroidRuntime::getJNIEnv();
-    mDvr = env->NewWeakGlobalRef(dvr);
+void DvrClientCallbackImpl::setDvr(jweak dvrObj) {
+    ALOGD("DvrClientCallbackImpl::setDvr");
+    mDvrObj = dvrObj;
 }
 
-DvrCallback::~DvrCallback() {
+DvrClientCallbackImpl::~DvrClientCallbackImpl() {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    if (mDvr != NULL) {
-        env->DeleteWeakGlobalRef(mDvr);
-        mDvr = NULL;
+    if (mDvrObj != NULL) {
+        env->DeleteWeakGlobalRef(mDvrObj);
+        mDvrObj = NULL;
     }
-}
-
-/////////////// Dvr ///////////////////////
-
-Dvr::Dvr(sp<IDvr> sp, jobject obj) : mDvrSp(sp), mDvrMQEventFlag(nullptr) {
-    JNIEnv *env = AndroidRuntime::getJNIEnv();
-    mDvrObj = env->NewWeakGlobalRef(obj);
-}
-
-Dvr::~Dvr() {
-    JNIEnv *env = AndroidRuntime::getJNIEnv();
-    env->DeleteWeakGlobalRef(mDvrObj);
-    mDvrObj = NULL;
-}
-
-jint Dvr::close() {
-    Result r = mDvrSp->close();
-    if (r == Result::SUCCESS) {
-        EventFlag::deleteEventFlag(&mDvrMQEventFlag);
-    }
-    return (jint) r;
-}
-
-sp<IDvr> Dvr::getIDvr() {
-    return mDvrSp;
-}
-
-MQ& Dvr::getDvrMQ() {
-    return *mDvrMQ;
 }
 
 /////////////// C2DataIdInfo ///////////////////////
@@ -1840,9 +1808,7 @@ jobject JTuner::openDescrambler() {
 
 jobject JTuner::openFilter(DemuxFilterType type, int bufferSize) {
     if (mDemux == NULL || mDemuxClient == NULL) {
-        if (openDemux() != Result::SUCCESS) {
-            return NULL;
-        }
+        return NULL;
     }
 
     sp<FilterClient> filterClient;
@@ -1906,21 +1872,14 @@ jobject JTuner::openTimeFilter() {
 
 jobject JTuner::openDvr(DvrType type, jlong bufferSize) {
     ALOGD("JTuner::openDvr");
-    if (mDemux == NULL) {
-        if (openDemux() != Result::SUCCESS) {
-            return NULL;
-        }
+    if (mDemuxClient == NULL) {
+        return NULL;
     }
-    sp<IDvr> iDvrSp;
-    sp<DvrCallback> callback = new DvrCallback();
-    Result res;
-    mDemux->openDvr(type, (uint32_t) bufferSize, callback,
-            [&](Result r, const sp<IDvr>& dvr) {
-                res = r;
-                iDvrSp = dvr;
-            });
+    sp<DvrClient> dvrClient;
+    sp<DvrClientCallbackImpl> callback = new DvrClientCallbackImpl();
+    dvrClient = mDemuxClient->openDvr(type, (int) bufferSize, callback);
 
-    if (res != Result::SUCCESS || iDvrSp == NULL) {
+    if (dvrClient == NULL) {
         return NULL;
     }
 
@@ -1932,21 +1891,19 @@ jobject JTuner::openDvr(DvrType type, jlong bufferSize) {
                         env->FindClass("android/media/tv/tuner/dvr/DvrRecorder"),
                         gFields.dvrRecorderInitID,
                         mObject);
-        sp<Dvr> dvrSp = new Dvr(iDvrSp, dvrObj);
-        dvrSp->incStrong(dvrObj);
-        env->SetLongField(dvrObj, gFields.dvrRecorderContext, (jlong)dvrSp.get());
+        dvrClient->incStrong(dvrObj);
+        env->SetLongField(dvrObj, gFields.dvrRecorderContext, (jlong)dvrClient.get());
     } else {
         dvrObj =
                 env->NewObject(
                         env->FindClass("android/media/tv/tuner/dvr/DvrPlayback"),
                         gFields.dvrPlaybackInitID,
                         mObject);
-        sp<Dvr> dvrSp = new Dvr(iDvrSp, dvrObj);
-        dvrSp->incStrong(dvrObj);
-        env->SetLongField(dvrObj, gFields.dvrPlaybackContext, (jlong)dvrSp.get());
+        dvrClient->incStrong(dvrObj);
+        env->SetLongField(dvrObj, gFields.dvrPlaybackContext, (jlong)dvrClient.get());
     }
 
-    callback->setDvr(dvrObj);
+    callback->setDvr(env->NewWeakGlobalRef(dvrObj));
 
     return dvrObj;
 }
@@ -3304,12 +3261,12 @@ static DvrSettings getDvrSettings(JNIEnv *env, jobject settings, bool isRecorder
     return dvrSettings;
 }
 
-static sp<Dvr> getDvr(JNIEnv *env, jobject dvr) {
+static sp<DvrClient> getDvrClient(JNIEnv *env, jobject dvr) {
     bool isRecorder =
             env->IsInstanceOf(dvr, env->FindClass("android/media/tv/tuner/dvr/DvrRecorder"));
     jfieldID fieldId =
             isRecorder ? gFields.dvrRecorderContext : gFields.dvrPlaybackContext;
-    return (Dvr *)env->GetLongField(dvr, fieldId);
+    return (DvrClient *)env->GetLongField(dvr, fieldId);
 }
 
 static void android_media_tv_Tuner_native_init(JNIEnv *env) {
@@ -3910,33 +3867,6 @@ static Result configureIpFilterContextId(
     return filterClient->configureIpFilterContextId(cid);
 }
 
-static jint copyData(JNIEnv *env, std::unique_ptr<MQ>& mq, EventFlag* flag, jbyteArray buffer,
-        jlong offset, jlong size) {
-    ALOGD("copyData, size=%ld, offset=%ld", (long) size, (long) offset);
-
-    jlong available = mq->availableToRead();
-    ALOGD("copyData, available=%ld", (long) available);
-    size = std::min(size, available);
-
-    jboolean isCopy;
-    jbyte *dst = env->GetByteArrayElements(buffer, &isCopy);
-    ALOGD("copyData, isCopy=%d", isCopy);
-    if (dst == nullptr) {
-        jniThrowRuntimeException(env, "Failed to GetByteArrayElements");
-        return 0;
-    }
-
-    if (mq->read(reinterpret_cast<unsigned char*>(dst) + offset, size)) {
-        env->ReleaseByteArrayElements(buffer, dst, 0);
-        flag->wake(static_cast<uint32_t>(DemuxQueueNotifyBits::DATA_CONSUMED));
-    } else {
-        jniThrowRuntimeException(env, "Failed to read FMQ");
-        env->ReleaseByteArrayElements(buffer, dst, 0);
-        return 0;
-    }
-    return size;
-}
-
 static bool isAvFilterSettings(DemuxFilterSettings filterSettings) {
     return (filterSettings.getDiscriminator() == DemuxFilterSettings::hidl_discriminator::ts
             && filterSettings.ts().filterSettings.getDiscriminator()
@@ -4068,7 +3998,7 @@ static jint android_media_tv_Tuner_read_filter_fmq(
     if (filterClient == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
                 "Failed to read filter FMQ: filter client not found");
-        return 0;
+        return -1;
     }
 
     jboolean isCopy;
@@ -4076,14 +4006,11 @@ static jint android_media_tv_Tuner_read_filter_fmq(
     ALOGD("copyData, isCopy=%d", isCopy);
     if (dst == nullptr) {
         jniThrowRuntimeException(env, "Failed to GetByteArrayElements");
-        return 0;
+        return -1;
     }
     int realReadSize = filterClient->read(reinterpret_cast<uint8_t*>(dst) + offset, size);
     env->ReleaseByteArrayElements(buffer, dst, 0);
-    if (realReadSize < 0) {
-        return (jint) Result::UNKNOWN_ERROR;
-    }
-    return (jint) Result::SUCCESS;
+    return (jint) realReadSize;
 }
 
 static jint android_media_tv_Tuner_close_filter(JNIEnv *env, jobject filter) {
@@ -4283,106 +4210,80 @@ static jint android_media_tv_Tuner_close_frontend(JNIEnv* env, jobject thiz, jin
 }
 
 static jint android_media_tv_Tuner_attach_filter(JNIEnv *env, jobject dvr, jobject filter) {
-    sp<Dvr> dvrSp = getDvr(env, dvr);
-    if (dvrSp == NULL) {
-        return (jint) Result::NOT_INITIALIZED;
-    }
     sp<FilterClient> filterClient = getFilterClient(env, filter);
     if (filterClient == NULL) {
         return (jint) Result::INVALID_ARGUMENT;
     }
-    sp<IDvr> iDvrSp = dvrSp->getIDvr();
-    // TODO: use filter client once dvrClient is ready
-    sp<IFilter> iFilterSp = filterClient->getHalFilter();
-    Result result = iDvrSp->attachFilter(iFilterSp);
+    sp<DvrClient> dvrClient = getDvrClient(env, dvr);
+    if (dvrClient == NULL) {
+        return (jint) Result::NOT_INITIALIZED;
+    }
+    Result result = dvrClient->attachFilter(filterClient);
     return (jint) result;
 }
 
 static jint android_media_tv_Tuner_detach_filter(JNIEnv *env, jobject dvr, jobject filter) {
-    sp<Dvr> dvrSp = getDvr(env, dvr);
-    if (dvrSp == NULL) {
-        return (jint) Result::NOT_INITIALIZED;
-    }
     sp<FilterClient> filterClient = getFilterClient(env, filter);
     if (filterClient == NULL) {
         return (jint) Result::INVALID_ARGUMENT;
     }
-    sp<IDvr> iDvrSp = dvrSp->getIDvr();
-    // TODO: use filter client once dvrClient is ready
-    sp<IFilter> iFilterSp = filterClient->getHalFilter();
-    Result result = iDvrSp->detachFilter(iFilterSp);
+    sp<DvrClient> dvrClient = getDvrClient(env, dvr);
+    if (dvrClient == NULL) {
+        return (jint) Result::NOT_INITIALIZED;
+    }
+    Result result = dvrClient->detachFilter(filterClient);
     return (jint) result;
 }
 
 static jint android_media_tv_Tuner_configure_dvr(JNIEnv *env, jobject dvr, jobject settings) {
-    sp<Dvr> dvrSp = getDvr(env, dvr);
-    if (dvrSp == NULL) {
-        ALOGD("Failed to configure dvr: dvr not found");
+    sp<DvrClient> dvrClient = getDvrClient(env, dvr);
+    if (dvrClient == NULL) {
+        ALOGD("Failed to configure dvr: dvr client not found");
         return (int)Result::NOT_INITIALIZED;
     }
-    sp<IDvr> iDvrSp = dvrSp->getIDvr();
     bool isRecorder =
             env->IsInstanceOf(dvr, env->FindClass("android/media/tv/tuner/dvr/DvrRecorder"));
-    Result result = iDvrSp->configure(getDvrSettings(env, settings, isRecorder));
-    if (result != Result::SUCCESS) {
-        return (jint) result;
-    }
-    MQDescriptorSync<uint8_t> dvrMQDesc;
-    Result getQueueDescResult = Result::UNKNOWN_ERROR;
-    iDvrSp->getQueueDesc(
-            [&](Result r, const MQDescriptorSync<uint8_t>& desc) {
-                dvrMQDesc = desc;
-                getQueueDescResult = r;
-                ALOGD("getDvrQueueDesc");
-            });
-    if (getQueueDescResult == Result::SUCCESS) {
-        dvrSp->mDvrMQ = std::make_unique<MQ>(dvrMQDesc, true);
-        EventFlag::createEventFlag(
-                dvrSp->mDvrMQ->getEventFlagWord(), &(dvrSp->mDvrMQEventFlag));
-    }
-    return (jint) getQueueDescResult;
+    Result result = dvrClient->configure(getDvrSettings(env, settings, isRecorder));
+    return (jint) result;
 }
 
 static jint android_media_tv_Tuner_start_dvr(JNIEnv *env, jobject dvr) {
-    sp<Dvr> dvrSp = getDvr(env, dvr);
-    if (dvrSp == NULL) {
-        ALOGD("Failed to start dvr: dvr not found");
+    sp<DvrClient> dvrClient = getDvrClient(env, dvr);
+    if (dvrClient == NULL) {
+        ALOGD("Failed to start dvr: dvr client not found");
         return (jint) Result::NOT_INITIALIZED;
     }
-    sp<IDvr> iDvrSp = dvrSp->getIDvr();
-    Result result = iDvrSp->start();
+    Result result = dvrClient->start();
     return (jint) result;
 }
 
 static jint android_media_tv_Tuner_stop_dvr(JNIEnv *env, jobject dvr) {
-    sp<Dvr> dvrSp = getDvr(env, dvr);
-    if (dvrSp == NULL) {
-        ALOGD("Failed to stop dvr: dvr not found");
+    sp<DvrClient> dvrClient = getDvrClient(env, dvr);
+    if (dvrClient == NULL) {
+        ALOGD("Failed to stop dvr: dvr client not found");
         return (jint) Result::NOT_INITIALIZED;
     }
-    sp<IDvr> iDvrSp = dvrSp->getIDvr();
-    Result result = iDvrSp->stop();
+    Result result = dvrClient->stop();
     return (jint) result;
 }
 
 static jint android_media_tv_Tuner_flush_dvr(JNIEnv *env, jobject dvr) {
-    sp<Dvr> dvrSp = getDvr(env, dvr);
-    if (dvrSp == NULL) {
-        ALOGD("Failed to flush dvr: dvr not found");
+    sp<DvrClient> dvrClient = getDvrClient(env, dvr);
+    if (dvrClient == NULL) {
+        ALOGD("Failed to flush dvr: dvr client not found");
         return (jint) Result::NOT_INITIALIZED;
     }
-    sp<IDvr> iDvrSp = dvrSp->getIDvr();
-    Result result = iDvrSp->flush();
+    Result result = dvrClient->flush();
     return (jint) result;
 }
 
 static jint android_media_tv_Tuner_close_dvr(JNIEnv* env, jobject dvr) {
-    sp<Dvr> dvrSp = getDvr(env, dvr);
-    if (dvrSp == NULL) {
-        ALOGD("Failed to close dvr: dvr not found");
+    sp<DvrClient> dvrClient = getDvrClient(env, dvr);
+    if (dvrClient == NULL) {
+        ALOGD("Failed to close dvr: dvr client not found");
         return (jint) Result::NOT_INITIALIZED;
     }
-    return dvrSp->close();
+    return (jint) dvrClient->close();
 }
 
 static sp<Lnb> getLnb(JNIEnv *env, jobject lnb) {
@@ -4427,170 +4328,76 @@ static int android_media_tv_Tuner_close_lnb(JNIEnv* env, jobject lnb) {
 }
 
 static void android_media_tv_Tuner_dvr_set_fd(JNIEnv *env, jobject dvr, jint fd) {
-    sp<Dvr> dvrSp = getDvr(env, dvr);
-    if (dvrSp == NULL) {
-        ALOGD("Failed to set FD for dvr: dvr not found");
+    sp<DvrClient> dvrClient = getDvrClient(env, dvr);
+    if (dvrClient == NULL) {
+        ALOGD("Failed to set FD for dvr: dvr client not found");
+        return;
     }
-    dvrSp->mFd = (int) fd;
-    ALOGD("set fd = %d", dvrSp->mFd);
+    dvrClient->setFd((int)fd);
+    ALOGD("set fd = %d", fd);
 }
 
 static jlong android_media_tv_Tuner_read_dvr(JNIEnv *env, jobject dvr, jlong size) {
-    sp<Dvr> dvrSp = getDvr(env, dvr);
-    if (dvrSp == NULL) {
+    sp<DvrClient> dvrClient = getDvrClient(env, dvr);
+    if (dvrClient == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
-                "Failed to read dvr: dvr not found");
-        return 0;
+                "Failed to read dvr: dvr client not found");
+        return -1;
     }
 
-    long available = dvrSp->mDvrMQ->availableToWrite();
-    long write = std::min((long) size, available);
-
-    MQ::MemTransaction tx;
-    long ret = 0;
-    if (dvrSp->mDvrMQ->beginWrite(write, &tx)) {
-        auto first = tx.getFirstRegion();
-        auto data = first.getAddress();
-        long length = first.getLength();
-        long firstToWrite = std::min(length, write);
-        ret = read(dvrSp->mFd, data, firstToWrite);
-
-        if (ret < 0) {
-            ALOGE("[DVR] Failed to read from FD: %s", strerror(errno));
-            jniThrowRuntimeException(env, strerror(errno));
-            return 0;
-        }
-        if (ret < firstToWrite) {
-            ALOGW("[DVR] file to MQ, first region: %ld bytes to write, but %ld bytes written",
-                    firstToWrite, ret);
-        } else if (firstToWrite < write) {
-            ALOGD("[DVR] write second region: %ld bytes written, %ld bytes in total", ret, write);
-            auto second = tx.getSecondRegion();
-            data = second.getAddress();
-            length = second.getLength();
-            int secondToWrite = std::min(length, write - firstToWrite);
-            ret += read(dvrSp->mFd, data, secondToWrite);
-        }
-        ALOGD("[DVR] file to MQ: %ld bytes need to be written, %ld bytes written", write, ret);
-        if (!dvrSp->mDvrMQ->commitWrite(ret)) {
-            ALOGE("[DVR] Error: failed to commit write!");
-            return 0;
-        }
-
-    } else {
-        ALOGE("dvrMq.beginWrite failed");
-    }
-
-    if (ret > 0) {
-        dvrSp->mDvrMQEventFlag->wake(static_cast<uint32_t>(DemuxQueueNotifyBits::DATA_READY));
-    }
-    return (jlong) ret;
+    return (jlong) dvrClient->readFromFile(size);
 }
 
 static jlong android_media_tv_Tuner_read_dvr_from_array(
         JNIEnv* env, jobject dvr, jbyteArray buffer, jlong offset, jlong size) {
-    sp<Dvr> dvrSp = getDvr(env, dvr);
-    if (dvrSp == NULL) {
-        ALOGW("Failed to read dvr: dvr not found");
-        return 0;
+    sp<DvrClient> dvrClient = getDvrClient(env, dvr);
+    if (dvrClient == NULL) {
+        ALOGW("Failed to read dvr: dvr client not found");
+        return -1;
     }
-    if (dvrSp->mDvrMQ == NULL) {
-        ALOGW("Failed to read dvr: dvr not configured");
-        return 0;
-    }
-
-    jlong available = dvrSp->mDvrMQ->availableToWrite();
-    size = std::min(size, available);
 
     jboolean isCopy;
     jbyte *src = env->GetByteArrayElements(buffer, &isCopy);
     if (src == nullptr) {
         ALOGD("Failed to GetByteArrayElements");
-        return 0;
+        return -1;
     }
+    long realSize = dvrClient->readFromBuffer(reinterpret_cast<unsigned char*>(src) + offset, size);
+    env->ReleaseByteArrayElements(buffer, src, 0);
+    return (jlong) realSize;
 
-    if (dvrSp->mDvrMQ->write(reinterpret_cast<unsigned char*>(src) + offset, size)) {
-        env->ReleaseByteArrayElements(buffer, src, 0);
-        dvrSp->mDvrMQEventFlag->wake(static_cast<uint32_t>(DemuxQueueNotifyBits::DATA_READY));
-    } else {
-        ALOGD("Failed to write FMQ");
-        env->ReleaseByteArrayElements(buffer, src, 0);
-        return 0;
-    }
-    return size;
 }
 
 static jlong android_media_tv_Tuner_write_dvr(JNIEnv *env, jobject dvr, jlong size) {
-    sp<Dvr> dvrSp = getDvr(env, dvr);
-    if (dvrSp == NULL) {
+    sp<DvrClient> dvrClient = getDvrClient(env, dvr);
+    if (dvrClient == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
-                "Failed to write dvr: dvr not found");
-        return 0;
+                "Failed to write dvr: dvr client not found");
+        return -1;
     }
 
-    if (dvrSp->mDvrMQ == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException",
-                "Failed to write dvr: dvr not configured");
-        return 0;
-    }
-
-    MQ& dvrMq = dvrSp->getDvrMQ();
-
-    long available = dvrMq.availableToRead();
-    long toRead = std::min((long) size, available);
-
-    long ret = 0;
-    MQ::MemTransaction tx;
-    if (dvrMq.beginRead(toRead, &tx)) {
-        auto first = tx.getFirstRegion();
-        auto data = first.getAddress();
-        long length = first.getLength();
-        long firstToRead = std::min(length, toRead);
-        ret = write(dvrSp->mFd, data, firstToRead);
-
-        if (ret < 0) {
-            ALOGE("[DVR] Failed to write to FD: %s", strerror(errno));
-            jniThrowRuntimeException(env, strerror(errno));
-            return 0;
-        }
-        if (ret < firstToRead) {
-            ALOGW("[DVR] MQ to file: %ld bytes read, but %ld bytes written", firstToRead, ret);
-        } else if (firstToRead < toRead) {
-            ALOGD("[DVR] read second region: %ld bytes read, %ld bytes in total", ret, toRead);
-            auto second = tx.getSecondRegion();
-            data = second.getAddress();
-            length = second.getLength();
-            int secondToRead = toRead - firstToRead;
-            ret += write(dvrSp->mFd, data, secondToRead);
-        }
-        ALOGD("[DVR] MQ to file: %ld bytes to be read, %ld bytes written", toRead, ret);
-        if (!dvrMq.commitRead(ret)) {
-            ALOGE("[DVR] Error: failed to commit read!");
-            return 0;
-        }
-
-    } else {
-        ALOGE("dvrMq.beginRead failed");
-    }
-    if (ret > 0) {
-        dvrSp->mDvrMQEventFlag->wake(static_cast<uint32_t>(DemuxQueueNotifyBits::DATA_CONSUMED));
-    }
-
-    return (jlong) ret;
+    return (jlong) dvrClient->writeToFile(size);
 }
 
 static jlong android_media_tv_Tuner_write_dvr_to_array(
         JNIEnv *env, jobject dvr, jbyteArray buffer, jlong offset, jlong size) {
-    sp<Dvr> dvrSp = getDvr(env, dvr);
-    if (dvrSp == NULL) {
-        ALOGW("Failed to write dvr: dvr not found");
-        return 0;
+    sp<DvrClient> dvrClient = getDvrClient(env, dvr);
+    if (dvrClient == NULL) {
+        ALOGW("Failed to read dvr: dvr client not found");
+        return -1;
     }
-    if (dvrSp->mDvrMQ == NULL) {
-        ALOGW("Failed to write dvr: dvr not configured");
-        return 0;
+
+    jboolean isCopy;
+    jbyte *dst = env->GetByteArrayElements(buffer, &isCopy);
+    ALOGD("copyData, isCopy=%d", isCopy);
+    if (dst == nullptr) {
+        jniThrowRuntimeException(env, "Failed to GetByteArrayElements");
+        return -1;
     }
-    return copyData(env, dvrSp->mDvrMQ, dvrSp->mDvrMQEventFlag, buffer, offset, size);
+
+    long realSize = dvrClient->writeToBuffer(reinterpret_cast<unsigned char*>(dst) + offset, size);
+    env->ReleaseByteArrayElements(buffer, dst, 0);
+    return (jlong) realSize;
 }
 
 static sp<MediaEvent> getMediaEventSp(JNIEnv *env, jobject mediaEventObj) {
