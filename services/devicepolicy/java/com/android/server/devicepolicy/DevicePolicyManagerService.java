@@ -1106,7 +1106,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * Used by {@code setDevicePolicySafetyChecker()} above and {@link OneTimeSafetyChecker}.
      */
     void setDevicePolicySafetyCheckerUnchecked(DevicePolicySafetyChecker safetyChecker) {
-        Slog.i(LOG_TAG, String.format("Setting DevicePolicySafetyChecker as %s", safetyChecker));
+        Slog.i(LOG_TAG, "Setting DevicePolicySafetyChecker as %s", safetyChecker);
         mSafetyChecker = safetyChecker;
         mInjector.setDevicePolicySafetyChecker(safetyChecker);
     }
