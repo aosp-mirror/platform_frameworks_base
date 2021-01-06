@@ -285,8 +285,12 @@ public class LocationTimeZoneManagerService extends Binder {
     }
 
     static void warnLog(String msg) {
+        warnLog(msg, null);
+    }
+
+    static void warnLog(String msg, @Nullable Throwable t) {
         if (Log.isLoggable(TAG, Log.WARN)) {
-            Slog.w(TAG, msg);
+            Slog.w(TAG, msg, t);
         }
     }
 }
