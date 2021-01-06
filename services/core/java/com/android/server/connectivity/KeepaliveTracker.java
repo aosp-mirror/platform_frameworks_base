@@ -18,10 +18,7 @@ package com.android.server.connectivity;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.net.NattSocketKeepalive.NATT_PORT;
-import static android.net.NetworkAgent.CMD_ADD_KEEPALIVE_PACKET_FILTER;
-import static android.net.NetworkAgent.CMD_REMOVE_KEEPALIVE_PACKET_FILTER;
 import static android.net.NetworkAgent.CMD_START_SOCKET_KEEPALIVE;
-import static android.net.NetworkAgent.CMD_STOP_SOCKET_KEEPALIVE;
 import static android.net.SocketKeepalive.BINDER_DIED;
 import static android.net.SocketKeepalive.DATA_RECEIVED;
 import static android.net.SocketKeepalive.ERROR_INSUFFICIENT_RESOURCES;
@@ -330,10 +327,9 @@ public class KeepaliveTracker {
                 Log.d(TAG, "Starting keepalive " + mSlot + " on " + mNai.toShortString());
                 switch (mType) {
                     case TYPE_NATT:
-                        mNai.asyncChannel.sendMessage(
-                                CMD_ADD_KEEPALIVE_PACKET_FILTER, slot, 0 /* Unused */, mPacket);
-                        mNai.asyncChannel
-                                .sendMessage(CMD_START_SOCKET_KEEPALIVE, slot, mInterval, mPacket);
+                        final NattKeepalivePacketData nattData = (NattKeepalivePacketData) mPacket;
+                        mNai.onAddNattKeepalivePacketFilter(slot, nattData);
+                        mNai.onStartNattSocketKeepalive(slot, mInterval, nattData);
                         break;
                     case TYPE_TCP:
                         try {
@@ -342,11 +338,10 @@ public class KeepaliveTracker {
                             handleStopKeepalive(mNai, mSlot, ERROR_INVALID_SOCKET);
                             return;
                         }
-                        mNai.asyncChannel.sendMessage(
-                                CMD_ADD_KEEPALIVE_PACKET_FILTER, slot, 0 /* Unused */, mPacket);
+                        final TcpKeepalivePacketData tcpData = (TcpKeepalivePacketData) mPacket;
+                        mNai.onAddTcpKeepalivePacketFilter(slot, tcpData);
                         // TODO: check result from apf and notify of failure as needed.
-                        mNai.asyncChannel
-                                .sendMessage(CMD_START_SOCKET_KEEPALIVE, slot, mInterval, mPacket);
+                        mNai.onStartTcpSocketKeepalive(slot, mInterval, tcpData);
                         break;
                     default:
                         Log.wtf(TAG, "Starting keepalive with unknown type: " + mType);
@@ -394,9 +389,8 @@ public class KeepaliveTracker {
                             mTcpController.stopSocketMonitor(mSlot);
                             // fall through
                         case TYPE_NATT:
-                            mNai.asyncChannel.sendMessage(CMD_STOP_SOCKET_KEEPALIVE, mSlot);
-                            mNai.asyncChannel.sendMessage(CMD_REMOVE_KEEPALIVE_PACKET_FILTER,
-                                    mSlot);
+                            mNai.onStopSocketKeepalive(mSlot);
+                            mNai.onRemoveKeepalivePacketFilter(mSlot);
                             break;
                         default:
                             Log.wtf(TAG, "Stopping keepalive with unknown type: " + mType);
@@ -548,17 +542,13 @@ public class KeepaliveTracker {
     }
 
     /** Handle keepalive events from lower layer. */
-    public void handleEventSocketKeepalive(@NonNull NetworkAgentInfo nai,
-            @NonNull Message message) {
-        int slot = message.arg1;
-        int reason = message.arg2;
-
+    public void handleEventSocketKeepalive(@NonNull NetworkAgentInfo nai, int slot, int reason) {
         KeepaliveInfo ki = null;
         try {
             ki = mKeepalives.get(nai).get(slot);
         } catch(NullPointerException e) {}
         if (ki == null) {
-            Log.e(TAG, "Event " + message.what + "," + slot + "," + reason
+            Log.e(TAG, "Event " + NetworkAgent.EVENT_SOCKET_KEEPALIVE + "," + slot + "," + reason
                     + " for unknown keepalive " + slot + " on " + nai.toShortString());
             return;
         }
@@ -601,7 +591,7 @@ public class KeepaliveTracker {
             ki.mStartedState = KeepaliveInfo.NOT_STARTED;
             cleanupStoppedKeepalive(nai, slot);
         } else {
-            Log.wtf(TAG, "Event " + message.what + "," + slot + "," + reason
+            Log.wtf(TAG, "Event " + NetworkAgent.EVENT_SOCKET_KEEPALIVE + "," + slot + "," + reason
                     + " for keepalive in wrong state: " + ki.toString());
         }
     }
