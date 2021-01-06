@@ -38773,6 +38773,7 @@ package android.telecom {
     method public android.telecom.PhoneAccount.Builder toBuilder();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CAPABILITY_ADHOC_CONFERENCE_CALLING = 16384; // 0x4000
+    field public static final int CAPABILITY_CALL_COMPOSER = 32768; // 0x8000
     field public static final int CAPABILITY_CALL_PROVIDER = 2; // 0x2
     field public static final int CAPABILITY_CALL_SUBJECT = 64; // 0x40
     field public static final int CAPABILITY_CONNECTION_MANAGER = 1; // 0x1

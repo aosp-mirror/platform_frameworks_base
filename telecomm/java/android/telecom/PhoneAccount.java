@@ -361,7 +361,13 @@ public final class PhoneAccount implements Parcelable {
      */
     public static final int CAPABILITY_ADHOC_CONFERENCE_CALLING = 0x4000;
 
-    /* NEXT CAPABILITY: 0x8000 */
+    /**
+     * Flag indicating whether this {@link PhoneAccount} is capable of supporting the call composer
+     * functionality for enriched calls.
+     */
+    public static final int CAPABILITY_CALL_COMPOSER = 0x8000;
+
+    /* NEXT CAPABILITY: 0x10000 */
 
     /**
      * URI scheme for telephone number URIs.
@@ -1087,6 +1093,9 @@ public final class PhoneAccount implements Parcelable {
         }
         if (hasCapabilities(CAPABILITY_ADHOC_CONFERENCE_CALLING)) {
             sb.append("AdhocConf");
+        }
+        if (hasCapabilities(CAPABILITY_CALL_COMPOSER)) {
+            sb.append("CallComposer ");
         }
         return sb.toString();
     }
