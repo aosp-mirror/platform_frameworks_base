@@ -169,6 +169,7 @@ public final class ActiveServices {
     public static final int FGS_FEATURE_ALLOWED_BY_DEVICE_DEMO_MODE = 18;
     public static final int FGS_FEATURE_ALLOWED_BY_PROCESS_RECORD = 19;
     public static final int FGS_FEATURE_ALLOWED_BY_EXEMPTED_PACKAGES = 20;
+    public static final int FGS_FEATURE_ALLOWED_BY_ACTIVITY_STARTER = 21;
 
     @IntDef(flag = true, prefix = { "FGS_FEATURE_" }, value = {
             FGS_FEATURE_DENIED,
@@ -191,6 +192,7 @@ public final class ActiveServices {
             FGS_FEATURE_ALLOWED_BY_DEVICE_DEMO_MODE,
             FGS_FEATURE_ALLOWED_BY_PROCESS_RECORD,
             FGS_FEATURE_ALLOWED_BY_EXEMPTED_PACKAGES,
+            FGS_FEATURE_ALLOWED_BY_ACTIVITY_STARTER
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FgsFeatureRetCode {}
@@ -5202,8 +5204,8 @@ public final class ActiveServices {
             for (int i = mAm.mProcessList.mLruProcesses.size() - 1; i >= 0; i--) {
                 final ProcessRecord pr = mAm.mProcessList.mLruProcesses.get(i);
                 if (pr.uid == callingUid) {
-                    if (pr.areBackgroundActivityStartsAllowedByToken()) {
-                        ret = FGS_FEATURE_ALLOWED_BY_ACTIVITY_TOKEN;
+                    if (pr.getWindowProcessController().areBackgroundActivityStartsAllowed()) {
+                        ret = FGS_FEATURE_ALLOWED_BY_ACTIVITY_STARTER;
                         break;
                     }
                 }
@@ -5406,6 +5408,8 @@ public final class ActiveServices {
                 return "ALLOWED_BY_PROCESS_RECORD";
             case FGS_FEATURE_ALLOWED_BY_EXEMPTED_PACKAGES:
                 return "FGS_FEATURE_ALLOWED_BY_EXEMPTED_PACKAGES";
+            case FGS_FEATURE_ALLOWED_BY_ACTIVITY_STARTER:
+                return "ALLOWED_BY_ACTIVITY_STARTER";
             default:
                 return "";
         }

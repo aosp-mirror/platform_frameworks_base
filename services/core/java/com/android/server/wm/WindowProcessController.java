@@ -510,13 +510,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
     }
 
-    /**
-     * Returns true if background activity starts are allowed by any token added via {@link
-     * #addOrUpdateAllowBackgroundActivityStartsToken(Binder, IBinder)}.
-     */
-    public boolean areBackgroundActivityStartsAllowedByToken() {
+    public boolean areBackgroundActivityStartsAllowed() {
         synchronized (mAtm.mGlobalLock) {
-            return !mBackgroundActivityStartTokens.isEmpty();
+            return areBackgroundActivityStartsAllowed(mAtm.getBalAppSwitchesAllowed());
         }
     }
 
