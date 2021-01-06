@@ -5183,6 +5183,9 @@ public class UserManagerService extends IUserManager.Stub {
                                 debugMsg + " for another profile "
                                         + targetUserId + " from " + callingUserId);
                     }
+                    Slog.w(LOG_TAG, debugMsg + " for another profile "
+                            + targetUserId + " from " + callingUserId);
+                    return false;
                 }
 
                 UserInfo targetUserInfo = getUserInfoLU(targetUserId);
