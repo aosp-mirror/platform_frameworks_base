@@ -5511,26 +5511,39 @@ public final class ViewRootImpl implements ViewParent,
             if (mView == null || !mAdded) {
                 Slog.w(mTag, "Dropping event due to root view being removed: " + q.mEvent);
                 return true;
-            } else if ((!mAttachInfo.mHasWindowFocus
-                    && !q.mEvent.isFromSource(InputDevice.SOURCE_CLASS_POINTER)
-                    && !isAutofillUiShowing()) || mStopped
-                    || (mIsAmbientMode && !q.mEvent.isFromSource(InputDevice.SOURCE_CLASS_BUTTON))
-                    || (mPausedForTransition && !isBack(q.mEvent))) {
-                // This is a focus event and the window doesn't currently have input focus or
-                // has stopped. This could be an event that came back from the previous stage
-                // but the window has lost focus or stopped in the meantime.
-                if (isTerminalInputEvent(q.mEvent)) {
-                    // Don't drop terminal input events, however mark them as canceled.
-                    q.mEvent.cancel();
-                    Slog.w(mTag, "Cancelling event due to no window focus: " + q.mEvent);
-                    return false;
-                }
-
-                // Drop non-terminal input events.
-                Slog.w(mTag, "Dropping event due to no window focus: " + q.mEvent);
-                return true;
             }
-            return false;
+
+            // Find a reason for dropping or canceling the event.
+            final String reason;
+            if (!mAttachInfo.mHasWindowFocus
+                    && !q.mEvent.isFromSource(InputDevice.SOURCE_CLASS_POINTER)
+                    && !isAutofillUiShowing()) {
+                // This is a non-pointer event and the window doesn't currently have input focus
+                // This could be an event that came back from the previous stage
+                // but the window has lost focus or stopped in the meantime.
+                reason = "no window focus";
+            } else if (mStopped) {
+                reason = "window is stopped";
+            } else if (mIsAmbientMode
+                    && !q.mEvent.isFromSource(InputDevice.SOURCE_CLASS_BUTTON)) {
+                reason = "non-button event in ambient mode";
+            } else if (mPausedForTransition && !isBack(q.mEvent)) {
+                reason = "paused for transition";
+            } else {
+                // Most common path: no reason to drop or cancel the event
+                return false;
+            }
+
+            if (isTerminalInputEvent(q.mEvent)) {
+                // Don't drop terminal input events, however mark them as canceled.
+                q.mEvent.cancel();
+                Slog.w(mTag, "Cancelling event (" + reason + "):" + q.mEvent);
+                return false;
+            }
+
+            // Drop non-terminal input events.
+            Slog.w(mTag, "Dropping event (" + reason + "):" + q.mEvent);
+            return true;
         }
 
         void dump(String prefix, PrintWriter writer) {
