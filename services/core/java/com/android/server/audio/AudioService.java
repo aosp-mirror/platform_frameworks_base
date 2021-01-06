@@ -95,6 +95,7 @@ import android.media.IVolumeController;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.media.MediaMetrics;
+import android.media.MediaRecorder.AudioSource;
 import android.media.PlayerBase;
 import android.media.VolumePolicy;
 import android.media.audiofx.AudioEffect;
@@ -161,9 +162,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -301,6 +304,9 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_UPDATE_VOLUME_STATES_FOR_DEVICE = 33;
     private static final int MSG_REINIT_VOLUMES = 34;
     private static final int MSG_UPDATE_A11Y_SERVICE_UIDS = 35;
+    private static final int MSG_UPDATE_AUDIO_MODE = 36;
+    private static final int MSG_RECORDING_CONFIG_CHANGE = 37;
+
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
     //   and not with sendMsg(..., ..., SENDMSG_QUEUE, ...)
@@ -941,6 +947,7 @@ public class AudioService extends IAudioService.Stub
         mDeviceBroker = new AudioDeviceBroker(mContext, this);
 
         mRecordMonitor = new RecordingActivityMonitor(mContext);
+        mRecordMonitor.registerRecordingCallback(mVoiceRecordingActivityMonitor, true);
 
         // must be called before readPersistedSettings() which needs a valid mStreamVolumeAlias[]
         // array initialized by updateStreamVolumeAlias()
@@ -950,6 +957,8 @@ public class AudioService extends IAudioService.Stub
 
         mPlaybackMonitor =
                 new PlaybackActivityMonitor(context, MAX_STREAM_VOLUME[AudioSystem.STREAM_ALARM]);
+        mPlaybackMonitor.registerPlaybackCallback(mVoicePlaybackActivityMonitor, true);
+
         mMediaFocusControl = new MediaFocusControl(mContext, mPlaybackMonitor);
 
         readAndSetLowRamDevice();
@@ -1198,12 +1207,8 @@ public class AudioService extends IAudioService.Stub
 
         // Restore call state
         synchronized (mDeviceBroker.mSetModeLock) {
-            if (mAudioSystem.setPhoneState(mMode, getModeOwnerUid())
-                    ==  AudioSystem.AUDIO_STATUS_OK) {
-                mModeLogger.log(new AudioEventLogger.StringEvent(
-                        "onAudioServerDied causes setPhoneState(" + AudioSystem.modeToString(mMode)
-                        + ", uid=" + getModeOwnerUid() + ")"));
-            }
+            onUpdateAudioMode(AudioSystem.MODE_CURRENT, android.os.Process.myPid(),
+                    mContext.getPackageName());
         }
         final int forSys;
         synchronized (mSettingsLock) {
@@ -2991,7 +2996,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     /*package*/ int getHearingAidStreamType() {
-        return getHearingAidStreamType(mMode);
+        return getHearingAidStreamType(getMode());
     }
 
     private int getHearingAidStreamType(int mode) {
@@ -3004,15 +3009,15 @@ public class AudioService extends IAudioService.Stub
                 // other conditions will influence the stream type choice, read on...
                 break;
         }
-        if (mVoiceActive.get()) {
+        if (mVoicePlaybackActive.get()) {
             return AudioSystem.STREAM_VOICE_CALL;
         }
         return AudioSystem.STREAM_MUSIC;
     }
 
-    private AtomicBoolean mVoiceActive = new AtomicBoolean(false);
+    private AtomicBoolean mVoicePlaybackActive = new AtomicBoolean(false);
 
-    private final IPlaybackConfigDispatcher mVoiceActivityMonitor =
+    private final IPlaybackConfigDispatcher mVoicePlaybackActivityMonitor =
             new IPlaybackConfigDispatcher.Stub() {
         @Override
         public void dispatchPlaybackConfigChange(List<AudioPlaybackConfiguration> configs,
@@ -3034,8 +3039,118 @@ public class AudioService extends IAudioService.Stub
                 break;
             }
         }
-        if (mVoiceActive.getAndSet(voiceActive) != voiceActive) {
+        if (mVoicePlaybackActive.getAndSet(voiceActive) != voiceActive) {
             updateHearingAidVolumeOnVoiceActivityUpdate();
+        }
+
+        // Update playback active state for all apps in audio mode stack.
+        // When the audio mode owner becomes active, replace any delayed MSG_UPDATE_AUDIO_MODE
+        // and request an audio mode update immediately. Upon any other change, queue the message
+        // and request an audio mode update after a grace period.
+        synchronized (mDeviceBroker.mSetModeLock) {
+            boolean updateAudioMode = false;
+            int existingMsgPolicy = SENDMSG_QUEUE;
+            int delay = CHECK_MODE_FOR_UID_PERIOD_MS;
+            for (SetModeDeathHandler h : mSetModeDeathHandlers) {
+                boolean wasActive = h.isActive();
+                h.setPlaybackActive(false);
+                for (AudioPlaybackConfiguration config : configs) {
+                    final int usage = config.getAudioAttributes().getUsage();
+                    if (config.getClientUid() == h.getUid()
+                            && (usage == AudioAttributes.USAGE_VOICE_COMMUNICATION
+                                || usage == AudioAttributes.USAGE_VOICE_COMMUNICATION_SIGNALLING)
+                            && config.getPlayerState()
+                                == AudioPlaybackConfiguration.PLAYER_STATE_STARTED) {
+                        h.setPlaybackActive(true);
+                        break;
+                    }
+                }
+                if (wasActive != h.isActive()) {
+                    updateAudioMode = true;
+                    if (h.isActive() && h == getAudioModeOwnerHandler()) {
+                        existingMsgPolicy = SENDMSG_REPLACE;
+                        delay = 0;
+                    }
+                }
+            }
+            if (updateAudioMode) {
+                sendMsg(mAudioHandler,
+                        MSG_UPDATE_AUDIO_MODE,
+                        existingMsgPolicy,
+                        AudioSystem.MODE_CURRENT,
+                        android.os.Process.myPid(),
+                        mContext.getPackageName(),
+                        delay);
+            }
+        }
+    }
+
+    private final IRecordingConfigDispatcher mVoiceRecordingActivityMonitor =
+            new IRecordingConfigDispatcher.Stub() {
+        @Override
+        public void dispatchRecordingConfigChange(List<AudioRecordingConfiguration> configs) {
+            sendMsg(mAudioHandler, MSG_RECORDING_CONFIG_CHANGE, SENDMSG_REPLACE,
+                    0 /*arg1 ignored*/, 0 /*arg2 ignored*/,
+                    configs /*obj*/, 0 /*delay*/);
+        }
+    };
+
+    private void onRecordingConfigChange(List<AudioRecordingConfiguration> configs) {
+        // Update recording active state for all apps in audio mode stack.
+        // When the audio mode owner becomes active, replace any delayed MSG_UPDATE_AUDIO_MODE
+        // and request an audio mode update immediately. Upon any other change, queue the message
+        // and request an audio mode update after a grace period.
+        synchronized (mDeviceBroker.mSetModeLock) {
+            boolean updateAudioMode = false;
+            int existingMsgPolicy = SENDMSG_QUEUE;
+            int delay = CHECK_MODE_FOR_UID_PERIOD_MS;
+            for (SetModeDeathHandler h : mSetModeDeathHandlers) {
+                boolean wasActive = h.isActive();
+                h.setRecordingActive(false);
+                for (AudioRecordingConfiguration config : configs) {
+                    if (config.getClientUid() == h.getUid()
+                            && config.getAudioSource() == AudioSource.VOICE_COMMUNICATION) {
+                        h.setRecordingActive(true);
+                        break;
+                    }
+                }
+                if (wasActive != h.isActive()) {
+                    updateAudioMode = true;
+                    if (h.isActive() && h == getAudioModeOwnerHandler()) {
+                        existingMsgPolicy = SENDMSG_REPLACE;
+                        delay = 0;
+                    }
+                }
+            }
+            if (updateAudioMode) {
+                sendMsg(mAudioHandler,
+                        MSG_UPDATE_AUDIO_MODE,
+                        existingMsgPolicy,
+                        AudioSystem.MODE_CURRENT,
+                        android.os.Process.myPid(),
+                        mContext.getPackageName(),
+                        delay);
+            }
+        }
+    }
+
+    private void dumpAudioMode(PrintWriter pw) {
+        pw.println("\nAudio mode: ");
+        pw.println("- Current mode = " + AudioSystem.modeToString(getMode()));
+        pw.println("- Mode owner: ");
+        SetModeDeathHandler hdlr = getAudioModeOwnerHandler();
+        if (hdlr != null) {
+            hdlr.dump(pw, -1);
+        } else {
+            pw.println("   None");
+        }
+        pw.println("- Mode owner stack: ");
+        if (mSetModeDeathHandlers.isEmpty()) {
+            pw.println("   Empty");
+        } else {
+            for (int i = 0; i < mSetModeDeathHandlers.size(); i++) {
+                mSetModeDeathHandlers.get(i).dump(pw, i);
+            }
         }
     }
 
@@ -3043,7 +3158,7 @@ public class AudioService extends IAudioService.Stub
         final int streamType = getHearingAidStreamType();
         final int index = getStreamVolume(streamType);
         sVolumeLogger.log(new VolumeEvent(VolumeEvent.VOL_VOICE_ACTIVITY_HEARING_AID,
-                mVoiceActive.get(), streamType, index));
+                mVoicePlaybackActive.get(), streamType, index));
         mDeviceBroker.postSetHearingAidVolumeIndex(index * 10, streamType);
 
     }
@@ -4060,65 +4175,46 @@ public class AudioService extends IAudioService.Stub
 
     }
 
-    /**
-     * Return the pid of the current audio mode owner
-     * @return 0 if nobody owns the mode
-     */
-    /*package*/ int getModeOwnerPid() {
-        int modeOwnerPid = 0;
-        try {
-            modeOwnerPid = mSetModeDeathHandlers.get(0).getPid();
-        } catch (Exception e) {
-            // nothing to do, modeOwnerPid is not modified
-        }
-        return modeOwnerPid;
-    }
-
-    /**
-     * Return the uid of the current audio mode owner
-     * @return 0 if nobody owns the mode
-     */
-    /*package*/ int getModeOwnerUid() {
-        int modeOwnerUid = 0;
-        try {
-            modeOwnerUid = mSetModeDeathHandlers.get(0).getUid();
-        } catch (Exception e) {
-            // nothing to do, modeOwnerUid is not modified
-        }
-        return modeOwnerUid;
-    }
-
     private class SetModeDeathHandler implements IBinder.DeathRecipient {
         private final IBinder mCb; // To be notified of client's death
         private final int mPid;
         private final int mUid;
         private final boolean mIsPrivileged;
         private final String mPackage;
-        private int mMode = AudioSystem.MODE_NORMAL; // Current mode set by this client
+        private int mMode;
+        private long mUpdateTime;
+        private boolean mPlaybackActive = false;
+        private boolean mRecordingActive = false;
 
-        SetModeDeathHandler(IBinder cb, int pid, int uid, boolean isPrivileged, String caller) {
+        SetModeDeathHandler(IBinder cb, int pid, int uid, boolean isPrivileged,
+                            String caller, int mode) {
+            mMode = mode;
             mCb = cb;
             mPid = pid;
             mUid = uid;
-            mIsPrivileged = isPrivileged;
             mPackage = caller;
+            mIsPrivileged = isPrivileged;
+            mUpdateTime = java.lang.System.currentTimeMillis();
         }
 
         public void binderDied() {
-            int newModeOwnerPid = 0;
             synchronized (mDeviceBroker.mSetModeLock) {
-                Log.w(TAG, "setMode() client died");
+                Log.w(TAG, "SetModeDeathHandler client died");
                 int index = mSetModeDeathHandlers.indexOf(this);
                 if (index < 0) {
-                    Log.w(TAG, "unregistered setMode() client died");
+                    Log.w(TAG, "unregistered SetModeDeathHandler client died");
                 } else {
-                    newModeOwnerPid = setModeInt(
-                            AudioSystem.MODE_NORMAL, mCb, mPid, mUid, mIsPrivileged, TAG);
+                    SetModeDeathHandler h = mSetModeDeathHandlers.get(index);
+                    mSetModeDeathHandlers.remove(index);
+                    sendMsg(mAudioHandler,
+                            MSG_UPDATE_AUDIO_MODE,
+                            SENDMSG_QUEUE,
+                            AudioSystem.MODE_CURRENT,
+                            android.os.Process.myPid(),
+                            mContext.getPackageName(),
+                            0);
                 }
             }
-            // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all
-            // SCO connections not started by the application changing the mode when pid changes
-            mDeviceBroker.postSetModeOwnerPid(newModeOwnerPid, AudioService.this.getMode());
         }
 
         public int getPid() {
@@ -4127,6 +4223,7 @@ public class AudioService extends IAudioService.Stub
 
         public void setMode(int mode) {
             mMode = mode;
+            mUpdateTime = java.lang.System.currentTimeMillis();
         }
 
         public int getMode() {
@@ -4148,24 +4245,130 @@ public class AudioService extends IAudioService.Stub
         public boolean isPrivileged() {
             return mIsPrivileged;
         }
+
+        public long getUpdateTime() {
+            return mUpdateTime;
+        }
+
+        public void setPlaybackActive(boolean active) {
+            mPlaybackActive = active;
+        }
+
+        public void setRecordingActive(boolean active) {
+            mRecordingActive = active;
+        }
+
+        /**
+         * An app is considered active if:
+         * - It is privileged (has MODIFY_PHONE_STATE permission)
+         *  or
+         * - It requests mode MODE_IN_COMMUNICATION, and it is either playing
+         * or recording for VOICE_COMMUNICATION.
+         *   or
+         * - It requests a mode different from MODE_IN_COMMUNICATION or MODE_NORMAL
+         */
+        public boolean isActive() {
+            return mIsPrivileged
+                    || ((mMode == AudioSystem.MODE_IN_COMMUNICATION)
+                        && (mRecordingActive || mPlaybackActive))
+                    || mMode == AudioSystem.MODE_IN_CALL
+                    || mMode == AudioSystem.MODE_RINGTONE
+                    || mMode == AudioSystem.MODE_CALL_SCREENING;
+        }
+
+        public void dump(PrintWriter pw, int index) {
+            SimpleDateFormat format = new SimpleDateFormat("MM-dd HH:mm:ss:SSS");
+
+            if (index >= 0) {
+                pw.println("  Requester # " + (index + 1) + ":");
+            }
+            pw.println("  - Mode: " + AudioSystem.modeToString(mMode));
+            pw.println("  - Binder: " + mCb);
+            pw.println("  - Pid: " + mPid);
+            pw.println("  - Uid: " + mUid);
+            pw.println("  - Package: " + mPackage);
+            pw.println("  - Privileged: " + mIsPrivileged);
+            pw.println("  - Active: " + isActive());
+            pw.println("    Playback active: " + mPlaybackActive);
+            pw.println("    Recording active: " + mRecordingActive);
+            pw.println("  - update time: " + format.format(new Date(mUpdateTime)));
+        }
+    }
+
+    @GuardedBy("mDeviceBroker.mSetModeLock")
+    private SetModeDeathHandler getAudioModeOwnerHandler() {
+        // The Audio mode owner is:
+        // 1) the most recent privileged app in the stack
+        // 2) the most recent active app in the tack
+        SetModeDeathHandler modeOwner = null;
+        SetModeDeathHandler privilegedModeOwner = null;
+        for (SetModeDeathHandler h : mSetModeDeathHandlers) {
+            if (h.isActive()) {
+                // privileged apps are always active
+                if (h.isPrivileged()) {
+                    if (privilegedModeOwner == null
+                            || h.getUpdateTime() > privilegedModeOwner.getUpdateTime()) {
+                        privilegedModeOwner = h;
+                    }
+                } else {
+                    if (modeOwner == null
+                            || h.getUpdateTime() > modeOwner.getUpdateTime()) {
+                        modeOwner = h;
+                    }
+                }
+            }
+        }
+        return privilegedModeOwner != null ? privilegedModeOwner :  modeOwner;
+    }
+
+    /**
+     * Return the pid of the current audio mode owner
+     * @return 0 if nobody owns the mode
+     */
+    @GuardedBy("mDeviceBroker.mSetModeLock")
+    /*package*/ int getModeOwnerPid() {
+        SetModeDeathHandler hdlr = getAudioModeOwnerHandler();
+        if (hdlr != null) {
+            return hdlr.getPid();
+        }
+        return 0;
+    }
+
+    /**
+     * Return the uid of the current audio mode owner
+     * @return 0 if nobody owns the mode
+     */
+    @GuardedBy("mDeviceBroker.mSetModeLock")
+    /*package*/ int getModeOwnerUid() {
+        SetModeDeathHandler hdlr = getAudioModeOwnerHandler();
+        if (hdlr != null) {
+            return hdlr.getUid();
+        }
+        return 0;
     }
 
     /** @see AudioManager#setMode(int) */
     public void setMode(int mode, IBinder cb, String callingPackage) {
+        int pid = Binder.getCallingPid();
+        int uid = Binder.getCallingUid();
         if (DEBUG_MODE) {
-            Log.v(TAG, "setMode(mode=" + mode + ", callingPackage=" + callingPackage + ")");
+            Log.v(TAG, "setMode(mode=" + mode + ", pid=" + pid
+                    + ", uid=" + uid + ", caller=" + callingPackage + ")");
         }
         if (!checkAudioSettingsPermission("setMode()")) {
             return;
         }
-        final boolean hasModifyPhoneStatePermission = mContext.checkCallingOrSelfPermission(
-                        android.Manifest.permission.MODIFY_PHONE_STATE)
-                        == PackageManager.PERMISSION_GRANTED;
-        final int callingPid = Binder.getCallingPid();
-        if ((mode == AudioSystem.MODE_IN_CALL) && !hasModifyPhoneStatePermission) {
-            Log.w(TAG, "MODIFY_PHONE_STATE Permission Denial: setMode(MODE_IN_CALL) from pid="
-                    + callingPid + ", uid=" + Binder.getCallingUid());
+        if (cb == null) {
+            Log.e(TAG, "setMode() called with null binder");
             return;
+        }
+        if (mode < AudioSystem.MODE_CURRENT || mode >= AudioSystem.NUM_MODES) {
+            Log.w(TAG, "setMode() invalid mode: " + mode);
+            return;
+        }
+
+        if (mode == AudioSystem.MODE_CURRENT) {
+            mode = getMode();
         }
 
         if (mode == AudioSystem.MODE_CALL_SCREENING && !mIsCallScreeningModeSupported) {
@@ -4174,171 +4377,152 @@ public class AudioService extends IAudioService.Stub
             return;
         }
 
-        if (mode < AudioSystem.MODE_CURRENT || mode >= AudioSystem.NUM_MODES) {
+        final boolean hasModifyPhoneStatePermission = mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.MODIFY_PHONE_STATE)
+                == PackageManager.PERMISSION_GRANTED;
+        if ((mode == AudioSystem.MODE_IN_CALL) && !hasModifyPhoneStatePermission) {
+            Log.w(TAG, "MODIFY_PHONE_STATE Permission Denial: setMode(MODE_IN_CALL) from pid="
+                    + pid + ", uid=" + Binder.getCallingUid());
             return;
         }
 
-        int newModeOwnerPid;
+        SetModeDeathHandler currentModeHandler = null;
         synchronized (mDeviceBroker.mSetModeLock) {
-            if (mode == AudioSystem.MODE_CURRENT) {
-                mode = mMode;
+            for (SetModeDeathHandler h : mSetModeDeathHandlers) {
+                if (h.getPid() == pid) {
+                    currentModeHandler = h;
+                    break;
+                }
             }
-            int oldModeOwnerPid = getModeOwnerPid();
-            // Do not allow changing mode if a call is active and the requester
-            // does not have permission to modify phone state or is not the mode owner,
-            // unless returning to NORMAL mode (will not change current mode owner) or
-            // not changing mode in which case the mode owner will reflect the last
-            // requester of current mode
-            if (!((mode == mMode) || (mode == AudioSystem.MODE_NORMAL))
-                    && ((mMode == AudioSystem.MODE_IN_CALL)
-                        || (mMode == AudioSystem.MODE_IN_COMMUNICATION))
-                    && !(hasModifyPhoneStatePermission || (oldModeOwnerPid == callingPid))) {
-                Log.w(TAG, "setMode(" + mode + ") from pid=" + callingPid
-                        + ", uid=" + Binder.getCallingUid()
-                        + ", cannot change mode from " + mMode
-                        + " without permission or being mode owner");
-                return;
+
+            if (mode == AudioSystem.MODE_NORMAL) {
+                if (currentModeHandler != null) {
+                    if (!currentModeHandler.isPrivileged()
+                            && currentModeHandler.getMode() == AudioSystem.MODE_IN_COMMUNICATION) {
+                        mAudioHandler.removeEqualMessages(
+                                MSG_CHECK_MODE_FOR_UID, currentModeHandler);
+                    }
+                    mSetModeDeathHandlers.remove(currentModeHandler);
+                    if (DEBUG_MODE) {
+                        Log.v(TAG, "setMode(" + mode + ") removing hldr for pid: " + pid);
+                    }
+                    try {
+                        currentModeHandler.getBinder().unlinkToDeath(currentModeHandler, 0);
+                    } catch (NoSuchElementException e) {
+                        Log.w(TAG, "setMode link does not exist ...");
+                    }
+                }
+            } else {
+                if (currentModeHandler != null) {
+                    currentModeHandler.setMode(mode);
+                    if (DEBUG_MODE) {
+                        Log.v(TAG, "setMode(" + mode + ") updating hldr for pid: " + pid);
+                    }
+                } else {
+                    currentModeHandler = new SetModeDeathHandler(cb, pid, uid,
+                            hasModifyPhoneStatePermission, callingPackage, mode);
+                    // Register for client death notification
+                    try {
+                        cb.linkToDeath(currentModeHandler, 0);
+                    } catch (RemoteException e) {
+                        // Client has died!
+                        Log.w(TAG, "setMode() could not link to " + cb + " binder death");
+                        return;
+                    }
+                    mSetModeDeathHandlers.add(currentModeHandler);
+                    if (DEBUG_MODE) {
+                        Log.v(TAG, "setMode(" + mode + ") adding handler for pid=" + pid);
+                    }
+                }
+                if (mode == AudioSystem.MODE_IN_COMMUNICATION) {
+                    // Force active state when entering/updating the stack to avoid glitches when
+                    // an app starts playing/recording after settng the audio mode,
+                    // and send a reminder to check activity after a grace period.
+                    if (!currentModeHandler.isPrivileged()) {
+                        currentModeHandler.setPlaybackActive(true);
+                        currentModeHandler.setRecordingActive(true);
+                        sendMsg(mAudioHandler,
+                                MSG_CHECK_MODE_FOR_UID,
+                                SENDMSG_QUEUE,
+                                0,
+                                0,
+                                currentModeHandler,
+                                CHECK_MODE_FOR_UID_PERIOD_MS);
+                    }
+                }
             }
-            newModeOwnerPid = setModeInt(mode, cb, callingPid, Binder.getCallingUid(),
-                    hasModifyPhoneStatePermission, callingPackage);
+
+            sendMsg(mAudioHandler,
+                    MSG_UPDATE_AUDIO_MODE,
+                    SENDMSG_REPLACE,
+                    mode,
+                    pid,
+                    callingPackage,
+                    0);
         }
-        // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all
-        // SCO connections not started by the application changing the mode when pid changes
-        mDeviceBroker.postSetModeOwnerPid(newModeOwnerPid, getMode());
     }
 
-    // setModeInt() returns a valid PID if the audio mode was successfully set to
-    // any mode other than NORMAL.
     @GuardedBy("mDeviceBroker.mSetModeLock")
-    private int setModeInt(
-            int mode, IBinder cb, int pid, int uid, boolean isPrivileged, String caller) {
+    void onUpdateAudioMode(int requestedMode, int requesterPid, String requesterPackage) {
+        if (requestedMode == AudioSystem.MODE_CURRENT) {
+            requestedMode = getMode();
+        }
+        int mode = AudioSystem.MODE_NORMAL;
+        int uid = 0;
+        int pid = 0;
+        SetModeDeathHandler currentModeHandler = getAudioModeOwnerHandler();
+        if (currentModeHandler != null) {
+            mode = currentModeHandler.getMode();
+            uid = currentModeHandler.getUid();
+            pid = currentModeHandler.getPid();
+        }
         if (DEBUG_MODE) {
-            Log.v(TAG, "setModeInt(mode=" + mode + ", pid=" + pid
-                    + ", uid=" + uid + ", caller=" + caller + ")");
+            Log.v(TAG, "onUpdateAudioMode() mode: " + mode + ", mMode: " + mMode
+                    + " requestedMode: " + requestedMode);
         }
-        int newModeOwnerPid = 0;
-        if (cb == null) {
-            Log.e(TAG, "setModeInt() called with null binder");
-            return newModeOwnerPid;
-        }
+        if (mode != mMode) {
+            final long identity = Binder.clearCallingIdentity();
+            int status = mAudioSystem.setPhoneState(mode, uid);
+            Binder.restoreCallingIdentity(identity);
+            if (status == AudioSystem.AUDIO_STATUS_OK) {
+                if (DEBUG_MODE) {
+                    Log.v(TAG, "onUpdateAudioMode: mode successfully set to " + mode);
+                }
+                int previousMode = mMode;
+                mMode = mode;
+                // Note: newModeOwnerPid is always 0 when actualMode is MODE_NORMAL
+                mModeLogger.log(new PhoneStateEvent(requesterPackage, requesterPid,
+                        requestedMode, pid, mode));
 
-        SetModeDeathHandler hdlr = null;
-        Iterator iter = mSetModeDeathHandlers.iterator();
-        while (iter.hasNext()) {
-            SetModeDeathHandler h = (SetModeDeathHandler)iter.next();
-            if (h.getPid() == pid) {
-                hdlr = h;
-                // Remove from client list so that it is re-inserted at top of list
-                iter.remove();
-                if (hdlr.getMode() == AudioSystem.MODE_IN_COMMUNICATION) {
-                    mAudioHandler.removeEqualMessages(MSG_CHECK_MODE_FOR_UID, hdlr);
-                }
-                try {
-                    hdlr.getBinder().unlinkToDeath(hdlr, 0);
-                    if (cb != hdlr.getBinder()){
-                        hdlr = null;
-                    }
-                } catch (NoSuchElementException e) {
-                    hdlr = null;
-                    Log.w(TAG, "link does not exist ...");
-                }
-                break;
-            }
-        }
-        final int oldMode = mMode;
-        int status = AudioSystem.AUDIO_STATUS_OK;
-        int actualMode;
-        do {
-            actualMode = mode;
-            if (mode == AudioSystem.MODE_NORMAL) {
-                // get new mode from client at top the list if any
-                if (!mSetModeDeathHandlers.isEmpty()) {
-                    hdlr = mSetModeDeathHandlers.get(0);
-                    cb = hdlr.getBinder();
-                    actualMode = hdlr.getMode();
-                    if (DEBUG_MODE) {
-                        Log.w(TAG, " using mode=" + mode + " instead due to death hdlr at pid="
-                                + hdlr.mPid);
-                    }
-                }
+                int streamType = getActiveStreamType(AudioManager.USE_DEFAULT_STREAM_TYPE);
+                int device = getDeviceForStream(streamType);
+                int index = mStreamStates[mStreamVolumeAlias[streamType]].getIndex(device);
+                setStreamVolumeInt(mStreamVolumeAlias[streamType], index, device, true,
+                        requesterPackage, true /*hasModifyAudioSettings*/);
+
+                updateStreamVolumeAlias(true /*updateVolumes*/, requesterPackage);
+
+                // change of mode may require volume to be re-applied on some devices
+                updateAbsVolumeMultiModeDevices(previousMode, mode);
+
+                // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all SCO
+                // connections not started by the application changing the mode when pid changes
+                mDeviceBroker.postSetModeOwnerPid(pid, mode);
             } else {
-                if (hdlr == null) {
-                    hdlr = new SetModeDeathHandler(cb, pid, uid, isPrivileged, caller);
-                }
-                // Register for client death notification
-                try {
-                    cb.linkToDeath(hdlr, 0);
-                } catch (RemoteException e) {
-                    // Client has died!
-                    Log.w(TAG, "setMode() could not link to "+cb+" binder death");
-                }
-
-                // Last client to call setMode() is always at top of client list
-                // as required by SetModeDeathHandler.binderDied()
-                mSetModeDeathHandlers.add(0, hdlr);
-                hdlr.setMode(mode);
-            }
-
-            if (actualMode != mMode) {
-                final long identity = Binder.clearCallingIdentity();
-                status = mAudioSystem.setPhoneState(actualMode, getModeOwnerUid());
-                Binder.restoreCallingIdentity(identity);
-                if (status == AudioSystem.AUDIO_STATUS_OK) {
-                    if (DEBUG_MODE) { Log.v(TAG, " mode successfully set to " + actualMode); }
-                    mMode = actualMode;
-                } else {
-                    if (hdlr != null) {
-                        mSetModeDeathHandlers.remove(hdlr);
-                        cb.unlinkToDeath(hdlr, 0);
-                    }
-                    // force reading new top of mSetModeDeathHandlers stack
-                    if (DEBUG_MODE) { Log.w(TAG, " mode set to MODE_NORMAL after phoneState pb"); }
-                    mode = AudioSystem.MODE_NORMAL;
-                }
-            } else {
-                status = AudioSystem.AUDIO_STATUS_OK;
-            }
-        } while (status != AudioSystem.AUDIO_STATUS_OK && !mSetModeDeathHandlers.isEmpty());
-
-        if (status == AudioSystem.AUDIO_STATUS_OK) {
-            if (actualMode != AudioSystem.MODE_NORMAL) {
-                newModeOwnerPid = getModeOwnerPid();
-                if (newModeOwnerPid == 0) {
-                    Log.e(TAG, "setMode() different from MODE_NORMAL with empty mode client stack");
-                }
-            }
-            // Note: newModeOwnerPid is always 0 when actualMode is MODE_NORMAL
-            mModeLogger.log(
-                    new PhoneStateEvent(caller, pid, mode, newModeOwnerPid, actualMode));
-
-            int streamType = getActiveStreamType(AudioManager.USE_DEFAULT_STREAM_TYPE);
-            int device = getDeviceForStream(streamType);
-            int index = mStreamStates[mStreamVolumeAlias[streamType]].getIndex(device);
-            setStreamVolumeInt(mStreamVolumeAlias[streamType], index, device, true, caller,
-                    true /*hasModifyAudioSettings*/);
-
-            updateStreamVolumeAlias(true /*updateVolumes*/, caller);
-
-            // change of mode may require volume to be re-applied on some devices
-            updateAbsVolumeMultiModeDevices(oldMode, actualMode);
-
-            if (actualMode == AudioSystem.MODE_IN_COMMUNICATION
-                    && !hdlr.isPrivileged()) {
-                sendMsg(mAudioHandler,
-                        MSG_CHECK_MODE_FOR_UID,
-                        SENDMSG_QUEUE,
-                        0,
-                        0,
-                        hdlr,
-                        CHECK_MODE_FOR_UID_PERIOD_MS);
+                Log.w(TAG, "onUpdateAudioMode: failed to set audio mode to: " + mode);
             }
         }
-        return newModeOwnerPid;
     }
 
     /** @see AudioManager#getMode() */
     public int getMode() {
-        return mMode;
+        synchronized (mDeviceBroker.mSetModeLock) {
+            SetModeDeathHandler currentModeHandler = getAudioModeOwnerHandler();
+            if (currentModeHandler != null) {
+                return currentModeHandler.getMode();
+            }
+            return AudioSystem.MODE_NORMAL;
+        }
     }
 
     /** cached value read from audiopolicy manager after initialization. */
@@ -5685,11 +5869,6 @@ public class AudioService extends IAudioService.Stub
             throw new IllegalArgumentException("Illegal BluetoothProfile state for device "
                     + " (dis)connection, got " + state);
         }
-        if (state == BluetoothProfile.STATE_CONNECTED) {
-            mPlaybackMonitor.registerPlaybackCallback(mVoiceActivityMonitor, true);
-        } else {
-            mPlaybackMonitor.unregisterPlaybackCallback(mVoiceActivityMonitor);
-        }
         mDeviceBroker.postBluetoothHearingAidDeviceConnectionState(
                 device, state, suppressNoisyIntent, musicDevice, "AudioService");
     }
@@ -7034,6 +7213,9 @@ public class AudioService extends IAudioService.Stub
                 case MSG_PLAYBACK_CONFIG_CHANGE:
                     onPlaybackConfigChange((List<AudioPlaybackConfiguration>) msg.obj);
                     break;
+                case MSG_RECORDING_CONFIG_CHANGE:
+                    onRecordingConfigChange((List<AudioRecordingConfiguration>) msg.obj);
+                    break;
 
                 case MSG_BROADCAST_MICROPHONE_MUTE:
                     mSystemServer.sendMicrophoneMuteChangedIntent();
@@ -7044,30 +7226,19 @@ public class AudioService extends IAudioService.Stub
                         if (msg.obj == null) {
                             break;
                         }
-                        // If no other app is currently owning the audio mode and
-                        // the app corresponding to this mode death handler object is still in the
-                        // mode owner stack but not capturing or playing audio after 3 seconds,
-                        // remove it from the stack.
-                        // Otherwise, check again in 3 seconds.
+                        // Update active playback/recording for apps requesting IN_COMMUNICATION
+                        // mode after a grace period following the mode change
                         SetModeDeathHandler h = (SetModeDeathHandler) msg.obj;
                         if (mSetModeDeathHandlers.indexOf(h) < 0) {
                             break;
                         }
-                        if (getModeOwnerUid() != h.getUid()
-                                || mRecordMonitor.isRecordingActiveForUid(h.getUid())
-                                || mPlaybackMonitor.isPlaybackActiveForUid(h.getUid())) {
-                            sendMsg(mAudioHandler,
-                                    MSG_CHECK_MODE_FOR_UID,
-                                    SENDMSG_QUEUE,
-                                    0,
-                                    0,
-                                    h,
-                                    CHECK_MODE_FOR_UID_PERIOD_MS);
-                            break;
+                        boolean wasActive = h.isActive();
+                        h.setPlaybackActive(mPlaybackMonitor.isPlaybackActiveForUid(h.getUid()));
+                        h.setRecordingActive(mRecordMonitor.isRecordingActiveForUid(h.getUid()));
+                        if (wasActive != h.isActive()) {
+                            onUpdateAudioMode(AudioSystem.MODE_CURRENT,
+                                    android.os.Process.myPid(), mContext.getPackageName());
                         }
-                        setModeInt(AudioSystem.MODE_NORMAL, h.getBinder(), h.getPid(), h.getUid(),
-                                h.isPrivileged(), "MSG_CHECK_MODE_FOR_UID");
-                        mModeLogger.log(new PhoneStateEvent(h.getPackage(), h.getPid()));
                     }
                     break;
 
@@ -7084,10 +7255,16 @@ public class AudioService extends IAudioService.Stub
                 case MSG_REINIT_VOLUMES:
                     onReinitVolumes((String) msg.obj);
                     break;
+
                 case MSG_UPDATE_A11Y_SERVICE_UIDS:
                     onUpdateAccessibilityServiceUids();
                     break;
 
+                case MSG_UPDATE_AUDIO_MODE:
+                    synchronized (mDeviceBroker.mSetModeLock) {
+                        onUpdateAudioMode(msg.arg1, msg.arg2, (String) msg.obj);
+                    }
+                    break;
             }
         }
     }
@@ -8118,6 +8295,7 @@ public class AudioService extends IAudioService.Stub
         dumpStreamStates(pw);
         dumpVolumeGroups(pw);
         dumpRingerMode(pw);
+        dumpAudioMode(pw);
         pw.println("\nAudio routes:");
         pw.print("  mMainType=0x"); pw.println(Integer.toHexString(
                 mDeviceBroker.getCurAudioRoutes().mainType));
