@@ -32,4 +32,5 @@ oneway interface IDataServiceCallback
     void onDataCallListChanged(in List<DataCallResponse> dataCallList);
     void onHandoverStarted(int result);
     void onHandoverCancelled(int result);
+    void onApnUnthrottled(in String apn);
 }
