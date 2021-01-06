@@ -3064,7 +3064,7 @@
     <!-- dimension definitions go here -->
   </public-group>
 
-  <public-group type="bool" first-id="0x01110006">
+  <public-group type="bool" first-id="0x01110007">
     <!-- boolean definitions go here -->
   </public-group>
 

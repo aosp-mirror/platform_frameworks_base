@@ -11641,6 +11641,14 @@ package android.content.pm {
     method public final int compare(android.content.pm.ApplicationInfo, android.content.pm.ApplicationInfo);
   }
 
+  public final class Attribution implements android.os.Parcelable {
+    method public int describeContents();
+    method @IdRes public int getLabel();
+    method @NonNull public String getTag();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.Attribution> CREATOR;
+  }
+
   public final class ChangedPackages implements android.os.Parcelable {
     ctor public ChangedPackages(int, @NonNull java.util.List<java.lang.String>);
     method public int describeContents();
@@ -11890,6 +11898,7 @@ package android.content.pm {
     field public static final int REQUESTED_PERMISSION_GRANTED = 2; // 0x2
     field public android.content.pm.ActivityInfo[] activities;
     field public android.content.pm.ApplicationInfo applicationInfo;
+    field @Nullable public android.content.pm.Attribution[] attributions;
     field public int baseRevisionCode;
     field public android.content.pm.ConfigurationInfo[] configPreferences;
     field public android.content.pm.FeatureGroupInfo[] featureGroups;
@@ -12338,6 +12347,7 @@ package android.content.pm {
     field public static final int FLAG_PERMISSION_WHITELIST_SYSTEM = 1; // 0x1
     field public static final int FLAG_PERMISSION_WHITELIST_UPGRADE = 4; // 0x4
     field public static final int GET_ACTIVITIES = 1; // 0x1
+    field public static final int GET_ATTRIBUTIONS = -2147483648; // 0x80000000
     field public static final int GET_CONFIGURATIONS = 16384; // 0x4000
     field @Deprecated public static final int GET_DISABLED_COMPONENTS = 512; // 0x200
     field @Deprecated public static final int GET_DISABLED_UNTIL_USED_COMPONENTS = 32768; // 0x8000
