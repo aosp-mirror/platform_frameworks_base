@@ -259,6 +259,7 @@ public class LockscreenLockIconController {
                         force = true;
                     }
                     if (!wasShowing && mKeyguardShowing) {
+                        setBouncerHideAmount(KeyguardBouncer.EXPANSION_HIDDEN);
                         mKeyguardJustShown = true;
                     }
                     update(force);
