@@ -17201,12 +17201,6 @@ public final class Settings {
             public static final String WEAR_OS_VERSION_STRING = "wear_os_version_string";
 
             /**
-             * How round the corners of square screens are.
-             * @hide
-             */
-            public static final String CORNER_ROUNDNESS = "corner_roundness";
-
-            /**
              * Whether the physical button has been set.
              * @hide
              */

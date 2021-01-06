@@ -250,7 +250,6 @@ public class GlobalSettingsValidators {
                             String.valueOf(Global.Wearable.STEM_TYPE_CONTACT_LAUNCH)
                         }));
         VALIDATORS.put(Global.Wearable.MUTE_WHEN_OFF_BODY_ENABLED, BOOLEAN_VALIDATOR);
-        VALIDATORS.put(Global.Wearable.CORNER_ROUNDNESS, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.Wearable.SIDE_BUTTON, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.BUTTON_SET, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.ANDROID_WEAR_VERSION, ANY_INTEGER_VALIDATOR);
