@@ -74,7 +74,7 @@ import java.util.ArrayList;
 public class DynamicSystemInstallationService extends Service
         implements InstallationAsyncTask.ProgressListener {
 
-    private static final String TAG = "DynSystemInstallationService";
+    private static final String TAG = "DynamicSystemInstallationService";
 
     // TODO (b/131866826): This is currently for test only. Will move this to System API.
     static final String KEY_ENABLE_WHEN_COMPLETED = "KEY_ENABLE_WHEN_COMPLETED";
