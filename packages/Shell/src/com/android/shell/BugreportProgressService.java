@@ -1248,6 +1248,7 @@ public class BugreportProgressService extends Service {
                 .setContentText(content)
                 .setContentIntent(PendingIntent.getService(mContext, info.id, shareIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT))
+                .setOnlyAlertOnce(false)
                 .setDeleteIntent(newCancelIntent(mContext, info));
 
         if (!TextUtils.isEmpty(info.getName())) {
@@ -1287,6 +1288,7 @@ public class BugreportProgressService extends Service {
                 .setLocalOnly(true)
                 .setColor(context.getColor(
                         com.android.internal.R.color.system_notification_accent_color))
+                .setOnlyAlertOnce(true)
                 .extend(new Notification.TvExtender());
     }
 
