@@ -3842,7 +3842,6 @@ public class UserManagerService extends IUserManager.Stub {
      */
     @Override
     public boolean removeUser(@UserIdInt int userId) {
-        Slog.i(LOG_TAG, "removeUser u" + userId, new Exception());
         checkManageOrCreateUsersPermission("Only the system can remove users");
 
         final String restriction = getUserRemovalRestriction(userId);
@@ -3967,13 +3966,16 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public @UserManager.RemoveResult int removeUserOrSetEphemeral(@UserIdInt int userId) {
-        Slog.i(LOG_TAG, "removeUserOrSetEphemeral u" + userId);
+    public @UserManager.RemoveResult int removeUserOrSetEphemeral(@UserIdInt int userId,
+            boolean evenWhenDisallowed) {
         checkManageOrCreateUsersPermission("Only the system can remove users");
-        final String restriction = getUserRemovalRestriction(userId);
-        if (getUserRestrictions(UserHandle.getCallingUserId()).getBoolean(restriction, false)) {
-            Slog.w(LOG_TAG, "Cannot remove user. " + restriction + " is enabled.");
-            return UserManager.REMOVE_RESULT_ERROR;
+
+        if (!evenWhenDisallowed) {
+            final String restriction = getUserRemovalRestriction(userId);
+            if (getUserRestrictions(UserHandle.getCallingUserId()).getBoolean(restriction, false)) {
+                Slog.w(LOG_TAG, "Cannot remove user. " + restriction + " is enabled.");
+                return UserManager.REMOVE_RESULT_ERROR;
+            }
         }
         if (userId == UserHandle.USER_SYSTEM) {
             Slog.e(LOG_TAG, "System user cannot be removed.");
@@ -4002,7 +4004,7 @@ public class UserManagerService extends IUserManager.Stub {
                 final int currentUser = ActivityManager.getCurrentUser();
                 if (currentUser != userId) {
                     // Attempt to remove the user. This will fail if the user is the current user
-                    if (removeUser(userId)) {
+                    if (removeUserUnchecked(userId)) {
                         return UserManager.REMOVE_RESULT_REMOVED;
                     }
                 }

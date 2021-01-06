@@ -86,7 +86,7 @@ interface IUserManager {
     Bundle getApplicationRestrictionsForUser(in String packageName, int userId);
     void setDefaultGuestRestrictions(in Bundle restrictions);
     Bundle getDefaultGuestRestrictions();
-    int removeUserOrSetEphemeral(int userId);
+    int removeUserOrSetEphemeral(int userId, boolean evenWhenDisallowed);
     boolean markGuestForDeletion(int userId);
     UserInfo findCurrentGuestUser();
     boolean isQuietModeEnabled(int userId);
