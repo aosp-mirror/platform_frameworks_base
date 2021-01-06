@@ -28,6 +28,7 @@ public class TestInjector implements Injector {
     private final FakeLocationPowerSaveModeHelper mLocationPowerSaveModeHelper;
     private final FakeScreenInteractiveHelper mScreenInteractiveHelper;
     private final LocationAttributionHelper mLocationAttributionHelper;
+    private final FakeEmergencyHelper mEmergencyHelper;
     private final LocationUsageLogger mLocationUsageLogger;
 
     public TestInjector() {
@@ -41,6 +42,7 @@ public class TestInjector implements Injector {
         mLocationPowerSaveModeHelper = new FakeLocationPowerSaveModeHelper(mLocationEventLog);
         mScreenInteractiveHelper = new FakeScreenInteractiveHelper();
         mLocationAttributionHelper = new LocationAttributionHelper(mAppOpsHelper);
+        mEmergencyHelper = new FakeEmergencyHelper();
         mLocationUsageLogger = new LocationUsageLogger();
     }
 
@@ -87,6 +89,11 @@ public class TestInjector implements Injector {
     @Override
     public LocationAttributionHelper getLocationAttributionHelper() {
         return mLocationAttributionHelper;
+    }
+
+    @Override
+    public EmergencyHelper getEmergencyHelper() {
+        return mEmergencyHelper;
     }
 
     @Override

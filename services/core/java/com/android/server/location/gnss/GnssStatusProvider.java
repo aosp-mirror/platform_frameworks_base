@@ -20,6 +20,7 @@ import static com.android.server.location.gnss.GnssManagerService.D;
 import static com.android.server.location.gnss.GnssManagerService.TAG;
 
 import android.app.AppOpsManager;
+import android.location.GnssCapabilities;
 import android.location.GnssStatus;
 import android.location.IGnssStatusListener;
 import android.location.util.identity.CallerIdentity;
@@ -27,6 +28,7 @@ import android.os.IBinder;
 import android.stats.location.LocationStatsEnums;
 import android.util.Log;
 
+import com.android.server.location.gnss.hal.GnssNative;
 import com.android.server.location.injector.AppOpsHelper;
 import com.android.server.location.injector.Injector;
 import com.android.server.location.injector.LocationUsageLogger;
@@ -36,15 +38,23 @@ import java.util.Collection;
 /**
  * Implementation of a handler for {@link IGnssStatusListener}.
  */
-public class GnssStatusProvider extends GnssListenerMultiplexer<Void, IGnssStatusListener, Void> {
+public class GnssStatusProvider extends
+        GnssListenerMultiplexer<Void, IGnssStatusListener, Void> implements
+        GnssNative.BaseCallbacks, GnssNative.StatusCallbacks, GnssNative.SvStatusCallbacks {
 
     private final AppOpsHelper mAppOpsHelper;
     private final LocationUsageLogger mLogger;
 
-    public GnssStatusProvider(Injector injector) {
+    private boolean mIsNavigating = false;
+
+    public GnssStatusProvider(Injector injector, GnssNative gnssNative) {
         super(injector);
         mAppOpsHelper = injector.getAppOpsHelper();
         mLogger = injector.getLocationUsageLogger();
+
+        gnssNative.addBaseCallbacks(this);
+        gnssNative.addStatusCallbacks(this);
+        gnssNative.addSvStatusCallbacks(this);
     }
 
     @Override
@@ -95,48 +105,54 @@ public class GnssStatusProvider extends GnssListenerMultiplexer<Void, IGnssStatu
                 registration.isForeground());
     }
 
-    /**
-     * Called by GnssLocationProvider.
-     */
-    public void onStatusChanged(boolean isNavigating) {
-        if (isNavigating) {
-            deliverToListeners(IGnssStatusListener::onGnssStarted);
-        } else {
-            deliverToListeners(IGnssStatusListener::onGnssStopped);
+    @Override
+    public void onHalRestarted() {
+        resetService();
+    }
+
+    @Override
+    public void onCapabilitiesChanged(GnssCapabilities oldCapabilities,
+            GnssCapabilities newCapabilities) {}
+
+    @Override
+    public void onReportStatus(@GnssNative.StatusCallbacks.GnssStatusValue int gnssStatus) {
+        boolean isNavigating;
+        switch (gnssStatus) {
+            case GNSS_STATUS_SESSION_BEGIN:
+                isNavigating = true;
+                break;
+            case GNSS_STATUS_SESSION_END:
+                // fall through
+            case GNSS_STATUS_ENGINE_OFF:
+                isNavigating = false;
+                break;
+            default:
+                isNavigating = mIsNavigating;
+        }
+
+        if (isNavigating != mIsNavigating) {
+            mIsNavigating = isNavigating;
+            if (isNavigating) {
+                deliverToListeners(IGnssStatusListener::onGnssStarted);
+            } else {
+                deliverToListeners(IGnssStatusListener::onGnssStopped);
+            }
         }
     }
 
-    /**
-     * Called by GnssLocationProvider.
-     */
-    public void onFirstFix(int ttff) {
+    @Override
+    public void onReportFirstFix(int ttff) {
         deliverToListeners(listener -> {
             listener.onFirstFix(ttff);
         });
     }
 
-    /**
-     * Called by GnssLocationProvider.
-     */
-    public void onSvStatusChanged(GnssStatus gnssStatus) {
+    @Override
+    public void onReportSvStatus(GnssStatus gnssStatus) {
         deliverToListeners(registration -> {
             if (mAppOpsHelper.noteOpNoThrow(AppOpsManager.OP_FINE_LOCATION,
                     registration.getIdentity())) {
                 return listener -> listener.onSvStatusChanged(gnssStatus);
-            } else {
-                return null;
-            }
-        });
-    }
-
-    /**
-     * Called by GnssLocationProvider.
-     */
-    public void onNmeaReceived(long timestamp, String nmea) {
-        deliverToListeners(registration -> {
-            if (mAppOpsHelper.noteOpNoThrow(AppOpsManager.OP_FINE_LOCATION,
-                    registration.getIdentity())) {
-                return listener -> listener.onNmeaReceived(timestamp, nmea);
             } else {
                 return null;
             }

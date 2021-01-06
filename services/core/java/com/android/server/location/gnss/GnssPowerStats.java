@@ -19,13 +19,23 @@ package com.android.server.location.gnss;
 import static android.hardware.gnss.ElapsedRealtime.HAS_TIMESTAMP_NS;
 import static android.hardware.gnss.ElapsedRealtime.HAS_TIME_UNCERTAINTY_NS;
 
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
+
+import android.location.GnssCapabilities;
+import android.util.IndentingPrintWriter;
+import android.util.TimeUtils;
+
 import com.android.internal.util.Preconditions;
+import com.android.server.location.gnss.hal.GnssNative.GnssRealtimeFlags;
+
+import java.io.FileDescriptor;
 
 /**
  * Represents Cumulative GNSS power statistics since boot.
  */
-class GnssPowerStats {
-    private final int mElapsedRealtimeFlags;
+public class GnssPowerStats {
+
+    private final @GnssRealtimeFlags int mElapsedRealtimeFlags;
     private final long mElapsedRealtimeNanos;
     private final double mElapsedRealtimeUncertaintyNanos;
     private final double mTotalEnergyMilliJoule;
@@ -35,7 +45,7 @@ class GnssPowerStats {
     private final double mMultibandAcquisitionModeEnergyMilliJoule;
     private final double[] mOtherModesEnergyMilliJoule;
 
-    GnssPowerStats(int elapsedRealtimeFlags,
+    public GnssPowerStats(@GnssRealtimeFlags int elapsedRealtimeFlags,
             long elapsedRealtimeNanos,
             double elapsedRealtimeUncertaintyNanos,
             double totalEnergyMilliJoule,
@@ -130,5 +140,52 @@ class GnssPowerStats {
 
     public void validate() {
         Preconditions.checkArgument(hasElapsedRealtimeNanos());
+    }
+
+    /**
+     * Dumps power stat information filtered by the given capabilities.
+     */
+    public void dump(FileDescriptor fd, IndentingPrintWriter ipw, String[] args,
+            GnssCapabilities capabilities) {
+        if (hasElapsedRealtimeNanos()) {
+            ipw.print("time: ");
+            ipw.print(TimeUtils.formatRealtime(NANOSECONDS.toMillis(mElapsedRealtimeNanos)));
+            if (hasElapsedRealtimeUncertaintyNanos() && mElapsedRealtimeUncertaintyNanos != 0) {
+                ipw.print(" +/- ");
+                ipw.print(NANOSECONDS.toMillis((long) mElapsedRealtimeUncertaintyNanos));
+            }
+        }
+        if (capabilities.hasPowerTotal()) {
+            ipw.print("total power: ");
+            ipw.print(mTotalEnergyMilliJoule);
+            ipw.println("mJ");
+        }
+        if (capabilities.hasPowerSinglebandTracking()) {
+            ipw.print("single-band tracking power: ");
+            ipw.print(mSinglebandTrackingModeEnergyMilliJoule);
+            ipw.println("mJ");
+        }
+        if (capabilities.hasPowerMultibandTracking()) {
+            ipw.print("multi-band tracking power: ");
+            ipw.print(mMultibandTrackingModeEnergyMilliJoule);
+            ipw.println("mJ");
+        }
+        if (capabilities.hasPowerSinglebandAcquisition()) {
+            ipw.print("single-band acquisition power: ");
+            ipw.print(mSinglebandAcquisitionModeEnergyMilliJoule);
+            ipw.println("mJ");
+        }
+        if (capabilities.hasPowerMultibandAcquisition()) {
+            ipw.print("multi-band acquisition power: ");
+            ipw.print(mMultibandAcquisitionModeEnergyMilliJoule);
+            ipw.println("mJ");
+        }
+        if (capabilities.hasPowerOtherModes()) {
+            for (int i = 1; i <= mOtherModesEnergyMilliJoule.length; i++) {
+                ipw.print("other mode [" + i + "] power: ");
+                ipw.print(mOtherModesEnergyMilliJoule[i]);
+                ipw.println("mJ");
+            }
+        }
     }
 }

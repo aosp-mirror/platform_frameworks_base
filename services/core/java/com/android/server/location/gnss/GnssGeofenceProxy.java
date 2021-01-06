@@ -16,20 +16,17 @@
 
 package com.android.server.location.gnss;
 
+import android.location.GnssCapabilities;
 import android.location.IGpsGeofenceHardware;
-import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.location.gnss.hal.GnssNative;
 
 /**
  * Manages GNSS Geofence operations.
  */
-class GnssGeofenceProvider extends IGpsGeofenceHardware.Stub {
-
-    private static final String TAG = "GnssGeofenceProvider";
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+class GnssGeofenceProxy extends IGpsGeofenceHardware.Stub implements GnssNative.BaseCallbacks {
 
     /** Holds the parameters of a geofence. */
     private static class GeofenceEntry {
@@ -45,43 +42,22 @@ class GnssGeofenceProvider extends IGpsGeofenceHardware.Stub {
     }
 
     private final Object mLock = new Object();
-    @GuardedBy("mLock")
-    private final GnssGeofenceProviderNative mNative;
+
+    private final GnssNative mGnssNative;
+
     @GuardedBy("mLock")
     private final SparseArray<GeofenceEntry> mGeofenceEntries = new SparseArray<>();
 
-    GnssGeofenceProvider() {
-        this(new GnssGeofenceProviderNative());
-    }
+    GnssGeofenceProxy(GnssNative gnssNative) {
+        mGnssNative = gnssNative;
 
-    @VisibleForTesting
-    GnssGeofenceProvider(GnssGeofenceProviderNative gnssGeofenceProviderNative) {
-        mNative = gnssGeofenceProviderNative;
-    }
-
-    void resumeIfStarted() {
-        if (DEBUG) {
-            Log.d(TAG, "resumeIfStarted");
-        }
-        synchronized (mLock) {
-            for (int i = 0; i < mGeofenceEntries.size(); i++) {
-                GeofenceEntry entry = mGeofenceEntries.valueAt(i);
-                boolean added = mNative.addGeofence(entry.geofenceId, entry.latitude,
-                        entry.longitude,
-                        entry.radius,
-                        entry.lastTransition, entry.monitorTransitions,
-                        entry.notificationResponsiveness, entry.unknownTimer);
-                if (added && entry.paused) {
-                    mNative.pauseGeofence(entry.geofenceId);
-                }
-            }
-        }
+        mGnssNative.addBaseCallbacks(this);
     }
 
     @Override
     public boolean isHardwareGeofenceSupported() {
         synchronized (mLock) {
-            return mNative.isGeofenceSupported();
+            return mGnssNative.isGeofencingSupported();
         }
     }
 
@@ -90,7 +66,7 @@ class GnssGeofenceProvider extends IGpsGeofenceHardware.Stub {
             double longitude, double radius, int lastTransition, int monitorTransitions,
             int notificationResponsiveness, int unknownTimer) {
         synchronized (mLock) {
-            boolean added = mNative.addGeofence(geofenceId, latitude, longitude, radius,
+            boolean added = mGnssNative.addGeofence(geofenceId, latitude, longitude, radius,
                     lastTransition, monitorTransitions, notificationResponsiveness,
                     unknownTimer);
             if (added) {
@@ -112,7 +88,7 @@ class GnssGeofenceProvider extends IGpsGeofenceHardware.Stub {
     @Override
     public boolean removeHardwareGeofence(int geofenceId) {
         synchronized (mLock) {
-            boolean removed = mNative.removeGeofence(geofenceId);
+            boolean removed = mGnssNative.removeGeofence(geofenceId);
             if (removed) {
                 mGeofenceEntries.remove(geofenceId);
             }
@@ -123,7 +99,7 @@ class GnssGeofenceProvider extends IGpsGeofenceHardware.Stub {
     @Override
     public boolean pauseHardwareGeofence(int geofenceId) {
         synchronized (mLock) {
-            boolean paused = mNative.pauseGeofence(geofenceId);
+            boolean paused = mGnssNative.pauseGeofence(geofenceId);
             if (paused) {
                 GeofenceEntry entry = mGeofenceEntries.get(geofenceId);
                 if (entry != null) {
@@ -137,7 +113,7 @@ class GnssGeofenceProvider extends IGpsGeofenceHardware.Stub {
     @Override
     public boolean resumeHardwareGeofence(int geofenceId, int monitorTransitions) {
         synchronized (mLock) {
-            boolean resumed = mNative.resumeGeofence(geofenceId, monitorTransitions);
+            boolean resumed = mGnssNative.resumeGeofence(geofenceId, monitorTransitions);
             if (resumed) {
                 GeofenceEntry entry = mGeofenceEntries.get(geofenceId);
                 if (entry != null) {
@@ -149,41 +125,24 @@ class GnssGeofenceProvider extends IGpsGeofenceHardware.Stub {
         }
     }
 
-    @VisibleForTesting
-    static class GnssGeofenceProviderNative {
-        public boolean isGeofenceSupported() {
-            return native_is_geofence_supported();
-        }
-
-        public boolean addGeofence(int geofenceId, double latitude, double longitude, double radius,
-                int lastTransition, int monitorTransitions, int notificationResponsiveness,
-                int unknownTimer) {
-            return native_add_geofence(geofenceId, latitude, longitude, radius, lastTransition,
-                    monitorTransitions, notificationResponsiveness, unknownTimer);
-        }
-
-        public boolean removeGeofence(int geofenceId) {
-            return native_remove_geofence(geofenceId);
-        }
-
-        public boolean resumeGeofence(int geofenceId, int transitions) {
-            return native_resume_geofence(geofenceId, transitions);
-        }
-
-        public boolean pauseGeofence(int geofenceId) {
-            return native_pause_geofence(geofenceId);
+    @Override
+    public void onHalRestarted() {
+        synchronized (mLock) {
+            for (int i = 0; i < mGeofenceEntries.size(); i++) {
+                GeofenceEntry entry = mGeofenceEntries.valueAt(i);
+                boolean added = mGnssNative.addGeofence(entry.geofenceId, entry.latitude,
+                        entry.longitude,
+                        entry.radius,
+                        entry.lastTransition, entry.monitorTransitions,
+                        entry.notificationResponsiveness, entry.unknownTimer);
+                if (added && entry.paused) {
+                    mGnssNative.pauseGeofence(entry.geofenceId);
+                }
+            }
         }
     }
 
-    private static native boolean native_is_geofence_supported();
-
-    private static native boolean native_add_geofence(int geofenceId, double latitude,
-            double longitude, double radius, int lastTransition, int monitorTransitions,
-            int notificationResponsivenes, int unknownTimer);
-
-    private static native boolean native_remove_geofence(int geofenceId);
-
-    private static native boolean native_resume_geofence(int geofenceId, int transitions);
-
-    private static native boolean native_pause_geofence(int geofenceId);
+    @Override
+    public void onCapabilitiesChanged(GnssCapabilities oldCapabilities,
+            GnssCapabilities newCapabilities) {}
 }
