@@ -40,7 +40,9 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
 import android.net.NetworkScoreManager;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.provider.Settings;
@@ -119,6 +121,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected int mSubId;
 
     private NetworkCapabilities mNetCapabilities;
+    private ConnectivityManager.NetworkCallback mDefaultNetworkCallback;
     private ConnectivityManager.NetworkCallback mNetworkCallback;
 
     @Rule
@@ -232,6 +235,10 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
             ArgumentCaptor.forClass(ConnectivityManager.NetworkCallback.class);
         verify(mMockCm, atLeastOnce())
             .registerDefaultNetworkCallback(callbackArg.capture(), isA(Handler.class));
+        mDefaultNetworkCallback = callbackArg.getValue();
+        assertNotNull(mDefaultNetworkCallback);
+        verify(mMockCm, atLeastOnce()).registerNetworkCallback(
+                isA(NetworkRequest.class), callbackArg.capture(), isA(Handler.class));
         mNetworkCallback = callbackArg.getValue();
         assertNotNull(mNetworkCallback);
     }
@@ -288,10 +295,19 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     }
 
     public void setConnectivityViaCallback(
-        int networkType, boolean validated, boolean isConnected){
+            int networkType, boolean validated, boolean isConnected, WifiInfo wifiInfo) {
+        mNetCapabilities.setTransportInfo(wifiInfo);
         setConnectivityCommon(networkType, validated, isConnected);
-        mNetworkCallback.onCapabilitiesChanged(
+        mDefaultNetworkCallback.onCapabilitiesChanged(
             mock(Network.class), new NetworkCapabilities(mNetCapabilities));
+        if (networkType == NetworkCapabilities.TRANSPORT_WIFI) {
+            if (isConnected) {
+                mNetworkCallback.onCapabilitiesChanged(
+                        mock(Network.class), new NetworkCapabilities(mNetCapabilities));
+            } else {
+                mNetworkCallback.onLost(mock(Network.class));
+            }
+        }
     }
 
     private void setConnectivityCommon(
