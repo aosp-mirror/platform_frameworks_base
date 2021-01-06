@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
@@ -53,7 +52,6 @@ public class ActivityOptionsTest {
         opts.setRotationAnimationHint(ROTATION_ANIMATION_ROTATE);
         opts.setTaskAlwaysOnTop(true);
         opts.setTaskOverlay(true, true);
-        opts.setSplitScreenCreateMode(SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT);
         Bundle optsBundle = opts.toBundle();
 
         // Try and merge the constructed options with a new set of options
@@ -71,7 +69,5 @@ public class ActivityOptionsTest {
         assertTrue(restoredOpts.getTaskAlwaysOnTop());
         assertTrue(restoredOpts.getTaskOverlay());
         assertTrue(restoredOpts.canTaskOverlayResume());
-        assertEquals(SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT,
-                restoredOpts.getSplitScreenCreateMode());
     }
 }

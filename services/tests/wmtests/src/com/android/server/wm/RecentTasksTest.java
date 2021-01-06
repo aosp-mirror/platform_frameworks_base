@@ -1006,8 +1006,6 @@ public class RecentTasksTest extends WindowTestsBase {
         assertNotRestoreTask(
                 () -> mAtm.setTaskWindowingMode(taskId, WINDOWING_MODE_FULLSCREEN,
                         false/* toTop */));
-        assertNotRestoreTask(
-                () -> mAtm.setTaskWindowingModeSplitScreenPrimary(taskId, false /* toTop */));
     }
 
     @Test
@@ -1143,8 +1141,6 @@ public class RecentTasksTest extends WindowTestsBase {
                 () -> mAtm.setTaskWindowingMode(0, WINDOWING_MODE_UNDEFINED, true));
         assertSecurityException(expectCallable,
                 () -> mAtm.moveTaskToRootTask(0, INVALID_STACK_ID, true));
-        assertSecurityException(expectCallable,
-                () -> mAtm.setTaskWindowingModeSplitScreenPrimary(0, true));
         assertSecurityException(expectCallable,
                 () -> mAtm.moveTopActivityToPinnedRootTask(INVALID_STACK_ID, new Rect()));
         assertSecurityException(expectCallable, () -> mAtm.getAllRootTaskInfos());

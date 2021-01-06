@@ -17,7 +17,6 @@
 package android.app;
 
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
-import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.INVALID_DISPLAY;
@@ -256,13 +255,6 @@ public class ActivityOptions {
             "android.activity.freezeRecentTasksReordering";
 
     /**
-     * Where the split-screen-primary stack should be positioned.
-     * @hide
-     */
-    private static final String KEY_SPLIT_SCREEN_CREATE_MODE =
-            "android:activity.splitScreenCreateMode";
-
-    /**
      * Determines whether to disallow the outgoing activity from entering picture-in-picture as the
      * result of a new activity being launched.
      * @hide
@@ -373,7 +365,6 @@ public class ActivityOptions {
     private int mLaunchActivityType = ACTIVITY_TYPE_UNDEFINED;
     private int mLaunchTaskId = -1;
     private int mPendingIntentLaunchFlags;
-    private int mSplitScreenCreateMode = SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
     private boolean mLockTaskMode = false;
     private boolean mDisallowEnterPictureInPictureWhileLaunching;
     private boolean mApplyActivityFlagsForBubbles;
@@ -1049,8 +1040,6 @@ public class ActivityOptions {
         mTaskOverlayCanResume = opts.getBoolean(KEY_TASK_OVERLAY_CAN_RESUME, false);
         mAvoidMoveToFront = opts.getBoolean(KEY_AVOID_MOVE_TO_FRONT, false);
         mFreezeRecentTasksReordering = opts.getBoolean(KEY_FREEZE_RECENT_TASKS_REORDERING, false);
-        mSplitScreenCreateMode = opts.getInt(KEY_SPLIT_SCREEN_CREATE_MODE,
-                SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT);
         mDisallowEnterPictureInPictureWhileLaunching = opts.getBoolean(
                 KEY_DISALLOW_ENTER_PICTURE_IN_PICTURE_WHILE_LAUNCHING, false);
         mApplyActivityFlagsForBubbles = opts.getBoolean(
@@ -1469,14 +1458,9 @@ public class ActivityOptions {
     }
 
     /** @hide */
-    public int getSplitScreenCreateMode() {
-        return mSplitScreenCreateMode;
-    }
-
-    /** @hide */
     @UnsupportedAppUsage
     public void setSplitScreenCreateMode(int splitScreenCreateMode) {
-        mSplitScreenCreateMode = splitScreenCreateMode;
+        // Remove this method after @UnsupportedAppUsage can be removed.
     }
 
     /** @hide */
@@ -1708,9 +1692,6 @@ public class ActivityOptions {
         }
         if (mFreezeRecentTasksReordering) {
             b.putBoolean(KEY_FREEZE_RECENT_TASKS_REORDERING, mFreezeRecentTasksReordering);
-        }
-        if (mSplitScreenCreateMode != SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT) {
-            b.putInt(KEY_SPLIT_SCREEN_CREATE_MODE, mSplitScreenCreateMode);
         }
         if (mDisallowEnterPictureInPictureWhileLaunching) {
             b.putBoolean(KEY_DISALLOW_ENTER_PICTURE_IN_PICTURE_WHILE_LAUNCHING,
