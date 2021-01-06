@@ -4037,10 +4037,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             return;
         }
 
-        if (mVibrator != null && mVibrator.hasVibrator()) {
-            mVibrator.vibrate(500L);
-        }
-
         emergencyIntent.setComponent(new ComponentName(resolveInfo.activityInfo.packageName,
                 resolveInfo.activityInfo.name));
         emergencyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
