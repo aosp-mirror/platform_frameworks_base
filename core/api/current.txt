@@ -21912,6 +21912,8 @@ package android.media {
     field public static final int METADATA_KEY_VIDEO_ROTATION = 24; // 0x18
     field public static final int METADATA_KEY_VIDEO_WIDTH = 18; // 0x12
     field public static final int METADATA_KEY_WRITER = 11; // 0xb
+    field public static final int METADATA_KEY_XMP_LENGTH = 42; // 0x2a
+    field public static final int METADATA_KEY_XMP_OFFSET = 41; // 0x29
     field public static final int METADATA_KEY_YEAR = 8; // 0x8
     field public static final int OPTION_CLOSEST = 3; // 0x3
     field public static final int OPTION_CLOSEST_SYNC = 2; // 0x2

@@ -1374,17 +1374,13 @@ public class MediaMetadataRetriever implements AutoCloseable {
     /**
      * If the media contains XMP data, this key retrieves the offset (in bytes)
      * of the data.
-     * @hide
      */
-    @SystemApi(client = MODULE_LIBRARIES)
     public static final int METADATA_KEY_XMP_OFFSET = 41;
 
     /**
      * If the media contains XMP data, this key retrieves the length (in bytes)
      * of the data.
-     * @hide
      */
-    @SystemApi(client = MODULE_LIBRARIES)
     public static final int METADATA_KEY_XMP_LENGTH = 42;
 
     // Add more here...
