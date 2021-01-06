@@ -105,6 +105,7 @@ import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES;
+import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.server.am.PendingIntentRecord.FLAG_ACTIVITY_SENDER;
 import static com.android.server.am.PendingIntentRecord.FLAG_BROADCAST_SENDER;
 import static com.android.server.am.PendingIntentRecord.FLAG_SERVICE_SENDER;
@@ -291,7 +292,6 @@ import libcore.io.IoUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;
@@ -308,7 +308,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -10416,12 +10416,15 @@ public class NotificationManagerService extends SystemService {
         private final Set<String> mPackagesShown = new ArraySet<>();
 
         @Override
-        public IBinder getToken() {
-            return ALLOWLIST_TOKEN;
-        }
-
-        @Override
-        public boolean isActivityStartAllowed(int uid, String packageName) {
+        public boolean isActivityStartAllowed(Collection<IBinder> tokens, int uid,
+                String packageName) {
+            checkArgument(!tokens.isEmpty());
+            for (IBinder token : tokens) {
+                if (token != ALLOWLIST_TOKEN) {
+                    // We only block or warn if the start is exclusively due to notification
+                    return true;
+                }
+            }
             String toastMessage = "Indirect activity start from " + packageName;
             String logcatMessage =
                     "Indirect notification activity start (trampoline) from " + packageName;
@@ -10437,6 +10440,15 @@ public class NotificationManagerService extends SystemService {
                 Slog.w(TAG, logcatMessage + ", this should be avoided for performance reasons");
                 return true;
             }
+        }
+
+        @Override
+        public boolean canCloseSystemDialogs(Collection<IBinder> tokens, int uid) {
+            // If the start is allowed via notification, we allow the app to close system dialogs
+            // only if their targetSdk < S, otherwise they have no valid reason to do this since
+            // trampolines are blocked.
+            return tokens.contains(ALLOWLIST_TOKEN)
+                    && !CompatChanges.isChangeEnabled(NOTIFICATION_TRAMPOLINE_BLOCK, uid);
         }
 
         private void toast(String message) {
