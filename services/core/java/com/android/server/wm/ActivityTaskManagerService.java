@@ -3200,33 +3200,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     /**
-     * Moves the top activity in the input rootTaskId to the pinned root task.
-     *
-     * @param rootTaskId Id of root task to move the top activity to pinned root task.
-     * @param bounds     Bounds to use for pinned root task.
-     * @return True if the top activity of the input stack was successfully moved to the pinned root
-     * task.
-     */
-    @Override
-    public boolean moveTopActivityToPinnedRootTask(int rootTaskId, Rect bounds) {
-        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_TASKS,
-                "moveTopActivityToPinnedRootTask()");
-        synchronized (mGlobalLock) {
-            if (!mSupportsPictureInPicture) {
-                throw new IllegalStateException("moveTopActivityToPinnedRootTask:"
-                        + "Device doesn't support picture-in-picture mode");
-            }
-
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                return mRootWindowContainer.moveTopRootTaskActivityToPinnedRootTask(rootTaskId);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-    }
-
-    /**
      * Puts the given activity in picture in picture mode if possible.
      *
      * @return true if the activity is now in picture-in-picture mode, or false if it could not
