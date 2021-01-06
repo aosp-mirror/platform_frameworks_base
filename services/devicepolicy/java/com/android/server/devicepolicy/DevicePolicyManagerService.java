@@ -214,6 +214,7 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.hardware.usb.UsbManager;
 import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.IAudioService;
@@ -1355,6 +1356,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         WifiManager getWifiManager() {
             return mContext.getSystemService(WifiManager.class);
+        }
+
+        UsbManager getUsbManager() {
+            return mContext.getSystemService(UsbManager.class);
         }
 
         @SuppressWarnings("AndroidFrameworkBinderIdentity")
@@ -2928,6 +2933,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
             revertTransferOwnershipIfNecessaryLocked();
         }
+        updateUsbDataSignal();
     }
 
     private void revertTransferOwnershipIfNecessaryLocked() {
@@ -16566,5 +16572,79 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         return mPolicyCache.canAdminGrantSensorsPermissionsForUser(userId);
+    }
+
+    @Override
+    public void setUsbDataSignalingEnabled(String packageName, boolean enabled) {
+        Objects.requireNonNull(packageName, "Admin package name must be provided");
+        final CallerIdentity caller = getCallerIdentity(packageName);
+        Preconditions.checkCallAuthorization(
+                isDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(caller),
+                "USB data signaling can only be controlled by a device owner or "
+                        + "a profile owner on an organization-owned device.");
+        Preconditions.checkState(canUsbDataSignalingBeDisabled(),
+                "USB data signaling cannot be disabled.");
+
+        synchronized (getLockObject()) {
+            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
+            if (admin.mUsbDataSignalingEnabled != enabled) {
+                admin.mUsbDataSignalingEnabled = enabled;
+                saveSettingsLocked(caller.getUserId());
+                updateUsbDataSignal();
+            }
+        }
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_USB_DATA_SIGNALING)
+                .setAdmin(packageName)
+                .setBoolean(enabled)
+                .write();
+    }
+
+    private void updateUsbDataSignal() {
+        if (!canUsbDataSignalingBeDisabled()) {
+            return;
+        }
+        final boolean usbEnabled;
+        synchronized (getLockObject()) {
+            final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
+                    UserHandle.USER_SYSTEM);
+            usbEnabled = admin != null && admin.mUsbDataSignalingEnabled;
+        }
+        if (!mInjector.binderWithCleanCallingIdentity(
+                () -> mInjector.getUsbManager().enableUsbDataSignal(usbEnabled))) {
+            Slog.w(LOG_TAG, "Failed to set usb data signaling state");
+        }
+    }
+
+    @Override
+    public boolean isUsbDataSignalingEnabled(String packageName) {
+        final CallerIdentity caller = getCallerIdentity(packageName);
+        Preconditions.checkCallAuthorization(
+                isDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(caller),
+                "USB data signaling can only be controlled by a device owner or "
+                        + "a profile owner on an organization-owned device.");
+
+        synchronized (getLockObject()) {
+            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
+            return admin.mUsbDataSignalingEnabled;
+        }
+    }
+
+    @Override
+    public boolean isUsbDataSignalingEnabledForUser(int userId) {
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(isSystemUid(caller));
+
+        synchronized (getLockObject()) {
+            final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
+                    UserHandle.USER_SYSTEM);
+            return admin != null && admin.mUsbDataSignalingEnabled;
+        }
+    }
+
+    @Override
+    public boolean canUsbDataSignalingBeDisabled() {
+        return mInjector.binderWithCleanCallingIdentity(() ->
+                mInjector.getUsbManager().getUsbHalVersion() >= UsbManager.USB_HAL_V1_3);
     }
 }

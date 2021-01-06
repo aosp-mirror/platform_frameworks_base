@@ -6958,6 +6958,7 @@ package android.app.admin {
     method public void addUserRestriction(@NonNull android.content.ComponentName, String);
     method public boolean bindDeviceAdminServiceAsUser(@NonNull android.content.ComponentName, android.content.Intent, @NonNull android.content.ServiceConnection, int, @NonNull android.os.UserHandle);
     method public boolean canAdminGrantSensorsPermissions();
+    method public boolean canUsbDataSignalingBeDisabled();
     method public void clearApplicationUserData(@NonNull android.content.ComponentName, @NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.app.admin.DevicePolicyManager.OnClearApplicationUserDataListener);
     method public void clearCrossProfileIntentFilters(@NonNull android.content.ComponentName);
     method @Deprecated public void clearDeviceOwnerApp(String);
@@ -7085,6 +7086,7 @@ package android.app.admin {
     method public boolean isSecurityLoggingEnabled(@Nullable android.content.ComponentName);
     method public boolean isUninstallBlocked(@Nullable android.content.ComponentName, String);
     method public boolean isUniqueDeviceAttestationSupported();
+    method public boolean isUsbDataSignalingEnabled();
     method public boolean isUsingUnifiedPassword(@NonNull android.content.ComponentName);
     method public void lockNow();
     method public void lockNow(int);
@@ -7186,6 +7188,7 @@ package android.app.admin {
     method public boolean setTimeZone(@NonNull android.content.ComponentName, String);
     method public void setTrustAgentConfiguration(@NonNull android.content.ComponentName, @NonNull android.content.ComponentName, android.os.PersistableBundle);
     method public void setUninstallBlocked(@Nullable android.content.ComponentName, String, boolean);
+    method public void setUsbDataSignalingEnabled(boolean);
     method public void setUserControlDisabledPackages(@NonNull android.content.ComponentName, @NonNull java.util.List<java.lang.String>);
     method public void setUserIcon(@NonNull android.content.ComponentName, android.graphics.Bitmap);
     method public int startUserInBackground(@NonNull android.content.ComponentName, @NonNull android.os.UserHandle);
