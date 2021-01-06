@@ -41890,6 +41890,7 @@ package android.telephony.ims.feature {
 
   public static class MmTelFeature.MmTelCapabilities {
     method public final boolean isCapable(int);
+    field public static final int CAPABILITY_TYPE_CALL_COMPOSER = 16; // 0x10
     field public static final int CAPABILITY_TYPE_SMS = 8; // 0x8
     field public static final int CAPABILITY_TYPE_UT = 4; // 0x4
     field public static final int CAPABILITY_TYPE_VIDEO = 2; // 0x2
