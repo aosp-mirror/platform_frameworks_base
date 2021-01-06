@@ -608,8 +608,9 @@ public class BiometricService extends SystemService {
         }
 
         @Override
-        public void registerAuthenticator(int id, int modality, @Authenticators.Types int strength,
-                IBiometricAuthenticator authenticator) {
+        public synchronized void registerAuthenticator(int id, int modality,
+                @Authenticators.Types int strength,
+                @NonNull IBiometricAuthenticator authenticator) {
             checkInternalPermission();
 
             Slog.d(TAG, "Registering ID: " + id

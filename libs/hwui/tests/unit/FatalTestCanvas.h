@@ -60,25 +60,23 @@ public:
     void onDrawVerticesObject(const SkVertices*, SkBlendMode, const SkPaint&) {
         ADD_FAILURE() << "onDrawVertices not expected in this test";
     }
-    void onDrawAtlas(const SkImage*, const SkRSXform[], const SkRect[], const SkColor[], int count,
-                     SkBlendMode, const SkRect* cull, const SkPaint*) {
+    void onDrawAtlas2(const SkImage*, const SkRSXform[], const SkRect[], const SkColor[], int count,
+                      SkBlendMode, const SkSamplingOptions&, const SkRect* cull, const SkPaint*) {
         ADD_FAILURE() << "onDrawAtlas not expected in this test";
     }
     void onDrawPath(const SkPath&, const SkPaint&) {
         ADD_FAILURE() << "onDrawPath not expected in this test";
     }
-    void onDrawImage(const SkImage*, SkScalar dx, SkScalar dy, const SkPaint*) {
+    void onDrawImage2(const SkImage*, SkScalar dx, SkScalar dy, const SkSamplingOptions&,
+                      const SkPaint*) {
         ADD_FAILURE() << "onDrawImage not expected in this test";
     }
-    void onDrawImageRect(const SkImage*, const SkRect*, const SkRect&, const SkPaint*,
-                         SrcRectConstraint) {
+    void onDrawImageRect2(const SkImage*, const SkRect&, const SkRect&, const SkSamplingOptions&,
+                          const SkPaint*, SrcRectConstraint) {
         ADD_FAILURE() << "onDrawImageRect not expected in this test";
     }
-    void onDrawImageNine(const SkImage*, const SkIRect& center, const SkRect& dst, const SkPaint*) {
-        ADD_FAILURE() << "onDrawImageNine not expected in this test";
-    }
-    void onDrawImageLattice(const SkImage*, const Lattice& lattice, const SkRect& dst,
-                            const SkPaint*) {
+    void onDrawImageLattice2(const SkImage*, const Lattice& lattice, const SkRect& dst,
+                             SkFilterMode, const SkPaint*) {
         ADD_FAILURE() << "onDrawImageLattice not expected in this test";
     }
     void onClipRRect(const SkRRect& rrect, SkClipOp, ClipEdgeStyle) {

@@ -22,6 +22,9 @@ import android.os.Bundle;
 
 import org.junit.Test;
 
+import java.util.List;
+import java.util.Map;
+
 public class SearchSpecTest {
     @Test
     public void testGetBundle() {
@@ -52,5 +55,22 @@ public class SearchSpecTest {
         assertThat(bundle.getInt(SearchSpec.ORDER_FIELD)).isEqualTo(SearchSpec.ORDER_ASCENDING);
         assertThat(bundle.getInt(SearchSpec.RANKING_STRATEGY_FIELD))
                 .isEqualTo(SearchSpec.RANKING_STRATEGY_DOCUMENT_SCORE);
+    }
+
+    @Test
+    public void testGetProjectionTypePropertyMasks() {
+        SearchSpec searchSpec =
+                new SearchSpec.Builder()
+                        .setTermMatch(SearchSpec.TERM_MATCH_PREFIX)
+                        .addProjectionTypePropertyPaths("TypeA", "field1", "field2.subfield2")
+                        .addProjectionTypePropertyPaths("TypeB", "field7")
+                        .addProjectionTypePropertyPaths("TypeC")
+                        .build();
+
+        Map<String, List<String>> typePropertyPathMap = searchSpec.getProjectionTypePropertyPaths();
+        assertThat(typePropertyPathMap.keySet()).containsExactly("TypeA", "TypeB", "TypeC");
+        assertThat(typePropertyPathMap.get("TypeA")).containsExactly("field1", "field2.subfield2");
+        assertThat(typePropertyPathMap.get("TypeB")).containsExactly("field7");
+        assertThat(typePropertyPathMap.get("TypeC")).isEmpty();
     }
 }

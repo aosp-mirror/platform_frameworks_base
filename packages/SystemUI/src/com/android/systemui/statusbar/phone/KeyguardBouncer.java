@@ -451,10 +451,6 @@ public class KeyguardBouncer {
         }
     }
 
-    public boolean onBackPressed() {
-        return mKeyguardViewController != null && mKeyguardViewController.handleBackKey();
-    }
-
     /**
      * @return True if and only if the security method should be shown before showing the
      * notifications on Keyguard, like SIM PIN/PUK.
@@ -492,6 +488,14 @@ public class KeyguardBouncer {
     public boolean interceptMediaKey(KeyEvent event) {
         ensureView();
         return mKeyguardViewController.interceptMediaKey(event);
+    }
+
+    /**
+     * @return true if the pre IME back event should be handled
+     */
+    public boolean dispatchBackKeyEventPreIme() {
+        ensureView();
+        return mKeyguardViewController.dispatchBackKeyEventPreIme();
     }
 
     public void notifyKeyguardAuthenticated(boolean strongAuth) {

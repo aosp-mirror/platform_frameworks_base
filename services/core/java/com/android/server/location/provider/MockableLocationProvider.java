@@ -21,11 +21,11 @@ import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import android.annotation.Nullable;
 import android.location.Location;
 import android.location.LocationResult;
+import android.location.ProviderProperties;
 import android.location.util.identity.CallerIdentity;
 import android.os.Bundle;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 import com.android.internal.util.Preconditions;
 
@@ -75,7 +75,7 @@ public class MockableLocationProvider extends AbstractLocationProvider {
     public MockableLocationProvider(Object ownerLock) {
         // using a direct executor is acceptable because all inbound calls are delegated to the
         // actual provider implementations which will use their own executors
-        super(DIRECT_EXECUTOR);
+        super(DIRECT_EXECUTOR, null, null);
         mOwnerLock = ownerLock;
         mRequest = ProviderRequest.EMPTY_REQUEST;
     }
@@ -167,7 +167,7 @@ public class MockableLocationProvider extends AbstractLocationProvider {
             newState = State.EMPTY_STATE;
         }
 
-        setState(newState);
+        setState(prevState -> newState);
     }
 
     /**
@@ -325,7 +325,7 @@ public class MockableLocationProvider extends AbstractLocationProvider {
                     return;
                 }
 
-                setState(newState);
+                setState(prevState -> newState);
             }
         }
 

@@ -316,8 +316,7 @@ public class BrightnessController implements ToggleSlider.Listener {
                 PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM);
         mMaximumBacklight = pm.getBrightnessConstraint(
                 PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM);
-        mDefaultBacklight = pm.getBrightnessConstraint(
-                PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DEFAULT);
+        mDefaultBacklight = mContext.getDisplay().getBrightnessDefault();
         mMinimumBacklightForVr = pm.getBrightnessConstraint(
                 PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM_VR);
         mMaximumBacklightForVr = pm.getBrightnessConstraint(

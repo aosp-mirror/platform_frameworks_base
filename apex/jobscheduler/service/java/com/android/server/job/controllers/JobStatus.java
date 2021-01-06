@@ -1151,6 +1151,11 @@ public final class JobStatus {
         if (setConstraintSatisfied(CONSTRAINT_WITHIN_EXPEDITED_QUOTA, state)) {
             // The constraint was changed. Update the ready flag.
             mReadyWithinExpeditedQuota = state;
+            // DeviceIdleJobsController currently only tracks jobs with the WILL_BE_FOREGROUND flag.
+            // Making it also track requested-expedited jobs would add unnecessary hops since the
+            // controller would then defer to canRunInDoze. Avoid the hops and just update
+            // mReadyNotDozing directly.
+            mReadyNotDozing = isConstraintSatisfied(CONSTRAINT_DEVICE_NOT_DOZING) || canRunInDoze();
             return true;
         }
         return false;

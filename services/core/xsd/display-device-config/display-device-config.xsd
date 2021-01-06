@@ -29,6 +29,10 @@
                     <xs:annotation name="nonnull"/>
                     <xs:annotation name="final"/>
                 </xs:element>
+                <xs:element type="nonNegativeDecimal" name="screenBrightnessDefault">
+                    <xs:annotation name="nonnull"/>
+                    <xs:annotation name="final"/>
+                </xs:element>
                 <xs:element type="displayQuirks" name="quirks" minOccurs="0" maxOccurs="1" />
             </xs:sequence>
         </xs:complexType>

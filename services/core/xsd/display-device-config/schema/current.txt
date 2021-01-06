@@ -4,8 +4,10 @@ package com.android.server.display.config {
   public class DisplayConfiguration {
     ctor public DisplayConfiguration();
     method public com.android.server.display.config.DisplayQuirks getQuirks();
+    method @NonNull public final java.math.BigDecimal getScreenBrightnessDefault();
     method @NonNull public final com.android.server.display.config.NitsMap getScreenBrightnessMap();
     method public void setQuirks(com.android.server.display.config.DisplayQuirks);
+    method public final void setScreenBrightnessDefault(@NonNull java.math.BigDecimal);
     method public final void setScreenBrightnessMap(@NonNull com.android.server.display.config.NitsMap);
   }
 

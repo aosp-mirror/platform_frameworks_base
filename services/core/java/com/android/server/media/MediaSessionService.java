@@ -43,7 +43,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.media.AudioManager;
 import android.media.AudioPlaybackConfiguration;
-import android.media.IRemoteVolumeControllerCallback;
+import android.media.IRemoteSessionCallback;
 import android.media.Session2Token;
 import android.media.session.IActiveSessionsListener;
 import android.media.session.IOnMediaKeyEventDispatchedListener;
@@ -142,7 +142,7 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     // Used to notify System UI and Settings when remote volume was changed.
     @GuardedBy("mLock")
-    final RemoteCallbackList<IRemoteVolumeControllerCallback> mRemoteVolumeControllers =
+    final RemoteCallbackList<IRemoteSessionCallback> mRemoteVolumeControllers =
             new RemoteCallbackList<>();
 
     private SessionPolicyProvider mCustomSessionPolicyProvider;
@@ -304,7 +304,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             MediaSession.Token token = session.getSessionToken();
             for (int i = size - 1; i >= 0; i--) {
                 try {
-                    IRemoteVolumeControllerCallback cb =
+                    IRemoteSessionCallback cb =
                             mRemoteVolumeControllers.getBroadcastItem(i);
                     cb.onVolumeChanged(token, flags);
                 } catch (Exception e) {
@@ -713,7 +713,7 @@ public class MediaSessionService extends SystemService implements Monitor {
 
             for (int i = size - 1; i >= 0; i--) {
                 try {
-                    IRemoteVolumeControllerCallback cb =
+                    IRemoteSessionCallback cb =
                             mRemoteVolumeControllers.getBroadcastItem(i);
                     cb.onSessionChanged(token);
                 } catch (Exception e) {
@@ -1839,7 +1839,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         @Override
-        public void registerRemoteVolumeControllerCallback(IRemoteVolumeControllerCallback rvc) {
+        public void registerRemoteSessionCallback(IRemoteSessionCallback rvc) {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
@@ -1854,7 +1854,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         @Override
-        public void unregisterRemoteVolumeControllerCallback(IRemoteVolumeControllerCallback rvc) {
+        public void unregisterRemoteSessionCallback(IRemoteSessionCallback rvc) {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();

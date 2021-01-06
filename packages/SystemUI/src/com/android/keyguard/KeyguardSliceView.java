@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.InsetDrawable;
 import android.graphics.text.LineBreaker;
 import android.net.Uri;
 import android.os.Trace;
@@ -239,6 +240,12 @@ public class KeyguardSliceView extends LinearLayout {
                 final int iconSize = mHasHeader ? mIconSizeWithHeader : mIconSize;
                 iconDrawable = icon.getIcon().loadDrawable(mContext);
                 if (iconDrawable != null) {
+                    if ((iconDrawable instanceof InsetDrawable)
+                            && mLockScreenMode == KeyguardUpdateMonitor.LOCK_SCREEN_MODE_LAYOUT_1) {
+                        // System icons (DnD) use insets which are fine for centered slice content
+                        // but will cause a slight indent for left/right-aligned slice views
+                        iconDrawable = ((InsetDrawable) iconDrawable).getDrawable();
+                    }
                     final int width = (int) (iconDrawable.getIntrinsicWidth()
                             / (float) iconDrawable.getIntrinsicHeight() * iconSize);
                     iconDrawable.setBounds(0, 0, Math.max(width, 1), iconSize);

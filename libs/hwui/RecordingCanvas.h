@@ -108,19 +108,20 @@ private:
 
     void drawTextBlob(const SkTextBlob*, SkScalar, SkScalar, const SkPaint&);
 
-    void drawImage(sk_sp<const SkImage>, SkScalar, SkScalar, const SkPaint*, BitmapPalette palette);
+    void drawImage(sk_sp<const SkImage>, SkScalar, SkScalar, const SkSamplingOptions&,
+                   const SkPaint*, BitmapPalette palette);
     void drawImageNine(sk_sp<const SkImage>, const SkIRect&, const SkRect&, const SkPaint*);
-    void drawImageRect(sk_sp<const SkImage>, const SkRect*, const SkRect&, const SkPaint*,
-                       SkCanvas::SrcRectConstraint, BitmapPalette palette);
+    void drawImageRect(sk_sp<const SkImage>, const SkRect*, const SkRect&, const SkSamplingOptions&,
+                       const SkPaint*, SkCanvas::SrcRectConstraint, BitmapPalette palette);
     void drawImageLattice(sk_sp<const SkImage>, const SkCanvas::Lattice&, const SkRect&,
-                          const SkPaint*, BitmapPalette);
+                          SkFilterMode, const SkPaint*, BitmapPalette);
 
     void drawPatch(const SkPoint[12], const SkColor[4], const SkPoint[4], SkBlendMode,
                    const SkPaint&);
     void drawPoints(SkCanvas::PointMode, size_t, const SkPoint[], const SkPaint&);
     void drawVertices(const SkVertices*, SkBlendMode, const SkPaint&);
     void drawAtlas(const SkImage*, const SkRSXform[], const SkRect[], const SkColor[], int,
-                   SkBlendMode, const SkRect*, const SkPaint*);
+                   SkBlendMode, const SkSamplingOptions&, const SkRect*, const SkPaint*);
     void drawShadowRec(const SkPath&, const SkDrawShadowRec&);
     void drawVectorDrawable(VectorDrawableRoot* tree);
     void drawWebView(skiapipeline::FunctorDrawable*);
@@ -178,26 +179,27 @@ public:
 
     void onDrawTextBlob(const SkTextBlob*, SkScalar, SkScalar, const SkPaint&) override;
 
-    void drawImage(const sk_sp<SkImage>& image, SkScalar left, SkScalar top, const SkPaint* paint,
-                   BitmapPalette pallete);
+    void drawImage(const sk_sp<SkImage>&, SkScalar left, SkScalar top, const SkSamplingOptions&,
+                   const SkPaint* paint, BitmapPalette pallete);
 
     void drawImageRect(const sk_sp<SkImage>& image, const SkRect& src, const SkRect& dst,
-                       const SkPaint* paint, SrcRectConstraint constraint, BitmapPalette palette);
+                       const SkSamplingOptions&, const SkPaint*, SrcRectConstraint, BitmapPalette);
     void drawImageLattice(const sk_sp<SkImage>& image, const Lattice& lattice, const SkRect& dst,
-                          const SkPaint* paint, BitmapPalette palette);
+                          SkFilterMode, const SkPaint* paint, BitmapPalette palette);
 
-    void onDrawImage(const SkImage*, SkScalar, SkScalar, const SkPaint*) override;
-    void onDrawImageLattice(const SkImage*, const Lattice&, const SkRect&, const SkPaint*) override;
-    void onDrawImageNine(const SkImage*, const SkIRect&, const SkRect&, const SkPaint*) override;
-    void onDrawImageRect(const SkImage*, const SkRect*, const SkRect&, const SkPaint*,
-                         SrcRectConstraint) override;
+    void onDrawImage2(const SkImage*, SkScalar, SkScalar, const SkSamplingOptions&,
+                      const SkPaint*) override;
+    void onDrawImageLattice2(const SkImage*, const Lattice&, const SkRect&, SkFilterMode,
+                             const SkPaint*) override;
+    void onDrawImageRect2(const SkImage*, const SkRect&, const SkRect&, const SkSamplingOptions&,
+                          const SkPaint*, SrcRectConstraint) override;
 
     void onDrawPatch(const SkPoint[12], const SkColor[4], const SkPoint[4], SkBlendMode,
                      const SkPaint&) override;
     void onDrawPoints(PointMode, size_t count, const SkPoint pts[], const SkPaint&) override;
     void onDrawVerticesObject(const SkVertices*, SkBlendMode, const SkPaint&) override;
-    void onDrawAtlas(const SkImage*, const SkRSXform[], const SkRect[], const SkColor[], int,
-                     SkBlendMode, const SkRect*, const SkPaint*) override;
+    void onDrawAtlas2(const SkImage*, const SkRSXform[], const SkRect[], const SkColor[], int,
+                     SkBlendMode, const SkSamplingOptions&, const SkRect*, const SkPaint*) override;
     void onDrawShadowRec(const SkPath&, const SkDrawShadowRec&) override;
 
     void drawVectorDrawable(VectorDrawableRoot* tree);

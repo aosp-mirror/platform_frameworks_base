@@ -115,8 +115,7 @@ public class FastDataOutput implements DataOutput, Flushable, Closeable {
 
         // Magnitude of this returned value indicates the number of bytes
         // required to encode the string; sign indicates success/failure
-        int len = CharsetUtils.toModifiedUtf8Bytes(s, mBufferPtr, mBufferPos + 2,
-                mBufferCap - mBufferPos - 2);
+        int len = CharsetUtils.toModifiedUtf8Bytes(s, mBufferPtr, mBufferPos + 2, mBufferCap);
         if (Math.abs(len) > MAX_UNSIGNED_SHORT) {
             throw new IOException("Modified UTF-8 length too large: " + len);
         }

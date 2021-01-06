@@ -375,6 +375,17 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
     }
 
     /**
+     * @return true if the current bouncer is password
+     */
+    public boolean dispatchBackKeyEventPreIme() {
+        if (mKeyguardSecurityContainerController.getCurrentSecurityMode()
+                == SecurityMode.Password) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Allows the media keys to work when the keyguard is showing.
      * The media keys should be of no interest to the actual keyguard view(s),
      * so intercepting them here should not be of any harm.

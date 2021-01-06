@@ -136,24 +136,14 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
 
     @Override
     public void startAppearAnimation() {
+        // Reset state, and let IME animation reveal the view as it slides in
         setAlpha(0f);
         setTranslationY(0f);
-        animate()
-                .alpha(1)
-                .withLayer()
-                .setDuration(300)
-                .setInterpolator(mLinearOutSlowInInterpolator);
     }
 
     @Override
-    public boolean startDisappearAnimation(Runnable finishRunnable) {
-        animate()
-                .alpha(0f)
-                .translationY(mDisappearYTranslation)
-                .setInterpolator(mFastOutLinearInInterpolator)
-                .setDuration(100)
-                .withEndAction(finishRunnable);
-        return true;
+    public void animateForIme(float interpolatedFraction) {
+        setAlpha(interpolatedFraction);
     }
 
     @Override

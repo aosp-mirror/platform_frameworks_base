@@ -26,6 +26,7 @@ import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.RectF;
+import android.hardware.display.DisplayManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IUdfpsOverlayController;
@@ -166,7 +167,7 @@ class UdfpsController implements DozeReceiver {
             @Main Resources resources,
             LayoutInflater inflater,
             @Nullable FingerprintManager fingerprintManager,
-            PowerManager powerManager,
+            DisplayManager displayManager,
             WindowManager windowManager,
             SystemSettings systemSettings,
             @NonNull StatusBarStateController statusBarStateController,
@@ -246,7 +247,7 @@ class UdfpsController implements DozeReceiver {
 
         mBacklightToNitsSpline = Spline.createSpline(normalizedBacklightRange, nitsRange);
         mNitsToHbmBacklightSpline = Spline.createSpline(hbmNitsRange, normalizedBacklightRange);
-        mDefaultBrightness = obtainDefaultBrightness(powerManager);
+        mDefaultBrightness = obtainDefaultBrightness(mContext);
 
         // TODO(b/160025856): move to the "dump" method.
         Log.v(TAG, String.format("ctor | mNitsRange: [%f, %f]", nitsRange[0],
@@ -450,14 +451,9 @@ class UdfpsController implements DozeReceiver {
         }
     }
 
-    private static float obtainDefaultBrightness(PowerManager powerManager) {
-        if (powerManager == null) {
-            Log.e(TAG, "PowerManager is unavailable. Can't obtain default brightness.");
-            return 0f;
-        }
-        return MathUtils.constrain(powerManager.getBrightnessConstraint(
-                PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DEFAULT), PowerManager.BRIGHTNESS_MIN,
-                PowerManager.BRIGHTNESS_MAX);
+    private static float obtainDefaultBrightness(Context context) {
+        return MathUtils.constrain(context.getDisplay().getBrightnessDefault(),
+                PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX);
     }
 
     private static float[] toFloatArray(TypedArray array) {

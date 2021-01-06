@@ -18,11 +18,11 @@ package com.android.server.location.provider;
 
 import android.annotation.Nullable;
 import android.location.LocationResult;
+import android.location.ProviderProperties;
 import android.location.util.identity.CallerIdentity;
 import android.os.Binder;
 import android.os.Bundle;
 
-import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 import com.android.internal.util.Preconditions;
 
@@ -90,7 +90,10 @@ public abstract class AbstractLocationProvider {
             this.identity = identity;
         }
 
-        State withAllowed(boolean allowed) {
+        /**
+         * Returns a state the same as the current but with allowed set as specified.
+         */
+        public State withAllowed(boolean allowed) {
             if (allowed == this.allowed) {
                 return this;
             } else {
@@ -98,7 +101,10 @@ public abstract class AbstractLocationProvider {
             }
         }
 
-        State withProperties(@Nullable ProviderProperties properties) {
+        /**
+         * Returns a state the same as the current but with properties set as specified.
+         */
+        public State withProperties(@Nullable ProviderProperties properties) {
             if (Objects.equals(properties, this.properties)) {
                 return this;
             } else {
@@ -106,7 +112,10 @@ public abstract class AbstractLocationProvider {
             }
         }
 
-        State withIdentity(@Nullable CallerIdentity identity) {
+        /**
+         * Returns a state the same as the current but with an identity set as specified.
+         */
+        public State withIdentity(@Nullable CallerIdentity identity) {
             if (Objects.equals(identity, this.identity)) {
                 return this;
             } else {
@@ -175,28 +184,21 @@ public abstract class AbstractLocationProvider {
 
     private final LocationProviderController mController;
 
-
-    /**
-     * See {@link #AbstractLocationProvider(Executor, CallerIdentity)}.
-     */
-    protected AbstractLocationProvider(Executor executor) {
-        this(executor, null);
-    }
-
     /**
      * Creates a new location provider.
      *
      * All callback methods will be invoked on the given executor. A direct executor may be provided
      * only if the provider can guarantee that all callback methods will never synchronously invoke
-     * any command method (that changes provider state, or reports a location, etc...). If this
-     * invariant is not held, use a normal executor or risk deadlock.
+     * any {@link LocationProviderController} methods. If this invariant is not held, use a normal
+     * executor or risk deadlock.
      *
-     * An optional identity may be provided to initialize the location provider.
+     * An optional identity and properties may be provided to initialize the location provider.
      */
-    protected AbstractLocationProvider(Executor executor, CallerIdentity identity) {
+    protected AbstractLocationProvider(Executor executor, @Nullable CallerIdentity identity,
+            @Nullable ProviderProperties properties) {
         mExecutor = executor;
-        mInternalState = new AtomicReference<>(
-                new InternalState(null, State.EMPTY_STATE.withIdentity(identity)));
+        mInternalState = new AtomicReference<>(new InternalState(null,
+                State.EMPTY_STATE.withIdentity(identity).withProperties(properties)));
         mController = new Controller();
     }
 
@@ -209,46 +211,23 @@ public abstract class AbstractLocationProvider {
         return mController;
     }
 
-    /**
-     * Sets the state of the provider to the new state.
-     */
-    protected void setState(State newState) {
-        InternalState oldInternalState = mInternalState.getAndUpdate(
-                internalState -> internalState.withState(newState));
-        if (newState.equals(oldInternalState.state)) {
+    protected void setState(UnaryOperator<State> operator) {
+        AtomicReference<State> oldStateRef = new AtomicReference<>();
+        InternalState newInternalState = mInternalState.updateAndGet(
+                internalState -> {
+                    oldStateRef.set(internalState.state);
+                    return internalState.withState(operator);
+                });
+        State oldState = oldStateRef.get();
+
+        if (oldState.equals(newInternalState.state)) {
             return;
         }
 
-        // we know that we only updated the state, so the listener for the old state is the same as
-        // the listener for the new state.
-        if (oldInternalState.listener != null) {
+        if (newInternalState.listener != null) {
             final long identity = Binder.clearCallingIdentity();
             try {
-                oldInternalState.listener.onStateChanged(oldInternalState.state, newState);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
-    }
-
-    private void setState(UnaryOperator<State> operator) {
-        InternalState oldInternalState = mInternalState.getAndUpdate(
-                internalState -> internalState.withState(operator));
-
-        // recreate the new state from our knowledge of the old state - unfortunately may result in
-        // an extra allocation, but oh well...
-        State newState = operator.apply(oldInternalState.state);
-
-        if (newState.equals(oldInternalState.state)) {
-            return;
-        }
-
-        // we know that we only updated the state, so the listener for the old state is the same as
-        // the listener for the new state.
-        if (oldInternalState.listener != null) {
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                oldInternalState.listener.onStateChanged(oldInternalState.state, newState);
+                newInternalState.listener.onStateChanged(oldState, newInternalState.state);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -279,7 +258,7 @@ public abstract class AbstractLocationProvider {
     /**
      * Call this method to report a change in provider properties.
      */
-    protected void setProperties(ProviderProperties properties) {
+    protected void setProperties(@Nullable ProviderProperties properties) {
         setState(state -> state.withProperties(properties));
     }
 
@@ -293,7 +272,7 @@ public abstract class AbstractLocationProvider {
     /**
      * Call this method to report a change in provider packages.
      */
-    protected void setIdentity(CallerIdentity identity) {
+    protected void setIdentity(@Nullable CallerIdentity identity) {
         setState(state -> state.withIdentity(identity));
     }
 

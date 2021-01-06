@@ -78,6 +78,11 @@ public final class BackgroundJobsController extends StateController {
     }
 
     @Override
+    public void evaluateStateLocked(JobStatus jobStatus) {
+        updateSingleJobRestrictionLocked(jobStatus, UNKNOWN);
+    }
+
+    @Override
     public void dumpControllerStateLocked(final IndentingPrintWriter pw,
             final Predicate<JobStatus> predicate) {
         mAppStateTracker.dump(pw);

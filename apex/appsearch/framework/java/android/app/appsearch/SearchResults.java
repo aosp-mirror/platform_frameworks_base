@@ -45,15 +45,16 @@ public class SearchResults implements Closeable {
 
     private final IAppSearchManager mService;
 
+    // The database name to search over. If null, this will search over all database names.
     @Nullable
     private final String mDatabaseName;
-
-    @UserIdInt
-    private final int mUserId;
 
     private final String mQueryExpression;
 
     private final SearchSpec mSearchSpec;
+
+    @UserIdInt
+    private final int mUserId;
 
     private final Executor mExecutor;
 
@@ -61,17 +62,18 @@ public class SearchResults implements Closeable {
 
     private boolean mIsFirstLoad = true;
 
-    SearchResults(@NonNull IAppSearchManager service,
+    SearchResults(
+            @NonNull IAppSearchManager service,
             @Nullable String databaseName,
             @NonNull String queryExpression,
             @NonNull SearchSpec searchSpec,
             @UserIdInt int userId,
             @NonNull @CallbackExecutor Executor executor) {
         mService = Objects.requireNonNull(service);
-        mUserId = userId;
-        mDatabaseName = Objects.requireNonNull(databaseName);
+        mDatabaseName = databaseName;
         mQueryExpression = Objects.requireNonNull(queryExpression);
         mSearchSpec = Objects.requireNonNull(searchSpec);
+        mUserId = userId;
         mExecutor = Objects.requireNonNull(executor);
     }
 
@@ -90,11 +92,14 @@ public class SearchResults implements Closeable {
             if (mIsFirstLoad) {
                 mIsFirstLoad = false;
                 if (mDatabaseName == null) {
+                    // Global query, there's no one package-database combination to check.
                     mService.globalQuery(mQueryExpression, mSearchSpec.getBundle(), mUserId,
                             wrapCallback(callback));
                 } else {
-                    mService.query(mDatabaseName, mQueryExpression, mSearchSpec.getBundle(),
-                            mUserId, wrapCallback(callback));
+                    // Normal local query, pass in specified database.
+                    mService.query(
+                            mDatabaseName, mQueryExpression, mSearchSpec.getBundle(), mUserId,
+                            wrapCallback(callback));
                 }
             } else {
                 mService.getNextPage(mNextPageToken, mUserId, wrapCallback(callback));
@@ -102,6 +107,24 @@ public class SearchResults implements Closeable {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    @Override
+    public void close() {
+        try {
+            mService.invalidateNextPageToken(mNextPageToken, mUserId);
+        } catch (RemoteException e) {
+            Log.d(TAG, "Unable to close the SearchResults", e);
+        }
+    }
+
+    private IAppSearchResultCallback wrapCallback(
+            @NonNull Consumer<AppSearchResult<List<SearchResult>>> callback) {
+        return new IAppSearchResultCallback.Stub() {
+            public void onResult(AppSearchResult result) {
+                mExecutor.execute(() -> invokeCallback(result, callback));
+            }
+        };
     }
 
     private void invokeCallback(AppSearchResult result,
@@ -119,24 +142,5 @@ public class SearchResults implements Closeable {
         } else {
             callback.accept(result);
         }
-    }
-    @Override
-    public void close() {
-        mExecutor.execute(() -> {
-            try {
-                mService.invalidateNextPageToken(mNextPageToken, mUserId);
-            } catch (RemoteException e) {
-                Log.d(TAG, "Unable to close the SearchResults", e);
-            }
-        });
-    }
-
-    private IAppSearchResultCallback wrapCallback(
-            @NonNull Consumer<AppSearchResult<List<SearchResult>>> callback) {
-        return new IAppSearchResultCallback.Stub() {
-            public void onResult(AppSearchResult result) {
-                mExecutor.execute(() -> invokeCallback(result, callback));
-            }
-        };
     }
 }

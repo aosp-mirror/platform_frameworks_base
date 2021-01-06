@@ -182,7 +182,7 @@ public class ChooserActivity extends ResolverActivity implements
      * To be used for shared element transition into this activity.
      * @hide
      */
-    public static final String FIRST_IMAGE_PREVIEW_TRANSITION_NAME = "chooser_preview_image_1";
+    public static final String FIRST_IMAGE_PREVIEW_TRANSITION_NAME = "screenshot_preview_image";
 
     private static final String PREF_NUM_SHEET_EXPANSIONS = "pref_num_sheet_expansions";
 

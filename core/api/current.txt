@@ -11641,6 +11641,14 @@ package android.content.pm {
     method public final int compare(android.content.pm.ApplicationInfo, android.content.pm.ApplicationInfo);
   }
 
+  public final class Attribution implements android.os.Parcelable {
+    method public int describeContents();
+    method @IdRes public int getLabel();
+    method @NonNull public String getTag();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.Attribution> CREATOR;
+  }
+
   public final class ChangedPackages implements android.os.Parcelable {
     ctor public ChangedPackages(int, @NonNull java.util.List<java.lang.String>);
     method public int describeContents();
@@ -11890,6 +11898,7 @@ package android.content.pm {
     field public static final int REQUESTED_PERMISSION_GRANTED = 2; // 0x2
     field public android.content.pm.ActivityInfo[] activities;
     field public android.content.pm.ApplicationInfo applicationInfo;
+    field @Nullable public android.content.pm.Attribution[] attributions;
     field public int baseRevisionCode;
     field public android.content.pm.ConfigurationInfo[] configPreferences;
     field public android.content.pm.FeatureGroupInfo[] featureGroups;
@@ -12338,6 +12347,7 @@ package android.content.pm {
     field public static final int FLAG_PERMISSION_WHITELIST_SYSTEM = 1; // 0x1
     field public static final int FLAG_PERMISSION_WHITELIST_UPGRADE = 4; // 0x4
     field public static final int GET_ACTIVITIES = 1; // 0x1
+    field public static final int GET_ATTRIBUTIONS = -2147483648; // 0x80000000
     field public static final int GET_CONFIGURATIONS = 16384; // 0x4000
     field @Deprecated public static final int GET_DISABLED_COMPONENTS = 512; // 0x200
     field @Deprecated public static final int GET_DISABLED_UNTIL_USED_COMPONENTS = 32768; // 0x8000
@@ -16244,7 +16254,7 @@ package android.graphics.drawable {
     method public static android.graphics.drawable.Icon createWithResource(android.content.Context, @DrawableRes int);
     method public static android.graphics.drawable.Icon createWithResource(String, @DrawableRes int);
     method public int describeContents();
-    method @IdRes public int getResId();
+    method @DrawableRes public int getResId();
     method @NonNull public String getResPackage();
     method public int getType();
     method @NonNull public android.net.Uri getUri();
@@ -19303,9 +19313,11 @@ package android.location {
     method public int getGnssYearOfHardware();
     method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public android.location.GpsStatus getGpsStatus(@Nullable android.location.GpsStatus);
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public android.location.Location getLastKnownLocation(@NonNull String);
-    method @Nullable public android.location.LocationProvider getProvider(@NonNull String);
+    method @Deprecated @Nullable public android.location.LocationProvider getProvider(@NonNull String);
+    method @Nullable public android.location.ProviderProperties getProviderProperties(@NonNull String);
     method @NonNull public java.util.List<java.lang.String> getProviders(boolean);
     method @NonNull public java.util.List<java.lang.String> getProviders(@NonNull android.location.Criteria, boolean);
+    method public boolean hasProvider(@NonNull String);
     method public boolean isLocationEnabled();
     method public boolean isProviderEnabled(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean registerAntennaInfoListener(@NonNull java.util.concurrent.Executor, @NonNull android.location.GnssAntennaInfo.Listener);
@@ -19366,18 +19378,18 @@ package android.location {
     field public static final String PROVIDERS_CHANGED_ACTION = "android.location.PROVIDERS_CHANGED";
   }
 
-  public class LocationProvider {
-    method public int getAccuracy();
-    method public String getName();
-    method public int getPowerRequirement();
-    method public boolean hasMonetaryCost();
-    method public boolean meetsCriteria(android.location.Criteria);
-    method public boolean requiresCell();
-    method public boolean requiresNetwork();
-    method public boolean requiresSatellite();
-    method public boolean supportsAltitude();
-    method public boolean supportsBearing();
-    method public boolean supportsSpeed();
+  @Deprecated public class LocationProvider {
+    method @Deprecated public int getAccuracy();
+    method @Deprecated public String getName();
+    method @Deprecated public int getPowerRequirement();
+    method @Deprecated public boolean hasMonetaryCost();
+    method @Deprecated public boolean meetsCriteria(android.location.Criteria);
+    method @Deprecated public boolean requiresCell();
+    method @Deprecated public boolean requiresNetwork();
+    method @Deprecated public boolean requiresSatellite();
+    method @Deprecated public boolean supportsAltitude();
+    method @Deprecated public boolean supportsBearing();
+    method @Deprecated public boolean supportsSpeed();
     field @Deprecated public static final int AVAILABLE = 2; // 0x2
     field @Deprecated public static final int OUT_OF_SERVICE = 0; // 0x0
     field @Deprecated public static final int TEMPORARILY_UNAVAILABLE = 1; // 0x1
@@ -19428,6 +19440,26 @@ package android.location {
 
   public interface OnNmeaMessageListener {
     method public void onNmeaMessage(String, long);
+  }
+
+  public final class ProviderProperties implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getAccuracy();
+    method public int getPowerUsage();
+    method public boolean hasAltitudeSupport();
+    method public boolean hasBearingSupport();
+    method public boolean hasCellRequirement();
+    method public boolean hasMonetaryCost();
+    method public boolean hasNetworkRequirement();
+    method public boolean hasSatelliteRequirement();
+    method public boolean hasSpeedSupport();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int ACCURACY_COARSE = 2; // 0x2
+    field public static final int ACCURACY_FINE = 1; // 0x1
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.ProviderProperties> CREATOR;
+    field public static final int POWER_USAGE_HIGH = 3; // 0x3
+    field public static final int POWER_USAGE_LOW = 1; // 0x1
+    field public static final int POWER_USAGE_MEDIUM = 2; // 0x2
   }
 
   public abstract class SettingInjectorService extends android.app.Service {

@@ -1257,6 +1257,16 @@ public final class NotificationRecord {
         return !Objects.equals(getSbn().getPackageName(), getSbn().getOpPkg());
     }
 
+    public int getNotificationType() {
+        if (isConversation()) {
+            return NotificationListenerService.FLAG_FILTER_TYPE_CONVERSATIONS;
+        } else if (getImportance() >= IMPORTANCE_DEFAULT) {
+            return NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
+        } else {
+            return NotificationListenerService.FLAG_FILTER_TYPE_SILENT;
+        }
+    }
+
     /**
      * @return all {@link Uri} that should have permission granted to whoever
      *         will be rendering it. This list has already been vetted to only

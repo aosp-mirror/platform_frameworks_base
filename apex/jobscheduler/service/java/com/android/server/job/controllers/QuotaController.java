@@ -347,6 +347,9 @@ public final class QuotaController extends StateController {
     private final QcHandler mHandler;
     private final QcConstants mQcConstants;
 
+    private final BackgroundJobsController mBackgroundJobsController;
+    private final ConnectivityController mConnectivityController;
+
     /** How much time each app will have to run jobs within their standby bucket window. */
     private long mAllowedTimePerPeriodMs = QcConstants.DEFAULT_ALLOWED_TIME_PER_PERIOD_MS;
 
@@ -552,7 +555,9 @@ public final class QuotaController extends StateController {
      */
     private static final int MSG_PROCESS_USAGE_EVENT = 5;
 
-    public QuotaController(JobSchedulerService service) {
+    public QuotaController(@NonNull JobSchedulerService service,
+            @NonNull BackgroundJobsController backgroundJobsController,
+            @NonNull ConnectivityController connectivityController) {
         super(service);
         mHandler = new QcHandler(mContext.getMainLooper());
         mChargeTracker = new ChargingTracker();
@@ -560,6 +565,8 @@ public final class QuotaController extends StateController {
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         mQcConstants = new QcConstants();
+        mBackgroundJobsController = backgroundJobsController;
+        mConnectivityController = connectivityController;
 
         final IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
         mContext.registerReceiverAsUser(mPackageAddedReceiver, UserHandle.ALL, filter, null, null);
@@ -596,7 +603,7 @@ public final class QuotaController extends StateController {
         final boolean outOfEJQuota;
         if (jobStatus.isRequestedExpeditedJob()) {
             final boolean isWithinEJQuota = isWithinEJQuotaLocked(jobStatus);
-            jobStatus.setExpeditedJobQuotaConstraintSatisfied(isWithinEJQuota);
+            setExpeditedConstraintSatisfied(jobStatus, isWithinEJQuota);
             outOfEJQuota = !isWithinEJQuota;
         } else {
             outOfEJQuota = false;
@@ -1473,7 +1480,7 @@ public final class QuotaController extends StateController {
 
             if (js.isRequestedExpeditedJob()) {
                 boolean isWithinEJQuota = isWithinEJQuotaLocked(js);
-                changed |= js.setExpeditedJobQuotaConstraintSatisfied(isWithinEJQuota);
+                changed |= setExpeditedConstraintSatisfied(js, isWithinEJQuota);
                 outOfEJQuota |= !isWithinEJQuota;
             }
         }
@@ -1499,7 +1506,7 @@ public final class QuotaController extends StateController {
             final boolean outOfEJQuota;
             if (jobStatus.isRequestedExpeditedJob()) {
                 final boolean isWithinEJQuota = isWithinEJQuotaLocked(jobStatus);
-                wasJobChanged |= jobStatus.setExpeditedJobQuotaConstraintSatisfied(isWithinEJQuota);
+                wasJobChanged |= setExpeditedConstraintSatisfied(jobStatus, isWithinEJQuota);
                 outOfEJQuota = !isWithinEJQuota;
             } else {
                 outOfEJQuota = false;
@@ -1648,6 +1655,23 @@ public final class QuotaController extends StateController {
             jobStatus.setWhenStandbyDeferred(sElapsedRealtimeClock.millis());
         }
         return jobStatus.setQuotaConstraintSatisfied(isWithinQuota);
+    }
+
+    /**
+     * If the satisfaction changes, this will tell connectivity & background jobs controller to
+     * also re-evaluate their state.
+     */
+    private boolean setExpeditedConstraintSatisfied(@NonNull JobStatus jobStatus,
+            boolean isWithinQuota) {
+        if (jobStatus.setExpeditedJobQuotaConstraintSatisfied(isWithinQuota)) {
+            mBackgroundJobsController.evaluateStateLocked(jobStatus);
+            mConnectivityController.evaluateStateLocked(jobStatus);
+            if (isWithinQuota && jobStatus.isReady()) {
+                mStateChangedListener.onRunJobNow(jobStatus);
+            }
+            return true;
+        }
+        return false;
     }
 
     private final class ChargingTracker extends BroadcastReceiver {

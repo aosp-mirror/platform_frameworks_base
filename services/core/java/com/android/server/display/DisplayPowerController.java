@@ -163,6 +163,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // The display blanker.
     private final DisplayBlanker mBlanker;
 
+    // The LogicalDisplay tied to this DisplayPowerController.
+    private final LogicalDisplay mLogicalDisplay;
+
     // The ID of the LogicalDisplay tied to this DisplayPowerController.
     private final int mDisplayId;
 
@@ -406,7 +409,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
      */
     public DisplayPowerController(Context context,
             DisplayPowerCallbacks callbacks, Handler handler,
-            SensorManager sensorManager, DisplayBlanker blanker, int displayId) {
+            SensorManager sensorManager, DisplayBlanker blanker, LogicalDisplay logicalDisplay) {
         mHandler = new DisplayControllerHandler(handler.getLooper());
         mBrightnessTracker = new BrightnessTracker(context, null);
         mSettingsObserver = new SettingsObserver(mHandler);
@@ -418,9 +421,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mContext = context;
         mBrightnessSynchronizer = new BrightnessSynchronizer(context);
         mBrightnessSynchronizer.startSynchronizing();
-        mDisplayId = displayId;
+        mLogicalDisplay = logicalDisplay;
+        mDisplayId = mLogicalDisplay.getDisplayIdLocked();
 
-        PowerManager pm =  context.getSystemService(PowerManager.class);
+        PowerManager pm = context.getSystemService(PowerManager.class);
 
         final Resources resources = context.getResources();
 
@@ -439,7 +443,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mScreenBrightnessRangeMaximum = clampAbsoluteBrightness(
                 pm.getBrightnessConstraint(PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM));
         mScreenBrightnessDefault = clampAbsoluteBrightness(
-                pm.getBrightnessConstraint(PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DEFAULT));
+                mLogicalDisplay.getDisplayInfoLocked().brightnessDefault);
 
         // VR SETTINGS
         mScreenBrightnessForVrDefault = clampAbsoluteBrightness(
@@ -1833,6 +1837,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         pw.println();
         pw.println("Display Power Controller Configuration:");
+        pw.println("  mScreenBrightnessRangeMinimum=" + mScreenBrightnessRangeMinimum);
+        pw.println("  mScreenBrightnessRangeMaximum=" + mScreenBrightnessRangeMaximum);
+        pw.println("  mScreenBrightnessRangeDefault=" + mScreenBrightnessDefault);
         pw.println("  mScreenBrightnessDozeConfig=" + mScreenBrightnessDozeConfig);
         pw.println("  mScreenBrightnessDimConfig=" + mScreenBrightnessDimConfig);
         pw.println("  mScreenBrightnessDefault=" + mScreenBrightnessDefault);

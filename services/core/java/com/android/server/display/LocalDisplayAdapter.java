@@ -415,7 +415,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             Spline sysToNits = null;
 
             // Load the mapping from nits to HAL brightness range (display-device-config.xml)
-            mDisplayDeviceConfig = DisplayDeviceConfig.create(mPhysicalDisplayId);
+            final Context context = getOverlayContext();
+            mDisplayDeviceConfig = DisplayDeviceConfig.create(context, mPhysicalDisplayId,
+                    mIsDefaultDisplay);
             if (mDisplayDeviceConfig == null) {
                 return;
             }
@@ -431,9 +433,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             nitsToHal = Spline.createSpline(halNits, halBrightness);
 
             // Load the mapping from system brightness range to nits (config.xml)
-            final Resources res = getOverlayContext().getResources();
+            final Resources res = context.getResources();
             final float[] sysNits = BrightnessMappingStrategy.getFloatArray(res.obtainTypedArray(
-                            com.android.internal.R.array.config_screenBrightnessNits));
+                    com.android.internal.R.array.config_screenBrightnessNits));
             final int[] sysBrightness = res.getIntArray(
                     com.android.internal.R.array.config_screenBrightnessBacklight);
             if (sysNits.length == 0 || sysBrightness.length != sysNits.length) {
@@ -630,6 +632,15 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
                 // The display is trusted since it is created by system.
                 mInfo.flags |= DisplayDeviceInfo.FLAG_TRUSTED;
+                if (mDisplayDeviceConfig != null) {
+                    mInfo.brightnessMinimum = mDisplayDeviceConfig.getBrightnessMinimum();
+                    mInfo.brightnessMaximum = mDisplayDeviceConfig.getBrightnessMaximum();
+                    mInfo.brightnessDefault = mDisplayDeviceConfig.getBrightnessDefault();
+                } else {
+                    mInfo.brightnessMinimum = PowerManager.BRIGHTNESS_MIN;
+                    mInfo.brightnessMaximum = PowerManager.BRIGHTNESS_MAX;
+                    mInfo.brightnessDefault = 0.5f;
+                }
             }
             return mInfo;
         }
@@ -997,7 +1008,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 pw.println("  " + mSupportedModes.valueAt(i));
             }
             pw.println("mSupportedColorModes=" + mSupportedColorModes.toString());
-            pw.print("mDisplayDeviceConfig=" + mDisplayDeviceConfig);
+            pw.println("mDisplayDeviceConfig=" + mDisplayDeviceConfig);
         }
 
         private int findDisplayConfigIdLocked(int modeId, int configGroup) {
