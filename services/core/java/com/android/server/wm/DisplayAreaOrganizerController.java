@@ -21,6 +21,7 @@ import static android.window.DisplayAreaOrganizer.FEATURE_RUNTIME_TASK_CONTAINER
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
 import static com.android.server.wm.DisplayArea.Type.ANY;
 
+import android.annotation.Nullable;
 import android.content.pm.ParceledListSlice;
 import android.os.Binder;
 import android.os.IBinder;
@@ -49,6 +50,10 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
     final ActivityTaskManagerService mService;
     private final WindowManagerGlobalLock mGlobalLock;
     private final HashMap<Integer, IDisplayAreaOrganizer> mOrganizersByFeatureIds = new HashMap();
+
+    @Nullable IDisplayAreaOrganizer getOrganizerByFeature(int featureId) {
+        return mOrganizersByFeatureIds.get(featureId);
+    }
 
     private class DeathRecipient implements IBinder.DeathRecipient {
         int mFeature;
