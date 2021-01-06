@@ -35,8 +35,6 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.ParcelableException;
 import android.os.RemoteException;
-import android.os.SystemProperties;
-import android.util.FeatureFlagUtils;
 import android.util.Slog;
 
 import java.lang.annotation.Retention;
@@ -251,13 +249,7 @@ public class DynamicSystemClient {
                 mService.send(msg);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Unable to get status from installation service");
-                if (mExecutor != null) {
-                    mExecutor.execute(() -> {
-                        mListener.onStatusChanged(STATUS_UNKNOWN, CAUSE_ERROR_IPC, 0, e);
-                    });
-                } else {
-                    mListener.onStatusChanged(STATUS_UNKNOWN, CAUSE_ERROR_IPC, 0, e);
-                }
+                notifyOnStatusChangedListener(STATUS_UNKNOWN, CAUSE_ERROR_IPC, 0, e);
             }
         }
 
@@ -311,6 +303,20 @@ public class DynamicSystemClient {
         mExecutor = null;
     }
 
+    private void notifyOnStatusChangedListener(
+            int status, int cause, long progress, Throwable detail) {
+        if (mListener != null) {
+            if (mExecutor != null) {
+                mExecutor.execute(
+                        () -> {
+                            mListener.onStatusChanged(status, cause, progress, detail);
+                        });
+            } else {
+                mListener.onStatusChanged(status, cause, progress, detail);
+            }
+        }
+    }
+
     /**
      * Bind to {@code DynamicSystem} installation service. Binding to the installation service
      * allows it to send status updates to {@link #OnStatusChangedListener}. It is recommanded
@@ -320,11 +326,6 @@ public class DynamicSystemClient {
     @RequiresPermission(android.Manifest.permission.INSTALL_DYNAMIC_SYSTEM)
     @SystemApi
     public void bind() {
-        if (!featureFlagEnabled()) {
-            Slog.w(TAG, FeatureFlagUtils.DYNAMIC_SYSTEM + " not enabled; bind() aborted.");
-            return;
-        }
-
         Intent intent = new Intent();
         intent.setClassName("com.android.dynsystem",
                 "com.android.dynsystem.DynamicSystemInstallationService");
@@ -395,11 +396,6 @@ public class DynamicSystemClient {
     @RequiresPermission(android.Manifest.permission.INSTALL_DYNAMIC_SYSTEM)
     public void start(@NonNull Uri systemUrl, @BytesLong long systemSize,
             @BytesLong long userdataSize) {
-        if (!featureFlagEnabled()) {
-            Slog.w(TAG, FeatureFlagUtils.DYNAMIC_SYSTEM + " not enabled; start() aborted.");
-            return;
-        }
-
         Intent intent = new Intent();
 
         intent.setClassName("com.android.dynsystem",
@@ -407,16 +403,12 @@ public class DynamicSystemClient {
 
         intent.setData(systemUrl);
         intent.setAction(ACTION_START_INSTALL);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         intent.putExtra(KEY_SYSTEM_SIZE, systemSize);
         intent.putExtra(KEY_USERDATA_SIZE, userdataSize);
 
         mContext.startActivity(intent);
-    }
-
-    private boolean featureFlagEnabled() {
-        return SystemProperties.getBoolean(
-                FeatureFlagUtils.PERSIST_PREFIX + FeatureFlagUtils.DYNAMIC_SYSTEM, false);
     }
 
     private void handleMessage(Message msg) {
@@ -432,13 +424,7 @@ public class DynamicSystemClient {
 
                 Throwable detail = t == null ? null : t.getCause();
 
-                if (mExecutor != null) {
-                    mExecutor.execute(() -> {
-                        mListener.onStatusChanged(status, cause, progress, detail);
-                    });
-                } else {
-                    mListener.onStatusChanged(status, cause, progress, detail);
-                }
+                notifyOnStatusChangedListener(status, cause, progress, detail);
                 break;
             default:
                 // do nothing
