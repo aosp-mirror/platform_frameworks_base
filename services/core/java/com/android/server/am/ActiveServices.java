@@ -1836,11 +1836,13 @@ public final class ActiveServices {
         if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "bindService: " + service
                 + " type=" + resolvedType + " conn=" + connection.asBinder()
                 + " flags=0x" + Integer.toHexString(flags));
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
         final ProcessRecord callerApp = mAm.getRecordForAppLocked(caller);
         if (callerApp == null) {
             throw new SecurityException(
                     "Unable to find app for caller " + caller
-                    + " (pid=" + Binder.getCallingPid()
+                    + " (pid=" + callingPid
                     + ") when binding service " + service);
         }
 
@@ -1880,19 +1882,19 @@ public final class ActiveServices {
         }
 
         if ((flags & Context.BIND_SCHEDULE_LIKE_TOP_APP) != 0 && !isCallerSystem) {
-            throw new SecurityException("Non-system caller (pid=" + Binder.getCallingPid()
+            throw new SecurityException("Non-system caller (pid=" + callingPid
                     + ") set BIND_SCHEDULE_LIKE_TOP_APP when binding service " + service);
         }
 
         if ((flags & Context.BIND_ALLOW_WHITELIST_MANAGEMENT) != 0 && !isCallerSystem) {
             throw new SecurityException(
-                    "Non-system caller " + caller + " (pid=" + Binder.getCallingPid()
+                    "Non-system caller " + caller + " (pid=" + callingPid
                     + ") set BIND_ALLOW_WHITELIST_MANAGEMENT when binding service " + service);
         }
 
         if ((flags & Context.BIND_ALLOW_INSTANT) != 0 && !isCallerSystem) {
             throw new SecurityException(
-                    "Non-system caller " + caller + " (pid=" + Binder.getCallingPid()
+                    "Non-system caller " + caller + " (pid=" + callingPid
                             + ") set BIND_ALLOW_INSTANT when binding service " + service);
         }
 
@@ -1908,7 +1910,7 @@ public final class ActiveServices {
 
         ServiceLookupResult res =
             retrieveServiceLocked(service, instanceName, resolvedType, callingPackage,
-                    Binder.getCallingPid(), Binder.getCallingUid(), userId, true,
+                    callingPid, callingUid, userId, true,
                     callerFg, isBindExternal, allowInstant);
         if (res == null) {
             return 0;
@@ -2068,7 +2070,7 @@ public final class ActiveServices {
             if (!s.mAllowWhileInUsePermissionInFgs) {
                 s.mAllowWhileInUsePermissionInFgs =
                         shouldAllowWhileInUsePermissionInFgsLocked(callingPackage,
-                                Binder.getCallingPid(), Binder.getCallingUid(),
+                                callingPid, callingUid,
                                 service, s, false);
             }
 
