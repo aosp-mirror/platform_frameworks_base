@@ -29071,9 +29071,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          */
         final Rect mCaptionInsets = new Rect();
 
-        final DisplayCutout.ParcelableWrapper mDisplayCutout =
-                new DisplayCutout.ParcelableWrapper(DisplayCutout.NO_CUTOUT);
-
         /**
          * In multi-window we force show the system bars. Because we don't want that the surface
          * size changes in this mode, we instead have a flag whether the system bars sizes should

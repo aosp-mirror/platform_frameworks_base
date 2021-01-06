@@ -25,20 +25,16 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECOND
 import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
 import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.view.Display.TYPE_INTERNAL;
-import static android.view.InsetsState.ITYPE_BOTTOM_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_BOTTOM_GESTURES;
 import static android.view.InsetsState.ITYPE_BOTTOM_TAPPABLE_ELEMENT;
 import static android.view.InsetsState.ITYPE_CAPTION_BAR;
 import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
 import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
-import static android.view.InsetsState.ITYPE_LEFT_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_LEFT_GESTURES;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_RIGHT_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_RIGHT_GESTURES;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
-import static android.view.InsetsState.ITYPE_TOP_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_TOP_GESTURES;
 import static android.view.InsetsState.ITYPE_TOP_TAPPABLE_ELEMENT;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
@@ -1408,15 +1404,13 @@ public class DisplayPolicy {
      * @param attrs The LayoutParams of the window.
      * @param windowToken The token of the window.
      * @param outFrame The frame of the window.
-     * @param outDisplayCutout The area that has been cut away from the display.
      * @param outInsetsState The insets state of this display from the client's perspective.
      * @param localClient Whether the client is from the our process.
      * @return Whether to always consume the system bars.
      *         See {@link #areSystemBarsForcedShownLw(WindowState)}.
      */
     boolean getLayoutHint(LayoutParams attrs, WindowToken windowToken, Rect outFrame,
-            DisplayCutout.ParcelableWrapper outDisplayCutout, InsetsState outInsetsState,
-            boolean localClient) {
+            InsetsState outInsetsState, boolean localClient) {
         final boolean isFixedRotationTransforming =
                 windowToken != null && windowToken.isFixedRotationTransforming();
         final ActivityRecord activity = windowToken != null ? windowToken.asActivityRecord() : null;
@@ -1430,19 +1424,6 @@ public class DisplayPolicy {
         computeWindowBounds(attrs, state, windowToken, outFrame);
         if (taskBounds != null) {
             outFrame.intersect(taskBounds);
-        }
-
-        final int fl = attrs.flags;
-        final boolean layoutInScreenAndInsetDecor = (fl & FLAG_LAYOUT_IN_SCREEN) != 0
-                && (fl & FLAG_LAYOUT_INSET_DECOR) != 0;
-        final DisplayFrames displayFrames = isFixedRotationTransforming
-                ? windowToken.getFixedRotationTransformDisplayFrames()
-                : mDisplayContent.mDisplayFrames;
-        if (layoutInScreenAndInsetDecor) {
-            outDisplayCutout.set(
-                    displayFrames.mDisplayCutout.calculateRelativeTo(outFrame).getDisplayCutout());
-        } else {
-            outDisplayCutout.set(DisplayCutout.NO_CUTOUT);
         }
 
         final boolean inSizeCompatMode = WindowState.inSizeCompatMode(attrs, windowToken);
@@ -1523,9 +1504,7 @@ public class DisplayPolicy {
      */
     void simulateLayoutDisplay(DisplayFrames displayFrames, InsetsState insetsState,
             SparseArray<Rect> barContentFrames) {
-        displayFrames.onBeginLayout();
-        updateInsetsStateForDisplayCutout(displayFrames, insetsState);
-        insetsState.setDisplayFrame(displayFrames.mUnrestricted);
+        displayFrames.onBeginLayout(insetsState);
         final WindowFrames simulatedWindowFrames = new WindowFrames();
         if (mNavigationBar != null) {
             simulateLayoutDecorWindow(mNavigationBar, displayFrames, insetsState,
@@ -1547,10 +1526,7 @@ public class DisplayPolicy {
      * @param uiMode The current uiMode in configuration.
      */
     public void beginLayoutLw(DisplayFrames displayFrames, int uiMode) {
-        displayFrames.onBeginLayout();
-        final InsetsState state = mDisplayContent.getInsetsStateController().getRawInsetsState();
-        updateInsetsStateForDisplayCutout(displayFrames, state);
-        state.setDisplayFrame(displayFrames.mUnrestricted);
+        displayFrames.onBeginLayout(mDisplayContent.getInsetsStateController().getRawInsetsState());
         mSystemGestures.screenWidth = displayFrames.mUnrestricted.width();
         mSystemGestures.screenHeight = displayFrames.mUnrestricted.height();
 
@@ -1595,23 +1571,6 @@ public class DisplayPolicy {
         }
     }
 
-    private static void updateInsetsStateForDisplayCutout(DisplayFrames displayFrames,
-            InsetsState state) {
-        if (displayFrames.mDisplayCutout.getDisplayCutout().isEmpty()) {
-            state.removeSource(ITYPE_LEFT_DISPLAY_CUTOUT);
-            state.removeSource(ITYPE_TOP_DISPLAY_CUTOUT);
-            state.removeSource(ITYPE_RIGHT_DISPLAY_CUTOUT);
-            state.removeSource(ITYPE_BOTTOM_DISPLAY_CUTOUT);
-            return;
-        }
-        final Rect u = displayFrames.mUnrestricted;
-        final Rect s = displayFrames.mDisplayCutoutSafe;
-        state.getSource(ITYPE_LEFT_DISPLAY_CUTOUT).setFrame(u.left, u.top, s.left, u.bottom);
-        state.getSource(ITYPE_TOP_DISPLAY_CUTOUT).setFrame(u.left, u.top, u.right, s.top);
-        state.getSource(ITYPE_RIGHT_DISPLAY_CUTOUT).setFrame(s.right, u.top, u.right, u.bottom);
-        state.getSource(ITYPE_BOTTOM_DISPLAY_CUTOUT).setFrame(u.left, s.bottom, u.right, u.bottom);
-    }
-
     private void layoutStatusBar(DisplayFrames displayFrames, Rect simulatedContentFrame) {
         // decide where the status bar goes ahead of time
         if (mStatusBar == null) {
@@ -1623,7 +1582,7 @@ public class DisplayPolicy {
         windowFrames.setFrames(sTmpStatusFrame /* parentFrame */,
                 sTmpStatusFrame /* displayFrame */);
         // Let the status bar determine its size.
-        mStatusBar.computeFrame(displayFrames);
+        mStatusBar.computeFrameAndUpdateSourceFrame();
 
         // For layout, the status bar is always at the top with our fixed height.
         int statusBarBottom = displayFrames.mUnrestricted.top
@@ -1690,7 +1649,7 @@ public class DisplayPolicy {
         final WindowFrames windowFrames = mNavigationBar.getLayoutingWindowFrames();
         windowFrames.setFrames(navigationFrame /* parentFrame */,
                 navigationFrame /* displayFrame */);
-        mNavigationBar.computeFrame(displayFrames);
+        mNavigationBar.computeFrameAndUpdateSourceFrame();
         final Rect contentFrame =  sTmpRect;
         contentFrame.set(windowFrames.mFrame);
         contentFrame.intersect(displayFrames.mDisplayCutoutSafe);
@@ -1872,7 +1831,7 @@ public class DisplayPolicy {
             windowFrames.setContentChanged(true);
         }
 
-        win.computeFrame(displayFrames);
+        win.computeFrameAndUpdateSourceFrame();
     }
 
     WindowState getTopFullscreenOpaqueWindow() {

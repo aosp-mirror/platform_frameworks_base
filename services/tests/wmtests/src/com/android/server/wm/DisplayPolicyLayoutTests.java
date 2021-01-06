@@ -689,7 +689,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         final InsetsState outState = new InsetsState();
 
         mDisplayPolicy.getLayoutHint(mWindow.mAttrs, null /* windowToken */, outFrame,
-                outDisplayCutout, outState, true /* localClient */);
+                outState, true /* localClient */);
 
         assertThat(outFrame, is(outState.getDisplayFrame()));
         assertThat(outDisplayCutout, is(new DisplayCutout.ParcelableWrapper()));
@@ -716,8 +716,8 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
                 new DisplayCutout.ParcelableWrapper();
         final InsetsState outState = new InsetsState();
 
-        mDisplayPolicy.getLayoutHint(mWindow.mAttrs, mWindow.mToken, outFrame, outDisplayCutout,
-                outState, true /* localClient */);
+        mDisplayPolicy.getLayoutHint(mWindow.mAttrs, mWindow.mToken, outFrame, outState,
+                true /* localClient */);
 
         assertThat(outFrame, is(taskBounds));
         assertThat(outDisplayCutout, is(new DisplayCutout.ParcelableWrapper()));
@@ -756,8 +756,8 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
                 new DisplayCutout.ParcelableWrapper();
         final InsetsState outState = new InsetsState();
 
-        mDisplayPolicy.getLayoutHint(mWindow.mAttrs, mWindow.mToken, outFrame, outDisplayCutout,
-                outState, true /* localClient */);
+        mDisplayPolicy.getLayoutHint(mWindow.mAttrs, mWindow.mToken, outFrame, outState,
+                true /* localClient */);
 
         assertThat(outFrame, is(taskBounds));
         assertThat(outDisplayCutout, is(new DisplayCutout.ParcelableWrapper()));

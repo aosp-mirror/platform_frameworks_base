@@ -495,7 +495,7 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
 
         // We didn't set up the overall environment for this test, so we need to mute the side
         // effect of layout passes that loosen the stable frame.
-        doNothing().when(display.mDisplayContent.mDisplayFrames).onBeginLayout();
+        doNothing().when(display.mDisplayContent.mDisplayFrames).onBeginLayout(any());
         return display;
     }
 }

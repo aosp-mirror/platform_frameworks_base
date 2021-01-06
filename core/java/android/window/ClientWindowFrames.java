@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.view.DisplayCutout;
 
 /**
  * The window frame container class used by client side for layout.
@@ -39,28 +38,22 @@ public class ClientWindowFrames implements Parcelable {
     /** The background area while the window is resizing. */
     public final @NonNull Rect backdropFrame;
 
-    /** The area cut from the display. */
-    public final @NonNull DisplayCutout.ParcelableWrapper displayCutout;
-
     public ClientWindowFrames() {
         frame = new Rect();
         displayFrame = new Rect();
         backdropFrame = new Rect();
-        displayCutout = new DisplayCutout.ParcelableWrapper();
     }
 
     public ClientWindowFrames(ClientWindowFrames other) {
         frame = new Rect(other.frame);
         displayFrame = new Rect(other.displayFrame);
         backdropFrame = new Rect(other.backdropFrame);
-        displayCutout = new DisplayCutout.ParcelableWrapper(other.displayCutout.get());
     }
 
     private ClientWindowFrames(Parcel in) {
         frame = Rect.CREATOR.createFromParcel(in);
         displayFrame = Rect.CREATOR.createFromParcel(in);
         backdropFrame = Rect.CREATOR.createFromParcel(in);
-        displayCutout = DisplayCutout.ParcelableWrapper.CREATOR.createFromParcel(in);
     }
 
     /** Needed for AIDL out parameters. */
@@ -68,7 +61,6 @@ public class ClientWindowFrames implements Parcelable {
         frame.set(Rect.CREATOR.createFromParcel(in));
         displayFrame.set(Rect.CREATOR.createFromParcel(in));
         backdropFrame.set(Rect.CREATOR.createFromParcel(in));
-        displayCutout.set(DisplayCutout.ParcelableWrapper.CREATOR.createFromParcel(in));
     }
 
     @Override
@@ -76,7 +68,6 @@ public class ClientWindowFrames implements Parcelable {
         frame.writeToParcel(dest, flags);
         displayFrame.writeToParcel(dest, flags);
         backdropFrame.writeToParcel(dest, flags);
-        displayCutout.writeToParcel(dest, flags);
     }
 
     @Override
@@ -84,8 +75,7 @@ public class ClientWindowFrames implements Parcelable {
         final StringBuilder sb = new StringBuilder(32);
         return "ClientWindowFrames{frame=" + frame.toShortString(sb)
                 + " display=" + displayFrame.toShortString(sb)
-                + " backdrop=" + backdropFrame.toShortString(sb)
-                + " cutout=" + displayCutout + "}";
+                + " backdrop=" + backdropFrame.toShortString(sb) + "}";
     }
 
     @Override

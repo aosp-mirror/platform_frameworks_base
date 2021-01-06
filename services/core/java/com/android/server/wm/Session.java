@@ -61,7 +61,6 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.MergedConfiguration;
 import android.util.Slog;
-import android.view.DisplayCutout;
 import android.view.IWindow;
 import android.view.IWindowId;
 import android.view.IWindowSession;
@@ -185,22 +184,21 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     @Override
     public int addToDisplay(IWindow window, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, InsetsState requestedVisibility, Rect outFrame,
-            DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
-            InsetsState outInsetsState, InsetsSourceControl[] outActiveControls) {
+            InputChannel outInputChannel, InsetsState outInsetsState,
+            InsetsSourceControl[] outActiveControls) {
         return mService.addWindow(this, window, attrs, viewVisibility, displayId,
-                UserHandle.getUserId(mUid), requestedVisibility, outFrame, outDisplayCutout,
-                outInputChannel, outInsetsState, outActiveControls);
+                UserHandle.getUserId(mUid), requestedVisibility, outFrame, outInputChannel,
+                outInsetsState, outActiveControls);
     }
 
 
     @Override
     public int addToDisplayAsUser(IWindow window, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, int userId, InsetsState requestedVisibility,
-            Rect outFrame, DisplayCutout.ParcelableWrapper outDisplayCutout,
-            InputChannel outInputChannel, InsetsState outInsetsState,
+            Rect outFrame, InputChannel outInputChannel, InsetsState outInsetsState,
             InsetsSourceControl[] outActiveControls) {
         return mService.addWindow(this, window, attrs, viewVisibility, displayId, userId,
-                requestedVisibility, outFrame, outDisplayCutout, outInputChannel, outInsetsState,
+                requestedVisibility, outFrame, outInputChannel, outInsetsState,
                 outActiveControls);
     }
 
@@ -209,8 +207,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             int viewVisibility, int displayId, InsetsState outInsetsState) {
         return mService.addWindow(this, window, attrs, viewVisibility, displayId,
                 UserHandle.getUserId(mUid), mDummyRequestedVisibility,
-                new Rect() /* outFrame */, new DisplayCutout.ParcelableWrapper() /* cutout */,
-                null /* outInputChannel */, outInsetsState, mDummyControls);
+                new Rect() /* outFrame */, null /* outInputChannel */, outInsetsState,
+                mDummyControls);
     }
 
     @Override

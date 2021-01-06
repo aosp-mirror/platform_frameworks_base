@@ -42,7 +42,6 @@ import static android.view.ViewRootImplProto.HEIGHT;
 import static android.view.ViewRootImplProto.IS_ANIMATING;
 import static android.view.ViewRootImplProto.IS_DRAWING;
 import static android.view.ViewRootImplProto.LAST_WINDOW_INSETS;
-import static android.view.ViewRootImplProto.PENDING_DISPLAY_CUTOUT;
 import static android.view.ViewRootImplProto.REMOVED;
 import static android.view.ViewRootImplProto.SCROLL_Y;
 import static android.view.ViewRootImplProto.SOFT_INPUT_MODE;
@@ -573,8 +572,6 @@ public final class ViewRootImpl implements ViewParent,
     final Rect mWinFrame; // frame given by window manager.
 
     final Rect mPendingBackDropFrame = new Rect();
-    final DisplayCutout.ParcelableWrapper mPendingDisplayCutout =
-            new DisplayCutout.ParcelableWrapper(DisplayCutout.NO_CUTOUT);
     boolean mPendingAlwaysConsumeSystemBars;
     private final InsetsState mTempInsets = new InsetsState();
     private final InsetsSourceControl[] mTempControls = new InsetsSourceControl[SIZE];
@@ -1061,8 +1058,7 @@ public final class ViewRootImpl implements ViewParent,
                     res = mWindowSession.addToDisplayAsUser(mWindow, mWindowAttributes,
                             getHostVisibility(), mDisplay.getDisplayId(), userId,
                             mInsetsController.getRequestedVisibility(), mTmpFrames.frame,
-                            mAttachInfo.mDisplayCutout, inputChannel,
-                            mTempInsets, mTempControls);
+                            inputChannel, mTempInsets, mTempControls);
                     if (mTranslator != null) {
                         mTranslator.translateRectInScreenToAppWindow(mTmpFrames.frame);
                         mTranslator.translateInsetsStateInScreenToAppWindow(mTempInsets);
@@ -1083,7 +1079,6 @@ public final class ViewRootImpl implements ViewParent,
                     }
                 }
 
-                mPendingDisplayCutout.set(mAttachInfo.mDisplayCutout);
                 mAttachInfo.mAlwaysConsumeSystemBars =
                         (res & WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_SYSTEM_BARS) != 0;
                 mPendingAlwaysConsumeSystemBars = mAttachInfo.mAlwaysConsumeSystemBars;
@@ -1504,15 +1499,13 @@ public final class ViewRootImpl implements ViewParent,
         final boolean forceNextWindowRelayout = args.argi1 != 0;
         final int displayId = args.argi3;
         final Rect backdropFrame = frames.backdropFrame;
-        final DisplayCutout displayCutout = frames.displayCutout.get();
 
         final boolean frameChanged = !mWinFrame.equals(frames.frame);
-        final boolean cutoutChanged = !mPendingDisplayCutout.get().equals(displayCutout);
         final boolean backdropFrameChanged = !mPendingBackDropFrame.equals(backdropFrame);
         final boolean configChanged = !mLastReportedMergedConfiguration.equals(mergedConfiguration);
         final boolean displayChanged = mDisplay.getDisplayId() != displayId;
-        if (msg == MSG_RESIZED && !frameChanged && !cutoutChanged && !backdropFrameChanged
-                && !configChanged && !displayChanged && !forceNextWindowRelayout) {
+        if (msg == MSG_RESIZED && !frameChanged && !backdropFrameChanged && !configChanged
+                && !displayChanged && !forceNextWindowRelayout) {
             return;
         }
 
@@ -1527,7 +1520,6 @@ public final class ViewRootImpl implements ViewParent,
 
         setFrame(frames.frame);
         mTmpFrames.displayFrame.set(frames.displayFrame);
-        mPendingDisplayCutout.set(displayCutout);
         mPendingBackDropFrame.set(backdropFrame);
         mForceNextWindowRelayout = forceNextWindowRelayout;
         mPendingAlwaysConsumeSystemBars = args.argi2 != 0;
@@ -1536,7 +1528,7 @@ public final class ViewRootImpl implements ViewParent,
             reportNextDraw();
         }
 
-        if (mView != null && (frameChanged || cutoutChanged || configChanged)) {
+        if (mView != null && (frameChanged || configChanged)) {
             forceLayout(mView);
         }
         requestLayout();
@@ -2336,8 +2328,7 @@ public final class ViewRootImpl implements ViewParent,
             final Configuration config = mContext.getResources().getConfiguration();
             mLastWindowInsets = mInsetsController.calculateInsets(
                     config.isScreenRound(), mAttachInfo.mAlwaysConsumeSystemBars,
-                    mPendingDisplayCutout.get(), mWindowAttributes.type,
-                    config.windowConfiguration.getWindowingMode(),
+                    mWindowAttributes.type, config.windowConfiguration.getWindowingMode(),
                     mWindowAttributes.softInputMode, mWindowAttributes.flags,
                     (mWindowAttributes.systemUiVisibility
                             | mWindowAttributes.subtreeSystemUiVisibility));
@@ -2537,8 +2528,6 @@ public final class ViewRootImpl implements ViewParent,
         // Execute enqueued actions on every traversal in case a detached view enqueued an action
         getRunQueue().executeActions(mAttachInfo.mHandler);
 
-        boolean cutoutChanged = false;
-
         boolean layoutRequested = mLayoutRequested && (!mStopped || mReportNextDraw);
         if (layoutRequested) {
 
@@ -2550,9 +2539,6 @@ public final class ViewRootImpl implements ViewParent,
                 mAttachInfo.mInTouchMode = !mAddedTouchMode;
                 ensureTouchModeLocally(mAddedTouchMode);
             } else {
-                if (!mPendingDisplayCutout.equals(mAttachInfo.mDisplayCutout)) {
-                    cutoutChanged = true;
-                }
                 if (lp.width == ViewGroup.LayoutParams.WRAP_CONTENT
                         || lp.height == ViewGroup.LayoutParams.WRAP_CONTENT) {
                     windowSizeMayChange = true;
@@ -2678,7 +2664,7 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        if (mFirst || windowShouldResize || viewVisibilityChanged || cutoutChanged || params != null
+        if (mFirst || windowShouldResize || viewVisibilityChanged || params != null
                 || mForceNextWindowRelayout) {
             mForceNextWindowRelayout = false;
 
@@ -2718,7 +2704,6 @@ public final class ViewRootImpl implements ViewParent,
                 relayoutResult = relayoutWindow(params, viewVisibility, insetsPending);
 
                 if (DEBUG_LAYOUT) Log.v(mTag, "relayout: frame=" + frame.toShortString()
-                        + " cutout=" + mPendingDisplayCutout.get().toString()
                         + " surface=" + mSurface);
 
                 // If the pending {@link MergedConfiguration} handed back from
@@ -2734,7 +2719,6 @@ public final class ViewRootImpl implements ViewParent,
                     updatedConfiguration = true;
                 }
 
-                cutoutChanged = !mPendingDisplayCutout.equals(mAttachInfo.mDisplayCutout);
                 surfaceSizeChanged = false;
                 if (!mLastSurfaceSize.equals(mSurfaceSize)) {
                     surfaceSizeChanged = true;
@@ -2758,14 +2742,6 @@ public final class ViewRootImpl implements ViewParent,
                     mSurfaceSequenceId++;
                 }
 
-                if (cutoutChanged) {
-                    mAttachInfo.mDisplayCutout.set(mPendingDisplayCutout);
-                    if (DEBUG_LAYOUT) {
-                        Log.v(mTag, "DisplayCutout changing to: " + mAttachInfo.mDisplayCutout);
-                    }
-                    // Need to relayout with content insets.
-                    dispatchApplyInsets = true;
-                }
                 if (alwaysConsumeSystemBarsChanged) {
                     mAttachInfo.mAlwaysConsumeSystemBars = mPendingAlwaysConsumeSystemBars;
                     dispatchApplyInsets = true;
@@ -7587,7 +7563,6 @@ public final class ViewRootImpl implements ViewParent,
                 insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0, frameNumber,
                 mTmpFrames, mPendingMergedConfiguration, mSurfaceControl, mTempInsets,
                 mTempControls, mSurfaceSize);
-        mPendingDisplayCutout.set(mTmpFrames.displayCutout);
         mPendingBackDropFrame.set(mTmpFrames.backdropFrame);
         if (mSurfaceControl.isValid()) {
             if (!useBLAST()) {
@@ -7748,7 +7723,6 @@ public final class ViewRootImpl implements ViewParent,
         proto.write(IS_DRAWING, mIsDrawing);
         proto.write(ADDED, mAdded);
         mWinFrame.dumpDebug(proto, WIN_FRAME);
-        mPendingDisplayCutout.get().dumpDebug(proto, PENDING_DISPLAY_CUTOUT);
         proto.write(LAST_WINDOW_INSETS, Objects.toString(mLastWindowInsets));
         proto.write(SOFT_INPUT_MODE, InputMethodDebug.softInputModeToString(mSoftInputMode));
         proto.write(SCROLL_Y, mScrollY);
