@@ -65,17 +65,18 @@ static int createFromStream(std::unique_ptr<SkStreamRewindable> stream, AImageDe
     SkCodec::Result result;
     auto codec = SkCodec::MakeFromStream(std::move(stream), &result, nullptr,
                                          SkCodec::SelectionPolicy::kPreferAnimation);
-    auto androidCodec = SkAndroidCodec::MakeFromCodec(std::move(codec),
-            SkAndroidCodec::ExifOrientationBehavior::kRespect);
+    // These may be swapped due to the SkEncodedOrigin, but we're just checking
+    // them to make sure they fit in int32_t.
+    auto dimensions = codec->dimensions();
+    auto androidCodec = SkAndroidCodec::MakeFromCodec(std::move(codec));
     if (!androidCodec) {
         return ResultToErrorCode(result);
     }
 
     // AImageDecoderHeaderInfo_getWidth/Height return an int32_t. Ensure that
     // the conversion is safe.
-    const auto& info = androidCodec->getInfo();
-    if (info.width() > std::numeric_limits<int32_t>::max()
-        || info.height() > std::numeric_limits<int32_t>::max()) {
+    if (dimensions.width() > std::numeric_limits<int32_t>::max() ||
+        dimensions.height() > std::numeric_limits<int32_t>::max()) {
         return ANDROID_IMAGE_DECODER_INVALID_INPUT;
     }
 
@@ -200,14 +201,14 @@ int32_t AImageDecoderHeaderInfo_getWidth(const AImageDecoderHeaderInfo* info) {
     if (!info) {
         return 0;
     }
-    return toDecoder(info)->mCodec->getInfo().width();
+    return toDecoder(info)->width();
 }
 
 int32_t AImageDecoderHeaderInfo_getHeight(const AImageDecoderHeaderInfo* info) {
     if (!info) {
         return 0;
     }
-    return toDecoder(info)->mCodec->getInfo().height();
+    return toDecoder(info)->height();
 }
 
 const char* AImageDecoderHeaderInfo_getMimeType(const AImageDecoderHeaderInfo* info) {

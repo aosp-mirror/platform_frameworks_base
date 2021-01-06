@@ -40,13 +40,14 @@ sk_sp<SkColorSpace> ImageDecoder::getDefaultColorSpace() const {
 ImageDecoder::ImageDecoder(std::unique_ptr<SkAndroidCodec> codec, sk_sp<SkPngChunkReader> peeker)
     : mCodec(std::move(codec))
     , mPeeker(std::move(peeker))
-    , mTargetSize(mCodec->getInfo().dimensions())
-    , mDecodeSize(mTargetSize)
+    , mDecodeSize(mCodec->codec()->dimensions())
     , mOutColorType(mCodec->computeOutputColorType(kN32_SkColorType))
     , mUnpremultipliedRequired(false)
     , mOutColorSpace(getDefaultColorSpace())
     , mSampleSize(1)
 {
+    mTargetSize = swapWidthHeight() ? SkISize { mDecodeSize.height(), mDecodeSize.width() }
+                                    : mDecodeSize;
 }
 
 SkAlphaType ImageDecoder::getOutAlphaType() const {
@@ -77,7 +78,8 @@ bool ImageDecoder::setTargetSize(int width, int height) {
         }
     }
 
-    SkISize targetSize = { width, height }, decodeSize = targetSize;
+    SkISize targetSize = { width, height };
+    SkISize decodeSize = swapWidthHeight() ? SkISize { height, width } : targetSize;
     int sampleSize = mCodec->computeSampleSize(&decodeSize);
 
     if (decodeSize != targetSize && mUnpremultipliedRequired && !opaque()) {
@@ -157,6 +159,22 @@ SkImageInfo ImageDecoder::getOutputInfo() const {
     return SkImageInfo::Make(size, mOutColorType, getOutAlphaType(), getOutputColorSpace());
 }
 
+bool ImageDecoder::swapWidthHeight() const {
+    return SkEncodedOriginSwapsWidthHeight(mCodec->codec()->getOrigin());
+}
+
+int ImageDecoder::width() const {
+    return swapWidthHeight()
+            ? mCodec->codec()->dimensions().height()
+            : mCodec->codec()->dimensions().width();
+}
+
+int ImageDecoder::height() const {
+    return swapWidthHeight()
+            ? mCodec->codec()->dimensions().width()
+            : mCodec->codec()->dimensions().height();
+}
+
 bool ImageDecoder::opaque() const {
     return mCodec->getInfo().alphaType() == kOpaque_SkAlphaType;
 }
@@ -174,7 +192,9 @@ SkCodec::Result ImageDecoder::decode(void* pixels, size_t rowBytes) {
     // FIXME: Use scanline decoding on only a couple lines to save memory. b/70709380.
     SkBitmap tmp;
     const bool scale = mDecodeSize != mTargetSize;
-    if (scale || mCropRect) {
+    const auto origin = mCodec->codec()->getOrigin();
+    const bool handleOrigin = origin != kDefault_SkEncodedOrigin;
+    if (scale || handleOrigin || mCropRect) {
         if (!tmp.setInfo(decodeInfo)) {
             return SkCodec::kInternalError;
         }
@@ -189,7 +209,7 @@ SkCodec::Result ImageDecoder::decode(void* pixels, size_t rowBytes) {
     options.fSampleSize = mSampleSize;
     auto result = mCodec->getAndroidPixels(decodeInfo, decodePixels, decodeRowBytes, &options);
 
-    if (scale || mCropRect) {
+    if (scale || handleOrigin || mCropRect) {
         SkBitmap scaledBm;
         if (!scaledBm.installPixels(getOutputInfo(), pixels, rowBytes)) {
             return SkCodec::kInternalError;
@@ -200,15 +220,27 @@ SkCodec::Result ImageDecoder::decode(void* pixels, size_t rowBytes) {
         paint.setFilterQuality(kLow_SkFilterQuality);  // bilinear filtering
 
         SkCanvas canvas(scaledBm, SkCanvas::ColorBehavior::kLegacy);
+        SkMatrix outputMatrix;
         if (mCropRect) {
-            canvas.translate(-mCropRect->fLeft, -mCropRect->fTop);
-        }
-        if (scale) {
-            float scaleX = (float) mTargetSize.width()  / mDecodeSize.width();
-            float scaleY = (float) mTargetSize.height() / mDecodeSize.height();
-            canvas.scale(scaleX, scaleY);
+            outputMatrix.setTranslate(-mCropRect->fLeft, -mCropRect->fTop);
         }
 
+        int targetWidth  = mTargetSize.width();
+        int targetHeight = mTargetSize.height();
+        if (handleOrigin) {
+            outputMatrix.preConcat(SkEncodedOriginToMatrix(origin, targetWidth, targetHeight));
+            if (SkEncodedOriginSwapsWidthHeight(origin)) {
+                std::swap(targetWidth, targetHeight);
+            }
+        }
+
+        if (scale) {
+            float scaleX = (float) targetWidth  / mDecodeSize.width();
+            float scaleY = (float) targetHeight / mDecodeSize.height();
+            outputMatrix.preScale(scaleX, scaleY);
+        }
+
+        canvas.setMatrix(outputMatrix);
         canvas.drawBitmap(tmp, 0.0f, 0.0f, &paint);
     }
 
