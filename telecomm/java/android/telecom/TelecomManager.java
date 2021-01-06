@@ -266,9 +266,68 @@ public class TelecomManager {
     /**
      * Optional extra for {@link android.content.Intent#ACTION_CALL} containing a string call
      * subject which will be associated with an outgoing call.  Should only be specified if the
-     * {@link PhoneAccount} supports the capability {@link PhoneAccount#CAPABILITY_CALL_SUBJECT}.
+     * {@link PhoneAccount} supports the capability {@link PhoneAccount#CAPABILITY_CALL_SUBJECT}
+     * or {@link PhoneAccount#CAPABILITY_CALL_COMPOSER}.
      */
     public static final String EXTRA_CALL_SUBJECT = "android.telecom.extra.CALL_SUBJECT";
+
+    // Values for EXTRA_PRIORITY
+    /**
+     * Indicates the call composer call priority is normal.
+     *
+     * Reference: RCC.20 Section 2.4.4.2
+     */
+    public static final int PRIORITY_NORMAL = 0;
+
+    /**
+     * Indicates the call composer call priority is urgent.
+     *
+     * Reference: RCC.20 Section 2.4.4.2
+     */
+    public static final int PRIORITY_URGENT = 1;
+
+    /**
+     * Extra for the call composer call priority, either {@link #PRIORITY_NORMAL} or
+     * {@link #PRIORITY_URGENT}.
+     *
+     * Reference: RCC.20 Section 2.4.4.2
+     */
+    public static final String EXTRA_PRIORITY = "android.telecom.extra.PRIORITY";
+
+    /**
+     * Extra for the call composer call location, an {@link android.location.Location} parcelable
+     * class to represent the geolocation as a latitude and longitude pair.
+     *
+     * Reference: RCC.20 Section 2.4.3.2
+     */
+    public static final String EXTRA_LOCATION = "android.telecom.extra.LOCATION";
+
+    /**
+     * A boolean extra set on incoming calls to indicate that the call has a picture specified.
+     * Given that image download could take a (short) time, the EXTRA is set immediately upon
+     * adding the call to the Dialer app, this allows the Dialer app to reserve space for an image
+     * if one is expected. The EXTRA may be unset if the image download ends up failing for some
+     * reason.
+     */
+    public static final String EXTRA_HAS_PICTURE = "android.telecom.extra.HAS_PICTURE";
+
+    /**
+     * A URI representing the picture that was downloaded when a call is received.
+     * This is a content URI within the call log provider which can be used to open a file
+     * descriptor. This could be set a short time after a call is added to the Dialer app if the
+     * download is delayed for some reason. The Dialer app will receive a callback via
+     * {@link Call.Callback#onDetailsChanged} when this value has changed.
+     *
+     * Reference: RCC.20 Section 2.4.3.2
+     */
+    public static final String EXTRA_INCOMING_PICTURE = "android.telecom.extra.INCOMING_PICTURE";
+
+    // TODO(hallliu), This UUID is obtained from TelephonyManager#uploadCallComposerPicture.
+    /**
+     * A ParcelUuid used as a token to represent a picture that was uploaded prior to the call
+     * being placed.
+     */
+    public static final String EXTRA_OUTGOING_PICTURE = "android.telecom.extra.OUTGOING_PICTURE";
 
     /**
      * The extra used by a {@link ConnectionService} to provide the handle of the caller that
