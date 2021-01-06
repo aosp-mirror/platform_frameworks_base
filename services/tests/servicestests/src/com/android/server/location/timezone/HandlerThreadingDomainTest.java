@@ -85,6 +85,28 @@ public class HandlerThreadingDomainTest {
     }
 
     @Test
+    public void assertNotCurrentThread() throws Exception {
+        ThreadingDomain domain = new HandlerThreadingDomain(mTestHandler);
+
+        // Expect no exception (current thread != handler thread)
+        domain.assertNotCurrentThread();
+
+        AtomicBoolean exceptionThrown = new AtomicBoolean(false);
+        LatchedRunnable testCode = new LatchedRunnable(() -> {
+            // Expect an exception (current thread == handler thread)
+            try {
+                domain.assertNotCurrentThread();
+                fail("Expected exception");
+            } catch (RuntimeException expected) {
+                exceptionThrown.set(true);
+            }
+        });
+        mTestHandler.post(testCode);
+        testCode.assertCompletesWithin(60, TimeUnit.SECONDS);
+        assertTrue(exceptionThrown.get());
+    }
+
+    @Test
     public void post() throws Exception {
         ThreadingDomain domain = new HandlerThreadingDomain(mTestHandler);
         AtomicBoolean ranOnExpectedThread = new AtomicBoolean(false);

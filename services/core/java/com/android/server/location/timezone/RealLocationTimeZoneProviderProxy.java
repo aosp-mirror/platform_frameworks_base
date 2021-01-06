@@ -17,6 +17,8 @@
 package com.android.server.location.timezone;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.service.timezone.TimeZoneProviderService.TEST_COMMAND_RESULT_ERROR_KEY;
+import static android.service.timezone.TimeZoneProviderService.TEST_COMMAND_RESULT_SUCCESS_KEY;
 
 import static com.android.server.location.timezone.LocationTimeZoneManagerService.warnLog;
 
@@ -28,9 +30,10 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.RemoteException;
+import android.os.RemoteCallback;
 import android.service.timezone.ITimeZoneProvider;
 import android.service.timezone.ITimeZoneProviderManager;
 import android.service.timezone.TimeZoneProviderSuggestion;
@@ -118,18 +121,15 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
     private void onBind(IBinder binder, ComponentName componentName) {
         mThreadingDomain.assertCurrentThread();
 
-        ITimeZoneProvider provider = ITimeZoneProvider.Stub.asInterface(binder);
-
         synchronized (mSharedLock) {
-            try {
-                mManagerProxy = new ManagerProxy();
-                provider.setTimeZoneProviderManager(mManagerProxy);
-                trySendCurrentRequest();
-                mListener.onProviderBound();
-            } catch (RemoteException e) {
-                // This is not expected to happen.
-                throw new RuntimeException(e);
-            }
+            // When a new remote is first bound we create the ManagerProxy that will be passed to
+            // it. By creating a new one for each bind the ManagerProxy can check whether it is
+            // still the current proxy and if not it can ignore incoming calls.
+            mManagerProxy = new ManagerProxy();
+            mListener.onProviderBound();
+
+            // Send the current request to the remote.
+            trySendCurrentRequest();
         }
     }
 
@@ -137,6 +137,8 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
         mThreadingDomain.assertCurrentThread();
 
         synchronized (mSharedLock) {
+            // Clear the ManagerProxy used with the old remote so we will ignore calls from any old
+            // remotes that somehow hold a reference to it.
             mManagerProxy = null;
             mListener.onProviderUnbound();
         }
@@ -150,21 +152,41 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
         synchronized (mSharedLock) {
             mRequest = request;
 
+            // Two possible outcomes here: Either we are already bound to a remote service, in
+            // which case trySendCurrentRequest() will communicate the request immediately, or we
+            // are not bound to the remote service yet, in which case it will be sent during
+            // onBindOnHandlerThread() instead.
             trySendCurrentRequest();
         }
     }
 
     @GuardedBy("mSharedLock")
     private void trySendCurrentRequest() {
+        ManagerProxy managerProxy = mManagerProxy;
         TimeZoneProviderRequest request = mRequest;
         mServiceWatcher.runOnBinder(binder -> {
             ITimeZoneProvider service = ITimeZoneProvider.Stub.asInterface(binder);
             if (request.sendUpdates()) {
-                service.startUpdates(request.getInitializationTimeout().toMillis());
+                service.startUpdates(managerProxy, request.getInitializationTimeout().toMillis());
             } else {
                 service.stopUpdates();
             }
         });
+    }
+
+    /**
+     * A stubbed implementation.
+     */
+    @Override
+    void handleTestCommand(@NonNull TestCommand testCommand, @Nullable RemoteCallback callback) {
+        mThreadingDomain.assertCurrentThread();
+
+        if (callback != null) {
+            Bundle result = new Bundle();
+            result.putBoolean(TEST_COMMAND_RESULT_SUCCESS_KEY, false);
+            result.putString(TEST_COMMAND_RESULT_ERROR_KEY, "Not implemented");
+            callback.sendResult(result);
+        }
     }
 
     @Override
@@ -205,6 +227,8 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
         private void onTimeZoneProviderEvent(TimeZoneProviderEvent event) {
             synchronized (mSharedLock) {
                 if (mManagerProxy != this) {
+                    // Ignore incoming calls if this instance is no longer the current
+                    // mManagerProxy.
                     return;
                 }
             }
