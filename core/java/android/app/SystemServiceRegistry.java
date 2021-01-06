@@ -1719,7 +1719,7 @@ public final class SystemServiceRegistry {
                 synchronized (cache) {
                     // Return it if we already have a cached instance.
                     T service = (T) cache[mCacheIndex];
-                    if (service != null || gates[mCacheIndex] == ContextImpl.STATE_NOT_FOUND) {
+                    if (service != null) {
                         ret = service;
                         break; // exit the for (;;)
                     }
@@ -1729,7 +1729,9 @@ public final class SystemServiceRegistry {
                     // Grr... if gate is STATE_READY, then this means we initialized the service
                     // once but someone cleared it.
                     // We start over from STATE_UNINITIALIZED.
-                    if (gates[mCacheIndex] == ContextImpl.STATE_READY) {
+                    // Similarly, if the previous attempt returned null, we'll retry again.
+                    if (gates[mCacheIndex] == ContextImpl.STATE_READY
+                            || gates[mCacheIndex] == ContextImpl.STATE_NOT_FOUND) {
                         gates[mCacheIndex] = ContextImpl.STATE_UNINITIALIZED;
                     }
 
