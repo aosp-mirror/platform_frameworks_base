@@ -236,4 +236,9 @@ public class DynamicSystemService extends IDynamicSystemService.Stub {
             throw new RuntimeException(e.toString());
         }
     }
+
+    @Override
+    public long suggestScratchSize() throws RemoteException {
+        return getGsiService().suggestScratchSize();
+    }
 }
