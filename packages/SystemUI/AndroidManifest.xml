@@ -570,6 +570,7 @@
         <!-- People Space UI Screen -->
         <activity android:name=".people.PeopleSpaceActivity"
             android:label="People"
+            android:enabled="true"
             android:exported="true"
             android:theme="@android:style/Theme.Material.NoActionBar">
             <intent-filter>
