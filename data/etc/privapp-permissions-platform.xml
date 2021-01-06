@@ -460,6 +460,8 @@ applications that come with the platform
         <!-- Permission needed for CTS test - WifiManagerTest -->
         <permission name="android.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS" />
         <permission name="android.permission.WIFI_UPDATE_COEX_UNSAFE_CHANNELS" />
+        <!-- Permission required for CTS test CarrierMessagingServiceWrapperTest -->
+        <permission name="android.permission.BIND_CARRIER_SERVICES"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
