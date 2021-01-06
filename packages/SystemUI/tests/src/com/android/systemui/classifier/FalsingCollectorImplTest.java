@@ -17,12 +17,15 @@
 package com.android.systemui.classifier;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
+import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
 
@@ -38,6 +41,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -65,7 +69,6 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
         mFalsingCollector = new FalsingCollectorImpl(mFalsingDataProvider, mFalsingManager,
                 mKeyguardUpdateMonitor, mProximitySensor, mStatusBarStateController);
     }
-
 
     @Test
     public void testRegisterSensor() {
@@ -110,7 +113,6 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
 
     @Test
     public void testUnregisterSensor_StateTransition() {
-
         ArgumentCaptor<StatusBarStateController.StateListener> stateListenerArgumentCaptor =
                 ArgumentCaptor.forClass(StatusBarStateController.StateListener.class);
         verify(mStatusBarStateController).addCallback(stateListenerArgumentCaptor.capture());
@@ -119,5 +121,38 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
         reset(mProximitySensor);
         stateListenerArgumentCaptor.getValue().onStateChanged(StatusBarState.SHADE);
         verify(mProximitySensor).unregister(any(ThresholdSensor.Listener.class));
+    }
+
+    @Test
+    public void testPassThroughGesture() {
+        MotionEvent down = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0);
+        MotionEvent up = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 0, 0, 0);
+
+        // Nothing passed initially
+        mFalsingCollector.onTouchEvent(down);
+        verify(mFalsingDataProvider, never()).onMotionEvent(any(MotionEvent.class));
+
+        // Up event flushes the down event.
+        mFalsingCollector.onTouchEvent(up);
+        InOrder orderedCalls = inOrder(mFalsingDataProvider);
+        // We can't simply use "eq" or similar because the collector makes a copy of "down".
+        orderedCalls.verify(mFalsingDataProvider).onMotionEvent(
+                argThat(argument -> argument.getActionMasked() == MotionEvent.ACTION_DOWN));
+        orderedCalls.verify(mFalsingDataProvider).onMotionEvent(up);
+    }
+
+    @Test
+    public void testAvoidGesture() {
+        MotionEvent down = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0);
+        MotionEvent up = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0);
+
+        // Nothing passed initially
+        mFalsingCollector.onTouchEvent(down);
+        verify(mFalsingDataProvider, never()).onMotionEvent(any(MotionEvent.class));
+
+        mFalsingCollector.avoidGesture();
+        // Up event would flush, but we were told to avoid.
+        mFalsingCollector.onTouchEvent(up);
+        verify(mFalsingDataProvider, never()).onMotionEvent(any(MotionEvent.class));
     }
 }

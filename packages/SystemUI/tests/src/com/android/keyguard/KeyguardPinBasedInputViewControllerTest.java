@@ -31,6 +31,8 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.classifier.FalsingCollectorFake;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -65,6 +67,7 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
     private LatencyTracker mLatencyTracker;
     @Mock
     private LiftToActivateListener mLiftToactivateListener;
+    private FalsingCollector mFalsingCollector = new FalsingCollectorFake();
     @Mock
     private View mDeleteButton;
     @Mock
@@ -88,7 +91,8 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
                 .thenReturn(mOkButton);
         mKeyguardPinViewController = new KeyguardPinBasedInputViewController(mPinBasedInputView,
                 mKeyguardUpdateMonitor, mSecurityMode, mLockPatternUtils, mKeyguardSecurityCallback,
-                mKeyguardMessageAreaControllerFactory, mLatencyTracker, mLiftToactivateListener) {
+                mKeyguardMessageAreaControllerFactory, mLatencyTracker, mLiftToactivateListener,
+                mFalsingCollector) {
             @Override
             public void onResume(int reason) {
                 super.onResume(reason);
