@@ -749,9 +749,15 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                         // There are other callbacks in the queue, let's just update the originating
                         // token
                         if (mIsAllowedBgActivityStartsByStart) {
-                            mAppForAllowingBgActivityStartsByStart
-                                    .addOrUpdateAllowBackgroundActivityStartsToken(
-                                            this, getExclusiveOriginatingToken());
+                            // mAppForAllowingBgActivityStartsByStart can be null here for example
+                            // if get 2 calls to allowBgActivityStartsOnServiceStart() without a
+                            // process attached to this ServiceRecord, so we need to perform a null
+                            // check here.
+                            if (mAppForAllowingBgActivityStartsByStart != null) {
+                                mAppForAllowingBgActivityStartsByStart
+                                        .addOrUpdateAllowBackgroundActivityStartsToken(
+                                                this, getExclusiveOriginatingToken());
+                            }
                         } else {
                             Slog.wtf(TAG,
                                     "Service callback to revoke bg activity starts by service "
