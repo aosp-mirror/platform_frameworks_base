@@ -352,9 +352,7 @@ public final class PendingIntent implements Parcelable {
 
         if (Compatibility.isChangeEnabled(PENDING_INTENT_EXPLICIT_MUTABILITY_REQUIRED)
                 && !flagImmutableSet && !flagMutableSet) {
-            Log.wtf(TAG, msg);
-            throw new IllegalArgumentException(
-                "Please specify an explicit mutability flag (FLAG_IMMUTABLE or FLAG_MUTABLE)");
+            Log.e(TAG, msg);
         }
     }
 
