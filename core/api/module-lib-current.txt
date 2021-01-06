@@ -28,6 +28,10 @@ package android.os {
     method public final void markVintfStability();
   }
 
+  public static class Build.VERSION {
+    field public static final int FIRST_SDK_INT;
+  }
+
   public interface Parcelable {
     method public default int getStability();
   }
