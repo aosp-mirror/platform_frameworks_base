@@ -23,9 +23,11 @@ import static android.app.servertransaction.TestUtils.resultInfoList;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 
+import android.app.ActivityOptions;
 import android.app.servertransaction.TestUtils.LaunchActivityItemBuilder;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -244,6 +246,22 @@ public class ObjectPoolTests {
         ResumeActivityItem item2 = ResumeActivityItem.obtain(2, true);
         assertSame(item, item2);
         assertFalse(item2.equals(emptyItem));
+    }
+
+    @Test
+    public void testRecycleStartActivityItem() {
+        StartActivityItem emptyItem = StartActivityItem.obtain(null /* activityOptions */);
+        StartActivityItem item = StartActivityItem.obtain(ActivityOptions.makeBasic());
+        assertNotSame(item, emptyItem);
+        assertNotEquals(item, emptyItem);
+
+        item.recycle();
+        assertEquals(item, emptyItem);
+
+        StartActivityItem item2 = StartActivityItem.obtain(
+                ActivityOptions.makeBasic().setLaunchDisplayId(10));
+        assertSame(item, item2);
+        assertNotEquals(item2, emptyItem);
     }
 
     @Test

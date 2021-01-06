@@ -218,7 +218,8 @@ public class TransactionExecutor {
                             null /* customIntent */);
                     break;
                 case ON_START:
-                    mTransactionHandler.handleStartActivity(r, mPendingActions);
+                    mTransactionHandler.handleStartActivity(r, mPendingActions,
+                            null /* activityOptions */);
                     break;
                 case ON_RESUME:
                     mTransactionHandler.handleResumeActivity(r, false /* finalStateRequest */,

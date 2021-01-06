@@ -1926,8 +1926,9 @@ class Task extends WindowContainer<WindowContainer> {
         if (r == boundaryActivity) return true;
 
         if (!r.finishing) {
-            final ActivityOptions opts = r.takeOptionsLocked(false /* fromClient */);
+            final ActivityOptions opts = r.getOptions();
             if (opts != null) {
+                r.clearOptionsAnimation();
                 // TODO: Why is this updating the boundary activity vs. the current activity???
                 boundaryActivity.updateOptionsLocked(opts);
             }
@@ -6247,9 +6248,9 @@ class Task extends WindowContainer<WindowContainer> {
         }
 
         if (anim) {
-            next.applyOptionsLocked();
+            next.applyOptionsAnimation();
         } else {
-            next.clearOptionsLocked();
+            next.abortAndClearOptionsAnimation();
         }
 
         mTaskSupervisor.mNoAnimActivities.clear();
@@ -6356,7 +6357,7 @@ class Task extends WindowContainer<WindowContainer> {
 
                 mAtmService.getAppWarningsLocked().onResumeActivity(next);
                 next.app.setPendingUiCleanAndForceProcessStateUpTo(mAtmService.mTopProcessState);
-                next.clearOptionsLocked();
+                next.abortAndClearOptionsAnimation();
                 transaction.setLifecycleStateRequest(
                         ResumeActivityItem.obtain(next.app.getReportedProcState(),
                                 dc.isNextTransitionForward()));

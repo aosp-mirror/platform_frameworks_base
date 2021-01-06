@@ -60,7 +60,6 @@ interface IActivityClientController {
     String getCallingPackage(in IBinder token);
     int getLaunchedFromUid(in IBinder token);
     String getLaunchedFromPackage(in IBinder token);
-    Bundle getActivityOptions(in IBinder token);
 
     void setRequestedOrientation(in IBinder token, int requestedOrientation);
     int getRequestedOrientation(in IBinder token);

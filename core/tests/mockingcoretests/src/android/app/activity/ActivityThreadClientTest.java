@@ -242,7 +242,7 @@ public class ActivityThreadClientTest {
         }
 
         private void startActivity(ActivityClientRecord r) {
-            mThread.handleStartActivity(r, null /* pendingActions */);
+            mThread.handleStartActivity(r, null /* pendingActions */, null /* activityOptions */);
         }
 
         private void resumeActivity(ActivityClientRecord r) {
@@ -295,8 +295,9 @@ public class ActivityThreadClientTest {
                     0 /* ident */, info, new Configuration(),
                     CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null /* referrer */,
                     null /* voiceInteractor */, null /* state */, null /* persistentState */,
-                    null /* pendingResults */, null /* pendingNewIntents */, true /* isForward */,
-                    null /* profilerInfo */,  mThread /* client */, null /* asssitToken */,
+                    null /* pendingResults */, null /* pendingNewIntents */,
+                    null /* activityOptions */, true /* isForward */, null /* profilerInfo */,
+                    mThread /* client */, null /* asssitToken */,
                     null /* fixedRotationAdjustments */);
         }
 
