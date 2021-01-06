@@ -209,7 +209,8 @@ public class QuotaControllerTest {
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
         ArgumentCaptor<IUidObserver> uidObserverCaptor =
                 ArgumentCaptor.forClass(IUidObserver.class);
-        mQuotaController = new QuotaController(mJobSchedulerService);
+        mQuotaController = new QuotaController(mJobSchedulerService,
+                mock(BackgroundJobsController.class), mock(ConnectivityController.class));
 
         verify(mContext).registerReceiver(receiverCaptor.capture(), any());
         mChargingReceiver = receiverCaptor.getValue();

@@ -35,6 +35,7 @@ import android.service.notification.Condition;
 import android.service.notification.IConditionListener;
 import android.service.notification.IConditionProvider;
 import android.service.notification.INotificationListener;
+import android.service.notification.NotificationListenerFilter;
 import android.service.notification.StatusBarNotification;
 import android.app.AutomaticZenRule;
 import android.service.notification.ZenModeConfig;
@@ -224,4 +225,7 @@ interface INotificationManager
     boolean getPrivateNotificationsAllowed();
 
     long pullStats(long startNs, int report, boolean doAgg, out List<ParcelFileDescriptor> stats);
+
+    NotificationListenerFilter getListenerFilter(in ComponentName cn, int userId);
+    void setListenerFilter(in ComponentName cn, int userId, in NotificationListenerFilter nlf);
 }

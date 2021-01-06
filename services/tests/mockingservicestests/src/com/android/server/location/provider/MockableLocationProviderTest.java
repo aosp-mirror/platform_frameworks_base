@@ -15,8 +15,6 @@
  */
 package com.android.server.location.provider;
 
-import static androidx.test.ext.truth.location.LocationSubject.assertThat;
-
 import static com.android.internal.location.ProviderRequest.EMPTY_REQUEST;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -29,13 +27,13 @@ import static org.testng.Assert.assertThrows;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationResult;
+import android.location.ProviderProperties;
 import android.location.util.identity.CallerIdentity;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 import com.android.server.location.test.FakeProvider;
 import com.android.server.location.test.ProviderListenerCapture;

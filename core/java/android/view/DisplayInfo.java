@@ -275,6 +275,27 @@ public final class DisplayInfo implements Parcelable {
     // TODO (b/114338689): Remove the flag and use IWindowManager#getRemoveContentMode
     public int removeMode = Display.REMOVE_MODE_MOVE_CONTENT_TO_PRIMARY;
 
+    /**
+     * @hide
+     * The current minimum brightness constraint of the display. Value between 0.0 and 1.0,
+     * derived from the config constraints of the display device of this logical display.
+     */
+    public float brightnessMinimum;
+
+    /**
+     * @hide
+     * The current maximum brightness constraint of the display. Value between 0.0 and 1.0,
+     * derived from the config constraints of the display device of this logical display.
+     */
+    public float brightnessMaximum;
+
+    /**
+     * @hide
+     * The current default brightness of the display. Value between 0.0 and 1.0,
+     * derived from the configuration of the display device of this logical display.
+     */
+    public float brightnessDefault;
+
     public static final @android.annotation.NonNull Creator<DisplayInfo> CREATOR = new Creator<DisplayInfo>() {
         @Override
         public DisplayInfo createFromParcel(Parcel source) {
@@ -339,7 +360,10 @@ public final class DisplayInfo implements Parcelable {
                 && ownerUid == other.ownerUid
                 && Objects.equals(ownerPackageName, other.ownerPackageName)
                 && removeMode == other.removeMode
-                && refreshRateOverride == other.refreshRateOverride;
+                && refreshRateOverride == other.refreshRateOverride
+                && brightnessMinimum == other.brightnessMinimum
+                && brightnessMaximum == other.brightnessMaximum
+                && brightnessDefault == other.brightnessDefault;
     }
 
     @Override
@@ -384,6 +408,9 @@ public final class DisplayInfo implements Parcelable {
         ownerPackageName = other.ownerPackageName;
         removeMode = other.removeMode;
         refreshRateOverride = other.refreshRateOverride;
+        brightnessMinimum = other.brightnessMinimum;
+        brightnessMaximum = other.brightnessMaximum;
+        brightnessDefault = other.brightnessDefault;
     }
 
     public void readFromParcel(Parcel source) {
@@ -430,6 +457,9 @@ public final class DisplayInfo implements Parcelable {
         uniqueId = source.readString8();
         removeMode = source.readInt();
         refreshRateOverride = source.readFloat();
+        brightnessMinimum = source.readFloat();
+        brightnessMaximum = source.readFloat();
+        brightnessDefault = source.readFloat();
     }
 
     @Override
@@ -475,6 +505,9 @@ public final class DisplayInfo implements Parcelable {
         dest.writeString8(uniqueId);
         dest.writeInt(removeMode);
         dest.writeFloat(refreshRateOverride);
+        dest.writeFloat(brightnessMinimum);
+        dest.writeFloat(brightnessMaximum);
+        dest.writeFloat(brightnessDefault);
     }
 
     @Override
@@ -698,7 +731,12 @@ public final class DisplayInfo implements Parcelable {
         sb.append(removeMode);
         sb.append(", refreshRateOverride ");
         sb.append(refreshRateOverride);
-
+        sb.append(", brightnessMinimum ");
+        sb.append(brightnessMinimum);
+        sb.append(", brightnessMaximum ");
+        sb.append(brightnessMaximum);
+        sb.append(", brightnessDefault ");
+        sb.append(brightnessDefault);
         sb.append("}");
         return sb.toString();
     }

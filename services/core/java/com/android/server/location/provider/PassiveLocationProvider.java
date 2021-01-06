@@ -19,12 +19,11 @@ package com.android.server.location.provider;
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 
 import android.content.Context;
-import android.location.Criteria;
 import android.location.LocationResult;
+import android.location.ProviderProperties;
 import android.location.util.identity.CallerIdentity;
 import android.os.Bundle;
 
-import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 
 import java.io.FileDescriptor;
@@ -47,14 +46,12 @@ public class PassiveLocationProvider extends AbstractLocationProvider {
             /* supportsAltitude = */false,
             /* supportsSpeed = */false,
             /* supportsBearing = */false,
-            Criteria.POWER_LOW,
-            Criteria.ACCURACY_COARSE);
+            ProviderProperties.POWER_USAGE_LOW,
+            ProviderProperties.ACCURACY_COARSE);
 
     public PassiveLocationProvider(Context context) {
         // using a direct executor is ok because this class has no locks that could deadlock
-        super(DIRECT_EXECUTOR, CallerIdentity.fromContext(context));
-
-        setProperties(PROPERTIES);
+        super(DIRECT_EXECUTOR, CallerIdentity.fromContext(context), PROPERTIES);
         setAllowed(true);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.internal.location;
+package android.location;
 
 import android.annotation.IntDef;
-import android.location.Criteria;
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -29,18 +29,43 @@ import java.util.Objects;
 
 /**
  * Location provider properties.
- * @hide
  */
 public final class ProviderProperties implements Parcelable {
 
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({Criteria.POWER_LOW, Criteria.POWER_MEDIUM, Criteria.POWER_HIGH})
-    public @interface PowerRequirement {}
+    /**
+     * A constant indicating low power usage.
+     */
+    public static final int POWER_USAGE_LOW = 1;
+
+    /**
+     * A constant indicating a medium power usage.
+     */
+    public static final int POWER_USAGE_MEDIUM = 2;
+
+    /**
+     * A constant indicating high power usage.
+     */
+    public static final int POWER_USAGE_HIGH = 3;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({Criteria.ACCURACY_FINE, Criteria.ACCURACY_COARSE})
+    @IntDef(prefix = "POWER_USAGE_", value = {POWER_USAGE_LOW, POWER_USAGE_MEDIUM,
+            POWER_USAGE_HIGH})
+    public @interface PowerUsage {}
+
+    /**
+     * A constant indicating a finer location accuracy.
+     */
+    public static final int ACCURACY_FINE = 1;
+
+    /**
+     * A constant indicating a coarser location accuracy.
+     */
+    public static final int ACCURACY_COARSE = 2;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "ACCURACY_", value = {ACCURACY_FINE, ACCURACY_COARSE})
     public @interface Accuracy {}
 
     private final boolean mHasNetworkRequirement;
@@ -50,13 +75,16 @@ public final class ProviderProperties implements Parcelable {
     private final boolean mHasAltitudeSupport;
     private final boolean mHasSpeedSupport;
     private final boolean mHasBearingSupport;
-    private final @PowerRequirement int mPowerRequirement;
+    private final @PowerUsage int mPowerUsage;
     private final @Accuracy int mAccuracy;
 
+    /**
+     * @hide
+     */
     public ProviderProperties(boolean hasNetworkRequirement, boolean hasSatelliteRequirement,
             boolean hasCellRequirement, boolean hasMonetaryCost, boolean hasAltitudeSupport,
             boolean hasSpeedSupport, boolean hasBearingSupport,
-            @PowerRequirement int powerRequirement, @Accuracy int accuracy) {
+            @PowerUsage int powerUsage, @Accuracy int accuracy) {
         mHasNetworkRequirement = hasNetworkRequirement;
         mHasSatelliteRequirement = hasSatelliteRequirement;
         mHasCellRequirement = hasCellRequirement;
@@ -64,10 +92,10 @@ public final class ProviderProperties implements Parcelable {
         mHasAltitudeSupport = hasAltitudeSupport;
         mHasSpeedSupport = hasSpeedSupport;
         mHasBearingSupport = hasBearingSupport;
-        mPowerRequirement = Preconditions.checkArgumentInRange(powerRequirement, Criteria.POWER_LOW,
-                Criteria.POWER_HIGH, "powerRequirement");
-        mAccuracy = Preconditions.checkArgumentInRange(accuracy, Criteria.ACCURACY_FINE,
-                Criteria.ACCURACY_COARSE, "accuracy");
+        mPowerUsage = Preconditions.checkArgumentInRange(powerUsage, POWER_USAGE_LOW,
+                POWER_USAGE_HIGH, "powerUsage");
+        mAccuracy = Preconditions.checkArgumentInRange(accuracy, ACCURACY_FINE,
+                ACCURACY_COARSE, "locationAccuracy");
     }
 
     /**
@@ -121,22 +149,22 @@ public final class ProviderProperties implements Parcelable {
     }
 
     /**
-     * Power requirement for this provider.
+     * Power usage for this provider.
      */
-    public @PowerRequirement int getPowerRequirement() {
-        return mPowerRequirement;
+    public @PowerUsage int getPowerUsage() {
+        return mPowerUsage;
     }
 
     /**
-     * Constant describing the horizontal accuracy returned
-     * by this provider.
+     * Rough location accuracy for this provider, primarily with respect to horizontal location
+     * accuracy.
      */
     public @Accuracy int getAccuracy() {
         return mAccuracy;
     }
 
-    public static final Parcelable.Creator<ProviderProperties> CREATOR =
-            new Parcelable.Creator<ProviderProperties>() {
+    public static final @NonNull Creator<ProviderProperties> CREATOR =
+            new Creator<ProviderProperties>() {
                 @Override
                 public ProviderProperties createFromParcel(Parcel in) {
                     return new ProviderProperties(
@@ -147,7 +175,7 @@ public final class ProviderProperties implements Parcelable {
                             /* hasAltitudeSupport= */ in.readBoolean(),
                             /* hasSpeedSupport= */ in.readBoolean(),
                             /* hasBearingSupport= */ in.readBoolean(),
-                            /* powerRequirement= */ in.readInt(),
+                            /* powerUsage= */ in.readInt(),
                             /* accuracy= */ in.readInt());
                 }
 
@@ -163,7 +191,7 @@ public final class ProviderProperties implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel parcel, int flags) {
+    public void writeToParcel(@NonNull Parcel parcel, int flags) {
         parcel.writeBoolean(mHasNetworkRequirement);
         parcel.writeBoolean(mHasSatelliteRequirement);
         parcel.writeBoolean(mHasCellRequirement);
@@ -171,7 +199,7 @@ public final class ProviderProperties implements Parcelable {
         parcel.writeBoolean(mHasAltitudeSupport);
         parcel.writeBoolean(mHasSpeedSupport);
         parcel.writeBoolean(mHasBearingSupport);
-        parcel.writeInt(mPowerRequirement);
+        parcel.writeInt(mPowerUsage);
         parcel.writeInt(mAccuracy);
     }
 
@@ -191,7 +219,7 @@ public final class ProviderProperties implements Parcelable {
                 && mHasAltitudeSupport == that.mHasAltitudeSupport
                 && mHasSpeedSupport == that.mHasSpeedSupport
                 && mHasBearingSupport == that.mHasBearingSupport
-                && mPowerRequirement == that.mPowerRequirement
+                && mPowerUsage == that.mPowerUsage
                 && mAccuracy == that.mAccuracy;
     }
 
@@ -199,13 +227,13 @@ public final class ProviderProperties implements Parcelable {
     public int hashCode() {
         return Objects.hash(mHasNetworkRequirement, mHasSatelliteRequirement, mHasCellRequirement,
                 mHasMonetaryCost, mHasAltitudeSupport, mHasSpeedSupport, mHasBearingSupport,
-                mPowerRequirement, mAccuracy);
+                mPowerUsage, mAccuracy);
     }
 
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder("ProviderProperties[");
-        b.append("power=").append(powerToString(mPowerRequirement)).append(", ");
+        b.append("power=").append(powerToString(mPowerUsage)).append(", ");
         b.append("accuracy=").append(accuracyToString(mAccuracy));
         if (mHasNetworkRequirement || mHasSatelliteRequirement || mHasCellRequirement) {
             b.append(", requires=");
@@ -226,42 +254,42 @@ public final class ProviderProperties implements Parcelable {
         if (mHasBearingSupport || mHasSpeedSupport || mHasAltitudeSupport) {
             b.append(", supports=[");
             if (mHasBearingSupport) {
-                b.append("bearing, ");
+                b.append("bearing,");
             }
             if (mHasSpeedSupport) {
-                b.append("speed, ");
+                b.append("speed,");
             }
             if (mHasAltitudeSupport) {
-                b.append("altitude, ");
+                b.append("altitude,");
             }
-            b.setLength(b.length() - 2);
+            b.setLength(b.length() - 1);
             b.append("]");
         }
         b.append("]");
         return b.toString();
     }
 
-    private static String powerToString(@PowerRequirement int power) {
+    private static String powerToString(@PowerUsage int power) {
         switch (power) {
-            case Criteria.POWER_LOW:
+            case POWER_USAGE_LOW:
                 return "Low";
-            case Criteria.POWER_MEDIUM:
+            case POWER_USAGE_MEDIUM:
                 return "Medium";
-            case Criteria.POWER_HIGH:
+            case POWER_USAGE_HIGH:
                 return "High";
             default:
-                return "???";
+                throw new AssertionError();
         }
     }
 
     private static String accuracyToString(@Accuracy int accuracy) {
         switch (accuracy) {
-            case Criteria.ACCURACY_COARSE:
+            case ACCURACY_COARSE:
                 return "Coarse";
-            case Criteria.ACCURACY_FINE:
+            case ACCURACY_FINE:
                 return "Fine";
             default:
-                return "???";
+                throw new AssertionError();
         }
     }
 }

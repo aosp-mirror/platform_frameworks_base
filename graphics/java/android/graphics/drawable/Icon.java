@@ -21,7 +21,6 @@ import static android.content.Context.CONTEXT_RESTRICTED;
 
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
-import android.annotation.IdRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -248,7 +247,7 @@ public final class Icon implements Parcelable {
      * Note: This resource may not be available if the application changes at all, and it is
      * up to the caller to ensure safety if this resource is re-used and/or persisted.
      */
-    @IdRes
+    @DrawableRes
     public int getResId() {
         if (mType != TYPE_RESOURCE) {
             throw new IllegalStateException("called getResId() on " + this);

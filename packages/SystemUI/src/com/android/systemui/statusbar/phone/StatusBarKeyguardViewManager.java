@@ -955,6 +955,13 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         return mBouncer.interceptMediaKey(event);
     }
 
+    /**
+     * @return true if the pre IME back event should be handled
+     */
+    public boolean dispatchBackKeyEventPreIme() {
+        return mBouncer.dispatchBackKeyEventPreIme();
+    }
+
     public void readyForKeyguardDone() {
         mViewMediatorCallback.readyForKeyguardDone();
     }

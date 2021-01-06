@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.location.LocationResult;
+import android.location.ProviderProperties;
 import android.location.util.identity.CallerIdentity;
 import android.os.Binder;
 import android.os.Bundle;
@@ -31,7 +32,6 @@ import android.os.RemoteException;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.location.ILocationProvider;
 import com.android.internal.location.ILocationProviderManager;
-import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.ServiceWatcher;
@@ -82,7 +82,7 @@ public class ProxyLocationProvider extends AbstractLocationProvider {
             int nonOverlayPackageResId) {
         // safe to use direct executor since our locks are not acquired in a code path invoked by
         // our owning provider
-        super(DIRECT_EXECUTOR);
+        super(DIRECT_EXECUTOR, null, null);
 
         mContext = context;
         mServiceWatcher = new ServiceWatcher(context, action, this::onBind,
@@ -116,7 +116,7 @@ public class ProxyLocationProvider extends AbstractLocationProvider {
         synchronized (mLock) {
             mProxy = null;
             mService = null;
-            setState(State.EMPTY_STATE);
+            setState(prevState -> State.EMPTY_STATE);
             flushListeners = mFlushListeners.toArray(new Runnable[0]);
             mFlushListeners.clear();
         }
@@ -210,7 +210,8 @@ public class ProxyLocationProvider extends AbstractLocationProvider {
 
         // executed on binder thread
         @Override
-        public void onSetIdentity(@Nullable String packageName, @Nullable String attributionTag) {
+        public void onInitialize(boolean allowed, ProviderProperties properties,
+                @Nullable String packageName, @Nullable String attributionTag) {
             synchronized (mLock) {
                 if (mProxy != this) {
                     return;
@@ -226,7 +227,10 @@ public class ProxyLocationProvider extends AbstractLocationProvider {
                     identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
                 }
 
-                setIdentity(identity);
+                setState(prevState -> prevState
+                        .withAllowed(allowed)
+                        .withProperties(properties)
+                        .withIdentity(identity));
             }
         }
 
@@ -236,14 +240,6 @@ public class ProxyLocationProvider extends AbstractLocationProvider {
             synchronized (mLock) {
                 if (mProxy != this) {
                     return;
-                }
-
-                // if no identity is set yet, set it now
-                if (getIdentity() == null) {
-                    String packageName = guessPackageName(mContext, Binder.getCallingUid(),
-                            Objects.requireNonNull(mService).getPackageName());
-                    // unsafe is ok since the package is coming direct from the package manager here
-                    setIdentity(CallerIdentity.fromBinderUnsafe(packageName, null));
                 }
 
                 setProperties(properties);

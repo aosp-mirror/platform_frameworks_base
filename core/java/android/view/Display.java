@@ -687,6 +687,19 @@ public final class Display {
     }
 
     /**
+     * Gets the default brightness configured for the display.
+     *
+     * @return Default brightness between 0.0-1.0
+     * @hide
+     */
+    public float getBrightnessDefault() {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            return mDisplayInfo.brightnessDefault;
+        }
+    }
+
+    /**
      * Gets the size of the display, in pixels.
      * Value returned by this method does not necessarily represent the actual raw size
      * (native resolution) of the display.

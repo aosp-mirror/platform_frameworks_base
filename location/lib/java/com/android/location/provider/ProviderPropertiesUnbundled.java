@@ -17,8 +17,7 @@
 package com.android.location.provider;
 
 import android.annotation.NonNull;
-
-import com.android.internal.location.ProviderProperties;
+import android.location.ProviderProperties;
 
 import java.util.Objects;
 

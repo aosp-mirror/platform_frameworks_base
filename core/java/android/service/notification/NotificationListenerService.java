@@ -242,6 +242,23 @@ public abstract class NotificationListenerService extends Service {
     public @interface NotificationCancelReason{};
 
     /**
+     * A flag value indicating that this notification listener can see conversation type
+     * notifications.
+     * @hide
+     */
+    public static final int FLAG_FILTER_TYPE_CONVERSATIONS = 1;
+    /**
+     * A flag value indicating that this notification listener can see altering type notifications.
+     * @hide
+     */
+    public static final int FLAG_FILTER_TYPE_ALERTING = 2;
+    /**
+     * A flag value indicating that this notification listener can see silent type notifications.
+     * @hide
+     */
+    public static final int FLAG_FILTER_TYPE_SILENT = 4;
+
+    /**
      * The full trim of the StatusBarNotification including all its features.
      *
      * @hide

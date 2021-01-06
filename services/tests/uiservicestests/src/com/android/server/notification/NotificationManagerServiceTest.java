@@ -55,6 +55,7 @@ import static android.os.Build.VERSION_CODES.P;
 import static android.os.UserHandle.USER_SYSTEM;
 import static android.service.notification.Adjustment.KEY_IMPORTANCE;
 import static android.service.notification.Adjustment.KEY_USER_SENTIMENT;
+import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
 
@@ -143,6 +144,7 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.service.notification.Adjustment;
 import android.service.notification.ConversationChannelWrapper;
+import android.service.notification.NotificationListenerFilter;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
@@ -269,6 +271,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Mock
     private NotificationListeners mListeners;
+    @Mock
+    private NotificationListenerFilter mNlf;
     @Mock private NotificationAssistants mAssistants;
     @Mock private ConditionProviders mConditionProviders;
     private ManagedServices.ManagedServiceInfo mListener;
@@ -459,6 +463,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mPolicyFile.finishWrite(fos);
 
         // Setup managed services
+        when(mNlf.isTypeAllowed(anyInt())).thenReturn(true);
+        when(mNlf.isPackageAllowed(anyString())).thenReturn(true);
+        when(mNlf.isPackageAllowed(null)).thenReturn(true);
+        when(mListeners.getNotificationListenerFilter(any())).thenReturn(mNlf);
         mListener = mListeners.new ManagedServiceInfo(
                 null, new ComponentName(PKG, "test_class"),
                 UserHandle.getUserId(mUid), true, null, 0);
@@ -3596,7 +3604,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         mService.mNotificationDelegate.onNotificationDirectReplied(r.getKey());
         assertTrue(mService.getNotificationRecord(r.getKey()).getStats().hasDirectReplied());
-        verify(mAssistants).notifyAssistantNotificationDirectReplyLocked(eq(r.getSbn()));
+        verify(mAssistants).notifyAssistantNotificationDirectReplyLocked(eq(r));
 
         assertEquals(1, mNotificationRecordLogger.numCalls());
         assertEquals(NotificationRecordLogger.NotificationEvent.NOTIFICATION_DIRECT_REPLIED,
@@ -3610,14 +3618,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), true, true,
                 NOTIFICATION_LOCATION_UNKNOWN);
-        verify(mAssistants).notifyAssistantExpansionChangedLocked(eq(r.getSbn()), eq(true),
-                eq((true)));
+        verify(mAssistants).notifyAssistantExpansionChangedLocked(eq(r.getSbn()),
+                eq(FLAG_FILTER_TYPE_ALERTING), eq(true), eq((true)));
         assertTrue(mService.getNotificationRecord(r.getKey()).getStats().hasExpanded());
 
         mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), true, false,
                 NOTIFICATION_LOCATION_UNKNOWN);
-        verify(mAssistants).notifyAssistantExpansionChangedLocked(eq(r.getSbn()), eq(true),
-                eq((false)));
+        verify(mAssistants).notifyAssistantExpansionChangedLocked(eq(r.getSbn()),
+                eq(FLAG_FILTER_TYPE_ALERTING), eq(true), eq((false)));
         assertTrue(mService.getNotificationRecord(r.getKey()).getStats().hasExpanded());
 
         assertEquals(2, mNotificationRecordLogger.numCalls());
@@ -3635,14 +3643,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), false, true,
                 NOTIFICATION_LOCATION_UNKNOWN);
         assertFalse(mService.getNotificationRecord(r.getKey()).getStats().hasExpanded());
-        verify(mAssistants).notifyAssistantExpansionChangedLocked(eq(r.getSbn()), eq(false),
-                eq((true)));
+        verify(mAssistants).notifyAssistantExpansionChangedLocked(eq(r.getSbn()),
+                eq(FLAG_FILTER_TYPE_ALERTING), eq(false), eq((true)));
 
         mService.mNotificationDelegate.onNotificationExpansionChanged(r.getKey(), false, false,
                 NOTIFICATION_LOCATION_UNKNOWN);
         assertFalse(mService.getNotificationRecord(r.getKey()).getStats().hasExpanded());
         verify(mAssistants).notifyAssistantExpansionChangedLocked(
-                eq(r.getSbn()), eq(false), eq((false)));
+                eq(r.getSbn()), eq(FLAG_FILTER_TYPE_ALERTING), eq(false), eq((false)));
     }
 
     @Test
@@ -3662,11 +3670,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final NotificationVisibility nv = NotificationVisibility.obtain(r.getKey(), 1, 2, true);
         mService.mNotificationDelegate.onNotificationVisibilityChanged(
                 new NotificationVisibility[] {nv}, new NotificationVisibility[]{});
-        verify(mAssistants).notifyAssistantVisibilityChangedLocked(eq(r.getSbn()), eq(true));
+        verify(mAssistants).notifyAssistantVisibilityChangedLocked(eq(r), eq(true));
         assertTrue(mService.getNotificationRecord(r.getKey()).getStats().hasSeen());
         mService.mNotificationDelegate.onNotificationVisibilityChanged(
                 new NotificationVisibility[] {}, new NotificationVisibility[]{nv});
-        verify(mAssistants).notifyAssistantVisibilityChangedLocked(eq(r.getSbn()), eq(false));
+        verify(mAssistants).notifyAssistantVisibilityChangedLocked(eq(r), eq(false));
         assertTrue(mService.getNotificationRecord(r.getKey()).getStats().hasSeen());
     }
 
@@ -5324,7 +5332,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 r.getKey(), replyIndex, reply, NOTIFICATION_LOCATION_UNKNOWN,
                 modifiedBeforeSending);
         verify(mAssistants).notifyAssistantSuggestedReplySent(
-                eq(r.getSbn()), eq(reply), eq(generatedByAssistant));
+                eq(r.getSbn()), eq(FLAG_FILTER_TYPE_ALERTING), eq(reply), eq(generatedByAssistant));
         assertEquals(1, mNotificationRecordLogger.numCalls());
         assertEquals(NotificationRecordLogger.NotificationEvent.NOTIFICATION_SMART_REPLIED,
                 mNotificationRecordLogger.event(0));
@@ -5346,7 +5354,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 10, 10, r.getKey(), actionIndex, action, notificationVisibility,
                 generatedByAssistant);
         verify(mAssistants).notifyAssistantActionClicked(
-                eq(r.getSbn()), eq(action), eq(generatedByAssistant));
+                eq(r), eq(action), eq(generatedByAssistant));
 
         assertEquals(1, mNotificationRecordLogger.numCalls());
         assertEquals(
@@ -5370,7 +5378,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 10, 10, r.getKey(), actionIndex, action, notificationVisibility,
                 generatedByAssistant);
         verify(mAssistants).notifyAssistantActionClicked(
-                eq(r.getSbn()), eq(action), eq(generatedByAssistant));
+                eq(r), eq(action), eq(generatedByAssistant));
 
         assertEquals(1, mNotificationRecordLogger.numCalls());
         assertEquals(
@@ -7249,7 +7257,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(info.enabledAndUserMatches(info.userid)).thenReturn(false);
         when(mAssistants.checkServiceTokenLocked(any())).thenReturn(assistant);
 
-        assertFalse(mService.isVisibleToListener(sbn, info));
+        assertFalse(mService.isVisibleToListener(sbn, 0, info));
     }
 
     @Test
@@ -7262,7 +7270,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(info.enabledAndUserMatches(info.userid)).thenReturn(true);
         when(mAssistants.checkServiceTokenLocked(any())).thenReturn(null);
 
-        assertTrue(mService.isVisibleToListener(sbn, info));
+        assertTrue(mService.isVisibleToListener(sbn, 0, info));
     }
 
     @Test
@@ -7277,7 +7285,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(info.enabledAndUserMatches(info.userid)).thenReturn(true);
         when(mAssistants.checkServiceTokenLocked(any())).thenReturn(assistant);
 
-        assertFalse(mService.isVisibleToListener(sbn, info));
+        assertFalse(mService.isVisibleToListener(sbn, 0, info));
     }
 
     @Test
@@ -7292,7 +7300,42 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(info.enabledAndUserMatches(info.userid)).thenReturn(true);
         when(mAssistants.checkServiceTokenLocked(any())).thenReturn(assistant);
 
-        assertTrue(mService.isVisibleToListener(sbn, info));
+        assertTrue(mService.isVisibleToListener(sbn, 0, info));
+    }
+
+    @Test
+    public void testIsVisibleToListener_mismatchedType() {
+        when(mNlf.isTypeAllowed(anyInt())).thenReturn(false);
+
+        StatusBarNotification sbn = mock(StatusBarNotification.class);
+        when(sbn.getUserId()).thenReturn(10);
+        ManagedServices.ManagedServiceInfo info = mock(ManagedServices.ManagedServiceInfo.class);
+        ManagedServices.ManagedServiceInfo assistant = mock(ManagedServices.ManagedServiceInfo.class);
+        info.userid = 10;
+        when(info.isSameUser(anyInt())).thenReturn(true);
+        when(assistant.isSameUser(anyInt())).thenReturn(true);
+        when(info.enabledAndUserMatches(info.userid)).thenReturn(true);
+        when(mAssistants.checkServiceTokenLocked(any())).thenReturn(assistant);
+
+        assertFalse(mService.isVisibleToListener(sbn, 0, info));
+    }
+
+    @Test
+    public void testIsVisibleToListener_disallowedPackage() {
+        when(mNlf.isPackageAllowed(null)).thenReturn(false);
+
+        StatusBarNotification sbn = mock(StatusBarNotification.class);
+        when(sbn.getUserId()).thenReturn(10);
+        ManagedServices.ManagedServiceInfo info = mock(ManagedServices.ManagedServiceInfo.class);
+        ManagedServices.ManagedServiceInfo assistant =
+                mock(ManagedServices.ManagedServiceInfo.class);
+        info.userid = 10;
+        when(info.isSameUser(anyInt())).thenReturn(true);
+        when(assistant.isSameUser(anyInt())).thenReturn(true);
+        when(info.enabledAndUserMatches(info.userid)).thenReturn(true);
+        when(mAssistants.checkServiceTokenLocked(any())).thenReturn(assistant);
+
+        assertFalse(mService.isVisibleToListener(sbn, 0, info));
     }
 
     @Test

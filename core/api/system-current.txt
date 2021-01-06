@@ -51,6 +51,7 @@ package android {
     field public static final String BIND_TELEPHONY_DATA_SERVICE = "android.permission.BIND_TELEPHONY_DATA_SERVICE";
     field public static final String BIND_TELEPHONY_NETWORK_SERVICE = "android.permission.BIND_TELEPHONY_NETWORK_SERVICE";
     field public static final String BIND_TEXTCLASSIFIER_SERVICE = "android.permission.BIND_TEXTCLASSIFIER_SERVICE";
+    field public static final String BIND_TIME_ZONE_PROVIDER_SERVICE = "android.permission.BIND_TIME_ZONE_PROVIDER_SERVICE";
     field public static final String BIND_TRUST_AGENT = "android.permission.BIND_TRUST_AGENT";
     field public static final String BIND_TV_REMOTE_SERVICE = "android.permission.BIND_TV_REMOTE_SERVICE";
     field public static final String BRICK = "android.permission.BRICK";
@@ -99,7 +100,7 @@ package android {
     field public static final String INJECT_EVENTS = "android.permission.INJECT_EVENTS";
     field public static final String INSTALL_DYNAMIC_SYSTEM = "android.permission.INSTALL_DYNAMIC_SYSTEM";
     field public static final String INSTALL_GRANT_RUNTIME_PERMISSIONS = "android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS";
-    field public static final String INSTALL_LOCATION_TIME_ZONE_PROVIDER = "android.permission.INSTALL_LOCATION_TIME_ZONE_PROVIDER";
+    field public static final String INSTALL_LOCATION_TIME_ZONE_PROVIDER_SERVICE = "android.permission.INSTALL_LOCATION_TIME_ZONE_PROVIDER_SERVICE";
     field public static final String INSTALL_PACKAGE_UPDATES = "android.permission.INSTALL_PACKAGE_UPDATES";
     field public static final String INSTALL_SELF_UPDATES = "android.permission.INSTALL_SELF_UPDATES";
     field public static final String INTENT_FILTER_VERIFICATION_AGENT = "android.permission.INTENT_FILTER_VERIFICATION_AGENT";
@@ -1346,7 +1347,6 @@ package android.app.role {
 
   public abstract class RoleControllerService extends android.app.Service {
     ctor public RoleControllerService();
-    method @NonNull public android.app.role.RolePrivileges getRolePrivileges(@NonNull String);
     method @WorkerThread public abstract boolean onAddRoleHolder(@NonNull String, @NonNull String, int);
     method @Nullable public final android.os.IBinder onBind(@Nullable android.content.Intent);
     method @WorkerThread public abstract boolean onClearRoleHolders(@NonNull String, int);
@@ -1371,18 +1371,6 @@ package android.app.role {
     method @RequiresPermission("com.android.permissioncontroller.permission.MANAGE_ROLES_FROM_CONTROLLER") public boolean removeRoleHolderFromController(@NonNull String, @NonNull String);
     method @RequiresPermission("com.android.permissioncontroller.permission.MANAGE_ROLES_FROM_CONTROLLER") public void setRoleNamesFromController(@NonNull java.util.List<java.lang.String>);
     field public static final int MANAGE_HOLDERS_FLAG_DONT_KILL_APP = 1; // 0x1
-  }
-
-  public final class RolePrivileges implements android.os.Parcelable {
-    ctor public RolePrivileges(@NonNull java.util.List<java.lang.String>, @NonNull java.util.List<java.lang.String>, @NonNull java.util.List<java.lang.String>, @NonNull java.util.List<java.lang.String>);
-    method public int describeContents();
-    method @NonNull public java.util.List<java.lang.String> getAppOpPermissions();
-    method @NonNull public java.util.List<java.lang.String> getAppOps();
-    method @NonNull public java.util.List<java.lang.String> getCapabilities();
-    method @NonNull public java.util.List<java.lang.String> getPermissions();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field public static final String CAPABILITY_NOTIFICATION_LISTENER = "android.app.role.capability.NOTIFICATION_LISTENER";
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.role.RolePrivileges> CREATOR;
   }
 
 }
@@ -9776,7 +9764,6 @@ package android.service.timezone {
     method public final void reportPermanentFailure(@NonNull Throwable);
     method public final void reportSuggestion(@NonNull android.service.timezone.TimeZoneProviderSuggestion);
     method public final void reportUncertain();
-    field public static final String BIND_PERMISSION = "android.permission.INSTALL_LOCATION_TIME_ZONE_PROVIDER";
     field public static final String PRIMARY_LOCATION_TIME_ZONE_PROVIDER_SERVICE_INTERFACE = "android.service.timezone.PrimaryLocationTimeZoneProviderService";
     field public static final String SECONDARY_LOCATION_TIME_ZONE_PROVIDER_SERVICE_INTERFACE = "android.service.timezone.SecondaryLocationTimeZoneProviderService";
   }
@@ -12127,7 +12114,9 @@ package android.telephony.ims {
     method public void callSessionHoldFailed(android.telephony.ims.ImsReasonInfo);
     method public void callSessionHoldReceived(android.telephony.ims.ImsCallProfile);
     method public void callSessionInitiated(android.telephony.ims.ImsCallProfile);
-    method public void callSessionInitiatedFailed(android.telephony.ims.ImsReasonInfo);
+    method @Deprecated public void callSessionInitiatedFailed(android.telephony.ims.ImsReasonInfo);
+    method public void callSessionInitiating(@NonNull android.telephony.ims.ImsCallProfile);
+    method public void callSessionInitiatingFailed(@NonNull android.telephony.ims.ImsReasonInfo);
     method public void callSessionInviteParticipantsRequestDelivered();
     method public void callSessionInviteParticipantsRequestFailed(android.telephony.ims.ImsReasonInfo);
     method @Deprecated public void callSessionMayHandover(int, int);

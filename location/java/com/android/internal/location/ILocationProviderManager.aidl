@@ -17,17 +17,17 @@
 package com.android.internal.location;
 
 import android.location.LocationResult;
-
-import com.android.internal.location.ProviderProperties;
+import android.location.ProviderProperties;
 
 /**
  * Binder interface for manager of all location providers.
  * @hide
  */
 interface ILocationProviderManager {
-    void onSetIdentity(@nullable String packageName, @nullable String attributionTag);
+    void onInitialize(boolean allowed, in ProviderProperties properties, @nullable String packageName, @nullable String attributionTag);
     void onSetAllowed(boolean allowed);
     void onSetProperties(in ProviderProperties properties);
+
     void onReportLocation(in LocationResult locationResult);
     void onFlushComplete();
 }
