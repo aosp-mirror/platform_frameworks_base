@@ -4004,19 +4004,18 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      *     <li>Update the state (grant, flags) of the permissions</li>
      * </ol>
      *
-     * @param volumeUuid The volume of the packages to be updated, {@code null} for all volumes
-     * @param allPackages All currently known packages
-     * @param callback Callback to call after permission changes
+     * @param volumeUuid The volume UUID of the packages to be updated
+     * @param sdkVersionChanged whether the current SDK version is different from what it was when
+     *                          this volume was last mounted
      */
-    private void updateAllPermissions(@Nullable String volumeUuid, boolean sdkUpdated,
-            @NonNull PermissionCallback callback) {
+    private void updateAllPermissions(@NonNull String volumeUuid, boolean sdkVersionChanged) {
         PackageManager.corkPackageInfoCache();  // Prevent invalidation storm
         try {
             final int flags = UPDATE_PERMISSIONS_ALL |
-                    (sdkUpdated
+                    (sdkVersionChanged
                             ? UPDATE_PERMISSIONS_REPLACE_PKG | UPDATE_PERMISSIONS_REPLACE_ALL
                             : 0);
-            updatePermissions(null, null, volumeUuid, flags, callback);
+            updatePermissions(null, null, volumeUuid, flags, mDefaultPermissionCallback);
         } finally {
             PackageManager.uncorkPackageInfoCache();
         }
@@ -4457,6 +4456,20 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     private void systemReady() {
+        // Now that we've scanned all packages, and granted any default
+        // permissions, ensure permissions are updated. Beware of dragons if you
+        // try optimizing this.
+        updateAllPermissions(StorageManager.UUID_PRIVATE_INTERNAL, false);
+
+        final PermissionPolicyInternal permissionPolicyInternal = LocalServices.getService(
+                PermissionPolicyInternal.class);
+        permissionPolicyInternal.setOnInitializedCallback(userId -> {
+            // The SDK updated case is already handled when we run during the ctor.
+            synchronized (mLock) {
+                updateAllPermissions(StorageManager.UUID_PRIVATE_INTERNAL, false);
+            }
+        });
+
         mSystemReady = true;
 
         synchronized (mLock) {
@@ -4982,9 +4995,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             return PermissionManagerService.this.getAppOpPermissionPackagesInternal(permissionName);
         }
         @Override
-        public void updateAllPermissions(@Nullable String volumeUuid, boolean sdkUpdated) {
-            PermissionManagerService.this
-                    .updateAllPermissions(volumeUuid, sdkUpdated, mDefaultPermissionCallback);
+        public void onStorageVolumeMounted(@Nullable String volumeUuid, boolean sdkVersionChanged) {
+            updateAllPermissions(volumeUuid, sdkVersionChanged);
         }
         @Override
         public void resetRuntimePermissions(@NonNull AndroidPackage pkg, @UserIdInt int userId) {
@@ -5084,8 +5096,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         public void onUserCreated(@UserIdInt int userId) {
             Preconditions.checkArgumentNonNegative(userId, "userId");
             // NOTE: This adds UPDATE_PERMISSIONS_REPLACE_PKG
-            PermissionManagerService.this.updateAllPermissions(StorageManager.UUID_PRIVATE_INTERNAL,
-                    true, mDefaultPermissionCallback);
+            updateAllPermissions(StorageManager.UUID_PRIVATE_INTERNAL, true);
         }
 
         @Override
