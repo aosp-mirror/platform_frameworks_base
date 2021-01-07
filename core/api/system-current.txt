@@ -902,6 +902,7 @@ package android.app.admin {
     field public static final int STATE_USER_SETUP_FINALIZED = 3; // 0x3
     field public static final int STATE_USER_SETUP_INCOMPLETE = 1; // 0x1
     field public static final int STATE_USER_UNMANAGED = 0; // 0x0
+    field public static final int SUPPORTED_MODES_DEVICE_OWNER = 4; // 0x4
     field public static final int SUPPORTED_MODES_ORGANIZATION_AND_PERSONALLY_OWNED = 3; // 0x3
     field public static final int SUPPORTED_MODES_ORGANIZATION_OWNED = 1; // 0x1
     field public static final int SUPPORTED_MODES_PERSONALLY_OWNED = 2; // 0x2
