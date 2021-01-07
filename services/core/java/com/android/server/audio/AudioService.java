@@ -3467,8 +3467,6 @@ public class AudioService extends IAudioService.Stub
     /** @see AudioManager#getStreamVolume(int) */
     public int getStreamVolume(int streamType) {
         ensureValidStreamType(streamType);
-        Log.e(TAG, "AudioSystem.getDevicesForStream In AudioService from u/pid"
-                + Binder.getCallingUid() + "/" + Binder.getCallingPid());
         int device = getDeviceForStream(streamType);
         synchronized (VolumeStreamState.class) {
             int index = mStreamStates[streamType].getIndex(device);
