@@ -350,6 +350,8 @@ applications that come with the platform
         <permission name="android.permission.MOUNT_FORMAT_FILESYSTEMS"/>
         <permission name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
         <permission name="android.permission.MOVE_PACKAGE"/>
+        <!-- Needed for test only -->
+        <permission name="android.permission.NETWORK_AIRPLANE_MODE"/>
         <permission name="android.permission.OBSERVE_APP_USAGE"/>
         <permission name="android.permission.NETWORK_SCAN"/>
         <permission name="android.permission.PACKAGE_USAGE_STATS" />
@@ -455,6 +457,9 @@ applications that come with the platform
         <permission name="android.contacts.permission.MANAGE_SIM_ACCOUNTS" />
         <!-- Permissions required for CTS test - CtsHdmiCecHostTestCases -->
         <permission name="android.permission.HDMI_CEC"/>
+        <!-- Permission needed for CTS test - WifiManagerTest -->
+        <permission name="android.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS" />
+        <permission name="android.permission.WIFI_UPDATE_COEX_UNSAFE_CHANNELS" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
@@ -464,6 +469,8 @@ applications that come with the platform
     <privapp-permissions package="com.android.traceur">
         <!-- Permissions required to receive BUGREPORT_STARTED intent -->
         <permission name="android.permission.DUMP"/>
+        <!-- Permissions required to start/stop tracing -->
+        <permission name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"/>
         <!-- Permissions required for quick settings tile -->
         <permission name="android.permission.STATUS_BAR"/>
     </privapp-permissions>

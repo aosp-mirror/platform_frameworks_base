@@ -22,7 +22,6 @@ import android.service.timezone.ITimeZoneProviderManager;
  * @hide
  */
 oneway interface ITimeZoneProvider {
-    void setTimeZoneProviderManager(in @nullable ITimeZoneProviderManager manager);
-    void startUpdates(in long initializationTimeoutMillis);
+    void startUpdates(in ITimeZoneProviderManager manager, in long initializationTimeoutMillis);
     void stopUpdates();
 }

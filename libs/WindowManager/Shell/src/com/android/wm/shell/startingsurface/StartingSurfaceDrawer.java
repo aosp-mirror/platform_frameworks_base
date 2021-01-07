@@ -35,7 +35,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -64,6 +63,7 @@ import java.util.function.Consumer;
  * class to remove the starting window of the Task.
  * @hide
  */
+
 public class StartingSurfaceDrawer {
     static final String TAG = StartingSurfaceDrawer.class.getSimpleName();
     static final boolean DEBUG_SPLASH_SCREEN = false;
@@ -72,6 +72,7 @@ public class StartingSurfaceDrawer {
     private final Context mContext;
     private final DisplayManager mDisplayManager;
     final ShellExecutor mMainExecutor;
+    private final SplashscreenContentDrawer mSplashscreenContentDrawer;
 
     // TODO(b/131727939) remove this when clearing ActivityRecord
     private static final int REMOVE_WHEN_TIMEOUT = 2000;
@@ -80,6 +81,7 @@ public class StartingSurfaceDrawer {
         mContext = context;
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
         mMainExecutor = mainExecutor;
+        mSplashscreenContentDrawer = new SplashscreenContentDrawer(context);
     }
 
     private final SparseArray<StartingWindowRecord> mStartingWindowRecords = new SparseArray<>();
@@ -234,7 +236,6 @@ public class StartingSurfaceDrawer {
             return;
         }
         context = displayContext;
-
         if (theme != context.getThemeResId() || labelRes != 0) {
             try {
                 context = context.createPackageContext(
@@ -347,7 +348,12 @@ public class StartingSurfaceDrawer {
         }
 
         params.setTitle("Splash Screen " + activityInfo.packageName);
-        addSplashscreenContent(win, context, splashscreenContentResId[0]);
+        final View contentView = mSplashscreenContentDrawer.makeSplashScreenContentView(win,
+                context, iconRes, splashscreenContentResId[0]);
+        if (contentView == null) {
+            Slog.w(TAG, "Adding splash screen window for " + activityInfo.packageName + " failed!");
+            return;
+        }
 
         final View view = win.getDecorView();
 
@@ -458,21 +464,5 @@ public class StartingSurfaceDrawer {
             mDecorView = decorView;
             mTaskSnapshotWindow = taskSnapshotWindow;
         }
-    }
-
-    private void addSplashscreenContent(PhoneWindow win, Context ctx,
-            int splashscreenContentResId) {
-        if (splashscreenContentResId == 0) {
-            return;
-        }
-        final Drawable drawable = ctx.getDrawable(splashscreenContentResId);
-        if (drawable == null) {
-            return;
-        }
-
-        // We wrap this into a view so the system insets get applied to the drawable.
-        final View v = new View(ctx);
-        v.setBackground(drawable);
-        win.setContentView(v);
     }
 }

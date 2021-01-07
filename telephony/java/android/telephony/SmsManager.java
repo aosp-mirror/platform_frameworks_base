@@ -638,7 +638,7 @@ public final class SmsManager {
                                 persistMessage, messageId);
                     } catch (RemoteException e) {
                         Log.e(TAG, "sendTextMessageInternal: Couldn't send SMS, exception - "
-                                + e.getMessage() + " id: " + messageId);
+                                + e.getMessage() + " " + formatCrossStackMessageId(messageId));
                         notifySmsError(sentIntent, RESULT_REMOTE_EXCEPTION);
                     }
                 }
@@ -658,7 +658,7 @@ public final class SmsManager {
                         persistMessage, messageId);
             } catch (RemoteException e) {
                 Log.e(TAG, "sendTextMessageInternal (no persist): Couldn't send SMS, exception - "
-                        + e.getMessage() + " id: " + messageId);
+                        + e.getMessage() + " " + formatCrossStackMessageId(messageId));
                 notifySmsError(sentIntent, RESULT_REMOTE_EXCEPTION);
             }
         }
@@ -1072,8 +1072,7 @@ public final class SmsManager {
                                     deliveryIntents, persistMessage, messageId);
                         } catch (RemoteException e) {
                             Log.e(TAG, "sendMultipartTextMessageInternal: Couldn't send SMS - "
-                                    + e.getMessage() + " id: "
-                                    + messageId);
+                                    + e.getMessage() + " " + formatCrossStackMessageId(messageId));
                             notifySmsError(sentIntents, RESULT_REMOTE_EXCEPTION);
                         }
                     }
@@ -1094,7 +1093,7 @@ public final class SmsManager {
                     }
                 } catch (RemoteException e) {
                     Log.e(TAG, "sendMultipartTextMessageInternal: Couldn't send SMS - "
-                            + e.getMessage() + " id: " + messageId);
+                            + e.getMessage() + " " + formatCrossStackMessageId(messageId));
                     notifySmsError(sentIntents, RESULT_REMOTE_EXCEPTION);
                 }
             }
@@ -3149,5 +3148,9 @@ public final class SmsManager {
         } catch (RemoteException ex) {
             ex.rethrowFromSystemServer();
         }
+    }
+
+    private static String formatCrossStackMessageId(long id) {
+        return "{x-message-id:" + id + "}";
     }
 }

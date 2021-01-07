@@ -27,5 +27,4 @@ oneway interface IGnssStatusListener
     void onGnssStopped();
     void onFirstFix(int ttff);
     void onSvStatusChanged(in GnssStatus gnssStatus);
-    void onNmeaReceived(long timestamp, String nmea);
 }

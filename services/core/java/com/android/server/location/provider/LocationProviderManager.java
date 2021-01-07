@@ -46,7 +46,6 @@ import android.app.AlarmManager.OnAlarmListener;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.location.Criteria;
 import android.location.ILocationCallback;
 import android.location.ILocationListener;
 import android.location.LastLocationRequest;
@@ -56,6 +55,7 @@ import android.location.LocationManagerInternal;
 import android.location.LocationManagerInternal.ProviderEnabledListener;
 import android.location.LocationRequest;
 import android.location.LocationResult;
+import android.location.ProviderProperties;
 import android.location.util.identity.CallerIdentity;
 import android.os.Binder;
 import android.os.Build;
@@ -82,7 +82,6 @@ import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 import com.android.internal.util.Preconditions;
 import com.android.server.FgThread;
@@ -452,7 +451,7 @@ public class LocationProviderManager extends
 
             return isActive()
                     && getRequest().getIntervalMillis() < MAX_HIGH_POWER_INTERVAL_MS
-                    && getProperties().getPowerRequirement() == Criteria.POWER_HIGH;
+                    && getProperties().getPowerUsage() == ProviderProperties.POWER_USAGE_HIGH;
         }
 
         @GuardedBy("mLock")
@@ -1358,6 +1357,8 @@ public class LocationProviderManager extends
     public boolean isEnabled(int userId) {
         if (userId == UserHandle.USER_NULL) {
             return false;
+        } else if (userId == UserHandle.USER_CURRENT) {
+            return isEnabled(mUserHelper.getCurrentUserId());
         }
 
         Preconditions.checkArgument(userId >= 0);
@@ -1519,6 +1520,9 @@ public class LocationProviderManager extends
                 }
             }
             return lastLocation;
+        } else if (userId == UserHandle.USER_CURRENT) {
+            return getLastLocationUnsafe(mUserHelper.getCurrentUserId(), permissionLevel,
+                    ignoreLocationSettings, maximumAgeMs);
         }
 
         Preconditions.checkArgument(userId >= 0);
@@ -1560,6 +1564,9 @@ public class LocationProviderManager extends
             for (int i = 0; i < runningUserIds.length; i++) {
                 setLastLocation(location, runningUserIds[i]);
             }
+            return;
+        } else if (userId == UserHandle.USER_CURRENT) {
+            setLastLocation(location, mUserHelper.getCurrentUserId());
             return;
         }
 

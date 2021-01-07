@@ -21,6 +21,9 @@ import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.service.notification.Adjustment.KEY_IMPORTANCE;
 import static android.service.notification.Adjustment.KEY_NOT_CONVERSATION;
+import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
+import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_CONVERSATIONS;
+import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_SILENT;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_POSITIVE;
@@ -910,11 +913,13 @@ public class NotificationRecordTest extends UiServiceTestCase {
         record.setAssistantImportance(IMPORTANCE_LOW);
         record.calculateImportance();
         assertEquals(IMPORTANCE_LOW, record.getImportance());
+        assertEquals(FLAG_FILTER_TYPE_SILENT, record.getNotificationType());
 
         record.updateNotificationChannel(
                 new NotificationChannel(channelId, "", IMPORTANCE_DEFAULT));
 
         assertEquals(IMPORTANCE_LOW, record.getImportance());
+        assertEquals(FLAG_FILTER_TYPE_SILENT, record.getNotificationType());
     }
 
     @Test
@@ -1125,6 +1130,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
         record.setShortcutInfo(mock(ShortcutInfo.class));
 
         assertTrue(record.isConversation());
+        assertEquals(FLAG_FILTER_TYPE_CONVERSATIONS, record.getNotificationType());
     }
 
     @Test
@@ -1134,6 +1140,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
         record.setShortcutInfo(null);
 
         assertTrue(record.isConversation());
+        assertEquals(FLAG_FILTER_TYPE_CONVERSATIONS, record.getNotificationType());
     }
 
     @Test
@@ -1144,6 +1151,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
         record.setHasSentValidMsg(true);
 
         assertFalse(record.isConversation());
+        assertEquals(FLAG_FILTER_TYPE_ALERTING, record.getNotificationType());
     }
 
     @Test

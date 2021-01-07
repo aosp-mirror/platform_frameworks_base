@@ -41,6 +41,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
+import android.media.AudioManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -114,6 +115,7 @@ public final class PermissionManager {
 
     private final ArrayMap<PackageManager.OnPermissionsChangedListener,
             IOnPermissionsChangeListener> mPermissionListeners = new ArrayMap<>();
+    private PermissionUsageHelper mUsageHelper;
 
     private List<SplitPermissionInfo> mSplitPermissionInfos;
 
@@ -303,7 +305,7 @@ public final class PermissionManager {
     public boolean isPermissionRevokedByPolicy(@NonNull String packageName,
             @NonNull String permissionName) {
         try {
-            return mPermissionManager.isPermissionRevokedByPolicy(permissionName, packageName,
+            return mPermissionManager.isPermissionRevokedByPolicy(packageName, permissionName,
                     mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -330,7 +332,7 @@ public final class PermissionManager {
      * @param permissionName the permission name to grant
      * @param user the user for which to grant the permission
      *
-     * @see #revokeRuntimePermission(String, String, android.os.UserHandle)
+     * @see #revokeRuntimePermission(String, String, android.os.UserHandle, String)
      *
      * @hide
      */
@@ -409,7 +411,7 @@ public final class PermissionManager {
     public int getPermissionFlags(@NonNull String packageName, @NonNull String permissionName,
             @NonNull UserHandle user) {
         try {
-            return mPermissionManager.getPermissionFlags(permissionName, packageName,
+            return mPermissionManager.getPermissionFlags(packageName, permissionName,
                     user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -448,7 +450,7 @@ public final class PermissionManager {
         try {
             final boolean checkAdjustPolicyFlagPermission =
                     mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.Q;
-            mPermissionManager.updatePermissionFlags(permissionName, packageName, flagMask,
+            mPermissionManager.updatePermissionFlags(packageName, permissionName, flagMask,
                     flagValues, checkAdjustPolicyFlagPermission, user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -719,8 +721,8 @@ public final class PermissionManager {
     public boolean shouldShowRequestPermissionRationale(@NonNull String permissionName) {
         try {
             final String packageName = mContext.getPackageName();
-            return mPermissionManager.shouldShowRequestPermissionRationale(permissionName,
-                    packageName, mContext.getUserId());
+            return mPermissionManager.shouldShowRequestPermissionRationale(packageName,
+                    permissionName, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -851,6 +853,22 @@ public final class PermissionManager {
         mSplitPermissionInfos = splitPermissionInfoListToNonParcelableList(parcelableList);
 
         return mSplitPermissionInfos;
+    }
+
+    /**
+     * @return A list of permission groups currently or recently used by all apps by all users in
+     * the current profile group.
+     *
+     * @hide
+     */
+    @NonNull
+    @RequiresPermission(Manifest.permission.GET_APP_OPS_STATS)
+    public List<PermGroupUsage> getIndicatorAppOpUsageData() {
+        // Lazily initialize the usage helper
+        if (mUsageHelper == null) {
+            mUsageHelper = new PermissionUsageHelper(mContext);
+        }
+        return mUsageHelper.getOpUsageData(new AudioManager().isMicrophoneMute());
     }
 
     /**
@@ -1218,7 +1236,7 @@ public final class PermissionManager {
     private static int checkPackageNamePermissionUncached(
             String permName, String pkgName, @UserIdInt int userId) {
         try {
-            return ActivityThread.getPermissionManager().checkPermission(
+            return ActivityThread.getPackageManager().checkPermission(
                     permName, pkgName, userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

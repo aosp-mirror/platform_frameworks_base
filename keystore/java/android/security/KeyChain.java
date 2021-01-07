@@ -31,6 +31,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Process;
@@ -854,10 +855,26 @@ public final class KeyChain {
     @WorkerThread
     public static KeyChainConnection bindAsUser(@NonNull Context context, UserHandle user)
             throws InterruptedException {
+        return bindAsUser(context, null, user);
+    }
+
+    /**
+     * Bind to KeyChainService in the target user.
+     * Caller should call unbindService on the result when finished.
+     *
+     * @throws InterruptedException if interrupted during binding.
+     * @throws AssertionError if unable to bind to KeyChainService.
+     * @hide
+     */
+    public static KeyChainConnection bindAsUser(@NonNull Context context, @Nullable Handler handler,
+            UserHandle user) throws InterruptedException {
+
         if (context == null) {
             throw new NullPointerException("context == null");
         }
-        ensureNotOnMainThread(context);
+        if (handler == null) {
+            ensureNotOnMainThread(context);
+        }
         if (!UserManager.get(context).isUserUnlocked(user)) {
             throw new IllegalStateException("User must be unlocked");
         }
@@ -884,9 +901,19 @@ public final class KeyChain {
         };
         Intent intent = new Intent(IKeyChainService.class.getName());
         ComponentName comp = intent.resolveSystemService(context.getPackageManager(), 0);
+        if (comp == null) {
+            throw new AssertionError("could not resolve KeyChainService");
+        }
         intent.setComponent(comp);
-        if (comp == null || !context.bindServiceAsUser(
-                intent, keyChainServiceConnection, Context.BIND_AUTO_CREATE, user)) {
+        final boolean bindSucceed;
+        if (handler != null) {
+            bindSucceed = context.bindServiceAsUser(
+                    intent, keyChainServiceConnection, Context.BIND_AUTO_CREATE, handler, user);
+        } else {
+            bindSucceed = context.bindServiceAsUser(
+                    intent, keyChainServiceConnection, Context.BIND_AUTO_CREATE, user);
+        }
+        if (!bindSucceed) {
             throw new AssertionError("could not bind to KeyChainService");
         }
         countDownLatch.await();

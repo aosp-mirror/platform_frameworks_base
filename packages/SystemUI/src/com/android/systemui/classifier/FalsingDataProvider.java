@@ -90,10 +90,8 @@ public class FalsingDataProvider {
         }
 
         if (motionEvent.getActionMasked() == MotionEvent.ACTION_DOWN) {
-            if (!mRecentMotionEvents.isEmpty()) {
-                mExtendedMotionEvents.addFirst(mRecentMotionEvents);
-                mRecentMotionEvents = new TimeLimitedMotionEventBuffer(MOTION_EVENT_AGE_MS);
-            }
+            completePriorGesture();
+            mRecentMotionEvents = new TimeLimitedMotionEventBuffer(MOTION_EVENT_AGE_MS);
         }
         mRecentMotionEvents.addAll(motionEvents);
 
@@ -101,7 +99,23 @@ public class FalsingDataProvider {
 
         mMotionEventListeners.forEach(listener -> listener.onMotionEvent(motionEvent));
 
+        // We explicitly do not complete a gesture on UP or CANCEL events.
+        // We wait for the next gesture to start before marking the prior gesture as complete.  This
+        // has multiple benefits. First, it makes it trivial to track the "current" or "recent"
+        // gesture, as it will always be found in mRecentMotionEvents. Second, and most importantly,
+        // it ensures that the current gesture doesn't get added to this HistoryTracker before it
+        // is analyzed.
+
         mDirty = true;
+    }
+
+    private void completePriorGesture() {
+        if (!mRecentMotionEvents.isEmpty()) {
+            mGestuerCompleteListeners.forEach(listener -> listener.onGestureComplete(
+                    mRecentMotionEvents.get(mRecentMotionEvents.size() - 1).getEventTime()));
+
+            mExtendedMotionEvents.addFirst(mRecentMotionEvents);
+        }
     }
 
     /** Returns screen width in pixels. */
@@ -144,13 +158,6 @@ public class FalsingDataProvider {
             mInteractionType = interactionType;
             mDirty = true;
         }
-    }
-
-    /**
-     * Returns true if new data has been supplied since the last time this class has been accessed.
-     */
-    public boolean isDirty() {
-        return mDirty;
     }
 
     /** Return the interaction type that is being compared against for falsing. */
@@ -387,6 +394,6 @@ public class FalsingDataProvider {
     /** Callback to be alerted when the current gesture ends. */
     public interface GestureCompleteListener {
         /** */
-        void onGestureComplete();
+        void onGestureComplete(long completionTimeMs);
     }
 }

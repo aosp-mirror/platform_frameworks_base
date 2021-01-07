@@ -190,7 +190,6 @@ protected:
         }
         operator const SkPaint*() const { return mPtr; }
         const SkPaint* operator->() const { assert(mPtr); return mPtr; }
-        const SkPaint& operator*() const { assert(mPtr); return *mPtr; }
         explicit operator bool() { return mPtr != nullptr; }
     private:
         const SkPaint* mPtr;

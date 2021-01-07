@@ -23,6 +23,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.location.LocationResult;
+import android.location.ProviderProperties;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -35,7 +36,6 @@ import androidx.annotation.RequiresApi;
 
 import com.android.internal.location.ILocationProvider;
 import com.android.internal.location.ILocationProviderManager;
-import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 
 import java.io.FileDescriptor;
@@ -372,11 +372,7 @@ public abstract class LocationProviderBase {
         public void setLocationProviderManager(ILocationProviderManager manager) {
             synchronized (mBinder) {
                 try {
-                    if (mPackageName != null || mAttributionTag != null) {
-                        manager.onSetIdentity(mPackageName, mAttributionTag);
-                    }
-                    manager.onSetProperties(mProperties);
-                    manager.onSetAllowed(mAllowed);
+                    manager.onInitialize(mAllowed, mProperties, mPackageName, mAttributionTag);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 } catch (RuntimeException e) {

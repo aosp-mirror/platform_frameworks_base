@@ -449,6 +449,7 @@ public abstract class PackageManager {
             GET_DISABLED_UNTIL_USED_COMPONENTS,
             GET_UNINSTALLED_PACKAGES,
             MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS,
+            GET_ATTRIBUTIONS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PackageInfoFlags {}
@@ -841,6 +842,11 @@ public abstract class PackageManager {
      * </ul>
      */
     public static final int MATCH_DIRECT_BOOT_AUTO = 0x10000000;
+
+    /**
+     * {@link PackageInfo} flag: return all attributions declared in the package manifest
+     */
+    public static final int GET_ATTRIBUTIONS = 0x80000000;
 
     /** @hide */
     @Deprecated

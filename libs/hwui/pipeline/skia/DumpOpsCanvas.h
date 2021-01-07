@@ -86,22 +86,18 @@ protected:
         mOutput << mIdent << "drawTextBlob" << std::endl;
     }
 
-    void onDrawImage(const SkImage*, SkScalar dx, SkScalar dy, const SkPaint*) override {
+    void onDrawImage2(const SkImage*, SkScalar dx, SkScalar dy, const SkSamplingOptions&,
+                      const SkPaint*) override {
         mOutput << mIdent << "drawImage" << std::endl;
     }
 
-    void onDrawImageNine(const SkImage*, const SkIRect& center, const SkRect& dst,
-                         const SkPaint*) override {
-        mOutput << mIdent << "drawImageNine" << std::endl;
-    }
-
-    void onDrawImageRect(const SkImage*, const SkRect*, const SkRect&, const SkPaint*,
-                         SrcRectConstraint) override {
+    void onDrawImageRect2(const SkImage*, const SkRect&, const SkRect&, const SkSamplingOptions&,
+                          const SkPaint*, SrcRectConstraint) override {
         mOutput << mIdent << "drawImageRect" << std::endl;
     }
 
-    void onDrawImageLattice(const SkImage*, const Lattice& lattice, const SkRect& dst,
-                            const SkPaint*) override {
+    void onDrawImageLattice2(const SkImage*, const Lattice& lattice, const SkRect& dst,
+                             SkFilterMode, const SkPaint*) override {
         mOutput << mIdent << "drawImageLattice" << std::endl;
     }
 

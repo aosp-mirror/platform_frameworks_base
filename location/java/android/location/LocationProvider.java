@@ -16,23 +16,15 @@
 
 package android.location;
 
-
-import com.android.internal.location.ProviderProperties;
+import android.annotation.Nullable;
 
 /**
- * An abstract superclass for location providers.  A location provider
- * provides periodic reports on the geographical location of the
- * device.
+ * Information about the properties of a location provider.
  *
- * <p> Each provider has a set of criteria under which it may be used;
- * for example, some providers require GPS hardware and visibility to
- * a number of satellites; others require the use of the cellular
- * radio, or access to a specific carrier's network, or to the
- * internet.  They may also have different battery consumption
- * characteristics or monetary costs to the user.  The {@link
- * Criteria} class allows providers to be selected based on
- * user-specified criteria.
+ * @deprecated This class is incapable of representing unknown provider properties and may return
+ * incorrect results when the properties are unknown.
  */
+@Deprecated
 public class LocationProvider {
 
     /**
@@ -54,9 +46,9 @@ public class LocationProvider {
     public static final int AVAILABLE = 2;
 
     private final String mName;
-    private final ProviderProperties mProperties;
+    private final @Nullable ProviderProperties mProperties;
 
-    LocationProvider(String name, ProviderProperties properties) {
+    LocationProvider(String name, @Nullable ProviderProperties properties) {
         mName = name;
         mProperties = properties;
     }
@@ -96,7 +88,7 @@ public class LocationProvider {
             return false;
         }
         if (criteria.getPowerRequirement() != Criteria.NO_REQUIREMENT &&
-                criteria.getPowerRequirement() < properties.getPowerRequirement()) {
+                criteria.getPowerRequirement() < properties.getPowerUsage()) {
             return false;
         }
         if (criteria.isAltitudeRequired() && !properties.hasAltitudeSupport()) {
@@ -119,7 +111,11 @@ public class LocationProvider {
      * data network (e.g., the Internet), false otherwise.
      */
     public boolean requiresNetwork() {
-        return mProperties.hasNetworkRequirement();
+        if (mProperties == null) {
+            return false;
+        } else {
+            return mProperties.hasNetworkRequirement();
+        }
     }
 
     /**
@@ -128,7 +124,11 @@ public class LocationProvider {
      * otherwise.
      */
     public boolean requiresSatellite() {
-        return mProperties.hasSatelliteRequirement();
+        if (mProperties == null) {
+            return false;
+        } else {
+            return mProperties.hasSatelliteRequirement();
+        }
     }
 
     /**
@@ -137,7 +137,11 @@ public class LocationProvider {
      * otherwise.
      */
     public boolean requiresCell() {
-        return mProperties.hasCellRequirement();
+        if (mProperties == null) {
+            return false;
+        } else {
+            return mProperties.hasCellRequirement();
+        }
     }
 
     /**
@@ -146,7 +150,11 @@ public class LocationProvider {
      * each provider to give accurate information.
      */
     public boolean hasMonetaryCost() {
-        return mProperties.hasMonetaryCost();
+        if (mProperties == null) {
+            return false;
+        } else {
+            return mProperties.hasMonetaryCost();
+        }
     }
 
     /**
@@ -156,7 +164,11 @@ public class LocationProvider {
      * should return true.
      */
     public boolean supportsAltitude() {
-        return mProperties.hasAltitudeSupport();
+        if (mProperties == null) {
+            return false;
+        } else {
+            return mProperties.hasAltitudeSupport();
+        }
     }
 
     /**
@@ -166,7 +178,11 @@ public class LocationProvider {
      * should return true.
      */
     public boolean supportsSpeed() {
-        return mProperties.hasSpeedSupport();
+        if (mProperties == null) {
+            return false;
+        } else {
+            return mProperties.hasSpeedSupport();
+        }
     }
 
     /**
@@ -176,27 +192,39 @@ public class LocationProvider {
      * should return true.
      */
     public boolean supportsBearing() {
-        return mProperties.hasBearingSupport();
+        if (mProperties == null) {
+            return false;
+        } else {
+            return mProperties.hasBearingSupport();
+        }
     }
 
     /**
      * Returns the power requirement for this provider.
      *
      * @return the power requirement for this provider, as one of the
-     * constants Criteria.POWER_REQUIREMENT_*.
+     * constants ProviderProperties.POWER_USAGE_*.
      */
     public int getPowerRequirement() {
-        return mProperties.getPowerRequirement();
+        if (mProperties == null) {
+            return ProviderProperties.POWER_USAGE_HIGH;
+        } else {
+            return mProperties.getPowerUsage();
+        }
     }
 
     /**
      * Returns a constant describing horizontal accuracy of this provider.
      * If the provider returns finer grain or exact location,
-     * {@link Criteria#ACCURACY_FINE} is returned, otherwise if the
-     * location is only approximate then {@link Criteria#ACCURACY_COARSE}
+     * {@link ProviderProperties#ACCURACY_FINE} is returned, otherwise if the
+     * location is only approximate then {@link ProviderProperties#ACCURACY_COARSE}
      * is returned.
      */
     public int getAccuracy() {
-        return mProperties.getAccuracy();
+        if (mProperties == null) {
+            return ProviderProperties.ACCURACY_COARSE;
+        } else {
+            return mProperties.getAccuracy();
+        }
     }
 }

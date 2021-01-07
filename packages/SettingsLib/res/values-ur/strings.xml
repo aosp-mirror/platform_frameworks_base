@@ -31,7 +31,7 @@
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"توثیق کا مسئلہ"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"منسلک نہیں ہو سکتا ہے"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\' سے منسلک نہیں ہو سکتا ہے"</string>
-    <string name="wifi_check_password_try_again" msgid="8817789642851605628">"پاسورڈ چیک کر کے دوبارہ کوشش کریں"</string>
+    <string name="wifi_check_password_try_again" msgid="8817789642851605628">"پاس ورڈ چیک کر کے دوبارہ کوشش کریں"</string>
     <string name="wifi_not_in_range" msgid="1541760821805777772">"رینج میں نہیں ہے"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"خودکار طور پر منسلک نہیں ہو گا"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"انٹرنیٹ تک کوئی رسائی نہیں"</string>

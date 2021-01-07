@@ -34,7 +34,6 @@ import static com.android.systemui.charging.WirelessChargingLayout.UNKNOWN_BATTE
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
-import static com.android.systemui.shared.system.WindowManagerWrapper.NAV_BAR_POS_INVALID;
 import static com.android.systemui.statusbar.LightRevealScrimKt.getEnableLightReveal;
 import static com.android.systemui.statusbar.NotificationLockscreenUserManager.PERMISSION_SELF;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
@@ -176,7 +175,6 @@ import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.settings.brightness.BrightnessSlider;
 import com.android.systemui.shared.plugins.PluginManager;
-import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.CommandQueue;
@@ -1580,11 +1578,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mMetricsLogger.action(metricsUndockAction);
             }
             return true;
-        }
-
-        final int navbarPos = WindowManagerWrapper.getInstance().getNavBarPosition(mDisplayId);
-        if (navbarPos == NAV_BAR_POS_INVALID) {
-            return false;
         }
 
         if (legacySplitScreen.splitPrimaryTask()) {
@@ -3520,6 +3513,23 @@ public class StatusBar extends SystemUI implements DemoMode,
                 && mStatusBarKeyguardViewManager.interceptMediaKey(event);
     }
 
+    /**
+     * While IME is active and a BACK event is detected, check with
+     * {@link StatusBarKeyguardViewManager#dispatchBackKeyEventPreIme(KeyEvent)} to see if the event
+     * should be handled before routing to IME, in order to prevent the user having to hit back
+     * twice to exit bouncer.
+     */
+    public boolean dispatchKeyEventPreIme(KeyEvent event) {
+        switch (event.getKeyCode()) {
+            case KeyEvent.KEYCODE_BACK:
+                if (mState == StatusBarState.KEYGUARD
+                        && mStatusBarKeyguardViewManager.dispatchBackKeyEventPreIme()) {
+                    return onBackPressed();
+                }
+        }
+        return false;
+    }
+
     protected boolean shouldUnlockOnMenuPressed() {
         return mDeviceInteractive && mState != StatusBarState.SHADE
             && mStatusBarKeyguardViewManager.shouldDismissOnMenuPressed();
@@ -4025,10 +4035,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             // TODO(b/171084088) Upgrade log to wtf when we have default app in main branch.
             Log.d(TAG, "Couldn't find an app to process the emergency intent.");
             return;
-        }
-
-        if (mVibrator != null && mVibrator.hasVibrator()) {
-            mVibrator.vibrate(500L);
         }
 
         emergencyIntent.setComponent(new ComponentName(resolveInfo.activityInfo.packageName,

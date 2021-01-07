@@ -839,6 +839,8 @@
     <string name="quick_settings_user_new_user">New user</string>
     <!-- QuickSettings: Wifi [CHAR LIMIT=NONE] -->
     <string name="quick_settings_wifi_label">Wi-Fi</string>
+    <!-- QuickSettings: Internet [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_internet_label">Internet</string>
     <!-- QuickSettings: Wifi (Not connected) [CHAR LIMIT=NONE] -->
     <string name="quick_settings_wifi_not_connected">Not Connected</string>
     <!-- QuickSettings: Wifi (No network) [CHAR LIMIT=NONE] -->
@@ -1096,13 +1098,13 @@
     <string name="user_new_user_name">New user</string>
 
     <!-- Title of the confirmation dialog when exiting guest session [CHAR LIMIT=NONE] -->
-    <string name="guest_exit_guest_dialog_title">Remove guest?</string>
+    <string name="guest_exit_guest_dialog_title">End guest session?</string>
 
     <!-- Message of the confirmation dialog when exiting guest session [CHAR LIMIT=NONE] -->
     <string name="guest_exit_guest_dialog_message">All apps and data in this session will be deleted.</string>
 
     <!-- Label for button in confirmation dialog when exiting guest session [CHAR LIMIT=35] -->
-    <string name="guest_exit_guest_dialog_remove">Remove</string>
+    <string name="guest_exit_guest_dialog_remove">End session</string>
 
     <!-- Title of the notification when resuming an existing guest session [CHAR LIMIT=NONE] -->
     <string name="guest_wipe_session_title">Welcome back, guest!</string>

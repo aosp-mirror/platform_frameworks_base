@@ -1591,12 +1591,30 @@
     <permission android:name="android.permission.INSTALL_LOCATION_PROVIDER"
         android:protectionLevel="signature|privileged" />
 
-    <!-- @SystemApi @hide Allows an application to install a LocationTimeZoneProvider into the
-         LocationTimeZoneProviderManager.
+    <!-- @SystemApi @hide Allows an application to provide location-based time zone suggestions to
+         the system server. This is needed because the system server discovers time zone providers
+         by exposed intent actions and metadata, without it any app could potentially register
+         itself as time zone provider. The system server checks for this permission.
          <p>Not for use by third-party applications.
     -->
-    <permission android:name="android.permission.INSTALL_LOCATION_TIME_ZONE_PROVIDER"
+    <permission android:name="android.permission.INSTALL_LOCATION_TIME_ZONE_PROVIDER_SERVICE"
         android:protectionLevel="signature|privileged" />
+
+    <!-- The system server uses this permission to install a default secondary location time zone
+         provider.
+    -->
+    <uses-permission android:name="android.permission.INSTALL_LOCATION_TIME_ZONE_PROVIDER_SERVICE"/>
+
+    <!-- @SystemApi @hide Allows an application to bind to a android.service.TimeZoneProviderService
+         for the purpose of detecting the device's time zone. This prevents arbitrary clients
+         connecting to the time zone provider service. The system server checks that the provider's
+         intent service explicitly sets this permission via the android:permission attribute of the
+         service.
+         This is only expected to be possessed by the system server outside of tests.
+         <p>Not for use by third-party applications.
+    -->
+    <permission android:name="android.permission.BIND_TIME_ZONE_PROVIDER_SERVICE"
+        android:protectionLevel="signature" />
 
     <!-- @SystemApi @hide Allows HDMI-CEC service to access device and configuration files.
          This should only be used by HDMI-CEC service.
@@ -5786,6 +5804,7 @@
              data set from the com.android.geotz APEX. -->
         <service android:name="com.android.timezone.geotz.provider.OfflineLocationTimeZoneProviderService"
                  android:enabled="@bool/config_enableSecondaryLocationTimeZoneProvider"
+                 android:permission="android.permission.BIND_TIME_ZONE_PROVIDER_SERVICE"
                  android:exported="false">
             <intent-filter>
                 <action android:name="android.service.timezone.SecondaryLocationTimeZoneProviderService" />

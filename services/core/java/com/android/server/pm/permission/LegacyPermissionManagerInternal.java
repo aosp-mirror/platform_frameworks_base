@@ -24,6 +24,11 @@ import android.annotation.UserIdInt;
  */
 public interface LegacyPermissionManagerInternal {
     /**
+     * Reset the runtime permission state for all users and packages.
+     */
+    void resetRuntimePermissions();
+
+    /**
      * Sets the dialer application packages provider.
      * @param provider The provider.
      */

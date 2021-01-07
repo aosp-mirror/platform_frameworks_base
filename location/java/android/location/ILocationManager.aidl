@@ -21,6 +21,7 @@ import android.location.Address;
 import android.location.Criteria;
 import android.location.GeocoderParams;
 import android.location.Geofence;
+import android.location.GnssCapabilities;
 import android.location.GnssMeasurementCorrections;
 import android.location.GnssMeasurementRequest;
 import android.location.IGeocodeListener;
@@ -28,16 +29,16 @@ import android.location.IGnssAntennaInfoListener;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssStatusListener;
 import android.location.IGnssNavigationMessageListener;
+import android.location.IGnssNmeaListener;
 import android.location.ILocationCallback;
 import android.location.ILocationListener;
 import android.location.LastLocationRequest;
 import android.location.Location;
 import android.location.LocationRequest;
 import android.location.LocationTime;
+import android.location.ProviderProperties;
 import android.os.Bundle;
 import android.os.ICancellationSignal;
-
-import com.android.internal.location.ProviderProperties;
 
 /**
  * System private API for talking with the location service.
@@ -71,12 +72,15 @@ interface ILocationManager
         double upperRightLatitude, double upperRightLongitude, int maxResults,
         in GeocoderParams params, in IGeocodeListener listener);
 
-    long getGnssCapabilities();
+    GnssCapabilities getGnssCapabilities();
     int getGnssYearOfHardware();
     String getGnssHardwareModelName();
 
     void registerGnssStatusCallback(in IGnssStatusListener callback, String packageName, String attributionTag);
     void unregisterGnssStatusCallback(in IGnssStatusListener callback);
+
+    void registerGnssNmeaCallback(in IGnssNmeaListener callback, String packageName, String attributionTag);
+    void unregisterGnssNmeaCallback(in IGnssNmeaListener callback);
 
     void addGnssMeasurementsListener(in GnssMeasurementRequest request, in IGnssMeasurementsListener listener, String packageName, String attributionTag);
     void removeGnssMeasurementsListener(in IGnssMeasurementsListener listener);
@@ -93,6 +97,7 @@ interface ILocationManager
     void flushGnssBatch();
     void stopGnssBatch();
 
+    boolean hasProvider(String provider);
     List<String> getAllProviders();
     List<String> getProviders(in Criteria criteria, boolean enabledOnly);
     String getBestProvider(in Criteria criteria, boolean enabledOnly);

@@ -18,7 +18,6 @@ package android.view.autofill;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.content.ClipData;
 import android.os.Parcel;
 
 import org.junit.Test;
@@ -38,21 +37,5 @@ public class AutofillValueTest {
         AutofillValue result = AutofillValue.CREATOR.createFromParcel(parcel);
         assertThat(result.isText()).isTrue();
         assertThat(result.getTextValue()).isEqualTo("hello");
-    }
-
-    @Test
-    public void testWriteToParcel_richContent() throws Exception {
-        ClipData clip = ClipData.newPlainText("my label", "hello");
-        AutofillValue value = AutofillValue.forRichContent(clip);
-        Parcel parcel = Parcel.obtain();
-        value.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-
-        AutofillValue result = AutofillValue.CREATOR.createFromParcel(parcel);
-        assertThat(result.isRichContent()).isTrue();
-        ClipData resultClip = result.getRichContentValue();
-        assertThat(resultClip.getDescription().getLabel()).isEqualTo("my label");
-        assertThat(resultClip.getItemAt(0).getText()).isEqualTo("hello");
-        assertThat(resultClip.getDescription().getMimeType(0)).isEqualTo("text/plain");
     }
 }

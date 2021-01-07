@@ -24,7 +24,11 @@ import libcore.util.NativeAllocationRegistry;
 
 /**
  * Intermediate rendering step used to render drawing commands with a corresponding
- * visual effect
+ * visual effect. A {@link RenderEffect} can be configured on a {@link RenderNode} through
+ * {@link RenderNode#setRenderEffect(RenderEffect)} and will be applied when drawn through
+ * {@link Canvas#drawRenderNode(RenderNode)}.
+ * Additionally a {@link RenderEffect} can be applied to a View's backing RenderNode through
+ * {@link android.view.View#setRenderEffect(RenderEffect)}
  */
 public final class RenderEffect {
 
@@ -156,7 +160,8 @@ public final class RenderEffect {
      * @param src Optional subset of the bitmap to be part of the rendered output. If null
      *            is provided, the entire bitmap bounds are used.
      * @param dst Bounds of the destination which the bitmap is translated and scaled to be
-     *            drawn into
+     *            drawn into within the bounds of the {@link RenderNode} this RenderEffect is
+     *            installed on
      */
     @NonNull
     public static RenderEffect createBitmapEffect(
@@ -222,8 +227,8 @@ public final class RenderEffect {
      * {@link RenderEffect} that is a composition of 2 other {@link RenderEffect} instances
      * combined by the specified {@link BlendMode}
      *
-     * @param dst The Dst pixels used in blending, if null the source bitmap is used.
-     * @param src The Src pixels used in blending, if null the source bitmap is use
+     * @param dst The Dst pixels used in blending
+     * @param src The Src pixels used in blending
      * @param blendMode The {@link BlendMode} to be used to combine colors from the two
      *                  {@link RenderEffect}s
      */
@@ -246,7 +251,11 @@ public final class RenderEffect {
      * Create a filter that composes 'inner' with 'outer', such that the results of 'inner' are
      * treated as the source bitmap passed to 'outer', i.e.
      *
-     * result = outer(inner(source)).
+     * <pre>
+     * {@code
+     * result = outer(inner(source))
+     * }
+     * </pre>
      *
      * Consumers should favor explicit chaining of {@link RenderEffect} instances at creation time
      * rather than using chain effect. Chain effects are useful for situations where the input or

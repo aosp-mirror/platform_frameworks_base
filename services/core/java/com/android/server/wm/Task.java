@@ -807,55 +807,20 @@ class Task extends WindowContainer<WindowContainer> {
     // Tracking cookie for the creation of this task.
     IBinder mLaunchCookie;
 
-    /**
-     * Don't use constructor directly. Use {@link TaskDisplayArea#createStackUnchecked()} instead.
-     */
-    Task(ActivityTaskManagerService atmService, int id, int activityType, ActivityInfo info,
-            Intent intent, boolean createdByOrganizer, boolean deferTaskAppear,
-            IBinder launchCookie) {
-        this(atmService, id, info, intent, null /*voiceSession*/, null /*voiceInteractor*/,
-                null /*taskDescription*/, null /*stack*/);
-        mCreatedByOrganizer = createdByOrganizer;
-        mLaunchCookie = launchCookie;
-        mDeferTaskAppear = deferTaskAppear;
-        setActivityType(activityType);
-    }
-
-    /**
-     * Don't use constructor directly. Use {@link Task#reuseOrCreateTask()} instead.
-     */
-    Task(ActivityTaskManagerService atmService, int _taskId, ActivityInfo info, Intent _intent,
-            IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor,
-            TaskDescription _taskDescription, Task stack) {
-        this(atmService, _taskId, _intent,  null /*_affinityIntent*/, null /*_affinity*/,
-                null /*_rootAffinity*/, null /*_realActivity*/, null /*_origActivity*/,
-                false /*_rootWasReset*/, false /*_autoRemoveRecents*/, false /*_askedCompatMode*/,
-                UserHandle.getUserId(info.applicationInfo.uid), 0 /*_effectiveUid*/,
-                null /*_lastDescription*/, System.currentTimeMillis(),
-                true /*neverRelinquishIdentity*/,
-                _taskDescription != null ? _taskDescription : new TaskDescription(),
-                _taskId, INVALID_TASK_ID, INVALID_TASK_ID,
-                info.applicationInfo.uid, info.packageName, null /* default featureId */,
-                info.resizeMode, info.supportsPictureInPicture(), false /*_realActivitySuspended*/,
-                false /*userSetupComplete*/, INVALID_MIN_SIZE, INVALID_MIN_SIZE, info,
-                _voiceSession, _voiceInteractor, stack);
-    }
-
-    /** Don't use constructor directly. This is only used by XML parser. */
-    Task(ActivityTaskManagerService atmService, int _taskId, Intent _intent, Intent _affinityIntent,
-            String _affinity, String _rootAffinity, ComponentName _realActivity,
-            ComponentName _origActivity, boolean _rootWasReset, boolean _autoRemoveRecents,
-            boolean _askedCompatMode, int _userId, int _effectiveUid, String _lastDescription,
-            long lastTimeMoved, boolean neverRelinquishIdentity,
+    private Task(ActivityTaskManagerService atmService, int _taskId, Intent _intent,
+            Intent _affinityIntent, String _affinity, String _rootAffinity,
+            ComponentName _realActivity, ComponentName _origActivity, boolean _rootWasReset,
+            boolean _autoRemoveRecents, boolean _askedCompatMode, int _userId, int _effectiveUid,
+            String _lastDescription, long lastTimeMoved, boolean neverRelinquishIdentity,
             TaskDescription _lastTaskDescription, int taskAffiliation, int prevTaskId,
             int nextTaskId, int callingUid, String callingPackage,
             @Nullable String callingFeatureId, int resizeMode, boolean supportsPictureInPicture,
             boolean _realActivitySuspended, boolean userSetupComplete, int minWidth, int minHeight,
             ActivityInfo info, IVoiceInteractionSession _voiceSession,
-            IVoiceInteractor _voiceInteractor, Task stack) {
+            IVoiceInteractor _voiceInteractor, boolean _createdByOrganizer,
+            IBinder _launchCookie, boolean _deferTaskAppear) {
         super(atmService.mWindowManager);
 
-        EventLogTags.writeWmTaskCreated(_taskId, stack != null ? getRootTaskId() : INVALID_TASK_ID);
         mAtmService = atmService;
         mTaskSupervisor = atmService.mTaskSupervisor;
         mRootWindowContainer = mAtmService.mRootWindowContainer;
@@ -903,6 +868,11 @@ class Task extends WindowContainer<WindowContainer> {
         mAtmService.getTaskChangeNotificationController().notifyTaskCreated(_taskId, realActivity);
         mHandler = new ActivityTaskHandler(mTaskSupervisor.mLooper);
         mCurrentUser = mAtmService.mAmInternal.getCurrentUserId();
+
+        mCreatedByOrganizer = _createdByOrganizer;
+        mLaunchCookie = _launchCookie;
+        mDeferTaskAppear = _deferTaskAppear;
+        EventLogTags.writeWmTaskCreated(mTaskId, isRootTask() ? INVALID_TASK_ID : getRootTaskId());
     }
 
     Task reuseAsLeafTask(IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor,
@@ -1926,8 +1896,9 @@ class Task extends WindowContainer<WindowContainer> {
         if (r == boundaryActivity) return true;
 
         if (!r.finishing) {
-            final ActivityOptions opts = r.takeOptionsLocked(false /* fromClient */);
+            final ActivityOptions opts = r.getOptions();
             if (opts != null) {
+                r.clearOptionsAnimation();
                 // TODO: Why is this updating the boundary activity vs. the current activity???
                 boundaryActivity.updateOptionsLocked(opts);
             }
@@ -4830,14 +4801,36 @@ class Task extends WindowContainer<WindowContainer> {
             }
         }
 
-        final Task task = new Task(taskSupervisor.mService, taskId, intent,
-                affinityIntent, affinity, rootAffinity, realActivity, origActivity, rootHasReset,
-                autoRemoveRecents, askedCompatMode, userId, effectiveUid, lastDescription,
-                lastTimeOnTop, neverRelinquishIdentity, taskDescription, taskAffiliation,
-                prevTaskId, nextTaskId, callingUid, callingPackage,
-                callingFeatureId, resizeMode, supportsPictureInPicture, realActivitySuspended,
-                userSetupComplete, minWidth, minHeight, null /*ActivityInfo*/,
-                null /*_voiceSession*/, null /*_voiceInteractor*/, null /* stack */);
+        final Task task = new Task.Builder(taskSupervisor.mService)
+                .setTaskId(taskId)
+                .setIntent(intent)
+                .setAffinityIntent(affinityIntent)
+                .setAffinity(affinity)
+                .setRootAffinity(rootAffinity)
+                .setRealActivity(realActivity)
+                .setOrigActivity(origActivity)
+                .setRootWasReset(rootHasReset)
+                .setAutoRemoveRecents(autoRemoveRecents)
+                .setAskedCompatMode(askedCompatMode)
+                .setUserId(userId)
+                .setEffectiveUid(effectiveUid)
+                .setLastDescription(lastDescription)
+                .setLastTimeMoved(lastTimeOnTop)
+                .setNeverRelinquishIdentity(neverRelinquishIdentity)
+                .setLastTaskDescription(taskDescription)
+                .setTaskAffiliation(taskAffiliation)
+                .setPrevAffiliateTaskId(prevTaskId)
+                .setNextAffiliateTaskId(nextTaskId)
+                .setCallingUid(callingUid)
+                .setCallingPackage(callingPackage)
+                .setCallingFeatureId(callingFeatureId)
+                .setResizeMode(resizeMode)
+                .setSupportsPictureInPicture(supportsPictureInPicture)
+                .setRealActivitySuspended(realActivitySuspended)
+                .setUserSetupComplete(userSetupComplete)
+                .setMinWidth(minWidth)
+                .setMinHeight(minHeight)
+                .buildInner();
         task.mLastNonFullscreenBounds = lastNonFullscreenBounds;
         task.setBounds(lastNonFullscreenBounds);
         task.mWindowLayoutAffinity = windowLayoutAffinity;
@@ -6247,9 +6240,9 @@ class Task extends WindowContainer<WindowContainer> {
         }
 
         if (anim) {
-            next.applyOptionsLocked();
+            next.applyOptionsAnimation();
         } else {
-            next.clearOptionsLocked();
+            next.abortAndClearOptionsAnimation();
         }
 
         mTaskSupervisor.mNoAnimActivities.clear();
@@ -6356,7 +6349,7 @@ class Task extends WindowContainer<WindowContainer> {
 
                 mAtmService.getAppWarningsLocked().onResumeActivity(next);
                 next.app.setPendingUiCleanAndForceProcessStateUpTo(mAtmService.mTopProcessState);
-                next.clearOptionsLocked();
+                next.abortAndClearOptionsAnimation();
                 transaction.setLifecycleStateRequest(
                         ResumeActivityItem.obtain(next.app.getReportedProcState(),
                                 dc.isNextTransitionForward()));
@@ -6734,15 +6727,20 @@ class Task extends WindowContainer<WindowContainer> {
         if (taskDisplayArea == null) {
             return false;
         }
-        final int index = taskDisplayArea.getTaskIndexOf(this);
-        if (index == 0) {
-            return false;
-        }
-        final int[] indexCount = new int[1];
+        final boolean[] hasFound = new boolean[1];
         final Task rootTaskBehind = taskDisplayArea.getRootTask(
-                // From bottom to top, find the one behind this Task.
-                task -> ++indexCount[0] == index, false /* traverseTopToBottom */);
-        return rootTaskBehind.isActivityTypeStandard();
+                // From top to bottom, find the one behind this Task.
+                task -> {
+                    if (hasFound[0]) {
+                        return true;
+                    }
+                    if (task == this) {
+                        // The next one is our target.
+                        hasFound[0] = true;
+                    }
+                    return false;
+                });
+        return rootTaskBehind != null && rootTaskBehind.isActivityTypeStandard();
     }
 
     boolean shouldUpRecreateTaskLocked(ActivityRecord srec, String destAffinity) {
@@ -7307,11 +7305,15 @@ class Task extends WindowContainer<WindowContainer> {
             final int taskId = activity != null
                     ? mTaskSupervisor.getNextTaskIdForUser(activity.mUserId)
                     : mTaskSupervisor.getNextTaskIdForUser();
-            task = new Task(mAtmService, taskId, info, intent, voiceSession,
-                    voiceInteractor, null /* taskDescription */, this);
-
-            // add the task to stack first, mTaskPositioner might need the stack association
-            addChild(task, toTop, (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0);
+            task = new Task.Builder(mAtmService)
+                    .setTaskId(taskId)
+                    .setActivityInfo(info)
+                    .setIntent(intent)
+                    .setVoiceSession(voiceSession)
+                    .setVoiceInteractor(voiceInteractor)
+                    .setOnTop(toTop)
+                    .setParent(this)
+                    .build();
         }
 
         int displayId = getDisplayId();
@@ -7711,5 +7713,369 @@ class Task extends WindowContainer<WindowContainer> {
         proto.write(CREATED_BY_ORGANIZER, mCreatedByOrganizer);
 
         proto.end(token);
+    }
+
+    static class Builder {
+        private final ActivityTaskManagerService mAtmService;
+        private WindowContainer mParent;
+        private int mTaskId;
+        private Intent mIntent;
+        private Intent mAffinityIntent;
+        private String mAffinity;
+        private String mRootAffinity;
+        private ComponentName mRealActivity;
+        private ComponentName mOrigActivity;
+        private boolean mRootWasReset;
+        private boolean mAutoRemoveRecents;
+        private boolean mAskedCompatMode;
+        private int mUserId;
+        private int mEffectiveUid;
+        private String mLastDescription;
+        private long mLastTimeMoved;
+        private boolean mNeverRelinquishIdentity;
+        private TaskDescription mLastTaskDescription;
+        private int mTaskAffiliation;
+        private int mPrevAffiliateTaskId = INVALID_TASK_ID;
+        private int mNextAffiliateTaskId = INVALID_TASK_ID;
+        private int mCallingUid;
+        private String mCallingPackage;
+        private String mCallingFeatureId;
+        private int mResizeMode;
+        private boolean mSupportsPictureInPicture;
+        private boolean mRealActivitySuspended;
+        private boolean mUserSetupComplete;
+        private int mMinWidth = INVALID_MIN_SIZE;
+        private int mMinHeight = INVALID_MIN_SIZE;
+        private ActivityInfo mActivityInfo;
+        private IVoiceInteractionSession mVoiceSession;
+        private IVoiceInteractor mVoiceInteractor;
+        private int mActivityType;
+        private int mWindowingMode = WINDOWING_MODE_UNDEFINED;
+        private boolean mCreatedByOrganizer;
+        private boolean mDeferTaskAppear;
+        private IBinder mLaunchCookie;
+        private boolean mOnTop;
+
+        Builder(ActivityTaskManagerService atm) {
+            mAtmService = atm;
+        }
+
+        Builder setParent(WindowContainer parent) {
+            mParent = parent;
+            return this;
+        }
+
+        Builder setTaskId(int taskId) {
+            mTaskId = taskId;
+            return this;
+        }
+
+        Builder setIntent(Intent intent) {
+            mIntent = intent;
+            return this;
+        }
+
+        Builder setRealActivity(ComponentName realActivity) {
+            mRealActivity = realActivity;
+            return this;
+        }
+
+        Builder setEffectiveUid(int effectiveUid) {
+            mEffectiveUid = effectiveUid;
+            return this;
+        }
+
+        Builder setMinWidth(int minWidth) {
+            mMinWidth = minWidth;
+            return this;
+        }
+
+        Builder setMinHeight(int minHeight) {
+            mMinHeight = minHeight;
+            return this;
+        }
+
+        Builder setActivityInfo(ActivityInfo info) {
+            mActivityInfo = info;
+            return this;
+        }
+
+        Builder setVoiceSession(IVoiceInteractionSession voiceSession) {
+            mVoiceSession = voiceSession;
+            return this;
+        }
+
+        Builder setActivityType(int activityType) {
+            mActivityType = activityType;
+            return this;
+        }
+
+        int getActivityType() {
+            return mActivityType;
+        }
+
+        Builder setWindowingMode(int windowingMode) {
+            mWindowingMode = windowingMode;
+            return this;
+        }
+
+        int getWindowingMode() {
+            return mWindowingMode;
+        }
+
+        Builder setCreatedByOrganizer(boolean createdByOrganizer) {
+            mCreatedByOrganizer = createdByOrganizer;
+            return this;
+        }
+
+        boolean getCreatedByOrganizer() {
+            return mCreatedByOrganizer;
+        }
+
+        Builder setDeferTaskAppear(boolean defer) {
+            mDeferTaskAppear = defer;
+            return this;
+        }
+
+        Builder setLaunchCookie(IBinder launchCookie) {
+            mLaunchCookie = launchCookie;
+            return this;
+        }
+
+        Builder setOnTop(boolean onTop) {
+            mOnTop = onTop;
+            return this;
+        }
+
+        private Builder setUserId(int userId) {
+            mUserId = userId;
+            return this;
+        }
+
+        private Builder setLastTimeMoved(long lastTimeMoved) {
+            mLastTimeMoved = lastTimeMoved;
+            return this;
+        }
+
+        private Builder setNeverRelinquishIdentity(boolean neverRelinquishIdentity) {
+            mNeverRelinquishIdentity = neverRelinquishIdentity;
+            return this;
+        }
+
+        private Builder setCallingUid(int callingUid) {
+            mCallingUid = callingUid;
+            return this;
+        }
+
+        private Builder setCallingPackage(String callingPackage) {
+            mCallingPackage = callingPackage;
+            return this;
+        }
+
+        private Builder setResizeMode(int resizeMode) {
+            mResizeMode = resizeMode;
+            return this;
+        }
+
+        private Builder setSupportsPictureInPicture(boolean supportsPictureInPicture) {
+            mSupportsPictureInPicture = supportsPictureInPicture;
+            return this;
+        }
+
+        private Builder setUserSetupComplete(boolean userSetupComplete) {
+            mUserSetupComplete = userSetupComplete;
+            return this;
+        }
+
+        private Builder setTaskAffiliation(int taskAffiliation) {
+            mTaskAffiliation = taskAffiliation;
+            return this;
+        }
+
+        private Builder setPrevAffiliateTaskId(int prevAffiliateTaskId) {
+            mPrevAffiliateTaskId = prevAffiliateTaskId;
+            return this;
+        }
+
+        private Builder setNextAffiliateTaskId(int nextAffiliateTaskId) {
+            mNextAffiliateTaskId = nextAffiliateTaskId;
+            return this;
+        }
+
+        private Builder setCallingFeatureId(String callingFeatureId) {
+            mCallingFeatureId = callingFeatureId;
+            return this;
+        }
+
+        private Builder setRealActivitySuspended(boolean realActivitySuspended) {
+            mRealActivitySuspended = realActivitySuspended;
+            return this;
+        }
+
+        private Builder setLastDescription(String lastDescription) {
+            mLastDescription = lastDescription;
+            return this;
+        }
+
+        private Builder setLastTaskDescription(TaskDescription lastTaskDescription) {
+            mLastTaskDescription = lastTaskDescription;
+            return this;
+        }
+
+        private Builder setOrigActivity(ComponentName origActivity) {
+            mOrigActivity = origActivity;
+            return this;
+        }
+
+        private Builder setRootWasReset(boolean rootWasReset) {
+            mRootWasReset = rootWasReset;
+            return this;
+        }
+
+        private Builder setAutoRemoveRecents(boolean autoRemoveRecents) {
+            mAutoRemoveRecents = autoRemoveRecents;
+            return this;
+        }
+
+        private Builder setAskedCompatMode(boolean askedCompatMode) {
+            mAskedCompatMode = askedCompatMode;
+            return this;
+        }
+
+        private Builder setAffinityIntent(Intent affinityIntent) {
+            mAffinityIntent = affinityIntent;
+            return this;
+        }
+
+        private Builder setAffinity(String affinity) {
+            mAffinity = affinity;
+            return this;
+        }
+
+        private Builder setRootAffinity(String rootAffinity) {
+            mRootAffinity = rootAffinity;
+            return this;
+        }
+
+        private Builder setVoiceInteractor(IVoiceInteractor voiceInteractor) {
+            mVoiceInteractor = voiceInteractor;
+            return this;
+        }
+
+        private void validateRootTask(TaskDisplayArea tda) {
+            if (mActivityType == ACTIVITY_TYPE_UNDEFINED && !mCreatedByOrganizer) {
+                // Can't have an undefined root task type yet...so re-map to standard. Anyone
+                // that wants anything else should be passing it in anyways...except for the task
+                // organizer.
+                mActivityType = ACTIVITY_TYPE_STANDARD;
+            }
+
+            if (mActivityType != ACTIVITY_TYPE_STANDARD
+                    && mActivityType != ACTIVITY_TYPE_UNDEFINED) {
+                // For now there can be only one root task of a particular non-standard activity
+                // type on a display. So, get that ignoring whatever windowing mode it is
+                // currently in.
+                Task rootTask = tda.getRootTask(WINDOWING_MODE_UNDEFINED, mActivityType);
+                if (rootTask != null) {
+                    throw new IllegalArgumentException("Root task=" + rootTask + " of activityType="
+                            + mActivityType + " already on display=" + tda
+                            + ". Can't have multiple.");
+                }
+            }
+
+            if (!TaskDisplayArea.isWindowingModeSupported(mWindowingMode,
+                    mAtmService.mSupportsMultiWindow,
+                    mAtmService.mSupportsSplitScreenMultiWindow,
+                    mAtmService.mSupportsFreeformWindowManagement,
+                    mAtmService.mSupportsPictureInPicture, mActivityType)) {
+                throw new IllegalArgumentException("Can't create root task for unsupported "
+                        + "windowingMode=" + mWindowingMode);
+            }
+
+            if (mWindowingMode == WINDOWING_MODE_PINNED
+                    && mActivityType != ACTIVITY_TYPE_STANDARD) {
+                throw new IllegalArgumentException(
+                        "Root task with pinned windowing mode cannot with "
+                                + "non-standard activity type.");
+            }
+
+            if (mWindowingMode == WINDOWING_MODE_PINNED && tda.getRootPinnedTask() != null) {
+                // Only 1 root task can be PINNED at a time, so dismiss the existing one
+                tda.getRootPinnedTask().dismissPip();
+            }
+
+            // Task created by organizer are added as root.
+            final Task launchRootTask = mCreatedByOrganizer
+                    ? null : tda.updateLaunchRootTask(mWindowingMode);
+            if (launchRootTask != null) {
+                // Since this task will be put into a root task, its windowingMode will be
+                // inherited.
+                mWindowingMode = WINDOWING_MODE_UNDEFINED;
+                mParent = launchRootTask;
+            }
+
+            mTaskId = tda.getNextRootTaskId();
+        }
+
+        Task build() {
+            if (mParent != null && mParent instanceof TaskDisplayArea) {
+                validateRootTask((TaskDisplayArea) mParent);
+            }
+
+            if (mActivityInfo == null) {
+                mActivityInfo = new ActivityInfo();
+                mActivityInfo.applicationInfo = new ApplicationInfo();
+            }
+
+            mUserId = UserHandle.getUserId(mActivityInfo.applicationInfo.uid);
+            mTaskAffiliation = mTaskId;
+            mLastTimeMoved = System.currentTimeMillis();
+            mNeverRelinquishIdentity = true;
+            mCallingUid = mActivityInfo.applicationInfo.uid;
+            mCallingPackage = mActivityInfo.packageName;
+            mResizeMode = mActivityInfo.resizeMode;
+            mSupportsPictureInPicture = mActivityInfo.supportsPictureInPicture();
+            if (mLastTaskDescription == null) {
+                mLastTaskDescription = new TaskDescription();
+            }
+
+            final Task task = buildInner();
+
+            // Set activity type before adding the root task to TaskDisplayArea, so home task can
+            // be cached, see TaskDisplayArea#addRootTaskReferenceIfNeeded().
+            if (mActivityType != ACTIVITY_TYPE_UNDEFINED) {
+                task.setActivityType(mActivityType);
+            }
+
+            if (mParent != null) {
+                if (mParent instanceof Task) {
+                    final Task parentTask = (Task) mParent;
+                    parentTask.addChild(task, mOnTop ? POSITION_TOP : POSITION_BOTTOM,
+                            (mActivityInfo.flags & FLAG_SHOW_FOR_ALL_USERS) != 0);
+                } else {
+                    mParent.addChild(task, mOnTop ? POSITION_TOP : POSITION_BOTTOM);
+                }
+            }
+
+            // Set windowing mode after attached to display area or it abort silently.
+            if (mWindowingMode != WINDOWING_MODE_UNDEFINED) {
+                task.setWindowingMode(mWindowingMode, true /* creating */);
+            }
+            return task;
+        }
+
+        /** Don't use {@link Builder#buildInner()} directly. This is only used by XML parser. */
+        @VisibleForTesting
+        Task buildInner() {
+            return new Task(mAtmService, mTaskId, mIntent, mAffinityIntent, mAffinity,
+                    mRootAffinity, mRealActivity, mOrigActivity, mRootWasReset, mAutoRemoveRecents,
+                    mAskedCompatMode, mUserId, mEffectiveUid, mLastDescription, mLastTimeMoved,
+                    mNeverRelinquishIdentity, mLastTaskDescription, mTaskAffiliation,
+                    mPrevAffiliateTaskId, mNextAffiliateTaskId, mCallingUid, mCallingPackage,
+                    mCallingFeatureId, mResizeMode, mSupportsPictureInPicture,
+                    mRealActivitySuspended, mUserSetupComplete, mMinWidth, mMinHeight,
+                    mActivityInfo, mVoiceSession, mVoiceInteractor, mCreatedByOrganizer,
+                    mLaunchCookie, mDeferTaskAppear);
+        }
     }
 }

@@ -147,10 +147,6 @@ interface IConnectivityManager
     boolean isVpnLockdownEnabled(int userId);
     List<String> getVpnLockdownWhitelist(int userId);
 
-    int checkMobileProvisioning(int suggestedTimeOutMs);
-
-    String getMobileProvisioningUrl();
-
     void setProvisioningNotificationVisible(boolean visible, int networkType, in String action);
 
     void setAirplaneMode(boolean enable);

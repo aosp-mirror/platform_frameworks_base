@@ -18,25 +18,29 @@ package com.android.server.wm;
 
 import android.os.IBinder;
 
+import java.util.Collection;
+
 /**
- * Callback to be called when a background activity start is allowed exclusively because of the
- * token provided in {@link #getToken()}.
+ * Callback to decide activity starts and related operations based on originating tokens.
  */
 public interface BackgroundActivityStartCallback {
     /**
-     * The token for which this callback is responsible for deciding whether the app can start
-     * background activities or not.
+     * Returns true if the background activity start originating from {@code tokens} should be
+     * allowed or not.
      *
-     * Ideally this should just return a final variable, don't do anything costly here (don't hold
-     * any locks).
-     */
-    IBinder getToken();
-
-    /**
-     * Returns true if the background activity start due to originating token in {@link #getToken()}
-     * should be allowed or not.
+     * Note that if the start was allowed due to a mechanism other than tokens (eg. permission),
+     * this won't be called.
      *
      * This will be called holding the WM lock, don't do anything costly here.
      */
-    boolean isActivityStartAllowed(int uid, String packageName);
+    boolean isActivityStartAllowed(Collection<IBinder> tokens, int uid, String packageName);
+
+    /**
+     * Returns whether {@code uid} can send {@link android.content.Intent
+     * #ACTION_CLOSE_SYSTEM_DIALOGS}, presumably to start activities, based on the originating
+     * tokens {@code tokens} currently associated with potential activity starts.
+     *
+     * This will be called holding the AM and WM lock, don't do anything costly here.
+     */
+    boolean canCloseSystemDialogs(Collection<IBinder> tokens, int uid);
 }

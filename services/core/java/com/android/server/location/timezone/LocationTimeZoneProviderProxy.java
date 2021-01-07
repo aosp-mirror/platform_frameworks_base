@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Handler;
+import android.os.RemoteCallback;
 import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.GuardedBy;
@@ -79,8 +80,8 @@ abstract class LocationTimeZoneProviderProxy implements Dumpable {
                 throw new IllegalStateException("listener already set");
             }
             this.mListener = listener;
+            onInitialize();
         }
-        onInitialize();
     }
 
     /**
@@ -92,6 +93,13 @@ abstract class LocationTimeZoneProviderProxy implements Dumpable {
      * Sets a new request for the provider.
      */
     abstract void setRequest(@NonNull TimeZoneProviderRequest request);
+
+    /**
+     * Processes the supplied test command. An optional callback can be supplied to listen for a
+     * response.
+     */
+    abstract void handleTestCommand(@NonNull TestCommand testCommand,
+            @Nullable RemoteCallback callback);
 
     /**
      * Handles a {@link TimeZoneProviderEvent} from a remote process.

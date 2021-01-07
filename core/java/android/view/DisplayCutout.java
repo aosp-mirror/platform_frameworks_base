@@ -196,6 +196,12 @@ public final class DisplayCutout {
             return rects;
         }
 
+        private void scale(float scale) {
+            for (int i = 0; i < BOUNDS_POSITION_LENGTH; ++i) {
+                mRects[i].scale(scale);
+            }
+        }
+
         @Override
         public int hashCode() {
             int result = 0;
@@ -869,6 +875,16 @@ public final class DisplayCutout {
 
         public void set(DisplayCutout cutout) {
             mInner = cutout;
+        }
+
+        public void scale(float scale) {
+            final Rect safeInsets = mInner.getSafeInsets();
+            safeInsets.scale(scale);
+            final Bounds bounds = new Bounds(mInner.mBounds.mRects, true);
+            bounds.scale(scale);
+            final Rect waterfallInsets = mInner.mWaterfallInsets.toRect();
+            waterfallInsets.scale(scale);
+            mInner = new DisplayCutout(safeInsets, Insets.of(waterfallInsets), bounds);
         }
 
         @Override

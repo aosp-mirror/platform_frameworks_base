@@ -1555,6 +1555,19 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
 
+        // Get a handle to the RemoteAugmentedAutofillService. In
+        // AutofillManagerServiceImpl.updateRemoteAugmentedAutofillService() we invalidate sessions
+        // whenever the service changes, so there should never be a case when we get here and the
+        // remote service instance is not present or different.
+        final RemoteAugmentedAutofillService remoteAugmentedAutofillService =
+                mService.getRemoteAugmentedAutofillServiceIfCreatedLocked();
+        if (remoteAugmentedAutofillService == null) {
+            Slog.e(TAG, "Can't fill after auth: RemoteAugmentedAutofillService is null");
+            mService.resetLastAugmentedAutofillResponse();
+            removeFromServiceLocked();
+            return;
+        }
+
         // Update state to ensure that after filling the field here we don't end up firing another
         // autofill request that will end up showing the same suggestions to the user again. When
         // the auth activity came up, the field for which the suggestions were shown lost focus and
@@ -1566,6 +1579,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         // Notify the Augmented Autofill provider of the dataset that was selected.
         final Bundle clientState = data.getBundle(AutofillManager.EXTRA_CLIENT_STATE);
         mService.logAugmentedAutofillSelected(id, dataset.getId(), clientState);
+
+        // For any content URIs, grant URI permissions to the target app before filling.
+        if (content != null) {
+            final AutofillUriGrantsManager autofillUgm =
+                    remoteAugmentedAutofillService.getAutofillUriGrantsManager();
+            autofillUgm.grantUriPermissions(mComponentName, userId, content);
+        }
 
         // Fill the value into the field.
         if (sDebug) {
@@ -3986,6 +4006,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 mService.getRemoteInlineSuggestionRenderServiceLocked();
         if (remoteRenderService != null) {
             remoteRenderService.destroySuggestionViews(userId, id);
+        }
+        final RemoteAugmentedAutofillService remoteAugmentedAutofillService =
+                mService.getRemoteAugmentedAutofillServiceIfCreatedLocked();
+        if (remoteAugmentedAutofillService != null) {
+            final AutofillUriGrantsManager autofillUgm =
+                    remoteAugmentedAutofillService.getAutofillUriGrantsManager();
+            autofillUgm.revokeUriPermissions(mComponentName, userId);
         }
 
         mDestroyed = true;

@@ -16,6 +16,7 @@
 
 package com.android.systemui.shared.system;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -26,18 +27,21 @@ import java.util.HashMap;
 
 public class ViewTreeObserverWrapper {
 
+    private static final HashMap<OnComputeInsetsListener, ViewTreeObserver>
+            sListenerObserverMap = new HashMap<>();
     private static final HashMap<OnComputeInsetsListener, OnComputeInternalInsetsListener>
-            sOnComputeInsetsListenerMap = new HashMap<>();
+            sListenerInternalListenerMap = new HashMap<>();
 
     /**
-     * Register a callback to be invoked when the invoked when it is time to
-     * compute the window's insets.
+     * Register a callback to be invoked when the invoked when it is time to compute the window's
+     * insets.
      *
+     * @param observer The observer to be added
      * @param listener The callback to add
      * @throws IllegalStateException If {@link ViewTreeObserver#isAlive()} returns false
      */
     public static void addOnComputeInsetsListener(
-            ViewTreeObserver observer, OnComputeInsetsListener listener) {
+            @NonNull ViewTreeObserver observer, @NonNull OnComputeInsetsListener listener) {
         final OnComputeInternalInsetsListener internalListener = internalInOutInfo -> {
             final InsetsInfo inOutInfo = new InsetsInfo();
             inOutInfo.contentInsets.set(internalInOutInfo.contentInsets);
@@ -49,23 +53,26 @@ public class ViewTreeObserverWrapper {
             internalInOutInfo.touchableRegion.set(inOutInfo.touchableRegion);
             internalInOutInfo.setTouchableInsets(inOutInfo.mTouchableInsets);
         };
-        sOnComputeInsetsListenerMap.put(listener, internalListener);
+        sListenerObserverMap.put(listener, observer);
+        sListenerInternalListenerMap.put(listener, internalListener);
         observer.addOnComputeInternalInsetsListener(internalListener);
     }
 
     /**
-     * Remove a previously installed insets computation callback
+     * Remove a previously installed insets computation callback.
      *
      * @param victim The callback to remove
      * @throws IllegalStateException If {@link ViewTreeObserver#isAlive()} returns false
      * @see #addOnComputeInsetsListener(ViewTreeObserver, OnComputeInsetsListener)
      */
-    public void removeOnComputeInsetsListener(
-            ViewTreeObserver observer, OnComputeInsetsListener victim) {
-        final OnComputeInternalInsetsListener listener = sOnComputeInsetsListenerMap.get(victim);
-        if (listener != null) {
+    public static void removeOnComputeInsetsListener(@NonNull OnComputeInsetsListener victim) {
+        final ViewTreeObserver observer = sListenerObserverMap.get(victim);
+        final OnComputeInternalInsetsListener listener = sListenerInternalListenerMap.get(victim);
+        if (observer != null && listener != null) {
             observer.removeOnComputeInternalInsetsListener(listener);
         }
+        sListenerObserverMap.remove(victim);
+        sListenerInternalListenerMap.remove(victim);
     }
 
     /**

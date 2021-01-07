@@ -53,7 +53,7 @@ import java.util.Objects;
  * <p>Provider discovery:
  *
  * <p>You must declare the service in your manifest file with the
- * {@link android.Manifest.permission#INSTALL_LOCATION_TIME_ZONE_PROVIDER} permission,
+ * {@link android.Manifest.permission#BIND_TIME_ZONE_PROVIDER_SERVICE} permission,
  * and include an intent filter with the necessary action indicating what type of provider it is.
  *
  * <p>Device configuration can influence how {@link TimeZoneProviderService}s are discovered.
@@ -66,18 +66,29 @@ import java.util.Objects;
  *
  * <p>Provider types:
  *
- * <p>Android currently supports up to two location-derived time zone providers. These are called
- * the "primary" and "secondary" location time zone provider, configured using {@link
- * #PRIMARY_LOCATION_TIME_ZONE_PROVIDER_SERVICE_INTERFACE} and {@link
- * #SECONDARY_LOCATION_TIME_ZONE_PROVIDER_SERVICE_INTERFACE} respectively. The primary location time
- * zone provider is started first and will be used until becomes uncertain or fails, at which point
- * the secondary provider will be started.
+ * <p>Android supports up to two <em>location-derived</em> time zone providers. These are called the
+ * "primary" and "secondary" location time zone provider. The primary location time zone provider is
+ * started first and will be used until it becomes uncertain or fails, at which point the secondary
+ * provider will be started.
  *
- * For example:
+ * <p>Location-derived time zone providers are configured using {@link
+ * #PRIMARY_LOCATION_TIME_ZONE_PROVIDER_SERVICE_INTERFACE} and {@link
+ * #SECONDARY_LOCATION_TIME_ZONE_PROVIDER_SERVICE_INTERFACE} intent-filter actions respectively.
+ * Besides declaring the android:permission attribute mentioned above, the application supplying a
+ * location provider must be granted the {@link
+ * android.Manifest.permission#INSTALL_LOCATION_TIME_ZONE_PROVIDER_SERVICE} permission to be
+ * accepted by the system server.
+ *
+ * <p>For example:
  * <pre>
+ *   &lt;uses-permission
+ *       android:name="android.permission.INSTALL_LOCATION_TIME_ZONE_PROVIDER_SERVICE"/&gt;
+ *
+ * ...
+ *
  *     &lt;service android:name=".FooTimeZoneProviderService"
  *             android:exported="true"
- *             android:permission="android.permission.INSTALL_LOCATION_TIME_ZONE_PROVIDER"&gt;
+ *             android:permission="android.permission.BIND_TIME_ZONE_PROVIDER_SERVICE"&gt;
  *         &lt;intent-filter&gt;
  *             &lt;action
  *             android:name="android.service.timezone.SecondaryLocationTimeZoneProviderService"
@@ -87,7 +98,6 @@ import java.util.Objects;
  *         &lt;meta-data android:name="serviceIsMultiuser" android:value="true" /&gt;
  *     &lt;/service&gt;
  * </pre>
- *
  *
  * <p>Threading:
  *
@@ -102,7 +112,18 @@ public abstract class TimeZoneProviderService extends Service {
 
     private static final String TAG = "TimeZoneProviderService";
 
-    private final Handler mHandler = BackgroundThread.getHandler();
+    /**
+     * The test command result key indicating whether a command succeeded. Value type: boolean
+     * @hide
+     */
+    public static final String TEST_COMMAND_RESULT_SUCCESS_KEY = "SUCCESS";
+
+    /**
+     * The test command result key for the error message present when {@link
+     * #TEST_COMMAND_RESULT_SUCCESS_KEY} is false. Value type: string
+     * @hide
+     */
+    public static final String TEST_COMMAND_RESULT_ERROR_KEY = "ERROR";
 
     /**
      * The Intent action that the primary location-derived time zone provider service must respond
@@ -120,15 +141,9 @@ public abstract class TimeZoneProviderService extends Service {
     public static final String SECONDARY_LOCATION_TIME_ZONE_PROVIDER_SERVICE_INTERFACE =
             "android.service.timezone.SecondaryLocationTimeZoneProviderService";
 
-    /**
-     * The permission that a service must require to ensure that only Android system can bind to it.
-     * If this permission is not enforced in the AndroidManifest of the service, the system will
-     * skip that service.
-     */
-    public static final String BIND_PERMISSION =
-            "android.permission.INSTALL_LOCATION_TIME_ZONE_PROVIDER";
-
     private final TimeZoneProviderServiceWrapper mWrapper = new TimeZoneProviderServiceWrapper();
+
+    private final Handler mHandler = BackgroundThread.getHandler();
 
     /** Set by {@link #mHandler} thread. */
     @Nullable
@@ -196,10 +211,21 @@ public abstract class TimeZoneProviderService extends Service {
         });
     }
 
+    private void onStartUpdatesInternal(@NonNull ITimeZoneProviderManager manager,
+            @DurationMillisLong long initializationTimeoutMillis) {
+        mManager = manager;
+        onStartUpdates(initializationTimeoutMillis);
+    }
+
     /**
      * Starts the provider sending updates.
      */
     public abstract void onStartUpdates(@DurationMillisLong long initializationTimeoutMillis);
+
+    private void onStopUpdatesInternal() {
+        onStopUpdates();
+        mManager = null;
+    }
 
     /**
      * Stops the provider sending updates.
@@ -208,18 +234,14 @@ public abstract class TimeZoneProviderService extends Service {
 
     private class TimeZoneProviderServiceWrapper extends ITimeZoneProvider.Stub {
 
-        @Override
-        public void setTimeZoneProviderManager(ITimeZoneProviderManager manager) {
+        public void startUpdates(@NonNull ITimeZoneProviderManager manager,
+                @DurationMillisLong long initializationTimeoutMillis) {
             Objects.requireNonNull(manager);
-            mHandler.post(() -> TimeZoneProviderService.this.mManager = manager);
-        }
-
-        public void startUpdates(@DurationMillisLong long initializationTimeoutMillis) {
-            mHandler.post(() -> onStartUpdates(initializationTimeoutMillis));
+            mHandler.post(() -> onStartUpdatesInternal(manager, initializationTimeoutMillis));
         }
 
         public void stopUpdates() {
-            mHandler.post(TimeZoneProviderService.this::onStopUpdates);
+            mHandler.post(TimeZoneProviderService.this::onStopUpdatesInternal);
         }
     }
 }

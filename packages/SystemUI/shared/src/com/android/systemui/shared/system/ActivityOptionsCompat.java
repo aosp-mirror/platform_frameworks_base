@@ -16,8 +16,6 @@
 
 package com.android.systemui.shared.system;
 
-import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT;
-import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
@@ -48,9 +46,6 @@ public abstract class ActivityOptionsCompat {
         options.setLaunchWindowingMode(isPrimary
                 ? WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
                 : WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
-        options.setSplitScreenCreateMode(dockTopLeft
-                ? SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT
-                : SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT);
         return options;
     }
 

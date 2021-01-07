@@ -3838,12 +3838,10 @@ public class SyncManager {
             }
 
             UserHandle user = new UserHandle(userId);
-            // TODO(b/174186839) Please replace FLAG_MUTABLE_UNAUDITED below
-            // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
             final PendingIntent pendingIntent = PendingIntent
                     .getActivityAsUser(mContext, 0, clickIntent,
-                            PendingIntent.FLAG_CANCEL_CURRENT
-                            | PendingIntent.FLAG_MUTABLE_UNAUDITED, null, user);
+                            PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                            null, user);
 
             CharSequence tooManyDeletesDescFormat = mContext.getResources().getText(
                     R.string.contentServiceTooManyDeletesNotificationDesc);

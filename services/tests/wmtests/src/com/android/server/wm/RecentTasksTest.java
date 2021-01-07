@@ -324,7 +324,9 @@ public class RecentTasksTest extends WindowTestsBase {
                 .setActivityType(ACTIVITY_TYPE_UNDEFINED)
                 .setFlags(FLAG_ACTIVITY_NEW_TASK)
                 .build();
-        assertThat(task1.getActivityType()).isEqualTo(ACTIVITY_TYPE_UNDEFINED);
+        // Set the activity type again or the activity type of a root task would be remapped
+        // to ACTIVITY_TYPE_STANDARD, {@link TaskDisplayArea#createRootTask()}
+        task1.getWindowConfiguration().setActivityType(ACTIVITY_TYPE_UNDEFINED);
         mRecentTasks.add(task1);
         mCallbacksRecorder.clear();
 
@@ -347,7 +349,9 @@ public class RecentTasksTest extends WindowTestsBase {
                 .setFlags(FLAG_ACTIVITY_NEW_TASK)
                 .setUserId(TEST_USER_0_ID)
                 .build();
-        assertEquals(ACTIVITY_TYPE_UNDEFINED, task1.getActivityType());
+        // Set the activity type again or the activity type of a root task would be remapped
+        // to ACTIVITY_TYPE_STANDARD, {@link TaskDisplayArea#createRootTask()}
+        task1.getWindowConfiguration().setActivityType(ACTIVITY_TYPE_UNDEFINED);
         mRecentTasks.add(task1);
         mCallbacksRecorder.clear();
 
@@ -1006,8 +1010,6 @@ public class RecentTasksTest extends WindowTestsBase {
         assertNotRestoreTask(
                 () -> mAtm.setTaskWindowingMode(taskId, WINDOWING_MODE_FULLSCREEN,
                         false/* toTop */));
-        assertNotRestoreTask(
-                () -> mAtm.setTaskWindowingModeSplitScreenPrimary(taskId, false /* toTop */));
     }
 
     @Test
@@ -1143,8 +1145,6 @@ public class RecentTasksTest extends WindowTestsBase {
                 () -> mAtm.setTaskWindowingMode(0, WINDOWING_MODE_UNDEFINED, true));
         assertSecurityException(expectCallable,
                 () -> mAtm.moveTaskToRootTask(0, INVALID_STACK_ID, true));
-        assertSecurityException(expectCallable,
-                () -> mAtm.setTaskWindowingModeSplitScreenPrimary(0, true));
         assertSecurityException(expectCallable,
                 () -> mAtm.moveTopActivityToPinnedRootTask(INVALID_STACK_ID, new Rect()));
         assertSecurityException(expectCallable, () -> mAtm.getAllRootTaskInfos());

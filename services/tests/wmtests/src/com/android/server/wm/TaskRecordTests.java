@@ -571,9 +571,11 @@ public class TaskRecordTests extends WindowTestsBase {
         info.packageName = DEFAULT_COMPONENT_PACKAGE_NAME;
         info.targetActivity = targetClassName;
 
-        final Task task = new Task(mAtm, 1 /* taskId */, info, intent,
-                null /* voiceSession */, null /* voiceInteractor */, null /* taskDescriptor */,
-                null /*stack*/);
+        final Task task = new Task.Builder(mAtm)
+                .setTaskId(1)
+                .setActivityInfo(info)
+                .setIntent(intent)
+                .build();
         assertEquals("The alias activity component should be saved in task intent.", aliasClassName,
                 task.intent.getComponent().getClassName());
 
@@ -1122,10 +1124,11 @@ public class TaskRecordTests extends WindowTestsBase {
     }
 
     private Task createTask(int taskId) {
-        return new Task(mAtm, taskId, new Intent(), null, null, null,
-                ActivityBuilder.getDefaultComponent(), null, false, false, false, 0, 10050, null,
-                0, false, null, 0, 0, 0, 0, null, null, 0, false, false, false, 0,
-                0, null /*ActivityInfo*/, null /*_voiceSession*/, null /*_voiceInteractor*/,
-                null /*stack*/);
+        return new Task.Builder(mAtm)
+                .setTaskId(taskId)
+                .setIntent(new Intent())
+                .setRealActivity(ActivityBuilder.getDefaultComponent())
+                .setEffectiveUid(10050)
+                .buildInner();
     }
 }

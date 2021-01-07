@@ -51,6 +51,9 @@ public interface Injector {
     /** Returns a LocationAttributionHelper. */
     LocationAttributionHelper getLocationAttributionHelper();
 
+    /** Returns an EmergencyHelper. */
+    EmergencyHelper getEmergencyHelper();
+
     /** Returns a LocationUsageLogger. */
     LocationUsageLogger getLocationUsageLogger();
 

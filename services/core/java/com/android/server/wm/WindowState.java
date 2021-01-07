@@ -252,7 +252,6 @@ import com.android.internal.util.ToBooleanFunction;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
-import com.android.server.wm.utils.WmDisplayCutout;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -1071,8 +1070,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         frame.inset(left, top, right, bottom);
     }
 
-    void computeFrame(DisplayFrames displayFrames) {
-        getLayoutingWindowFrames().setDisplayCutout(displayFrames.mDisplayCutout);
+    void computeFrameAndUpdateSourceFrame() {
         computeFrame();
         // Update the source frame to provide insets to other windows during layout. If the
         // simulated frames exist, then this is not computing a stable result so just skip.
@@ -1213,9 +1211,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
         }
 
-        windowFrames.setDisplayCutout(
-                windowFrames.mDisplayCutout.calculateRelativeTo(windowFrames.mFrame));
-
         // Offset the actual frame by the amount layout frame is off.
         windowFrames.offsetFrames(-layoutXDiff, -layoutYDiff);
 
@@ -1290,10 +1285,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     Rect getContainingFrame() {
         return mWindowFrames.mContainingFrame;
-    }
-
-    WmDisplayCutout getWmDisplayCutout() {
-        return mWindowFrames.mDisplayCutout;
     }
 
     void getCompatFrameSize(Rect outFrame) {
@@ -3577,7 +3568,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             final DisplayInfo displayInfo = getDisplayInfo();
             backdropFrame.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
         }
-        outFrames.displayCutout.set(mWindowFrames.mDisplayCutout.getDisplayCutout());
     }
 
     void reportResized() {

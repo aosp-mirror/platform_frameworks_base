@@ -104,6 +104,15 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
                 Context context) {
             this(visible, icon, context.getString(contentDescription));
         }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            return builder.append("[visible=").append(visible).append(',')
+                .append("icon=").append(icon).append(',')
+                .append("contentDescription=").append(contentDescription).append(']')
+                .toString();
+        }
     }
 
     /**

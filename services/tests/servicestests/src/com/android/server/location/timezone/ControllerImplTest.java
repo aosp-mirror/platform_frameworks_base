@@ -1053,11 +1053,6 @@ public class ControllerImplTest {
         }
 
         @Override
-        void logWarn(String msg) {
-            System.out.println(msg);
-        }
-
-        @Override
         public void dump(IndentingPrintWriter pw, String[] args) {
             // Nothing needed for tests.
         }

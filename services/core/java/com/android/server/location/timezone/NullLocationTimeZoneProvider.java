@@ -21,7 +21,6 @@ import static com.android.server.location.timezone.LocationTimeZoneProvider.Prov
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.IndentingPrintWriter;
-import android.util.Slog;
 
 import java.time.Duration;
 
@@ -71,11 +70,6 @@ class NullLocationTimeZoneProvider extends LocationTimeZoneProvider {
     @Override
     void onStopUpdates() {
         // Ignored - this implementation is always permanently failed.
-    }
-
-    @Override
-    void logWarn(String msg) {
-        Slog.w(TAG, msg);
     }
 
     @Override

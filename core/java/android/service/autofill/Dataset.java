@@ -406,6 +406,8 @@ public final class Dataset implements Parcelable {
          * authentication.
          *
          * @throws IllegalStateException if {@link #build()} was already called.
+         * @throws IllegalArgumentException if the provided content
+         * {@link ClipData.Item#getIntent() contains an intent}
          *
          * @return this builder.
          *
@@ -416,6 +418,12 @@ public final class Dataset implements Parcelable {
         @SuppressLint("MissingGetterMatchingBuilder")
         public @NonNull Builder setContent(@NonNull AutofillId id, @Nullable ClipData content) {
             throwIfDestroyed();
+            if (content != null) {
+                for (int i = 0; i < content.getItemCount(); i++) {
+                    Preconditions.checkArgument(content.getItemAt(i).getIntent() == null,
+                            "Content items cannot contain an Intent: content=" + content);
+                }
+            }
             setLifeTheUniverseAndEverything(id, null, null, null, null);
             mFieldContent = content;
             return this;

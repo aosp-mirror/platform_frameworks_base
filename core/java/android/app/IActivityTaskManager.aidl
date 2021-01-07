@@ -218,7 +218,7 @@ interface IActivityTaskManager {
      */
     boolean setTaskWindowingMode(int taskId, int windowingMode, boolean toTop);
     void moveTaskToRootTask(int taskId, int rootTaskId, boolean toTop);
-    boolean setTaskWindowingModeSplitScreenPrimary(int taskId, boolean toTop);
+
     /**
      * Removes root tasks in the input windowing modes from the system if they are of activity type
      * ACTIVITY_TYPE_STANDARD or ACTIVITY_TYPE_UNDEFINED

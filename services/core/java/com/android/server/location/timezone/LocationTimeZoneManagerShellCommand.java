@@ -15,12 +15,24 @@
  */
 package com.android.server.location.timezone;
 
+import static com.android.server.location.timezone.LocationTimeZoneManagerService.PRIMARY_PROVIDER_NAME;
+import static com.android.server.location.timezone.LocationTimeZoneManagerService.SECONDARY_PROVIDER_NAME;
+
+import android.annotation.NonNull;
+import android.os.Bundle;
 import android.os.ShellCommand;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.List;
 
 /** Implements the shell command interface for {@link LocationTimeZoneManagerService}. */
 class LocationTimeZoneManagerShellCommand extends ShellCommand {
+
+    private static final List<String> VALID_PROVIDER_NAMES =
+            Arrays.asList(PRIMARY_PROVIDER_NAME, SECONDARY_PROVIDER_NAME);
+
+    private static final String CMD_SEND_PROVIDER_TEST_COMMAND = "send_provider_test_command";
 
     private final LocationTimeZoneManagerService mService;
 
@@ -35,34 +47,13 @@ class LocationTimeZoneManagerShellCommand extends ShellCommand {
         }
 
         switch (cmd) {
-            case "simulate_binder": {
-                return runSimulateBinderEvent();
+            case CMD_SEND_PROVIDER_TEST_COMMAND: {
+                return runSendProviderTestCommand();
             }
             default: {
                 return handleDefaultCommands(cmd);
             }
         }
-    }
-
-    private int runSimulateBinderEvent() {
-        PrintWriter outPrintWriter = getOutPrintWriter();
-
-        SimulatedBinderProviderEvent simulatedProviderBinderEvent;
-        try {
-            simulatedProviderBinderEvent = SimulatedBinderProviderEvent.createFromArgs(this);
-        } catch (IllegalArgumentException e) {
-            outPrintWriter.println("Error: " + e.getMessage());
-            return 1;
-        }
-
-        outPrintWriter.println("Injecting: " + simulatedProviderBinderEvent);
-        try {
-            mService.simulateBinderProviderEvent(simulatedProviderBinderEvent);
-        } catch (IllegalStateException e) {
-            outPrintWriter.println("Error: " + e.getMessage());
-            return 2;
-        }
-        return 0;
     }
 
     @Override
@@ -71,10 +62,76 @@ class LocationTimeZoneManagerShellCommand extends ShellCommand {
         pw.println("Location Time Zone Manager (location_time_zone_manager) commands:");
         pw.println("  help");
         pw.println("    Print this help text.");
-        pw.println("  simulate_binder");
-        pw.println("    <simulated provider binder event>");
+        pw.printf("  %s <provider name> <test command>\n", CMD_SEND_PROVIDER_TEST_COMMAND);
+        pw.println("    Passes a test command to the named provider.");
         pw.println();
-        SimulatedBinderProviderEvent.printCommandLineOpts(pw);
+        pw.printf("%s details:\n", CMD_SEND_PROVIDER_TEST_COMMAND);
         pw.println();
+        pw.printf("<provider name> = One of %s\n", VALID_PROVIDER_NAMES);
+        pw.println();
+        pw.println("<test command> encoding:");
+        pw.println();
+        TestCommand.printShellCommandEncodingHelp(pw);
+        pw.println();
+        pw.printf("Provider modes can be modified by setting the \"%s<provider name>\" system"
+                        + " property and restarting the service or rebooting the device.\n",
+                LocationTimeZoneManagerService.PROVIDER_MODE_OVERRIDE_SYSTEM_PROPERTY_PREFIX);
+        pw.println("Values are:");
+        pw.printf("  %s - simulation mode (see below for commands)\n",
+                LocationTimeZoneManagerService.PROVIDER_MODE_SIMULATED);
+        pw.printf("  %s - disabled mode\n", LocationTimeZoneManagerService.PROVIDER_MODE_DISABLED);
+        pw.println();
+        pw.println("Simulated providers can be used to test the system server behavior or to"
+                + " reproduce bugs without the complexity of using real providers.");
+        pw.println();
+        pw.println("The test commands for simulated providers are:");
+        SimulatedLocationTimeZoneProviderProxy.printTestCommandShellHelp(pw);
+        pw.println();
+        pw.println("Test commands cannot currently be passed to real provider implementations.");
+        pw.println();
+    }
+
+    private int runSendProviderTestCommand() {
+        PrintWriter outPrintWriter = getOutPrintWriter();
+
+        String providerName;
+        TestCommand testCommand;
+        try {
+            providerName = validateProviderName(getNextArgRequired());
+            testCommand = createTestCommandFromNextShellArg();
+        } catch (RuntimeException e) {
+            reportError(e);
+            return 1;
+        }
+
+        outPrintWriter.println("Injecting testCommand=" + testCommand
+                + " to providerName=" + providerName);
+        try {
+            Bundle result = mService.handleProviderTestCommand(providerName, testCommand);
+            outPrintWriter.println(result);
+        } catch (RuntimeException e) {
+            reportError(e);
+            return 2;
+        }
+        return 0;
+    }
+
+    @NonNull
+    private TestCommand createTestCommandFromNextShellArg() {
+        return TestCommand.createFromShellCommandArgs(this);
+    }
+
+    private void reportError(Throwable e) {
+        PrintWriter errPrintWriter = getErrPrintWriter();
+        errPrintWriter.println("Error: ");
+        e.printStackTrace(errPrintWriter);
+    }
+
+    @NonNull
+    static String validateProviderName(@NonNull String value) {
+        if (!VALID_PROVIDER_NAMES.contains(value)) {
+            throw new IllegalArgumentException("Unknown provider name=" + value);
+        }
+        return value;
     }
 }

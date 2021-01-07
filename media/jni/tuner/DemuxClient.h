@@ -21,6 +21,8 @@
 #include <android/hardware/tv/tuner/1.0/IDemux.h>
 #include <android/hardware/tv/tuner/1.1/types.h>
 
+#include "DvrClient.h"
+#include "DvrClientCallback.h"
 #include "FilterClient.h"
 #include "FilterClientCallback.h"
 #include "FrontendClient.h"
@@ -28,6 +30,7 @@
 //using ::aidl::android::media::tv::tuner::ITunerDemux;
 
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterType;
+using ::android::hardware::tv::tuner::V1_0::DvrType;
 using ::android::hardware::tv::tuner::V1_0::IDemux;
 
 using namespace std;
@@ -68,8 +71,7 @@ public:
     /**
      * Open a DVR (Digital Video Record) client.
      */
-    // TODO: handle DvrClient and callback
-    //DvrClient openDvr(int dvbType, int bufferSize, DvrClientCallback cb);  
+    sp<DvrClient> openDvr(DvrType dvbType, int bufferSize, sp<DvrClientCallback> cb);
 
     /**
      * Connect Conditional Access Modules (CAM) through Common Interface (CI).
@@ -88,6 +90,7 @@ public:
 
 private:
     sp<IFilter> openHidlFilter(DemuxFilterType type, int bufferSize, sp<HidlFilterCallback> cb);
+    sp<IDvr> openHidlDvr(DvrType type, int bufferSize, sp<HidlDvrCallback> cb);
 
     /**
      * An AIDL Tuner Demux Singleton assigned at the first time the Tuner Client

@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
@@ -480,9 +479,14 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         // We want to defer the task appear signal until the task is fully created and attached to
         // to the hierarchy so that the complete starting configuration is in the task info we send
         // over to the organizer.
-        final Task task = display.getDefaultTaskDisplayArea().createRootTask(windowingMode,
-                ACTIVITY_TYPE_UNDEFINED, false /* onTop */, null /* info */, new Intent(),
-                true /* createdByOrganizer */, true /* deferTaskAppear */, launchCookie);
+        final Task task = new Task.Builder(mService)
+                .setWindowingMode(windowingMode)
+                .setIntent(new Intent())
+                .setCreatedByOrganizer(true)
+                .setDeferTaskAppear(true)
+                .setLaunchCookie(launchCookie)
+                .setParent(display.getDefaultTaskDisplayArea())
+                .build();
         task.setDeferTaskAppear(false /* deferTaskAppear */);
         return task;
     }

@@ -47,7 +47,7 @@ public class MainSwitchPreferenceTest {
     }
 
     @Test
-    public void setTitleText_shouldUpdateTitle() {
+    public void setTitle_shouldUpdateTitle() {
         final String defaultOnText = "Test title";
 
         mPreference.onBindViewHolder(mHolder);

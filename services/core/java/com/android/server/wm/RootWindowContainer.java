@@ -306,52 +306,54 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     private final FindTaskResult mTmpFindTaskResult = new FindTaskResult();
 
     static class FindTaskResult implements Function<Task, Boolean> {
-        ActivityRecord mRecord;
-        boolean mIdealMatch;
+        ActivityRecord mIdealRecord;
+        ActivityRecord mCandidateRecord;
 
-        private ActivityRecord mTarget;
-        private Intent intent;
-        private ActivityInfo info;
+        private int mActivityType;
+        private String mTaskAffinity;
+        private Intent mIntent;
+        private ActivityInfo mInfo;
         private ComponentName cls;
         private int userId;
         private boolean isDocument;
         private Uri documentData;
 
+        void init(int activityType, String taskAffinity, Intent intent, ActivityInfo info) {
+            mActivityType = activityType;
+            mTaskAffinity = taskAffinity;
+            mIntent = intent;
+            mInfo = info;
+            mIdealRecord = null;
+            mCandidateRecord = null;
+        }
+
         /**
          * Returns the top activity in any existing task matching the given Intent in the input
          * result. Returns null if no such task is found.
          */
-        void process(ActivityRecord target, Task parent) {
-            mTarget = target;
-
-            intent = target.intent;
-            info = target.info;
-            cls = intent.getComponent();
-            if (info.targetActivity != null) {
-                cls = new ComponentName(info.packageName, info.targetActivity);
+        void process(WindowContainer parent) {
+            cls = mIntent.getComponent();
+            if (mInfo.targetActivity != null) {
+                cls = new ComponentName(mInfo.packageName, mInfo.targetActivity);
             }
-            userId = UserHandle.getUserId(info.applicationInfo.uid);
-            isDocument = intent != null & intent.isDocument();
+            userId = UserHandle.getUserId(mInfo.applicationInfo.uid);
+            isDocument = mIntent != null & mIntent.isDocument();
             // If documentData is non-null then it must match the existing task data.
-            documentData = isDocument ? intent.getData() : null;
+            documentData = isDocument ? mIntent.getData() : null;
 
-            ProtoLog.d(WM_DEBUG_TASKS, "Looking for task of %s in %s", target,
+            ProtoLog.d(WM_DEBUG_TASKS, "Looking for task of %s in %s", mInfo,
                     parent);
             parent.forAllLeafTasks(this);
         }
 
-        void clear() {
-            mRecord = null;
-            mIdealMatch = false;
-        }
-
-        void setTo(FindTaskResult result) {
-            mRecord = result.mRecord;
-            mIdealMatch = result.mIdealMatch;
-        }
-
         @Override
         public Boolean apply(Task task) {
+            if (!ConfigurationContainer.isCompatibleActivityType(mActivityType,
+                    task.getActivityType())) {
+                ProtoLog.d(WM_DEBUG_TASKS, "Skipping task: (mismatch activity/task) %s", task);
+                return false;
+            }
+
             if (task.voiceSession != null) {
                 // We never match voice sessions; those always run independently.
                 ProtoLog.d(WM_DEBUG_TASKS, "Skipping %s: voice session", task);
@@ -370,7 +372,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 ProtoLog.d(WM_DEBUG_TASKS, "Skipping %s: mismatch root %s", task, r);
                 return false;
             }
-            if (!r.hasCompatibleActivityType(mTarget)) {
+            if (!ConfigurationContainer.isCompatibleActivityType(r.getActivityType(),
+                    mActivityType)) {
                 ProtoLog.d(WM_DEBUG_TASKS, "Skipping %s: mismatch activity type", task);
                 return false;
             }
@@ -391,35 +394,33 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
 
             ProtoLog.d(WM_DEBUG_TASKS, "Comparing existing cls=%s /aff=%s to new cls=%s /aff=%s",
-                    r.getTask().rootAffinity, intent.getComponent().flattenToShortString(),
-                    info.taskAffinity, (task.realActivity != null
+                    r.getTask().rootAffinity, mIntent.getComponent().flattenToShortString(),
+                    mInfo.taskAffinity, (task.realActivity != null
                             ? task.realActivity.flattenToShortString() : ""));
             // TODO Refactor to remove duplications. Check if logic can be simplified.
             if (task.realActivity != null && task.realActivity.compareTo(cls) == 0
                     && Objects.equals(documentData, taskDocumentData)) {
                 ProtoLog.d(WM_DEBUG_TASKS, "Found matching class!");
                 //dump();
-                ProtoLog.d(WM_DEBUG_TASKS, "For Intent %s bringing to top: %s", intent, r.intent);
-                mRecord = r;
-                mIdealMatch = true;
+                ProtoLog.d(WM_DEBUG_TASKS, "For Intent %s bringing to top: %s", mIntent, r.intent);
+                mIdealRecord = r;
                 return true;
             } else if (affinityIntent != null && affinityIntent.getComponent() != null
                     && affinityIntent.getComponent().compareTo(cls) == 0 &&
                     Objects.equals(documentData, taskDocumentData)) {
                 ProtoLog.d(WM_DEBUG_TASKS, "Found matching class!");
-                ProtoLog.d(WM_DEBUG_TASKS, "For Intent %s bringing to top: %s", intent, r.intent);
-                mRecord = r;
-                mIdealMatch = true;
+                ProtoLog.d(WM_DEBUG_TASKS, "For Intent %s bringing to top: %s", mIntent, r.intent);
+                mIdealRecord = r;
                 return true;
             } else if (!isDocument && !taskIsDocument
-                    && mRecord == null && task.rootAffinity != null) {
-                if (task.rootAffinity.equals(mTarget.taskAffinity)) {
+                    && mIdealRecord == null && mCandidateRecord == null
+                    && task.rootAffinity != null) {
+                if (task.rootAffinity.equals(mTaskAffinity)) {
                     ProtoLog.d(WM_DEBUG_TASKS, "Found matching affinity candidate!");
                     // It is possible for multiple tasks to have the same root affinity especially
                     // if they are in separate stacks. We save off this candidate, but keep looking
                     // to see if there is a better candidate.
-                    mRecord = r;
-                    mIdealMatch = false;
+                    mCandidateRecord = r;
                 }
             } else {
                 ProtoLog.d(WM_DEBUG_TASKS, "Not a match: %s", task);
@@ -2152,9 +2153,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             } else {
                 // In the case of multiple activities, we will create a new task for it and then
                 // move the PIP activity into the task.
-                rootTask = taskDisplayArea.createRootTask(WINDOWING_MODE_UNDEFINED,
-                        r.getActivityType(), ON_TOP, r.info, r.intent,
-                        false /* createdByOrganizer */);
+                rootTask = new Task.Builder(mService)
+                        .setActivityType(r.getActivityType())
+                        .setOnTop(true)
+                        .setActivityInfo(r.info)
+                        .setParent(taskDisplayArea)
+                        .setIntent(r.intent)
+                        .build();
                 // It's possible the task entering PIP is in freeform, so save the last
                 // non-fullscreen bounds. Then when this new PIP task exits PIP, it can restore
                 // to its previous freeform bounds.
@@ -2234,38 +2239,48 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     @Nullable
     ActivityRecord findTask(ActivityRecord r, TaskDisplayArea preferredTaskDisplayArea) {
-        ProtoLog.d(WM_DEBUG_TASKS, "Looking for task of %s", r);
-        mTmpFindTaskResult.clear();
+        return findTask(r.getActivityType(), r.taskAffinity, r.intent, r.info,
+                preferredTaskDisplayArea);
+    }
+
+    @Nullable
+    ActivityRecord findTask(int activityType, String taskAffinity, Intent intent, ActivityInfo info,
+            TaskDisplayArea preferredTaskDisplayArea) {
+        ProtoLog.d(WM_DEBUG_TASKS, "Looking for task of type=%s, taskAffinity=%s, intent=%s"
+                        + ", info=%s, preferredTDA=%s", activityType, taskAffinity, intent, info,
+                preferredTaskDisplayArea);
+        mTmpFindTaskResult.init(activityType, taskAffinity, intent, info);
 
         // Looking up task on preferred display area first
+        ActivityRecord candidateActivity = null;
         if (preferredTaskDisplayArea != null) {
-            preferredTaskDisplayArea.findTaskLocked(r, true /* isPreferredDisplay */,
-                    mTmpFindTaskResult);
-            if (mTmpFindTaskResult.mIdealMatch) {
-                return mTmpFindTaskResult.mRecord;
+            mTmpFindTaskResult.process(preferredTaskDisplayArea);
+            if (mTmpFindTaskResult.mIdealRecord != null) {
+                return mTmpFindTaskResult.mIdealRecord;
+            } else if (mTmpFindTaskResult.mCandidateRecord != null) {
+                candidateActivity = mTmpFindTaskResult.mCandidateRecord;
             }
         }
 
-        final ActivityRecord task = getItemFromTaskDisplayAreas(taskDisplayArea -> {
+        final ActivityRecord idealMatchActivity = getItemFromTaskDisplayAreas(taskDisplayArea -> {
             if (taskDisplayArea == preferredTaskDisplayArea) {
                 return null;
             }
 
-            taskDisplayArea.findTaskLocked(r, false /* isPreferredDisplay */,
-                    mTmpFindTaskResult);
-            if (mTmpFindTaskResult.mIdealMatch) {
-                return mTmpFindTaskResult.mRecord;
+            mTmpFindTaskResult.process(taskDisplayArea);
+            if (mTmpFindTaskResult.mIdealRecord != null) {
+                return mTmpFindTaskResult.mIdealRecord;
             }
             return null;
         });
-        if (task != null) {
-            return task;
+        if (idealMatchActivity != null) {
+            return idealMatchActivity;
         }
 
-        if (WM_DEBUG_TASKS.isEnabled() && mTmpFindTaskResult.mRecord == null) {
+        if (WM_DEBUG_TASKS.isEnabled() && candidateActivity == null) {
             ProtoLog.d(WM_DEBUG_TASKS, "No task found");
         }
-        return mTmpFindTaskResult.mRecord;
+        return candidateActivity;
     }
 
     /**
@@ -2422,12 +2437,27 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     private RootTaskInfo getRootTaskInfo(Task task) {
-        final TaskDisplayArea taskDisplayArea = task.getDisplayArea();
         RootTaskInfo info = new RootTaskInfo();
         task.fillTaskInfo(info);
 
-        // A task might be not attached to a display.
-        info.position = taskDisplayArea != null ? taskDisplayArea.getTaskIndexOf(task) : 0;
+        final DisplayContent displayContent = task.getDisplayContent();
+        if (displayContent == null) {
+            // A task might be not attached to a display.
+            info.position = -1;
+        } else {
+            // Find the task z-order among all root tasks on the display from bottom to top.
+            final int[] taskIndex = new int[1];
+            final boolean[] hasFound = new boolean[1];
+            displayContent.forAllRootTasks(rootTask -> {
+                if (task == rootTask) {
+                    hasFound[0] = true;
+                    return true;
+                }
+                taskIndex[0]++;
+                return false;
+            }, false /* traverseTopToBottom */);
+            info.position = hasFound[0] ? taskIndex[0] : -1;
+        }
         info.visible = task.shouldBeVisible(null);
         task.getBounds(info.bounds);
 

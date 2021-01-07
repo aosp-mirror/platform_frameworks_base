@@ -66,6 +66,7 @@ import android.location.LocationManagerInternal;
 import android.location.LocationManagerInternal.ProviderEnabledListener;
 import android.location.LocationRequest;
 import android.location.LocationResult;
+import android.location.ProviderProperties;
 import android.location.util.identity.CallerIdentity;
 import android.os.Bundle;
 import android.os.ICancellationSignal;
@@ -80,7 +81,6 @@ import android.util.Log;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
@@ -1016,8 +1016,7 @@ public class LocationProviderManagerTest {
         private final ArrayList<Runnable> mFlushCallbacks = new ArrayList<>();
 
         TestProvider(ProviderProperties properties, CallerIdentity identity) {
-            super(DIRECT_EXECUTOR, identity);
-            setProperties(properties);
+            super(DIRECT_EXECUTOR, identity, properties);
         }
 
         public void setProviderAllowed(boolean allowed) {
