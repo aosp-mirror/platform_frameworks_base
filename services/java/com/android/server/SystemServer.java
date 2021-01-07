@@ -1032,6 +1032,9 @@ public final class SystemServer implements Dumpable {
         mActivityManagerService.setSystemProcess();
         t.traceEnd();
 
+        // The package receiver depends on the activity service in order to get registered.
+        platformCompat.registerPackageReceiver(mSystemContext);
+
         // Complete the watchdog setup with an ActivityManager instance and listen for reboots
         // Do this only after the ActivityManagerService is properly started as a system process
         t.traceBegin("InitWatchdog");
