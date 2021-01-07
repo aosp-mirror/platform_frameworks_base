@@ -3077,6 +3077,23 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return true;
     }
 
+    /** @return {@code true} if the wallpaper is visible behind this container. */
+    boolean showWallpaper() {
+        if (!isVisibleRequested()
+                // in multi-window mode, wallpaper is always visible at the back and not tied to
+                // the app (there is no wallpaper target).
+                || inMultiWindowMode()) {
+            return false;
+        }
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowContainer child = mChildren.get(i);
+            if (child.showWallpaper()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Nullable
     static WindowContainer fromBinder(IBinder binder) {
         return RemoteToken.fromBinder(binder).getContainer();

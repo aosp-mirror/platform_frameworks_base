@@ -20,6 +20,7 @@ import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
@@ -166,8 +167,14 @@ public class Transitions {
                 if (isOpening) {
                     // put on top and fade in
                     t.setLayer(leash, info.getChanges().size() - i);
-                    t.setAlpha(leash, 0.f);
-                    startExampleAnimation(transitionToken, leash, true /* show */);
+                    if ((change.getFlags() & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0) {
+                        // This received a transferred starting window, so make it immediately
+                        // visible.
+                        t.setAlpha(leash, 1.f);
+                    } else {
+                        t.setAlpha(leash, 0.f);
+                        startExampleAnimation(transitionToken, leash, true /* show */);
+                    }
                 } else {
                     // put on bottom and leave it visible without fade
                     t.setLayer(leash, -i);

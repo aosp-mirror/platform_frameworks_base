@@ -573,7 +573,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private final WindowState.UpdateReportedVisibilityResults mReportedVisibilityResults =
             new WindowState.UpdateReportedVisibilityResults();
 
-    private boolean mUseTransferredAnimation;
+    boolean mUseTransferredAnimation;
 
     /**
      * @see #currentLaunchCanTurnScreenOn()
@@ -3500,8 +3500,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
                 ProtoLog.v(WM_DEBUG_ADD_REMOVE,
                         "Removing starting %s from %s", tStartingWindow, fromActivity);
-                fromActivity.removeChild(tStartingWindow);
-                addWindow(tStartingWindow);
+                mAtmService.getTransitionController().collect(tStartingWindow);
+                tStartingWindow.reparent(this, POSITION_TOP);
 
                 // Propagate other interesting state between the tokens. If the old token is displayed,
                 // we should immediately force the new one to be displayed. If it is animating, we need
@@ -3525,6 +3525,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     // When transferring an animation, we no longer need to apply an animation to
                     // the token we transfer the animation over. Thus, set this flag to indicate
                     // we've transferred the animation.
+                    mUseTransferredAnimation = true;
+                } else if (mAtmService.getTransitionController().getTransitionPlayer() != null) {
+                    // In the new transit system, just set this every time we transfer the window
                     mUseTransferredAnimation = true;
                 }
                 // Post cleanup after the visibility and animation are transferred.
