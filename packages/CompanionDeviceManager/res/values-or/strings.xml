@@ -17,16 +17,10 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"ସହଯୋଗୀ ଡିଭାଇସ୍ ପରିଚାଳକ"</string>
-    <!-- no translation found for chooser_title (2262294130493605839) -->
-    <skip />
-    <!-- no translation found for profile_name_generic (6851028682723034988) -->
-    <skip />
-    <!-- no translation found for confirmation_title (4751119145078041732) -->
-    <skip />
-    <!-- no translation found for profile_summary (3167701603666642104) -->
-    <skip />
-    <!-- no translation found for consent_yes (4055438216605487056) -->
-    <skip />
-    <!-- no translation found for consent_no (1335543792857823917) -->
-    <skip />
+    <string name="chooser_title" msgid="2262294130493605839">"&lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; ଦ୍ୱାରା ପରିଚାଳିତ ହେବା ପାଇଁ ଏକ <xliff:g id="PROFILE_NAME">%1$s</xliff:g>କୁ ବାଛନ୍ତୁ"</string>
+    <string name="profile_name_generic" msgid="6851028682723034988">"ଡିଭାଇସ୍"</string>
+    <string name="confirmation_title" msgid="4751119145078041732">"ଆପଣଙ୍କ <xliff:g id="PROFILE_NAME">%2$s</xliff:g>କୁ ପରିଚାଳନା କରିବା ପାଇଁ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;କୁ ସେଟ୍ କରନ୍ତୁ - &lt;strong&gt;<xliff:g id="DEVICE_NAME">%3$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="profile_summary" msgid="3167701603666642104">"ଆପଣଙ୍କ <xliff:g id="PROFILE_NAME_1">%2$s</xliff:g>କୁ ପରିଚାଳନା କରିବା ପାଇଁ <xliff:g id="APP_NAME_0">%1$s</xliff:g>ର ଆବଶ୍ୟକତା ଅଛି। <xliff:g id="PROFILE_NAME2">%5$s</xliff:g> ସଂଯୁକ୍ତ ହୋଇଥିବା ସମୟରେ <xliff:g id="APP_NAME2">%3$s</xliff:g> <xliff:g id="PERMISSIONS">%4$s</xliff:g>କୁ ଆକ୍ସେସ୍ ପାଇବ।"</string>
+    <string name="consent_yes" msgid="4055438216605487056">"ହଁ"</string>
+    <string name="consent_no" msgid="1335543792857823917">"ନା, ଧନ୍ୟବାଦ"</string>
 </resources>
