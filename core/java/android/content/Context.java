@@ -40,6 +40,7 @@ import android.app.ActivityManager;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.VrManager;
+import android.app.people.PeopleManager;
 import android.app.time.TimeManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ApplicationInfo;
@@ -5311,10 +5312,10 @@ public abstract class Context {
     public static final String SMS_SERVICE = "sms";
 
     /**
-     * Use with {@link #getSystemService(String)} to access people service.
+     * Use with {@link #getSystemService(String)} to access a {@link PeopleManager} to interact
+     * with your published conversations.
      *
      * @see #getSystemService(String)
-     * @hide
      */
     public static final String PEOPLE_SERVICE = "people";
 

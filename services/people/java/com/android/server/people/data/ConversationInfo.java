@@ -19,6 +19,7 @@ package com.android.server.people.data;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.people.ConversationStatus;
 import android.content.LocusId;
 import android.content.LocusIdProto;
 import android.content.pm.ShortcutInfo;
@@ -39,6 +40,10 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -101,6 +106,8 @@ public class ConversationInfo {
     @ConversationFlags
     private int mConversationFlags;
 
+    private Map<String, ConversationStatus> mCurrStatuses;
+
     private ConversationInfo(Builder builder) {
         mShortcutId = builder.mShortcutId;
         mLocusId = builder.mLocusId;
@@ -111,6 +118,7 @@ public class ConversationInfo {
         mLastEventTimestamp = builder.mLastEventTimestamp;
         mShortcutFlags = builder.mShortcutFlags;
         mConversationFlags = builder.mConversationFlags;
+        mCurrStatuses = builder.mCurrStatuses;
     }
 
     @NonNull
@@ -213,6 +221,10 @@ public class ConversationInfo {
         return hasConversationFlags(FLAG_CONTACT_STARRED);
     }
 
+    public Collection<ConversationStatus> getStatuses() {
+        return mCurrStatuses.values();
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -230,14 +242,15 @@ public class ConversationInfo {
                 && Objects.equals(mParentNotificationChannelId, other.mParentNotificationChannelId)
                 && Objects.equals(mLastEventTimestamp, other.mLastEventTimestamp)
                 && mShortcutFlags == other.mShortcutFlags
-                && mConversationFlags == other.mConversationFlags;
+                && mConversationFlags == other.mConversationFlags
+                && Objects.equals(mCurrStatuses, other.mCurrStatuses);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mShortcutId, mLocusId, mContactUri, mContactPhoneNumber,
                 mNotificationChannelId, mParentNotificationChannelId, mLastEventTimestamp,
-                mShortcutFlags, mConversationFlags);
+                mShortcutFlags, mConversationFlags, mCurrStatuses);
     }
 
     @Override
@@ -251,6 +264,7 @@ public class ConversationInfo {
         sb.append(", notificationChannelId=").append(mNotificationChannelId);
         sb.append(", parentNotificationChannelId=").append(mParentNotificationChannelId);
         sb.append(", lastEventTimestamp=").append(mLastEventTimestamp);
+        sb.append(", statuses=").append(mCurrStatuses);
         sb.append(", shortcutFlags=0x").append(Integer.toHexString(mShortcutFlags));
         sb.append(" [");
         if (isShortcutLongLived()) {
@@ -321,6 +335,7 @@ public class ConversationInfo {
             protoOutputStream.write(ConversationInfoProto.CONTACT_PHONE_NUMBER,
                     mContactPhoneNumber);
         }
+        // ConversationStatus is a transient object and not persisted
     }
 
     @Nullable
@@ -337,6 +352,7 @@ public class ConversationInfo {
             out.writeUTF(mContactPhoneNumber != null ? mContactPhoneNumber : "");
             out.writeUTF(mParentNotificationChannelId != null ? mParentNotificationChannelId : "");
             out.writeLong(mLastEventTimestamp);
+            // ConversationStatus is a transient object and not persisted
         } catch (IOException e) {
             Slog.e(TAG, "Failed to write fields to backup payload.", e);
             return null;
@@ -469,6 +485,8 @@ public class ConversationInfo {
         @ConversationFlags
         private int mConversationFlags;
 
+        private Map<String, ConversationStatus> mCurrStatuses = new HashMap<>();
+
         Builder() {
         }
 
@@ -486,6 +504,7 @@ public class ConversationInfo {
             mLastEventTimestamp = conversationInfo.mLastEventTimestamp;
             mShortcutFlags = conversationInfo.mShortcutFlags;
             mConversationFlags = conversationInfo.mConversationFlags;
+            mCurrStatuses = conversationInfo.mCurrStatuses;
         }
 
         Builder setShortcutId(@NonNull String shortcutId) {
@@ -576,6 +595,26 @@ public class ConversationInfo {
 
         private Builder removeConversationFlags(@ConversationFlags int flags) {
             mConversationFlags &= ~flags;
+            return this;
+        }
+
+        Builder setStatuses(List<ConversationStatus> statuses) {
+            mCurrStatuses.clear();
+            if (statuses != null) {
+                for (ConversationStatus status : statuses) {
+                    mCurrStatuses.put(status.getId(), status);
+                }
+            }
+            return this;
+        }
+
+        Builder addOrUpdateStatus(ConversationStatus status) {
+            mCurrStatuses.put(status.getId(), status);
+            return this;
+        }
+
+        Builder clearStatus(String statusId) {
+            mCurrStatuses.remove(statusId);
             return this;
         }
 

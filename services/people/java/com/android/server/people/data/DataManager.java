@@ -26,6 +26,7 @@ import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
 import android.app.Person;
 import android.app.people.ConversationChannel;
+import android.app.people.ConversationStatus;
 import android.app.prediction.AppTarget;
 import android.app.prediction.AppTargetEvent;
 import android.app.usage.UsageEvents;
@@ -75,6 +76,7 @@ import com.android.server.notification.NotificationManagerInternal;
 import com.android.server.notification.ShortcutHelper;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -306,6 +308,73 @@ public class DataManager {
             }
         }
         return 0L;
+    }
+
+    public void addOrUpdateStatus(String packageName, int userId, String conversationId,
+            ConversationStatus status) {
+        ConversationStore cs = getConversationStoreOrThrow(packageName, userId);
+        ConversationInfo convToModify = getConversationInfoOrThrow(cs, conversationId);
+        ConversationInfo.Builder builder = new ConversationInfo.Builder(convToModify);
+        builder.addOrUpdateStatus(status);
+        cs.addOrUpdate(builder.build());
+    }
+
+    public void clearStatus(String packageName, int userId, String conversationId,
+            String statusId) {
+        ConversationStore cs = getConversationStoreOrThrow(packageName, userId);
+        ConversationInfo convToModify = getConversationInfoOrThrow(cs, conversationId);
+        ConversationInfo.Builder builder = new ConversationInfo.Builder(convToModify);
+        builder.clearStatus(statusId);
+        cs.addOrUpdate(builder.build());
+    }
+
+    public void clearStatuses(String packageName, int userId, String conversationId) {
+        ConversationStore cs = getConversationStoreOrThrow(packageName, userId);
+        ConversationInfo convToModify = getConversationInfoOrThrow(cs, conversationId);
+        ConversationInfo.Builder builder = new ConversationInfo.Builder(convToModify);
+        builder.setStatuses(null);
+        cs.addOrUpdate(builder.build());
+    }
+
+    public @NonNull List<ConversationStatus> getStatuses(String packageName, int userId,
+            String conversationId) {
+        ConversationStore cs = getConversationStoreOrThrow(packageName, userId);
+        ConversationInfo conversationInfo = getConversationInfoOrThrow(cs, conversationId);
+        Collection<ConversationStatus> statuses = conversationInfo.getStatuses();
+        if (statuses != null) {
+            final ArrayList<ConversationStatus> list = new ArrayList<>(statuses.size());
+            list.addAll(statuses);
+            return list;
+        }
+        return new ArrayList<>();
+    }
+
+    /**
+     * Returns a conversation store for a package, if it exists.
+     */
+    private @NonNull ConversationStore getConversationStoreOrThrow(String packageName, int userId) {
+        final PackageData packageData = getPackage(packageName, userId);
+        if (packageData == null) {
+            throw new IllegalArgumentException("No settings exist for package " + packageName);
+        }
+        ConversationStore cs = packageData.getConversationStore();
+        if (cs == null) {
+            throw new IllegalArgumentException("No conversations exist for package " + packageName);
+        }
+        return cs;
+    }
+
+    /**
+     * Returns a conversation store for a package, if it exists.
+     */
+    private @NonNull ConversationInfo getConversationInfoOrThrow(ConversationStore cs,
+            String conversationId) {
+        ConversationInfo ci = cs.getConversation(conversationId);
+
+        if (ci == null) {
+            throw new IllegalArgumentException("Conversation does not exist");
+        }
+        return ci;
     }
 
     /** Reports the sharing related {@link AppTargetEvent} from App Prediction Manager. */

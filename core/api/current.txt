@@ -7826,6 +7826,52 @@ package android.app.job {
 
 }
 
+package android.app.people {
+
+  public final class ConversationStatus implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getActivity();
+    method public int getAvailability();
+    method @Nullable public CharSequence getDescription();
+    method public long getEndTimeMillis();
+    method @Nullable public android.graphics.drawable.Icon getIcon();
+    method @NonNull public String getId();
+    method public long getStartTimeMillis();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int ACTIVITY_ANNIVERSARY = 2; // 0x2
+    field public static final int ACTIVITY_BIRTHDAY = 1; // 0x1
+    field public static final int ACTIVITY_GAME = 5; // 0x5
+    field public static final int ACTIVITY_LOCATION = 6; // 0x6
+    field public static final int ACTIVITY_MEDIA = 4; // 0x4
+    field public static final int ACTIVITY_NEW_STORY = 3; // 0x3
+    field public static final int ACTIVITY_OTHER = 0; // 0x0
+    field public static final int ACTIVITY_UPCOMING_BIRTHDAY = 7; // 0x7
+    field public static final int AVAILABILITY_AVAILABLE = 0; // 0x0
+    field public static final int AVAILABILITY_BUSY = 1; // 0x1
+    field public static final int AVAILABILITY_OFFLINE = 2; // 0x2
+    field public static final int AVAILABILITY_UNKNOWN = -1; // 0xffffffff
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.people.ConversationStatus> CREATOR;
+  }
+
+  public static final class ConversationStatus.Builder {
+    ctor public ConversationStatus.Builder(@NonNull String, @NonNull int);
+    method @NonNull public android.app.people.ConversationStatus build();
+    method @NonNull public android.app.people.ConversationStatus.Builder setAvailability(int);
+    method @NonNull public android.app.people.ConversationStatus.Builder setDescription(@Nullable CharSequence);
+    method @NonNull public android.app.people.ConversationStatus.Builder setEndTimeMillis(long);
+    method @NonNull public android.app.people.ConversationStatus.Builder setIcon(@Nullable android.graphics.drawable.Icon);
+    method @NonNull public android.app.people.ConversationStatus.Builder setStartTimeMillis(long);
+  }
+
+  public final class PeopleManager {
+    method public void addOrUpdateStatus(@NonNull String, @NonNull android.app.people.ConversationStatus);
+    method public void clearStatus(@NonNull String, @NonNull String);
+    method public void clearStatuses(@NonNull String);
+    method @NonNull public java.util.List<android.app.people.ConversationStatus> getStatuses(@NonNull String);
+  }
+
+}
+
 package android.app.role {
 
   public final class RoleManager {
@@ -10315,6 +10361,7 @@ package android.content {
     field public static final String NFC_SERVICE = "nfc";
     field public static final String NOTIFICATION_SERVICE = "notification";
     field public static final String NSD_SERVICE = "servicediscovery";
+    field public static final String PEOPLE_SERVICE = "people";
     field public static final String POWER_SERVICE = "power";
     field public static final String PRINT_SERVICE = "print";
     field public static final int RECEIVER_VISIBLE_TO_INSTANT_APPS = 1; // 0x1
