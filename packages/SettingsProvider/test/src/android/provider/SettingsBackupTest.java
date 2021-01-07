@@ -300,6 +300,7 @@ public class SettingsBackupTest {
                     Settings.Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED,
                     Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED,
                     Settings.Global.HIDDEN_API_POLICY,
+                    Settings.Global.FORCE_NON_DEBUGGABLE_FINAL_BUILD_FOR_COMPAT,
                     Settings.Global.HIDE_ERROR_DIALOGS,
                     Settings.Global.HTTP_PROXY,
                     HYBRID_SYSUI_BATTERY_WARNING_FLAGS,
