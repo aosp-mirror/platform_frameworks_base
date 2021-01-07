@@ -314,11 +314,12 @@ public class ActivityStackTests extends WindowTestsBase {
 
         final RootWindowContainer.FindTaskResult result =
                 new RootWindowContainer.FindTaskResult();
-        result.process(r, task);
+        result.init(r.getActivityType(), r.taskAffinity, r.intent, r.info);
+        result.process(task);
 
         assertEquals(r, task.getTopNonFinishingActivity(false /* includeOverlays */));
         assertEquals(taskOverlay, task.getTopNonFinishingActivity(true /* includeOverlays */));
-        assertNotNull(result.mRecord);
+        assertNotNull(result.mIdealRecord);
     }
 
     @Test
@@ -340,15 +341,17 @@ public class ActivityStackTests extends WindowTestsBase {
         final ActivityRecord r1 = new ActivityBuilder(mAtm).setComponent(
                 target).setTargetActivity(targetActivity).build();
         RootWindowContainer.FindTaskResult result = new RootWindowContainer.FindTaskResult();
-        result.process(r1, parentTask);
-        assertThat(result.mRecord).isNotNull();
+        result.init(r1.getActivityType(), r1.taskAffinity, r1.intent, r1.info);
+        result.process(parentTask);
+        assertThat(result.mIdealRecord).isNotNull();
 
         // Using alias activity to find task.
         final ActivityRecord r2 = new ActivityBuilder(mAtm).setComponent(
                 alias).setTargetActivity(targetActivity).build();
         result = new RootWindowContainer.FindTaskResult();
-        result.process(r2, parentTask);
-        assertThat(result.mRecord).isNotNull();
+        result.init(r2.getActivityType(), r2.taskAffinity, r2.intent, r2.info);
+        result.process(parentTask);
+        assertThat(result.mIdealRecord).isNotNull();
     }
 
     @Test

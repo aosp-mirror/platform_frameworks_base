@@ -35,7 +35,6 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
 import static com.android.server.wm.ActivityTaskManagerService.TAG_ROOT_TASK;
 import static com.android.server.wm.DisplayContent.alwaysCreateRootTask;
 import static com.android.server.wm.Task.ActivityState.RESUMED;
@@ -127,9 +126,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      * target stack properly when there are other focusable always-on-top stacks.
      */
     Task mPreferredTopFocusableRootTask;
-
-    private final RootWindowContainer.FindTaskResult
-            mTmpFindTaskResult = new RootWindowContainer.FindTaskResult();
 
     /**
      * If this is the same as {@link #getFocusedRootTask} then the activity on the top of the
@@ -1310,43 +1306,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             }
         }, true /* traverseTopToBottom */);
         return someActivityPaused[0] > 0;
-    }
-
-    /**
-     * Find task for putting the Activity in.
-     */
-    void findTaskLocked(final ActivityRecord r, final boolean isPreferredDisplayArea,
-            RootWindowContainer.FindTaskResult result) {
-        mTmpFindTaskResult.clear();
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final Task rootTask = mChildren.get(i).asTask();
-            if (rootTask == null) {
-                continue;
-            }
-            if (!r.hasCompatibleActivityType(rootTask) && rootTask.isLeafTask()) {
-                ProtoLog.d(WM_DEBUG_TASKS, "Skipping rootTask: (mismatch activity/rootTask) "
-                        + "%s", rootTask);
-                continue;
-            }
-
-            mTmpFindTaskResult.process(r, rootTask);
-            // It is possible to have tasks in multiple root tasks with the same root affinity, so
-            // we should keep looking after finding an affinity match to see if there is a
-            // better match in another root task. Also, task affinity isn't a good enough reason
-            // to target a display which isn't the source of the intent, so skip any affinity
-            // matches not on the specified display.
-            if (mTmpFindTaskResult.mRecord != null) {
-                if (mTmpFindTaskResult.mIdealMatch) {
-                    result.setTo(mTmpFindTaskResult);
-                    return;
-                } else if (isPreferredDisplayArea) {
-                    // Note: since the traversing through the root tasks is top down, the floating
-                    // tasks should always have lower priority than any affinity-matching tasks
-                    // in the fullscreen root tasks
-                    result.setTo(mTmpFindTaskResult);
-                }
-            }
-        }
     }
 
     void onSplitScreenModeDismissed() {
