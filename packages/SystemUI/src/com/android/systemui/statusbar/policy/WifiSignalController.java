@@ -104,11 +104,7 @@ public class WifiSignalController extends
                 wifiDesc, mCurrentState.isTransient, mCurrentState.statusLabel);
     }
 
-    /**
-     * Fetches wifi initial state replacing the initial sticky broadcast.
-     */
-    public void fetchInitialState() {
-        mWifiTracker.fetchInitialState();
+    private void copyWifiStates() {
         mCurrentState.enabled = mWifiTracker.enabled;
         mCurrentState.isDefault = mWifiTracker.isDefaultNetwork;
         mCurrentState.connected = mWifiTracker.connected;
@@ -116,6 +112,14 @@ public class WifiSignalController extends
         mCurrentState.rssi = mWifiTracker.rssi;
         mCurrentState.level = mWifiTracker.level;
         mCurrentState.statusLabel = mWifiTracker.statusLabel;
+    }
+
+    /**
+     * Fetches wifi initial state replacing the initial sticky broadcast.
+     */
+    public void fetchInitialState() {
+        mWifiTracker.fetchInitialState();
+        copyWifiStates();
         notifyListenersIfNecessary();
     }
 
@@ -124,19 +128,12 @@ public class WifiSignalController extends
      */
     public void handleBroadcast(Intent intent) {
         mWifiTracker.handleBroadcast(intent);
-        mCurrentState.enabled = mWifiTracker.enabled;
-        mCurrentState.isDefault = mWifiTracker.isDefaultNetwork;
-        mCurrentState.connected = mWifiTracker.connected;
-        mCurrentState.ssid = mWifiTracker.ssid;
-        mCurrentState.rssi = mWifiTracker.rssi;
-        mCurrentState.level = mWifiTracker.level;
-        mCurrentState.statusLabel = mWifiTracker.statusLabel;
+        copyWifiStates();
         notifyListenersIfNecessary();
     }
 
     private void handleStatusUpdated() {
-        mCurrentState.statusLabel = mWifiTracker.statusLabel;
-        mCurrentState.isDefault = mWifiTracker.isDefaultNetwork;
+        copyWifiStates();
         notifyListenersIfNecessary();
     }
 
