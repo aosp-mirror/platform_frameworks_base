@@ -1055,23 +1055,25 @@ class WindowTestsBase extends SystemServiceTestsBase {
                 mIntent.setFlags(mFlags);
             }
 
-            Task task;
-            final int taskId = mTaskId >= 0 ? mTaskId : mTaskDisplayArea.getNextRootTaskId();
+            final Task.Builder builder = new Task.Builder(mSupervisor.mService)
+                    .setTaskId(mTaskId >= 0 ? mTaskId : mTaskDisplayArea.getNextRootTaskId())
+                    .setWindowingMode(mWindowingMode)
+                    .setActivityInfo(mActivityInfo)
+                    .setIntent(mIntent)
+                    .setOnTop(mOnTop)
+                    .setVoiceSession(mVoiceSession);
+            final Task task;
             if (mParentTask == null) {
-                task = mTaskDisplayArea.createRootTaskUnchecked(
-                        mWindowingMode, mActivityType, taskId, mOnTop, mActivityInfo, mIntent,
-                        false /* createdByOrganizer */, false /* deferTaskAppear */,
-                        null /* launchCookie */);
+                task = builder.setActivityType(mActivityType)
+                        .setParent(mTaskDisplayArea)
+                        .build();
             } else {
-                task = new Task(mSupervisor.mService, taskId, mActivityInfo,
-                        mIntent /*intent*/, mVoiceSession, null /*_voiceInteractor*/,
-                        null /*taskDescription*/, mParentTask);
+                task = builder.setParent(mParentTask).build();
                 mParentTask.moveToFront("build-task");
-                mParentTask.addChild(task, true, true);
             }
             spyOn(task);
             task.mUserId = mUserId;
-            Task rootTask = task.getRootTask();
+            final Task rootTask = task.getRootTask();
             if (task != rootTask && !Mockito.mockingDetails(rootTask).isSpy()) {
                 spyOn(rootTask);
             }

@@ -2664,14 +2664,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                                     + ainfo.applicationInfo.uid + ", calling uid=" + callingUid);
                 }
 
-                final Task stack = r.getRootTask();
-                final Task task = stack.getDisplayArea().createRootTask(stack.getWindowingMode(),
-                        stack.getActivityType(), !ON_TOP, ainfo, intent,
-                        false /* createdByOrganizer */);
+                final Task rootTask = r.getRootTask();
+                final Task task = new Task.Builder(this)
+                        .setWindowingMode(rootTask.getWindowingMode())
+                        .setActivityType(rootTask.getActivityType())
+                        .setActivityInfo(ainfo)
+                        .setParent(rootTask.getDisplayArea())
+                        .setIntent(intent)
+                        .build();
 
                 if (!mRecentTasks.addToBottom(task)) {
                     // The app has too many tasks already and we can't add any more
-                    stack.removeChild(task, "addAppTask");
+                    rootTask.removeChild(task, "addAppTask");
                     return INVALID_TASK_ID;
                 }
                 task.getTaskDescription().copyFrom(description);
