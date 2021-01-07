@@ -24277,7 +24277,9 @@ package android.media.tv {
     field public static final String COLUMN_APP_LINK_INTENT_URI = "app_link_intent_uri";
     field public static final String COLUMN_APP_LINK_POSTER_ART_URI = "app_link_poster_art_uri";
     field public static final String COLUMN_APP_LINK_TEXT = "app_link_text";
+    field public static final String COLUMN_BROADCAST_GENRE = "broadcast_genre";
     field public static final String COLUMN_BROWSABLE = "browsable";
+    field public static final String COLUMN_CHANNEL_LIST_ID = "channel_list_id";
     field public static final String COLUMN_DESCRIPTION = "description";
     field public static final String COLUMN_DISPLAY_NAME = "display_name";
     field public static final String COLUMN_DISPLAY_NUMBER = "display_number";
@@ -24292,6 +24294,8 @@ package android.media.tv {
     field public static final String COLUMN_LOCKED = "locked";
     field public static final String COLUMN_NETWORK_AFFILIATION = "network_affiliation";
     field public static final String COLUMN_ORIGINAL_NETWORK_ID = "original_network_id";
+    field public static final String COLUMN_REMOTE_CONTROL_KEY_PRESET_NUMBER = "remote_control_key_preset_number";
+    field public static final String COLUMN_SCRAMBLED = "scrambled";
     field public static final String COLUMN_SEARCHABLE = "searchable";
     field public static final String COLUMN_SERVICE_ID = "service_id";
     field public static final String COLUMN_SERVICE_TYPE = "service_type";
@@ -24300,6 +24304,7 @@ package android.media.tv {
     field public static final String COLUMN_TYPE = "type";
     field public static final String COLUMN_VERSION_NUMBER = "version_number";
     field public static final String COLUMN_VIDEO_FORMAT = "video_format";
+    field public static final String COLUMN_VIDEO_RESOLUTION = "video_resolution";
     field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/channel";
     field public static final String CONTENT_TYPE = "vnd.android.cursor.dir/channel";
     field public static final android.net.Uri CONTENT_URI;
