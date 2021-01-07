@@ -377,6 +377,7 @@ public class GnssNative {
     private volatile boolean mItarSpeedLimitExceeded;
 
     private GnssCapabilities mCapabilities = new GnssCapabilities.Builder().build();
+    private @GnssCapabilities.TopHalCapabilityFlags int mTopFlags;
     private @Nullable GnssPowerStats mPowerStats = null;
     private int mHardwareYear = 0;
     private @Nullable String mHardwareModelName = null;
@@ -490,6 +491,7 @@ public class GnssNative {
 
     private void initializeGnss(boolean restart) {
         Preconditions.checkState(mRegistered);
+        mTopFlags = 0;
         mGnssHal.initOnce(GnssNative.this, restart);
 
         // gnss chipset appears to require an init/cleanup cycle on startup in order to properly
@@ -1031,8 +1033,12 @@ public class GnssNative {
 
     @NativeEntryPoint
     void setTopHalCapabilities(@GnssCapabilities.TopHalCapabilityFlags int capabilities) {
+        // Here the bits specified by 'capabilities' are turned on. It is handled differently from
+        // sub hal because top hal capabilities could be set by HIDL HAL and/or AIDL HAL. Each of
+        // them possesses a different set of capabilities.
+        mTopFlags |= capabilities;
         GnssCapabilities oldCapabilities = mCapabilities;
-        mCapabilities = oldCapabilities.withTopHalFlags(capabilities);
+        mCapabilities = oldCapabilities.withTopHalFlags(mTopFlags);
         onCapabilitiesChanged(oldCapabilities, mCapabilities);
     }
 
