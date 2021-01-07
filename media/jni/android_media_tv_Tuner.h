@@ -35,10 +35,13 @@
 #include <utils/RefBase.h>
 
 #include "tuner/DemuxClient.h"
+#include "tuner/DescramblerClient.h"
 #include "tuner/FilterClient.h"
 #include "tuner/FilterClientCallback.h"
 #include "tuner/FrontendClient.h"
 #include "tuner/FrontendClientCallback.h"
+#include "tuner/LnbClient.h"
+#include "tuner/LnbClientCallback.h"
 #include "tuner/TunerClient.h"
 #include "jni.h"
 
@@ -87,13 +90,14 @@ using MQ = MessageQueue<uint8_t, kSynchronizedReadWrite>;
 
 namespace android {
 
-struct LnbCallback : public ILnbCallback {
-    LnbCallback(jweak tunerObj, LnbId id);
-    ~LnbCallback();
-    virtual Return<void> onEvent(LnbEventType lnbEventType);
-    virtual Return<void> onDiseqcMessage(const hidl_vec<uint8_t>& diseqcMessage);
-    jweak mLnb;
-    LnbId mId;
+struct LnbClientCallbackImpl : public LnbClientCallback {
+    ~LnbClientCallbackImpl();
+    virtual void onEvent(LnbEventType lnbEventType);
+    virtual void onDiseqcMessage(const hidl_vec<uint8_t>& diseqcMessage);
+
+    void setLnb(jweak lnbObj);
+private:
+    jweak mLnbObj;
 };
 
 struct Lnb : public RefBase {
@@ -215,9 +219,9 @@ struct JTuner : public RefBase {
     int scan(const FrontendSettings& settings, FrontendScanType scanType,
             const FrontendSettingsExt1_1& settingsExt1_1);
     int stopScan();
-    int setLnb(int id);
+    int setLnb(sp<LnbClient> lnbClient);
     int setLna(bool enable);
-    jobject openLnbById(int id);
+    jobject openLnbByHandle(int handle);
     jobject openLnbByName(jstring name);
     jobject openFilter(DemuxFilterType type, int bufferSize);
     jobject openTimeFilter();
@@ -246,8 +250,7 @@ private:
     sp<::android::hardware::tv::tuner::V1_1::IFrontend> mFe_1_1;
     sp<FrontendClient> mFeClient;
     int mFeId;
-    // TODO: remove after migrate to client lib
-    sp<ILnb> mLnb;
+    sp<LnbClient> mLnbClient;
     // TODO: remove after migrate to client lib
     sp<IDemux> mDemux;
     sp<DemuxClient> mDemuxClient;

@@ -552,7 +552,7 @@ public class Tuner implements AutoCloseable  {
     private native int nativeStopTune();
     private native int nativeScan(int settingsType, FrontendSettings settings, int scanType);
     private native int nativeStopScan();
-    private native int nativeSetLnb(int lnbId);
+    private native int nativeSetLnb(Lnb lnb);
     private native int nativeSetLna(boolean enable);
     private native FrontendStatus nativeGetFrontendStatus(int[] statusTypes);
     private native Integer nativeGetAvSyncHwId(Filter filter);
@@ -825,7 +825,7 @@ public class Tuner implements AutoCloseable  {
      */
     @Result
     private int setLnb(@NonNull Lnb lnb) {
-        return nativeSetLnb(lnb.mId);
+        return nativeSetLnb(lnb);
     }
 
     /**

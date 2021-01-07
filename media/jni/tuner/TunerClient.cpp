@@ -180,11 +180,49 @@ sp<DescramblerClient> TunerClient::openDescrambler(int /*descramblerHandle*/) {
     return NULL;
 }
 
-sp<LnbClient> TunerClient::openLnb(int /*lnbHandle*/) {
+sp<LnbClient> TunerClient::openLnb(int lnbHandle) {
+    if (mTunerService != NULL) {
+        // TODO: handle error code
+        /*shared_ptr<ITunerLnb> tunerLnb;
+        mTunerService->openLnb(demuxHandle, &tunerLnb);
+        return new LnbClient(tunerLnb);*/
+    }
+
+    if (mTuner != NULL) {
+        int id = getResourceIdFromHandle(lnbHandle, LNB);
+        // TODO: pending aidl interface
+        sp<LnbClient> lnbClient = new LnbClient();
+        sp<ILnb> hidlLnb = openHidlLnbById(id);
+        if (hidlLnb != NULL) {
+            lnbClient->setHidlLnb(hidlLnb);
+            lnbClient->setId(id);
+            return lnbClient;
+        }
+    }
+
     return NULL;
 }
 
-sp<LnbClient> TunerClient::openLnbByName(string /*lnbName*/) {
+sp<LnbClient> TunerClient::openLnbByName(string lnbName) {
+    if (mTunerService != NULL) {
+        // TODO: handle error code
+        /*shared_ptr<ITunerLnb> tunerLnb;
+        mTunerService->openLnbByName(lnbName, &tunerLnb);
+        return new LnbClient(tunerLnb);*/
+    }
+
+    if (mTuner != NULL) {
+        // TODO: pending aidl interface
+        sp<LnbClient> lnbClient = new LnbClient();
+        LnbId id;
+        sp<ILnb> hidlLnb = openHidlLnbByName(lnbName, id);
+        if (hidlLnb != NULL) {
+            lnbClient->setHidlLnb(hidlLnb);
+            lnbClient->setId(id);
+            return lnbClient;
+        }
+    }
+
     return NULL;
 }
 
@@ -247,6 +285,37 @@ sp<IDemux> TunerClient::openHidlDemux() {
         return NULL;
     }
     return demux;
+}
+
+sp<ILnb> TunerClient::openHidlLnbById(int id) {
+    sp<ILnb> lnb;
+    Result res;
+
+    mTuner->openLnbById(id, [&](Result r, const sp<ILnb>& lnbSp) {
+        res = r;
+        lnb = lnbSp;
+    });
+    if (res != Result::SUCCESS || lnb == nullptr) {
+        ALOGE("Failed to open lnb by id");
+        return NULL;
+    }
+    return lnb;
+}
+
+sp<ILnb> TunerClient::openHidlLnbByName(string name, LnbId& lnbId) {
+    sp<ILnb> lnb;
+    Result res;
+
+    mTuner->openLnbByName(name, [&](Result r, LnbId id, const sp<ILnb>& lnbSp) {
+        res = r;
+        lnb = lnbSp;
+        lnbId = id;
+    });
+    if (res != Result::SUCCESS || lnb == nullptr) {
+        ALOGE("Failed to open lnb by name");
+        return NULL;
+    }
+    return lnb;
 }
 
 FrontendInfo TunerClient::FrontendInfoAidlToHidl(TunerServiceFrontendInfo aidlFrontendInfo) {
