@@ -131,10 +131,11 @@ public:
 private:
     sp<ITuner> getHidlTuner();
     sp<IFrontend> openHidlFrontendById(int id);
-    sp<IDemux> openHidlDemux();
+    sp<IDemux> openHidlDemux(int& demuxId);
     Result getHidlFrontendInfo(int id, FrontendInfo& info);
     sp<ILnb> openHidlLnbById(int id);
     sp<ILnb> openHidlLnbByName(string name, LnbId& lnbId);
+    sp<IDescrambler> openHidlDescrambler();
     FrontendInfo FrontendInfoAidlToHidl(TunerServiceFrontendInfo aidlFrontendInfo);
 
     int getResourceIdFromHandle(int handle, int resourceType);

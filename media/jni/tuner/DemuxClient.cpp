@@ -32,11 +32,13 @@ namespace android {
 // TODO: pending aidl interface
 DemuxClient::DemuxClient() {
     //mTunerDemux = tunerDemux;
+    mId = -1;
 }
 
 DemuxClient::~DemuxClient() {
     //mTunerDemux = NULL;
     mDemux = NULL;
+    mId = -1;
 }
 
 // TODO: remove after migration to Tuner Service is done.

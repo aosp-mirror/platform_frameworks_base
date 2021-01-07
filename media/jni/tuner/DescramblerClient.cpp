@@ -42,25 +42,56 @@ void DescramblerClient::setHidlDescrambler(sp<IDescrambler> descrambler) {
     mDescrambler = descrambler;
 }
 
-Result DescramblerClient::setDemuxSource(sp<DemuxClient> /*demuxClient*/) {
-    return Result::SUCCESS;
+Result DescramblerClient::setDemuxSource(sp<DemuxClient> demuxClient) {
+    if (demuxClient == NULL) {
+        return Result::INVALID_ARGUMENT;
+    }
+
+    // TODO: pending aidl interface
+
+    if (mDescrambler != NULL) {
+        return mDescrambler->setDemuxSource(demuxClient->getId());
+    }
+
+    return Result::INVALID_STATE;
 }
 
-Result DescramblerClient::setKeyToken(vector<uint8_t> /*keyToken*/) {
-    return Result::SUCCESS;
+Result DescramblerClient::setKeyToken(vector<uint8_t> keyToken) {
+    // TODO: pending aidl interface
+
+    if (mDescrambler != NULL) {
+        return mDescrambler->setKeyToken(keyToken);
+    }
+
+    return Result::INVALID_STATE;
 }
 
-Result DescramblerClient::addPid(DemuxPid /*pid*/, sp<FilterClient> /*optionalSourceFilter*/) {
-    return Result::SUCCESS;
-}
+Result DescramblerClient::addPid(DemuxPid pid, sp<FilterClient> optionalSourceFilter) {
+    // TODO: pending aidl interface
 
-Result DescramblerClient::removePid(DemuxPid /*pid*/, sp<FilterClient> /*optionalSourceFilter*/) {
-    return Result::SUCCESS;
-}
+    if (mDescrambler != NULL) {
+        return mDescrambler->addPid(pid, optionalSourceFilter->getHalFilter());
+    }
+
+    return Result::INVALID_STATE;}
+
+Result DescramblerClient::removePid(DemuxPid pid, sp<FilterClient> optionalSourceFilter) {
+    // TODO: pending aidl interface
+
+    if (mDescrambler != NULL) {
+        return mDescrambler->addPid(pid, optionalSourceFilter->getHalFilter());
+    }
+
+    return Result::INVALID_STATE;}
 
 Result DescramblerClient::close() {
-    return Result::SUCCESS;
-}
+    // TODO: pending aidl interface
+
+    if (mDescrambler != NULL) {
+        return mDescrambler->close();
+    }
+
+    return Result::INVALID_STATE;}
 
 /////////////// DescramblerClient Helper Methods ///////////////////////
 

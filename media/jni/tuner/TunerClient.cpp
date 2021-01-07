@@ -161,9 +161,11 @@ sp<DemuxClient> TunerClient::openDemux(int /*demuxHandle*/) {
     if (mTuner != NULL) {
         // TODO: pending aidl interface
         sp<DemuxClient> demuxClient = new DemuxClient();
-        sp<IDemux> hidlDemux = openHidlDemux();
+        int demuxId;
+        sp<IDemux> hidlDemux = openHidlDemux(demuxId);
         if (hidlDemux != NULL) {
             demuxClient->setHidlDemux(hidlDemux);
+            demuxClient->setId(demuxId);
             return demuxClient;
         }
     }
@@ -177,8 +179,24 @@ DemuxCapabilities TunerClient::getDemuxCaps() {
 }
 
 sp<DescramblerClient> TunerClient::openDescrambler(int /*descramblerHandle*/) {
-    return NULL;
-}
+    if (mTunerService != NULL) {
+        // TODO: handle error code
+        /*shared_ptr<ITunerDescrambler> tunerDescrambler;
+        mTunerService->openDescrambler(demuxHandle, &tunerDescrambler);
+        return new DescramblerClient(tunerDescrambler);*/
+    }
+
+    if (mTuner != NULL) {
+        // TODO: pending aidl interface
+        sp<DescramblerClient> descramblerClient = new DescramblerClient();
+        sp<IDescrambler> hidlDescrambler = openHidlDescrambler();
+        if (hidlDescrambler != NULL) {
+            descramblerClient->setHidlDescrambler(hidlDescrambler);
+            return descramblerClient;
+        }
+    }
+
+    return NULL;}
 
 sp<LnbClient> TunerClient::openLnb(int lnbHandle) {
     if (mTunerService != NULL) {
@@ -272,12 +290,13 @@ Result TunerClient::getHidlFrontendInfo(int id, FrontendInfo& feInfo) {
     return res;
 }
 
-sp<IDemux> TunerClient::openHidlDemux() {
+sp<IDemux> TunerClient::openHidlDemux(int& demuxId) {
     sp<IDemux> demux;
     Result res;
 
-    mTuner->openDemux([&](Result result, uint32_t /*id*/, const sp<IDemux>& demuxSp) {
+    mTuner->openDemux([&](Result result, uint32_t id, const sp<IDemux>& demuxSp) {
         demux = demuxSp;
+        demuxId = id;
         res = result;
     });
     if (res != Result::SUCCESS || demux == nullptr) {
@@ -316,6 +335,22 @@ sp<ILnb> TunerClient::openHidlLnbByName(string name, LnbId& lnbId) {
         return NULL;
     }
     return lnb;
+}
+
+sp<IDescrambler> TunerClient::openHidlDescrambler() {
+    sp<IDescrambler> descrambler;
+    Result res;
+
+    mTuner->openDescrambler([&](Result r, const sp<IDescrambler>& descramblerSp) {
+        res = r;
+        descrambler = descramblerSp;
+    });
+
+    if (res != Result::SUCCESS || descrambler == NULL) {
+        return NULL;
+    }
+
+    return descrambler;
 }
 
 FrontendInfo TunerClient::FrontendInfoAidlToHidl(TunerServiceFrontendInfo aidlFrontendInfo) {
