@@ -5152,9 +5152,25 @@ public class CarrierConfigManager {
         public static final String KEY_HOTSPOT_MAX_CLIENT_COUNT =
                 KEY_PREFIX + "hotspot_maximum_client_count";
 
+        /**
+         * This configuration is intended to be a narrow exception for provisioning
+         * {@link android.net.wifi.WifiNetworkSuggestion} of widely-known carrier networks that do
+         * not support using randomized MAC address.
+         * Carrier provisioned {@link android.net.wifi.WifiNetworkSuggestion} with SSIDs included
+         * in this list will have MAC randomization disabled.
+         *
+         * Note: the SSIDs in the list are expected to be interpreted as is - do not add double
+         * quotes to the SSIDs.
+         */
+        public static final String KEY_SUGGESTION_SSID_LIST_WITH_MAC_RANDOMIZATION_DISABLED =
+                KEY_PREFIX + "suggestion_ssid_list_with_mac_randomization_disabled";
+
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
             defaults.putInt(KEY_HOTSPOT_MAX_CLIENT_COUNT, 0);
+            defaults.putStringArray(KEY_SUGGESTION_SSID_LIST_WITH_MAC_RANDOMIZATION_DISABLED,
+                    new String[0]);
+
             return defaults;
         }
 
