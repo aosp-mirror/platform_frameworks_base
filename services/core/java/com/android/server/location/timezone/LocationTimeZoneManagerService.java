@@ -16,6 +16,13 @@
 
 package com.android.server.location.timezone;
 
+import static android.app.time.LocationTimeZoneManager.PRIMARY_PROVIDER_NAME;
+import static android.app.time.LocationTimeZoneManager.SECONDARY_PROVIDER_NAME;
+import static android.app.time.LocationTimeZoneManager.SYSTEM_PROPERTY_KEY_PROVIDER_MODE_OVERRIDE_PRIMARY;
+import static android.app.time.LocationTimeZoneManager.SYSTEM_PROPERTY_KEY_PROVIDER_MODE_OVERRIDE_SECONDARY;
+import static android.app.time.LocationTimeZoneManager.SYSTEM_PROPERTY_VALUE_PROVIDER_MODE_DISABLED;
+import static android.app.time.LocationTimeZoneManager.SYSTEM_PROPERTY_VALUE_PROVIDER_MODE_SIMULATED;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -118,13 +125,6 @@ public class LocationTimeZoneManagerService extends Binder {
     }
 
     static final String TAG = "LocationTZDetector";
-
-    static final String PRIMARY_PROVIDER_NAME = "primary";
-    static final String SECONDARY_PROVIDER_NAME = "secondary";
-
-    static final String PROVIDER_MODE_OVERRIDE_SYSTEM_PROPERTY_PREFIX = "persist.sys.geotz.";
-    static final String PROVIDER_MODE_SIMULATED = "simulated";
-    static final String PROVIDER_MODE_DISABLED = "disabled";
 
     private static final long BLOCKING_OP_WAIT_DURATION_MILLIS = Duration.ofSeconds(20).toMillis();
 
@@ -269,13 +269,15 @@ public class LocationTimeZoneManagerService extends Binder {
 
     /** Used for bug triage and in tests to simulate provider events. */
     private static boolean isInSimulationMode(String providerName) {
-        return isProviderModeSetInSystemProperties(providerName, PROVIDER_MODE_SIMULATED);
+        return isProviderModeSetInSystemProperties(providerName,
+                SYSTEM_PROPERTY_VALUE_PROVIDER_MODE_SIMULATED);
     }
 
     /** Used for bug triage, tests and experiments to remove a provider. */
     private boolean isDisabled(String providerName) {
         return !isProviderEnabledInConfig(providerName)
-                || isProviderModeSetInSystemProperties(providerName, PROVIDER_MODE_DISABLED);
+                || isProviderModeSetInSystemProperties(
+                        providerName, SYSTEM_PROPERTY_VALUE_PROVIDER_MODE_DISABLED);
     }
 
     private boolean isProviderEnabledInConfig(String providerName) {
@@ -299,8 +301,22 @@ public class LocationTimeZoneManagerService extends Binder {
 
     private static boolean isProviderModeSetInSystemProperties(
             @NonNull String providerName, @NonNull String mode) {
-        String systemPropertyProviderMode = SystemProperties.get(
-                PROVIDER_MODE_OVERRIDE_SYSTEM_PROPERTY_PREFIX + providerName, null);
+        String systemPropertyKey;
+        switch (providerName) {
+            case PRIMARY_PROVIDER_NAME: {
+                systemPropertyKey = SYSTEM_PROPERTY_KEY_PROVIDER_MODE_OVERRIDE_PRIMARY;
+                break;
+            }
+            case SECONDARY_PROVIDER_NAME: {
+                systemPropertyKey = SYSTEM_PROPERTY_KEY_PROVIDER_MODE_OVERRIDE_SECONDARY;
+                break;
+            }
+            default: {
+                throw new IllegalArgumentException(providerName);
+            }
+        }
+
+        String systemPropertyProviderMode = SystemProperties.get(systemPropertyKey, null);
         return Objects.equals(systemPropertyProviderMode, mode);
     }
 
