@@ -298,15 +298,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
         if (mDeviceId == PLAYER_DEVICEID_INVALID) {
             return null;
         }
-        // TODO(175802592): change this to AudioManager.getDeviceForPortId() when available
-        AudioDeviceInfo[] devices =
-                AudioManager.getDevicesStatic(AudioManager.GET_DEVICES_OUTPUTS);
-        for (int i = 0; i < devices.length; i++) {
-            if (devices[i].getId() == mDeviceId) {
-                return devices[i];
-            }
-        }
-        return null;
+        return AudioManager.getDeviceForPortId(mDeviceId, AudioManager.GET_DEVICES_OUTPUTS);
     }
 
     /**
