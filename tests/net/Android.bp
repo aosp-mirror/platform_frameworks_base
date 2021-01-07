@@ -70,4 +70,7 @@ android_test {
         "android.test.base",
         "android.test.mock",
     ],
+    jni_libs: [
+        "libservice-connectivity",
+    ],
 }
