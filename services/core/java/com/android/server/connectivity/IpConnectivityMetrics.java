@@ -122,8 +122,6 @@ final public class IpConnectivityMetrics extends SystemService {
 
     public IpConnectivityMetrics(Context ctx, ToIntFunction<Context> capacityGetter) {
         super(ctx);
-        // Load JNI libraries used by the IpConnectivityMetrics service and its dependencies
-        System.loadLibrary("service-connectivity");
         mCapacityGetter = capacityGetter;
         initBuffer();
     }
