@@ -295,7 +295,7 @@ import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
-import android.permission.IPermissionManager;
+import android.permission.PermissionManager;
 import android.provider.ContactsContract;
 import android.provider.DeviceConfig;
 import android.provider.Settings.Global;
@@ -962,7 +962,6 @@ public class PackageManagerService extends IPackageManager.Stub
         private final Singleton<ArtManagerService> mArtManagerServiceProducer;
         private final Singleton<ApexManager> mApexManagerProducer;
         private final Singleton<ViewCompiler> mViewCompilerProducer;
-        private final Singleton<IPermissionManager> mPermissionManagerProducer;
         private final Singleton<IncrementalManager> mIncrementalManagerProducer;
         private final Singleton<DefaultAppProvider> mDefaultAppProviderProducer;
         private final Singleton<DisplayMetrics> mDisplayMetricsProducer;
@@ -994,7 +993,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 Producer<DexManager> dexManagerProducer,
                 Producer<ArtManagerService> artManagerServiceProducer,
                 Producer<ApexManager> apexManagerProducer,
-                Producer<IPermissionManager> permissionManagerProducer,
                 Producer<ViewCompiler> viewCompilerProducer,
                 Producer<IncrementalManager> incrementalManagerProducer,
                 Producer<DefaultAppProvider> defaultAppProviderProducer,
@@ -1029,7 +1027,6 @@ public class PackageManagerService extends IPackageManager.Stub
             mDexManagerProducer = new Singleton<>(dexManagerProducer);
             mArtManagerServiceProducer = new Singleton<>(artManagerServiceProducer);
             mApexManagerProducer = new Singleton<>(apexManagerProducer);
-            mPermissionManagerProducer = new Singleton<>(permissionManagerProducer);
             mViewCompilerProducer = new Singleton<>(viewCompilerProducer);
             mIncrementalManagerProducer = new Singleton<>(incrementalManagerProducer);
             mDefaultAppProviderProducer = new Singleton<>(defaultAppProviderProducer);
@@ -1129,10 +1126,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
         public ViewCompiler getViewCompiler() {
             return mViewCompilerProducer.get(this, mPackageManager);
-        }
-
-        public IPermissionManager getPermissionManagerService() {
-            return mPermissionManagerProducer.get(this, mPackageManager);
         }
 
         public Handler getBackgroundHandler() {
@@ -1260,7 +1253,6 @@ public class PackageManagerService extends IPackageManager.Stub
         public OverlayConfig overlayConfig;
         public PackageDexOptimizer packageDexOptimizer;
         public PackageParser2.Callback packageParserCallback;
-        public IPermissionManager permissionManagerService;
         public PendingPackageBroadcasts pendingPackageBroadcasts;
         public PackageManagerInternal pmInternal;
         public TestUtilityService testUtilityService;
@@ -1381,8 +1373,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     // Internal interface for permission manager
     private final PermissionManagerServiceInternal mPermissionManager;
-    // Public interface for permission manager
-    private final IPermissionManager mPermissionManagerService;
 
     private final ComponentResolver mComponentResolver;
     // List of packages names to keep cached, even if they are uninstalled for all users
@@ -2857,7 +2847,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 (i, pm) -> new ArtManagerService(i.getContext(), pm, i.getInstaller(),
                         i.getInstallLock()),
                 (i, pm) -> ApexManager.getInstance(),
-                (i, pm) -> (IPermissionManager) ServiceManager.getService("permissionmgr"),
                 (i, pm) -> new ViewCompiler(i.getInstallLock(), i.getInstaller()),
                 (i, pm) -> (IncrementalManager)
                         i.getContext().getSystemService(Context.INCREMENTAL_SERVICE),
@@ -3080,7 +3069,6 @@ public class PackageManagerService extends IPackageManager.Stub
         mPackageDexOptimizer = testParams.packageDexOptimizer;
         mPackageParserCallback = testParams.packageParserCallback;
         mPendingBroadcasts = testParams.pendingPackageBroadcasts;
-        mPermissionManagerService = testParams.permissionManagerService;
         mPmInternal = testParams.pmInternal;
         mTestUtilityService = testParams.testUtilityService;
         mProcessLoggingHandler = testParams.processLoggingHandler;
@@ -3158,7 +3146,6 @@ public class PackageManagerService extends IPackageManager.Stub
         mComponentResolver = injector.getComponentResolver();
         mPermissionManager = injector.getPermissionManagerServiceInternal();
         mSettings = injector.getSettings();
-        mPermissionManagerService = injector.getPermissionManagerService();
         mIncrementalManager = mInjector.getIncrementalManager();
         mDefaultAppProvider = mInjector.getDefaultAppProvider();
         mLegacyPermissionManager = mInjector.getLegacyPermissionManagerInternal();
@@ -5176,12 +5163,10 @@ public class PackageManagerService extends IPackageManager.Stub
     // NOTE: Can't remove due to unsupported app usage
     @Override
     public PermissionGroupInfo getPermissionGroupInfo(String groupName, int flags) {
-        try {
-            // Because this is accessed via the package manager service AIDL,
-            // go through the permission manager service AIDL
-            return mPermissionManagerService.getPermissionGroupInfo(groupName, flags);
-        } catch (RemoteException ignore) { }
-        return null;
+        // Because this is accessed via the package manager service AIDL,
+        // go through the permission manager service AIDL
+        return mContext.getSystemService(PermissionManager.class)
+                .getPermissionGroupInfo(groupName, flags);
     }
 
     @GuardedBy("mLock")
@@ -6213,23 +6198,13 @@ public class PackageManagerService extends IPackageManager.Stub
     // NOTE: Can't remove due to unsupported app usage
     @Override
     public int checkPermission(String permName, String pkgName, int userId) {
-        try {
-            // Because this is accessed via the package manager service AIDL,
-            // go through the permission manager service AIDL
-            return mPermissionManagerService.checkPermission(permName, pkgName, userId);
-        } catch (RemoteException ignore) { }
-        return PackageManager.PERMISSION_DENIED;
+        return mPermissionManager.checkPermission(pkgName, permName, userId);
     }
 
     // NOTE: Can't remove without a major refactor. Keep around for now.
     @Override
     public int checkUidPermission(String permName, int uid) {
-        try {
-            // Because this is accessed via the package manager service AIDL,
-            // go through the permission manager service AIDL
-            return mPermissionManagerService.checkUidPermission(permName, uid);
-        } catch (RemoteException ignore) { }
-        return PackageManager.PERMISSION_DENIED;
+        return mPermissionManager.checkUidPermission(uid, permName);
     }
 
     @Override
@@ -6248,43 +6223,34 @@ public class PackageManagerService extends IPackageManager.Stub
     // NOTE: Can't remove due to unsupported app usage
     @Override
     public boolean addPermission(PermissionInfo info) {
-        try {
-            // Because this is accessed via the package manager service AIDL,
-            // go through the permission manager service AIDL
-            return mPermissionManagerService.addPermission(info, false);
-        } catch (RemoteException ignore) { }
-        return false;
+        // Because this is accessed via the package manager service AIDL,
+        // go through the permission manager service AIDL
+        return mContext.getSystemService(PermissionManager.class).addPermission(info, false);
     }
 
     // NOTE: Can't remove due to unsupported app usage
     @Override
     public boolean addPermissionAsync(PermissionInfo info) {
-        try {
-            // Because this is accessed via the package manager service AIDL,
-            // go through the permission manager service AIDL
-            return mPermissionManagerService.addPermission(info, true);
-        } catch (RemoteException ignore) { }
-        return false;
+        // Because this is accessed via the package manager service AIDL,
+        // go through the permission manager service AIDL
+        return mContext.getSystemService(PermissionManager.class).addPermission(info, true);
     }
 
     // NOTE: Can't remove due to unsupported app usage
     @Override
     public void removePermission(String permName) {
-        try {
-            // Because this is accessed via the package manager service AIDL,
-            // go through the permission manager service AIDL
-            mPermissionManagerService.removePermission(permName);
-        } catch (RemoteException ignore) { }
+        // Because this is accessed via the package manager service AIDL,
+        // go through the permission manager service AIDL
+        mContext.getSystemService(PermissionManager.class).removePermission(permName);
     }
 
     // NOTE: Can't remove due to unsupported app usage
     @Override
     public void grantRuntimePermission(String packageName, String permName, final int userId) {
-        try {
-            // Because this is accessed via the package manager service AIDL,
-            // go through the permission manager service AIDL
-            mPermissionManagerService.grantRuntimePermission(packageName, permName, userId);
-        } catch (RemoteException ignore) { }
+        // Because this is accessed via the package manager service AIDL,
+        // go through the permission manager service AIDL
+        mContext.getSystemService(PermissionManager.class)
+                .grantRuntimePermission(packageName, permName, UserHandle.of(userId));
     }
 
     @Override
@@ -22521,7 +22487,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public void onShellCommand(FileDescriptor in, FileDescriptor out,
             FileDescriptor err, String[] args, ShellCallback callback,
             ResultReceiver resultReceiver) {
-        (new PackageManagerShellCommand(this, mPermissionManagerService, mContext)).exec(
+        (new PackageManagerShellCommand(this, mContext)).exec(
                 this, in, out, err, args, callback, resultReceiver);
     }
 

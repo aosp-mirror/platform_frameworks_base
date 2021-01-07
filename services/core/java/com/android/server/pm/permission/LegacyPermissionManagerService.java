@@ -22,6 +22,7 @@ import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
 import android.os.Process;
 import android.os.ServiceManager;
@@ -32,6 +33,7 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 import com.android.server.pm.PackageManagerServiceUtils;
+import com.android.server.pm.UserManagerService;
 
 /**
  * Legacy permission manager service.
@@ -41,6 +43,9 @@ public class LegacyPermissionManagerService extends ILegacyPermissionManager.Stu
 
     /** Injector that can be used to facilitate testing. */
     private final Injector mInjector;
+
+    @NonNull
+    private final Context mContext;
 
     @NonNull
     private final DefaultPermissionGrantPolicy mDefaultPermissionGrantPolicy;
@@ -74,6 +79,7 @@ public class LegacyPermissionManagerService extends ILegacyPermissionManager.Stu
 
     @VisibleForTesting
     LegacyPermissionManagerService(@NonNull Context context, @NonNull Injector injector) {
+        mContext = context;
         mInjector = injector;
         mDefaultPermissionGrantPolicy = new DefaultPermissionGrantPolicy(context);
     }
@@ -189,6 +195,29 @@ public class LegacyPermissionManagerService extends ILegacyPermissionManager.Stu
     }
 
     private class Internal implements LegacyPermissionManagerInternal {
+        @Override
+        public void resetRuntimePermissions() {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
+                    "revokeRuntimePermission");
+
+            final int callingUid = Binder.getCallingUid();
+            if (callingUid != Process.SYSTEM_UID && callingUid != 0) {
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                        "resetRuntimePermissions");
+            }
+
+            final PackageManagerInternal packageManagerInternal = LocalServices.getService(
+                    PackageManagerInternal.class);
+            final PermissionManagerServiceInternal permissionManagerInternal =
+                    LocalServices.getService(PermissionManagerServiceInternal.class);
+            for (final int userId : UserManagerService.getInstance().getUserIds()) {
+                packageManagerInternal.forEachPackage(pkg ->
+                        permissionManagerInternal.resetRuntimePermissions(pkg, userId));
+            }
+        }
+
         @Override
         public void setDialerAppPackagesProvider(PackagesProvider provider) {
             mDefaultPermissionGrantPolicy.setDialerAppPackagesProvider(provider);
