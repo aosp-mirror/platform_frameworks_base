@@ -100,7 +100,7 @@
     <string name="peerTtyModeHco" msgid="5626377160840915617">"समवयस्क व्यक्तीने TTY मोड HCO ची विनंती केली"</string>
     <string name="peerTtyModeVco" msgid="572208600818270944">"समवयस्क व्यक्तीने TTY मोड VCO ची विनंती केली"</string>
     <string name="peerTtyModeOff" msgid="2420380956369226583">"समवयस्क व्यक्तीने TTY मोड बंद ची विनंती केली"</string>
-    <string name="serviceClassVoice" msgid="2065556932043454987">"व्हॉइस"</string>
+    <string name="serviceClassVoice" msgid="2065556932043454987">"Voice"</string>
     <string name="serviceClassData" msgid="4148080018967300248">"डेटा"</string>
     <string name="serviceClassFAX" msgid="2561653371698904118">"फॅक्स"</string>
     <string name="serviceClassSMS" msgid="1547664561704509004">"SMS"</string>
@@ -2009,14 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"मायक्रोफोन"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"तुमच्‍या स्‍क्रीनवर इतर ॲप्‍सवर डिस्‍प्‍ले करत आहे"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"फीडबॅक द्या"</string>
-    <!-- no translation found for notification_feedback_indicator_alerted (6552871804121942099) -->
-    <skip />
-    <!-- no translation found for notification_feedback_indicator_silenced (3799442124723177262) -->
-    <skip />
-    <!-- no translation found for notification_feedback_indicator_promoted (9030204303764698640) -->
-    <skip />
-    <!-- no translation found for notification_feedback_indicator_demoted (8880309924296450875) -->
-    <skip />
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"ही सूचना डीफॉल्ट करण्यात आली आहे. फीडबॅक देण्यासाठी टॅप करा."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ही सूचना सायलंट करण्यात आली आहे. फीडबॅक देण्यासाठी टॅप करा."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"हा सूचनेला उच्च रँक करण्यात आले. फीडबॅक देण्यासाठी टॅप करा."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"या सूचनेला कमी रँक करण्यात आले. फीडबॅक देण्यासाठी टॅप करा."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"दिनक्रम मोडची माहिती सूचना"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"चार्जिंगची सामान्य पातळी गाठेपर्यंत कदाचित बॅटरी संपू शकते"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"बॅटरी लाइफ वाढवण्यासाठी बॅटरी सेव्हर सुरू केला आहे"</string>

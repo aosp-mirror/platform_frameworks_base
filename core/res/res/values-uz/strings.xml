@@ -1410,7 +1410,7 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Ilovaga batareya quvvatidan xohlagancha foydalanish uchun ruxsat so‘rashga imkon beradi."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Ko‘lamini o‘zgartirish uchun ikki marta bosing"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Vidjet qo‘shilmadi."</string>
-    <string name="ime_action_go" msgid="5536744546326495436">"O‘tish"</string>
+    <string name="ime_action_go" msgid="5536744546326495436">"Tanlash"</string>
     <string name="ime_action_search" msgid="4501435960587287668">"Qidirish"</string>
     <string name="ime_action_send" msgid="8456843745664334138">"Yuborish"</string>
     <string name="ime_action_next" msgid="4169702997635728543">"Keyingisi"</string>
@@ -2009,10 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Mikrofon"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"ekranda boshqa ilovalar ustidan ochiladi"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Fikr-mulohaza yuborish"</string>
-    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Bu bildirishnoma standart sifatida balandlatildi. Fikr-mulohaza bildirish uchun bosing."</string>
-    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Bu bildirishnoma Ovozsiz sifatida pastlatildi Fikr-mulohaza bildirish uchun bosing."</string>
-    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Bu bildirishnomaga baland baho berilgan. Fikr-mulohaza bildirish uchun bosing."</string>
-    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Bu bildirishnomaga past baho berilgan. Fikr-mulohaza bildirish uchun bosing."</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Bu bildirishnoma darajasi Standart darajaga chiqarildi. Fikr-mulohaza bildirish uchun bosing."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Bu bildirishnoma darajasi Tovushsiz darajaga tushirildi Fikr-mulohaza bildirish uchun bosing."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Bu bildirishnoma darajasi oshirildi. Fikr-mulohaza bildirish uchun bosing."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Bu bildirishnoma darajasi pasaytirildi. Fikr-mulohaza bildirish uchun bosing."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Kun tartibi rejimi haqidagi bildirishnoma"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Batareya quvvati odatdagidan ertaroq tugashi mumkin"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batareya quvvatini uzoqroq vaqtga yetkazish uchun quvvat tejash rejimi yoqildi"</string>
