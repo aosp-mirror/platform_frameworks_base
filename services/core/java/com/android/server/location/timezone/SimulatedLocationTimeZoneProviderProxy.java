@@ -69,6 +69,11 @@ class SimulatedLocationTimeZoneProviderProxy extends LocationTimeZoneProviderPro
         // No-op - nothing to do for the simulated provider.
     }
 
+    @Override
+    void onDestroy() {
+        // No-op - nothing to do for the simulated provider.
+    }
+
     void handleTestCommand(@NonNull TestCommand testCommand, @Nullable RemoteCallback callback) {
         mThreadingDomain.assertCurrentThread();
 
@@ -152,6 +157,7 @@ class SimulatedLocationTimeZoneProviderProxy extends LocationTimeZoneProviderPro
     @Override
     public void dump(@NonNull IndentingPrintWriter ipw, @Nullable String[] args) {
         synchronized (mSharedLock) {
+            ipw.println("{SimulatedLocationTimeZoneProviderProxy}");
             ipw.println("mRequest=" + mRequest);
             ipw.println("mLastEvent=" + mLastEvent);
 

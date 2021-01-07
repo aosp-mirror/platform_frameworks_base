@@ -17,6 +17,7 @@
 package com.android.server.location.timezone;
 
 import static com.android.server.location.timezone.LocationTimeZoneManagerService.debugLog;
+import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_DESTROYED;
 import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_PERM_FAILED;
 import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_CERTAIN;
 import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_INITIALIZING;
@@ -71,6 +72,11 @@ class BinderLocationTimeZoneProvider extends LocationTimeZoneProvider {
         });
     }
 
+    @Override
+    void onDestroy() {
+        mProxy.destroy();
+    }
+
     private void handleProviderLost(String reason) {
         mThreadingDomain.assertCurrentThread();
 
@@ -100,11 +106,12 @@ class BinderLocationTimeZoneProvider extends LocationTimeZoneProvider {
                             + ": No state change required, provider is stopped.");
                     break;
                 }
-                case PROVIDER_STATE_PERM_FAILED: {
+                case PROVIDER_STATE_PERM_FAILED:
+                case PROVIDER_STATE_DESTROYED: {
                     debugLog("handleProviderLost reason=" + reason
                             + ", mProviderName=" + mProviderName
                             + ", currentState=" + currentState
-                            + ": No state change required, provider is perm failed.");
+                            + ": No state change required, provider is terminated.");
                     break;
                 }
                 default: {
@@ -132,11 +139,12 @@ class BinderLocationTimeZoneProvider extends LocationTimeZoneProvider {
                             + ", currentState=" + currentState + ": Provider is stopped.");
                     break;
                 }
-                case PROVIDER_STATE_PERM_FAILED: {
+                case PROVIDER_STATE_PERM_FAILED:
+                case PROVIDER_STATE_DESTROYED: {
                     debugLog("handleOnProviderBound"
                             + ", mProviderName=" + mProviderName
                             + ", currentState=" + currentState
-                            + ": No state change required, provider is perm failed.");
+                            + ": No state change required, provider is terminated.");
                     break;
                 }
                 default: {

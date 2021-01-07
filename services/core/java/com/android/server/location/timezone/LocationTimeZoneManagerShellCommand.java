@@ -32,6 +32,8 @@ class LocationTimeZoneManagerShellCommand extends ShellCommand {
     private static final List<String> VALID_PROVIDER_NAMES =
             Arrays.asList(PRIMARY_PROVIDER_NAME, SECONDARY_PROVIDER_NAME);
 
+    private static final String CMD_START = "start";
+    private static final String CMD_STOP = "stop";
     private static final String CMD_SEND_PROVIDER_TEST_COMMAND = "send_provider_test_command";
 
     private final LocationTimeZoneManagerService mService;
@@ -47,6 +49,12 @@ class LocationTimeZoneManagerShellCommand extends ShellCommand {
         }
 
         switch (cmd) {
+            case CMD_START: {
+                return runStart();
+            }
+            case CMD_STOP: {
+                return runStop();
+            }
             case CMD_SEND_PROVIDER_TEST_COMMAND: {
                 return runSendProviderTestCommand();
             }
@@ -62,7 +70,12 @@ class LocationTimeZoneManagerShellCommand extends ShellCommand {
         pw.println("Location Time Zone Manager (location_time_zone_manager) commands:");
         pw.println("  help");
         pw.println("    Print this help text.");
-        pw.printf("  %s <provider name> <test command>\n", CMD_SEND_PROVIDER_TEST_COMMAND);
+        pw.printf("  %s\n", CMD_START);
+        pw.println("    Starts the location_time_zone_manager, creating time zone providers.");
+        pw.printf("  %s\n", CMD_STOP);
+        pw.println("    Stops the location_time_zone_manager, destroying time zone providers.");
+        pw.printf("  %s <provider name> <test command>\n",
+                CMD_SEND_PROVIDER_TEST_COMMAND);
         pw.println("    Passes a test command to the named provider.");
         pw.println();
         pw.printf("%s details:\n", CMD_SEND_PROVIDER_TEST_COMMAND);
@@ -89,6 +102,30 @@ class LocationTimeZoneManagerShellCommand extends ShellCommand {
         pw.println();
         pw.println("Test commands cannot currently be passed to real provider implementations.");
         pw.println();
+    }
+
+    private int runStart() {
+        try {
+            mService.start();
+        } catch (RuntimeException e) {
+            reportError(e);
+            return 1;
+        }
+        PrintWriter outPrintWriter = getOutPrintWriter();
+        outPrintWriter.println("Service started");
+        return 0;
+    }
+
+    private int runStop() {
+        try {
+            mService.stop();
+        } catch (RuntimeException e) {
+            reportError(e);
+            return 1;
+        }
+        PrintWriter outPrintWriter = getOutPrintWriter();
+        outPrintWriter.println("Service stopped");
+        return 0;
     }
 
     private int runSendProviderTestCommand() {

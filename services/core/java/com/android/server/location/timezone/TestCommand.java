@@ -21,6 +21,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.ShellCommand;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Objects;
@@ -48,6 +50,12 @@ final class TestCommand {
     private TestCommand(@NonNull String type, @NonNull Bundle args) {
         mName = Objects.requireNonNull(type);
         mArgs = Objects.requireNonNull(args);
+    }
+
+    @VisibleForTesting
+    @NonNull
+    public static TestCommand createForTests(@NonNull String type, @NonNull Bundle args) {
+        return new TestCommand(type, args);
     }
 
     /**
