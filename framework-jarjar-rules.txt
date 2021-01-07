@@ -1,2 +1,3 @@
 rule android.hidl.** android.internal.hidl.@1
 rule android.net.wifi.WifiAnnotations* android.internal.wifi.WifiAnnotations@1
+rule com.android.server.vcn.util.** com.android.server.vcn.repackaged.util.@1
