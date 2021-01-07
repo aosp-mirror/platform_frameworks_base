@@ -138,7 +138,6 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BatterySipper;
 import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BinderCallsStats.ExportedCallStat;
-import com.android.internal.os.KernelCpuSpeedReader;
 import com.android.internal.os.KernelCpuThreadReader;
 import com.android.internal.os.KernelCpuThreadReaderDiff;
 import com.android.internal.os.KernelCpuThreadReaderSettingsObserver;
@@ -301,8 +300,6 @@ public class StatsPullAtomService extends SystemService {
     @GuardedBy("mDiskIoLock")
     private StoragedUidIoStatsReader mStoragedUidIoStatsReader;
 
-    @GuardedBy("mCpuTimePerFreqLock")
-    private KernelCpuSpeedReader[] mKernelCpuSpeedReaders;
     // Disables throttler on CPU time readers.
     @GuardedBy("mCpuTimePerUidLock")
     private KernelCpuUidUserSysTimeReader mCpuUidUserSysTimeReader;
@@ -353,7 +350,6 @@ public class StatsPullAtomService extends SystemService {
     private final Object mDataBytesTransferLock = new Object();
     private final Object mBluetoothBytesTransferLock = new Object();
     private final Object mKernelWakelockLock = new Object();
-    private final Object mCpuTimePerFreqLock = new Object();
     private final Object mCpuTimePerUidLock = new Object();
     private final Object mCpuTimePerUidFreqLock = new Object();
     private final Object mCpuActiveTimeLock = new Object();
@@ -441,10 +437,6 @@ public class StatsPullAtomService extends SystemService {
                     case FrameworkStatsLog.KERNEL_WAKELOCK:
                         synchronized (mKernelWakelockLock) {
                             return pullKernelWakelockLocked(atomTag, data);
-                        }
-                    case FrameworkStatsLog.CPU_TIME_PER_FREQ:
-                        synchronized (mCpuTimePerFreqLock) {
-                            return pullCpuTimePerFreqLocked(atomTag, data);
                         }
                     case FrameworkStatsLog.CPU_TIME_PER_UID:
                         synchronized (mCpuTimePerUidLock) {
@@ -722,18 +714,6 @@ public class StatsPullAtomService extends SystemService {
         mKernelWakelockReader = new KernelWakelockReader();
         mTmpWakelockStats = new KernelWakelockStats();
 
-        // Initialize state for CPU_TIME_PER_FREQ atom
-        PowerProfile powerProfile = new PowerProfile(mContext);
-        final int numClusters = powerProfile.getNumCpuClusters();
-        mKernelCpuSpeedReaders = new KernelCpuSpeedReader[numClusters];
-        int firstCpuOfCluster = 0;
-        for (int i = 0; i < numClusters; i++) {
-            final int numSpeedSteps = powerProfile.getNumSpeedStepsInCpuCluster(i);
-            mKernelCpuSpeedReaders[i] = new KernelCpuSpeedReader(firstCpuOfCluster,
-                    numSpeedSteps);
-            firstCpuOfCluster += powerProfile.getNumCoresInCpuCluster(i);
-        }
-
         // Used for CPU_TIME_PER_THREAD_FREQ
         mKernelCpuThreadReader =
                 KernelCpuThreadReaderSettingsObserver.getSettingsModifiedReader(mContext);
@@ -793,7 +773,6 @@ public class StatsPullAtomService extends SystemService {
         mStatsCallbackImpl = new StatsPullAtomCallbackImpl();
         registerBluetoothBytesTransfer();
         registerKernelWakelock();
-        registerCpuTimePerFreq();
         registerCpuTimePerUid();
         registerCpuCyclesPerUidCluster();
         registerCpuTimePerUidFreq();
@@ -1461,32 +1440,6 @@ public class StatsPullAtomService extends SystemService {
             KernelWakelockStats.Entry kws = ent.getValue();
             pulledData.add(FrameworkStatsLog.buildStatsEvent(
                     atomTag, name, kws.mCount, kws.mVersion, kws.mTotalTime));
-        }
-        return StatsManager.PULL_SUCCESS;
-    }
-
-    private void registerCpuTimePerFreq() {
-        int tagId = FrameworkStatsLog.CPU_TIME_PER_FREQ;
-        PullAtomMetadata metadata = new PullAtomMetadata.Builder()
-                .setAdditiveFields(new int[] {3})
-                .build();
-        mStatsManager.setPullAtomCallback(
-                tagId,
-                metadata,
-                DIRECT_EXECUTOR,
-                mStatsCallbackImpl
-        );
-    }
-
-    int pullCpuTimePerFreqLocked(int atomTag, List<StatsEvent> pulledData) {
-        for (int cluster = 0; cluster < mKernelCpuSpeedReaders.length; cluster++) {
-            long[] clusterTimeMs = mKernelCpuSpeedReaders[cluster].readAbsolute();
-            if (clusterTimeMs != null) {
-                for (int speed = clusterTimeMs.length - 1; speed >= 0; --speed) {
-                    pulledData.add(FrameworkStatsLog.buildStatsEvent(
-                            atomTag, cluster, speed, clusterTimeMs[speed]));
-                }
-            }
         }
         return StatsManager.PULL_SUCCESS;
     }
