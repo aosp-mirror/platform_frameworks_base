@@ -3132,39 +3132,6 @@ public class ConnectivityManager {
     }
 
     /**
-     * Check mobile provisioning.
-     *
-     * @param suggestedTimeOutMs, timeout in milliseconds
-     *
-     * @return time out that will be used, maybe less that suggestedTimeOutMs
-     * -1 if an error.
-     *
-     * {@hide}
-     */
-    public int checkMobileProvisioning(int suggestedTimeOutMs) {
-        int timeOutMs = -1;
-        try {
-            timeOutMs = mService.checkMobileProvisioning(suggestedTimeOutMs);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-        return timeOutMs;
-    }
-
-    /**
-     * Get the mobile provisioning url.
-     * {@hide}
-     */
-    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public String getMobileProvisioningUrl() {
-        try {
-            return mService.getMobileProvisioningUrl();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Set sign in error notification to visible or invisible
      *
      * @hide
