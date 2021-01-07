@@ -13596,6 +13596,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     cleanupDisabledPackageComponentsLocked(ssp, userId,
                                             intent.getStringArrayExtra(
                                                     Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST));
+                                    mServices.schedulePendingServiceStartLocked(ssp, userId);
                                 }
                             }
                             break;
