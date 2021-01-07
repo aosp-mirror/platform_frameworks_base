@@ -89,7 +89,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/keyguard_status_area"
-        android:paddingTop="20dp"
         android:visibility="gone">
         <com.android.keyguard.AnimatableClockView
             android:id="@+id/animatable_clock_view_large"
@@ -97,7 +96,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:gravity="center_horizontal"
-            android:textSize="200dp"
+            android:textSize="@dimen/large_clock_text_size"
             android:letterSpacing="0.02"
             android:lineSpacingMultiplier=".8"
             android:includeFontPadding="false"

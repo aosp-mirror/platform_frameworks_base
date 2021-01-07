@@ -112,6 +112,11 @@ public class KeyguardClockPositionAlgorithm {
     private int mBurnInPreventionOffsetY;
 
     /**
+     * Burn-in prevention y translation for large clock layouts.
+     */
+    private int mBurnInPreventionOffsetYLargeClock;
+
+    /**
      * Doze/AOD transition amount.
      */
     private float mDarkAmount;
@@ -156,6 +161,8 @@ public class KeyguardClockPositionAlgorithm {
                 R.dimen.burn_in_prevention_offset_x);
         mBurnInPreventionOffsetY = res.getDimensionPixelSize(
                 R.dimen.burn_in_prevention_offset_y);
+        mBurnInPreventionOffsetYLargeClock = res.getDimensionPixelSize(
+                R.dimen.burn_in_prevention_offset_y_large_clock);
     }
 
     /**
@@ -287,8 +294,12 @@ public class KeyguardClockPositionAlgorithm {
     }
 
     private float burnInPreventionOffsetY() {
-        return getBurnInOffset(mBurnInPreventionOffsetY * 2, false /* xAxis */)
-                - mBurnInPreventionOffsetY;
+        int offset = mBurnInPreventionOffsetY;
+        if (mLockScreenMode != KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL) {
+            offset = mBurnInPreventionOffsetYLargeClock;
+        }
+
+        return getBurnInOffset(offset * 2, false /* xAxis */) - offset;
     }
 
     private float burnInPreventionOffsetX() {
