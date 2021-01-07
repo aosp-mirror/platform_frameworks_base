@@ -47966,7 +47966,6 @@ package android.view {
     field public static final int AUTOFILL_TYPE_DATE = 4; // 0x4
     field public static final int AUTOFILL_TYPE_LIST = 3; // 0x3
     field public static final int AUTOFILL_TYPE_NONE = 0; // 0x0
-    field public static final int AUTOFILL_TYPE_RICH_CONTENT = 5; // 0x5
     field public static final int AUTOFILL_TYPE_TEXT = 1; // 0x1
     field public static final int AUTOFILL_TYPE_TOGGLE = 2; // 0x2
     field public static final int DRAG_FLAG_GLOBAL = 256; // 0x100
@@ -50239,17 +50238,14 @@ package android.view.autofill {
     method public int describeContents();
     method public static android.view.autofill.AutofillValue forDate(long);
     method public static android.view.autofill.AutofillValue forList(int);
-    method @NonNull public static android.view.autofill.AutofillValue forRichContent(@NonNull android.content.ClipData);
     method public static android.view.autofill.AutofillValue forText(@Nullable CharSequence);
     method public static android.view.autofill.AutofillValue forToggle(boolean);
     method public long getDateValue();
     method public int getListValue();
-    method @NonNull public android.content.ClipData getRichContentValue();
     method @NonNull public CharSequence getTextValue();
     method public boolean getToggleValue();
     method public boolean isDate();
     method public boolean isList();
-    method public boolean isRichContent();
     method public boolean isText();
     method public boolean isToggle();
     method public void writeToParcel(android.os.Parcel, int);
