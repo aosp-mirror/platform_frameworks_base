@@ -28,20 +28,21 @@ import org.junit.runners.Parameterized
 class BufferRejectionTests(useBlastAdapter: Boolean) : SurfaceTracingTestBase(useBlastAdapter) {
     @Test
     fun testSetBuffersGeometry_0x0_rejectsBuffer() {
-        val trace = withTrace {
-            it.mSurfaceProxy.ANativeWindowSetBuffersGeometry(it.surface!!, 100, 100,
+        val trace = withTrace { activity ->
+            activity.mSurfaceProxy.ANativeWindowSetBuffersGeometry(activity.surface!!, 100, 100,
                     R8G8B8A8_UNORM)
-            it.mSurfaceProxy.ANativeWindowLock()
-            it.mSurfaceProxy.ANativeWindowUnlockAndPost()
-            it.mSurfaceProxy.ANativeWindowLock()
-            it.mSurfaceProxy.ANativeWindowSetBuffersGeometry(it.surface!!, 0, 0, R8G8B8A8_UNORM)
+            activity.mSurfaceProxy.ANativeWindowLock()
+            activity.mSurfaceProxy.ANativeWindowUnlockAndPost()
+            activity.mSurfaceProxy.ANativeWindowLock()
+            activity.mSurfaceProxy.ANativeWindowSetBuffersGeometry(activity.surface!!, 0, 0,
+                    R8G8B8A8_UNORM)
             // Submit buffer one with a different size which should be rejected
-            it.mSurfaceProxy.ANativeWindowUnlockAndPost()
+            activity.mSurfaceProxy.ANativeWindowUnlockAndPost()
 
             // submit a buffer with the default buffer size
-            it.mSurfaceProxy.ANativeWindowLock()
-            it.mSurfaceProxy.ANativeWindowUnlockAndPost()
-            it.mSurfaceProxy.waitUntilBufferDisplayed(3, 500 /* ms */)
+            activity.mSurfaceProxy.ANativeWindowLock()
+            activity.mSurfaceProxy.ANativeWindowUnlockAndPost()
+            activity.mSurfaceProxy.waitUntilBufferDisplayed(3, 500 /* ms */)
         }
         // Verify we reject buffers since scaling mode == NATIVE_WINDOW_SCALING_MODE_FREEZE
         assertThat(trace).layer("SurfaceView", 2).doesNotExist()
@@ -61,22 +62,22 @@ class BufferRejectionTests(useBlastAdapter: Boolean) : SurfaceTracingTestBase(us
     @Test
     fun testSetBufferScalingMode_freeze() {
         val bufferSize = Point(300, 200)
-        val trace = withTrace {
-            it.drawFrame()
-            assertEquals(it.mSurfaceProxy.waitUntilBufferDisplayed(1, 500 /* ms */), 0)
-            it.mSurfaceProxy.ANativeWindowSetBuffersGeometry(it.surface!!, bufferSize,
+        val trace = withTrace { activity ->
+            activity.drawFrame()
+            assertEquals(activity.mSurfaceProxy.waitUntilBufferDisplayed(1, 500 /* ms */), 0)
+            activity.mSurfaceProxy.ANativeWindowSetBuffersGeometry(activity.surface!!, bufferSize,
                     R8G8B8A8_UNORM)
-            assertEquals(0, it.mSurfaceProxy.SurfaceDequeueBuffer(0, 1000 /* ms */))
-            assertEquals(0, it.mSurfaceProxy.SurfaceDequeueBuffer(1, 1000 /* ms */))
+            assertEquals(0, activity.mSurfaceProxy.SurfaceDequeueBuffer(0, 1000 /* ms */))
+            assertEquals(0, activity.mSurfaceProxy.SurfaceDequeueBuffer(1, 1000 /* ms */))
             // Change buffer size and set scaling mode to freeze
-            it.mSurfaceProxy.ANativeWindowSetBuffersGeometry(it.surface!!, Point(0, 0),
+            activity.mSurfaceProxy.ANativeWindowSetBuffersGeometry(activity.surface!!, Point(0, 0),
                     R8G8B8A8_UNORM)
 
             // first dequeued buffer does not have the new size so it should be rejected.
-            it.mSurfaceProxy.SurfaceQueueBuffer(0)
-            it.mSurfaceProxy.SurfaceSetScalingMode(ScalingMode.SCALE_TO_WINDOW)
-            it.mSurfaceProxy.SurfaceQueueBuffer(1)
-            assertEquals(it.mSurfaceProxy.waitUntilBufferDisplayed(3, 500 /* ms */), 0)
+            activity.mSurfaceProxy.SurfaceQueueBuffer(0)
+            activity.mSurfaceProxy.SurfaceSetScalingMode(ScalingMode.SCALE_TO_WINDOW)
+            activity.mSurfaceProxy.SurfaceQueueBuffer(1)
+            assertEquals(activity.mSurfaceProxy.waitUntilBufferDisplayed(3, 500 /* ms */), 0)
         }
 
         // verify buffer size is reset to default buffer size
@@ -88,23 +89,23 @@ class BufferRejectionTests(useBlastAdapter: Boolean) : SurfaceTracingTestBase(us
     @Test
     fun testSetBufferScalingMode_freeze_withBufferRotation() {
         val rotatedBufferSize = Point(defaultBufferSize.y, defaultBufferSize.x)
-        val trace = withTrace {
-            it.drawFrame()
-            assertEquals(it.mSurfaceProxy.waitUntilBufferDisplayed(1, 500 /* ms */), 0)
-            it.mSurfaceProxy.ANativeWindowSetBuffersGeometry(it.surface!!, rotatedBufferSize,
-                    R8G8B8A8_UNORM)
-            assertEquals(0, it.mSurfaceProxy.SurfaceDequeueBuffer(0, 1000 /* ms */))
-            assertEquals(0, it.mSurfaceProxy.SurfaceDequeueBuffer(1, 1000 /* ms */))
+        val trace = withTrace { activity ->
+            activity.drawFrame()
+            assertEquals(activity.mSurfaceProxy.waitUntilBufferDisplayed(1, 500 /* ms */), 0)
+            activity.mSurfaceProxy.ANativeWindowSetBuffersGeometry(activity.surface!!,
+                    rotatedBufferSize, R8G8B8A8_UNORM)
+            assertEquals(0, activity.mSurfaceProxy.SurfaceDequeueBuffer(0, 1000 /* ms */))
+            assertEquals(0, activity.mSurfaceProxy.SurfaceDequeueBuffer(1, 1000 /* ms */))
             // Change buffer size and set scaling mode to freeze
-            it.mSurfaceProxy.ANativeWindowSetBuffersGeometry(it.surface!!, Point(0, 0),
+            activity.mSurfaceProxy.ANativeWindowSetBuffersGeometry(activity.surface!!, Point(0, 0),
                     R8G8B8A8_UNORM)
 
             // first dequeued buffer does not have the new size so it should be rejected.
-            it.mSurfaceProxy.SurfaceQueueBuffer(0)
+            activity.mSurfaceProxy.SurfaceQueueBuffer(0)
             // add a buffer transform so the buffer size is correct.
-            it.mSurfaceProxy.ANativeWindowSetBuffersTransform(Transform.ROT_90)
-            it.mSurfaceProxy.SurfaceQueueBuffer(1)
-            assertEquals(it.mSurfaceProxy.waitUntilBufferDisplayed(3, 500 /* ms */), 0)
+            activity.mSurfaceProxy.ANativeWindowSetBuffersTransform(Transform.ROT_90)
+            activity.mSurfaceProxy.SurfaceQueueBuffer(1)
+            assertEquals(activity.mSurfaceProxy.waitUntilBufferDisplayed(3, 500 /* ms */), 0)
         }
 
         // verify buffer size is reset to default buffer size
@@ -117,24 +118,24 @@ class BufferRejectionTests(useBlastAdapter: Boolean) : SurfaceTracingTestBase(us
     @Test
     fun testRejectedBuffersAreReleased() {
         val bufferSize = Point(300, 200)
-        val trace = withTrace {
+        val trace = withTrace { activity ->
             for (count in 0 until 5) {
-                it.drawFrame()
-                assertEquals(it.mSurfaceProxy.waitUntilBufferDisplayed((count * 3) + 1L,
+                activity.drawFrame()
+                assertEquals(activity.mSurfaceProxy.waitUntilBufferDisplayed((count * 3) + 1L,
                         500 /* ms */), 0)
-                it.mSurfaceProxy.ANativeWindowSetBuffersGeometry(it.surface!!, bufferSize,
-                        R8G8B8A8_UNORM)
-                assertEquals(0, it.mSurfaceProxy.SurfaceDequeueBuffer(0, 1000 /* ms */))
-                assertEquals(0, it.mSurfaceProxy.SurfaceDequeueBuffer(1, 1000 /* ms */))
+                activity.mSurfaceProxy.ANativeWindowSetBuffersGeometry(activity.surface!!,
+                        bufferSize, R8G8B8A8_UNORM)
+                assertEquals(0, activity.mSurfaceProxy.SurfaceDequeueBuffer(0, 1000 /* ms */))
+                assertEquals(0, activity.mSurfaceProxy.SurfaceDequeueBuffer(1, 1000 /* ms */))
                 // Change buffer size and set scaling mode to freeze
-                it.mSurfaceProxy.ANativeWindowSetBuffersGeometry(it.surface!!, Point(0, 0),
-                        R8G8B8A8_UNORM)
+                activity.mSurfaceProxy.ANativeWindowSetBuffersGeometry(activity.surface!!,
+                        Point(0, 0), R8G8B8A8_UNORM)
 
                 // first dequeued buffer does not have the new size so it should be rejected.
-                it.mSurfaceProxy.SurfaceQueueBuffer(0)
-                it.mSurfaceProxy.SurfaceSetScalingMode(ScalingMode.SCALE_TO_WINDOW)
-                it.mSurfaceProxy.SurfaceQueueBuffer(1)
-                assertEquals(it.mSurfaceProxy.waitUntilBufferDisplayed((count * 3) + 3L,
+                activity.mSurfaceProxy.SurfaceQueueBuffer(0)
+                activity.mSurfaceProxy.SurfaceSetScalingMode(ScalingMode.SCALE_TO_WINDOW)
+                activity.mSurfaceProxy.SurfaceQueueBuffer(1)
+                assertEquals(activity.mSurfaceProxy.waitUntilBufferDisplayed((count * 3) + 3L,
                         500 /* ms */), 0)
             }
         }
