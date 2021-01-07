@@ -23,6 +23,8 @@ import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.RemoteException;
 import android.util.Slog;
+
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 
 /**
@@ -47,7 +49,8 @@ final class DeviceSelectAction extends HdmiCecFeatureAction {
 
     // State in which we wait for <Report Power Status> to come in response to the command
     // <Give Device Power Status> we have sent.
-    private static final int STATE_WAIT_FOR_REPORT_POWER_STATUS = 1;
+    @VisibleForTesting
+    static final int STATE_WAIT_FOR_REPORT_POWER_STATUS = 1;
 
     // State in which we wait for the device power status to switch to 'Standby'.
     // We wait till the status becomes 'Standby' before we send <Set Stream Path>
@@ -56,11 +59,13 @@ final class DeviceSelectAction extends HdmiCecFeatureAction {
 
     // State in which we wait for the device power status to switch to 'on'. We wait
     // maximum 100 seconds (20 * 5) before we give up and just send <Set Stream Path>.
-    private static final int STATE_WAIT_FOR_DEVICE_POWER_ON = 3;
+    @VisibleForTesting
+    static final int STATE_WAIT_FOR_DEVICE_POWER_ON = 3;
 
     private final HdmiDeviceInfo mTarget;
     private final IHdmiControlCallback mCallback;
     private final HdmiCecMessage mGivePowerStatus;
+    private final boolean mIsCec20;
 
     private int mPowerStatusCounter = 0;
 
@@ -71,13 +76,22 @@ final class DeviceSelectAction extends HdmiCecFeatureAction {
      * @param target target logical device that will be a new active source
      * @param callback callback object
      */
-    public DeviceSelectAction(HdmiCecLocalDeviceTv source,
-            HdmiDeviceInfo target, IHdmiControlCallback callback) {
+    DeviceSelectAction(HdmiCecLocalDeviceTv source, HdmiDeviceInfo target,
+                              IHdmiControlCallback callback) {
+        this(source, target, callback,
+             source.getDeviceInfo().getCecVersion() >= HdmiControlManager.HDMI_CEC_VERSION_2_0
+                     && target.getCecVersion() >= HdmiControlManager.HDMI_CEC_VERSION_2_0);
+    }
+
+    @VisibleForTesting
+    DeviceSelectAction(HdmiCecLocalDeviceTv source, HdmiDeviceInfo target,
+                       IHdmiControlCallback callback, boolean isCec20) {
         super(source);
         mCallback = callback;
         mTarget = target;
         mGivePowerStatus = HdmiCecMessageBuilder.buildGiveDevicePowerStatus(
                 getSourceAddress(), getTargetAddress());
+        mIsCec20 = isCec20;
     }
 
     int getTargetAddress() {
@@ -86,8 +100,18 @@ final class DeviceSelectAction extends HdmiCecFeatureAction {
 
     @Override
     public boolean start() {
-        // Seq #9
-        queryDevicePowerStatus();
+        if (mIsCec20) {
+            sendSetStreamPath();
+        }
+        if (!mIsCec20 || mTarget.getDevicePowerStatus()
+                              == HdmiControlManager.POWER_STATUS_UNKNOWN) {
+            queryDevicePowerStatus();
+        } else if (mTarget.getDevicePowerStatus() == HdmiControlManager.POWER_STATUS_ON) {
+            invokeCallbackAndFinish(HdmiControlManager.RESULT_SUCCESS);
+            return true;
+        }
+        mState = STATE_WAIT_FOR_REPORT_POWER_STATUS;
+        addTimer(mState, HdmiConfig.TIMEOUT_MS);
         return true;
     }
 
@@ -96,14 +120,10 @@ final class DeviceSelectAction extends HdmiCecFeatureAction {
             @Override
             public void onSendCompleted(int error) {
                 if (error != SendMessageResult.SUCCESS) {
-                    invokeCallback(HdmiControlManager.RESULT_COMMUNICATION_FAILED);
-                    finish();
-                    return;
+                    invokeCallbackAndFinish(HdmiControlManager.RESULT_COMMUNICATION_FAILED);
                 }
             }
         });
-        mState = STATE_WAIT_FOR_REPORT_POWER_STATUS;
-        addTimer(mState, HdmiConfig.TIMEOUT_MS);
     }
 
     @Override
@@ -113,7 +133,6 @@ final class DeviceSelectAction extends HdmiCecFeatureAction {
         }
         int opcode = cmd.getOpcode();
         byte[] params = cmd.getParams();
-
         switch (mState) {
             case STATE_WAIT_FOR_REPORT_POWER_STATUS:
                 if (opcode == Constants.MESSAGE_REPORT_POWER_STATUS) {
@@ -129,21 +148,23 @@ final class DeviceSelectAction extends HdmiCecFeatureAction {
     private boolean handleReportPowerStatus(int powerStatus) {
         switch (powerStatus) {
             case HdmiControlManager.POWER_STATUS_ON:
-                sendSetStreamPath();
+                selectDevice();
                 return true;
             case HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY:
                 if (mPowerStatusCounter < 4) {
                     mState = STATE_WAIT_FOR_DEVICE_TO_TRANSIT_TO_STANDBY;
                     addTimer(mState, TIMEOUT_TRANSIT_TO_STANDBY_MS);
                 } else {
-                    sendSetStreamPath();
+                    selectDevice();
                 }
                 return true;
             case HdmiControlManager.POWER_STATUS_STANDBY:
                 if (mPowerStatusCounter == 0) {
                     turnOnDevice();
+                    mState = STATE_WAIT_FOR_DEVICE_POWER_ON;
+                    addTimer(mState, TIMEOUT_POWER_ON_MS);
                 } else {
-                    sendSetStreamPath();
+                    selectDevice();
                 }
                 return true;
             case HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON:
@@ -151,31 +172,11 @@ final class DeviceSelectAction extends HdmiCecFeatureAction {
                     mState = STATE_WAIT_FOR_DEVICE_POWER_ON;
                     addTimer(mState, TIMEOUT_POWER_ON_MS);
                 } else {
-                    sendSetStreamPath();
+                    selectDevice();
                 }
                 return true;
         }
         return false;
-    }
-
-    private void turnOnDevice() {
-        sendUserControlPressedAndReleased(mTarget.getLogicalAddress(),
-                HdmiCecKeycode.CEC_KEYCODE_POWER);
-        sendUserControlPressedAndReleased(mTarget.getLogicalAddress(),
-                HdmiCecKeycode.CEC_KEYCODE_POWER_ON_FUNCTION);
-        mState = STATE_WAIT_FOR_DEVICE_POWER_ON;
-        addTimer(mState, TIMEOUT_POWER_ON_MS);
-    }
-
-    private void sendSetStreamPath() {
-        // Turn the active source invalidated, which remains so till <Active Source> comes from
-        // the selected device.
-        tv().getActiveSource().invalidate();
-        tv().setActivePath(mTarget.getPhysicalAddress());
-        sendCommand(HdmiCecMessageBuilder.buildSetStreamPath(
-                getSourceAddress(), mTarget.getPhysicalAddress()));
-        invokeCallback(HdmiControlManager.RESULT_SUCCESS);
-        finish();
     }
 
     @Override
@@ -187,28 +188,54 @@ final class DeviceSelectAction extends HdmiCecFeatureAction {
         switch (mState) {
             case STATE_WAIT_FOR_REPORT_POWER_STATUS:
                 if (tv().isPowerStandbyOrTransient()) {
-                    invokeCallback(HdmiControlManager.RESULT_INCORRECT_MODE);
-                    finish();
+                    invokeCallbackAndFinish(HdmiControlManager.RESULT_INCORRECT_MODE);
                     return;
                 }
-                sendSetStreamPath();
+                selectDevice();
                 break;
             case STATE_WAIT_FOR_DEVICE_TO_TRANSIT_TO_STANDBY:
             case STATE_WAIT_FOR_DEVICE_POWER_ON:
                 mPowerStatusCounter++;
                 queryDevicePowerStatus();
+                mState = STATE_WAIT_FOR_REPORT_POWER_STATUS;
+                addTimer(mState, HdmiConfig.TIMEOUT_MS);
                 break;
         }
     }
 
-    private void invokeCallback(int result) {
-        if (mCallback == null) {
-            return;
+    private void turnOnDevice() {
+        if (!mIsCec20) {
+            sendUserControlPressedAndReleased(mTarget.getLogicalAddress(),
+                    HdmiCecKeycode.CEC_KEYCODE_POWER);
+            sendUserControlPressedAndReleased(mTarget.getLogicalAddress(),
+                    HdmiCecKeycode.CEC_KEYCODE_POWER_ON_FUNCTION);
         }
-        try {
-            mCallback.onComplete(result);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Callback failed:" + e);
+    }
+
+    private void selectDevice() {
+        if (!mIsCec20) {
+            sendSetStreamPath();
         }
+        invokeCallbackAndFinish(HdmiControlManager.RESULT_SUCCESS);
+    }
+
+    private void sendSetStreamPath() {
+        // Turn the active source invalidated, which remains so till <Active Source> comes from
+        // the selected device.
+        tv().getActiveSource().invalidate();
+        tv().setActivePath(mTarget.getPhysicalAddress());
+        sendCommand(HdmiCecMessageBuilder.buildSetStreamPath(
+                getSourceAddress(), mTarget.getPhysicalAddress()));
+    }
+
+    private void invokeCallbackAndFinish(int result) {
+        if (mCallback != null) {
+            try {
+                mCallback.onComplete(result);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Callback failed:" + e);
+            }
+        }
+        finish();
     }
 }
