@@ -1976,7 +1976,8 @@ public class StatsPullAtomService extends SystemService {
                         metrics.pageTablesKb,
                         metrics.kernelStackKb,
                         metrics.totalIonKb,
-                        metrics.unaccountedKb));
+                        metrics.unaccountedKb,
+                        metrics.gpuTotalUsageKb));
         return StatsManager.PULL_SUCCESS;
     }
 
