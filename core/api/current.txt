@@ -23939,6 +23939,19 @@ package android.media.effect {
 
 }
 
+package android.media.metrics {
+
+  public class MediaMetricsManager {
+    method @NonNull public android.media.metrics.PlaybackSession createPlaybackSession();
+  }
+
+  public final class PlaybackSession implements java.lang.AutoCloseable {
+    method public void close();
+    method @NonNull public String getId();
+  }
+
+}
+
 package android.media.midi {
 
   public final class MidiDevice implements java.io.Closeable {
