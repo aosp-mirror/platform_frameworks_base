@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-cc_library_shared {
-    name: "libservice-connectivity",
+cc_defaults {
+    name: "libservice-connectivity-defaults",
     // TODO: build against the NDK (sdk_version: "30" for example)
     cflags: [
         "-Wall",
@@ -26,7 +26,6 @@ cc_library_shared {
     srcs: [
         "jni/com_android_server_TestNetworkService.cpp",
         "jni/com_android_server_connectivity_Vpn.cpp",
-        "jni/onload.cpp",
     ],
     shared_libs: [
         "libbase",
@@ -36,9 +35,25 @@ cc_library_shared {
         // addresses, and remove dependency on libnetutils.
         "libnetutils",
     ],
-    apex_available: [
-        "com.android.tethering",
+}
+
+cc_library_shared {
+    name: "libservice-connectivity",
+    defaults: ["libservice-connectivity-defaults"],
+    srcs: [
+        "jni/onload.cpp",
     ],
+    apex_available: [
+        // TODO: move this library to the tethering APEX and remove libservice-connectivity-static
+        // "com.android.tethering",
+    ],
+}
+
+// Static library linked into libservices.core until libservice-connectivity can be loaded from
+// the tethering APEX instead.
+cc_library_static {
+    name: "libservice-connectivity-static",
+    defaults: ["libservice-connectivity-defaults"],
 }
 
 java_library {
@@ -60,6 +75,5 @@ java_library {
     ],
     apex_available: [
         "//apex_available:platform",
-        "com.android.tethering",
     ],
 }
