@@ -41017,6 +41017,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean doesSwitchMultiSimConfigTriggerReboot();
     method public int getActiveModemCount();
     method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public java.util.List<android.telephony.CellInfo> getAllCellInfo();
+    method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public int getCallComposerStatus();
     method public int getCallState();
     method public int getCardIdForDefaultEuicc();
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) @WorkerThread public android.os.PersistableBundle getCarrierConfig();
@@ -41111,6 +41112,7 @@ package android.telephony {
     method @Deprecated public String sendEnvelopeWithStatus(String);
     method @RequiresPermission(android.Manifest.permission.CALL_PHONE) public void sendUssdRequest(String, android.telephony.TelephonyManager.UssdResponseCallback, android.os.Handler);
     method public void sendVisualVoicemailSms(String, int, String, android.app.PendingIntent);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCallComposerStatus(int);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataEnabledForReason(int, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setForbiddenPlmns(@NonNull java.util.List<java.lang.String>);
@@ -41145,6 +41147,8 @@ package android.telephony {
     field public static final int APPTYPE_USIM = 2; // 0x2
     field public static final int AUTHTYPE_EAP_AKA = 129; // 0x81
     field public static final int AUTHTYPE_EAP_SIM = 128; // 0x80
+    field public static final int CALL_COMPOSER_STATUS_OFF = 0; // 0x0
+    field public static final int CALL_COMPOSER_STATUS_ON = 1; // 0x1
     field public static final int CALL_STATE_IDLE = 0; // 0x0
     field public static final int CALL_STATE_OFFHOOK = 2; // 0x2
     field public static final int CALL_STATE_RINGING = 1; // 0x1
