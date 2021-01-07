@@ -36,6 +36,7 @@ import android.window.TaskSnapshot;
 import android.window.WindowContainerToken;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -277,6 +278,24 @@ public class TaskInfo {
     public void addLaunchCookie(IBinder cookie) {
         if (cookie == null || launchCookies.contains(cookie)) return;
         launchCookies.add(cookie);
+    }
+
+    /**
+     * @return {@code true} if this task contains the launch cookie.
+     * @hide
+     */
+    @TestApi
+    public boolean containsLaunchCookie(@NonNull IBinder cookie) {
+        return launchCookies.contains(cookie);
+    }
+
+    /**
+     * @return The parent task id of this task.
+     * @hide
+     */
+    @TestApi
+    public int getParentTaskId() {
+        return parentTaskId;
     }
 
     /** @hide */
