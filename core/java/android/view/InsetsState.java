@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.InsetsStateProto.DISPLAY_CUTOUT;
 import static android.view.InsetsStateProto.DISPLAY_FRAME;
 import static android.view.InsetsStateProto.SOURCES;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
@@ -165,6 +166,10 @@ public class InsetsState implements Parcelable {
      */
     private final Rect mDisplayFrame = new Rect();
 
+    /** The area cut from the display. */
+    private final DisplayCutout.ParcelableWrapper mDisplayCutout =
+            new DisplayCutout.ParcelableWrapper();
+
     public InsetsState() {
     }
 
@@ -186,7 +191,7 @@ public class InsetsState implements Parcelable {
      * @return The calculated insets.
      */
     public WindowInsets calculateInsets(Rect frame, @Nullable InsetsState ignoringVisibilityState,
-            boolean isScreenRound, boolean alwaysConsumeSystemBars, DisplayCutout cutout,
+            boolean isScreenRound, boolean alwaysConsumeSystemBars,
             int legacySoftInputMode, int legacyWindowFlags, int legacySystemUiFlags,
             int windowType, @WindowConfiguration.WindowingMode int windowingMode,
             @Nullable @InternalInsetsSide SparseIntArray typeSideMap) {
@@ -236,8 +241,29 @@ public class InsetsState implements Parcelable {
         }
 
         return new WindowInsets(typeInsetsMap, typeMaxInsetsMap, typeVisibilityMap, isScreenRound,
-                alwaysConsumeSystemBars, cutout, compatInsetsTypes,
+                alwaysConsumeSystemBars, calculateRelativeCutout(frame), compatInsetsTypes,
                 (legacySystemUiFlags & SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0);
+    }
+
+    private DisplayCutout calculateRelativeCutout(Rect frame) {
+        final DisplayCutout raw = mDisplayCutout.get();
+        if (mDisplayFrame.equals(frame)) {
+            return raw;
+        }
+        if (frame == null) {
+            return DisplayCutout.NO_CUTOUT;
+        }
+        final int insetLeft = frame.left - mDisplayFrame.left;
+        final int insetTop = frame.top - mDisplayFrame.top;
+        final int insetRight = mDisplayFrame.right - frame.right;
+        final int insetBottom = mDisplayFrame.bottom - frame.bottom;
+        if (insetLeft >= raw.getSafeInsetLeft()
+                && insetTop >= raw.getSafeInsetTop()
+                && insetRight >= raw.getSafeInsetRight()
+                && insetBottom >= raw.getSafeInsetBottom()) {
+            return DisplayCutout.NO_CUTOUT;
+        }
+        return raw.inset(insetLeft, insetTop, insetRight, insetBottom);
     }
 
     public Rect calculateInsets(Rect frame, @InsetsType int types, boolean ignoreVisibility) {
@@ -392,15 +418,6 @@ public class InsetsState implements Parcelable {
         return mSources[type];
     }
 
-    public boolean hasSources() {
-        for (int i = 0; i < SIZE; i++) {
-            if (mSources[i] != null) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     /**
      * Returns the source visibility or the default visibility if the source doesn't exist. This is
      * useful if when treating this object as a request.
@@ -420,6 +437,14 @@ public class InsetsState implements Parcelable {
 
     public Rect getDisplayFrame() {
         return mDisplayFrame;
+    }
+
+    public void setDisplayCutout(DisplayCutout cutout) {
+        mDisplayCutout.set(cutout);
+    }
+
+    public DisplayCutout getDisplayCutout() {
+        return mDisplayCutout.get();
     }
 
     /**
@@ -452,6 +477,7 @@ public class InsetsState implements Parcelable {
      */
     public void scale(float scale) {
         mDisplayFrame.scale(scale);
+        mDisplayCutout.scale(scale);
         for (int i = 0; i < SIZE; i++) {
             final InsetsSource source = mSources[i];
             if (source != null) {
@@ -470,6 +496,7 @@ public class InsetsState implements Parcelable {
 
     public void set(InsetsState other, boolean copySources) {
         mDisplayFrame.set(other.mDisplayFrame);
+        mDisplayCutout.set(other.mDisplayCutout);
         if (copySources) {
             for (int i = 0; i < SIZE; i++) {
                 InsetsSource source = other.mSources[i];
@@ -592,6 +619,7 @@ public class InsetsState implements Parcelable {
             source.dumpDebug(proto, SOURCES);
         }
         mDisplayFrame.dumpDebug(proto, DISPLAY_FRAME);
+        mDisplayCutout.get().dumpDebug(proto, DISPLAY_CUTOUT);
         proto.end(token);
     }
 
@@ -669,7 +697,8 @@ public class InsetsState implements Parcelable {
 
         InsetsState state = (InsetsState) o;
 
-        if (!mDisplayFrame.equals(state.mDisplayFrame)) {
+        if (!mDisplayFrame.equals(state.mDisplayFrame)
+                || !mDisplayCutout.equals(state.mDisplayCutout)) {
             return false;
         }
         for (int i = 0; i < SIZE; i++) {
@@ -681,7 +710,7 @@ public class InsetsState implements Parcelable {
             if (source == null && otherSource == null) {
                 continue;
             }
-            if (source != null && otherSource == null || source == null && otherSource != null) {
+            if (source == null || otherSource == null) {
                 return false;
             }
             if (!otherSource.equals(source, excludeInvisibleImeFrames)) {
@@ -693,7 +722,7 @@ public class InsetsState implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mDisplayFrame, Arrays.hashCode(mSources));
+        return Objects.hash(mDisplayFrame, mDisplayCutout, Arrays.hashCode(mSources));
     }
 
     public InsetsState(Parcel in) {
@@ -707,7 +736,8 @@ public class InsetsState implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeParcelable(mDisplayFrame, flags);
+        mDisplayFrame.writeToParcel(dest, flags);
+        mDisplayCutout.writeToParcel(dest, flags);
         dest.writeParcelableArray(mSources, 0);
     }
 
@@ -723,7 +753,8 @@ public class InsetsState implements Parcelable {
     };
 
     public void readFromParcel(Parcel in) {
-        mDisplayFrame.set(in.readParcelable(null /* loader */));
+        mDisplayFrame.set(Rect.CREATOR.createFromParcel(in));
+        mDisplayCutout.set(DisplayCutout.ParcelableWrapper.CREATOR.createFromParcel(in));
         mSources = in.readParcelableArray(null, InsetsSource.class);
     }
 
@@ -738,6 +769,7 @@ public class InsetsState implements Parcelable {
         }
         return "InsetsState: {"
                 + "mDisplayFrame=" + mDisplayFrame
+                + ", mDisplayCutout=" + mDisplayCutout
                 + ", mSources= { " + joiner
                 + " }";
     }

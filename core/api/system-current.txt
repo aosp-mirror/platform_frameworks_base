@@ -2222,7 +2222,7 @@ package android.content.pm {
   }
 
   public static class LauncherApps.ShortcutQuery {
-    field public static final int FLAG_GET_PERSONS_DATA = 2048; // 0x800
+    field @RequiresPermission(android.Manifest.permission.ACCESS_SHORTCUTS) public static final int FLAG_GET_PERSONS_DATA = 2048; // 0x800
   }
 
   public class PackageInstaller {
@@ -3938,17 +3938,27 @@ package android.location {
     method public void onLocationBatch(java.util.List<android.location.Location>);
   }
 
-  public final class GnssCapabilities {
+  public final class GnssCapabilities implements android.os.Parcelable {
     method public boolean hasGeofencing();
     method public boolean hasLowPowerMode();
     method public boolean hasMeasurementCorrections();
     method public boolean hasMeasurementCorrectionsExcessPathLength();
     method public boolean hasMeasurementCorrectionsLosSats();
-    method public boolean hasMeasurementCorrectionsReflectingPane();
-    method public boolean hasMeasurements();
-    method public boolean hasNavMessages();
+    method @Deprecated public boolean hasMeasurementCorrectionsReflectingPane();
+    method public boolean hasMeasurementCorrectionsReflectingPlane();
+    method @Deprecated public boolean hasNavMessages();
     method @Deprecated public boolean hasSatelliteBlacklist();
     method public boolean hasSatelliteBlocklist();
+  }
+
+  public static final class GnssCapabilities.Builder {
+    method @NonNull public android.location.GnssCapabilities.Builder setHasGeofencing(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasLowPowerMode(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrections(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrectionsExcessPathLength(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrectionsLosSats(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrectionsReflectingPlane(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasSatelliteBlocklist(boolean);
   }
 
   public final class GnssMeasurementCorrections implements android.os.Parcelable {
@@ -12114,7 +12124,9 @@ package android.telephony.ims {
     method public void callSessionHoldFailed(android.telephony.ims.ImsReasonInfo);
     method public void callSessionHoldReceived(android.telephony.ims.ImsCallProfile);
     method public void callSessionInitiated(android.telephony.ims.ImsCallProfile);
-    method public void callSessionInitiatedFailed(android.telephony.ims.ImsReasonInfo);
+    method @Deprecated public void callSessionInitiatedFailed(android.telephony.ims.ImsReasonInfo);
+    method public void callSessionInitiating(@NonNull android.telephony.ims.ImsCallProfile);
+    method public void callSessionInitiatingFailed(@NonNull android.telephony.ims.ImsReasonInfo);
     method public void callSessionInviteParticipantsRequestDelivered();
     method public void callSessionInviteParticipantsRequestFailed(android.telephony.ims.ImsReasonInfo);
     method @Deprecated public void callSessionMayHandover(int, int);

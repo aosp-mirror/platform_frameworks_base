@@ -171,6 +171,7 @@ public class BatteryConsumerData {
         mBatteryConsumerInfo = BatteryConsumerInfoHelper.makeBatteryConsumerInfo(
                 context.getPackageManager(), requestedBatterySipper);
         long totalScreenMeasuredEnergyUJ = batteryStats.getScreenOnEnergy();
+        long uidScreenMeasuredEnergyUJ = requestedBatterySipper.uidObj.getScreenOnEnergy();
 
         addEntry("Total power", EntryType.POWER,
                 requestedBatterySipper.totalSmearedPowerMah, totalSmearedPowerMah);
@@ -180,11 +181,12 @@ public class BatteryConsumerData {
                 requestedBatterySipper.totalSmearedPowerMah, totalPowerExcludeSystemMah);
         addEntry("Screen, smeared", EntryType.POWER,
                 requestedBatterySipper.screenPowerMah, totalScreenPower);
-        if (totalScreenMeasuredEnergyUJ != BatteryStats.ENERGY_DATA_UNAVAILABLE) {
-            final double measuredCharge = UJ_2_MAH * totalScreenMeasuredEnergyUJ;
-            final double ratio = measuredCharge / totalScreenPower;
-            addEntry("Screen, smeared (PowerStatsHal adjusted)", EntryType.POWER,
-                    requestedBatterySipper.screenPowerMah * ratio, measuredCharge);
+        if (uidScreenMeasuredEnergyUJ != BatteryStats.ENERGY_DATA_UNAVAILABLE
+                && totalScreenMeasuredEnergyUJ != BatteryStats.ENERGY_DATA_UNAVAILABLE) {
+            final double measuredCharge = UJ_2_MAH * uidScreenMeasuredEnergyUJ;
+            final double totalMeasuredCharge = UJ_2_MAH * totalScreenMeasuredEnergyUJ;
+            addEntry("Screen, measured", EntryType.POWER,
+                    measuredCharge, totalMeasuredCharge);
         }
         addEntry("Other, smeared", EntryType.POWER,
                 requestedBatterySipper.proportionalSmearMah, totalProportionalSmearMah);

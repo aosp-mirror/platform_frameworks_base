@@ -267,8 +267,9 @@ class ResetTargetTaskHelper {
     private boolean takeOption(ActivityRecord p, boolean noOptions) {
         mCanMoveOptions = false;
         if (noOptions && mTopOptions == null) {
-            mTopOptions = p.takeOptionsLocked(false /* fromClient */);
+            mTopOptions = p.getOptions();
             if (mTopOptions != null) {
+                p.clearOptionsAnimation();
                 noOptions = false;
             }
         }

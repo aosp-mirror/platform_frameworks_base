@@ -503,31 +503,31 @@ public class LegacySplitScreenController implements LegacySplitScreen,
                     || isSplitActive()) {
                 return false;
             }
-
-            // Try fetching the top running task.
-            final List<RunningTaskInfo> runningTasks =
-                    ActivityTaskManager.getInstance().getTasks(1 /* maxNum */);
-            if (runningTasks == null || runningTasks.isEmpty()) {
-                return false;
-            }
-            // Note: The set of running tasks from the system is ordered by recency.
-            final RunningTaskInfo topRunningTask = runningTasks.get(0);
-            final int activityType = topRunningTask.getActivityType();
-            if (activityType == ACTIVITY_TYPE_HOME || activityType == ACTIVITY_TYPE_RECENTS) {
-                return false;
-            }
-
-            if (!topRunningTask.supportsSplitScreenMultiWindow) {
-                Toast.makeText(mContext, R.string.dock_non_resizeble_failed_to_dock_text,
-                        Toast.LENGTH_SHORT).show();
-                return false;
-            }
-
-            return ActivityTaskManager.getService().setTaskWindowingModeSplitScreenPrimary(
-                    topRunningTask.taskId, true /* onTop */);
         } catch (RemoteException e) {
             return false;
         }
+
+        // Try fetching the top running task.
+        final List<RunningTaskInfo> runningTasks =
+                ActivityTaskManager.getInstance().getTasks(1 /* maxNum */);
+        if (runningTasks == null || runningTasks.isEmpty()) {
+            return false;
+        }
+        // Note: The set of running tasks from the system is ordered by recency.
+        final RunningTaskInfo topRunningTask = runningTasks.get(0);
+        final int activityType = topRunningTask.getActivityType();
+        if (activityType == ACTIVITY_TYPE_HOME || activityType == ACTIVITY_TYPE_RECENTS) {
+            return false;
+        }
+
+        if (!topRunningTask.supportsSplitScreenMultiWindow) {
+            Toast.makeText(mContext, R.string.dock_non_resizeble_failed_to_dock_text,
+                    Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        return ActivityTaskManager.getInstance().setTaskWindowingModeSplitScreenPrimary(
+                topRunningTask.taskId, true /* onTop */);
     }
 
     @Override

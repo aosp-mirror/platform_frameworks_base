@@ -27,7 +27,6 @@ import static android.Manifest.permission.STATUS_BAR_SERVICE;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
-import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.StatusBarManager.DISABLE_MASK;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
@@ -220,7 +219,6 @@ import android.util.TypedValue;
 import android.util.proto.ProtoOutputStream;
 import android.view.Choreographer;
 import android.view.Display;
-import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IAppTransitionAnimationSpecsFuture;
@@ -686,12 +684,9 @@ public class WindowManagerService extends IWindowManager.Stub
     // Whether the system should use BLAST for ViewRootImpl
     final boolean mUseBLAST;
     // Whether to enable BLASTSyncEngine Transaction passing.
-    final boolean mUseBLASTSync = false;
+    final boolean mUseBLASTSync = true;
 
     final BLASTSyncEngine mSyncEngine;
-
-    int mDockedStackCreateMode = SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
-    Rect mDockedStackCreateBounds;
 
     boolean mIsPc;
     /**
@@ -1445,8 +1440,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public int addWindow(Session session, IWindow client, LayoutParams attrs, int viewVisibility,
             int displayId, int requestUserId, InsetsState requestedVisibility, Rect outFrame,
-            DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
-            InsetsState outInsetsState, InsetsSourceControl[] outActiveControls) {
+            InputChannel outInputChannel, InsetsState outInsetsState,
+            InsetsSourceControl[] outActiveControls) {
         Arrays.fill(outActiveControls, null);
         int[] appOp = new int[1];
         final boolean isRoundedCornerOverlay = (attrs.privateFlags
@@ -1759,8 +1754,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 prepareNoneTransitionForRelaunching(activity);
             }
 
-            if (displayPolicy.getLayoutHint(win.mAttrs, token, outFrame, outDisplayCutout,
-                    outInsetsState, win.isClientLocal())) {
+            if (displayPolicy.getLayoutHint(win.mAttrs, token, outFrame, outInsetsState,
+                    win.isClientLocal())) {
                 res |= WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_SYSTEM_BARS;
             }
 
@@ -8392,7 +8387,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public boolean getWindowInsets(WindowManager.LayoutParams attrs, int displayId,
-            DisplayCutout.ParcelableWrapper outDisplayCutout, InsetsState outInsetsState) {
+            InsetsState outInsetsState) {
         final boolean fromLocal = Binder.getCallingPid() == myPid();
         final long origId = Binder.clearCallingIdentity();
         try {
@@ -8404,7 +8399,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 final WindowToken windowToken = dc.getWindowToken(attrs.token);
                 return dc.getDisplayPolicy().getLayoutHint(attrs, windowToken,
-                        mTmpRect /* outFrame */, outDisplayCutout, outInsetsState, fromLocal);
+                        mTmpRect /* outFrame */, outInsetsState, fromLocal);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

@@ -77,7 +77,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     private boolean mCharged;
     protected boolean mPowerSave;
     private boolean mAodPowerSave;
-    protected boolean mWirelessCharging;
+    private boolean mWirelessCharging;
     private boolean mTestMode = false;
     @VisibleForTesting
     boolean mHasReceivedBattery = false;
@@ -155,6 +155,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         cb.onBatteryLevelChanged(mLevel, mPluggedIn, mCharging);
         cb.onPowerSaveChanged(mPowerSave);
         cb.onBatteryUnknownStateChanged(mStateUnknown);
+        cb.onWirelessChargingChanged(mWirelessCharging);
     }
 
     @Override
@@ -179,8 +180,12 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
                     BatteryManager.BATTERY_STATUS_UNKNOWN);
             mCharged = status == BatteryManager.BATTERY_STATUS_FULL;
             mCharging = mCharged || status == BatteryManager.BATTERY_STATUS_CHARGING;
-            mWirelessCharging = mCharging && intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0)
-                    == BatteryManager.BATTERY_PLUGGED_WIRELESS;
+            if (mWirelessCharging != (mCharging
+                    && intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0)
+                    == BatteryManager.BATTERY_PLUGGED_WIRELESS)) {
+                mWirelessCharging = !mWirelessCharging;
+                fireWirelessChargingChanged();
+            }
 
             boolean present = intent.getBooleanExtra(EXTRA_PRESENT, true);
             boolean unknown = !present;
@@ -224,6 +229,13 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
                     mMainHandler.postDelayed(this, 200);
                 }
             });
+        }
+    }
+
+    private void fireWirelessChargingChanged() {
+        synchronized (mChangeCallbacks) {
+            mChangeCallbacks.forEach(batteryStateChangeCallback ->
+                    batteryStateChangeCallback.onWirelessChargingChanged(mWirelessCharging));
         }
     }
 

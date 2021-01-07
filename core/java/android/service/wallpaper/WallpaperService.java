@@ -881,8 +881,7 @@ public abstract class WallpaperService extends Service {
 
                         if (mSession.addToDisplay(mWindow, mLayout, View.VISIBLE,
                                 mDisplay.getDisplayId(), mInsetsState, mWinFrames.frame,
-                                mWinFrames.displayCutout, inputChannel, mInsetsState,
-                                mTempControls) < 0) {
+                                inputChannel, mInsetsState, mTempControls) < 0) {
                             Log.w(TAG, "Failed to add window while updating wallpaper surface.");
                             return;
                         }
@@ -924,13 +923,13 @@ public abstract class WallpaperService extends Service {
                     int w = mWinFrames.frame.width();
                     int h = mWinFrames.frame.height();
 
-                    final DisplayCutout rawCutout = mWinFrames.displayCutout.get();
+                    final DisplayCutout rawCutout = mInsetsState.getDisplayCutout();
                     final Configuration config = getResources().getConfiguration();
                     final Rect visibleFrame = new Rect(mWinFrames.frame);
                     visibleFrame.intersect(mInsetsState.getDisplayFrame());
                     WindowInsets windowInsets = mInsetsState.calculateInsets(visibleFrame,
                             null /* ignoringVisibilityState */, config.isScreenRound(),
-                            false /* alwaysConsumeSystemBars */, rawCutout, mLayout.softInputMode,
+                            false /* alwaysConsumeSystemBars */, mLayout.softInputMode,
                             mLayout.flags, SYSTEM_UI_FLAG_VISIBLE, mLayout.type,
                             config.windowConfiguration.getWindowingMode(), null /* typeSideMap */);
 

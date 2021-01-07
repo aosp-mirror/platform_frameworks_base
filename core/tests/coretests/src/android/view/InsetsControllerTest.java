@@ -151,11 +151,11 @@ public class InsetsControllerTest {
                     new Rect(0, 90, 100, 100));
             mController.getState().getSource(ITYPE_IME).setFrame(new Rect(0, 50, 100, 100));
             mController.getState().setDisplayFrame(new Rect(0, 0, 100, 100));
+            mController.getState().setDisplayCutout(new DisplayCutout(
+                    Insets.of(10, 10, 10, 10), rect, rect, rect, rect));
             mController.calculateInsets(
                     false,
                     false,
-                    new DisplayCutout(
-                            Insets.of(10, 10, 10, 10), rect, rect, rect, rect),
                     TYPE_APPLICATION, WINDOWING_MODE_UNDEFINED,
                     SOFT_INPUT_ADJUST_RESIZE, 0, 0);
             mController.onFrameChanged(new Rect(0, 0, 100, 100));

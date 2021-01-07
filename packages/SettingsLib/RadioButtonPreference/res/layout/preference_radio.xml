@@ -92,16 +92,32 @@
                 android:textAlignment="viewEnd"
                 android:textColor="?android:attr/textColorSecondary"
                 android:maxLines="1"
+                android:visibility="gone"
                 android:ellipsize="end"/>
         </LinearLayout>
-        <ProgressBar
-            android:id="@android:id/progress"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:max="100"
-            android:visibility="gone"/>
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/radio_extra_widget_container"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+        <View
+            android:layout_width=".75dp"
+            android:layout_height="match_parent"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="?android:attr/dividerVertical" />
+        <ImageView
+            android:id="@+id/radio_extra_widget"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:src="@drawable/ic_settings_accent"
+            android:contentDescription="@string/settings_label"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:layout_gravity="center"
+            android:background="?android:attr/selectableItemBackground" />
+    </LinearLayout>
 </LinearLayout>

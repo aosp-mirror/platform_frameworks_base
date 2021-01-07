@@ -34,7 +34,6 @@ import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.RESIZE_MODE_PRESERVE_WINDOW;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -1902,9 +1901,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Override
     public boolean setTaskWindowingMode(int taskId, int windowingMode, boolean toTop) {
-        if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-            return setTaskWindowingModeSplitScreenPrimary(taskId, toTop);
-        }
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_TASKS, "setTaskWindowingMode()");
         synchronized (mGlobalLock) {
             final long ident = Binder.clearCallingIdentity();
@@ -2228,28 +2224,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
                 task.reparent(rootTask, toTop, REPARENT_KEEP_ROOT_TASK_AT_FRONT, ANIMATE,
                         !DEFER_RESUME, "moveTaskToRootTask");
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-    }
-
-    /**
-     * Moves the specified task to the primary-split-screen stack.
-     *
-     * @param taskId Id of task to move.
-     * @param toTop  If the task and stack should be moved to the top.
-     * @return Whether the task was successfully put into splitscreen.
-     */
-    @Override
-    public boolean setTaskWindowingModeSplitScreenPrimary(int taskId, boolean toTop) {
-        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_TASKS,
-                "setTaskWindowingModeSplitScreenPrimary()");
-        synchronized (mGlobalLock) {
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                return setTaskWindowingModeSplitScreen(taskId, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY,
-                        toTop);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

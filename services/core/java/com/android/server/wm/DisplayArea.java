@@ -564,6 +564,22 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     }
 
     @Override
+    void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent) {
+        super.onParentChanged(newParent, oldParent);
+        if (mOrganizer != null || newParent == null) {
+            return;
+        }
+        // Check if we have a registered organizer, just after mSurfaceControl is ready.
+        setOrganizer(mOrganizerController.getOrganizerByFeature(mFeatureId));
+    }
+
+    @Override
+    void removeImmediately() {
+        setOrganizer(null);
+        super.removeImmediately();
+    }
+
+    @Override
     DisplayArea getDisplayArea() {
         return this;
     }

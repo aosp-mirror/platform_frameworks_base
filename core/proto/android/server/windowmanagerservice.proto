@@ -509,7 +509,7 @@ message WindowFramesProto {
     optional .android.graphics.RectProto overscan_frame = 7 [deprecated=true];
     optional .android.graphics.RectProto parent_frame = 8;
     optional .android.graphics.RectProto visible_frame = 9 [deprecated=true];
-    optional .android.view.DisplayCutoutProto cutout = 10;
+    optional .android.view.DisplayCutoutProto cutout = 10 [deprecated=true];
     optional .android.graphics.RectProto content_insets = 11 [deprecated=true];
     optional .android.graphics.RectProto overscan_insets = 12 [deprecated=true];
     optional .android.graphics.RectProto visible_insets = 13 [deprecated=true];

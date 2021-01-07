@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.internal.location.timezone;
+#ifndef _ANDROID_MEDIA_TV_DVR_CLIENT_CALLBACK_H_
+#define _ANDROID_MEDIA_TV_DVR_CLIENT_CALLBACK_H_
 
-import com.android.internal.location.timezone.LocationTimeZoneEvent;
+using ::android::hardware::tv::tuner::V1_0::PlaybackStatus;
+using ::android::hardware::tv::tuner::V1_0::RecordStatus;
 
-/**
- * Binder interface for the manager of location time zone provider implementations.
- * @hide
- */
-interface ILocationTimeZoneProviderManager {
-    void onLocationTimeZoneEvent(in LocationTimeZoneEvent locationTimeZoneEvent);
-}
+using namespace std;
+
+namespace android {
+
+struct DvrClientCallback : public RefBase {
+    virtual void onRecordStatus(const RecordStatus status);
+    virtual void onPlaybackStatus(const PlaybackStatus status);
+};
+}  // namespace android
+
+#endif  // _ANDROID_MEDIA_TV_DVR_CLIENT_CALLBACK_H_

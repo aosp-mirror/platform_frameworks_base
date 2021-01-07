@@ -30,7 +30,6 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IMMERSIVE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_VISIBILITY;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
@@ -42,7 +41,6 @@ import static com.android.server.wm.Task.ActivityState.DESTROYING;
 import android.annotation.NonNull;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.IActivityClientController;
 import android.app.PictureInPictureParams;
@@ -80,7 +78,6 @@ import java.util.Arrays;
  */
 class ActivityClientController extends IActivityClientController.Stub {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityClientController" : TAG_ATM;
-    private static final String TAG_VISIBILITY = TAG + POSTFIX_VISIBILITY;
 
     private final ActivityTaskManagerService mService;
     private final WindowManagerGlobalLock mGlobalLock;
@@ -553,23 +550,6 @@ class ActivityClientController extends IActivityClientController.Stub {
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.forTokenLocked(token);
             return r != null ? r.launchedFromPackage : null;
-        }
-    }
-
-    @Override
-    public Bundle getActivityOptions(IBinder token) {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
-                if (r == null) {
-                    return null;
-                }
-                final ActivityOptions activityOptions = r.takeOptionsLocked(true /* fromClient */);
-                return activityOptions != null ? activityOptions.toBundle() : null;
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
         }
     }
 

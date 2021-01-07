@@ -441,6 +441,7 @@ public class LauncherApps {
          * @hide
          */
         @SystemApi
+        @RequiresPermission(android.Manifest.permission.ACCESS_SHORTCUTS)
         public static final int FLAG_GET_PERSONS_DATA = 1 << 11;
 
         /** @hide */

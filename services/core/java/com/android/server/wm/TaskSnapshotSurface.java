@@ -227,7 +227,7 @@ class TaskSnapshotSurface implements StartingSurface {
         int displayId = activity.getDisplayContent().getDisplayId();
         try {
             final int res = session.addToDisplay(window, layoutParams,
-                    View.GONE, displayId, mTmpInsetsState, tmpFrames.frame, tmpFrames.displayCutout,
+                    View.GONE, displayId, mTmpInsetsState, tmpFrames.frame,
                     null /* outInputChannel */, mTmpInsetsState, mTempControls);
             if (res < 0) {
                 Slog.w(TAG, "Failed to add snapshot starting window res=" + res);

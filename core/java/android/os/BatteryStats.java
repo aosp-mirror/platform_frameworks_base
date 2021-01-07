@@ -985,6 +985,15 @@ public abstract class BatteryStats implements Parcelable {
          */
         public abstract void getDeferredJobsLineLocked(StringBuilder sb, int which);
 
+        /**
+         * Returns the measured energy in microjoules that the display consumed while the screen
+         * was on and uid active.
+         * Will return {@link #ENERGY_DATA_UNAVAILABLE} if data is unavailable
+         *
+         * {@hide}
+         */
+        public abstract long getScreenOnEnergy();
+
         public static abstract class Sensor {
 
             @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)

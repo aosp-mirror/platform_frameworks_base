@@ -18,6 +18,9 @@ package android.content.pm;
 
 import android.annotation.IntDef;
 import android.annotation.TestApi;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -27,6 +30,7 @@ import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 import android.util.Printer;
 
 import java.lang.annotation.Retention;
@@ -866,6 +870,47 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     };
 
     /**
+     * This change id forces the packages it is applied to to be resizable. We only allow resizing
+     * in fullscreen windowing mode, but not forcing the app into resizable multi-windowing mode.
+     * @hide
+     */
+    @ChangeId
+    @Disabled
+    public static final long FORCE_RESIZE_APP = 174042936L; // number refers to buganizer id
+
+    /**
+     * Return value for {@link #supportsSizeChanges()} indicating that this activity does not
+     * support size changes.
+     * @hide
+     */
+    public static final int SIZE_CHANGES_UNSUPPORTED = 0;
+
+    /**
+     * Return value for {@link #supportsSizeChanges()} indicating that this activity supports size
+     * changes due to the android.supports_size_changes metadata flag being set either on
+     * application or on activity level.
+     * @hide
+     */
+    public static final int SIZE_CHANGES_SUPPORTED_METADATA = 1;
+
+    /**
+     * Return value for {@link #supportsSizeChanges()} indicating that this activity has been
+     * overridden to support size changes through the compat framework change id
+     * {@link #FORCE_RESIZE_APP}.
+     * @hide
+     */
+    public static final int SIZE_CHANGES_SUPPORTED_OVERRIDE = 2;
+
+    /** @hide */
+    @IntDef(prefix = { "SIZE_CHANGES_" }, value = {
+            SIZE_CHANGES_UNSUPPORTED,
+            SIZE_CHANGES_SUPPORTED_METADATA,
+            SIZE_CHANGES_SUPPORTED_OVERRIDE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SizeChangesSupportMode {}
+
+    /**
      * Convert Java change bits to native.
      *
      * @hide
@@ -1146,6 +1191,25 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         return (flags & FLAG_SUPPORTS_PICTURE_IN_PICTURE) != 0;
     }
 
+    /**
+     * Returns whether the activity supports size changes.
+     * @hide
+     */
+    @SizeChangesSupportMode
+    public int supportsSizeChanges() {
+        if (supportsSizeChanges) {
+            return SIZE_CHANGES_SUPPORTED_METADATA;
+        }
+
+        if (CompatChanges.isChangeEnabled(FORCE_RESIZE_APP,
+                applicationInfo.packageName,
+                UserHandle.getUserHandleForUid(applicationInfo.uid))) {
+            return SIZE_CHANGES_SUPPORTED_OVERRIDE;
+        }
+
+        return SIZE_CHANGES_UNSUPPORTED;
+    }
+
     /** @hide */
     @UnsupportedAppUsage
     public static boolean isResizeableMode(int mode) {
@@ -1181,6 +1245,20 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
                 return "RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY";
             case RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION:
                 return "RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION";
+            default:
+                return "unknown=" + mode;
+        }
+    }
+
+    /** @hide */
+    public static String sizeChangesSupportModeToString(@SizeChangesSupportMode int mode) {
+        switch (mode) {
+            case SIZE_CHANGES_UNSUPPORTED:
+                return "SIZE_CHANGES_UNSUPPORTED";
+            case SIZE_CHANGES_SUPPORTED_METADATA:
+                return "SIZE_CHANGES_SUPPORTED_METADATA";
+            case SIZE_CHANGES_SUPPORTED_OVERRIDE:
+                return "SIZE_CHANGES_SUPPORTED_OVERRIDE";
             default:
                 return "unknown=" + mode;
         }

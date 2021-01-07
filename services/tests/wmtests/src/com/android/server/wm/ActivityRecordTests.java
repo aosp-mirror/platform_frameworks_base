@@ -254,26 +254,26 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Set and apply options for ActivityRecord. Pending options should be cleared
         activity.updateOptionsLocked(activityOptions);
-        activity.applyOptionsLocked();
-        assertNull(activity.pendingOptions);
+        activity.applyOptionsAnimation();
+        assertNull(activity.getOptions());
 
         // Set options for two ActivityRecords in same Task. Apply one ActivityRecord options.
         // Pending options should be cleared for both ActivityRecords
         ActivityRecord activity2 = new ActivityBuilder(mAtm).setTask(activity.getTask()).build();
         activity2.updateOptionsLocked(activityOptions);
         activity.updateOptionsLocked(activityOptions);
-        activity.applyOptionsLocked();
-        assertNull(activity.pendingOptions);
-        assertNull(activity2.pendingOptions);
+        activity.applyOptionsAnimation();
+        assertNull(activity.getOptions());
+        assertNull(activity2.getOptions());
 
         // Set options for two ActivityRecords in separate Tasks. Apply one ActivityRecord options.
         // Pending options should be cleared for only ActivityRecord that was applied
         activity2 = new ActivityBuilder(mAtm).setCreateTask(true).build();
         activity2.updateOptionsLocked(activityOptions);
         activity.updateOptionsLocked(activityOptions);
-        activity.applyOptionsLocked();
-        assertNull(activity.pendingOptions);
-        assertNotNull(activity2.pendingOptions);
+        activity.applyOptionsAnimation();
+        assertNull(activity.getOptions());
+        assertNotNull(activity2.getOptions());
     }
 
     @Test
@@ -653,21 +653,21 @@ public class ActivityRecordTests extends WindowTestsBase {
                     public void onAnimationStart(RemoteAnimationTarget[] apps,
                             RemoteAnimationTarget[] wallpapers,
                             IRemoteAnimationFinishedCallback finishedCallback) {
-
                     }
 
                     @Override
                     public void onAnimationCancelled() {
-
                     }
                 }, 0, 0));
         activity.updateOptionsLocked(opts);
-        assertNotNull(activity.takeOptionsLocked(true /* fromClient */));
-        assertNotNull(activity.pendingOptions);
+        assertNotNull(activity.takeOptions());
+        assertNull(activity.getOptions());
 
-        activity.updateOptionsLocked(ActivityOptions.makeBasic());
-        assertNotNull(activity.takeOptionsLocked(false /* fromClient */));
-        assertNull(activity.pendingOptions);
+        final AppTransition appTransition = activity.mDisplayContent.mAppTransition;
+        spyOn(appTransition);
+        activity.applyOptionsAnimation();
+
+        verify(appTransition).overridePendingAppTransitionRemote(any());
     }
 
     @Test
@@ -1660,8 +1660,8 @@ public class ActivityRecordTests extends WindowTestsBase {
                     any() /* window */,  any() /* attrs */,
                     anyInt() /* viewVisibility */, anyInt() /* displayId */,
                     any() /* requestedVisibility */, any() /* outFrame */,
-                    any() /* outDisplayCutout */, any() /* outInputChannel */,
-                    any() /* outInsetsState */, any() /* outActiveControls */);
+                    any() /* outInputChannel */, any() /* outInsetsState */,
+                    any() /* outActiveControls */);
             mAtm.mWindowManager.mStartingSurfaceController
                     .createTaskSnapshotSurface(activity, snapshot);
         } catch (RemoteException ignored) {

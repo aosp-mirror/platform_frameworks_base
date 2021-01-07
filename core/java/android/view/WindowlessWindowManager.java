@@ -136,8 +136,8 @@ public class WindowlessWindowManager implements IWindowSession {
     @Override
     public int addToDisplay(IWindow window, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, InsetsState requestedVisibility, Rect outFrame,
-            DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
-            InsetsState outInsetsState, InsetsSourceControl[] outActiveControls) {
+            InputChannel outInputChannel, InsetsState outInsetsState,
+            InsetsSourceControl[] outActiveControls) {
         final SurfaceControl.Builder b = new SurfaceControl.Builder(mSurfaceSession)
                 .setFormat(attrs.format)
                 .setBufferSize(getSurfaceWidth(attrs), getSurfaceHeight(attrs))
@@ -171,11 +171,10 @@ public class WindowlessWindowManager implements IWindowSession {
     @Override
     public int addToDisplayAsUser(IWindow window, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, int userId, InsetsState requestedVisibility,
-            Rect outFrame, DisplayCutout.ParcelableWrapper outDisplayCutout,
-            InputChannel outInputChannel, InsetsState outInsetsState,
+            Rect outFrame, InputChannel outInputChannel, InsetsState outInsetsState,
             InsetsSourceControl[] outActiveControls) {
         return addToDisplay(window, attrs, viewVisibility, displayId, requestedVisibility,
-                outFrame, outDisplayCutout, outInputChannel, outInsetsState, outActiveControls);
+                outFrame, outInputChannel, outInsetsState, outActiveControls);
     }
 
     @Override

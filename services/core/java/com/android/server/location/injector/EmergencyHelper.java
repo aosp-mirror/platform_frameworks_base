@@ -14,6 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.internal.location.timezone;
+package com.android.server.location.injector;
 
-parcelable LocationTimeZoneProviderRequest;
+/**
+ * Provides helpers for emergency sessions.
+ */
+public abstract class EmergencyHelper {
+
+    /**
+     * Returns true if the device is in an emergency session, or if an emergency session ended
+     * within the given extension time.
+     */
+    public abstract boolean isInEmergency(long extensionTimeMs);
+}

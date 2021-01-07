@@ -49,6 +49,8 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.TaskStackListener;
 import android.app.WindowConfiguration;
+import android.compat.testing.PlatformCompatChangeRule;
+import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -58,7 +60,11 @@ import android.view.WindowManager;
 
 import androidx.test.filters.MediumTest;
 
+import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
+
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
@@ -73,6 +79,9 @@ import java.util.ArrayList;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class SizeCompatTests extends WindowTestsBase {
+    @Rule
+    public TestRule compatChangeRule = new PlatformCompatChangeRule();
+
     private Task mTask;
     private ActivityRecord mActivity;
 
@@ -531,6 +540,26 @@ public class SizeCompatTests extends WindowTestsBase {
         // changing windowing mode from fullscreen to freeform.
         mTask.mDisplayContent.setDisplayWindowingMode(WindowConfiguration.WINDOWING_MODE_FREEFORM);
         mTask.setWindowingMode(WindowConfiguration.WINDOWING_MODE_FULLSCREEN);
+        assertFalse(activity.shouldUseSizeCompatMode());
+    }
+
+    @Test
+    @EnableCompatChanges({ActivityInfo.FORCE_RESIZE_APP})
+    public void testNoSizeCompatWhenPerAppOverrideSet() {
+        setUpDisplaySizeWithApp(1000, 2500);
+
+        // Make the task root resizable.
+        mActivity.info.resizeMode = ActivityInfo.RESIZE_MODE_RESIZEABLE;
+
+        // Create a size compat activity on the same task.
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setTask(mTask)
+                .setResizeMode(ActivityInfo.RESIZE_MODE_UNRESIZEABLE)
+                .setScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+                .setComponent(ComponentName.createRelative(mContext,
+                        SizeCompatTests.class.getName()))
+                .setUid(android.os.Process.myUid())
+                .build();
         assertFalse(activity.shouldUseSizeCompatMode());
     }
 
