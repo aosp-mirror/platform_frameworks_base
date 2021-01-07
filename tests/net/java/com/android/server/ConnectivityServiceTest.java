@@ -161,7 +161,6 @@ import android.net.DataStallReportParcelable;
 import android.net.EthernetManager;
 import android.net.IConnectivityDiagnosticsCallback;
 import android.net.IDnsResolver;
-import android.net.IIpConnectivityMetrics;
 import android.net.INetd;
 import android.net.INetworkMonitor;
 import android.net.INetworkMonitorCallbacks;
@@ -359,7 +358,6 @@ public class ConnectivityServiceTest {
     private HandlerThread mAlarmManagerThread;
     private TestNetIdManager mNetIdManager;
 
-    @Mock IIpConnectivityMetrics mIpConnectivityMetrics;
     @Mock IpConnectivityMetrics.Logger mMetricsService;
     @Mock DefaultNetworkMetrics mDefaultNetworkMetrics;
     @Mock DeviceIdleInternal mDeviceIdleInternal;
@@ -1373,7 +1371,6 @@ public class ConnectivityServiceTest {
         doReturn(mock(ProxyTracker.class)).when(deps).makeProxyTracker(any(), any());
         doReturn(mMetricsService).when(deps).getMetricsLogger();
         doReturn(true).when(deps).queryUserAccess(anyInt(), anyInt());
-        doReturn(mIpConnectivityMetrics).when(deps).getIpConnectivityMetrics();
         doReturn(mBatteryStatsService).when(deps).getBatteryStatsService();
         doAnswer(inv -> {
             mPolicyTracker = new WrappedMultinetworkPolicyTracker(

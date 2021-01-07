@@ -87,7 +87,6 @@ import android.net.ICaptivePortal;
 import android.net.IConnectivityDiagnosticsCallback;
 import android.net.IConnectivityManager;
 import android.net.IDnsResolver;
-import android.net.IIpConnectivityMetrics;
 import android.net.INetd;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkMonitor;
@@ -154,7 +153,6 @@ import android.os.PersistableBundle;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -925,14 +923,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         public IpConnectivityMetrics.Logger getMetricsLogger() {
             return Objects.requireNonNull(LocalServices.getService(IpConnectivityMetrics.Logger.class),
                     "no IpConnectivityMetrics service");
-        }
-
-        /**
-         * @see IpConnectivityMetrics
-         */
-        public IIpConnectivityMetrics getIpConnectivityMetrics() {
-            return IIpConnectivityMetrics.Stub.asInterface(
-                    ServiceManager.getService(IpConnectivityLog.SERVICE_NAME));
         }
 
         public IBatteryStats getBatteryStatsService() {
@@ -2983,9 +2973,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             if (valid != nai.lastValidated) {
                 if (wasDefault) {
-                    mDeps.getMetricsLogger()
-                            .defaultNetworkMetrics().logDefaultNetworkValidity(
-                            SystemClock.elapsedRealtime(), valid);
+                    mMetricsLog.logDefaultNetworkValidity(valid);
                 }
                 final int oldScore = nai.getCurrentScore();
                 nai.lastValidated = valid;
@@ -3413,7 +3401,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // if there is a fallback. Taken together, the two form a X -> 0, 0 -> Y sequence
             // whose timestamps tell how long it takes to recover a default network.
             long now = SystemClock.elapsedRealtime();
-            mDeps.getMetricsLogger().defaultNetworkMetrics().logDefaultNetworkEvent(now, null, nai);
+            mMetricsLog.logDefaultNetworkEvent(null, 0, false,
+                    null /* lp */, null /* nc */, nai.network, nai.getCurrentScore(),
+                    nai.linkProperties, nai.networkCapabilities);
         }
         notifyIfacesChangedForNetworkStats();
         // TODO - we shouldn't send CALLBACK_LOST to requests that can be satisfied
@@ -7167,9 +7157,28 @@ public class ConnectivityService extends IConnectivityManager.Stub
             updateDataActivityTracking(newDefaultNetwork, oldDefaultNetwork);
             // Notify system services of the new default.
             makeDefault(newDefaultNetwork);
+
             // Log 0 -> X and Y -> X default network transitions, where X is the new default.
-            mDeps.getMetricsLogger().defaultNetworkMetrics().logDefaultNetworkEvent(
-                    now, newDefaultNetwork, oldDefaultNetwork);
+            final Network network = (newDefaultNetwork != null) ? newDefaultNetwork.network : null;
+            final int score = (newDefaultNetwork != null) ? newDefaultNetwork.getCurrentScore() : 0;
+            final boolean validated = newDefaultNetwork != null && newDefaultNetwork.lastValidated;
+            final LinkProperties lp = (newDefaultNetwork != null)
+                    ? newDefaultNetwork.linkProperties : null;
+            final NetworkCapabilities nc = (newDefaultNetwork != null)
+                    ? newDefaultNetwork.networkCapabilities : null;
+
+            final Network prevNetwork = (oldDefaultNetwork != null)
+                    ? oldDefaultNetwork.network : null;
+            final int prevScore = (oldDefaultNetwork != null)
+                    ? oldDefaultNetwork.getCurrentScore() : 0;
+            final LinkProperties prevLp = (oldDefaultNetwork != null)
+                    ? oldDefaultNetwork.linkProperties : null;
+            final NetworkCapabilities prevNc = (oldDefaultNetwork != null)
+                    ? oldDefaultNetwork.networkCapabilities : null;
+
+            mMetricsLog.logDefaultNetworkEvent(network, score, validated, lp, nc,
+                    prevNetwork, prevScore, prevLp, prevNc);
+
             // Have a new default network, release the transition wakelock in
             scheduleReleaseNetworkTransitionWakelock();
         }
