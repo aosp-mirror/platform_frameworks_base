@@ -177,7 +177,7 @@ public class PacManager {
      * @param proxy Proxy information that is about to be broadcast.
      * @return Returns whether the broadcast should be sent : either DO_ or DONT_SEND_BROADCAST
      */
-    synchronized boolean setCurrentProxyScriptUrl(ProxyInfo proxy) {
+    public synchronized boolean setCurrentProxyScriptUrl(ProxyInfo proxy) {
         if (!Uri.EMPTY.equals(proxy.getPacFileUrl())) {
             if (proxy.getPacFileUrl().equals(mPacUrl) && (proxy.getPort() > 0)) {
                 // Allow to send broadcast, nothing to do.
