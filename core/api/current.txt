@@ -51517,6 +51517,10 @@ package android.view.textservice {
   }
 
   public final class TextServicesManager {
+    method @Nullable public android.view.textservice.SpellCheckerInfo getCurrentSpellChecker();
+    method @Nullable public android.view.textservice.SpellCheckerSubtype getCurrentSpellCheckerSubtype(boolean);
+    method @Nullable public java.util.List<android.view.textservice.SpellCheckerInfo> getEnabledSpellCheckersList();
+    method public boolean isSpellCheckerEnabled();
     method public android.view.textservice.SpellCheckerSession newSpellCheckerSession(android.os.Bundle, java.util.Locale, android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener, boolean);
   }
 

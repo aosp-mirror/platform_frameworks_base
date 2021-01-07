@@ -17,8 +17,8 @@
 package android.view.textservice;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -34,6 +34,8 @@ import android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener;
 import com.android.internal.textservice.ISpellCheckerSessionListener;
 import com.android.internal.textservice.ITextServicesManager;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -232,9 +234,22 @@ public final class TextServicesManager {
     }
 
     /**
-     * @hide
+     * Retrieve the list of currently enabled spell checkers, or null if there is none.
+     *
+     * @return The list of currently enabled spell checkers.
      */
-    @UnsupportedAppUsage
+    @Nullable
+    public List<SpellCheckerInfo> getEnabledSpellCheckersList() {
+        final SpellCheckerInfo[] enabledSpellCheckers = getEnabledSpellCheckers();
+        return enabledSpellCheckers != null ? Arrays.asList(enabledSpellCheckers) : null;
+    }
+
+    /**
+     * Retrieve the currently active spell checker, or null if there is none.
+     *
+     * @return The current active spell checker info.
+     */
+    @Nullable
     public SpellCheckerInfo getCurrentSpellChecker() {
         try {
             // Passing null as a locale for ICS
@@ -245,9 +260,13 @@ public final class TextServicesManager {
     }
 
     /**
-     * @hide
+     * Retrieve the selected subtype of the selected spell checker, or null if there is none.
+     *
+     * @param allowImplicitlySelectedSubtype {@code true} to return the default language matching
+     * system locale if there's no subtype selected explicitly, otherwise, returns null.
+     * @return The meta information of the selected subtype of the selected spell checker.
      */
-    @UnsupportedAppUsage
+    @Nullable
     public SpellCheckerSubtype getCurrentSpellCheckerSubtype(
             boolean allowImplicitlySelectedSubtype) {
         try {
@@ -258,10 +277,10 @@ public final class TextServicesManager {
     }
 
     /**
-     * @hide
+     * Return whether the spell checker is enabled or not.
+     *
+     * @return {@code true} if spell checker is enabled, {@code false} otherwise.
      */
-    @UnsupportedAppUsage
-    @TestApi
     public boolean isSpellCheckerEnabled() {
         try {
             return mService.isSpellCheckerEnabled(mUserId);
