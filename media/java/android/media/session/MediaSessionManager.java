@@ -547,6 +547,7 @@ public final class MediaSessionManager {
      * @param keyEvent the key event to send
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public void dispatchMediaKeyEvent(@NonNull KeyEvent keyEvent) {
         dispatchMediaKeyEventInternal(keyEvent, /*asSystemService=*/false, /*needWakeLock=*/false);
     }
@@ -558,6 +559,7 @@ public final class MediaSessionManager {
      * @param needWakeLock true if a wake lock should be held while sending the key
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public void dispatchMediaKeyEvent(@NonNull KeyEvent keyEvent, boolean needWakeLock) {
         dispatchMediaKeyEventInternal(keyEvent, /*asSystemService=*/false, needWakeLock);
     }
@@ -630,6 +632,7 @@ public final class MediaSessionManager {
      * @param musicOnly true if key event should only be sent to music stream
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public void dispatchVolumeKeyEvent(@NonNull KeyEvent keyEvent, int streamType,
             boolean musicOnly) {
         dispatchVolumeKeyEventInternal(keyEvent, streamType, musicOnly, /*asSystemService=*/false);
