@@ -122,7 +122,7 @@ public class RippleDrawable extends LayerDrawable {
     private final Rect mDirtyBounds = new Rect();
 
     /** Mirrors mLayerState with some extra information. */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage(trackingBug = 175939224)
     private RippleState mState;
 
     /** The masking layer, e.g. the layer with id R.id.mask. */
