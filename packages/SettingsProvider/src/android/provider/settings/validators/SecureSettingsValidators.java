@@ -273,5 +273,11 @@ public class SecureSettingsValidators {
                 new InclusiveIntegerRangeValidator(
                         Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR,
                         Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU));
+        VALIDATORS.put(Secure.ACCESSIBILITY_FLOATING_MENU_SIZE,
+                new DiscreteValueValidator(new String[] {"0", "1"}));
+        VALIDATORS.put(Secure.ACCESSIBILITY_FLOATING_MENU_ICON_TYPE,
+                new DiscreteValueValidator(new String[] {"0", "1"}));
+        VALIDATORS.put(Secure.ACCESSIBILITY_FLOATING_MENU_OPACITY,
+                new InclusiveFloatRangeValidator(0.0f, 1.0f));
     }
 }
