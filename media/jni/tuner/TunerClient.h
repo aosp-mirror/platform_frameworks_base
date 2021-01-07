@@ -23,6 +23,8 @@
 
 #include "FrontendClient.h"
 #include "DemuxClient.h"
+#include "DescramblerClient.h"
+#include "LnbClient.h"
 
 using ::aidl::android::media::tv::tuner::ITunerService;
 using ::aidl::android::media::tv::tuner::TunerServiceFrontendInfo;
@@ -94,7 +96,31 @@ public:
      *
      * @return the demux’s capabilities.
      */
-    //DemuxCapabilities getDemuxCaps() {};
+    DemuxCapabilities getDemuxCaps();
+
+    /**
+     * Open a new interface of DescramblerClient given a descramblerHandle.
+     *
+     * @param descramblerHandle the handle of the descrambler granted by TRM.
+     * @return a newly created DescramblerClient interface.
+     */
+    sp<DescramblerClient> openDescrambler(int descramblerHandle);
+
+    /**
+     * Open a new interface of LnbClient given an lnbHandle.
+     *
+     * @param lnbHandle the handle of the LNB granted by TRM.
+     * @return a newly created LnbClient interface.
+     */
+    sp<LnbClient> openLnb(int lnbHandle);
+
+    /**
+     * Open a new interface of LnbClient given a LNB name.
+     *
+     * @param lnbName the name for an external LNB to be opened.
+     * @return a newly created LnbClient interface.
+     */
+    sp<LnbClient> openLnbByName(string lnbName);
 
     /**
      * Get the current Tuner HAL version. The high 16 bits are the major version number

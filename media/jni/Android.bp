@@ -140,9 +140,11 @@ cc_library_shared {
     srcs: [
         "android_media_tv_Tuner.cpp",
         "tuner/DemuxClient.cpp",
+        "tuner/DescramblerClient.cpp",
         "tuner/DvrClient.cpp",
         "tuner/FilterClient.cpp",
         "tuner/FrontendClient.cpp",
+        "tuner/LnbClient.cpp",
         "tuner/TunerClient.cpp",
     ],
 

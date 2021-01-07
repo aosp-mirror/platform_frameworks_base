@@ -171,6 +171,23 @@ sp<DemuxClient> TunerClient::openDemux(int /*demuxHandle*/) {
     return NULL;
 }
 
+DemuxCapabilities TunerClient::getDemuxCaps() {
+    DemuxCapabilities caps;
+    return caps;
+}
+
+sp<DescramblerClient> TunerClient::openDescrambler(int /*descramblerHandle*/) {
+    return NULL;
+}
+
+sp<LnbClient> TunerClient::openLnb(int /*lnbHandle*/) {
+    return NULL;
+}
+
+sp<LnbClient> TunerClient::openLnbByName(string /*lnbName*/) {
+    return NULL;
+}
+
 /////////////// TunerClient Helper Methods ///////////////////////
 
 sp<ITuner> TunerClient::getHidlTuner() {
