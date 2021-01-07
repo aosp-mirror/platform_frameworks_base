@@ -24,6 +24,8 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.internal.util.Preconditions;
+
 import java.io.Closeable;
 import java.util.List;
 import java.util.Objects;
@@ -62,6 +64,8 @@ public class SearchResults implements Closeable {
 
     private boolean mIsFirstLoad = true;
 
+    private boolean mIsClosed = false;
+
     SearchResults(
             @NonNull IAppSearchManager service,
             @Nullable String databaseName,
@@ -88,6 +92,7 @@ public class SearchResults implements Closeable {
      * @param callback Callback to receive the pending result of performing this operation.
      */
     public void getNextPage(@NonNull Consumer<AppSearchResult<List<SearchResult>>> callback) {
+        Preconditions.checkState(!mIsClosed, "SearchResults has already been closed");
         try {
             if (mIsFirstLoad) {
                 mIsFirstLoad = false;
@@ -111,10 +116,13 @@ public class SearchResults implements Closeable {
 
     @Override
     public void close() {
-        try {
-            mService.invalidateNextPageToken(mNextPageToken, mUserId);
-        } catch (RemoteException e) {
-            Log.d(TAG, "Unable to close the SearchResults", e);
+        if (!mIsClosed) {
+            try {
+                mService.invalidateNextPageToken(mNextPageToken, mUserId);
+                mIsClosed = true;
+            } catch (RemoteException e) {
+                Log.e(TAG, "Unable to close the SearchResults", e);
+            }
         }
     }
 
