@@ -33,7 +33,7 @@ public final class OverrideAllowedState implements Parcelable {
             DISABLED_NOT_DEBUGGABLE,
             DISABLED_NON_TARGET_SDK,
             DISABLED_TARGET_SDK_TOO_HIGH,
-            PACKAGE_DOES_NOT_EXIST,
+            DEFERRED_VERIFICATION,
             LOGGING_ONLY_CHANGE
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -57,10 +57,10 @@ public final class OverrideAllowedState implements Parcelable {
      * Change cannot be overridden, due to the app's targetSdk being above the change's targetSdk.
      */
     public static final int DISABLED_TARGET_SDK_TOO_HIGH = 3;
-    /**
-     * Package does not exist.
+     /**
+     * Change override decision is currently being deferred, due to the app not being installed yet.
      */
-    public static final int PACKAGE_DOES_NOT_EXIST = 4;
+    public static final int DEFERRED_VERIFICATION = 4;
     /**
      * Change is marked as logging only, and cannot be toggled.
      */
@@ -106,6 +106,7 @@ public final class OverrideAllowedState implements Parcelable {
             throws SecurityException {
         switch (state) {
             case ALLOWED:
+            case DEFERRED_VERIFICATION:
                 return;
             case DISABLED_NOT_DEBUGGABLE:
                 throw new SecurityException(
@@ -118,11 +119,6 @@ public final class OverrideAllowedState implements Parcelable {
                         "Cannot override %1$d for %2$s because the app's targetSdk (%3$d) is "
                                 + "above the change's targetSdk threshold (%4$d)",
                         changeId, packageName, appTargetSdk, changeIdTargetSdk));
-            case PACKAGE_DOES_NOT_EXIST:
-                throw new SecurityException(String.format(
-                        "Cannot override %1$d for %2$s because the package does not exist, and "
-                                + "the change is targetSdk gated.",
-                        changeId, packageName));
             case LOGGING_ONLY_CHANGE:
                 throw new SecurityException(String.format(
                         "Cannot override %1$d because it is marked as a logging-only change.",
@@ -170,8 +166,8 @@ public final class OverrideAllowedState implements Parcelable {
                 return "DISABLED_NON_TARGET_SDK";
             case DISABLED_TARGET_SDK_TOO_HIGH:
                 return "DISABLED_TARGET_SDK_TOO_HIGH";
-            case PACKAGE_DOES_NOT_EXIST:
-                return "PACKAGE_DOES_NOT_EXIST";
+            case DEFERRED_VERIFICATION:
+                return "DEFERRED_VERIFICATION";
             case LOGGING_ONLY_CHANGE:
                 return "LOGGING_ONLY_CHANGE";
         }

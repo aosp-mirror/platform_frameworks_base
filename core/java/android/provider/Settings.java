@@ -13283,6 +13283,16 @@ public final class Settings {
         @TestApi
         public static final String HIDDEN_API_POLICY = "hidden_api_policy";
 
+         /**
+         * Flag for forcing {@link com.android.server.compat.OverrideValidatorImpl}
+         * to consider this a non-debuggable build.
+         *
+         * @hide
+         */
+        public static final String FORCE_NON_DEBUGGABLE_FINAL_BUILD_FOR_COMPAT =
+                "force_non_debuggable_final_build_for_compat";
+
+
         /**
          * Current version of signed configuration applied.
          *
