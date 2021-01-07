@@ -33,17 +33,17 @@ interface IPermissionManager {
 
     PermissionGroupInfo getPermissionGroupInfo(String groupName, int flags);
 
-    PermissionInfo getPermissionInfo(String permName, String packageName, int flags);
+    PermissionInfo getPermissionInfo(String permissionName, String packageName, int flags);
 
     ParceledListSlice queryPermissionsByGroup(String groupName, int flags);
 
-    boolean addPermission(in PermissionInfo info, boolean async);
+    boolean addPermission(in PermissionInfo permissionInfo, boolean async);
 
-    void removePermission(String name);
+    void removePermission(String permissionName);
 
-    int getPermissionFlags(String permName, String packageName, int userId);
+    int getPermissionFlags(String packageName, String permissionName, int userId);
 
-    void updatePermissionFlags(String permName, String packageName, int flagMask,
+    void updatePermissionFlags(String packageName, String permissionName, int flagMask,
             int flagValues, boolean checkAdjustPolicyFlagPermission, int userId);
 
     void updatePermissionFlagsForAllApps(int flagMask, int flagValues, int userId);
@@ -61,14 +61,15 @@ interface IPermissionManager {
     boolean removeAllowlistedRestrictedPermission(String packageName, String permissionName,
             int flags, int userId);
 
-    void grantRuntimePermission(String packageName, String permName, int userId);
+    void grantRuntimePermission(String packageName, String permissionName, int userId);
 
-    void revokeRuntimePermission(String packageName, String permName, int userId, String reason);
+    void revokeRuntimePermission(String packageName, String permissionName, int userId,
+            String reason);
 
-    boolean shouldShowRequestPermissionRationale(String permName,
-            String packageName, int userId);
+    boolean shouldShowRequestPermissionRationale(String packageName, String permissionName,
+            int userId);
 
-    boolean isPermissionRevokedByPolicy(String permName, String packageName, int userId);
+    boolean isPermissionRevokedByPolicy(String packageName, String permissionName, int userId);
 
     List<SplitPermissionInfoParcelable> getSplitPermissions();
 
