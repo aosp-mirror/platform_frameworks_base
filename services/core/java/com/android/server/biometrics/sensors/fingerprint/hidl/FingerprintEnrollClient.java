@@ -52,10 +52,11 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
             @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String owner,
             @NonNull BiometricUtils<Fingerprint> utils, int timeoutSec, int sensorId,
-            @Nullable IUdfpsOverlayController udfpsOverlayController) {
+            @Nullable IUdfpsOverlayController udfpsOverlayController,
+            boolean shouldLogMetrics) {
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
                 timeoutSec, BiometricsProtoEnums.MODALITY_FINGERPRINT, sensorId,
-                true /* shouldVibrate */);
+                true /* shouldVibrate */, shouldLogMetrics);
         mUdfpsOverlayController = udfpsOverlayController;
     }
 
