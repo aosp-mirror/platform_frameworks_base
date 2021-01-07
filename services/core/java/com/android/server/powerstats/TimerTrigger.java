@@ -29,7 +29,7 @@ public final class TimerTrigger extends PowerStatsLogTrigger {
     private static final String TAG = TimerTrigger.class.getSimpleName();
     private static final boolean DEBUG = false;
     // TODO(b/166689029): Make configurable through global settings.
-    private static final long LOG_PERIOD_MS = 60 * 1000;
+    private static final long LOG_PERIOD_MS = 120 * 1000;
 
     private final Handler mHandler;
 
@@ -40,7 +40,7 @@ public final class TimerTrigger extends PowerStatsLogTrigger {
             // LOG_PERIOD_MS.
             mHandler.postDelayed(mLogData, LOG_PERIOD_MS);
             if (DEBUG) Slog.d(TAG, "Received delayed message.  Log rail data");
-            logPowerStatsData();
+            logPowerStatsData(PowerStatsLogger.MSG_LOG_TO_DATA_STORAGE_TIMER);
         }
     };
 
