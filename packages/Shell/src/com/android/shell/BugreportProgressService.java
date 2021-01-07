@@ -2146,8 +2146,10 @@ public class BugreportProgressService extends Service {
             name = in.readString();
             initialName = in.readString();
             title = in.readString();
+            shareTitle = in.readString();
             description = in.readString();
             progress.set(in.readInt());
+            lastProgress.set(in.readInt());
             lastUpdate.set(in.readLong());
             formattedLastUpdate = in.readString();
             bugreportFile = readFile(in);
@@ -2158,9 +2160,10 @@ public class BugreportProgressService extends Service {
             }
 
             finished.set(in.readInt() == 1);
+            addingDetailsToZip = in.readBoolean();
+            addedDetailsToZip = in.readBoolean();
             screenshotCounter = in.readInt();
             shareDescription = in.readString();
-            shareTitle = in.readString();
             type = in.readInt();
         }
 
@@ -2171,8 +2174,10 @@ public class BugreportProgressService extends Service {
             dest.writeString(name);
             dest.writeString(initialName);
             dest.writeString(title);
+            dest.writeString(shareTitle);
             dest.writeString(description);
             dest.writeInt(progress.intValue());
+            dest.writeInt(lastProgress.intValue());
             dest.writeLong(lastUpdate.longValue());
             dest.writeString(getFormattedLastUpdate());
             writeFile(dest, bugreportFile);
@@ -2183,9 +2188,10 @@ public class BugreportProgressService extends Service {
             }
 
             dest.writeInt(finished.get() ? 1 : 0);
+            dest.writeBoolean(addingDetailsToZip);
+            dest.writeBoolean(addedDetailsToZip);
             dest.writeInt(screenshotCounter);
             dest.writeString(shareDescription);
-            dest.writeString(shareTitle);
             dest.writeInt(type);
         }
 
