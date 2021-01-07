@@ -61,7 +61,6 @@ import android.app.admin.DevicePolicyEventLogger;
 import android.app.compat.CompatChanges;
 import android.appwidget.AppWidgetManagerInternal;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
 import android.content.ComponentName.WithComponentName;
@@ -108,6 +107,7 @@ import android.webkit.WebViewZygote;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.procstats.ServiceState;
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.notification.SystemNotificationChannels;
@@ -275,7 +275,7 @@ public final class ActiveServices {
      * is higher than R.
      */
     @ChangeId
-    @Disabled
+    @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.S)
     static final long FGS_BG_START_RESTRICTION_CHANGE_ID = 170668199L;
 
     /**
@@ -307,9 +307,40 @@ public final class ActiveServices {
      */
     private static final ArraySet<String> sFgsBgStartExemptedPackages = new ArraySet<>();
 
+    private static final ArrayList<String> sFgsBgStartExemptedPackagePrefixes = new ArrayList<>();
+
+    /**
+     * List of packages that are exempted from the FGS restriction *for now*.
+     *
+     * STOPSHIP(/b/176844961) Remove it. Also update ActiveServicesTest.java.
+     */
+    private static final String[] FGS_BG_START_EXEMPTED_PACKAGES = {
+            "com.google.pixel.exo.bootstrapping",
+    };
+
+    /**
+     * List of packages that are exempted from the FGS restriction *for now*. We also allow
+     * any packages that
+     *
+     * STOPSHIP(/b/176844961) Remove it. Also update ActiveServicesTest.java.
+     */
+    private static final String[] FGS_BG_START_EXEMPTED_PACKAGES_PREFIXED_ALLOWED = {
+            "com.android.webview",
+            "com.google.android.webview",
+            "com.android.chrome",
+            "com.google.android.apps.chrome",
+            "com.chrome",
+    };
+
     static {
-        sFgsBgStartExemptedPackages.add("com.google.pixel.exo.bootstrapping"); //STOPSHIP Remove it.
-        sFgsBgStartExemptedPackages.add("com.android.chrome"); // STOPSHIP Remove it.
+        for (String s : FGS_BG_START_EXEMPTED_PACKAGES) {
+            sFgsBgStartExemptedPackages.add(s);
+        }
+
+        for (String s : FGS_BG_START_EXEMPTED_PACKAGES_PREFIXED_ALLOWED) {
+            sFgsBgStartExemptedPackages.add(s); // Add it for an exact match.
+            sFgsBgStartExemptedPackagePrefixes.add(s + "."); // Add it for an prefix match.
+        }
     }
 
     final Runnable mLastAnrDumpClearer = new Runnable() {
@@ -5365,10 +5396,25 @@ public final class ActiveServices {
         return ret;
     }
 
-    private boolean isPackageExemptedFromFgsRestriction(String packageName, int uid) {
-        if (!sFgsBgStartExemptedPackages.contains(packageName)) {
-            return false;
+    @VisibleForTesting
+    static boolean isPackageExemptedFromFgsRestriction(String packageName, int uid) {
+        boolean exempted = false;
+        if (sFgsBgStartExemptedPackages.contains(packageName)) {
+            exempted = true;
+        } else {
+            for (String pkg : sFgsBgStartExemptedPackagePrefixes) {
+                if (packageName.startsWith(pkg)) {
+                    exempted = true;
+                    break;
+                }
+            }
         }
+        if (!exempted) {
+            return false; // Package isn't exempted.
+        }
+        // Allow exempted packages to be subject to the restriction using this compat ID.
+        // (so that, for example, the webview developer will be able to test the restriction
+        // locally.)
         return CompatChanges.isChangeEnabled(FGS_BG_START_USE_EXEMPTION_LIST_CHANGE_ID, uid);
     }
 
@@ -5451,9 +5497,7 @@ public final class ActiveServices {
     }
 
     private boolean isBgFgsRestrictionEnabled(ServiceRecord r) {
-        if (mAm.mConstants.mFlagFgsStartRestrictionEnabled) {
-            return true;
-        }
-        return CompatChanges.isChangeEnabled(FGS_BG_START_RESTRICTION_CHANGE_ID, r.appInfo.uid);
+        return mAm.mConstants.mFlagFgsStartRestrictionEnabled
+                && CompatChanges.isChangeEnabled(FGS_BG_START_RESTRICTION_CHANGE_ID, r.appInfo.uid);
     }
 }
