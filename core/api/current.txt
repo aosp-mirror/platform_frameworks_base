@@ -8977,6 +8977,8 @@ package android.bluetooth {
     method public int getConnectionState(android.bluetooth.BluetoothDevice);
     method public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(int[]);
     method public boolean isAudioConnected(android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public boolean isNoiseReductionSupported(@NonNull android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public boolean isVoiceRecognitionSupported(@NonNull android.bluetooth.BluetoothDevice);
     method public boolean sendVendorSpecificResultCode(android.bluetooth.BluetoothDevice, String, String);
     method public boolean startVoiceRecognition(android.bluetooth.BluetoothDevice);
     method public boolean stopVoiceRecognition(android.bluetooth.BluetoothDevice);
