@@ -18,8 +18,6 @@ package com.android.systemui.screenshot;
 
 import static android.graphics.ColorSpace.Named.SRGB;
 
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -27,33 +25,19 @@ import android.graphics.Canvas;
 import android.graphics.ColorSpace;
 import android.graphics.Picture;
 import android.graphics.Rect;
-import android.media.ExifInterface;
 import android.media.Image;
 import android.net.Uri;
-import android.os.Build;
-import android.os.Environment;
-import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
-import android.provider.MediaStore;
-import android.text.format.DateUtils;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.android.systemui.screenshot.ScrollCaptureClient.Connection;
 import com.android.systemui.screenshot.ScrollCaptureClient.Session;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.sql.Date;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Objects;
-import java.util.UUID;
+import com.google.common.util.concurrent.ListenableFuture;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
@@ -67,11 +51,19 @@ public class ScrollCaptureController {
 
     private final Connection mConnection;
     private final Context mContext;
+
+    private final Executor mUiExecutor;
+    private final Executor mBgExecutor;
+    private final ImageExporter mImageExporter;
     private Picture mPicture;
 
-    public ScrollCaptureController(Context context, Connection connection) {
+    public ScrollCaptureController(Context context, Connection connection, Executor uiExecutor,
+            Executor bgExecutor, ImageExporter exporter) {
         mContext = context;
         mConnection = connection;
+        mUiExecutor = uiExecutor;
+        mBgExecutor = bgExecutor;
+        mImageExporter = exporter;
     }
 
     /**
@@ -83,7 +75,7 @@ public class ScrollCaptureController {
         mConnection.start(MAX_PAGES, (session) -> startCapture(session, after));
     }
 
-    private void startCapture(Session session, final Runnable after) {
+    private void startCapture(Session session, final Runnable onDismiss) {
         Rect requestRect = new Rect(0, 0,
                 session.getMaxTileWidth(), session.getMaxTileHeight());
         Consumer<ScrollCaptureClient.CaptureResult> consumer =
@@ -101,20 +93,11 @@ public class ScrollCaptureController {
                         }
                         if (emptyFrame || mFrameCount >= MAX_PAGES
                                 || requestRect.bottom > MAX_HEIGHT) {
-                            Uri uri = null;
                             if (mPicture != null) {
-                                // This is probably on a binder thread right now ¯\_(ツ)_/¯
-                                uri = writeImage(Bitmap.createBitmap(mPicture));
-                                // Release those buffers!
-                                mPicture.close();
-                            }
-                            if (uri != null) {
-                                launchViewer(uri);
+                                exportToFile(mPicture, session, onDismiss);
                             } else {
-                                Toast.makeText(mContext, "Failed to create tall screenshot",
-                                        Toast.LENGTH_SHORT).show();
+                                session.end(onDismiss);
                             }
-                            session.end(after); // end session, close connection, after.run()
                             return;
                         }
                         requestRect.offset(0, session.getMaxTileHeight());
@@ -126,6 +109,22 @@ public class ScrollCaptureController {
         session.requestTile(requestRect, consumer);
     };
 
+    void exportToFile(Picture picture, Session session, Runnable afterEnd) {
+        mImageExporter.setFormat(Bitmap.CompressFormat.PNG);
+        mImageExporter.setQuality(6);
+        ListenableFuture<Uri> future =
+                mImageExporter.export(mBgExecutor, Bitmap.createBitmap(picture));
+        future.addListener(() -> {
+            picture.close(); // release resources
+            try {
+                launchViewer(future.get());
+            } catch (InterruptedException | ExecutionException e) {
+                Toast.makeText(mContext, "Failed to write image", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Error storing screenshot to media store", e.getCause());
+            }
+            session.end(afterEnd); // end session, close connection, afterEnd.run()
+        }, mUiExecutor);
+    }
 
     /**
      * Combine the top {@link Picture} with an {@link Image} by appending the image directly
@@ -160,79 +159,6 @@ public class ScrollCaptureController {
                 below.getHardwareBuffer(), ColorSpace.get(SRGB)), 0, y, null);
         combined.endRecording();
         return combined;
-    }
-
-    Uri writeImage(Bitmap image) {
-        ContentResolver resolver = mContext.getContentResolver();
-        long mImageTime = System.currentTimeMillis();
-        String imageDate = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date(mImageTime));
-        String mImageFileName = String.format("tall_Screenshot_%s.png", imageDate);
-        String mScreenshotId = String.format("Screenshot_%s", UUID.randomUUID());
-        try {
-            // Save the screenshot to the MediaStore
-            final ContentValues values = new ContentValues();
-            values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES
-                    + File.separator + Environment.DIRECTORY_SCREENSHOTS);
-            values.put(MediaStore.MediaColumns.DISPLAY_NAME, mImageFileName);
-            values.put(MediaStore.MediaColumns.MIME_TYPE, "image/png");
-            values.put(MediaStore.MediaColumns.DATE_ADDED, mImageTime / 1000);
-            values.put(MediaStore.MediaColumns.DATE_MODIFIED, mImageTime / 1000);
-            values.put(
-                    MediaStore.MediaColumns.DATE_EXPIRES,
-                    (mImageTime + DateUtils.DAY_IN_MILLIS) / 1000);
-            values.put(MediaStore.MediaColumns.IS_PENDING, 1);
-
-            final Uri uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                    values);
-            try {
-                try (OutputStream out = resolver.openOutputStream(uri)) {
-                    if (!image.compress(Bitmap.CompressFormat.PNG, 100, out)) {
-                        throw new IOException("Failed to compress");
-                    }
-                }
-
-                // Next, write metadata to help index the screenshot
-                try (ParcelFileDescriptor pfd = resolver.openFile(uri, "rw", null)) {
-                    final ExifInterface exif = new ExifInterface(pfd.getFileDescriptor());
-
-                    exif.setAttribute(ExifInterface.TAG_SOFTWARE,
-                            "Android " + Build.DISPLAY);
-
-                    exif.setAttribute(ExifInterface.TAG_IMAGE_WIDTH,
-                            Integer.toString(image.getWidth()));
-                    exif.setAttribute(ExifInterface.TAG_IMAGE_LENGTH,
-                            Integer.toString(image.getHeight()));
-
-                    final ZonedDateTime time = ZonedDateTime.ofInstant(
-                            Instant.ofEpochMilli(mImageTime), ZoneId.systemDefault());
-                    exif.setAttribute(ExifInterface.TAG_DATETIME_ORIGINAL,
-                            DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss").format(time));
-                    exif.setAttribute(ExifInterface.TAG_SUBSEC_TIME_ORIGINAL,
-                            DateTimeFormatter.ofPattern("SSS").format(time));
-
-                    if (Objects.equals(time.getOffset(), ZoneOffset.UTC)) {
-                        exif.setAttribute(ExifInterface.TAG_OFFSET_TIME_ORIGINAL, "+00:00");
-                    } else {
-                        exif.setAttribute(ExifInterface.TAG_OFFSET_TIME_ORIGINAL,
-                                DateTimeFormatter.ofPattern("XXX").format(time));
-                    }
-                    exif.saveAttributes();
-                }
-
-                // Everything went well above, publish it!
-                values.clear();
-                values.put(MediaStore.MediaColumns.IS_PENDING, 0);
-                values.putNull(MediaStore.MediaColumns.DATE_EXPIRES);
-                resolver.update(uri, values, null, null);
-                return uri;
-            } catch (Exception e) {
-                resolver.delete(uri, null);
-                throw e;
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "unable to save screenshot", e);
-        }
-        return null;
     }
 
     void launchViewer(Uri uri) {

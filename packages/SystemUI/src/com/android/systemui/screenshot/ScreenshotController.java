@@ -78,10 +78,13 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.PhoneWindow;
 import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ShareTransition;
 import com.android.systemui.util.DeviceConfigProxy;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -166,6 +169,9 @@ public class ScreenshotController {
     private final ScreenshotNotificationsController mNotificationsController;
     private final ScreenshotSmartActions mScreenshotSmartActions;
     private final UiEventLogger mUiEventLogger;
+    private final ImageExporter mImageExporter;
+    private final Executor mMainExecutor;
+    private final Executor mBgExecutor;
 
     private final WindowManager mWindowManager;
     private final WindowManager.LayoutParams mWindowLayoutParams;
@@ -219,11 +225,17 @@ public class ScreenshotController {
             ScreenshotNotificationsController screenshotNotificationsController,
             ScrollCaptureClient scrollCaptureClient,
             UiEventLogger uiEventLogger,
-            DeviceConfigProxy configProxy) {
+            DeviceConfigProxy configProxy,
+            ImageExporter imageExporter,
+            @Main Executor mainExecutor,
+            @Background Executor bgExecutor) {
         mScreenshotSmartActions = screenshotSmartActions;
         mNotificationsController = screenshotNotificationsController;
         mScrollCaptureClient = scrollCaptureClient;
         mUiEventLogger = uiEventLogger;
+        mImageExporter = imageExporter;
+        mMainExecutor = mainExecutor;
+        mBgExecutor = bgExecutor;
 
         final DisplayManager dm = requireNonNull(context.getSystemService(DisplayManager.class));
         final Display display = dm.getDisplay(DEFAULT_DISPLAY);
@@ -502,9 +514,10 @@ public class ScreenshotController {
         }
     }
 
-    private void runScrollCapture(ScrollCaptureClient.Connection connection,
-            Runnable after) {
-        new ScrollCaptureController(mContext, connection).run(after);
+    private void runScrollCapture(ScrollCaptureClient.Connection connection, Runnable andThen) {
+        ScrollCaptureController controller = new ScrollCaptureController(mContext, connection,
+                mMainExecutor, mBgExecutor, mImageExporter);
+        controller.run(andThen);
     }
 
     /**
@@ -604,8 +617,8 @@ public class ScreenshotController {
             mSaveInBgTask.setActionsReadyListener(this::logSuccessOnActionsReady);
         }
 
-        mSaveInBgTask = new SaveImageInBackgroundTask(mContext, mScreenshotSmartActions, data,
-                getShareTransitionSupplier());
+        mSaveInBgTask = new SaveImageInBackgroundTask(mContext, mImageExporter,
+                mScreenshotSmartActions, data, getShareTransitionSupplier());
         mSaveInBgTask.execute();
     }
 
