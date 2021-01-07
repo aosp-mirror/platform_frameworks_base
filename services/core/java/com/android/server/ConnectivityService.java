@@ -89,7 +89,6 @@ import android.net.IConnectivityManager;
 import android.net.IDnsResolver;
 import android.net.IIpConnectivityMetrics;
 import android.net.INetd;
-import android.net.INetdEventCallback;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkMonitor;
 import android.net.INetworkMonitorCallbacks;
@@ -131,6 +130,7 @@ import android.net.UidRangeParcel;
 import android.net.Uri;
 import android.net.VpnManager;
 import android.net.VpnService;
+import android.net.metrics.INetdEventListener;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
 import android.net.netlink.InetDiagMessage;
@@ -207,7 +207,6 @@ import com.android.server.connectivity.NetworkRanker;
 import com.android.server.connectivity.PermissionMonitor;
 import com.android.server.connectivity.ProxyTracker;
 import com.android.server.connectivity.Vpn;
-import com.android.server.net.BaseNetdEventCallback;
 import com.android.server.net.BaseNetworkObserver;
 import com.android.server.net.LockdownVpnTracker;
 import com.android.server.net.NetworkPolicyManagerInternal;
@@ -1904,8 +1903,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return true;
     }
 
-    @VisibleForTesting
-    protected final INetdEventCallback mNetdEventCallback = new BaseNetdEventCallback() {
+    private class NetdEventCallback extends INetdEventListener.Stub {
         @Override
         public void onPrivateDnsValidationEvent(int netId, String ipAddress,
                 String hostname, boolean validated) {
@@ -1921,8 +1919,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         @Override
-        public void onDnsEvent(int netId, int eventType, int returnCode, String hostname,
-                String[] ipAddresses, int ipAddressesCount, long timestamp, int uid) {
+        public void onDnsEvent(int netId, int eventType, int returnCode, int latencyMs,
+                String hostname,  String[] ipAddresses, int ipAddressesCount, int uid) {
             NetworkAgentInfo nai = getNetworkAgentInfoForNetId(netId);
             // Netd event only allow registrants from system. Each NetworkMonitor thread is under
             // the caller thread of registerNetworkAgent. Thus, it's not allowed to register netd
@@ -1941,21 +1939,42 @@ public class ConnectivityService extends IConnectivityManager.Stub
                                        String prefixString, int prefixLength) {
             mHandler.post(() -> handleNat64PrefixEvent(netId, added, prefixString, prefixLength));
         }
-    };
 
-    private void registerNetdEventCallback() {
-        final IIpConnectivityMetrics ipConnectivityMetrics = mDeps.getIpConnectivityMetrics();
-        if (ipConnectivityMetrics == null) {
-            Log.wtf(TAG, "Missing IIpConnectivityMetrics");
-            return;
+        @Override
+        public void onConnectEvent(int netId, int error, int latencyMs, String ipAddr, int port,
+                int uid) {
         }
 
+        @Override
+        public void onWakeupEvent(String prefix, int uid, int ethertype, int ipNextHeader,
+                byte[] dstHw, String srcIp, String dstIp, int srcPort, int dstPort,
+                long timestampNs) {
+        }
+
+        @Override
+        public void onTcpSocketStatsEvent(int[] networkIds, int[] sentPackets, int[] lostPackets,
+                int[] rttsUs, int[] sentAckDiffsMs) {
+        }
+
+        @Override
+        public int getInterfaceVersion() throws RemoteException {
+            return this.VERSION;
+        }
+
+        @Override
+        public String getInterfaceHash() {
+            return this.HASH;
+        }
+    };
+
+    @VisibleForTesting
+    protected final INetdEventListener mNetdEventCallback = new NetdEventCallback();
+
+    private void registerNetdEventCallback() {
         try {
-            ipConnectivityMetrics.addNetdEventCallback(
-                    INetdEventCallback.CALLBACK_CALLER_CONNECTIVITY_SERVICE,
-                    mNetdEventCallback);
+            mDnsResolver.registerEventListener(mNetdEventCallback);
         } catch (Exception e) {
-            loge("Error registering netd callback: " + e);
+            loge("Error registering DnsResolver callback: " + e);
         }
     }
 
