@@ -27,6 +27,6 @@ import java.lang.annotation.Target;
  * TODO(b/176923052) Automate validation of @Watchable attributes.
  */
 @Target({ ElementType.FIELD })
-@Retention(RetentionPolicy.CLASS)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Watched {
 }

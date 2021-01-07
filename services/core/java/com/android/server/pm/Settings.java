@@ -192,6 +192,16 @@ public final class Settings implements Watchable, Snappable {
     }
 
     /**
+     * Return true if the {@link Watcher) is a registered observer.
+     * @param observer A {@link Watcher} that might be registered
+     * @return true if the observer is registered with this {@link Watchable}.
+     */
+    @Override
+    public boolean isRegisteredObserver(@NonNull Watcher observer) {
+        return mWatchable.isRegisteredObserver(observer);
+    }
+
+    /**
      * Invokes {@link Watcher#onChange} on each registered observer.  The method can be called
      * with the {@link Watchable} that generated the event.  In a tree of {@link Watchable}s, this
      * is generally the first (deepest) {@link Watchable} to detect a change.
@@ -544,6 +554,8 @@ public final class Settings implements Watchable, Snappable {
         mRenamedPackages.registerObserver(mObserver);
         mDefaultBrowserApp.registerObserver(mObserver);
         mNextAppLinkGeneration.registerObserver(mObserver);
+
+        Watchable.verifyWatchedAttributes(this, mObserver);
     }
 
     Settings(File dataDir, RuntimePermissionsPersistence runtimePermissionsPersistence,
@@ -574,7 +586,6 @@ public final class Settings implements Watchable, Snappable {
         mStoppedPackagesFilename = new File(mSystemDir, "packages-stopped.xml");
         mBackupStoppedPackagesFilename = new File(mSystemDir, "packages-stopped-backup.xml");
 
-
         mPackages.registerObserver(mObserver);
         mInstallerPackages.registerObserver(mObserver);
         mKernelMapping.registerObserver(mObserver);
@@ -591,6 +602,8 @@ public final class Settings implements Watchable, Snappable {
         mRenamedPackages.registerObserver(mObserver);
         mDefaultBrowserApp.registerObserver(mObserver);
         mNextAppLinkGeneration.registerObserver(mObserver);
+
+        Watchable.verifyWatchedAttributes(this, mObserver);
     }
 
     /**

@@ -66,6 +66,18 @@ public class WatchableImpl implements Watchable {
     }
 
     /**
+     * Return true if the {@link Watcher) is a registered observer.
+     * @param observer A {@link Watcher} that might be registered
+     * @return true if the observer is registered with this {@link Watchable}.
+     */
+    @Override
+    public boolean isRegisteredObserver(@NonNull Watcher observer) {
+        synchronized (mObservers) {
+            return mObservers.contains(observer);
+        }
+    }
+
+    /**
      * Return the number of registered observers.
      *
      * @return The number of registered observers.
