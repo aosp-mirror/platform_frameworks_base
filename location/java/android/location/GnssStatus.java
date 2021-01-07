@@ -391,20 +391,10 @@ public final class GnssStatus implements Parcelable {
             float[] basebandCn0DbHzs = new float[svCount];
             for (int i = 0; i < svCount; i++) {
                 svidWithFlags[i] = in.readInt();
-            }
-            for (int i = 0; i < svCount; i++) {
                 cn0DbHzs[i] = in.readFloat();
-            }
-            for (int i = 0; i < svCount; i++) {
                 elevations[i] = in.readFloat();
-            }
-            for (int i = 0; i < svCount; i++) {
                 azimuths[i] = in.readFloat();
-            }
-            for (int i = 0; i < svCount; i++) {
                 carrierFrequencies[i] = in.readFloat();
-            }
-            for (int i = 0; i < svCount; i++) {
                 basebandCn0DbHzs[i] = in.readFloat();
             }
 
@@ -428,20 +418,10 @@ public final class GnssStatus implements Parcelable {
         parcel.writeInt(mSvCount);
         for (int i = 0; i < mSvCount; i++) {
             parcel.writeInt(mSvidWithFlags[i]);
-        }
-        for (int i = 0; i < mSvCount; i++) {
             parcel.writeFloat(mCn0DbHzs[i]);
-        }
-        for (int i = 0; i < mSvCount; i++) {
             parcel.writeFloat(mElevations[i]);
-        }
-        for (int i = 0; i < mSvCount; i++) {
             parcel.writeFloat(mAzimuths[i]);
-        }
-        for (int i = 0; i < mSvCount; i++) {
             parcel.writeFloat(mCarrierFrequencies[i]);
-        }
-        for (int i = 0; i < mSvCount; i++) {
             parcel.writeFloat(mBasebandCn0DbHzs[i]);
         }
     }

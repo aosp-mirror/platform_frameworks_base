@@ -50,7 +50,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
-import android.location.Criteria;
 import android.location.GnssCapabilities;
 import android.location.GnssStatus;
 import android.location.INetInitiatedListener;
