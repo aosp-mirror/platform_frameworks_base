@@ -141,10 +141,13 @@ import android.net.UnderlyingNetworkInfo;
 import android.net.Uri;
 import android.net.VpnManager;
 import android.net.VpnTransportInfo;
-import android.net.metrics.INetdEventListener;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
 import android.net.netlink.InetDiagMessage;
+import android.net.resolv.aidl.DnsHealthEventParcel;
+import android.net.resolv.aidl.IDnsResolverUnsolicitedEventListener;
+import android.net.resolv.aidl.Nat64PrefixEventParcel;
+import android.net.resolv.aidl.PrivateDnsValidationEventParcel;
 import android.net.shared.PrivateDnsConfig;
 import android.net.util.MultinetworkPolicyTracker;
 import android.net.util.NetdService;
@@ -2029,25 +2032,24 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return true;
     }
 
-    private class NetdEventCallback extends INetdEventListener.Stub {
+    class DnsResolverUnsolicitedEventCallback extends
+            IDnsResolverUnsolicitedEventListener.Stub {
         @Override
-        public void onPrivateDnsValidationEvent(int netId, String ipAddress,
-                String hostname, boolean validated) {
+        public void onPrivateDnsValidationEvent(final PrivateDnsValidationEventParcel event) {
             try {
                 mHandler.sendMessage(mHandler.obtainMessage(
                         EVENT_PRIVATE_DNS_VALIDATION_UPDATE,
-                        new PrivateDnsValidationUpdate(netId,
-                                InetAddresses.parseNumericAddress(ipAddress),
-                                hostname, validated)));
+                        new PrivateDnsValidationUpdate(event.netId,
+                                InetAddresses.parseNumericAddress(event.ipAddress),
+                                event.hostname, event.validation)));
             } catch (IllegalArgumentException e) {
                 loge("Error parsing ip address in validation event");
             }
         }
 
         @Override
-        public void onDnsEvent(int netId, int eventType, int returnCode, int latencyMs,
-                String hostname,  String[] ipAddresses, int ipAddressesCount, int uid) {
-            NetworkAgentInfo nai = getNetworkAgentInfoForNetId(netId);
+        public void onDnsHealthEvent(final DnsHealthEventParcel event) {
+            NetworkAgentInfo nai = getNetworkAgentInfoForNetId(event.netId);
             // Netd event only allow registrants from system. Each NetworkMonitor thread is under
             // the caller thread of registerNetworkAgent. Thus, it's not allowed to register netd
             // event callback for certain nai. e.g. cellular. Register here to pass to
@@ -2056,34 +2058,18 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // callback from each caller type. Need to re-factor NetdEventListenerService to allow
             // multiple NetworkMonitor registrants.
             if (nai != null && nai.satisfies(mDefaultRequest.mRequests.get(0))) {
-                nai.networkMonitor().notifyDnsResponse(returnCode);
+                nai.networkMonitor().notifyDnsResponse(event.healthResult);
             }
         }
 
         @Override
-        public void onNat64PrefixEvent(int netId, boolean added,
-                                       String prefixString, int prefixLength) {
-            mHandler.post(() -> handleNat64PrefixEvent(netId, added, prefixString, prefixLength));
+        public void onNat64PrefixEvent(final Nat64PrefixEventParcel event) {
+            mHandler.post(() -> handleNat64PrefixEvent(event.netId, event.prefixOperation,
+                    event.prefixAddress, event.prefixLength));
         }
 
         @Override
-        public void onConnectEvent(int netId, int error, int latencyMs, String ipAddr, int port,
-                int uid) {
-        }
-
-        @Override
-        public void onWakeupEvent(String prefix, int uid, int ethertype, int ipNextHeader,
-                byte[] dstHw, String srcIp, String dstIp, int srcPort, int dstPort,
-                long timestampNs) {
-        }
-
-        @Override
-        public void onTcpSocketStatsEvent(int[] networkIds, int[] sentPackets, int[] lostPackets,
-                int[] rttsUs, int[] sentAckDiffsMs) {
-        }
-
-        @Override
-        public int getInterfaceVersion() throws RemoteException {
+        public int getInterfaceVersion() {
             return this.VERSION;
         }
 
@@ -2091,16 +2077,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
         public String getInterfaceHash() {
             return this.HASH;
         }
-    };
+    }
 
     @VisibleForTesting
-    protected final INetdEventListener mNetdEventCallback = new NetdEventCallback();
+    protected final DnsResolverUnsolicitedEventCallback mResolverUnsolEventCallback =
+            new DnsResolverUnsolicitedEventCallback();
 
-    private void registerNetdEventCallback() {
+    private void registerDnsResolverUnsolicitedEventListener() {
         try {
-            mDnsResolver.registerEventListener(mNetdEventCallback);
+            mDnsResolver.registerUnsolicitedEventListener(mResolverUnsolEventCallback);
         } catch (Exception e) {
-            loge("Error registering DnsResolver callback: " + e);
+            loge("Error registering DnsResolver unsolicited event callback: " + e);
         }
     }
 
@@ -2394,7 +2381,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // to ensure the tracking will be initialized correctly.
         mPermissionMonitor.startMonitoring();
         mProxyTracker.loadGlobalProxy();
-        registerNetdEventCallback();
+        registerDnsResolverUnsolicitedEventListener();
 
         synchronized (this) {
             mSystemReady = true;
@@ -3325,21 +3312,21 @@ public class ConnectivityService extends IConnectivityManager.Stub
         handleUpdateLinkProperties(nai, new LinkProperties(nai.linkProperties));
     }
 
-    private void handleNat64PrefixEvent(int netId, boolean added, String prefixString,
+    private void handleNat64PrefixEvent(int netId, int operation, String prefixAddress,
             int prefixLength) {
         NetworkAgentInfo nai = mNetworkForNetId.get(netId);
         if (nai == null) return;
 
-        log(String.format("NAT64 prefix %s on netId %d: %s/%d",
-                          (added ? "added" : "removed"), netId, prefixString, prefixLength));
+        log(String.format("NAT64 prefix changed on netId %d: operation=%d, %s/%d",
+                netId, operation, prefixAddress, prefixLength));
 
         IpPrefix prefix = null;
-        if (added) {
+        if (operation == IDnsResolverUnsolicitedEventListener.PREFIX_OPERATION_ADDED) {
             try {
-                prefix = new IpPrefix(InetAddresses.parseNumericAddress(prefixString),
+                prefix = new IpPrefix(InetAddresses.parseNumericAddress(prefixAddress),
                         prefixLength);
             } catch (IllegalArgumentException e) {
-                loge("Invalid NAT64 prefix " + prefixString + "/" + prefixLength);
+                loge("Invalid NAT64 prefix " + prefixAddress + "/" + prefixLength);
                 return;
             }
         }
