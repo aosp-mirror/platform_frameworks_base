@@ -32,6 +32,7 @@ import static com.android.internal.util.Preconditions.checkStringNotEmpty;
 import android.Manifest;
 import android.annotation.BinderThread;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.app.admin.DevicePolicyManager.PermissionGrantState;
@@ -61,6 +62,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -280,6 +282,22 @@ public abstract class PermissionControllerService extends Service {
      */
     @BinderThread
     public void onOneTimePermissionSessionTimeout(@NonNull String packageName) {
+        throw new AbstractMethodError("Must be overridden in implementing class");
+    }
+
+    /**
+     * Get a user-readable sentence, describing the set of privileges that are to be granted to a
+     * companion app managing a device of the given profile.
+     *
+     * @param deviceProfileName the
+     *      {@link android.companion.AssociationRequest.DeviceProfile device profile} name
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_COMPANION_DEVICES)
+    @NonNull
+    public String getPrivilegesDescriptionStringForProfile(@NonNull String deviceProfileName) {
         throw new AbstractMethodError("Must be overridden in implementing class");
     }
 
@@ -516,6 +534,24 @@ public abstract class PermissionControllerService extends Service {
                 enforceSomePermissionsGrantedToCaller(Manifest.permission.GET_RUNTIME_PERMISSIONS);
 
                 PermissionControllerService.this.dump(fd, writer, args);
+            }
+
+            @Override
+            public void getPrivilegesDescriptionStringForProfile(
+                    @NonNull String deviceProfileName,
+                    @NonNull AndroidFuture<String> callback) {
+                checkStringNotEmpty(deviceProfileName);
+                Objects.requireNonNull(callback);
+
+                enforceSomePermissionsGrantedToCaller(Manifest.permission.MANAGE_COMPANION_DEVICES);
+
+                try {
+                    callback.complete(PermissionControllerService
+                            .this
+                            .getPrivilegesDescriptionStringForProfile(deviceProfileName));
+                } catch (Throwable t) {
+                    callback.completeExceptionally(t);
+                }
             }
         };
     }

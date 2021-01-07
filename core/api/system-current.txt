@@ -8358,6 +8358,7 @@ package android.permission {
 
   public abstract class PermissionControllerService extends android.app.Service {
     ctor public PermissionControllerService();
+    method @NonNull @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public String getPrivilegesDescriptionStringForProfile(@NonNull String);
     method @BinderThread public void onApplyStagedRuntimePermissionBackup(@NonNull String, @NonNull android.os.UserHandle, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @NonNull public final android.os.IBinder onBind(android.content.Intent);
     method @BinderThread public abstract void onCountPermissionApps(@NonNull java.util.List<java.lang.String>, int, @NonNull java.util.function.IntConsumer);
