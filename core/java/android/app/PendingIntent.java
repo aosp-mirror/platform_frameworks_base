@@ -19,6 +19,7 @@ package android.app;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
@@ -221,6 +222,7 @@ public final class PendingIntent implements Parcelable {
      * @hide
      */
     @Deprecated
+    @TestApi
     public static final int FLAG_MUTABLE_UNAUDITED = FLAG_MUTABLE;
 
     /**
