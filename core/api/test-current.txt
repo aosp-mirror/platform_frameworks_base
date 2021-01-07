@@ -1714,6 +1714,7 @@ package android.service.autofill.augmented {
     method @NonNull public android.content.ComponentName getActivityComponent();
     method @NonNull public android.view.autofill.AutofillId getFocusedId();
     method @NonNull public android.view.autofill.AutofillValue getFocusedValue();
+    method @Nullable public android.app.assist.AssistStructure.ViewNode getFocusedViewNode();
     method @Nullable public android.view.inputmethod.InlineSuggestionsRequest getInlineSuggestionsRequest();
     method @Nullable public android.service.autofill.augmented.PresentationParams getPresentationParams();
     method public int getTaskId();
@@ -2199,6 +2200,7 @@ package android.view.autofill {
     ctor public AutofillId(int, int);
     ctor public AutofillId(@NonNull android.view.autofill.AutofillId, long, int);
     method public boolean equalsIgnoreSession(@Nullable android.view.autofill.AutofillId);
+    method public boolean isNonVirtual();
     method @NonNull public static android.view.autofill.AutofillId withoutSession(@NonNull android.view.autofill.AutofillId);
   }
 

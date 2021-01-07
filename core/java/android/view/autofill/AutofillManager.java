@@ -32,6 +32,9 @@ import android.annotation.RequiresFeature;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.app.assist.AssistStructure.ViewNode;
+import android.app.assist.AssistStructure.ViewNodeBuilder;
+import android.app.assist.AssistStructure.ViewNodeParcelable;
 import android.content.AutofillOptions;
 import android.content.ClipData;
 import android.content.ComponentName;
@@ -64,6 +67,8 @@ import android.view.Choreographer;
 import android.view.ContentInfo;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewRootImpl;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -3579,6 +3584,35 @@ public final class AutofillManager {
 
         private AugmentedAutofillManagerClient(AutofillManager autofillManager) {
             mAfm = new WeakReference<>(autofillManager);
+        }
+
+        @Nullable
+        @Override
+        public ViewNodeParcelable getViewNodeParcelable(@NonNull AutofillId id) {
+            final AutofillManager afm = mAfm.get();
+            if (afm == null) return null;
+
+            final View view = getView(afm, id);
+            if (view == null) {
+                Log.w(TAG, "getViewNodeParcelable(" + id + "): could not find view");
+                return null;
+            }
+            final ViewRootImpl root = view.getViewRootImpl();
+            if (root != null
+                    && (root.getWindowFlags() & WindowManager.LayoutParams.FLAG_SECURE) == 0) {
+                ViewNodeBuilder viewStructure = new ViewNodeBuilder();
+                viewStructure.setAutofillId(view.getAutofillId());
+                view.onProvideAutofillStructure(viewStructure, /* flags= */ 0);
+                // TODO(b/141703532): We don't call View#onProvideAutofillVirtualStructure for
+                //  efficiency reason. But this also means we will return null for virtual views
+                //  for now. We will add a new API to fetch the view node info of the virtual
+                //  child view.
+                ViewNode viewNode = viewStructure.getViewNode();
+                if (viewNode != null && id.equals(viewNode.getAutofillId())) {
+                    return new ViewNodeParcelable(viewNode);
+                }
+            }
+            return null;
         }
 
         @Override
