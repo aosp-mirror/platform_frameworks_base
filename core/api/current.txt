@@ -18575,6 +18575,58 @@ package android.hardware.input {
 
 }
 
+package android.hardware.lights {
+
+  public final class Light implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getId();
+    method @NonNull public String getName();
+    method public int getOrdinal();
+    method public int getType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.lights.Light> CREATOR;
+    field public static final int LIGHT_TYPE_INPUT_PLAYER_ID = 10; // 0xa
+    field public static final int LIGHT_TYPE_INPUT_RGB = 11; // 0xb
+    field public static final int LIGHT_TYPE_INPUT_SINGLE = 9; // 0x9
+    field public static final int LIGHT_TYPE_MICROPHONE = 8; // 0x8
+  }
+
+  public final class LightState implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public static android.hardware.lights.LightState forColor(@ColorInt int);
+    method @NonNull public static android.hardware.lights.LightState forPlayerId(int);
+    method @ColorInt public int getColor();
+    method public int getPlayerId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.lights.LightState> CREATOR;
+  }
+
+  public abstract class LightsManager {
+    method @NonNull public abstract android.hardware.lights.LightState getLightState(@NonNull android.hardware.lights.Light);
+    method @NonNull public abstract java.util.List<android.hardware.lights.Light> getLights();
+    method @NonNull public abstract android.hardware.lights.LightsManager.LightsSession openSession();
+  }
+
+  public abstract static class LightsManager.LightsSession implements java.lang.AutoCloseable {
+    ctor public LightsManager.LightsSession();
+    method public abstract void close();
+    method public abstract void requestLights(@NonNull android.hardware.lights.LightsRequest);
+  }
+
+  public final class LightsRequest {
+    method @NonNull public java.util.List<android.hardware.lights.LightState> getLightStates();
+    method @NonNull public java.util.List<java.lang.Integer> getLights();
+  }
+
+  public static final class LightsRequest.Builder {
+    ctor public LightsRequest.Builder();
+    method @NonNull public android.hardware.lights.LightsRequest.Builder addLight(@NonNull android.hardware.lights.Light, @NonNull android.hardware.lights.LightState);
+    method @NonNull public android.hardware.lights.LightsRequest build();
+    method @NonNull public android.hardware.lights.LightsRequest.Builder clearLight(@NonNull android.hardware.lights.Light);
+  }
+
+}
+
 package android.hardware.usb {
 
   public class UsbAccessory implements android.os.Parcelable {
@@ -46508,6 +46560,7 @@ package android.view {
     method public int getId();
     method public android.view.KeyCharacterMap getKeyCharacterMap();
     method public int getKeyboardType();
+    method @NonNull public android.hardware.lights.LightsManager getLightsManager();
     method public android.view.InputDevice.MotionRange getMotionRange(int);
     method public android.view.InputDevice.MotionRange getMotionRange(int, int);
     method public java.util.List<android.view.InputDevice.MotionRange> getMotionRanges();

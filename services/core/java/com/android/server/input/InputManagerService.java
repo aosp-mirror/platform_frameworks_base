@@ -17,6 +17,7 @@
 package com.android.server.input;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -50,6 +51,8 @@ import android.hardware.input.InputManagerInternal.LidSwitchCallback;
 import android.hardware.input.InputSensorInfo;
 import android.hardware.input.KeyboardLayout;
 import android.hardware.input.TouchCalibration;
+import android.hardware.lights.Light;
+import android.hardware.lights.LightState;
 import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Bundle;
@@ -232,6 +235,13 @@ public class InputManagerService extends IInputManager.Stub
     // List of vibrator states by device id.
     @GuardedBy("mVibratorLock")
     private final SparseBooleanArray mIsVibrating = new SparseBooleanArray();
+    private Object mLightLock = new Object();
+    // State for light tokens. A light token marks a lights manager session, it is generated
+    // by light session open() and deleted in session close().
+    // When lights session requests light states, the token will be used to find the light session.
+    @GuardedBy("mLightLock")
+    private final ArrayMap<IBinder, LightSession> mLightSessions =
+            new ArrayMap<IBinder, LightSession>();
 
     // State for lid switch
     private final Object mLidSwitchLock = new Object();
@@ -298,6 +308,12 @@ public class InputManagerService extends IInputManager.Stub
     private static native int[] nativeGetVibratorIds(long ptr, int deviceId);
     private static native int nativeGetBatteryCapacity(long ptr, int deviceId);
     private static native int nativeGetBatteryStatus(long ptr, int deviceId);
+    private static native List<Light> nativeGetLights(long ptr, int deviceId);
+    private static native int nativeGetLightPlayerId(long ptr, int deviceId, int lightId);
+    private static native int nativeGetLightColor(long ptr, int deviceId, int lightId);
+    private static native void nativeSetLightPlayerId(long ptr, int deviceId, int lightId,
+            int playerId);
+    private static native void nativeSetLightColor(long ptr, int deviceId, int lightId, int color);
     private static native void nativeReloadKeyboardLayouts(long ptr);
     private static native void nativeReloadDeviceAliases(long ptr);
     private static native String nativeDump(long ptr);
@@ -2243,6 +2259,151 @@ public class InputManagerService extends IInputManager.Stub
     public void disableSensor(int deviceId, int sensorType) {
         synchronized (mInputDevicesLock) {
             nativeDisableSensor(mPtr, deviceId, sensorType);
+        }
+    }
+
+    /**
+     * LightSession represents a light session for lights manager.
+     */
+    private final class LightSession implements DeathRecipient {
+        private final int mDeviceId;
+        private final IBinder mToken;
+        private final String mOpPkg;
+        // The light ids and states that are requested by the light seesion
+        private int[] mLightIds;
+        private LightState[] mLightStates;
+
+        LightSession(int deviceId, String opPkg, IBinder token) {
+            mDeviceId = deviceId;
+            mOpPkg = opPkg;
+            mToken = token;
+        }
+
+        @Override
+        public void binderDied() {
+            if (DEBUG) {
+                Slog.d(TAG, "Light token died.");
+            }
+            synchronized (mLightLock) {
+                closeLightSession(mDeviceId, mToken);
+                mLightSessions.remove(mToken);
+            }
+        }
+    }
+
+    /**
+     * Returns the lights available for apps to control on the specified input device.
+     * Only lights that aren't reserved for system use are available to apps.
+     */
+    @Override // Binder call
+    public List<Light> getLights(int deviceId) {
+        return nativeGetLights(mPtr, deviceId);
+    }
+
+    /**
+     * Set specified light state with for a specific input device.
+     */
+    private void setLightStateInternal(int deviceId, Light light, LightState lightState) {
+        Preconditions.checkNotNull(light, "light does not exist");
+        if (DEBUG) {
+            Slog.d(TAG, "setLightStateInternal device " + deviceId + " light " + light
+                    + "lightState " + lightState);
+        }
+        if (light.getType() == Light.LIGHT_TYPE_INPUT_PLAYER_ID) {
+            nativeSetLightPlayerId(mPtr, deviceId, light.getId(), lightState.getPlayerId());
+        } else if (light.getType() == Light.LIGHT_TYPE_INPUT_SINGLE
+                || light.getType() == Light.LIGHT_TYPE_INPUT_RGB) {
+            // Set ARGB format color to input device light
+            // Refer to https://developer.android.com/reference/kotlin/android/graphics/Color
+            nativeSetLightColor(mPtr, deviceId, light.getId(), lightState.getColor());
+        } else {
+            Slog.e(TAG, "setLightStates for unsupported light type " + light.getType());
+        }
+    }
+
+    /**
+     * Set multiple light states with multiple light ids for a specific input device.
+     */
+    private void setLightStatesInternal(int deviceId, int[] lightIds, LightState[] lightStates) {
+        final List<Light> lights = nativeGetLights(mPtr, deviceId);
+        SparseArray<Light> lightArray = new SparseArray<>();
+        for (int i = 0; i < lights.size(); i++) {
+            lightArray.put(lights.get(i).getId(), lights.get(i));
+        }
+        for (int i = 0; i < lightIds.length; i++) {
+            if (lightArray.contains(lightIds[i])) {
+                setLightStateInternal(deviceId, lightArray.get(lightIds[i]), lightStates[i]);
+            }
+        }
+    }
+
+    /**
+     * Set states for multiple lights for an opened light session.
+     */
+    @Override
+    public void setLightStates(int deviceId, int[] lightIds, LightState[] lightStates,
+            IBinder token) {
+        Preconditions.checkArgument(lightIds.length == lightStates.length,
+                "lights and light states are not same length");
+        synchronized (mLightLock) {
+            LightSession lightSession = mLightSessions.get(token);
+            Preconditions.checkArgument(lightSession != null, "not registered");
+            Preconditions.checkState(lightSession.mDeviceId == deviceId, "Incorrect device ID");
+            lightSession.mLightIds = lightIds.clone();
+            lightSession.mLightStates = lightStates.clone();
+            if (DEBUG) {
+                Slog.d(TAG, "setLightStates for " + lightSession.mOpPkg + " device " + deviceId);
+            }
+        }
+        setLightStatesInternal(deviceId, lightIds, lightStates);
+    }
+
+    @Override
+    public @Nullable LightState getLightState(int deviceId, int lightId) {
+        synchronized (mLightLock) {
+            int color = nativeGetLightColor(mPtr, deviceId, lightId);
+            int playerId = nativeGetLightPlayerId(mPtr, deviceId, lightId);
+
+            return new LightState(color, playerId);
+        }
+    }
+
+    @Override
+    public void openLightSession(int deviceId, String opPkg, IBinder token) {
+        Preconditions.checkNotNull(token);
+        synchronized (mLightLock) {
+            Preconditions.checkState(mLightSessions.get(token) == null, "already registered");
+            LightSession lightSession = new LightSession(deviceId, opPkg, token);
+            try {
+                token.linkToDeath(lightSession, 0);
+            } catch (RemoteException ex) {
+                // give up
+                ex.rethrowAsRuntimeException();
+            }
+            mLightSessions.put(token, lightSession);
+            if (DEBUG) {
+                Slog.d(TAG, "Open light session for " + opPkg + " device " + deviceId);
+            }
+        }
+    }
+
+    @Override
+    public void closeLightSession(int deviceId, IBinder token) {
+        Preconditions.checkNotNull(token);
+        synchronized (mLightLock) {
+            LightSession lightSession = mLightSessions.get(token);
+            Preconditions.checkState(lightSession != null, "not registered");
+            // Turn off the lights that were previously requested by the session to be closed.
+            Arrays.fill(lightSession.mLightStates, new LightState(0));
+            setLightStatesInternal(deviceId, lightSession.mLightIds,
+                    lightSession.mLightStates);
+            mLightSessions.remove(token);
+            // If any other session is still pending with light request, apply the first session's
+            // request.
+            if (!mLightSessions.isEmpty()) {
+                LightSession nextSession = mLightSessions.valueAt(0);
+                setLightStatesInternal(deviceId, nextSession.mLightIds, nextSession.mLightStates);
+            }
         }
     }
 

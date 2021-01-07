@@ -3341,42 +3341,12 @@ package android.hardware.hdmi {
 
 package android.hardware.lights {
 
-  public final class Light implements android.os.Parcelable {
-    method public int describeContents();
-    method public int getId();
-    method public int getOrdinal();
-    method public int getType();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.lights.Light> CREATOR;
-  }
-
   public final class LightState implements android.os.Parcelable {
-    ctor public LightState(@ColorInt int);
-    method public int describeContents();
-    method @ColorInt public int getColor();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.lights.LightState> CREATOR;
+    ctor @Deprecated public LightState(@ColorInt int);
   }
 
-  public final class LightsManager {
-    method @NonNull @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_LIGHTS) public java.util.List<android.hardware.lights.Light> getLights();
-    method @NonNull @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_LIGHTS) public android.hardware.lights.LightsManager.LightsSession openSession();
-    field public static final int LIGHT_TYPE_MICROPHONE = 8; // 0x8
-  }
-
-  public final class LightsManager.LightsSession implements java.lang.AutoCloseable {
-    method @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_LIGHTS) public void close();
-    method @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_LIGHTS) public void requestLights(@NonNull android.hardware.lights.LightsRequest);
-  }
-
-  public final class LightsRequest {
-  }
-
-  public static final class LightsRequest.Builder {
-    ctor public LightsRequest.Builder();
-    method @NonNull public android.hardware.lights.LightsRequest build();
-    method @NonNull public android.hardware.lights.LightsRequest.Builder clearLight(@NonNull android.hardware.lights.Light);
-    method @NonNull public android.hardware.lights.LightsRequest.Builder setLight(@NonNull android.hardware.lights.Light, @NonNull android.hardware.lights.LightState);
+  public abstract class LightsManager {
+    field @Deprecated public static final int LIGHT_TYPE_MICROPHONE = 8; // 0x8
   }
 
 }

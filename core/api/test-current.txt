@@ -998,14 +998,6 @@ package android.hardware.input {
 
 }
 
-package android.hardware.lights {
-
-  public final class LightsManager {
-    method @NonNull @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_LIGHTS) public android.hardware.lights.LightState getLightState(@NonNull android.hardware.lights.Light);
-  }
-
-}
-
 package android.hardware.soundtrigger {
 
   public class KeyphraseEnrollmentInfo {
