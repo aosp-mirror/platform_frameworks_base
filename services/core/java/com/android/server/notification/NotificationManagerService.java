@@ -445,16 +445,6 @@ public class NotificationManagerService extends SystemService {
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.R)
     private static final long NOTIFICATION_TRAMPOLINE_BLOCK = 167676448L;
 
-    /**
-     * Rate limit showing toasts, on a per package basis.
-     *
-     * It limits the effects of {@link android.widget.Toast#show()} calls to prevent overburdening
-     * the user with too many toasts in a limited time. Any attempt to show more toasts than allowed
-     * in a certain time frame will result in the toast being discarded.
-     */
-    @ChangeId
-    private static final long RATE_LIMIT_TOASTS = 154198299L;
-
     private IActivityManager mAm;
     private ActivityTaskManagerInternal mAtm;
     private ActivityManager mActivityManager;
@@ -526,6 +516,9 @@ public class NotificationManagerService extends SystemService {
     @GuardedBy("mNotificationLock")
     final ArrayMap<Integer, ArrayMap<String, String>> mAutobundledSummaries = new ArrayMap<>();
     final ArrayList<ToastRecord> mToastQueue = new ArrayList<>();
+    // set of uids for which toast rate limiting is disabled
+    @GuardedBy("mToastQueue")
+    private final Set<Integer> mToastRateLimitingDisabledUids = new ArraySet<>();
     final ArrayMap<String, NotificationRecord> mSummaryByGroupKey = new ArrayMap<>();
 
     // True if the toast that's on top of the queue is being shown at the moment.
@@ -3062,6 +3055,22 @@ public class NotificationManagerService extends SystemService {
                     }
                 } finally {
                     Binder.restoreCallingIdentity(callingId);
+                }
+            }
+        }
+
+        @Override
+        public void setToastRateLimitingEnabled(boolean enable) {
+            getContext().enforceCallingPermission(
+                    android.Manifest.permission.MANAGE_TOAST_RATE_LIMITING,
+                    "App doesn't have the permission to enable/disable toast rate limiting");
+
+            synchronized (mToastQueue) {
+                int uid = Binder.getCallingUid();
+                if (enable) {
+                    mToastRateLimitingDisabledUids.remove(uid);
+                } else {
+                    mToastRateLimitingDisabledUids.add(uid);
                 }
             }
         }
@@ -7377,7 +7386,7 @@ public class NotificationManagerService extends SystemService {
         while (record != null) {
             int userId = UserHandle.getUserId(record.uid);
             boolean rateLimitingEnabled =
-                    CompatChanges.isChangeEnabled(RATE_LIMIT_TOASTS, record.uid);
+                    !mToastRateLimitingDisabledUids.contains(record.uid);
             boolean isWithinQuota =
                     mToastRateLimiter.isWithinQuota(userId, record.pkg, TOAST_QUOTA_TAG);
 
