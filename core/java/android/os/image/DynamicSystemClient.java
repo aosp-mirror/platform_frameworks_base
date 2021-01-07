@@ -68,6 +68,8 @@ import java.util.concurrent.Executor;
  */
 @SystemApi
 public class DynamicSystemClient {
+    private static final String TAG = "DynamicSystemClient";
+
     /** @hide */
     @IntDef(prefix = { "STATUS_" }, value = {
             STATUS_UNKNOWN,
@@ -91,8 +93,6 @@ public class DynamicSystemClient {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface StatusChangedCause {}
-
-    private static final String TAG = "DynSystemClient";
 
     /** Listener for installation status updates. */
     public interface OnStatusChangedListener {
@@ -240,7 +240,7 @@ public class DynamicSystemClient {
 
     private class DynSystemServiceConnection implements ServiceConnection {
         public void onServiceConnected(ComponentName className, IBinder service) {
-            Slog.v(TAG, "DynSystemService connected");
+            Slog.v(TAG, "onServiceConnected: " + className);
 
             mService = new Messenger(service);
 
@@ -262,7 +262,7 @@ public class DynamicSystemClient {
         }
 
         public void onServiceDisconnected(ComponentName className) {
-            Slog.v(TAG, "DynSystemService disconnected");
+            Slog.v(TAG, "onServiceDisconnected: " + className);
             mService = null;
         }
     }

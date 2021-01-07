@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.internal.location.gnssmetrics;
-
-import static android.location.GnssSignalQuality.GNSS_SIGNAL_QUALITY_GOOD;
-import static android.location.GnssSignalQuality.GNSS_SIGNAL_QUALITY_POOR;
-import static android.location.GnssSignalQuality.GNSS_SIGNAL_QUALITY_UNKNOWN;
-import static android.location.GnssSignalQuality.NUM_GNSS_SIGNAL_QUALITY_LEVELS;
+package com.android.server.location.gnss;
 
 import android.app.StatsManager;
 import android.content.Context;
+import android.location.GnssSignalQuality;
 import android.location.GnssStatus;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -67,11 +63,11 @@ public class GnssMetrics {
 
     // A boolean array indicating whether the constellation types have been used in fix.
     private boolean[] mConstellationTypes;
-    private Statistics mLocationFailureStatistics;
-    private Statistics mTimeToFirstFixSecStatistics;
-    private Statistics mPositionAccuracyMeterStatistics;
-    private Statistics mTopFourAverageCn0Statistics;
-    private Statistics mTopFourAverageCn0StatisticsL5;
+    private final Statistics mLocationFailureStatistics;
+    private final Statistics mTimeToFirstFixSecStatistics;
+    private final Statistics mPositionAccuracyMeterStatistics;
+    private final Statistics mTopFourAverageCn0Statistics;
+    private final Statistics mTopFourAverageCn0StatisticsL5;
     // Total number of sv status messages processed
     private int mNumSvStatus;
     // Total number of L5 sv status messages processed
@@ -91,7 +87,7 @@ public class GnssMetrics {
     long mSvStatusReportsUsedInFix;
     long mL5SvStatusReportsUsedInFix;
 
-    private StatsManager mStatsManager;
+    private final StatsManager mStatsManager;
 
     public GnssMetrics(Context context, IBatteryStats stats) {
         mGnssPowerMetrics = new GnssPowerMetrics(stats);
@@ -390,7 +386,7 @@ public class GnssMetrics {
                     stats.getLoggingDurationMs() / ((double) DateUtils.MINUTE_IN_MILLIS)).append(
                     "\n");
             long[] t = stats.getTimeInGpsSignalQualityLevel();
-            if (t != null && t.length == NUM_GNSS_SIGNAL_QUALITY_LEVELS) {
+            if (t != null && t.length == GnssSignalQuality.NUM_GNSS_SIGNAL_QUALITY_LEVELS) {
                 s.append("  Amount of time (while on battery) Top 4 Avg CN0 > "
                         + GnssPowerMetrics.POOR_TOP_FOUR_AVG_CN0_THRESHOLD_DB_HZ
                         + " dB-Hz (min): ").append(
@@ -505,7 +501,7 @@ public class GnssMetrics {
           // so that
             // the first CNO report will trigger an update to BatteryStats
             mLastAverageCn0 = -100.0;
-            mLastSignalLevel = GNSS_SIGNAL_QUALITY_UNKNOWN;
+            mLastSignalLevel = GnssSignalQuality.GNSS_SIGNAL_QUALITY_UNKNOWN;
         }
 
         /**
@@ -577,9 +573,9 @@ public class GnssMetrics {
          */
         private int getSignalLevel(double cn0) {
             if (cn0 > POOR_TOP_FOUR_AVG_CN0_THRESHOLD_DB_HZ) {
-                return GNSS_SIGNAL_QUALITY_GOOD;
+                return GnssSignalQuality.GNSS_SIGNAL_QUALITY_GOOD;
             }
-            return GNSS_SIGNAL_QUALITY_POOR;
+            return GnssSignalQuality.GNSS_SIGNAL_QUALITY_POOR;
         }
     }
 

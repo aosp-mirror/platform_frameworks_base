@@ -120,6 +120,7 @@ abstract class KeyStoreCryptoOperationUtils {
                 return new KeyPermanentlyInvalidatedException();
             case ResponseCode.LOCKED:
             case ResponseCode.UNINITIALIZED:
+            case KeymasterDefs.KM_ERROR_KEY_USER_NOT_AUTHENTICATED:
                 // TODO b/173111727 remove response codes LOCKED and UNINITIALIZED
                 return new UserNotAuthenticatedException();
             default:

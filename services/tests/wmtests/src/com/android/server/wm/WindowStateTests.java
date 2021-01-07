@@ -67,22 +67,17 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.when;
 
-import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
-import android.util.Size;
-import android.view.DisplayCutout;
 import android.view.InputWindowHandle;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
-
-import com.android.server.wm.utils.WmDisplayCutout;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -524,24 +519,6 @@ public class WindowStateTests extends WindowTestsBase {
         curSurfacePos[1] = frame.top;
         matrix.mapPoints(curSurfacePos);
         verify(t).setPosition(eq(app.mSurfaceControl), eq(curSurfacePos[0]), eq(curSurfacePos[1]));
-    }
-
-    @Test
-    public void testDisplayCutoutIsCalculatedRelativeToFrame() {
-        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
-        WindowFrames wf = app.getWindowFrames();
-        wf.mParentFrame.set(7, 10, 185, 380);
-        wf.mDisplayFrame.set(wf.mParentFrame);
-        final DisplayCutout cutout = new DisplayCutout(
-                Insets.of(0, 15, 0, 22) /* safeInset */,
-                null /* boundLeft */,
-                new Rect(95, 0, 105, 15),
-                null /* boundRight */,
-                new Rect(95, 378, 105, 400));
-        wf.setDisplayCutout(new WmDisplayCutout(cutout, new Size(200, 400)));
-
-        app.computeFrame();
-        assertThat(app.getWmDisplayCutout().getDisplayCutout(), is(cutout.inset(7, 10, 5, 20)));
     }
 
     @Test

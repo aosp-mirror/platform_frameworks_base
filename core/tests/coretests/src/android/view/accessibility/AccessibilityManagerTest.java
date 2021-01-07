@@ -64,7 +64,8 @@ public class AccessibilityManagerTest {
     private static final String INTENT_ACTION = "TESTACTION";
     private static final String DESCRIPTION = "description";
     private static final PendingIntent TEST_PENDING_INTENT = PendingIntent.getBroadcast(
-            InstrumentationRegistry.getTargetContext(), 0, new Intent(INTENT_ACTION), 0);
+            InstrumentationRegistry.getTargetContext(), 0, new Intent(INTENT_ACTION), 
+            PendingIntent.FLAG_IMMUTABLE);
     private static final RemoteAction TEST_ACTION = new RemoteAction(
             Icon.createWithContentUri("content://test"),
             LABEL,

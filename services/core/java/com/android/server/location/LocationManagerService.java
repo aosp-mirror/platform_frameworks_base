@@ -52,8 +52,8 @@ import android.location.IGeocodeListener;
 import android.location.IGnssAntennaInfoListener;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssNavigationMessageListener;
+import android.location.IGnssNmeaListener;
 import android.location.IGnssStatusListener;
-import android.location.IGpsGeofenceHardware;
 import android.location.ILocationCallback;
 import android.location.ILocationListener;
 import android.location.ILocationManager;
@@ -87,10 +87,13 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.location.geofence.GeofenceManager;
 import com.android.server.location.geofence.GeofenceProxy;
+import com.android.server.location.gnss.GnssConfiguration;
 import com.android.server.location.gnss.GnssManagerService;
+import com.android.server.location.gnss.hal.GnssNative;
 import com.android.server.location.injector.AlarmHelper;
 import com.android.server.location.injector.AppForegroundHelper;
 import com.android.server.location.injector.AppOpsHelper;
+import com.android.server.location.injector.EmergencyHelper;
 import com.android.server.location.injector.Injector;
 import com.android.server.location.injector.LocationAttributionHelper;
 import com.android.server.location.injector.LocationEventLog;
@@ -102,6 +105,7 @@ import com.android.server.location.injector.SettingsHelper;
 import com.android.server.location.injector.SystemAlarmHelper;
 import com.android.server.location.injector.SystemAppForegroundHelper;
 import com.android.server.location.injector.SystemAppOpsHelper;
+import com.android.server.location.injector.SystemEmergencyHelper;
 import com.android.server.location.injector.SystemLocationPermissionsHelper;
 import com.android.server.location.injector.SystemLocationPowerSaveModeHelper;
 import com.android.server.location.injector.SystemScreenInteractiveHelper;
@@ -367,8 +371,10 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         // initialize gnss last because it has no awareness of boot phases and blindly assumes that
         // all other location providers are loaded at initialization
-        if (GnssManagerService.isGnssSupported()) {
-            mGnssManagerService = new GnssManagerService(mContext, mInjector);
+        if (GnssNative.isSupported()) {
+            GnssConfiguration gnssConfiguration = new GnssConfiguration(mContext);
+            GnssNative gnssNative = GnssNative.create(mInjector, gnssConfiguration);
+            mGnssManagerService = new GnssManagerService(mContext, mInjector, gnssNative);
             mGnssManagerService.onSystemReady();
 
             LocationProviderManager gnssManager = new LocationProviderManager(mContext, mInjector,
@@ -390,13 +396,11 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         // bind to gnss geofence proxy
-        if (GnssManagerService.isGnssSupported()) {
-            IGpsGeofenceHardware gpsGeofenceHardware = mGnssManagerService.getGpsGeofenceProxy();
-            if (gpsGeofenceHardware != null) {
-                GeofenceProxy provider = GeofenceProxy.createAndBind(mContext, gpsGeofenceHardware);
-                if (provider == null) {
-                    Log.e(TAG, "unable to bind to GeofenceProxy");
-                }
+        if (mGnssManagerService != null) {
+            GeofenceProxy provider = GeofenceProxy.createAndBind(mContext,
+                    mGnssManagerService.getGnssGeofenceProxy());
+            if (provider == null) {
+                Log.e(TAG, "unable to bind to GeofenceProxy");
             }
         }
 
@@ -864,6 +868,21 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
+    public void registerGnssNmeaCallback(IGnssNmeaListener listener, String packageName,
+            String attributionTag) {
+        if (mGnssManagerService != null) {
+            mGnssManagerService.registerGnssNmeaCallback(listener, packageName, attributionTag);
+        }
+    }
+
+    @Override
+    public void unregisterGnssNmeaCallback(IGnssNmeaListener listener) {
+        if (mGnssManagerService != null) {
+            mGnssManagerService.unregisterGnssNmeaCallback(listener);
+        }
+    }
+
+    @Override
     public void addGnssMeasurementsListener(@Nullable GnssMeasurementRequest request,
             IGnssMeasurementsListener listener, String packageName, String attributionTag) {
         if (mGnssManagerService != null) {
@@ -888,8 +907,8 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public long getGnssCapabilities() {
-        return mGnssManagerService == null ? GnssCapabilities.INVALID_CAPABILITIES
+    public GnssCapabilities getGnssCapabilities() {
+        return mGnssManagerService == null ? new GnssCapabilities.Builder().build()
                 : mGnssManagerService.getGnssCapabilities();
     }
 
@@ -1289,8 +1308,10 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     private static class SystemInjector implements Injector {
 
-        private final LocationEventLog mLocationEventLog;
+        private final Context mContext;
+
         private final UserInfoHelper mUserInfoHelper;
+        private final LocationEventLog mLocationEventLog;
         private final AlarmHelper mAlarmHelper;
         private final SystemAppOpsHelper mAppOpsHelper;
         private final SystemLocationPermissionsHelper mLocationPermissionsHelper;
@@ -1301,9 +1322,19 @@ public class LocationManagerService extends ILocationManager.Stub {
         private final LocationAttributionHelper mLocationAttributionHelper;
         private final LocationUsageLogger mLocationUsageLogger;
 
+        // lazily instantiated since they may not always be used
+
+        @GuardedBy("this")
+        private @Nullable SystemEmergencyHelper mEmergencyCallHelper;
+
+        @GuardedBy("this")
+        private boolean mSystemReady;
+
         SystemInjector(Context context, UserInfoHelper userInfoHelper) {
-            mLocationEventLog = new LocationEventLog();
+            mContext = context;
+
             mUserInfoHelper = userInfoHelper;
+            mLocationEventLog = new LocationEventLog();
             mAlarmHelper = new SystemAlarmHelper(context);
             mAppOpsHelper = new SystemAppOpsHelper(context);
             mLocationPermissionsHelper = new SystemLocationPermissionsHelper(context,
@@ -1317,13 +1348,19 @@ public class LocationManagerService extends ILocationManager.Stub {
             mLocationUsageLogger = new LocationUsageLogger();
         }
 
-        void onSystemReady() {
+        synchronized void onSystemReady() {
             mAppOpsHelper.onSystemReady();
             mLocationPermissionsHelper.onSystemReady();
             mSettingsHelper.onSystemReady();
             mAppForegroundHelper.onSystemReady();
             mLocationPowerSaveModeHelper.onSystemReady();
             mScreenInteractiveHelper.onSystemReady();
+
+            if (mEmergencyCallHelper != null) {
+                mEmergencyCallHelper.onSystemReady();
+            }
+
+            mSystemReady = true;
         }
 
         @Override
@@ -1357,11 +1394,6 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         @Override
-        public LocationUsageLogger getLocationUsageLogger() {
-            return mLocationUsageLogger;
-        }
-
-        @Override
         public LocationPowerSaveModeHelper getLocationPowerSaveModeHelper() {
             return mLocationPowerSaveModeHelper;
         }
@@ -1377,8 +1409,25 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         @Override
+        public synchronized EmergencyHelper getEmergencyHelper() {
+            if (mEmergencyCallHelper == null) {
+                mEmergencyCallHelper = new SystemEmergencyHelper(mContext);
+                if (mSystemReady) {
+                    mEmergencyCallHelper.onSystemReady();
+                }
+            }
+
+            return mEmergencyCallHelper;
+        }
+
+        @Override
         public LocationEventLog getLocationEventLog() {
             return mLocationEventLog;
+        }
+
+        @Override
+        public LocationUsageLogger getLocationUsageLogger() {
+            return mLocationUsageLogger;
         }
     }
 }

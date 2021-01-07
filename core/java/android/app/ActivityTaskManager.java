@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
@@ -56,20 +58,6 @@ public class ActivityTaskManager {
      * @hide
      */
     public static final int INVALID_TASK_ID = -1;
-
-    /**
-     * Parameter to {@link IActivityTaskManager#setTaskWindowingModeSplitScreenPrimary} which
-     * specifies the position of the created docked stack at the top half of the screen if
-     * in portrait mode or at the left half of the screen if in landscape mode.
-     */
-    public static final int SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT = 0;
-
-    /**
-     * Parameter to {@link IActivityTaskManager#setTaskWindowingModeSplitScreenPrimary} which
-     * specifies the position of the created docked stack at the bottom half of the screen if
-     * in portrait mode or at the right half of the screen if in landscape mode.
-     */
-    public static final int SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT = 1;
 
     /**
      * Input parameter to {@link IActivityTaskManager#resizeTask} which indicates
@@ -199,28 +187,12 @@ public class ActivityTaskManager {
     /**
      * Moves the input task to the primary-split-screen stack.
      * @param taskId Id of task to move.
-     * @param createMode The mode the primary split screen stack should be created in if it doesn't
-     *                   exist already. See
-     *                   {@link ActivityTaskManager#SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT}
-     *                   and
-     *                   {@link android.app.ActivityManager
-     *                        #SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT}
      * @param toTop If the task and stack should be moved to the top.
-     * @param animate Whether we should play an animation for the moving the task
-     * @param initialBounds If the primary stack gets created, it will use these bounds for the
-     *                      docked stack. Pass {@code null} to use default bounds.
-     * @param showRecents If the recents activity should be shown on the other side of the task
-     *                    going into split-screen mode.
      * @return Whether the task was successfully put into splitscreen.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
-    public boolean setTaskWindowingModeSplitScreenPrimary(int taskId, int createMode, boolean toTop,
-            boolean animate, Rect initialBounds, boolean showRecents) throws SecurityException {
-        try {
-            return getService().setTaskWindowingModeSplitScreenPrimary(taskId, toTop);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+    public boolean setTaskWindowingModeSplitScreenPrimary(int taskId, boolean toTop) {
+        return setTaskWindowingMode(taskId, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, toTop);
     }
 
     /**

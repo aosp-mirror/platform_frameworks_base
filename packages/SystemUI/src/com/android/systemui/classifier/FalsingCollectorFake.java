@@ -147,6 +147,10 @@ public class FalsingCollectorFake implements FalsingCollector {
     }
 
     @Override
+    public void avoidGesture() {
+    }
+
+    @Override
     public void cleanup() {
     }
 }

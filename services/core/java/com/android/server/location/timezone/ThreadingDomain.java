@@ -62,6 +62,14 @@ abstract class ThreadingDomain {
     }
 
     /**
+     * Asserts the currently executing thread is not the one associated with this threading domain.
+     * Generally useful for documenting expectations in the code and avoiding deadlocks.
+     */
+    void assertNotCurrentThread() {
+        Preconditions.checkArgument(Thread.currentThread() != getThread());
+    }
+
+    /**
      * Execute the supplied runnable on the threading domain's thread.
      */
     abstract void post(@NonNull Runnable runnable);

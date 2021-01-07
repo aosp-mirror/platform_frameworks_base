@@ -20,6 +20,7 @@ import android.content.Context;
 import android.gsi.AvbPublicKey;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.MemoryFile;
 import android.os.ParcelFileDescriptor;
 import android.os.image.DynamicSystemManager;
@@ -51,7 +52,8 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
     private static final long MIN_PROGRESS_TO_PUBLISH = 1 << 27;
 
     private static final List<String> UNSUPPORTED_PARTITIONS =
-            Arrays.asList("vbmeta", "boot", "userdata", "dtbo", "super_empty", "system_other");
+            Arrays.asList(
+                    "vbmeta", "boot", "userdata", "dtbo", "super_empty", "system_other", "scratch");
 
     private class UnsupportedUrlException extends Exception {
         private UnsupportedUrlException(String message) {
@@ -196,6 +198,22 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
                 return null;
             }
 
+            if (Build.IS_DEBUGGABLE) {
+                // If host is debuggable, then install a scratch partition so that we can do
+                // adb remount in the guest system.
+                try {
+                    installScratch();
+                } catch (IOException e) {
+                    // Failing to install overlayFS scratch shouldn't be fatal.
+                    // Just ignore the error and skip installing the scratch partition.
+                    Log.w(TAG, e.toString(), e);
+                }
+                if (isCancelled()) {
+                    mDynSystem.remove();
+                    return null;
+                }
+            }
+
             mDynSystem.finishInstallation();
         } catch (Exception e) {
             Log.e(TAG, e.toString(), e);
@@ -302,12 +320,53 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
         }
     }
 
-    private void installUserdata() throws Exception {
+    private void installScratch() throws IOException, InterruptedException {
+        final long scratchSize = mDynSystem.suggestScratchSize();
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                mInstallationSession =
+                        mDynSystem.createPartition("scratch", scratchSize, /* readOnly= */ false);
+            }
+        };
+
+        Log.d(TAG, "Creating partition: scratch, size = " + scratchSize);
+        thread.start();
+
+        Progress progress = new Progress("scratch", scratchSize, mNumInstalledPartitions++);
+
+        while (thread.isAlive()) {
+            if (isCancelled()) {
+                return;
+            }
+
+            final long installedSize = mDynSystem.getInstallationProgress().bytes_processed;
+
+            if (installedSize > progress.installedSize + MIN_PROGRESS_TO_PUBLISH) {
+                progress.installedSize = installedSize;
+                publishProgress(progress);
+            }
+
+            Thread.sleep(100);
+        }
+
+        if (mInstallationSession == null) {
+            throw new IOException(
+                    "Failed to start installation with requested size: " + scratchSize);
+        }
+        // Reset installation session and verify that installation completes successfully.
+        mInstallationSession = null;
+        if (!mDynSystem.closePartition()) {
+            throw new IOException("Failed to complete partition installation: scratch");
+        }
+    }
+
+    private void installUserdata() throws IOException, InterruptedException {
         Thread thread = new Thread(() -> {
             mInstallationSession = mDynSystem.createPartition("userdata", mUserdataSize, false);
         });
 
-        Log.d(TAG, "Creating partition: userdata");
+        Log.d(TAG, "Creating partition: userdata, size = " + mUserdataSize);
         thread.start();
 
         Progress progress = new Progress("userdata", mUserdataSize, mNumInstalledPartitions++);
@@ -324,7 +383,7 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
                 publishProgress(progress);
             }
 
-            Thread.sleep(10);
+            Thread.sleep(100);
         }
 
         if (mInstallationSession == null) {
@@ -445,7 +504,7 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
                 return;
             }
 
-            Thread.sleep(10);
+            Thread.sleep(100);
         }
 
         if (mInstallationSession == null) {

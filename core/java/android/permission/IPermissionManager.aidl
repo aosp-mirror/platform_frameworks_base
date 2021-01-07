@@ -48,10 +48,6 @@ interface IPermissionManager {
 
     void updatePermissionFlagsForAllApps(int flagMask, int flagValues, int userId);
 
-    int checkPermission(String permName, String pkgName, int userId);
-
-    int checkUidPermission(String permName, int uid);
-
     void addOnPermissionsChangeListener(in IOnPermissionsChangeListener listener);
 
     void removeOnPermissionsChangeListener(in IOnPermissionsChangeListener listener);
@@ -68,8 +64,6 @@ interface IPermissionManager {
     void grantRuntimePermission(String packageName, String permName, int userId);
 
     void revokeRuntimePermission(String packageName, String permName, int userId, String reason);
-
-    void resetRuntimePermissions();
 
     boolean shouldShowRequestPermissionRationale(String permName,
             String packageName, int userId);

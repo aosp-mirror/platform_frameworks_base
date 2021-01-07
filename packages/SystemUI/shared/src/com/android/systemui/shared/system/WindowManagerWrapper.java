@@ -83,6 +83,11 @@ public class WindowManagerWrapper {
     public static final int WINDOWING_MODE_FREEFORM = WindowConfiguration.WINDOWING_MODE_FREEFORM;
 
     public static final int ITYPE_EXTRA_NAVIGATION_BAR = InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
+    public static final int ITYPE_LEFT_TAPPABLE_ELEMENT = InsetsState.ITYPE_LEFT_TAPPABLE_ELEMENT;
+    public static final int ITYPE_TOP_TAPPABLE_ELEMENT = InsetsState.ITYPE_TOP_TAPPABLE_ELEMENT;
+    public static final int ITYPE_RIGHT_TAPPABLE_ELEMENT = InsetsState.ITYPE_RIGHT_TAPPABLE_ELEMENT;
+    public static final int ITYPE_BOTTOM_TAPPABLE_ELEMENT =
+            InsetsState.ITYPE_BOTTOM_TAPPABLE_ELEMENT;
 
     private static final WindowManagerWrapper sInstance = new WindowManagerWrapper();
 

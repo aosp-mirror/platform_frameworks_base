@@ -18,6 +18,7 @@ package android.app.servertransaction;
 
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 
+import android.app.ActivityOptions;
 import android.app.ProfilerInfo;
 import android.app.ResultInfo;
 import android.content.Intent;
@@ -104,6 +105,7 @@ class TestUtils {
         private PersistableBundle mPersistentState;
         private List<ResultInfo> mPendingResults;
         private List<ReferrerIntent> mPendingNewIntents;
+        private ActivityOptions mActivityOptions;
         private boolean mIsForward;
         private ProfilerInfo mProfilerInfo;
         private IBinder mAssistToken;
@@ -174,6 +176,11 @@ class TestUtils {
             return this;
         }
 
+        LaunchActivityItemBuilder setActivityOptions(ActivityOptions activityOptions) {
+            mActivityOptions = activityOptions;
+            return this;
+        }
+
         LaunchActivityItemBuilder setIsForward(boolean isForward) {
             mIsForward = isForward;
             return this;
@@ -198,8 +205,8 @@ class TestUtils {
             return LaunchActivityItem.obtain(mIntent, mIdent, mInfo,
                     mCurConfig, mOverrideConfig, mCompatInfo, mReferrer, mVoiceInteractor,
                     mProcState, mState, mPersistentState, mPendingResults, mPendingNewIntents,
-                    mIsForward, mProfilerInfo, mAssistToken, null /* activityClientController */,
-                    mFixedRotationAdjustments);
+                    mActivityOptions, mIsForward, mProfilerInfo, mAssistToken,
+                    null /* activityClientController */, mFixedRotationAdjustments);
         }
     }
 }

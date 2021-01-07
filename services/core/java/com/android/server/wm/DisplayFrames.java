@@ -16,11 +16,17 @@
 
 package com.android.server.wm;
 
+import static android.view.InsetsState.ITYPE_BOTTOM_DISPLAY_CUTOUT;
+import static android.view.InsetsState.ITYPE_LEFT_DISPLAY_CUTOUT;
+import static android.view.InsetsState.ITYPE_RIGHT_DISPLAY_CUTOUT;
+import static android.view.InsetsState.ITYPE_TOP_DISPLAY_CUTOUT;
+
 import android.annotation.NonNull;
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
+import android.view.InsetsState;
 
 import com.android.server.wm.utils.WmDisplayCutout;
 
@@ -67,25 +73,41 @@ public class DisplayFrames {
         mDisplayInfoCutout = displayCutout != null ? displayCutout : WmDisplayCutout.NO_CUTOUT;
     }
 
-    public void onBeginLayout() {
-        mUnrestricted.set(0, 0, mDisplayWidth, mDisplayHeight);
+    public void onBeginLayout(InsetsState state) {
         mDisplayCutout = mDisplayInfoCutout;
-        mDisplayCutoutSafe.set(Integer.MIN_VALUE, Integer.MIN_VALUE,
-                Integer.MAX_VALUE, Integer.MAX_VALUE);
-        if (!mDisplayCutout.getDisplayCutout().isEmpty()) {
-            final DisplayCutout c = mDisplayCutout.getDisplayCutout();
-            if (c.getSafeInsetLeft() > 0) {
-                mDisplayCutoutSafe.left = mUnrestricted.left + c.getSafeInsetLeft();
+        final Rect unrestricted = mUnrestricted;
+        final Rect safe = mDisplayCutoutSafe;
+        final DisplayCutout cutout = mDisplayCutout.getDisplayCutout();
+        unrestricted.set(0, 0, mDisplayWidth, mDisplayHeight);
+        safe.set(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
+        state.setDisplayFrame(unrestricted);
+        state.setDisplayCutout(cutout);
+        if (!cutout.isEmpty()) {
+            if (cutout.getSafeInsetLeft() > 0) {
+                safe.left = unrestricted.left + cutout.getSafeInsetLeft();
             }
-            if (c.getSafeInsetTop() > 0) {
-                mDisplayCutoutSafe.top = mUnrestricted.top + c.getSafeInsetTop();
+            if (cutout.getSafeInsetTop() > 0) {
+                safe.top = unrestricted.top + cutout.getSafeInsetTop();
             }
-            if (c.getSafeInsetRight() > 0) {
-                mDisplayCutoutSafe.right = mUnrestricted.right - c.getSafeInsetRight();
+            if (cutout.getSafeInsetRight() > 0) {
+                safe.right = unrestricted.right - cutout.getSafeInsetRight();
             }
-            if (c.getSafeInsetBottom() > 0) {
-                mDisplayCutoutSafe.bottom = mUnrestricted.bottom - c.getSafeInsetBottom();
+            if (cutout.getSafeInsetBottom() > 0) {
+                safe.bottom = unrestricted.bottom - cutout.getSafeInsetBottom();
             }
+            state.getSource(ITYPE_LEFT_DISPLAY_CUTOUT).setFrame(
+                    unrestricted.left, unrestricted.top, safe.left, unrestricted.bottom);
+            state.getSource(ITYPE_TOP_DISPLAY_CUTOUT).setFrame(
+                    unrestricted.left, unrestricted.top, unrestricted.right, safe.top);
+            state.getSource(ITYPE_RIGHT_DISPLAY_CUTOUT).setFrame(
+                    safe.right, unrestricted.top, unrestricted.right, unrestricted.bottom);
+            state.getSource(ITYPE_BOTTOM_DISPLAY_CUTOUT).setFrame(
+                    unrestricted.left, safe.bottom, unrestricted.right, unrestricted.bottom);
+        } else {
+            state.removeSource(ITYPE_LEFT_DISPLAY_CUTOUT);
+            state.removeSource(ITYPE_TOP_DISPLAY_CUTOUT);
+            state.removeSource(ITYPE_RIGHT_DISPLAY_CUTOUT);
+            state.removeSource(ITYPE_BOTTOM_DISPLAY_CUTOUT);
         }
     }
 

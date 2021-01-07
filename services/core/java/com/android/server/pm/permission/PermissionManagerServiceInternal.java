@@ -39,6 +39,30 @@ import java.util.Set;
 public interface PermissionManagerServiceInternal extends PermissionManagerInternal,
         LegacyPermissionDataProvider {
     /**
+     * Check whether a particular package has been granted a particular permission.
+     *
+     * @param packageName the name of the package you are checking against
+     * @param permissionName the name of the permission you are checking for
+     * @param userId the user ID
+     * @return {@code PERMISSION_GRANTED} if the permission is granted, or {@code PERMISSION_DENIED}
+     *         otherwise
+     */
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    int checkPermission(@NonNull String packageName, @NonNull String permissionName,
+            @UserIdInt int userId);
+
+    /**
+     * Check whether a particular UID has been granted a particular permission.
+     *
+     * @param uid the UID
+     * @param permissionName the name of the permission you are checking for
+     * @return {@code PERMISSION_GRANTED} if the permission is granted, or {@code PERMISSION_DENIED}
+     *         otherwise
+     */
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    int checkUidPermission(int uid, @NonNull String permissionName);
+
+    /**
      * Adds a listener for runtime permission state (permissions or flags) changes.
      *
      * @param listener The listener.

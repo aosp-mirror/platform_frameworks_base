@@ -39,6 +39,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.classifier.FalsingCollector;
 
 public class KeyguardSimPukViewController
         extends KeyguardPinBasedInputViewController<KeyguardSimPukView> {
@@ -83,11 +84,11 @@ public class KeyguardSimPukViewController
             SecurityMode securityMode, LockPatternUtils lockPatternUtils,
             KeyguardSecurityCallback keyguardSecurityCallback,
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
-            LatencyTracker latencyTracker,
-            LiftToActivateListener liftToActivateListener,
-            TelephonyManager telephonyManager) {
+            LatencyTracker latencyTracker, LiftToActivateListener liftToActivateListener,
+            TelephonyManager telephonyManager, FalsingCollector falsingCollector) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
-                messageAreaControllerFactory, latencyTracker, liftToActivateListener);
+                messageAreaControllerFactory, latencyTracker, liftToActivateListener,
+                falsingCollector);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mTelephonyManager = telephonyManager;
         mSimImageView = mView.findViewById(R.id.keyguard_sim);

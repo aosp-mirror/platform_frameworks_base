@@ -47,6 +47,7 @@ android_test {
         "testables",
         "ub-uiautomator",
         "hamcrest-library",
+        "platform-compat-test-rules",
     ],
 
     libs: [

@@ -16,7 +16,11 @@
 
 package com.android.server.location.timezone;
 
+import static android.service.timezone.TimeZoneProviderService.TEST_COMMAND_RESULT_ERROR_KEY;
+import static android.service.timezone.TimeZoneProviderService.TEST_COMMAND_RESULT_SUCCESS_KEY;
+
 import static com.android.server.location.timezone.LocationTimeZoneManagerService.debugLog;
+import static com.android.server.location.timezone.LocationTimeZoneManagerService.warnLog;
 import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_PERM_FAILED;
 import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_CERTAIN;
 import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_INITIALIZING;
@@ -30,7 +34,9 @@ import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Bundle;
 import android.os.Handler;
+import android.os.RemoteCallback;
 import android.os.SystemClock;
 
 import com.android.internal.annotations.GuardedBy;
@@ -345,12 +351,21 @@ abstract class LocationTimeZoneProvider implements Dumpable {
             }
             mProviderListener = Objects.requireNonNull(providerListener);
             ProviderState currentState = ProviderState.createStartingState(this);
-            ProviderState newState = currentState.newState(
+            currentState = currentState.newState(
                     PROVIDER_STATE_STOPPED, null, null,
                     "initialize() called");
-            setCurrentState(newState, false);
+            setCurrentState(currentState, false);
 
-            onInitialize();
+            // Guard against uncaught exceptions due to initialization problems.
+            try {
+                onInitialize();
+            } catch (RuntimeException e) {
+                warnLog("Unable to initialize the provider", e);
+                currentState = currentState
+                        .newState(PROVIDER_STATE_PERM_FAILED, null, null,
+                                "Provider failed to initialize");
+                setCurrentState(currentState, true);
+            }
         }
     }
 
@@ -483,6 +498,21 @@ abstract class LocationTimeZoneProvider implements Dumpable {
      */
     abstract void onStopUpdates();
 
+    /**
+     * Overridden by subclasses to handle the supplied {@link TestCommand}. If {@code callback} is
+     * non-null, the default implementation sends a result {@link Bundle} with {@link
+     * android.service.timezone.TimeZoneProviderService#TEST_COMMAND_RESULT_SUCCESS_KEY} set to
+     * {@code false} and a "Not implemented" error message.
+     */
+    void handleTestCommand(@NonNull TestCommand testCommand, @Nullable RemoteCallback callback) {
+        if (callback != null) {
+            Bundle result = new Bundle();
+            result.putBoolean(TEST_COMMAND_RESULT_SUCCESS_KEY, false);
+            result.putString(TEST_COMMAND_RESULT_ERROR_KEY, "Not implemented");
+            callback.sendResult(result);
+        }
+    }
+
     /** For subclasses to invoke when a {@link TimeZoneProviderEvent} has been received. */
     final void handleTimeZoneProviderEvent(@NonNull TimeZoneProviderEvent timeZoneProviderEvent) {
         mThreadingDomain.assertCurrentThread();
@@ -498,7 +528,7 @@ abstract class LocationTimeZoneProvider implements Dumpable {
                 case PROVIDER_STATE_PERM_FAILED: {
                     // After entering perm failed, there is nothing to do. The remote peer is
                     // supposed to stop sending events after it has reported perm failure.
-                    logWarn("handleTimeZoneProviderEvent: Event=" + timeZoneProviderEvent
+                    warnLog("handleTimeZoneProviderEvent: Event=" + timeZoneProviderEvent
                             + " received for provider=" + this + " when in failed state");
                     return;
                 }
@@ -509,7 +539,7 @@ abstract class LocationTimeZoneProvider implements Dumpable {
                                     + " Failure event=" + timeZoneProviderEvent
                                     + " received for stopped provider=" + this
                                     + ", entering permanently failed state";
-                            logWarn(msg);
+                            warnLog(msg);
                             ProviderState newState = currentState.newState(
                                     PROVIDER_STATE_PERM_FAILED, null, null, msg);
                             setCurrentState(newState, true);
@@ -522,7 +552,7 @@ abstract class LocationTimeZoneProvider implements Dumpable {
                         case EVENT_TYPE_UNCERTAIN: {
                             // Any geolocation-related events received for a stopped provider are
                             // ignored: they should not happen.
-                            logWarn("handleTimeZoneProviderEvent:"
+                            warnLog("handleTimeZoneProviderEvent:"
                                     + " event=" + timeZoneProviderEvent
                                     + " received for stopped provider=" + this
                                     + ", ignoring");
@@ -544,7 +574,7 @@ abstract class LocationTimeZoneProvider implements Dumpable {
                                     + " Failure event=" + timeZoneProviderEvent
                                     + " received for provider=" + this
                                     + ", entering permanently failed state";
-                            logWarn(msg);
+                            warnLog(msg);
                             ProviderState newState = currentState.newState(
                                     PROVIDER_STATE_PERM_FAILED, null, null, msg);
                             setCurrentState(newState, true);
@@ -583,11 +613,6 @@ abstract class LocationTimeZoneProvider implements Dumpable {
             }
         }
     }
-
-    /**
-     * Implemented by subclasses.
-     */
-    abstract void logWarn(String msg);
 
     @GuardedBy("mSharedLock")
     private void assertIsStarted() {

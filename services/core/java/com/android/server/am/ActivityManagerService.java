@@ -14052,16 +14052,23 @@ public class ActivityManagerService extends IActivityManager.Stub
                 callerApp = mPidsSelfLocked.get(pid);
             }
         }
-        // Check if the instrumentation of the process has the permission. This covers the usual
-        // test started from the shell (which has the permission) case. This is needed for apps
-        // targeting SDK level < S but we are also allowing for targetSdk S+ as a convenience to
-        // avoid breaking a bunch of existing tests and asking them to adopt shell permissions to do
-        // this.
+
         if (callerApp != null) {
+            // Check if the instrumentation of the process has the permission. This covers the usual
+            // test started from the shell (which has the permission) case. This is needed for apps
+            // targeting SDK level < S but we are also allowing for targetSdk S+ as a convenience to
+            // avoid breaking a bunch of existing tests and asking them to adopt shell permissions
+            // to do this.
             ActiveInstrumentation instrumentation = callerApp.getActiveInstrumentation();
             if (instrumentation != null && checkPermission(
                     permission.BROADCAST_CLOSE_SYSTEM_DIALOGS, -1, instrumentation.mSourceUid)
                     == PERMISSION_GRANTED) {
+                return true;
+            }
+            // This is the notification trampoline use-case for example, where apps use Intent.ACSD
+            // to close the shade prior to starting an activity.
+            WindowProcessController wmApp = callerApp.getWindowProcessController();
+            if (wmApp.canCloseSystemDialogsByToken()) {
                 return true;
             }
         }

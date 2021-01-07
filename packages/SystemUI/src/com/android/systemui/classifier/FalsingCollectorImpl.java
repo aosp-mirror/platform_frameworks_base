@@ -49,6 +49,8 @@ class FalsingCollectorImpl implements FalsingCollector {
     private boolean mShowingAod;
     private boolean mScreenOn;
     private boolean mSessionStarted;
+    private MotionEvent mPendingDownEvent;
+    private boolean mAvoidGesture;
 
     private final ThresholdSensor.Listener mSensorEventListener = this::onProximityEvent;
 
@@ -245,7 +247,32 @@ class FalsingCollectorImpl implements FalsingCollector {
 
     @Override
     public void onTouchEvent(MotionEvent ev) {
-        mFalsingDataProvider.onMotionEvent(ev);
+        // We delay processing down events to see if another component wants to process them.
+        // If #avoidGesture is called after a MotionEvent.ACTION_DOWN, all following motion events
+        // will be ignored by the collector until another MotionEvent.ACTION_DOWN is passed in.
+        // avoidGesture must be called immediately following the MotionEvent.ACTION_DOWN, before
+        // any other events are processed, otherwise the whole gesture will be recorded.
+        if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            // Make a copy of ev, since it will be recycled after we exit this method.
+            mPendingDownEvent = MotionEvent.obtain(ev);
+            mAvoidGesture = false;
+        } else if (!mAvoidGesture) {
+            if (mPendingDownEvent != null) {
+                mFalsingDataProvider.onMotionEvent(mPendingDownEvent);
+                mPendingDownEvent.recycle();
+                mPendingDownEvent = null;
+            }
+            mFalsingDataProvider.onMotionEvent(ev);
+        }
+    }
+
+    @Override
+    public void avoidGesture() {
+        if (mPendingDownEvent != null) {
+            mAvoidGesture = true;
+            mPendingDownEvent.recycle();
+            mPendingDownEvent = null;
+        }
     }
 
     @Override

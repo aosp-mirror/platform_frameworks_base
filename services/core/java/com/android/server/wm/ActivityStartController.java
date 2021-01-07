@@ -528,7 +528,7 @@ public class ActivityStartController {
                     "pendingActivityLaunch");
             try {
                 starter.startResolvedActivity(pal.r, pal.sourceRecord, null, null, pal.startFlags,
-                        resume, pal.r.pendingOptions, null, pal.intentGrants);
+                        resume, pal.r.getOptions(), null, pal.intentGrants);
             } catch (Exception e) {
                 Slog.e(TAG, "Exception during pending activity launch pal=" + pal, e);
                 pal.sendErrorResult(e.getMessage());

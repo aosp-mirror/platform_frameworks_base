@@ -105,29 +105,14 @@ struct Lnb : public RefBase {
     jweak mLnbObj;
 };
 
-struct DvrCallback : public IDvrCallback {
-    ~DvrCallback();
-    virtual Return<void> onRecordStatus(RecordStatus status);
-    virtual Return<void> onPlaybackStatus(PlaybackStatus status);
+struct DvrClientCallbackImpl : public DvrClientCallback {
+    ~DvrClientCallbackImpl();
+    virtual void onRecordStatus(RecordStatus status);
+    virtual void onPlaybackStatus(PlaybackStatus status);
 
-    void setDvr(const jobject dvr);
+    void setDvr(jweak dvrObj);
 private:
-    jweak mDvr;
-};
-
-struct Dvr : public RefBase {
-    Dvr(sp<IDvr> sp, jweak obj);
-    ~Dvr();
-    jint close();
-    MQ& getDvrMQ();
-    sp<IDvr> getIDvr();
-    // TODO: remove after migrate to client lib
-    sp<IDvr> mDvrSp;
     jweak mDvrObj;
-    std::unique_ptr<MQ> mDvrMQ;
-    EventFlag* mDvrMQEventFlag;
-    std::string mFilePath;
-    int mFd;
 };
 
 struct MediaEvent : public RefBase {

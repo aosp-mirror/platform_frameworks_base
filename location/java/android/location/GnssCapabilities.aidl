@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package com.android.internal.location.timezone;
+package android.location;
 
-parcelable LocationTimeZoneEvent;
+parcelable GnssCapabilities;

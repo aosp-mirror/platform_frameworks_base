@@ -6143,6 +6143,12 @@ public class AppOpsService extends IAppOpsService.Stub {
     /** Pulls current AppOps access report and resamples package and app op to watch */
     @Override
     public @Nullable RuntimeAppOpAccessMessage collectRuntimeAppOpAccessMessage() {
+        ActivityManagerInternal ami = LocalServices.getService(ActivityManagerInternal.class);
+        boolean isCallerInstrumented = ami.isUidCurrentlyInstrumented(Binder.getCallingUid());
+        boolean isCallerSystem = Binder.getCallingPid() == Process.myPid();
+        if (!isCallerSystem && !isCallerInstrumented) {
+            return null;
+        }
         mContext.enforcePermission(android.Manifest.permission.GET_APP_OPS_STATS,
                 Binder.getCallingPid(), Binder.getCallingUid(), null);
         RuntimeAppOpAccessMessage result;

@@ -105,6 +105,9 @@ public interface BatteryController extends DemoMode, Dumpable,
 
         default void onExtremeBatterySaverChanged(boolean isExtreme) {
         }
+
+        default void onWirelessChargingChanged(boolean isWirlessCharging) {
+        }
     }
 
     /**

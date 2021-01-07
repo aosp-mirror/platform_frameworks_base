@@ -8648,6 +8648,15 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
+        @Override
+        public long getScreenOnEnergy() {
+            if (mUidMeasuredEnergyStats == null) {
+                return ENERGY_DATA_UNAVAILABLE;
+            }
+            return mUidMeasuredEnergyStats.getAccumulatedBucketEnergy(
+                    MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_ON);
+        }
+
         void initNetworkActivityLocked() {
             detachIfNotNull(mNetworkByteActivityCounters);
             mNetworkByteActivityCounters = new LongSamplingCounter[NUM_NETWORK_ACTIVITY_TYPES];

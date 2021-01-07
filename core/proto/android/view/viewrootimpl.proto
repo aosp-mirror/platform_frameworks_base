@@ -38,7 +38,7 @@ message ViewRootImplProto {
     optional bool is_drawing = 8;
     optional bool added = 9;
     optional .android.graphics.RectProto win_frame = 10;
-    optional DisplayCutoutProto pending_display_cutout = 11;
+    optional DisplayCutoutProto pending_display_cutout = 11 [deprecated=true];
     optional string last_window_insets = 12;
     optional string soft_input_mode = 13;
     optional int32 scroll_y = 14;

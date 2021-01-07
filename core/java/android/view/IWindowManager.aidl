@@ -728,7 +728,7 @@ interface IWindowManager
      * @return {@code true} if system bars are always comsumed.
      */
     boolean getWindowInsets(in WindowManager.LayoutParams attrs, int displayId,
-            out DisplayCutout.ParcelableWrapper outDisplayCutout, out InsetsState outInsetsState);
+            out InsetsState outInsetsState);
 
     /**
      * Called to show global actions.

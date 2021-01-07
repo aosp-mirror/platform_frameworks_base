@@ -22,6 +22,7 @@ import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.R;
+import com.android.systemui.classifier.FalsingCollector;
 
 public class KeyguardPinViewController
         extends KeyguardPinBasedInputViewController<KeyguardPINView> {
@@ -32,10 +33,11 @@ public class KeyguardPinViewController
             SecurityMode securityMode, LockPatternUtils lockPatternUtils,
             KeyguardSecurityCallback keyguardSecurityCallback,
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
-            LatencyTracker latencyTracker,
-            LiftToActivateListener liftToActivateListener) {
+            LatencyTracker latencyTracker, LiftToActivateListener liftToActivateListener,
+            FalsingCollector falsingCollector) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
-                messageAreaControllerFactory, latencyTracker, liftToActivateListener);
+                messageAreaControllerFactory, latencyTracker, liftToActivateListener,
+                falsingCollector);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
     }
 

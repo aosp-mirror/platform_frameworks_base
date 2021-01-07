@@ -955,8 +955,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
     }
 
-    @Override
-    public int checkPermission(String permName, String pkgName, @UserIdInt int userId) {
+    private int checkPermission(String permName, String pkgName, @UserIdInt int userId) {
         // Not using Objects.requireNonNull() here for compatibility reasons.
         if (permName == null || pkgName == null) {
             return PackageManager.PERMISSION_DENIED;
@@ -1037,8 +1036,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         return true;
     }
 
-    @Override
-    public int checkUidPermission(String permName, int uid) {
+    private int checkUidPermission(String permName, int uid) {
         // Not using Objects.requireNonNull() here for compatibility reasons.
         if (permName == null) {
             return PackageManager.PERMISSION_DENIED;
@@ -1762,27 +1760,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         final String permissionControllerPackageName =
                 packageManager.getPermissionControllerPackageName();
         return Arrays.asList(packageNames).contains(permissionControllerPackageName);
-    }
-
-    @Override
-    public void resetRuntimePermissions() {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
-                "revokeRuntimePermission");
-
-        final int callingUid = Binder.getCallingUid();
-        if (callingUid != Process.SYSTEM_UID && callingUid != 0) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                    "resetRuntimePermissions");
-        }
-
-        updateAllPermissions(
-                StorageManager.UUID_PRIVATE_INTERNAL, false, mDefaultPermissionCallback);
-        for (final int userId : UserManagerService.getInstance().getUserIds()) {
-            mPackageManagerInt.forEachPackage(
-                    (AndroidPackage pkg) -> resetRuntimePermissionsInternal(pkg, userId));
-        }
     }
 
     /**
@@ -4947,6 +4924,18 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     private class PermissionManagerServiceInternalImpl implements PermissionManagerServiceInternal {
+        @Override
+        public int checkPermission(@NonNull String packageName, @NonNull String permissionName,
+                @UserIdInt int userId) {
+            return PermissionManagerService.this.checkPermission(permissionName, packageName,
+                    userId);
+        }
+
+        @Override
+        public int checkUidPermission(int uid, @NonNull String permissionName) {
+            return PermissionManagerService.this.checkUidPermission(permissionName, uid);
+        }
+
         @Override
         public void onSystemReady() {
             PermissionManagerService.this.systemReady();

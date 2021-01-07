@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
-package com.android.internal.location.timezone;
-
-import com.android.internal.location.timezone.ILocationTimeZoneProviderManager;
-import com.android.internal.location.timezone.LocationTimeZoneProviderRequest;
+package com.android.server.location.injector;
 
 /**
- * Binder interface for location time zone provider implementations. Do not implement this
- * directly, extend {@link com.android.location.timezone.provider.LocationTimeZoneProviderBase}
- * instead.
- * @hide
+ * Version of EmergencyHelper for testing.
  */
-interface ILocationTimeZoneProvider {
+public class FakeEmergencyHelper extends EmergencyHelper {
 
-    oneway void setLocationTimeZoneProviderManager(in ILocationTimeZoneProviderManager manager);
+    private boolean mInEmergency;
 
-    oneway void setRequest(in LocationTimeZoneProviderRequest request);
+    public FakeEmergencyHelper() {}
+
+    public void setInEmergency(boolean inEmergency) {
+        mInEmergency = inEmergency;
+    }
+
+    @Override
+    public boolean isInEmergency(long extensionTimeMs) {
+        return mInEmergency;
+    }
 }

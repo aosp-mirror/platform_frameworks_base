@@ -164,7 +164,7 @@ public abstract class ClientTransactionHandler {
 
     /** Perform activity start. */
     public abstract void handleStartActivity(@NonNull ActivityClientRecord r,
-            PendingTransactionActions pendingActions);
+            PendingTransactionActions pendingActions, ActivityOptions activityOptions);
 
     /** Get package info. */
     public abstract LoadedApk getPackageInfoNoCheck(ApplicationInfo ai,

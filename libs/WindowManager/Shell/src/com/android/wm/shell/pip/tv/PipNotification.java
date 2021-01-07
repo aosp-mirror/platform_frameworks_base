@@ -175,7 +175,7 @@ public class PipNotification {
     }
 
     private static PendingIntent createPendingIntent(Context context, String action) {
-        return PendingIntent.getBroadcast(context, 0,
-                new Intent(action), PendingIntent.FLAG_CANCEL_CURRENT);
+        return PendingIntent.getBroadcast(context, 0, new Intent(action),
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 }
