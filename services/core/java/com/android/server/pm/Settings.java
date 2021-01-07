@@ -471,7 +471,7 @@ public final class Settings implements Watchable, Snappable {
     private final File mSystemDir;
 
     public final KeySetManagerService mKeySetManagerService =
-            new KeySetManagerService(mPackages.untrackedMap());
+            new KeySetManagerService(mPackages.untrackedStorage());
 
     /** Settings and other information about permissions */
     final LegacyPermissionSettings mPermissions;

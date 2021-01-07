@@ -100,7 +100,7 @@ public class WatchableImpl implements Watchable {
 
     /**
      * Freeze the {@link Watchable}.
-     **/
+     */
     public void seal() {
         synchronized (mObservers) {
             mSealed = true;

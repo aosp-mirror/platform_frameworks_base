@@ -143,10 +143,47 @@ public class WatchedSparseArray<E> extends WatchableImpl
     }
 
     /**
+     * Create a {@link WatchedSparseArray} from a {@link SparseArray}
+     */
+    public WatchedSparseArray(@NonNull SparseArray<E> c) {
+        mStorage = c.clone();
+    }
+
+    /**
      * The copy constructor does not copy the watcher data.
      */
     public WatchedSparseArray(@NonNull WatchedSparseArray<E> r) {
         mStorage = r.mStorage.clone();
+    }
+
+    /**
+     * Make <this> a copy of src.  Any data in <this> is discarded.
+     */
+    public void copyFrom(@NonNull SparseArray<E> src) {
+        clear();
+        final int end = src.size();
+        for (int i = 0; i < end; i++) {
+            put(src.keyAt(i), src.valueAt(i));
+        }
+    }
+
+    /**
+     * Make dst a copy of <this>.  Any previous data in dst is discarded.
+     */
+    public void copyTo(@NonNull SparseArray<E> dst) {
+        dst.clear();
+        final int end = size();
+        for (int i = 0; i < end; i++) {
+            dst.put(keyAt(i), valueAt(i));
+        }
+    }
+
+    /**
+     * Return the underlying storage.  This breaks the wrapper but is necessary when
+     * passing the array to distant methods.
+     */
+    public SparseArray<E> untrackedStorage() {
+        return mStorage;
     }
 
     /**
@@ -390,6 +427,21 @@ public class WatchedSparseArray<E> extends WatchableImpl
         onChanged();
     }
 
+    @Override
+    public int hashCode() {
+        return mStorage.hashCode();
+    }
+
+    @Override
+    public boolean equals(@Nullable Object o) {
+        if (o instanceof WatchedSparseArray) {
+            WatchedSparseArray w = (WatchedSparseArray) o;
+            return mStorage.equals(w.mStorage);
+        } else {
+            return false;
+        }
+    }
+
     /**
      * <p>This implementation composes a string by iterating over its mappings. If
      * this map contains itself as a value, the string "(this Map)"
@@ -407,9 +459,18 @@ public class WatchedSparseArray<E> extends WatchableImpl
      * @return A new array whose elements are the elements of <this>.
      */
     public WatchedSparseArray<E> snapshot() {
-        WatchedSparseArray<E> l = new WatchedSparseArray<>();
+        WatchedSparseArray<E> l = new WatchedSparseArray<>(size());
         snapshot(l, this);
         return l;
+    }
+
+    /**
+     * Make <this> a snapshot of the argument.  Note that <this> is immutable when the
+     * method returns.  <this> must be empty when the function is called.
+     * @param r The source array, which is copied into <this>
+     */
+    public void snapshot(@NonNull WatchedSparseArray<E> r) {
+        snapshot(this, r);
     }
 
     /**

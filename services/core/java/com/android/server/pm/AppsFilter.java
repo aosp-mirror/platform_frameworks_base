@@ -443,7 +443,7 @@ public class AppsFilter implements Watchable, Snappable {
         }
         final StateProvider stateProvider = command -> {
             synchronized (injector.getLock()) {
-                command.currentState(injector.getSettings().getPackagesLocked().untrackedMap(),
+                command.currentState(injector.getSettings().getPackagesLocked().untrackedStorage(),
                         injector.getUserManagerInternal().getUserInfos());
             }
         };
@@ -979,7 +979,7 @@ public class AppsFilter implements Watchable, Snappable {
     @Nullable
     SparseArray<int[]> getVisibilityAllowList(PackageSetting setting, int[] users,
             WatchedArrayMap<String, PackageSetting> existingSettings) {
-        return getVisibilityAllowList(setting, users, existingSettings.untrackedMap());
+        return getVisibilityAllowList(setting, users, existingSettings.untrackedStorage());
     }
 
     /**
