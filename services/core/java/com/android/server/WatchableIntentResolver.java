@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.server.utils;
+package com.android.server;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
-import com.android.server.IntentResolver;
+import com.android.server.utils.Watchable;
+import com.android.server.utils.WatchableImpl;
+import com.android.server.utils.Watcher;
 
 import java.util.List;
 
