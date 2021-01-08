@@ -203,7 +203,6 @@ public class GenericDocument {
      *
      * @param key The key to look for.
      * @return The entry with the given key as an object or {@code null} if there is no such key.
-     * @hide
      */
     @Nullable
     public Object getProperty(@NonNull String key) {
