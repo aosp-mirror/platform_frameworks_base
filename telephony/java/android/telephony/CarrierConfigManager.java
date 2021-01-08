@@ -3557,6 +3557,28 @@ public class CarrierConfigManager {
      */
     public static final String ENABLE_EAP_METHOD_PREFIX_BOOL = "enable_eap_method_prefix_bool";
 
+
+    /**
+     * Configs used by ImsServiceEntitlement.
+     */
+    public static final class ImsServiceEntitlement {
+        private ImsServiceEntitlement() {}
+
+        /** Prefix of all ImsServiceEntitlement.KEY_* constants. */
+        public static final String KEY_PREFIX = "imsserviceentitlement.";
+
+
+        /** The address of the entitlement configuration server. */
+        public static final String KEY_AES_URL_STRING = KEY_PREFIX + "aes_url_string";
+
+
+        private static PersistableBundle getDefaults() {
+            PersistableBundle defaults = new PersistableBundle();
+            defaults.putString(KEY_AES_URL_STRING, "");
+            return defaults;
+        }
+    }
+
     /**
      * GPS configs. See the GNSS HAL documentation for more details.
      */
@@ -5083,6 +5105,7 @@ public class CarrierConfigManager {
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_BACKOFF_TIME_LONG, 10000);
         /* Default value is 60 seconds. */
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_MAX_BACKOFF_TIME_LONG, 60000);
+        sDefaults.putAll(ImsServiceEntitlement.getDefaults());
         sDefaults.putAll(Gps.getDefaults());
         sDefaults.putIntArray(KEY_CDMA_ENHANCED_ROAMING_INDICATOR_FOR_HOME_NETWORK_INT_ARRAY,
                 new int[] {

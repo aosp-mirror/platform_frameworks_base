@@ -40001,6 +40001,11 @@ package android.telephony {
     field public static final String KEY_WIFI_OFF_DEFERRING_TIME_MILLIS_INT = "ims.wifi_off_deferring_time_millis_int";
   }
 
+  public static final class CarrierConfigManager.ImsServiceEntitlement {
+    field public static final String KEY_AES_URL_STRING = "imsserviceentitlement.aes_url_string";
+    field public static final String KEY_PREFIX = "imsserviceentitlement.";
+  }
+
   public static final class CarrierConfigManager.Iwlan {
     field public static final int AUTHENTICATION_METHOD_CERT = 1; // 0x1
     field public static final int AUTHENTICATION_METHOD_EAP_ONLY = 0; // 0x0
