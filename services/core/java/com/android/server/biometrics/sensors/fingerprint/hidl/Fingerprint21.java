@@ -125,7 +125,8 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
                     Slog.e(TAG, "Task stack changed for client: " + client);
                     return;
                 }
-                if (Utils.isKeyguard(mContext, client.getOwnerString())) {
+                if (Utils.isKeyguard(mContext, client.getOwnerString())
+                        || Utils.isSystem(mContext, client.getOwnerString())) {
                     return; // Keyguard is always allowed
                 }
 
