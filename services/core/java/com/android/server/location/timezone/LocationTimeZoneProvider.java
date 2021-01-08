@@ -49,6 +49,8 @@ import com.android.server.timezonedetector.Dumpable;
 import com.android.server.timezonedetector.ReferenceWithHistory;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -339,11 +341,20 @@ abstract class LocationTimeZoneProvider implements Dumpable {
     @NonNull final String mProviderName;
 
     /**
+     * Usually {@code false} but can be set to {@code true} for testing.
+     */
+    @GuardedBy("mSharedLock")
+    private boolean mStateChangeRecording;
+
+    @GuardedBy("mSharedLock")
+    @NonNull
+    private final ArrayList<ProviderState> mRecordedStates = new ArrayList<>(0);
+
+    /**
      * The current state (with history for debugging).
      */
     @GuardedBy("mSharedLock")
-    final ReferenceWithHistory<ProviderState> mCurrentState =
-            new ReferenceWithHistory<>(10);
+    final ReferenceWithHistory<ProviderState> mCurrentState = new ReferenceWithHistory<>(10);
 
     /**
      * Used for scheduling initialization timeouts, i.e. for providers that have just been started.
@@ -423,6 +434,28 @@ abstract class LocationTimeZoneProvider implements Dumpable {
     abstract void onDestroy();
 
     /**
+     * Sets the provider into state recording mode for tests.
+     */
+    final void setStateChangeRecordingEnabled(boolean enabled) {
+        mThreadingDomain.assertCurrentThread();
+        synchronized (mSharedLock) {
+            mStateChangeRecording = enabled;
+            mRecordedStates.clear();
+            mRecordedStates.trimToSize();
+        }
+    }
+
+    /**
+     * Returns recorded states.
+     */
+    final List<ProviderState> getRecordedStates() {
+        mThreadingDomain.assertCurrentThread();
+        synchronized (mSharedLock) {
+            return new ArrayList<>(mRecordedStates);
+        }
+    }
+
+    /**
      * Set the current state, for use by this class and subclasses only. If {@code #notifyChanges}
      * is {@code true} and {@code newState} is not equal to the old state, then {@link
      * ProviderListener#onProviderStateChange(ProviderState)} must be called on
@@ -434,8 +467,11 @@ abstract class LocationTimeZoneProvider implements Dumpable {
             ProviderState oldState = mCurrentState.get();
             mCurrentState.set(newState);
             onSetCurrentState(newState);
-            if (notifyChanges) {
-                if (!Objects.equals(newState, oldState)) {
+            if (!Objects.equals(newState, oldState)) {
+                if (mStateChangeRecording) {
+                    mRecordedStates.add(newState);
+                }
+                if (notifyChanges) {
                     mProviderListener.onProviderStateChange(newState);
                 }
             }

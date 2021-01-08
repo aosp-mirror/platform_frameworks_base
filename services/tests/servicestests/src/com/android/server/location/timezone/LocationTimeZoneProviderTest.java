@@ -18,6 +18,7 @@ package com.android.server.location.timezone;
 import static android.service.timezone.TimeZoneProviderService.TEST_COMMAND_RESULT_ERROR_KEY;
 import static android.service.timezone.TimeZoneProviderService.TEST_COMMAND_RESULT_SUCCESS_KEY;
 
+import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_DESTROYED;
 import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_CERTAIN;
 import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_INITIALIZING;
 import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_UNCERTAIN;
@@ -49,6 +50,7 @@ import org.junit.Test;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -174,6 +176,48 @@ public class LocationTimeZoneProviderTest {
         assertNotNull(result.getString(TEST_COMMAND_RESULT_ERROR_KEY));
     }
 
+    @Test
+    public void stateRecording() {
+        String providerName = "primary";
+        TestLocationTimeZoneProvider provider =
+                new TestLocationTimeZoneProvider(mTestThreadingDomain, providerName);
+        provider.setStateChangeRecordingEnabled(true);
+
+        // initialize()
+        provider.initialize(mProviderListener);
+        provider.assertLatestRecordedState(PROVIDER_STATE_STOPPED);
+
+        // startUpdates()
+        ConfigurationInternal config = USER1_CONFIG_GEO_DETECTION_ENABLED;
+        Duration arbitraryInitializationTimeout = Duration.ofMinutes(5);
+        Duration arbitraryInitializationTimeoutFuzz = Duration.ofMinutes(2);
+        provider.startUpdates(config, arbitraryInitializationTimeout,
+                arbitraryInitializationTimeoutFuzz);
+        provider.assertLatestRecordedState(PROVIDER_STATE_STARTED_INITIALIZING);
+
+        // Simulate a suggestion event being received.
+        TimeZoneProviderSuggestion suggestion = new TimeZoneProviderSuggestion.Builder()
+                .setElapsedRealtimeMillis(ARBITRARY_ELAPSED_REALTIME_MILLIS)
+                .setTimeZoneIds(Arrays.asList("Europe/London"))
+                .build();
+        TimeZoneProviderEvent event = TimeZoneProviderEvent.createSuggestionEvent(suggestion);
+        provider.simulateProviderEventReceived(event);
+        provider.assertLatestRecordedState(PROVIDER_STATE_STARTED_CERTAIN);
+
+        // Simulate an uncertain event being received.
+        event = TimeZoneProviderEvent.createUncertainEvent();
+        provider.simulateProviderEventReceived(event);
+        provider.assertLatestRecordedState(PROVIDER_STATE_STARTED_UNCERTAIN);
+
+        // stopUpdates()
+        provider.stopUpdates();
+        provider.assertLatestRecordedState(PROVIDER_STATE_STOPPED);
+
+        // destroy()
+        provider.destroy();
+        provider.assertLatestRecordedState(PROVIDER_STATE_DESTROYED);
+    }
+
     /** A test stand-in for the real {@link LocationTimeZoneProviderController}'s listener. */
     private static class TestProviderListener implements ProviderListener {
 
@@ -256,6 +300,12 @@ public class LocationTimeZoneProviderTest {
 
         void assertOnDestroyCalled() {
             assertTrue(mOnDestroyCalled);
+        }
+
+        void assertLatestRecordedState(@ProviderState.ProviderStateEnum int expectedStateEnum) {
+            List<ProviderState> recordedStates = getRecordedStates();
+            assertEquals(expectedStateEnum,
+                    recordedStates.get(recordedStates.size() - 1).stateEnum);
         }
     }
 }

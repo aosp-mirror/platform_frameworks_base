@@ -610,6 +610,38 @@ class ControllerImpl extends LocationTimeZoneProviderController {
         }
     }
 
+    /**
+     * Sets whether the controller should record provider state changes for later dumping via
+     * {@link #getStateForTests()}.
+     */
+    void setProviderStateRecordingEnabled(boolean enabled) {
+        mThreadingDomain.assertCurrentThread();
+
+        synchronized (mSharedLock) {
+            mPrimaryProvider.setStateChangeRecordingEnabled(enabled);
+            mSecondaryProvider.setStateChangeRecordingEnabled(enabled);
+        }
+    }
+
+    /**
+     * Returns a snapshot of the current controller state for tests.
+     */
+    @NonNull
+    LocationTimeZoneManagerServiceState getStateForTests() {
+        mThreadingDomain.assertCurrentThread();
+
+        synchronized (mSharedLock) {
+            LocationTimeZoneManagerServiceState.Builder builder =
+                    new LocationTimeZoneManagerServiceState.Builder();
+            if (mLastSuggestion != null) {
+                builder.setLastSuggestion(mLastSuggestion);
+            }
+            builder.setPrimaryProviderStateChanges(mPrimaryProvider.getRecordedStates())
+                    .setSecondaryProviderStateChanges(mSecondaryProvider.getRecordedStates());
+            return builder.build();
+        }
+    }
+
     @Nullable
     private LocationTimeZoneProvider getLocationTimeZoneProvider(@NonNull String providerName) {
         LocationTimeZoneProvider targetProvider;
