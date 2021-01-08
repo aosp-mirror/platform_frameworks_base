@@ -64,7 +64,6 @@ import org.junit.runner.RunWith;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -124,7 +123,7 @@ public class NetworkStatsCollectionTest {
 
         // now export into a unified format
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        collection.write(new DataOutputStream(bos));
+        collection.write(bos);
 
         // clear structure completely
         collection.reset();
@@ -152,7 +151,7 @@ public class NetworkStatsCollectionTest {
 
         // now export into a unified format
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        collection.write(new DataOutputStream(bos));
+        collection.write(bos);
 
         // clear structure completely
         collection.reset();
@@ -180,7 +179,7 @@ public class NetworkStatsCollectionTest {
 
         // now export into a unified format
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        collection.write(new DataOutputStream(bos));
+        collection.write(bos);
 
         // clear structure completely
         collection.reset();
