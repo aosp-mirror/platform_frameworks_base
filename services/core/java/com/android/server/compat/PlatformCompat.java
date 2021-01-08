@@ -137,6 +137,9 @@ public class PlatformCompat extends IPlatformCompat.Stub {
             @UserIdInt int userId) {
         checkCompatChangeReadAndLogPermission();
         ApplicationInfo appInfo = getApplicationInfo(packageName, userId);
+        if (appInfo == null) {
+            return mCompatConfig.willChangeBeEnabled(changeId, packageName);
+        }
         return isChangeEnabled(changeId, appInfo);
     }
 
