@@ -983,8 +983,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void setDevicePolicySafetyChecker(DevicePolicySafetyChecker safetyChecker) {
-        Slog.i(LOG_TAG, "Setting DevicePolicySafetyChecker as " + safetyChecker);
+        CallerIdentity callerIdentity = getCallerIdentity();
+        Preconditions.checkCallAuthorization(mIsAutomotive || isAdb(callerIdentity), "can only set "
+                + "DevicePolicySafetyChecker on automotive builds or from ADB (but caller is %s)",
+                callerIdentity);
+        setDevicePolicySafetyCheckerUnchecked(safetyChecker);
+    }
+
+    /**
+     * Used by {@code setDevicePolicySafetyChecker()} above and {@link OneTimeSafetyChecker}.
+     */
+    void setDevicePolicySafetyCheckerUnchecked(DevicePolicySafetyChecker safetyChecker) {
+        Slog.i(LOG_TAG, String.format("Setting DevicePolicySafetyChecker as %s", safetyChecker));
         mSafetyChecker = safetyChecker;
+        mInjector.setDevicePolicySafetyChecker(safetyChecker);
     }
 
     /**
@@ -1021,8 +1033,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public void setNextOperationSafety(@DevicePolicyOperation int operation, boolean safe) {
         Preconditions.checkCallAuthorization(
                 hasCallingOrSelfPermission(permission.MANAGE_DEVICE_ADMINS));
-        Slog.i(LOG_TAG, "setNextOperationSafety(" + DevicePolicyManager.operationToString(operation)
-                + ", " + safe + ")");
+        Slog.i(LOG_TAG, String.format("setNextOperationSafety(%s, %b)",
+                DevicePolicyManager.operationToString(operation), safe));
         mSafetyChecker = new OneTimeSafetyChecker(this, operation, safe);
     }
 
@@ -1033,6 +1045,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     static class Injector {
 
         public final Context mContext;
+
+        private @Nullable DevicePolicySafetyChecker mSafetyChecker;
 
         Injector(Context context) {
             mContext = context;
@@ -1278,7 +1292,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         void recoverySystemRebootWipeUserData(boolean shutdown, String reason, boolean force,
                 boolean wipeEuicc, boolean wipeExtRequested, boolean wipeResetProtectionData)
                         throws IOException {
-            FactoryResetter.newBuilder(mContext).setReason(reason).setShutdown(shutdown)
+            FactoryResetter.newBuilder(mContext).setSafetyChecker(mSafetyChecker)
+                    .setReason(reason).setShutdown(shutdown)
                     .setForce(force).setWipeEuicc(wipeEuicc)
                     .setWipeAdoptableStorage(wipeExtRequested)
                     .setWipeFactoryResetProtection(wipeResetProtectionData)
@@ -1432,6 +1447,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         public boolean isChangeEnabled(long changeId, String packageName, int userId) {
             return CompatChanges.isChangeEnabled(changeId, packageName, UserHandle.of(userId));
+        }
+
+        void setDevicePolicySafetyChecker(DevicePolicySafetyChecker safetyChecker) {
+            mSafetyChecker = safetyChecker;
         }
     }
 

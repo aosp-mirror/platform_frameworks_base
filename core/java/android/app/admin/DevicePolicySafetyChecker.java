@@ -18,6 +18,8 @@ package android.app.admin;
 import android.annotation.NonNull;
 import android.app.admin.DevicePolicyManager.DevicePolicyOperation;
 
+import com.android.internal.os.IResultReceiver;
+
 /**
  * Interface responsible to check if a {@link DevicePolicyManager} API can be safely executed.
  *
@@ -28,9 +30,7 @@ public interface DevicePolicySafetyChecker {
     /**
      * Returns whether the given {@code operation} can be safely executed at the moment.
      */
-    default boolean isDevicePolicyOperationSafe(@DevicePolicyOperation int operation) {
-        return true;
-    }
+    boolean isDevicePolicyOperationSafe(@DevicePolicyOperation int operation);
 
     /**
      * Returns a new exception for when the given {@code operation} cannot be safely executed.
@@ -39,4 +39,13 @@ public interface DevicePolicySafetyChecker {
     default UnsafeStateException newUnsafeStateException(@DevicePolicyOperation int operation) {
         return new UnsafeStateException(operation);
     }
+
+    /**
+     * Called when a request was made to factory reset the device, so it can be delayed if it's not
+     * safe to proceed.
+     *
+     * @param callback callback whose {@code send()} method must be called when it's safe to factory
+     * reset.
+     */
+    void onFactoryReset(IResultReceiver callback);
 }
