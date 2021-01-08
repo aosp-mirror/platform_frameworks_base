@@ -18,6 +18,7 @@ package com.android.systemui.screenshot;
 
 import static com.android.systemui.screenshot.LogConfig.DEBUG_SCROLL;
 
+import static java.lang.Math.min;
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.UiContext;
@@ -44,14 +45,19 @@ import java.util.function.Consumer;
 import javax.inject.Inject;
 
 /**
- * High level interface to scroll capture API.
+ * High(er) level interface to scroll capture API.
  */
 public class ScrollCaptureClient {
+    private static final int TILE_SIZE_PX_MAX = 4 * (1024 * 1024);
+    private static final int TILES_PER_PAGE = 2; // increase once b/174571735 is addressed
+    private static final int MAX_PAGES = 5;
+    private static final int MAX_IMAGE_COUNT = MAX_PAGES * TILES_PER_PAGE;
 
     @VisibleForTesting
     static final int MATCH_ANY_TASK = ActivityTaskManager.INVALID_TASK_ID;
 
     private static final String TAG = LogConfig.logTag(ScrollCaptureClient.class);
+
 
     /**
      * A connection to a remote window. Starts a capture session.
@@ -60,13 +66,10 @@ public class ScrollCaptureClient {
         /**
          * Session start should be deferred until UI is active because of resource allocation and
          * potential visible side effects in the target window.
-         *
-         * @param maxBuffers the maximum number of buffers (tiles) that may be in use at one
-         *                   time, tiles are not cached anywhere so set this to a large enough
-         *                   number to retain offscreen content until it is no longer needed
+
          * @param sessionConsumer listener to receive the session once active
          */
-        void start(int maxBuffers, Consumer<Session> sessionConsumer);
+        void start(Consumer<Session> sessionConsumer);
 
         /**
          * Close the connection.
@@ -100,26 +103,33 @@ public class ScrollCaptureClient {
      */
     interface Session {
         /**
-         * Request the given horizontal strip. Values are y-coordinates in captured space, relative
-         * to start position.
+         * Request an image tile at the given position, from top, to top + {@link #getTileHeight()},
+         * and from left 0, to {@link #getPageWidth()}
          *
-         * @param contentRect the area to capture, in content rect space, relative to scroll-bounds
+         * @param top the top (y) position of the tile to capture, in content rect space
          * @param consumer listener to be informed of the result
          */
-        void requestTile(Rect contentRect, Consumer<CaptureResult> consumer);
+        void requestTile(int top, Consumer<CaptureResult> consumer);
 
         /**
-         * End the capture session, return the target app to original state. The returned
-         * stage must be waited for to complete to allow the target app a chance to restore to
-         * original state before becoming visible.
+         * Returns the maximum number of tiles which may be requested and retained without
+         * being {@link Image#close() closed}.
          *
-         * @return a stage presenting the session shutdown
+         * @return the maximum number of open tiles allowed
+         */
+        int getMaxTiles();
+
+        int getTileHeight();
+
+        int getPageHeight();
+
+        int getPageWidth();
+
+        /**
+         * End the capture session, return the target app to original state. The listener
+         * will be called when the target app is ready to before visible and interactive.
          */
         void end(Runnable listener);
-
-        int getMaxTileHeight();
-
-        int getMaxTileWidth();
     }
 
     private final IWindowManager mWindowManagerService;
@@ -131,6 +141,12 @@ public class ScrollCaptureClient {
         mWindowManagerService = windowManagerService;
     }
 
+    /**
+     * Set the window token for the screenshot window/ This is required to avoid targeting our
+     * window or any above it.
+     *
+     * @param token the windowToken of the screenshot window
+     */
     public void setHostWindowToken(IBinder token) {
         mHostWindowToken = token;
     }
@@ -176,6 +192,8 @@ public class ScrollCaptureClient {
 
         private ImageReader mReader;
         private Rect mScrollBounds;
+        private int mTileHeight;
+        private int mTileWidth;
         private Rect mRequestRect;
         private boolean mStarted;
 
@@ -197,6 +215,15 @@ public class ScrollCaptureClient {
             mScrollBounds = scrollBounds;
             mConnectionConsumer.accept(this);
             mConnectionConsumer = null;
+
+            int pxPerPage = mScrollBounds.width() * mScrollBounds.height();
+            int pxPerTile = min(TILE_SIZE_PX_MAX, (pxPerPage / TILES_PER_PAGE));
+            mTileWidth = mScrollBounds.width();
+            mTileHeight = pxPerTile  / mScrollBounds.width();
+            if (DEBUG_SCROLL) {
+                Log.d(TAG, "scrollBounds: " + mScrollBounds);
+                Log.d(TAG, "tile dimen: " + mTileWidth + "x" + mTileHeight);
+            }
         }
 
         @Override
@@ -257,24 +284,19 @@ public class ScrollCaptureClient {
 
         // ScrollCaptureController.Connection
 
-        // -> Error handling: BiConsumer<Session, Throwable> ?
         @Override
-        public void start(int maxBufferCount, Consumer<Session> sessionConsumer) {
+        public void start(Consumer<Session> sessionConsumer) {
             if (DEBUG_SCROLL) {
-                Log.d(TAG, "start(maxBufferCount=" + maxBufferCount
-                        + ", sessionConsumer=" + sessionConsumer + ")");
+                Log.d(TAG, "start(sessionConsumer=" + sessionConsumer + ")");
             }
-            mReader = ImageReader.newInstance(mScrollBounds.width(), mScrollBounds.height(),
-                    PixelFormat.RGBA_8888, maxBufferCount, HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE);
+            mReader = ImageReader.newInstance(mTileWidth, mTileHeight, PixelFormat.RGBA_8888,
+                    MAX_IMAGE_COUNT, HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE);
             mSessionConsumer = sessionConsumer;
             try {
                 mConnection.startCapture(mReader.getSurface());
                 mStarted = true;
             } catch (RemoteException e) {
-                Log.w(TAG, "should not be happening :-(");
-                // ?
-                //mSessionListener.onError(e);
-                //mSessionListener = null;
+                Log.w(TAG, "Failed to start", e);
             }
         }
 
@@ -307,27 +329,36 @@ public class ScrollCaptureClient {
         }
 
         @Override
-        public int getMaxTileHeight() {
+        public int getPageHeight() {
             return mScrollBounds.height();
         }
 
         @Override
-        public int getMaxTileWidth() {
+        public int getPageWidth() {
             return mScrollBounds.width();
         }
 
         @Override
-        public void requestTile(Rect contentRect, Consumer<CaptureResult> consumer) {
+        public int getTileHeight() {
+            return mTileHeight;
+        }
+
+        @Override
+        public int getMaxTiles() {
+            return MAX_IMAGE_COUNT;
+        }
+
+        @Override
+        public void requestTile(int top, Consumer<CaptureResult> consumer) {
             if (DEBUG_SCROLL) {
-                Log.d(TAG, "requestTile(contentRect=" + contentRect + "consumer=" + consumer + ")");
+                Log.d(TAG, "requestTile(top=" + top + ", consumer=" + consumer + ")");
             }
-            mRequestRect = new Rect(contentRect);
+            mRequestRect = new Rect(0, top, mTileWidth, top + mTileHeight);
             mResultConsumer = consumer;
             try {
                 mConnection.requestImage(mRequestRect);
             } catch (RemoteException e) {
                 Log.e(TAG, "Caught remote exception from requestImage", e);
-                // ?
             }
         }
 
