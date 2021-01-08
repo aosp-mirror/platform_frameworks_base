@@ -44,8 +44,6 @@ import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Proxy to simplify calls into window manager/activity manager
@@ -63,25 +61,7 @@ class WindowManagerProxy {
     @GuardedBy("mDockedRect")
     private final Rect mTouchableRegion = new Rect();
 
-    private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
-
     private final SyncTransactionQueue mSyncTransactionQueue;
-
-    private final Runnable mSetTouchableRegionRunnable = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                synchronized (mDockedRect) {
-                    mTmpRect1.set(mTouchableRegion);
-                }
-                WindowManagerGlobal.getWindowManagerService().setDockedStackDividerTouchRegion(
-                        mTmpRect1);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed to set touchable region: " + e);
-            }
-        }
-    };
-
     private final TaskOrganizer mTaskOrganizer;
 
     WindowManagerProxy(SyncTransactionQueue syncQueue, TaskOrganizer taskOrganizer) {
@@ -94,29 +74,29 @@ class WindowManagerProxy {
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             tiles.mSplitScreenController.startDismissSplit(!dismissOrMaximize, true /* snapped */);
         } else {
-            mExecutor.execute(() -> applyDismissSplit(tiles, layout, dismissOrMaximize));
+            applyDismissSplit(tiles, layout, dismissOrMaximize);
         }
     }
 
     public void setResizing(final boolean resizing) {
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    ActivityTaskManager.getService().setSplitScreenResizing(resizing);
-                } catch (RemoteException e) {
-                    Log.w(TAG, "Error calling setDockedStackResizing: " + e);
-                }
-            }
-        });
+        try {
+            ActivityTaskManager.getService().setSplitScreenResizing(resizing);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Error calling setDockedStackResizing: " + e);
+        }
     }
 
     /** Sets a touch region */
     public void setTouchRegion(Rect region) {
-        synchronized (mDockedRect) {
-            mTouchableRegion.set(region);
+        try {
+            synchronized (mDockedRect) {
+                mTouchableRegion.set(region);
+            }
+            WindowManagerGlobal.getWindowManagerService().setDockedStackDividerTouchRegion(
+                    mTouchableRegion);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to set touchable region: " + e);
         }
-        mExecutor.execute(mSetTouchableRegionRunnable);
     }
 
     void applyResizeSplits(int position, LegacySplitDisplayLayout splitLayout) {
