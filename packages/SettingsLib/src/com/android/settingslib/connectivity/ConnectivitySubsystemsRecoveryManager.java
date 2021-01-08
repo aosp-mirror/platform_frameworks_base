@@ -23,12 +23,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
+import android.net.wifi.WifiManager.SubsystemRestartTrackingCallback;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
-import android.text.TextUtils;
 import android.util.Log;
 
 /**
@@ -58,35 +58,18 @@ public class ConnectivitySubsystemsRecoveryManager {
     private boolean mWifiRestartInProgress = false;
     private boolean mTelephonyRestartInProgress = false;
     private RecoveryStatusCallback mCurrentRecoveryCallback = null;
-    private final BroadcastReceiver mWifiMonitor = new BroadcastReceiver() {
+    private final SubsystemRestartTrackingCallback mWifiSubsystemRestartTrackingCallback =
+            new SubsystemRestartTrackingCallback() {
         @Override
-        public void onReceive(Context context, Intent intent) {
-            if (!mWifiRestartInProgress || mCurrentRecoveryCallback == null) {
-                stopTrackingWifiRestart();
-            }
+        public void onSubsystemRestarting() {
+            // going to do nothing on this - already assuming that subsystem is restarting
+        }
 
-            // TODO: harden this code to avoid race condition. What if WiFi toggled just before
-            // recovery triggered. Either use new broadcasts from framework or detect more state
-            // changes.
-            boolean recoveryDone = false;
-            if (TextUtils.equals(intent.getAction(), WifiManager.WIFI_STATE_CHANGED_ACTION)) {
-                if (intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
-                        WifiManager.WIFI_STATE_UNKNOWN) == WifiManager.WIFI_STATE_ENABLED) {
-                    recoveryDone = true;
-                }
-            } else if (TextUtils.equals(intent.getAction(),
-                    WifiManager.WIFI_AP_STATE_CHANGED_ACTION)) {
-                if (intent.getIntExtra(WifiManager.EXTRA_WIFI_AP_STATE,
-                        WifiManager.WIFI_AP_STATE_FAILED) == WifiManager.WIFI_AP_STATE_ENABLED) {
-                    recoveryDone = true;
-                }
-            }
-
-            if (recoveryDone) {
-                mWifiRestartInProgress = false;
-                stopTrackingWifiRestart();
-                checkIfAllSubsystemsRestartsAreDone();
-            }
+        @Override
+        public void onSubsystemRestarted() {
+            mWifiRestartInProgress = false;
+            stopTrackingWifiRestart();
+            checkIfAllSubsystemsRestartsAreDone();
         }
     };
     private final PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
@@ -208,13 +191,13 @@ public class ConnectivitySubsystemsRecoveryManager {
     }
 
     private void startTrackingWifiRestart() {
-        IntentFilter filter = new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION);
-        filter.addAction(WifiManager.WIFI_AP_STATE_CHANGED_ACTION);
-        mContext.registerReceiver(mWifiMonitor, filter, null, mHandler);
+        mWifiManager.registerSubsystemRestartTrackingCallback(new HandlerExecutor(mHandler),
+                mWifiSubsystemRestartTrackingCallback);
     }
 
     private void stopTrackingWifiRestart() {
-        mContext.unregisterReceiver(mWifiMonitor);
+        mWifiManager.unregisterWifiSubsystemRestartTrackingCallback(
+                mWifiSubsystemRestartTrackingCallback);
     }
 
     private void startTrackingTelephonyRestart() {
