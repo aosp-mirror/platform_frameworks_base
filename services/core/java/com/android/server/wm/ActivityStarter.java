@@ -772,6 +772,11 @@ class ActivityStarter {
             newIntent.putExtra(HeavyWeightSwitcherActivity.KEY_HAS_RESULT, true);
         }
         newIntent.putExtra(HeavyWeightSwitcherActivity.KEY_INTENT, new IntentSender(target));
+        ActivityOptions options = mRequest.activityOptions.getOptions(mRequest.intent,
+                mRequest.activityInfo,
+                mService.getProcessController(mRequest.caller),
+                mSupervisor);
+        newIntent.putExtra(HeavyWeightSwitcherActivity.KEY_ACTIVITY_OPTIONS, options.toBundle());
         heavy.updateIntentForHeavyWeightActivity(newIntent);
         newIntent.putExtra(HeavyWeightSwitcherActivity.KEY_NEW_APP,
                 mRequest.activityInfo.packageName);

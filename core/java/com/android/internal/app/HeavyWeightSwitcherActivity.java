@@ -53,8 +53,10 @@ public class HeavyWeightSwitcherActivity extends Activity {
     public static final String KEY_CUR_TASK = "cur_task";
     /** Package of newly requested heavy-weight app. */
     public static final String KEY_NEW_APP = "new_app";
+    public static final String KEY_ACTIVITY_OPTIONS = "activity_options";
     
     IntentSender mStartIntent;
+    Bundle mActivityOptions;
     boolean mHasResult;
     String mCurApp;
     int mCurTask;
@@ -65,8 +67,9 @@ public class HeavyWeightSwitcherActivity extends Activity {
         super.onCreate(savedInstanceState);
         
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        
+
         mStartIntent = (IntentSender)getIntent().getParcelableExtra(KEY_INTENT);
+        mActivityOptions = getIntent().getBundleExtra(KEY_ACTIVITY_OPTIONS);
         mHasResult = getIntent().getBooleanExtra(KEY_HAS_RESULT, false);
         mCurApp = getIntent().getStringExtra(KEY_CUR_APP);
         mCurTask = getIntent().getIntExtra(KEY_CUR_TASK, 0);
@@ -148,9 +151,9 @@ public class HeavyWeightSwitcherActivity extends Activity {
                 if (mHasResult) {
                     startIntentSenderForResult(mStartIntent, -1, null,
                             Intent.FLAG_ACTIVITY_FORWARD_RESULT,
-                            Intent.FLAG_ACTIVITY_FORWARD_RESULT, 0);
+                            Intent.FLAG_ACTIVITY_FORWARD_RESULT, 0, mActivityOptions);
                 } else {
-                    startIntentSenderForResult(mStartIntent, -1, null, 0, 0, 0);
+                    startIntentSenderForResult(mStartIntent, -1, null, 0, 0, 0, mActivityOptions);
                 }
             } catch (IntentSender.SendIntentException ex) {
                 Log.w("HeavyWeightSwitcherActivity", "Failure starting", ex);
