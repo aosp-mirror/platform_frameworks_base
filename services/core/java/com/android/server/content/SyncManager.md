@@ -29,8 +29,10 @@ exempted from app-standby throttling.
 
 ### Two Levels of Exemption
 Specifically, there are two different levels of exemption, depending on the state of the caller:
-1. `ContentResolver.SYNC_EXEMPTION_PROMOTE_BUCKET`
+1. `ContentResolver.SYNC_EXEMPTION_PROMOTE_BUCKET`.
+  This is shown as `STANDBY-EXEMPTED` in `dumpsys content`.
 2. `ContentResolver.SYNC_EXEMPTION_PROMOTE_BUCKET_WITH_TEMP`, which is more powerful than 1.
+  This is shown as `STANDBY-EXEMPTED(TOP)` in `dumpsys content`.
 
 The exemption level is calculated in
 [ContentService.getSyncExemptionAndCleanUpExtrasForCaller()](https://cs.android.com/android/platform/superproject/+/master:frameworks/base/services/core/java/com/android/server/content/ContentService.java?q=%22int%20getSyncExemptionAndCleanUpExtrasForCaller%22&ss=android%2Fplatform%2Fsuperproject),
