@@ -353,6 +353,8 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Người dùng"</string>
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Người dùng mới"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
+    <!-- no translation found for quick_settings_internet_label (6603068555872455463) -->
+    <skip />
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Chưa được kết nối"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"Không có mạng nào"</string>
     <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"Tắt Wi-Fi"</string>
@@ -454,9 +456,11 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Hiển thị hồ sơ"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Thêm người dùng"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Người dùng mới"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Xóa phiên khách?"</string>
+    <!-- no translation found for guest_exit_guest_dialog_title (2034481024623462357) -->
+    <skip />
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Tất cả ứng dụng và dữ liệu trong phiên này sẽ bị xóa."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Xóa"</string>
+    <!-- no translation found for guest_exit_guest_dialog_remove (8533184512885775423) -->
+    <skip />
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Chào mừng bạn trở lại!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Bạn có muốn tiếp tục phiên của mình không?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Bắt đầu lại"</string>
