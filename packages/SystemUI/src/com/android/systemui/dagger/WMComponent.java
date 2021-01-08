@@ -22,9 +22,9 @@ import com.android.wm.shell.ShellInit;
 import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import java.util.Optional;
 

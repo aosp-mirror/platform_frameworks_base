@@ -16,6 +16,7 @@
 
 package android.window;
 
+import android.app.ActivityManager;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 import android.window.WindowContainerTransaction;
@@ -58,6 +59,9 @@ oneway interface ITransitionPlayer {
      * @param type The {@link WindowManager#TransitionType} of the transition to start.
      * @param transitionToken An identifying token for the transition that needs to be started.
      *                        Pass this to {@link IWindowOrganizerController#startTransition}.
+     * @param triggerTask If non-null, the task containing the activity whose lifecycle change
+     *                    (start or finish) has caused this transition to occur.
      */
-    void requestStartTransition(int type, in IBinder transitionToken);
+    void requestStartTransition(int type, in IBinder transitionToken,
+            in ActivityManager.RunningTaskInfo triggerTask);
 }

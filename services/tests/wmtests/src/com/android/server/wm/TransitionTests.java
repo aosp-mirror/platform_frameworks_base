@@ -77,6 +77,7 @@ public class TransitionTests extends WindowTestsBase {
         changes.put(oldTask, new Transition.ChangeInfo(true /* vis */, true /* exChg */));
         changes.put(opening, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
         changes.put(closing, new Transition.ChangeInfo(true /* vis */, true /* exChg */));
+        fillChangeMap(changes, newTask);
         // End states.
         closing.mVisibleRequested = false;
         opening.mVisibleRequested = true;
@@ -141,6 +142,7 @@ public class TransitionTests extends WindowTestsBase {
         changes.put(opening, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
         changes.put(opening2, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
         changes.put(closing, new Transition.ChangeInfo(true /* vis */, true /* exChg */));
+        fillChangeMap(changes, newTask);
         // End states.
         closing.mVisibleRequested = false;
         opening.mVisibleRequested = true;
@@ -189,6 +191,8 @@ public class TransitionTests extends WindowTestsBase {
         changes.put(tda, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
         changes.put(showing, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
         changes.put(showing2, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
+        fillChangeMap(changes, tda);
+
         // End states.
         showing.mVisibleRequested = true;
         showing2.mVisibleRequested = true;
@@ -337,5 +341,13 @@ public class TransitionTests extends WindowTestsBase {
                 info.getChanges().get(info.getChanges().size() - 1).getFlags());
         assertEquals(FLAG_SHOW_WALLPAPER, info.getChange(
                 tasks[showWallpaperTask].mRemoteToken.toWindowContainerToken()).getFlags());
+    }
+
+    /** Fill the change map with all the parents of top. Change maps are usually fully populated */
+    private static void fillChangeMap(ArrayMap<WindowContainer, Transition.ChangeInfo> changes,
+            WindowContainer top) {
+        for (WindowContainer curr = top.getParent(); curr != null; curr = curr.getParent()) {
+            changes.put(curr, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
+        }
     }
 }

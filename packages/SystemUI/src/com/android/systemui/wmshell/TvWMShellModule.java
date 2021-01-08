@@ -23,6 +23,7 @@ import android.view.IWindowManager;
 import com.android.systemui.dagger.WMSingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.Transitions;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.SyncTransactionQueue;
@@ -58,9 +59,10 @@ public class TvWMShellModule {
             DisplayController displayController, SystemWindows systemWindows,
             DisplayImeController displayImeController, @Main Handler handler,
             TransactionPool transactionPool, ShellTaskOrganizer shellTaskOrganizer,
-            SyncTransactionQueue syncQueue, TaskStackListenerImpl taskStackListener) {
+            SyncTransactionQueue syncQueue, TaskStackListenerImpl taskStackListener,
+            Transitions transitions) {
         return new LegacySplitScreenController(context, displayController, systemWindows,
                 displayImeController, handler, transactionPool, shellTaskOrganizer, syncQueue,
-                taskStackListener);
+                taskStackListener, transitions);
     }
 }

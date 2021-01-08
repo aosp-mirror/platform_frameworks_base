@@ -26,6 +26,7 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Parcel;
@@ -153,7 +154,8 @@ public final class TransitionInfo implements Parcelable {
     /**
      * @return a surfacecontrol that can serve as a parent surfacecontrol for all the changing
      * participants to animate within. This will generally be placed at the highest-z-order
-     * shared ancestor of all participants.
+     * shared ancestor of all participants. While this is non-null, it's possible for the rootleash
+     * to be invalid if the transition is a no-op.
      */
     @NonNull
     public SurfaceControl getRootLeash() {
@@ -181,7 +183,7 @@ public final class TransitionInfo implements Parcelable {
     @Nullable
     public Change getChange(@NonNull WindowContainerToken token) {
         for (int i = mChanges.size() - 1; i >= 0; --i) {
-            if (mChanges.get(i).mContainer == token) {
+            if (token.equals(mChanges.get(i).mContainer)) {
                 return mChanges.get(i);
             }
         }
@@ -254,6 +256,7 @@ public final class TransitionInfo implements Parcelable {
         private final Rect mStartAbsBounds = new Rect();
         private final Rect mEndAbsBounds = new Rect();
         private final Point mEndRelOffset = new Point();
+        private ActivityManager.RunningTaskInfo mTaskInfo = null;
 
         public Change(@Nullable WindowContainerToken container, @NonNull SurfaceControl leash) {
             mContainer = container;
@@ -270,6 +273,7 @@ public final class TransitionInfo implements Parcelable {
             mStartAbsBounds.readFromParcel(in);
             mEndAbsBounds.readFromParcel(in);
             mEndRelOffset.readFromParcel(in);
+            mTaskInfo = in.readTypedObject(ActivityManager.RunningTaskInfo.CREATOR);
         }
 
         /** Sets the parent of this change's container. The parent must be a participant or null. */
@@ -300,6 +304,14 @@ public final class TransitionInfo implements Parcelable {
         /** Sets the offset of this container from its parent surface */
         public void setEndRelOffset(int left, int top) {
             mEndRelOffset.set(left, top);
+        }
+
+        /**
+         * Sets the taskinfo of this container if this is a task. WARNING: this takes the
+         * reference, so don't modify it afterwards.
+         */
+        public void setTaskInfo(ActivityManager.RunningTaskInfo taskInfo) {
+            mTaskInfo = taskInfo;
         }
 
         /** @return the container that is changing. May be null if non-remotable (eg. activity) */
@@ -359,6 +371,12 @@ public final class TransitionInfo implements Parcelable {
             return mLeash;
         }
 
+        /** @return the task info or null if this isn't a task */
+        @NonNull
+        public ActivityManager.RunningTaskInfo getTaskInfo() {
+            return mTaskInfo;
+        }
+
         @Override
         /** @hide */
         public void writeToParcel(@NonNull Parcel dest, int flags) {
@@ -370,6 +388,7 @@ public final class TransitionInfo implements Parcelable {
             mStartAbsBounds.writeToParcel(dest, flags);
             mEndAbsBounds.writeToParcel(dest, flags);
             mEndRelOffset.writeToParcel(dest, flags);
+            dest.writeTypedObject(mTaskInfo, flags);
         }
 
         @NonNull
