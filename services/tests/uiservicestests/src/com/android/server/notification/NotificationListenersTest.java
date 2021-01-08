@@ -80,7 +80,7 @@ public class NotificationListenersTest extends UiServiceTestCase {
 
     @Test
     public void testReadExtraTag() throws Exception {
-        String xml = "<requested_listeners>"
+        String xml = "<req_listeners>"
                 + "<listener component=\"" + mCn1.flattenToString() + "\" user=\"0\">"
                 + "<allowed types=\"7\" />"
                 + "<disallowed pkgs=\"\" />"
@@ -89,13 +89,13 @@ public class NotificationListenersTest extends UiServiceTestCase {
                 + "<allowed types=\"4\" />"
                 + "<disallowed pkgs=\"something\" />"
                 + "</listener>"
-                + "</requested_listeners>";
+                + "</req_listeners>";
 
         TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml.getBytes())), null);
         parser.nextTag();
-        mListeners.readExtraTag("requested_listeners", parser);
+        mListeners.readExtraTag("req_listeners", parser);
 
         validateListenersFromXml();
     }
@@ -120,7 +120,7 @@ public class NotificationListenersTest extends UiServiceTestCase {
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(baos.toByteArray())), null);
         parser.nextTag();
-        mListeners.readExtraTag("requested_listeners", parser);
+        mListeners.readExtraTag("req_listeners", parser);
 
         validateListenersFromXml();
     }
@@ -192,7 +192,7 @@ public class NotificationListenersTest extends UiServiceTestCase {
 
         assertThat(mListeners.getNotificationListenerFilter(
                 Pair.create(si.getComponentName(), 0)).getTypes())
-                .isEqualTo(7);
+                .isEqualTo(15);
         assertThat(mListeners.getNotificationListenerFilter(Pair.create(si.getComponentName(), 0))
                 .getDisallowedPackages())
                 .isEmpty();
