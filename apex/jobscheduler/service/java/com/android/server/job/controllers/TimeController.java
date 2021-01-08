@@ -157,31 +157,27 @@ public final class TimeController extends StateController {
                 && !job.isConstraintSatisfied(JobStatus.CONSTRAINT_DEADLINE)
                 && job.getLatestRunTimeElapsed() <= mNextJobExpiredElapsedMillis) {
             if (evaluateDeadlineConstraint(job, nowElapsedMillis)) {
-                checkExpiredDeadlinesAndResetAlarm();
-                checkExpiredDelaysAndResetAlarm();
-            } else {
-                final boolean isAlarmForJob =
-                        job.getLatestRunTimeElapsed() == mNextJobExpiredElapsedMillis;
-                final boolean wouldBeReady = wouldBeReadyWithConstraintLocked(
-                        job, JobStatus.CONSTRAINT_DEADLINE);
-                if ((isAlarmForJob && !wouldBeReady) || (!isAlarmForJob && wouldBeReady)) {
-                    checkExpiredDeadlinesAndResetAlarm();
+                if (job.isReady()) {
+                    // If the job still isn't ready, there's no point trying to rush the
+                    // Scheduler.
+                    mStateChangedListener.onRunJobNow(job);
                 }
+            } else if (wouldBeReadyWithConstraintLocked(job, JobStatus.CONSTRAINT_DEADLINE)) {
+                // This job's deadline is earlier than the current set alarm. Update the alarm.
+                setDeadlineExpiredAlarmLocked(job.getLatestRunTimeElapsed(),
+                        deriveWorkSource(job.getSourceUid(), job.getSourcePackageName()));
             }
         }
         if (job.hasTimingDelayConstraint()
                 && !job.isConstraintSatisfied(JobStatus.CONSTRAINT_TIMING_DELAY)
                 && job.getEarliestRunTime() <= mNextDelayExpiredElapsedMillis) {
-            if (evaluateTimingDelayConstraint(job, nowElapsedMillis)) {
-                checkExpiredDelaysAndResetAlarm();
-            } else {
-                final boolean isAlarmForJob =
-                        job.getEarliestRunTime() == mNextDelayExpiredElapsedMillis;
-                final boolean wouldBeReady = wouldBeReadyWithConstraintLocked(
-                        job, JobStatus.CONSTRAINT_TIMING_DELAY);
-                if ((isAlarmForJob && !wouldBeReady) || (!isAlarmForJob && wouldBeReady)) {
-                    checkExpiredDelaysAndResetAlarm();
-                }
+            // Since this is just the delay, we don't need to rush the Scheduler to run the job
+            // immediately if the constraint is satisfied here.
+            if (!evaluateTimingDelayConstraint(job, nowElapsedMillis)
+                    && wouldBeReadyWithConstraintLocked(job, JobStatus.CONSTRAINT_TIMING_DELAY)) {
+                // This job's delay is earlier than the current set alarm. Update the alarm.
+                setDelayExpiredAlarmLocked(job.getEarliestRunTime(),
+                        deriveWorkSource(job.getSourceUid(), job.getSourcePackageName()));
             }
         }
     }
