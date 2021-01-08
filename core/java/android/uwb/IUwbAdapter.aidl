@@ -119,40 +119,94 @@ interface IUwbAdapter {
   PersistableBundle getSpecificationInfo();
 
   /**
-   * Request to start a new ranging session
+   * Request to open a new ranging session
    *
-   * This function must return before calling IUwbAdapterCallbacks
-   * #onRangingStarted, #onRangingClosed, or #onRangingResult.
+   * This function must return before calling any functions in
+   * IUwbAdapterCallbacks.
    *
-   * A ranging session does not need to be started before returning.
+   * This function does not start the ranging session, but all necessary
+   * components must be initialized and ready to start a new ranging
+   * session prior to calling IUwbAdapterCallback#onRangingOpened.
    *
-   * IUwbAdapterCallbacks#onRangingStarted must be called within
-   * RANGING_SESSION_START_THRESHOLD_MS milliseconds of #startRanging being called
-   * if the ranging session is scheduled to start successfully.
+   * IUwbAdapterCallbacks#onRangingOpened must be called within
+   * RANGING_SESSION_OPEN_THRESHOLD_MS milliseconds of #openRanging being
+   * called if the ranging session is opened successfully.
    *
-   * IUwbAdapterCallbacks#onRangingStartFailed must be called within
-   * RANGING_SESSION_START_THRESHOLD_MS milliseconds of #startRanging being called
-   * if the ranging session fails to be scheduled to start successfully.
+   * IUwbAdapterCallbacks#onRangingOpenFailed must be called within
+   * RANGING_SESSION_OPEN_THRESHOLD_MS milliseconds of #openRanging being called
+   * if the ranging session fails to be opened.
    *
    * @param rangingCallbacks the callbacks used to deliver ranging information
    * @param parameters the configuration to use for ranging
    * @return a SessionHandle used to identify this ranging request
    */
-  SessionHandle startRanging(in IUwbRangingCallbacks rangingCallbacks,
-                             in PersistableBundle parameters);
+  SessionHandle openRanging(in IUwbRangingCallbacks rangingCallbacks,
+                            in PersistableBundle parameters);
 
   /**
-   * Stop and close ranging for the session associated with the given handle
+   * Request to start ranging
+   *
+   * IUwbAdapterCallbacks#onRangingStarted must be called within
+   * RANGING_SESSION_START_THRESHOLD_MS milliseconds of #startRanging being
+   * called if the ranging session starts successfully.
+   *
+   * IUwbAdapterCallbacks#onRangingStartFailed must be called within
+   * RANGING_SESSION_START_THRESHOLD_MS milliseconds of #startRanging being
+   * called if the ranging session fails to be started.
+   *
+   * @param sessionHandle the session handle to start ranging for
+   * @param parameters additional configuration required to start ranging
+   */
+  void startRanging(in SessionHandle sessionHandle,
+                    in PersistableBundle parameters);
+
+  /**
+   * Request to reconfigure ranging
+   *
+   * IUwbAdapterCallbacks#onRangingReconfigured must be called after
+   * successfully reconfiguring the session.
+   *
+   * IUwbAdapterCallbacks#onRangingReconfigureFailed must be called after
+   * failing to reconfigure the session.
+   *
+   * A session must not be modified by a failed call to #reconfigureRanging.
+   *
+   * @param sessionHandle the session handle to start ranging for
+   * @param parameters the parameters to reconfigure and their new values
+   */
+  void reconfigureRanging(in SessionHandle sessionHandle,
+                          in PersistableBundle parameters);
+
+  /**
+   * Request to stop ranging
+   *
+   * IUwbAdapterCallbacks#onRangingStopped must be called after
+   * successfully stopping the session.
+   *
+   * IUwbAdapterCallbacks#onRangingStopFailed must be called after failing
+   * to stop the session.
+   *
+   * @param sessionHandle the session handle to stop ranging for
+   */
+  void stopRanging(in SessionHandle sessionHandle);
+
+  /**
+   * Close ranging for the session associated with the given handle
    *
    * Calling with an invalid handle or a handle that has already been closed
    * is a no-op.
    *
    * IUwbAdapterCallbacks#onRangingClosed must be called within
-   * RANGING_SESSION_CLOSE_THRESHOLD_MS of #stopRanging being called.
+   * RANGING_SESSION_CLOSE_THRESHOLD_MS of #closeRanging being called.
    *
-   * @param sessionHandle the session handle to stop ranging for
+   * @param sessionHandle the session handle to close ranging for
    */
   void closeRanging(in SessionHandle sessionHandle);
+
+  /**
+   * The maximum allowed time to open a ranging session.
+   */
+  const int RANGING_SESSION_OPEN_THRESHOLD_MS = 3000; // Value TBD
 
   /**
    * The maximum allowed time to start a ranging session.
