@@ -15,14 +15,13 @@
  */
 package unittest.src.com.android.wm.shell.startingsurface;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -72,6 +71,7 @@ public class StartingSurfaceDrawerTests {
 
     static final class TestStartingSurfaceDrawer extends StartingSurfaceDrawer{
         int mAddWindowForTask = 0;
+        int mViewThemeResId;
 
         TestStartingSurfaceDrawer(Context context, ShellExecutor executor) {
             super(context, executor);
@@ -82,6 +82,7 @@ public class StartingSurfaceDrawerTests {
                 View view, WindowManager wm, WindowManager.LayoutParams params) {
             // listen for addView
             mAddWindowForTask = taskId;
+            mViewThemeResId = view.getContext().getThemeResId();
         }
 
         @Override
@@ -121,7 +122,7 @@ public class StartingSurfaceDrawerTests {
         final int taskId = 1;
         final Handler mainLoop = new Handler(Looper.getMainLooper());
         final StartingWindowInfo windowInfo =
-                createWindowInfo(taskId, WINDOWING_MODE_FULLSCREEN);
+                createWindowInfo(taskId, android.R.style.Theme);
         mStartingSurfaceDrawer.addStartingWindow(windowInfo, mBinder);
         waitHandlerIdle(mainLoop);
         verify(mStartingSurfaceDrawer).postAddWindow(eq(taskId), eq(mBinder), any(), any(), any());
@@ -133,12 +134,24 @@ public class StartingSurfaceDrawerTests {
         assertEquals(mStartingSurfaceDrawer.mAddWindowForTask, 0);
     }
 
-    private StartingWindowInfo createWindowInfo(int taskId, int windowingMode) {
+    @Test
+    public void testFallbackDefaultTheme() {
+        final int taskId = 1;
+        final Handler mainLoop = new Handler(Looper.getMainLooper());
+        final StartingWindowInfo windowInfo =
+                createWindowInfo(taskId, 0);
+        mStartingSurfaceDrawer.addStartingWindow(windowInfo, mBinder);
+        waitHandlerIdle(mainLoop);
+        verify(mStartingSurfaceDrawer).postAddWindow(eq(taskId), eq(mBinder), any(), any(), any());
+        assertNotEquals(mStartingSurfaceDrawer.mViewThemeResId, 0);
+    }
+
+    private StartingWindowInfo createWindowInfo(int taskId, int themeResId) {
         StartingWindowInfo windowInfo = new StartingWindowInfo();
         final ActivityInfo info = new ActivityInfo();
         info.applicationInfo = new ApplicationInfo();
         info.packageName = "test";
-        info.theme = android.R.style.Theme;
+        info.theme = themeResId;
         final ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
         taskInfo.topActivityInfo = info;
         taskInfo.taskId = taskId;
