@@ -18,6 +18,7 @@ package android.uwb;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Binder;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
@@ -42,6 +43,7 @@ import java.util.concurrent.Executor;
  *
  * @hide
  */
+@SystemApi
 public final class RangingSession implements AutoCloseable {
     private static final String TAG = "Uwb.RangingSession";
     private final SessionHandle mSessionHandle;
