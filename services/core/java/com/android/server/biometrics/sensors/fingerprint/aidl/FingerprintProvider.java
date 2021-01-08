@@ -96,7 +96,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                         Slog.e(getTag(), "Task stack changed for client: " + client);
                         continue;
                     }
-                    if (Utils.isKeyguard(mContext, client.getOwnerString())) {
+                    if (Utils.isKeyguard(mContext, client.getOwnerString())
+                            || Utils.isSystem(mContext, client.getOwnerString())) {
                         continue; // Keyguard is always allowed
                     }
 
