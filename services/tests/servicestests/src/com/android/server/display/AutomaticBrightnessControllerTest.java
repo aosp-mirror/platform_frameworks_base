@@ -53,21 +53,29 @@ public class AutomaticBrightnessControllerTest {
     private static final int DARKENING_LIGHT_DEBOUNCE_CONFIG = 0;
     private static final float DOZE_SCALE_FACTOR = 0.0f;
     private static final boolean RESET_AMBIENT_LUX_AFTER_WARMUP_CONFIG = false;
+    private static final int DISPLAY_ID = 0;
+    private static final int LAYER_STACK = 0;
 
     private Context mContext;
+    private LogicalDisplay mLogicalDisplay;
+
     @Mock SensorManager mSensorManager;
     @Mock BrightnessMappingStrategy mBrightnessMappingStrategy;
     @Mock HysteresisLevels mAmbientBrightnessThresholds;
     @Mock HysteresisLevels mScreenBrightnessThresholds;
-    @Mock Handler mNoopHandler;
+    @Mock Handler mNoOpHandler;
     @Mock DisplayDeviceConfig mDisplayDeviceConfig;
+    @Mock DisplayDevice mDisplayDevice;
 
     private static final int LIGHT_SENSOR_WARMUP_TIME = 0;
     @Before
     public void setUp() {
+        // Share classloader to allow package private access.
+        System.setProperty("dexmaker.share_classloader", "true");
         MockitoAnnotations.initMocks(this);
 
         mContext = InstrumentationRegistry.getContext();
+        mLogicalDisplay = new LogicalDisplay(DISPLAY_ID, LAYER_STACK, mDisplayDevice);
     }
 
     private AutomaticBrightnessController setupController(Sensor lightSensor) {
@@ -75,7 +83,7 @@ public class AutomaticBrightnessControllerTest {
                 new AutomaticBrightnessController.Injector() {
                     @Override
                     public Handler getBackgroundThreadHandler() {
-                        return mNoopHandler;
+                        return mNoOpHandler;
                     }
                 },
                 () -> { }, mContext.getMainLooper(), mSensorManager, lightSensor,
@@ -83,7 +91,7 @@ public class AutomaticBrightnessControllerTest {
                 BRIGHTNESS_MAX_FLOAT, DOZE_SCALE_FACTOR, LIGHT_SENSOR_RATE,
                 INITIAL_LIGHT_SENSOR_RATE, BRIGHTENING_LIGHT_DEBOUNCE_CONFIG,
                 DARKENING_LIGHT_DEBOUNCE_CONFIG, RESET_AMBIENT_LUX_AFTER_WARMUP_CONFIG,
-                mAmbientBrightnessThresholds, mScreenBrightnessThresholds, mContext
+                mAmbientBrightnessThresholds, mScreenBrightnessThresholds, mLogicalDisplay, mContext
         );
         controller.setLoggingEnabled(true);
 
