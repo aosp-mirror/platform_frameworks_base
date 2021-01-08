@@ -37,6 +37,7 @@ import com.android.systemui.qs.tiles.DataSaverTile;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.FlashlightTile;
 import com.android.systemui.qs.tiles.HotspotTile;
+import com.android.systemui.qs.tiles.InternetTile;
 import com.android.systemui.qs.tiles.LocationTile;
 import com.android.systemui.qs.tiles.NfcTile;
 import com.android.systemui.qs.tiles.NightDisplayTile;
@@ -60,6 +61,7 @@ public class QSFactoryImpl implements QSFactory {
     private static final String TAG = "QSFactory";
 
     private final Provider<WifiTile> mWifiTileProvider;
+    private final Provider<InternetTile> mInternetTileProvider;
     private final Provider<BluetoothTile> mBluetoothTileProvider;
     private final Provider<CellularTile> mCellularTileProvider;
     private final Provider<DndTile> mDndTileProvider;
@@ -89,6 +91,7 @@ public class QSFactoryImpl implements QSFactory {
             Lazy<QSHost> qsHostLazy,
             Provider<CustomTile.Builder> customTileBuilderProvider,
             Provider<WifiTile> wifiTileProvider,
+            Provider<InternetTile> internetTileProvider,
             Provider<BluetoothTile> bluetoothTileProvider,
             Provider<CellularTile> cellularTileProvider,
             Provider<DndTile> dndTileProvider,
@@ -113,6 +116,7 @@ public class QSFactoryImpl implements QSFactory {
         mCustomTileBuilderProvider = customTileBuilderProvider;
 
         mWifiTileProvider = wifiTileProvider;
+        mInternetTileProvider = internetTileProvider;
         mBluetoothTileProvider = bluetoothTileProvider;
         mCellularTileProvider = cellularTileProvider;
         mDndTileProvider = dndTileProvider;
@@ -148,6 +152,8 @@ public class QSFactoryImpl implements QSFactory {
         switch (tileSpec) {
             case "wifi":
                 return mWifiTileProvider.get();
+            case "internet":
+                return mInternetTileProvider.get();
             case "bt":
                 return mBluetoothTileProvider.get();
             case "cell":

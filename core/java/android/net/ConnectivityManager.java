@@ -1833,30 +1833,42 @@ public class ConnectivityManager {
             mCallback = new ISocketKeepaliveCallback.Stub() {
                 @Override
                 public void onStarted(int slot) {
-                    Binder.withCleanCallingIdentity(() ->
-                            mExecutor.execute(() -> {
-                                mSlot = slot;
-                                callback.onStarted();
-                            }));
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        mExecutor.execute(() -> {
+                            mSlot = slot;
+                            callback.onStarted();
+                        });
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
                 }
 
                 @Override
                 public void onStopped() {
-                    Binder.withCleanCallingIdentity(() ->
-                            mExecutor.execute(() -> {
-                                mSlot = null;
-                                callback.onStopped();
-                            }));
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        mExecutor.execute(() -> {
+                            mSlot = null;
+                            callback.onStopped();
+                        });
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
                     mExecutor.shutdown();
                 }
 
                 @Override
                 public void onError(int error) {
-                    Binder.withCleanCallingIdentity(() ->
-                            mExecutor.execute(() -> {
-                                mSlot = null;
-                                callback.onError(error);
-                            }));
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        mExecutor.execute(() -> {
+                            mSlot = null;
+                            callback.onError(error);
+                        });
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
                     mExecutor.shutdown();
                 }
 
@@ -3114,39 +3126,6 @@ public class ConnectivityManager {
     public boolean updateLockdownVpn() {
         try {
             return mService.updateLockdownVpn();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Check mobile provisioning.
-     *
-     * @param suggestedTimeOutMs, timeout in milliseconds
-     *
-     * @return time out that will be used, maybe less that suggestedTimeOutMs
-     * -1 if an error.
-     *
-     * {@hide}
-     */
-    public int checkMobileProvisioning(int suggestedTimeOutMs) {
-        int timeOutMs = -1;
-        try {
-            timeOutMs = mService.checkMobileProvisioning(suggestedTimeOutMs);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-        return timeOutMs;
-    }
-
-    /**
-     * Get the mobile provisioning url.
-     * {@hide}
-     */
-    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public String getMobileProvisioningUrl() {
-        try {
-            return mService.getMobileProvisioningUrl();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

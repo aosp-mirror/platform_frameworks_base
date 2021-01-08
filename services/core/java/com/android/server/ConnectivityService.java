@@ -74,7 +74,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.net.CaptivePortal;
 import android.net.CaptivePortalData;
@@ -95,7 +94,6 @@ import android.net.INetworkManagementEventObserver;
 import android.net.INetworkMonitor;
 import android.net.INetworkMonitorCallbacks;
 import android.net.INetworkPolicyListener;
-import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
 import android.net.ISocketKeepaliveCallback;
 import android.net.InetAddresses;
@@ -173,7 +171,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
-import android.util.Xml;
 
 import com.android.connectivity.aidl.INetworkAgent;
 import com.android.internal.R;
@@ -190,7 +187,6 @@ import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.LocationPermissionChecker;
 import com.android.internal.util.MessageUtils;
-import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.BasicShellCommandHandler;
 import com.android.net.module.util.LinkPropertiesUtils.CompareOrUpdateResult;
 import com.android.net.module.util.LinkPropertiesUtils.CompareResult;
@@ -221,14 +217,7 @@ import com.google.android.collect.Lists;
 
 import libcore.io.IoUtils;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -337,7 +326,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @VisibleForTesting
     protected INetd mNetd;
     private INetworkStatsService mStatsService;
-    private INetworkPolicyManager mPolicyManager;
+    private NetworkPolicyManager mPolicyManager;
     private NetworkPolicyManagerInternal mPolicyManagerInternal;
 
     /**
@@ -946,15 +935,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     public ConnectivityService(Context context, INetworkManagementService netManager,
-            INetworkStatsService statsService, INetworkPolicyManager policyManager) {
-        this(context, netManager, statsService, policyManager, getDnsResolver(context),
-                new IpConnectivityLog(), NetdService.getInstance(), new Dependencies());
+            INetworkStatsService statsService) {
+        this(context, netManager, statsService, getDnsResolver(context), new IpConnectivityLog(),
+                NetdService.getInstance(), new Dependencies());
     }
 
     @VisibleForTesting
     protected ConnectivityService(Context context, INetworkManagementService netManager,
-            INetworkStatsService statsService, INetworkPolicyManager policyManager,
-            IDnsResolver dnsresolver, IpConnectivityLog logger, INetd netd, Dependencies deps) {
+            INetworkStatsService statsService, IDnsResolver dnsresolver, IpConnectivityLog logger,
+            INetd netd, Dependencies deps) {
         if (DBG) log("ConnectivityService starting up");
 
         mDeps = Objects.requireNonNull(deps, "missing Dependencies");
@@ -992,7 +981,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         mNMS = Objects.requireNonNull(netManager, "missing INetworkManagementService");
         mStatsService = Objects.requireNonNull(statsService, "missing INetworkStatsService");
-        mPolicyManager = Objects.requireNonNull(policyManager, "missing INetworkPolicyManager");
+        mPolicyManager = mContext.getSystemService(NetworkPolicyManager.class);
         mPolicyManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(NetworkPolicyManagerInternal.class),
                 "missing NetworkPolicyManagerInternal");
@@ -1008,12 +997,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // To ensure uid rules are synchronized with Network Policy, register for
         // NetworkPolicyManagerService events must happen prior to NetworkPolicyManagerService
         // reading existing policy from disk.
-        try {
-            mPolicyManager.registerListener(mPolicyListener);
-        } catch (RemoteException e) {
-            // ouch, no rules updates means some processes may never get network
-            loge("unable to register INetworkPolicyListener" + e);
-        }
+        mPolicyManager.registerListener(mPolicyListener);
 
         final PowerManager powerManager = (PowerManager) context.getSystemService(
                 Context.POWER_SERVICE);
@@ -5082,101 +5066,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             return vpn.getLockdownAllowlist();
         }
-    }
-
-    @Override
-    public int checkMobileProvisioning(int suggestedTimeOutMs) {
-        // TODO: Remove?  Any reason to trigger a provisioning check?
-        return -1;
-    }
-
-    /** Location to an updatable file listing carrier provisioning urls.
-     *  An example:
-     *
-     * <?xml version="1.0" encoding="utf-8"?>
-     *  <provisioningUrls>
-     *   <provisioningUrl mcc="310" mnc="4">http://myserver.com/foo?mdn=%3$s&amp;iccid=%1$s&amp;imei=%2$s</provisioningUrl>
-     *  </provisioningUrls>
-     */
-    private static final String PROVISIONING_URL_PATH =
-            "/data/misc/radio/provisioning_urls.xml";
-    private final File mProvisioningUrlFile = new File(PROVISIONING_URL_PATH);
-
-    /** XML tag for root element. */
-    private static final String TAG_PROVISIONING_URLS = "provisioningUrls";
-    /** XML tag for individual url */
-    private static final String TAG_PROVISIONING_URL = "provisioningUrl";
-    /** XML attribute for mcc */
-    private static final String ATTR_MCC = "mcc";
-    /** XML attribute for mnc */
-    private static final String ATTR_MNC = "mnc";
-
-    private String getProvisioningUrlBaseFromFile() {
-        XmlPullParser parser;
-        Configuration config = mContext.getResources().getConfiguration();
-
-        try (FileReader fileReader = new FileReader(mProvisioningUrlFile)) {
-            parser = Xml.newPullParser();
-            parser.setInput(fileReader);
-            XmlUtils.beginDocument(parser, TAG_PROVISIONING_URLS);
-
-            while (true) {
-                XmlUtils.nextElement(parser);
-
-                String element = parser.getName();
-                if (element == null) break;
-
-                if (element.equals(TAG_PROVISIONING_URL)) {
-                    String mcc = parser.getAttributeValue(null, ATTR_MCC);
-                    try {
-                        if (mcc != null && Integer.parseInt(mcc) == config.mcc) {
-                            String mnc = parser.getAttributeValue(null, ATTR_MNC);
-                            if (mnc != null && Integer.parseInt(mnc) == config.mnc) {
-                                parser.next();
-                                if (parser.getEventType() == XmlPullParser.TEXT) {
-                                    return parser.getText();
-                                }
-                            }
-                        }
-                    } catch (NumberFormatException e) {
-                        loge("NumberFormatException in getProvisioningUrlBaseFromFile: " + e);
-                    }
-                }
-            }
-            return null;
-        } catch (FileNotFoundException e) {
-            loge("Carrier Provisioning Urls file not found");
-        } catch (XmlPullParserException e) {
-            loge("Xml parser exception reading Carrier Provisioning Urls file: " + e);
-        } catch (IOException e) {
-            loge("I/O exception reading Carrier Provisioning Urls file: " + e);
-        }
-        return null;
-    }
-
-    @Override
-    public String getMobileProvisioningUrl() {
-        enforceSettingsPermission();
-        String url = getProvisioningUrlBaseFromFile();
-        if (TextUtils.isEmpty(url)) {
-            url = mContext.getResources().getString(R.string.mobile_provisioning_url);
-            log("getMobileProvisioningUrl: mobile_provisioining_url from resource =" + url);
-        } else {
-            log("getMobileProvisioningUrl: mobile_provisioning_url from File =" + url);
-        }
-        // populate the iccid, imei and phone number in the provisioning url.
-        if (!TextUtils.isEmpty(url)) {
-            String phoneNumber = mTelephonyManager.getLine1Number();
-            if (TextUtils.isEmpty(phoneNumber)) {
-                phoneNumber = "0000000000";
-            }
-            url = String.format(url,
-                    mTelephonyManager.getSimSerialNumber() /* ICCID */,
-                    mTelephonyManager.getDeviceId() /* IMEI */,
-                    phoneNumber /* Phone number */);
-        }
-
-        return url;
     }
 
     @Override

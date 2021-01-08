@@ -24277,7 +24277,9 @@ package android.media.tv {
     field public static final String COLUMN_APP_LINK_INTENT_URI = "app_link_intent_uri";
     field public static final String COLUMN_APP_LINK_POSTER_ART_URI = "app_link_poster_art_uri";
     field public static final String COLUMN_APP_LINK_TEXT = "app_link_text";
+    field public static final String COLUMN_BROADCAST_GENRE = "broadcast_genre";
     field public static final String COLUMN_BROWSABLE = "browsable";
+    field public static final String COLUMN_CHANNEL_LIST_ID = "channel_list_id";
     field public static final String COLUMN_DESCRIPTION = "description";
     field public static final String COLUMN_DISPLAY_NAME = "display_name";
     field public static final String COLUMN_DISPLAY_NUMBER = "display_number";
@@ -24292,6 +24294,8 @@ package android.media.tv {
     field public static final String COLUMN_LOCKED = "locked";
     field public static final String COLUMN_NETWORK_AFFILIATION = "network_affiliation";
     field public static final String COLUMN_ORIGINAL_NETWORK_ID = "original_network_id";
+    field public static final String COLUMN_REMOTE_CONTROL_KEY_PRESET_NUMBER = "remote_control_key_preset_number";
+    field public static final String COLUMN_SCRAMBLED = "scrambled";
     field public static final String COLUMN_SEARCHABLE = "searchable";
     field public static final String COLUMN_SERVICE_ID = "service_id";
     field public static final String COLUMN_SERVICE_TYPE = "service_type";
@@ -24300,6 +24304,7 @@ package android.media.tv {
     field public static final String COLUMN_TYPE = "type";
     field public static final String COLUMN_VERSION_NUMBER = "version_number";
     field public static final String COLUMN_VIDEO_FORMAT = "video_format";
+    field public static final String COLUMN_VIDEO_RESOLUTION = "video_resolution";
     field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/channel";
     field public static final String CONTENT_TYPE = "vnd.android.cursor.dir/channel";
     field public static final android.net.Uri CONTENT_URI;
@@ -47961,7 +47966,6 @@ package android.view {
     field public static final int AUTOFILL_TYPE_DATE = 4; // 0x4
     field public static final int AUTOFILL_TYPE_LIST = 3; // 0x3
     field public static final int AUTOFILL_TYPE_NONE = 0; // 0x0
-    field public static final int AUTOFILL_TYPE_RICH_CONTENT = 5; // 0x5
     field public static final int AUTOFILL_TYPE_TEXT = 1; // 0x1
     field public static final int AUTOFILL_TYPE_TOGGLE = 2; // 0x2
     field public static final int DRAG_FLAG_GLOBAL = 256; // 0x100
@@ -50234,17 +50238,14 @@ package android.view.autofill {
     method public int describeContents();
     method public static android.view.autofill.AutofillValue forDate(long);
     method public static android.view.autofill.AutofillValue forList(int);
-    method @NonNull public static android.view.autofill.AutofillValue forRichContent(@NonNull android.content.ClipData);
     method public static android.view.autofill.AutofillValue forText(@Nullable CharSequence);
     method public static android.view.autofill.AutofillValue forToggle(boolean);
     method public long getDateValue();
     method public int getListValue();
-    method @NonNull public android.content.ClipData getRichContentValue();
     method @NonNull public CharSequence getTextValue();
     method public boolean getToggleValue();
     method public boolean isDate();
     method public boolean isList();
-    method public boolean isRichContent();
     method public boolean isText();
     method public boolean isToggle();
     method public void writeToParcel(android.os.Parcel, int);

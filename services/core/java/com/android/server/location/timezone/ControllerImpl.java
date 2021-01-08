@@ -31,6 +31,7 @@ import static com.android.server.location.timezone.TimeZoneProviderEvent.EVENT_T
 import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.RemoteCallback;
 import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.GuardedBy;
@@ -117,7 +118,7 @@ class ControllerImpl extends LocationTimeZoneProviderController {
         mThreadingDomain.assertCurrentThread();
 
         synchronized (mSharedLock) {
-            debugLog("onEnvironmentConfigChanged()");
+            debugLog("onConfigChanged()");
 
             ConfigurationInternal oldConfig = mCurrentUserConfiguration;
             ConfigurationInternal newConfig = mEnvironment.getCurrentUserConfigurationInternal();
@@ -553,6 +554,7 @@ class ControllerImpl extends LocationTimeZoneProviderController {
         }
     }
 
+    @NonNull
     private static GeolocationTimeZoneSuggestion createUncertainSuggestion(@NonNull String reason) {
         GeolocationTimeZoneSuggestion suggestion = new GeolocationTimeZoneSuggestion(null);
         suggestion.addDebugInfo(reason);
@@ -560,30 +562,42 @@ class ControllerImpl extends LocationTimeZoneProviderController {
     }
 
     /**
-     * Passes a {@link SimulatedBinderProviderEvent] to the appropriate provider.
-     * If the provider name does not match a known provider, then the event is logged and discarded.
+     * Passes a test command to the specified provider. If the provider name does not match a
+     * known provider, then the command is logged and discarded.
      */
-    void simulateBinderProviderEvent(@NonNull SimulatedBinderProviderEvent event) {
+    void handleProviderTestCommand(
+            @NonNull String providerName, @NonNull TestCommand testCommand,
+            @Nullable RemoteCallback callback) {
         mThreadingDomain.assertCurrentThread();
 
-        String targetProviderName = event.getProviderName();
+        LocationTimeZoneProvider targetProvider = getLocationTimeZoneProvider(providerName);
+        if (targetProvider == null) {
+            warnLog("Unable to process test command:"
+                    + " providerName=" + providerName + ", testCommand=" + testCommand);
+            return;
+        }
+
+        synchronized (mSharedLock) {
+            try {
+                targetProvider.handleTestCommand(testCommand, callback);
+            } catch (Exception e) {
+                warnLog("Unable to process test command:"
+                        + " providerName=" + providerName + ", testCommand=" + testCommand, e);
+            }
+        }
+    }
+
+    @Nullable
+    private LocationTimeZoneProvider getLocationTimeZoneProvider(@NonNull String providerName) {
         LocationTimeZoneProvider targetProvider;
-        if (Objects.equals(mPrimaryProvider.getName(), targetProviderName)) {
+        if (Objects.equals(mPrimaryProvider.getName(), providerName)) {
             targetProvider = mPrimaryProvider;
-        } else if (Objects.equals(mSecondaryProvider.getName(), targetProviderName)) {
+        } else if (Objects.equals(mSecondaryProvider.getName(), providerName)) {
             targetProvider = mSecondaryProvider;
         } else {
-            warnLog("Unable to process simulated binder provider event,"
-                    + " unknown providerName in event=" + event);
-            return;
+            warnLog("Bad providerName=" + providerName);
+            targetProvider = null;
         }
-        if (!(targetProvider instanceof BinderLocationTimeZoneProvider)) {
-            warnLog("Unable to process simulated binder provider event,"
-                    + " provider=" + targetProvider
-                    + " is not a " + BinderLocationTimeZoneProvider.class
-                    + ", event=" + event);
-            return;
-        }
-        ((BinderLocationTimeZoneProvider) targetProvider).simulateBinderProviderEvent(event);
+        return targetProvider;
     }
 }

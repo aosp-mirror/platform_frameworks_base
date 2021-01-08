@@ -89,7 +89,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.incremental.V4Signature;
 import android.os.storage.StorageManager;
-import android.permission.IPermissionManager;
+import android.permission.PermissionManager;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.text.TextUtils;
@@ -108,6 +108,7 @@ import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.pm.PackageManagerShellCommandDataLoader.Metadata;
+import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 
 import dalvik.system.DexFile;
 
@@ -144,7 +145,8 @@ class PackageManagerShellCommand extends ShellCommand {
     private static final String TAG = "PackageManagerShellCommand";
 
     final IPackageManager mInterface;
-    final IPermissionManager mPermissionManager;
+    final LegacyPermissionManagerInternal mLegacyPermissionManager;
+    final PermissionManager mPermissionManager;
     final Context mContext;
     final private WeakHashMap<String, Resources> mResourceCache =
             new WeakHashMap<String, Resources>();
@@ -153,10 +155,10 @@ class PackageManagerShellCommand extends ShellCommand {
     boolean mComponents;
     int mQueryFlags;
 
-    PackageManagerShellCommand(
-            PackageManagerService service, IPermissionManager permissionManager, Context context) {
+    PackageManagerShellCommand(PackageManagerService service, Context context) {
         mInterface = service;
-        mPermissionManager = permissionManager;
+        mLegacyPermissionManager = LocalServices.getService(LegacyPermissionManagerInternal.class);
+        mPermissionManager = context.getSystemService(PermissionManager.class);
         mContext = context;
     }
 
@@ -887,8 +889,7 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private int runListPermissionGroups() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
-        final List<PermissionGroupInfo> pgs =
-                mPermissionManager.getAllPermissionGroups(0).getList();
+        final List<PermissionGroupInfo> pgs = mPermissionManager.getAllPermissionGroups(0);
 
         final int count = pgs.size();
         for (int p = 0; p < count ; p++) {
@@ -935,7 +936,7 @@ class PackageManagerShellCommand extends ShellCommand {
         final ArrayList<String> groupList = new ArrayList<String>();
         if (groups) {
             final List<PermissionGroupInfo> infos =
-                    mPermissionManager.getAllPermissionGroups(0 /*flags*/).getList();
+                    mPermissionManager.getAllPermissionGroups(0 /*flags*/);
             final int count = infos.size();
             for (int i = 0; i < count; i++) {
                 groupList.add(infos.get(i).name);
@@ -2297,18 +2298,18 @@ class PackageManagerShellCommand extends ShellCommand {
             getErrPrintWriter().println("Error: no permission specified");
             return 1;
         }
-        final int translatedUserId =
-                translateUserId(userId, UserHandle.USER_NULL, "runGrantRevokePermission");
+        final UserHandle translatedUser = UserHandle.of(translateUserId(userId,
+                UserHandle.USER_NULL, "runGrantRevokePermission"));
         if (grant) {
-            mPermissionManager.grantRuntimePermission(pkg, perm, translatedUserId);
+            mPermissionManager.grantRuntimePermission(pkg, perm, translatedUser);
         } else {
-            mPermissionManager.revokeRuntimePermission(pkg, perm, translatedUserId, null);
+            mPermissionManager.revokeRuntimePermission(pkg, perm, translatedUser, null);
         }
         return 0;
     }
 
     private int runResetPermissions() throws RemoteException {
-        mPermissionManager.resetRuntimePermissions();
+        mLegacyPermissionManager.resetRuntimePermissions();
         return 0;
     }
 
@@ -3483,7 +3484,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 prefix = "  ";
             }
             List<PermissionInfo> ps = mPermissionManager
-                    .queryPermissionsByGroup(groupList.get(i), 0 /*flags*/).getList();
+                    .queryPermissionsByGroup(groupList.get(i), 0 /*flags*/);
             final int count = ps.size();
             boolean first = true;
             for (int p = 0 ; p < count ; p++) {

@@ -20,7 +20,6 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 
 import android.content.Context;
-import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
 import android.os.INetworkManagementService;
 import android.os.ServiceManager;
@@ -38,7 +37,7 @@ public final class ConnectivityServiceInitializer extends SystemService {
         super(context);
         // TODO: Define formal APIs to get the needed services.
         mConnectivity = new ConnectivityService(context, getNetworkManagementService(),
-                getNetworkStatsService(), getNetworkPolicyManager());
+                getNetworkStatsService());
     }
 
     @Override
@@ -57,10 +56,4 @@ public final class ConnectivityServiceInitializer extends SystemService {
         return INetworkStatsService.Stub.asInterface(
                 ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
     }
-
-    private INetworkPolicyManager getNetworkPolicyManager() {
-        return INetworkPolicyManager.Stub.asInterface(
-                ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
-    }
-
 }

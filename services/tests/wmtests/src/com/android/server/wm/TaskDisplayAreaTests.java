@@ -43,8 +43,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -175,15 +173,9 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
     }
 
     @Test
-    public void testReuseTaskAsStack() {
+    public void testReuseTaskAsRootTask() {
         final Task candidateTask = createTaskStackOnDisplay(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, mDisplayContent);
-        final Task newStack = createTaskStackOnDisplay(WINDOWING_MODE_FULLSCREEN,
-                ACTIVITY_TYPE_STANDARD, mDisplayContent);
-        final TaskDisplayArea taskDisplayArea = candidateTask.getDisplayArea();
-        doReturn(newStack).when(taskDisplayArea).createRootTask(anyInt(), anyInt(), anyBoolean(),
-                any(), any(), anyBoolean());
-
         final int type = ACTIVITY_TYPE_STANDARD;
         assertGetOrCreateRootTask(WINDOWING_MODE_FULLSCREEN, type, candidateTask,
                 true /* reuseCandidate */);
@@ -359,8 +351,8 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
     private void assertGetOrCreateRootTask(int windowingMode, int activityType, Task candidateTask,
             boolean reuseCandidate) {
         final TaskDisplayArea taskDisplayArea = candidateTask.getDisplayArea();
-        final Task stack = taskDisplayArea.getOrCreateRootTask(windowingMode, activityType,
+        final Task rootTask = taskDisplayArea.getOrCreateRootTask(windowingMode, activityType,
                 false /* onTop */, null /* intent */, candidateTask /* candidateTask */);
-        assertEquals(reuseCandidate, stack == candidateTask);
+        assertEquals(reuseCandidate, rootTask == candidateTask);
     }
 }

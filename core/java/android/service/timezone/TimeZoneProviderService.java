@@ -112,7 +112,18 @@ public abstract class TimeZoneProviderService extends Service {
 
     private static final String TAG = "TimeZoneProviderService";
 
-    private final Handler mHandler = BackgroundThread.getHandler();
+    /**
+     * The test command result key indicating whether a command succeeded. Value type: boolean
+     * @hide
+     */
+    public static final String TEST_COMMAND_RESULT_SUCCESS_KEY = "SUCCESS";
+
+    /**
+     * The test command result key for the error message present when {@link
+     * #TEST_COMMAND_RESULT_SUCCESS_KEY} is false. Value type: string
+     * @hide
+     */
+    public static final String TEST_COMMAND_RESULT_ERROR_KEY = "ERROR";
 
     /**
      * The Intent action that the primary location-derived time zone provider service must respond
@@ -131,6 +142,8 @@ public abstract class TimeZoneProviderService extends Service {
             "android.service.timezone.SecondaryLocationTimeZoneProviderService";
 
     private final TimeZoneProviderServiceWrapper mWrapper = new TimeZoneProviderServiceWrapper();
+
+    private final Handler mHandler = BackgroundThread.getHandler();
 
     /** Set by {@link #mHandler} thread. */
     @Nullable
@@ -198,10 +211,21 @@ public abstract class TimeZoneProviderService extends Service {
         });
     }
 
+    private void onStartUpdatesInternal(@NonNull ITimeZoneProviderManager manager,
+            @DurationMillisLong long initializationTimeoutMillis) {
+        mManager = manager;
+        onStartUpdates(initializationTimeoutMillis);
+    }
+
     /**
      * Starts the provider sending updates.
      */
     public abstract void onStartUpdates(@DurationMillisLong long initializationTimeoutMillis);
+
+    private void onStopUpdatesInternal() {
+        onStopUpdates();
+        mManager = null;
+    }
 
     /**
      * Stops the provider sending updates.
@@ -210,18 +234,14 @@ public abstract class TimeZoneProviderService extends Service {
 
     private class TimeZoneProviderServiceWrapper extends ITimeZoneProvider.Stub {
 
-        @Override
-        public void setTimeZoneProviderManager(ITimeZoneProviderManager manager) {
+        public void startUpdates(@NonNull ITimeZoneProviderManager manager,
+                @DurationMillisLong long initializationTimeoutMillis) {
             Objects.requireNonNull(manager);
-            mHandler.post(() -> TimeZoneProviderService.this.mManager = manager);
-        }
-
-        public void startUpdates(@DurationMillisLong long initializationTimeoutMillis) {
-            mHandler.post(() -> onStartUpdates(initializationTimeoutMillis));
+            mHandler.post(() -> onStartUpdatesInternal(manager, initializationTimeoutMillis));
         }
 
         public void stopUpdates() {
-            mHandler.post(TimeZoneProviderService.this::onStopUpdates);
+            mHandler.post(TimeZoneProviderService.this::onStopUpdatesInternal);
         }
     }
 }

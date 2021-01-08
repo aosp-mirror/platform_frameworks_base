@@ -16,6 +16,9 @@
 
 package com.android.server.location.timezone;
 
+import static android.service.timezone.TimeZoneProviderService.TEST_COMMAND_RESULT_ERROR_KEY;
+import static android.service.timezone.TimeZoneProviderService.TEST_COMMAND_RESULT_SUCCESS_KEY;
+
 import static com.android.server.location.timezone.LocationTimeZoneManagerService.debugLog;
 import static com.android.server.location.timezone.LocationTimeZoneManagerService.warnLog;
 import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_PERM_FAILED;
@@ -31,7 +34,9 @@ import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Bundle;
 import android.os.Handler;
+import android.os.RemoteCallback;
 import android.os.SystemClock;
 
 import com.android.internal.annotations.GuardedBy;
@@ -492,6 +497,21 @@ abstract class LocationTimeZoneProvider implements Dumpable {
      * Implemented by subclasses to do work during {@link #stopUpdates}.
      */
     abstract void onStopUpdates();
+
+    /**
+     * Overridden by subclasses to handle the supplied {@link TestCommand}. If {@code callback} is
+     * non-null, the default implementation sends a result {@link Bundle} with {@link
+     * android.service.timezone.TimeZoneProviderService#TEST_COMMAND_RESULT_SUCCESS_KEY} set to
+     * {@code false} and a "Not implemented" error message.
+     */
+    void handleTestCommand(@NonNull TestCommand testCommand, @Nullable RemoteCallback callback) {
+        if (callback != null) {
+            Bundle result = new Bundle();
+            result.putBoolean(TEST_COMMAND_RESULT_SUCCESS_KEY, false);
+            result.putString(TEST_COMMAND_RESULT_ERROR_KEY, "Not implemented");
+            callback.sendResult(result);
+        }
+    }
 
     /** For subclasses to invoke when a {@link TimeZoneProviderEvent} has been received. */
     final void handleTimeZoneProviderEvent(@NonNull TimeZoneProviderEvent timeZoneProviderEvent) {

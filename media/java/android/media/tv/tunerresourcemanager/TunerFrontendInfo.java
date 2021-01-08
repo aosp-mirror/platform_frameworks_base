@@ -54,7 +54,7 @@ public final class TunerFrontendInfo implements Parcelable {
                 }
             };
 
-    private final int mId;
+    private final int mHandle;
 
     @Type
     private final int mFrontendType;
@@ -66,7 +66,7 @@ public final class TunerFrontendInfo implements Parcelable {
     private final int mExclusiveGroupId;
 
     private TunerFrontendInfo(@NonNull Parcel source) {
-        mId = source.readInt();
+        mHandle = source.readInt();
         mFrontendType = source.readInt();
         mExclusiveGroupId = source.readInt();
     }
@@ -74,25 +74,26 @@ public final class TunerFrontendInfo implements Parcelable {
     /**
      * Constructs a new {@link TunerFrontendInfo} with the given parameters.
      *
+     * @param handle frontend handle
      * @param frontendType the type of the frontend.
      * @param exclusiveGroupId the group id of the frontend. FE with the same
                                group id can't function at the same time.
      */
-    public TunerFrontendInfo(int id,
+    public TunerFrontendInfo(int handle,
                              @Type int frontendType,
                              int exclusiveGroupId) {
-        mId = id;
+        mHandle = handle;
         mFrontendType = frontendType;
         mExclusiveGroupId = exclusiveGroupId;
     }
 
     /**
-     * Returns the frontend id.
+     * Returns the frontend handle.
      *
-     * @return the value of the frontend id.
+     * @return the value of the frontend handle.
      */
-    public int getId() {
-        return mId;
+    public int getHandle() {
+        return mHandle;
     }
 
     /**
@@ -125,7 +126,7 @@ public final class TunerFrontendInfo implements Parcelable {
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder(128);
-        b.append("TunerFrontendInfo {id=").append(mId);
+        b.append("TunerFrontendInfo {handle=").append(mHandle);
         b.append(", frontendType=").append(mFrontendType);
         b.append(", exclusiveGroupId=").append(mExclusiveGroupId);
         b.append("}");
@@ -134,7 +135,7 @@ public final class TunerFrontendInfo implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeInt(mId);
+        dest.writeInt(mHandle);
         dest.writeInt(mFrontendType);
         dest.writeInt(mExclusiveGroupId);
     }

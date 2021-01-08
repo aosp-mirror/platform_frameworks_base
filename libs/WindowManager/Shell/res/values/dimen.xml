@@ -167,4 +167,7 @@
     <!-- Size of padding for the user education cling, this should at minimum be larger than
         individual_bubble_size + some padding. -->
     <dimen name="bubble_stack_user_education_side_inset">72dp</dimen>
+
+    <!-- The width/height of the icon view on staring surface. -->
+    <dimen name="starting_surface_icon_size">108dp</dimen>
 </resources>
