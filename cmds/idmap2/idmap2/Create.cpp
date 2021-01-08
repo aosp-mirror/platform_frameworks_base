@@ -20,7 +20,6 @@
 #include <fstream>
 #include <memory>
 #include <ostream>
-#include <string>
 #include <vector>
 
 #include "androidfw/ResourceTypes.h"
@@ -31,12 +30,13 @@
 #include "idmap2/PolicyUtils.h"
 #include "idmap2/SysTrace.h"
 
-using android::ApkAssets;
 using android::idmap2::BinaryStreamVisitor;
 using android::idmap2::CommandLineOptions;
 using android::idmap2::Error;
 using android::idmap2::Idmap;
+using android::idmap2::OverlayResourceContainer;
 using android::idmap2::Result;
+using android::idmap2::TargetResourceContainer;
 using android::idmap2::Unit;
 using android::idmap2::utils::kIdmapFilePermissionMask;
 using android::idmap2::utils::PoliciesToBitmaskResult;
@@ -93,18 +93,18 @@ Result<Unit> Create(const std::vector<std::string>& args) {
     fulfilled_policies |= PolicyFlags::PUBLIC;
   }
 
-  const std::unique_ptr<const ApkAssets> target_apk = ApkAssets::Load(target_apk_path);
-  if (!target_apk) {
-    return Error("failed to load apk %s", target_apk_path.c_str());
+  const auto target = TargetResourceContainer::FromPath(target_apk_path);
+  if (!target) {
+    return Error("failed to load target '%s'", target_apk_path.c_str());
   }
 
-  const std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
-  if (!overlay_apk) {
-    return Error("failed to load apk %s", overlay_apk_path.c_str());
+  const auto overlay = OverlayResourceContainer::FromPath(overlay_apk_path);
+  if (!overlay) {
+    return Error("failed to load apk overlay '%s'", overlay_apk_path.c_str());
   }
 
-  const auto idmap = Idmap::FromApkAssets(*target_apk, *overlay_apk, overlay_name,
-                                          fulfilled_policies, !ignore_overlayable);
+  const auto idmap = Idmap::FromContainers(**target, **overlay, overlay_name, fulfilled_policies,
+                                           !ignore_overlayable);
   if (!idmap) {
     return Error(idmap.GetError(), "failed to create idmap");
   }
@@ -112,13 +112,14 @@ Result<Unit> Create(const std::vector<std::string>& args) {
   umask(kIdmapFilePermissionMask);
   std::ofstream fout(idmap_path);
   if (fout.fail()) {
-    return Error("failed to open idmap path %s", idmap_path.c_str());
+    return Error("failed to open idmap path '%s'", idmap_path.c_str());
   }
+
   BinaryStreamVisitor visitor(fout);
   (*idmap)->accept(&visitor);
   fout.close();
   if (fout.fail()) {
-    return Error("failed to write to idmap path %s", idmap_path.c_str());
+    return Error("failed to write to idmap path '%s'", idmap_path.c_str());
   }
 
   return Unit{};

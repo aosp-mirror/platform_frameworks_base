@@ -84,7 +84,7 @@ const std::string& ZipAssetsProvider::PathOrDebugName::GetDebugName() const {
   return value_;
 }
 
-ZipAssetsProvider::ZipAssetsProvider(ZipArchive* handle, PathOrDebugName&& path,
+ZipAssetsProvider::ZipAssetsProvider(ZipArchiveHandle handle, PathOrDebugName&& path,
                                      time_t last_mod_time)
     : zip_handle_(handle, ::CloseArchive),
       name_(std::forward<PathOrDebugName>(path)),
@@ -93,7 +93,7 @@ ZipAssetsProvider::ZipAssetsProvider(ZipArchive* handle, PathOrDebugName&& path,
 std::unique_ptr<ZipAssetsProvider> ZipAssetsProvider::Create(std::string path) {
   ZipArchiveHandle handle;
   if (int32_t result = OpenArchive(path.c_str(), &handle); result != 0) {
-    LOG(ERROR) << "Failed to open APK '" << path << "' " << ::ErrorCodeString(result);
+    LOG(ERROR) << "Failed to open APK '" << path << "': " << ::ErrorCodeString(result);
     CloseArchive(handle);
     return {};
   }
@@ -251,6 +251,14 @@ bool ZipAssetsProvider::ForEachFile(const std::string& root_path,
 
     // -1 is end of iteration, anything else is an error.
     return result == -1;
+}
+
+std::optional<uint32_t> ZipAssetsProvider::GetCrc(std::string_view path) const {
+  ::ZipEntry entry;
+  if (FindEntry(zip_handle_.get(), path, &entry) != 0) {
+    return {};
+  }
+  return entry.crc32;
 }
 
 const std::string& ZipAssetsProvider::GetDebugName() const {

@@ -17,27 +17,16 @@
 #include "idmap2/ResourceUtils.h"
 
 #include <memory>
-#include <string>
 
 #include "androidfw/StringPiece.h"
 #include "androidfw/Util.h"
 #include "idmap2/Result.h"
-#include "idmap2/XmlParser.h"
-#include "idmap2/ZipFile.h"
 
 using android::StringPiece16;
 using android::idmap2::Result;
-using android::idmap2::XmlParser;
-using android::idmap2::ZipFile;
 using android::util::Utf16ToUtf8;
 
 namespace android::idmap2::utils {
-namespace {
-constexpr ResourceId kAttrName = 0x01010003;
-constexpr ResourceId kAttrResourcesMap = 0x01010609;
-constexpr ResourceId kAttrTargetName = 0x0101044d;
-constexpr ResourceId kAttrTargetPackage = 0x01010021;
-}  // namespace
 
 bool IsReference(uint8_t data_type) {
   return data_type == Res_value::TYPE_REFERENCE || data_type == Res_value::TYPE_DYNAMIC_REFERENCE;
@@ -95,73 +84,6 @@ Result<std::string> ResToTypeEntryName(const AssetManager2& am, uint32_t resid) 
     out += Utf16ToUtf8(StringPiece16(name->entry16, name->entry_len));
   }
   return out;
-}
-
-Result<OverlayManifestInfo> ExtractOverlayManifestInfo(const std::string& path,
-                                                       const std::string& name) {
-  std::unique_ptr<const ZipFile> zip = ZipFile::Open(path);
-  if (!zip) {
-    return Error("failed to open %s as a zip file", path.c_str());
-  }
-
-  std::unique_ptr<const MemoryChunk> entry = zip->Uncompress("AndroidManifest.xml");
-  if (!entry) {
-    return Error("failed to uncompress AndroidManifest.xml from %s", path.c_str());
-  }
-
-  Result<std::unique_ptr<const XmlParser>> xml = XmlParser::Create(entry->buf, entry->size);
-  if (!xml) {
-    return Error("failed to parse AndroidManifest.xml from %s", path.c_str());
-  }
-
-  auto manifest_it = (*xml)->tree_iterator();
-  if (manifest_it->event() != XmlParser::Event::START_TAG || manifest_it->name() != "manifest") {
-    return Error("root element tag is not <manifest> in AndroidManifest.xml of %s", path.c_str());
-  }
-
-  for (auto&& it : manifest_it) {
-    if (it.event() != XmlParser::Event::START_TAG || it.name() != "overlay") {
-      continue;
-    }
-
-    OverlayManifestInfo info{};
-    if (auto result_str = it.GetAttributeStringValue(kAttrName, "android:name")) {
-      if (*result_str != name) {
-        // A value for android:name was found, but either a the name does not match the requested
-        // name, or an <overlay> tag with no name was requested.
-        continue;
-      }
-      info.name = *result_str;
-    } else if (!name.empty()) {
-      // This tag does not have a value for android:name, but an <overlay> tag with a specific name
-      // has been requested.
-      continue;
-    }
-
-    if (auto result_str = it.GetAttributeStringValue(kAttrTargetPackage, "android:targetPackage")) {
-      info.target_package = *result_str;
-    } else {
-      return Error("android:targetPackage missing from <overlay> of %s: %s", path.c_str(),
-                   result_str.GetErrorMessage().c_str());
-    }
-
-    if (auto result_str = it.GetAttributeStringValue(kAttrTargetName, "android:targetName")) {
-      info.target_name = *result_str;
-    }
-
-    if (auto result_value = it.GetAttributeValue(kAttrResourcesMap, "android:resourcesMap")) {
-      if (IsReference((*result_value).dataType)) {
-        info.resource_mapping = (*result_value).data;
-      } else {
-        return Error("android:resourcesMap is not a reference in AndroidManifest.xml of %s",
-                     path.c_str());
-      }
-    }
-    return info;
-  }
-
-  return Error("<overlay> with android:name \"%s\" missing from AndroidManifest.xml of %s",
-               name.c_str(), path.c_str());
 }
 
 }  // namespace android::idmap2::utils
