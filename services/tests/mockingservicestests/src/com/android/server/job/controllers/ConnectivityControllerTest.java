@@ -602,7 +602,7 @@ public class ConnectivityControllerTest {
     }
 
     private void answerNetwork(int uid, Network net, NetworkCapabilities caps) {
-        when(mConnManager.getActiveNetworkForUid(eq(uid))).thenReturn(net);
+        when(mConnManager.getActiveNetworkForUid(eq(uid), anyBoolean())).thenReturn(net);
         when(mConnManager.getNetworkCapabilities(eq(net))).thenReturn(caps);
         if (net != null) {
             final NetworkInfo ni = new NetworkInfo(ConnectivityManager.TYPE_WIFI, 0, null, null);
