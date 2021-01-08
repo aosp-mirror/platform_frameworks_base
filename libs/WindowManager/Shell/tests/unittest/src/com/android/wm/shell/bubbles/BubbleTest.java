@@ -71,7 +71,7 @@ public class BubbleTest extends ShellTestCase {
 
         Intent target = new Intent(mContext, BubblesTestActivity.class);
         Notification.BubbleMetadata metadata = new Notification.BubbleMetadata.Builder(
-                PendingIntent.getActivity(mContext, 0, target, 0),
+                PendingIntent.getActivity(mContext, 0, target, PendingIntent.FLAG_MUTABLE),
                         Icon.createWithResource(mContext, R.drawable.bubble_ic_create_bubble))
                 .build();
         when(mSbn.getNotification()).thenReturn(mNotif);
