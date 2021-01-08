@@ -16,23 +16,18 @@
 
 package com.android.server.biometrics.sensors.face;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.face.Face;
-import android.util.AtomicFile;
-import android.util.Slog;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
-import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.biometrics.sensors.BiometricUserState;
 
-import libcore.io.IoUtils;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -75,46 +70,26 @@ public class FaceUserState extends BiometricUserState<Face> {
     }
 
     @Override
-    protected void doWriteState() {
-        AtomicFile destination = new AtomicFile(mFile);
-
-        ArrayList<Face> faces;
+    protected void doWriteState(@NonNull TypedXmlSerializer serializer) throws Exception {
+        final ArrayList<Face> faces;
 
         synchronized (this) {
             faces = getCopy(mBiometrics);
         }
 
-        FileOutputStream out = null;
-        try {
-            out = destination.startWrite();
+        serializer.startTag(null, TAG_FACES);
 
-            TypedXmlSerializer serializer = Xml.resolveSerializer(out);
-            serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
-            serializer.startDocument(null, true);
-            serializer.startTag(null, TAG_FACES);
-
-            final int count = faces.size();
-            for (int i = 0; i < count; i++) {
-                Face f = faces.get(i);
-                serializer.startTag(null, TAG_FACE);
-                serializer.attributeInt(null, ATTR_FACE_ID, f.getBiometricId());
-                serializer.attribute(null, ATTR_NAME, f.getName().toString());
-                serializer.attributeLong(null, ATTR_DEVICE_ID, f.getDeviceId());
-                serializer.endTag(null, TAG_FACE);
-            }
-
-            serializer.endTag(null, TAG_FACES);
-            serializer.endDocument();
-            destination.finishWrite(out);
-
-            // Any error while writing is fatal.
-        } catch (Throwable t) {
-            Slog.wtf(TAG, "Failed to write settings, restoring backup", t);
-            destination.failWrite(out);
-            throw new IllegalStateException("Failed to write faces", t);
-        } finally {
-            IoUtils.closeQuietly(out);
+        final int count = faces.size();
+        for (int i = 0; i < count; i++) {
+            Face f = faces.get(i);
+            serializer.startTag(null, TAG_FACE);
+            serializer.attributeInt(null, ATTR_FACE_ID, f.getBiometricId());
+            serializer.attribute(null, ATTR_NAME, f.getName().toString());
+            serializer.attributeLong(null, ATTR_DEVICE_ID, f.getDeviceId());
+            serializer.endTag(null, TAG_FACE);
         }
+
+        serializer.endTag(null, TAG_FACES);
     }
 
     @GuardedBy("this")

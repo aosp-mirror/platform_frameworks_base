@@ -62,7 +62,7 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
             @Nullable NativeHandle previewSurface, int sensorId, int maxTemplatesPerUser) {
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, opPackageName, utils,
                 timeoutSec, BiometricsProtoEnums.MODALITY_FACE, sensorId,
-                false /* shouldVibrate */, true /* shouldLogMetrics */);
+                false /* shouldVibrate */);
         mEnrollIgnoreList = getContext().getResources()
                 .getIntArray(R.array.config_face_acquire_enroll_ignorelist);
         mEnrollIgnoreListVendor = getContext().getResources()
