@@ -1523,6 +1523,14 @@ public class Notification implements Parcelable
          */
         public static final int SEMANTIC_ACTION_CALL = 10;
 
+        /**
+         * {@code SemanticAction}: Mark the conversation associated with the notification as a
+         * priority. Note that this is only for use by the notification assistant services.
+         * @hide
+         */
+        @SystemApi
+        public static final int SEMANTIC_ACTION_MARK_CONVERSATION_AS_PRIORITY = 11;
+
         private final Bundle mExtras;
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         private Icon mIcon;
@@ -2233,7 +2241,8 @@ public class Notification implements Parcelable
                 SEMANTIC_ACTION_UNMUTE,
                 SEMANTIC_ACTION_THUMBS_UP,
                 SEMANTIC_ACTION_THUMBS_DOWN,
-                SEMANTIC_ACTION_CALL
+                SEMANTIC_ACTION_CALL,
+                SEMANTIC_ACTION_MARK_CONVERSATION_AS_PRIORITY
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface SemanticAction {}
