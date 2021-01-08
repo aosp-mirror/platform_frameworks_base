@@ -61,10 +61,11 @@ class CloseImeAutoOpenWindowToHomeTest(
         @JvmStatic
         fun getParams(): List<Array<Any>> {
             val instrumentation = InstrumentationRegistry.getInstrumentation()
-            val testApp = ImeAppAutoFocusHelper(instrumentation)
 
             return FlickerTestRunnerFactory(instrumentation)
                 .buildTest { configuration ->
+                    val testApp = ImeAppAutoFocusHelper(instrumentation,
+                        configuration.startRotation)
                     withTestName {
                         buildTestTag("imeToHomeAutoOpen", testApp, configuration)
                     }
