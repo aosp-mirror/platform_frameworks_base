@@ -18,7 +18,6 @@ package android.app.appsearch;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
-import android.app.appsearch.exceptions.AppSearchException;
 
 import com.android.internal.util.Preconditions;
 

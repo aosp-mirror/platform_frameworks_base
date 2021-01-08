@@ -46,7 +46,7 @@ public class GlobalSearchSessionShimImpl implements GlobalSearchSessionShim {
     private final ExecutorService mExecutor;
 
     @NonNull
-    public static ListenableFuture<GlobalSearchSessionShimImpl> createGlobalSearchSession() {
+    public static ListenableFuture<GlobalSearchSessionShim> createGlobalSearchSession() {
         Context context = ApplicationProvider.getApplicationContext();
         AppSearchManager appSearchManager = context.getSystemService(AppSearchManager.class);
         SettableFuture<AppSearchResult<GlobalSearchSession>> future = SettableFuture.create();
