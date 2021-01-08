@@ -3646,6 +3646,7 @@ public class UserManagerService extends IUserManager.Stub {
 
         //...then external ones
         Intent addedIntent = new Intent(Intent.ACTION_USER_ADDED);
+        addedIntent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
         addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userInfo.id);
         // Also, add the UserHandle for mainline modules which can't use the @hide
         // EXTRA_USER_HANDLE.
@@ -4048,6 +4049,7 @@ public class UserManagerService extends IUserManager.Stub {
         final long ident = Binder.clearCallingIdentity();
         try {
             Intent removedIntent = new Intent(Intent.ACTION_USER_REMOVED);
+            removedIntent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
             removedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
             // Also, add the UserHandle for mainline modules which can't use the @hide
             // EXTRA_USER_HANDLE.
