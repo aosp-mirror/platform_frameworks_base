@@ -146,6 +146,25 @@ final class CompatConfig {
     }
 
     /**
+     * Find if a given change will be enabled for a given package name, prior to installation.
+     *
+     * @param changeId    The ID of the change in question
+     * @param packageName Package name to check for
+     * @return {@code true} if the change would be enabled for this package name. Also returns
+     * {@code true} if the change ID is not known, as unknown changes are enabled by default.
+     */
+    boolean willChangeBeEnabled(long changeId, String packageName) {
+        synchronized (mChanges) {
+            CompatChange c = mChanges.get(changeId);
+            if (c == null) {
+                // we know nothing about this change: default behaviour is enabled.
+                return true;
+            }
+            return c.willBeEnabled(packageName);
+        }
+    }
+
+    /**
      * Overrides the enabled state for a given change and app. This method is intended to be used
      * *only* for debugging purposes, ultimately invoked either by an adb command, or from some
      * developer settings UI.
