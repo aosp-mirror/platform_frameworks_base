@@ -30,7 +30,6 @@ import android.annotation.IdRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.Px;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -217,6 +216,11 @@ public class Notification implements Parcelable
      * Maximum entries of reply text that are accepted by Builder and friends.
      */
     private static final int MAX_REPLY_HISTORY = 5;
+
+    /**
+     * Maximum aspect ratio of the large icon. 16:9
+     */
+    private static final float MAX_LARGE_ICON_ASPECT_RATIO = 16f / 9f;
 
     /**
      * Maximum number of (generic) action buttons in a notification (contextual action buttons are
@@ -4238,9 +4242,9 @@ public class Notification implements Parcelable
         /**
          * Add a large icon to the notification content view.
          *
-         * In the platform template, this image will be shown on the left of the notification view
-         * in place of the {@link #setSmallIcon(Icon) small icon} (which will be placed in a small
-         * badge atop the large icon).
+         * In the platform template, this image will be shown either on the right of the
+         * notification, with an aspect ratio of up to 16:9, or (when the notification is grouped)
+         * on the left in place of the {@link #setSmallIcon(Icon) small icon}.
          */
         @NonNull
         public Builder setLargeIcon(Bitmap b) {
@@ -4250,9 +4254,9 @@ public class Notification implements Parcelable
         /**
          * Add a large icon to the notification content view.
          *
-         * In the platform template, this image will be shown on the left of the notification view
-         * in place of the {@link #setSmallIcon(Icon) small icon} (which will be placed in a small
-         * badge atop the large icon).
+         * In the platform template, this image will be shown either on the right of the
+         * notification, with an aspect ratio of up to 16:9, or (when the notification is grouped)
+         * on the left in place of the {@link #setSmallIcon(Icon) small icon}.
          */
         @NonNull
         public Builder setLargeIcon(Icon icon) {
@@ -5120,8 +5124,7 @@ public class Notification implements Parcelable
             if (result == null) {
                 result = new TemplateBindResult();
             }
-            final boolean largeIconShown = bindLargeIcon(contentView, p);
-            calculateLargeIconMarginEnd(largeIconShown, result);
+            bindLargeIcon(contentView, p, result);
             if (p.mHeaderless) {
                 // views in the headerless (collapsed) state
                 result.mHeadingExtraMarginSet.applyToView(contentView,
@@ -5133,28 +5136,54 @@ public class Notification implements Parcelable
             }
         }
 
-        private void calculateLargeIconMarginEnd(boolean largeIconShown,
+        // This code is executed on behalf of other apps' notifications, sometimes even by 3p apps,
+        // a use case that is not supported by the Compat Framework library.  Workarounds to resolve
+        // the change's state in NotificationManagerService were very complex. These behavior
+        // changes are entirely visual, and should otherwise be undetectable by apps.
+        @SuppressWarnings("AndroidFrameworkCompatChange")
+        private void calculateLargeIconDimens(boolean largeIconShown,
                 @NonNull TemplateBindResult result) {
             final Resources resources = mContext.getResources();
-            final int contentMargin = resources.getDimensionPixelOffset(
-                    R.dimen.notification_content_margin_end);
-            final int expanderSize = resources.getDimensionPixelSize(
-                    R.dimen.notification_header_expand_icon_size) - contentMargin;
-            final int extraMarginEndIfVisible = resources.getDimensionPixelSize(
-                    R.dimen.notification_right_icon_size) + contentMargin;
-            result.setRightIconState(largeIconShown, extraMarginEndIfVisible, expanderSize);
+            final float density = resources.getDisplayMetrics().density;
+            final float contentMarginDp = resources.getDimension(
+                    R.dimen.notification_content_margin_end) / density;
+            final float expanderSizeDp = resources.getDimension(
+                    R.dimen.notification_header_expand_icon_size) / density - contentMarginDp;
+            final float viewHeightDp = resources.getDimension(
+                    R.dimen.notification_right_icon_size) / density;
+            float viewWidthDp = viewHeightDp;  // icons are 1:1 by default
+            if (largeIconShown && (
+                    mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.S
+                            || DevFlags.shouldBackportSNotifRules(mContext.getContentResolver()))) {
+                Drawable drawable = mN.mLargeIcon.loadDrawable(mContext);
+                if (drawable != null) {
+                    int iconWidth = drawable.getIntrinsicWidth();
+                    int iconHeight = drawable.getIntrinsicHeight();
+                    if (iconWidth > iconHeight && iconHeight > 0) {
+                        final float maxViewWidthDp = viewHeightDp * MAX_LARGE_ICON_ASPECT_RATIO;
+                        viewWidthDp = Math.min(viewHeightDp * iconWidth / iconHeight,
+                                maxViewWidthDp);
+                    }
+                }
+            }
+            final float extraMarginEndDpIfVisible = viewWidthDp + contentMarginDp;
+            result.setRightIconState(largeIconShown, viewWidthDp,
+                    extraMarginEndDpIfVisible, expanderSizeDp);
         }
 
         /**
          * Bind the large icon.
-         * @return if the largeIcon is visible
          */
-        private boolean bindLargeIcon(RemoteViews contentView, StandardTemplateParams p) {
+        private void bindLargeIcon(RemoteViews contentView, @NonNull StandardTemplateParams p,
+                @NonNull TemplateBindResult result) {
             if (mN.mLargeIcon == null && mN.largeIcon != null) {
                 mN.mLargeIcon = Icon.createWithBitmap(mN.largeIcon);
             }
             boolean showLargeIcon = mN.mLargeIcon != null && !p.hideLargeIcon;
+            calculateLargeIconDimens(showLargeIcon, result);
             if (showLargeIcon) {
+                contentView.setViewLayoutWidth(R.id.right_icon,
+                        result.mRightIconWidthDp, TypedValue.COMPLEX_UNIT_DIP);
                 contentView.setViewVisibility(R.id.right_icon, View.VISIBLE);
                 contentView.setImageViewIcon(R.id.right_icon, mN.mLargeIcon);
                 processLargeLegacyIcon(mN.mLargeIcon, contentView, p);
@@ -5164,7 +5193,6 @@ public class Notification implements Parcelable
                 // visibility) is used by NotificationGroupingUtil to set the visibility.
                 contentView.setImageViewIcon(R.id.right_icon, null);
             }
-            return showLargeIcon;
         }
 
         private void bindNotificationHeader(RemoteViews contentView, StandardTemplateParams p) {
@@ -7802,7 +7830,8 @@ public class Notification implements Parcelable
                 // NOTE: This template doesn't support moving this icon to the left, so we don't
                 // need to fully apply the MarginSet
                 contentView.setViewLayoutMargin(R.id.notification_messaging, RemoteViews.MARGIN_END,
-                        bindResult.mHeadingExtraMarginSet.getValue(), TypedValue.COMPLEX_UNIT_PX);
+                        bindResult.mHeadingExtraMarginSet.getDpValue(),
+                        TypedValue.COMPLEX_UNIT_DIP);
             }
             contentView.setInt(R.id.status_bar_latest_event_content, "setLayoutColor",
                     mBuilder.isColorized(p)
@@ -8801,7 +8830,8 @@ public class Notification implements Parcelable
                 // also update the end margin to account for the large icon or expander
                 Resources resources = mBuilder.mContext.getResources();
                 result.mTitleMarginSet.applyToView(remoteViews, R.id.notification_main_column,
-                        resources.getDimensionPixelOffset(R.dimen.notification_content_margin_end));
+                        resources.getDimension(R.dimen.notification_content_margin_end)
+                                / resources.getDisplayMetrics().density);
             }
         }
 
@@ -11039,6 +11069,7 @@ public class Notification implements Parcelable
      */
     private static class TemplateBindResult {
         boolean mRightIconVisible;
+        float mRightIconWidthDp;
 
         /**
          * The margin end that needs to be added to the heading so that it won't overlap
@@ -11063,11 +11094,13 @@ public class Notification implements Parcelable
          */
         public final MarginSet mTitleMarginSet = new MarginSet();
 
-        public void setRightIconState(boolean visible, int marginEndIfVisible, int expanderSize) {
+        public void setRightIconState(boolean visible, float widthDp,
+                float marginEndDpIfVisible, float expanderSizeDp) {
             mRightIconVisible = visible;
-            mHeadingExtraMarginSet.setValues(0, marginEndIfVisible);
-            mHeadingFullMarginSet.setValues(expanderSize, marginEndIfVisible + expanderSize);
-            mTitleMarginSet.setValues(0, marginEndIfVisible + expanderSize);
+            mRightIconWidthDp = widthDp;
+            mHeadingExtraMarginSet.setValues(0, marginEndDpIfVisible);
+            mHeadingFullMarginSet.setValues(expanderSizeDp, marginEndDpIfVisible + expanderSizeDp);
+            mTitleMarginSet.setValues(0, marginEndDpIfVisible + expanderSizeDp);
         }
 
         /**
@@ -11076,10 +11109,10 @@ public class Notification implements Parcelable
          * left_icon and adjust the margins, and to undo that change as well.
          */
         private class MarginSet {
-            private int mValueIfGone;
-            private int mValueIfVisible;
+            private float mValueIfGone;
+            private float mValueIfVisible;
 
-            public void setValues(int valueIfGone, int valueIfVisible) {
+            public void setValues(float valueIfGone, float valueIfVisible) {
                 mValueIfGone = valueIfGone;
                 mValueIfVisible = valueIfVisible;
             }
@@ -11089,23 +11122,26 @@ public class Notification implements Parcelable
             }
 
             public void applyToView(@NonNull RemoteViews views, @IdRes int viewId,
-                    @Px int extraMargin) {
-                final int marginEnd = getValue() + extraMargin;
+                    float extraMarginDp) {
+                final float marginEndDp = getDpValue() + extraMarginDp;
                 if (viewId == R.id.notification_header) {
-                    views.setInt(R.id.notification_header, "setTopLineExtraMarginEnd", marginEnd);
+                    views.setFloat(R.id.notification_header,
+                            "setTopLineExtraMarginEndDp", marginEndDp);
                 } else {
                     views.setViewLayoutMargin(viewId, RemoteViews.MARGIN_END,
-                                    marginEnd, TypedValue.COMPLEX_UNIT_PX);
+                                    marginEndDp, TypedValue.COMPLEX_UNIT_DIP);
                 }
                 if (mRightIconVisible) {
                     views.setIntTag(viewId, R.id.tag_margin_end_when_icon_visible,
-                            mValueIfVisible + extraMargin);
+                            TypedValue.createComplexDimension(
+                                    mValueIfVisible + extraMarginDp, TypedValue.COMPLEX_UNIT_DIP));
                     views.setIntTag(viewId, R.id.tag_margin_end_when_icon_gone,
-                            mValueIfGone + extraMargin);
+                            TypedValue.createComplexDimension(
+                                    mValueIfGone + extraMarginDp, TypedValue.COMPLEX_UNIT_DIP));
                 }
             }
 
-            public int getValue() {
+            public float getDpValue() {
                 return mRightIconVisible ? mValueIfVisible : mValueIfGone;
             }
         }
