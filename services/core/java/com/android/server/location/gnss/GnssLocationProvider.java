@@ -16,6 +16,9 @@
 
 package com.android.server.location.gnss;
 
+import static android.location.provider.ProviderProperties.ACCURACY_FINE;
+import static android.location.provider.ProviderProperties.POWER_USAGE_HIGH;
+
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.server.location.gnss.hal.GnssNative.AGPS_REF_LOCATION_TYPE_GSM_CELLID;
 import static com.android.server.location.gnss.hal.GnssNative.AGPS_REF_LOCATION_TYPE_UMTS_CELLID;
@@ -58,7 +61,8 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationRequest;
 import android.location.LocationResult;
-import android.location.ProviderProperties;
+import android.location.provider.ProviderProperties;
+import android.location.provider.ProviderRequest;
 import android.location.util.identity.CallerIdentity;
 import android.os.AsyncTask;
 import android.os.BatteryStats;
@@ -88,7 +92,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.location.GpsNetInitiatedHandler;
 import com.android.internal.location.GpsNetInitiatedHandler.GpsNiNotification;
-import com.android.internal.location.ProviderRequest;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.FgThread;
 import com.android.server.location.gnss.GnssSatelliteBlocklistHelper.GnssSatelliteBlocklistCallback;
@@ -122,16 +125,14 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
 
-    private static final ProviderProperties PROPERTIES = new ProviderProperties(
-            /* requiresNetwork = */false,
-            /* requiresSatellite = */true,
-            /* requiresCell = */false,
-            /* hasMonetaryCost = */false,
-            /* supportAltitude = */true,
-            /* supportsSpeed = */true,
-            /* supportsBearing = */true,
-            ProviderProperties.POWER_USAGE_HIGH,
-            ProviderProperties.ACCURACY_FINE);
+    private static final ProviderProperties PROPERTIES = new ProviderProperties.Builder()
+                .setHasSatelliteRequirement(true)
+                .setHasAltitudeSupport(true)
+                .setHasSpeedSupport(true)
+                .setHasBearingSupport(true)
+                .setPowerUsage(POWER_USAGE_HIGH)
+                .setAccuracy(ACCURACY_FINE)
+                .build();
 
     // The AGPS SUPL mode
     private static final int AGPS_SUPL_MODE_MSA = 0x02;

@@ -49,6 +49,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.location.provider.ProviderProperties;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -1803,7 +1804,6 @@ public class LocationManager {
         }
 
         try {
-
             ProviderProperties properties = mService.getProviderProperties(provider);
             return new LocationProvider(provider, properties);
         } catch (IllegalArgumentException e) {
@@ -1931,11 +1931,35 @@ public class LocationManager {
             boolean supportsSpeed, boolean supportsBearing,
             @ProviderProperties.PowerUsage int powerUsage,
             @ProviderProperties.Accuracy int accuracy) {
-        Preconditions.checkArgument(provider != null, "invalid null provider");
+        addTestProvider(provider, new ProviderProperties.Builder()
+                .setHasNetworkRequirement(requiresNetwork)
+                .setHasSatelliteRequirement(requiresSatellite)
+                .setHasCellRequirement(requiresCell)
+                .setHasMonetaryCost(hasMonetaryCost)
+                .setHasAltitudeSupport(supportsAltitude)
+                .setHasSpeedSupport(supportsSpeed)
+                .setHasBearingSupport(supportsBearing)
+                .setPowerUsage(powerUsage)
+                .setAccuracy(accuracy)
+                .build());
+    }
 
-        ProviderProperties properties = new ProviderProperties(requiresNetwork,
-                requiresSatellite, requiresCell, hasMonetaryCost, supportsAltitude, supportsSpeed,
-                supportsBearing, powerUsage, accuracy);
+    /**
+     * Creates a test location provider and adds it to the set of active providers. This provider
+     * will replace any provider with the same name that exists prior to this call.
+     *
+     * @param provider the provider name
+     *
+     * @throws IllegalArgumentException if provider is null
+     * @throws IllegalArgumentException if properties is null
+     * @throws SecurityException if {@link android.app.AppOpsManager#OPSTR_MOCK_LOCATION
+     * mock location app op} is not set to {@link android.app.AppOpsManager#MODE_ALLOWED
+     * allowed} for your app.
+     */
+    public void addTestProvider(@NonNull String provider, @NonNull ProviderProperties properties) {
+        Preconditions.checkArgument(provider != null, "invalid null provider");
+        Preconditions.checkArgument(properties != null, "invalid null properties");
+
         try {
             mService.addTestProvider(provider, properties, mContext.getOpPackageName(),
                     mContext.getFeatureId());

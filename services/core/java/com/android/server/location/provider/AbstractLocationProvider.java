@@ -18,12 +18,12 @@ package com.android.server.location.provider;
 
 import android.annotation.Nullable;
 import android.location.LocationResult;
-import android.location.ProviderProperties;
+import android.location.provider.ProviderProperties;
+import android.location.provider.ProviderRequest;
 import android.location.util.identity.CallerIdentity;
 import android.os.Binder;
 import android.os.Bundle;
 
-import com.android.internal.location.ProviderRequest;
 import com.android.internal.util.Preconditions;
 
 import java.io.FileDescriptor;

@@ -40,7 +40,7 @@
              LocationManagerService will bind to the service with the highest
              version. -->
         <service android:name="com.android.location.fused.FusedLocationService"
-                 android:exported="true"
+                 android:exported="false"
                  android:permission="android.permission.WRITE_SECURE_SETTINGS">
            <intent-filter>
                <action android:name="com.android.location.service.FusedLocationProvider" />

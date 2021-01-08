@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.internal.location;
+package android.location.provider;
 
 import android.os.Bundle;
-import android.os.WorkSource;
 
-import com.android.internal.location.ILocationProviderManager;
-import com.android.internal.location.ProviderRequest;
+import android.location.provider.ILocationProviderManager;
+import android.location.provider.ProviderRequest;
 
 /**
  * Binder interface for services that implement location providers. Do not implement this directly,
@@ -29,14 +28,8 @@ import com.android.internal.location.ProviderRequest;
  */
 interface ILocationProvider {
 
-    @UnsupportedAppUsage(maxTargetSdk = 30, publicAlternatives = "{@code Do not use}")
     oneway void setLocationProviderManager(in ILocationProviderManager manager);
-
-    @UnsupportedAppUsage(maxTargetSdk = 30, publicAlternatives = "{@code Do not use}")
-    oneway void setRequest(in ProviderRequest request, in WorkSource ws);
-
+    oneway void setRequest(in ProviderRequest request);
     oneway void flush();
-
-    @UnsupportedAppUsage(maxTargetSdk = 30, publicAlternatives = "{@code Do not use}")
     oneway void sendExtraCommand(String command, in Bundle extras);
 }

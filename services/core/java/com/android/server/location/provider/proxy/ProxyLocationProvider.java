@@ -22,7 +22,10 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.location.LocationResult;
-import android.location.ProviderProperties;
+import android.location.provider.ILocationProvider;
+import android.location.provider.ILocationProviderManager;
+import android.location.provider.ProviderProperties;
+import android.location.provider.ProviderRequest;
 import android.location.util.identity.CallerIdentity;
 import android.os.Binder;
 import android.os.Bundle;
@@ -30,9 +33,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.location.ILocationProvider;
-import com.android.internal.location.ILocationProviderManager;
-import com.android.internal.location.ProviderRequest;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.ServiceWatcher;
 import com.android.server.location.provider.AbstractLocationProvider;
@@ -106,7 +106,7 @@ public class ProxyLocationProvider extends AbstractLocationProvider {
 
             ProviderRequest request = mRequest;
             if (!request.equals(ProviderRequest.EMPTY_REQUEST)) {
-                provider.setRequest(request, request.getWorkSource());
+                provider.setRequest(request);
             }
         }
     }
@@ -142,7 +142,7 @@ public class ProxyLocationProvider extends AbstractLocationProvider {
         mRequest = request;
         mServiceWatcher.runOnBinder(binder -> {
             ILocationProvider provider = ILocationProvider.Stub.asInterface(binder);
-            provider.setRequest(request, request.getWorkSource());
+            provider.setRequest(request);
         });
     }
 

@@ -19320,6 +19320,7 @@ package android.location {
     method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean addNmeaListener(@NonNull java.util.concurrent.Executor, @NonNull android.location.OnNmeaMessageListener);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void addProximityAlert(double, double, float, long, @NonNull android.app.PendingIntent);
     method public void addTestProvider(@NonNull String, boolean, boolean, boolean, boolean, boolean, boolean, boolean, int, int);
+    method public void addTestProvider(@NonNull String, @NonNull android.location.provider.ProviderProperties);
     method @Deprecated public void clearTestProviderEnabled(@NonNull String);
     method @Deprecated public void clearTestProviderLocation(@NonNull String);
     method @Deprecated public void clearTestProviderStatus(@NonNull String);
@@ -19334,7 +19335,7 @@ package android.location {
     method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public android.location.GpsStatus getGpsStatus(@Nullable android.location.GpsStatus);
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public android.location.Location getLastKnownLocation(@NonNull String);
     method @Deprecated @Nullable public android.location.LocationProvider getProvider(@NonNull String);
-    method @Nullable public android.location.ProviderProperties getProviderProperties(@NonNull String);
+    method @Nullable public android.location.provider.ProviderProperties getProviderProperties(@NonNull String);
     method @NonNull public java.util.List<java.lang.String> getProviders(boolean);
     method @NonNull public java.util.List<java.lang.String> getProviders(@NonNull android.location.Criteria, boolean);
     method public boolean hasProvider(@NonNull String);
@@ -19466,6 +19467,24 @@ package android.location {
     method public void onNmeaMessage(String, long);
   }
 
+  public abstract class SettingInjectorService extends android.app.Service {
+    ctor public SettingInjectorService(String);
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method protected abstract boolean onGetEnabled();
+    method protected abstract String onGetSummary();
+    method public final void onStart(android.content.Intent, int);
+    method public final int onStartCommand(android.content.Intent, int, int);
+    method public static final void refreshSettings(@NonNull android.content.Context);
+    field public static final String ACTION_INJECTED_SETTING_CHANGED = "android.location.InjectedSettingChanged";
+    field public static final String ACTION_SERVICE_INTENT = "android.location.SettingInjectorService";
+    field public static final String ATTRIBUTES_NAME = "injected-location-setting";
+    field public static final String META_DATA_NAME = "android.location.SettingInjectorService";
+  }
+
+}
+
+package android.location.provider {
+
   public final class ProviderProperties implements android.os.Parcelable {
     method public int describeContents();
     method public int getAccuracy();
@@ -19480,24 +19499,25 @@ package android.location {
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int ACCURACY_COARSE = 2; // 0x2
     field public static final int ACCURACY_FINE = 1; // 0x1
-    field @NonNull public static final android.os.Parcelable.Creator<android.location.ProviderProperties> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.provider.ProviderProperties> CREATOR;
     field public static final int POWER_USAGE_HIGH = 3; // 0x3
     field public static final int POWER_USAGE_LOW = 1; // 0x1
     field public static final int POWER_USAGE_MEDIUM = 2; // 0x2
   }
 
-  public abstract class SettingInjectorService extends android.app.Service {
-    ctor public SettingInjectorService(String);
-    method public final android.os.IBinder onBind(android.content.Intent);
-    method protected abstract boolean onGetEnabled();
-    method protected abstract String onGetSummary();
-    method public final void onStart(android.content.Intent, int);
-    method public final int onStartCommand(android.content.Intent, int, int);
-    method public static final void refreshSettings(@NonNull android.content.Context);
-    field public static final String ACTION_INJECTED_SETTING_CHANGED = "android.location.InjectedSettingChanged";
-    field public static final String ACTION_SERVICE_INTENT = "android.location.SettingInjectorService";
-    field public static final String ATTRIBUTES_NAME = "injected-location-setting";
-    field public static final String META_DATA_NAME = "android.location.SettingInjectorService";
+  public static final class ProviderProperties.Builder {
+    ctor public ProviderProperties.Builder();
+    ctor public ProviderProperties.Builder(@NonNull android.location.provider.ProviderProperties);
+    method @NonNull public android.location.provider.ProviderProperties build();
+    method @NonNull public android.location.provider.ProviderProperties.Builder setAccuracy(int);
+    method @NonNull public android.location.provider.ProviderProperties.Builder setHasAltitudeSupport(boolean);
+    method @NonNull public android.location.provider.ProviderProperties.Builder setHasBearingSupport(boolean);
+    method @NonNull public android.location.provider.ProviderProperties.Builder setHasCellRequirement(boolean);
+    method @NonNull public android.location.provider.ProviderProperties.Builder setHasMonetaryCost(boolean);
+    method @NonNull public android.location.provider.ProviderProperties.Builder setHasNetworkRequirement(boolean);
+    method @NonNull public android.location.provider.ProviderProperties.Builder setHasSatelliteRequirement(boolean);
+    method @NonNull public android.location.provider.ProviderProperties.Builder setHasSpeedSupport(boolean);
+    method @NonNull public android.location.provider.ProviderProperties.Builder setPowerUsage(int);
   }
 
 }

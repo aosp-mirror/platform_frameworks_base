@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package android.location;
+package android.location.provider;
 
 parcelable ProviderProperties;
