@@ -393,7 +393,11 @@ import com.android.server.security.VerityUtils;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.utils.TimingsTraceAndSlog;
+import com.android.server.utils.Watchable;
+import com.android.server.utils.Watched;
 import com.android.server.utils.WatchedArrayMap;
+import com.android.server.utils.WatchedSparseBooleanArray;
+import com.android.server.utils.Watcher;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import dalvik.system.CloseGuard;
@@ -506,6 +510,8 @@ public class PackageManagerService extends IPackageManager.Stub
     public static final boolean DEBUG_PERMISSIONS = false;
     private static final boolean DEBUG_SHARED_LIBRARIES = false;
     public static final boolean DEBUG_COMPRESSION = Build.IS_DEBUGGABLE;
+    public static final boolean DEBUG_CACHES = false;
+    public static final boolean TRACE_CACHES = false;
 
     // Debug output for dexopting. This is shared between PackageManagerService, OtaDexoptService
     // and PackageDexOptimizer. All these classes have their own flag to allow switching a single
@@ -793,11 +799,13 @@ public class PackageManagerService extends IPackageManager.Stub
     final Object mLock;
 
     // Keys are String (package name), values are Package.
+    @Watched
     @GuardedBy("mLock")
-    final ArrayMap<String, AndroidPackage> mPackages = new ArrayMap<>();
+    final WatchedArrayMap<String, AndroidPackage> mPackages = new WatchedArrayMap<>();
 
     // Keys are isolated uids and values are the uid of the application
-    // that created the isolated proccess.
+    // that created the isolated process.
+    @Watched
     @GuardedBy("mLock")
     final SparseIntArray mIsolatedOwners = new SparseIntArray();
 
@@ -822,6 +830,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private final TestUtilityService mTestUtilityService;
 
 
+    @Watched
     @GuardedBy("mLock")
     final Settings mSettings;
 
@@ -852,6 +861,7 @@ public class PackageManagerService extends IPackageManager.Stub
     @GuardedBy("mAvailableFeatures")
     final ArrayMap<String, FeatureInfo> mAvailableFeatures;
 
+    @Watched
     private final InstantAppRegistry mInstantAppRegistry;
 
     @GuardedBy("mLock")
@@ -1208,12 +1218,14 @@ public class PackageManagerService extends IPackageManager.Stub
             // Avoid invalidation-thrashing by preventing cache invalidations from causing property
             // writes if the cache isn't enabled yet.  We re-enable writes later when we're
             // done initializing.
+            sSnapshotCorked = true;
             PackageManager.corkPackageInfoCache();
         }
 
         @Override
         public void enablePackageCaches() {
             // Uncork cache invalidations and allow clients to cache package information.
+            sSnapshotCorked = false;
             PackageManager.uncorkPackageInfoCache();
         }
     }
@@ -1286,18 +1298,23 @@ public class PackageManagerService extends IPackageManager.Stub
         public String incrementalVersion = Build.VERSION.INCREMENTAL;
     }
 
+    @Watched
     private final AppsFilter mAppsFilter;
 
     final PackageParser2.Callback mPackageParserCallback;
 
     // Currently known shared libraries.
-    final ArrayMap<String, LongSparseArray<SharedLibraryInfo>> mSharedLibraries = new ArrayMap<>();
-    final ArrayMap<String, LongSparseArray<SharedLibraryInfo>> mStaticLibsByDeclaringPackage =
-            new ArrayMap<>();
+    @Watched
+    final WatchedArrayMap<String, LongSparseArray<SharedLibraryInfo>> mSharedLibraries =
+            new WatchedArrayMap<>();
+    @Watched
+    final WatchedArrayMap<String, LongSparseArray<SharedLibraryInfo>>
+            mStaticLibsByDeclaringPackage = new WatchedArrayMap<>();
 
     // Mapping from instrumentation class names to info about them.
-    final ArrayMap<ComponentName, ParsedInstrumentation> mInstrumentation =
-            new ArrayMap<>();
+    @Watched
+    final WatchedArrayMap<ComponentName, ParsedInstrumentation> mInstrumentation =
+            new WatchedArrayMap<>();
 
     // Packages whose data we have transfered into another package, thus
     // should no longer exist.
@@ -1336,15 +1353,22 @@ public class PackageManagerService extends IPackageManager.Stub
     /** Token for keys in mPendingEnableRollback. */
     private int mPendingEnableRollbackToken = 0;
 
+    @Watched
     volatile boolean mSystemReady;
-    volatile boolean mSafeMode;
+    @Watched
+    private volatile boolean mSafeMode;
     volatile boolean mHasSystemUidErrors;
-    private volatile SparseBooleanArray mWebInstantAppsDisabled = new SparseBooleanArray();
+    @Watched
+    private final WatchedSparseBooleanArray mWebInstantAppsDisabled =
+            new WatchedSparseBooleanArray();
 
-    ApplicationInfo mAndroidApplication;
+    @Watched
+    private ApplicationInfo mAndroidApplication;
+    @Watched
     final ActivityInfo mResolveActivity = new ActivityInfo();
     final ResolveInfo mResolveInfo = new ResolveInfo();
-    ComponentName mResolveComponentName;
+    @Watched
+    private ComponentName mResolveComponentName;
     AndroidPackage mPlatformPackage;
     ComponentName mCustomResolverComponentName;
 
@@ -1361,8 +1385,10 @@ public class PackageManagerService extends IPackageManager.Stub
     final ComponentName mInstantAppResolverSettingsComponent;
 
     /** Activity used to install instant applications */
-    ActivityInfo mInstantAppInstallerActivity;
-    final ResolveInfo mInstantAppInstallerInfo = new ResolveInfo();
+    @Watched
+    private ActivityInfo mInstantAppInstallerActivity;
+    @Watched
+    private final ResolveInfo mInstantAppInstallerInfo = new ResolveInfo();
 
     private final Map<String, Pair<PackageInstalledInfo, IPackageInstallObserver2>>
             mNoKillInstallObservers = Collections.synchronizedMap(new HashMap<>());
@@ -1744,7 +1770,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final long DEFAULT_UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD =
             2 * 60 * 60 * 1000L; /* two hours */
 
-    UserManagerService mUserManager;
+    final UserManagerService mUserManager;
 
     // Stores a list of users whose package restrictions file needs to be updated
     private ArraySet<Integer> mDirtyUsers = new ArraySet<>();
@@ -1828,6 +1854,344 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     public static void invalidatePackageInfoCache() {
         PackageManager.invalidatePackageInfoCache();
+        onChanged();
+    }
+
+    private final Watcher mWatcher = new Watcher() {
+            @Override
+            public void onChange(@Nullable Watchable what) {
+                PackageManagerService.this.onChange(what);
+            }
+        };
+
+    /**
+     * A Snapshot is a subset of PackageManagerService state.  A snapshot is either live
+     * or snapped.  Live snapshots directly reference PackageManagerService attributes.
+     * Snapped snapshots contain deep copies of the attributes.
+     */
+    private class Snapshot {
+        public static final int LIVE = 1;
+        public static final int SNAPPED = 2;
+
+        public final Settings settings;
+        public final SparseIntArray isolatedOwners;
+        public final WatchedArrayMap<String, AndroidPackage> packages;
+        public final WatchedArrayMap<String, LongSparseArray<SharedLibraryInfo>> sharedLibs;
+        public final WatchedArrayMap<String, LongSparseArray<SharedLibraryInfo>> staticLibs;
+        public final WatchedArrayMap<ComponentName, ParsedInstrumentation> instrumentation;
+        public final WatchedSparseBooleanArray webInstantAppsDisabled;
+        public final ComponentName resolveComponentName;
+        public final ActivityInfo resolveActivity;
+        public final ActivityInfo instantAppInstallerActivity;
+        public final ResolveInfo instantAppInstallerInfo;
+        public final InstantAppRegistry instantAppRegistry;
+        public final ApplicationInfo androidApplication;
+        public final String appPredictionServicePackage;
+        public final AppsFilter appsFilter;
+        public final PackageManagerService service;
+
+        Snapshot(int type) {
+            if (type == Snapshot.SNAPPED) {
+                settings = mSettings.snapshot();
+                isolatedOwners = mIsolatedOwners.clone();
+                packages = mPackages.snapshot();
+                sharedLibs = mSharedLibraries.snapshot();
+                staticLibs = mStaticLibsByDeclaringPackage.snapshot();
+                instrumentation = mInstrumentation.snapshot();
+                resolveComponentName = mResolveComponentName.clone();
+                resolveActivity = new ActivityInfo(mResolveActivity);
+                instantAppInstallerActivity =
+                        (mInstantAppInstallerActivity == null)
+                        ? null
+                        : new ActivityInfo(mInstantAppInstallerActivity);
+                instantAppInstallerInfo = new ResolveInfo(mInstantAppInstallerInfo);
+                webInstantAppsDisabled = mWebInstantAppsDisabled.snapshot();
+                instantAppRegistry = mInstantAppRegistry.snapshot();
+                androidApplication =
+                        (mAndroidApplication == null)
+                        ? null
+                        : new ApplicationInfo(mAndroidApplication);
+                appPredictionServicePackage = mAppPredictionServicePackage;
+                appsFilter = mAppsFilter.snapshot();
+            } else if (type == Snapshot.LIVE) {
+                settings = mSettings;
+                isolatedOwners = mIsolatedOwners;
+                packages = mPackages;
+                sharedLibs = mSharedLibraries;
+                staticLibs = mStaticLibsByDeclaringPackage;
+                instrumentation = mInstrumentation;
+                resolveComponentName = mResolveComponentName;
+                resolveActivity = mResolveActivity;
+                instantAppInstallerActivity = mInstantAppInstallerActivity;
+                instantAppInstallerInfo = mInstantAppInstallerInfo;
+                webInstantAppsDisabled = mWebInstantAppsDisabled;
+                instantAppRegistry = mInstantAppRegistry;
+                androidApplication = mAndroidApplication;
+                appPredictionServicePackage = mAppPredictionServicePackage;
+                appsFilter = mAppsFilter;
+            } else {
+                throw new IllegalArgumentException();
+            }
+            service = PackageManagerService.this;
+        }
+    }
+
+    /**
+     * A computer provides the functional interface to the cache
+     */
+    private interface Computer {
+
+    }
+
+    /**
+     * This class contains the implementation of the Computer functions.  It
+     * is entirely self-contained - it has no implicit access to
+     * PackageManagerService.
+     */
+    private static class ComputerEngine implements Computer {
+
+        // Cached attributes.  The names in this class are the same as the
+        // names in PackageManagerService; see that class for documentation.
+        private final Settings mSettings;
+        private final SparseIntArray mIsolatedOwners;
+        private final WatchedArrayMap<String, AndroidPackage> mPackages;
+        private final WatchedArrayMap<ComponentName, ParsedInstrumentation>
+                mInstrumentation;
+        private final WatchedArrayMap<String, LongSparseArray<SharedLibraryInfo>>
+                mStaticLibsByDeclaringPackage;
+        private final WatchedArrayMap<String, LongSparseArray<SharedLibraryInfo>>
+                mSharedLibraries;
+        private final ComponentName mLocalResolveComponentName;
+        private final ActivityInfo mResolveActivity;
+        private final WatchedSparseBooleanArray mWebInstantAppsDisabled;
+        private final ActivityInfo mLocalInstantAppInstallerActivity;
+        private final ResolveInfo mInstantAppInstallerInfo;
+        private final InstantAppRegistry mInstantAppRegistry;
+        private final ApplicationInfo mLocalAndroidApplication;
+
+        // Immutable service attribute
+        private final String mAppPredictionServicePackage;
+
+        // TODO: create cache copies of the following attributes
+        private final AppsFilter mAppsFilter;
+
+        // The following are not cloned since changes to these have never
+        // been guarded by the PMS lock.
+        private final Context mContext;
+        private final UserManagerService mUserManager;
+        private final PermissionManagerServiceInternal mPermissionManager;
+        private final ApexManager mApexManager;
+        private final Injector mInjector;
+        private final ComponentResolver mComponentResolver;
+        private final InstantAppResolverConnection mInstantAppResolverConnection;
+        private final DefaultAppProvider mDefaultAppProvider;
+
+        // PackageManagerService attributes that are primitives are referenced through the
+        // pms object directly.  Primitives are the only attributes so referenced.
+        protected final PackageManagerService mService;
+        protected boolean safeMode() {
+            return mService.mSafeMode;
+        }
+        protected ComponentName resolveComponentName() {
+            return mLocalResolveComponentName;
+        }
+        protected ActivityInfo instantAppInstallerActivity() {
+            return mLocalInstantAppInstallerActivity;
+        }
+        protected ApplicationInfo androidApplication() {
+            return mLocalAndroidApplication;
+        }
+
+        ComputerEngine(Snapshot args) {
+            mSettings = args.settings;
+            mIsolatedOwners = args.isolatedOwners;
+            mPackages = args.packages;
+            mSharedLibraries = args.sharedLibs;
+            mStaticLibsByDeclaringPackage = args.staticLibs;
+            mInstrumentation = args.instrumentation;
+            mWebInstantAppsDisabled = args.webInstantAppsDisabled;
+            mLocalResolveComponentName = args.resolveComponentName;
+            mResolveActivity = args.resolveActivity;
+            mLocalInstantAppInstallerActivity = args.instantAppInstallerActivity;
+            mInstantAppInstallerInfo = args.instantAppInstallerInfo;
+            mInstantAppRegistry = args.instantAppRegistry;
+            mLocalAndroidApplication = args.androidApplication;
+            mAppsFilter = args.appsFilter;
+
+            mAppPredictionServicePackage = args.appPredictionServicePackage;
+
+            // The following are not cached copies.  Instead they are
+            // references to outside services.
+            mPermissionManager = args.service.mPermissionManager;
+            mUserManager = args.service.mUserManager;
+            mContext = args.service.mContext;
+            mInjector = args.service.mInjector;
+            mApexManager = args.service.mApexManager;
+            mComponentResolver = args.service.mComponentResolver;
+            mInstantAppResolverConnection = args.service.mInstantAppResolverConnection;
+            mDefaultAppProvider = args.service.mDefaultAppProvider;
+
+            // Used to reference PMS attributes that are primitives and which are not
+            // updated under control of the PMS lock.
+            mService = args.service;
+        }
+
+    }
+
+    /**
+     * The live computer differs from the ComputerEngine in the methods that fetch data
+     * from PackageManagerService.
+     **/
+    private static class ComputerEngineLive extends ComputerEngine {
+        ComputerEngineLive(Snapshot args) {
+            super(args);
+        }
+        protected ComponentName resolveComponentName() {
+            return mService.mResolveComponentName;
+        }
+        protected ActivityInfo instantAppInstallerActivity() {
+            return mService.mInstantAppInstallerActivity;
+        }
+        protected ApplicationInfo androidApplication() {
+            return mService.mAndroidApplication;
+        }
+    }
+
+    /**
+     * This subclass is the external interface to the live computer.  For each
+     * interface, it takes the PM lock and then delegates to the live
+     * computer engine.  This is required because there are no locks taken in
+     * the engine itself.
+     */
+    private static class ComputerLocked extends ComputerEngine {
+        private final Object mLock;
+
+        ComputerLocked(Snapshot args) {
+            super(args);
+            mLock = mService.mLock;
+        }
+
+        protected ComponentName resolveComponentName() {
+            return mService.mResolveComponentName;
+        }
+        protected ActivityInfo instantAppInstallerActivity() {
+            return mService.mInstantAppInstallerActivity;
+        }
+        protected ApplicationInfo androidApplication() {
+            return mService.mAndroidApplication;
+        }
+
+    }
+
+
+    // Compute read-only functions, based on live data.
+    private final Computer mLiveComputer;
+    // A lock-free cache for frequently called functions.
+    private volatile Computer mSnapshotComputer;
+    // If true, the cached computer object is invalid (the cache is stale).
+    // The attribute is static since it may be set from outside classes.
+    private static volatile boolean sSnapshotInvalid = true;
+     // If true, the cache is corked.  Do not create a new cache but continue to use the
+    // existing one.  This throttles cache creation during periods of churn in Package
+    // Manager.
+    private static volatile boolean sSnapshotCorked = false;
+
+    // A counter of all queries that hit the cache.
+    private AtomicInteger mSnapshotHits = new AtomicInteger(0);
+
+    // The number of queries at the last miss.  This is updated when the cache is rebuilt
+    // (guarded by mLock) and is used to report the hit run-length.
+    @GuardedBy("mLock")
+    private int mSnapshotRebuilt = 0;
+
+    // The snapshot disable/enable switch.  An image with the flag set true uses snapshots
+    // and an image with the flag set false does not use snapshots.
+    private static final boolean SNAPSHOT_ENABLED = false;
+
+    /**
+     * Return the live or cached computer.  The method will rebuild the
+     * cached computer if necessary.
+     */
+    private Computer computer(boolean live) {
+        if (live || !SNAPSHOT_ENABLED) {
+            return mLiveComputer;
+        } else {
+            int hits = 0;
+            if (TRACE_CACHES) {
+                hits = mSnapshotHits.incrementAndGet();
+            }
+            Computer c = mSnapshotComputer;
+            if ((sSnapshotInvalid || (c == null)) && !sSnapshotCorked) {
+                synchronized (mLock) {
+                    // Rebuild the computer if it is invalid and if the cache is not
+                    // corked.  The lock is taken inside the rebuild method.  Note that
+                    // the cache might be invalidated as it is rebuilt.  However, the
+                    // cache is still consistent and is current as of the time this
+                    // function is entered.
+                    if (sSnapshotInvalid) {
+                        rebuildSnapshot(hits);
+                    }
+                    // Guaranteed to be non-null
+                    c = mSnapshotComputer;
+                }
+            }
+            return c;
+        }
+    }
+
+    /**
+     * Return the live computer if the thread holds the lock, and the cached
+     * computer otehrwise.  This method is for functions that are unsure
+     * which computer to use.
+     **/
+    private Computer computer() {
+        return computer(Thread.holdsLock(mLock));
+    }
+
+    /**
+     * Rebuild the cached computer.
+     */
+    @GuardedBy("mLock")
+    private void rebuildSnapshot(int hits) {
+        mSnapshotComputer = null;
+        sSnapshotInvalid = false;
+        final Snapshot args = new Snapshot(Snapshot.SNAPPED);
+        mSnapshotComputer = new ComputerEngine(args);
+
+        // Still guarded by mLock
+        final int run = hits - mSnapshotRebuilt;
+        mSnapshotRebuilt = hits;
+        if (TRACE_CACHES) {
+            Log.w(TAG, "computer: rebuild after " + run + " hits");
+        }
+    }
+
+    /**
+     * Create a live computer
+     */
+    private ComputerLocked liveComputer() {
+        return new ComputerLocked(new Snapshot(Snapshot.LIVE));
+    }
+
+    /**
+     * This method is called when the state of PackageManagerService changes so as to
+     * invalidate the current snapshot.
+     * @param what The {@link Watchable} that reported the change
+     * @hide
+     */
+    public static void onChange(@Nullable Watchable what) {
+        if (TRACE_CACHES) {
+            Log.e(TAG, "computer: onChange(" + what + ")");
+        }
+        sSnapshotInvalid = true;
+    }
+
+    /**
+     * Report a locally-detected change to observers.  The <what> parameter is left null,
+     * but it signifies that the change was detected by PackageManagerService itself.
+     */
+    private static void onChanged() {
+        onChange(null);
     }
 
     class PackageHandler extends Handler {
@@ -3093,6 +3457,25 @@ public class PackageManagerService extends IPackageManager.Stub
         mSharedSystemSharedLibraryPackageName = testParams.sharedSystemSharedLibraryPackageName;
         mOverlayConfigSignaturePackage = testParams.overlayConfigSignaturePackage;
         mResolveComponentName = testParams.resolveComponentName;
+
+        // Create the computer as soon as the state objects have been installed.  The
+        // cached computer is the same as the live computer until the end of the
+        // constructor, at which time the invalidation method updates it.  The cache is
+        // corked initially to ensure a cached computer is not built until the end of the
+        // constructor.
+        sSnapshotCorked = true;
+        mLiveComputer = liveComputer();
+        mSnapshotComputer = mLiveComputer;
+
+        // Link up the watchers
+        mPackages.registerObserver(mWatcher);
+        mSharedLibraries.registerObserver(mWatcher);
+        mStaticLibsByDeclaringPackage.registerObserver(mWatcher);
+        mInstrumentation.registerObserver(mWatcher);
+        mWebInstantAppsDisabled.registerObserver(mWatcher);
+        mAppsFilter.registerObserver(mWatcher);
+        Watchable.verifyWatchedAttributes(this, mWatcher);
+
         mPackages.putAll(testParams.packages);
         mEnableFreeCacheV2 = testParams.enableFreeCacheV2;
         mSdkVersion = testParams.sdkVersion;
@@ -3102,6 +3485,9 @@ public class PackageManagerService extends IPackageManager.Stub
         mIsEngBuild = testParams.isEngBuild;
         mIsUserDebugBuild = testParams.isUserDebugBuild;
         mIncrementalVersion = testParams.incrementalVersion;
+
+        invalidatePackageInfoCache();
+        sSnapshotCorked = false;
     }
 
     public PackageManagerService(Injector injector, boolean onlyCore, boolean factoryTest,
@@ -3229,6 +3615,8 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
+        mInstantAppRegistry = new InstantAppRegistry(this, mPermissionManager);
+
         mDirsToScanAsSystem = new ArrayList<>();
         mDirsToScanAsSystem.addAll(injector.getSystemPartitions());
         mDirsToScanAsSystem.addAll(scanPartitions);
@@ -3236,6 +3624,24 @@ public class PackageManagerService extends IPackageManager.Stub
 
         mAppInstallDir = new File(Environment.getDataDirectory(), "app");
         mAppLib32InstallDir = getAppLib32InstallDir();
+
+        // Link up the watchers
+        mPackages.registerObserver(mWatcher);
+        mSharedLibraries.registerObserver(mWatcher);
+        mStaticLibsByDeclaringPackage.registerObserver(mWatcher);
+        mInstrumentation.registerObserver(mWatcher);
+        mWebInstantAppsDisabled.registerObserver(mWatcher);
+        mAppsFilter.registerObserver(mWatcher);
+        Watchable.verifyWatchedAttributes(this, mWatcher);
+
+        // Create the computer as soon as the state objects have been installed.  The
+        // cached computer is the same as the live computer until the end of the
+        // constructor, at which time the invalidation method updates it.  The cache is
+        // corked initially to ensure a cached computer is not built until the end of the
+        // constructor.
+        sSnapshotCorked = true;
+        mLiveComputer = liveComputer();
+        mSnapshotComputer = mLiveComputer;
 
         // CHECKSTYLE:OFF IndentationCheck
         synchronized (mInstallLock) {
@@ -3247,7 +3653,6 @@ public class PackageManagerService extends IPackageManager.Stub
             mHandler = new PackageHandler(handlerThread.getLooper());
             mProcessLoggingHandler = new ProcessLoggingHandler();
             Watchdog.getInstance().addThread(mHandler, WATCHDOG_TIMEOUT);
-            mInstantAppRegistry = new InstantAppRegistry(this, mPermissionManager);
 
             ArrayMap<String, SystemConfig.SharedLibraryEntry> libConfig
                     = systemConfig.getSharedLibraries();
@@ -4784,7 +5189,7 @@ public class PackageManagerService extends IPackageManager.Stub
     /**
      * Important: The provided filterCallingUid is used exclusively to filter out packages
      * that can be seen based on user state. It's typically the original caller uid prior
-     * to clearing. Because it can only be provided by trusted code, it's value can be
+     * to clearing. Because it can only be provided by trusted code, its value can be
      * trusted and will be used as-is; unlike userId which will be validated by this method.
      */
     private PackageInfo getPackageInfoInternal(String packageName, long versionCode,
@@ -5205,7 +5610,7 @@ public class PackageManagerService extends IPackageManager.Stub
     /**
      * Important: The provided filterCallingUid is used exclusively to filter out applications
      * that can be seen based on user state. It's typically the original caller uid prior
-     * to clearing. Because it can only be provided by trusted code, it's value can be
+     * to clearing. Because it can only be provided by trusted code, its value can be
      * trusted and will be used as-is; unlike userId which will be validated by this method.
      */
     private ApplicationInfo getApplicationInfoInternal(String packageName, int flags,
@@ -5584,14 +5989,14 @@ public class PackageManagerService extends IPackageManager.Stub
      * action and a {@code android.intent.category.BROWSABLE} category</li>
      * </ul>
      */
-    int updateFlagsForResolve(int flags, int userId, int callingUid, boolean wantInstantApps,
-            boolean isImplicitImageCaptureIntentAndNotSetByDpc) {
+    private int updateFlagsForResolve(int flags, int userId, int callingUid,
+            boolean wantInstantApps, boolean isImplicitImageCaptureIntentAndNotSetByDpc) {
         return updateFlagsForResolve(flags, userId, callingUid,
                 wantInstantApps, false /*onlyExposedExplicitly*/,
                 isImplicitImageCaptureIntentAndNotSetByDpc);
     }
 
-    int updateFlagsForResolve(int flags, int userId, int callingUid,
+    private int updateFlagsForResolve(int flags, int userId, int callingUid,
             boolean wantInstantApps, boolean onlyExposedExplicitly,
             boolean isImplicitImageCaptureIntentAndNotSetByDpc) {
         // Safe mode means we shouldn't match any third-party components
@@ -5643,7 +6048,7 @@ public class PackageManagerService extends IPackageManager.Stub
     /**
      * Important: The provided filterCallingUid is used exclusively to filter out activities
      * that can be seen based on user state. It's typically the original caller uid prior
-     * to clearing. Because it can only be provided by trusted code, it's value can be
+     * to clearing. Because it can only be provided by trusted code, its value can be
      * trusted and will be used as-is; unlike userId which will be validated by this method.
      */
     private ActivityInfo getActivityInfoInternal(ComponentName component, int flags,
@@ -7629,7 +8034,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         }
                         if (result.size() == 0 && !addInstant) {
                             // No result in current profile, but found candidate in parent user.
-                            // And we are not going to add emphemeral app, so we can return the
+                            // And we are not going to add ephemeral app, so we can return the
                             // result straight away.
                             result.add(xpDomainInfo.resolveInfo);
                             return new QueryIntentActivitiesResult(
@@ -7639,7 +8044,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         }
                     } else if (result.size() <= 1 && !addInstant) {
                         // No result in parent user and <= 1 result in current profile, and we
-                        // are not going to add emphemeral app, so we can return the result without
+                        // are not going to add ephemeral app, so we can return the result without
                         // further processing.
                         return new QueryIntentActivitiesResult(
                                 applyPostResolutionFilter(result, instantAppPkgName,
@@ -12971,6 +13376,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     mResolveComponentName = new ComponentName(
                             mAndroidApplication.packageName, mResolveActivity.name);
                 }
+                onChanged();
             }
         }
 
@@ -13107,6 +13513,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mResolveInfo.preferredOrder = 0;
             mResolveInfo.match = 0;
             mResolveComponentName = mCustomResolverComponentName;
+            onChanged();
             Slog.i(TAG, "Replacing default ResolverActivity with custom activity: " +
                     mResolveComponentName);
         }
@@ -13118,6 +13525,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 Slog.d(TAG, "Clear ephemeral installer activity");
             }
             mInstantAppInstallerActivity = null;
+            onChanged();
             return;
         }
 
@@ -13137,6 +13545,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mInstantAppInstallerInfo.isDefault = true;
         mInstantAppInstallerInfo.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
                 | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
+        onChanged();
     }
 
     private void killApplication(String pkgName, @AppIdInt int appId, String reason) {
