@@ -18,15 +18,21 @@ package com.android.settingslib.emergencynumber;
 
 import static android.telephony.emergency.EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_POLICE;
 
+import static com.android.settingslib.emergencynumber.EmergencyNumberUtils.EMERGENCY_GESTURE_CALL_NUMBER;
+
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.provider.Settings;
+import android.net.Uri;
+import android.os.Bundle;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.emergency.EmergencyNumber;
@@ -38,7 +44,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,12 +60,15 @@ public class EmergencyNumberUtilsTest {
     private PackageManager mPackageManager;
     @Mock
     private TelephonyManager mTelephonyManager;
+    @Mock
+    ContentResolver mContentResolver;
     private EmergencyNumberUtils mUtils;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
+        when(mContext.getContentResolver()).thenReturn(mContentResolver);
     }
 
     @Test
@@ -89,11 +97,10 @@ public class EmergencyNumberUtilsTest {
         when(mContext.getSystemService(TelephonyManager.class)).thenReturn(mTelephonyManager);
         addEmergencyNumberToTelephony();
 
-        ContentResolver resolver = RuntimeEnvironment.application.getContentResolver();
-        when(mContext.getContentResolver()).thenReturn(resolver);
-        Settings.Secure.putString(resolver, Settings.Secure.EMERGENCY_GESTURE_CALL_NUMBER,
-                USER_OVERRIDE_EMERGENCY_NUMBER);
-
+        Bundle bundle = new Bundle();
+        bundle.putString(EMERGENCY_GESTURE_CALL_NUMBER, USER_OVERRIDE_EMERGENCY_NUMBER);
+        when(mContentResolver.call(any(Uri.class), anyString(), nullable(String.class), nullable(
+                Bundle.class))).thenReturn(bundle);
         mUtils = new EmergencyNumberUtils(mContext);
 
         assertThat(mUtils.getPoliceNumber()).isEqualTo(USER_OVERRIDE_EMERGENCY_NUMBER);
