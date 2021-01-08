@@ -43,7 +43,6 @@ import android.window.WindowContainerTransaction;
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.Transitions;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
@@ -54,6 +53,7 @@ import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;

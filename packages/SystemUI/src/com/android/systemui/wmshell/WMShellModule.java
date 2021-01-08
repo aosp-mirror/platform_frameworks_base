@@ -17,13 +17,10 @@
 package com.android.systemui.wmshell;
 
 import android.content.Context;
-import android.os.Handler;
 import android.view.IWindowManager;
 
 import com.android.systemui.dagger.WMSingleton;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.Transitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.apppairs.AppPairsController;
@@ -49,9 +46,9 @@ import com.android.wm.shell.pip.phone.PhonePipMenuController;
 import com.android.wm.shell.pip.phone.PipAppOpsListener;
 import com.android.wm.shell.pip.phone.PipController;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
+import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
-import java.util.concurrent.Executor;
 
 import dagger.Module;
 import dagger.Provides;

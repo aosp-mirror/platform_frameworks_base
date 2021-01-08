@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell;
+package com.android.wm.shell.transition;
 
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
@@ -42,6 +42,7 @@ import android.window.WindowOrganizer;
 import androidx.annotation.BinderThread;
 
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
@@ -82,6 +83,7 @@ public class Transitions {
         mPlayerImpl = new TransitionPlayerImpl();
     }
 
+    /** Register this transition handler with Core */
     public void register(ShellTaskOrganizer taskOrganizer) {
         taskOrganizer.registerTransitionPlayer(mPlayerImpl);
     }
