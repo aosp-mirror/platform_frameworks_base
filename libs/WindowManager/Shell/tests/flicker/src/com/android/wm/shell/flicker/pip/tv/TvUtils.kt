@@ -26,9 +26,9 @@ import com.android.wm.shell.flicker.SYSTEM_UI_PACKAGE_NAME
 
 /** Id of the root view in the com.android.wm.shell.pip.tv.PipMenuActivity */
 private const val TV_PIP_MENU_ROOT_ID = "tv_pip_menu"
-private const val TV_PIP_MENU_CONTROLS_ID = "pip_controls"
-private const val TV_PIP_MENU_CLOSE_BUTTON_ID = "close_button"
-private const val TV_PIP_MENU_FULLSCREEN_BUTTON_ID = "full_button"
+private const val TV_PIP_MENU_BUTTONS_CONTAINER_ID = "tv_pip_menu_action_buttons"
+private const val TV_PIP_MENU_CLOSE_BUTTON_ID = "tv_pip_menu_close_button"
+private const val TV_PIP_MENU_FULLSCREEN_BUTTON_ID = "tv_pip_menu_fullscreen_button"
 
 private const val FOCUS_ATTEMPTS = 10
 private const val WAIT_TIME_MS = 3_000L
@@ -49,7 +49,7 @@ fun UiDevice.waitForTvPipMenuToClose(): Boolean = wait(Until.gone(tvPipMenuSelec
 
 fun UiDevice.findTvPipMenuControls(): UiObject2? =
         findObject(tvPipMenuSelector)
-                ?.findObject(By.res(SYSTEM_UI_PACKAGE_NAME, TV_PIP_MENU_CONTROLS_ID))
+                ?.findObject(By.res(SYSTEM_UI_PACKAGE_NAME, TV_PIP_MENU_BUTTONS_CONTAINER_ID))
 
 fun UiDevice.findTvPipMenuCloseButton(): UiObject2? =
         findObject(tvPipMenuSelector)?.findObject(TV_PIP_MENU_CLOSE_BUTTON_SELECTOR)

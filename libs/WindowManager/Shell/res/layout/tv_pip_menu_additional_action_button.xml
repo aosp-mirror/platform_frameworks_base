@@ -14,7 +14,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<com.android.wm.shell.pip.tv.PipControlButtonView
+<com.android.wm.shell.pip.tv.TvPipMenuActionButton
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="@dimen/picture_in_picture_button_width"
     android:layout_height="wrap_content"

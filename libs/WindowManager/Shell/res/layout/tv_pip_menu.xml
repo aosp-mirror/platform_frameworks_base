@@ -14,19 +14,39 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/tv_pip_menu"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="horizontal"
-              android:paddingTop="350dp"
-              android:background="#CC000000"
-              android:gravity="top|center_horizontal"
-              android:clipChildren="false">
+<!-- Layout for TvPipMenuView -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:id="@+id/tv_pip_menu"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:background="#CC000000">
 
-    <com.android.wm.shell.pip.tv.PipControlsView
-        android:id="@+id/pip_controls"
+    <LinearLayout
+        android:id="@+id/tv_pip_menu_action_buttons"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:alpha="0" />
-</LinearLayout>
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="350dp"
+        android:orientation="horizontal"
+        android:alpha="0">
+
+        <com.android.wm.shell.pip.tv.TvPipMenuActionButton
+            android:id="@+id/tv_pip_menu_fullscreen_button"
+            android:layout_width="@dimen/picture_in_picture_button_width"
+            android:layout_height="wrap_content"
+            android:src="@drawable/pip_ic_fullscreen_white"
+            android:text="@string/pip_fullscreen" />
+
+        <com.android.wm.shell.pip.tv.TvPipMenuActionButton
+            android:id="@+id/tv_pip_menu_close_button"
+            android:layout_width="@dimen/picture_in_picture_button_width"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/picture_in_picture_button_start_margin"
+            android:src="@drawable/pip_ic_close_white"
+            android:text="@string/pip_close" />
+
+        <!-- More TvPipMenuActionButtons may be added here at runtime. -->
+
+    </LinearLayout>
+
+</FrameLayout>
