@@ -67,6 +67,7 @@ public class TypefaceSystemFallbackTest {
     private static final String TEST_FONT_DIR;
     private static final String TEST_OEM_XML;
     private static final String TEST_OEM_DIR;
+    private static final String TEST_UPDATABLE_FONT_DIR;
 
     private static final float GLYPH_1EM_WIDTH;
     private static final float GLYPH_2EM_WIDTH;
@@ -82,9 +83,11 @@ public class TypefaceSystemFallbackTest {
         TEST_FONTS_XML = new File(cacheDir, "fonts.xml").getAbsolutePath();
         TEST_OEM_DIR = cacheDir.getAbsolutePath() + "/oem_fonts/";
         TEST_OEM_XML = new File(cacheDir, "fonts_customization.xml").getAbsolutePath();
+        TEST_UPDATABLE_FONT_DIR = cacheDir.getAbsolutePath() + "/updatable_fonts/";
 
         new File(TEST_FONT_DIR).mkdirs();
         new File(TEST_OEM_DIR).mkdirs();
+        new File(TEST_UPDATABLE_FONT_DIR).mkdirs();
 
         final AssetManager am =
                 InstrumentationRegistry.getInstrumentation().getContext().getAssets();
@@ -103,18 +106,11 @@ public class TypefaceSystemFallbackTest {
                 InstrumentationRegistry.getInstrumentation().getContext().getAssets();
         for (final String fontFile : TEST_FONT_FILES) {
             final String sourceInAsset = "fonts/" + fontFile;
-            final File outInCache = new File(TEST_FONT_DIR, fontFile);
-            try (InputStream is = am.open(sourceInAsset)) {
-                Files.copy(is, outInCache.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            final File outOemInCache = new File(TEST_OEM_DIR, fontFile);
-            try (InputStream is = am.open(sourceInAsset)) {
-                Files.copy(is, outOemInCache.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            copyAssetToFile(sourceInAsset, new File(TEST_FONT_DIR, fontFile));
+            copyAssetToFile(sourceInAsset, new File(TEST_OEM_DIR, fontFile));
+        }
+        for (final File fontFile : new File(TEST_UPDATABLE_FONT_DIR).listFiles()) {
+            fontFile.delete();
         }
     }
 
@@ -124,7 +120,20 @@ public class TypefaceSystemFallbackTest {
             final File outInCache = new File(TEST_FONT_DIR, fontFile);
             outInCache.delete();
             final File outOemInCache = new File(TEST_OEM_DIR, fontFile);
-            outInCache.delete();
+            outOemInCache.delete();
+        }
+        for (final File fontFile : new File(TEST_UPDATABLE_FONT_DIR).listFiles()) {
+            fontFile.delete();
+        }
+    }
+
+    private static void copyAssetToFile(String sourceInAsset, File out) {
+        final AssetManager am =
+                InstrumentationRegistry.getInstrumentation().getContext().getAssets();
+        try (InputStream is = am.open(sourceInAsset)) {
+            Files.copy(is, out.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -138,7 +147,7 @@ public class TypefaceSystemFallbackTest {
         }
 
         final FontConfig.Alias[] aliases = SystemFonts.buildSystemFallback(TEST_FONTS_XML,
-                TEST_FONT_DIR, oemCustomization, fallbackMap);
+                TEST_FONT_DIR, TEST_UPDATABLE_FONT_DIR, oemCustomization, fallbackMap);
         Typeface.initSystemDefaultTypefaces(fontMap, fallbackMap, aliases);
     }
 
@@ -834,5 +843,33 @@ public class TypefaceSystemFallbackTest {
                 + "  </family>"
                 + "</fonts-modification>";
         readFontCustomization(oemXml);
+    }
+
+
+    @Test
+    public void testBuildSystemFallback_UpdatableFont() {
+        final String xml = "<?xml version='1.0' encoding='UTF-8'?>"
+                + "<familyset>"
+                + "  <family name='test'>"
+                + "    <font weight='400' style='normal'>a3em.ttf</font>"
+                + "  </family>"
+                + "</familyset>";
+        final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
+        final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
+        final FontCustomizationParser.Result oemCustomization =
+                new FontCustomizationParser.Result();
+
+        // Install all2em.ttf as a3em.ttf
+        copyAssetToFile("fonts/all2em.ttf", new File(TEST_UPDATABLE_FONT_DIR, "a3em.ttf"));
+        buildSystemFallback(xml, oemCustomization, fontMap, fallbackMap);
+
+        final Paint paint = new Paint();
+
+        final Typeface sansSerifTypeface = fontMap.get("test");
+        assertNotNull(sansSerifTypeface);
+        paint.setTypeface(sansSerifTypeface);
+        assertEquals(GLYPH_2EM_WIDTH, paint.measureText("a"), 0.0f);
+        assertEquals(GLYPH_2EM_WIDTH, paint.measureText("b"), 0.0f);
+        assertEquals(GLYPH_2EM_WIDTH, paint.measureText("c"), 0.0f);
     }
 }

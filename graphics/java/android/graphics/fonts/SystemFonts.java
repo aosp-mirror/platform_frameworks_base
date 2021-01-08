@@ -91,7 +91,9 @@ public final class SystemFonts {
         final FontCustomizationParser.Result oemCustomization =
                 readFontCustomization("/product/etc/fonts_customization.xml", "/product/fonts/");
         Map<String, FontFamily[]> map = new ArrayMap<>();
-        buildSystemFallback("/system/etc/fonts.xml", "/system/fonts/", oemCustomization, map);
+        // TODO: use updated fonts
+        buildSystemFallback("/system/etc/fonts.xml", "/system/fonts/", null /* updatableFontDir */,
+                oemCustomization, map);
         Set<Font> res = new HashSet<>();
         for (FontFamily[] families : map.values()) {
             for (FontFamily family : families) {
@@ -226,13 +228,7 @@ public final class SystemFonts {
     }
 
     /**
-     * Build the system fallback from xml file.
-     *
-     * @param xmlPath A full path string to the fonts.xml file.
-     * @param fontDir A full path string to the system font directory. This must end with
-     *                slash('/').
-     * @param fallbackMap An output system fallback map. Caller must pass empty map.
-     * @return a list of aliases
+     * @see #buildSystemFallback(String, String, String, FontCustomizationParser.Result, Map)
      * @hide
      */
     @VisibleForTesting
@@ -240,9 +236,31 @@ public final class SystemFonts {
             @NonNull String fontDir,
             @NonNull FontCustomizationParser.Result oemCustomization,
             @NonNull Map<String, FontFamily[]> fallbackMap) {
+        return buildSystemFallback(xmlPath, fontDir, null /* updatableFontDir */,
+                oemCustomization, fallbackMap);
+    }
+
+    /**
+     * Build the system fallback from xml file.
+     *
+     * @param xmlPath A full path string to the fonts.xml file.
+     * @param fontDir A full path string to the system font directory. This must end with
+     *                slash('/').
+     * @param updatableFontDir A full path string to the updatable system font directory. This
+     *                           must end with slash('/').
+     * @param fallbackMap An output system fallback map. Caller must pass empty map.
+     * @return a list of aliases
+     * @hide
+     */
+    @VisibleForTesting
+    public static FontConfig.Alias[] buildSystemFallback(@NonNull String xmlPath,
+            @NonNull String fontDir,
+            @Nullable String updatableFontDir,
+            @NonNull FontCustomizationParser.Result oemCustomization,
+            @NonNull Map<String, FontFamily[]> fallbackMap) {
         try {
             final FileInputStream fontsIn = new FileInputStream(xmlPath);
-            final FontConfig fontConfig = FontListParser.parse(fontsIn, fontDir);
+            final FontConfig fontConfig = FontListParser.parse(fontsIn, fontDir, updatableFontDir);
 
             final HashMap<String, ByteBuffer> bufferCache = new HashMap<String, ByteBuffer>();
             final FontConfig.Family[] xmlFamilies = fontConfig.getFamilies();
@@ -306,11 +324,17 @@ public final class SystemFonts {
     /** @hide */
     public static @NonNull Pair<FontConfig.Alias[], Map<String, FontFamily[]>>
             initializePreinstalledFonts() {
+        return initializeSystemFonts(null);
+    }
+
+    /** @hide */
+    public static Pair<FontConfig.Alias[], Map<String, FontFamily[]>>
+            initializeSystemFonts(@Nullable String updatableFontDir) {
         final FontCustomizationParser.Result oemCustomization =
                 readFontCustomization("/product/etc/fonts_customization.xml", "/product/fonts/");
         Map<String, FontFamily[]> map = new ArrayMap<>();
         FontConfig.Alias[] aliases = buildSystemFallback("/system/etc/fonts.xml", "/system/fonts/",
-                oemCustomization, map);
+                updatableFontDir, oemCustomization, map);
         synchronized (LOCK) {
             sFamilyMap = map;
         }
