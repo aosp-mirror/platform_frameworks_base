@@ -42,6 +42,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.internal.R;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.ShellExecutor;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -90,8 +91,8 @@ class HideDisplayCutoutOrganizer extends DisplayAreaOrganizer {
             };
 
     HideDisplayCutoutOrganizer(Context context, DisplayController displayController,
-            Executor executor) {
-        super(executor);
+            ShellExecutor mainExecutor) {
+        super(mainExecutor);
         mContext = context;
         mDisplayController = displayController;
     }

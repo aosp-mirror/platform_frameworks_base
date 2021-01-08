@@ -37,8 +37,8 @@ public class WindowManagerShellWrapper {
      */
     private final PinnedStackListenerForwarder mPinnedStackListenerForwarder;
 
-    public WindowManagerShellWrapper(ShellExecutor shellMainExecutor) {
-        mPinnedStackListenerForwarder = new PinnedStackListenerForwarder(shellMainExecutor);
+    public WindowManagerShellWrapper(ShellExecutor mainExecutor) {
+        mPinnedStackListenerForwarder = new PinnedStackListenerForwarder(mainExecutor);
     }
 
     /**

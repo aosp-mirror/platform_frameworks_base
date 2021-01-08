@@ -38,11 +38,11 @@ import java.util.ArrayList;
 public class PinnedStackListenerForwarder {
 
     private final IPinnedStackListener mListenerImpl = new PinnedStackListenerImpl();
-    private final ShellExecutor mShellMainExecutor;
+    private final ShellExecutor mMainExecutor;
     private final ArrayList<PinnedStackListener> mListeners = new ArrayList<>();
 
-    public PinnedStackListenerForwarder(ShellExecutor shellMainExecutor) {
-        mShellMainExecutor = shellMainExecutor;
+    public PinnedStackListenerForwarder(ShellExecutor mainExecutor) {
+        mMainExecutor = mainExecutor;
     }
 
     /** Adds a listener to receive updates from the WindowManagerService. */
@@ -94,35 +94,35 @@ public class PinnedStackListenerForwarder {
     private class PinnedStackListenerImpl extends IPinnedStackListener.Stub {
         @Override
         public void onMovementBoundsChanged(boolean fromImeAdjustment) {
-            mShellMainExecutor.execute(() -> {
+            mMainExecutor.execute(() -> {
                 PinnedStackListenerForwarder.this.onMovementBoundsChanged(fromImeAdjustment);
             });
         }
 
         @Override
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
-            mShellMainExecutor.execute(() -> {
+            mMainExecutor.execute(() -> {
                 PinnedStackListenerForwarder.this.onImeVisibilityChanged(imeVisible, imeHeight);
             });
         }
 
         @Override
         public void onActionsChanged(ParceledListSlice<RemoteAction> actions) {
-            mShellMainExecutor.execute(() -> {
+            mMainExecutor.execute(() -> {
                 PinnedStackListenerForwarder.this.onActionsChanged(actions);
             });
         }
 
         @Override
         public void onActivityHidden(ComponentName componentName) {
-            mShellMainExecutor.execute(() -> {
+            mMainExecutor.execute(() -> {
                 PinnedStackListenerForwarder.this.onActivityHidden(componentName);
             });
         }
 
         @Override
         public void onAspectRatioChanged(float aspectRatio) {
-            mShellMainExecutor.execute(() -> {
+            mMainExecutor.execute(() -> {
                 PinnedStackListenerForwarder.this.onAspectRatioChanged(aspectRatio);
             });
         }

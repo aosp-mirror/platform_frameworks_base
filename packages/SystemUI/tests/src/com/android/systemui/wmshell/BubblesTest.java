@@ -100,6 +100,7 @@ import com.android.wm.shell.bubbles.BubbleOverflow;
 import com.android.wm.shell.bubbles.BubbleStackView;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.common.FloatingContentCoordinator;
+import com.android.wm.shell.common.ShellExecutor;
 
 import com.google.common.collect.ImmutableList;
 
@@ -278,9 +279,9 @@ public class BubblesTest extends SysuiTestCase {
                 mWindowManagerShellWrapper,
                 mLauncherApps,
                 mBubbleLogger,
-                mock(Handler.class),
                 mock(ShellTaskOrganizer.class),
-                mPositioner);
+                mPositioner,
+                mock(ShellExecutor.class));
         mBubbleController.setExpandListener(mBubbleExpandListener);
 
         mBubblesManager = new BubblesManager(

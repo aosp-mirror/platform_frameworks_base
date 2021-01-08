@@ -36,7 +36,9 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.wm.shell.FullscreenTaskListener;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellCommandHandler;
+import com.android.wm.shell.ShellCommandHandlerImpl;
 import com.android.wm.shell.ShellInit;
+import com.android.wm.shell.ShellInitImpl;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.Transitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
@@ -158,7 +160,7 @@ public abstract class WMShellBaseModule {
                 // Choreographer.getSfInstance() which returns a thread-local Choreographer instance
                 // that uses the SF vsync
                 handler.setProvider(new SfVsyncFrameCallbackProvider());
-            }, 1, TimeUnit.SECONDS);
+            });
             return handler;
         } catch (InterruptedException e) {
             throw new RuntimeException("Failed to initialize SfVsync animation handler in 1s", e);
@@ -173,14 +175,14 @@ public abstract class WMShellBaseModule {
             Optional<LegacySplitScreen> legacySplitScreenOptional,
             Optional<AppPairs> appPairsOptional,
             FullscreenTaskListener fullscreenTaskListener,
-            Transitions transitions) {
-        return new ShellInit(displayImeController,
+            @ShellMainThread ShellExecutor shellMainExecutor) {
+        return ShellInitImpl.create(displayImeController,
                 dragAndDropController,
                 shellTaskOrganizer,
                 legacySplitScreenOptional,
                 appPairsOptional,
                 fullscreenTaskListener,
-                transitions);
+                shellMainExecutor);
     }
 
     /**
@@ -195,9 +197,11 @@ public abstract class WMShellBaseModule {
             Optional<Pip> pipOptional,
             Optional<OneHanded> oneHandedOptional,
             Optional<HideDisplayCutout> hideDisplayCutout,
-            Optional<AppPairs> appPairsOptional) {
-        return Optional.of(new ShellCommandHandler(shellTaskOrganizer, legacySplitScreenOptional,
-                pipOptional, oneHandedOptional, hideDisplayCutout, appPairsOptional));
+            Optional<AppPairs> appPairsOptional,
+            @ShellMainThread ShellExecutor shellMainExecutor) {
+        return Optional.of(ShellCommandHandlerImpl.create(shellTaskOrganizer,
+                legacySplitScreenOptional, pipOptional, oneHandedOptional, hideDisplayCutout,
+                appPairsOptional, shellMainExecutor));
     }
 
     @WMSingleton
@@ -208,9 +212,9 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static DisplayController provideDisplayController(Context context, @Main Handler handler,
-            IWindowManager wmService) {
-        return new DisplayController(context, handler, wmService);
+    static DisplayController provideDisplayController(Context context,
+            IWindowManager wmService, @ShellMainThread ShellExecutor shellMainExecutor) {
+        return new DisplayController(context, wmService, shellMainExecutor);
     }
 
     @WMSingleton
@@ -269,9 +273,9 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static SyncTransactionQueue provideSyncTransactionQueue(@Main Handler handler,
-            TransactionPool pool) {
-        return new SyncTransactionQueue(pool, handler);
+    static SyncTransactionQueue provideSyncTransactionQueue(TransactionPool pool,
+            @ShellMainThread ShellExecutor shellMainExecutor) {
+        return new SyncTransactionQueue(pool, shellMainExecutor);
     }
 
     @WMSingleton
@@ -288,10 +292,12 @@ public abstract class WMShellBaseModule {
         return new RootTaskDisplayAreaOrganizer(mainExecutor, context);
     }
 
+    // We currently dedupe multiple messages, so we use the shell main handler directly
     @WMSingleton
     @Provides
-    static TaskStackListenerImpl providerTaskStackListenerImpl(@Main Handler handler) {
-        return new TaskStackListenerImpl(handler);
+    static TaskStackListenerImpl providerTaskStackListenerImpl(
+            @ShellMainThread Handler shellMainHandler) {
+        return new TaskStackListenerImpl(shellMainHandler);
     }
 
     @BindsOptionalOf
@@ -309,11 +315,12 @@ public abstract class WMShellBaseModule {
             WindowManagerShellWrapper windowManagerShellWrapper,
             LauncherApps launcherApps,
             UiEventLogger uiEventLogger,
-            @Main Handler mainHandler,
-            ShellTaskOrganizer organizer) {
+            ShellTaskOrganizer organizer,
+            @ShellMainThread ShellExecutor shellMainExecutor) {
         return Optional.of(BubbleController.create(context, null /* synchronizer */,
                 floatingContentCoordinator, statusBarService, windowManager,
-                windowManagerShellWrapper, launcherApps, uiEventLogger, mainHandler, organizer));
+                windowManagerShellWrapper, launcherApps, uiEventLogger, organizer,
+                shellMainExecutor));
     }
 
     @WMSingleton
