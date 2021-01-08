@@ -143,10 +143,6 @@ public abstract class KernelCpuUidTimeReader<T> {
      */
     public void removeUid(int uid) {
         mLastTimes.delete(uid);
-
-        if (mBpfTimesAvailable) {
-            mBpfReader.removeUidsInRange(uid, uid);
-        }
     }
 
     /**
