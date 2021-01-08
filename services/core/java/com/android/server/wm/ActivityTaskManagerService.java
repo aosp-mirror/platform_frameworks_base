@@ -28,6 +28,8 @@ import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.REMOVE_TASKS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.Manifest.permission.STOP_APP_SWITCHES;
+import static android.app.ActivityManager.DROP_CLOSE_SYSTEM_DIALOGS;
+import static android.app.ActivityManager.LOCK_DOWN_CLOSE_SYSTEM_DIALOGS;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
@@ -253,6 +255,7 @@ import com.android.server.firewall.IntentFirewall;
 import com.android.server.inputmethod.InputMethodSystemProperty;
 import com.android.server.pm.UserManagerService;
 import com.android.server.policy.PermissionPolicyInternal;
+import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriGrantsManagerInternal;
 
@@ -342,6 +345,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /** The cached sys ui service component name from package manager. */
     private ComponentName mSysUiServiceComponent;
     private PermissionPolicyInternal mPermissionPolicyInternal;
+    private StatusBarManagerInternal mStatusBarManagerInternal;
     @VisibleForTesting
     final ActivityTaskManagerInternal mInternal;
     PowerManagerInternal mPowerManagerInternal;
@@ -2927,14 +2931,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
         if (!canCloseSystemDialogs(pid, uid, process)) {
             // The app can't close system dialogs, throw only if it targets S+
-            if (CompatChanges.isChangeEnabled(
-                    ActivityManager.LOCK_DOWN_CLOSE_SYSTEM_DIALOGS, uid)) {
+            if (CompatChanges.isChangeEnabled(LOCK_DOWN_CLOSE_SYSTEM_DIALOGS, uid)) {
                 throw new SecurityException(
                         "Permission Denial: " + Intent.ACTION_CLOSE_SYSTEM_DIALOGS
                                 + " broadcast from " + caller + " requires "
                                 + Manifest.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS + ".");
-            } else if (CompatChanges.isChangeEnabled(
-                    ActivityManager.DROP_CLOSE_SYSTEM_DIALOGS, uid)) {
+            } else if (CompatChanges.isChangeEnabled(DROP_CLOSE_SYSTEM_DIALOGS, uid)) {
                 Slog.e(TAG,
                         "Permission Denial: " + Intent.ACTION_CLOSE_SYSTEM_DIALOGS
                                 + " broadcast from " + caller + " requires "
@@ -2976,6 +2978,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             // to close the shade prior to starting an activity.
             if (process.canCloseSystemDialogsByToken()) {
                 return true;
+            }
+        }
+        // This covers the case where the app is displaying some UI on top of the notification shade
+        // and wants to start an activity. The app then sends the intent in order to move the
+        // notification shade out of the way and show the activity to the user. This is fine since
+        // the caller already has privilege to show a visible window on top of the notification
+        // shade, so it can already prevent the user from accessing the shade if it wants to.
+        // We only allow for targetSdk < S, for S+ we automatically collapse the shade on
+        // startActivity() for these apps.
+        if (!CompatChanges.isChangeEnabled(LOCK_DOWN_CLOSE_SYSTEM_DIALOGS, uid)) {
+            synchronized (mGlobalLock) {
+                if (mRootWindowContainer.hasVisibleWindowAboveNotificationShade(uid)) {
+                    return true;
+                }
             }
         }
         return false;
@@ -4780,6 +4796,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mPermissionPolicyInternal = LocalServices.getService(PermissionPolicyInternal.class);
         }
         return mPermissionPolicyInternal;
+    }
+
+    StatusBarManagerInternal getStatusBarManagerInternal() {
+        if (mStatusBarManagerInternal == null) {
+            mStatusBarManagerInternal = LocalServices.getService(StatusBarManagerInternal.class);
+        }
+        return mStatusBarManagerInternal;
     }
 
     AppWarnings getAppWarningsLocked() {

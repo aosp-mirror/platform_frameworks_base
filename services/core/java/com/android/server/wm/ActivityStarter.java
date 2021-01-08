@@ -118,6 +118,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.pm.InstantAppResolver;
 import com.android.server.power.ShutdownCheckPoints;
+import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.wm.ActivityMetricsLogger.LaunchingState;
 import com.android.server.wm.ActivityTaskSupervisor.PendingActivityLaunch;
@@ -1589,6 +1590,20 @@ class ActivityStarter {
                     newTransition.abort();
                 }
             } else {
+                if (!mAvoidMoveToFront && mDoResume
+                        && mRootWindowContainer.hasVisibleWindowAboveNotificationShade(
+                            r.launchedFromUid)) {
+                    // If the UID launching the activity has a visible window on top of the
+                    // notification shade and it's launching an activity that's going to be at the
+                    // front, we should move the shade out of the way so the user can see it.
+                    // We want to avoid the case where the activity is launched on top of a
+                    // background task which is not moved to the front.
+                    StatusBarManagerInternal statusBar = mService.getStatusBarManagerInternal();
+                    if (statusBar != null) {
+                        // This results in a async call since the interface is one-way
+                        statusBar.collapsePanels();
+                    }
+                }
                 if (result == START_SUCCESS || result == START_TASK_TO_FRONT) {
                     // The activity is started new rather than just brought forward, so record
                     // it as an existence change.
