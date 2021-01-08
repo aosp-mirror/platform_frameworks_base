@@ -213,6 +213,19 @@ public final class CompatChange extends CompatibilityChangeInfo {
     }
 
     /**
+     * Find if this change will be enabled for the given package after installation.
+     *
+     * @param packageName The package name in question
+     * @return {@code true} if the change should be enabled for the package.
+     */
+    boolean willBeEnabled(String packageName) {
+        if (hasDeferredOverride(packageName)) {
+            return mDeferredOverrides.get(packageName);
+        }
+        return defaultValue();
+    }
+
+    /**
      * Returns the default value for the change id, assuming there are no overrides.
      *
      * @return {@code false} if it's a default disabled change, {@code true} otherwise.
