@@ -29,6 +29,7 @@ import android.app.time.TimeZoneConfiguration;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.os.ShellCommand;
+import android.os.UserHandle;
 
 import java.io.PrintWriter;
 import java.util.function.Consumer;
@@ -76,7 +77,8 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
 
     private int runIsAutoDetectionEnabled() {
         final PrintWriter pw = getOutPrintWriter();
-        boolean enabled = mInterface.getCapabilitiesAndConfig()
+        int userId = UserHandle.USER_CURRENT;
+        boolean enabled = mInterface.getCapabilitiesAndConfig(userId)
                 .getConfiguration()
                 .isAutoDetectionEnabled();
         pw.println(enabled);
@@ -92,14 +94,16 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
 
     private int runIsLocationEnabled() {
         final PrintWriter pw = getOutPrintWriter();
-        boolean enabled = mInterface.isLocationEnabled();
+        int userId = UserHandle.USER_CURRENT;
+        boolean enabled = mInterface.isLocationEnabled(userId);
         pw.println(enabled);
         return 0;
     }
 
     private int runIsGeoDetectionEnabled() {
         final PrintWriter pw = getOutPrintWriter();
-        boolean enabled = mInterface.getCapabilitiesAndConfig()
+        int userId = UserHandle.USER_CURRENT;
+        boolean enabled = mInterface.getCapabilitiesAndConfig(userId)
                 .getConfiguration()
                 .isGeoDetectionEnabled();
         pw.println(enabled);
@@ -108,18 +112,20 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
 
     private int runSetAutoDetectionEnabled() {
         boolean enabled = Boolean.parseBoolean(getNextArgRequired());
+        int userId = UserHandle.USER_CURRENT;
         TimeZoneConfiguration configuration = new TimeZoneConfiguration.Builder()
                 .setAutoDetectionEnabled(enabled)
                 .build();
-        return mInterface.updateConfiguration(configuration) ? 0 : 1;
+        return mInterface.updateConfiguration(userId, configuration) ? 0 : 1;
     }
 
     private int runSetGeoDetectionEnabled() {
         boolean enabled = Boolean.parseBoolean(getNextArgRequired());
+        int userId = UserHandle.USER_CURRENT;
         TimeZoneConfiguration configuration = new TimeZoneConfiguration.Builder()
                 .setGeoDetectionEnabled(enabled)
                 .build();
-        return mInterface.updateConfiguration(configuration) ? 0 : 1;
+        return mInterface.updateConfiguration(userId, configuration) ? 0 : 1;
     }
 
     private int runSuggestGeolocationTimeZone() {
