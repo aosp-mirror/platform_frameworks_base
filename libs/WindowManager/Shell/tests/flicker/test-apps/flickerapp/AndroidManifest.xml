@@ -53,6 +53,7 @@
         <activity android:name=".ImeActivity"
                  android:taskAffinity="com.android.wm.shell.flicker.testapp.ImeActivity"
                  android:label="ImeApp"
+                 android:launchMode="singleTop"
                  android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
