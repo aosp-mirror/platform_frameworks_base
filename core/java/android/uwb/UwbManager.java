@@ -369,13 +369,13 @@ public final class UwbManager {
 
     /**
      * Open a {@link RangingSession} with the given parameters
-     * <p>This function is asynchronous and will return before ranging begins. The
-     * {@link RangingSession.Callback#onOpenSuccess(RangingSession, PersistableBundle)} function is
-     * called with a {@link RangingSession} object used to control ranging when the session is
-     * successfully opened.
+     * <p>The {@link RangingSession.Callback#onOpened(RangingSession)} function is called with a
+     * {@link RangingSession} object used to control ranging when the session is successfully
+     * opened.
      *
-     * <p>If a session cannot be opened, then {@link RangingSession.Callback#onClosed(int)} will be
-     * invoked with the appropriate {@link RangingSession.Callback.CloseReason}.
+     * <p>If a session cannot be opened, then
+     * {@link RangingSession.Callback#onClosed(int, PersistableBundle)} will be invoked with the
+     * appropriate {@link RangingSession.Callback.Reason}.
      *
      * <p>An open {@link RangingSession} will be automatically closed if client application process
      * dies.
@@ -391,7 +391,7 @@ public final class UwbManager {
      * @return an {@link AutoCloseable} that is able to be used to close or cancel the opening of a
      *         {@link RangingSession} that has been requested through {@link #openRangingSession}
      *         but has not yet been made available by
-     *         {@link RangingSession.Callback#onOpenSuccess}.
+     *         {@link RangingSession.Callback#onOpened(RangingSession)}.
      */
     @NonNull
     public AutoCloseable openRangingSession(@NonNull PersistableBundle parameters,
