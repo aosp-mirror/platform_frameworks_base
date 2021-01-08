@@ -18,6 +18,7 @@ package android.view.inputmethod;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -74,7 +75,7 @@ public final class SurroundingText implements Parcelable {
     public SurroundingText(@NonNull final CharSequence text,
             @IntRange(from = 0) int selectionStart, @IntRange(from = 0) int selectionEnd,
             @IntRange(from = -1) int offset) {
-        mText = text;
+        mText = copyWithParcelableSpans(text);
         mSelectionStart = selectionStart;
         mSelectionEnd = selectionEnd;
         mOffset = offset;
@@ -155,4 +156,29 @@ public final class SurroundingText implements Parcelable {
                     return new SurroundingText[size];
                 }
             };
+
+    /**
+     * Create a copy of the given {@link CharSequence} object, with completely copy
+     * {@link ParcelableSpan} instances.
+     *
+     * @param source the original {@link CharSequence} to be copied.
+     * @return the copied {@link CharSequence}. {@code null} if {@code source} is {@code null}.
+     */
+    @Nullable
+    private static CharSequence copyWithParcelableSpans(@Nullable CharSequence source) {
+        if (source == null) {
+            return null;
+        }
+        Parcel parcel = null;
+        try {
+            parcel = Parcel.obtain();
+            TextUtils.writeToParcel(source, parcel, /* parcelableFlags= */ 0);
+            parcel.setDataPosition(0);
+            return TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
+        } finally {
+            if (parcel != null) {
+                parcel.recycle();
+            }
+        }
+    }
 }

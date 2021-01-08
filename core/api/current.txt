@@ -50464,6 +50464,7 @@ package android.view.inputmethod {
     method public int describeContents();
     method public void dump(android.util.Printer, String);
     method @Nullable public CharSequence getInitialSelectedText(int);
+    method @Nullable public android.view.inputmethod.SurroundingText getInitialSurroundingText(@IntRange(from=0) int, @IntRange(from=0) int, int);
     method @Nullable public CharSequence getInitialTextAfterCursor(int, int);
     method @Nullable public CharSequence getInitialTextBeforeCursor(int, int);
     method public final void makeCompatible(int);
