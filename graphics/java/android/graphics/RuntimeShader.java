@@ -115,6 +115,10 @@ public class RuntimeShader extends Shader {
                 nativeShaders, colorSpace().getNativeInstance(), mIsOpaque);
     }
 
+    public long getNativeShaderFactory() {
+        return mNativeInstanceRuntimeShaderFactory;
+    }
+
     private static native long nativeCreate(long shaderFactory, long matrix, byte[] inputs,
             long[] shaderInputs, long colorSpaceHandle, boolean isOpaque);
 
