@@ -3020,6 +3020,10 @@ public class DevicePolicyManager {
      *
      * <p><strong>Note:</strong> Specifying password requirements using this method clears the
      * password complexity requirements set using {@link #setRequiredPasswordComplexity(int)}.
+     * If this method is called on the {@link DevicePolicyManager} instance returned by
+     * {@link #getParentProfileInstance(ComponentName)}, then password complexity requirements
+     * set on the primary {@link DevicePolicyManager} must be cleared first by calling
+     * {@link #setRequiredPasswordComplexity} with {@link #PASSWORD_COMPLEXITY_NONE) first.
      *
      * @deprecated Prefer using {@link #setRequiredPasswordComplexity(int)}, to require a password
      * that satisfies a complexity level defined by the platform, rather than specifying custom
@@ -3039,6 +3043,9 @@ public class DevicePolicyManager {
      *             calling app is targeting {@link android.os.Build.VERSION_CODES#S} and above,
      *             and is calling the method the {@link DevicePolicyManager} instance returned by
      *             {@link #getParentProfileInstance(ComponentName)}.
+     * @throws IllegalStateException if the caller is trying to set password quality on the parent
+     *             {@link DevicePolicyManager} instance while password complexity was set on the
+     *             primary {@link DevicePolicyManager} instance.
      */
     @Deprecated
     public void setPasswordQuality(@NonNull ComponentName admin, int quality) {
@@ -4055,10 +4062,18 @@ public class DevicePolicyManager {
      * <p><strong>Note:</strong> Specifying password requirements using this method clears any
      * password requirements set using the obsolete {@link #setPasswordQuality(ComponentName, int)}
      * and any of its associated methods.
+     * Additionally, if there are password requirements set using the obsolete
+     * {@link #setPasswordQuality(ComponentName, int)} on the parent {@code DevicePolicyManager}
+     * instance, they must be cleared by calling {@link #setPasswordQuality(ComponentName, int)}
+     * with {@link #PASSWORD_QUALITY_UNSPECIFIED} on that instance prior to setting complexity
+     * requirement for the managed profile.
      *
      * @throws SecurityException if the calling application is not a device owner or a profile
      * owner.
      * @throws IllegalArgumentException if the complexity level is not one of the four above.
+     * @throws IllegalStateException if the caller is trying to set password complexity while there
+     * are password requirements specified using {@link #setPasswordQuality(ComponentName, int)}
+     * on the parent {@code DevicePolicyManager} instance.
      */
     public void setRequiredPasswordComplexity(@PasswordComplexity int passwordComplexity) {
         if (mService == null) {
