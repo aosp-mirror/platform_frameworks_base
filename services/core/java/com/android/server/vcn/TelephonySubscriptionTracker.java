@@ -36,6 +36,8 @@ import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
+import android.telephony.TelephonyManager;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 
@@ -79,6 +81,7 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
     @NonNull private final TelephonySubscriptionTrackerCallback mCallback;
     @NonNull private final Dependencies mDeps;
 
+    @NonNull private final TelephonyManager mTelephonyManager;
     @NonNull private final SubscriptionManager mSubscriptionManager;
     @NonNull private final CarrierConfigManager mCarrierConfigManager;
 
@@ -106,6 +109,7 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
         mCallback = Objects.requireNonNull(callback, "Missing callback");
         mDeps = Objects.requireNonNull(deps, "Missing deps");
 
+        mTelephonyManager = mContext.getSystemService(TelephonyManager.class);
         mSubscriptionManager = mContext.getSystemService(SubscriptionManager.class);
         mCarrierConfigManager = mContext.getSystemService(CarrierConfigManager.class);
 
@@ -139,7 +143,7 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
      * so callbacks & broadcasts are all serialized on mHandler, avoiding the need for locking.
      */
     public void handleSubscriptionsChanged() {
-        final Set<ParcelUuid> activeSubGroups = new ArraySet<>();
+        final Map<ParcelUuid, Set<String>> privilegedPackages = new HashMap<>();
         final Map<Integer, ParcelUuid> newSubIdToGroupMap = new HashMap<>();
 
         final List<SubscriptionInfo> allSubs = mSubscriptionManager.getAllSubscriptionInfoList();
@@ -166,12 +170,22 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
             // group.
             if (subInfo.getSimSlotIndex() != INVALID_SIM_SLOT_INDEX
                     && mReadySubIdsBySlotId.values().contains(subInfo.getSubscriptionId())) {
-                activeSubGroups.add(subInfo.getGroupUuid());
+                // TODO (b/172619301): Cache based on callbacks from CarrierPrivilegesTracker
+
+                final TelephonyManager subIdSpecificTelephonyManager =
+                        mTelephonyManager.createForSubscriptionId(subInfo.getSubscriptionId());
+
+                final ParcelUuid subGroup = subInfo.getGroupUuid();
+                final Set<String> pkgs =
+                        privilegedPackages.getOrDefault(subGroup, new ArraySet<>());
+                pkgs.addAll(subIdSpecificTelephonyManager.getPackagesWithCarrierPrivileges());
+
+                privilegedPackages.put(subGroup, pkgs);
             }
         }
 
         final TelephonySubscriptionSnapshot newSnapshot =
-                new TelephonySubscriptionSnapshot(newSubIdToGroupMap, activeSubGroups);
+                new TelephonySubscriptionSnapshot(newSubIdToGroupMap, privilegedPackages);
 
         // If snapshot was meaningfully updated, fire the callback
         if (!newSnapshot.equals(mCurrentSnapshot)) {
@@ -231,22 +245,40 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
     /** TelephonySubscriptionSnapshot is a class containing info about active subscriptions */
     public static class TelephonySubscriptionSnapshot {
         private final Map<Integer, ParcelUuid> mSubIdToGroupMap;
-        private final Set<ParcelUuid> mActiveGroups;
+        private final Map<ParcelUuid, Set<String>> mPrivilegedPackages;
+
+        public static final TelephonySubscriptionSnapshot EMPTY_SNAPSHOT =
+                new TelephonySubscriptionSnapshot(Collections.emptyMap(), Collections.emptyMap());
 
         @VisibleForTesting(visibility = Visibility.PRIVATE)
         TelephonySubscriptionSnapshot(
                 @NonNull Map<Integer, ParcelUuid> subIdToGroupMap,
-                @NonNull Set<ParcelUuid> activeGroups) {
-            mSubIdToGroupMap = Collections.unmodifiableMap(
-                    Objects.requireNonNull(subIdToGroupMap, "subIdToGroupMap was null"));
-            mActiveGroups = Collections.unmodifiableSet(
-                    Objects.requireNonNull(activeGroups, "activeGroups was null"));
+                @NonNull Map<ParcelUuid, Set<String>> privilegedPackages) {
+            Objects.requireNonNull(subIdToGroupMap, "subIdToGroupMap was null");
+            Objects.requireNonNull(privilegedPackages, "privilegedPackages was null");
+
+            mSubIdToGroupMap = Collections.unmodifiableMap(subIdToGroupMap);
+
+            final Map<ParcelUuid, Set<String>> unmodifiableInnerSets = new ArrayMap<>();
+            for (Entry<ParcelUuid, Set<String>> entry : privilegedPackages.entrySet()) {
+                unmodifiableInnerSets.put(
+                        entry.getKey(), Collections.unmodifiableSet(entry.getValue()));
+            }
+            mPrivilegedPackages = Collections.unmodifiableMap(unmodifiableInnerSets);
         }
 
         /** Returns the active subscription groups */
         @NonNull
         public Set<ParcelUuid> getActiveSubscriptionGroups() {
-            return mActiveGroups;
+            return mPrivilegedPackages.keySet();
+        }
+
+        /** Checks if the provided package is carrier privileged for the specified sub group. */
+        public boolean packageHasPermissionsForSubscriptionGroup(
+                @NonNull ParcelUuid subGrp, @NonNull String packageName) {
+            final Set<String> privilegedPackages = mPrivilegedPackages.get(subGrp);
+
+            return privilegedPackages != null && privilegedPackages.contains(packageName);
         }
 
         /** Returns the Subscription Group for a given subId. */
@@ -273,7 +305,7 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
 
         @Override
         public int hashCode() {
-            return Objects.hash(mSubIdToGroupMap, mActiveGroups);
+            return Objects.hash(mSubIdToGroupMap, mPrivilegedPackages);
         }
 
         @Override
@@ -285,7 +317,15 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
             final TelephonySubscriptionSnapshot other = (TelephonySubscriptionSnapshot) obj;
 
             return mSubIdToGroupMap.equals(other.mSubIdToGroupMap)
-                    && mActiveGroups.equals(other.mActiveGroups);
+                    && mPrivilegedPackages.equals(other.mPrivilegedPackages);
+        }
+
+        @Override
+        public String toString() {
+            return "TelephonySubscriptionSnapshot{ "
+                    + "mSubIdToGroupMap=" + mSubIdToGroupMap
+                    + ", mPrivilegedPackages=" + mPrivilegedPackages
+                    + " }";
         }
     }
 
