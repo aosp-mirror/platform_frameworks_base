@@ -272,6 +272,7 @@ public final class NetworkAgentConfig implements Parcelable {
          * Sets the subscriber ID for this network.
          *
          * @return this builder, to facilitate chaining.
+         * @hide
          */
         @NonNull
         public Builder setSubscriberId(@Nullable String subscriberId) {
