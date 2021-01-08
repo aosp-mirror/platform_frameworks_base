@@ -2044,7 +2044,7 @@ public class NetworkPolicyManagerServiceTest {
         final NetworkCapabilities networkCapabilities = new NetworkCapabilities();
         networkCapabilities.addTransportType(TRANSPORT_WIFI);
         networkCapabilities.setSSID(TEST_SSID);
-        return new NetworkState(TYPE_WIFI, prop, networkCapabilities, null, null, TEST_SSID);
+        return new NetworkState(TYPE_WIFI, prop, networkCapabilities, null, null);
     }
 
     private void expectHasInternetPermission(int uid, boolean hasIt) throws Exception {
@@ -2068,7 +2068,7 @@ public class NetworkPolicyManagerServiceTest {
                 new NetworkState(TYPE_MOBILE,
                         buildLinkProperties(TEST_IFACE),
                         buildNetworkCapabilities(TEST_SUB_ID, roaming),
-                        new Network(TEST_NET_ID), TEST_IMSI, null)
+                        new Network(TEST_NET_ID), TEST_IMSI)
         });
     }
 

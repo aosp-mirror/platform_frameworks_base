@@ -889,7 +889,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
                     ? networkAgentConfig.subscriberId : null;
             return new NetworkState(new NetworkInfo(networkInfo),
                     new LinkProperties(linkProperties),
-                    new NetworkCapabilities(networkCapabilities), network, subscriberId, null);
+                    new NetworkCapabilities(networkCapabilities), network, subscriberId);
         }
     }
 
