@@ -44,7 +44,7 @@ import org.junit.runner.RunWith;
 @RunWith(WindowTestRunner.class)
 @FlakyTest
 public class RefreshRatePolicyTest extends WindowTestsBase {
-
+    private static final float FLOAT_TOLERANCE = 0.01f;
     private static final int LOW_MODE_ID = 3;
 
     private RefreshRatePolicy mPolicy;
@@ -70,28 +70,34 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
                 "cameraUsingWindow");
         cameraUsingWindow.mAttrs.packageName = "com.android.test";
         assertEquals(0, mPolicy.getPreferredModeId(cameraUsingWindow));
+        assertEquals(0, mPolicy.getPreferredRefreshRate(cameraUsingWindow), FLOAT_TOLERANCE);
         mPolicy.addNonHighRefreshRatePackage("com.android.test");
         assertEquals(LOW_MODE_ID, mPolicy.getPreferredModeId(cameraUsingWindow));
+        assertEquals(0, mPolicy.getPreferredRefreshRate(cameraUsingWindow), FLOAT_TOLERANCE);
         mPolicy.removeNonHighRefreshRatePackage("com.android.test");
         assertEquals(0, mPolicy.getPreferredModeId(cameraUsingWindow));
+        assertEquals(0, mPolicy.getPreferredRefreshRate(cameraUsingWindow), FLOAT_TOLERANCE);
     }
 
     @Test
-    public void testBlacklist() {
-        final WindowState blacklistedWindow = createWindow(null, TYPE_BASE_APPLICATION,
-                "blacklistedWindow");
-        blacklistedWindow.mAttrs.packageName = "com.android.test";
+    public void testDenyList() {
+        final WindowState denylistedWindow = createWindow(null, TYPE_BASE_APPLICATION,
+                "denylistedWindow");
+        denylistedWindow.mAttrs.packageName = "com.android.test";
         when(mDenylist.isDenylisted("com.android.test")).thenReturn(true);
-        assertEquals(LOW_MODE_ID, mPolicy.getPreferredModeId(blacklistedWindow));
+        assertEquals(0, mPolicy.getPreferredModeId(denylistedWindow));
+        assertEquals(60, mPolicy.getPreferredRefreshRate(denylistedWindow), FLOAT_TOLERANCE);
     }
 
     @Test
     public void testAppOverride_blacklist() {
         final WindowState overrideWindow = createWindow(null, TYPE_BASE_APPLICATION,
                 "overrideWindow");
+        overrideWindow.mAttrs.packageName = "com.android.test";
         overrideWindow.mAttrs.preferredDisplayModeId = LOW_MODE_ID;
         when(mDenylist.isDenylisted("com.android.test")).thenReturn(true);
         assertEquals(LOW_MODE_ID, mPolicy.getPreferredModeId(overrideWindow));
+        assertEquals(60, mPolicy.getPreferredRefreshRate(overrideWindow), FLOAT_TOLERANCE);
     }
 
     @Test
@@ -102,6 +108,7 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
         overrideWindow.mAttrs.preferredDisplayModeId = LOW_MODE_ID;
         mPolicy.addNonHighRefreshRatePackage("com.android.test");
         assertEquals(LOW_MODE_ID, mPolicy.getPreferredModeId(overrideWindow));
+        assertEquals(0, mPolicy.getPreferredRefreshRate(overrideWindow), FLOAT_TOLERANCE);
     }
 
     @Test
@@ -115,6 +122,7 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
                 false /* hidden */, ANIMATION_TYPE_APP_TRANSITION);
         mPolicy.addNonHighRefreshRatePackage("com.android.test");
         assertEquals(0, mPolicy.getPreferredModeId(overrideWindow));
+        assertEquals(0, mPolicy.getPreferredRefreshRate(overrideWindow), FLOAT_TOLERANCE);
     }
 
     @Test
@@ -125,10 +133,12 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
 
         mPolicy.addNonHighRefreshRatePackage("com.android.test");
         assertEquals(LOW_MODE_ID, mPolicy.getPreferredModeId(cameraUsingWindow));
+        assertEquals(0, mPolicy.getPreferredRefreshRate(cameraUsingWindow), FLOAT_TOLERANCE);
 
         cameraUsingWindow.mActivityRecord.mSurfaceAnimator.startAnimation(
                 cameraUsingWindow.getPendingTransaction(), mock(AnimationAdapter.class),
                 false /* hidden */, ANIMATION_TYPE_APP_TRANSITION);
         assertEquals(0, mPolicy.getPreferredModeId(cameraUsingWindow));
+        assertEquals(0, mPolicy.getPreferredRefreshRate(cameraUsingWindow), FLOAT_TOLERANCE);
     }
 }

@@ -28,7 +28,7 @@ import android.view.DisplayInfo;
  */
 class RefreshRatePolicy {
 
-    private final int mLowRefreshRateId;
+    private final Mode mLowRefreshRateMode;
     private final ArraySet<String> mNonHighRefreshRatePackages = new ArraySet<>();
     private final HighRefreshRateDenylist mHighRefreshRateDenylist;
     private final WindowManagerService mWmService;
@@ -56,7 +56,7 @@ class RefreshRatePolicy {
 
     RefreshRatePolicy(WindowManagerService wmService, DisplayInfo displayInfo,
             HighRefreshRateDenylist denylist) {
-        mLowRefreshRateId = findLowRefreshRateModeId(displayInfo);
+        mLowRefreshRateMode = findLowRefreshRateMode(displayInfo);
         mHighRefreshRateDenylist = denylist;
         mWmService = wmService;
     }
@@ -65,7 +65,7 @@ class RefreshRatePolicy {
      * Finds the mode id with the lowest refresh rate which is >= 60hz and same resolution as the
      * default mode.
      */
-    private int findLowRefreshRateModeId(DisplayInfo displayInfo) {
+    private Mode findLowRefreshRateMode(DisplayInfo displayInfo) {
         Mode mode = displayInfo.getDefaultMode();
         float[] refreshRates = displayInfo.getDefaultRefreshRates();
         float bestRefreshRate = mode.getRefreshRate();
@@ -104,13 +104,9 @@ class RefreshRatePolicy {
 
         // If app is using Camera, force it to default (lower) refresh rate.
         if (mNonHighRefreshRatePackages.contains(packageName)) {
-            return mLowRefreshRateId;
+            return mLowRefreshRateMode.getModeId();
         }
 
-        // If app is denylisted using higher refresh rate, return default (lower) refresh rate
-        if (mHighRefreshRateDenylist.isDenylisted(packageName)) {
-            return mLowRefreshRateId;
-        }
         return 0;
     }
 
@@ -136,5 +132,19 @@ class RefreshRatePolicy {
             return LAYER_PRIORITY_FOCUSED_WITH_MODE;
         }
         return LAYER_PRIORITY_UNSET;
+    }
+
+    float getPreferredRefreshRate(WindowState w) {
+        // If app is animating, it's not able to control refresh rate because we want the animation
+        // to run in default refresh rate.
+        if (w.isAnimating(TRANSITION | PARENTS)) {
+            return 0;
+        }
+
+        final String packageName = w.getOwningPackage();
+        if (mHighRefreshRateDenylist.isDenylisted(packageName)) {
+            return mLowRefreshRateMode.getRefreshRate();
+        }
+        return 0;
     }
 }

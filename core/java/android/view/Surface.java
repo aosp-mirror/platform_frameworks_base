@@ -218,6 +218,15 @@ public class Surface implements Parcelable {
     public static final int FRAME_RATE_COMPATIBILITY_FIXED_SOURCE = 1;
 
     /**
+     * This surface belongs to an app on the High Refresh Rate Deny list, and needs the display
+     * to operate at the exact frame rate.
+     *
+     * This is used internally by the platform and should not be used by apps.
+     * @hide
+     */
+    public static final int FRAME_RATE_COMPATIBILITY_EXACT = 100;
+
+    /**
      * Create an empty surface, which will later be filled in by readFromParcel().
      * @hide
      */
