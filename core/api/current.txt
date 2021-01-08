@@ -8163,6 +8163,7 @@ package android.app.usage {
     method public long getAppBytes();
     method public long getCacheBytes();
     method public long getDataBytes();
+    method public long getExternalCacheBytes();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.usage.StorageStats> CREATOR;
   }
