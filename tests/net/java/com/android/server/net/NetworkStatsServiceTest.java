@@ -44,6 +44,7 @@ import static android.net.NetworkStatsHistory.FIELD_ALL;
 import static android.net.NetworkTemplate.NETWORK_TYPE_ALL;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.NetworkTemplate.buildTemplateMobileWithRatType;
+import static android.net.NetworkTemplate.buildTemplateWifi;
 import static android.net.NetworkTemplate.buildTemplateWifiWildcard;
 import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.net.TrafficStats.UID_REMOVED;
@@ -146,7 +147,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
     private static final String IMSI_2 = "310260";
     private static final String TEST_SSID = "AndroidAP";
 
-    private static NetworkTemplate sTemplateWifi = buildTemplateWifiWildcard();
+    private static NetworkTemplate sTemplateWifi = buildTemplateWifi(TEST_SSID);
     private static NetworkTemplate sTemplateImsi1 = buildTemplateMobileAll(IMSI_1);
     private static NetworkTemplate sTemplateImsi2 = buildTemplateMobileAll(IMSI_2);
 
@@ -290,7 +291,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
 
         // verify service has empty history for wifi
         assertNetworkTotal(sTemplateWifi, 0L, 0L, 0L, 0L, 0);
-
 
         // modify some number on wifi, and trigger poll event
         incrementCurrentTime(HOUR_IN_MILLIS);
@@ -1503,6 +1503,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED, !isMetered);
         capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING, true);
         capabilities.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
+        capabilities.setSSID(TEST_SSID);
         return new NetworkState(info, prop, capabilities, WIFI_NETWORK, null, TEST_SSID);
     }
 
