@@ -568,11 +568,13 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      * @param cancel an object that can be used to cancel enrollment
      * @param userId the user to whom this fingerprint will belong to
      * @param callback an object to receive enrollment events
+     * @param shouldLogMetrics a flag that indicates if enrollment failure/success metrics
+     * should be logged.
      * @hide
      */
     @RequiresPermission(MANAGE_FINGERPRINT)
     public void enroll(byte [] hardwareAuthToken, CancellationSignal cancel, int userId,
-            EnrollmentCallback callback) {
+            EnrollmentCallback callback, boolean shouldLogMetrics) {
         if (userId == UserHandle.USER_CURRENT) {
             userId = getCurrentUserId();
         }
@@ -593,7 +595,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             try {
                 mEnrollmentCallback = callback;
                 mService.enroll(mToken, hardwareAuthToken, userId, mServiceReceiver,
-                        mContext.getOpPackageName());
+                        mContext.getOpPackageName(), shouldLogMetrics);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception in enroll: ", e);
                 // Though this may not be a hardware issue, it will cause apps to give up or try

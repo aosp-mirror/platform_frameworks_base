@@ -38,7 +38,8 @@ class FingerprintGetAuthenticatorIdClient extends ClientMonitor<ISession> {
             int sensorId, Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, owner,
                 0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_FINGERPRINT,
-                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
+                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN,
+                true /* shouldLogMetrics */);
         mAuthenticatorIds = authenticatorIds;
     }
 

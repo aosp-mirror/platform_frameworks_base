@@ -47,7 +47,7 @@ public class FaceGetFeatureClient extends ClientMonitor<IBiometricsFace> {
             @NonNull String owner, int sensorId, int feature, int faceId) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
                 BiometricsProtoEnums.MODALITY_UNKNOWN, BiometricsProtoEnums.ACTION_UNKNOWN,
-                BiometricsProtoEnums.CLIENT_UNKNOWN);
+                BiometricsProtoEnums.CLIENT_UNKNOWN, true /* shouldLogMetrics */);
         mFeature = feature;
         mFaceId = faceId;
 

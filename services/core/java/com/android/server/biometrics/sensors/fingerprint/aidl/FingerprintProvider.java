@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
-import android.app.IActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.Context;
 import android.content.pm.UserInfo;
@@ -348,7 +347,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     @Override
     public void scheduleEnroll(int sensorId, @NonNull IBinder token, byte[] hardwareAuthToken,
             int userId, @NonNull IFingerprintServiceReceiver receiver,
-            @NonNull String opPackageName) {
+            @NonNull String opPackageName, boolean shouldLogMetrics) {
         mHandler.post(() -> {
             final IFingerprint daemon = getHalInstance();
             if (daemon == null) {
@@ -370,7 +369,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                         mSensors.get(sensorId).getLazySession(), token,
                         new ClientMonitorCallbackConverter(receiver), userId, hardwareAuthToken,
                         opPackageName, FingerprintUtils.getInstance(sensorId), sensorId,
-                        mUdfpsOverlayController, maxTemplatesPerUser);
+                        mUdfpsOverlayController, maxTemplatesPerUser, shouldLogMetrics);
                 scheduleForSensor(sensorId, client, new ClientMonitor.Callback() {
                     @Override
                     public void onClientFinished(@NonNull ClientMonitor<?> clientMonitor,

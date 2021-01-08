@@ -32,7 +32,7 @@ public abstract class GenerateChallengeClient<T> extends ClientMonitor<T> {
             @NonNull String owner, int sensorId) {
         super(context, lazyDaemon, token, listener, 0 /* userId */, owner, 0 /* cookie */, sensorId,
                 BiometricsProtoEnums.MODALITY_UNKNOWN, BiometricsProtoEnums.ACTION_UNKNOWN,
-                BiometricsProtoEnums.CLIENT_UNKNOWN);
+                BiometricsProtoEnums.CLIENT_UNKNOWN, true /* shouldLogMetrics */);
     }
 
     @Override

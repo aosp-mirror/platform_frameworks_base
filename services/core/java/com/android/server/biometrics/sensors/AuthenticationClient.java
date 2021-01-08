@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
-import android.app.IActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.ComponentName;
 import android.content.Context;
@@ -67,7 +66,8 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
             int statsModality, int statsClient, @Nullable TaskStackListener taskStackListener,
             @NonNull LockoutTracker lockoutTracker) {
         super(context, lazyDaemon, token, listener, targetUserId, owner, cookie, sensorId,
-                statsModality, BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient);
+                statsModality, BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient,
+                true /* shouldLogMetrics */);
         mIsStrongBiometric = isStrongBiometric;
         mOperationId = operationId;
         mRequireConfirmation = requireConfirmation;
