@@ -864,7 +864,7 @@ public class NotificationManagerService extends SystemService {
     @VisibleForTesting
     protected void handleSavePolicyFile() {
         if (!IoThread.getHandler().hasCallbacks(mSavePolicyFile)) {
-            IoThread.getHandler().post(mSavePolicyFile);
+            IoThread.getHandler().postDelayed(mSavePolicyFile, 250);
         }
     }
 
