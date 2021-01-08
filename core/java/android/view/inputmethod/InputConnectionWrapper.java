@@ -335,4 +335,13 @@ public class InputConnectionWrapper implements InputConnection {
     public boolean commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts) {
         return mTarget.commitContent(inputContentInfo, flags, opts);
     }
+
+    /**
+     * {@inheritDoc}
+     * @throws NullPointerException if the target is {@code null}.
+     */
+    @Override
+    public boolean setImeTemporarilyConsumesInput(boolean imeTemporarilyConsumesInput) {
+        return mTarget.setImeTemporarilyConsumesInput(imeTemporarilyConsumesInput);
+    }
 }
