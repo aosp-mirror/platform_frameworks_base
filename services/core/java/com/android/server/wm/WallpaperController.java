@@ -779,7 +779,7 @@ class WallpaperController {
                 wallpaperBuffer.getHardwareBuffer(), wallpaperBuffer.getColorSpace());
     }
 
-    private WindowState getTopVisibleWallpaper() {
+    WindowState getTopVisibleWallpaper() {
         mTmpTopWallpaper = null;
 
         for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {

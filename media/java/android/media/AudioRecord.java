@@ -1578,14 +1578,7 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
         if (deviceId == 0) {
             return null;
         }
-        AudioDeviceInfo[] devices =
-                AudioManager.getDevicesStatic(AudioManager.GET_DEVICES_INPUTS);
-        for (int i = 0; i < devices.length; i++) {
-            if (devices[i].getId() == deviceId) {
-                return devices[i];
-            }
-        }
-        return null;
+        return AudioManager.getDeviceForPortId(deviceId, AudioManager.GET_DEVICES_INPUTS);
     }
 
     /*

@@ -306,10 +306,6 @@ class ImageExporter {
         exif.setAttribute(ExifInterface.TAG_DATETIME_ORIGINAL, dateTime);
         exif.setAttribute(ExifInterface.TAG_SUBSEC_TIME_ORIGINAL, subSec);
         exif.setAttribute(ExifInterface.TAG_OFFSET_TIME_ORIGINAL, timeZone);
-
-        exif.setAttribute(ExifInterface.TAG_DATETIME_DIGITIZED, dateTime);
-        exif.setAttribute(ExifInterface.TAG_SUBSEC_TIME_DIGITIZED, subSec);
-        exif.setAttribute(ExifInterface.TAG_OFFSET_TIME_DIGITIZED, timeZone);
     }
 
     static String getMimeType(CompressFormat format) {

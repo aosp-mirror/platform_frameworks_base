@@ -59,6 +59,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Range;
 import android.util.SparseIntArray;
 
 import com.android.connectivity.aidl.INetworkAgent;
@@ -73,10 +74,12 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1163,6 +1166,55 @@ public class ConnectivityManager {
     }
 
     /**
+     * Adds or removes a requirement for given UID ranges to use the VPN.
+     *
+     * If set to {@code true}, informs the system that the UIDs in the specified ranges must not
+     * have any connectivity except if a VPN is connected and applies to the UIDs, or if the UIDs
+     * otherwise have permission to bypass the VPN (e.g., because they have the
+     * {@link android.Manifest.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS} permission, or when
+     * using a socket protected by a method such as {@link VpnService#protect(DatagramSocket)}. If
+     * set to {@code false}, a previously-added restriction is removed.
+     * <p>
+     * Each of the UID ranges specified by this method is added and removed as is, and no processing
+     * is performed on the ranges to de-duplicate, merge, split, or intersect them. In order to
+     * remove a previously-added range, the exact range must be removed as is.
+     * <p>
+     * The changes are applied asynchronously and may not have been applied by the time the method
+     * returns. Apps will be notified about any changes that apply to them via
+     * {@link NetworkCallback#onBlockedStatusChanged} callbacks called after the changes take
+     * effect.
+     * <p>
+     * This method should be called only by the VPN code.
+     *
+     * @param ranges the UID ranges to restrict
+     * @param requireVpn whether the specified UID ranges must use a VPN
+     *
+     * TODO: expose as @SystemApi.
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
+    public void setRequireVpnForUids(boolean requireVpn,
+            @NonNull Collection<Range<Integer>> ranges) {
+        Objects.requireNonNull(ranges);
+        // The Range class is not parcelable. Convert to UidRange, which is what is used internally.
+        // This method is not necessarily expected to be used outside the system server, so
+        // parceling may not be necessary, but it could be used out-of-process, e.g., by the network
+        // stack process, or by tests.
+        UidRange[] rangesArray = new UidRange[ranges.size()];
+        int index = 0;
+        for (Range<Integer> range : ranges) {
+            rangesArray[index++] = new UidRange(range.getLower(), range.getUpper());
+        }
+        try {
+            mService.setRequireVpnForUids(requireVpn, rangesArray);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns details about the currently active default data network
      * for a given uid.  This is for internal use only to avoid spying
      * other apps.
@@ -1833,30 +1885,42 @@ public class ConnectivityManager {
             mCallback = new ISocketKeepaliveCallback.Stub() {
                 @Override
                 public void onStarted(int slot) {
-                    Binder.withCleanCallingIdentity(() ->
-                            mExecutor.execute(() -> {
-                                mSlot = slot;
-                                callback.onStarted();
-                            }));
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        mExecutor.execute(() -> {
+                            mSlot = slot;
+                            callback.onStarted();
+                        });
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
                 }
 
                 @Override
                 public void onStopped() {
-                    Binder.withCleanCallingIdentity(() ->
-                            mExecutor.execute(() -> {
-                                mSlot = null;
-                                callback.onStopped();
-                            }));
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        mExecutor.execute(() -> {
+                            mSlot = null;
+                            callback.onStopped();
+                        });
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
                     mExecutor.shutdown();
                 }
 
                 @Override
                 public void onError(int error) {
-                    Binder.withCleanCallingIdentity(() ->
-                            mExecutor.execute(() -> {
-                                mSlot = null;
-                                callback.onError(error);
-                            }));
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        mExecutor.execute(() -> {
+                            mSlot = null;
+                            callback.onError(error);
+                        });
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
                     mExecutor.shutdown();
                 }
 
@@ -3114,39 +3178,6 @@ public class ConnectivityManager {
     public boolean updateLockdownVpn() {
         try {
             return mService.updateLockdownVpn();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Check mobile provisioning.
-     *
-     * @param suggestedTimeOutMs, timeout in milliseconds
-     *
-     * @return time out that will be used, maybe less that suggestedTimeOutMs
-     * -1 if an error.
-     *
-     * {@hide}
-     */
-    public int checkMobileProvisioning(int suggestedTimeOutMs) {
-        int timeOutMs = -1;
-        try {
-            timeOutMs = mService.checkMobileProvisioning(suggestedTimeOutMs);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-        return timeOutMs;
-    }
-
-    /**
-     * Get the mobile provisioning url.
-     * {@hide}
-     */
-    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public String getMobileProvisioningUrl() {
-        try {
-            return mService.getMobileProvisioningUrl();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

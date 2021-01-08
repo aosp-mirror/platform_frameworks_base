@@ -29,6 +29,7 @@ import android.net.NetworkRequest;
 import android.net.NetworkState;
 import android.net.ISocketKeepaliveCallback;
 import android.net.ProxyInfo;
+import android.net.UidRange;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.INetworkActivityListener;
@@ -146,10 +147,7 @@ interface IConnectivityManager
     String getAlwaysOnVpnPackage(int userId);
     boolean isVpnLockdownEnabled(int userId);
     List<String> getVpnLockdownWhitelist(int userId);
-
-    int checkMobileProvisioning(int suggestedTimeOutMs);
-
-    String getMobileProvisioningUrl();
+    void setRequireVpnForUids(boolean requireVpn, in UidRange[] ranges);
 
     void setProvisioningNotificationVisible(boolean visible, int networkType, in String action);
 

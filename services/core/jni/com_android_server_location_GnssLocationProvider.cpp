@@ -31,6 +31,7 @@
 #include <android/hardware/gnss/2.1/IGnssMeasurement.h>
 #include <android/hardware/gnss/3.0/IGnssPsds.h>
 #include <android/hardware/gnss/BnGnss.h>
+#include <android/hardware/gnss/BnGnssCallback.h>
 #include <android/hardware/gnss/BnGnssMeasurementCallback.h>
 #include <android/hardware/gnss/BnGnssPowerIndicationCallback.h>
 #include <android/hardware/gnss/BnGnssPsdsCallback.h>
@@ -223,6 +224,7 @@ using android::hardware::gnss::IGnssPowerIndication;
 using android::hardware::gnss::IGnssPowerIndicationCallback;
 using android::hardware::gnss::PsdsType;
 using IGnssAidl = android::hardware::gnss::IGnss;
+using IGnssCallbackAidl = android::hardware::gnss::IGnssCallback;
 using IGnssPsdsAidl = android::hardware::gnss::IGnssPsds;
 using IGnssPsdsCallbackAidl = android::hardware::gnss::IGnssPsdsCallback;
 using IGnssConfigurationAidl = android::hardware::gnss::IGnssConfiguration;
@@ -709,6 +711,19 @@ Return<void> GnssCallback::gnssSetSystemInfoCb(const IGnssCallback_V2_0::GnssSys
                         info.yearOfHw);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return Void();
+}
+
+class GnssCallbackAidl : public android::hardware::gnss::BnGnssCallback {
+public:
+    Status gnssSetCapabilitiesCb(const int capabilities) override;
+};
+
+Status GnssCallbackAidl::gnssSetCapabilitiesCb(const int capabilities) {
+    ALOGD("GnssCallbackAidl::%s: %du\n", __func__, capabilities);
+    JNIEnv* env = getJniEnv();
+    env->CallVoidMethod(mCallbacksObj, method_setTopHalCapabilities, capabilities);
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    return Status::ok();
 }
 
 /*
@@ -1985,6 +2000,14 @@ static jboolean android_location_gnss_hal_GnssNative_init(JNIEnv* /* env */, jcl
 
     if (!checkHidlReturn(result, "IGnss setCallback() failed.")) {
         return JNI_FALSE;
+    }
+
+    sp<IGnssCallbackAidl> gnssCbIfaceAidl = new GnssCallbackAidl();
+    if (gnssHalAidl != nullptr) {
+        auto status = gnssHalAidl->setCallback(gnssCbIfaceAidl);
+        if (!checkAidlStatus(status, "IGnssAidl setCallback() failed.")) {
+            return JNI_FALSE;
+        }
     }
 
     // Set IGnssPsds or IGnssXtra callback.

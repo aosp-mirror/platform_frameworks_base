@@ -1,0 +1,449 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.systemui.qs.tiles;
+
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.UserHandle;
+import android.provider.Settings;
+import android.service.quicksettings.Tile;
+import android.text.Html;
+import android.text.TextUtils;
+import android.util.Log;
+import android.widget.Switch;
+
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.settingslib.graph.SignalDrawable;
+import com.android.settingslib.net.DataUsageController;
+import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.qs.QSIconView;
+import com.android.systemui.plugins.qs.QSTile;
+import com.android.systemui.plugins.qs.QSTile.Icon;
+import com.android.systemui.plugins.qs.QSTile.SignalState;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.qs.AlphaControlledSignalTileView;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.statusbar.policy.NetworkController.IconState;
+import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
+import com.android.systemui.statusbar.policy.WifiIcons;
+
+import javax.inject.Inject;
+
+/** Quick settings tile: Internet **/
+public class InternetTile extends QSTileImpl<SignalState> {
+    private static final Intent WIFI_SETTINGS = new Intent(Settings.ACTION_WIFI_SETTINGS);
+
+    protected final NetworkController mController;
+    private final DataUsageController mDataController;
+    private final QSTile.SignalState mStateBeforeClick = newTileState();
+    // The last updated tile state, 0: mobile, 1: wifi
+    private int mLastTileState = -1;
+
+    protected final InternetSignalCallback mSignalCallback = new InternetSignalCallback();
+
+    @Inject
+    public InternetTile(
+            QSHost host,
+            @Background Looper backgroundLooper,
+            @Main Handler mainHandler,
+            MetricsLogger metricsLogger,
+            StatusBarStateController statusBarStateController,
+            ActivityStarter activityStarter,
+            QSLogger qsLogger,
+            NetworkController networkController
+    ) {
+        super(host, backgroundLooper, mainHandler, metricsLogger, statusBarStateController,
+                activityStarter, qsLogger);
+        mController = networkController;
+        mDataController = mController.getMobileDataController();
+        mController.observe(getLifecycle(), mSignalCallback);
+    }
+
+    @Override
+    public SignalState newTileState() {
+        return new SignalState();
+    }
+
+    @Override
+    public QSIconView createTileView(Context context) {
+        return new AlphaControlledSignalTileView(context);
+    }
+
+    @Override
+    public Intent getLongClickIntent() {
+        return WIFI_SETTINGS;
+    }
+
+    @Override
+    protected void handleClick() {
+        mActivityStarter.postStartActivityDismissingKeyguard(WIFI_SETTINGS, 0);
+    }
+
+    @Override
+    public CharSequence getTileLabel() {
+        return mContext.getString(R.string.quick_settings_internet_label);
+    }
+
+    @Override
+    public int getMetricsCategory() {
+        return MetricsEvent.QS_WIFI;
+    }
+
+    @Override
+    public boolean isAvailable() {
+        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI)
+                || (mController.hasMobileDataFeature()
+                        && mHost.getUserContext().getUserId() == UserHandle.USER_SYSTEM);
+    }
+
+    private CharSequence getSecondaryLabel(boolean isTransient, String statusLabel) {
+        return isTransient
+                ? mContext.getString(R.string.quick_settings_wifi_secondary_label_transient)
+                : statusLabel;
+    }
+
+    private static String removeDoubleQuotes(String string) {
+        if (string == null) return null;
+        final int length = string.length();
+        if ((length > 1) && (string.charAt(0) == '"') && (string.charAt(length - 1) == '"')) {
+            return string.substring(1, length - 1);
+        }
+        return string;
+    }
+
+    private static final class WifiCallbackInfo {
+        boolean mEnabled;
+        boolean mConnected;
+        int mWifiSignalIconId;
+        String mSsid;
+        boolean mActivityIn;
+        boolean mActivityOut;
+        String mWifiSignalContentDescription;
+        boolean mIsTransient;
+        public String mStatusLabel;
+
+        @Override
+        public String toString() {
+            return new StringBuilder("WifiCallbackInfo[")
+                    .append("mEnabled=").append(mEnabled)
+                    .append(",mConnected=").append(mConnected)
+                    .append(",mWifiSignalIconId=").append(mWifiSignalIconId)
+                    .append(",mSsid=").append(mSsid)
+                    .append(",mActivityIn=").append(mActivityIn)
+                    .append(",mActivityOut=").append(mActivityOut)
+                    .append(",mWifiSignalContentDescription=").append(mWifiSignalContentDescription)
+                    .append(",mIsTransient=").append(mIsTransient)
+                    .append(']').toString();
+        }
+    }
+
+    private static final class CellularCallbackInfo {
+        boolean mAirplaneModeEnabled;
+        CharSequence mDataSubscriptionName;
+        CharSequence mDataContentDescription;
+        int mMobileSignalIconId;
+        boolean mActivityIn;
+        boolean mActivityOut;
+        boolean mNoSim;
+        boolean mRoaming;
+        boolean mMultipleSubs;
+
+        @Override
+        public String toString() {
+            return new StringBuilder("CellularCallbackInfo[")
+                .append("mAirplaneModeEnabled=").append(mAirplaneModeEnabled)
+                .append(",mDataSubscriptionName=").append(mDataSubscriptionName)
+                .append(",mDataContentDescription=").append(mDataContentDescription)
+                .append(",mMobileSignalIconId=").append(mMobileSignalIconId)
+                .append(",mActivityIn=").append(mActivityIn)
+                .append(",mActivityOut=").append(mActivityOut)
+                .append(",mNoSim=").append(mNoSim)
+                .append(",mRoaming=").append(mRoaming)
+                .append(",mMultipleSubs=").append(mMultipleSubs)
+                .append(']').toString();
+        }
+    }
+
+    protected final class InternetSignalCallback implements SignalCallback {
+        final WifiCallbackInfo mWifiInfo = new WifiCallbackInfo();
+        final CellularCallbackInfo mCellularInfo = new CellularCallbackInfo();
+
+        @Override
+        public void setWifiIndicators(boolean enabled, IconState statusIcon, IconState qsIcon,
+                boolean activityIn, boolean activityOut, String description, boolean isTransient,
+                String statusLabel) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "setWifiIndicators: "
+                        + "enabled = " + enabled + ","
+                        + "statusIcon = " + (statusIcon == null ? "" : statusIcon.toString()) + ","
+                        + "qsIcon = " + (qsIcon == null ? "" : qsIcon.toString()) + ","
+                        + "activityIn = " + activityIn + ","
+                        + "activityOut = " + activityOut + ","
+                        + "description = " + description + ","
+                        + "isTransient = " + isTransient + ","
+                        + "statusLabel = " + statusLabel);
+            }
+            mWifiInfo.mEnabled = enabled;
+            mWifiInfo.mConnected = qsIcon.visible;
+            mWifiInfo.mWifiSignalIconId = qsIcon.icon;
+            mWifiInfo.mSsid = description;
+            mWifiInfo.mActivityIn = activityIn;
+            mWifiInfo.mActivityOut = activityOut;
+            mWifiInfo.mWifiSignalContentDescription = qsIcon.contentDescription;
+            mWifiInfo.mIsTransient = isTransient;
+            mWifiInfo.mStatusLabel = statusLabel;
+            refreshState(mWifiInfo);
+        }
+
+        @Override
+        public void setMobileDataIndicators(IconState statusIcon, IconState qsIcon, int statusType,
+                int qsType, boolean activityIn, boolean activityOut,
+                CharSequence typeContentDescription,
+                CharSequence typeContentDescriptionHtml, CharSequence description,
+                boolean isWide, int subId, boolean roaming) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "setMobileDataIndicators: "
+                        + "statusIcon = " + (statusIcon == null ? "" :  statusIcon.toString()) + ","
+                        + "qsIcon = " + (qsIcon == null ? "" : qsIcon.toString()) + ","
+                        + "statusType = " + statusType + ","
+                        + "qsType = " + qsType + ","
+                        + "activityIn = " + activityIn + ","
+                        + "activityOut = " + activityOut + ","
+                        + "typeContentDescription = " + typeContentDescription + ","
+                        + "typeContentDescriptionHtml = " + typeContentDescriptionHtml + ","
+                        + "description = " + description + ","
+                        + "isWide = " + isWide + ","
+                        + "subId = " + subId + ","
+                        + "roaming = " + roaming);
+            }
+            if (qsIcon == null) {
+                // Not data sim, don't display.
+                return;
+            }
+            mCellularInfo.mDataSubscriptionName = mController.getMobileDataNetworkName();
+            mCellularInfo.mDataContentDescription =
+                    (description != null) ? typeContentDescriptionHtml : null;
+            mCellularInfo.mMobileSignalIconId = qsIcon.icon;
+            mCellularInfo.mActivityIn = activityIn;
+            mCellularInfo.mActivityOut = activityOut;
+            mCellularInfo.mRoaming = roaming;
+            mCellularInfo.mMultipleSubs = mController.getNumberSubscriptions() > 1;
+            refreshState(mCellularInfo);
+        }
+
+        @Override
+        public void setNoSims(boolean show, boolean simDetected) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "setNoSims: "
+                        + "show = " + show + ","
+                        + "simDetected = " + simDetected);
+            }
+            mCellularInfo.mNoSim = show;
+            if (mCellularInfo.mNoSim) {
+                // Make sure signal gets cleared out when no sims.
+                mCellularInfo.mMobileSignalIconId = 0;
+            }
+            refreshState(mCellularInfo);
+        }
+
+        @Override
+        public void setIsAirplaneMode(IconState icon) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "InternetTile-setIsAirplaneMode: "
+                        + "icon = " + (icon == null ? "" : icon.toString()));
+            }
+            mCellularInfo.mAirplaneModeEnabled = icon.visible;
+            refreshState(mCellularInfo);
+        }
+    }
+
+    @Override
+    protected void handleUpdateState(SignalState state, Object arg) {
+        Log.d(TAG, "handleUpdateState: " + "arg = " + arg);
+        if (arg instanceof CellularCallbackInfo) {
+            mLastTileState = 0;
+            handleUpdateCellularState(state, arg);
+        } else if (arg instanceof WifiCallbackInfo) {
+            mLastTileState = 1;
+            handleUpdateWifiState(state, arg);
+        } else {
+            // handleUpdateState will be triggered when user expands the QuickSetting panel with
+            // arg = null, in this case the last updated CellularCallbackInfo or WifiCallbackInfo
+            // should be used to refresh the tile.
+            if (mLastTileState == 0) {
+                handleUpdateCellularState(state, mSignalCallback.mCellularInfo);
+            } else if (mLastTileState == 1) {
+                handleUpdateWifiState(state, mSignalCallback.mWifiInfo);
+            }
+        }
+    }
+
+    private void handleUpdateWifiState(SignalState state, Object arg) {
+        WifiCallbackInfo cb = (WifiCallbackInfo) arg;
+        boolean wifiConnected = cb.mEnabled && (cb.mWifiSignalIconId > 0) && (cb.mSsid != null);
+        boolean wifiNotConnected = (cb.mWifiSignalIconId > 0) && (cb.mSsid == null);
+        boolean enabledChanging = state.value != cb.mEnabled;
+        if (enabledChanging) {
+            fireToggleStateChanged(cb.mEnabled);
+        }
+        if (state.slash == null) {
+            state.slash = new SlashState();
+            state.slash.rotation = 6;
+        }
+        state.slash.isSlashed = false;
+        state.secondaryLabel = getSecondaryLabel(cb.mIsTransient, removeDoubleQuotes(cb.mSsid));
+        state.state = Tile.STATE_ACTIVE;
+        state.dualTarget = true;
+        state.value = cb.mEnabled;
+        state.activityIn = cb.mEnabled && cb.mActivityIn;
+        state.activityOut = cb.mEnabled && cb.mActivityOut;
+        final StringBuffer minimalContentDescription = new StringBuffer();
+        final StringBuffer minimalStateDescription = new StringBuffer();
+        final Resources r = mContext.getResources();
+        // TODO(b/174753536): Use the new "Internet" string as state.label once available.
+        if (cb.mIsTransient) {
+            state.icon = ResourceIcon.get(
+                com.android.internal.R.drawable.ic_signal_wifi_transient_animation);
+            state.label = r.getString(R.string.quick_settings_internet_label);
+        } else if (!state.value) {
+            state.slash.isSlashed = true;
+            state.state = Tile.STATE_INACTIVE;
+            state.icon = ResourceIcon.get(WifiIcons.QS_WIFI_DISABLED);
+            state.label = r.getString(R.string.quick_settings_internet_label);
+        } else if (wifiConnected) {
+            state.icon = ResourceIcon.get(cb.mWifiSignalIconId);
+            state.label = r.getString(R.string.quick_settings_internet_label);
+        } else if (wifiNotConnected) {
+            state.icon = ResourceIcon.get(WifiIcons.QS_WIFI_NO_NETWORK);
+            state.label = r.getString(R.string.quick_settings_internet_label);
+        } else {
+            state.icon = ResourceIcon.get(WifiIcons.QS_WIFI_NO_NETWORK);
+            state.label = r.getString(R.string.quick_settings_internet_label);
+        }
+        minimalContentDescription.append(
+            mContext.getString(R.string.quick_settings_internet_label)).append(",");
+        if (state.value) {
+            if (wifiConnected) {
+                minimalStateDescription.append(cb.mWifiSignalContentDescription);
+                minimalContentDescription.append(removeDoubleQuotes(cb.mSsid));
+                if (!TextUtils.isEmpty(state.secondaryLabel)) {
+                    minimalContentDescription.append(",").append(state.secondaryLabel);
+                }
+            }
+        }
+        state.stateDescription = minimalStateDescription.toString();
+        state.contentDescription = minimalContentDescription.toString();
+        state.dualLabelContentDescription = r.getString(
+                R.string.accessibility_quick_settings_open_settings, getTileLabel());
+        state.expandedAccessibilityClassName = Switch.class.getName();
+    }
+
+    private void handleUpdateCellularState(SignalState state, Object arg) {
+        CellularCallbackInfo cb = (CellularCallbackInfo) arg;
+        final Resources r = mContext.getResources();
+        // TODO(b/174753536): Use the new "Internet" string as state.label once available.
+        state.label = r.getString(R.string.quick_settings_internet_label);
+        boolean mobileDataEnabled = mDataController.isMobileDataSupported()
+                && mDataController.isMobileDataEnabled();
+        state.value = mobileDataEnabled;
+        state.activityIn = mobileDataEnabled && cb.mActivityIn;
+        state.activityOut = mobileDataEnabled && cb.mActivityOut;
+        state.expandedAccessibilityClassName = Switch.class.getName();
+        if (cb.mNoSim) {
+            state.icon = ResourceIcon.get(R.drawable.ic_qs_no_sim);
+        } else {
+            state.icon = new SignalIcon(cb.mMobileSignalIconId);
+        }
+
+        if (cb.mNoSim) {
+            state.state = Tile.STATE_UNAVAILABLE;
+            state.secondaryLabel = r.getString(R.string.keyguard_missing_sim_message_short);
+        } else if (cb.mAirplaneModeEnabled) {
+            state.state = Tile.STATE_UNAVAILABLE;
+            state.secondaryLabel = r.getString(R.string.status_bar_airplane);
+        } else if (mobileDataEnabled) {
+            state.state = Tile.STATE_ACTIVE;
+            state.secondaryLabel = appendMobileDataType(cb.mDataSubscriptionName,
+                    getMobileDataContentName(cb));
+        } else {
+            state.state = Tile.STATE_INACTIVE;
+            state.secondaryLabel = r.getString(R.string.cell_data_off);
+        }
+
+        state.contentDescription = state.label;
+        if (state.state == Tile.STATE_INACTIVE) {
+            // This information is appended later by converting the Tile.STATE_INACTIVE state.
+            state.stateDescription = "";
+        } else {
+            state.stateDescription = state.secondaryLabel;
+        }
+    }
+
+    private CharSequence appendMobileDataType(CharSequence current, CharSequence dataType) {
+        if (TextUtils.isEmpty(dataType)) {
+            return Html.fromHtml((current == null ? "" : current.toString()), 0);
+        }
+        if (TextUtils.isEmpty(current)) {
+            return Html.fromHtml((dataType == null ? "" : dataType.toString()), 0);
+        }
+        String concat = mContext.getString(R.string.mobile_carrier_text_format, current, dataType);
+        return Html.fromHtml(concat, 0);
+    }
+
+    private CharSequence getMobileDataContentName(CellularCallbackInfo cb) {
+        if (cb.mRoaming && !TextUtils.isEmpty(cb.mDataContentDescription)) {
+            String roaming = mContext.getString(R.string.data_connection_roaming);
+            String dataDescription =
+                    cb.mDataContentDescription == null ? ""
+                            : cb.mDataContentDescription.toString();
+            return mContext.getString(R.string.mobile_data_text_format, roaming, dataDescription);
+        }
+        if (cb.mRoaming) {
+            return mContext.getString(R.string.data_connection_roaming);
+        }
+        return cb.mDataContentDescription;
+    }
+
+    private static class SignalIcon extends Icon {
+        private final int mState;
+        SignalIcon(int state) {
+            mState = state;
+        }
+        public int getState() {
+            return mState;
+        }
+
+        @Override
+        public Drawable getDrawable(Context context) {
+            SignalDrawable d = new SignalDrawable(context);
+            d.setLevel(getState());
+            return d;
+        }
+    }
+}

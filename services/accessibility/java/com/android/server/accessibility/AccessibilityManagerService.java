@@ -508,6 +508,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                                 }
                                 it.remove();
                                 userState.getBindingServicesLocked().remove(comp);
+                                userState.getCrashedServicesLocked().remove(comp);
                                 persistComponentNamesToSettingLocked(
                                         Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
                                         userState.mEnabledServices, userId);

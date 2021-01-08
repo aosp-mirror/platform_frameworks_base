@@ -90,20 +90,6 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
             @UserIdInt int userId);
 
     /**
-     * Update all permissions for all apps.
-     *
-     * <p><ol>
-     *     <li>Reconsider the ownership of permission</li>
-     *     <li>Update the state (grant, flags) of the permissions</li>
-     * </ol>
-     *
-     * @param volumeUuid The volume of the packages to be updated, {@code null} for all volumes
-     * @param allPackages All currently known packages
-     * @param callback Callback to call after permission changes
-     */
-    void updateAllPermissions(@Nullable String volumeUuid, boolean sdkUpdate);
-
-    /**
      * Reset the runtime permission state changes for a package.
      *
      * TODO(zhanghai): Turn this into package change callback?
@@ -219,6 +205,16 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
     void onSystemReady();
+
+    /**
+     * Callback when a storage volume is mounted, so that all packages on it become available.
+     *
+     * @param volumeUuid the UUID of the storage volume
+     * @param sdkVersionChanged whether the current SDK version is different from what it was when
+     *                          this volume was last mounted
+     */
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    void onStorageVolumeMounted(@NonNull String volumeUuid, boolean sdkVersionChanged);
 
     /**
      * Callback when a user has been created.

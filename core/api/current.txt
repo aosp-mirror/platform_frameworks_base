@@ -8977,6 +8977,8 @@ package android.bluetooth {
     method public int getConnectionState(android.bluetooth.BluetoothDevice);
     method public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(int[]);
     method public boolean isAudioConnected(android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public boolean isNoiseReductionSupported(@NonNull android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public boolean isVoiceRecognitionSupported(@NonNull android.bluetooth.BluetoothDevice);
     method public boolean sendVendorSpecificResultCode(android.bluetooth.BluetoothDevice, String, String);
     method public boolean startVoiceRecognition(android.bluetooth.BluetoothDevice);
     method public boolean stopVoiceRecognition(android.bluetooth.BluetoothDevice);
@@ -18940,7 +18942,9 @@ package android.location {
   }
 
   public static class GnssAntennaInfo.Builder {
-    ctor public GnssAntennaInfo.Builder();
+    ctor @Deprecated public GnssAntennaInfo.Builder();
+    ctor public GnssAntennaInfo.Builder(double, @NonNull android.location.GnssAntennaInfo.PhaseCenterOffset);
+    ctor public GnssAntennaInfo.Builder(@NonNull android.location.GnssAntennaInfo);
     method @NonNull public android.location.GnssAntennaInfo build();
     method @NonNull public android.location.GnssAntennaInfo.Builder setCarrierFrequencyMHz(@FloatRange(from=0.0f) double);
     method @NonNull public android.location.GnssAntennaInfo.Builder setPhaseCenterOffset(@NonNull android.location.GnssAntennaInfo.PhaseCenterOffset);
@@ -18948,8 +18952,8 @@ package android.location {
     method @NonNull public android.location.GnssAntennaInfo.Builder setSignalGainCorrections(@Nullable android.location.GnssAntennaInfo.SphericalCorrections);
   }
 
-  public static interface GnssAntennaInfo.Listener {
-    method public void onGnssAntennaInfoReceived(@NonNull java.util.List<android.location.GnssAntennaInfo>);
+  @Deprecated public static interface GnssAntennaInfo.Listener {
+    method @Deprecated public void onGnssAntennaInfoReceived(@NonNull java.util.List<android.location.GnssAntennaInfo>);
   }
 
   public static final class GnssAntennaInfo.PhaseCenterOffset implements android.os.Parcelable {
@@ -19122,11 +19126,11 @@ package android.location {
   public abstract static class GnssMeasurementsEvent.Callback {
     ctor public GnssMeasurementsEvent.Callback();
     method public void onGnssMeasurementsReceived(android.location.GnssMeasurementsEvent);
-    method public void onStatusChanged(int);
-    field public static final int STATUS_LOCATION_DISABLED = 2; // 0x2
-    field public static final int STATUS_NOT_ALLOWED = 3; // 0x3
-    field public static final int STATUS_NOT_SUPPORTED = 0; // 0x0
-    field public static final int STATUS_READY = 1; // 0x1
+    method @Deprecated public void onStatusChanged(int);
+    field @Deprecated public static final int STATUS_LOCATION_DISABLED = 2; // 0x2
+    field @Deprecated public static final int STATUS_NOT_ALLOWED = 3; // 0x3
+    field @Deprecated public static final int STATUS_NOT_SUPPORTED = 0; // 0x0
+    field @Deprecated public static final int STATUS_READY = 1; // 0x1
   }
 
   public final class GnssNavigationMessage implements android.os.Parcelable {
@@ -19162,10 +19166,10 @@ package android.location {
   public abstract static class GnssNavigationMessage.Callback {
     ctor public GnssNavigationMessage.Callback();
     method public void onGnssNavigationMessageReceived(android.location.GnssNavigationMessage);
-    method public void onStatusChanged(int);
-    field public static final int STATUS_LOCATION_DISABLED = 2; // 0x2
-    field public static final int STATUS_NOT_SUPPORTED = 0; // 0x0
-    field public static final int STATUS_READY = 1; // 0x1
+    method @Deprecated public void onStatusChanged(int);
+    field @Deprecated public static final int STATUS_LOCATION_DISABLED = 2; // 0x2
+    field @Deprecated public static final int STATUS_NOT_SUPPORTED = 0; // 0x0
+    field @Deprecated public static final int STATUS_READY = 1; // 0x1
   }
 
   public final class GnssStatus implements android.os.Parcelable {
@@ -19323,6 +19327,7 @@ package android.location {
     method @Nullable public String getBestProvider(@NonNull android.location.Criteria, boolean);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void getCurrentLocation(@NonNull String, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.location.Location>);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void getCurrentLocation(@NonNull String, @NonNull android.location.LocationRequest, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.location.Location>);
+    method @Nullable public java.util.List<android.location.GnssAntennaInfo> getGnssAntennaInfos();
     method @NonNull public android.location.GnssCapabilities getGnssCapabilities();
     method @Nullable public String getGnssHardwareModelName();
     method public int getGnssYearOfHardware();
@@ -19335,7 +19340,7 @@ package android.location {
     method public boolean hasProvider(@NonNull String);
     method public boolean isLocationEnabled();
     method public boolean isProviderEnabled(@NonNull String);
-    method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean registerAntennaInfoListener(@NonNull java.util.concurrent.Executor, @NonNull android.location.GnssAntennaInfo.Listener);
+    method @Deprecated public boolean registerAntennaInfoListener(@NonNull java.util.concurrent.Executor, @NonNull android.location.GnssAntennaInfo.Listener);
     method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean registerGnssMeasurementsCallback(@NonNull android.location.GnssMeasurementsEvent.Callback);
     method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean registerGnssMeasurementsCallback(@NonNull android.location.GnssMeasurementsEvent.Callback, @Nullable android.os.Handler);
     method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean registerGnssMeasurementsCallback(@NonNull java.util.concurrent.Executor, @NonNull android.location.GnssMeasurementsEvent.Callback);
@@ -19372,10 +19377,14 @@ package android.location {
     method public void setTestProviderEnabled(@NonNull String, boolean);
     method public void setTestProviderLocation(@NonNull String, @NonNull android.location.Location);
     method @Deprecated public void setTestProviderStatus(@NonNull String, int, @Nullable android.os.Bundle, long);
-    method public void unregisterAntennaInfoListener(@NonNull android.location.GnssAntennaInfo.Listener);
+    method @Deprecated public void unregisterAntennaInfoListener(@NonNull android.location.GnssAntennaInfo.Listener);
     method public void unregisterGnssMeasurementsCallback(@NonNull android.location.GnssMeasurementsEvent.Callback);
     method public void unregisterGnssNavigationMessageCallback(@NonNull android.location.GnssNavigationMessage.Callback);
     method public void unregisterGnssStatusCallback(@NonNull android.location.GnssStatus.Callback);
+    field public static final String ACTION_GNSS_ANTENNA_INFOS_CHANGED = "android.location.action.GNSS_ANTENNA_INFOS_CHANGED";
+    field public static final String ACTION_GNSS_CAPABILITIES_CHANGED = "android.location.action.GNSS_CAPABILITIES_CHANGED";
+    field public static final String EXTRA_GNSS_ANTENNA_INFOS = "android.location.extra.GNSS_ANTENNA_INFOS";
+    field public static final String EXTRA_GNSS_CAPABILITIES = "android.location.extra.GNSS_CAPABILITIES";
     field public static final String EXTRA_LOCATION_ENABLED = "android.location.extra.LOCATION_ENABLED";
     field public static final String EXTRA_PROVIDER_ENABLED = "android.location.extra.PROVIDER_ENABLED";
     field public static final String EXTRA_PROVIDER_NAME = "android.location.extra.PROVIDER_NAME";
@@ -24277,7 +24286,9 @@ package android.media.tv {
     field public static final String COLUMN_APP_LINK_INTENT_URI = "app_link_intent_uri";
     field public static final String COLUMN_APP_LINK_POSTER_ART_URI = "app_link_poster_art_uri";
     field public static final String COLUMN_APP_LINK_TEXT = "app_link_text";
+    field public static final String COLUMN_BROADCAST_GENRE = "broadcast_genre";
     field public static final String COLUMN_BROWSABLE = "browsable";
+    field public static final String COLUMN_CHANNEL_LIST_ID = "channel_list_id";
     field public static final String COLUMN_DESCRIPTION = "description";
     field public static final String COLUMN_DISPLAY_NAME = "display_name";
     field public static final String COLUMN_DISPLAY_NUMBER = "display_number";
@@ -24292,6 +24303,8 @@ package android.media.tv {
     field public static final String COLUMN_LOCKED = "locked";
     field public static final String COLUMN_NETWORK_AFFILIATION = "network_affiliation";
     field public static final String COLUMN_ORIGINAL_NETWORK_ID = "original_network_id";
+    field public static final String COLUMN_REMOTE_CONTROL_KEY_PRESET_NUMBER = "remote_control_key_preset_number";
+    field public static final String COLUMN_SCRAMBLED = "scrambled";
     field public static final String COLUMN_SEARCHABLE = "searchable";
     field public static final String COLUMN_SERVICE_ID = "service_id";
     field public static final String COLUMN_SERVICE_TYPE = "service_type";
@@ -24300,6 +24313,7 @@ package android.media.tv {
     field public static final String COLUMN_TYPE = "type";
     field public static final String COLUMN_VERSION_NUMBER = "version_number";
     field public static final String COLUMN_VIDEO_FORMAT = "video_format";
+    field public static final String COLUMN_VIDEO_RESOLUTION = "video_resolution";
     field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/channel";
     field public static final String CONTENT_TYPE = "vnd.android.cursor.dir/channel";
     field public static final android.net.Uri CONTENT_URI;
@@ -47961,7 +47975,6 @@ package android.view {
     field public static final int AUTOFILL_TYPE_DATE = 4; // 0x4
     field public static final int AUTOFILL_TYPE_LIST = 3; // 0x3
     field public static final int AUTOFILL_TYPE_NONE = 0; // 0x0
-    field public static final int AUTOFILL_TYPE_RICH_CONTENT = 5; // 0x5
     field public static final int AUTOFILL_TYPE_TEXT = 1; // 0x1
     field public static final int AUTOFILL_TYPE_TOGGLE = 2; // 0x2
     field public static final int DRAG_FLAG_GLOBAL = 256; // 0x100
@@ -50234,17 +50247,14 @@ package android.view.autofill {
     method public int describeContents();
     method public static android.view.autofill.AutofillValue forDate(long);
     method public static android.view.autofill.AutofillValue forList(int);
-    method @NonNull public static android.view.autofill.AutofillValue forRichContent(@NonNull android.content.ClipData);
     method public static android.view.autofill.AutofillValue forText(@Nullable CharSequence);
     method public static android.view.autofill.AutofillValue forToggle(boolean);
     method public long getDateValue();
     method public int getListValue();
-    method @NonNull public android.content.ClipData getRichContentValue();
     method @NonNull public CharSequence getTextValue();
     method public boolean getToggleValue();
     method public boolean isDate();
     method public boolean isList();
-    method public boolean isRichContent();
     method public boolean isText();
     method public boolean isToggle();
     method public void writeToParcel(android.os.Parcel, int);

@@ -30,6 +30,10 @@ import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
+import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
+import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
+import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -160,8 +164,20 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         }
         if (mParticipants.contains(wc)) return;
         mSyncEngine.addToSyncSet(mSyncId, wc);
-        mChanges.put(wc, new ChangeInfo(wc));
+        ChangeInfo info = mChanges.get(wc);
+        if (info == null) {
+            info = new ChangeInfo(wc);
+            mChanges.put(wc, info);
+        }
         mParticipants.add(wc);
+        if (info.mShowWallpaper) {
+            // Collect the wallpaper so it is part of the sync set.
+            final WindowContainer wallpaper =
+                    wc.getDisplayContent().mWallpaperController.getTopVisibleWallpaper();
+            if (wallpaper != null) {
+                collect(wallpaper);
+            }
+        }
     }
 
     /**
@@ -386,6 +402,10 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         return -1;
     }
 
+    private static boolean isWallpaper(WindowContainer wc) {
+        return wc instanceof WallpaperWindowToken;
+    }
+
     /**
      * Under some conditions (eg. all visible targets within a parent container are transitioning
      * the same way) the transition can be "promoted" to the parent container. This means an
@@ -401,6 +421,10 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 || parentChanges == null || !parentChanges.hasChanged(parent)) {
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "      SKIP: %s",
                     parent == null ? "no parent" : ("parent can't be target " + parent));
+            return false;
+        }
+        if (isWallpaper(target)) {
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "      SKIP: is wallpaper");
             return false;
         }
         @TransitionInfo.TransitionMode int mode = TRANSIT_NONE;
@@ -604,18 +628,32 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     static TransitionInfo calculateTransitionInfo(int type, int flags,
             ArraySet<WindowContainer> targets, ArrayMap<WindowContainer, ChangeInfo> changes) {
         final TransitionInfo out = new TransitionInfo(type, flags);
-        if (targets.isEmpty()) {
+
+        final ArraySet<WindowContainer> appTargets = new ArraySet<>();
+        final ArraySet<WindowContainer> wallpapers = new ArraySet<>();
+        for (int i = targets.size() - 1; i >= 0; --i) {
+            (isWallpaper(targets.valueAt(i)) ? wallpapers : appTargets).add(targets.valueAt(i));
+        }
+
+        // Find the top-most shared ancestor of app targets
+        WindowContainer ancestor = null;
+        for (int i = appTargets.size() - 1; i >= 0; --i) {
+            final WindowContainer wc = appTargets.valueAt(i);
+            ancestor = wc;
+            break;
+        }
+        if (ancestor == null) {
             out.setRootLeash(new SurfaceControl(), 0, 0);
             return out;
         }
+        ancestor = ancestor.getParent();
 
-        // Find the top-most shared ancestor
-        WindowContainer ancestor = targets.valueAt(0).getParent();
-        // Go up ancestor parent chain until all topTargets are descendants.
+        // Go up ancestor parent chain until all targets are descendants.
         ancestorLoop:
         while (ancestor != null) {
-            for (int i = 1; i < targets.size(); ++i) {
-                if (!targets.valueAt(i).isDescendantOf(ancestor)) {
+            for (int i = appTargets.size() - 1; i >= 0; --i) {
+                final WindowContainer wc = appTargets.valueAt(i);
+                if (!wc.isDescendantOf(ancestor)) {
                     ancestor = ancestor.getParent();
                     continue ancestorLoop;
                 }
@@ -623,7 +661,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             break;
         }
 
-        // Sort targets top-to-bottom in Z.
+        // Sort targets top-to-bottom in Z. Check ALL targets here in case the display area itself
+        // is animating: then we want to include wallpapers at the right position.
         ArrayList<WindowContainer> sortedTargets = new ArrayList<>();
         addMembersInOrder(ancestor, targets, sortedTargets);
 
@@ -639,6 +678,14 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         t.apply();
         t.close();
         out.setRootLeash(rootLeash, ancestor.getBounds().left, ancestor.getBounds().top);
+
+        // add the wallpapers at the bottom
+        for (int i = wallpapers.size() - 1; i >= 0; --i) {
+            final WindowContainer wc = wallpapers.valueAt(i);
+            // If the displayarea itself is animating, then the wallpaper was already added.
+            if (wc.isDescendantOf(ancestor)) break;
+            sortedTargets.add(wc);
+        }
 
         // Convert all the resolved ChangeInfos into TransactionInfo.Change objects in order.
         final int count = sortedTargets.size();
@@ -656,6 +703,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             change.setEndAbsBounds(target.getBounds());
             change.setEndRelOffset(target.getBounds().left - target.getParent().getBounds().left,
                     target.getBounds().top - target.getParent().getBounds().top);
+            change.setFlags(info.getChangeFlags(target));
             out.addChange(change);
         }
 
@@ -678,17 +726,20 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         boolean mVisible;
         int mWindowingMode;
         final Rect mAbsoluteBounds = new Rect();
+        boolean mShowWallpaper;
 
         ChangeInfo(@NonNull WindowContainer origState) {
             mVisible = origState.isVisibleRequested();
             mWindowingMode = origState.getWindowingMode();
             mAbsoluteBounds.set(origState.getBounds());
+            mShowWallpaper = origState.showWallpaper();
         }
 
         @VisibleForTesting
         ChangeInfo(boolean visible, boolean existChange) {
             mVisible = visible;
             mExistenceChanged = existChange;
+            mShowWallpaper = false;
         }
 
         boolean hasChanged(@NonNull WindowContainer newState) {
@@ -714,6 +765,29 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             } else {
                 return nowVisible ? TRANSIT_TO_FRONT : TRANSIT_TO_BACK;
             }
+        }
+
+        @TransitionInfo.ChangeFlags
+        int getChangeFlags(@NonNull WindowContainer wc) {
+            int flags = 0;
+            if (mShowWallpaper || wc.showWallpaper()) {
+                flags |= FLAG_SHOW_WALLPAPER;
+            }
+            if (!wc.fillsParent()) {
+                // TODO(b/172695805): hierarchical check. This is non-trivial because for containers
+                //                    it is effected by child visibility but needs to work even
+                //                    before visibility is committed. This means refactoring some
+                //                    checks to use requested visibility.
+                flags |= FLAG_TRANSLUCENT;
+            }
+            if (wc instanceof ActivityRecord
+                    && wc.asActivityRecord().mUseTransferredAnimation) {
+                flags |= FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
+            }
+            if (isWallpaper(wc)) {
+                flags |= FLAG_IS_WALLPAPER;
+            }
+            return flags;
         }
 
         void addChild(@NonNull WindowContainer wc) {

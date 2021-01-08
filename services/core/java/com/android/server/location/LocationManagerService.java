@@ -45,11 +45,11 @@ import android.content.Intent;
 import android.location.Criteria;
 import android.location.GeocoderParams;
 import android.location.Geofence;
+import android.location.GnssAntennaInfo;
 import android.location.GnssCapabilities;
 import android.location.GnssMeasurementCorrections;
 import android.location.GnssMeasurementRequest;
 import android.location.IGeocodeListener;
-import android.location.IGnssAntennaInfoListener;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssNavigationMessageListener;
 import android.location.IGnssNmeaListener;
@@ -913,18 +913,8 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public void addGnssAntennaInfoListener(IGnssAntennaInfoListener listener,
-            String packageName, String attributionTag) {
-        if (mGnssManagerService != null) {
-            mGnssManagerService.addGnssAntennaInfoListener(listener, packageName, attributionTag);
-        }
-    }
-
-    @Override
-    public void removeGnssAntennaInfoListener(IGnssAntennaInfoListener listener) {
-        if (mGnssManagerService != null) {
-            mGnssManagerService.removeGnssAntennaInfoListener(listener);
-        }
+    public List<GnssAntennaInfo> getGnssAntennaInfos() {
+        return mGnssManagerService == null ? null : mGnssManagerService.getGnssAntennaInfos();
     }
 
     @Override

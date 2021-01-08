@@ -7241,6 +7241,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long waitForNetworkTimeoutMs = Settings.Global.getLong(resolver,
                 NETWORK_ACCESS_TIMEOUT_MS, NETWORK_ACCESS_TIMEOUT_DEFAULT_MS);
         mHiddenApiBlacklist.registerObserver();
+        mPlatformCompat.registerContentObserver();
 
         mAppProfiler.retrieveSettings();
 

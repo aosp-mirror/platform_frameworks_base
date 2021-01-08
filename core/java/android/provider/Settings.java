@@ -9194,6 +9194,39 @@ public final class Settings {
         public static final int ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU = 0x1;
 
         /**
+         * The size of the accessibility floating menu.
+         * <ul>
+         *     <li> 0 = small size
+         *     <li> 1 = large size
+         * </ul>
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_FLOATING_MENU_SIZE =
+                "accessibility_floating_menu_size";
+
+        /**
+         * The icon type of the accessibility floating menu.
+         * <ul>
+         *     <li> 0 = full circle type
+         *     <li> 1 = half circle type
+         * </ul>
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_FLOATING_MENU_ICON_TYPE =
+                "accessibility_floating_menu_icon_type";
+
+        /**
+         * The opacity value for the accessibility floating menu fade out effect, from 0.0
+         * (transparent) to 1.0 (opaque).
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_FLOATING_MENU_OPACITY =
+                "accessibility_floating_menu_opacity";
+
+        /**
          * Whether the Adaptive connectivity option is enabled.
          *
          * @hide
@@ -13422,6 +13455,16 @@ public final class Settings {
          */
         @TestApi
         public static final String HIDDEN_API_POLICY = "hidden_api_policy";
+
+         /**
+         * Flag for forcing {@link com.android.server.compat.OverrideValidatorImpl}
+         * to consider this a non-debuggable build.
+         *
+         * @hide
+         */
+        public static final String FORCE_NON_DEBUGGABLE_FINAL_BUILD_FOR_COMPAT =
+                "force_non_debuggable_final_build_for_compat";
+
 
         /**
          * Current version of signed configuration applied.

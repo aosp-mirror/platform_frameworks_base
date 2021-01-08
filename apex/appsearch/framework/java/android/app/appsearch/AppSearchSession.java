@@ -23,6 +23,9 @@ import android.os.Bundle;
 import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.util.ArraySet;
+import android.util.Log;
+
+import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,10 +42,13 @@ import java.util.function.Consumer;
  * This class is thread safe.
  */
 public final class AppSearchSession {
+    private static final String TAG = "AppSearchSession";
     private final String mDatabaseName;
     @UserIdInt
     private final int mUserId;
     private final IAppSearchManager mService;
+    private boolean mIsMutated = false;
+    private boolean mIsClosed = false;
 
     static void createSearchSession(
             @NonNull AppSearchManager.SearchContext searchContext,
@@ -150,6 +156,7 @@ public final class AppSearchSession {
         Objects.requireNonNull(request);
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
+        Preconditions.checkState(!mIsClosed, "AppSearchSession has already been closed");
         List<Bundle> schemaBundles = new ArrayList<>(request.getSchemas().size());
         for (AppSearchSchema schema : request.getSchemas()) {
             schemaBundles.add(schema.getBundle());
@@ -166,6 +173,7 @@ public final class AppSearchSession {
                             executor.execute(() -> callback.accept(result));
                         }
                     });
+            mIsMutated = true;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -182,6 +190,7 @@ public final class AppSearchSession {
             @NonNull Consumer<AppSearchResult<Set<AppSearchSchema>>> callback) {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
+        Preconditions.checkState(!mIsClosed, "AppSearchSession has already been closed");
         try {
             mService.getSchema(
                     mDatabaseName,
@@ -232,6 +241,7 @@ public final class AppSearchSession {
         Objects.requireNonNull(request);
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
+        Preconditions.checkState(!mIsClosed, "AppSearchSession has already been closed");
         List<GenericDocument> documents = request.getDocuments();
         List<Bundle> documentBundles = new ArrayList<>(documents.size());
         for (int i = 0; i < documents.size(); i++) {
@@ -248,6 +258,7 @@ public final class AppSearchSession {
                             executor.execute(() -> callback.onSystemError(exception.getCause()));
                         }
                     });
+            mIsMutated = true;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -275,6 +286,7 @@ public final class AppSearchSession {
         Objects.requireNonNull(request);
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
+        Preconditions.checkState(!mIsClosed, "AppSearchSession has already been closed");
         try {
             mService.getDocuments(mDatabaseName, request.getNamespace(),
                     new ArrayList<>(request.getUris()), mUserId,
@@ -379,6 +391,7 @@ public final class AppSearchSession {
         Objects.requireNonNull(queryExpression);
         Objects.requireNonNull(searchSpec);
         Objects.requireNonNull(executor);
+        Preconditions.checkState(!mIsClosed, "AppSearchSession has already been closed");
         return new SearchResults(mService, mDatabaseName, queryExpression, searchSpec, mUserId,
                 executor);
     }
@@ -404,6 +417,7 @@ public final class AppSearchSession {
         Objects.requireNonNull(request);
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
+        Preconditions.checkState(!mIsClosed, "AppSearchSession has already been closed");
         try {
             mService.removeByUri(mDatabaseName, request.getNamespace(),
                     new ArrayList<>(request.getUris()), mUserId,
@@ -416,6 +430,7 @@ public final class AppSearchSession {
                             executor.execute(() -> callback.onSystemError(exception.getCause()));
                         }
                     });
+            mIsMutated = true;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -448,6 +463,7 @@ public final class AppSearchSession {
         Objects.requireNonNull(searchSpec);
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
+        Preconditions.checkState(!mIsClosed, "AppSearchSession has already been closed");
         try {
             mService.removeByQuery(mDatabaseName, queryExpression, searchSpec.getBundle(), mUserId,
                     new IAppSearchResultCallback.Stub() {
@@ -455,8 +471,26 @@ public final class AppSearchSession {
                             executor.execute(() -> callback.accept(result));
                         }
                     });
+            mIsMutated = true;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Closes the SearchSessionImpl to persists all update/delete requests to the disk.
+     *
+     * @hide
+     */
+    // TODO(b/175637134) when unhide it, implement Closeable and remove this method.
+    public void close() {
+        if (mIsMutated && !mIsClosed) {
+            try {
+                mService.persistToDisk(mUserId);
+                mIsClosed = true;
+            } catch (RemoteException e) {
+                Log.e(TAG, "Unable to close the AppSearchSession", e);
+            }
         }
     }
 }

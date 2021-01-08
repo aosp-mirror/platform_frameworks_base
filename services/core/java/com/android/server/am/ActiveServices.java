@@ -61,7 +61,6 @@ import android.app.admin.DevicePolicyEventLogger;
 import android.app.compat.CompatChanges;
 import android.appwidget.AppWidgetManagerInternal;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
 import android.content.ComponentName.WithComponentName;
@@ -108,6 +107,7 @@ import android.webkit.WebViewZygote;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.procstats.ServiceState;
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.notification.SystemNotificationChannels;
@@ -169,6 +169,7 @@ public final class ActiveServices {
     public static final int FGS_FEATURE_ALLOWED_BY_DEVICE_DEMO_MODE = 18;
     public static final int FGS_FEATURE_ALLOWED_BY_PROCESS_RECORD = 19;
     public static final int FGS_FEATURE_ALLOWED_BY_EXEMPTED_PACKAGES = 20;
+    public static final int FGS_FEATURE_ALLOWED_BY_ACTIVITY_STARTER = 21;
 
     @IntDef(flag = true, prefix = { "FGS_FEATURE_" }, value = {
             FGS_FEATURE_DENIED,
@@ -191,6 +192,7 @@ public final class ActiveServices {
             FGS_FEATURE_ALLOWED_BY_DEVICE_DEMO_MODE,
             FGS_FEATURE_ALLOWED_BY_PROCESS_RECORD,
             FGS_FEATURE_ALLOWED_BY_EXEMPTED_PACKAGES,
+            FGS_FEATURE_ALLOWED_BY_ACTIVITY_STARTER
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FgsFeatureRetCode {}
@@ -273,7 +275,7 @@ public final class ActiveServices {
      * is higher than R.
      */
     @ChangeId
-    @Disabled
+    @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.S)
     static final long FGS_BG_START_RESTRICTION_CHANGE_ID = 170668199L;
 
     /**
@@ -305,9 +307,40 @@ public final class ActiveServices {
      */
     private static final ArraySet<String> sFgsBgStartExemptedPackages = new ArraySet<>();
 
+    private static final ArrayList<String> sFgsBgStartExemptedPackagePrefixes = new ArrayList<>();
+
+    /**
+     * List of packages that are exempted from the FGS restriction *for now*.
+     *
+     * STOPSHIP(/b/176844961) Remove it. Also update ActiveServicesTest.java.
+     */
+    private static final String[] FGS_BG_START_EXEMPTED_PACKAGES = {
+            "com.google.pixel.exo.bootstrapping",
+    };
+
+    /**
+     * List of packages that are exempted from the FGS restriction *for now*. We also allow
+     * any packages that
+     *
+     * STOPSHIP(/b/176844961) Remove it. Also update ActiveServicesTest.java.
+     */
+    private static final String[] FGS_BG_START_EXEMPTED_PACKAGES_PREFIXED_ALLOWED = {
+            "com.android.webview",
+            "com.google.android.webview",
+            "com.android.chrome",
+            "com.google.android.apps.chrome",
+            "com.chrome",
+    };
+
     static {
-        sFgsBgStartExemptedPackages.add("com.google.pixel.exo.bootstrapping"); //STOPSHIP Remove it.
-        sFgsBgStartExemptedPackages.add("com.android.chrome"); // STOPSHIP Remove it.
+        for (String s : FGS_BG_START_EXEMPTED_PACKAGES) {
+            sFgsBgStartExemptedPackages.add(s);
+        }
+
+        for (String s : FGS_BG_START_EXEMPTED_PACKAGES_PREFIXED_ALLOWED) {
+            sFgsBgStartExemptedPackages.add(s); // Add it for an exact match.
+            sFgsBgStartExemptedPackagePrefixes.add(s + "."); // Add it for an prefix match.
+        }
     }
 
     final Runnable mLastAnrDumpClearer = new Runnable() {
@@ -1700,12 +1733,13 @@ public final class ActiveServices {
     // TODO: remove as part of fixing b/173627642
     @SuppressWarnings("AndroidFrameworkCompatChange")
     private void postFgsNotificationLocked(ServiceRecord r) {
+        final boolean isLegacyApp = (r.appInfo.targetSdkVersion < Build.VERSION_CODES.S);
         boolean showNow = !mAm.mConstants.mFlagFgsNotificationDeferralEnabled;
         if (!showNow) {
             // Legacy apps' FGS notifications are not deferred unless the relevant
             // DeviceConfig element has been set
             showNow = mAm.mConstants.mFlagFgsNotificationDeferralApiGated
-                    && r.appInfo.targetSdkVersion < Build.VERSION_CODES.S;
+                    && isLegacyApp;
         }
         if (!showNow) {
             // is the notification such that it should show right away?
@@ -1759,6 +1793,11 @@ public final class ActiveServices {
         if (DEBUG_FOREGROUND_SERVICE) {
             Slog.d(TAG_SERVICE, "FGS " + r
                     + " notification in " + (when - now) + " ms");
+        }
+        if (isLegacyApp) {
+            Slog.i(TAG_SERVICE, "Deferring FGS notification in legacy app "
+                    + r.appInfo.packageName + "/" + UserHandle.formatUid(r.appInfo.uid)
+                    + " : " + r.foregroundNoti);
         }
         mAm.mHandler.postAtTime(mPostDeferredFGSNotifications, when);
     }
@@ -5202,8 +5241,8 @@ public final class ActiveServices {
             for (int i = mAm.mProcessList.mLruProcesses.size() - 1; i >= 0; i--) {
                 final ProcessRecord pr = mAm.mProcessList.mLruProcesses.get(i);
                 if (pr.uid == callingUid) {
-                    if (pr.areBackgroundActivityStartsAllowedByToken()) {
-                        ret = FGS_FEATURE_ALLOWED_BY_ACTIVITY_TOKEN;
+                    if (pr.getWindowProcessController().areBackgroundActivityStartsAllowed()) {
+                        ret = FGS_FEATURE_ALLOWED_BY_ACTIVITY_STARTER;
                         break;
                     }
                 }
@@ -5357,10 +5396,25 @@ public final class ActiveServices {
         return ret;
     }
 
-    private boolean isPackageExemptedFromFgsRestriction(String packageName, int uid) {
-        if (!sFgsBgStartExemptedPackages.contains(packageName)) {
-            return false;
+    @VisibleForTesting
+    static boolean isPackageExemptedFromFgsRestriction(String packageName, int uid) {
+        boolean exempted = false;
+        if (sFgsBgStartExemptedPackages.contains(packageName)) {
+            exempted = true;
+        } else {
+            for (String pkg : sFgsBgStartExemptedPackagePrefixes) {
+                if (packageName.startsWith(pkg)) {
+                    exempted = true;
+                    break;
+                }
+            }
         }
+        if (!exempted) {
+            return false; // Package isn't exempted.
+        }
+        // Allow exempted packages to be subject to the restriction using this compat ID.
+        // (so that, for example, the webview developer will be able to test the restriction
+        // locally.)
         return CompatChanges.isChangeEnabled(FGS_BG_START_USE_EXEMPTION_LIST_CHANGE_ID, uid);
     }
 
@@ -5406,6 +5460,8 @@ public final class ActiveServices {
                 return "ALLOWED_BY_PROCESS_RECORD";
             case FGS_FEATURE_ALLOWED_BY_EXEMPTED_PACKAGES:
                 return "FGS_FEATURE_ALLOWED_BY_EXEMPTED_PACKAGES";
+            case FGS_FEATURE_ALLOWED_BY_ACTIVITY_STARTER:
+                return "ALLOWED_BY_ACTIVITY_STARTER";
             default:
                 return "";
         }
@@ -5441,9 +5497,7 @@ public final class ActiveServices {
     }
 
     private boolean isBgFgsRestrictionEnabled(ServiceRecord r) {
-        if (mAm.mConstants.mFlagFgsStartRestrictionEnabled) {
-            return true;
-        }
-        return CompatChanges.isChangeEnabled(FGS_BG_START_RESTRICTION_CHANGE_ID, r.appInfo.uid);
+        return mAm.mConstants.mFlagFgsStartRestrictionEnabled
+                && CompatChanges.isChangeEnabled(FGS_BG_START_RESTRICTION_CHANGE_ID, r.appInfo.uid);
     }
 }

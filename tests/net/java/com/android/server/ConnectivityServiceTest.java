@@ -166,7 +166,6 @@ import android.net.INetd;
 import android.net.INetworkMonitor;
 import android.net.INetworkMonitorCallbacks;
 import android.net.INetworkPolicyListener;
-import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
 import android.net.InetAddresses;
 import android.net.InterfaceConfigurationParcel;
@@ -183,6 +182,7 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkFactory;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
+import android.net.NetworkPolicyManager;
 import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
 import android.net.NetworkStack;
@@ -299,6 +299,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import kotlin.reflect.KClass;
 
@@ -365,7 +366,6 @@ public class ConnectivityServiceTest {
     @Mock INetworkManagementService mNetworkManagementService;
     @Mock INetworkStatsService mStatsService;
     @Mock IBatteryStats mBatteryStatsService;
-    @Mock INetworkPolicyManager mNpm;
     @Mock IDnsResolver mMockDnsResolver;
     @Mock INetd mMockNetd;
     @Mock NetworkStackClient mNetworkStack;
@@ -380,6 +380,7 @@ public class ConnectivityServiceTest {
     @Mock TelephonyManager mTelephonyManager;
     @Mock MockableSystemProperties mSystemProperties;
     @Mock EthernetManager mEthernetManager;
+    @Mock NetworkPolicyManager mNetworkPolicyManager;
 
     private ArgumentCaptor<ResolverParamsParcel> mResolverParamsParcelCaptor =
             ArgumentCaptor.forClass(ResolverParamsParcel.class);
@@ -412,6 +413,7 @@ public class ConnectivityServiceTest {
 
         @Spy private Resources mResources;
         private final LinkedBlockingQueue<Intent> mStartedActivities = new LinkedBlockingQueue<>();
+
         // Map of permission name -> PermissionManager.Permission_{GRANTED|DENIED} constant
         private final HashMap<String, Integer> mMockedPermissions = new HashMap<>();
 
@@ -477,6 +479,7 @@ public class ConnectivityServiceTest {
             if (Context.APP_OPS_SERVICE.equals(name)) return mAppOpsManager;
             if (Context.TELEPHONY_SERVICE.equals(name)) return mTelephonyManager;
             if (Context.ETHERNET_SERVICE.equals(name)) return mEthernetManager;
+            if (Context.NETWORK_POLICY_SERVICE.equals(name)) return mNetworkPolicyManager;
             return super.getSystemService(name);
         }
 
@@ -1326,7 +1329,6 @@ public class ConnectivityServiceTest {
         mService = new ConnectivityService(mServiceContext,
                 mNetworkManagementService,
                 mStatsService,
-                mNpm,
                 mMockDnsResolver,
                 mock(IpConnectivityLog.class),
                 mMockNetd,
@@ -1336,7 +1338,7 @@ public class ConnectivityServiceTest {
 
         final ArgumentCaptor<INetworkPolicyListener> policyListenerCaptor =
                 ArgumentCaptor.forClass(INetworkPolicyListener.class);
-        verify(mNpm).registerListener(policyListenerCaptor.capture());
+        verify(mNetworkPolicyManager).registerListener(policyListenerCaptor.capture());
         mPolicyListener = policyListenerCaptor.getValue();
 
         // Create local CM before sending system ready so that we can answer
@@ -6509,6 +6511,26 @@ public class ConnectivityServiceTest {
         checkNetworkInfo(mCm.getNetworkInfo(type), type, state);
     }
 
+    // Checks that each of the |agents| receive a blocked status change callback with the specified
+    // |blocked| value, in any order. This is needed because when an event affects multiple
+    // networks, ConnectivityService does not guarantee the order in which callbacks are fired.
+    private void assertBlockedCallbackInAnyOrder(TestNetworkCallback callback, boolean blocked,
+            TestNetworkAgentWrapper... agents) {
+        final List<Network> expectedNetworks = Arrays.asList(agents).stream()
+                .map((agent) -> agent.getNetwork())
+                .collect(Collectors.toList());
+
+        // Expect exactly one blocked callback for each agent.
+        for (int i = 0; i < agents.length; i++) {
+            CallbackEntry e = callback.expectCallbackThat(TIMEOUT_MS, (c) ->
+                    c instanceof CallbackEntry.BlockedStatus
+                            && ((CallbackEntry.BlockedStatus) c).getBlocked() == blocked);
+            Network network = e.getNetwork();
+            assertTrue("Received unexpected blocked callback for network " + network,
+                    expectedNetworks.remove(network));
+        }
+    }
+
     @Test
     public void testNetworkBlockedStatusAlwaysOnVpn() throws Exception {
         mServiceContext.setPermission(
@@ -6555,9 +6577,10 @@ public class ConnectivityServiceTest {
         assertNetworkInfo(TYPE_WIFI, DetailedState.BLOCKED);
 
         // Disable lockdown, expect to see the network unblocked.
-        // There are no callbacks because they are not implemented yet.
         mService.setAlwaysOnVpnPackage(userId, null, false /* lockdown */, allowList);
         expectNetworkRejectNonSecureVpn(inOrder, false, firstHalf, secondHalf);
+        callback.expectBlockedStatusCallback(false, mWiFiNetworkAgent);
+        defaultCallback.expectBlockedStatusCallback(false, mWiFiNetworkAgent);
         vpnUidCallback.assertNoCallback();
         assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetworkForUid(VPN_UID));
         assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetwork());
@@ -6605,6 +6628,8 @@ public class ConnectivityServiceTest {
         allowList.clear();
         mService.setAlwaysOnVpnPackage(userId, ALWAYS_ON_PACKAGE, true /* lockdown */, allowList);
         expectNetworkRejectNonSecureVpn(inOrder, true, firstHalf, secondHalf);
+        defaultCallback.expectBlockedStatusCallback(true, mWiFiNetworkAgent);
+        assertBlockedCallbackInAnyOrder(callback, true, mWiFiNetworkAgent, mCellNetworkAgent);
         vpnUidCallback.assertNoCallback();
         assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetworkForUid(VPN_UID));
         assertNull(mCm.getActiveNetwork());
@@ -6614,6 +6639,8 @@ public class ConnectivityServiceTest {
 
         // Disable lockdown. Everything is unblocked.
         mService.setAlwaysOnVpnPackage(userId, null, false /* lockdown */, allowList);
+        defaultCallback.expectBlockedStatusCallback(false, mWiFiNetworkAgent);
+        assertBlockedCallbackInAnyOrder(callback, false, mWiFiNetworkAgent, mCellNetworkAgent);
         vpnUidCallback.assertNoCallback();
         assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetworkForUid(VPN_UID));
         assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetwork());
@@ -6647,6 +6674,8 @@ public class ConnectivityServiceTest {
 
         // Enable lockdown and connect a VPN. The VPN is not blocked.
         mService.setAlwaysOnVpnPackage(userId, ALWAYS_ON_PACKAGE, true /* lockdown */, allowList);
+        defaultCallback.expectBlockedStatusCallback(true, mWiFiNetworkAgent);
+        assertBlockedCallbackInAnyOrder(callback, true, mWiFiNetworkAgent, mCellNetworkAgent);
         vpnUidCallback.assertNoCallback();
         assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetworkForUid(VPN_UID));
         assertNull(mCm.getActiveNetwork());
@@ -6658,7 +6687,7 @@ public class ConnectivityServiceTest {
         defaultCallback.expectAvailableThenValidatedCallbacks(mMockVpn);
         vpnUidCallback.assertNoCallback();  // vpnUidCallback has NOT_VPN capability.
         assertEquals(mMockVpn.getNetwork(), mCm.getActiveNetwork());
-        assertEquals(null, mCm.getActiveNetworkForUid(VPN_UID));  // BUG?
+        assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetworkForUid(VPN_UID));
         assertActiveNetworkInfo(TYPE_WIFI, DetailedState.CONNECTED);
         assertNetworkInfo(TYPE_MOBILE, DetailedState.DISCONNECTED);
         assertNetworkInfo(TYPE_VPN, DetailedState.CONNECTED);

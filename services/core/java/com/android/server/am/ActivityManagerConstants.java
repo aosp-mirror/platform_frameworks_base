@@ -360,19 +360,20 @@ final class ActivityManagerConstants extends ContentObserver {
     // started, the restriction is on while-in-use permissions.)
     volatile boolean mFlagBackgroundFgsStartRestrictionEnabled = true;
 
-    // Indicates whether the foreground service background start restriction is enabled.
+    // Indicates whether the foreground service background start restriction is enabled for
+    // apps targeting S+.
     // When the restriction is enabled, service is not allowed to startForeground from background
     // at all.
-    volatile boolean mFlagFgsStartRestrictionEnabled = false;
+    volatile boolean mFlagFgsStartRestrictionEnabled = true;
 
     // Whether we defer FGS notifications a few seconds following their transition to
     // the foreground state.  Applies only to S+ apps; enabled by default.
     volatile boolean mFlagFgsNotificationDeferralEnabled = true;
 
     // Restrict FGS notification deferral policy to only those apps that target
-    // API version S or higher.  Enabled by default; set to "false" to defer FGS
-    // notifications from legacy apps as well.
-    volatile boolean mFlagFgsNotificationDeferralApiGated = true;
+    // API version S or higher.  Disabled by default; set to "true" to force
+    // legacy app FGS notifications to display immediately in all cases.
+    volatile boolean mFlagFgsNotificationDeferralApiGated = false;
 
     // Time in milliseconds to defer FGS notifications after their transition to
     // the foreground state.
@@ -792,7 +793,7 @@ final class ActivityManagerConstants extends ContentObserver {
         mFlagFgsStartRestrictionEnabled = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_DEFAULT_FGS_STARTS_RESTRICTION_ENABLED,
-                /*defaultValue*/ false);
+                /*defaultValue*/ true);
     }
 
     private void updateFgsNotificationDeferralEnable() {
@@ -806,7 +807,7 @@ final class ActivityManagerConstants extends ContentObserver {
         mFlagFgsNotificationDeferralApiGated = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_DEFERRED_FGS_NOTIFICATIONS_API_GATED,
-                /*default value*/ true);
+                /*default value*/ false);
     }
 
     private void updateFgsNotificationDeferralInterval() {

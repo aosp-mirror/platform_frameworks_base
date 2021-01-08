@@ -110,6 +110,7 @@ public final class GnssNavigationMessage implements Parcelable {
     public static abstract class Callback {
         /**
          * The status of GNSS Navigation Message event.
+         * @deprecated Do not use.
          * @hide
          */
         @Retention(RetentionPolicy.SOURCE)
@@ -120,19 +121,28 @@ public final class GnssNavigationMessage implements Parcelable {
          * The system does not support tracking of GNSS Navigation Messages.
          *
          * This status will not change in the future.
+         *
+         * @deprecated Do not use.
          */
+        @Deprecated
         public static final int STATUS_NOT_SUPPORTED = 0;
 
         /**
          * GNSS Navigation Messages are successfully being tracked, it will receive updates once
          * they are available.
+         *
+         * @deprecated Do not use.
          */
+        @Deprecated
         public static final int STATUS_READY = 1;
 
         /**
          * GNSS provider or Location is disabled, updated will not be received until they are
          * enabled.
+         *
+         * @deprecated Do not use.
          */
+        @Deprecated
         public static final int STATUS_LOCATION_DISABLED = 2;
 
         /**
@@ -142,7 +152,13 @@ public final class GnssNavigationMessage implements Parcelable {
 
         /**
          * Returns the latest status of the GNSS Navigation Messages sub-system.
+         *
+         * @deprecated Do not rely on this callback. From Android S onwards this callback will be
+         * invoked once with {@link #STATUS_READY} in all cases for backwards compatibility, and
+         * then never invoked again. Use LocationManager APIs if you need to determine if
+         * GNSS navigation messages are supported or if location is off, etc...
          */
+        @Deprecated
         public void onStatusChanged(@GnssNavigationMessageStatus int status) {}
     }
 

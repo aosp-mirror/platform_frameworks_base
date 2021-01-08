@@ -23,7 +23,6 @@
     <!-- Footer Preferences -->
     <style name="Preference.FooterPreference.SettingsBase" parent="@style/Preference.Material">
         <item name="android:layout">@layout/preference_footer</item>
-        <item name="allowDividerAbove">true</item>
     </style>
 
     <style name="PreferenceThemeOverlay.SettingsBase" parent="@style/PreferenceThemeOverlay">

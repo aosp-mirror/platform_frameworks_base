@@ -2489,6 +2489,20 @@ class ContextImpl extends Context {
         return new WindowContext(this, display, type, options);
     }
 
+    @NonNull
+    @Override
+    public Context createTokenContext(@NonNull IBinder token, @NonNull Display display) {
+        if (display == null) {
+            throw new UnsupportedOperationException("Token context can only be created from "
+                    + "other visual contexts, such as Activity or one created with "
+                    + "Context#createDisplayContext(Display)");
+        }
+        final ContextImpl tokenContext = createBaseWindowContext(token, display);
+        tokenContext.setResources(createWindowContextResources());
+        return tokenContext;
+    }
+
+
     ContextImpl createBaseWindowContext(IBinder token, Display display) {
         ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo, mAttributionTag,
                 mSplitName, token, mUser, mFlags, mClassLoader, null);

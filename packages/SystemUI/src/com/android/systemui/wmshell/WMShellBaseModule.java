@@ -285,7 +285,7 @@ public abstract class WMShellBaseModule {
     @Provides
     static RootTaskDisplayAreaOrganizer provideRootTaskDisplayAreaOrganizer(
             @ShellMainThread ShellExecutor mainExecutor, Context context) {
-        return new RootTaskDisplayAreaOrganizer(mainExecutor);
+        return new RootTaskDisplayAreaOrganizer(mainExecutor, context);
     }
 
     @WMSingleton

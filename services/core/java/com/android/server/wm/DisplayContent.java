@@ -332,6 +332,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     DisplayCutout mInitialDisplayCutout;
     private final RotationCache<DisplayCutout, WmDisplayCutout> mDisplayCutoutCache
             = new RotationCache<>(this::calculateDisplayCutoutForRotationUncached);
+    boolean mIgnoreDisplayCutout;
 
     /**
      * Overridden display size. Initialized with {@link #mInitialDisplayWidth}
@@ -2507,7 +2508,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final int newWidth = rotated ? mDisplayInfo.logicalHeight : mDisplayInfo.logicalWidth;
         final int newHeight = rotated ? mDisplayInfo.logicalWidth : mDisplayInfo.logicalHeight;
         final int newDensity = mDisplayInfo.logicalDensityDpi;
-        final DisplayCutout newCutout = mDisplayInfo.displayCutout;
+        final DisplayCutout newCutout = mIgnoreDisplayCutout
+                ? DisplayCutout.NO_CUTOUT : mDisplayInfo.displayCutout;
         final String newUniqueId = mDisplayInfo.uniqueId;
 
         final boolean displayMetricsChanged = mInitialDisplayWidth != newWidth

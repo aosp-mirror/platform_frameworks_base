@@ -193,6 +193,13 @@ interface IAppSearchManager {
         in IAppSearchResultCallback callback);
 
     /**
+     * Persists all update/delete requests to the disk.
+     *
+     * @param userId Id of the calling user
+     */
+    void persistToDisk(in int userId);
+
+    /**
      * Creates and initializes AppSearchImpl for the calling app.
      *
      * @param userId Id of the calling user

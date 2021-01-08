@@ -49,12 +49,6 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "-2062338592": {
-      "message": "Looking for task of %s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_TASKS",
-      "at": "com\/android\/server\/wm\/RootWindowContainer.java"
-    },
     "-2054442123": {
       "message": "Setting Intent of %s to %s",
       "level": "VERBOSE",
@@ -72,6 +66,12 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "-2036671725": {
+      "message": "      SKIP: is wallpaper",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
     },
     "-2029985709": {
       "message": "setFocusedTask: taskId=%d",
@@ -474,6 +474,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/Transition.java"
+    },
+    "-1559645910": {
+      "message": "Looking for task of type=%s, taskAffinity=%s, intent=%s, info=%s, preferredTDA=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_TASKS",
+      "at": "com\/android\/server\/wm\/RootWindowContainer.java"
     },
     "-1558137010": {
       "message": "Config is relaunching invisible activity %s called by %s",
@@ -1530,6 +1536,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "-373110070": {
+      "message": "Skipping task: (mismatch activity\/task) %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_TASKS",
+      "at": "com\/android\/server\/wm\/RootWindowContainer.java"
     },
     "-354571697": {
       "message": "Existence Changed in transition %d: %s",

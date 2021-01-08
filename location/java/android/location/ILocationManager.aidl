@@ -21,11 +21,11 @@ import android.location.Address;
 import android.location.Criteria;
 import android.location.GeocoderParams;
 import android.location.Geofence;
+import android.location.GnssAntennaInfo;
 import android.location.GnssCapabilities;
 import android.location.GnssMeasurementCorrections;
 import android.location.GnssMeasurementRequest;
 import android.location.IGeocodeListener;
-import android.location.IGnssAntennaInfoListener;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssStatusListener;
 import android.location.IGnssNavigationMessageListener;
@@ -76,6 +76,8 @@ interface ILocationManager
     int getGnssYearOfHardware();
     String getGnssHardwareModelName();
 
+    @nullable List<GnssAntennaInfo> getGnssAntennaInfos();
+
     void registerGnssStatusCallback(in IGnssStatusListener callback, String packageName, String attributionTag);
     void unregisterGnssStatusCallback(in IGnssStatusListener callback);
 
@@ -85,9 +87,6 @@ interface ILocationManager
     void addGnssMeasurementsListener(in GnssMeasurementRequest request, in IGnssMeasurementsListener listener, String packageName, String attributionTag);
     void removeGnssMeasurementsListener(in IGnssMeasurementsListener listener);
     void injectGnssMeasurementCorrections(in GnssMeasurementCorrections corrections);
-
-    void addGnssAntennaInfoListener(in IGnssAntennaInfoListener listener, String packageName, String attributionTag);
-    void removeGnssAntennaInfoListener(in IGnssAntennaInfoListener listener);
 
     void addGnssNavigationMessageListener(in IGnssNavigationMessageListener listener, String packageName, String attributionTag);
     void removeGnssNavigationMessageListener(in IGnssNavigationMessageListener listener);

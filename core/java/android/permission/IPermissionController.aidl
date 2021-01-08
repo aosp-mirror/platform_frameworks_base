@@ -44,4 +44,7 @@ oneway interface IPermissionController {
     void grantOrUpgradeDefaultRuntimePermissions(in AndroidFuture callback);
     void notifyOneTimePermissionSessionTimeout(String packageName);
     void updateUserSensitiveForApp(int uid, in AndroidFuture callback);
+    void getPrivilegesDescriptionStringForProfile(
+            in String deviceProfileName,
+            in AndroidFuture<String> callback);
 }

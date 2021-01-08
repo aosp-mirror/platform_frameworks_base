@@ -73,6 +73,7 @@ public class PlatformCompatTest {
         mCompatConfig = new CompatConfig(mBuildClassifier, mContext);
         mPlatformCompat = new PlatformCompat(mContext, mCompatConfig);
         // Assume userdebug/eng non-final build
+        mCompatConfig.forceNonDebuggableFinalForTest(false);
         when(mBuildClassifier.isDebuggableBuild()).thenReturn(true);
         when(mBuildClassifier.isFinalBuild()).thenReturn(false);
         LocalServices.removeServiceForTest(PackageManagerInternal.class);

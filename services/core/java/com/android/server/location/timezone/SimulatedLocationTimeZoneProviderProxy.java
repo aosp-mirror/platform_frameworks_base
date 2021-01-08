@@ -16,6 +16,12 @@
 
 package com.android.server.location.timezone;
 
+import static android.app.time.LocationTimeZoneManager.SIMULATED_PROVIDER_TEST_COMMAND_ON_BIND;
+import static android.app.time.LocationTimeZoneManager.SIMULATED_PROVIDER_TEST_COMMAND_ON_UNBIND;
+import static android.app.time.LocationTimeZoneManager.SIMULATED_PROVIDER_TEST_COMMAND_PERM_FAILURE;
+import static android.app.time.LocationTimeZoneManager.SIMULATED_PROVIDER_TEST_COMMAND_SUCCESS;
+import static android.app.time.LocationTimeZoneManager.SIMULATED_PROVIDER_TEST_COMMAND_SUCCESS_ARG_KEY_TZ;
+import static android.app.time.LocationTimeZoneManager.SIMULATED_PROVIDER_TEST_COMMAND_UNCERTAIN;
 import static android.service.timezone.TimeZoneProviderService.TEST_COMMAND_RESULT_ERROR_KEY;
 import static android.service.timezone.TimeZoneProviderService.TEST_COMMAND_RESULT_SUCCESS_KEY;
 
@@ -41,17 +47,6 @@ import java.util.Objects;
  */
 class SimulatedLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
 
-    private static final String TEST_COMMAND_NAME_ON_BIND = "on_bind";
-    private static final String TEST_COMMAND_NAME_ON_UNBIND = "on_unbind";
-    private static final String TEST_COMMAND_NAME_PERM_FAIL = "perm_fail";
-    private static final String TEST_COMMAND_NAME_UNCERTAIN = "uncertain";
-    private static final String TEST_COMMAND_NAME_SUCCESS = "success";
-
-    /**
-     * Used for {@link #TEST_COMMAND_NAME_SUCCESS}.
-     */
-    private static final String KEY_TIME_ZONE = "tz";
-
     @GuardedBy("mSharedLock")
     @NonNull private TimeZoneProviderRequest mRequest;
 
@@ -69,6 +64,11 @@ class SimulatedLocationTimeZoneProviderProxy extends LocationTimeZoneProviderPro
         // No-op - nothing to do for the simulated provider.
     }
 
+    @Override
+    void onDestroy() {
+        // No-op - nothing to do for the simulated provider.
+    }
+
     void handleTestCommand(@NonNull TestCommand testCommand, @Nullable RemoteCallback callback) {
         mThreadingDomain.assertCurrentThread();
 
@@ -77,21 +77,21 @@ class SimulatedLocationTimeZoneProviderProxy extends LocationTimeZoneProviderPro
         synchronized (mSharedLock) {
             Bundle resultBundle = new Bundle();
             switch (testCommand.getName()) {
-                case TEST_COMMAND_NAME_ON_BIND: {
+                case SIMULATED_PROVIDER_TEST_COMMAND_ON_BIND: {
                     mLastEvent.set("Simulating onProviderBound(), testCommand=" + testCommand);
                     mThreadingDomain.post(this::onBindOnHandlerThread);
                     resultBundle.putBoolean(TEST_COMMAND_RESULT_SUCCESS_KEY, true);
                     break;
                 }
-                case TEST_COMMAND_NAME_ON_UNBIND: {
+                case SIMULATED_PROVIDER_TEST_COMMAND_ON_UNBIND: {
                     mLastEvent.set("Simulating onProviderUnbound(), testCommand=" + testCommand);
                     mThreadingDomain.post(this::onUnbindOnHandlerThread);
                     resultBundle.putBoolean(TEST_COMMAND_RESULT_SUCCESS_KEY, true);
                     break;
                 }
-                case TEST_COMMAND_NAME_PERM_FAIL:
-                case TEST_COMMAND_NAME_UNCERTAIN:
-                case TEST_COMMAND_NAME_SUCCESS: {
+                case SIMULATED_PROVIDER_TEST_COMMAND_PERM_FAILURE:
+                case SIMULATED_PROVIDER_TEST_COMMAND_UNCERTAIN:
+                case SIMULATED_PROVIDER_TEST_COMMAND_SUCCESS: {
                     if (!mRequest.sendUpdates()) {
                         String errorMsg = "testCommand=" + testCommand
                                 + " is testing an invalid case:"
@@ -152,6 +152,7 @@ class SimulatedLocationTimeZoneProviderProxy extends LocationTimeZoneProviderPro
     @Override
     public void dump(@NonNull IndentingPrintWriter ipw, @Nullable String[] args) {
         synchronized (mSharedLock) {
+            ipw.println("{SimulatedLocationTimeZoneProviderProxy}");
             ipw.println("mRequest=" + mRequest);
             ipw.println("mLastEvent=" + mLastEvent);
 
@@ -167,12 +168,13 @@ class SimulatedLocationTimeZoneProviderProxy extends LocationTimeZoneProviderPro
      * {@link #createTimeZoneProviderEventFromTestCommand(TestCommand)}.
      */
     static void printTestCommandShellHelp(@NonNull PrintWriter pw) {
-        pw.printf("%s\n", TEST_COMMAND_NAME_ON_BIND);
-        pw.printf("%s\n", TEST_COMMAND_NAME_ON_UNBIND);
-        pw.printf("%s\n", TEST_COMMAND_NAME_PERM_FAIL);
-        pw.printf("%s\n", TEST_COMMAND_NAME_UNCERTAIN);
+        pw.printf("%s\n", SIMULATED_PROVIDER_TEST_COMMAND_ON_BIND);
+        pw.printf("%s\n", SIMULATED_PROVIDER_TEST_COMMAND_ON_UNBIND);
+        pw.printf("%s\n", SIMULATED_PROVIDER_TEST_COMMAND_PERM_FAILURE);
+        pw.printf("%s\n", SIMULATED_PROVIDER_TEST_COMMAND_UNCERTAIN);
         pw.printf("%s %s=string_array:<time zone id>[&<time zone id>]+\n",
-                TEST_COMMAND_NAME_SUCCESS, KEY_TIME_ZONE);
+                SIMULATED_PROVIDER_TEST_COMMAND_SUCCESS,
+                SIMULATED_PROVIDER_TEST_COMMAND_SUCCESS_ARG_KEY_TZ);
     }
 
     @NonNull
@@ -180,17 +182,19 @@ class SimulatedLocationTimeZoneProviderProxy extends LocationTimeZoneProviderPro
             @NonNull TestCommand testCommand) {
         String name = testCommand.getName();
         switch (name) {
-            case TEST_COMMAND_NAME_PERM_FAIL: {
+            case SIMULATED_PROVIDER_TEST_COMMAND_PERM_FAILURE: {
                 return TimeZoneProviderEvent.createPermanentFailureEvent("Simulated failure");
             }
-            case TEST_COMMAND_NAME_UNCERTAIN: {
+            case SIMULATED_PROVIDER_TEST_COMMAND_UNCERTAIN: {
                 return TimeZoneProviderEvent.createUncertainEvent();
             }
-            case TEST_COMMAND_NAME_SUCCESS: {
+            case SIMULATED_PROVIDER_TEST_COMMAND_SUCCESS: {
                 Bundle args = testCommand.getArgs();
-                String[] timeZoneIds = args.getStringArray(KEY_TIME_ZONE);
+                String[] timeZoneIds = args.getStringArray(
+                        SIMULATED_PROVIDER_TEST_COMMAND_SUCCESS_ARG_KEY_TZ);
                 if (timeZoneIds == null) {
-                    throw new IllegalArgumentException("No " + KEY_TIME_ZONE + " arg found");
+                    throw new IllegalArgumentException("No "
+                            + SIMULATED_PROVIDER_TEST_COMMAND_SUCCESS_ARG_KEY_TZ + " arg found");
                 }
                 TimeZoneProviderSuggestion suggestion = new TimeZoneProviderSuggestion.Builder()
                         .setTimeZoneIds(Arrays.asList(timeZoneIds))

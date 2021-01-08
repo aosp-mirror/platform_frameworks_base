@@ -176,7 +176,7 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         data.finisher = null;
         data.mActionsReadyListener = null;
         SaveImageInBackgroundTask task =
-                new SaveImageInBackgroundTask(mContext, mScreenshotSmartActions, data,
+                new SaveImageInBackgroundTask(mContext, null, mScreenshotSmartActions, data,
                         ShareTransition::new);
 
         Notification.Action shareAction = task.createShareAction(mContext, mContext.getResources(),
@@ -204,7 +204,7 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         data.finisher = null;
         data.mActionsReadyListener = null;
         SaveImageInBackgroundTask task =
-                new SaveImageInBackgroundTask(mContext, mScreenshotSmartActions, data,
+                new SaveImageInBackgroundTask(mContext, null, mScreenshotSmartActions, data,
                         ShareTransition::new);
 
         Notification.Action editAction = task.createEditAction(mContext, mContext.getResources(),
@@ -232,7 +232,7 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         data.finisher = null;
         data.mActionsReadyListener = null;
         SaveImageInBackgroundTask task =
-                new SaveImageInBackgroundTask(mContext, mScreenshotSmartActions, data,
+                new SaveImageInBackgroundTask(mContext, null, mScreenshotSmartActions, data,
                         ShareTransition::new);
 
         Notification.Action deleteAction = task.createDeleteAction(mContext,

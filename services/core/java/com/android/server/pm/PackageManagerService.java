@@ -388,7 +388,6 @@ import com.android.server.pm.permission.LegacyPermissionManagerService;
 import com.android.server.pm.permission.Permission;
 import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
-import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.rollback.RollbackManagerInternal;
 import com.android.server.security.VerityUtils;
 import com.android.server.storage.DeviceStorageMonitorInternal;
@@ -3721,7 +3720,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 Slog.i(TAG, "Platform changed from " + ver.sdkVersion + " to "
                         + mSdkVersion + "; regranting permissions for internal storage");
             }
-            mPermissionManager.updateAllPermissions(
+            mPermissionManager.onStorageVolumeMounted(
                     StorageManager.UUID_PRIVATE_INTERNAL, sdkUpdated);
             ver.sdkVersion = mSdkVersion;
 
@@ -22354,23 +22353,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
         mUserManager.systemReady();
 
-        // Now that we've scanned all packages, and granted any default
-        // permissions, ensure permissions are updated. Beware of dragons if you
-        // try optimizing this.
-        synchronized (mLock) {
-            mPermissionManager.updateAllPermissions(StorageManager.UUID_PRIVATE_INTERNAL, false);
-
-            final PermissionPolicyInternal permissionPolicyInternal =
-                    mInjector.getLocalService(PermissionPolicyInternal.class);
-            permissionPolicyInternal.setOnInitializedCallback(userId -> {
-                // The SDK updated case is already handled when we run during the ctor.
-                synchronized (mLock) {
-                    mPermissionManager.updateAllPermissions(
-                            StorageManager.UUID_PRIVATE_INTERNAL, false);
-                }
-            });
-        }
-
         // Watch for external volumes that come and go over time
         final StorageManager storage = mInjector.getSystemService(StorageManager.class);
         storage.registerListener(mStorageListener);
@@ -23426,7 +23408,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 logCriticalInfo(Log.INFO, "Platform changed from " + ver.sdkVersion + " to "
                         + mSdkVersion + "; regranting permissions for " + volumeUuid);
             }
-            mPermissionManager.updateAllPermissions(volumeUuid, sdkUpdated);
+            mPermissionManager.onStorageVolumeMounted(volumeUuid, sdkUpdated);
 
             // Yay, everything is now upgraded
             ver.forceCurrent();

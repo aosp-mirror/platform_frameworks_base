@@ -16,7 +16,6 @@
 
 package com.android.server.location.gnss;
 
-import android.location.GnssCapabilities;
 import android.location.IGpsGeofenceHardware;
 import android.util.SparseArray;
 
@@ -141,8 +140,4 @@ class GnssGeofenceProxy extends IGpsGeofenceHardware.Stub implements GnssNative.
             }
         }
     }
-
-    @Override
-    public void onCapabilitiesChanged(GnssCapabilities oldCapabilities,
-            GnssCapabilities newCapabilities) {}
 }

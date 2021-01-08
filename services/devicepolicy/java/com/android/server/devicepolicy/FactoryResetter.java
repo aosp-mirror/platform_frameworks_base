@@ -17,14 +17,18 @@
 package com.android.server.devicepolicy;
 
 import android.annotation.Nullable;
+import android.app.admin.DevicePolicySafetyChecker;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.os.RecoverySystem;
+import android.os.RemoteException;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.service.persistentdata.PersistentDataBlockManager;
-import android.util.Log;
+import android.util.Slog;
 
+import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.Preconditions;
 
 import java.io.IOException;
@@ -38,6 +42,7 @@ public final class FactoryResetter {
     private static final String TAG = FactoryResetter.class.getSimpleName();
 
     private final Context mContext;
+    private final @Nullable DevicePolicySafetyChecker mSafetyChecker;
     private final @Nullable String mReason;
     private final boolean mShutdown;
     private final boolean mForce;
@@ -45,17 +50,39 @@ public final class FactoryResetter {
     private final boolean mWipeAdoptableStorage;
     private final boolean mWipeFactoryResetProtection;
 
-
     /**
      * Factory reset the device according to the builder's arguments.
      */
     public void factoryReset() throws IOException {
-        Log.i(TAG, String.format("factoryReset(): reason=%s, shutdown=%b, force=%b, wipeEuicc=%b"
-                + ", wipeAdoptableStorage=%b, wipeFRP=%b", mReason, mShutdown, mForce, mWipeEuicc,
-                mWipeAdoptableStorage, mWipeFactoryResetProtection));
-
         Preconditions.checkCallAuthorization(mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.MASTER_CLEAR) == PackageManager.PERMISSION_GRANTED);
+
+        if (mSafetyChecker == null) {
+            factoryResetInternalUnchecked();
+            return;
+        }
+
+        IResultReceiver receiver = new IResultReceiver.Stub() {
+            @Override
+            public void send(int resultCode, Bundle resultData) throws RemoteException {
+                Slog.i(TAG, String.format("Factory reset confirmed by %s, proceeding",
+                        mSafetyChecker));
+                try {
+                    factoryResetInternalUnchecked();
+                } catch (IOException e) {
+                    // Shouldn't happen
+                    Slog.wtf(TAG, "IOException calling underlying systems", e);
+                }
+            }
+        };
+        Slog.i(TAG, String.format("Delaying factory reset until %s confirms", mSafetyChecker));
+        mSafetyChecker.onFactoryReset(receiver);
+    }
+
+    private void factoryResetInternalUnchecked() throws IOException {
+        Slog.i(TAG, String.format("factoryReset(): reason=%s, shutdown=%b, force=%b, wipeEuicc=%b, "
+                + "wipeAdoptableStorage=%b, wipeFRP=%b", mReason, mShutdown, mForce, mWipeEuicc,
+                mWipeAdoptableStorage, mWipeFactoryResetProtection));
 
         UserManager um = mContext.getSystemService(UserManager.class);
         if (!mForce && um.hasUserRestriction(UserManager.DISALLOW_FACTORY_RESET)) {
@@ -66,15 +93,15 @@ public final class FactoryResetter {
             PersistentDataBlockManager manager = mContext
                     .getSystemService(PersistentDataBlockManager.class);
             if (manager != null) {
-                Log.w(TAG, "Wiping factory reset protection");
+                Slog.w(TAG, "Wiping factory reset protection");
                 manager.wipe();
             } else {
-                Log.w(TAG, "No need to wipe factory reset protection");
+                Slog.w(TAG, "No need to wipe factory reset protection");
             }
         }
 
         if (mWipeAdoptableStorage) {
-            Log.w(TAG, "Wiping adoptable storage");
+            Slog.w(TAG, "Wiping adoptable storage");
             StorageManager sm = mContext.getSystemService(StorageManager.class);
             sm.wipeAdoptableDisks();
         }
@@ -84,8 +111,9 @@ public final class FactoryResetter {
 
     private FactoryResetter(Builder builder) {
         mContext = builder.mContext;
-        mShutdown = builder.mShutdown;
+        mSafetyChecker = builder.mSafetyChecker;
         mReason = builder.mReason;
+        mShutdown = builder.mShutdown;
         mForce = builder.mForce;
         mWipeEuicc = builder.mWipeEuicc;
         mWipeAdoptableStorage = builder.mWipeAdoptableStorage;
@@ -105,6 +133,7 @@ public final class FactoryResetter {
     public static final class Builder {
 
         private final Context mContext;
+        private @Nullable DevicePolicySafetyChecker mSafetyChecker;
         private @Nullable String mReason;
         private boolean mShutdown;
         private boolean mForce;
@@ -114,6 +143,15 @@ public final class FactoryResetter {
 
         private Builder(Context context) {
             mContext = Objects.requireNonNull(context);
+        }
+
+        /**
+         * Sets a {@link DevicePolicySafetyChecker} object that will be used to delay the
+         * factory reset when it's not safe to do so.
+         */
+        public Builder setSafetyChecker(@Nullable DevicePolicySafetyChecker safetyChecker) {
+            mSafetyChecker = safetyChecker;
+            return this;
         }
 
         /**
