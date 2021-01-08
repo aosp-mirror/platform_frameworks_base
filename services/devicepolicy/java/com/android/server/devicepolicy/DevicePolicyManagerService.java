@@ -8401,7 +8401,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return null;
         }
         Preconditions.checkCallAuthorization(canManageUsers(getCallerIdentity()));
+        return getProfileOwnerNameUnchecked(userHandle);
+    }
 
+    private String getProfileOwnerNameUnchecked(int userHandle) {
         ComponentName profileOwner = getProfileOwnerAsUser(userHandle);
         if (profileOwner == null) {
             return null;
@@ -9707,7 +9710,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         // Set admin.
         setActiveAdmin(profileOwner, /* refreshing= */ true, userId);
-        final String ownerName = getProfileOwnerName(Process.myUserHandle().getIdentifier());
+        final String ownerName = getProfileOwnerNameUnchecked(
+                Process.myUserHandle().getIdentifier());
         setProfileOwner(profileOwner, ownerName, userId);
 
         synchronized (getLockObject()) {
