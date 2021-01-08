@@ -18,25 +18,19 @@ package com.android.server.utils;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.util.ArrayMap;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
+import android.util.ArraySet;
 
 /**
- * WatchedArrayMap is an {@link android.util.ArrayMap} that can report changes to itself.  If its
- * values are {@link Watchable} then the WatchedArrayMap will also report changes to the values.
+ * WatchedArraySet is an {@link android.util.ArraySet} that can report changes to itself.  If its
+ * values are {@link Watchable} then the WatchedArraySet will also report changes to the values.
  * A {@link Watchable} is notified only once, no matter how many times it is stored in the array.
- * @param <K> The key type.
- * @param <V> The value type.
+ * @param <E> The element type
  */
-public class WatchedArrayMap<K, V> extends WatchableImpl
-        implements Map<K, V>, Snappable {
+public class WatchedArraySet<E> extends WatchableImpl
+        implements Snappable {
 
     // The storage
-    private final ArrayMap<K, V> mStorage;
+    private final ArraySet<E> mStorage;
 
     // If true, the array is watching its children
     private volatile boolean mWatching = false;
@@ -45,7 +39,7 @@ public class WatchedArrayMap<K, V> extends WatchableImpl
     private final Watcher mObserver = new Watcher() {
             @Override
             public void onChange(@Nullable Watchable what) {
-                WatchedArrayMap.this.dispatchChange(what);
+                WatchedArraySet.this.dispatchChange(what);
             }
         };
 
@@ -89,7 +83,7 @@ public class WatchedArrayMap<K, V> extends WatchableImpl
      */
     private void unregisterChildIf(Object o) {
         if (mWatching && o instanceof Watchable) {
-            if (!mStorage.containsValue(o)) {
+            if (!mStorage.contains(o)) {
                 ((Watchable) o).unregisterObserver(mObserver);
             }
         }
@@ -130,70 +124,67 @@ public class WatchedArrayMap<K, V> extends WatchableImpl
     }
 
     /**
-     * Create a new empty {@link WatchedArrayMap}.  The default capacity of an array map
+     * Create a new empty {@link WatchedArraySet}.  The default capacity of an array map
      * is 0, and will grow once items are added to it.
      */
-    public WatchedArrayMap() {
+    public WatchedArraySet() {
         this(0, false);
     }
 
     /**
-     * Create a new {@link WatchedArrayMap} with a given initial capacity.
+     * Create a new {@link WatchedArraySet} with a given initial capacity.
      */
-    public WatchedArrayMap(int capacity) {
+    public WatchedArraySet(int capacity) {
         this(capacity, false);
     }
 
     /** {@hide} */
-    public WatchedArrayMap(int capacity, boolean identityHashCode) {
-        mStorage = new ArrayMap<K, V>(capacity, identityHashCode);
+    public WatchedArraySet(int capacity, boolean identityHashCode) {
+        mStorage = new ArraySet<E>(capacity, identityHashCode);
     }
 
     /**
-     * Create a new {@link WatchedArrayMap} with the mappings from the given {@link Map}.
+     * Create a new {@link WatchedArraySet} with items from the given array
      */
-    public WatchedArrayMap(@Nullable Map<? extends K, ? extends V> map) {
-        mStorage = new ArrayMap<K, V>();
-        if (map != null) {
-            putAll(map);
-        }
+    public WatchedArraySet(@Nullable E[] array) {
+        mStorage = new ArraySet(array);
     }
 
     /**
-     * Create a {@link WatchedArrayMap} from an {@link ArrayMap}
+     * Create a {@link WatchedArraySet} from an {@link ArraySet}
      */
-    public WatchedArrayMap(@NonNull ArrayMap<K, V> c) {
-        mStorage = new ArrayMap<>(c);
+    public WatchedArraySet(@NonNull ArraySet<E> c) {
+        mStorage = new ArraySet<>(c);
     }
 
     /**
-     * Create a {@link WatchedArrayMap} from an {@link WatchedArrayMap}
+     * Create a {@link WatchedArraySet} from an {@link WatchedArraySet}
      */
-    public WatchedArrayMap(@NonNull WatchedArrayMap<K, V> c) {
-        mStorage = new ArrayMap<>(c.mStorage);
+    public WatchedArraySet(@NonNull WatchedArraySet<E> c) {
+        mStorage = new ArraySet<>(c.mStorage);
     }
 
     /**
      * Make <this> a copy of src.  Any data in <this> is discarded.
      */
-    public void copyFrom(@NonNull ArrayMap<K, V> src) {
+    public void copyFrom(@NonNull ArraySet<E> src) {
         clear();
         final int end = src.size();
         mStorage.ensureCapacity(end);
         for (int i = 0; i < end; i++) {
-            put(src.keyAt(i), src.valueAt(i));
+            add(src.valueAt(i));
         }
     }
 
     /**
      * Make dst a copy of <this>.  Any previous data in dst is discarded.
      */
-    public void copyTo(@NonNull ArrayMap<K, V> dst) {
+    public void copyTo(@NonNull ArraySet<E> dst) {
         dst.clear();
         final int end = size();
         dst.ensureCapacity(end);
         for (int i = 0; i < end; i++) {
-            dst.put(keyAt(i), valueAt(i));
+            dst.add(valueAt(i));
         }
     }
 
@@ -201,14 +192,13 @@ public class WatchedArrayMap<K, V> extends WatchableImpl
      * Return the underlying storage.  This breaks the wrapper but is necessary when
      * passing the array to distant methods.
      */
-    public ArrayMap<K, V> untrackedStorage() {
+    public ArraySet<E> untrackedStorage() {
         return mStorage;
     }
 
     /**
-     * {@inheritDoc}
+     * Make the array map empty.  All storage is released.
      */
-    @Override
     public void clear() {
         // The storage cannot be simply cleared.  Each element in the storage must be
         // unregistered.  Deregistration is only needed if the array is actually
@@ -224,48 +214,159 @@ public class WatchedArrayMap<K, V> extends WatchableImpl
     }
 
     /**
-     * {@inheritDoc}
+     * Check whether a value exists in the set.
+     *
+     * @param key The value to search for.
+     * @return Returns true if the value exists, else false.
      */
-    @Override
-    public boolean containsKey(Object key) {
-        return mStorage.containsKey(key);
+    public boolean contains(Object key) {
+        return mStorage.contains(key);
     }
 
     /**
-     * {@inheritDoc}
+     * Returns the index of a value in the set.
+     *
+     * @param key The value to search for.
+     * @return Returns the index of the value if it exists, else a negative integer.
      */
-    @Override
-    public boolean containsValue(Object value) {
-        return mStorage.containsValue(value);
+    public int indexOf(Object key) {
+        return mStorage.indexOf(key);
     }
 
     /**
-     * {@inheritDoc}
+     * Return the value at the given index in the array.
+     *
+     * <p>For indices outside of the range <code>0...size()-1</code>, an
+     * {@link ArrayIndexOutOfBoundsException} is thrown.</p>
+     *
+     * @param index The desired index, must be between 0 and {@link #size()}-1.
+     * @return Returns the value stored at the given index.
      */
-    @Override
-    public Set<Map.Entry<K, V>> entrySet() {
-        return Collections.unmodifiableSet(mStorage.entrySet());
+    public E valueAt(int index) {
+        return mStorage.valueAt(index);
     }
 
     /**
-     * {@inheritDoc}
+     * Return true if the array map contains no items.
      */
-    @Override
-    public boolean equals(@Nullable Object o) {
-        if (o instanceof WatchedArrayMap) {
-            WatchedArrayMap w = (WatchedArrayMap) o;
-            return mStorage.equals(w.mStorage);
-        } else {
-            return false;
+    public boolean isEmpty() {
+        return mStorage.isEmpty();
+    }
+
+    /**
+     * Adds the specified object to this set. The set is not modified if it
+     * already contains the object.
+     *
+     * @param value the object to add.
+     * @return {@code true} if this set is modified, {@code false} otherwise.
+     */
+    public boolean add(E value) {
+        final boolean result = mStorage.add(value);
+        registerChild(value);
+        onChanged();
+        return result;
+    }
+
+    /**
+     * Special fast path for appending items to the end of the array without validation.
+     * The array must already be large enough to contain the item.
+     * @hide
+     */
+    public void append(E value) {
+        mStorage.append(value);
+        registerChild(value);
+        onChanged();
+    }
+
+    /**
+     * Perform a {@link #add(Object)} of all values in <var>array</var>
+     * @param array The array whose contents are to be retrieved.
+     */
+    public void addAll(ArraySet<? extends E> array) {
+        final int end = array.size();
+        for (int i = 0; i < end; i++) {
+            add(array.valueAt(i));
         }
     }
 
     /**
+     * Perform a {@link #add(Object)} of all values in <var>array</var>
+     * @param array The array whose contents are to be retrieved.
+     */
+    public void addAll(WatchedArraySet<? extends E> array) {
+        final int end = array.size();
+        for (int i = 0; i < end; i++) {
+            add(array.valueAt(i));
+        }
+    }
+
+    /**
+     * Removes the specified object from this set.
+     *
+     * @param o the object to remove.
+     * @return {@code true} if this set was modified, {@code false} otherwise.
+     */
+    public boolean remove(Object o) {
+        if (mStorage.remove(o)) {
+            unregisterChildIf(o);
+            onChanged();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Remove the key/value mapping at the given index.
+     *
+     * <p>For indices outside of the range <code>0...size()-1</code>, an
+     * {@link ArrayIndexOutOfBoundsException} is thrown.</p>
+     *
+     * @param index The desired index, must be between 0 and {@link #size()}-1.
+     * @return Returns the value that was stored at this index.
+     */
+    public E removeAt(int index) {
+        final E result = mStorage.removeAt(index);
+        unregisterChildIf(result);
+        onChanged();
+        return result;
+    }
+
+    /**
+     * Perform a {@link #remove(Object)} of all values in <var>array</var>
+     * @param array The array whose contents are to be removed.
+     */
+    public boolean removeAll(ArraySet<? extends E> array) {
+        final int end = array.size();
+        boolean any = false;
+        for (int i = 0; i < end; i++) {
+            any = remove(array.valueAt(i)) || any;
+        }
+        return any;
+    }
+
+    /**
+     * Return the number of items in this array map.
+     */
+    public int size() {
+        return mStorage.size();
+    }
+
+    /**
      * {@inheritDoc}
+     *
+     * <p>This implementation returns false if the object is not a set, or
+     * if the sets have different sizes.  Otherwise, for each value in this
+     * set, it checks to make sure the value also exists in the other set.
+     * If any value doesn't exist, the method returns false; otherwise, it
+     * returns true.
      */
     @Override
-    public V get(Object key) {
-        return mStorage.get(key);
+    public boolean equals(@Nullable Object object) {
+        if (object instanceof WatchedArraySet) {
+            return mStorage.equals(((WatchedArraySet) object).mStorage);
+        } else {
+            return mStorage.equals(object);
+        }
     }
 
     /**
@@ -278,152 +379,14 @@ public class WatchedArrayMap<K, V> extends WatchableImpl
 
     /**
      * {@inheritDoc}
+     *
+     * <p>This implementation composes a string by iterating over its values. If
+     * this set contains itself as a value, the string "(this Set)"
+     * will appear in its place.
      */
     @Override
-    public boolean isEmpty() {
-        return mStorage.isEmpty();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Set<K> keySet() {
-        return Collections.unmodifiableSet(mStorage.keySet());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public V put(K key, V value) {
-        final V result = mStorage.put(key, value);
-        registerChild(value);
-        onChanged();
-        return result;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void putAll(@NonNull Map<? extends K, ? extends V> map) {
-        for (Map.Entry<? extends K, ? extends V> element : map.entrySet()) {
-            put(element.getKey(), element.getValue());
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public V remove(@NonNull Object key) {
-        final V result = mStorage.remove(key);
-        unregisterChildIf(result);
-        onChanged();
-        return result;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int size() {
-        return mStorage.size();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Collection<V> values() {
-        return Collections.unmodifiableCollection(mStorage.values());
-    }
-
-    // Methods supported by ArrayMap that are not part of Map
-
-    /**
-     * Return the key at the given index in the array.
-     *
-     * <p>For indices outside of the range <code>0...size()-1</code>, an
-     * {@link ArrayIndexOutOfBoundsException} is thrown.</p>
-     *
-     * @param index The desired index, must be between 0 and {@link #size()}-1.
-     * @return Returns the key stored at the given index.
-     */
-    public K keyAt(int index) {
-        return mStorage.keyAt(index);
-    }
-
-    /**
-     * Return the value at the given index in the array.
-     *
-     * <p>For indices outside of the range <code>0...size()-1</code>, an
-     * {@link ArrayIndexOutOfBoundsException} is thrown.</p>
-     *
-     * @param index The desired index, must be between 0 and {@link #size()}-1.
-     * @return Returns the value stored at the given index.
-     */
-    public V valueAt(int index) {
-        return mStorage.valueAt(index);
-    }
-
-     /**
-     * Remove an existing key from the array map.
-     * @param key The key of the mapping to remove.
-     * @return Returns the value that was stored under the key, or null if there
-     * was no such key.
-     */
-    public int indexOfKey(K key) {
-        return mStorage.indexOfKey(key);
-    }
-
-    /**
-     * Returns an index for which {@link #valueAt} would return the
-     * specified value, or a negative number if no keys map to the
-     * specified value.
-     * Beware that this is a linear search, unlike lookups by key,
-     * and that multiple keys can map to the same value and this will
-     * find only one of them.
-     */
-    public int indexOfValue(V value) {
-        return mStorage.indexOfValue(value);
-    }
-
-    /**
-     * Set the value at a given index in the array.
-     *
-     * <p>For indices outside of the range <code>0...size()-1</code>, an
-     * {@link ArrayIndexOutOfBoundsException} is thrown.</p>
-     *
-     * @param index The desired index, must be between 0 and {@link #size()}-1.
-     * @param value The new value to store at this index.
-     * @return Returns the previous value at the given index.
-     */
-    public V setValueAt(int index, V value) {
-        final V result = mStorage.setValueAt(index, value);
-        if (value != result) {
-            unregisterChildIf(result);
-            registerChild(value);
-            onChanged();
-        }
-        return result;
-    }
-
-    /**
-     * Remove the key/value mapping at the given index.
-     *
-     * <p>For indices outside of the range <code>0...size()-1</code>, an
-     * {@link ArrayIndexOutOfBoundsException} is thrown.</p>
-     *
-     * @param index The desired index, must be between 0 and {@link #size()}-1.
-     * @return Returns the value that was stored at this index.
-     */
-    public V removeAt(int index) {
-        final V result = mStorage.removeAt(index);
-        unregisterChildIf(result);
-        onChanged();
-        return result;
+    public String toString() {
+        return mStorage.toString();
     }
 
     /**
@@ -432,8 +395,8 @@ public class WatchedArrayMap<K, V> extends WatchableImpl
      * elements.  The returned snapshot is immutable.
      * @return A new array whose elements are the elements of <this>.
      */
-    public WatchedArrayMap<K, V> snapshot() {
-        WatchedArrayMap<K, V> l = new WatchedArrayMap<>();
+    public WatchedArraySet<E> snapshot() {
+        WatchedArraySet<E> l = new WatchedArraySet<>();
         snapshot(l, this);
         return l;
     }
@@ -443,7 +406,7 @@ public class WatchedArrayMap<K, V> extends WatchableImpl
      * method returns.  <this> must be empty when the function is called.
      * @param r The source array, which is copied into <this>
      */
-    public void snapshot(@NonNull WatchedArrayMap<K, V> r) {
+    public void snapshot(@NonNull WatchedArraySet<E> r) {
         snapshot(this, r);
     }
 
@@ -455,17 +418,16 @@ public class WatchedArrayMap<K, V> extends WatchableImpl
      * @param dst The destination array.  It must be empty.
      * @param src The source array.  It is not modified.
      */
-    public static <K, V> void snapshot(@NonNull WatchedArrayMap<K, V> dst,
-            @NonNull WatchedArrayMap<K, V> src) {
+    public static <E> void snapshot(@NonNull WatchedArraySet<E> dst,
+            @NonNull WatchedArraySet<E> src) {
         if (dst.size() != 0) {
             throw new IllegalArgumentException("snapshot destination is not empty");
         }
         final int end = src.size();
         dst.mStorage.ensureCapacity(end);
         for (int i = 0; i < end; i++) {
-            final V val = Snapshots.maybeSnapshot(src.valueAt(i));
-            final K key = src.keyAt(i);
-            dst.put(key, val);
+            final E val = Snapshots.maybeSnapshot(src.valueAt(i));
+            dst.append(val);
         }
         dst.seal();
     }

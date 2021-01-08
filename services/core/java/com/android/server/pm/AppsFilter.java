@@ -167,6 +167,7 @@ public class AppsFilter implements Watchable, Snappable {
      *
      * @param observer The {@link Watcher} to be notified when the {@link Watchable} changes.
      */
+    @Override
     public void registerObserver(@NonNull Watcher observer) {
         mWatchable.registerObserver(observer);
     }
@@ -177,8 +178,19 @@ public class AppsFilter implements Watchable, Snappable {
      *
      * @param observer The {@link Watcher} that should not be in the notification list.
      */
+    @Override
     public void unregisterObserver(@NonNull Watcher observer) {
         mWatchable.unregisterObserver(observer);
+    }
+
+    /**
+     * Return true if the {@link Watcher) is a registered observer.
+     * @param observer A {@link Watcher} that might be registered
+     * @return true if the observer is registered with this {@link Watchable}.
+     */
+    @Override
+    public boolean isRegisteredObserver(@NonNull Watcher observer) {
+        return mWatchable.isRegisteredObserver(observer);
     }
 
     /**
@@ -188,6 +200,7 @@ public class AppsFilter implements Watchable, Snappable {
      *
      * @param what The {@link Watchable} that generated the event.
      */
+    @Override
     public void dispatchChange(@Nullable Watchable what) {
         mSnapshot = null;
         mWatchable.dispatchChange(what);
@@ -443,7 +456,7 @@ public class AppsFilter implements Watchable, Snappable {
         }
         final StateProvider stateProvider = command -> {
             synchronized (injector.getLock()) {
-                command.currentState(injector.getSettings().getPackagesLocked().untrackedMap(),
+                command.currentState(injector.getSettings().getPackagesLocked().untrackedStorage(),
                         injector.getUserManagerInternal().getUserInfos());
             }
         };
@@ -979,7 +992,7 @@ public class AppsFilter implements Watchable, Snappable {
     @Nullable
     SparseArray<int[]> getVisibilityAllowList(PackageSetting setting, int[] users,
             WatchedArrayMap<String, PackageSetting> existingSettings) {
-        return getVisibilityAllowList(setting, users, existingSettings.untrackedMap());
+        return getVisibilityAllowList(setting, users, existingSettings.untrackedStorage());
     }
 
     /**

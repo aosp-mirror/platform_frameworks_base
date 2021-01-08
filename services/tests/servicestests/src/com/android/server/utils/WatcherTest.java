@@ -20,11 +20,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.util.ArrayMap;
+import android.util.ArraySet;
+import android.util.SparseArray;
+import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
+
 import androidx.test.filters.SmallTest;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.ArrayList;
 
 /**
  * Test class for {@link Watcher}, {@link Watchable}, {@link WatchableImpl},
@@ -40,7 +48,7 @@ public class WatcherTest {
     // A counter to generate unique IDs for Leaf elements.
     private int mLeafId = 0;
 
-    // Useful indices used int the tests.
+    // Useful indices used in the tests.
     private static final int INDEX_A = 1;
     private static final int INDEX_B = 2;
     private static final int INDEX_C = 3;
@@ -171,6 +179,7 @@ public class WatcherTest {
 
     @Test
     public void testWatchedArrayMap() {
+        final String name = "WatchedArrayMap";
         WatchableTester tester;
 
         // Create a few leaves
@@ -183,7 +192,7 @@ public class WatcherTest {
         WatchedArrayMap<Integer, Leaf> array = new WatchedArrayMap<>();
         array.put(INDEX_A, leafA);
         array.put(INDEX_B, leafB);
-        tester = new WatchableTester(array, "WatchedArrayMap");
+        tester = new WatchableTester(array, name);
         tester.verify(0, "Initial array - no registration");
         leafA.tick();
         tester.verify(0, "Updates with no registration");
@@ -231,20 +240,20 @@ public class WatcherTest {
             final WatchedArrayMap<Integer, Leaf> arraySnap = array.snapshot();
             tester.verify(14, "Generate snapshot (no changes)");
             // Verify that the snapshot is a proper copy of the source.
-            assertEquals("WatchedArrayMap snap same size",
+            assertEquals(name + " snap same size",
                          array.size(), arraySnap.size());
             for (int i = 0; i < array.size(); i++) {
                 for (int j = 0; j < arraySnap.size(); j++) {
-                    assertTrue("WatchedArrayMap elements differ",
+                    assertTrue(name + " elements differ",
                                array.valueAt(i) != arraySnap.valueAt(j));
                 }
-                assertTrue("WatchedArrayMap element copy",
+                assertTrue(name + " element copy",
                            array.valueAt(i).equals(arraySnap.valueAt(i)));
             }
             leafD.tick();
             tester.verify(15, "Tick after snapshot");
             // Verify that the snapshot is sealed
-            verifySealed("WatchedArrayMap", ()->arraySnap.put(INDEX_A, leafA));
+            verifySealed(name, ()->arraySnap.put(INDEX_A, leafA));
         }
         // Recreate the snapshot since the test corrupted it.
         {
@@ -253,10 +262,235 @@ public class WatcherTest {
             final Leaf arraySnapElement = arraySnap.valueAt(0);
             verifySealed("ArraySnapshotElement", ()->arraySnapElement.tick());
         }
+        // Verify copy-in/out
+        {
+            final String msg = name + " copy-in/out failed";
+            ArrayMap<Integer, Leaf> base = new ArrayMap<>();
+            array.copyTo(base);
+            WatchedArrayMap<Integer, Leaf> copy = new WatchedArrayMap<>();
+            copy.copyFrom(base);
+            if (!array.equals(copy)) {
+                fail(msg);
+            }
+        }
+    }
+
+    @Test
+    public void testWatchedArraySet() {
+        final String name = "WatchedArraySet";
+        WatchableTester tester;
+
+        // Create a few leaves
+        Leaf leafA = new Leaf();
+        Leaf leafB = new Leaf();
+        Leaf leafC = new Leaf();
+        Leaf leafD = new Leaf();
+
+        // Test WatchedArraySet
+        WatchedArraySet<Leaf> array = new WatchedArraySet<>();
+        array.add(leafA);
+        array.add(leafB);
+        tester = new WatchableTester(array, name);
+        tester.verify(0, "Initial array - no registration");
+        leafA.tick();
+        tester.verify(0, "Updates with no registration");
+        tester.register();
+        tester.verify(0, "Updates with no registration");
+        leafA.tick();
+        tester.verify(1, "Updates with registration");
+        leafB.tick();
+        tester.verify(2, "Updates with registration");
+        array.remove(leafB);
+        tester.verify(3, "Removed b");
+        leafB.tick();
+        tester.verify(3, "Updates with b not watched");
+        array.add(leafB);
+        array.add(leafB);
+        tester.verify(5, "Added b once");
+        leafB.tick();
+        tester.verify(6, "Changed b - single notification");
+        array.remove(leafB);
+        tester.verify(7, "Removed b");
+        leafB.tick();
+        tester.verify(7, "Changed b - not watched");
+        array.remove(leafB);
+        tester.verify(7, "Removed non-existent b");
+        array.clear();
+        tester.verify(8, "Cleared array");
+        leafA.tick();
+        tester.verify(8, "Change to a not in array");
+
+        // Special methods
+        array.add(leafA);
+        array.add(leafB);
+        array.add(leafC);
+        tester.verify(11, "Added a, b, c");
+        leafC.tick();
+        tester.verify(12, "Ticked c");
+        array.removeAt(array.indexOf(leafC));
+        tester.verify(13, "Removed c");
+        leafC.tick();
+        tester.verify(13, "Ticked c, not registered");
+        array.append(leafC);
+        tester.verify(14, "Append c");
+        leafC.tick();
+        leafD.tick();
+        tester.verify(15, "Ticked d and c");
+        assertEquals("Verify three elements", 3, array.size());
+
+        // Snapshot
+        {
+            final WatchedArraySet<Leaf> arraySnap = array.snapshot();
+            tester.verify(15, "Generate snapshot (no changes)");
+            // Verify that the snapshot is a proper copy of the source.
+            assertEquals(name + " snap same size",
+                         array.size(), arraySnap.size());
+            for (int i = 0; i < array.size(); i++) {
+                for (int j = 0; j < arraySnap.size(); j++) {
+                    assertTrue(name + " elements differ",
+                               array.valueAt(i) != arraySnap.valueAt(j));
+                }
+            }
+            leafC.tick();
+            tester.verify(16, "Tick after snapshot");
+            // Verify that the array snapshot is sealed
+            verifySealed(name, ()->arraySnap.add(leafB));
+        }
+        // Recreate the snapshot since the test corrupted it.
+        {
+            final WatchedArraySet<Leaf> arraySnap = array.snapshot();
+            // Verify that elements are also snapshots
+            final Leaf arraySnapElement = arraySnap.valueAt(0);
+            verifySealed(name + " snap element", ()->arraySnapElement.tick());
+        }
+        // Verify copy-in/out
+        {
+            final String msg = name + " copy-in/out";
+            ArraySet<Leaf> base = new ArraySet<>();
+            array.copyTo(base);
+            WatchedArraySet<Leaf> copy = new WatchedArraySet<>();
+            copy.copyFrom(base);
+            if (!array.equals(copy)) {
+                fail(msg);
+            }
+        }
+    }
+
+    @Test
+    public void testWatchedArrayList() {
+        final String name = "WatchedArrayList";
+        WatchableTester tester;
+
+        // Create a few leaves
+        Leaf leafA = new Leaf();
+        Leaf leafB = new Leaf();
+        Leaf leafC = new Leaf();
+        Leaf leafD = new Leaf();
+
+        // Redefine the indices used in the tests to be zero-based
+        final int indexA = 0;
+        final int indexB = 1;
+        final int indexC = 2;
+        final int indexD = 3;
+
+        // Test WatchedArrayList
+        WatchedArrayList<Leaf> array = new WatchedArrayList<>();
+        // A spacer that takes up index 0 (and is not Watchable).
+        array.add(indexA, leafA);
+        array.add(indexB, leafB);
+        tester = new WatchableTester(array, name);
+        tester.verify(0, "Initial array - no registration");
+        leafA.tick();
+        tester.verify(0, "Updates with no registration");
+        tester.register();
+        tester.verify(0, "Updates with no registration");
+        leafA.tick();
+        tester.verify(1, "Updates with registration");
+        leafB.tick();
+        tester.verify(2, "Updates with registration");
+        array.remove(indexB);
+        tester.verify(3, "Removed b");
+        leafB.tick();
+        tester.verify(3, "Updates with b not watched");
+        array.add(indexB, leafB);
+        array.add(indexC, leafB);
+        tester.verify(5, "Added b twice");
+        leafB.tick();
+        tester.verify(6, "Changed b - single notification");
+        array.remove(indexC);
+        tester.verify(7, "Removed first b");
+        leafB.tick();
+        tester.verify(8, "Changed b - single notification");
+        array.remove(indexB);
+        tester.verify(9, "Removed second b");
+        leafB.tick();
+        tester.verify(9, "Updated leafB - no change");
+        array.clear();
+        tester.verify(10, "Cleared array");
+        leafB.tick();
+        tester.verify(10, "Change to b not in array");
+
+        // Special methods
+        array.add(indexA, leafA);
+        array.add(indexB, leafB);
+        array.add(indexC, leafC);
+        tester.verify(13, "Added c");
+        leafC.tick();
+        tester.verify(14, "Ticked c");
+        array.set(array.indexOf(leafC), leafD);
+        tester.verify(15, "Replaced c with d");
+        leafC.tick();
+        leafD.tick();
+        tester.verify(16, "Ticked d and c (c not registered)");
+        array.add(leafC);
+        tester.verify(17, "Append c");
+        leafC.tick();
+        leafD.tick();
+        tester.verify(19, "Ticked d and c");
+
+        // Snapshot
+        {
+            final WatchedArrayList<Leaf> arraySnap = array.snapshot();
+            tester.verify(19, "Generate snapshot (no changes)");
+            // Verify that the snapshot is a proper copy of the source.
+            assertEquals(name + " snap same size",
+                         array.size(), arraySnap.size());
+            for (int i = 0; i < array.size(); i++) {
+                for (int j = 0; j < arraySnap.size(); j++) {
+                    assertTrue(name + " elements differ",
+                               array.get(i) != arraySnap.get(j));
+                }
+                assertTrue(name + " element copy",
+                           array.get(i).equals(arraySnap.get(i)));
+            }
+            leafD.tick();
+            tester.verify(20, "Tick after snapshot");
+            // Verify that the array snapshot is sealed
+            verifySealed(name, ()->arraySnap.add(indexA, leafB));
+        }
+        // Recreate the snapshot since the test corrupted it.
+        {
+            final WatchedArrayList<Leaf> arraySnap = array.snapshot();
+            // Verify that elements are also snapshots
+            final Leaf arraySnapElement = arraySnap.get(0);
+            verifySealed("ArraySnapshotElement", ()->arraySnapElement.tick());
+        }
+        // Verify copy-in/out
+        {
+            final String msg = name + " copy-in/out";
+            ArrayList<Leaf> base = new ArrayList<>();
+            array.copyTo(base);
+            WatchedArrayList<Leaf> copy = new WatchedArrayList<>();
+            copy.copyFrom(base);
+            if (!array.equals(copy)) {
+                fail(msg);
+            }
+        }
     }
 
     @Test
     public void testWatchedSparseArray() {
+        final String name = "WatchedSparseArray";
         WatchableTester tester;
 
         // Create a few leaves
@@ -269,7 +503,7 @@ public class WatcherTest {
         WatchedSparseArray<Leaf> array = new WatchedSparseArray<>();
         array.put(INDEX_A, leafA);
         array.put(INDEX_B, leafB);
-        tester = new WatchableTester(array, "WatchedSparseArray");
+        tester = new WatchableTester(array, name);
         tester.verify(0, "Initial array - no registration");
         leafA.tick();
         tester.verify(0, "Updates with no registration");
@@ -338,20 +572,20 @@ public class WatcherTest {
             final WatchedSparseArray<Leaf> arraySnap = array.snapshot();
             tester.verify(22, "Generate snapshot (no changes)");
             // Verify that the snapshot is a proper copy of the source.
-            assertEquals("WatchedSparseArray snap same size",
+            assertEquals(name + " snap same size",
                          array.size(), arraySnap.size());
             for (int i = 0; i < array.size(); i++) {
                 for (int j = 0; j < arraySnap.size(); j++) {
-                    assertTrue("WatchedSparseArray elements differ",
+                    assertTrue(name + " elements differ",
                                array.valueAt(i) != arraySnap.valueAt(j));
                 }
-                assertTrue("WatchedArrayMap element copy",
+                assertTrue(name + " element copy",
                            array.valueAt(i).equals(arraySnap.valueAt(i)));
             }
             leafD.tick();
             tester.verify(23, "Tick after snapshot");
             // Verify that the array snapshot is sealed
-            verifySealed("WatchedSparseArray", ()->arraySnap.put(INDEX_A, leafB));
+            verifySealed(name, ()->arraySnap.put(INDEX_A, leafB));
         }
         // Recreate the snapshot since the test corrupted it.
         {
@@ -360,15 +594,30 @@ public class WatcherTest {
             final Leaf arraySnapElement = arraySnap.valueAt(0);
             verifySealed("ArraySnapshotElement", ()->arraySnapElement.tick());
         }
+        // Verify copy-in/out
+        {
+            final String msg = name + " copy-in/out";
+            SparseArray<Leaf> base = new SparseArray<>();
+            array.copyTo(base);
+            WatchedSparseArray<Leaf> copy = new WatchedSparseArray<>();
+            copy.copyFrom(base);
+            final int end = array.size();
+            assertTrue(msg + " size mismatch " + end + " " + copy.size(), end == copy.size());
+            for (int i = 0; i < end; i++) {
+                final int key = array.keyAt(i);
+                assertTrue(msg, array.get(i) == copy.get(i));
+            }
+        }
     }
 
     @Test
     public void testWatchedSparseBooleanArray() {
+        final String name = "WatchedSparseBooleanArray";
         WatchableTester tester;
 
         // Test WatchedSparseBooleanArray
         WatchedSparseBooleanArray array = new WatchedSparseBooleanArray();
-        tester = new WatchableTester(array, "WatchedSparseBooleanArray");
+        tester = new WatchableTester(array, name);
         tester.verify(0, "Initial array - no registration");
         array.put(INDEX_A, true);
         tester.verify(0, "Updates with no registration");
@@ -376,14 +625,10 @@ public class WatcherTest {
         tester.verify(0, "Updates with no registration");
         array.put(INDEX_B, true);
         tester.verify(1, "Updates with registration");
-        array.put(INDEX_B, true);
-        tester.verify(1, "Null update");
         array.put(INDEX_B, false);
         array.put(INDEX_C, true);
         tester.verify(3, "Updates with registration");
         // Special methods
-        array.put(INDEX_C, true);
-        tester.verify(3, "Added true, no change");
         array.setValueAt(array.indexOfKey(INDEX_C), false);
         tester.verify(4, "Replaced true with false");
         array.append(INDEX_D, true);
@@ -403,7 +648,77 @@ public class WatcherTest {
             array.put(INDEX_D, false);
             tester.verify(6, "Tick after snapshot");
             // Verify that the array is sealed
-            verifySealed("WatchedSparseBooleanArray", ()->arraySnap.put(INDEX_D, false));
+            verifySealed(name, ()->arraySnap.put(INDEX_D, false));
+        }
+        // Verify copy-in/out
+        {
+            final String msg = name + " copy-in/out";
+            SparseBooleanArray base = new SparseBooleanArray();
+            array.copyTo(base);
+            WatchedSparseBooleanArray copy = new WatchedSparseBooleanArray();
+            copy.copyFrom(base);
+            final int end = array.size();
+            assertTrue(msg + " size mismatch/2 " + end + " " + copy.size(), end == copy.size());
+            for (int i = 0; i < end; i++) {
+                final int key = array.keyAt(i);
+                assertTrue(msg + " element", array.get(i) == copy.get(i));
+            }
+        }
+    }
+
+    @Test
+    public void testWatchedSparseIntArray() {
+        final String name = "WatchedSparseIntArray";
+        WatchableTester tester;
+
+        // Test WatchedSparseIntArray
+        WatchedSparseIntArray array = new WatchedSparseIntArray();
+        tester = new WatchableTester(array, name);
+        tester.verify(0, "Initial array - no registration");
+        array.put(INDEX_A, 1);
+        tester.verify(0, "Updates with no registration");
+        tester.register();
+        tester.verify(0, "Updates with no registration");
+        array.put(INDEX_B, 2);
+        tester.verify(1, "Updates with registration");
+        array.put(INDEX_B, 4);
+        array.put(INDEX_C, 5);
+        tester.verify(3, "Updates with registration");
+        // Special methods
+        array.setValueAt(array.indexOfKey(INDEX_C), 7);
+        tester.verify(4, "Replaced 6 with 7");
+        array.append(INDEX_D, 8);
+        tester.verify(5, "Append 8");
+
+        // Snapshot
+        {
+            WatchedSparseIntArray arraySnap = array.snapshot();
+            tester.verify(5, "Generate snapshot");
+            // Verify that the snapshot is a proper copy of the source.
+            assertEquals("WatchedSparseIntArray snap same size",
+                         array.size(), arraySnap.size());
+            for (int i = 0; i < array.size(); i++) {
+                assertEquals(name + " element copy",
+                             array.valueAt(i), arraySnap.valueAt(i));
+            }
+            array.put(INDEX_D, 9);
+            tester.verify(6, "Tick after snapshot");
+            // Verify that the array is sealed
+            verifySealed(name, ()->arraySnap.put(INDEX_D, 10));
+        }
+        // Verify copy-in/out
+        {
+            final String msg = name + " copy-in/out";
+            SparseIntArray base = new SparseIntArray();
+            array.copyTo(base);
+            WatchedSparseIntArray copy = new WatchedSparseIntArray();
+            copy.copyFrom(base);
+            final int end = array.size();
+            assertTrue(msg + " size mismatch " + end + " " + copy.size(), end == copy.size());
+            for (int i = 0; i < end; i++) {
+                final int key = array.keyAt(i);
+                assertTrue(msg, array.get(i) == copy.get(i));
+            }
         }
     }
 }

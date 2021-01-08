@@ -1215,7 +1215,7 @@ public class PackageManagerSettingsTests {
     private void verifyKeySetMetaData(Settings settings)
             throws ReflectiveOperationException, IllegalAccessException {
         ArrayMap<String, PackageSetting> packages =
-                settings.mPackages.untrackedMap();
+                settings.mPackages.untrackedStorage();
         KeySetManagerService ksms = settings.mKeySetManagerService;
 
         /* verify keyset and public key ref counts */

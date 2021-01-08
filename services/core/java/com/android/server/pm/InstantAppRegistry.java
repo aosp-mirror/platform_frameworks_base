@@ -154,6 +154,9 @@ class InstantAppRegistry implements Watchable, Snappable {
     public void unregisterObserver(@NonNull Watcher observer) {
         mWatchable.unregisterObserver(observer);
     }
+    public boolean isRegisteredObserver(@NonNull Watcher observer) {
+        return mWatchable.isRegisteredObserver(observer);
+    }
     public void dispatchChange(@Nullable Watchable what) {
         mSnapshot = null;
         mWatchable.dispatchChange(what);

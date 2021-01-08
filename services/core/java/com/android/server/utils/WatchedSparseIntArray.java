@@ -18,17 +18,17 @@ package com.android.server.utils;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 
 /**
- * A watched variant of SparseBooleanArray.  Changes to the array are notified to
+ * A watched variant of SparseIntArray.  Changes to the array are notified to
  * registered {@link Watcher}s.
  */
-public class WatchedSparseBooleanArray extends WatchableImpl
+public class WatchedSparseIntArray extends WatchableImpl
         implements Snappable {
 
     // The storage
-    private final SparseBooleanArray mStorage;
+    private final SparseIntArray mStorage;
 
     // A private convenience function
     private void onChanged() {
@@ -36,41 +36,41 @@ public class WatchedSparseBooleanArray extends WatchableImpl
     }
 
     /**
-     * Creates a new WatchedSparseBooleanArray containing no mappings.
+     * Creates a new WatchedSparseIntArray containing no mappings.
      */
-    public WatchedSparseBooleanArray() {
-        mStorage = new SparseBooleanArray();
+    public WatchedSparseIntArray() {
+        mStorage = new SparseIntArray();
     }
 
     /**
-     * Creates a new WatchedSparseBooleanArray containing no mappings that
+     * Creates a new WatchedSparseIntArray containing no mappings that
      * will not require any additional memory allocation to store the
      * specified number of mappings.  If you supply an initial capacity of
      * 0, the sparse array will be initialized with a light-weight
      * representation not requiring any additional array allocations.
      */
-    public WatchedSparseBooleanArray(int initialCapacity) {
-        mStorage = new SparseBooleanArray(initialCapacity);
+    public WatchedSparseIntArray(int initialCapacity) {
+        mStorage = new SparseIntArray(initialCapacity);
     }
 
     /**
-     * Create a {@link WatchedSparseBooleanArray} from a {@link SparseBooleanArray}
+     * Create a {@link WatchedSparseIntArray} from a {@link SparseIntArray}
      */
-    public WatchedSparseBooleanArray(@NonNull SparseBooleanArray c) {
+    public WatchedSparseIntArray(@NonNull SparseIntArray c) {
         mStorage = c.clone();
     }
 
     /**
      * The copy constructor does not copy the watcher data.
      */
-    public WatchedSparseBooleanArray(@NonNull WatchedSparseBooleanArray r) {
+    public WatchedSparseIntArray(@NonNull WatchedSparseIntArray r) {
         mStorage = r.mStorage.clone();
     }
 
     /**
      * Make <this> a copy of src.  Any data in <this> is discarded.
      */
-    public void copyFrom(@NonNull SparseBooleanArray src) {
+    public void copyFrom(@NonNull SparseIntArray src) {
         clear();
         final int end = src.size();
         for (int i = 0; i < end; i++) {
@@ -81,7 +81,7 @@ public class WatchedSparseBooleanArray extends WatchableImpl
     /**
      * Make dst a copy of <this>.  Any previous data in dst is discarded.
      */
-    public void copyTo(@NonNull SparseBooleanArray dst) {
+    public void copyTo(@NonNull SparseIntArray dst) {
         dst.clear();
         final int end = size();
         for (int i = 0; i < end; i++) {
@@ -93,7 +93,7 @@ public class WatchedSparseBooleanArray extends WatchableImpl
      * Return the underlying storage.  This breaks the wrapper but is necessary when
      * passing the array to distant methods.
      */
-    public SparseBooleanArray untrackedStorage() {
+    public SparseIntArray untrackedStorage() {
         return mStorage;
     }
 
@@ -101,7 +101,7 @@ public class WatchedSparseBooleanArray extends WatchableImpl
      * Gets the boolean mapped from the specified key, or <code>false</code>
      * if no such mapping has been made.
      */
-    public boolean get(int key) {
+    public int get(int key) {
         return mStorage.get(key);
     }
 
@@ -109,7 +109,7 @@ public class WatchedSparseBooleanArray extends WatchableImpl
      * Gets the boolean mapped from the specified key, or the specified value
      * if no such mapping has been made.
      */
-    public boolean get(int key, boolean valueIfKeyNotFound) {
+    public int get(int key, int valueIfKeyNotFound) {
         return mStorage.get(key, valueIfKeyNotFound);
     }
 
@@ -117,14 +117,17 @@ public class WatchedSparseBooleanArray extends WatchableImpl
      * Removes the mapping from the specified key, if there was any.
      */
     public void delete(int key) {
-        mStorage.delete(key);
-        onChanged();
+        // This code ensures that onChanged is called only if the key is actually
+        // present.
+        final int index = mStorage.indexOfKey(key);
+        if (index >= 0) {
+            mStorage.removeAt(index);
+            onChanged();
+        }
     }
 
     /**
      * Removes the mapping at the specified index.
-     * <p>
-     * For indices outside of the range {@code 0...size()-1}, the behavior is undefined.
      */
     public void removeAt(int index) {
         mStorage.removeAt(index);
@@ -136,7 +139,7 @@ public class WatchedSparseBooleanArray extends WatchableImpl
      * replacing the previous mapping from the specified key if there
      * was one.
      */
-    public void put(int key, boolean value) {
+    public void put(int key, int value) {
         // There is no fast way to know if the key exists with the input value, so this
         // method always notifies change listeners.
         mStorage.put(key, value);
@@ -144,7 +147,7 @@ public class WatchedSparseBooleanArray extends WatchableImpl
     }
 
     /**
-     * Returns the number of key-value mappings that this SparseBooleanArray
+     * Returns the number of key-value mappings that this SparseIntArray
      * currently stores.
      */
     public int size() {
@@ -154,7 +157,7 @@ public class WatchedSparseBooleanArray extends WatchableImpl
     /**
      * Given an index in the range <code>0...size()-1</code>, returns
      * the key from the <code>index</code>th key-value mapping that this
-     * SparseBooleanArray stores.
+     * SparseIntArray stores.
      *
      * <p>The keys corresponding to indices in ascending order are guaranteed to
      * be in ascending order, e.g., <code>keyAt(0)</code> will return the
@@ -173,7 +176,7 @@ public class WatchedSparseBooleanArray extends WatchableImpl
     /**
      * Given an index in the range <code>0...size()-1</code>, returns
      * the value from the <code>index</code>th key-value mapping that this
-     * SparseBooleanArray stores.
+     * SparseIntArray stores.
      *
      * <p>The values corresponding to indices in ascending order are guaranteed
      * to be associated with keys in ascending order, e.g.,
@@ -186,7 +189,7 @@ public class WatchedSparseBooleanArray extends WatchableImpl
      * {@link ArrayIndexOutOfBoundsException} is thrown for apps targeting
      * {@link android.os.Build.VERSION_CODES#Q} and later.</p>
      */
-    public boolean valueAt(int index) {
+    public int valueAt(int index) {
         return mStorage.valueAt(index);
     }
 
@@ -198,17 +201,9 @@ public class WatchedSparseBooleanArray extends WatchableImpl
      * {@link ArrayIndexOutOfBoundsException} is thrown for apps targeting
      * {@link android.os.Build.VERSION_CODES#Q} and later.</p>
      */
-    public void setValueAt(int index, boolean value) {
+    public void setValueAt(int index, int value) {
         if (mStorage.valueAt(index) != value) {
             mStorage.setValueAt(index, value);
-            onChanged();
-        }
-    }
-
-    /** @hide */
-    public void setKeyAt(int index, int key) {
-        if (mStorage.keyAt(index) != key) {
-            mStorage.setKeyAt(index, key);
             onChanged();
         }
     }
@@ -230,25 +225,35 @@ public class WatchedSparseBooleanArray extends WatchableImpl
      * and that multiple keys can map to the same value and this will
      * find only one of them.
      */
-    public int indexOfValue(boolean value) {
+    public int indexOfValue(int value) {
         return mStorage.indexOfValue(value);
     }
 
     /**
-     * Removes all key-value mappings from this SparseBooleanArray.
+     * Removes all key-value mappings from this SparseIntArray.
      */
     public void clear() {
+        final int count = size();
         mStorage.clear();
-        onChanged();
+        if (count > 0) {
+            onChanged();
+        }
     }
 
     /**
      * Puts a key/value pair into the array, optimizing for the case where
      * the key is greater than all existing keys in the array.
      */
-    public void append(int key, boolean value) {
+    public void append(int key, int value) {
         mStorage.append(key, value);
         onChanged();
+    }
+
+    /**
+     * Provides a copy of keys.
+     **/
+    public int[] copyKeys() {
+        return mStorage.copyKeys();
     }
 
     @Override
@@ -258,8 +263,8 @@ public class WatchedSparseBooleanArray extends WatchableImpl
 
     @Override
     public boolean equals(@Nullable Object o) {
-        if (o instanceof WatchedSparseBooleanArray) {
-            WatchedSparseBooleanArray w = (WatchedSparseBooleanArray) o;
+        if (o instanceof WatchedSparseIntArray) {
+            WatchedSparseIntArray w = (WatchedSparseIntArray) o;
             return mStorage.equals(w.mStorage);
         } else {
             return false;
@@ -280,8 +285,8 @@ public class WatchedSparseBooleanArray extends WatchableImpl
      * Create a snapshot.  The snapshot does not include any {@link Watchable}
      * information.
      */
-    public WatchedSparseBooleanArray snapshot() {
-        WatchedSparseBooleanArray l = new WatchedSparseBooleanArray(this);
+    public WatchedSparseIntArray snapshot() {
+        WatchedSparseIntArray l = new WatchedSparseIntArray(this);
         l.seal();
         return l;
     }
@@ -291,7 +296,7 @@ public class WatchedSparseBooleanArray extends WatchableImpl
      * method returns.  <this> must be empty when the function is called.
      * @param r The source array, which is copied into <this>
      */
-    public void snapshot(@NonNull WatchedSparseBooleanArray r) {
+    public void snapshot(@NonNull WatchedSparseIntArray r) {
         snapshot(this, r);
     }
 
@@ -303,8 +308,8 @@ public class WatchedSparseBooleanArray extends WatchableImpl
      * @param dst The destination array.  It must be empty.
      * @param src The source array.  It is not modified.
      */
-    public static void snapshot(@NonNull WatchedSparseBooleanArray dst,
-            @NonNull WatchedSparseBooleanArray src) {
+    public static void snapshot(@NonNull WatchedSparseIntArray dst,
+            @NonNull WatchedSparseIntArray src) {
         if (dst.size() != 0) {
             throw new IllegalArgumentException("snapshot destination is not empty");
         }
@@ -314,4 +319,5 @@ public class WatchedSparseBooleanArray extends WatchableImpl
         }
         dst.seal();
     }
+
 }

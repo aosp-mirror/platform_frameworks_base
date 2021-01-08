@@ -19,8 +19,8 @@ package com.android.server.pm;
 import android.annotation.NonNull;
 import android.content.IntentFilter;
 
+import com.android.server.WatchableIntentResolver;
 import com.android.server.utils.Snappable;
-import com.android.server.utils.WatchableIntentResolver;
 
 public class PersistentPreferredIntentResolver
         extends WatchableIntentResolver<PersistentPreferredActivity, PersistentPreferredActivity>
@@ -47,7 +47,7 @@ public class PersistentPreferredIntentResolver
      */
     public PersistentPreferredIntentResolver snapshot() {
         PersistentPreferredIntentResolver result = new PersistentPreferredIntentResolver();
-        result.doCopy(this);
+        result.copyFrom(this);
         return result;
     }
 }
