@@ -23,6 +23,7 @@ import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_OLD_UNSET;
 import static android.view.WindowManager.TRANSIT_OPEN;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
@@ -81,7 +82,8 @@ public class AppTransitionTests extends WindowTestsBase {
         assertEquals(TRANSIT_OLD_KEYGUARD_GOING_AWAY,
                 AppTransitionController.getTransitCompatType(mDc.mAppTransition,
                         mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                        null /* wallpaperTarget */, null /* oldWallpaper */));
+                        null /* wallpaperTarget */, null /* oldWallpaper */,
+                        false /*skipAppTransitionAnimation*/));
     }
 
     @Test
@@ -95,7 +97,8 @@ public class AppTransitionTests extends WindowTestsBase {
         assertEquals(TRANSIT_OLD_KEYGUARD_GOING_AWAY,
                 AppTransitionController.getTransitCompatType(mDc.mAppTransition,
                         mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                        null /* wallpaperTarget */, null /* oldWallpaper */));
+                        null /* wallpaperTarget */, null /* oldWallpaper */,
+                        false /*skipAppTransitionAnimation*/));
     }
 
     @Test
@@ -109,7 +112,8 @@ public class AppTransitionTests extends WindowTestsBase {
         assertEquals(TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE,
                 AppTransitionController.getTransitCompatType(mDc.mAppTransition,
                         mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                        null /* wallpaperTarget */, null /* oldWallpaper */));
+                        null /* wallpaperTarget */, null /* oldWallpaper */,
+                        false /*skipAppTransitionAnimation*/));
     }
 
     @Test
@@ -123,7 +127,23 @@ public class AppTransitionTests extends WindowTestsBase {
         assertEquals(TRANSIT_OLD_KEYGUARD_GOING_AWAY,
                 AppTransitionController.getTransitCompatType(mDc.mAppTransition,
                         mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                        null /* wallpaperTarget */, null /* oldWallpaper */));
+                        null /* wallpaperTarget */, null /* oldWallpaper */,
+                        false /*skipAppTransitionAnimation*/));
+    }
+
+    @Test
+    public void testSkipTransitionAnimation() {
+        final DisplayContent dc = createNewDisplay(Display.STATE_ON);
+        final ActivityRecord activity = createActivityRecord(dc);
+
+        mDc.prepareAppTransition(TRANSIT_OPEN);
+        mDc.prepareAppTransition(TRANSIT_CLOSE);
+        mDc.mClosingApps.add(activity);
+        assertEquals(TRANSIT_OLD_UNSET,
+                AppTransitionController.getTransitCompatType(mDc.mAppTransition,
+                        mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
+                        null /* wallpaperTarget */, null /* oldWallpaper */,
+                        true /*skipAppTransitionAnimation*/));
     }
 
     @Test
