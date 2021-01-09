@@ -241,7 +241,7 @@ public class PermissionUsageHelper {
                             opEntry.getAttributedOpEntries().get(attributionTag);
 
                     long lastAccessTime = attrOpEntry.getLastAccessTime(opFlags);
-                    if (lastAccessTime < recentThreshold) {
+                    if (lastAccessTime < recentThreshold && !attrOpEntry.isRunning()) {
                         continue;
                     }
                     if (!isUserSensitive(packageName, user, op)
