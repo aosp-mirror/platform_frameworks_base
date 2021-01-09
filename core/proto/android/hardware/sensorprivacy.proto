@@ -25,11 +25,29 @@ import "frameworks/base/core/proto/android/privacy.proto";
 message SensorPrivacyServiceDumpProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
+    // DEPRECATED
     // Is global sensor privacy enabled
     optional bool is_enabled = 1;
 
+    // DEPRECATED
     // Per sensor privacy enabled
     repeated SensorPrivacyIndividualEnabledSensorProto individual_enabled_sensor = 2;
+
+    // Per user settings for sensor privacy
+    repeated SensorPrivacyUserProto user = 3;
+}
+
+message SensorPrivacyUserProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // User id
+    optional int32 user_id = 1;
+
+    // Is global sensor privacy enabled
+    optional bool is_enabled = 2;
+
+    // Per sensor privacy enabled
+    repeated SensorPrivacyIndividualEnabledSensorProto individual_enabled_sensor = 3;
 }
 
 message SensorPrivacyIndividualEnabledSensorProto {
