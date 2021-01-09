@@ -4421,8 +4421,17 @@ class Task extends WindowContainer<WindowContainer> {
             sb.append(stringName);
             sb.append(" U=");
             sb.append(mUserId);
-            sb.append(" StackId=");
-            sb.append(getRootTaskId());
+            final Task rootTask = getRootTask();
+            if (rootTask != this) {
+                sb.append(" rootTaskId=");
+                sb.append(rootTask.mTaskId);
+            }
+            sb.append(" visible=");
+            sb.append(shouldBeVisible(null /* starting */));
+            sb.append(" mode=");
+            sb.append(windowingModeToString(getWindowingMode()));
+            sb.append(" translucent=");
+            sb.append(isTranslucent(null /* starting */));
             sb.append(" sz=");
             sb.append(getChildCount());
             sb.append('}');
@@ -4432,10 +4441,7 @@ class Task extends WindowContainer<WindowContainer> {
         sb.append(Integer.toHexString(System.identityHashCode(this)));
         sb.append(" #");
         sb.append(mTaskId);
-        sb.append(" visible=" + shouldBeVisible(null /* starting */));
         sb.append(" type=" + activityTypeToString(getActivityType()));
-        sb.append(" mode=" + windowingModeToString(getWindowingMode()));
-        sb.append(" translucent=" + isTranslucent(null /* starting */));
         if (affinity != null) {
             sb.append(" A=");
             sb.append(affinity);
@@ -5180,9 +5186,6 @@ class Task extends WindowContainer<WindowContainer> {
 
     @Override
     public void setWindowingMode(int windowingMode) {
-        // Reset the cached result of toString()
-        stringName = null;
-
         // Calling Task#setWindowingMode() for leaf task since this is the a specialization of
         // {@link #setWindowingMode(int)} for ActivityStack.
         if (!isRootTask()) {

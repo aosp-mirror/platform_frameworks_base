@@ -17,7 +17,7 @@
 package com.android.location.provider;
 
 import android.annotation.NonNull;
-import android.location.ProviderProperties;
+import android.location.provider.ProviderProperties;
 
 import java.util.Objects;
 
@@ -35,10 +35,18 @@ public final class ProviderPropertiesUnbundled {
     public static @NonNull ProviderPropertiesUnbundled create(boolean requiresNetwork,
             boolean requiresSatellite, boolean requiresCell, boolean hasMonetaryCost,
             boolean supportsAltitude, boolean supportsSpeed, boolean supportsBearing,
-            int powerRequirement, int accuracy) {
-        return new ProviderPropertiesUnbundled(new ProviderProperties(requiresNetwork,
-                requiresSatellite, requiresCell, hasMonetaryCost, supportsAltitude, supportsSpeed,
-                supportsBearing, powerRequirement, accuracy));
+            int powerUsage, int accuracy) {
+        return new ProviderPropertiesUnbundled(new ProviderProperties.Builder()
+                .setHasNetworkRequirement(requiresNetwork)
+                .setHasSatelliteRequirement(requiresSatellite)
+                .setHasCellRequirement(requiresCell)
+                .setHasMonetaryCost(requiresCell)
+                .setHasAltitudeSupport(requiresCell)
+                .setHasSpeedSupport(requiresCell)
+                .setHasBearingSupport(requiresCell)
+                .setPowerUsage(powerUsage)
+                .setAccuracy(accuracy)
+                .build());
     }
 
     private final ProviderProperties mProperties;

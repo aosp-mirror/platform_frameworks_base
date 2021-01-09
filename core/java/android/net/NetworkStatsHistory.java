@@ -45,8 +45,8 @@ import com.android.internal.util.IndentingPrintWriter;
 import libcore.util.EmptyArray;
 
 import java.io.CharArrayWriter;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ProtocolException;
@@ -162,7 +162,7 @@ public class NetworkStatsHistory implements Parcelable {
         out.writeLong(totalBytes);
     }
 
-    public NetworkStatsHistory(DataInputStream in) throws IOException {
+    public NetworkStatsHistory(DataInput in) throws IOException {
         final int version = in.readInt();
         switch (version) {
             case VERSION_INIT: {
@@ -204,7 +204,7 @@ public class NetworkStatsHistory implements Parcelable {
         }
     }
 
-    public void writeToStream(DataOutputStream out) throws IOException {
+    public void writeToStream(DataOutput out) throws IOException {
         out.writeInt(VERSION_ADD_ACTIVE);
         out.writeLong(bucketDuration);
         writeVarLongArray(out, bucketStart, bucketCount);
@@ -768,7 +768,7 @@ public class NetworkStatsHistory implements Parcelable {
      */
     public static class DataStreamUtils {
         @Deprecated
-        public static long[] readFullLongArray(DataInputStream in) throws IOException {
+        public static long[] readFullLongArray(DataInput in) throws IOException {
             final int size = in.readInt();
             if (size < 0) throw new ProtocolException("negative array size");
             final long[] values = new long[size];
@@ -781,7 +781,7 @@ public class NetworkStatsHistory implements Parcelable {
         /**
          * Read variable-length {@link Long} using protobuf-style approach.
          */
-        public static long readVarLong(DataInputStream in) throws IOException {
+        public static long readVarLong(DataInput in) throws IOException {
             int shift = 0;
             long result = 0;
             while (shift < 64) {
@@ -797,7 +797,7 @@ public class NetworkStatsHistory implements Parcelable {
         /**
          * Write variable-length {@link Long} using protobuf-style approach.
          */
-        public static void writeVarLong(DataOutputStream out, long value) throws IOException {
+        public static void writeVarLong(DataOutput out, long value) throws IOException {
             while (true) {
                 if ((value & ~0x7FL) == 0) {
                     out.writeByte((int) value);
@@ -809,7 +809,7 @@ public class NetworkStatsHistory implements Parcelable {
             }
         }
 
-        public static long[] readVarLongArray(DataInputStream in) throws IOException {
+        public static long[] readVarLongArray(DataInput in) throws IOException {
             final int size = in.readInt();
             if (size == -1) return null;
             if (size < 0) throw new ProtocolException("negative array size");
@@ -820,7 +820,7 @@ public class NetworkStatsHistory implements Parcelable {
             return values;
         }
 
-        public static void writeVarLongArray(DataOutputStream out, long[] values, int size)
+        public static void writeVarLongArray(DataOutput out, long[] values, int size)
                 throws IOException {
             if (values == null) {
                 out.writeInt(-1);

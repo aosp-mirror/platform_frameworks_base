@@ -43,7 +43,8 @@ public class FaceUpdateActiveUserClient extends ClientMonitor<IBiometricsFace> {
             @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, owner,
                 0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_UNKNOWN,
-                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
+                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN,
+                true /* shouldLogMetrics */);
         mCurrentUserId = currentUserId;
         mHasEnrolledBiometrics = hasEnrolledBIometrics;
         mAuthenticatorIds = authenticatorIds;

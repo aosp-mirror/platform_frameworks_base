@@ -83,7 +83,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         assertEquals(WindowManager.TRANSIT_OLD_TRANSLUCENT_ACTIVITY_OPEN,
                 AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
                     mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                    null, null));
+                    null, null, false));
     }
 
     @Test
@@ -99,7 +99,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         assertEquals(WindowManager.TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE,
                 AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
                         mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                        null, null));
+                        null, null, false));
     }
 
     @Test
@@ -117,7 +117,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         assertEquals(TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE,
                 AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
                         mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                        null, null));
+                        null, null, false));
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.android.keyguard;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
@@ -107,7 +108,10 @@ public class KeyguardClockSwitch extends RelativeLayout {
     /**
      * Boolean value indicating if notifications are visible on lock screen.
      */
-    private boolean mHasVisibleNotifications;
+    private boolean mHasVisibleNotifications = true;
+
+    private AnimatorSet mClockInAnim = null;
+    private AnimatorSet mClockOutAnim = null;
 
     /**
      * If the Keyguard Slice has a header (big center-aligned text.)
@@ -318,12 +322,15 @@ public class KeyguardClockSwitch extends RelativeLayout {
     private void animateClockChange(boolean useLargeClock) {
         if (mLockScreenMode != KeyguardUpdateMonitor.LOCK_SCREEN_MODE_LAYOUT_1) return;
 
+        if (mClockInAnim != null) mClockInAnim.cancel();
+        if (mClockOutAnim != null) mClockOutAnim.cancel();
+
         View in, out;
         int direction = 1;
         if (useLargeClock) {
             out = mNewLockscreenClockFrame;
             in = mNewLockscreenLargeClockFrame;
-            addView(in);
+            if (indexOfChild(in) == -1) addView(in);
             direction = -1;
         } else {
             in = mNewLockscreenClockFrame;
@@ -333,25 +340,35 @@ public class KeyguardClockSwitch extends RelativeLayout {
             removeView(out);
         }
 
-        AnimatorSet outAnim = new AnimatorSet();
-        outAnim.setDuration(CLOCK_OUT_MILLIS);
-        outAnim.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
-        outAnim.playTogether(
+        mClockOutAnim = new AnimatorSet();
+        mClockOutAnim.setDuration(CLOCK_OUT_MILLIS);
+        mClockOutAnim.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
+        mClockOutAnim.playTogether(
                 ObjectAnimator.ofFloat(out, View.ALPHA, 0f),
                 ObjectAnimator.ofFloat(out, View.TRANSLATION_Y, 0,
                         direction * -mClockSwitchYAmount));
+        mClockOutAnim.addListener(new AnimatorListenerAdapter() {
+            public void onAnimationEnd(Animator animation) {
+                mClockOutAnim = null;
+            }
+        });
 
         in.setAlpha(0);
         in.setVisibility(View.VISIBLE);
-        AnimatorSet inAnim = new AnimatorSet();
-        inAnim.setDuration(CLOCK_IN_MILLIS);
-        inAnim.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
-        inAnim.playTogether(ObjectAnimator.ofFloat(in, View.ALPHA, 1f),
+        mClockInAnim = new AnimatorSet();
+        mClockInAnim.setDuration(CLOCK_IN_MILLIS);
+        mClockInAnim.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
+        mClockInAnim.playTogether(ObjectAnimator.ofFloat(in, View.ALPHA, 1f),
                 ObjectAnimator.ofFloat(in, View.TRANSLATION_Y, direction * mClockSwitchYAmount, 0));
-        inAnim.setStartDelay(CLOCK_OUT_MILLIS / 2);
+        mClockInAnim.setStartDelay(CLOCK_OUT_MILLIS / 2);
+        mClockInAnim.addListener(new AnimatorListenerAdapter() {
+            public void onAnimationEnd(Animator animation) {
+                mClockInAnim = null;
+            }
+        });
 
-        inAnim.start();
-        outAnim.start();
+        mClockInAnim.start();
+        mClockOutAnim.start();
     }
 
     /**

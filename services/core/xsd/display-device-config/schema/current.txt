@@ -3,9 +3,11 @@ package com.android.server.display.config {
 
   public class DisplayConfiguration {
     ctor public DisplayConfiguration();
+    method public com.android.server.display.config.HighBrightnessMode getHighBrightnessMode();
     method public com.android.server.display.config.DisplayQuirks getQuirks();
     method @NonNull public final java.math.BigDecimal getScreenBrightnessDefault();
     method @NonNull public final com.android.server.display.config.NitsMap getScreenBrightnessMap();
+    method public void setHighBrightnessMode(com.android.server.display.config.HighBrightnessMode);
     method public void setQuirks(com.android.server.display.config.DisplayQuirks);
     method public final void setScreenBrightnessDefault(@NonNull java.math.BigDecimal);
     method public final void setScreenBrightnessMap(@NonNull com.android.server.display.config.NitsMap);
@@ -14,6 +16,28 @@ package com.android.server.display.config {
   public class DisplayQuirks {
     ctor public DisplayQuirks();
     method public java.util.List<java.lang.String> getQuirk();
+  }
+
+  public class HbmTiming {
+    ctor public HbmTiming();
+    method @NonNull public final java.math.BigInteger getTimeMaxSecs_all();
+    method @NonNull public final java.math.BigInteger getTimeMinSecs_all();
+    method @NonNull public final java.math.BigInteger getTimeWindowSecs_all();
+    method public final void setTimeMaxSecs_all(@NonNull java.math.BigInteger);
+    method public final void setTimeMinSecs_all(@NonNull java.math.BigInteger);
+    method public final void setTimeWindowSecs_all(@NonNull java.math.BigInteger);
+  }
+
+  public class HighBrightnessMode {
+    ctor public HighBrightnessMode();
+    method public boolean getEnabled();
+    method @NonNull public final java.math.BigDecimal getMinimumLux_all();
+    method public com.android.server.display.config.HbmTiming getTiming_all();
+    method @NonNull public final java.math.BigDecimal getTransitionPoint_all();
+    method public void setEnabled(boolean);
+    method public final void setMinimumLux_all(@NonNull java.math.BigDecimal);
+    method public void setTiming_all(com.android.server.display.config.HbmTiming);
+    method public final void setTransitionPoint_all(@NonNull java.math.BigDecimal);
   }
 
   public class NitsMap {

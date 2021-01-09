@@ -18,6 +18,10 @@ package com.android.server.utils;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Build;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 
 /**
  * Notify registered {@link Watcher}s when the content changes.
@@ -41,6 +45,13 @@ public interface Watchable {
     public void unregisterObserver(@NonNull Watcher observer);
 
     /**
+     * Return true if the {@link Watcher) is a registered observer.
+     * @param observer A {@link Watcher} that might be registered
+     * @return true if the observer is registered with this {@link Watchable}.
+     */
+    public boolean isRegisteredObserver(@NonNull Watcher observer);
+
+    /**
      * Invokes {@link Watcher#onChange} on each registered observer.  The method can be called
      * with the {@link Watchable} that generated the event.  In a tree of {@link Watchable}s, this
      * is generally the first (deepest) {@link Watchable} to detect a change.
@@ -48,4 +59,42 @@ public interface Watchable {
      * @param what The {@link Watchable} that generated the event.
      */
     public void dispatchChange(@Nullable Watchable what);
+
+    /**
+     * Return true if the field is tagged with @Watched
+     */
+    private static boolean isWatched(Field f) {
+        for (Annotation a : f.getDeclaredAnnotations()) {
+            if (a.annotationType().equals(Watched.class)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Verify that all @Watched {@link Watchable} attributes are being watched by this
+     * class.  This requires reflection and only runs in engineering or user debug
+     * builds.
+     */
+    static void verifyWatchedAttributes(Object base, Watcher observer) {
+        if (Build.IS_ENG || Build.IS_USERDEBUG) {
+            for (Field f : base.getClass().getDeclaredFields()) {
+                try {
+                    final boolean flagged = isWatched(f);
+                    final Object o = f.get(base);
+                    final boolean watchable = o instanceof Watchable;
+                    if (flagged && watchable) {
+                        Watchable attr = (Watchable) f.get(base);
+                        if (attr != null && !attr.isRegisteredObserver(observer)) {
+                            throw new RuntimeException(f.getName() + " missing an observer");
+                        }
+                    }
+                } catch (IllegalAccessException e) {
+                    // The field is protected; ignore it.  Other exceptions that may be thrown by
+                    // Field.get() are allowed to roll up.
+                }
+            }
+        }
+    }
 }

@@ -18,12 +18,11 @@ package com.android.location.provider;
 
 import android.annotation.NonNull;
 import android.location.LocationRequest;
+import android.location.provider.ProviderRequest;
 import android.os.Build;
 import android.os.WorkSource;
 
 import androidx.annotation.RequiresApi;
-
-import com.android.internal.location.ProviderRequest;
 
 import java.util.Collections;
 import java.util.List;

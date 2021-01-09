@@ -4821,16 +4821,6 @@ public abstract class Context {
     public static final String ROLE_SERVICE = "role";
 
     /**
-     * Official published name of the (internal) role controller service.
-     *
-     * @see #getSystemService(String)
-     * @see android.app.role.RoleControllerService
-     *
-     * @hide
-     */
-    public static final String ROLE_CONTROLLER_SERVICE = "role_controller";
-
-    /**
      * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.hardware.camera2.CameraManager} for interacting with
      * camera devices.

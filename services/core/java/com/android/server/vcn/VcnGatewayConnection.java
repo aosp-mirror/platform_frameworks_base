@@ -65,8 +65,8 @@ public class VcnGatewayConnection extends Handler implements UnderlyingNetworkTr
                 mDeps.newUnderlyingNetworkTracker(mVcnContext, subscriptionGroup, this);
     }
 
-    /** Tears down this GatewayConnection, and any resources used */
-    public void teardown() {
+    /** Asynchronously tears down this GatewayConnection, and any resources used */
+    public void teardownAsynchronously() {
         mUnderlyingNetworkTracker.teardown();
     }
 

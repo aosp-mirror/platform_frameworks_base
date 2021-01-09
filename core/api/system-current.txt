@@ -661,6 +661,10 @@ package android.app {
     field public static final int FLAG_AUTOGROUP_SUMMARY = 1024; // 0x400
   }
 
+  public static class Notification.Action implements android.os.Parcelable {
+    field public static final int SEMANTIC_ACTION_MARK_CONVERSATION_AS_PRIORITY = 11; // 0xb
+  }
+
   public static final class Notification.TvExtender implements android.app.Notification.Extender {
     ctor public Notification.TvExtender();
     ctor public Notification.TvExtender(android.app.Notification);
@@ -1366,6 +1370,8 @@ package android.app.role {
     method @NonNull @RequiresPermission("com.android.permissioncontroller.permission.MANAGE_ROLES_FROM_CONTROLLER") public java.util.List<java.lang.String> getHeldRolesFromController(@NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public java.util.List<java.lang.String> getRoleHolders(@NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public java.util.List<java.lang.String> getRoleHoldersAsUser(@NonNull String, @NonNull android.os.UserHandle);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public void isApplicationVisibleForRole(@NonNull String, @NonNull String, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public void isRoleVisible(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_ROLE_HOLDERS) public void removeOnRoleHoldersChangedListenerAsUser(@NonNull android.app.role.OnRoleHoldersChangedListener, @NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public void removeRoleHolderAsUser(@NonNull String, @NonNull String, int, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @RequiresPermission("com.android.permissioncontroller.permission.MANAGE_ROLES_FROM_CONTROLLER") public boolean removeRoleHolderFromController(@NonNull String, @NonNull String);
@@ -1801,6 +1807,7 @@ package android.bluetooth {
     field @NonNull public static final android.os.ParcelUuid AVRCP_TARGET;
     field @NonNull public static final android.os.ParcelUuid BASE_UUID;
     field @NonNull public static final android.os.ParcelUuid BNEP;
+    field @NonNull public static final android.os.ParcelUuid DIP;
     field @NonNull public static final android.os.ParcelUuid HEARING_AID;
     field @NonNull public static final android.os.ParcelUuid HFP;
     field @NonNull public static final android.os.ParcelUuid HFP_AG;
@@ -4371,6 +4378,56 @@ package android.location {
 
   public final class LocationResult implements android.os.Parcelable {
     method @NonNull public static android.location.LocationResult wrap(@NonNull android.location.Location);
+  }
+
+}
+
+package android.location.provider {
+
+  public abstract class LocationProviderBase {
+    ctor public LocationProviderBase(@NonNull android.content.Context, @NonNull String, @NonNull android.location.provider.ProviderProperties);
+    method @Nullable public final android.os.IBinder getBinder();
+    method @NonNull public android.location.provider.ProviderProperties getProperties();
+    method public boolean isAllowed();
+    method public abstract void onFlush(@NonNull android.location.provider.LocationProviderBase.OnFlushCompleteCallback);
+    method public abstract void onSendExtraCommand(@NonNull String, @Nullable android.os.Bundle);
+    method public abstract void onSetRequest(@NonNull android.location.provider.ProviderRequest);
+    method public void reportLocation(@NonNull android.location.Location);
+    method public void reportLocation(@NonNull android.location.LocationResult);
+    method public void setAllowed(boolean);
+    method public void setProperties(@NonNull android.location.provider.ProviderProperties);
+    field public static final String ACTION_FUSED_PROVIDER = "com.android.location.service.FusedLocationProvider";
+    field public static final String ACTION_NETWORK_PROVIDER = "com.android.location.service.v3.NetworkLocationProvider";
+  }
+
+  public static interface LocationProviderBase.OnFlushCompleteCallback {
+    method public void onFlushComplete();
+  }
+
+  public final class ProviderRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method @IntRange(from=0) public long getIntervalMillis();
+    method @IntRange(from=0) public long getMaxUpdateDelayMillis();
+    method public int getQuality();
+    method @NonNull public android.os.WorkSource getWorkSource();
+    method public boolean isActive();
+    method public boolean isLocationSettingsIgnored();
+    method public boolean isLowPower();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.provider.ProviderRequest> CREATOR;
+    field @NonNull public static final android.location.provider.ProviderRequest EMPTY_REQUEST;
+    field public static final long INTERVAL_DISABLED = 9223372036854775807L; // 0x7fffffffffffffffL
+  }
+
+  public static final class ProviderRequest.Builder {
+    ctor public ProviderRequest.Builder();
+    method @NonNull public android.location.provider.ProviderRequest build();
+    method @NonNull public android.location.provider.ProviderRequest.Builder setIntervalMillis(@IntRange(from=0) long);
+    method @NonNull public android.location.provider.ProviderRequest.Builder setLocationSettingsIgnored(boolean);
+    method @NonNull public android.location.provider.ProviderRequest.Builder setLowPower(boolean);
+    method @NonNull public android.location.provider.ProviderRequest.Builder setMaxUpdateDelayMillis(@IntRange(from=0) long);
+    method @NonNull public android.location.provider.ProviderRequest.Builder setQuality(int);
+    method @NonNull public android.location.provider.ProviderRequest.Builder setWorkSource(@NonNull android.os.WorkSource);
   }
 
 }
@@ -9852,6 +9909,7 @@ package android.service.voice {
     field public static final int RECOGNITION_FLAG_ENABLE_AUDIO_NOISE_SUPPRESSION = 8; // 0x8
     field public static final int RECOGNITION_MODE_USER_IDENTIFICATION = 2; // 0x2
     field public static final int RECOGNITION_MODE_VOICE_TRIGGER = 1; // 0x1
+    field public static final int STATE_ERROR = 3; // 0x3
     field public static final int STATE_HARDWARE_UNAVAILABLE = -2; // 0xfffffffe
     field public static final int STATE_KEYPHRASE_ENROLLED = 2; // 0x2
     field public static final int STATE_KEYPHRASE_UNENROLLED = 1; // 0x1

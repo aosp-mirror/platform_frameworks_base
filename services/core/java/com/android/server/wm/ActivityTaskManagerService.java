@@ -744,7 +744,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mActivityClientController.onSystemReady();
             mBlockActivityAfterHomeEnabled = DeviceConfig.getBoolean(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                    BLOCK_ACTIVITY_STARTS_AFTER_HOME_FLAG, false);
+                    BLOCK_ACTIVITY_STARTS_AFTER_HOME_FLAG, true);
         }
     }
 

@@ -23,7 +23,10 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.location.LocationResult;
-import android.location.ProviderProperties;
+import android.location.provider.ILocationProvider;
+import android.location.provider.ILocationProviderManager;
+import android.location.provider.ProviderProperties;
+import android.location.provider.ProviderRequest;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -33,10 +36,6 @@ import android.os.WorkSource;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
-
-import com.android.internal.location.ILocationProvider;
-import com.android.internal.location.ILocationProviderManager;
-import com.android.internal.location.ProviderRequest;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -58,7 +57,11 @@ import java.util.List;
  * <p>IMPORTANT: This class is effectively a public API for unbundled
  * applications, and must remain API stable. See README.txt in the root
  * of this package for more information.
+ *
+ * @deprecated This class is not part of the standard API surface - use
+ * {@link android.location.provider.LocationProviderBase} instead.
  */
+@Deprecated
 public abstract class LocationProviderBase {
 
     /**
@@ -386,8 +389,8 @@ public abstract class LocationProviderBase {
         }
 
         @Override
-        public void setRequest(ProviderRequest request, WorkSource ws) {
-            onSetRequest(new ProviderRequestUnbundled(request), ws);
+        public void setRequest(ProviderRequest request) {
+            onSetRequest(new ProviderRequestUnbundled(request), request.getWorkSource());
         }
 
         @Override

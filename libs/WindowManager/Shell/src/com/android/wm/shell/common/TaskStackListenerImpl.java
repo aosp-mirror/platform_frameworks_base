@@ -71,11 +71,11 @@ public class TaskStackListenerImpl extends TaskStackListener implements Handler.
     private final IActivityTaskManager mActivityTaskManager;
     // NOTE: In this case we do want to use a handler since we rely on the message system to
     // efficiently dedupe sequential calls
-    private Handler mHandler;
+    private Handler mMainHandler;
 
-    public TaskStackListenerImpl(Handler handler) {
+    public TaskStackListenerImpl(Handler mainHandler) {
         mActivityTaskManager = ActivityTaskManager.getService();
-        mHandler = new Handler(handler.getLooper(), this);
+        mMainHandler = new Handler(mainHandler.getLooper(), this);
     }
 
     @VisibleForTesting
@@ -84,8 +84,8 @@ public class TaskStackListenerImpl extends TaskStackListener implements Handler.
     }
 
     @VisibleForTesting
-    void setHandler(Handler handler) {
-        mHandler = handler;
+    void setHandler(Handler mainHandler) {
+        mMainHandler = mainHandler;
     }
 
     public void addListener(TaskStackListenerCallback listener) {
@@ -124,13 +124,13 @@ public class TaskStackListenerImpl extends TaskStackListener implements Handler.
 
     @Override
     public void onRecentTaskListUpdated() {
-        mHandler.obtainMessage(ON_TASK_LIST_UPDATED).sendToTarget();
+        mMainHandler.obtainMessage(ON_TASK_LIST_UPDATED).sendToTarget();
     }
 
     @Override
     public void onRecentTaskListFrozenChanged(boolean frozen) {
-        mHandler.obtainMessage(ON_TASK_LIST_FROZEN_UNFROZEN, frozen ? 1 : 0, 0 /* unused */)
-                .sendToTarget();
+        mMainHandler.obtainMessage(ON_TASK_LIST_FROZEN_UNFROZEN, frozen ? 1 : 0,
+                0 /* unused */).sendToTarget();
     }
 
     @Override
@@ -147,48 +147,50 @@ public class TaskStackListenerImpl extends TaskStackListener implements Handler.
         }
         mTmpListeners.clear();
 
-        mHandler.removeMessages(ON_TASK_STACK_CHANGED);
-        mHandler.sendEmptyMessage(ON_TASK_STACK_CHANGED);
+        mMainHandler.removeMessages(ON_TASK_STACK_CHANGED);
+        mMainHandler.sendEmptyMessage(ON_TASK_STACK_CHANGED);
     }
 
     @Override
     public void onTaskProfileLocked(int taskId, int userId) {
-        mHandler.obtainMessage(ON_TASK_PROFILE_LOCKED, taskId, userId).sendToTarget();
+        mMainHandler.obtainMessage(ON_TASK_PROFILE_LOCKED, taskId, userId).sendToTarget();
     }
 
     @Override
     public void onTaskDisplayChanged(int taskId, int newDisplayId) {
-        mHandler.obtainMessage(ON_TASK_DISPLAY_CHANGED, taskId, newDisplayId).sendToTarget();
+        mMainHandler.obtainMessage(ON_TASK_DISPLAY_CHANGED, taskId,
+                newDisplayId).sendToTarget();
     }
 
     @Override
     public void onTaskCreated(int taskId, ComponentName componentName) {
-        mHandler.obtainMessage(ON_TASK_CREATED, taskId, 0, componentName).sendToTarget();
+        mMainHandler.obtainMessage(ON_TASK_CREATED, taskId, 0, componentName).sendToTarget();
     }
 
     @Override
     public void onTaskRemoved(int taskId) {
-        mHandler.obtainMessage(ON_TASK_REMOVED, taskId, 0).sendToTarget();
+        mMainHandler.obtainMessage(ON_TASK_REMOVED, taskId, 0).sendToTarget();
     }
 
     @Override
     public void onTaskMovedToFront(ActivityManager.RunningTaskInfo taskInfo) {
-        mHandler.obtainMessage(ON_TASK_MOVED_TO_FRONT, taskInfo).sendToTarget();
+        mMainHandler.obtainMessage(ON_TASK_MOVED_TO_FRONT, taskInfo).sendToTarget();
     }
 
     @Override
     public void onTaskDescriptionChanged(ActivityManager.RunningTaskInfo taskInfo) {
-        mHandler.obtainMessage(ON_TASK_DESCRIPTION_CHANGED, taskInfo).sendToTarget();
+        mMainHandler.obtainMessage(ON_TASK_DESCRIPTION_CHANGED, taskInfo).sendToTarget();
     }
 
     @Override
     public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) {
-        mHandler.obtainMessage(ON_TASK_SNAPSHOT_CHANGED, taskId, 0, snapshot).sendToTarget();
+        mMainHandler.obtainMessage(ON_TASK_SNAPSHOT_CHANGED, taskId, 0, snapshot)
+                .sendToTarget();
     }
 
     @Override
     public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo taskInfo) {
-        mHandler.obtainMessage(ON_BACK_PRESSED_ON_TASK_ROOT, taskInfo).sendToTarget();
+        mMainHandler.obtainMessage(ON_BACK_PRESSED_ON_TASK_ROOT, taskInfo).sendToTarget();
     }
 
     @Override
@@ -198,44 +200,44 @@ public class TaskStackListenerImpl extends TaskStackListener implements Handler.
         args.argi1 = userId;
         args.argi2 = taskId;
         args.argi3 = stackId;
-        mHandler.removeMessages(ON_ACTIVITY_PINNED);
-        mHandler.obtainMessage(ON_ACTIVITY_PINNED, args).sendToTarget();
+        mMainHandler.removeMessages(ON_ACTIVITY_PINNED);
+        mMainHandler.obtainMessage(ON_ACTIVITY_PINNED, args).sendToTarget();
     }
 
     @Override
     public void onActivityUnpinned() {
-        mHandler.removeMessages(ON_ACTIVITY_UNPINNED);
-        mHandler.sendEmptyMessage(ON_ACTIVITY_UNPINNED);
+        mMainHandler.removeMessages(ON_ACTIVITY_UNPINNED);
+        mMainHandler.sendEmptyMessage(ON_ACTIVITY_UNPINNED);
     }
 
     @Override
-    public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task, boolean homeTaskVisible,
-            boolean clearedTask, boolean wasVisible) {
+    public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
+            boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
         final SomeArgs args = SomeArgs.obtain();
         args.arg1 = task;
         args.argi1 = homeTaskVisible ? 1 : 0;
         args.argi2 = clearedTask ? 1 : 0;
         args.argi3 = wasVisible ? 1 : 0;
-        mHandler.removeMessages(ON_ACTIVITY_RESTART_ATTEMPT);
-        mHandler.obtainMessage(ON_ACTIVITY_RESTART_ATTEMPT, args).sendToTarget();
+        mMainHandler.removeMessages(ON_ACTIVITY_RESTART_ATTEMPT);
+        mMainHandler.obtainMessage(ON_ACTIVITY_RESTART_ATTEMPT, args).sendToTarget();
     }
 
     @Override
     public void onActivityForcedResizable(String packageName, int taskId, int reason) {
-        mHandler.obtainMessage(ON_ACTIVITY_FORCED_RESIZABLE, taskId, reason, packageName)
+        mMainHandler.obtainMessage(ON_ACTIVITY_FORCED_RESIZABLE, taskId, reason, packageName)
                 .sendToTarget();
     }
 
     @Override
     public void onActivityDismissingDockedStack() {
-        mHandler.sendEmptyMessage(ON_ACTIVITY_DISMISSING_DOCKED_STACK);
+        mMainHandler.sendEmptyMessage(ON_ACTIVITY_DISMISSING_DOCKED_STACK);
     }
 
     @Override
     public void onActivityLaunchOnSecondaryDisplayFailed(
             ActivityManager.RunningTaskInfo taskInfo,
             int requestedDisplayId) {
-        mHandler.obtainMessage(ON_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED,
+        mMainHandler.obtainMessage(ON_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED,
                 requestedDisplayId,
                 0 /* unused */,
                 taskInfo).sendToTarget();
@@ -245,25 +247,25 @@ public class TaskStackListenerImpl extends TaskStackListener implements Handler.
     public void onActivityLaunchOnSecondaryDisplayRerouted(
             ActivityManager.RunningTaskInfo taskInfo,
             int requestedDisplayId) {
-        mHandler.obtainMessage(ON_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_REROUTED,
+        mMainHandler.obtainMessage(ON_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_REROUTED,
                 requestedDisplayId, 0 /* unused */, taskInfo).sendToTarget();
     }
 
     @Override
     public void onActivityRequestedOrientationChanged(int taskId, int requestedOrientation) {
-        mHandler.obtainMessage(ON_ACTIVITY_REQUESTED_ORIENTATION_CHANGE, taskId,
+        mMainHandler.obtainMessage(ON_ACTIVITY_REQUESTED_ORIENTATION_CHANGE, taskId,
                 requestedOrientation).sendToTarget();
     }
 
     @Override
     public void onActivityRotation(int displayId) {
-        mHandler.obtainMessage(ON_ACTIVITY_ROTATION, displayId, 0 /* unused */)
+        mMainHandler.obtainMessage(ON_ACTIVITY_ROTATION, displayId, 0 /* unused */)
                 .sendToTarget();
     }
 
     @Override
     public void onSizeCompatModeActivityChanged(int displayId, IBinder activityToken) {
-        mHandler.obtainMessage(ON_SIZE_COMPAT_MODE_ACTIVITY_CHANGED, displayId,
+        mMainHandler.obtainMessage(ON_SIZE_COMPAT_MODE_ACTIVITY_CHANGED, displayId,
                 0 /* unused */,
                 activityToken).sendToTarget();
     }

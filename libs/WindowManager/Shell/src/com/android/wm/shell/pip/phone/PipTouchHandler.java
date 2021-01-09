@@ -155,7 +155,7 @@ public class PipTouchHandler {
             PipTaskOrganizer pipTaskOrganizer,
             FloatingContentCoordinator floatingContentCoordinator,
             PipUiEventLogger pipUiEventLogger,
-            ShellExecutor shellMainExecutor) {
+            ShellExecutor mainExecutor) {
         // Initialize the Pip input consumer
         mContext = context;
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
@@ -186,7 +186,7 @@ public class PipTouchHandler {
         mFloatingContentCoordinator = floatingContentCoordinator;
         mConnection = new PipAccessibilityInteractionConnection(mContext, pipBoundsState,
                 mMotionHelper, pipTaskOrganizer, mPipBoundsAlgorithm.getSnapAlgorithm(),
-                this::onAccessibilityShowMenu, this::updateMovementBounds, shellMainExecutor);
+                this::onAccessibilityShowMenu, this::updateMovementBounds, mainExecutor);
 
         mPipUiEventLogger = pipUiEventLogger;
 

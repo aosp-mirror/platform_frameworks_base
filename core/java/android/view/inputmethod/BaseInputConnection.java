@@ -163,11 +163,13 @@ public class BaseInputConnection implements InputConnection {
     }
 
     /**
-     * Default implementation calls {@link #finishComposingText()}.
+     * Default implementation calls {@link #finishComposingText()} and
+     * {@code setImeTemporarilyConsumesInput(false)}.
      */
     @CallSuper
     public void closeConnection() {
         finishComposingText();
+        setImeTemporarilyConsumesInput(false);
     }
 
     /**

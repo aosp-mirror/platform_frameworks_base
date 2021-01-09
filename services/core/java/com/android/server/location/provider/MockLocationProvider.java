@@ -21,11 +21,10 @@ import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import android.annotation.Nullable;
 import android.location.Location;
 import android.location.LocationResult;
-import android.location.ProviderProperties;
+import android.location.provider.ProviderProperties;
+import android.location.provider.ProviderRequest;
 import android.location.util.identity.CallerIdentity;
 import android.os.Bundle;
-
-import com.android.internal.location.ProviderRequest;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

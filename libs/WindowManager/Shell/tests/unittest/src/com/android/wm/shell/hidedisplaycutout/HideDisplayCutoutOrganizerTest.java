@@ -50,6 +50,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.ShellExecutor;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -72,6 +73,9 @@ public class HideDisplayCutoutOrganizerTest {
     private DisplayController mMockDisplayController;
     private HideDisplayCutoutOrganizer mOrganizer;
 
+    @Mock
+    private ShellExecutor mMockMainExecutor;
+
     private DisplayAreaInfo mDisplayAreaInfo;
     private SurfaceControl mLeash;
 
@@ -93,7 +97,7 @@ public class HideDisplayCutoutOrganizerTest {
         when(mMockDisplayController.getDisplay(anyInt())).thenReturn(mDisplay);
 
         HideDisplayCutoutOrganizer organizer = new HideDisplayCutoutOrganizer(
-                mContext, mMockDisplayController, Runnable::run);
+                mContext, mMockDisplayController, mMockMainExecutor);
         mOrganizer = Mockito.spy(organizer);
         doNothing().when(mOrganizer).unregisterOrganizer();
         doNothing().when(mOrganizer).applyBoundsAndOffsets(any(), any(), any(), any());

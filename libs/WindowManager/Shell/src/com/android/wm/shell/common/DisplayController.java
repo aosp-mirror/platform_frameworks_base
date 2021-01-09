@@ -20,7 +20,6 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.hardware.display.DisplayManager;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -44,7 +43,7 @@ import java.util.ArrayList;
 public class DisplayController {
     private static final String TAG = "DisplayController";
 
-    private final Handler mHandler;
+    private final ShellExecutor mMainExecutor;
     private final Context mContext;
     private final IWindowManager mWmService;
     private final DisplayChangeController mChangeController;
@@ -61,12 +60,12 @@ public class DisplayController {
         return displayManager.getDisplay(displayId);
     }
 
-    public DisplayController(Context context, Handler handler,
-            IWindowManager wmService) {
-        mHandler = handler;
+    public DisplayController(Context context, IWindowManager wmService,
+            ShellExecutor mainExecutor) {
+        mMainExecutor = mainExecutor;
         mContext = context;
         mWmService = wmService;
-        mChangeController = new DisplayChangeController(mHandler, mWmService);
+        mChangeController = new DisplayChangeController(mWmService, mainExecutor);
         mDisplayContainerListener = new DisplayWindowListenerImpl();
         try {
             mWmService.registerDisplayWindowListener(mDisplayContainerListener);
@@ -229,35 +228,35 @@ public class DisplayController {
     private class DisplayWindowListenerImpl extends IDisplayWindowListener.Stub {
         @Override
         public void onDisplayAdded(int displayId) {
-            mHandler.post(() -> {
+            mMainExecutor.execute(() -> {
                 DisplayController.this.onDisplayAdded(displayId);
             });
         }
 
         @Override
         public void onDisplayConfigurationChanged(int displayId, Configuration newConfig) {
-            mHandler.post(() -> {
+            mMainExecutor.execute(() -> {
                 DisplayController.this.onDisplayConfigurationChanged(displayId, newConfig);
             });
         }
 
         @Override
         public void onDisplayRemoved(int displayId) {
-            mHandler.post(() -> {
+            mMainExecutor.execute(() -> {
                 DisplayController.this.onDisplayRemoved(displayId);
             });
         }
 
         @Override
         public void onFixedRotationStarted(int displayId, int newRotation) {
-            mHandler.post(() -> {
+            mMainExecutor.execute(() -> {
                 DisplayController.this.onFixedRotationStarted(displayId, newRotation);
             });
         }
 
         @Override
         public void onFixedRotationFinished(int displayId) {
-            mHandler.post(() -> {
+            mMainExecutor.execute(() -> {
                 DisplayController.this.onFixedRotationFinished(displayId);
             });
         }

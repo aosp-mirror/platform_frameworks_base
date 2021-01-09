@@ -24,6 +24,7 @@ import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
@@ -32,11 +33,8 @@ import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.tv.PipController;
-import com.android.wm.shell.pip.tv.PipControlsView;
-import com.android.wm.shell.pip.tv.PipControlsViewController;
 import com.android.wm.shell.pip.tv.PipNotification;
 import com.android.wm.shell.pip.tv.TvPipMenuController;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import java.util.Optional;
 
@@ -75,19 +73,6 @@ public abstract class TvPipModule {
 
     @WMSingleton
     @Provides
-    static PipControlsViewController providePipControlsViewController(
-            PipControlsView pipControlsView, PipController pipController) {
-        return new PipControlsViewController(pipControlsView, pipController);
-    }
-
-    @WMSingleton
-    @Provides
-    static PipControlsView providePipControlsView(Context context) {
-        return new PipControlsView(context, null);
-    }
-
-    @WMSingleton
-    @Provides
     static PipNotification providePipNotification(Context context,
             PipMediaController pipMediaController) {
         return new PipNotification(context, pipMediaController);
@@ -108,9 +93,12 @@ public abstract class TvPipModule {
 
     @WMSingleton
     @Provides
-    static TvPipMenuController providesPipTvMenuController(Context context,
-            PipBoundsState pipBoundsState, SystemWindows systemWindows) {
-        return new TvPipMenuController(context, pipBoundsState, systemWindows);
+    static TvPipMenuController providesPipTvMenuController(
+            Context context,
+            PipBoundsState pipBoundsState,
+            SystemWindows systemWindows,
+            PipMediaController pipMediaController) {
+        return new TvPipMenuController(context, pipBoundsState, systemWindows, pipMediaController);
     }
 
     @WMSingleton

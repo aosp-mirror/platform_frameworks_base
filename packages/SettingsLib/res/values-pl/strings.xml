@@ -450,7 +450,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Do naładowania <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – do naładowania <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – Optymalizuję, by utrzymać baterię w dobrym stanie"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> – Optymalizuję, aby utrzymać baterię w dobrym stanie"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Nieznane"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Ładowanie"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Szybkie ładowanie"</string>
@@ -555,7 +555,8 @@
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Tworzę nowego użytkownika…"</string>
     <string name="user_nickname" msgid="262624187455825083">"Pseudonim"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Dodaj gościa"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"Usuń gościa"</string>
+    <!-- no translation found for guest_exit_guest (4754204715192830850) -->
+    <skip />
     <string name="guest_nickname" msgid="6332276931583337261">"Gość"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Zrób zdjęcie"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Wybierz obraz"</string>

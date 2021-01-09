@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.server.utils;
+package com.android.server;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
-import com.android.server.IntentResolver;
+import com.android.server.utils.Watchable;
+import com.android.server.utils.WatchableImpl;
+import com.android.server.utils.Watcher;
 
 import java.util.List;
 
@@ -37,28 +39,45 @@ public abstract class WatchableIntentResolver<F, R extends Object>
      * Watchable machinery
      */
     private final Watchable mWatchable = new WatchableImpl();
+
     /**
      * Register an observer to receive change notifications.
      * @param observer The observer to register.
      */
+    @Override
     public void registerObserver(@NonNull Watcher observer) {
         mWatchable.registerObserver(observer);
     }
+
     /**
      * Unregister the observer, which will no longer receive change notifications.
      * @param observer The observer to unregister.
      */
+    @Override
     public void unregisterObserver(@NonNull Watcher observer) {
         mWatchable.unregisterObserver(observer);
     }
+
+    /**
+     * Return true if the {@link Watcher) is a registered observer.
+     * @param observer A {@link Watcher} that might be registered
+     * @return true if the observer is registered with this {@link Watchable}.
+     */
+    @Override
+    public boolean isRegisteredObserver(@NonNull Watcher observer) {
+        return mWatchable.isRegisteredObserver(observer);
+    }
+
     /**
      * Notify listeners that the object has changd.  The argument is a hint as to the
      * source of the change.
      * @param what The attribute or sub-object that changed, if not null.
      */
+    @Override
     public void dispatchChange(@Nullable Watchable what) {
         mWatchable.dispatchChange(what);
     }
+
     /**
      * Notify listeners that this object has changed.
      */

@@ -31,6 +31,10 @@ const val TEST_APP_PIP_MENU_ACTION_CLEAR = "Clear"
 
 // Test App > Ime Activity
 const val TEST_APP_IME_ACTIVITY_LABEL = "ImeApp"
+const val TEST_APP_IME_ACTIVITY_ACTION_OPEN_IME =
+        "com.android.wm.shell.flicker.testapp.action.OPEN_IME"
+const val TEST_APP_IME_ACTIVITY_ACTION_CLOSE_IME =
+        "com.android.wm.shell.flicker.testapp.action.CLOSE_IME"
 // Test App > Test Activity
 const val TEST_APP_FIXED_ACTIVITY_LABEL = "FixedApp"
 

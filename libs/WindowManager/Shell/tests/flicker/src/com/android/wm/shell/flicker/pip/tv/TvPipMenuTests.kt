@@ -208,8 +208,8 @@ class TvPipMenuTests : TvPipTestBase() {
     @Test
     fun pipMenu_customActions_override_mediaControls() {
         // Start media session before entering PiP with custom actions.
-        testApp.clickStartMediaSessionButton()
         testApp.checkWithCustomActionsCheckbox()
+        testApp.clickStartMediaSessionButton()
         enterPip_openMenu_assertShown()
 
         // PiP menu should contain "No-Op", "Off" and "Clear" buttons for the custom actions...

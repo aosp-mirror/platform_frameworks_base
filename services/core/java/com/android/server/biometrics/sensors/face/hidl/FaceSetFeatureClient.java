@@ -49,7 +49,7 @@ public class FaceSetFeatureClient extends ClientMonitor<IBiometricsFace> {
             byte[] hardwareAuthToken, int faceId) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
                 BiometricsProtoEnums.MODALITY_UNKNOWN, BiometricsProtoEnums.ACTION_UNKNOWN,
-                BiometricsProtoEnums.CLIENT_UNKNOWN);
+                BiometricsProtoEnums.CLIENT_UNKNOWN, true /* shouldLogMetrics */);
         mFeature = feature;
         mEnabled = enabled;
         mFaceId = faceId;

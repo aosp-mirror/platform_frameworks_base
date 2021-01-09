@@ -51,7 +51,7 @@ public abstract class InternalEnumerateClient<T> extends ClientMonitor<T>
         // is all done internally.
         super(context, lazyDaemon, token, null /* ClientMonitorCallbackConverter */, userId, owner,
                 0 /* cookie */, sensorId, statsModality, BiometricsProtoEnums.ACTION_ENUMERATE,
-                BiometricsProtoEnums.CLIENT_UNKNOWN);
+                BiometricsProtoEnums.CLIENT_UNKNOWN, true /* shouldLogMetrics */);
         mEnrolledList = enrolledList;
         mUtils = utils;
     }

@@ -33,6 +33,7 @@ import android.net.wifi.WifiNetworkScoreCache;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.util.FeatureFlagUtils;
 
 import com.android.settingslib.R;
 
@@ -103,11 +104,14 @@ public class WifiStatusTracker {
     private Network mDefaultNetwork = null;
     private NetworkCapabilities mDefaultNetworkCapabilities = null;
     private final Runnable mCallback;
+    private final boolean mProviderModel;
 
     private WifiInfo mWifiInfo;
     public boolean enabled;
     public boolean isCaptivePortal;
     public boolean isDefaultNetwork;
+    public boolean isCarrierMerged;
+    public int subId;
     public int state;
     public boolean connected;
     public String ssid;
@@ -124,6 +128,8 @@ public class WifiStatusTracker {
         mNetworkScoreManager = networkScoreManager;
         mConnectivityManager = connectivityManager;
         mCallback = callback;
+        mProviderModel = FeatureFlagUtils.isEnabled(
+                mContext, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL);
     }
 
     public void setListening(boolean listening) {
@@ -192,6 +198,10 @@ public class WifiStatusTracker {
                 ssid = mWifiInfo.getPasspointProviderFriendlyName();
             } else {
                 ssid = getValidSsid(mWifiInfo);
+            }
+            if (mProviderModel) {
+                isCarrierMerged = mWifiInfo.isCarrierMerged();
+                subId = mWifiInfo.getSubscriptionId();
             }
             updateRssi(mWifiInfo.getRssi());
             maybeRequestNetworkScore();

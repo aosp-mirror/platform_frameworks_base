@@ -28,6 +28,7 @@ import static com.android.server.location.timezone.TimeZoneProviderEvent.createU
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -921,6 +922,74 @@ public class ControllerImplTest {
         mTestSecondaryLocationTimeZoneProvider.assertIsPermFailedAndCommit();
         mTestCallback.assertUncertainSuggestionMadeAndCommit();
         assertFalse(controllerImpl.isUncertaintyTimeoutSet());
+    }
+
+    @Test
+    public void stateRecording() {
+        ControllerImpl controllerImpl = new ControllerImpl(mTestThreadingDomain,
+                mTestPrimaryLocationTimeZoneProvider, mTestSecondaryLocationTimeZoneProvider);
+        TestEnvironment testEnvironment = new TestEnvironment(
+                mTestThreadingDomain, controllerImpl, USER1_CONFIG_GEO_DETECTION_ENABLED);
+
+        // Initialize and check initial state.
+        controllerImpl.initialize(testEnvironment, mTestCallback);
+
+        {
+            LocationTimeZoneManagerServiceState state = controllerImpl.getStateForTests();
+            assertNull(state.getLastSuggestion());
+            assertTrue(state.getPrimaryProviderStates().isEmpty());
+            assertTrue(state.getSecondaryProviderStates().isEmpty());
+        }
+
+        // State recording and simulate some provider behavior that will show up in the state
+        // recording.
+        controllerImpl.setProviderStateRecordingEnabled(true);
+
+        // Simulate an uncertain event from the primary. This will start the secondary.
+        mTestPrimaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
+                USER1_UNCERTAIN_LOCATION_TIME_ZONE_EVENT);
+
+        {
+            LocationTimeZoneManagerServiceState state = controllerImpl.getStateForTests();
+            assertNull(state.getLastSuggestion());
+            List<LocationTimeZoneProvider.ProviderState> primaryProviderStates =
+                    state.getPrimaryProviderStates();
+            assertEquals(1, primaryProviderStates.size());
+            assertEquals(PROVIDER_STATE_STARTED_UNCERTAIN,
+                    primaryProviderStates.get(0).stateEnum);
+            List<LocationTimeZoneProvider.ProviderState> secondaryProviderStates =
+                    state.getSecondaryProviderStates();
+            assertEquals(1, secondaryProviderStates.size());
+            assertEquals(PROVIDER_STATE_STARTED_INITIALIZING,
+                    secondaryProviderStates.get(0).stateEnum);
+        }
+
+        // Simulate an uncertain event from the primary. This will start the secondary.
+        mTestSecondaryLocationTimeZoneProvider.simulateTimeZoneProviderEvent(
+                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
+
+        {
+            LocationTimeZoneManagerServiceState state = controllerImpl.getStateForTests();
+            assertEquals(USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1.getSuggestion().getTimeZoneIds(),
+                    state.getLastSuggestion().getZoneIds());
+            List<LocationTimeZoneProvider.ProviderState> primaryProviderStates =
+                    state.getPrimaryProviderStates();
+            assertEquals(1, primaryProviderStates.size());
+            assertEquals(PROVIDER_STATE_STARTED_UNCERTAIN, primaryProviderStates.get(0).stateEnum);
+            List<LocationTimeZoneProvider.ProviderState> secondaryProviderStates =
+                    state.getSecondaryProviderStates();
+            assertEquals(2, secondaryProviderStates.size());
+            assertEquals(PROVIDER_STATE_STARTED_CERTAIN, secondaryProviderStates.get(1).stateEnum);
+        }
+
+        controllerImpl.setProviderStateRecordingEnabled(false);
+        {
+            LocationTimeZoneManagerServiceState state = controllerImpl.getStateForTests();
+            assertEquals(USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1.getSuggestion().getTimeZoneIds(),
+                    state.getLastSuggestion().getZoneIds());
+            assertTrue(state.getPrimaryProviderStates().isEmpty());
+            assertTrue(state.getSecondaryProviderStates().isEmpty());
+        }
     }
 
     private static void assertUncertaintyTimeoutSet(

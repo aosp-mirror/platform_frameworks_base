@@ -85,8 +85,7 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"No se ha podido guardar la captura de pantalla"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"El dispositivo debe desbloquearse para que se pueda guardar la captura de pantalla"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Vuelve a intentar hacer la captura de pantalla"</string>
-    <!-- no translation found for screenshot_failed_to_save_text (7232739948999195960) -->
-    <skip />
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"No se puede guardar la captura de pantalla"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"La aplicación o tu organización no permiten realizar capturas de pantalla"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Editar"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Editar captura de pantalla"</string>
@@ -354,6 +353,8 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Usuario"</string>
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Nuevo usuario"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
+    <!-- no translation found for quick_settings_internet_label (6603068555872455463) -->
+    <skip />
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"No conectado"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"No hay red."</string>
     <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"Wi-Fi desactivado"</string>
@@ -455,9 +456,9 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Mostrar perfil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Añadir usuario"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Nuevo usuario"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"¿Quitar invitado?"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"¿Finalizar sesión de invitado?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Se eliminarán todas las aplicaciones y datos de esta sesión."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Quitar"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"Finalizar sesión"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Hola de nuevo, invitado"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"¿Quieres continuar con la sesión?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Volver a empezar"</string>

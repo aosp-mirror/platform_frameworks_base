@@ -20,6 +20,8 @@ import android.app.Notification;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -456,12 +458,14 @@ public class NotificationGroupingUtil {
             if (target == null) {
                 return;
             }
-            Integer value = (Integer) target.getTag(iconVisible
+            final Integer data = (Integer) target.getTag(iconVisible
                     ? com.android.internal.R.id.tag_margin_end_when_icon_visible
                     : com.android.internal.R.id.tag_margin_end_when_icon_gone);
-            if (value == null) {
+            if (data == null) {
                 return;
             }
+            final DisplayMetrics metrics = target.getResources().getDisplayMetrics();
+            final int value = TypedValue.complexToDimensionPixelOffset(data, metrics);
             if (target instanceof NotificationHeaderView) {
                 ((NotificationHeaderView) target).setTopLineExtraMarginEnd(value);
             } else {

@@ -218,7 +218,7 @@ public class BiometricSchedulerTest {
                 @NonNull LazyDaemon<Object> lazyDaemon, int cookie) {
             super(context, lazyDaemon, token /* token */, null /* listener */, 0 /* userId */,
                     TAG, cookie, TEST_SENSOR_ID, 0 /* statsModality */,
-                    0 /* statsAction */, 0 /* statsClient */);
+                    0 /* statsAction */, 0 /* statsClient */, true /* shouldLogMetrics */);
         }
 
 

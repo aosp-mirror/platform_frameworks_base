@@ -55,7 +55,8 @@ import android.location.LocationManagerInternal;
 import android.location.LocationManagerInternal.ProviderEnabledListener;
 import android.location.LocationRequest;
 import android.location.LocationResult;
-import android.location.ProviderProperties;
+import android.location.provider.ProviderProperties;
+import android.location.provider.ProviderRequest;
 import android.location.util.identity.CallerIdentity;
 import android.os.Binder;
 import android.os.Build;
@@ -82,7 +83,6 @@ import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.location.ProviderRequest;
 import com.android.internal.util.Preconditions;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;

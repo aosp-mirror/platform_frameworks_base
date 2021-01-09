@@ -50,7 +50,8 @@ public class FingerprintUpdateActiveUserClient extends ClientMonitor<IBiometrics
             @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, owner,
                 0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_UNKNOWN,
-                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
+                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN,
+                true /* shouldLogMetrics */);
         mCurrentUserId = currentUserId;
         mHasEnrolledBiometrics = hasEnrolledBiometrics;
         mAuthenticatorIds = authenticatorIds;

@@ -76,7 +76,8 @@ public interface ServiceProvider {
             @NonNull String opPackageName, long challenge);
 
     void scheduleEnroll(int sensorId, @NonNull IBinder token, byte[] hardwareAuthToken, int userId,
-            @NonNull IFingerprintServiceReceiver receiver, @NonNull String opPackageName);
+            @NonNull IFingerprintServiceReceiver receiver, @NonNull String opPackageName,
+            boolean shouldLogMetrics);
 
     void cancelEnrollment(int sensorId, @NonNull IBinder token);
 

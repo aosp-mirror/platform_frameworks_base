@@ -63,12 +63,15 @@ import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
 import java.io.BufferedInputStream;
+import java.io.DataInput;
 import java.io.DataInputStream;
+import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ProtocolException;
 import java.time.ZonedDateTime;
@@ -82,7 +85,7 @@ import java.util.Objects;
  * Collection of {@link NetworkStatsHistory}, stored based on combined key of
  * {@link NetworkIdentitySet}, UID, set, and tag. Knows how to persist itself.
  */
-public class NetworkStatsCollection implements FileRotator.Reader {
+public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.Writer {
     /** File header magic number: "ANET" */
     private static final int FILE_MAGIC = 0x414E4554;
 
@@ -431,10 +434,10 @@ public class NetworkStatsCollection implements FileRotator.Reader {
 
     @Override
     public void read(InputStream in) throws IOException {
-        read(new DataInputStream(in));
+        read((DataInput) new DataInputStream(in));
     }
 
-    public void read(DataInputStream in) throws IOException {
+    private void read(DataInput in) throws IOException {
         // verify file magic header intact
         final int magic = in.readInt();
         if (magic != FILE_MAGIC) {
@@ -468,7 +471,13 @@ public class NetworkStatsCollection implements FileRotator.Reader {
         }
     }
 
-    public void write(DataOutputStream out) throws IOException {
+    @Override
+    public void write(OutputStream out) throws IOException {
+        write((DataOutput) new DataOutputStream(out));
+        out.flush();
+    }
+
+    private void write(DataOutput out) throws IOException {
         // cluster key lists grouped by ident
         final HashMap<NetworkIdentitySet, ArrayList<Key>> keysByIdent = Maps.newHashMap();
         for (Key key : mStats.keySet()) {
@@ -497,8 +506,6 @@ public class NetworkStatsCollection implements FileRotator.Reader {
                 history.writeToStream(out);
             }
         }
-
-        out.flush();
     }
 
     @Deprecated

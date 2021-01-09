@@ -19,9 +19,11 @@ package com.android.settingslib.emergencynumber;
 import static android.telephony.emergency.EmergencyNumber.EMERGENCY_NUMBER_SOURCE_DATABASE;
 import static android.telephony.emergency.EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_POLICE;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.provider.Settings;
+import android.net.Uri;
+import android.os.Bundle;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.emergency.EmergencyNumber;
@@ -40,7 +42,16 @@ import java.util.Map;
  */
 public class EmergencyNumberUtils {
     private static final String TAG = "EmergencyNumberUtils";
-    private static final String EMERGENCY_GESTURE_CALL_NUMBER = "emergency_gesture_call_number";
+
+    public static final Uri EMERGENCY_NUMBER_OVERRIDE_AUTHORITY = new Uri.Builder().scheme(
+            ContentResolver.SCHEME_CONTENT)
+            .authority("com.android.emergency.numbers")
+            .build();
+    public static final String METHOD_NAME_GET_EMERGENCY_NUMBER_OVERRIDE =
+            "GET_EMERGENCY_NUMBER_OVERRIDE";
+    public static final String METHOD_NAME_SET_EMERGENCY_NUMBER_OVERRIDE =
+            "SET_EMERGENCY_NUMBER_OVERRIDE";
+    public static final String EMERGENCY_GESTURE_CALL_NUMBER = "emergency_gesture_call_number";
     @VisibleForTesting
     static final String FALL_BACK_NUMBER = "112";
 
@@ -77,10 +88,26 @@ public class EmergencyNumberUtils {
      * #getDefaultPoliceNumber()}).
      */
     public String getPoliceNumber() {
-        final String userProvidedNumber = Settings.Secure.getString(mContext.getContentResolver(),
-                EMERGENCY_GESTURE_CALL_NUMBER);
+        final String userProvidedNumber = getEmergencyNumberOverride();
         return TextUtils.isEmpty(userProvidedNumber)
                 ? getDefaultPoliceNumber() : userProvidedNumber;
+    }
+
+    /**
+     * Sets device-local emergency number override
+     */
+    public void setEmergencyNumberOverride(String number) {
+        final Bundle bundle = new Bundle();
+        bundle.putString(EMERGENCY_GESTURE_CALL_NUMBER, number);
+        mContext.getContentResolver().call(EMERGENCY_NUMBER_OVERRIDE_AUTHORITY,
+                METHOD_NAME_SET_EMERGENCY_NUMBER_OVERRIDE, null /* args */, bundle);
+    }
+
+    private String getEmergencyNumberOverride() {
+        final Bundle bundle = mContext.getContentResolver().call(
+                EMERGENCY_NUMBER_OVERRIDE_AUTHORITY,
+                METHOD_NAME_GET_EMERGENCY_NUMBER_OVERRIDE, null /* args */, null /* bundle */);
+        return bundle == null ? null : bundle.getString(EMERGENCY_GESTURE_CALL_NUMBER);
     }
 
     private List<EmergencyNumber> getPromotedEmergencyNumbers(int categories) {

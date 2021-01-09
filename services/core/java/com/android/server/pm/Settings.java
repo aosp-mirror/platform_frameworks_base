@@ -115,12 +115,15 @@ import com.android.server.pm.permission.LegacyPermissionSettings;
 import com.android.server.pm.permission.LegacyPermissionState;
 import com.android.server.pm.permission.LegacyPermissionState.PermissionState;
 import com.android.server.utils.Snappable;
-import com.android.server.utils.Snapshots;
 import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.utils.Watchable;
 import com.android.server.utils.WatchableImpl;
+import com.android.server.utils.Watched;
+import com.android.server.utils.WatchedArrayList;
 import com.android.server.utils.WatchedArrayMap;
+import com.android.server.utils.WatchedArraySet;
 import com.android.server.utils.WatchedSparseArray;
+import com.android.server.utils.WatchedSparseIntArray;
 import com.android.server.utils.Watcher;
 
 import libcore.io.IoUtils;
@@ -186,6 +189,16 @@ public final class Settings implements Watchable, Snappable {
      */
     public void unregisterObserver(@NonNull Watcher observer) {
         mWatchable.unregisterObserver(observer);
+    }
+
+    /**
+     * Return true if the {@link Watcher) is a registered observer.
+     * @param observer A {@link Watcher} that might be registered
+     * @return true if the observer is registered with this {@link Watchable}.
+     */
+    @Override
+    public boolean isRegisteredObserver(@NonNull Watcher observer) {
+        return mWatchable.isRegisteredObserver(observer);
     }
 
     /**
@@ -350,6 +363,7 @@ public final class Settings implements Watchable, Snappable {
     private final File mKernelMappingFilename;
 
     /** Map from package name to settings */
+    @Watched
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     final WatchedArrayMap<String, PackageSetting> mPackages = new WatchedArrayMap<>();
 
@@ -357,21 +371,29 @@ public final class Settings implements Watchable, Snappable {
      * List of packages that were involved in installing other packages, i.e. are listed
      * in at least one app's InstallSource.
      */
-    private final ArraySet<String> mInstallerPackages = new ArraySet<>();
+    @Watched
+    private final WatchedArraySet<String> mInstallerPackages = new WatchedArraySet<>();
 
     /** Map from package name to appId and excluded userids */
-    private final ArrayMap<String, KernelPackageState> mKernelMapping = new ArrayMap<>();
+    @Watched
+    private final WatchedArrayMap<String, KernelPackageState> mKernelMapping =
+            new WatchedArrayMap<>();
 
     // List of replaced system applications
+    @Watched
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
-    final ArrayMap<String, PackageSetting> mDisabledSysPackages = new ArrayMap<>();
+    final WatchedArrayMap<String, PackageSetting> mDisabledSysPackages = new WatchedArrayMap<>();
 
     /** List of packages that are blocked for uninstall for specific users */
-    private final SparseArray<ArraySet<String>> mBlockUninstallPackages = new SparseArray<>();
+    @Watched
+    private final WatchedSparseArray<ArraySet<String>> mBlockUninstallPackages =
+            new WatchedSparseArray<>();
 
     // Set of restored intent-filter verification states
-    private final ArrayMap<String, IntentFilterVerificationInfo> mRestoredIntentFilterVerifications =
-            new ArrayMap<String, IntentFilterVerificationInfo>();
+    @Watched
+    private final WatchedArrayMap<String, IntentFilterVerificationInfo>
+            mRestoredIntentFilterVerifications =
+            new WatchedArrayMap<String, IntentFilterVerificationInfo>();
 
     private static final class KernelPackageState {
         int appId;
@@ -381,7 +403,8 @@ public final class Settings implements Watchable, Snappable {
     private static int mFirstAvailableUid = 0;
 
     /** Map from volume UUID to {@link VersionInfo} */
-    private ArrayMap<String, VersionInfo> mVersion = new ArrayMap<>();
+    @Watched
+    private WatchedArrayMap<String, VersionInfo> mVersion = new WatchedArrayMap<>();
 
     /**
      * Version details for a storage volume that may hold apps.
@@ -423,21 +446,27 @@ public final class Settings implements Watchable, Snappable {
 
     // The user's preferred activities associated with particular intent
     // filters.
+    @Watched
     private final WatchedSparseArray<PreferredIntentResolver>
             mPreferredActivities = new WatchedSparseArray<>();
 
     // The persistent preferred activities of the user's profile/device owner
     // associated with particular intent filters.
+    @Watched
     private final WatchedSparseArray<PersistentPreferredIntentResolver>
             mPersistentPreferredActivities = new WatchedSparseArray<>();
 
     // For every user, it is used to find to which other users the intent can be forwarded.
+    @Watched
     private final WatchedSparseArray<CrossProfileIntentResolver>
             mCrossProfileIntentResolvers = new WatchedSparseArray<>();
 
-    final ArrayMap<String, SharedUserSetting> mSharedUsers = new ArrayMap<>();
-    private final ArrayList<SettingBase> mAppIds;
-    private final SparseArray<SettingBase> mOtherAppIds;
+    @Watched
+    final WatchedArrayMap<String, SharedUserSetting> mSharedUsers = new WatchedArrayMap<>();
+    @Watched
+    private final WatchedArrayList<SettingBase> mAppIds;
+    @Watched
+    private final WatchedSparseArray<SettingBase> mOtherAppIds;
 
     // For reading/writing settings file.
     private final ArrayList<Signature> mPastSignatures =
@@ -449,13 +478,17 @@ public final class Settings implements Watchable, Snappable {
     // Keys are the new names of the packages, values are the original
     // names.  The packages appear everywhere else under their original
     // names.
-    private final ArrayMap<String, String> mRenamedPackages = new ArrayMap<String, String>();
+    @Watched
+    private final WatchedArrayMap<String, String> mRenamedPackages =
+            new WatchedArrayMap<String, String>();
 
     // For every user, it is used to find the package name of the default Browser App.
-    final SparseArray<String> mDefaultBrowserApp = new SparseArray<String>();
+    @Watched
+    final WatchedSparseArray<String> mDefaultBrowserApp = new WatchedSparseArray<String>();
 
     // App-link priority tracking, per-user
-    final SparseIntArray mNextAppLinkGeneration = new SparseIntArray();
+    @Watched
+    final WatchedSparseIntArray mNextAppLinkGeneration = new WatchedSparseIntArray();
 
     final StringBuilder mReadMessages = new StringBuilder();
 
@@ -471,7 +504,7 @@ public final class Settings implements Watchable, Snappable {
     private final File mSystemDir;
 
     public final KeySetManagerService mKeySetManagerService =
-            new KeySetManagerService(mPackages.untrackedMap());
+            new KeySetManagerService(mPackages.untrackedStorage());
 
     /** Settings and other information about permissions */
     final LegacyPermissionSettings mPermissions;
@@ -492,8 +525,8 @@ public final class Settings implements Watchable, Snappable {
     public Settings(Map<String, PackageSetting> pkgSettings) {
         mLock = new Object();
         mPackages.putAll(pkgSettings);
-        mAppIds = new ArrayList<>();
-        mOtherAppIds = new SparseArray<>();
+        mAppIds = new WatchedArrayList<>();
+        mOtherAppIds = new WatchedSparseArray<>();
         mSystemDir = null;
         mPermissions = null;
         mRuntimePermissionsPersistence = null;
@@ -504,17 +537,32 @@ public final class Settings implements Watchable, Snappable {
         mStoppedPackagesFilename = null;
         mBackupStoppedPackagesFilename = null;
         mKernelMappingFilename = null;
+
         mPackages.registerObserver(mObserver);
+        mInstallerPackages.registerObserver(mObserver);
+        mKernelMapping.registerObserver(mObserver);
+        mDisabledSysPackages.registerObserver(mObserver);
+        mBlockUninstallPackages.registerObserver(mObserver);
+        mRestoredIntentFilterVerifications.registerObserver(mObserver);
+        mVersion.registerObserver(mObserver);
         mPreferredActivities.registerObserver(mObserver);
         mPersistentPreferredActivities.registerObserver(mObserver);
         mCrossProfileIntentResolvers.registerObserver(mObserver);
+        mSharedUsers.registerObserver(mObserver);
+        mAppIds.registerObserver(mObserver);
+        mOtherAppIds.registerObserver(mObserver);
+        mRenamedPackages.registerObserver(mObserver);
+        mDefaultBrowserApp.registerObserver(mObserver);
+        mNextAppLinkGeneration.registerObserver(mObserver);
+
+        Watchable.verifyWatchedAttributes(this, mObserver);
     }
 
     Settings(File dataDir, RuntimePermissionsPersistence runtimePermissionsPersistence,
             LegacyPermissionDataProvider permissionDataProvider, Object lock) {
         mLock = lock;
-        mAppIds = new ArrayList<>();
-        mOtherAppIds = new SparseArray<>();
+        mAppIds = new WatchedArrayList<>();
+        mOtherAppIds = new WatchedSparseArray<>();
         mPermissions = new LegacyPermissionSettings(lock);
         mRuntimePermissionsPersistence = new RuntimePermissionPersistence(
                 runtimePermissionsPersistence);
@@ -537,10 +585,25 @@ public final class Settings implements Watchable, Snappable {
         // Deprecated: Needed for migration
         mStoppedPackagesFilename = new File(mSystemDir, "packages-stopped.xml");
         mBackupStoppedPackagesFilename = new File(mSystemDir, "packages-stopped-backup.xml");
+
         mPackages.registerObserver(mObserver);
+        mInstallerPackages.registerObserver(mObserver);
+        mKernelMapping.registerObserver(mObserver);
+        mDisabledSysPackages.registerObserver(mObserver);
+        mBlockUninstallPackages.registerObserver(mObserver);
+        mRestoredIntentFilterVerifications.registerObserver(mObserver);
+        mVersion.registerObserver(mObserver);
         mPreferredActivities.registerObserver(mObserver);
         mPersistentPreferredActivities.registerObserver(mObserver);
         mCrossProfileIntentResolvers.registerObserver(mObserver);
+        mSharedUsers.registerObserver(mObserver);
+        mAppIds.registerObserver(mObserver);
+        mOtherAppIds.registerObserver(mObserver);
+        mRenamedPackages.registerObserver(mObserver);
+        mDefaultBrowserApp.registerObserver(mObserver);
+        mNextAppLinkGeneration.registerObserver(mObserver);
+
+        Watchable.verifyWatchedAttributes(this, mObserver);
     }
 
     /**
@@ -568,7 +631,7 @@ public final class Settings implements Watchable, Snappable {
         mInstallerPackages.addAll(r.mInstallerPackages);
         mKernelMapping.putAll(r.mKernelMapping);
         mDisabledSysPackages.putAll(r.mDisabledSysPackages);
-        Snapshots.copy(mBlockUninstallPackages, r.mBlockUninstallPackages);
+        mBlockUninstallPackages.snapshot(r.mBlockUninstallPackages);
         mRestoredIntentFilterVerifications.putAll(r.mRestoredIntentFilterVerifications);
         mVersion.putAll(r.mVersion);
         mVerifierDeviceIdentity = r.mVerifierDeviceIdentity;
@@ -579,13 +642,13 @@ public final class Settings implements Watchable, Snappable {
         WatchedSparseArray.snapshot(
                 mCrossProfileIntentResolvers, r.mCrossProfileIntentResolvers);
         mSharedUsers.putAll(r.mSharedUsers);
-        mAppIds = new ArrayList<>(r.mAppIds);
-        mOtherAppIds = r.mOtherAppIds.clone();
+        mAppIds = r.mAppIds.snapshot();
+        mOtherAppIds = r.mOtherAppIds.snapshot();
         mPastSignatures.addAll(r.mPastSignatures);
         mKeySetRefs.putAll(r.mKeySetRefs);
-        mRenamedPackages.putAll(r.mRenamedPackages);
-        Snapshots.copy(mDefaultBrowserApp, r.mDefaultBrowserApp);
-        Snapshots.snapshot(mNextAppLinkGeneration, r.mNextAppLinkGeneration);
+        mRenamedPackages.snapshot(r.mRenamedPackages);
+        mDefaultBrowserApp.snapshot(r.mDefaultBrowserApp);
+        mNextAppLinkGeneration.snapshot(r.mNextAppLinkGeneration);
         // mReadMessages
         mPendingPackages.addAll(r.mPendingPackages);
         mSystemDir = null;

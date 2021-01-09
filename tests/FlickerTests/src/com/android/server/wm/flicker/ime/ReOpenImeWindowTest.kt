@@ -66,11 +66,12 @@ class ReOpenImeWindowTest(
         @JvmStatic
         fun getParams(): List<Array<Any>> {
             val instrumentation = InstrumentationRegistry.getInstrumentation()
-            val testApp = ImeAppAutoFocusHelper(instrumentation)
             val testAppComponentName = ActivityOptions.IME_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME
 
             return FlickerTestRunnerFactory(instrumentation, repetitions = 5)
                     .buildTest { configuration ->
+                        val testApp = ImeAppAutoFocusHelper(instrumentation,
+                            configuration.startRotation)
                         withTestName { buildTestTag("reOpenImeAutoFocus", testApp, configuration) }
                         repeat { configuration.repetitions }
                         setup {

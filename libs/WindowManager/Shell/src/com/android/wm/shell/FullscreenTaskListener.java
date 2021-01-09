@@ -55,19 +55,16 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Fullscreen Task Appeared: #%d",
                 taskInfo.taskId);
         mLeashByTaskId.put(taskInfo.taskId, leash);
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) return;
         final Point positionInParent = taskInfo.positionInParent;
         mSyncQueue.runInSync(t -> {
             // Reset several properties back to fullscreen (PiP, for example, leaves all these
             // properties in a bad state).
             t.setWindowCrop(leash, null);
             t.setPosition(leash, positionInParent.x, positionInParent.y);
-            // TODO(shell-transitions): Eventually set everything in transition so there's no
-            //                          SF Transaction here.
-            if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
-                t.setAlpha(leash, 1f);
-                t.setMatrix(leash, 1, 0, 0, 1);
-                t.show(leash);
-            }
+            t.setAlpha(leash, 1f);
+            t.setMatrix(leash, 1, 0, 0, 1);
+            t.show(leash);
         });
     }
 

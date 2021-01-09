@@ -50,7 +50,8 @@ class FingerprintResetLockoutClient extends ClientMonitor<ISession> {
             @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, owner,
                 0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_UNKNOWN,
-                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
+                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN,
+                true /* shouldLogMetrics */);
         mHardwareAuthToken = HardwareAuthTokenUtils.toHardwareAuthToken(hardwareAuthToken);
         mLockoutCache = lockoutTracker;
         mLockoutResetDispatcher = lockoutResetDispatcher;

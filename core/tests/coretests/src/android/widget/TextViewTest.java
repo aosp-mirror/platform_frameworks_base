@@ -276,6 +276,34 @@ public class TextViewTest {
                 0, mTextView.getImeOptions() & EditorInfo.IME_FLAG_NO_FULLSCREEN);
     }
 
+    @Test
+    @UiThreadTest
+    public void setSetImeTemporarilyConsumesInput_recoveryToVisible() {
+        mTextView = new TextView(mActivity);
+        mTextView.setCursorVisible(true);
+        assertTrue(mTextView.isCursorVisible());
+
+        mTextView.setImeTemporarilyConsumesInput(true);
+        assertFalse(mTextView.isCursorVisible());
+
+        mTextView.setImeTemporarilyConsumesInput(false);
+        assertTrue(mTextView.isCursorVisible());
+    }
+
+    @Test
+    @UiThreadTest
+    public void setSetImeTemporarilyConsumesInput_recoveryToInvisible() {
+        mTextView = new TextView(mActivity);
+        mTextView.setCursorVisible(false);
+        assertFalse(mTextView.isCursorVisible());
+
+        mTextView.setImeTemporarilyConsumesInput(true);
+        assertFalse(mTextView.isCursorVisible());
+
+        mTextView.setImeTemporarilyConsumesInput(false);
+        assertFalse(mTextView.isCursorVisible());
+    }
+
     private String createLongText() {
         int size = 600 * 1000;
         final StringBuilder builder = new StringBuilder(size);
