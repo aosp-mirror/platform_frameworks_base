@@ -33,6 +33,7 @@
                     <xs:annotation name="nonnull"/>
                     <xs:annotation name="final"/>
                 </xs:element>
+                <xs:element type="highBrightnessMode" name="highBrightnessMode" minOccurs="0" maxOccurs="1"/>
                 <xs:element type="displayQuirks" name="quirks" minOccurs="0" maxOccurs="1" />
             </xs:sequence>
         </xs:complexType>
@@ -44,6 +45,38 @@
         <xs:sequence>
             <xs:element name="quirk" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
         </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="highBrightnessMode">
+        <xs:all>
+            <xs:element name="transitionPoint" type="nonNegativeDecimal" minOccurs="1" maxOccurs="1">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element name="minimumLux" type="nonNegativeDecimal" minOccurs="1" maxOccurs="1">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element name="timing" type="hbmTiming" minOccurs="1" maxOccurs="1"/>
+        </xs:all>
+        <xs:attribute name="enabled" type="xs:boolean" use="optional"/>
+    </xs:complexType>
+
+    <xs:complexType name="hbmTiming">
+        <xs:all>
+            <xs:element name="timeWindowSecs" type="xs:nonNegativeInteger" minOccurs="1" maxOccurs="1">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element name="timeMaxSecs" type="xs:nonNegativeInteger" minOccurs="1" maxOccurs="1">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element name="timeMinSecs" type="xs:nonNegativeInteger" minOccurs="1" maxOccurs="1">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:all>
     </xs:complexType>
 
     <xs:complexType name="nitsMap">

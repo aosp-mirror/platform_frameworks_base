@@ -105,8 +105,8 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
     public ClientMonitor(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
             @Nullable IBinder token, @Nullable ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int cookie, int sensorId, int statsModality, int statsAction,
-            int statsClient) {
-        super(statsModality, statsAction, statsClient);
+            int statsClient, boolean shouldLogMetrics) {
+        super(statsModality, statsAction, statsClient, shouldLogMetrics);
         mSequentialId = sCount++;
         mContext = context;
         mLazyDaemon = lazyDaemon;

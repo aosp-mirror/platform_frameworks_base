@@ -20,8 +20,8 @@
 #include <utils/Looper.h>
 #endif
 
-#include <SkBitmap.h>
 #include <SkRegion.h>
+#include <SkRuntimeEffect.h>
 
 #include <Rect.h>
 #include <RenderNode.h>
@@ -139,6 +139,21 @@ static void android_view_DisplayListCanvas_drawCircleProps(CRITICAL_JNI_PARAMS_C
     canvas->drawCircle(xProp, yProp, radiusProp, paintProp);
 }
 
+static void android_view_DisplayListCanvas_drawRippleProps(CRITICAL_JNI_PARAMS_COMMA jlong canvasPtr,
+                                                           jlong xPropPtr, jlong yPropPtr,
+                                                           jlong radiusPropPtr, jlong paintPropPtr,
+                                                           jlong progressPropPtr, jlong effectPtr) {
+    Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
+    CanvasPropertyPrimitive* xProp = reinterpret_cast<CanvasPropertyPrimitive*>(xPropPtr);
+    CanvasPropertyPrimitive* yProp = reinterpret_cast<CanvasPropertyPrimitive*>(yPropPtr);
+    CanvasPropertyPrimitive* radiusProp = reinterpret_cast<CanvasPropertyPrimitive*>(radiusPropPtr);
+    CanvasPropertyPaint* paintProp = reinterpret_cast<CanvasPropertyPaint*>(paintPropPtr);
+    CanvasPropertyPrimitive* progressProp =
+            reinterpret_cast<CanvasPropertyPrimitive*>(progressPropPtr);
+    SkRuntimeEffect* effect = reinterpret_cast<SkRuntimeEffect*>(effectPtr);
+    canvas->drawRipple(xProp, yProp, radiusProp, paintProp, progressProp, sk_ref_sp(effect));
+}
+
 static void android_view_DisplayListCanvas_drawWebViewFunctor(CRITICAL_JNI_PARAMS_COMMA jlong canvasPtr, jint functor) {
     Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     canvas->drawWebViewFunctor(functor);
@@ -163,6 +178,7 @@ static JNINativeMethod gMethods[] = {
     { "nDrawCircle",              "(JJJJJ)V",   (void*) android_view_DisplayListCanvas_drawCircleProps },
     { "nDrawRoundRect",           "(JJJJJJJJ)V",(void*) android_view_DisplayListCanvas_drawRoundRectProps },
     { "nDrawWebViewFunctor",      "(JI)V",      (void*) android_view_DisplayListCanvas_drawWebViewFunctor },
+    { "nDrawRipple",              "(JJJJJJJ)V", (void*) android_view_DisplayListCanvas_drawRippleProps },
 };
 
 int register_android_view_DisplayListCanvas(JNIEnv* env) {

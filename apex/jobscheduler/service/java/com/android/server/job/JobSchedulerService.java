@@ -1978,9 +1978,12 @@ public class JobSchedulerService extends com.android.server.SystemService
                         JobStatus runNow = (JobStatus) message.obj;
                         // runNow can be null, which is a controller's way of indicating that its
                         // state is such that all ready jobs should be run immediately.
-                        if (runNow != null && isReadyToBeExecutedLocked(runNow)) {
-                            mJobPackageTracker.notePending(runNow);
-                            addOrderedItem(mPendingJobs, runNow, sPendingJobComparator);
+                        if (runNow != null) {
+                            if (!isCurrentlyActiveLocked(runNow)
+                                    && isReadyToBeExecutedLocked(runNow)) {
+                                mJobPackageTracker.notePending(runNow);
+                                addOrderedItem(mPendingJobs, runNow, sPendingJobComparator);
+                            }
                         } else {
                             queueReadyJobsForExecutionLocked();
                         }

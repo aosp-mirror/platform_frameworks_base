@@ -19,8 +19,8 @@ package com.android.server.wm;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
-import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityTaskManagerService.LAYOUT_REASON_CONFIG_CHANGED;
+import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
@@ -163,6 +163,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         try {
             synchronized (mGlobalLock) {
                 Transition transition = Transition.fromBinder(transitionToken);
+                // In cases where transition is already provided, the "readiness lifecycle" of the
+                // transition is determined outside of this transaction. However, if this is a
+                // direct call from shell, the entire transition lifecycle is contained in the
+                // provided transaction and thus we can setReady immediately after apply.
+                boolean needsSetReady = transition == null && t != null;
                 if (transition == null) {
                     if (type < 0) {
                         throw new IllegalArgumentException("Can't create transition with no type");
@@ -174,6 +179,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     t = new WindowContainerTransaction();
                 }
                 applyTransaction(t, -1 /*syncId*/, transition);
+                if (needsSetReady) {
+                    transition.setReady();
+                }
                 return transition;
             }
         } finally {
@@ -258,14 +266,21 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 }
                 if (transition != null) {
                     transition.collect(wc);
-                    if (hop.isReparent() && hop.getNewParent() != null) {
-                        final WindowContainer parentWc =
-                                WindowContainer.fromBinder(hop.getNewParent());
-                        if (parentWc == null) {
-                            Slog.e(TAG, "Can't resolve parent window from token");
-                            continue;
+                    if (hop.isReparent()) {
+                        if (wc.getParent() != null) {
+                            // Collect the current parent. It's visibility may change as a result
+                            // of this reparenting.
+                            transition.collect(wc.getParent());
                         }
-                        transition.collect(parentWc);
+                        if (hop.getNewParent() != null) {
+                            final WindowContainer parentWc =
+                                    WindowContainer.fromBinder(hop.getNewParent());
+                            if (parentWc == null) {
+                                Slog.e(TAG, "Can't resolve parent window from token");
+                                continue;
+                            }
+                            transition.collect(parentWc);
+                        }
                     }
                 }
                 effects |= sanitizeAndApplyHierarchyOp(wc, hop);
@@ -307,6 +322,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             if ((effects & TRANSACT_EFFECTS_LIFECYCLE) != 0) {
                 // Already calls ensureActivityConfig
                 mService.mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
+                mService.mRootWindowContainer.resumeFocusedTasksTopActivities();
             } else if ((effects & TRANSACT_EFFECTS_CLIENT_CONFIG) != 0) {
                 final PooledConsumer f = PooledLambda.obtainConsumer(
                         ActivityRecord::ensureActivityConfiguration,

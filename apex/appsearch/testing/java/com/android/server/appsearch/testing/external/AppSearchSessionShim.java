@@ -208,4 +208,13 @@ public interface AppSearchSessionShim {
     @NonNull
     ListenableFuture<Void> removeByQuery(
             @NonNull String queryExpression, @NonNull SearchSpec searchSpec);
+
+    /**
+     * Closes the SearchSessionImpl to persists all update/delete requests to the disk.
+     *
+     * @hide
+     */
+
+    // TODO(b/175637134) when unhide it, extends Closeable and remove this method.
+    void close();
 }

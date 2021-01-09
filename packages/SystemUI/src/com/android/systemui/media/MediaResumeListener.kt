@@ -29,11 +29,15 @@ import android.provider.Settings
 import android.service.media.MediaBrowserService
 import android.util.Log
 import com.android.internal.annotations.VisibleForTesting
+import com.android.systemui.Dumpable
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.Utils
+import java.io.FileDescriptor
+import java.io.PrintWriter
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -49,8 +53,9 @@ class MediaResumeListener @Inject constructor(
     private val broadcastDispatcher: BroadcastDispatcher,
     @Background private val backgroundExecutor: Executor,
     private val tunerService: TunerService,
-    private val mediaBrowserFactory: ResumeMediaBrowserFactory
-) : MediaDataManager.Listener {
+    private val mediaBrowserFactory: ResumeMediaBrowserFactory,
+    dumpManager: DumpManager
+) : MediaDataManager.Listener, Dumpable {
 
     private var useMediaResumption: Boolean = Utils.useMediaResumption(context)
     private val resumeComponents: ConcurrentLinkedQueue<ComponentName> = ConcurrentLinkedQueue()
@@ -99,6 +104,7 @@ class MediaResumeListener @Inject constructor(
 
     init {
         if (useMediaResumption) {
+            dumpManager.registerDumpable(TAG, this)
             val unlockFilter = IntentFilter()
             unlockFilter.addAction(Intent.ACTION_USER_UNLOCKED)
             unlockFilter.addAction(Intent.ACTION_USER_SWITCHED)
@@ -281,6 +287,12 @@ class MediaResumeListener @Inject constructor(
                 },
                 componentName)
             mediaBrowser?.restart()
+        }
+    }
+
+    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+        pw.apply {
+            println("resumeComponents: $resumeComponents")
         }
     }
 }

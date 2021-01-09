@@ -983,8 +983,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void setDevicePolicySafetyChecker(DevicePolicySafetyChecker safetyChecker) {
-        Slog.i(LOG_TAG, "Setting DevicePolicySafetyChecker as " + safetyChecker);
+        CallerIdentity callerIdentity = getCallerIdentity();
+        Preconditions.checkCallAuthorization(mIsAutomotive || isAdb(callerIdentity), "can only set "
+                + "DevicePolicySafetyChecker on automotive builds or from ADB (but caller is %s)",
+                callerIdentity);
+        setDevicePolicySafetyCheckerUnchecked(safetyChecker);
+    }
+
+    /**
+     * Used by {@code setDevicePolicySafetyChecker()} above and {@link OneTimeSafetyChecker}.
+     */
+    void setDevicePolicySafetyCheckerUnchecked(DevicePolicySafetyChecker safetyChecker) {
+        Slog.i(LOG_TAG, String.format("Setting DevicePolicySafetyChecker as %s", safetyChecker));
         mSafetyChecker = safetyChecker;
+        mInjector.setDevicePolicySafetyChecker(safetyChecker);
     }
 
     /**
@@ -1021,8 +1033,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public void setNextOperationSafety(@DevicePolicyOperation int operation, boolean safe) {
         Preconditions.checkCallAuthorization(
                 hasCallingOrSelfPermission(permission.MANAGE_DEVICE_ADMINS));
-        Slog.i(LOG_TAG, "setNextOperationSafety(" + DevicePolicyManager.operationToString(operation)
-                + ", " + safe + ")");
+        Slog.i(LOG_TAG, String.format("setNextOperationSafety(%s, %b)",
+                DevicePolicyManager.operationToString(operation), safe));
         mSafetyChecker = new OneTimeSafetyChecker(this, operation, safe);
     }
 
@@ -1033,6 +1045,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     static class Injector {
 
         public final Context mContext;
+
+        private @Nullable DevicePolicySafetyChecker mSafetyChecker;
 
         Injector(Context context) {
             mContext = context;
@@ -1278,7 +1292,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         void recoverySystemRebootWipeUserData(boolean shutdown, String reason, boolean force,
                 boolean wipeEuicc, boolean wipeExtRequested, boolean wipeResetProtectionData)
                         throws IOException {
-            FactoryResetter.newBuilder(mContext).setReason(reason).setShutdown(shutdown)
+            FactoryResetter.newBuilder(mContext).setSafetyChecker(mSafetyChecker)
+                    .setReason(reason).setShutdown(shutdown)
                     .setForce(force).setWipeEuicc(wipeEuicc)
                     .setWipeAdoptableStorage(wipeExtRequested)
                     .setWipeFactoryResetProtection(wipeResetProtectionData)
@@ -1432,6 +1447,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         public boolean isChangeEnabled(long changeId, String packageName, int userId) {
             return CompatChanges.isChangeEnabled(changeId, packageName, UserHandle.of(userId));
+        }
+
+        void setDevicePolicySafetyChecker(DevicePolicySafetyChecker safetyChecker) {
+            mSafetyChecker = safetyChecker;
         }
     }
 
@@ -7507,6 +7526,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization((caller.hasAdminComponent() &&  isDeviceOwner(caller))
                 || (caller.hasPackage()
                 && isCallerDelegate(caller, DELEGATION_KEEP_UNINSTALLED_PACKAGES)));
+        checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_KEEP_UNINSTALLED_PACKAGES);
 
         synchronized (getLockObject()) {
             // Get the device owner
@@ -8975,6 +8995,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization((caller.hasAdminComponent()
                 && (isProfileOwner(caller) || isDeviceOwner(caller)))
                 || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_APP_RESTRICTIONS)));
+        checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_APPLICATION_RESTRICTIONS);
 
         mInjector.binderWithCleanCallingIdentity(() -> {
             mUserManager.setApplicationRestrictions(packageName, settings,
@@ -9000,6 +9021,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             ActiveAdmin ap = getActiveAdminForCallerLocked(admin,
                     DeviceAdminInfo.USES_POLICY_DISABLE_KEYGUARD_FEATURES, parent);
+            checkCanExecuteOrThrowUnsafe(
+                    DevicePolicyManager.OPERATION_SET_TRUST_AGENT_CONFIGURATION);
+
             ap.trustAgentInfos.put(agent.flattenToString(), new TrustAgentInfo(args));
             saveSettingsLocked(userHandle);
         }
@@ -9939,6 +9963,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization((caller.hasAdminComponent()
                 && (isProfileOwner(caller) || isDeviceOwner(caller)))
                 || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_PACKAGE_ACCESS)));
+        checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_PACKAGES_SUSPENDED);
 
         String[] result = null;
         synchronized (getLockObject()) {
@@ -10146,6 +10171,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mInjector.binderWithCleanCallingIdentity(() ->
                         enforcePackageIsSystemPackage(packageName, userId));
             }
+            checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_APPLICATION_HIDDEN);
+
             result = mInjector.binderWithCleanCallingIdentity(() -> mIPackageManager
                     .setApplicationHiddenSettingAsUser(packageName, hidden, userId));
         }
@@ -10744,6 +10771,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         synchronized (getLockObject()) {
             enforceCanCallLockTaskLocked(caller);
+            checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_LOCK_TASK_PACKAGES);
             final int userHandle = caller.getUserId();
             setLockTaskPackagesLocked(userHandle, new ArrayList<>(Arrays.asList(packages)));
         }
@@ -10796,6 +10824,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final int userHandle = caller.getUserId();
         synchronized (getLockObject()) {
             enforceCanCallLockTaskLocked(caller);
+            checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_LOCK_TASK_FEATURES);
             setLockTaskFeaturesLocked(userHandle, flags);
         }
     }
@@ -10924,6 +10953,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkStringNotEmpty(setting, "String setting is null or empty");
         final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(isProfileOwner(caller) || isDeviceOwner(caller));
+        checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_SYSTEM_SETTING);
 
         synchronized (getLockObject()) {
             if (!SYSTEM_SETTINGS_ALLOWLIST.contains(setting)) {
@@ -11225,6 +11255,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (isManagedProfile(userId)) {
             throw new SecurityException("Managed profile cannot disable keyguard");
         }
+        checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_KEYGUARD_DISABLED);
 
         long ident = mInjector.binderClearCallingIdentity();
         try {
@@ -11264,6 +11295,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (isManagedProfile(userId)) {
                 throw new SecurityException("Managed profile cannot disable status bar");
             }
+            checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_STATUS_BAR_DISABLED);
+
             DevicePolicyData policy = getUserData(userId);
             if (policy.mStatusBarDisabled != disabled) {
                 boolean isLockTaskMode = false;
@@ -11931,6 +11964,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             Preconditions.checkCallAuthorization(isProfileOwnerOfOrganizationOwnedDevice(caller)
                     || isDeviceOwner(caller));
+            checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_SYSTEM_UPDATE_POLICY);
 
             if (policy == null) {
                 mOwners.clearSystemUpdatePolicy();
@@ -15077,6 +15111,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkNotNull(packages, "packages is null");
         final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(isDeviceOwner(caller));
+        checkCanExecuteOrThrowUnsafe(
+                DevicePolicyManager.OPERATION_SET_USER_CONTROL_DISABLED_PACKAGES);
 
         synchronized (getLockObject()) {
             setUserControlDisabledPackagesLocked(caller.getUserId(), packages);

@@ -492,8 +492,8 @@
     <string name="status_unavailable" msgid="5279036186589861608">"Hamna"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"Imechagua anwani ya MAC kwa nasibu"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
-      <item quantity="other">Imeunganisha vifaa %1$d</item>
-      <item quantity="one">Imeunganisha kifaa %1$d</item>
+      <item quantity="other">Vifaa %1$d vimeunganishwa</item>
+      <item quantity="one">Kifaa %1$d kimeunganishwa</item>
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Muda zaidi."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Muda kidogo."</string>
@@ -553,7 +553,8 @@
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Inaweka mtumiaji mpya…"</string>
     <string name="user_nickname" msgid="262624187455825083">"Jina wakilishi"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Weka mgeni"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"Ondoa mgeni"</string>
+    <!-- no translation found for guest_exit_guest (4754204715192830850) -->
+    <skip />
     <string name="guest_nickname" msgid="6332276931583337261">"Mgeni"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Piga picha"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Chagua picha"</string>

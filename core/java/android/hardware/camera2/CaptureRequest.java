@@ -1699,7 +1699,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * transform fields, and what its illumination target
      * is.</p>
      * <p>This control is only effective if {@link CaptureRequest#CONTROL_MODE android.control.mode} is AUTO.</p>
-     * <p>When set to the ON mode, the camera device's auto-white balance
+     * <p>When set to the AUTO mode, the camera device's auto-white balance
      * routine is enabled, overriding the application's selected
      * {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}, {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} and
      * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode}. Note that when {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode}

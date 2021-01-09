@@ -19,8 +19,21 @@ package com.android.server.wm.flicker.helpers
 import android.app.Instrumentation
 import androidx.test.uiautomator.UiDevice
 
-class ImeAppAutoFocusHelper(instr: Instrumentation) : ImeAppHelper(instr, "ImeAppAutoFocus") {
+class ImeAppAutoFocusHelper @JvmOverloads constructor(
+    instr: Instrumentation,
+    private val rotation: Int,
+    private val imePackageName: String = IME_PACKAGE
+) : ImeAppHelper(instr, "ImeAppAutoFocus") {
     override fun openIME(device: UiDevice) {
         // do nothing (the app is focused automatically)
+    }
+
+    override fun open() {
+        val expectedPackage = if (rotation.isRotated()) {
+            imePackageName
+        } else {
+            packageName
+        }
+        launcherStrategy.launch(appName, expectedPackage)
     }
 }

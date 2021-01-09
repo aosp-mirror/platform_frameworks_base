@@ -91,18 +91,6 @@ public class LatencyTracker {
      */
     public static final int ACTION_START_RECENTS_ANIMATION = 8;
 
-    private static final String[] NAMES = new String[]{
-            "expand panel",
-            "toggle recents",
-            "fingerprint wake-and-unlock",
-            "check credential",
-            "check credential unlocked",
-            "turn on screen",
-            "rotate the screen",
-            "face wake-and-unlock",
-            "start recents-animation",
-    };
-
     private static final int[] STATSD_ACTION = new int[]{
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_EXPAND_PANEL,
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_TOGGLE_RECENTS,
@@ -185,6 +173,10 @@ public class LatencyTracker {
         }
     }
 
+    private String getTraceNameOfAcion(int action) {
+        return "L<" + getNameOfAction(action) + ">";
+    }
+
     public static boolean isEnabled(Context ctx) {
         return getInstance(ctx).isEnabled();
     }
@@ -202,7 +194,7 @@ public class LatencyTracker {
         if (!isEnabled()) {
             return;
         }
-        Trace.asyncTraceBegin(Trace.TRACE_TAG_APP, NAMES[action], 0);
+        Trace.asyncTraceBegin(Trace.TRACE_TAG_APP, getTraceNameOfAcion(action), 0);
         mStartRtc.put(action, SystemClock.elapsedRealtime());
     }
 
@@ -221,7 +213,7 @@ public class LatencyTracker {
             return;
         }
         mStartRtc.delete(action);
-        Trace.asyncTraceEnd(Trace.TRACE_TAG_APP, NAMES[action], 0);
+        Trace.asyncTraceEnd(Trace.TRACE_TAG_APP, getTraceNameOfAcion(action), 0);
         logAction(action, (int) (endRtc - startRtc));
     }
 

@@ -26,6 +26,7 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Parcel;
@@ -56,6 +57,32 @@ public final class TransitionInfo implements Parcelable {
             TRANSIT_CHANGE
     })
     public @interface TransitionMode {}
+
+    /** No flags */
+    public static final int FLAG_NONE = 0;
+
+    /** The container shows the wallpaper behind it. */
+    public static final int FLAG_SHOW_WALLPAPER = 1;
+
+    /** The container IS the wallpaper. */
+    public static final int FLAG_IS_WALLPAPER = 1 << 1;
+
+    /** The container is translucent. */
+    public static final int FLAG_TRANSLUCENT = 1 << 2;
+
+    // TODO: remove when starting-window is moved to Task
+    /** The container is the recipient of a transferred starting-window */
+    public static final int FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT = 1 << 3;
+
+    /** @hide */
+    @IntDef(prefix = { "FLAG_" }, value = {
+            FLAG_NONE,
+            FLAG_SHOW_WALLPAPER,
+            FLAG_IS_WALLPAPER,
+            FLAG_TRANSLUCENT,
+            FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT
+    })
+    public @interface ChangeFlags {}
 
     private final @WindowManager.TransitionOldType int mType;
     private final @WindowManager.TransitionFlags int mFlags;
@@ -127,7 +154,8 @@ public final class TransitionInfo implements Parcelable {
     /**
      * @return a surfacecontrol that can serve as a parent surfacecontrol for all the changing
      * participants to animate within. This will generally be placed at the highest-z-order
-     * shared ancestor of all participants.
+     * shared ancestor of all participants. While this is non-null, it's possible for the rootleash
+     * to be invalid if the transition is a no-op.
      */
     @NonNull
     public SurfaceControl getRootLeash() {
@@ -155,7 +183,7 @@ public final class TransitionInfo implements Parcelable {
     @Nullable
     public Change getChange(@NonNull WindowContainerToken token) {
         for (int i = mChanges.size() - 1; i >= 0; --i) {
-            if (mChanges.get(i).mContainer == token) {
+            if (token.equals(mChanges.get(i).mContainer)) {
                 return mChanges.get(i);
             }
         }
@@ -198,15 +226,37 @@ public final class TransitionInfo implements Parcelable {
         }
     }
 
+    /** Converts change flags into a string representation. */
+    @NonNull
+    public static String flagsToString(@ChangeFlags int flags) {
+        if (flags == 0) return "NONE";
+        final StringBuilder sb = new StringBuilder();
+        if ((flags & FLAG_SHOW_WALLPAPER) != 0) {
+            sb.append("SHOW_WALLPAPER");
+        }
+        if ((flags & FLAG_IS_WALLPAPER) != 0) {
+            sb.append("IS_WALLPAPER");
+        }
+        if ((flags & FLAG_TRANSLUCENT) != 0) {
+            sb.append((sb.length() == 0 ? "" : "|") + "TRANSLUCENT");
+        }
+        if ((flags & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0) {
+            sb.append((sb.length() == 0 ? "" : "|") + "STARTING_WINDOW_TRANSFER");
+        }
+        return sb.toString();
+    }
+
     /** Represents the change a WindowContainer undergoes during a transition */
     public static final class Change implements Parcelable {
         private final WindowContainerToken mContainer;
         private WindowContainerToken mParent;
         private final SurfaceControl mLeash;
         private @TransitionMode int mMode = TRANSIT_NONE;
+        private @ChangeFlags int mFlags = FLAG_NONE;
         private final Rect mStartAbsBounds = new Rect();
         private final Rect mEndAbsBounds = new Rect();
         private final Point mEndRelOffset = new Point();
+        private ActivityManager.RunningTaskInfo mTaskInfo = null;
 
         public Change(@Nullable WindowContainerToken container, @NonNull SurfaceControl leash) {
             mContainer = container;
@@ -219,9 +269,11 @@ public final class TransitionInfo implements Parcelable {
             mLeash = new SurfaceControl();
             mLeash.readFromParcel(in);
             mMode = in.readInt();
+            mFlags = in.readInt();
             mStartAbsBounds.readFromParcel(in);
             mEndAbsBounds.readFromParcel(in);
             mEndRelOffset.readFromParcel(in);
+            mTaskInfo = in.readTypedObject(ActivityManager.RunningTaskInfo.CREATOR);
         }
 
         /** Sets the parent of this change's container. The parent must be a participant or null. */
@@ -232,6 +284,11 @@ public final class TransitionInfo implements Parcelable {
         /** Sets the transition mode for this change */
         public void setMode(@TransitionMode int mode) {
             mMode = mode;
+        }
+
+        /** Sets the flags for this change */
+        public void setFlags(@ChangeFlags int flags) {
+            mFlags = flags;
         }
 
         /** Sets the bounds this container occupied before the change in screen space */
@@ -247,6 +304,14 @@ public final class TransitionInfo implements Parcelable {
         /** Sets the offset of this container from its parent surface */
         public void setEndRelOffset(int left, int top) {
             mEndRelOffset.set(left, top);
+        }
+
+        /**
+         * Sets the taskinfo of this container if this is a task. WARNING: this takes the
+         * reference, so don't modify it afterwards.
+         */
+        public void setTaskInfo(ActivityManager.RunningTaskInfo taskInfo) {
+            mTaskInfo = taskInfo;
         }
 
         /** @return the container that is changing. May be null if non-remotable (eg. activity) */
@@ -267,6 +332,11 @@ public final class TransitionInfo implements Parcelable {
         /** @return which action this change represents. */
         public @TransitionMode int getMode() {
             return mMode;
+        }
+
+        /** @return the flags for this change. */
+        public @ChangeFlags int getFlags() {
+            return mFlags;
         }
 
         /**
@@ -301,6 +371,12 @@ public final class TransitionInfo implements Parcelable {
             return mLeash;
         }
 
+        /** @return the task info or null if this isn't a task */
+        @NonNull
+        public ActivityManager.RunningTaskInfo getTaskInfo() {
+            return mTaskInfo;
+        }
+
         @Override
         /** @hide */
         public void writeToParcel(@NonNull Parcel dest, int flags) {
@@ -308,9 +384,11 @@ public final class TransitionInfo implements Parcelable {
             dest.writeTypedObject(mParent, flags);
             mLeash.writeToParcel(dest, flags);
             dest.writeInt(mMode);
+            dest.writeInt(mFlags);
             mStartAbsBounds.writeToParcel(dest, flags);
             mEndAbsBounds.writeToParcel(dest, flags);
             mEndRelOffset.writeToParcel(dest, flags);
+            dest.writeTypedObject(mTaskInfo, flags);
         }
 
         @NonNull
@@ -336,8 +414,8 @@ public final class TransitionInfo implements Parcelable {
         @Override
         public String toString() {
             return "{" + mContainer + "(" + mParent + ") leash=" + mLeash
-                    + " m=" + modeToString(mMode) + " sb=" + mStartAbsBounds
-                    + " eb=" + mEndAbsBounds + " eo=" + mEndRelOffset + "}";
+                    + " m=" + modeToString(mMode) + " f=" + flagsToString(mFlags) + " sb="
+                    + mStartAbsBounds + " eb=" + mEndAbsBounds + " eo=" + mEndRelOffset + "}";
         }
     }
 }

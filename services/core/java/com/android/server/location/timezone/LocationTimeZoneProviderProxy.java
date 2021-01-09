@@ -70,7 +70,7 @@ abstract class LocationTimeZoneProviderProxy implements Dumpable {
 
     /**
      * Initializes the proxy. The supplied listener can expect to receive all events after this
-     * point. This method also calls {@link #onInitialize()} for subclasses to handle their own
+     * point. This method calls {@link #onInitialize()} for subclasses to handle their own
      * initialization.
      */
     void initialize(@NonNull Listener listener) {
@@ -85,9 +85,27 @@ abstract class LocationTimeZoneProviderProxy implements Dumpable {
     }
 
     /**
-     * Initializes the proxy. This is called after {@link #mListener} is set.
+     * Implemented by subclasses to initializes the proxy. This is called after {@link #mListener}
+     * is set.
      */
+    @GuardedBy("mSharedLock")
     abstract void onInitialize();
+
+    /**
+     * Destroys the proxy. This method calls {@link #onDestroy()} for subclasses to handle their own
+     * destruction.
+     */
+    void destroy() {
+        synchronized (mSharedLock) {
+            onDestroy();
+        }
+    }
+
+    /**
+     * Implemented by subclasses to destroy the proxy.
+     */
+    @GuardedBy("mSharedLock")
+    abstract void onDestroy();
 
     /**
      * Sets a new request for the provider.

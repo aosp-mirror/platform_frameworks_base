@@ -383,27 +383,6 @@ public class ConnectivityControllerTest {
     }
 
     @Test
-    public void testWouldBeReadyWithConnectivityLocked() {
-        final ConnectivityController controller = spy(new ConnectivityController(mService));
-        final JobStatus red = createJobStatus(createJob()
-                .setEstimatedNetworkBytes(DataUnit.MEBIBYTES.toBytes(1), 0)
-                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED), UID_RED);
-
-        doReturn(false).when(controller).isNetworkAvailable(any());
-        assertFalse(controller.wouldBeReadyWithConnectivityLocked(red));
-
-        doReturn(true).when(controller).isNetworkAvailable(any());
-        doReturn(false).when(controller).wouldBeReadyWithConstraintLocked(any(),
-                eq(JobStatus.CONSTRAINT_CONNECTIVITY));
-        assertFalse(controller.wouldBeReadyWithConnectivityLocked(red));
-
-        doReturn(true).when(controller).isNetworkAvailable(any());
-        doReturn(true).when(controller).wouldBeReadyWithConstraintLocked(any(),
-                eq(JobStatus.CONSTRAINT_CONNECTIVITY));
-        assertTrue(controller.wouldBeReadyWithConnectivityLocked(red));
-    }
-
-    @Test
     public void testEvaluateStateLocked_JobWithoutConnectivity() {
         final ConnectivityController controller = new ConnectivityController(mService);
         final JobStatus red = createJobStatus(createJob().setMinimumLatency(1));
@@ -417,7 +396,9 @@ public class ConnectivityControllerTest {
     @Test
     public void testEvaluateStateLocked_JobWouldBeReady() {
         final ConnectivityController controller = spy(new ConnectivityController(mService));
-        doReturn(true).when(controller).wouldBeReadyWithConnectivityLocked(any());
+        doReturn(true).when(controller)
+                .wouldBeReadyWithConstraintLocked(any(), eq(JobStatus.CONSTRAINT_CONNECTIVITY));
+        doReturn(true).when(controller).isNetworkAvailable(any());
         final JobStatus red = createJobStatus(createJob()
                 .setEstimatedNetworkBytes(DataUnit.MEBIBYTES.toBytes(1), 0)
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED), UID_RED);
@@ -455,7 +436,8 @@ public class ConnectivityControllerTest {
     @Test
     public void testEvaluateStateLocked_JobWouldNotBeReady() {
         final ConnectivityController controller = spy(new ConnectivityController(mService));
-        doReturn(false).when(controller).wouldBeReadyWithConnectivityLocked(any());
+        doReturn(false).when(controller)
+                .wouldBeReadyWithConstraintLocked(any(), eq(JobStatus.CONSTRAINT_CONNECTIVITY));
         final JobStatus red = createJobStatus(createJob()
                 .setEstimatedNetworkBytes(DataUnit.MEBIBYTES.toBytes(1), 0)
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED), UID_RED);
@@ -523,21 +505,26 @@ public class ConnectivityControllerTest {
                 .setAppIdleWhitelist(eq(12345), anyBoolean());
 
         // Both jobs would still be ready. Exception should not be revoked.
-        doReturn(true).when(controller).wouldBeReadyWithConnectivityLocked(any());
+        doReturn(true).when(controller)
+                .wouldBeReadyWithConstraintLocked(any(), eq(JobStatus.CONSTRAINT_CONNECTIVITY));
+        doReturn(true).when(controller).isNetworkAvailable(any());
         controller.reevaluateStateLocked(UID_RED);
         inOrder.verify(mNetPolicyManagerInternal, never())
                 .setAppIdleWhitelist(eq(UID_RED), anyBoolean());
 
         // One job is still ready. Exception should not be revoked.
-        doReturn(true).when(controller).wouldBeReadyWithConnectivityLocked(eq(redOne));
-        doReturn(false).when(controller).wouldBeReadyWithConnectivityLocked(eq(redTwo));
+        doReturn(true).when(controller).wouldBeReadyWithConstraintLocked(
+                eq(redOne), eq(JobStatus.CONSTRAINT_CONNECTIVITY));
+        doReturn(false).when(controller).wouldBeReadyWithConstraintLocked(
+                eq(redTwo), eq(JobStatus.CONSTRAINT_CONNECTIVITY));
         controller.reevaluateStateLocked(UID_RED);
         inOrder.verify(mNetPolicyManagerInternal, never())
                 .setAppIdleWhitelist(eq(UID_RED), anyBoolean());
         assertTrue(controller.isStandbyExceptionRequestedLocked(UID_RED));
 
         // Both jobs are not ready. Exception should be revoked.
-        doReturn(false).when(controller).wouldBeReadyWithConnectivityLocked(any());
+        doReturn(false).when(controller)
+                .wouldBeReadyWithConstraintLocked(any(), eq(JobStatus.CONSTRAINT_CONNECTIVITY));
         controller.reevaluateStateLocked(UID_RED);
         inOrder.verify(mNetPolicyManagerInternal, times(1))
                 .setAppIdleWhitelist(eq(UID_RED), eq(false));

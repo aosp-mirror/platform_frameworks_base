@@ -17,6 +17,7 @@
 package com.android.server.devicepolicy;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
@@ -33,6 +34,7 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.test.mock.MockContext;
 import android.util.ArrayMap;
+import android.util.DisplayMetrics;
 import android.util.ExceptionUtils;
 
 import androidx.annotation.NonNull;
@@ -174,6 +176,11 @@ public class DpmMockContext extends MockContext {
         binder = new MockBinder();
         resources = mock(Resources.class);
         spiedContext = mock(Context.class);
+
+        // Set up density for notification building
+        DisplayMetrics displayMetrics = mock(DisplayMetrics.class);
+        displayMetrics.density = 2.25f;
+        when(resources.getDisplayMetrics()).thenReturn(displayMetrics);
     }
 
     @Override

@@ -143,6 +143,7 @@ public final class AutofillId implements Parcelable {
      *
      * @hide
      */
+    @TestApi
     public boolean isNonVirtual() {
         return !isVirtualInt() && !isVirtualLong();
     }

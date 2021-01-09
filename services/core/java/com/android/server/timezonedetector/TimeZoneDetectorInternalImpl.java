@@ -69,6 +69,13 @@ public final class TimeZoneDetectorInternalImpl implements TimeZoneDetectorInter
     }
 
     @Override
+    public void removeConfigurationListener(ConfigurationChangeListener listener) {
+        synchronized (mConfigurationListeners) {
+            mConfigurationListeners.remove(Objects.requireNonNull(listener));
+        }
+    }
+
+    @Override
     @NonNull
     public ConfigurationInternal getCurrentUserConfigurationInternal() {
         return mTimeZoneDetectorStrategy.getCurrentUserConfigurationInternal();

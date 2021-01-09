@@ -17,6 +17,7 @@ package android.service.notification;
 
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_CONVERSATIONS;
+import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ONGOING;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_SILENT;
 
 import android.os.Parcel;
@@ -35,7 +36,8 @@ public class NotificationListenerFilter implements Parcelable {
     public NotificationListenerFilter() {
         mAllowedNotificationTypes = FLAG_FILTER_TYPE_CONVERSATIONS
                 | FLAG_FILTER_TYPE_ALERTING
-                | FLAG_FILTER_TYPE_SILENT;
+                | FLAG_FILTER_TYPE_SILENT
+                | FLAG_FILTER_TYPE_ONGOING;
         mDisallowedPackages = new ArraySet<>();
     }
 

@@ -814,6 +814,18 @@ void SkiaCanvas::drawCircle(uirenderer::CanvasPropertyPrimitive* x,
     mCanvas->drawDrawable(drawable.get());
 }
 
+void SkiaCanvas::drawRipple(uirenderer::CanvasPropertyPrimitive* x,
+                            uirenderer::CanvasPropertyPrimitive* y,
+                            uirenderer::CanvasPropertyPrimitive* radius,
+                            uirenderer::CanvasPropertyPaint* paint,
+                            uirenderer::CanvasPropertyPrimitive* progress,
+                            sk_sp<SkRuntimeEffect> runtimeEffect) {
+    sk_sp<uirenderer::skiapipeline::AnimatedRipple> drawable(
+            new uirenderer::skiapipeline::AnimatedRipple(x, y, radius, paint, progress,
+                                                         runtimeEffect));
+    mCanvas->drawDrawable(drawable.get());
+}
+
 void SkiaCanvas::drawPicture(const SkPicture& picture) {
     // TODO: Change to mCanvas->drawPicture()? SkCanvas::drawPicture seems to be
     // where the logic is for playback vs. ref picture. Using picture.playback here

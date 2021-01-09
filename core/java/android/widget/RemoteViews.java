@@ -18,6 +18,7 @@ package android.widget;
 
 import android.annotation.ColorInt;
 import android.annotation.DimenRes;
+import android.annotation.IdRes;
 import android.annotation.IntDef;
 import android.annotation.LayoutRes;
 import android.annotation.NonNull;
@@ -63,12 +64,15 @@ import android.util.ArrayMap;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.Pair;
+import android.util.TypedValue;
+import android.util.TypedValue.ComplexDimensionUnit;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.LayoutInflater.Filter;
 import android.view.RemotableViewMethod;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.MarginLayoutParams;
 import android.view.ViewStub;
 import android.widget.AdapterView.OnItemClickListener;
 
@@ -171,6 +175,48 @@ public class RemoteViews implements Parcelable, Filter {
     private static final int OVERRIDE_TEXT_COLORS_TAG = 20;
     private static final int SET_RIPPLE_DRAWABLE_COLOR_TAG = 21;
     private static final int SET_INT_TAG_TAG = 22;
+
+    /** @hide **/
+    @IntDef(prefix = "MARGIN_", value = {
+            MARGIN_LEFT,
+            MARGIN_TOP,
+            MARGIN_RIGHT,
+            MARGIN_BOTTOM,
+            MARGIN_START,
+            MARGIN_END
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MarginType {}
+    /**
+     * The value will apply to the marginLeft.
+     * @hide
+     */
+    public static final int MARGIN_LEFT = 0;
+    /**
+     * The value will apply to the marginTop.
+     * @hide
+     */
+    public static final int MARGIN_TOP = 1;
+    /**
+     * The value will apply to the marginRight.
+     * @hide
+     */
+    public static final int MARGIN_RIGHT = 2;
+    /**
+     * The value will apply to the marginBottom.
+     * @hide
+     */
+    public static final int MARGIN_BOTTOM = 3;
+    /**
+     * The value will apply to the marginStart.
+     * @hide
+     */
+    public static final int MARGIN_START = 4;
+    /**
+     * The value will apply to the marginEnd.
+     * @hide
+     */
+    public static final int MARGIN_END = 5;
 
     /** @hide **/
     @IntDef(flag = true, value = {
@@ -1730,8 +1776,16 @@ public class RemoteViews implements Parcelable, Filter {
 
             final ViewGroup targetVg = (ViewGroup) target.mRoot;
 
-            // Clear all children when nested views omitted
-            target.mChildren = null;
+            if (mViewIdToKeep == REMOVE_ALL_VIEWS_ID) {
+                // Clear all children when there's no excepted view
+                target.mChildren = null;
+            } else {
+                // Remove just the children which don't match the excepted view
+                target.mChildren.removeIf(childTree -> childTree.mRoot.getId() != mViewIdToKeep);
+                if (target.mChildren.isEmpty()) {
+                    target.mChildren = null;
+                }
+            }
             return new RuntimeAction() {
                 @Override
                 public void apply(View root, ViewGroup rootParent, OnClickHandler handler)
@@ -1922,13 +1976,13 @@ public class RemoteViews implements Parcelable, Filter {
      * Helper action to set text size on a TextView in any supported units.
      */
     private class TextViewSizeAction extends Action {
-        public TextViewSizeAction(int viewId, int units, float size) {
+        TextViewSizeAction(@IdRes int viewId, @ComplexDimensionUnit int units, float size) {
             this.viewId = viewId;
             this.units = units;
             this.size = size;
         }
 
-        public TextViewSizeAction(Parcel parcel) {
+        TextViewSizeAction(Parcel parcel) {
             viewId = parcel.readInt();
             units = parcel.readInt();
             size  = parcel.readFloat();
@@ -2004,36 +2058,56 @@ public class RemoteViews implements Parcelable, Filter {
      */
     private static class LayoutParamAction extends Action {
 
-        /** Set marginEnd */
-        public static final int LAYOUT_MARGIN_END_DIMEN = 1;
-        /** Set width */
-        public static final int LAYOUT_WIDTH = 2;
-        public static final int LAYOUT_MARGIN_BOTTOM_DIMEN = 3;
-        public static final int LAYOUT_MARGIN_END = 4;
+        static final int LAYOUT_MARGIN_LEFT = MARGIN_LEFT;
+        static final int LAYOUT_MARGIN_TOP = MARGIN_TOP;
+        static final int LAYOUT_MARGIN_RIGHT = MARGIN_RIGHT;
+        static final int LAYOUT_MARGIN_BOTTOM = MARGIN_BOTTOM;
+        static final int LAYOUT_MARGIN_START = MARGIN_START;
+        static final int LAYOUT_MARGIN_END = MARGIN_END;
+        static final int LAYOUT_WIDTH = 8;
+        static final int LAYOUT_HEIGHT = 9;
 
         final int mProperty;
+        final boolean mIsDimen;
         final int mValue;
 
         /**
          * @param viewId ID of the view alter
          * @param property which layout parameter to alter
          * @param value new value of the layout parameter
+         * @param units the units of the given value
          */
-        public LayoutParamAction(int viewId, int property, int value) {
+        LayoutParamAction(@IdRes int viewId, int property, float value,
+                @ComplexDimensionUnit int units) {
             this.viewId = viewId;
             this.mProperty = property;
-            this.mValue = value;
+            this.mIsDimen = false;
+            this.mValue = TypedValue.createComplexDimension(value, units);
+        }
+
+        /**
+         * @param viewId ID of the view alter
+         * @param property which layout parameter to alter
+         * @param dimen new dimension with the value of the layout parameter
+         */
+        LayoutParamAction(@IdRes int viewId, int property, @DimenRes int dimen) {
+            this.viewId = viewId;
+            this.mProperty = property;
+            this.mIsDimen = true;
+            this.mValue = dimen;
         }
 
         public LayoutParamAction(Parcel parcel) {
             viewId = parcel.readInt();
             mProperty = parcel.readInt();
+            mIsDimen = parcel.readBoolean();
             mValue = parcel.readInt();
         }
 
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(viewId);
             dest.writeInt(mProperty);
+            dest.writeBoolean(mIsDimen);
             dest.writeInt(mValue);
         }
 
@@ -2047,26 +2121,49 @@ public class RemoteViews implements Parcelable, Filter {
             if (layoutParams == null) {
                 return;
             }
-            int value = mValue;
             switch (mProperty) {
-                case LAYOUT_MARGIN_END_DIMEN:
-                    value = resolveDimenPixelOffset(target, mValue);
-                    // fall-through
-                case LAYOUT_MARGIN_END:
-                    if (layoutParams instanceof ViewGroup.MarginLayoutParams) {
-                        ((ViewGroup.MarginLayoutParams) layoutParams).setMarginEnd(value);
+                case LAYOUT_MARGIN_LEFT:
+                    if (layoutParams instanceof MarginLayoutParams) {
+                        ((MarginLayoutParams) layoutParams).leftMargin = getPixelOffset(target);
                         target.setLayoutParams(layoutParams);
                     }
                     break;
-                case LAYOUT_MARGIN_BOTTOM_DIMEN:
-                    if (layoutParams instanceof ViewGroup.MarginLayoutParams) {
-                        int resolved = resolveDimenPixelOffset(target, mValue);
-                        ((ViewGroup.MarginLayoutParams) layoutParams).bottomMargin = resolved;
+                case LAYOUT_MARGIN_TOP:
+                    if (layoutParams instanceof MarginLayoutParams) {
+                        ((MarginLayoutParams) layoutParams).topMargin = getPixelOffset(target);
+                        target.setLayoutParams(layoutParams);
+                    }
+                    break;
+                case LAYOUT_MARGIN_RIGHT:
+                    if (layoutParams instanceof MarginLayoutParams) {
+                        ((MarginLayoutParams) layoutParams).rightMargin = getPixelOffset(target);
+                        target.setLayoutParams(layoutParams);
+                    }
+                    break;
+                case LAYOUT_MARGIN_BOTTOM:
+                    if (layoutParams instanceof MarginLayoutParams) {
+                        ((MarginLayoutParams) layoutParams).bottomMargin = getPixelOffset(target);
+                        target.setLayoutParams(layoutParams);
+                    }
+                    break;
+                case LAYOUT_MARGIN_START:
+                    if (layoutParams instanceof MarginLayoutParams) {
+                        ((MarginLayoutParams) layoutParams).setMarginStart(getPixelOffset(target));
+                        target.setLayoutParams(layoutParams);
+                    }
+                    break;
+                case LAYOUT_MARGIN_END:
+                    if (layoutParams instanceof MarginLayoutParams) {
+                        ((MarginLayoutParams) layoutParams).setMarginEnd(getPixelOffset(target));
                         target.setLayoutParams(layoutParams);
                     }
                     break;
                 case LAYOUT_WIDTH:
-                    layoutParams.width = mValue;
+                    layoutParams.width = getPixelSize(target);
+                    target.setLayoutParams(layoutParams);
+                    break;
+                case LAYOUT_HEIGHT:
+                    layoutParams.height = getPixelSize(target);
                     target.setLayoutParams(layoutParams);
                     break;
                 default:
@@ -2074,11 +2171,26 @@ public class RemoteViews implements Parcelable, Filter {
             }
         }
 
-        private static int resolveDimenPixelOffset(View target, int value) {
-            if (value == 0) {
-                return 0;
+        private int getPixelOffset(View target) {
+            if (mIsDimen) {
+                if (mValue == 0) {
+                    return 0;
+                }
+                return target.getResources().getDimensionPixelOffset(mValue);
             }
-            return target.getContext().getResources().getDimensionPixelOffset(value);
+            return TypedValue.complexToDimensionPixelOffset(mValue,
+                    target.getResources().getDisplayMetrics());
+        }
+
+        private int getPixelSize(View target) {
+            if (mIsDimen) {
+                if (mValue == 0) {
+                    return 0;
+                }
+                return target.getResources().getDimensionPixelSize(mValue);
+            }
+            return TypedValue.complexToDimensionPixelSize(mValue,
+                    target.getResources().getDisplayMetrics());
         }
 
         @Override
@@ -2512,6 +2624,7 @@ public class RemoteViews implements Parcelable, Filter {
      * @param nestedView {@link RemoteViews} that describes the child.
      */
     public void addView(int viewId, RemoteViews nestedView) {
+        // Clear all children when nested views omitted
         addAction(nestedView == null
                 ? new ViewGroupActionRemove(viewId)
                 : new ViewGroupActionAdd(viewId, nestedView));
@@ -3044,57 +3157,94 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * @hide
-     * Equivalent to calling {@link android.view.ViewGroup.MarginLayoutParams#setMarginEnd(int)}.
+     * Equivalent to calling {@link MarginLayoutParams#setMarginEnd}.
      * Only works if the {@link View#getLayoutParams()} supports margins.
-     * Hidden for now since we don't want to support this for all different layout margins yet.
      *
      * @param viewId The id of the view to change
-     * @param endMarginDimen a dimen resource to read the margin from or 0 to clear the margin.
+     * @param type The margin being set e.g. {@link #MARGIN_END}
+     * @param dimen a dimension resource to apply to the margin, or 0 to clear the margin.
+     * @hide
      */
-    public void setViewLayoutMarginEndDimen(int viewId, @DimenRes int endMarginDimen) {
-        addAction(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_MARGIN_END_DIMEN,
-                endMarginDimen));
+    public void setViewLayoutMarginDimen(@IdRes int viewId, @MarginType int type,
+            @DimenRes int dimen) {
+        addAction(new LayoutParamAction(viewId, type, dimen));
     }
 
     /**
-     * Equivalent to calling {@link android.view.ViewGroup.MarginLayoutParams#setMarginEnd(int)}.
+     * Equivalent to calling {@link MarginLayoutParams#setMarginEnd}.
      * Only works if the {@link View#getLayoutParams()} supports margins.
-     * Hidden for now since we don't want to support this for all different layout margins yet.
+     *
+     * <p>NOTE: It is recommended to use {@link TypedValue#COMPLEX_UNIT_PX} only for 0.
+     * Setting margins in pixels will behave poorly when the RemoteViews object is used on a
+     * display with a different density.
      *
      * @param viewId The id of the view to change
-     * @param endMargin a value in pixels for the end margin.
+     * @param type The margin being set e.g. {@link #MARGIN_END}
+     * @param value a value for the margin the given units.
+     * @param units The unit type of the value e.g. {@link TypedValue#COMPLEX_UNIT_DIP}
      * @hide
      */
-    public void setViewLayoutMarginEnd(int viewId, @DimenRes int endMargin) {
-        addAction(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_MARGIN_END,
-                endMargin));
+    public void setViewLayoutMargin(@IdRes int viewId, @MarginType int type, float value,
+            @ComplexDimensionUnit int units) {
+        addAction(new LayoutParamAction(viewId, type, value, units));
     }
 
     /**
-     * Equivalent to setting {@link android.view.ViewGroup.MarginLayoutParams#bottomMargin}.
+     * Equivalent to setting {@link android.view.ViewGroup.LayoutParams#width} except that you may
+     * provide the value in any dimension units.
      *
-     * @param bottomMarginDimen a dimen resource to read the margin from or 0 to clear the margin.
+     * <p>NOTE: It is recommended to use {@link TypedValue#COMPLEX_UNIT_PX} only for 0,
+     * {@link ViewGroup.LayoutParams#WRAP_CONTENT}, or {@link ViewGroup.LayoutParams#MATCH_PARENT}.
+     * Setting actual sizes in pixels will behave poorly when the RemoteViews object is used on a
+     * display with a different density.
+     *
+     * @param width Width of the view in the given units
+     * @param units The unit type of the value e.g. {@link TypedValue#COMPLEX_UNIT_DIP}
      * @hide
      */
-    public void setViewLayoutMarginBottomDimen(int viewId, @DimenRes int bottomMarginDimen) {
-        addAction(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_MARGIN_BOTTOM_DIMEN,
-                bottomMarginDimen));
+    public void setViewLayoutWidth(@IdRes int viewId, float width,
+            @ComplexDimensionUnit int units) {
+        addAction(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_WIDTH, width, units));
     }
 
     /**
-     * Equivalent to setting {@link android.view.ViewGroup.LayoutParams#width}.
+     * Equivalent to setting {@link android.view.ViewGroup.LayoutParams#width} with
+     * the result of {@link Resources#getDimensionPixelSize(int)}.
      *
-     * @param layoutWidth one of 0, MATCH_PARENT or WRAP_CONTENT. Other sizes are not allowed
-     *                    because they behave poorly when the density changes.
+     * @param widthDimen the dimension resource for the view's width
      * @hide
      */
-    public void setViewLayoutWidth(int viewId, int layoutWidth) {
-        if (layoutWidth != 0 && layoutWidth != ViewGroup.LayoutParams.MATCH_PARENT
-                && layoutWidth != ViewGroup.LayoutParams.WRAP_CONTENT) {
-            throw new IllegalArgumentException("Only supports 0, WRAP_CONTENT and MATCH_PARENT");
-        }
-        mActions.add(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_WIDTH, layoutWidth));
+    public void setViewLayoutWidthDimen(@IdRes int viewId, @DimenRes int widthDimen) {
+        addAction(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_WIDTH, widthDimen));
+    }
+
+    /**
+     * Equivalent to setting {@link android.view.ViewGroup.LayoutParams#height} except that you may
+     * provide the value in any dimension units.
+     *
+     * <p>NOTE: It is recommended to use {@link TypedValue#COMPLEX_UNIT_PX} only for 0,
+     * {@link ViewGroup.LayoutParams#WRAP_CONTENT}, or {@link ViewGroup.LayoutParams#MATCH_PARENT}.
+     * Setting actual sizes in pixels will behave poorly when the RemoteViews object is used on a
+     * display with a different density.
+     *
+     * @param height height of the view in the given units
+     * @param units The unit type of the value e.g. {@link TypedValue#COMPLEX_UNIT_DIP}
+     * @hide
+     */
+    public void setViewLayoutHeight(@IdRes int viewId, float height,
+            @ComplexDimensionUnit int units) {
+        addAction(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_HEIGHT, height, units));
+    }
+
+    /**
+     * Equivalent to setting {@link android.view.ViewGroup.LayoutParams#height} with
+     * the result of {@link Resources#getDimensionPixelSize(int)}.
+     *
+     * @param heightDimen a dimen resource to read the height from.
+     * @hide
+     */
+    public void setViewLayoutHeightDimen(@IdRes int viewId, @DimenRes int heightDimen) {
+        addAction(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_HEIGHT, heightDimen));
     }
 
     /**

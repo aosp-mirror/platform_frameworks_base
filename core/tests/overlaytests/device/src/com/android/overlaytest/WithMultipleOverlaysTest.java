@@ -22,8 +22,6 @@ import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import java.util.concurrent.Executor;
-
 @RunWith(JUnit4.class)
 @MediumTest
 public class WithMultipleOverlaysTest extends OverlayBaseTest {
@@ -33,9 +31,8 @@ public class WithMultipleOverlaysTest extends OverlayBaseTest {
 
     @BeforeClass
     public static void enableOverlay() throws Exception {
-        Executor executor = (cmd) -> new Thread(cmd).start();
-        LocalOverlayManager.setEnabledAndWait(executor, APP_OVERLAY_ONE_PKG, true);
-        LocalOverlayManager.setEnabledAndWait(executor, APP_OVERLAY_TWO_PKG, true);
-        LocalOverlayManager.setEnabledAndWait(executor, FRAMEWORK_OVERLAY_PKG, true);
+        LocalOverlayManager.toggleOverlaysAndWait(
+                new String[]{FRAMEWORK_OVERLAY_PKG, APP_OVERLAY_ONE_PKG, APP_OVERLAY_TWO_PKG},
+                new String[]{});
     }
 }

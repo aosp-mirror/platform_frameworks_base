@@ -310,7 +310,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private final LocalLog mLocalLog = new LocalLog(200);
 
-    private final LocalLog mListenLog = new LocalLog(00);
+    private final LocalLog mListenLog = new LocalLog(200);
 
     private List<PhysicalChannelConfig> mPhysicalChannelConfigs;
 
@@ -2455,7 +2455,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             pw.println("local logs:");
             pw.increaseIndent();
             mLocalLog.dump(fd, pw, args);
+            pw.decreaseIndent();
             pw.println("listen logs:");
+            pw.increaseIndent();
             mListenLog.dump(fd, pw, args);
             pw.decreaseIndent();
             pw.println("registrations: count=" + recordCount);

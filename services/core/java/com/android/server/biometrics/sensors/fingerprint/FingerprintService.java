@@ -66,10 +66,10 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.biometrics.Utils;
+import com.android.server.biometrics.sensors.BiometricServiceCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
-import com.android.server.biometrics.sensors.BiometricServiceCallback;
 import com.android.server.biometrics.sensors.fingerprint.aidl.FingerprintProvider;
 import com.android.server.biometrics.sensors.fingerprint.hidl.Fingerprint21;
 import com.android.server.biometrics.sensors.fingerprint.hidl.Fingerprint21UdfpsMock;
@@ -188,7 +188,8 @@ public class FingerprintService extends SystemService implements BiometricServic
 
         @Override // Binder call
         public void enroll(final IBinder token, final byte[] hardwareAuthToken, final int userId,
-                final IFingerprintServiceReceiver receiver, final String opPackageName) {
+                final IFingerprintServiceReceiver receiver, final String opPackageName,
+                boolean shouldLogMetrics) {
             Utils.checkPermission(getContext(), MANAGE_FINGERPRINT);
 
             final Pair<Integer, ServiceProvider> provider = getSingleProvider();
@@ -198,7 +199,7 @@ public class FingerprintService extends SystemService implements BiometricServic
             }
 
             provider.second.scheduleEnroll(provider.first, token, hardwareAuthToken, userId,
-                    receiver, opPackageName);
+                    receiver, opPackageName, shouldLogMetrics);
         }
 
         @Override // Binder call

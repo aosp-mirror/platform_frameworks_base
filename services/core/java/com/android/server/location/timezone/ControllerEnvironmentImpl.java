@@ -19,6 +19,7 @@ package com.android.server.location.timezone;
 import android.annotation.NonNull;
 
 import com.android.server.LocalServices;
+import com.android.server.timezonedetector.ConfigurationChangeListener;
 import com.android.server.timezonedetector.ConfigurationInternal;
 import com.android.server.timezonedetector.TimeZoneDetectorInternal;
 
@@ -37,6 +38,7 @@ class ControllerEnvironmentImpl extends LocationTimeZoneProviderController.Envir
 
     @NonNull private final TimeZoneDetectorInternal mTimeZoneDetectorInternal;
     @NonNull private final LocationTimeZoneProviderController mController;
+    @NonNull private final ConfigurationChangeListener mConfigurationChangeListener;
 
     ControllerEnvironmentImpl(@NonNull ThreadingDomain threadingDomain,
             @NonNull LocationTimeZoneProviderController controller) {
@@ -45,8 +47,14 @@ class ControllerEnvironmentImpl extends LocationTimeZoneProviderController.Envir
         mTimeZoneDetectorInternal = LocalServices.getService(TimeZoneDetectorInternal.class);
 
         // Listen for configuration changes.
-        mTimeZoneDetectorInternal.addConfigurationListener(
-                () -> mThreadingDomain.post(mController::onConfigChanged));
+        mConfigurationChangeListener = () -> mThreadingDomain.post(mController::onConfigChanged);
+        mTimeZoneDetectorInternal.addConfigurationListener(mConfigurationChangeListener);
+    }
+
+
+    @Override
+    void destroy() {
+        mTimeZoneDetectorInternal.removeConfigurationListener(mConfigurationChangeListener);
     }
 
     @Override

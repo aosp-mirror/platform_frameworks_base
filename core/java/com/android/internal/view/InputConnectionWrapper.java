@@ -524,6 +524,19 @@ public class InputConnectionWrapper implements InputConnection {
                 value, TAG, "commitContent()", mCancellationGroup, MAX_WAIT_TIME_MILLIS) != 0;
     }
 
+    /**
+     * See {@link InputConnection#setImeTemporarilyConsumesInput(boolean)}.
+     */
+    @AnyThread
+    public boolean setImeTemporarilyConsumesInput(boolean imeTemporarilyConsumesInput) {
+        try {
+            mIInputContext.setImeTemporarilyConsumesInput(imeTemporarilyConsumesInput);
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
     @AnyThread
     private boolean isMethodMissing(@MissingMethodFlags final int methodFlag) {
         return (mMissingMethods & methodFlag) == methodFlag;

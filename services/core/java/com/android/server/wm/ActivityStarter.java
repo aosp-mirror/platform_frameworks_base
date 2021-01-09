@@ -1618,7 +1618,8 @@ class ActivityStarter {
                     mService.getTransitionController().collectExistenceChange(r);
                 }
                 if (newTransition != null) {
-                    mService.getTransitionController().requestStartTransition(newTransition);
+                    mService.getTransitionController().requestStartTransition(newTransition,
+                            r.getTask());
                 } else {
                     // Make the collecting transition wait until this request is ready.
                     mService.getTransitionController().setReady(false);

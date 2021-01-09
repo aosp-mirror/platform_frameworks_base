@@ -2332,15 +2332,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
-            // We may be deferring layout passes at the moment, but since the client is interested
-            // in the new out values right now we need to force a layout.
-            mWindowPlacerLocked.performSurfacePlacement(true /* force */);
-
+            // Create surfaceControl before surface placement otherwise layout will be skipped
+            // (because WS.isGoneForLayout() is true when there is no surface.
             if (shouldRelayout) {
-                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "relayoutWindow: viewVisibility_1");
-
-                result = win.relayoutVisibleWindow(result, attrChanges);
-
                 try {
                     result = createSurfaceControl(outSurfaceControl, result, win, winAnimator);
                 } catch (Exception e) {
@@ -2352,6 +2346,17 @@ public class WindowManagerService extends IWindowManager.Stub
                     Binder.restoreCallingIdentity(origId);
                     return 0;
                 }
+            }
+
+            // We may be deferring layout passes at the moment, but since the client is interested
+            // in the new out values right now we need to force a layout.
+            mWindowPlacerLocked.performSurfacePlacement(true /* force */);
+
+            if (shouldRelayout) {
+                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "relayoutWindow: viewVisibility_1");
+
+                result = win.relayoutVisibleWindow(result, attrChanges);
+
                 if ((result & WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME) != 0) {
                     focusMayChange = true;
                 }

@@ -961,6 +961,11 @@ public class ControllerImplTest {
         }
 
         @Override
+        void destroy() {
+            // No-op test impl.
+        }
+
+        @Override
         ConfigurationInternal getCurrentUserConfigurationInternal() {
             return mConfigurationInternal;
         }
@@ -1024,6 +1029,7 @@ public class ControllerImplTest {
         /** Used to track historic provider states for tests. */
         private final TestState<ProviderState> mTestProviderState = new TestState<>();
         private boolean mInitialized;
+        private boolean mDestroyed;
 
         /**
          * Creates the instance.
@@ -1035,6 +1041,11 @@ public class ControllerImplTest {
         @Override
         void onInitialize() {
             mInitialized = true;
+        }
+
+        @Override
+        void onDestroy() {
+            mDestroyed = true;
         }
 
         @Override

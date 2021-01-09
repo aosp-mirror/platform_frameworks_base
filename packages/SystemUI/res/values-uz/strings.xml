@@ -353,6 +353,8 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Foydalanuvchi"</string>
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Yangi foydalanuvchi"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
+    <!-- no translation found for quick_settings_internet_label (6603068555872455463) -->
+    <skip />
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Ulanmagan"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"Tarmoq mavjud emas"</string>
     <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"Wi-Fi o‘chiq"</string>
@@ -454,9 +456,9 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Profilni ko‘rsatish"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Foydalanuvchi"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Yangi foydalanuvchi"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Mehmon hisobi o‘chirib tashlansinmi?"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"Mehmon seansi yakunlansinmi?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Ushbu seansdagi barcha ilovalar va ma’lumotlar o‘chirib tashlanadi."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Olib tashlash"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"Seansni yakunlash"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Xush kelibsiz, mehmon!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Seansni davom ettirmoqchimisiz?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Boshidan boshlansin"</string>
@@ -493,7 +495,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Bildirishnomalar"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Suhbatlar"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Barcha sokin bildirishnomalarni tozalash"</string>
-    <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Bezovta qilinmasin rejimida bildirishnomalar pauza qilingan"</string>
+    <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Bezovta qilinmasin rejimida bildirishnomalar pauza qilinadi"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Boshlash"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Bildirishnomalar yo‘q"</string>
     <string name="profile_owned_footer" msgid="2756770645766113964">"Profil kuzatilishi mumkin"</string>

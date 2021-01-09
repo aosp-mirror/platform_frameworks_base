@@ -27,8 +27,6 @@ import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ComponentName;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -36,22 +34,14 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
-import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
-import android.provider.MediaStore;
-import android.provider.MediaStore.MediaColumns;
 import android.text.TextUtils;
-import android.text.format.DateUtils;
 import android.util.Log;
-
-import androidx.exifinterface.media.ExifInterface;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
@@ -59,20 +49,11 @@ import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ShareTransition;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -99,14 +80,17 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
     private final boolean mSmartActionsEnabled;
     private final Random mRandom = new Random();
     private final Supplier<ShareTransition> mSharedElementTransition;
+    private final ImageExporter mImageExporter;
 
-    SaveImageInBackgroundTask(Context context, ScreenshotSmartActions screenshotSmartActions,
+    SaveImageInBackgroundTask(Context context, ImageExporter exporter,
+            ScreenshotSmartActions screenshotSmartActions,
             ScreenshotController.SaveImageInBackgroundData data,
             Supplier<ShareTransition> sharedElementTransition) {
         mContext = context;
         mScreenshotSmartActions = screenshotSmartActions;
         mImageData = new ScreenshotController.SavedImageData();
         mSharedElementTransition = sharedElementTransition;
+        mImageExporter = exporter;
 
         // Prepare all the output metadata
         mParams = data;
@@ -139,89 +123,16 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         }
         Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 
-        ContentResolver resolver = mContext.getContentResolver();
         Bitmap image = mParams.image;
 
         try {
-            // Save the screenshot to the MediaStore
-            final ContentValues values = new ContentValues();
-            values.put(MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES
-                    + File.separator + Environment.DIRECTORY_SCREENSHOTS);
-            values.put(MediaColumns.DISPLAY_NAME, mImageFileName);
-            values.put(MediaColumns.MIME_TYPE, "image/png");
-            values.put(MediaColumns.DATE_ADDED, mImageTime / 1000);
-            values.put(MediaColumns.DATE_MODIFIED, mImageTime / 1000);
-            values.put(MediaColumns.DATE_EXPIRES, (mImageTime + DateUtils.DAY_IN_MILLIS) / 1000);
-            values.put(MediaColumns.IS_PENDING, 1);
-
-            final Uri uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+            // Call synchronously here since already on a background thread.
+            Uri uri = mImageExporter.export(Runnable::run, image).get();
 
             CompletableFuture<List<Notification.Action>> smartActionsFuture =
                     mScreenshotSmartActions.getSmartActionsFuture(
                             mScreenshotId, uri, image, mSmartActionsProvider,
                             mSmartActionsEnabled, getUserHandle(mContext));
-
-            try {
-                // First, write the actual data for our screenshot
-                try (OutputStream out = resolver.openOutputStream(uri)) {
-                    if (DEBUG_STORAGE) {
-                        Log.d(TAG, "Compressing PNG:"
-                                + " w=" + image.getWidth() + " h=" + image.getHeight());
-                    }
-                    if (!image.compress(Bitmap.CompressFormat.PNG, 100, out)) {
-                        if (DEBUG_STORAGE) {
-                            Log.d(TAG, "Bitmap.compress returned false");
-                        }
-                        throw new IOException("Failed to compress");
-                    }
-                    if (DEBUG_STORAGE) {
-                        Log.d(TAG, "Done compressing PNG");
-                    }
-                }
-
-                // Next, write metadata to help index the screenshot
-                try (ParcelFileDescriptor pfd = resolver.openFile(uri, "rw", null)) {
-                    final ExifInterface exif = new ExifInterface(pfd.getFileDescriptor());
-
-                    exif.setAttribute(ExifInterface.TAG_SOFTWARE,
-                            "Android " + Build.DISPLAY);
-
-                    exif.setAttribute(ExifInterface.TAG_IMAGE_WIDTH,
-                            Integer.toString(image.getWidth()));
-                    exif.setAttribute(ExifInterface.TAG_IMAGE_LENGTH,
-                            Integer.toString(image.getHeight()));
-
-                    final ZonedDateTime time = ZonedDateTime.ofInstant(
-                            Instant.ofEpochMilli(mImageTime), ZoneId.systemDefault());
-                    exif.setAttribute(ExifInterface.TAG_DATETIME_ORIGINAL,
-                            DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss").format(time));
-                    exif.setAttribute(ExifInterface.TAG_SUBSEC_TIME_ORIGINAL,
-                            DateTimeFormatter.ofPattern("SSS").format(time));
-
-                    if (Objects.equals(time.getOffset(), ZoneOffset.UTC)) {
-                        exif.setAttribute(ExifInterface.TAG_OFFSET_TIME_ORIGINAL, "+00:00");
-                    } else {
-                        exif.setAttribute(ExifInterface.TAG_OFFSET_TIME_ORIGINAL,
-                                DateTimeFormatter.ofPattern("XXX").format(time));
-                    }
-                    if (DEBUG_STORAGE) {
-                        Log.d(TAG, "Writing EXIF metadata");
-                    }
-                    exif.saveAttributes();
-                }
-
-                // Everything went well above, publish it!
-                values.clear();
-                values.put(MediaColumns.IS_PENDING, 0);
-                values.putNull(MediaColumns.DATE_EXPIRES);
-                resolver.update(uri, values, null, null);
-                if (DEBUG_STORAGE) {
-                    Log.d(TAG, "Completed writing to ContentManager");
-                }
-            } catch (Exception e) {
-                resolver.delete(uri, null);
-                throw e;
-            }
 
             List<Notification.Action> smartActions = new ArrayList<>();
             if (mSmartActionsEnabled) {

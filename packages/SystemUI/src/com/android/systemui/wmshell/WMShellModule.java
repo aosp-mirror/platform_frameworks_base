@@ -23,6 +23,7 @@ import android.view.IWindowManager;
 import com.android.systemui.dagger.WMSingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.Transitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.apppairs.AppPairsController;
@@ -35,6 +36,8 @@ import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
@@ -46,8 +49,6 @@ import com.android.wm.shell.pip.phone.PhonePipMenuController;
 import com.android.wm.shell.pip.phone.PipAppOpsListener;
 import com.android.wm.shell.pip.phone.PipController;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -76,10 +77,11 @@ public class WMShellModule {
             DisplayController displayController, SystemWindows systemWindows,
             DisplayImeController displayImeController, @Main Handler handler,
             TransactionPool transactionPool, ShellTaskOrganizer shellTaskOrganizer,
-            SyncTransactionQueue syncQueue, TaskStackListenerImpl taskStackListener) {
+            SyncTransactionQueue syncQueue, TaskStackListenerImpl taskStackListener,
+            Transitions transitions) {
         return new LegacySplitScreenController(context, displayController, systemWindows,
                 displayImeController, handler, transactionPool, shellTaskOrganizer, syncQueue,
-                taskStackListener);
+                taskStackListener, transitions);
     }
 
     @WMSingleton

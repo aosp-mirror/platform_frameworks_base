@@ -26,6 +26,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 
+import android.app.admin.DevicePolicySafetyChecker;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.RecoverySystem;
@@ -34,6 +35,8 @@ import android.os.storage.StorageManager;
 import android.platform.test.annotations.Presubmit;
 import android.service.persistentdata.PersistentDataBlockManager;
 import android.util.Log;
+
+import com.android.internal.os.IResultReceiver;
 
 import org.junit.After;
 import org.junit.Before;
@@ -58,6 +61,7 @@ public final class FactoryResetterTest {
     private @Mock StorageManager mSm;
     private @Mock PersistentDataBlockManager mPdbm;
     private @Mock UserManager mUm;
+    private @Mock DevicePolicySafetyChecker mSafetyChecker;
 
     @Before
     public void startSession() {
@@ -69,7 +73,7 @@ public final class FactoryResetterTest {
 
         when(mContext.getSystemService(any(Class.class))).thenAnswer((inv) -> {
             Log.d(TAG, "Mocking " + inv);
-            Class serviceClass = (Class) inv.getArguments()[0];
+            Class<?> serviceClass = (Class<?>) inv.getArguments()[0];
             if (serviceClass.equals(PersistentDataBlockManager.class)) return mPdbm;
             if (serviceClass.equals(StorageManager.class)) return mSm;
             if (serviceClass.equals(UserManager.class)) return mUm;
@@ -181,6 +185,44 @@ public final class FactoryResetterTest {
         allowFactoryReset();
 
         FactoryResetter.newBuilder(mContext)
+                .setReason(REASON)
+                .setForce(true)
+                .setShutdown(true)
+                .setWipeEuicc(true)
+                .setWipeAdoptableStorage(true)
+                .setWipeFactoryResetProtection(true)
+                .build().factoryReset();
+
+        verifyWipeAdoptableStorageCalled();
+        verifyWipeFactoryResetProtectionCalled();
+        verifyRebootWipeUserDataAllArgsCalled();
+    }
+
+    @Test
+    public void testFactoryReset_minimumArgs_safetyChecker_neverReplied() throws Exception {
+        allowFactoryReset();
+
+        FactoryResetter.newBuilder(mContext).setSafetyChecker(mSafetyChecker).build()
+                .factoryReset();
+
+        verifyWipeAdoptableStorageNotCalled();
+        verifyWipeFactoryResetProtectionNotCalled();
+        verifyRebootWipeUserDataNotCalled();
+    }
+
+    @Test
+    public void testFactoryReset_allArgs_safetyChecker_replied() throws Exception {
+        allowFactoryReset();
+
+        doAnswer((inv) -> {
+            Log.d(TAG, "Mocking " + inv);
+            IResultReceiver receiver = (IResultReceiver) inv.getArguments()[0];
+            receiver.send(0, null);
+            return null;
+        }).when(mSafetyChecker).onFactoryReset(any());
+
+        FactoryResetter.newBuilder(mContext)
+                .setSafetyChecker(mSafetyChecker)
                 .setReason(REASON)
                 .setForce(true)
                 .setShutdown(true)

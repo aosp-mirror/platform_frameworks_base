@@ -21,6 +21,8 @@ import android.annotation.NonNull;
 
 import com.android.internal.util.Preconditions;
 
+import java.util.concurrent.Callable;
+
 /**
  * A class that can be used to enforce / indicate a set of components that need to share threading
  * behavior such as a shared lock object and a common thread, with async execution support.
@@ -58,7 +60,7 @@ abstract class ThreadingDomain {
      * being used within a set of components, a lot of races can be avoided.
      */
     void assertCurrentThread() {
-        Preconditions.checkArgument(Thread.currentThread() == getThread());
+        Preconditions.checkState(Thread.currentThread() == getThread());
     }
 
     /**
@@ -66,13 +68,44 @@ abstract class ThreadingDomain {
      * Generally useful for documenting expectations in the code and avoiding deadlocks.
      */
     void assertNotCurrentThread() {
-        Preconditions.checkArgument(Thread.currentThread() != getThread());
+        Preconditions.checkState(Thread.currentThread() != getThread());
     }
 
     /**
      * Execute the supplied runnable on the threading domain's thread.
      */
     abstract void post(@NonNull Runnable runnable);
+
+    /**
+     * Executes the supplied runnable and waits for up to the duration specified for it to be
+     * executed. This is only intended for use by test and/or shell command code as it consumes
+     * multiple threads and could lead to deadlocks.
+     *
+     * <p>An {@link IllegalStateException} will be thrown if calling this method would cause a
+     * deadlock, e.g. if it is called using the threading domain's own thread.
+     */
+    final void postAndWait(@NonNull Runnable runnable, @DurationMillisLong long durationMillis) {
+        try {
+            postAndWait(() -> {
+                runnable.run();
+                return null;
+            }, durationMillis);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Executes the supplied callable and waits for up to the duration specified for it to be
+     * executed. This is only intended for use by test and/or shell command code as it consumes
+     * multiple threads and could lead to deadlocks.
+     *
+     * <p>An {@link IllegalStateException} will be thrown if calling this method would cause a
+     * deadlock, e.g. if it is called using the threading domain's own thread.
+     */
+    abstract <V> V postAndWait(
+            @NonNull Callable<V> callable, @DurationMillisLong long durationMillis)
+            throws Exception;
 
     /**
      * Execute the supplied runnable on the threading domain's thread with a delay.

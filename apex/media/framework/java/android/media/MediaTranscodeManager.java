@@ -109,6 +109,9 @@ public final class MediaTranscodeManager {
     /** Interval between trying to reconnect to the service. */
     private static final int INTERVAL_CONNECT_SERVICE_RETRY_MS = 40;
 
+    /** Default bpp(bits-per-pixel) to use for calculating default bitrate. */
+    private static final float BPP = 0.25f;
+
     /**
      * Default transcoding type.
      * @hide
@@ -1002,12 +1005,90 @@ public final class MediaTranscodeManager {
                 if (!shouldTranscode()) {
                     return null;
                 }
-                // TODO(hkuang): Only modified the video codec type, and use fixed bitrate for now.
-                // May switch to transcoding profile when it's available.
+
                 MediaFormat videoTrackFormat = new MediaFormat(mSrcVideoFormatHint);
                 videoTrackFormat.setString(MediaFormat.KEY_MIME, MediaFormat.MIMETYPE_VIDEO_AVC);
-                videoTrackFormat.setInteger(MediaFormat.KEY_BIT_RATE, BIT_RATE);
+
+                int width = mSrcVideoFormatHint.getInteger(MediaFormat.KEY_WIDTH);
+                int height = mSrcVideoFormatHint.getInteger(MediaFormat.KEY_HEIGHT);
+                if (width <= 0 || height <= 0) {
+                    throw new IllegalArgumentException(
+                            "Source Width and height must be larger than 0");
+                }
+
+                // TODO(hkuang): Remove the hardcoded frameRate after b/176940364 is fixed.
+                float frameRate = (float) 30.0;
+                /*mSrcVideoFormatHint.getFloat(MediaFormat.KEY_FRAME_RATE, frameRate);
+                if (frameRate <= 0) {
+                    throw new IllegalArgumentException(
+                            "frameRate must be larger than 0");
+                }*/
+
+                int bitrate = getAVCBitrate(width, height, frameRate);
+                videoTrackFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitrate);
                 return videoTrackFormat;
+            }
+
+            /**
+             * Generate a default bitrate with the fixed bpp(bits-per-pixel) 0.25.
+             * This maps to:
+             * 1080P@30fps -> 16Mbps
+             * 1080P@60fps-> 32Mbps
+             * 4K@30fps -> 62Mbps
+             */
+            private static int getDefaultBitrate(int width, int height, float frameRate) {
+                return (int) (width * height * frameRate * BPP);
+            }
+
+            /**
+             * Query the bitrate from CamcorderProfile. If there are two profiles that match the
+             * width/height/framerate, we will use the higher one to get better quality.
+             * Return default bitrate if could not find any match profile.
+             */
+            private static int getAVCBitrate(int width, int height, float frameRate) {
+                int bitrate = -1;
+                int[] cameraIds = {0, 1};
+
+                // Profiles ordered in decreasing order of preference.
+                int[] preferQualities = {
+                        CamcorderProfile.QUALITY_2160P,
+                        CamcorderProfile.QUALITY_1080P,
+                        CamcorderProfile.QUALITY_720P,
+                        CamcorderProfile.QUALITY_480P,
+                        CamcorderProfile.QUALITY_LOW,
+                };
+
+                for (int cameraId : cameraIds) {
+                    for (int quality : preferQualities) {
+                        // Check if camera id has profile for the quality level.
+                        if (!CamcorderProfile.hasProfile(cameraId, quality)) {
+                            continue;
+                        }
+                        CamcorderProfile profile = CamcorderProfile.get(cameraId, quality);
+                        // Check the width/height/framerate/codec, also consider portrait case.
+                        if (((width == profile.videoFrameWidth
+                                && height == profile.videoFrameHeight)
+                                || (height == profile.videoFrameWidth
+                                && width == profile.videoFrameHeight))
+                                && (int) frameRate == profile.videoFrameRate
+                                && profile.videoCodec == MediaRecorder.VideoEncoder.H264) {
+                            if (bitrate < profile.videoBitRate) {
+                                bitrate = profile.videoBitRate;
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                if (bitrate == -1) {
+                    Log.w(TAG, "Failed to find CamcorderProfile for w: " + width + "h: " + height
+                            + " fps: "
+                            + frameRate);
+                    bitrate = getDefaultBitrate(width, height, frameRate);
+                }
+                Log.d(TAG, "Using bitrate " + bitrate + " for " + width + " " + height + " "
+                        + frameRate);
+                return bitrate;
             }
 
             /**

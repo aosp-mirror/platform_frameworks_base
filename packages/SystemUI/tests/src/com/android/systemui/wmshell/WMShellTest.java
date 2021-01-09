@@ -35,12 +35,12 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedGestureHandler;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import org.junit.Before;
 import org.junit.Test;

@@ -110,6 +110,11 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
         }
     }
 
+    @Override
+    void onDestroy() {
+        mServiceWatcher.unregister();
+    }
+
     private boolean register() {
         boolean resolves = mServiceWatcher.checkServiceResolves();
         if (resolves) {
@@ -192,6 +197,7 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
     @Override
     public void dump(@NonNull IndentingPrintWriter ipw, @Nullable String[] args) {
         synchronized (mSharedLock) {
+            ipw.println("{RealLocationTimeZoneProviderProxy}");
             ipw.println("mRequest=" + mRequest);
             mServiceWatcher.dump(null, ipw, args);
         }

@@ -20,7 +20,6 @@ import static com.android.server.location.gnss.GnssManagerService.D;
 import static com.android.server.location.gnss.GnssManagerService.TAG;
 
 import android.app.AppOpsManager;
-import android.location.GnssCapabilities;
 import android.location.GnssStatus;
 import android.location.IGnssStatusListener;
 import android.location.util.identity.CallerIdentity;
@@ -109,10 +108,6 @@ public class GnssStatusProvider extends
     public void onHalRestarted() {
         resetService();
     }
-
-    @Override
-    public void onCapabilitiesChanged(GnssCapabilities oldCapabilities,
-            GnssCapabilities newCapabilities) {}
 
     @Override
     public void onReportStatus(@GnssNative.StatusCallbacks.GnssStatusValue int gnssStatus) {

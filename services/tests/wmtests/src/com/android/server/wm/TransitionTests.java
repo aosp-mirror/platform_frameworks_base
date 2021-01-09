@@ -19,14 +19,21 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
+import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
+import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
+
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
+import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -70,6 +77,7 @@ public class TransitionTests extends WindowTestsBase {
         changes.put(oldTask, new Transition.ChangeInfo(true /* vis */, true /* exChg */));
         changes.put(opening, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
         changes.put(closing, new Transition.ChangeInfo(true /* vis */, true /* exChg */));
+        fillChangeMap(changes, newTask);
         // End states.
         closing.mVisibleRequested = false;
         opening.mVisibleRequested = true;
@@ -134,6 +142,7 @@ public class TransitionTests extends WindowTestsBase {
         changes.put(opening, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
         changes.put(opening2, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
         changes.put(closing, new Transition.ChangeInfo(true /* vis */, true /* exChg */));
+        fillChangeMap(changes, newTask);
         // End states.
         closing.mVisibleRequested = false;
         opening.mVisibleRequested = true;
@@ -182,6 +191,8 @@ public class TransitionTests extends WindowTestsBase {
         changes.put(tda, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
         changes.put(showing, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
         changes.put(showing2, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
+        fillChangeMap(changes, tda);
+
         // End states.
         showing.mVisibleRequested = true;
         showing2.mVisibleRequested = true;
@@ -278,6 +289,65 @@ public class TransitionTests extends WindowTestsBase {
         for (int i = 0; i < taskCount; ++i) {
             assertEquals(tasks[taskCount - i - 1].mRemoteToken.toWindowContainerToken(),
                     info.getChanges().get(i).getContainer());
+        }
+    }
+
+    @Test
+    public void testCreateInfo_wallpaper() {
+        final Transition transition = createTestTransition(TRANSIT_OLD_TASK_OPEN);
+        // pick some number with a high enough chance of being out-of-order when added to set.
+        final int taskCount = 4;
+        final int showWallpaperTask = 2;
+
+        final Task[] tasks = new Task[taskCount];
+        for (int i = 0; i < taskCount; ++i) {
+            // Each add goes on top, so at the end of this, task[9] should be on top
+            tasks[i] = createTaskStackOnDisplay(WINDOWING_MODE_FULLSCREEN,
+                    ACTIVITY_TYPE_STANDARD, mDisplayContent);
+            final ActivityRecord act = createActivityRecord(tasks[i]);
+            // alternate so that the transition doesn't get promoted to the display area
+            act.mVisibleRequested = (i % 2) == 0; // starts invisible
+            if (i == showWallpaperTask) {
+                doReturn(true).when(act).showWallpaper();
+            }
+        }
+
+        final WallpaperWindowToken wallpaperWindowToken = spy(new WallpaperWindowToken(mWm,
+                mock(IBinder.class), true, mDisplayContent, true /* ownerCanManageAppTokens */));
+        final WindowState wallpaperWindow = createWindow(null, TYPE_WALLPAPER, wallpaperWindowToken,
+                "wallpaperWindow");
+        wallpaperWindow.mWallpaperVisible = false;
+        transition.collect(wallpaperWindowToken);
+        wallpaperWindow.mWallpaperVisible = true;
+        wallpaperWindow.mHasSurface = true;
+
+        // doesn't matter which order collected since participants is a set
+        for (int i = 0; i < taskCount; ++i) {
+            transition.collectExistenceChange(tasks[i]);
+            final ActivityRecord act = tasks[i].getTopMostActivity();
+            transition.collect(act);
+            tasks[i].getTopMostActivity().mVisibleRequested = (i % 2) != 0;
+        }
+
+        ArraySet<WindowContainer> targets = Transition.calculateTargets(
+                transition.mParticipants, transition.mChanges);
+        TransitionInfo info = Transition.calculateTransitionInfo(
+                0, 0, targets, transition.mChanges);
+        // verify that wallpaper is at bottom
+        assertEquals(taskCount + 1, info.getChanges().size());
+        // The wallpaper is not organized, so it won't have a token; however, it will be marked
+        // as IS_WALLPAPER
+        assertEquals(FLAG_IS_WALLPAPER,
+                info.getChanges().get(info.getChanges().size() - 1).getFlags());
+        assertEquals(FLAG_SHOW_WALLPAPER, info.getChange(
+                tasks[showWallpaperTask].mRemoteToken.toWindowContainerToken()).getFlags());
+    }
+
+    /** Fill the change map with all the parents of top. Change maps are usually fully populated */
+    private static void fillChangeMap(ArrayMap<WindowContainer, Transition.ChangeInfo> changes,
+            WindowContainer top) {
+        for (WindowContainer curr = top.getParent(); curr != null; curr = curr.getParent()) {
+            changes.put(curr, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
         }
     }
 }

@@ -891,6 +891,12 @@ public class MockContext extends Context {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
+    @Override
+    public Context createTokenContext(@NonNull IBinder token, @NonNull Display display) {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public boolean isDeviceProtectedStorage() {
         throw new UnsupportedOperationException();

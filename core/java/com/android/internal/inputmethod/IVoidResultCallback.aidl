@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-/** @hide */
-package android.telephony.data;
+package com.android.internal.inputmethod;
 
-parcelable ApnThrottleStatus;
+import com.android.internal.inputmethod.ThrowableHolder;
+
+oneway interface IVoidResultCallback {
+    void onResult();
+    void onError(in ThrowableHolder exception);
+}

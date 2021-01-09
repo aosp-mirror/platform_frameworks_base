@@ -96,13 +96,13 @@ public class ScrollCaptureClientTest extends SysuiTestCase {
 
         Connection conn = mConnectionConsumer.getValue();
 
-        conn.start(5, mSessionConsumer);
+        conn.start(mSessionConsumer);
         verify(mSessionConsumer, timeout(100)).accept(any(Session.class));
 
         Session session = mSessionConsumer.getValue();
-        Rect request = new Rect(0, 0, session.getMaxTileWidth(), session.getMaxTileHeight());
+        Rect request = new Rect(0, 0, session.getPageWidth(), session.getTileHeight());
 
-        session.requestTile(request, mResultConsumer);
+        session.requestTile(0, mResultConsumer);
         verify(mResultConsumer, timeout(100)).accept(any(CaptureResult.class));
 
         CaptureResult result = mResultConsumer.getValue();

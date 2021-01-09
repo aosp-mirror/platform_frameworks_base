@@ -1463,8 +1463,7 @@ public final class FileUtils {
             Uri uri = MediaStore.scanFile(resolver, realFile);
             if (uri != null) {
                 Bundle opts = new Bundle();
-                // TODO(b/158465539): Use API constant
-                opts.putBoolean("android.provider.extra.ACCEPT_ORIGINAL_MEDIA_FORMAT", true);
+                opts.putBoolean(MediaStore.EXTRA_ACCEPT_ORIGINAL_MEDIA_FORMAT, true);
                 AssetFileDescriptor afd = resolver.openTypedAssetFileDescriptor(uri, "*/*", opts);
                 Log.i(TAG, "Changed to modern format dataSource for: " + realFile);
                 return afd.getFileDescriptor();

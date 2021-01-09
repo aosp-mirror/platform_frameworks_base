@@ -20,6 +20,7 @@ import static com.android.server.connectivity.NetworkNotificationManager.Notific
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -39,6 +40,7 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.os.UserHandle;
 import android.telephony.TelephonyManager;
+import android.util.DisplayMetrics;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -46,7 +48,9 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.R;
 import com.android.server.connectivity.NetworkNotificationManager.NotificationType;
 
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.AdditionalAnswers;
@@ -82,6 +86,7 @@ public class NetworkNotificationManagerTest {
 
     @Mock Context mCtx;
     @Mock Resources mResources;
+    @Mock DisplayMetrics mDisplayMetrics;
     @Mock PackageManager mPm;
     @Mock TelephonyManager mTelephonyManager;
     @Mock NotificationManager mNotificationManager;
@@ -93,6 +98,17 @@ public class NetworkNotificationManagerTest {
 
     NetworkNotificationManager mManager;
 
+
+    @BeforeClass
+    public static void setUpClass() {
+        Notification.DevFlags.sForceDefaults = true;
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+        Notification.DevFlags.sForceDefaults = false;
+    }
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -103,6 +119,7 @@ public class NetworkNotificationManagerTest {
         mCellNai.networkInfo = mNetworkInfo;
         mVpnNai.networkCapabilities = VPN_CAPABILITIES;
         mVpnNai.networkInfo = mNetworkInfo;
+        mDisplayMetrics.density = 2.275f;
         doReturn(true).when(mVpnNai).isVPN();
         when(mCtx.getResources()).thenReturn(mResources);
         when(mCtx.getPackageManager()).thenReturn(mPm);
@@ -114,6 +131,7 @@ public class NetworkNotificationManagerTest {
                 .thenReturn(mNotificationManager);
         when(mNetworkInfo.getExtraInfo()).thenReturn("extra");
         when(mResources.getColor(anyInt(), any())).thenReturn(0xFF607D8B);
+        when(mResources.getDisplayMetrics()).thenReturn(mDisplayMetrics);
 
         mManager = new NetworkNotificationManager(mCtx, mTelephonyManager);
     }
@@ -136,15 +154,15 @@ public class NetworkNotificationManagerTest {
     public void testTitleOfPrivateDnsBroken() {
         // Test the title of mobile data.
         verifyTitleByNetwork(100, mCellNai, R.string.mobile_no_internet);
-        reset(mResources);
+        clearInvocations(mResources);
 
         // Test the title of wifi.
         verifyTitleByNetwork(101, mWifiNai, R.string.wifi_no_internet);
-        reset(mResources);
+        clearInvocations(mResources);
 
         // Test the title of other networks.
         verifyTitleByNetwork(102, mVpnNai, R.string.other_networks_no_internet);
-        reset(mResources);
+        clearInvocations(mResources);
     }
 
     @Test

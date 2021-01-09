@@ -5726,6 +5726,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mAttrs.type == TYPE_APPLICATION_STARTING;
     }
 
+    @Override
+    boolean showWallpaper() {
+        if (!isVisibleRequested()
+                // in multi-window mode, wallpaper is always visible at the back and not tied to
+                // the app (there is no wallpaper target).
+                || inMultiWindowMode()) {
+            return false;
+        }
+        return (mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0;
+    }
+
     /**
      * When using the two WindowOrganizer sync-primitives (BoundsChangeTransaction, BLASTSync)
      * it can be a little difficult to predict whether your change will actually trigger redrawing
