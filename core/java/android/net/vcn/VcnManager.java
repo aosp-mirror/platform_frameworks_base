@@ -101,7 +101,7 @@ public final class VcnManager {
         requireNonNull(config, "config was null");
 
         try {
-            mService.setVcnConfig(subscriptionGroup, config);
+            mService.setVcnConfig(subscriptionGroup, config, mContext.getOpPackageName());
         } catch (ServiceSpecificException e) {
             throw new IOException(e);
         } catch (RemoteException e) {
