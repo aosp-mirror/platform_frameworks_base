@@ -1331,7 +1331,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         }
 
         mLastFocusedRootTask = prevFocusedTask;
-        EventLogTags.writeWmFocusedStack(mRootWindowContainer.mCurrentUser,
+        EventLogTags.writeWmFocusedRootTask(mRootWindowContainer.mCurrentUser,
                 mDisplayContent.mDisplayId,
                 currentFocusedTask == null ? -1 : currentFocusedTask.getRootTaskId(),
                 mLastFocusedRootTask == null ? -1 : mLastFocusedRootTask.getRootTaskId(),

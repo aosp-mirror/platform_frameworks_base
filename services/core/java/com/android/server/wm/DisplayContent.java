@@ -3022,7 +3022,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     public void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         super.dump(pw, prefix, dumpAll);
         pw.print(prefix);
-        pw.println("Display: mDisplayId=" + mDisplayId + " stacks=" + getRootTaskCount());
+        pw.println("Display: mDisplayId=" + mDisplayId + " rootTasks=" + getRootTaskCount());
         final String subPrefix = "  " + prefix;
         pw.print(subPrefix); pw.print("init="); pw.print(mInitialDisplayWidth); pw.print("x");
         pw.print(mInitialDisplayHeight); pw.print(" "); pw.print(mInitialDisplayDensity);
@@ -3105,30 +3105,31 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         pw.println();
 
-        // Dump stack references
-        final Task homeStack = getDefaultTaskDisplayArea().getRootHomeTask();
-        if (homeStack != null) {
-            pw.println(prefix + "homeStack=" + homeStack.getName());
+        // Dump root task references
+        final Task rootHomeTask = getDefaultTaskDisplayArea().getRootHomeTask();
+        if (rootHomeTask != null) {
+            pw.println(prefix + "rootHomeTask=" + rootHomeTask.getName());
         }
-        final Task pinnedStack = getDefaultTaskDisplayArea().getRootPinnedTask();
-        if (pinnedStack != null) {
-            pw.println(prefix + "pinnedStack=" + pinnedStack.getName());
+        final Task rootPinnedTask = getDefaultTaskDisplayArea().getRootPinnedTask();
+        if (rootPinnedTask != null) {
+            pw.println(prefix + "rootPinnedTask=" + rootPinnedTask.getName());
         }
-        final Task splitScreenPrimaryStack = getDefaultTaskDisplayArea()
+        final Task rootSplitScreenPrimaryTask = getDefaultTaskDisplayArea()
                 .getRootSplitScreenPrimaryTask();
-        if (splitScreenPrimaryStack != null) {
-            pw.println(prefix + "splitScreenPrimaryStack=" + splitScreenPrimaryStack.getName());
+        if (rootSplitScreenPrimaryTask != null) {
+            pw.println(
+                    prefix + "rootSplitScreenPrimaryTask=" + rootSplitScreenPrimaryTask.getName());
         }
         // TODO: Support recents on non-default task containers
-        final Task recentsStack = getDefaultTaskDisplayArea().getRootTask(
+        final Task rootRecentsTask = getDefaultTaskDisplayArea().getRootTask(
                 WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_RECENTS);
-        if (recentsStack != null) {
-            pw.println(prefix + "recentsStack=" + recentsStack.getName());
+        if (rootRecentsTask != null) {
+            pw.println(prefix + "rootRecentsTask=" + rootRecentsTask.getName());
         }
-        final Task dreamStack =
+        final Task rootDreamTask =
                 getRootTask(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_DREAM);
-        if (dreamStack != null) {
-            pw.println(prefix + "dreamStack=" + dreamStack.getName());
+        if (rootDreamTask != null) {
+            pw.println(prefix + "rootDreamTask=" + rootDreamTask.getName());
         }
 
         pw.println();
@@ -3148,7 +3149,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     @Override
     public String toString() {
-        return "Display " + mDisplayId + " info=" + mDisplayInfo + " stacks=" + mChildren;
+        return "Display " + mDisplayId + " info=" + mDisplayInfo + " rootTasks=" + mChildren;
     }
 
     String getName() {
