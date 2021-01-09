@@ -5098,7 +5098,9 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     void onPictureInPictureParamsChanged() {
-        dispatchTaskInfoChangedIfNeeded(true /* force */);
+        if (inPinnedWindowingMode()) {
+            dispatchTaskInfoChangedIfNeeded(true /* force */);
+        }
     }
 
     /**
