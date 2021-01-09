@@ -446,7 +446,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"പൂർണ്ണമായി ചാർജാവാൻ <xliff:g id="TIME">%1$s</xliff:g> ശേഷിക്കുന്നു"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - പൂർണ്ണമായി ചാർജാവാൻ <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - ബാറ്ററി നില ഒപ്റ്റിമൈസ് ചെയ്യുന്നു"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - ബാറ്ററിയുടെ ആയുസിനായി ഒപ്റ്റിമൈസ് ചെയ്യുന്നു"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"അജ്ഞാതം"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ചാർജ് ചെയ്യുന്നു"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"അതിവേഗ ചാർജിംഗ്"</string>
