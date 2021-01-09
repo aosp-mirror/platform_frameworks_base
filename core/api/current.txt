@@ -39795,6 +39795,8 @@ package android.telephony {
     method public static boolean isConfigForIdentifiedCarrier(android.os.PersistableBundle);
     method public void notifyConfigChangedForSubId(int);
     field public static final String ACTION_CARRIER_CONFIG_CHANGED = "android.telephony.action.CARRIER_CONFIG_CHANGED";
+    field public static final int CROSS_SIM_SPN_FORMAT_CARRIER_NAME_ONLY = 0; // 0x0
+    field public static final int CROSS_SIM_SPN_FORMAT_CARRIER_NAME_WITH_BRANDING = 1; // 0x1
     field public static final int DATA_CYCLE_THRESHOLD_DISABLED = -2; // 0xfffffffe
     field public static final int DATA_CYCLE_USE_PLATFORM_DEFAULT = -1; // 0xffffffff
     field public static final String ENABLE_EAP_METHOD_PREFIX_BOOL = "enable_eap_method_prefix_bool";
@@ -39836,6 +39838,7 @@ package android.telephony {
     field public static final String KEY_CARRIER_CERTIFICATE_STRING_ARRAY = "carrier_certificate_string_array";
     field public static final String KEY_CARRIER_CONFIG_APPLIED_BOOL = "carrier_config_applied_bool";
     field public static final String KEY_CARRIER_CONFIG_VERSION_STRING = "carrier_config_version_string";
+    field public static final String KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL = "carrier_cross_sim_ims_available_bool";
     field public static final String KEY_CARRIER_DATA_CALL_PERMANENT_FAILURE_STRINGS = "carrier_data_call_permanent_failure_strings";
     field public static final String KEY_CARRIER_DEFAULT_ACTIONS_ON_DCFAILURE_STRING_ARRAY = "carrier_default_actions_on_dcfailure_string_array";
     field public static final String KEY_CARRIER_DEFAULT_ACTIONS_ON_DEFAULT_NETWORK_AVAILABLE = "carrier_default_actions_on_default_network_available_string_array";
@@ -39887,6 +39890,7 @@ package android.telephony {
     field public static final String KEY_CONFIG_PLANS_PACKAGE_OVERRIDE_STRING = "config_plans_package_override_string";
     field public static final String KEY_CONFIG_TELEPHONY_USE_OWN_NUMBER_FOR_VOICEMAIL_BOOL = "config_telephony_use_own_number_for_voicemail_bool";
     field public static final String KEY_CONFIG_WIFI_DISABLE_IN_ECBM = "config_wifi_disable_in_ecbm";
+    field public static final String KEY_CROSS_SIM_SPN_FORMAT_INT = "cross_sim_spn_format_int";
     field public static final String KEY_CSP_ENABLED_BOOL = "csp_enabled_bool";
     field public static final String KEY_DATA_LIMIT_NOTIFICATION_BOOL = "data_limit_notification_bool";
     field public static final String KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG = "data_limit_threshold_bytes_long";
