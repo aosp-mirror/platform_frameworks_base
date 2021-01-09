@@ -22,6 +22,7 @@
 #include "FrontendClient.h"
 
 using ::aidl::android::media::tv::tuner::TunerFrontendSettings;
+using ::android::hardware::tv::tuner::V1_1::Constant;
 
 namespace android {
 
@@ -99,6 +100,96 @@ Result FrontendClient::stopTune() {
     return Result::INVALID_STATE;
 }
 
+Result FrontendClient::scan(const FrontendSettings& settings, FrontendScanType type,
+        const FrontendSettingsExt1_1& settingsExt1_1) {
+    if (mTunerFrontend != NULL) {
+        // TODO: parse hidl settings to aidl settings
+        // TODO: aidl frontend settings to include Tuner HAL 1.1 settings
+        TunerFrontendSettings settings;
+        // TODO: handle error message.
+        mTunerFrontend->scan(settings, (int)type);
+        return Result::SUCCESS;
+    }
+
+    Result result;
+    if (mFrontend_1_1 != NULL) {
+        result = mFrontend_1_1->scan_1_1(settings, type, settingsExt1_1);
+        return result;
+    }
+
+    if (mFrontend != NULL) {
+        result = mFrontend->scan(settings, type);
+        return result;
+    }
+
+    return Result::INVALID_STATE;
+}
+
+Result FrontendClient::stopScan() {
+    if (mTunerFrontend != NULL) {
+        // TODO: handle error message.
+        mTunerFrontend->stopScan();
+        return Result::SUCCESS;
+    }
+
+    if (mFrontend != NULL) {
+        Result result = mFrontend->stopScan();
+        return result;
+    }
+
+    return Result::INVALID_STATE;
+}
+
+vector<FrontendStatus> FrontendClient::getStatus(vector<FrontendStatusType> statusTypes) {
+    vector<FrontendStatus> status;
+
+    if (mTunerFrontend != NULL) {
+        // TODO: handle error message.
+        /*status = mTunerFrontend->getStatus(statusTypes);
+        return status;*/
+    }
+
+    if (mFrontend != NULL && statusTypes.size() > 0) {
+        Result res;
+        mFrontend->getStatus(statusTypes,
+                [&](Result r, const hidl_vec<FrontendStatus>& s) {
+                    res = r;
+                    status = s;
+                });
+        if (res != Result::SUCCESS) {
+            status.clear();
+            return status;
+        }
+    }
+
+    return status;
+}
+vector<FrontendStatusExt1_1> FrontendClient::getStatusExtended_1_1(
+        vector<FrontendStatusTypeExt1_1> statusTypes) {
+    vector<FrontendStatusExt1_1> status;
+
+    if (mTunerFrontend != NULL) {
+        // TODO: handle error message.
+        /*status = mTunerFrontend->getStatusExtended_1_1(statusTypes);
+        return status;*/
+    }
+
+    if (mFrontend_1_1 != NULL && statusTypes.size() > 0) {
+        Result res;
+        mFrontend_1_1->getStatusExt1_1(statusTypes,
+            [&](Result r, const hidl_vec<FrontendStatusExt1_1>& s) {
+                res = r;
+                status = s;
+            });
+        if (res != Result::SUCCESS) {
+            status.clear();
+            return status;
+        }
+    }
+
+    return status;
+}
+
 Result FrontendClient::setLnb(sp<LnbClient> lnbClient) {
     if (mTunerFrontend != NULL) {
         // TODO: handle error message.
@@ -109,6 +200,59 @@ Result FrontendClient::setLnb(sp<LnbClient> lnbClient) {
     if (mFrontend != NULL) {
         Result result = mFrontend->setLnb(lnbClient->getId());
         return result;
+    }
+
+    return Result::INVALID_STATE;
+}
+
+Result FrontendClient::setLna(bool bEnable) {
+    if (mTunerFrontend != NULL) {
+        // TODO: handle error message.
+        /*mTunerFrontend->setLna(bEnable);
+        return Result::SUCCESS;*/
+    }
+
+    if (mFrontend != NULL) {
+        Result result = mFrontend->setLna(bEnable);
+        return result;
+    }
+
+    return Result::INVALID_STATE;
+}
+
+int FrontendClient::linkCiCamToFrontend(int ciCamId) {
+    int ltsId = (int)Constant::INVALID_LTS_ID;
+
+    if (mTunerFrontend != NULL) {
+        // TODO: handle error message.
+        /*mTunerFrontend->linkCiCamToFrontend(ciCamId, ltsId);
+        return ltsId;*/
+    }
+
+    if (mFrontend_1_1 != NULL) {
+        Result res;
+        mFrontend_1_1->linkCiCam(static_cast<uint32_t>(ciCamId),
+            [&](Result r, uint32_t id) {
+                res = r;
+                ltsId = id;
+            });
+        if (res != Result::SUCCESS) {
+            return (int)Constant::INVALID_LTS_ID;
+        }
+    }
+
+    return ltsId;
+}
+
+Result FrontendClient::unlinkCiCamToFrontend(int ciCamId) {
+    if (mTunerFrontend != NULL) {
+        // TODO: handle error message.
+        /*mTunerFrontend->unlinkCiCamToFrontend(ciCamId);
+        return Result::SUCCESS;*/
+    }
+
+    if (mFrontend_1_1 != NULL) {
+        return mFrontend_1_1->unlinkCiCam(static_cast<uint32_t>(ciCamId));
     }
 
     return Result::INVALID_STATE;

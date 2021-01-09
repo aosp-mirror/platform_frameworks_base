@@ -38,13 +38,18 @@ using ::android::hardware::tv::tuner::V1_0::FrontendInfo;
 using ::android::hardware::tv::tuner::V1_0::FrontendEventType;
 using ::android::hardware::tv::tuner::V1_0::FrontendScanMessage;
 using ::android::hardware::tv::tuner::V1_0::FrontendScanMessageType;
+using ::android::hardware::tv::tuner::V1_0::FrontendScanType;
 using ::android::hardware::tv::tuner::V1_0::FrontendSettings;
+using ::android::hardware::tv::tuner::V1_0::FrontendStatus;
+using ::android::hardware::tv::tuner::V1_0::FrontendStatusType;
 using ::android::hardware::tv::tuner::V1_0::IFrontend;
 using ::android::hardware::tv::tuner::V1_0::Result;
 
 using ::android::hardware::tv::tuner::V1_1::FrontendScanMessageExt1_1;
 using ::android::hardware::tv::tuner::V1_1::FrontendScanMessageTypeExt1_1;
 using ::android::hardware::tv::tuner::V1_1::FrontendSettingsExt1_1;
+using ::android::hardware::tv::tuner::V1_1::FrontendStatusExt1_1;
+using ::android::hardware::tv::tuner::V1_1::FrontendStatusTypeExt1_1;
 using ::android::hardware::tv::tuner::V1_1::IFrontendCallback;
 
 using namespace std;
@@ -128,9 +133,48 @@ public:
     Result stopTune();
 
     /**
+     * Scan the frontend to use the settings given.
+     */
+    Result scan(const FrontendSettings& settings, FrontendScanType frontendScanType,
+            const FrontendSettingsExt1_1& settingsExt1_1);
+
+    /**
+     * Stop the previous scanning.
+     */
+    Result stopScan();
+
+    /**
+     * Gets the statuses of the frontend.
+     */
+    vector<FrontendStatus> getStatus(vector<FrontendStatusType> statusTypes);
+
+    /**
+     * Gets the 1.1 extended statuses of the frontend.
+     */
+    vector<FrontendStatusExt1_1> getStatusExtended_1_1(
+            vector<FrontendStatusTypeExt1_1> statusTypes);
+
+    /**
      * Sets Low-Noise Block downconverter (LNB) for satellite frontend.
      */
     Result setLnb(sp<LnbClient> lnbClient);
+
+    /**
+     * Enable or Disable Low Noise Amplifier (LNA).
+     */
+    Result setLna(bool bEnable);
+
+    /**
+     * Link Frontend to the cicam with given id.
+     *
+     * @return lts id
+     */
+    int linkCiCamToFrontend(int ciCamId);
+
+    /**
+     * Unink Frontend to the cicam with given id.
+     */
+    Result unlinkCiCamToFrontend(int ciCamId);
 
     /**
      * Close Frontend.
