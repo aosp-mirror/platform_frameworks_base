@@ -43,20 +43,18 @@ void RawPrintVisitor::visit(const IdmapHeader& header) {
   print(header.GetFulfilledPolicies(), "fulfilled policies: %s",
         PoliciesToDebugString(header.GetFulfilledPolicies()).c_str());
   print(static_cast<uint32_t>(header.GetEnforceOverlayable()), "enforce overlayable");
-  print(header.GetTargetPath().to_string(), kIdmapStringLength, "target path");
-  print(header.GetOverlayPath().to_string(), kIdmapStringLength, "overlay path");
+  print(header.GetTargetPath(), true /* print_value */, "target path");
+  print(header.GetOverlayPath(), true /* print_value */, "overlay path");
+  print(header.GetOverlayName(), true /* print_value */, "overlay name");
+  print(header.GetDebugInfo(), false /* print_value */, "debug info");
 
-  uint32_t debug_info_size = header.GetDebugInfo().size();
-  print(debug_info_size, "debug info size");
-  print("...", debug_info_size + CalculatePadding(debug_info_size), "debug info");
-
-  auto target_apk_ = ApkAssets::Load(header.GetTargetPath().to_string());
+  auto target_apk_ = ApkAssets::Load(header.GetTargetPath());
   if (target_apk_) {
     target_am_.SetApkAssets({target_apk_.get()});
     apk_assets_.push_back(std::move(target_apk_));
   }
 
-  auto overlay_apk_ = ApkAssets::Load(header.GetOverlayPath().to_string());
+  auto overlay_apk_ = ApkAssets::Load(header.GetOverlayPath());
   if (overlay_apk_) {
     overlay_am_.SetApkAssets({overlay_apk_.get()});
     apk_assets_.push_back(std::move(overlay_apk_));
@@ -100,7 +98,7 @@ void RawPrintVisitor::visit(const IdmapData& data ATTRIBUTE_UNUSED) {
       print(target_entry.target_id, "target id");
     }
 
-    print("...", sizeof(Res_value::size) + sizeof(Res_value::res0), "padding");
+    pad(sizeof(Res_value::size) + sizeof(Res_value::res0));
 
     print(target_entry.value.data_type, "type: %s",
           utils::DataTypeToString(target_entry.value.data_type).data());
@@ -143,15 +141,13 @@ void RawPrintVisitor::visit(const IdmapData& data ATTRIBUTE_UNUSED) {
     }
   }
 
-  uint32_t string_pool_size = data.GetStringPoolData().size();
-  print(string_pool_size, "string pool size");
-  print("...", string_pool_size + CalculatePadding(string_pool_size), "string pool");
+  print(data.GetStringPoolData(), false /* print_value */, "string pool");
 }
 
 void RawPrintVisitor::visit(const IdmapData::Header& header) {
   print(header.GetTargetPackageId(), "target package id");
   print(header.GetOverlayPackageId(), "overlay package id");
-  print("...", sizeof(Idmap_data_header::p0), "padding");
+  align();
   print(header.GetTargetEntryCount(), "target entry count");
   print(header.GetTargetInlineEntryCount(), "target inline entry count");
   print(header.GetOverlayEntryCount(), "overlay entry count");
@@ -168,7 +164,6 @@ void RawPrintVisitor::print(uint8_t value, const char* fmt, ...) {
 
   stream_ << base::StringPrintf("%08zx:       %02x", offset_, value) << "  " << comment
           << std::endl;
-
   offset_ += sizeof(uint8_t);
 }
 
@@ -181,7 +176,6 @@ void RawPrintVisitor::print(uint16_t value, const char* fmt, ...) {
   va_end(ap);
 
   stream_ << base::StringPrintf("%08zx:     %04x", offset_, value) << "  " << comment << std::endl;
-
   offset_ += sizeof(uint16_t);
 }
 
@@ -194,22 +188,35 @@ void RawPrintVisitor::print(uint32_t value, const char* fmt, ...) {
   va_end(ap);
 
   stream_ << base::StringPrintf("%08zx: %08x", offset_, value) << "  " << comment << std::endl;
-
   offset_ += sizeof(uint32_t);
 }
 
 // NOLINTNEXTLINE(cert-dcl50-cpp)
-void RawPrintVisitor::print(const std::string& value, size_t encoded_size, const char* fmt, ...) {
+void RawPrintVisitor::print(const std::string& value, bool print_value, const char* fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   std::string comment;
   base::StringAppendV(&comment, fmt, ap);
   va_end(ap);
 
-  stream_ << base::StringPrintf("%08zx: ", offset_) << "........  " << comment << ": " << value
-          << std::endl;
+  stream_ << base::StringPrintf("%08zx: %08x", offset_, (uint32_t)value.size()) << "  " << comment
+          << " size" << std::endl;
+  offset_ += sizeof(uint32_t);
 
-  offset_ += encoded_size;
+  stream_ << base::StringPrintf("%08zx: ", offset_) << "........  " << comment;
+  offset_ += value.size() + CalculatePadding(value.size());
+
+  if (print_value) {
+    stream_ << ": " << value;
+  }
+  stream_ << std::endl;
 }
 
+void RawPrintVisitor::align() {
+  offset_ += CalculatePadding(offset_);
+}
+
+void RawPrintVisitor::pad(size_t padding) {
+  offset_ += padding;
+}
 }  // namespace android::idmap2
