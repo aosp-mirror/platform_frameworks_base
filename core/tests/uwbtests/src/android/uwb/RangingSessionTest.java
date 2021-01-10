@@ -19,9 +19,11 @@ package android.uwb;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -34,6 +36,8 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.util.concurrent.Executor;
 
@@ -43,47 +47,48 @@ import java.util.concurrent.Executor;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class RangingSessionTest {
-    private static final IUwbAdapter ADAPTER = mock(IUwbAdapter.class);
     private static final Executor EXECUTOR = UwbTestUtils.getExecutor();
     private static final PersistableBundle PARAMS = new PersistableBundle();
-    private static final @RangingSession.Callback.CloseReason int CLOSE_REASON =
-            RangingSession.Callback.CLOSE_REASON_LOCAL_GENERIC_ERROR;
+    private static final @RangingSession.Callback.Reason int REASON =
+            RangingSession.Callback.REASON_GENERIC_ERROR;
 
     @Test
-    public void testOnRangingStarted_OnOpenSuccessCalled() {
+    public void testOnRangingOpened_OnOpenSuccessCalled() {
         SessionHandle handle = new SessionHandle(123);
         RangingSession.Callback callback = mock(RangingSession.Callback.class);
-        RangingSession session = new RangingSession(EXECUTOR, callback, ADAPTER, handle);
+        IUwbAdapter adapter = mock(IUwbAdapter.class);
+        RangingSession session = new RangingSession(EXECUTOR, callback, adapter, handle);
         verifyOpenState(session, false);
 
-        session.onRangingStarted(PARAMS);
+        session.onRangingOpened();
         verifyOpenState(session, true);
 
         // Verify that the onOpenSuccess callback was invoked
-        verify(callback, times(1)).onOpenSuccess(eq(session), any());
+        verify(callback, times(1)).onOpened(eq(session));
         verify(callback, times(0)).onClosed(anyInt(), any());
     }
 
     @Test
-    public void testOnRangingStarted_CannotOpenClosedSession() {
+    public void testOnRangingOpened_CannotOpenClosedSession() {
         SessionHandle handle = new SessionHandle(123);
         RangingSession.Callback callback = mock(RangingSession.Callback.class);
-        RangingSession session = new RangingSession(EXECUTOR, callback, ADAPTER, handle);
+        IUwbAdapter adapter = mock(IUwbAdapter.class);
+        RangingSession session = new RangingSession(EXECUTOR, callback, adapter, handle);
 
-        session.onRangingStarted(PARAMS);
+        session.onRangingOpened();
         verifyOpenState(session, true);
-        verify(callback, times(1)).onOpenSuccess(eq(session), any());
+        verify(callback, times(1)).onOpened(eq(session));
         verify(callback, times(0)).onClosed(anyInt(), any());
 
-        session.onRangingClosed(CLOSE_REASON, PARAMS);
+        session.onRangingClosed(REASON, PARAMS);
         verifyOpenState(session, false);
-        verify(callback, times(1)).onOpenSuccess(eq(session), any());
+        verify(callback, times(1)).onOpened(eq(session));
         verify(callback, times(1)).onClosed(anyInt(), any());
 
         // Now invoke the ranging started callback and ensure the session remains closed
-        session.onRangingStarted(PARAMS);
+        session.onRangingOpened();
         verifyOpenState(session, false);
-        verify(callback, times(1)).onOpenSuccess(eq(session), any());
+        verify(callback, times(1)).onOpened(eq(session));
         verify(callback, times(1)).onClosed(anyInt(), any());
     }
 
@@ -91,27 +96,30 @@ public class RangingSessionTest {
     public void testOnRangingClosed_OnClosedCalledWhenSessionNotOpen() {
         SessionHandle handle = new SessionHandle(123);
         RangingSession.Callback callback = mock(RangingSession.Callback.class);
-        RangingSession session = new RangingSession(EXECUTOR, callback, ADAPTER, handle);
+        IUwbAdapter adapter = mock(IUwbAdapter.class);
+        RangingSession session = new RangingSession(EXECUTOR, callback, adapter, handle);
         verifyOpenState(session, false);
 
-        session.onRangingClosed(CLOSE_REASON, PARAMS);
+        session.onRangingClosed(REASON, PARAMS);
         verifyOpenState(session, false);
 
         // Verify that the onOpenSuccess callback was invoked
-        verify(callback, times(0)).onOpenSuccess(eq(session), any());
+        verify(callback, times(0)).onOpened(eq(session));
         verify(callback, times(1)).onClosed(anyInt(), any());
     }
 
-    @Test public void testOnRangingClosed_OnClosedCalled() {
+    @Test
+    public void testOnRangingClosed_OnClosedCalled() {
         SessionHandle handle = new SessionHandle(123);
         RangingSession.Callback callback = mock(RangingSession.Callback.class);
-        RangingSession session = new RangingSession(EXECUTOR, callback, ADAPTER, handle);
+        IUwbAdapter adapter = mock(IUwbAdapter.class);
+        RangingSession session = new RangingSession(EXECUTOR, callback, adapter, handle);
         session.onRangingStarted(PARAMS);
-        session.onRangingClosed(CLOSE_REASON, PARAMS);
+        session.onRangingClosed(REASON, PARAMS);
         verify(callback, times(1)).onClosed(anyInt(), any());
 
         verifyOpenState(session, false);
-        session.onRangingClosed(CLOSE_REASON, PARAMS);
+        session.onRangingClosed(REASON, PARAMS);
         verify(callback, times(2)).onClosed(anyInt(), any());
     }
 
@@ -119,7 +127,8 @@ public class RangingSessionTest {
     public void testOnRangingResult_OnReportReceivedCalled() {
         SessionHandle handle = new SessionHandle(123);
         RangingSession.Callback callback = mock(RangingSession.Callback.class);
-        RangingSession session = new RangingSession(EXECUTOR, callback, ADAPTER, handle);
+        IUwbAdapter adapter = mock(IUwbAdapter.class);
+        RangingSession session = new RangingSession(EXECUTOR, callback, adapter, handle);
         verifyOpenState(session, false);
 
         session.onRangingStarted(PARAMS);
@@ -131,11 +140,83 @@ public class RangingSessionTest {
     }
 
     @Test
-    public void testClose() throws RemoteException {
+    public void testStart_CannotStartIfAlreadyStarted() throws RemoteException {
         SessionHandle handle = new SessionHandle(123);
         RangingSession.Callback callback = mock(RangingSession.Callback.class);
-        RangingSession session = new RangingSession(EXECUTOR, callback, ADAPTER, handle);
+        IUwbAdapter adapter = mock(IUwbAdapter.class);
+        RangingSession session = new RangingSession(EXECUTOR, callback, adapter, handle);
+        doAnswer(new StartAnswer(session)).when(adapter).startRanging(any(), any());
+        session.onRangingOpened();
+
+        session.start(PARAMS);
+        verify(callback, times(1)).onStarted(any());
+
+        // Calling start again should throw an illegal state
+        verifyThrowIllegalState(() -> session.start(PARAMS));
+        verify(callback, times(1)).onStarted(any());
+    }
+
+    @Test
+    public void testStop_CannotStopIfAlreadyStopped() throws RemoteException {
+        SessionHandle handle = new SessionHandle(123);
+        RangingSession.Callback callback = mock(RangingSession.Callback.class);
+        IUwbAdapter adapter = mock(IUwbAdapter.class);
+        RangingSession session = new RangingSession(EXECUTOR, callback, adapter, handle);
+        doAnswer(new StartAnswer(session)).when(adapter).startRanging(any(), any());
+        doAnswer(new StopAnswer(session)).when(adapter).stopRanging(any());
+        session.onRangingOpened();
+        session.start(PARAMS);
+
+        verifyNoThrowIllegalState(session::stop);
+        verify(callback, times(1)).onStopped();
+
+        // Calling stop again should throw an illegal state
+        verifyThrowIllegalState(session::stop);
+        verify(callback, times(1)).onStopped();
+    }
+
+    @Test
+    public void testReconfigure_OnlyWhenOpened() throws RemoteException {
+        SessionHandle handle = new SessionHandle(123);
+        RangingSession.Callback callback = mock(RangingSession.Callback.class);
+        IUwbAdapter adapter = mock(IUwbAdapter.class);
+        RangingSession session = new RangingSession(EXECUTOR, callback, adapter, handle);
+        doAnswer(new StartAnswer(session)).when(adapter).startRanging(any(), any());
+        doAnswer(new ReconfigureAnswer(session)).when(adapter).reconfigureRanging(any(), any());
+
+        verifyThrowIllegalState(() -> session.reconfigure(PARAMS));
+        verify(callback, times(0)).onReconfigured(any());
+        verifyOpenState(session, false);
+
+        session.onRangingOpened();
+        verifyNoThrowIllegalState(() -> session.reconfigure(PARAMS));
+        verify(callback, times(1)).onReconfigured(any());
+        verifyOpenState(session, true);
+
         session.onRangingStarted(PARAMS);
+        verifyNoThrowIllegalState(() -> session.reconfigure(PARAMS));
+        verify(callback, times(2)).onReconfigured(any());
+        verifyOpenState(session, true);
+
+        session.onRangingStopped();
+        verifyNoThrowIllegalState(() -> session.reconfigure(PARAMS));
+        verify(callback, times(3)).onReconfigured(any());
+        verifyOpenState(session, true);
+
+
+        session.onRangingClosed(REASON, PARAMS);
+        verifyThrowIllegalState(() -> session.reconfigure(PARAMS));
+        verify(callback, times(3)).onReconfigured(any());
+        verifyOpenState(session, false);
+    }
+
+    @Test
+    public void testClose_NoCallbackUntilInvoked() throws RemoteException {
+        SessionHandle handle = new SessionHandle(123);
+        RangingSession.Callback callback = mock(RangingSession.Callback.class);
+        IUwbAdapter adapter = mock(IUwbAdapter.class);
+        RangingSession session = new RangingSession(EXECUTOR, callback, adapter, handle);
+        session.onRangingOpened();
 
         // Calling close multiple times should invoke closeRanging until the session receives
         // the onClosed callback.
@@ -143,7 +224,7 @@ public class RangingSessionTest {
         for (int i = 1; i <= totalCallsBeforeOnRangingClosed; i++) {
             session.close();
             verifyOpenState(session, true);
-            verify(ADAPTER, times(i)).closeRanging(handle);
+            verify(adapter, times(i)).closeRanging(handle);
             verify(callback, times(0)).onClosed(anyInt(), any());
         }
 
@@ -151,18 +232,47 @@ public class RangingSessionTest {
         // the session's close.
         final int totalCallsAfterOnRangingClosed = 2;
         for (int i = 1; i <= totalCallsAfterOnRangingClosed; i++) {
-            session.onRangingClosed(CLOSE_REASON, PARAMS);
+            session.onRangingClosed(REASON, PARAMS);
             verifyOpenState(session, false);
-            verify(ADAPTER, times(totalCallsBeforeOnRangingClosed)).closeRanging(handle);
+            verify(adapter, times(totalCallsBeforeOnRangingClosed)).closeRanging(handle);
             verify(callback, times(i)).onClosed(anyInt(), any());
         }
+    }
+
+    @Test
+    public void testClose_OnClosedCalled() throws RemoteException {
+        SessionHandle handle = new SessionHandle(123);
+        RangingSession.Callback callback = mock(RangingSession.Callback.class);
+        IUwbAdapter adapter = mock(IUwbAdapter.class);
+        RangingSession session = new RangingSession(EXECUTOR, callback, adapter, handle);
+        doAnswer(new CloseAnswer(session)).when(adapter).closeRanging(any());
+        session.onRangingOpened();
+
+        session.close();
+        verify(callback, times(1)).onClosed(anyInt(), any());
+    }
+
+    @Test
+    public void testClose_CannotInteractFurther() throws RemoteException {
+        SessionHandle handle = new SessionHandle(123);
+        RangingSession.Callback callback = mock(RangingSession.Callback.class);
+        IUwbAdapter adapter = mock(IUwbAdapter.class);
+        RangingSession session = new RangingSession(EXECUTOR, callback, adapter, handle);
+        doAnswer(new CloseAnswer(session)).when(adapter).closeRanging(any());
+        session.close();
+
+        verifyThrowIllegalState(() -> session.start(PARAMS));
+        verifyThrowIllegalState(() -> session.reconfigure(PARAMS));
+        verifyThrowIllegalState(() -> session.stop());
+        verifyNoThrowIllegalState(() -> session.close());
     }
 
     @Test
     public void testOnRangingResult_OnReportReceivedCalledWhenOpen() {
         SessionHandle handle = new SessionHandle(123);
         RangingSession.Callback callback = mock(RangingSession.Callback.class);
-        RangingSession session = new RangingSession(EXECUTOR, callback, ADAPTER, handle);
+        IUwbAdapter adapter = mock(IUwbAdapter.class);
+        RangingSession session = new RangingSession(EXECUTOR, callback, adapter, handle);
 
         assertFalse(session.isOpen());
         session.onRangingStarted(PARAMS);
@@ -178,7 +288,8 @@ public class RangingSessionTest {
     public void testOnRangingResult_OnReportReceivedNotCalledWhenNotOpen() {
         SessionHandle handle = new SessionHandle(123);
         RangingSession.Callback callback = mock(RangingSession.Callback.class);
-        RangingSession session = new RangingSession(EXECUTOR, callback, ADAPTER, handle);
+        IUwbAdapter adapter = mock(IUwbAdapter.class);
+        RangingSession session = new RangingSession(EXECUTOR, callback, adapter, handle);
 
         assertFalse(session.isOpen());
 
@@ -190,5 +301,78 @@ public class RangingSessionTest {
 
     private void verifyOpenState(RangingSession session, boolean expected) {
         assertEquals(expected, session.isOpen());
+    }
+
+    private void verifyThrowIllegalState(Runnable runnable) {
+        try {
+            runnable.run();
+            fail();
+        } catch (IllegalStateException e) {
+            // Pass
+        }
+    }
+
+    private void verifyNoThrowIllegalState(Runnable runnable) {
+        try {
+            runnable.run();
+        } catch (IllegalStateException e) {
+            fail();
+        }
+    }
+
+    abstract class AdapterAnswer implements Answer {
+        protected RangingSession mSession;
+
+        protected AdapterAnswer(RangingSession session) {
+            mSession = session;
+        }
+    }
+
+    class StartAnswer extends AdapterAnswer {
+        StartAnswer(RangingSession session) {
+            super(session);
+        }
+
+        @Override
+        public Object answer(InvocationOnMock invocation) {
+            mSession.onRangingStarted(PARAMS);
+            return null;
+        }
+    }
+
+    class ReconfigureAnswer extends AdapterAnswer {
+        ReconfigureAnswer(RangingSession session) {
+            super(session);
+        }
+
+        @Override
+        public Object answer(InvocationOnMock invocation) {
+            mSession.onRangingReconfigured(PARAMS);
+            return null;
+        }
+    }
+
+    class StopAnswer extends AdapterAnswer {
+        StopAnswer(RangingSession session) {
+            super(session);
+        }
+
+        @Override
+        public Object answer(InvocationOnMock invocation) {
+            mSession.onRangingStopped();
+            return null;
+        }
+    }
+
+    class CloseAnswer extends AdapterAnswer {
+        CloseAnswer(RangingSession session) {
+            super(session);
+        }
+
+        @Override
+        public Object answer(InvocationOnMock invocation) {
+            mSession.onRangingClosed(REASON, PARAMS);
+            return null;
+        }
     }
 }

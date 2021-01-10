@@ -26,6 +26,8 @@ import static android.location.LocationManager.FUSED_PROVIDER;
 import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
 import static android.location.LocationRequest.LOW_POWER_EXCEPTIONS;
+import static android.location.provider.LocationProviderBase.ACTION_FUSED_PROVIDER;
+import static android.location.provider.LocationProviderBase.ACTION_NETWORK_PROVIDER;
 
 import static com.android.server.location.LocationPermissions.PERMISSION_COARSE;
 import static com.android.server.location.LocationPermissions.PERMISSION_FINE;
@@ -64,7 +66,7 @@ import android.location.LocationManagerInternal;
 import android.location.LocationProvider;
 import android.location.LocationRequest;
 import android.location.LocationTime;
-import android.location.ProviderProperties;
+import android.location.provider.ProviderProperties;
 import android.location.util.identity.CallerIdentity;
 import android.os.Binder;
 import android.os.Bundle;
@@ -213,11 +215,6 @@ public class LocationManagerService extends ILocationManager.Stub {
     public static final String TAG = "LocationManagerService";
     public static final boolean D = Log.isLoggable(TAG, Log.DEBUG);
 
-    private static final String NETWORK_LOCATION_SERVICE_ACTION =
-            "com.android.location.service.v3.NetworkLocationProvider";
-    private static final String FUSED_LOCATION_SERVICE_ACTION =
-            "com.android.location.service.FusedLocationProvider";
-
     private static final String ATTRIBUTION_TAG = "LocationService";
 
     private final Object mLock = new Object();
@@ -339,7 +336,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         // provider has unfortunate hard dependencies on the network provider
         ProxyLocationProvider networkProvider = ProxyLocationProvider.create(
                 mContext,
-                NETWORK_LOCATION_SERVICE_ACTION,
+                ACTION_NETWORK_PROVIDER,
                 com.android.internal.R.bool.config_enableNetworkLocationOverlay,
                 com.android.internal.R.string.config_networkLocationProviderPackageName);
         if (networkProvider != null) {
@@ -352,13 +349,13 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         // ensure that a fused provider exists which will work in direct boot
         Preconditions.checkState(!mContext.getPackageManager().queryIntentServicesAsUser(
-                new Intent(FUSED_LOCATION_SERVICE_ACTION),
+                new Intent(ACTION_FUSED_PROVIDER),
                 MATCH_DIRECT_BOOT_AWARE | MATCH_SYSTEM_ONLY, UserHandle.USER_SYSTEM).isEmpty(),
                 "Unable to find a direct boot aware fused location provider");
 
         ProxyLocationProvider fusedProvider = ProxyLocationProvider.create(
                 mContext,
-                FUSED_LOCATION_SERVICE_ACTION,
+                ACTION_FUSED_PROVIDER,
                 com.android.internal.R.bool.config_enableFusedLocationOverlay,
                 com.android.internal.R.string.config_fusedLocationProviderPackageName);
         if (fusedProvider != null) {
@@ -410,16 +407,17 @@ public class LocationManagerService extends ILocationManager.Stub {
         for (String testProviderString : testProviderStrings) {
             String[] fragments = testProviderString.split(",");
             String name = fragments[0].trim();
-            ProviderProperties properties = new ProviderProperties(
-                    Boolean.parseBoolean(fragments[1]) /* requiresNetwork */,
-                    Boolean.parseBoolean(fragments[2]) /* requiresSatellite */,
-                    Boolean.parseBoolean(fragments[3]) /* requiresCell */,
-                    Boolean.parseBoolean(fragments[4]) /* hasMonetaryCost */,
-                    Boolean.parseBoolean(fragments[5]) /* supportsAltitude */,
-                    Boolean.parseBoolean(fragments[6]) /* supportsSpeed */,
-                    Boolean.parseBoolean(fragments[7]) /* supportsBearing */,
-                    Integer.parseInt(fragments[8]) /* powerUsage */,
-                    Integer.parseInt(fragments[9]) /* accuracy */);
+            ProviderProperties properties = new ProviderProperties.Builder()
+                    .setHasNetworkRequirement(Boolean.parseBoolean(fragments[1]))
+                    .setHasSatelliteRequirement(Boolean.parseBoolean(fragments[2]))
+                    .setHasCellRequirement(Boolean.parseBoolean(fragments[3]))
+                    .setHasMonetaryCost(Boolean.parseBoolean(fragments[4]))
+                    .setHasAltitudeSupport(Boolean.parseBoolean(fragments[5]))
+                    .setHasSpeedSupport(Boolean.parseBoolean(fragments[6]))
+                    .setHasBearingSupport(Boolean.parseBoolean(fragments[7]))
+                    .setPowerUsage(Integer.parseInt(fragments[8]))
+                    .setAccuracy(Integer.parseInt(fragments[9]))
+                    .build();
             getOrAddLocationProviderManager(name).setMockProvider(
                     new MockLocationProvider(properties, CallerIdentity.fromContext(mContext)));
         }

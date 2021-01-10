@@ -45,7 +45,6 @@ import android.graphics.PixelFormat;
 import android.graphics.PointF;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -68,6 +67,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.FloatingContentCoordinator;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.pip.PinnedStackListenerForwarder;
 
 import java.io.FileDescriptor;
@@ -106,7 +106,6 @@ public class BubbleController implements Bubbles {
     private final FloatingContentCoordinator mFloatingContentCoordinator;
     private final BubbleDataRepository mDataRepository;
     private BubbleLogger mLogger;
-    private final Handler mMainHandler;
     private BubbleData mBubbleData;
     private View mBubbleScrim;
     @Nullable private BubbleStackView mStackView;
@@ -138,7 +137,7 @@ public class BubbleController implements Bubbles {
     private WindowManager mWindowManager;
 
     // Used to post to main UI thread
-    private Handler mHandler = new Handler();
+    private final ShellExecutor mMainExecutor;
 
     /** LayoutParams used to add the BubbleStackView to the window manager. */
     private WindowManager.LayoutParams mWmLayoutParams;
@@ -186,15 +185,15 @@ public class BubbleController implements Bubbles {
             WindowManagerShellWrapper windowManagerShellWrapper,
             LauncherApps launcherApps,
             UiEventLogger uiEventLogger,
-            Handler mainHandler,
-            ShellTaskOrganizer organizer) {
+            ShellTaskOrganizer organizer,
+            ShellExecutor mainExecutor) {
         BubbleLogger logger = new BubbleLogger(uiEventLogger);
         BubblePositioner positioner = new BubblePositioner(context, windowManager);
         BubbleData data = new BubbleData(context, logger, positioner);
         return new BubbleController(context, data, synchronizer, floatingContentCoordinator,
                 new BubbleDataRepository(context, launcherApps),
                 statusBarService, windowManager, windowManagerShellWrapper, launcherApps,
-                logger, mainHandler, organizer, positioner);
+                logger, organizer, positioner, mainExecutor);
     }
 
     /**
@@ -211,14 +210,14 @@ public class BubbleController implements Bubbles {
             WindowManagerShellWrapper windowManagerShellWrapper,
             LauncherApps launcherApps,
             BubbleLogger bubbleLogger,
-            Handler mainHandler,
             ShellTaskOrganizer organizer,
-            BubblePositioner positioner) {
+            BubblePositioner positioner,
+            ShellExecutor mainExecutor) {
         mContext = context;
         mFloatingContentCoordinator = floatingContentCoordinator;
         mDataRepository = dataRepository;
         mLogger = bubbleLogger;
-        mMainHandler = mainHandler;
+        mMainExecutor = mainExecutor;
 
         mBubblePositioner = positioner;
         mBubbleData = data;
@@ -241,7 +240,7 @@ public class BubbleController implements Bubbles {
                 bubble.setPendingIntentCanceled();
                 return;
             }
-            mHandler.post(() -> removeBubble(bubble.getKey(), DISMISS_INVALID_INTENT));
+            mMainExecutor.execute(() -> removeBubble(bubble.getKey(), DISMISS_INVALID_INTENT));
         });
 
         try {

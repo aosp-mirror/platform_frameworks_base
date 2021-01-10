@@ -16,15 +16,13 @@
 
 package com.android.wm.shell.common;
 
+import android.annotation.BinderThread;
 import android.annotation.NonNull;
-import android.os.Handler;
 import android.util.Slog;
 import android.view.SurfaceControl;
 import android.window.WindowContainerTransaction;
 import android.window.WindowContainerTransactionCallback;
 import android.window.WindowOrganizer;
-
-import androidx.annotation.BinderThread;
 
 import com.android.wm.shell.common.annotations.ShellMainThread;
 
@@ -41,7 +39,7 @@ public final class SyncTransactionQueue {
     private static final int REPLY_TIMEOUT = 5300;
 
     private final TransactionPool mTransactionPool;
-    private final Handler mHandler;
+    private final ShellExecutor mMainExecutor;
 
     // Sync Transactions currently don't support nesting or interleaving properly, so
     // queue up transactions to run them serially.
@@ -59,9 +57,9 @@ public final class SyncTransactionQueue {
         }
     };
 
-    public SyncTransactionQueue(TransactionPool pool, Handler handler) {
+    public SyncTransactionQueue(TransactionPool pool, ShellExecutor mainExecutor) {
         mTransactionPool = pool;
-        mHandler = handler;
+        mMainExecutor = mainExecutor;
     }
 
     /**
@@ -152,14 +150,14 @@ public final class SyncTransactionQueue {
             if (DEBUG) Slog.d(TAG, "Sending sync transaction: " + mWCT);
             mId = new WindowOrganizer().applySyncTransaction(mWCT, this);
             if (DEBUG) Slog.d(TAG, " Sent sync transaction. Got id=" + mId);
-            mHandler.postDelayed(mOnReplyTimeout, REPLY_TIMEOUT);
+            mMainExecutor.executeDelayed(mOnReplyTimeout, REPLY_TIMEOUT);
         }
 
         @BinderThread
         @Override
         public void onTransactionReady(int id,
                 @NonNull SurfaceControl.Transaction t) {
-            mHandler.post(() -> {
+            mMainExecutor.execute(() -> {
                 synchronized (mQueue) {
                     if (mId != id) {
                         Slog.e(TAG, "Got an unexpected onTransactionReady. Expected "
@@ -167,7 +165,7 @@ public final class SyncTransactionQueue {
                         return;
                     }
                     mInFlight = null;
-                    mHandler.removeCallbacks(mOnReplyTimeout);
+                    mMainExecutor.removeCallbacks(mOnReplyTimeout);
                     if (DEBUG) Slog.d(TAG, "onTransactionReady id=" + mId);
                     mQueue.remove(this);
                     onTransactionReceived(t);

@@ -19,10 +19,8 @@ package com.android.server.location.provider;
 import static android.app.AppOpsManager.OP_FINE_LOCATION;
 import static android.app.AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION;
 import static android.app.AppOpsManager.OP_MONITOR_LOCATION;
-import static android.location.Criteria.ACCURACY_COARSE;
-import static android.location.Criteria.ACCURACY_FINE;
-import static android.location.Criteria.POWER_HIGH;
 import static android.location.LocationRequest.PASSIVE_INTERVAL;
+import static android.location.provider.ProviderProperties.POWER_USAGE_HIGH;
 import static android.os.PowerManager.LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF;
 
 import static androidx.test.ext.truth.location.LocationSubject.assertThat;
@@ -66,7 +64,8 @@ import android.location.LocationManagerInternal;
 import android.location.LocationManagerInternal.ProviderEnabledListener;
 import android.location.LocationRequest;
 import android.location.LocationResult;
-import android.location.ProviderProperties;
+import android.location.provider.ProviderProperties;
+import android.location.provider.ProviderRequest;
 import android.location.util.identity.CallerIdentity;
 import android.os.Bundle;
 import android.os.ICancellationSignal;
@@ -81,7 +80,6 @@ import android.util.Log;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.location.ProviderRequest;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.location.injector.FakeUserInfoHelper;
@@ -115,8 +113,13 @@ public class LocationProviderManagerTest {
     private static final int OTHER_USER = CURRENT_USER + 10;
 
     private static final String NAME = "test";
-    private static final ProviderProperties PROPERTIES = new ProviderProperties(false, false, false,
-            false, true, true, true, POWER_HIGH, ACCURACY_FINE);
+    private static final ProviderProperties PROPERTIES = new ProviderProperties.Builder()
+            .setHasAltitudeSupport(true)
+            .setHasSpeedSupport(true)
+            .setHasBearingSupport(true)
+            .setPowerUsage(POWER_USAGE_HIGH)
+            .setAccuracy(ProviderProperties.ACCURACY_FINE)
+            .build();
     private static final CallerIdentity IDENTITY = CallerIdentity.forTest(CURRENT_USER, 1,
             "mypackage",
             "attribution");
@@ -189,8 +192,14 @@ public class LocationProviderManagerTest {
         assertThat(mManager.getIdentity()).isEqualTo(IDENTITY);
         assertThat(mManager.hasProvider()).isTrue();
 
-        ProviderProperties newProperties = new ProviderProperties(true, true, true,
-                true, false, false, false, POWER_HIGH, ACCURACY_COARSE);
+        ProviderProperties newProperties = new ProviderProperties.Builder()
+                .setHasNetworkRequirement(true)
+                .setHasSatelliteRequirement(true)
+                .setHasCellRequirement(true)
+                .setHasMonetaryCost(true)
+                .setPowerUsage(POWER_USAGE_HIGH)
+                .setAccuracy(ProviderProperties.ACCURACY_COARSE)
+                .build();
         mProvider.setProperties(newProperties);
         assertThat(mManager.getProperties()).isEqualTo(newProperties);
 

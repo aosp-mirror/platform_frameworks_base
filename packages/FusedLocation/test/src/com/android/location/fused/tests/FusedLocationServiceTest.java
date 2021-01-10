@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,18 +27,18 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationRequest;
 import android.location.LocationResult;
-import android.location.ProviderProperties;
+import android.location.provider.ILocationProvider;
+import android.location.provider.ILocationProviderManager;
+import android.location.provider.ProviderProperties;
+import android.location.provider.ProviderRequest;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
-import android.os.WorkSource;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.location.ILocationProvider;
-import com.android.internal.location.ILocationProviderManager;
-import com.android.internal.location.ProviderRequest;
 import com.android.location.fused.FusedLocationProvider;
 
 import org.junit.After;
@@ -71,7 +71,7 @@ public class FusedLocationServiceTest {
         long seed = System.currentTimeMillis();
         Log.i(TAG, "location seed: " + seed);
 
-        Context context = InstrumentationRegistry.getTargetContext();
+        Context context = ApplicationProvider.getApplicationContext();
         mRandom = new Random(seed);
         mLocationManager = context.getSystemService(LocationManager.class);
 
@@ -120,8 +120,7 @@ public class FusedLocationServiceTest {
         mProvider.setRequest(
                         new ProviderRequest.Builder()
                                 .setIntervalMillis(1000)
-                                .build(),
-                new WorkSource());
+                                .build());
 
         Location location = createLocation(NETWORK_PROVIDER, mRandom);
         mLocationManager.setTestProviderLocation(NETWORK_PROVIDER, location);
@@ -135,8 +134,7 @@ public class FusedLocationServiceTest {
                 new ProviderRequest.Builder()
                         .setQuality(LocationRequest.QUALITY_HIGH_ACCURACY)
                         .setIntervalMillis(1000)
-                        .build(),
-                new WorkSource());
+                        .build());
 
         Location location = createLocation(GPS_PROVIDER, mRandom);
         mLocationManager.setTestProviderLocation(GPS_PROVIDER, location);

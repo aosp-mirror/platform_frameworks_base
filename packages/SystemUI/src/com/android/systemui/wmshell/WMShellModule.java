@@ -65,9 +65,9 @@ public class WMShellModule {
     @WMSingleton
     @Provides
     static DisplayImeController provideDisplayImeController(IWindowManager wmService,
-            DisplayController displayController, @Main Executor mainExecutor,
+            DisplayController displayController, @ShellMainThread ShellExecutor shellMainExecutor,
             TransactionPool transactionPool) {
-        return new DisplayImeController(wmService, displayController, mainExecutor,
+        return new DisplayImeController(wmService, displayController, shellMainExecutor,
                 transactionPool);
     }
 
@@ -75,13 +75,13 @@ public class WMShellModule {
     @Provides
     static LegacySplitScreen provideLegacySplitScreen(Context context,
             DisplayController displayController, SystemWindows systemWindows,
-            DisplayImeController displayImeController, @Main Handler handler,
-            TransactionPool transactionPool, ShellTaskOrganizer shellTaskOrganizer,
-            SyncTransactionQueue syncQueue, TaskStackListenerImpl taskStackListener,
-            Transitions transitions) {
+            DisplayImeController displayImeController, TransactionPool transactionPool,
+            ShellTaskOrganizer shellTaskOrganizer, SyncTransactionQueue syncQueue,
+            TaskStackListenerImpl taskStackListener, Transitions transitions,
+            @ShellMainThread ShellExecutor mainExecutor) {
         return new LegacySplitScreenController(context, displayController, systemWindows,
-                displayImeController, handler, transactionPool, shellTaskOrganizer, syncQueue,
-                taskStackListener, transitions);
+                displayImeController, transactionPool, shellTaskOrganizer, syncQueue,
+                taskStackListener, transitions, mainExecutor);
     }
 
     @WMSingleton

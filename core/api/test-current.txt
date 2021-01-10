@@ -278,6 +278,10 @@ package android.app {
     method public void updateNotificationChannel(@NonNull String, int, @NonNull android.app.NotificationChannel);
   }
 
+  public final class PendingIntent implements android.os.Parcelable {
+    field @Deprecated public static final int FLAG_MUTABLE_UNAUDITED = 33554432; // 0x2000000
+  }
+
   public final class PictureInPictureParams implements android.os.Parcelable {
     method public java.util.List<android.app.RemoteAction> getActions();
     method public float getAspectRatio();
@@ -292,7 +296,9 @@ package android.app {
   }
 
   public class TaskInfo {
+    method public boolean containsLaunchCookie(@NonNull android.os.IBinder);
     method @NonNull public android.content.res.Configuration getConfiguration();
+    method public int getParentTaskId();
     method @Nullable public android.app.PictureInPictureParams getPictureInPictureParams();
     method @NonNull public android.window.WindowContainerToken getToken();
     method public boolean hasParentTask();

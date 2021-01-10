@@ -23,6 +23,6 @@ import android.os.ParcelUuid;
  * @hide
  */
 interface IVcnManagementService {
-    void setVcnConfig(in ParcelUuid subscriptionGroup, in VcnConfig config);
+    void setVcnConfig(in ParcelUuid subscriptionGroup, in VcnConfig config, in String opPkgName);
     void clearVcnConfig(in ParcelUuid subscriptionGroup);
 }

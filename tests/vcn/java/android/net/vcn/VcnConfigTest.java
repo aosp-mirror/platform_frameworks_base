@@ -18,12 +18,17 @@ package android.net.vcn;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
+import android.annotation.NonNull;
+import android.content.Context;
 import android.os.Parcel;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -33,12 +38,15 @@ import java.util.Set;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class VcnConfigTest {
+    private static final String TEST_PACKAGE_NAME = VcnConfigTest.class.getPackage().getName();
     private static final Set<VcnGatewayConnectionConfig> GATEWAY_CONNECTION_CONFIGS =
             Collections.singleton(VcnGatewayConnectionConfigTest.buildTestConfig());
 
+    private final Context mContext = mock(Context.class);
+
     // Public visibility for VcnManagementServiceTest
-    public static VcnConfig buildTestConfig() {
-        VcnConfig.Builder builder = new VcnConfig.Builder();
+    public static VcnConfig buildTestConfig(@NonNull Context context) {
+        VcnConfig.Builder builder = new VcnConfig.Builder(context);
 
         for (VcnGatewayConnectionConfig gatewayConnectionConfig : GATEWAY_CONNECTION_CONFIGS) {
             builder.addGatewayConnectionConfig(gatewayConnectionConfig);
@@ -47,10 +55,24 @@ public class VcnConfigTest {
         return builder.build();
     }
 
+    @Before
+    public void setUp() throws Exception {
+        doReturn(TEST_PACKAGE_NAME).when(mContext).getOpPackageName();
+    }
+
+    @Test
+    public void testBuilderConstructorRequiresContext() {
+        try {
+            new VcnConfig.Builder(null);
+            fail("Expected exception due to null context");
+        } catch (NullPointerException e) {
+        }
+    }
+
     @Test
     public void testBuilderRequiresGatewayConnectionConfig() {
         try {
-            new VcnConfig.Builder().build();
+            new VcnConfig.Builder(mContext).build();
             fail("Expected exception due to no VcnGatewayConnectionConfigs provided");
         } catch (IllegalArgumentException e) {
         }
@@ -58,21 +80,22 @@ public class VcnConfigTest {
 
     @Test
     public void testBuilderAndGetters() {
-        final VcnConfig config = buildTestConfig();
+        final VcnConfig config = buildTestConfig(mContext);
 
+        assertEquals(TEST_PACKAGE_NAME, config.getProvisioningPackageName());
         assertEquals(GATEWAY_CONNECTION_CONFIGS, config.getGatewayConnectionConfigs());
     }
 
     @Test
     public void testPersistableBundle() {
-        final VcnConfig config = buildTestConfig();
+        final VcnConfig config = buildTestConfig(mContext);
 
         assertEquals(config, new VcnConfig(config.toPersistableBundle()));
     }
 
     @Test
     public void testParceling() {
-        final VcnConfig config = buildTestConfig();
+        final VcnConfig config = buildTestConfig(mContext);
 
         Parcel parcel = Parcel.obtain();
         config.writeToParcel(parcel, 0);

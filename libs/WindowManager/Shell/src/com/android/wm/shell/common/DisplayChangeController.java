@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.common;
 
-import android.os.Handler;
 import android.os.RemoteException;
 import android.view.IDisplayWindowRotationCallback;
 import android.view.IDisplayWindowRotationController;
@@ -37,7 +36,7 @@ import java.util.ArrayList;
  */
 public class DisplayChangeController {
 
-    private final Handler mHandler;
+    private final ShellExecutor mMainExecutor;
     private final IWindowManager mWmService;
     private final IDisplayWindowRotationController mControllerImpl;
 
@@ -45,8 +44,8 @@ public class DisplayChangeController {
             new ArrayList<>();
     private final ArrayList<OnDisplayChangingListener> mTmpListeners = new ArrayList<>();
 
-    public DisplayChangeController(Handler mainHandler, IWindowManager wmService) {
-        mHandler = mainHandler;
+    public DisplayChangeController(IWindowManager wmService, ShellExecutor mainExecutor) {
+        mMainExecutor = mainExecutor;
         mWmService = wmService;
         mControllerImpl = new DisplayWindowRotationControllerImpl();
         try {
@@ -97,7 +96,7 @@ public class DisplayChangeController {
         @Override
         public void onRotateDisplay(int displayId, final int fromRotation,
                 final int toRotation, IDisplayWindowRotationCallback callback) {
-            mHandler.post(() -> {
+            mMainExecutor.execute(() -> {
                 DisplayChangeController.this.onRotateDisplay(displayId, fromRotation, toRotation,
                         callback);
             });

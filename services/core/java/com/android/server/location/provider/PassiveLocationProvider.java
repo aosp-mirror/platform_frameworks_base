@@ -16,15 +16,17 @@
 
 package com.android.server.location.provider;
 
+import static android.location.provider.ProviderProperties.ACCURACY_FINE;
+import static android.location.provider.ProviderProperties.POWER_USAGE_LOW;
+
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 
 import android.content.Context;
 import android.location.LocationResult;
-import android.location.ProviderProperties;
+import android.location.provider.ProviderProperties;
+import android.location.provider.ProviderRequest;
 import android.location.util.identity.CallerIdentity;
 import android.os.Bundle;
-
-import com.android.internal.location.ProviderRequest;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -38,16 +40,10 @@ import java.io.PrintWriter;
  */
 public class PassiveLocationProvider extends AbstractLocationProvider {
 
-    private static final ProviderProperties PROPERTIES = new ProviderProperties(
-            /* requiresNetwork = */false,
-            /* requiresSatellite = */false,
-            /* requiresCell = */false,
-            /* hasMonetaryCost = */false,
-            /* supportsAltitude = */false,
-            /* supportsSpeed = */false,
-            /* supportsBearing = */false,
-            ProviderProperties.POWER_USAGE_LOW,
-            ProviderProperties.ACCURACY_COARSE);
+    private static final ProviderProperties PROPERTIES = new ProviderProperties.Builder()
+            .setPowerUsage(POWER_USAGE_LOW)
+            .setAccuracy(ACCURACY_FINE)
+            .build();
 
     public PassiveLocationProvider(Context context) {
         // using a direct executor is ok because this class has no locks that could deadlock

@@ -250,7 +250,11 @@ public class DataServiceCallback {
     }
 
     /**
-     * Indicates that the specified APN is no longer throttled.
+     * The APN is throttled for the duration specified in
+     * {@link DataCallResponse#getRetryDurationMillis}.  Calling this method unthrottles that
+     * APN.
+     * <p/>
+     * see: {@link DataCallResponse#getRetryDurationMillis}
      *
      * @param apn Access Point Name defined by the carrier.
      */

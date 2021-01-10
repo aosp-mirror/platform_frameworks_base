@@ -24,7 +24,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.Nullable;
 import android.graphics.Rect;
-import android.os.Handler;
 import android.util.Slog;
 import android.view.Choreographer;
 import android.view.SurfaceControl;
@@ -33,6 +32,7 @@ import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
 
 class DividerImeController implements DisplayImeController.ImePositionProcessor {
@@ -43,7 +43,7 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
 
     private final LegacySplitScreenTaskListener mSplits;
     private final TransactionPool mTransactionPool;
-    private final Handler mHandler;
+    private final ShellExecutor mMainExecutor;
     private final TaskOrganizer mTaskOrganizer;
 
     /**
@@ -94,10 +94,10 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
     private boolean mAdjustedWhileHidden = false;
 
     DividerImeController(LegacySplitScreenTaskListener splits, TransactionPool pool,
-            Handler handler, TaskOrganizer taskOrganizer) {
+            ShellExecutor mainExecutor, TaskOrganizer taskOrganizer) {
         mSplits = splits;
         mTransactionPool = pool;
-        mHandler = handler;
+        mMainExecutor = mainExecutor;
         mTaskOrganizer = taskOrganizer;
     }
 
@@ -377,7 +377,7 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
     /** Completely aborts/resets adjustment state */
     public void pause(int displayId) {
         if (DEBUG) Slog.d(TAG, "ime pause posting " + dumpState());
-        mHandler.post(() -> {
+        mMainExecutor.execute(() -> {
             if (DEBUG) Slog.d(TAG, "ime pause run posted " + dumpState());
             if (mPaused) {
                 return;
@@ -396,7 +396,7 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
 
     public void resume(int displayId) {
         if (DEBUG) Slog.d(TAG, "ime resume posting " + dumpState());
-        mHandler.post(() -> {
+        mMainExecutor.execute(() -> {
             if (DEBUG) Slog.d(TAG, "ime resume run posted " + dumpState());
             if (!mPaused) {
                 return;
