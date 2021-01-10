@@ -41,6 +41,7 @@ cc_library {
         "AssetDir.cpp",
         "AssetManager.cpp",
         "AssetManager2.cpp",
+        "AssetsProvider.cpp",
         "AttributeResolution.cpp",
         "ChunkIterator.cpp",
         "ConfigDescription.cpp",
