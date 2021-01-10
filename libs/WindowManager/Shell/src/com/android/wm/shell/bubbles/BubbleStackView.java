@@ -1201,15 +1201,7 @@ public class BubbleStackView extends FrameLayout
 
         mTempRect.setEmpty();
         getTouchableRegion(mTempRect);
-        if (mIsExpanded && mExpandedBubble != null
-                && mExpandedBubble.getExpandedView() != null
-                && mExpandedBubble.getExpandedView().getTaskView() != null) {
-            inoutInfo.touchableRegion.set(mTempRect);
-            mExpandedBubble.getExpandedView().getTaskView().getBoundsOnScreen(mTempRect);
-            inoutInfo.touchableRegion.op(mTempRect, Region.Op.DIFFERENCE);
-        } else {
-            inoutInfo.touchableRegion.set(mTempRect);
-        }
+        inoutInfo.touchableRegion.set(mTempRect);
     }
 
     @Override
