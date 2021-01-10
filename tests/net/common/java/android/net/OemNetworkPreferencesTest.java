@@ -40,7 +40,7 @@ import java.util.Map;
 @SmallTest
 public class OemNetworkPreferencesTest {
 
-    private static final int TEST_PREF = OemNetworkPreferences.OEM_NETWORK_PREFERENCE_DEFAULT;
+    private static final int TEST_PREF = OemNetworkPreferences.OEM_NETWORK_PREFERENCE_UNINITIALIZED;
     private static final String TEST_PACKAGE = "com.google.apps.contacts";
 
     private final OemNetworkPreferences.Builder mBuilder = new OemNetworkPreferences.Builder();
