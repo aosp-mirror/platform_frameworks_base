@@ -56,9 +56,9 @@ public abstract class AcquisitionClient<T> extends ClientMonitor<T> implements I
     public AcquisitionClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int cookie, int sensorId, int statsModality,
-            int statsAction, int statsClient, boolean shouldLogMetrics) {
+            int statsAction, int statsClient) {
         super(context, lazyDaemon, token, listener, userId, owner, cookie, sensorId, statsModality,
-                statsAction, statsClient, shouldLogMetrics);
+                statsAction, statsClient);
         mPowerManager = context.getSystemService(PowerManager.class);
         mSuccessVibrationEffect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
         mErrorVibrationEffect = VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);

@@ -38,8 +38,7 @@ class FaceGetAuthenticatorIdClient extends ClientMonitor<ISession> {
             Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, opPackageName,
                 0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_FACE,
-                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN,
-                true /* shouldLogMetrics */);
+                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
         mAuthenticatorIds = authenticatorIds;
     }
 

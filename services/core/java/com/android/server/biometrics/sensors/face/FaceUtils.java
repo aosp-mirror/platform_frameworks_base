@@ -18,7 +18,6 @@ package com.android.server.biometrics.sensors.face;
 
 import android.annotation.Nullable;
 import android.content.Context;
-import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.face.Face;
 import android.text.TextUtils;
 import android.util.SparseArray;
@@ -113,6 +112,16 @@ public class FaceUtils implements BiometricUtils<Face> {
     @Override
     public CharSequence getUniqueName(Context context, int userId) {
         return getStateForUser(context, userId).getUniqueName();
+    }
+
+    @Override
+    public void setInvalidationInProgress(Context context, int userId, boolean inProgress) {
+        getStateForUser(context, userId).setInvalidationInProgress(inProgress);
+    }
+
+    @Override
+    public boolean isInvalidationInProgress(Context context, int userId) {
+        return getStateForUser(context, userId).isInvalidationInProgress();
     }
 
     private FaceUserState getStateForUser(Context ctx, int userId) {

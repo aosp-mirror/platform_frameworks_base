@@ -66,8 +66,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
             int statsModality, int statsClient, @Nullable TaskStackListener taskStackListener,
             @NonNull LockoutTracker lockoutTracker) {
         super(context, lazyDaemon, token, listener, targetUserId, owner, cookie, sensorId,
-                statsModality, BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient,
-                true /* shouldLogMetrics */);
+                statsModality, BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient);
         mIsStrongBiometric = isStrongBiometric;
         mOperationId = operationId;
         mRequireConfirmation = requireConfirmation;

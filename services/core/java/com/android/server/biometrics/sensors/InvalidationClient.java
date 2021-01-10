@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,30 +18,30 @@ package com.android.server.biometrics.sensors;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricsProtoEnums;
-import android.os.IBinder;
-import android.os.RemoteException;
-import android.util.Slog;
 
-public abstract class GenerateChallengeClient<T> extends ClientMonitor<T> {
+/**
+ * ClientMonitor subclass for requesting authenticatorId invalidation. See
+ * {@link InvalidationRequesterClient} for more info.
+ */
+public abstract class InvalidationClient<S extends BiometricAuthenticator.Identifier, T>
+        extends ClientMonitor<T> {
 
-    private static final String TAG = "GenerateChallengeClient";
+    private final BiometricUtils<S> mUtils;
 
-    public GenerateChallengeClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
-            @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
-            @NonNull String owner, int sensorId) {
-        super(context, lazyDaemon, token, listener, 0 /* userId */, owner, 0 /* cookie */, sensorId,
+    public InvalidationClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+            int userId, int sensorId, @NonNull BiometricUtils<S> utils) {
+        super(context, lazyDaemon, null /* token */, null /* listener */, userId,
+                context.getOpPackageName(), 0 /* cookie */, sensorId,
                 BiometricsProtoEnums.MODALITY_UNKNOWN, BiometricsProtoEnums.ACTION_UNKNOWN,
                 BiometricsProtoEnums.CLIENT_UNKNOWN);
+        mUtils = utils;
     }
 
-    @Override
-    public void unableToStart() {
-        try {
-            getListener().onChallengeGenerated(getSensorId(), 0L);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Unable to send error", e);
-        }
+    public void onAuthenticatorIdInvalidated(long newAuthenticatorId) {
+        // TODO: Update framework w/ newAuthenticatorId
+        mCallback.onClientFinished(this, true /* success */);
     }
 
     @Override
@@ -49,5 +49,10 @@ public abstract class GenerateChallengeClient<T> extends ClientMonitor<T> {
         super.start(callback);
 
         startHalOperation();
+    }
+
+    @Override
+    public void unableToStart() {
+
     }
 }
