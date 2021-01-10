@@ -38,12 +38,11 @@ import android.telephony.Annotation.PreciseDisconnectCauses;
 import android.telephony.Annotation.RadioPowerState;
 import android.telephony.Annotation.SimActivationState;
 import android.telephony.Annotation.SrvccState;
-import android.telephony.emergency.EmergencyNumber;
-import android.telephony.ims.ImsReasonInfo;
 import android.telephony.NetworkRegistrationInfo.Domain;
 import android.telephony.TelephonyManager.DataEnabledReason;
 import android.telephony.TelephonyManager.DataState;
-import android.util.Log;
+import android.telephony.emergency.EmergencyNumber;
+import android.telephony.ims.ImsReasonInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.IPhoneStateListener;
@@ -1082,7 +1081,9 @@ public class PhoneStateListener {
 
     /**
      * Create a PhoneStateListener for the Phone with the default subscription.
-     * This class requires Looper.myLooper() not return null.
+     * If this is created for use with deprecated API
+     * {@link TelephonyManager#listen(PhoneStateListener, int)}, then this class requires
+     * Looper.myLooper() not return null.
      */
     public PhoneStateListener() {
         this(null, Looper.myLooper());
@@ -1120,7 +1121,10 @@ public class PhoneStateListener {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public PhoneStateListener(Integer subId, Looper looper) {
-        this(subId, new HandlerExecutor(new Handler(looper)));
+        if (looper != null) {
+            setExecutor(new HandlerExecutor(new Handler(looper)));
+        }
+        mSubId = subId;
         if (subId != null && VMRuntime.getRuntime().getTargetSdkVersion()
                 >= Build.VERSION_CODES.Q) {
             throw new IllegalArgumentException("PhoneStateListener with subId: "
@@ -1140,7 +1144,8 @@ public class PhoneStateListener {
      */
     @Deprecated
     public PhoneStateListener(@NonNull Executor executor) {
-        this(null, executor);
+        setExecutor(executor);
+        mSubId = null;
     }
 
     private @NonNull Executor mExecutor;
@@ -1153,12 +1158,14 @@ public class PhoneStateListener {
             throw new IllegalArgumentException("PhoneStateListener Executor must be non-null");
         }
         mExecutor = executor;
+        callback = new IPhoneStateListenerStub(this, mExecutor);
     }
 
-    private PhoneStateListener(Integer subId, Executor executor) {
-        setExecutor(executor);
-        mSubId = subId;
-        callback = new IPhoneStateListenerStub(this, mExecutor);
+    /**
+     * @hide
+     */
+    public boolean isExecutorSet() {
+        return mExecutor != null;
     }
 
     /**
