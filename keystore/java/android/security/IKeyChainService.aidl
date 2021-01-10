@@ -49,6 +49,7 @@ interface IKeyChainService {
         in byte[] privateKey, in byte[] userCert, in byte[] certChain, String alias, int uid);
     boolean removeKeyPair(String alias);
     boolean containsKeyPair(String alias);
+    int[] getGrants(String alias);
 
     // APIs used by Settings
     boolean deleteCaCertificate(String alias);
