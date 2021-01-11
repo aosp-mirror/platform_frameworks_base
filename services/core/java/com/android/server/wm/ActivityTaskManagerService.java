@@ -147,7 +147,6 @@ import android.app.WindowConfiguration;
 import android.app.admin.DevicePolicyCache;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
-import android.app.compat.CompatChanges;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -2901,86 +2900,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    /**
-     * Returns true if the app can close system dialogs. Otherwise it either throws a {@link
-     * SecurityException} or returns false with a logcat message depending on whether the app
-     * targets SDK level {@link android.os.Build.VERSION_CODES#S} or not.
-     */
-    private boolean checkCanCloseSystemDialogs(int pid, int uid, @Nullable String packageName) {
-        final WindowProcessController process;
-        synchronized (mGlobalLock) {
-            process = mProcessMap.getProcess(pid);
-        }
-        if (packageName == null && process != null) {
-            // WindowProcessController.mInfo is final, so after the synchronized memory barrier
-            // above, process.mInfo can't change. As for reading mInfo.packageName,
-            // WindowProcessController doesn't own the ApplicationInfo object referenced by mInfo.
-            // ProcessRecord for example also holds a reference to that object, so protecting access
-            // to packageName with the WM lock would not be enough as we'd also need to synchronize
-            // on the AM lock if we are worried about races, but we can't synchronize on AM lock
-            // here. Hence, since this is only used for logging, we don't synchronize here.
-            packageName = process.mInfo.packageName;
-        }
-        String caller = "(pid=" + pid + ", uid=" + uid + ")";
-        if (packageName != null) {
-            caller = packageName + " " + caller;
-        }
-        if (!canCloseSystemDialogs(pid, uid, process)) {
-            // The app can't close system dialogs, throw only if it targets S+
-            if (CompatChanges.isChangeEnabled(
-                    ActivityManager.LOCK_DOWN_CLOSE_SYSTEM_DIALOGS, uid)) {
-                throw new SecurityException(
-                        "Permission Denial: " + Intent.ACTION_CLOSE_SYSTEM_DIALOGS
-                                + " broadcast from " + caller + " requires "
-                                + Manifest.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS + ".");
-            } else if (CompatChanges.isChangeEnabled(
-                    ActivityManager.DROP_CLOSE_SYSTEM_DIALOGS, uid)) {
-                Slog.e(TAG,
-                        "Permission Denial: " + Intent.ACTION_CLOSE_SYSTEM_DIALOGS
-                                + " broadcast from " + caller + " requires "
-                                + Manifest.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS
-                                + ", dropping broadcast.");
-                return false;
-            } else {
-                Slog.w(TAG, Intent.ACTION_CLOSE_SYSTEM_DIALOGS
-                        + " broadcast from " + caller + " will require "
-                        + Manifest.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS
-                        + " in future builds.");
-                return true;
-            }
-        }
-        return true;
-    }
-
-    private boolean canCloseSystemDialogs(int pid, int uid,
-            @Nullable WindowProcessController process) {
-        if (checkPermission(Manifest.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS, pid, uid)
-                == PERMISSION_GRANTED) {
-            return true;
-        }
-        if (process != null) {
-            // Check if the instrumentation of the process has the permission. This covers the
-            // usual test started from the shell (which has the permission) case. This is needed
-            // for apps targeting SDK level < S but we are also allowing for targetSdk S+ as a
-            // convenience to avoid breaking a bunch of existing tests and asking them to adopt
-            // shell permissions to do this.
-            // Note that these getters all read from volatile fields in WindowProcessController, so
-            // no need to lock.
-            int sourceUid = process.getInstrumentationSourceUid();
-            if (process.isInstrumenting() && sourceUid != -1 && checkPermission(
-                    Manifest.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS, -1, sourceUid)
-                    == PERMISSION_GRANTED) {
-                return true;
-            }
-            // This is the notification trampoline use-case for example, where apps use Intent.ACSD
-            // to close the shade prior to starting an activity.
-            if (process.canCloseSystemDialogsByToken()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     static void enforceTaskPermission(String func) {
         if (checkCallingPermission(MANAGE_ACTIVITY_TASKS) == PackageManager.PERMISSION_GRANTED) {
             return;
@@ -5231,12 +5150,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public boolean checkCanCloseSystemDialogs(int pid, int uid, @Nullable String packageName) {
-            return ActivityTaskManagerService.this.checkCanCloseSystemDialogs(pid, uid,
-                    packageName);
-        }
-
-        @Override
         public void notifyActiveVoiceInteractionServiceChanged(ComponentName component) {
             synchronized (mGlobalLock) {
                 mActiveVoiceInteractionServiceComponent = component;
@@ -5736,12 +5649,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void closeSystemDialogs(String reason) {
             enforceNotIsolatedCaller("closeSystemDialogs");
+
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
-            if (!checkCanCloseSystemDialogs(pid, uid, null)) {
-                return;
-            }
-
             final long origId = Binder.clearCallingIdentity();
             try {
                 synchronized (mGlobalLock) {

@@ -285,14 +285,6 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void enforceCallerIsRecentsOrHasPermission(String permission, String func);
 
     /**
-     * Returns true if the app can close system dialogs. Otherwise it either throws a {@link
-     * SecurityException} or returns false with a logcat message depending on whether the app
-     * targets SDK level {@link android.os.Build.VERSION_CODES#S} or not.
-     */
-    public abstract boolean checkCanCloseSystemDialogs(int pid, int uid,
-            @Nullable String packageName);
-
-    /**
      * Called after the voice interaction service has changed.
      */
     public abstract void notifyActiveVoiceInteractionServiceChanged(ComponentName component);

@@ -23,7 +23,6 @@ import static android.os.IInputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
-import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.server.am.ActivityManagerService.MY_PID;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ACTIVITY_STARTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RELEASE;
@@ -162,8 +161,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private volatile boolean mDebugging;
     // Active instrumentation running in process?
     private volatile boolean mInstrumenting;
-    // If there is active instrumentation, this is the source
-    private volatile int mInstrumentationSourceUid = -1;
     // Active instrumentation with background activity starts privilege running in process?
     private volatile boolean mInstrumentingWithBackgroundActivityStartPrivileges;
     // This process it perceptible by the user.
@@ -626,26 +623,14 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mBoundClientUids = boundClientUids;
     }
 
-    /**
-     * Set instrumentation-related info.
-     *
-     * If {@code instrumenting} is {@code false}, {@code sourceUid} has to be -1.
-     */
-    public void setInstrumenting(boolean instrumenting, int sourceUid,
+    public void setInstrumenting(boolean instrumenting,
             boolean hasBackgroundActivityStartPrivileges) {
-        checkArgument(instrumenting || sourceUid == -1);
         mInstrumenting = instrumenting;
-        mInstrumentationSourceUid = sourceUid;
         mInstrumentingWithBackgroundActivityStartPrivileges = hasBackgroundActivityStartPrivileges;
     }
 
     boolean isInstrumenting() {
         return mInstrumenting;
-    }
-
-    /** Returns the uid of the active instrumentation source if there is one, otherwise -1. */
-    int getInstrumentationSourceUid() {
-        return mInstrumentationSourceUid;
     }
 
     public void setPerceptible(boolean perceptible) {
