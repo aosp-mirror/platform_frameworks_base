@@ -124,6 +124,7 @@ public class DataManager {
     private PackageManagerInternal mPackageManagerInternal;
     private NotificationManagerInternal mNotificationManagerInternal;
     private UserManager mUserManager;
+    private ConversationStatusExpirationBroadcastReceiver mStatusExpReceiver;
 
     public DataManager(Context context) {
         this(context, new Injector());
@@ -144,6 +145,10 @@ public class DataManager {
         mUserManager = mContext.getSystemService(UserManager.class);
 
         mShortcutServiceInternal.addShortcutChangeCallback(new ShortcutServiceCallback());
+
+        mStatusExpReceiver = new ConversationStatusExpirationBroadcastReceiver();
+        mContext.registerReceiver(mStatusExpReceiver,
+                ConversationStatusExpirationBroadcastReceiver.getFilter());
 
         IntentFilter shutdownIntentFilter = new IntentFilter(Intent.ACTION_SHUTDOWN);
         BroadcastReceiver shutdownBroadcastReceiver = new ShutdownBroadcastReceiver();
@@ -296,6 +301,27 @@ public class DataManager {
     }
 
     /**
+     * Removes any status with an expiration time in the past.
+     */
+    public void pruneExpiredConversationStatuses(@UserIdInt int callingUserId, long currentTimeMs) {
+        forPackagesInProfile(callingUserId, packageData -> {
+            final ConversationStore cs = packageData.getConversationStore();
+            packageData.forAllConversations(conversationInfo -> {
+                ConversationInfo.Builder builder = new ConversationInfo.Builder(conversationInfo);
+                List<ConversationStatus> newStatuses = new ArrayList<>();
+                for (ConversationStatus status : conversationInfo.getStatuses()) {
+                    if (status.getEndTimeMillis() < 0
+                            || currentTimeMs < status.getEndTimeMillis()) {
+                        newStatuses.add(status);
+                    }
+                }
+                builder.setStatuses(newStatuses);
+                cs.addOrUpdate(builder.build());
+            });
+        });
+    }
+
+    /**
      * Returns the last notification interaction with the specified conversation. If the
      * conversation can't be found or no interactions have been recorded, returns 0L.
      */
@@ -317,6 +343,12 @@ public class DataManager {
         ConversationInfo.Builder builder = new ConversationInfo.Builder(convToModify);
         builder.addOrUpdateStatus(status);
         cs.addOrUpdate(builder.build());
+
+        if (status.getEndTimeMillis() >= 0) {
+            mStatusExpReceiver.scheduleExpiration(
+                    mContext, userId, packageName, conversationId, status);
+        }
+
     }
 
     public void clearStatus(String packageName, int userId, String conversationId,
@@ -458,6 +490,7 @@ public class DataManager {
                 packageData.getEventStore().deleteEventHistories(EventStore.CATEGORY_SMS);
             }
             packageData.pruneOrphanEvents();
+            pruneExpiredConversationStatuses(userId, System.currentTimeMillis());
             pruneOldRecentConversations(userId, System.currentTimeMillis());
             cleanupCachedShortcuts(userId, MAX_CACHED_RECENT_SHORTCUTS);
         });
