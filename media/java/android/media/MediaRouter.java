@@ -43,6 +43,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.view.Display;
 
@@ -51,6 +52,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -107,6 +109,8 @@ public class MediaRouter {
         int mCurrentUserId = -1;
         IMediaRouterClient mClient;
         MediaRouterClientState mClientState;
+
+        Map<Integer, Integer> mStreamVolume = new ArrayMap<>();
 
         final IAudioRoutesObserver.Stub mAudioRoutesObserver = new IAudioRoutesObserver.Stub() {
             @Override
@@ -257,6 +261,17 @@ public class MediaRouter {
                 }
             }
             mCurAudioRoutesInfo.bluetoothName = newRoutes.bluetoothName;
+        }
+
+        int getStreamVolume(int streamType) {
+            if (!mStreamVolume.containsKey(streamType)) {
+                try {
+                    mStreamVolume.put(streamType, mAudioService.getStreamVolume(streamType));
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error getting local stream volume", e);
+                }
+            }
+            return mStreamVolume.get(streamType);
         }
 
         boolean isBluetoothA2dpOn() {
@@ -1956,13 +1971,7 @@ public class MediaRouter {
          */
         public int getVolume() {
             if (mPlaybackType == PLAYBACK_TYPE_LOCAL) {
-                int vol = 0;
-                try {
-                    vol = sStatic.mAudioService.getStreamVolume(mPlaybackStream);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Error getting local stream volume", e);
-                }
-                return vol;
+                return sStatic.getStreamVolume(mPlaybackStream);
             } else {
                 return mVolume;
             }
@@ -3077,11 +3086,12 @@ public class MediaRouter {
             if (intent.getAction().equals(AudioManager.VOLUME_CHANGED_ACTION)) {
                 final int streamType = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE,
                         -1);
+                final int newVolume = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, 0);
+                sStatic.mStreamVolume.put(streamType, newVolume);
                 if (streamType != AudioManager.STREAM_MUSIC) {
                     return;
                 }
 
-                final int newVolume = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, 0);
                 final int oldVolume = intent.getIntExtra(
                         AudioManager.EXTRA_PREV_VOLUME_STREAM_VALUE, 0);
                 if (newVolume != oldVolume) {
