@@ -6613,6 +6613,9 @@ public class Editor {
                     }
 
                     updateSelection(event);
+                    if (mTextView.hasSelection() && mEndHandle != null) {
+                        mEndHandle.updateMagnifier(event);
+                    }
                     break;
 
                 case MotionEvent.ACTION_UP:
@@ -6623,6 +6626,9 @@ public class Editor {
                         break;
                     }
                     updateSelection(event);
+                    if (mEndHandle != null) {
+                        mEndHandle.dismissMagnifier();
+                    }
 
                     // No longer dragging to select text, let the parent intercept events.
                     mTextView.getParent().requestDisallowInterceptTouchEvent(false);
