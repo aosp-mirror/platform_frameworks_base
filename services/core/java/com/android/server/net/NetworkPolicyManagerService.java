@@ -3864,6 +3864,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    @VisibleForTesting
+    boolean isRestrictedModeEnabled() {
+        synchronized (mUidRulesFirstLock) {
+            return mRestrictedNetworkingMode;
+        }
+    }
+
     /**
      * updates restricted mode state / access for all apps
      * Called on initialization and when restricted mode is enabled / disabled.
