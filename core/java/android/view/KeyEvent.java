@@ -519,8 +519,13 @@ public class KeyEvent extends InputEvent implements Parcelable {
     /** Key code constant: Settings key.
      * Starts the system settings activity. */
     public static final int KEYCODE_SETTINGS        = 176;
-    /** Key code constant: TV power key.
-     * On TV remotes, toggles the power on a television screen. */
+    /**
+     * Key code constant: TV power key.
+     * On HDMI TV panel devices and Android TV devices that don't support HDMI, toggles the power
+     * state of the device.
+     * On HDMI source devices, toggles the power state of the HDMI-connected TV via HDMI-CEC and
+     * makes the source device follow this power state.
+     */
     public static final int KEYCODE_TV_POWER        = 177;
     /** Key code constant: TV input key.
      * On TV remotes, switches the input on a television screen. */
