@@ -62,19 +62,35 @@ public class SplitScreenController implements SplitScreen {
     }
 
     @Override
-    public boolean pinTask(int taskId) {
+    public boolean isSplitScreenVisible() {
+        return mStageCoordinator.isSplitScreenVisible();
+    }
+
+    @Override
+    public boolean moveToSideStage(int taskId, @SideStagePosition int sideStagePosition) {
         final ActivityManager.RunningTaskInfo task = mTaskOrganizer.getRunningTaskInfo(taskId);
-        return task != null && pinTask(task);
+        return task != null && moveToSideStage(task, sideStagePosition);
     }
 
     @Override
-    public boolean pinTask(ActivityManager.RunningTaskInfo task) {
-        return mStageCoordinator.pinTask(task);
+    public boolean moveToSideStage(ActivityManager.RunningTaskInfo task,
+            @SideStagePosition int sideStagePosition) {
+        return mStageCoordinator.moveToSideStage(task, sideStagePosition);
     }
 
     @Override
-    public boolean unpinTask(int taskId) {
-        return mStageCoordinator.unpinTask(taskId);
+    public boolean removeFromSideStage(int taskId) {
+        return mStageCoordinator.removeFromSideStage(taskId);
+    }
+
+    @Override
+    public void setSideStagePosition(@SideStagePosition int sideStagePosition) {
+        mStageCoordinator.setSideStagePosition(sideStagePosition);
+    }
+
+    @Override
+    public void setSideStageVisibility(boolean visible) {
+        mStageCoordinator.setSideStageVisibility(visible);
     }
 
     @Override

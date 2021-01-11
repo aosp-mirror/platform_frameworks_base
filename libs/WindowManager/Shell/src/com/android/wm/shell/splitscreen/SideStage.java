@@ -37,7 +37,7 @@ class SideStage extends StageTaskListener {
         super(taskOrganizer, displayId, callbacks, syncQueue);
     }
 
-    public void addTask(ActivityManager.RunningTaskInfo task, Rect rootBounds,
+    void addTask(ActivityManager.RunningTaskInfo task, Rect rootBounds,
             WindowContainerTransaction wct) {
         final WindowContainerToken rootToken = mRootTaskInfo.token;
         wct.setHidden(rootToken, false)
@@ -48,13 +48,13 @@ class SideStage extends StageTaskListener {
                 .reorder(rootToken, true);
     }
 
-    public boolean removeTask(int taskId, WindowContainerTransaction wct) {
+    boolean removeTask(int taskId, WindowContainerToken newParent, WindowContainerTransaction wct) {
         final ActivityManager.RunningTaskInfo task = mChildrenTaskInfo.get(taskId);
         if (task == null) return false;
 
         wct.setHidden(mRootTaskInfo.token, true)
                 .reorder(mRootTaskInfo.token, false)
-                .reparent(task.token, null, false /* onTop */);
+                .reparent(task.token, newParent, false /* onTop */);
         return true;
     }
 }

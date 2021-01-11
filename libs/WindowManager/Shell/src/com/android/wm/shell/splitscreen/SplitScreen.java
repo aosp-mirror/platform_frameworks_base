@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.splitscreen;
 
+import android.annotation.IntDef;
 import android.app.ActivityManager;
 
 import androidx.annotation.NonNull;
@@ -29,13 +30,37 @@ import java.io.PrintWriter;
  */
 @ExternalThread
 public interface SplitScreen {
-    /** Unpin a task in the side-stage of split-screen. */
-    boolean pinTask(int taskId);
-    /** Unpin a task in the side-stage of split-screen. */
-    boolean pinTask(ActivityManager.RunningTaskInfo task);
-    /** Unpin a task from the side-stage of split-screen. */
-    boolean unpinTask(int taskId);
-// TODO: Do we need show/hide side stage or is startActivity and sendToBack good enough?
+    /**
+     * Specifies that the side-stage is positioned at the top half of the screen if
+     * in portrait mode or at the left half of the screen if in landscape mode.
+     */
+    int SIDE_STAGE_POSITION_TOP_OR_LEFT = 0;
+
+    /**
+     * Specifies that the side-stage is positioned at the bottom half of the screen if
+     * in portrait mode or at the right half of the screen if in landscape mode.
+     */
+    int SIDE_STAGE_POSITION_BOTTOM_OR_RIGHT = 1;
+
+    @IntDef(prefix = { "SIDE_STAGE_POSITION_" }, value = {
+            SIDE_STAGE_POSITION_TOP_OR_LEFT,
+            SIDE_STAGE_POSITION_BOTTOM_OR_RIGHT
+    })
+    @interface SideStagePosition {}
+
+    /** @return {@code true} if split-screen is currently visible. */
+    boolean isSplitScreenVisible();
+    /** Moves a task in the side-stage of split-screen. */
+    boolean moveToSideStage(int taskId, @SideStagePosition int sideStagePosition);
+    /** Moves a task in the side-stage of split-screen. */
+    boolean moveToSideStage(ActivityManager.RunningTaskInfo task,
+            @SideStagePosition int sideStagePosition);
+    /** Removes a task from the side-stage of split-screen. */
+    boolean removeFromSideStage(int taskId);
+    /** Sets the position of the side-stage. */
+    void setSideStagePosition(@SideStagePosition int sideStagePosition);
+    /** Hides the side-stage if it is currently visible. */
+    void setSideStageVisibility(boolean visible);
     /** Dumps current status of split-screen. */
     void dump(@NonNull PrintWriter pw, String prefix);
     /** Called when the shell organizer has been registered. */

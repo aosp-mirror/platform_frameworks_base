@@ -19,8 +19,11 @@ package com.android.wm.shell.splitscreen;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
 
+import static com.android.wm.shell.splitscreen.SplitScreen.SIDE_STAGE_POSITION_BOTTOM_OR_RIGHT;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
@@ -65,10 +68,10 @@ public class StageCoordinatorTests extends ShellTestCase {
     }
 
     @Test
-    public void testPinTask() {
+    public void testMoveToSideStage() {
         final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder().build();
 
-        mStageCoordinator.pinTask(task);
+        mStageCoordinator.moveToSideStage(task, SIDE_STAGE_POSITION_BOTTOM_OR_RIGHT);
 
         verify(mMainStage).activate(any(Rect.class), any(WindowContainerTransaction.class));
         verify(mSideStage).addTask(eq(task), any(Rect.class),
@@ -76,12 +79,14 @@ public class StageCoordinatorTests extends ShellTestCase {
     }
 
     @Test
-    public void testUnpinTask() {
+    public void testRemoveFromSideStage() {
         final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder().build();
 
-        mStageCoordinator.unpinTask(task.taskId);
+        doReturn(false).when(mMainStage).isActive();
+        mStageCoordinator.removeFromSideStage(task.taskId);
 
-        verify(mSideStage).removeTask(eq(task.taskId), any(WindowContainerTransaction.class));
+        verify(mSideStage).removeTask(
+                eq(task.taskId), any(), any(WindowContainerTransaction.class));
     }
 
     private static class TestStageCoordinator extends StageCoordinator {
