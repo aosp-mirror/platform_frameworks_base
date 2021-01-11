@@ -52,7 +52,8 @@ import java.io.IOException;
 public final class PowerStatsLogger extends Handler {
     private static final String TAG = PowerStatsLogger.class.getSimpleName();
     private static final boolean DEBUG = false;
-    protected static final int MSG_LOG_TO_DATA_STORAGE = 0;
+    protected static final int MSG_LOG_TO_DATA_STORAGE_TIMER = 0;
+    protected static final int MSG_LOG_TO_DATA_STORAGE_BATTERY_DROP = 1;
 
     private final PowerStatsDataStorage mPowerStatsMeterStorage;
     private final PowerStatsDataStorage mPowerStatsModelStorage;
@@ -62,8 +63,8 @@ public final class PowerStatsLogger extends Handler {
     @Override
     public void handleMessage(Message msg) {
         switch (msg.what) {
-            case MSG_LOG_TO_DATA_STORAGE:
-                if (DEBUG) Slog.d(TAG, "Logging to data storage");
+            case MSG_LOG_TO_DATA_STORAGE_TIMER:
+                if (DEBUG) Slog.d(TAG, "Logging to data storage on timer");
 
                 // Log power meter data.
                 EnergyMeasurement[] energyMeasurements =
@@ -78,6 +79,10 @@ public final class PowerStatsLogger extends Handler {
                 mPowerStatsModelStorage.write(
                         EnergyConsumerResultUtils.getProtoBytes(energyConsumerResults));
                 if (DEBUG) EnergyConsumerResultUtils.print(energyConsumerResults);
+                break;
+
+            case MSG_LOG_TO_DATA_STORAGE_BATTERY_DROP:
+                if (DEBUG) Slog.d(TAG, "Logging to data storage on battery drop");
 
                 // Log state residency data.
                 StateResidencyResult[] stateResidencyResults =

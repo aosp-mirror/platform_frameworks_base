@@ -78,6 +78,7 @@ public class PowerStatsServiceTest {
     private PowerStatsService mService;
     private File mDataStorageDir;
     private TimerTrigger mTimerTrigger;
+    private BatteryTrigger mBatteryTrigger;
     private PowerStatsLogger mPowerStatsLogger;
 
     private final PowerStatsService.Injector mInjector = new PowerStatsService.Injector() {
@@ -125,7 +126,9 @@ public class PowerStatsServiceTest {
 
         @Override
         BatteryTrigger createBatteryTrigger(Context context, PowerStatsLogger powerStatsLogger) {
-            return new BatteryTrigger(context, powerStatsLogger, false /* trigger enabled */);
+            mBatteryTrigger = new BatteryTrigger(context, powerStatsLogger,
+                false /* trigger enabled */);
+            return mBatteryTrigger;
         }
 
         @Override
@@ -237,7 +240,7 @@ public class PowerStatsServiceTest {
         mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
 
         // Write data to on-device storage.
-        mTimerTrigger.logPowerStatsData();
+        mTimerTrigger.logPowerStatsData(PowerStatsLogger.MSG_LOG_TO_DATA_STORAGE_TIMER);
 
         // The above call puts a message on a handler.  Wait for
         // it to be processed.
@@ -278,7 +281,7 @@ public class PowerStatsServiceTest {
         mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
 
         // Write data to on-device storage.
-        mTimerTrigger.logPowerStatsData();
+        mTimerTrigger.logPowerStatsData(PowerStatsLogger.MSG_LOG_TO_DATA_STORAGE_TIMER);
 
         // The above call puts a message on a handler.  Wait for
         // it to be processed.
@@ -318,7 +321,7 @@ public class PowerStatsServiceTest {
         mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
 
         // Write data to on-device storage.
-        mTimerTrigger.logPowerStatsData();
+        mBatteryTrigger.logPowerStatsData(PowerStatsLogger.MSG_LOG_TO_DATA_STORAGE_BATTERY_DROP);
 
         // The above call puts a message on a handler.  Wait for
         // it to be processed.
