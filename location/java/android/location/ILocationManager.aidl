@@ -78,21 +78,21 @@ interface ILocationManager
 
     @nullable List<GnssAntennaInfo> getGnssAntennaInfos();
 
-    void registerGnssStatusCallback(in IGnssStatusListener callback, String packageName, String attributionTag);
+    void registerGnssStatusCallback(in IGnssStatusListener callback, String packageName, @nullable String attributionTag);
     void unregisterGnssStatusCallback(in IGnssStatusListener callback);
 
-    void registerGnssNmeaCallback(in IGnssNmeaListener callback, String packageName, String attributionTag);
+    void registerGnssNmeaCallback(in IGnssNmeaListener callback, String packageName, @nullable String attributionTag);
     void unregisterGnssNmeaCallback(in IGnssNmeaListener callback);
 
-    void addGnssMeasurementsListener(in GnssMeasurementRequest request, in IGnssMeasurementsListener listener, String packageName, String attributionTag);
+    void addGnssMeasurementsListener(in GnssMeasurementRequest request, in IGnssMeasurementsListener listener, String packageName, @nullable String attributionTag);
     void removeGnssMeasurementsListener(in IGnssMeasurementsListener listener);
     void injectGnssMeasurementCorrections(in GnssMeasurementCorrections corrections);
 
-    void addGnssNavigationMessageListener(in IGnssNavigationMessageListener listener, String packageName, String attributionTag);
+    void addGnssNavigationMessageListener(in IGnssNavigationMessageListener listener, String packageName, @nullable String attributionTag);
     void removeGnssNavigationMessageListener(in IGnssNavigationMessageListener listener);
 
     int getGnssBatchSize();
-    void startGnssBatch(long periodNanos, in ILocationListener listener, String packageName, String attributionTag, String listenerId);
+    void startGnssBatch(long periodNanos, in ILocationListener listener, String packageName, @nullable String attributionTag, @nullable String listenerId);
     void flushGnssBatch();
     void stopGnssBatch();
 
@@ -101,7 +101,7 @@ interface ILocationManager
     List<String> getProviders(in Criteria criteria, boolean enabledOnly);
     String getBestProvider(in Criteria criteria, boolean enabledOnly);
     ProviderProperties getProviderProperties(String provider);
-    boolean isProviderPackage(String provider, String packageName);
+    boolean isProviderPackage(@nullable String provider, String packageName, @nullable String attributionTag);
     List<String> getProviderPackages(String provider);
 
     void setExtraLocationControllerPackage(String packageName);
@@ -113,10 +113,10 @@ interface ILocationManager
     boolean isLocationEnabledForUser(int userId);
     void setLocationEnabledForUser(boolean enabled, int userId);
 
-    void addTestProvider(String name, in ProviderProperties properties, String packageName, String attributionTag);
-    void removeTestProvider(String provider, String packageName, String attributionTag);
-    void setTestProviderLocation(String provider, in Location location, String packageName, String attributionTag);
-    void setTestProviderEnabled(String provider, boolean enabled, String packageName, String attributionTag);
+    void addTestProvider(String name, in ProviderProperties properties, String packageName, @nullable String attributionTag);
+    void removeTestProvider(String provider, String packageName, @nullable String attributionTag);
+    void setTestProviderLocation(String provider, in Location location, String packageName, @nullable String attributionTag);
+    void setTestProviderEnabled(String provider, boolean enabled, String packageName, @nullable String attributionTag);
 
     LocationTime getGnssTimeMillis();
 
