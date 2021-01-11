@@ -187,7 +187,7 @@ public class PermissionUsageHelper {
             for (int usageNum = 0; usageNum < numUsages; usageNum++) {
                 OpUsage usage = rawUsages.get(permGroup).get(usageNum);
                 usages.add(new PermGroupUsage(usage.packageName, usage.uid, permGroup,
-                        usage.isRunning, isPhone,
+                        usage.lastAccessTime, usage.isRunning, isPhone,
                         packagesWithAttributionLabels.get(usage.toPackageAttr())));
             }
         }
