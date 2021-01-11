@@ -18,6 +18,7 @@ package android.hardware.biometrics;
 
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
+import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.SensorPropertiesInternal;
 import android.hardware.face.IFaceServiceReceiver;
@@ -62,6 +63,9 @@ interface IBiometricAuthenticator {
 
     // Return the LockoutTracker status for the specified user
     int getLockoutModeForUser(int userId);
+
+    // Request the authenticatorId to be invalidated for the specified user
+    void invalidateAuthenticatorId(int userId, IInvalidationCallback callback);
 
     // Gets the authenticator ID representing the current set of enrolled templates
     long getAuthenticatorId(int callingUserId);
