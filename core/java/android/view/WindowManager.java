@@ -1518,7 +1518,54 @@ public interface WindowManager extends ViewManager {
          * can use {@link #FLAG_ALT_FOCUSABLE_IM} to modify this behavior. */
         public static final int FLAG_NOT_FOCUSABLE      = 0x00000008;
 
-        /** Window flag: this window can never receive touch events. */
+        /**
+         * Window flag: this window can never receive touch events.
+         *
+         * <p>The intention of this flag is to leave the touch to be handled by some window below
+         * this window (in Z order).
+         *
+         * <p>Starting from Android {@link Build.VERSION_CODES#S}, for security reasons, touch
+         * events that pass through windows containing this flag (ie. are within the bounds of the
+         * window) will only be delivered to the touch-consuming window if one (or more) of the
+         * items below are true:
+         * <ol>
+         *   <li><b>Same UID</b>: This window belongs to the same UID that owns the touch-consuming
+         *   window.
+         *   <li><b>Trusted windows</b>: This window is trusted. Trusted windows include (but are
+         *   not limited to) accessibility windows ({@link #TYPE_ACCESSIBILITY_OVERLAY}), the IME
+         *   ({@link #TYPE_INPUT_METHOD}) and assistant windows (TYPE_VOICE_INTERACTION). Windows of
+         *   type {@link #TYPE_APPLICATION_OVERLAY} are <b>not</b> trusted, see below.
+         *   <li><b>Invisible windows</b>: This window is {@link View#GONE} or
+         *   {@link View#INVISIBLE}.
+         *   <li><b>Fully transparent windows</b>: This window has {@link LayoutParams#alpha} equal
+         *   to 0.
+         *   <li><b>One SAW window with enough transparency</b>: This window is of type {@link
+         *   #TYPE_APPLICATION_OVERLAY}, has {@link LayoutParams#alpha} below or equal to <b>0.8</b>
+         *   and it's the <b>only</b> window of type {@link #TYPE_APPLICATION_OVERLAY} from this UID
+         *   in the touch path.
+         *   <li><b>Multiple SAW windows with enough transparency</b>: The multiple overlapping
+         *   {@link #TYPE_APPLICATION_OVERLAY} windows in the
+         *   touch path from this UID have a <b>combined obscuring opacity</b> below or equal to
+         *   <b>0.8</b>. See section below on how to compute this value.
+         * </ol>
+         * <p>If none of these cases hold, the touch will not be delivered and a message will be
+         * logged to logcat.</p>
+         *
+         * <a name="ObscuringOpacity"></a>
+         * <h3>Combined obscuring opacity</h3>
+         *
+         * <p>The <b>combined obscuring opacity</b> of a set of windows is obtained by combining the
+         * opacity values of all windows in the set using the associative and commutative operation
+         * defined as:
+         * <pre>
+         * opacity({A,B}) = 1 - (1 - opacity(A))*(1 - opacity(B))
+         * </pre>
+         * <p>where {@code opacity(X)} is the {@link LayoutParams#alpha} of window X. So, for a set
+         * of windows {@code {W1, .., Wn}}, the combined obscuring opacity will be:
+         * <pre>
+         * opacity({W1, .., Wn}) = 1 - (1 - opacity(W1)) * ... * (1 - opacity(Wn))
+         * </pre>
+         */
         public static final int FLAG_NOT_TOUCHABLE      = 0x00000010;
 
         /** Window flag: even when this window is focusable (its
