@@ -24,6 +24,7 @@ import android.util.Slog;
 import android.view.DisplayAddress;
 
 import com.android.internal.BrightnessSynchronizer;
+import com.android.internal.R;
 import com.android.server.display.config.DisplayConfiguration;
 import com.android.server.display.config.DisplayQuirks;
 import com.android.server.display.config.HbmTiming;
@@ -64,6 +65,7 @@ public class DisplayDeviceConfig {
     private static final String STABLE_ID_SUFFIX_FORMAT = "id_%d";
     private static final String NO_SUFFIX_FORMAT = "%d";
     private static final long STABLE_FLAG = 1L << 62;
+
     // Float.NaN (used as invalid for brightness) cannot be stored in config.xml
     // so -2 is used instead
     private static final float INVALID_BRIGHTNESS_IN_CONFIG = -2f;
@@ -75,6 +77,10 @@ public class DisplayDeviceConfig {
     private float mBrightnessMinimum = Float.NaN;
     private float mBrightnessMaximum = Float.NaN;
     private float mBrightnessDefault = Float.NaN;
+    private float mBrightnessRampFastDecrease = Float.NaN;
+    private float mBrightnessRampFastIncrease = Float.NaN;
+    private float mBrightnessRampSlowDecrease = Float.NaN;
+    private float mBrightnessRampSlowIncrease = Float.NaN;
     private List<String> mQuirks;
     private boolean mIsHighBrightnessModeEnabled = false;
     private HighBrightnessModeData mHbmData;
@@ -177,6 +183,22 @@ public class DisplayDeviceConfig {
         return mBrightnessDefault;
     }
 
+    public float getBrightnessRampFastDecrease() {
+        return mBrightnessRampFastDecrease;
+    }
+
+    public float getBrightnessRampFastIncrease() {
+        return mBrightnessRampFastIncrease;
+    }
+
+    public float getBrightnessRampSlowDecrease() {
+        return mBrightnessRampSlowDecrease;
+    }
+
+    public float getBrightnessRampSlowIncrease() {
+        return mBrightnessRampSlowIncrease;
+    }
+
     /**
      * @param quirkValue The quirk to test.
      * @return {@code true} if the specified quirk is present in this configuration,
@@ -210,6 +232,10 @@ public class DisplayDeviceConfig {
                 + ", mQuirks=" + mQuirks
                 + ", isHbmEnabled=" + mIsHighBrightnessModeEnabled
                 + ", mHbmData=" + mHbmData
+                + ", mBrightnessRampFastDecrease=" + mBrightnessRampFastDecrease
+                + ", mBrightnessRampFastIncrease=" + mBrightnessRampFastIncrease
+                + ", mBrightnessRampSlowDecrease=" + mBrightnessRampSlowDecrease
+                + ", mBrightnessRampSlowIncrease=" + mBrightnessRampSlowIncrease
                 + "}";
         return str;
     }
@@ -265,6 +291,7 @@ public class DisplayDeviceConfig {
                 loadBrightnessConstraintsFromConfigXml();
                 loadHighBrightnessModeData(config);
                 loadQuirks(config);
+                loadBrightnessRamps(config);
             } else {
                 Slog.w(TAG, "DisplayDeviceConfig file is null");
             }
@@ -278,6 +305,7 @@ public class DisplayDeviceConfig {
         // If no ddc exists, use config.xml
         loadBrightnessDefaultFromConfigXml();
         loadBrightnessConstraintsFromConfigXml();
+        loadBrightnessRampsFromConfigXml();
     }
 
     private void initFromPmValues() {
@@ -395,6 +423,41 @@ public class DisplayDeviceConfig {
             mHbmData.timeMaxMillis = hbmTiming.getTimeMaxSecs_all().longValue() * 1000;
             mHbmData.timeMinMillis = hbmTiming.getTimeMinSecs_all().longValue() * 1000;
         }
+    }
+
+    private void loadBrightnessRamps(DisplayConfiguration config) {
+        // Priority 1: Value in the display device config (float)
+        // Priority 2: Value in the config.xml (int)
+        final BigDecimal fastDownDecimal = config.getScreenBrightnessRampFastDecrease();
+        final BigDecimal fastUpDecimal = config.getScreenBrightnessRampFastIncrease();
+        final BigDecimal slowDownDecimal = config.getScreenBrightnessRampSlowDecrease();
+        final BigDecimal slowUpDecimal = config.getScreenBrightnessRampSlowIncrease();
+
+        if (fastDownDecimal != null && fastUpDecimal != null && slowDownDecimal != null
+                && slowUpDecimal != null) {
+            mBrightnessRampFastDecrease = fastDownDecimal.floatValue();
+            mBrightnessRampFastIncrease = fastUpDecimal.floatValue();
+            mBrightnessRampSlowDecrease = slowDownDecimal.floatValue();
+            mBrightnessRampSlowIncrease = slowUpDecimal.floatValue();
+        } else {
+            if (fastDownDecimal != null || fastUpDecimal != null || slowDownDecimal != null
+                    || slowUpDecimal != null) {
+                Slog.w(TAG, "Per display brightness ramp values ignored because not all "
+                        + "values are present in display device config");
+            }
+            loadBrightnessRampsFromConfigXml();
+        }
+    }
+
+    private void loadBrightnessRampsFromConfigXml() {
+        mBrightnessRampFastIncrease = BrightnessSynchronizer.brightnessIntToFloat(
+                mContext.getResources().getInteger(R.integer.config_brightness_ramp_rate_fast));
+        mBrightnessRampSlowIncrease = BrightnessSynchronizer.brightnessIntToFloat(
+                mContext.getResources().getInteger(R.integer.config_brightness_ramp_rate_slow));
+        // config.xml uses the same values for both increasing and decreasing brightness
+        // transitions so we assign them to the same values here.
+        mBrightnessRampFastDecrease = mBrightnessRampFastIncrease;
+        mBrightnessRampSlowDecrease = mBrightnessRampSlowIncrease;
     }
 
     /**
