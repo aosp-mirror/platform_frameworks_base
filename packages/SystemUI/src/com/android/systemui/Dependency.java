@@ -34,6 +34,9 @@ import com.android.keyguard.KeyguardSecurityModel;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.clock.ClockManager;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
+import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
+import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
+import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuController;
 import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -284,6 +287,8 @@ public class Dependency {
     @Inject Lazy<IWindowManager> mIWindowManager;
     @Inject Lazy<OverviewProxyService> mOverviewProxyService;
     @Inject Lazy<NavigationModeController> mNavBarModeController;
+    @Inject Lazy<AccessibilityButtonModeObserver> mAccessibilityButtonModeObserver;
+    @Inject Lazy<AccessibilityButtonTargetsObserver> mAccessibilityButtonListController;
     @Inject Lazy<EnhancedEstimates> mEnhancedEstimates;
     @Inject Lazy<VibratorHelper> mVibratorHelper;
     @Inject Lazy<IStatusBarService> mIStatusBarService;
@@ -294,6 +299,7 @@ public class Dependency {
     @Inject Lazy<NotificationRemoteInputManager.Callback> mNotificationRemoteInputManagerCallback;
     @Inject Lazy<AppOpsController> mAppOpsController;
     @Inject Lazy<NavigationBarController> mNavigationBarController;
+    @Inject Lazy<AccessibilityFloatingMenuController> mAccessibilityFloatingMenuController;
     @Inject Lazy<StatusBarStateController> mStatusBarStateController;
     @Inject Lazy<NotificationLockscreenUserManager> mNotificationLockscreenUserManager;
     @Inject Lazy<NotificationGroupAlertTransferHelper> mNotificationGroupAlertTransferHelper;
@@ -470,6 +476,11 @@ public class Dependency {
 
         mProviders.put(NavigationModeController.class, mNavBarModeController::get);
 
+        mProviders.put(AccessibilityButtonModeObserver.class,
+                mAccessibilityButtonModeObserver::get);
+        mProviders.put(AccessibilityButtonTargetsObserver.class,
+                mAccessibilityButtonListController::get);
+
         mProviders.put(EnhancedEstimates.class, mEnhancedEstimates::get);
 
         mProviders.put(VibratorHelper.class, mVibratorHelper::get);
@@ -488,6 +499,9 @@ public class Dependency {
         mProviders.put(AppOpsController.class, mAppOpsController::get);
 
         mProviders.put(NavigationBarController.class, mNavigationBarController::get);
+
+        mProviders.put(AccessibilityFloatingMenuController.class,
+                mAccessibilityFloatingMenuController::get);
 
         mProviders.put(StatusBarStateController.class, mStatusBarStateController::get);
         mProviders.put(NotificationLockscreenUserManager.class,

@@ -17,6 +17,8 @@
 package com.android.systemui.accessibility;
 
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -52,7 +54,7 @@ public class AccessibilityButtonModeObserverTest extends SysuiTestCase {
             Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
 
     @Before
-    public void setUpController() {
+    public void setUp() {
         Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_BUTTON_MODE,
                 Settings.Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR);
@@ -80,5 +82,16 @@ public class AccessibilityButtonModeObserverTest extends SysuiTestCase {
         mAccessibilityButtonModeObserver.mContentObserver.onChange(false);
 
         verify(mListener, never()).onAccessibilityButtonModeChanged(anyInt());
+    }
+
+    @Test
+    public void getCurrentAccessibilityButtonMode_expectedValue() {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_BUTTON_MODE, TEST_A11Y_BTN_MODE_VALUE);
+
+        final int actualValue =
+                mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode();
+
+        assertThat(actualValue).isEqualTo(TEST_A11Y_BTN_MODE_VALUE);
     }
 }
