@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextClock;
+import android.widget.TextView;
 
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.keyguard.dagger.KeyguardStatusViewScope;
@@ -146,6 +147,10 @@ public class KeyguardClockSwitch extends RelativeLayout {
     public void onDensityOrFontScaleChanged() {
         setTextSize(TypedValue.COMPLEX_UNIT_PX, mContext.getResources()
                 .getDimensionPixelSize(R.dimen.widget_big_font_size));
+
+        ((TextView) mNewLockscreenLargeClockFrame.getChildAt(0))
+                .setTextSize(TypedValue.COMPLEX_UNIT_PX, mContext.getResources()
+                        .getDimensionPixelSize(R.dimen.large_clock_text_size));
 
         mClockSwitchYAmount = mContext.getResources().getDimensionPixelSize(
                 R.dimen.keyguard_clock_switch_y_shift);
@@ -391,7 +396,6 @@ public class KeyguardClockSwitch extends RelativeLayout {
         if (hasVisibleNotifications == mHasVisibleNotifications) {
             return;
         }
-
         animateClockChange(!hasVisibleNotifications);
 
         mHasVisibleNotifications = hasVisibleNotifications;
