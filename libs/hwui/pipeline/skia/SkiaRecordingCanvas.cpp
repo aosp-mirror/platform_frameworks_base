@@ -90,9 +90,9 @@ void SkiaRecordingCanvas::drawRipple(uirenderer::CanvasPropertyPrimitive* x,
                                      uirenderer::CanvasPropertyPrimitive* radius,
                                      uirenderer::CanvasPropertyPaint* paint,
                                      uirenderer::CanvasPropertyPrimitive* progress,
-                                     sk_sp<SkRuntimeEffect> runtimeEffect) {
+                                     const SkRuntimeShaderBuilder& effectBuilder) {
     drawDrawable(mDisplayList->allocateDrawable<AnimatedRipple>(x, y, radius, paint, progress,
-                                                                runtimeEffect));
+                                                                effectBuilder));
 }
 
 void SkiaRecordingCanvas::enableZ(bool enableZ) {
