@@ -1257,7 +1257,8 @@ public class DevicePolicyManager {
     @IntDef(prefix = { "SUPPORTED_MODES_" }, value = {
             SUPPORTED_MODES_ORGANIZATION_OWNED,
             SUPPORTED_MODES_PERSONALLY_OWNED,
-            SUPPORTED_MODES_ORGANIZATION_AND_PERSONALLY_OWNED
+            SUPPORTED_MODES_ORGANIZATION_AND_PERSONALLY_OWNED,
+            SUPPORTED_MODES_DEVICE_OWNER
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProvisioningConfiguration {}
@@ -1382,6 +1383,15 @@ public class DevicePolicyManager {
      */
     @SystemApi
     public static final int SUPPORTED_MODES_ORGANIZATION_AND_PERSONALLY_OWNED = 3;
+
+    /**
+     * A value for {@link #EXTRA_PROVISIONING_SUPPORTED_MODES} indicating that the only supported
+     * provisioning mode is device owner.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int SUPPORTED_MODES_DEVICE_OWNER = 4;
 
     /**
      * This MIME type is used for starting the device owner provisioning.
@@ -2519,6 +2529,7 @@ public class DevicePolicyManager {
      * @see #SUPPORTED_MODES_ORGANIZATION_OWNED
      * @see #SUPPORTED_MODES_PERSONALLY_OWNED
      * @see #SUPPORTED_MODES_ORGANIZATION_AND_PERSONALLY_OWNED
+     * @see #SUPPORTED_MODES_DEVICE_OWNER
      * @hide
      */
     @SystemApi
