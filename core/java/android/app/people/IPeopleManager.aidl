@@ -16,6 +16,7 @@
 
 package android.app.people;
 
+import android.app.people.ConversationStatus;
 import android.content.pm.ParceledListSlice;
 import android.net.Uri;
 import android.os.IBinder;
@@ -45,4 +46,9 @@ interface IPeopleManager {
      * conversation can't be found or no interactions have been recorded, returns 0L.
      */
     long getLastInteraction(in String packageName, int userId, in String shortcutId);
+
+    void addOrUpdateStatus(in String packageName, int userId, in String conversationId, in ConversationStatus status);
+    void clearStatus(in String packageName, int userId, in String conversationId, in String statusId);
+    void clearStatuses(in String packageName, int userId, in String conversationId);
+    ParceledListSlice getStatuses(in String packageName, int userId, in String conversationId);
 }
