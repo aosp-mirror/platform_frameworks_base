@@ -24,11 +24,13 @@ import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
 import static android.window.DisplayAreaOrganizer.FEATURE_FULLSCREEN_MAGNIFICATION;
 import static android.window.DisplayAreaOrganizer.FEATURE_HIDE_DISPLAY_CUTOUT;
 import static android.window.DisplayAreaOrganizer.FEATURE_IME_PLACEHOLDER;
 import static android.window.DisplayAreaOrganizer.FEATURE_ONE_HANDED;
+import static android.window.DisplayAreaOrganizer.FEATURE_ONE_HANDED_BACKGROUND_PANEL;
 import static android.window.DisplayAreaOrganizer.FEATURE_WINDOWED_MAGNIFICATION;
 
 import static com.android.server.wm.DisplayAreaPolicyBuilder.Feature;
@@ -131,14 +133,19 @@ public abstract class DisplayAreaPolicy {
                         .all()
                         .except(TYPE_NAVIGATION_BAR, TYPE_NAVIGATION_BAR_PANEL, TYPE_STATUS_BAR,
                                 TYPE_NOTIFICATION_SHADE)
-                        .build());
+                        .build())
+                        .addFeature(new Feature.Builder(wmService.mPolicy,
+                                "OneHandedBackgroundPanel",
+                                FEATURE_ONE_HANDED_BACKGROUND_PANEL)
+                                .upTo(TYPE_WALLPAPER)
+                                .build())
+                        .addFeature(new Feature.Builder(wmService.mPolicy, "OneHanded",
+                                FEATURE_ONE_HANDED)
+                                .all()
+                                .except(TYPE_NAVIGATION_BAR, TYPE_NAVIGATION_BAR_PANEL)
+                                .build());
             }
             rootHierarchy
-                    .addFeature(new Feature.Builder(wmService.mPolicy, "OneHanded",
-                            FEATURE_ONE_HANDED)
-                            .all()
-                            .except(TYPE_NAVIGATION_BAR, TYPE_NAVIGATION_BAR_PANEL)
-                            .build())
                     .addFeature(new Feature.Builder(wmService.mPolicy, "FullscreenMagnification",
                             FEATURE_FULLSCREEN_MAGNIFICATION)
                             .all()

@@ -15,7 +15,6 @@
  */
 
 package com.android.server.wm;
-
 import static android.os.Process.INVALID_UID;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -31,6 +30,7 @@ import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER
 import static android.window.DisplayAreaOrganizer.FEATURE_FULLSCREEN_MAGNIFICATION;
 import static android.window.DisplayAreaOrganizer.FEATURE_IME_PLACEHOLDER;
 import static android.window.DisplayAreaOrganizer.FEATURE_ONE_HANDED;
+import static android.window.DisplayAreaOrganizer.FEATURE_ONE_HANDED_BACKGROUND_PANEL;
 import static android.window.DisplayAreaOrganizer.FEATURE_ROOT;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_LAST;
@@ -103,6 +103,7 @@ public class DisplayAreaPolicyBuilderTest {
         mImeContainer = new DisplayArea.Tokens(mWms, ABOVE_TASKS, "ImeContainer");
         mDisplayContent = mock(DisplayContent.class);
         doReturn(true).when(mDisplayContent).isTrusted();
+        mDisplayContent.isDefaultDisplay = true;
         mDefaultTaskDisplayArea = new TaskDisplayArea(mDisplayContent, mWms, "Tasks",
                 FEATURE_DEFAULT_TASK_CONTAINER);
         mTaskDisplayAreaList = new ArrayList<>();
@@ -183,13 +184,34 @@ public class DisplayAreaPolicyBuilderTest {
         final DisplayAreaPolicyBuilder.Result defaultPolicy =
                 (DisplayAreaPolicyBuilder.Result) defaultProvider.instantiate(mWms, mDisplayContent,
                         mRoot, mImeContainer);
-        final List<Feature> features = defaultPolicy.getFeatures();
-        boolean hasOneHandedFeature = false;
-        for (int i = 0; i < features.size(); i++) {
-            hasOneHandedFeature |= features.get(i).getId() == FEATURE_ONE_HANDED;
-        }
+        if (mDisplayContent.isDefaultDisplay) {
+            final List<Feature> features = defaultPolicy.getFeatures();
+            boolean hasOneHandedFeature = false;
+            for (Feature feature : features) {
+                hasOneHandedFeature |= feature.getId() == FEATURE_ONE_HANDED;
+            }
 
-        assertThat(hasOneHandedFeature).isTrue();
+            assertThat(hasOneHandedFeature).isTrue();
+        }
+    }
+
+    @Test
+    public void testBuilder_defaultPolicy_hasOneHandedBackgroundFeature() {
+        final DisplayAreaPolicy.Provider defaultProvider = DisplayAreaPolicy.Provider.fromResources(
+                resourcesWithProvider(""));
+        final DisplayAreaPolicyBuilder.Result defaultPolicy =
+                (DisplayAreaPolicyBuilder.Result) defaultProvider.instantiate(mWms, mDisplayContent,
+                        mRoot, mImeContainer);
+        if (mDisplayContent.isDefaultDisplay) {
+            final List<Feature> features = defaultPolicy.getFeatures();
+            boolean hasOneHandedBackgroundFeature = false;
+            for (Feature feature : features) {
+                hasOneHandedBackgroundFeature |=
+                        feature.getId() == FEATURE_ONE_HANDED_BACKGROUND_PANEL;
+            }
+
+            assertThat(hasOneHandedBackgroundFeature).isTrue();
+        }
     }
 
     @Test

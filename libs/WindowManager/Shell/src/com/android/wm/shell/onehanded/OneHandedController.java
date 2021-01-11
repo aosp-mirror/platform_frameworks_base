@@ -77,6 +77,7 @@ public class OneHandedController implements OneHanded {
 
     private OneHandedDisplayAreaOrganizer mDisplayAreaOrganizer;
     private final AccessibilityManager mAccessibilityManager;
+    private OneHandedBackgroundPanelOrganizer mBackgroundPanelOrganizer;
 
     /**
      * Handle rotation based on OnDisplayChangingListener callback
@@ -204,17 +205,22 @@ public class OneHandedController implements OneHanded {
         OneHandedTouchHandler touchHandler = new OneHandedTouchHandler();
         OneHandedGestureHandler gestureHandler = new OneHandedGestureHandler(
                 context, displayController);
+        OneHandedBackgroundPanelOrganizer oneHandedBackgroundPanelOrganizer =
+                new OneHandedBackgroundPanelOrganizer(context, displayController, executor);
         OneHandedDisplayAreaOrganizer organizer = new OneHandedDisplayAreaOrganizer(
-                context, displayController, animationController, tutorialHandler, executor);
+                context, displayController, animationController, tutorialHandler, executor,
+                oneHandedBackgroundPanelOrganizer);
         IOverlayManager overlayManager = IOverlayManager.Stub.asInterface(
                 ServiceManager.getService(Context.OVERLAY_SERVICE));
-        return new OneHandedController(context, displayController, organizer, touchHandler,
-                tutorialHandler, gestureHandler, overlayManager, taskStackListener);
+        return new OneHandedController(context, displayController,
+                oneHandedBackgroundPanelOrganizer, organizer, touchHandler, tutorialHandler,
+                gestureHandler, overlayManager, taskStackListener);
     }
 
     @VisibleForTesting
     OneHandedController(Context context,
             DisplayController displayController,
+            OneHandedBackgroundPanelOrganizer backgroundPanelOrganizer,
             OneHandedDisplayAreaOrganizer displayAreaOrganizer,
             OneHandedTouchHandler touchHandler,
             OneHandedTutorialHandler tutorialHandler,
@@ -222,6 +228,7 @@ public class OneHandedController implements OneHanded {
             IOverlayManager overlayManager,
             TaskStackListenerImpl taskStackListener) {
         mContext = context;
+        mBackgroundPanelOrganizer = backgroundPanelOrganizer;
         mDisplayAreaOrganizer = displayAreaOrganizer;
         mDisplayController = displayController;
         mTouchHandler = touchHandler;
@@ -355,6 +362,7 @@ public class OneHandedController implements OneHanded {
         mDisplayAreaOrganizer.registerTransitionCallback(mTouchHandler);
         mDisplayAreaOrganizer.registerTransitionCallback(mGestureHandler);
         mDisplayAreaOrganizer.registerTransitionCallback(mTutorialHandler);
+        mDisplayAreaOrganizer.registerTransitionCallback(mBackgroundPanelOrganizer);
     }
 
     private void setupSettingObservers() {
@@ -405,9 +413,12 @@ public class OneHandedController implements OneHanded {
         }
         // TODO Be aware to unregisterOrganizer() after animation finished
         mDisplayAreaOrganizer.unregisterOrganizer();
+        mBackgroundPanelOrganizer.unregisterOrganizer();
         if (mIsOneHandedEnabled) {
             mDisplayAreaOrganizer.registerOrganizer(
                     OneHandedDisplayAreaOrganizer.FEATURE_ONE_HANDED);
+            mBackgroundPanelOrganizer.registerOrganizer(
+                    OneHandedBackgroundPanelOrganizer.FEATURE_ONE_HANDED_BACKGROUND_PANEL);
         }
         mTouchHandler.onOneHandedEnabled(mIsOneHandedEnabled);
         mGestureHandler.onOneHandedEnabled(mIsOneHandedEnabled || mIsSwipeToNotificationEnabled);
