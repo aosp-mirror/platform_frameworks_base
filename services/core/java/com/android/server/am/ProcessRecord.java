@@ -1435,9 +1435,7 @@ class ProcessRecord implements WindowProcessListener {
     void setActiveInstrumentation(ActiveInstrumentation instr) {
         mInstr = instr;
         boolean isInstrumenting = instr != null;
-        mWindowProcessController.setInstrumenting(
-                isInstrumenting,
-                isInstrumenting ? instr.mSourceUid : -1,
+        mWindowProcessController.setInstrumenting(isInstrumenting,
                 isInstrumenting && instr.mHasBackgroundActivityStartsPermission);
     }
 
