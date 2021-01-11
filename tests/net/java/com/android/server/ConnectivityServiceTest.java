@@ -5488,23 +5488,18 @@ public class ConnectivityServiceTest {
         callback.expectCapabilitiesThat(mMockVpn,
                 nc -> nc.hasCapability(NET_CAPABILITY_NOT_SUSPENDED)
                         && nc.hasTransport(TRANSPORT_WIFI));
-
-        // BUG: the VPN is no longer suspended, so a RESUMED callback should have been sent.
-        // callback.expectCallback(CallbackEntry.RESUMED, mMockVpn);
+        callback.expectCallback(CallbackEntry.RESUMED, mMockVpn);
         callback.assertNoCallback();
 
         assertTrue(mCm.getNetworkCapabilities(mMockVpn.getNetwork())
                 .hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
         assertNetworkInfo(TYPE_MOBILE, DetailedState.DISCONNECTED);
         assertNetworkInfo(TYPE_WIFI, DetailedState.CONNECTED);
-        assertNetworkInfo(TYPE_VPN, DetailedState.SUSPENDED);  // BUG: VPN caps have NOT_SUSPENDED.
+        assertNetworkInfo(TYPE_VPN, DetailedState.CONNECTED);
         assertActiveNetworkInfo(TYPE_WIFI, DetailedState.CONNECTED);
-        // BUG: the device has connectivity, so this should return true.
-        assertGetNetworkInfoOfGetActiveNetworkIsConnected(false);
+        assertGetNetworkInfoOfGetActiveNetworkIsConnected(true);
 
-        // Unsuspend cellular and then switch back to it.
-        // The same bug happens in the opposite direction: the VPN's capabilities correctly have
-        // NOT_SUSPENDED, but the VPN's NetworkInfo is in state SUSPENDED.
+        // Unsuspend cellular and then switch back to it. The VPN remains not suspended.
         mCellNetworkAgent.resume();
         mWiFiNetworkAgent.disconnect();
         callback.expectCapabilitiesThat(mMockVpn,
@@ -5520,12 +5515,11 @@ public class ConnectivityServiceTest {
                 .hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
         assertNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
         assertNetworkInfo(TYPE_WIFI, DetailedState.DISCONNECTED);
-        assertNetworkInfo(TYPE_VPN, DetailedState.SUSPENDED);  // BUG: VPN caps have NOT_SUSPENDED.
+        assertNetworkInfo(TYPE_VPN, DetailedState.CONNECTED);
         assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
-        // BUG: the device has connectivity, so this should return true.
-        assertGetNetworkInfoOfGetActiveNetworkIsConnected(false);
+        assertGetNetworkInfoOfGetActiveNetworkIsConnected(true);
 
-        // Re-suspending the current network fixes the problem.
+        // Suspend cellular and expect no connectivity.
         mCellNetworkAgent.suspend();
         callback.expectCapabilitiesThat(mMockVpn,
                 nc -> !nc.hasCapability(NET_CAPABILITY_NOT_SUSPENDED)
@@ -5541,6 +5535,7 @@ public class ConnectivityServiceTest {
         assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.SUSPENDED);
         assertGetNetworkInfoOfGetActiveNetworkIsConnected(false);
 
+        // Resume cellular and expect that connectivity comes back.
         mCellNetworkAgent.resume();
         callback.expectCapabilitiesThat(mMockVpn,
                 nc -> nc.hasCapability(NET_CAPABILITY_NOT_SUSPENDED)
@@ -5926,10 +5921,7 @@ public class ConnectivityServiceTest {
                 && caps.hasTransport(TRANSPORT_CELLULAR)
                 && !caps.hasCapability(NET_CAPABILITY_NOT_METERED)
                 && !caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
-        // While the SUSPENDED callback should in theory be sent here, it is not. This is
-        // a bug in ConnectivityService, but as the SUSPENDED and RESUMED callbacks have never
-        // been public and are deprecated and slated for removal, there is no sense in spending
-        // resources fixing this bug now.
+        vpnNetworkCallback.expectCallback(CallbackEntry.SUSPENDED, mMockVpn);
         assertDefaultNetworkCapabilities(userId, mCellNetworkAgent, mWiFiNetworkAgent);
 
         // Use both again.
@@ -5941,8 +5933,7 @@ public class ConnectivityServiceTest {
                 && caps.hasTransport(TRANSPORT_CELLULAR) && caps.hasTransport(TRANSPORT_WIFI)
                 && !caps.hasCapability(NET_CAPABILITY_NOT_METERED)
                 && caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
-        // As above, the RESUMED callback not being sent here is a bug, but not a bug that's
-        // worth anybody's time to fix.
+        vpnNetworkCallback.expectCallback(CallbackEntry.RESUMED, mMockVpn);
         assertDefaultNetworkCapabilities(userId, mCellNetworkAgent, mWiFiNetworkAgent);
 
         // Disconnect cell. Receive update without even removing the dead network from the
