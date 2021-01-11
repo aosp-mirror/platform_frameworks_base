@@ -40,6 +40,8 @@ import com.android.wm.shell.ShellCommandHandlerImpl;
 import com.android.wm.shell.ShellInit;
 import com.android.wm.shell.ShellInitImpl;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.TaskViewFactory;
+import com.android.wm.shell.TaskViewFactoryController;
 import com.android.wm.shell.Transitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.apppairs.AppPairs;
@@ -60,6 +62,7 @@ import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutoutController;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.Pip;
@@ -68,10 +71,8 @@ import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.phone.PipAppOpsListener;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import dagger.BindsOptionalOf;
 import dagger.Module;
@@ -338,6 +339,14 @@ public abstract class WMShellBaseModule {
             DisplayController displayController, @ShellMainThread ShellExecutor mainExecutor) {
         return Optional.ofNullable(
                 HideDisplayCutoutController.create(context, displayController, mainExecutor));
+    }
+
+    @WMSingleton
+    @Provides
+    static Optional<TaskViewFactory> provideTaskViewFactory(ShellTaskOrganizer shellTaskOrganizer,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return Optional.of(new TaskViewFactoryController(shellTaskOrganizer, mainExecutor)
+                .getTaskViewFactory());
     }
 
     @WMSingleton
