@@ -30298,9 +30298,9 @@ package android.os {
 
   public class DropBoxManager {
     ctor protected DropBoxManager();
-    method public void addData(String, byte[], int);
-    method public void addFile(String, java.io.File, int) throws java.io.IOException;
-    method public void addText(String, String);
+    method public void addData(@NonNull String, @Nullable byte[], int);
+    method public void addFile(@NonNull String, @NonNull java.io.File, int) throws java.io.IOException;
+    method public void addText(@NonNull String, @NonNull String);
     method @Nullable @RequiresPermission(allOf={android.Manifest.permission.READ_LOGS, android.Manifest.permission.PACKAGE_USAGE_STATS}) public android.os.DropBoxManager.Entry getNextEntry(String, long);
     method public boolean isTagEnabled(String);
     field public static final String ACTION_DROPBOX_ENTRY_ADDED = "android.intent.action.DROPBOX_ENTRY_ADDED";
@@ -30313,17 +30313,17 @@ package android.os {
   }
 
   public static class DropBoxManager.Entry implements java.io.Closeable android.os.Parcelable {
-    ctor public DropBoxManager.Entry(String, long);
-    ctor public DropBoxManager.Entry(String, long, String);
-    ctor public DropBoxManager.Entry(String, long, byte[], int);
-    ctor public DropBoxManager.Entry(String, long, android.os.ParcelFileDescriptor, int);
-    ctor public DropBoxManager.Entry(String, long, java.io.File, int) throws java.io.IOException;
+    ctor public DropBoxManager.Entry(@NonNull String, long);
+    ctor public DropBoxManager.Entry(@NonNull String, long, @NonNull String);
+    ctor public DropBoxManager.Entry(@NonNull String, long, @Nullable byte[], int);
+    ctor public DropBoxManager.Entry(@NonNull String, long, @Nullable android.os.ParcelFileDescriptor, int);
+    ctor public DropBoxManager.Entry(@NonNull String, long, @NonNull java.io.File, int) throws java.io.IOException;
     method public void close();
     method public int describeContents();
     method public int getFlags();
-    method public java.io.InputStream getInputStream() throws java.io.IOException;
-    method public String getTag();
-    method public String getText(int);
+    method @Nullable public java.io.InputStream getInputStream() throws java.io.IOException;
+    method @NonNull public String getTag();
+    method @Nullable public String getText(int);
     method public long getTimeMillis();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.DropBoxManager.Entry> CREATOR;
