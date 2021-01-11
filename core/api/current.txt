@@ -7492,6 +7492,7 @@ package android.app.assist {
     method public int getMaxTextEms();
     method public int getMaxTextLength();
     method public int getMinTextEms();
+    method @Nullable public String[] getOnReceiveContentMimeTypes();
     method public int getScrollX();
     method public int getScrollY();
     method @Nullable public CharSequence getText();
@@ -48764,6 +48765,7 @@ package android.view {
     method public void setMaxTextEms(int);
     method public void setMaxTextLength(int);
     method public void setMinTextEms(int);
+    method public void setOnReceiveContentMimeTypes(@Nullable String[]);
     method public abstract void setOpaque(boolean);
     method public abstract void setSelected(boolean);
     method public abstract void setText(CharSequence);

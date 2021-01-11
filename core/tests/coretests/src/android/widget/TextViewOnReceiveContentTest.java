@@ -87,7 +87,7 @@ public class TextViewOnReceiveContentTest {
     }
 
     @Test
-    public void testGetEditorInfoMimeTypes_fallbackToCommitContent() throws Throwable {
+    public void testGetFallbackMimeTypesForAutofill() throws Throwable {
         // Configure the EditText with an EditorInfo/InputConnection that supports some image MIME
         // types.
         String[] mimeTypes = {"image/gif", "image/png"};
@@ -99,11 +99,12 @@ public class TextViewOnReceiveContentTest {
         onView(withId(mEditText.getId())).perform(clickOnTextAtIndex(0));
 
         // Assert that the default listener returns the MIME types declared in the EditorInfo.
-        assertThat(mDefaultReceiver.getEditorInfoMimeTypes(mEditText)).isEqualTo(mimeTypes);
+        assertThat(mDefaultReceiver.getFallbackMimeTypesForAutofill(mEditText)).isEqualTo(
+                mimeTypes);
     }
 
     @Test
-    public void testGetEditorInfoMimeTypes_fallbackToCommitContent_noMimeTypesInEditorInfo()
+    public void testGetFallbackMimeTypesForAutofill_noMimeTypesInEditorInfo()
             throws Throwable {
         // Configure the EditText with an EditorInfo/InputConnection that doesn't declare any MIME
         // types.
@@ -115,7 +116,7 @@ public class TextViewOnReceiveContentTest {
         onView(withId(mEditText.getId())).perform(clickOnTextAtIndex(0));
 
         // Assert that the default listener returns null as the MIME types.
-        assertThat(mDefaultReceiver.getEditorInfoMimeTypes(mEditText)).isNull();
+        assertThat(mDefaultReceiver.getFallbackMimeTypesForAutofill(mEditText)).isNull();
     }
 
     @Test
