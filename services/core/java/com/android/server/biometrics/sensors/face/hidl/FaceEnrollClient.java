@@ -59,7 +59,7 @@ public class FaceEnrollClient extends EnrollClient<IBiometricsFace> {
             @Nullable NativeHandle surfaceHandle, int sensorId) {
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
                 timeoutSec, BiometricsProtoEnums.MODALITY_FACE, sensorId,
-                false /* shouldVibrate */, true /* shouldLogMetrics */);
+                false /* shouldVibrate */);
         mDisabledFeatures = Arrays.copyOf(disabledFeatures, disabledFeatures.length);
         mSurfaceHandle = surfaceHandle;
         mEnrollIgnoreList = getContext().getResources()

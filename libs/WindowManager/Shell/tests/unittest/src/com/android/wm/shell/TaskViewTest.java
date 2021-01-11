@@ -99,7 +99,7 @@ public class TaskViewTest extends ShellTestCase {
 
         when(mOrganizer.getExecutor()).thenReturn(mExecutor);
         mTaskView = new TaskView(mContext, mOrganizer);
-        mTaskView.setListener(mViewListener);
+        mTaskView.setListener(mExecutor, mViewListener);
     }
 
     @After
@@ -112,9 +112,9 @@ public class TaskViewTest extends ShellTestCase {
     @Test
     public void testSetPendingListener_throwsException() {
         TaskView taskView = new TaskView(mContext, mOrganizer);
-        taskView.setListener(mViewListener);
+        taskView.setListener(mExecutor, mViewListener);
         try {
-            taskView.setListener(mViewListener);
+            taskView.setListener(mExecutor, mViewListener);
         } catch (IllegalStateException e) {
             // pass
             return;

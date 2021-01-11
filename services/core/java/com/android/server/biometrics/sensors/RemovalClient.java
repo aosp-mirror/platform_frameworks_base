@@ -45,7 +45,7 @@ public abstract class RemovalClient<S extends BiometricAuthenticator.Identifier,
             int sensorId, @NonNull Map<Integer, Long> authenticatorIds, int statsModality) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
                 statsModality, BiometricsProtoEnums.ACTION_REMOVE,
-                BiometricsProtoEnums.CLIENT_UNKNOWN, true /* shouldLogMetrics */);
+                BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricId = biometricId;
         mBiometricUtils = utils;
         mAuthenticatorIds = authenticatorIds;

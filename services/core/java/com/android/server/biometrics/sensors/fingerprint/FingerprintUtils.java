@@ -118,6 +118,16 @@ public class FingerprintUtils implements BiometricUtils<Fingerprint> {
         return getStateForUser(context, userId).getUniqueName();
     }
 
+    @Override
+    public void setInvalidationInProgress(Context context, int userId, boolean inProgress) {
+        getStateForUser(context, userId).setInvalidationInProgress(inProgress);
+    }
+
+    @Override
+    public boolean isInvalidationInProgress(Context context, int userId) {
+        return getStateForUser(context, userId).isInvalidationInProgress();
+    }
+
     private FingerprintUserState getStateForUser(Context ctx, int userId) {
         synchronized (this) {
             FingerprintUserState state = mUserStates.get(userId);

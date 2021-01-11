@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-#ifndef IDMAP2_TESTS_TESTCONSTANTS_H_
-#define IDMAP2_TESTS_TESTCONSTANTS_H_
+package com.android.wm.shell;
 
-namespace android::idmap2::TestConstants {
+import android.annotation.UiContext;
+import android.content.Context;
 
-constexpr const auto TARGET_CRC = 0x7c2d4719;
-constexpr const auto TARGET_CRC_STRING = "7c2d4719";
+import com.android.wm.shell.common.annotations.ExternalThread;
 
-constexpr const auto OVERLAY_CRC = 0xb71095cf;
-constexpr const auto OVERLAY_CRC_STRING = "b71095cf";
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
-constexpr const char* OVERLAY_NAME_DEFAULT = "Default";
-constexpr const char* OVERLAY_NAME_ALL_POLICIES = "AllPolicies";
-
-}  // namespace android::idmap2::TestConstants
-
-#endif  // IDMAP2_TESTS_TESTCONSTANTS_H_
+/** Interface to create TaskView. */
+@ExternalThread
+public interface TaskViewFactory {
+    /** Creates an {@link TaskView} */
+    void create(@UiContext Context context, Executor executor, Consumer<TaskView> onCreate);
+}

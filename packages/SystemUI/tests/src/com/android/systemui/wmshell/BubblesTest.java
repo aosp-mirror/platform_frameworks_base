@@ -89,6 +89,8 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.bubbles.Bubble;
@@ -204,6 +206,8 @@ public class BubblesTest extends SysuiTestCase {
     private WindowManagerShellWrapper mWindowManagerShellWrapper;
     @Mock
     private BubbleLogger mBubbleLogger;
+    @Mock
+    private ShellTaskOrganizer mShellTaskOrganizer;
 
     private TestableBubblePositioner mPositioner;
 
@@ -269,6 +273,7 @@ public class BubblesTest extends SysuiTestCase {
                 );
 
         when(mFeatureFlagsOldPipeline.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
+        when(mShellTaskOrganizer.getExecutor()).thenReturn(new FakeExecutor(new FakeSystemClock()));
         mBubbleController = new TestableBubbleController(
                 mContext,
                 mBubbleData,
@@ -279,7 +284,7 @@ public class BubblesTest extends SysuiTestCase {
                 mWindowManagerShellWrapper,
                 mLauncherApps,
                 mBubbleLogger,
-                mock(ShellTaskOrganizer.class),
+                mShellTaskOrganizer,
                 mPositioner,
                 mock(ShellExecutor.class));
         mBubbleController.setExpandListener(mBubbleExpandListener);

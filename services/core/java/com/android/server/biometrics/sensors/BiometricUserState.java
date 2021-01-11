@@ -21,8 +21,10 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -35,6 +37,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,17 +49,16 @@ import java.util.List;
 public abstract class BiometricUserState<T extends BiometricAuthenticator.Identifier> {
     private static final String TAG = "UserState";
 
+    private static final String TAG_INVALIDATION = "authenticatorIdInvalidation_tag";
+    private static final String ATTR_INVALIDATION = "authenticatorIdInvalidation_attr";
+
     @GuardedBy("this")
     protected final ArrayList<T> mBiometrics = new ArrayList<>();
+    protected boolean mInvalidationInProgress;
     protected final Context mContext;
     protected final File mFile;
 
-    private final Runnable mWriteStateRunnable = new Runnable() {
-        @Override
-        public void run() {
-            doWriteState();
-        }
-    };
+    private final Runnable mWriteStateRunnable = this::doWriteStateInternal;
 
     /**
      * @return The tag for the biometrics. There may be multiple instances of a biometric within.
@@ -73,10 +75,40 @@ public abstract class BiometricUserState<T extends BiometricAuthenticator.Identi
      */
     protected abstract ArrayList<T> getCopy(ArrayList<T> array);
 
+    protected abstract void doWriteState(@NonNull TypedXmlSerializer serializer) throws Exception;
+
     /**
-     * @return Writes the cached data to persistent storage.
+     * @Writes the cached data to persistent storage.
      */
-    protected abstract void doWriteState();
+    private void doWriteStateInternal() {
+        AtomicFile destination = new AtomicFile(mFile);
+
+        FileOutputStream out = null;
+
+        try {
+            out = destination.startWrite();
+            TypedXmlSerializer serializer = Xml.resolveSerializer(out);
+            serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
+            serializer.startDocument(null, true);
+
+            // Store the authenticatorId
+            serializer.startTag(null, TAG_INVALIDATION);
+            serializer.attributeBoolean(null, ATTR_INVALIDATION, mInvalidationInProgress);
+            serializer.endTag(null, TAG_INVALIDATION);
+
+            // Do any additional serialization that subclasses may require
+            doWriteState(serializer);
+
+            serializer.endDocument();
+            destination.finishWrite(out);
+        } catch (Throwable t) {
+            Slog.wtf(TAG, "Failed to write settings, restoring backup", t);
+            destination.failWrite(out);
+            throw new IllegalStateException("Failed to write to file: " + mFile.toString(), t);
+        } finally {
+            IoUtils.closeQuietly(out);
+        }
+    }
 
     /**
      * @return
@@ -90,6 +122,19 @@ public abstract class BiometricUserState<T extends BiometricAuthenticator.Identi
         mContext = context;
         synchronized (this) {
             readStateSyncLocked();
+        }
+    }
+
+    public void setInvalidationInProgress(boolean invalidationInProgress) {
+        synchronized (this) {
+            mInvalidationInProgress = invalidationInProgress;
+            scheduleWriteStateLocked();
+        }
+    }
+
+    public boolean isInvalidationInProgress() {
+        synchronized (this) {
+            return mInvalidationInProgress;
         }
     }
 
@@ -202,6 +247,8 @@ public abstract class BiometricUserState<T extends BiometricAuthenticator.Identi
             String tagName = parser.getName();
             if (tagName.equals(getBiometricsTag())) {
                 parseBiometricsLocked(parser);
+            } else if (tagName.equals(TAG_INVALIDATION)) {
+                mInvalidationInProgress = parser.getAttributeBoolean(null, ATTR_INVALIDATION);
             }
         }
     }
