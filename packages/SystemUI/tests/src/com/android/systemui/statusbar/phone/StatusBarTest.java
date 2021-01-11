@@ -78,6 +78,7 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.InitController;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollectorFake;
@@ -210,6 +211,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private NotificationGutsManager mNotificationGutsManager;
     @Mock private NotificationMediaManager mNotificationMediaManager;
     @Mock private NavigationBarController mNavigationBarController;
+    @Mock private AccessibilityFloatingMenuController mAccessibilityFloatingMenuController;
     @Mock private BypassHeadsUpNotifier mBypassHeadsUpNotifier;
     @Mock private SysuiColorExtractor mColorExtractor;
     @Mock private ColorExtractor.GradientColors mGradientColors;
@@ -385,6 +387,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mVisualStabilityManager,
                 mDeviceProvisionedController,
                 mNavigationBarController,
+                mAccessibilityFloatingMenuController,
                 () -> mAssistManager,
                 configurationController,
                 mNotificationShadeWindowController,

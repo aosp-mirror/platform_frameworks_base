@@ -21,23 +21,14 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGAT
 
 import android.annotation.IntDef;
 import android.annotation.MainThread;
-import android.content.ContentResolver;
 import android.content.Context;
-import android.database.ContentObserver;
-import android.os.Handler;
-import android.os.Looper;
 import android.provider.Settings;
+import android.util.Log;
 
-import androidx.annotation.NonNull;
-
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.SysUISingleton;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -47,23 +38,20 @@ import javax.inject.Inject;
  */
 @MainThread
 @SysUISingleton
-public class AccessibilityButtonModeObserver {
+public class AccessibilityButtonModeObserver extends
+        SecureSettingsContentObserver<AccessibilityButtonModeObserver.ModeChangedListener> {
+
+    private static final String TAG = "A11yButtonModeObserver";
 
     private static final int ACCESSIBILITY_BUTTON_MODE_DEFAULT =
             ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR;
-
-    private final ContentResolver mContentResolver;
-    @VisibleForTesting
-    final ContentObserver mContentObserver;
-
-    private final List<ModeChangedListener> mListeners = new ArrayList<>();
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
             ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR,
             ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU
     })
-    private @interface AccessibilityButtonMode {}
+    public @interface AccessibilityButtonMode {}
 
     /** Listener for accessibility button mode changes. */
     public interface ModeChangedListener {
@@ -71,54 +59,20 @@ public class AccessibilityButtonModeObserver {
         /**
          * Called when accessibility button mode changes.
          *
-         * @param mode Current accessibility button mode.
+         * @param mode Current accessibility button mode
          */
         void onAccessibilityButtonModeChanged(@AccessibilityButtonMode int mode);
     }
 
     @Inject
     public AccessibilityButtonModeObserver(Context context) {
-        mContentResolver = context.getContentResolver();
-        mContentObserver = new ContentObserver(new Handler(Looper.getMainLooper())) {
-            @Override
-            public void onChange(boolean selfChange) {
-                updateAccessibilityButtonModeChanged();
-            }
-        };
+        super(context, Settings.Secure.ACCESSIBILITY_BUTTON_MODE);
     }
 
-    /**
-     * Registers a listener to receive updates from settings key {@link
-     * Settings.Secure#ACCESSIBILITY_BUTTON_MODE}.
-     *
-     * @param listener A {@link ModeChangedListener} object.
-     */
-    public void addListener(@NonNull ModeChangedListener listener) {
-        Objects.requireNonNull(listener, "listener must be non-null");
-
-        mListeners.add(listener);
-
-        if (mListeners.size() == 1) {
-            mContentResolver.registerContentObserver(
-                    Settings.Secure.getUriFor(
-                            Settings.Secure.ACCESSIBILITY_BUTTON_MODE), /* notifyForDescendants= */
-                    false, mContentObserver);
-        }
-    }
-
-    /**
-     * Unregisters a listener previously registered with {@link #addListener(ModeChangedListener)}.
-     *
-     * @param listener A {@link ModeChangedListener} object.
-     */
-    public void removeListener(@NonNull ModeChangedListener listener) {
-        Objects.requireNonNull(listener, "listener must be non-null");
-
-        mListeners.remove(listener);
-
-        if (mListeners.isEmpty()) {
-            mContentResolver.unregisterContentObserver(mContentObserver);
-        }
+    @Override
+    void onValueChanged(ModeChangedListener listener, String value) {
+        final int mode = parseAccessibilityButtonMode(value);
+        listener.onAccessibilityButtonModeChanged(mode);
     }
 
     /**
@@ -126,17 +80,22 @@ public class AccessibilityButtonModeObserver {
      *
      * See {@link Settings.Secure#ACCESSIBILITY_BUTTON_MODE}.
      */
-    @AccessibilityButtonMode
     public int getCurrentAccessibilityButtonMode() {
-        return Settings.Secure.getInt(mContentResolver, Settings.Secure.ACCESSIBILITY_BUTTON_MODE,
-                ACCESSIBILITY_BUTTON_MODE_DEFAULT);
+        final String value = getSettingsValue();
+
+        return parseAccessibilityButtonMode(value);
     }
 
-    private void updateAccessibilityButtonModeChanged() {
-        final int mode = getCurrentAccessibilityButtonMode();
-        final int listenerSize = mListeners.size();
-        for (int i = 0; i < listenerSize; i++) {
-            mListeners.get(i).onAccessibilityButtonModeChanged(mode);
+    private int parseAccessibilityButtonMode(String value) {
+        int mode;
+
+        try {
+            mode = Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            Log.e(TAG, "Invalid string for  " + e);
+            mode = ACCESSIBILITY_BUTTON_MODE_DEFAULT;
         }
+
+        return mode;
     }
 }
