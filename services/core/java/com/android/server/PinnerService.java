@@ -521,6 +521,13 @@ public final class PinnerService extends SystemService {
         return pinKeys;
     }
 
+    private static boolean shouldPinSplitApks() {
+        // For now this is disabled by default bcause the pinlist support for split APKs are
+        // missing in the toolchain. This flag should be removed once it is ready. b/174697187.
+        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT,
+                "pin_split_apks", false);
+    }
+
     private synchronized ArraySet<Integer> getPinKeys() {
         return mPinKeys;
     }
@@ -672,19 +679,40 @@ public final class PinnerService extends SystemService {
             mPinnedApps.put(key, pinnedApp);
         }
 
+
         // pin APK
-        int pinSizeLimit = getSizeLimitForKey(key);
-        String apk = appInfo.sourceDir;
-        PinnedFile pf = pinFile(apk, pinSizeLimit, /*attemptPinIntrospection=*/true);
-        if (pf == null) {
-            Slog.e(TAG, "Failed to pin " + apk);
-            return;
+        final int pinSizeLimit = getSizeLimitForKey(key);
+        List<String> apks = new ArrayList<>();
+        apks.add(appInfo.sourceDir);
+
+        if (shouldPinSplitApks() && appInfo.splitSourceDirs != null) {
+            for (String splitApk : appInfo.splitSourceDirs) {
+                apks.add(splitApk);
+            }
         }
-        if (DEBUG) {
-            Slog.i(TAG, "Pinned " + pf.fileName);
-        }
-        synchronized (this) {
-            pinnedApp.mFiles.add(pf);
+
+        int apkPinSizeLimit = pinSizeLimit;
+        for (String apk: apks) {
+            if (apkPinSizeLimit <= 0) {
+                Slog.w(TAG, "Reached to the pin size limit. Skipping: " + apk);
+                // Continue instead of break to print all skipped APK names.
+                continue;
+            }
+
+            PinnedFile pf = pinFile(apk, apkPinSizeLimit, /*attemptPinIntrospection=*/true);
+            if (pf == null) {
+                Slog.e(TAG, "Failed to pin " + apk);
+                continue;
+            }
+
+            if (DEBUG) {
+                Slog.i(TAG, "Pinned " + pf.fileName);
+            }
+            synchronized (this) {
+                pinnedApp.mFiles.add(pf);
+            }
+
+            apkPinSizeLimit -= pf.bytesPinned;
         }
 
         // determine the ABI from either ApplicationInfo or Build
@@ -703,7 +731,7 @@ public final class PinnerService extends SystemService {
 
         //not pinning the oat/odex is not a fatal error
         for (String file : files) {
-            pf = pinFile(file, pinSizeLimit, /*attemptPinIntrospection=*/false);
+            PinnedFile pf = pinFile(file, pinSizeLimit, /*attemptPinIntrospection=*/false);
             if (pf != null) {
                 synchronized (this) {
                     if (PROP_PIN_ODEX) {
