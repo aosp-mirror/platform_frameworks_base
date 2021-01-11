@@ -31,7 +31,6 @@ import android.app.contentsuggestions.IContentSuggestionsManager;
 import android.app.job.JobSchedulerFrameworkInitializer;
 import android.app.people.PeopleManager;
 import android.app.prediction.AppPredictionManager;
-import android.app.role.RoleControllerManager;
 import android.app.role.RoleManager;
 import android.app.search.SearchUiManager;
 import android.app.slice.SliceManager;
@@ -1313,14 +1312,6 @@ public final class SystemServiceRegistry {
                     public RoleManager createService(ContextImpl ctx)
                             throws ServiceNotFoundException {
                         return new RoleManager(ctx.getOuterContext());
-                    }});
-
-        registerService(Context.ROLE_CONTROLLER_SERVICE, RoleControllerManager.class,
-                new CachedServiceFetcher<RoleControllerManager>() {
-                    @Override
-                    public RoleControllerManager createService(ContextImpl ctx)
-                            throws ServiceNotFoundException {
-                        return new RoleControllerManager(ctx.getOuterContext());
                     }});
 
         registerService(Context.DYNAMIC_SYSTEM_SERVICE, DynamicSystemManager.class,
