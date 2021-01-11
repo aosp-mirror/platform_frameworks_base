@@ -1570,6 +1570,10 @@
         <item>network</item>
     </string-array>
 
+    <!-- Enables the GnssTimeUpdate service. This is the global switch for enabling Gnss time based
+         suggestions to TimeDetector service. See also config_autoTimeSourcesPriority. -->
+    <bool name="config_enableGnssTimeUpdateService">false</bool>
+
     <!-- Enables the TimeZoneRuleManager service. This is the global switch for the updateable time
          zone update mechanism. -->
     <bool name="config_enableUpdateableTimeZoneRules">false</bool>

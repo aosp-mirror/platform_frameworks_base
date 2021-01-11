@@ -323,6 +323,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.timezonedetector.TimeZoneDetectorService$Lifecycle";
     private static final String LOCATION_TIME_ZONE_MANAGER_SERVICE_CLASS =
             "com.android.server.location.timezone.LocationTimeZoneManagerService$Lifecycle";
+    private static final String GNSS_TIME_UPDATE_SERVICE_CLASS =
+            "com.android.server.timedetector.GnssTimeUpdateService$Lifecycle";
     private static final String ACCESSIBILITY_MANAGER_SERVICE_CLASS =
             "com.android.server.accessibility.AccessibilityManagerService$Lifecycle";
     private static final String ADB_SERVICE_CLASS =
@@ -1873,6 +1875,16 @@ public final class SystemServer implements Dumpable {
                 reportWtf("starting LocationTimeZoneManagerService service", e);
             }
             t.traceEnd();
+
+            if (context.getResources().getBoolean(R.bool.config_enableGnssTimeUpdateService)) {
+                t.traceBegin("StartGnssTimeUpdateService");
+                try {
+                    mSystemServiceManager.startService(GNSS_TIME_UPDATE_SERVICE_CLASS);
+                } catch (Throwable e) {
+                    reportWtf("starting GnssTimeUpdateService service", e);
+                }
+                t.traceEnd();
+            }
 
             if (!isWatch) {
                 t.traceBegin("StartSearchManagerService");
