@@ -138,7 +138,6 @@ package android.app {
     method public static boolean currentUiModeSupportsErrorDialogs(@NonNull android.content.Context);
     method public static int getMaxNumPictureInPictureActions(@NonNull android.content.Context);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void moveTaskToRootTask(int, int, boolean);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public boolean moveTopActivityToPinnedRootTask(int, @NonNull android.graphics.Rect);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void removeRootTasksInWindowingModes(@NonNull int[]);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void removeRootTasksWithActivityTypes(@NonNull int[]);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void resizePrimarySplitScreen(@NonNull android.graphics.Rect, @NonNull android.graphics.Rect);

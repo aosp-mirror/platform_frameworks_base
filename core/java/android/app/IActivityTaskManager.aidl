@@ -257,7 +257,6 @@ interface IActivityTaskManager {
     void keyguardGoingAway(int flags);
 
     void suppressResizeConfigChanges(boolean suppress);
-    boolean moveTopActivityToPinnedRootTask(int rootTaskId, in Rect bounds);
 
     /**
      * Resizes the docked stack, and all other stacks as the result of the dock stack bounds change.
