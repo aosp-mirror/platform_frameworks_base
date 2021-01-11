@@ -2958,6 +2958,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 == PERMISSION_GRANTED) {
             return true;
         }
+        if (process == null) {
+            synchronized (mGlobalLock) {
+                process = mProcessMap.getProcess(pid);
+            }
+        }
         if (process != null) {
             // Check if the instrumentation of the process has the permission. This covers the
             // usual test started from the shell (which has the permission) case. This is needed
@@ -5234,6 +5239,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public boolean checkCanCloseSystemDialogs(int pid, int uid, @Nullable String packageName) {
             return ActivityTaskManagerService.this.checkCanCloseSystemDialogs(pid, uid,
                     packageName);
+        }
+
+        @Override
+        public boolean canCloseSystemDialogs(int pid, int uid) {
+            return ActivityTaskManagerService.this.canCloseSystemDialogs(pid, uid,
+                    null /* process */);
         }
 
         @Override
