@@ -199,7 +199,10 @@ void RenderThread::requireGlContext() {
 
 void RenderThread::requireVkContext() {
     // the getter creates the context in the event it had been destroyed by destroyRenderingContext
-    if (vulkanManager().hasVkContext()) {
+    // Also check if we have a GrContext before returning fast. VulkanManager may be shared with
+    // the HardwareBitmapUploader which initializes the Vk context without persisting the GrContext
+    // in the rendering thread.
+    if (vulkanManager().hasVkContext() && mGrContext) {
         return;
     }
     mVkManager->initialize();

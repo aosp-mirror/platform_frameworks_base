@@ -44,8 +44,12 @@ import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.location.provider.ProviderProperties;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -64,6 +68,7 @@ import com.android.internal.listeners.ListenerTransportMultiplexer;
 import com.android.internal.util.Preconditions;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -310,6 +315,48 @@ public class LocationManager {
     @Deprecated
     public static final String HIGH_POWER_REQUEST_CHANGE_ACTION =
             "android.location.HIGH_POWER_REQUEST_CHANGE";
+
+    /**
+     * Broadcast intent action when GNSS capabilities change. This is most common at boot time as
+     * GNSS capabilities are queried from the chipset. Includes an intent extra,
+     * {@link #EXTRA_GNSS_CAPABILITIES}, with the new {@link GnssCapabilities}.
+     *
+     * @see #EXTRA_GNSS_CAPABILITIES
+     * @see #getGnssCapabilities()
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_GNSS_CAPABILITIES_CHANGED =
+            "android.location.action.GNSS_CAPABILITIES_CHANGED";
+
+    /**
+     * Intent extra included with {@link #ACTION_GNSS_CAPABILITIES_CHANGED} broadcasts, containing
+     * the new {@link GnssCapabilities}.
+     *
+     * @see #ACTION_GNSS_CAPABILITIES_CHANGED
+     */
+    public static final String EXTRA_GNSS_CAPABILITIES = "android.location.extra.GNSS_CAPABILITIES";
+
+    /**
+     * Broadcast intent action when GNSS antenna infos change. Includes an intent extra,
+     * {@link #EXTRA_GNSS_ANTENNA_INFOS}, with an ArrayList of the new {@link GnssAntennaInfo}. This
+     * may be read via {@link android.content.Intent#getParcelableArrayListExtra(String)}.
+     *
+     * @see #EXTRA_GNSS_ANTENNA_INFOS
+     * @see #getGnssAntennaInfos()
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_GNSS_ANTENNA_INFOS_CHANGED =
+            "android.location.action.GNSS_ANTENNA_INFOS_CHANGED";
+
+    /**
+     * Intent extra included with {@link #ACTION_GNSS_ANTENNA_INFOS_CHANGED} broadcasts, containing
+     * the new ArrayList of {@link GnssAntennaInfo}. This may be read via
+     * {@link android.content.Intent#getParcelableArrayListExtra(String)}.
+     *
+     * @see #ACTION_GNSS_ANTENNA_INFOS_CHANGED
+     */
+    public static final String EXTRA_GNSS_ANTENNA_INFOS =
+            "android.location.extra.GNSS_ANTENNA_INFOS";
 
     /**
      * Broadcast intent action for Settings app to inject a footer at the bottom of location
@@ -1757,7 +1804,6 @@ public class LocationManager {
         }
 
         try {
-
             ProviderProperties properties = mService.getProviderProperties(provider);
             return new LocationProvider(provider, properties);
         } catch (IllegalArgumentException e) {
@@ -1885,11 +1931,35 @@ public class LocationManager {
             boolean supportsSpeed, boolean supportsBearing,
             @ProviderProperties.PowerUsage int powerUsage,
             @ProviderProperties.Accuracy int accuracy) {
-        Preconditions.checkArgument(provider != null, "invalid null provider");
+        addTestProvider(provider, new ProviderProperties.Builder()
+                .setHasNetworkRequirement(requiresNetwork)
+                .setHasSatelliteRequirement(requiresSatellite)
+                .setHasCellRequirement(requiresCell)
+                .setHasMonetaryCost(hasMonetaryCost)
+                .setHasAltitudeSupport(supportsAltitude)
+                .setHasSpeedSupport(supportsSpeed)
+                .setHasBearingSupport(supportsBearing)
+                .setPowerUsage(powerUsage)
+                .setAccuracy(accuracy)
+                .build());
+    }
 
-        ProviderProperties properties = new ProviderProperties(requiresNetwork,
-                requiresSatellite, requiresCell, hasMonetaryCost, supportsAltitude, supportsSpeed,
-                supportsBearing, powerUsage, accuracy);
+    /**
+     * Creates a test location provider and adds it to the set of active providers. This provider
+     * will replace any provider with the same name that exists prior to this call.
+     *
+     * @param provider the provider name
+     *
+     * @throws IllegalArgumentException if provider is null
+     * @throws IllegalArgumentException if properties is null
+     * @throws SecurityException if {@link android.app.AppOpsManager#OPSTR_MOCK_LOCATION
+     * mock location app op} is not set to {@link android.app.AppOpsManager#MODE_ALLOWED
+     * allowed} for your app.
+     */
+    public void addTestProvider(@NonNull String provider, @NonNull ProviderProperties properties) {
+        Preconditions.checkArgument(provider != null, "invalid null provider");
+        Preconditions.checkArgument(properties != null, "invalid null properties");
+
         try {
             mService.addTestProvider(provider, properties, mContext.getOpPackageName(),
                     mContext.getFeatureId());
@@ -2131,6 +2201,20 @@ public class LocationManager {
     public String getGnssHardwareModelName() {
         try {
             return mService.getGnssHardwareModelName();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the current list of GNSS antenna infos, or null if unknown or unsupported.
+     *
+     * @see #getGnssCapabilities()
+     */
+    @Nullable
+    public List<GnssAntennaInfo> getGnssAntennaInfos() {
+        try {
+            return mService.getGnssAntennaInfos();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2559,15 +2643,19 @@ public class LocationManager {
      *
      * <p>Not all GNSS chipsets support antenna info updates, see {@link #getGnssCapabilities()}.
      *
+     * <p>Prior to Android S, this requires the {@link Manifest.permission#ACCESS_FINE_LOCATION}
+     * permission.
+     *
      * @param executor the executor that the listener runs on
      * @param listener the listener to register
      * @return {@code true} always
      *
      * @throws IllegalArgumentException if executor is null
      * @throws IllegalArgumentException if listener is null
-     * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
+     *
+     * @deprecated Prefer to use a receiver for {@link #ACTION_GNSS_ANTENNA_INFOS_CHANGED}.
      */
-    @RequiresPermission(ACCESS_FINE_LOCATION)
+    @Deprecated
     public boolean registerAntennaInfoListener(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull GnssAntennaInfo.Listener listener) {
@@ -2579,7 +2667,10 @@ public class LocationManager {
      * Unregisters a GNSS Antenna Info listener.
      *
      * @param listener a {@link GnssAntennaInfo.Listener} object to remove
+     *
+     * @deprecated Prefer to use a receiver for {@link #ACTION_GNSS_ANTENNA_INFOS_CHANGED}.
      */
+    @Deprecated
     public void unregisterAntennaInfoListener(@NonNull GnssAntennaInfo.Listener listener) {
         getGnssAntennaInfoTransportMultiplexer().removeListener(listener);
     }
@@ -3153,40 +3244,41 @@ public class LocationManager {
     private class GnssAntennaInfoTransportMultiplexer extends
             ListenerTransportMultiplexer<Void, GnssAntennaInfo.Listener> {
 
-        private @Nullable IGnssAntennaInfoListener mListenerTransport;
+        private @Nullable BroadcastReceiver mListenerTransport;
 
         GnssAntennaInfoTransportMultiplexer() {}
 
         @Override
-        protected void registerWithServer(Void ignored) throws RemoteException {
-            IGnssAntennaInfoListener transport = mListenerTransport;
-            if (transport == null) {
-                transport = new GnssAntennaInfoListener();
+        protected void registerWithServer(Void ignored) {
+            if (mListenerTransport == null) {
+                // if an exception is thrown the transport should not be set
+                BroadcastReceiver transport = new GnssAntennaInfoReceiver();
+                mContext.registerReceiver(transport,
+                        new IntentFilter(ACTION_GNSS_ANTENNA_INFOS_CHANGED));
+                mListenerTransport = transport;
             }
-
-            // if a remote exception is thrown the transport should not be set
-            mListenerTransport = null;
-            mService.addGnssAntennaInfoListener(transport, mContext.getPackageName(),
-                    mContext.getAttributionTag());
-            mListenerTransport = transport;
         }
 
         @Override
-        protected void unregisterWithServer() throws RemoteException {
+        protected void unregisterWithServer() {
             if (mListenerTransport != null) {
-                IGnssAntennaInfoListener transport = mListenerTransport;
+                BroadcastReceiver transport = mListenerTransport;
                 mListenerTransport = null;
-                mService.removeGnssAntennaInfoListener(transport);
+                mContext.unregisterReceiver(transport);
             }
         }
 
-        private class GnssAntennaInfoListener extends IGnssAntennaInfoListener.Stub {
+        private class GnssAntennaInfoReceiver extends BroadcastReceiver {
 
-            GnssAntennaInfoListener() {}
+            GnssAntennaInfoReceiver() {}
 
             @Override
-            public void onGnssAntennaInfoReceived(List<GnssAntennaInfo> infos) {
-                deliverToListeners(callback -> callback.onGnssAntennaInfoReceived(infos));
+            public void onReceive(Context context, Intent intent) {
+                ArrayList<GnssAntennaInfo> infos = intent.getParcelableArrayListExtra(
+                        EXTRA_GNSS_ANTENNA_INFOS);
+                if (infos != null) {
+                    deliverToListeners(callback -> callback.onGnssAntennaInfoReceived(infos));
+                }
             }
         }
     }

@@ -1496,6 +1496,7 @@ class RecentTasks {
         final Task removedTask = mTasks.remove(removeIndex);
         if (removedTask != task) {
             if (removedTask.hasChild()) {
+                Slog.i(TAG, "Add " + removedTask + " to hidden list because adding " + task);
                 // A non-empty task is replaced by a new task. Because the removed task is no longer
                 // managed by the recent tasks list, add it to the hidden list to prevent the task
                 // from becoming dangling.

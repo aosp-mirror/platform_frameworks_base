@@ -1381,10 +1381,6 @@ class ProcessRecord implements WindowProcessListener {
         mWindowProcessController.removeAllowBackgroundActivityStartsToken(entity);
     }
 
-    boolean areBackgroundActivityStartsAllowedByToken() {
-        return mWindowProcessController.areBackgroundActivityStartsAllowedByToken();
-    }
-
     void addBoundClientUid(int clientUid) {
         mBoundClientUids.add(clientUid);
         mWindowProcessController.setBoundClientUids(mBoundClientUids);

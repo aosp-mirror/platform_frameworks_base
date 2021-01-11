@@ -15,6 +15,17 @@
  */
 package com.android.server.timezonedetector;
 
+import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_IS_AUTO_DETECTION_ENABLED;
+import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_IS_GEO_DETECTION_ENABLED;
+import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_IS_GEO_DETECTION_SUPPORTED;
+import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_IS_LOCATION_ENABLED;
+import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SET_AUTO_DETECTION_ENABLED;
+import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SET_GEO_DETECTION_ENABLED;
+import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SUGGEST_GEO_LOCATION_TIME_ZONE;
+import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SUGGEST_MANUAL_TIME_ZONE;
+import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SUGGEST_TELEPHONY_TIME_ZONE;
+
+import android.app.time.TimeZoneConfiguration;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.os.ShellCommand;
@@ -39,16 +50,76 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
         }
 
         switch (cmd) {
-            case "suggest_geo_location_time_zone":
+            case SHELL_COMMAND_IS_AUTO_DETECTION_ENABLED:
+                return runIsAutoDetectionEnabled();
+            case SHELL_COMMAND_SET_AUTO_DETECTION_ENABLED:
+                return runSetAutoDetectionEnabled();
+            case SHELL_COMMAND_IS_GEO_DETECTION_SUPPORTED:
+                return runIsGeoDetectionSupported();
+            case SHELL_COMMAND_IS_LOCATION_ENABLED:
+                return runIsLocationEnabled();
+            case SHELL_COMMAND_IS_GEO_DETECTION_ENABLED:
+                return runIsGeoDetectionEnabled();
+            case SHELL_COMMAND_SET_GEO_DETECTION_ENABLED:
+                return runSetGeoDetectionEnabled();
+            case SHELL_COMMAND_SUGGEST_GEO_LOCATION_TIME_ZONE:
                 return runSuggestGeolocationTimeZone();
-            case "suggest_manual_time_zone":
+            case SHELL_COMMAND_SUGGEST_MANUAL_TIME_ZONE:
                 return runSuggestManualTimeZone();
-            case "suggest_telephony_time_zone":
+            case SHELL_COMMAND_SUGGEST_TELEPHONY_TIME_ZONE:
                 return runSuggestTelephonyTimeZone();
             default: {
                 return handleDefaultCommands(cmd);
             }
         }
+    }
+
+    private int runIsAutoDetectionEnabled() {
+        final PrintWriter pw = getOutPrintWriter();
+        boolean enabled = mInterface.getCapabilitiesAndConfig()
+                .getConfiguration()
+                .isAutoDetectionEnabled();
+        pw.println(enabled);
+        return 0;
+    }
+
+    private int runIsGeoDetectionSupported() {
+        final PrintWriter pw = getOutPrintWriter();
+        boolean enabled = mInterface.isGeoTimeZoneDetectionSupported();
+        pw.println(enabled);
+        return 0;
+    }
+
+    private int runIsLocationEnabled() {
+        final PrintWriter pw = getOutPrintWriter();
+        boolean enabled = mInterface.isLocationEnabled();
+        pw.println(enabled);
+        return 0;
+    }
+
+    private int runIsGeoDetectionEnabled() {
+        final PrintWriter pw = getOutPrintWriter();
+        boolean enabled = mInterface.getCapabilitiesAndConfig()
+                .getConfiguration()
+                .isGeoDetectionEnabled();
+        pw.println(enabled);
+        return 0;
+    }
+
+    private int runSetAutoDetectionEnabled() {
+        boolean enabled = Boolean.parseBoolean(getNextArgRequired());
+        TimeZoneConfiguration configuration = new TimeZoneConfiguration.Builder()
+                .setAutoDetectionEnabled(enabled)
+                .build();
+        return mInterface.updateConfiguration(configuration) ? 0 : 1;
+    }
+
+    private int runSetGeoDetectionEnabled() {
+        boolean enabled = Boolean.parseBoolean(getNextArgRequired());
+        TimeZoneConfiguration configuration = new TimeZoneConfiguration.Builder()
+                .setGeoDetectionEnabled(enabled)
+                .build();
+        return mInterface.updateConfiguration(configuration) ? 0 : 1;
     }
 
     private int runSuggestGeolocationTimeZone() {
@@ -72,16 +143,7 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
     private <T> int runSuggestTimeZone(Supplier<T> suggestionParser, Consumer<T> invoker) {
         final PrintWriter pw = getOutPrintWriter();
         try {
-            T suggestion = null;
-            String opt;
-            while ((opt = getNextArg()) != null) {
-                if ("--suggestion".equals(opt)) {
-                    suggestion = suggestionParser.get();
-                } else {
-                    pw.println("Error: Unknown option: " + opt);
-                    return 1;
-                }
-            }
+            T suggestion = suggestionParser.get();
             if (suggestion == null) {
                 pw.println("Error: suggestion not specified");
                 return 1;
@@ -101,12 +163,26 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
         pw.println("Time Zone Detector (time_zone_detector) commands:");
         pw.println("  help");
         pw.println("    Print this help text.");
-        pw.println("  suggest_geolocation_time_zone");
-        pw.println("    --suggestion <geolocation suggestion opts>");
-        pw.println("  suggest_manual_time_zone");
-        pw.println("    --suggestion <manual suggestion opts>");
-        pw.println("  suggest_telephony_time_zone");
-        pw.println("    --suggestion <telephony suggestion opts>");
+        pw.printf("  %s\n", SHELL_COMMAND_IS_AUTO_DETECTION_ENABLED);
+        pw.println("    Prints true/false according to the automatic tz detection setting");
+        pw.printf("  %s true|false\n", SHELL_COMMAND_SET_AUTO_DETECTION_ENABLED);
+        pw.println("    Sets the automatic tz detection setting.");
+        pw.printf("  %s\n", SHELL_COMMAND_IS_GEO_DETECTION_SUPPORTED);
+        pw.println("    Prints true/false according to whether geolocation time zone detection is"
+                + " supported on this device");
+        pw.printf("  %s\n", SHELL_COMMAND_IS_LOCATION_ENABLED);
+        pw.println("    Prints true/false according to whether the master location toggle is"
+                + " enabled for the current user");
+        pw.printf("  %s\n", SHELL_COMMAND_IS_GEO_DETECTION_ENABLED);
+        pw.println("    Prints true/false according to the geolocation tz detection setting");
+        pw.printf("  %s true|false\n", SHELL_COMMAND_SET_GEO_DETECTION_ENABLED);
+        pw.println("    Sets the geolocation tz detection setting.");
+        pw.printf("  %s <geolocation suggestion opts>\n",
+                SHELL_COMMAND_SUGGEST_GEO_LOCATION_TIME_ZONE);
+        pw.printf("  %s <manual suggestion opts>\n",
+                SHELL_COMMAND_SUGGEST_MANUAL_TIME_ZONE);
+        pw.printf("  %s <telephony suggestion opts>\n",
+                SHELL_COMMAND_SUGGEST_TELEPHONY_TIME_ZONE);
         pw.println();
         GeolocationTimeZoneSuggestion.printCommandLineOpts(pw);
         pw.println();

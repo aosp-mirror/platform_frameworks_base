@@ -25,6 +25,7 @@ import android.app.timezonedetector.ITimeZoneDetectorService;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.content.Context;
+import android.location.LocationManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -309,6 +310,19 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
         Objects.requireNonNull(timeZoneSuggestion);
 
         mHandler.post(() -> mTimeZoneDetectorStrategy.suggestTelephonyTimeZone(timeZoneSuggestion));
+    }
+
+    boolean isGeoTimeZoneDetectionSupported() {
+        enforceManageTimeZoneDetectorPermission();
+
+        return isGeoLocationTimeZoneDetectionEnabled(mContext);
+    }
+
+    boolean isLocationEnabled() {
+        enforceManageTimeZoneDetectorPermission();
+
+        return mContext.getSystemService(LocationManager.class)
+                .isLocationEnabledForUser(mContext.getUser());
     }
 
     @Override

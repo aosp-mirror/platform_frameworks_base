@@ -16,13 +16,23 @@
 
 package com.android.wm.shell;
 
+import android.annotation.UiContext;
+import android.app.ResourcesManager;
+import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.res.Configuration;
+import android.hardware.display.DisplayManager;
+import android.os.Binder;
+import android.os.IBinder;
 import android.util.SparseArray;
+import android.view.Display;
 import android.view.SurfaceControl;
 import android.window.DisplayAreaAppearedInfo;
 import android.window.DisplayAreaInfo;
 import android.window.DisplayAreaOrganizer;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -42,8 +52,13 @@ public class RootTaskDisplayAreaOrganizer extends DisplayAreaOrganizer {
     private final SparseArray<ArrayList<RootTaskDisplayAreaListener>> mListeners =
             new SparseArray<>();
 
-    public RootTaskDisplayAreaOrganizer(Executor executor) {
+    private final SparseArray<DisplayAreaContext> mDisplayAreaContexts = new SparseArray<>();
+
+    private final Context mContext;
+
+    public RootTaskDisplayAreaOrganizer(Executor executor, Context context) {
         super(executor);
+        mContext = context;
         List<DisplayAreaAppearedInfo> infos = registerOrganizer(FEATURE_DEFAULT_TASK_CONTAINER);
         for (int i = infos.size() - 1; i >= 0; --i) {
             onDisplayAreaAppeared(infos.get(i).getDisplayAreaInfo(), infos.get(i).getLeash());
@@ -103,6 +118,7 @@ public class RootTaskDisplayAreaOrganizer extends DisplayAreaOrganizer {
                 listeners.get(i).onDisplayAreaAppeared(displayAreaInfo);
             }
         }
+        applyConfigChangesToContext(displayId, displayAreaInfo.configuration);
     }
 
     @Override
@@ -123,6 +139,7 @@ public class RootTaskDisplayAreaOrganizer extends DisplayAreaOrganizer {
                 listeners.get(i).onDisplayAreaVanished(displayAreaInfo);
             }
         }
+        mDisplayAreaContexts.remove(displayId);
     }
 
     @Override
@@ -143,6 +160,33 @@ public class RootTaskDisplayAreaOrganizer extends DisplayAreaOrganizer {
                 listeners.get(i).onDisplayAreaInfoChanged(displayAreaInfo);
             }
         }
+        applyConfigChangesToContext(displayId, displayAreaInfo.configuration);
+    }
+
+    /**
+     * Applies the {@link Configuration} to the {@link DisplayAreaContext} specified by
+     * {@code displayId}.
+     *
+     * @param displayId The ID of the {@link Display} which the {@link DisplayAreaContext} is
+     *                  associated with
+     * @param newConfig The propagated configuration
+     */
+    private void applyConfigChangesToContext(int displayId, @NonNull Configuration newConfig) {
+        DisplayAreaContext daContext = mDisplayAreaContexts.get(displayId);
+        if (daContext == null) {
+            daContext = new DisplayAreaContext(mContext, displayId);
+            mDisplayAreaContexts.put(displayId, daContext);
+        }
+        daContext.updateConfigurationChanges(newConfig);
+    }
+
+    /**
+     * Returns the UI context associated with RootTaskDisplayArea specified by {@code displayId}.
+     */
+    @Nullable
+    @UiContext
+    public Context getContext(int displayId) {
+        return mDisplayAreaContexts.get(displayId);
     }
 
     public void dump(@NonNull PrintWriter pw, String prefix) {
@@ -168,6 +212,34 @@ public class RootTaskDisplayAreaOrganizer extends DisplayAreaOrganizer {
         }
 
         default void dump(@NonNull PrintWriter pw, String prefix) {
+        }
+    }
+
+    /**
+     * A UI context to associate with a {@link com.android.server.wm.DisplayArea}.
+     *
+     * This context receives configuration changes through {@link DisplayAreaOrganizer} callbacks
+     * and the core implementation is {@link Context#createTokenContext(IBinder, Display)} to apply
+     * the configuration updates to the {@link android.content.res.Resources}.
+     */
+    @UiContext
+    public static class DisplayAreaContext extends ContextWrapper {
+        private final IBinder mToken = new Binder();
+        private final ResourcesManager mResourcesManager = ResourcesManager.getInstance();
+
+        public DisplayAreaContext(@NonNull Context context, int displayId) {
+            super(null);
+            final Display display = context.getSystemService(DisplayManager.class)
+                    .getDisplay(displayId);
+            attachBaseContext(context.createTokenContext(mToken, display));
+        }
+
+        private void updateConfigurationChanges(@NonNull Configuration newConfig) {
+            final Configuration config = getResources().getConfiguration();
+            final boolean configChanged = config.diff(newConfig) != 0;
+            if (configChanged) {
+                mResourcesManager.updateResourcesForActivity(mToken, newConfig, getDisplayId());
+            }
         }
     }
 }

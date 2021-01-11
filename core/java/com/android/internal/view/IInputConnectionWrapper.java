@@ -79,6 +79,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
     private static final int DO_CLOSE_CONNECTION = 150;
     private static final int DO_COMMIT_CONTENT = 160;
     private static final int DO_GET_SURROUNDING_TEXT = 41;
+    private static final int DO_SET_IME_TEMPORARILY_CONSUMES_INPUT = 170;
 
 
     @GuardedBy("mLock")
@@ -264,6 +265,16 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
         args.arg2 = opts;
         args.arg3 = callback;
         dispatchMessage(mH.obtainMessage(DO_COMMIT_CONTENT, flags, 0 /* unused */, args));
+    }
+
+    /**
+     * Dispatches the request for setting ime temporarily consumes input.
+     *
+     * <p>See {@link InputConnection#setImeTemporarilyConsumesInput(boolean)}.
+     */
+    public void setImeTemporarilyConsumesInput(boolean imeTemporarilyConsumesInput) {
+        dispatchMessage(obtainMessageB(DO_SET_IME_TEMPORARILY_CONSUMES_INPUT,
+                imeTemporarilyConsumesInput));
     }
 
     void dispatchMessage(Message msg) {
@@ -811,6 +822,22 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 }
                 return;
             }
+            case DO_SET_IME_TEMPORARILY_CONSUMES_INPUT: {
+                Trace.traceBegin(Trace.TRACE_TAG_INPUT,
+                        "InputConnection#setImeTemporarilyConsumesInput");
+                try {
+                    InputConnection ic = getInputConnection();
+                    if (ic == null || !isActive()) {
+                        Log.w(TAG,
+                                "setImeTemporarilyConsumesInput on inactive InputConnection");
+                        return;
+                    }
+                    ic.setImeTemporarilyConsumesInput(msg.arg1 == 1);
+                } finally {
+                    Trace.traceEnd(Trace.TRACE_TAG_INPUT);
+                }
+                return;
+            }
         }
         Log.w(TAG, "Unhandled message code: " + msg.what);
     }
@@ -836,5 +863,9 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
         args.arg1 = arg1;
         args.arg2 = arg2;
         return mH.obtainMessage(what, 0, 0, args);
+    }
+
+    Message obtainMessageB(int what, boolean arg1) {
+        return mH.obtainMessage(what, arg1 ? 1 : 0, 0);
     }
 }

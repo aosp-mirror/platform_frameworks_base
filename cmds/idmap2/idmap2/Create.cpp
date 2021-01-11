@@ -50,6 +50,7 @@ Result<Unit> Create(const std::vector<std::string>& args) {
   std::string target_apk_path;
   std::string overlay_apk_path;
   std::string idmap_path;
+  std::string overlay_name;
   std::vector<std::string> policies;
   bool ignore_overlayable = false;
 
@@ -62,9 +63,11 @@ Result<Unit> Create(const std::vector<std::string>& args) {
                            "input: path to apk which contains the new resource values",
                            &overlay_apk_path)
           .MandatoryOption("--idmap-path", "output: path to where to write idmap file", &idmap_path)
+          .OptionalOption("--overlay-name", "input: the value of android:name of the overlay",
+                          &overlay_name)
           .OptionalOption("--policy",
                           "input: an overlayable policy this overlay fulfills "
-                          "(if none or supplied, the overlay policy will default to \"public\")",
+                          "(if none are supplied, the overlay policy will default to \"public\")",
                           &policies)
           .OptionalFlag("--ignore-overlayable", "disables overlayable and policy checks",
                         &ignore_overlayable);
@@ -100,8 +103,8 @@ Result<Unit> Create(const std::vector<std::string>& args) {
     return Error("failed to load apk %s", overlay_apk_path.c_str());
   }
 
-  const auto idmap =
-      Idmap::FromApkAssets(*target_apk, *overlay_apk, fulfilled_policies, !ignore_overlayable);
+  const auto idmap = Idmap::FromApkAssets(*target_apk, *overlay_apk, overlay_name,
+                                          fulfilled_policies, !ignore_overlayable);
   if (!idmap) {
     return Error(idmap.GetError(), "failed to create idmap");
   }

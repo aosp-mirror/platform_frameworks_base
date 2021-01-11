@@ -523,7 +523,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                         mScreenBrightnessRangeMaximum, dozeScaleFactor, lightSensorRate,
                         initialLightSensorRate, brighteningLightDebounce, darkeningLightDebounce,
                         autoBrightnessResetAmbientLuxAfterWarmUp, ambientBrightnessThresholds,
-                        screenBrightnessThresholds, context);
+                        screenBrightnessThresholds, logicalDisplay, context);
             } else {
                 mUseSoftwareAutoBrightnessConfig = false;
             }
@@ -672,6 +672,15 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             return null;
         }
         return mAutomaticBrightnessController.getDefaultConfig();
+    }
+
+    /**
+     * Notified when the display is changed. We use this to apply any changes that might be needed
+     * when displays get swapped on foldable devices.  For example, different brightness properties
+     * of each display need to be properly reflected in AutomaticBrightnessController.
+     */
+    public void onDisplayChanged() {
+        // TODO: b/175821789 - Support high brightness on multiple (folding) displays
     }
 
     private void sendUpdatePowerState() {

@@ -743,6 +743,14 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL = "carrier_wfc_ims_available_bool";
 
     /**
+     * Flag specifying whether Cross SIM over IMS should be available for carrier.
+     * When {@code false} the carrier does not support cross SIM calling.
+     * When {@code true} the carrier does support cross sim calling, where available
+     */
+    public static final String KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL =
+            "carrier_cross_sim_ims_available_bool";
+
+    /**
      * Specifies a map from dialstrings to replacements for roaming network service numbers which
      * cannot be replaced on the carrier side.
      * <p>
@@ -1495,6 +1503,31 @@ public class CarrierConfigManager {
      */
     public static final String KEY_WFC_CARRIER_NAME_OVERRIDE_BY_PNN_BOOL =
             "wfc_carrier_name_override_by_pnn_bool";
+
+    /**
+     * Value for {#CROSS_SIM_SPN_FORMAT_CARRIER_NAME_WITH_BRANDING} cnfig.
+     * specifies SPN format of displaying carrier name only.
+     *
+     */
+    public static final int CROSS_SIM_SPN_FORMAT_CARRIER_NAME_ONLY = 0;
+
+    /**
+     * Value for {#CROSS_SIM_SPN_FORMAT_CARRIER_NAME_WITH_BRANDING} cnfig.
+     * specifies SPN format of displaying carrier name along with "Cross-SIM calling".
+     */
+    public static final int CROSS_SIM_SPN_FORMAT_CARRIER_NAME_WITH_BRANDING = 1;
+
+    /**
+     * Indexes of SPN format strings in crossSimSpnFormats.
+     *
+     * <p>Available options are:
+     * <ul>
+     * <li>  {#CROSS_SIM_SPN_FORMAT_CARRIER_NAME_ONLY}: %s</li>
+     * <li>  {#CROSS_SIM_SPN_FORMAT_CARRIER_NAME_WITH_BRANDING}: %s Cross-SIM Calling</li>
+     * </ul>
+     * %s will be filled with carrier name
+     */
+    public static final String KEY_CROSS_SIM_SPN_FORMAT_INT = "cross_sim_spn_format_int";
 
     /**
      * Override the SPN Display Condition 2 integer bits (lsb). B2, B1 is the last two bits of the
@@ -2373,7 +2406,8 @@ public class CarrierConfigManager {
             "show_blocking_pay_phone_option_bool";
 
     /**
-     * Flag specifying whether the carrier will use the WFC home network mode in roaming network.
+     * Flag specifying whether the carrier will use the
+     * WFC home network mode in roaming network.
      * {@code false} - roaming preference can be selected separately from the home preference.
      * {@code true}  - roaming preference is the same as home preference and
      *                 {@link #KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT} is used as the default value.
@@ -4621,6 +4655,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_IGNORE_DATA_ENABLED_CHANGED_FOR_VIDEO_CALLS, true);
         sDefaults.putBoolean(KEY_VILTE_DATA_IS_METERED_BOOL, true);
         sDefaults.putBoolean(KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, false);
+        sDefaults.putBoolean(KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_WFC_SUPPORTS_WIFI_ONLY_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_DEFAULT_WFC_IMS_ENABLED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_ENABLED_BOOL, false);
@@ -4794,6 +4829,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_NAME_OVERRIDE_BOOL, false);
         sDefaults.putString(KEY_CARRIER_NAME_STRING, "");
         sDefaults.putBoolean(KEY_WFC_CARRIER_NAME_OVERRIDE_BY_PNN_BOOL, false);
+        sDefaults.putInt(KEY_CROSS_SIM_SPN_FORMAT_INT, 1);
         sDefaults.putInt(KEY_SPN_DISPLAY_CONDITION_OVERRIDE_INT, -1);
         sDefaults.putStringArray(KEY_SPDI_OVERRIDE_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_PNN_OVERRIDE_STRING_ARRAY, null);

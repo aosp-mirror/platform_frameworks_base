@@ -17,6 +17,7 @@
 package com.android.server.utils;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.util.SparseBooleanArray;
 
 /**
@@ -53,10 +54,47 @@ public class WatchedSparseBooleanArray extends WatchableImpl
     }
 
     /**
+     * Create a {@link WatchedSparseBooleanArray} from a {@link SparseBooleanArray}
+     */
+    public WatchedSparseBooleanArray(@NonNull SparseBooleanArray c) {
+        mStorage = c.clone();
+    }
+
+    /**
      * The copy constructor does not copy the watcher data.
      */
     public WatchedSparseBooleanArray(@NonNull WatchedSparseBooleanArray r) {
         mStorage = r.mStorage.clone();
+    }
+
+    /**
+     * Make <this> a copy of src.  Any data in <this> is discarded.
+     */
+    public void copyFrom(@NonNull SparseBooleanArray src) {
+        clear();
+        final int end = src.size();
+        for (int i = 0; i < end; i++) {
+            put(src.keyAt(i), src.valueAt(i));
+        }
+    }
+
+    /**
+     * Make dst a copy of <this>.  Any previous data in dst is discarded.
+     */
+    public void copyTo(@NonNull SparseBooleanArray dst) {
+        dst.clear();
+        final int end = size();
+        for (int i = 0; i < end; i++) {
+            dst.put(keyAt(i), valueAt(i));
+        }
+    }
+
+    /**
+     * Return the underlying storage.  This breaks the wrapper but is necessary when
+     * passing the array to distant methods.
+     */
+    public SparseBooleanArray untrackedStorage() {
+        return mStorage;
     }
 
     /**
@@ -99,10 +137,10 @@ public class WatchedSparseBooleanArray extends WatchableImpl
      * was one.
      */
     public void put(int key, boolean value) {
-        if (mStorage.get(key) != value) {
-            mStorage.put(key, value);
-            onChanged();
-        }
+        // There is no fast way to know if the key exists with the input value, so this
+        // method always notifies change listeners.
+        mStorage.put(key, value);
+        onChanged();
     }
 
     /**
@@ -219,8 +257,13 @@ public class WatchedSparseBooleanArray extends WatchableImpl
     }
 
     @Override
-    public boolean equals(Object that) {
-        return this == that || mStorage.equals(that);
+    public boolean equals(@Nullable Object o) {
+        if (o instanceof WatchedSparseBooleanArray) {
+            WatchedSparseBooleanArray w = (WatchedSparseBooleanArray) o;
+            return mStorage.equals(w.mStorage);
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -249,13 +292,26 @@ public class WatchedSparseBooleanArray extends WatchableImpl
      * @param r The source array, which is copied into <this>
      */
     public void snapshot(@NonNull WatchedSparseBooleanArray r) {
-        if (size() != 0) {
+        snapshot(this, r);
+    }
+
+    /**
+     * Make the destination a copy of the source.  If the element is a subclass of Snapper then the
+     * copy contains snapshots of the elements.  Otherwise the copy contains references to the
+     * elements.  The destination must be initially empty.  Upon return, the destination is
+     * immutable.
+     * @param dst The destination array.  It must be empty.
+     * @param src The source array.  It is not modified.
+     */
+    public static void snapshot(@NonNull WatchedSparseBooleanArray dst,
+            @NonNull WatchedSparseBooleanArray src) {
+        if (dst.size() != 0) {
             throw new IllegalArgumentException("snapshot destination is not empty");
         }
-        final int end = r.size();
+        final int end = src.size();
         for (int i = 0; i < end; i++) {
-            put(r.keyAt(i), r.valueAt(i));
+            dst.put(src.keyAt(i), src.valueAt(i));
         }
-        seal();
+        dst.seal();
     }
 }

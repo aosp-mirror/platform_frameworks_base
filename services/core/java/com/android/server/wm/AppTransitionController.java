@@ -154,7 +154,7 @@ public class AppTransitionController {
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "**** GOOD TO GO");
         // TODO(new-app-transition): Remove code using appTransition.getAppTransition()
         final AppTransition appTransition = mDisplayContent.mAppTransition;
-        mDisplayContent.mSkipAppTransitionAnimation = false;
+
         mDisplayContent.mNoAnimationNotifyOnTransitionFinished.clear();
 
         appTransition.removeAppTransitionTimeoutCallbacks();
@@ -188,7 +188,9 @@ public class AppTransitionController {
         final @TransitionOldType int transit = getTransitCompatType(
                 mDisplayContent.mAppTransition,
                 mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                mWallpaperControllerLocked.getWallpaperTarget(), getOldWallpaper());
+                mWallpaperControllerLocked.getWallpaperTarget(), getOldWallpaper(),
+                mDisplayContent.mSkipAppTransitionAnimation);
+        mDisplayContent.mSkipAppTransitionAnimation = false;
 
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                 "handleAppTransitionReady: displayId=%d appTransition={%s}"
@@ -274,7 +276,8 @@ public class AppTransitionController {
      */
     static @TransitionOldType int getTransitCompatType(AppTransition appTransition,
             ArraySet<ActivityRecord> openingApps, ArraySet<ActivityRecord> closingApps,
-            @Nullable WindowState wallpaperTarget, @Nullable WindowState oldWallpaper) {
+            @Nullable WindowState wallpaperTarget, @Nullable WindowState oldWallpaper,
+            boolean skipAppTransitionAnimation) {
 
         // Determine if closing and opening app token sets are wallpaper targets, in which case
         // special animations are needed.
@@ -298,6 +301,10 @@ public class AppTransitionController {
                 return TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
         }
 
+        // This is not keyguard transition and one of the app has request to skip app transition.
+        if (skipAppTransitionAnimation) {
+            return WindowManager.TRANSIT_OLD_UNSET;
+        }
         final @TransitionFlags int flags = appTransition.getTransitFlags();
         final @TransitionType int firstTransit = appTransition.getFirstAppTransition();
 

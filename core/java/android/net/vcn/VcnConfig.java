@@ -19,6 +19,7 @@ import static com.android.internal.annotations.VisibleForTesting.Visibility;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
@@ -45,11 +46,17 @@ import java.util.Set;
 public final class VcnConfig implements Parcelable {
     @NonNull private static final String TAG = VcnConfig.class.getSimpleName();
 
+    private static final String PACKAGE_NAME_KEY = "mPackageName";
+    @NonNull private final String mPackageName;
+
     private static final String GATEWAY_CONNECTION_CONFIGS_KEY = "mGatewayConnectionConfigs";
     @NonNull private final Set<VcnGatewayConnectionConfig> mGatewayConnectionConfigs;
 
-    private VcnConfig(@NonNull Set<VcnGatewayConnectionConfig> tunnelConfigs) {
-        mGatewayConnectionConfigs = Collections.unmodifiableSet(tunnelConfigs);
+    private VcnConfig(
+            @NonNull String packageName,
+            @NonNull Set<VcnGatewayConnectionConfig> gatewayConnectionConfigs) {
+        mPackageName = packageName;
+        mGatewayConnectionConfigs = Collections.unmodifiableSet(gatewayConnectionConfigs);
 
         validate();
     }
@@ -61,6 +68,8 @@ public final class VcnConfig implements Parcelable {
      */
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     public VcnConfig(@NonNull PersistableBundle in) {
+        mPackageName = in.getString(PACKAGE_NAME_KEY);
+
         final PersistableBundle gatewayConnectionConfigsBundle =
                 in.getPersistableBundle(GATEWAY_CONNECTION_CONFIGS_KEY);
         mGatewayConnectionConfigs =
@@ -72,8 +81,19 @@ public final class VcnConfig implements Parcelable {
     }
 
     private void validate() {
+        Objects.requireNonNull(mPackageName, "packageName was null");
         Preconditions.checkCollectionNotEmpty(
-                mGatewayConnectionConfigs, "gatewayConnectionConfigs");
+                mGatewayConnectionConfigs, "gatewayConnectionConfigs was empty");
+    }
+
+    /**
+     * Retrieve the package name of the provisioning app.
+     *
+     * @hide
+     */
+    @NonNull
+    public String getProvisioningPackageName() {
+        return mPackageName;
     }
 
     /** Retrieves the set of configured tunnels. */
@@ -91,6 +111,8 @@ public final class VcnConfig implements Parcelable {
     public PersistableBundle toPersistableBundle() {
         final PersistableBundle result = new PersistableBundle();
 
+        result.putString(PACKAGE_NAME_KEY, mPackageName);
+
         final PersistableBundle gatewayConnectionConfigsBundle =
                 PersistableBundleUtils.fromList(
                         new ArrayList<>(mGatewayConnectionConfigs),
@@ -102,7 +124,7 @@ public final class VcnConfig implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mGatewayConnectionConfigs);
+        return Objects.hash(mPackageName, mGatewayConnectionConfigs);
     }
 
     @Override
@@ -112,7 +134,8 @@ public final class VcnConfig implements Parcelable {
         }
 
         final VcnConfig rhs = (VcnConfig) other;
-        return mGatewayConnectionConfigs.equals(rhs.mGatewayConnectionConfigs);
+        return mPackageName.equals(rhs.mPackageName)
+                && mGatewayConnectionConfigs.equals(rhs.mGatewayConnectionConfigs);
     }
 
     // Parcelable methods
@@ -143,8 +166,16 @@ public final class VcnConfig implements Parcelable {
 
     /** This class is used to incrementally build {@link VcnConfig} objects. */
     public static class Builder {
+        @NonNull private final String mPackageName;
+
         @NonNull
         private final Set<VcnGatewayConnectionConfig> mGatewayConnectionConfigs = new ArraySet<>();
+
+        public Builder(@NonNull Context context) {
+            Objects.requireNonNull(context, "context was null");
+
+            mPackageName = context.getOpPackageName();
+        }
 
         /**
          * Adds a configuration for an individual gateway connection.
@@ -168,7 +199,7 @@ public final class VcnConfig implements Parcelable {
          */
         @NonNull
         public VcnConfig build() {
-            return new VcnConfig(mGatewayConnectionConfigs);
+            return new VcnConfig(mPackageName, mGatewayConnectionConfigs);
         }
     }
 }

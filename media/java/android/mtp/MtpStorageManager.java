@@ -958,7 +958,7 @@ public class MtpStorageManager {
         MtpObject parent = obj.getParent();
         MtpObject oldObj = parent.getChild(oldName);
         if (!success) {
-            // If the rename failed, we want oldObj to be the original and obj to be the dummy.
+            // If the rename failed, we want oldObj to be the original and obj to be the stand-in.
             // Switch the objects, except for their name and state.
             MtpObject temp = oldObj;
             MtpObjectState oldState = oldObj.getState();
@@ -1034,7 +1034,7 @@ public class MtpStorageManager {
             return generalBeginRemoveObject(obj, MtpOperation.RENAME)
                     && generalBeginCopyObject(newObj, false);
         }
-        // Move obj to new parent, create a dummy object in the old parent.
+        // Move obj to new parent, create a fake object in the old parent.
         MtpObject oldObj = obj.copy(false);
         obj.setParent(newParent);
         oldObj.getParent().addChild(oldObj);
@@ -1063,7 +1063,7 @@ public class MtpStorageManager {
             return generalEndCopyObject(newObj, success, true) && ret;
         }
         if (!success) {
-            // If the rename failed, we want oldObj to be the original and obj to be the dummy.
+            // If the rename failed, we want oldObj to be the original and obj to be the stand-in.
             // Switch the objects, except for their parent and state.
             MtpObject temp = oldObj;
             MtpObjectState oldState = oldObj.getState();

@@ -43,6 +43,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManagerInternal;
 import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
 import android.os.Handler;
@@ -64,6 +65,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import com.android.server.JobSchedulerBackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.job.ConstantsProto;
@@ -507,6 +509,8 @@ public final class QuotaController extends StateController {
             QcConstants.DEFAULT_EJ_LIMIT_RESTRICTED_MS
     };
 
+    private long mEjLimitSpecialAdditionMs = QcConstants.DEFAULT_EJ_LIMIT_SPECIAL_ADDITION_MS;
+
     /**
      * The period of time used to calculate expedited job sessions. Apps can only have expedited job
      * sessions totalling {@link #mEJLimitsMs}[bucket within this period of time (without factoring
@@ -517,22 +521,26 @@ public final class QuotaController extends StateController {
     /**
      * Length of time used to split an app's top time into chunks.
      */
-    public long mEJTopAppTimeChunkSizeMs = QcConstants.DEFAULT_EJ_TOP_APP_TIME_CHUNK_SIZE_MS;
+    private long mEJTopAppTimeChunkSizeMs = QcConstants.DEFAULT_EJ_TOP_APP_TIME_CHUNK_SIZE_MS;
 
     /**
      * How much EJ quota to give back to an app based on the number of top app time chunks it had.
      */
-    public long mEJRewardTopAppMs = QcConstants.DEFAULT_EJ_REWARD_TOP_APP_MS;
+    private long mEJRewardTopAppMs = QcConstants.DEFAULT_EJ_REWARD_TOP_APP_MS;
 
     /**
      * How much EJ quota to give back to an app based on each non-top user interaction.
      */
-    public long mEJRewardInteractionMs = QcConstants.DEFAULT_EJ_REWARD_INTERACTION_MS;
+    private long mEJRewardInteractionMs = QcConstants.DEFAULT_EJ_REWARD_INTERACTION_MS;
 
     /**
      * How much EJ quota to give back to an app based on each notification seen event.
      */
-    public long mEJRewardNotificationSeenMs = QcConstants.DEFAULT_EJ_REWARD_NOTIFICATION_SEEN_MS;
+    private long mEJRewardNotificationSeenMs = QcConstants.DEFAULT_EJ_REWARD_NOTIFICATION_SEEN_MS;
+
+    /** The package verifier app. */
+    @Nullable
+    private String mPackageVerifier;
 
     /** An app has reached its quota. The message should contain a {@link Package} object. */
     @VisibleForTesting
@@ -584,6 +592,16 @@ public final class QuotaController extends StateController {
                     ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, null);
         } catch (RemoteException e) {
             // ignored; both services live in system_server
+        }
+    }
+
+    @Override
+    public void onSystemServicesReady() {
+        String[] pkgNames = LocalServices.getService(PackageManagerInternal.class)
+                .getKnownPackageNames(
+                        PackageManagerInternal.PACKAGE_VERIFIER, UserHandle.USER_SYSTEM);
+        synchronized (mLock) {
+            mPackageVerifier = ArrayUtils.firstOrNull(pkgNames);
         }
     }
 
@@ -875,7 +893,7 @@ public final class QuotaController extends StateController {
         if (quota.getStandbyBucketLocked() == NEVER_INDEX) {
             return 0;
         }
-        final long limitMs = mEJLimitsMs[quota.getStandbyBucketLocked()];
+        final long limitMs = getEJLimitMsLocked(packageName, quota.getStandbyBucketLocked());
         long remainingMs = limitMs - quota.getTallyLocked();
 
         // Stale sessions may still be factored into tally. Make sure they're removed.
@@ -910,6 +928,14 @@ public final class QuotaController extends StateController {
         // TODO(171305774)/STOPSHIP: make sure getting rewards while HPJ currently executing isn't
         // treated negatively
         return remainingMs - timer.getCurrentDuration(sElapsedRealtimeClock.millis());
+    }
+
+    private long getEJLimitMsLocked(@NonNull final String packageName, final int standbyBucket) {
+        final long baseLimitMs = mEJLimitsMs[standbyBucket];
+        if (packageName.equals(mPackageVerifier)) {
+            return baseLimitMs + mEjLimitSpecialAdditionMs;
+        }
+        return baseLimitMs;
     }
 
     /**
@@ -1014,7 +1040,7 @@ public final class QuotaController extends StateController {
 
         final long nowElapsed = sElapsedRealtimeClock.millis();
         ShrinkableDebits quota = getEJQuotaLocked(userId, packageName);
-        final long limitMs = mEJLimitsMs[quota.getStandbyBucketLocked()];
+        final long limitMs = getEJLimitMsLocked(packageName, quota.getStandbyBucketLocked());
         final long startWindowElapsed = Math.max(0, nowElapsed - mEJLimitWindowSizeMs);
         long remainingDeadSpaceMs = remainingExecutionTimeMs;
         // Total time looked at where a session wouldn't be phasing out.
@@ -1606,7 +1632,7 @@ public final class QuotaController extends StateController {
             inRegularQuotaTimeElapsed = inQuotaTimeElapsed;
         }
         if (remainingEJQuota <= 0) {
-            final long limitMs = mEJLimitsMs[standbyBucket] - mQuotaBufferMs;
+            final long limitMs = getEJLimitMsLocked(packageName, standbyBucket) - mQuotaBufferMs;
             long sumMs = 0;
             final Timer ejTimer = mEJPkgTimers.get(userId, packageName);
             if (ejTimer != null && ejTimer.isActive()) {
@@ -2741,6 +2767,9 @@ public final class QuotaController extends StateController {
         static final String KEY_EJ_LIMIT_RESTRICTED_MS =
                 QC_CONSTANT_PREFIX + "ej_limit_restricted_ms";
         @VisibleForTesting
+        static final String KEY_EJ_LIMIT_SPECIAL_ADDITION_MS =
+                QC_CONSTANT_PREFIX + "ej_limit_special_addition_ms";
+        @VisibleForTesting
         static final String KEY_EJ_WINDOW_SIZE_MS =
                 QC_CONSTANT_PREFIX + "ej_window_size_ms";
         @VisibleForTesting
@@ -2801,6 +2830,7 @@ public final class QuotaController extends StateController {
         private static final long DEFAULT_EJ_LIMIT_FREQUENT_MS = 10 * MINUTE_IN_MILLIS;
         private static final long DEFAULT_EJ_LIMIT_RARE_MS = DEFAULT_EJ_LIMIT_FREQUENT_MS;
         private static final long DEFAULT_EJ_LIMIT_RESTRICTED_MS = 5 * MINUTE_IN_MILLIS;
+        private static final long DEFAULT_EJ_LIMIT_SPECIAL_ADDITION_MS = 30 * MINUTE_IN_MILLIS;
         private static final long DEFAULT_EJ_WINDOW_SIZE_MS = 24 * HOUR_IN_MILLIS;
         private static final long DEFAULT_EJ_TOP_APP_TIME_CHUNK_SIZE_MS = 30 * SECOND_IN_MILLIS;
         private static final long DEFAULT_EJ_REWARD_TOP_APP_MS = 10 * SECOND_IN_MILLIS;
@@ -3001,6 +3031,11 @@ public final class QuotaController extends StateController {
         public long EJ_LIMIT_RESTRICTED_MS = DEFAULT_EJ_LIMIT_RESTRICTED_MS;
 
         /**
+         * How much additional EJ quota special, critical apps should get.
+         */
+        public long EJ_LIMIT_SPECIAL_ADDITION_MS = DEFAULT_EJ_LIMIT_SPECIAL_ADDITION_MS;
+
+        /**
          * The period of time used to calculate expedited job sessions. Apps can only have expedited
          * job sessions totalling EJ_LIMIT_<bucket>_MS within this period of time (without factoring
          * in any rewards or free EJs).
@@ -3053,6 +3088,7 @@ public final class QuotaController extends StateController {
                 case KEY_EJ_LIMIT_FREQUENT_MS:
                 case KEY_EJ_LIMIT_RARE_MS:
                 case KEY_EJ_LIMIT_RESTRICTED_MS:
+                case KEY_EJ_LIMIT_SPECIAL_ADDITION_MS:
                 case KEY_EJ_WINDOW_SIZE_MS:
                     updateEJLimitConstantsLocked();
                     break;
@@ -3376,7 +3412,8 @@ public final class QuotaController extends StateController {
                     DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                     KEY_EJ_LIMIT_ACTIVE_MS, KEY_EJ_LIMIT_WORKING_MS,
                     KEY_EJ_LIMIT_FREQUENT_MS, KEY_EJ_LIMIT_RARE_MS,
-                    KEY_EJ_LIMIT_RESTRICTED_MS, KEY_EJ_WINDOW_SIZE_MS);
+                    KEY_EJ_LIMIT_RESTRICTED_MS, KEY_EJ_LIMIT_SPECIAL_ADDITION_MS,
+                    KEY_EJ_WINDOW_SIZE_MS);
             EJ_LIMIT_ACTIVE_MS = properties.getLong(
                     KEY_EJ_LIMIT_ACTIVE_MS, DEFAULT_EJ_LIMIT_ACTIVE_MS);
             EJ_LIMIT_WORKING_MS = properties.getLong(
@@ -3387,6 +3424,8 @@ public final class QuotaController extends StateController {
                     KEY_EJ_LIMIT_RARE_MS, DEFAULT_EJ_LIMIT_RARE_MS);
             EJ_LIMIT_RESTRICTED_MS = properties.getLong(
                     KEY_EJ_LIMIT_RESTRICTED_MS, DEFAULT_EJ_LIMIT_RESTRICTED_MS);
+            EJ_LIMIT_SPECIAL_ADDITION_MS = properties.getLong(
+                    KEY_EJ_LIMIT_SPECIAL_ADDITION_MS, DEFAULT_EJ_LIMIT_SPECIAL_ADDITION_MS);
             EJ_WINDOW_SIZE_MS = properties.getLong(
                     KEY_EJ_WINDOW_SIZE_MS, DEFAULT_EJ_WINDOW_SIZE_MS);
 
@@ -3432,6 +3471,13 @@ public final class QuotaController extends StateController {
                 mEJLimitsMs[RESTRICTED_INDEX] = newRestrictedLimitMs;
                 mShouldReevaluateConstraints = true;
             }
+            // The addition must be in the range [0 minutes, window size - active limit].
+            long newSpecialAdditionMs = Math.max(0,
+                    Math.min(newWindowSizeMs - newActiveLimitMs, EJ_LIMIT_SPECIAL_ADDITION_MS));
+            if (mEjLimitSpecialAdditionMs != newSpecialAdditionMs) {
+                mEjLimitSpecialAdditionMs = newSpecialAdditionMs;
+                mShouldReevaluateConstraints = true;
+            }
         }
 
         private void dump(IndentingPrintWriter pw) {
@@ -3470,6 +3516,7 @@ public final class QuotaController extends StateController {
             pw.print(KEY_EJ_LIMIT_FREQUENT_MS, EJ_LIMIT_FREQUENT_MS).println();
             pw.print(KEY_EJ_LIMIT_RARE_MS, EJ_LIMIT_RARE_MS).println();
             pw.print(KEY_EJ_LIMIT_RESTRICTED_MS, EJ_LIMIT_RESTRICTED_MS).println();
+            pw.print(KEY_EJ_LIMIT_SPECIAL_ADDITION_MS, EJ_LIMIT_SPECIAL_ADDITION_MS).println();
             pw.print(KEY_EJ_WINDOW_SIZE_MS, EJ_WINDOW_SIZE_MS).println();
             pw.print(KEY_EJ_TOP_APP_TIME_CHUNK_SIZE_MS, EJ_TOP_APP_TIME_CHUNK_SIZE_MS).println();
             pw.print(KEY_EJ_REWARD_TOP_APP_MS, EJ_REWARD_TOP_APP_MS).println();
@@ -3590,6 +3637,11 @@ public final class QuotaController extends StateController {
     @NonNull
     long[] getEJLimitsMs() {
         return mEJLimitsMs;
+    }
+
+    @VisibleForTesting
+    long getEjLimitSpecialAdditionMs() {
+        return mEjLimitSpecialAdditionMs;
     }
 
     @VisibleForTesting

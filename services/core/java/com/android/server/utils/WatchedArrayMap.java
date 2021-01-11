@@ -160,10 +160,48 @@ public class WatchedArrayMap<K, V> extends WatchableImpl
     }
 
     /**
+     * Create a {@link WatchedArrayMap} from an {@link ArrayMap}
+     */
+    public WatchedArrayMap(@NonNull ArrayMap<K, V> c) {
+        mStorage = new ArrayMap<>(c);
+    }
+
+    /**
+     * Create a {@link WatchedArrayMap} from an {@link WatchedArrayMap}
+     */
+    public WatchedArrayMap(@NonNull WatchedArrayMap<K, V> c) {
+        mStorage = new ArrayMap<>(c.mStorage);
+    }
+
+    /**
+     * Make <this> a copy of src.  Any data in <this> is discarded.
+     */
+    public void copyFrom(@NonNull ArrayMap<K, V> src) {
+        clear();
+        final int end = src.size();
+        mStorage.ensureCapacity(end);
+        for (int i = 0; i < end; i++) {
+            put(src.keyAt(i), src.valueAt(i));
+        }
+    }
+
+    /**
+     * Make dst a copy of <this>.  Any previous data in dst is discarded.
+     */
+    public void copyTo(@NonNull ArrayMap<K, V> dst) {
+        dst.clear();
+        final int end = size();
+        dst.ensureCapacity(end);
+        for (int i = 0; i < end; i++) {
+            dst.put(keyAt(i), valueAt(i));
+        }
+    }
+
+    /**
      * Return the underlying storage.  This breaks the wrapper but is necessary when
      * passing the array to distant methods.
      */
-    public ArrayMap untrackedMap() {
+    public ArrayMap<K, V> untrackedStorage() {
         return mStorage;
     }
 
@@ -213,7 +251,7 @@ public class WatchedArrayMap<K, V> extends WatchableImpl
      * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o instanceof WatchedArrayMap) {
             WatchedArrayMap w = (WatchedArrayMap) o;
             return mStorage.equals(w.mStorage);
@@ -401,6 +439,15 @@ public class WatchedArrayMap<K, V> extends WatchableImpl
     }
 
     /**
+     * Make <this> a snapshot of the argument.  Note that <this> is immutable when the
+     * method returns.  <this> must be empty when the function is called.
+     * @param r The source array, which is copied into <this>
+     */
+    public void snapshot(@NonNull WatchedArrayMap<K, V> r) {
+        snapshot(this, r);
+    }
+
+    /**
      * Make the destination a copy of the source.  If the element is a subclass of Snapper then the
      * copy contains snapshots of the elements.  Otherwise the copy contains references to the
      * elements.  The destination must be initially empty.  Upon return, the destination is
@@ -414,6 +461,7 @@ public class WatchedArrayMap<K, V> extends WatchableImpl
             throw new IllegalArgumentException("snapshot destination is not empty");
         }
         final int end = src.size();
+        dst.mStorage.ensureCapacity(end);
         for (int i = 0; i < end; i++) {
             final V val = Snapshots.maybeSnapshot(src.valueAt(i));
             final K key = src.keyAt(i);

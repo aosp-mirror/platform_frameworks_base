@@ -60,7 +60,8 @@ import java.util.Objects;
 /**
  * Manages the picture-in-picture (PIP) UI and states.
  */
-public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallback {
+public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallback,
+        TvPipMenuController.Delegate {
     private static final String TAG = "TvPipController";
     static final boolean DEBUG = false;
 
@@ -198,7 +199,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
         mPipMediaController = pipMediaController;
         mTvPipMenuController = tvPipMenuController;
-        mTvPipMenuController.attachPipController(this);
+        mTvPipMenuController.setDelegate(this);
         // Ensure that we have the display info in case we get calls to update the bounds
         // before the listener calls back
         final DisplayInfo displayInfo = new DisplayInfo();
@@ -289,6 +290,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     /**
      * Closes PIP (PIPed activity and PIP system UI).
      */
+    @Override
     public void closePip() {
         if (DEBUG) Log.d(TAG, "closePip(), current state=" + getStateDescription());
 
@@ -318,9 +320,15 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         mHandler.removeCallbacks(mClosePipRunnable);
     }
 
+    @Override
+    public void movePipToNormalPosition() {
+        resizePinnedStack(PipController.STATE_PIP);
+    }
+
     /**
      * Moves the PIPed activity to the fullscreen and closes PIP system UI.
      */
+    @Override
     public void movePipToFullscreen() {
         if (DEBUG) Log.d(TAG, "movePipToFullscreen(), current state=" + getStateDescription());
 

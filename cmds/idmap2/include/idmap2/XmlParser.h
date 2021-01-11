@@ -22,6 +22,7 @@
 #include <memory>
 #include <string>
 
+#include "ResourceUtils.h"
 #include "Result.h"
 #include "android-base/macros.h"
 #include "androidfw/ResourceTypes.h"
@@ -39,8 +40,11 @@ class XmlParser {
     Event event() const;
     std::string name() const;
 
-    Result<std::string> GetAttributeStringValue(const std::string& name) const;
     Result<Res_value> GetAttributeValue(const std::string& name) const;
+    Result<Res_value> GetAttributeValue(ResourceId attr, const std::string& label) const;
+
+    Result<std::string> GetAttributeStringValue(const std::string& name) const;
+    Result<std::string> GetAttributeStringValue(ResourceId attr, const std::string& label) const;
 
     bool operator==(const Node& rhs) const;
     bool operator!=(const Node& rhs) const;

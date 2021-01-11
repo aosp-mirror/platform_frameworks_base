@@ -217,20 +217,6 @@ public final class ConnectivityController extends RestrictingController implemen
         return jobs != null && jobs.size() > 0;
     }
 
-    @VisibleForTesting
-    @GuardedBy("mLock")
-    boolean wouldBeReadyWithConnectivityLocked(JobStatus jobStatus) {
-        final boolean networkAvailable = isNetworkAvailable(jobStatus);
-        if (DEBUG) {
-            Slog.v(TAG, "wouldBeReadyWithConnectivityLocked: " + jobStatus.toShortString()
-                    + " networkAvailable=" + networkAvailable);
-        }
-        // If the network isn't available, then requesting an exception won't help.
-
-        return networkAvailable && wouldBeReadyWithConstraintLocked(jobStatus,
-                JobStatus.CONSTRAINT_CONNECTIVITY);
-    }
-
     /**
      * Tell NetworkPolicyManager not to block a UID's network connection if that's the only
      * thing stopping a job from running.
@@ -243,7 +229,8 @@ public final class ConnectivityController extends RestrictingController implemen
         }
 
         // Always check the full job readiness stat in case the component has been disabled.
-        if (wouldBeReadyWithConnectivityLocked(jobStatus)) {
+        if (wouldBeReadyWithConstraintLocked(jobStatus, JobStatus.CONSTRAINT_CONNECTIVITY)
+                && isNetworkAvailable(jobStatus)) {
             if (DEBUG) {
                 Slog.i(TAG, "evaluateStateLocked finds job " + jobStatus + " would be ready.");
             }

@@ -19,8 +19,8 @@ package com.android.server.pm;
 import android.annotation.NonNull;
 import android.content.IntentFilter;
 
+import com.android.server.WatchableIntentResolver;
 import com.android.server.utils.Snappable;
-import com.android.server.utils.WatchableIntentResolver;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -76,7 +76,7 @@ public class PreferredIntentResolver
      */
     public PreferredIntentResolver snapshot() {
         PreferredIntentResolver result = new PreferredIntentResolver();
-        result.doCopy(this);
+        result.copyFrom(this);
         return result;
     }
 }

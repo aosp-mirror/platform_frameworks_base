@@ -27,6 +27,8 @@ import android.testing.TestableLooper;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
+import com.android.wm.shell.common.ShellExecutor;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,12 +46,14 @@ public class HideDisplayCutoutControllerTest {
     private HideDisplayCutoutController mHideDisplayCutoutController;
     @Mock
     private HideDisplayCutoutOrganizer mMockDisplayAreaOrganizer;
+    @Mock
+    private ShellExecutor mMockMainExecutor;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mHideDisplayCutoutController = new HideDisplayCutoutController(
-                mContext, mMockDisplayAreaOrganizer);
+                mContext, mMockDisplayAreaOrganizer, mMockMainExecutor);
     }
 
     @Test

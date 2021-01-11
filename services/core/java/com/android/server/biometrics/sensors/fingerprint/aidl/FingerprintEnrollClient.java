@@ -51,12 +51,14 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
             @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String owner,
             @NonNull BiometricUtils<Fingerprint> utils, int sensorId,
-            @Nullable IUdfpsOverlayController udfpsOvelayController, int maxTemplatesPerUser) {
+            @Nullable IUdfpsOverlayController udfpsOvelayController, int maxTemplatesPerUser,
+            boolean shouldLogMetrics) {
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
                 0 /* timeoutSec */, BiometricsProtoEnums.MODALITY_FINGERPRINT, sensorId,
                 true /* shouldVibrate */);
         mUdfpsOverlayController = udfpsOvelayController;
         mMaxTemplatesPerUser = maxTemplatesPerUser;
+        setShouldLog(shouldLogMetrics);
     }
 
     @Override

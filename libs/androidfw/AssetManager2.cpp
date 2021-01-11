@@ -157,7 +157,8 @@ void AssetManager2::BuildDynamicRefTable() {
           // The target package must precede the overlay package in the apk assets paths in order
           // to take effect.
           const auto& loaded_idmap = apk_assets->GetLoadedIdmap();
-          auto target_package_iter = apk_assets_package_ids.find(loaded_idmap->TargetApkPath());
+          auto target_package_iter = apk_assets_package_ids.find(
+              std::string(loaded_idmap->TargetApkPath()));
           if (target_package_iter == apk_assets_package_ids.end()) {
              LOG(INFO) << "failed to find target package for overlay "
                        << loaded_idmap->OverlayApkPath();

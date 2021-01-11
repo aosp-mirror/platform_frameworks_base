@@ -20,6 +20,8 @@ import android.app.Instrumentation
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.helpers.FIND_TIMEOUT
+import com.android.wm.shell.flicker.TEST_APP_IME_ACTIVITY_ACTION_CLOSE_IME
+import com.android.wm.shell.flicker.TEST_APP_IME_ACTIVITY_ACTION_OPEN_IME
 import com.android.wm.shell.flicker.TEST_APP_IME_ACTIVITY_LABEL
 import com.android.wm.shell.flicker.testapp.Components
 import org.junit.Assert
@@ -32,15 +34,27 @@ open class ImeAppHelper(
         Components.ImeActivity()
 ) {
     fun openIME() {
-        val editText = uiDevice.wait(
-                Until.findObject(By.res(getPackage(), "plain_text_input")),
-                FIND_TIMEOUT)
-        Assert.assertNotNull("Text field not found, this usually happens when the device " +
-                "was left in an unknown state (e.g. in split screen)", editText)
-        editText.click()
+        if (!isTelevision) {
+            val editText = uiDevice.wait(
+                    Until.findObject(By.res(getPackage(), "plain_text_input")),
+                    FIND_TIMEOUT)
+            Assert.assertNotNull("Text field not found, this usually happens when the device " +
+                    "was left in an unknown state (e.g. in split screen)", editText)
+            editText.click()
+        } else {
+            // If we do the same thing as above - editText.click() - on TV, that's going to force TV
+            // into the touch mode. We really don't want that.
+            launchViaIntent(action = TEST_APP_IME_ACTIVITY_ACTION_OPEN_IME)
+        }
     }
 
     fun closeIME() {
-        uiDevice.pressBack()
+        if (!isTelevision) {
+            uiDevice.pressBack()
+        } else {
+            // While pressing the back button should close the IME on TV as well, it may also lead
+            // to the app closing. So let's instead just ask the app to close the IME.
+            launchViaIntent(action = TEST_APP_IME_ACTIVITY_ACTION_CLOSE_IME)
+        }
     }
 }

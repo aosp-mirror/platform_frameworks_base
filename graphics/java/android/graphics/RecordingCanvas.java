@@ -204,6 +204,26 @@ public final class RecordingCanvas extends BaseRecordingCanvas {
     }
 
     /**
+     * Draws a ripple
+     *
+     * @param cx
+     * @param cy
+     * @param radius
+     * @param paint
+     * @param progress
+     * @param shader
+     *
+     * @hide
+     */
+    public void drawRipple(CanvasProperty<Float> cx, CanvasProperty<Float> cy,
+            CanvasProperty<Float> radius, CanvasProperty<Paint> paint,
+            CanvasProperty<Float> progress, RuntimeShader shader) {
+        nDrawRipple(mNativeCanvasWrapper, cx.getNativeContainer(), cy.getNativeContainer(),
+                radius.getNativeContainer(), paint.getNativeContainer(),
+                progress.getNativeContainer(), shader.getNativeShaderFactory());
+    }
+
+    /**
      * Draws a round rect
      *
      * @param left
@@ -259,6 +279,9 @@ public final class RecordingCanvas extends BaseRecordingCanvas {
     @CriticalNative
     private static native void nDrawCircle(long renderer, long propCx,
             long propCy, long propRadius, long propPaint);
+    @CriticalNative
+    private static native void nDrawRipple(long renderer, long propCx, long propCy, long propRadius,
+            long propPaint, long propProgress, long runtimeEffect);
     @CriticalNative
     private static native void nDrawRoundRect(long renderer, long propLeft, long propTop,
             long propRight, long propBottom, long propRx, long propRy, long propPaint);

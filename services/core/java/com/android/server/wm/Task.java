@@ -4421,8 +4421,17 @@ class Task extends WindowContainer<WindowContainer> {
             sb.append(stringName);
             sb.append(" U=");
             sb.append(mUserId);
-            sb.append(" StackId=");
-            sb.append(getRootTaskId());
+            final Task rootTask = getRootTask();
+            if (rootTask != this) {
+                sb.append(" rootTaskId=");
+                sb.append(rootTask.mTaskId);
+            }
+            sb.append(" visible=");
+            sb.append(shouldBeVisible(null /* starting */));
+            sb.append(" mode=");
+            sb.append(windowingModeToString(getWindowingMode()));
+            sb.append(" translucent=");
+            sb.append(isTranslucent(null /* starting */));
             sb.append(" sz=");
             sb.append(getChildCount());
             sb.append('}');
@@ -4432,10 +4441,7 @@ class Task extends WindowContainer<WindowContainer> {
         sb.append(Integer.toHexString(System.identityHashCode(this)));
         sb.append(" #");
         sb.append(mTaskId);
-        sb.append(" visible=" + shouldBeVisible(null /* starting */));
         sb.append(" type=" + activityTypeToString(getActivityType()));
-        sb.append(" mode=" + windowingModeToString(getWindowingMode()));
-        sb.append(" translucent=" + isTranslucent(null /* starting */));
         if (affinity != null) {
             sb.append(" A=");
             sb.append(affinity);
@@ -5180,9 +5186,6 @@ class Task extends WindowContainer<WindowContainer> {
 
     @Override
     public void setWindowingMode(int windowingMode) {
-        // Reset the cached result of toString()
-        stringName = null;
-
         // Calling Task#setWindowingMode() for leaf task since this is the a specialization of
         // {@link #setWindowingMode(int)} for ActivityStack.
         if (!isRootTask()) {
@@ -6099,13 +6102,13 @@ class Task extends WindowContainer<WindowContainer> {
         mTaskSupervisor.setLaunchSource(next.info.applicationInfo.uid);
 
         ActivityRecord lastResumed = null;
-        final Task lastFocusedStack = taskDisplayArea.getLastFocusedRootTask();
-        if (lastFocusedStack != null && lastFocusedStack != this) {
+        final Task lastFocusedRootTask = taskDisplayArea.getLastFocusedRootTask();
+        if (lastFocusedRootTask != null && lastFocusedRootTask != getRootTask()) {
             // So, why aren't we using prev here??? See the param comment on the method. prev
             // doesn't represent the last resumed activity. However, the last focus stack does if
             // it isn't null.
-            lastResumed = lastFocusedStack.getResumedActivity();
-            if (userLeaving && inMultiWindowMode() && lastFocusedStack.shouldBeVisible(next)) {
+            lastResumed = lastFocusedRootTask.getResumedActivity();
+            if (userLeaving && inMultiWindowMode() && lastFocusedRootTask.shouldBeVisible(next)) {
                 // The user isn't leaving if this stack is the multi-window mode and the last
                 // focused stack should still be visible.
                 if(DEBUG_USER_LEAVING) Slog.i(TAG_USER_LEAVING, "Overriding userLeaving to false"
@@ -6259,10 +6262,10 @@ class Task extends WindowContainer<WindowContainer> {
             // Launcher is already visible in this case. If we don't add it to opening
             // apps, maybeUpdateTransitToWallpaper() will fail to identify this as a
             // TRANSIT_WALLPAPER_OPEN animation, and run some funny animation.
-            final boolean lastActivityTranslucent = lastFocusedStack != null
-                    && (lastFocusedStack.inMultiWindowMode()
-                    || (lastFocusedStack.mLastPausedActivity != null
-                    && !lastFocusedStack.mLastPausedActivity.occludesParent()));
+            final boolean lastActivityTranslucent = lastFocusedRootTask != null
+                    && (lastFocusedRootTask.inMultiWindowMode()
+                    || (lastFocusedRootTask.mLastPausedActivity != null
+                    && !lastFocusedRootTask.mLastPausedActivity.occludesParent()));
 
             // This activity is now becoming visible.
             if (!next.mVisibleRequested || next.stopped || lastActivityTranslucent) {
@@ -6273,7 +6276,7 @@ class Task extends WindowContainer<WindowContainer> {
             next.startLaunchTickingLocked();
 
             ActivityRecord lastResumedActivity =
-                    lastFocusedStack == null ? null : lastFocusedStack.getResumedActivity();
+                    lastFocusedRootTask == null ? null : lastFocusedRootTask.getResumedActivity();
             final ActivityState lastState = next.getState();
 
             mAtmService.updateCpuStats();
@@ -6370,8 +6373,8 @@ class Task extends WindowContainer<WindowContainer> {
                 Slog.i(TAG, "Restarting because process died: " + next);
                 if (!next.hasBeenLaunched) {
                     next.hasBeenLaunched = true;
-                } else  if (SHOW_APP_STARTING_PREVIEW && lastFocusedStack != null
-                        && lastFocusedStack.isTopRootTaskInDisplayArea()) {
+                } else  if (SHOW_APP_STARTING_PREVIEW && lastFocusedRootTask != null
+                        && lastFocusedRootTask.isTopRootTaskInDisplayArea()) {
                     next.showStartingWindow(null /* prev */, false /* newTask */,
                             false /* taskSwitch */);
                 }

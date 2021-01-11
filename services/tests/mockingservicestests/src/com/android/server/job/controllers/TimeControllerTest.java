@@ -711,25 +711,31 @@ public class TimeControllerTest {
                 .set(anyInt(), anyLong(), anyLong(), anyLong(), anyString(), any(), any(), any());
 
         // Test evaluating something before the current deadline.
+        doReturn(false).when(mTimeController)
+                .wouldBeReadyWithConstraintLocked(eq(jobEarliest), anyInt());
+        mTimeController.evaluateStateLocked(jobEarliest);
+        inOrder.verify(mAlarmManager, never())
+                .set(anyInt(), anyLong(), anyLong(), anyLong(), eq(TAG_DELAY), any(), any(), any());
         doReturn(true).when(mTimeController)
                 .wouldBeReadyWithConstraintLocked(eq(jobEarliest), anyInt());
         mTimeController.evaluateStateLocked(jobEarliest);
         inOrder.verify(mAlarmManager, times(1))
                 .set(anyInt(), eq(now + 5 * MINUTE_IN_MILLIS), anyLong(), anyLong(), eq(TAG_DELAY),
                         any(), any(), any());
-        // Job goes back to not being ready. Middle is still true, so use that alarm.
+        // Job goes back to not being ready. Middle is still true, but we don't check and actively
+        // defer alarm.
         doReturn(false).when(mTimeController)
                 .wouldBeReadyWithConstraintLocked(eq(jobEarliest), anyInt());
         mTimeController.evaluateStateLocked(jobEarliest);
-        inOrder.verify(mAlarmManager, times(1))
-                .set(anyInt(), eq(now + 30 * MINUTE_IN_MILLIS), anyLong(), anyLong(),
+        inOrder.verify(mAlarmManager, never())
+                .set(anyInt(), anyLong(), anyLong(), anyLong(),
                         eq(TAG_DELAY), any(), any(), any());
-        // Turn middle off. Latest is true, so use that alarm.
+        // Turn middle off. Latest is true, but we don't check and actively defer alarm.
         doReturn(false).when(mTimeController)
                 .wouldBeReadyWithConstraintLocked(eq(jobMiddle), anyInt());
         mTimeController.evaluateStateLocked(jobMiddle);
-        inOrder.verify(mAlarmManager, times(1))
-                .set(anyInt(), eq(now + HOUR_IN_MILLIS), anyLong(), anyLong(),
+        inOrder.verify(mAlarmManager, never())
+                .set(anyInt(), anyLong(), anyLong(), anyLong(),
                         eq(TAG_DELAY), any(), any(), any());
     }
 
@@ -768,25 +774,32 @@ public class TimeControllerTest {
                 .set(anyInt(), anyLong(), anyLong(), anyLong(), anyString(), any(), any(), any());
 
         // Test evaluating something before the current deadline.
+        doReturn(false).when(mTimeController)
+                .wouldBeReadyWithConstraintLocked(eq(jobEarliest), anyInt());
+        mTimeController.evaluateStateLocked(jobEarliest);
+        inOrder.verify(mAlarmManager, never())
+                .set(anyInt(), anyLong(), anyLong(), anyLong(),
+                        eq(TAG_DEADLINE), any(), any(), any());
         doReturn(true).when(mTimeController)
                 .wouldBeReadyWithConstraintLocked(eq(jobEarliest), anyInt());
         mTimeController.evaluateStateLocked(jobEarliest);
         inOrder.verify(mAlarmManager, times(1))
                 .set(anyInt(), eq(now + 5 * MINUTE_IN_MILLIS), anyLong(), anyLong(),
                         eq(TAG_DEADLINE), any(), any(), any());
-        // Job goes back to not being ready. Middle is still true, so use that alarm.
+        // Job goes back to not being ready. Middle is still true, but we don't check and actively
+        // defer alarm.
         doReturn(false).when(mTimeController)
                 .wouldBeReadyWithConstraintLocked(eq(jobEarliest), anyInt());
         mTimeController.evaluateStateLocked(jobEarliest);
-        inOrder.verify(mAlarmManager, times(1))
-                .set(anyInt(), eq(now + 30 * MINUTE_IN_MILLIS), anyLong(), anyLong(),
+        inOrder.verify(mAlarmManager, never())
+                .set(anyInt(), anyLong(), anyLong(), anyLong(),
                         eq(TAG_DEADLINE), any(), any(), any());
-        // Turn middle off. Latest is true, so use that alarm.
+        // Turn middle off. Latest is true, but we don't check and actively defer alarm.
         doReturn(false).when(mTimeController)
                 .wouldBeReadyWithConstraintLocked(eq(jobMiddle), anyInt());
         mTimeController.evaluateStateLocked(jobMiddle);
-        inOrder.verify(mAlarmManager, times(1))
-                .set(anyInt(), eq(now + HOUR_IN_MILLIS), anyLong(), anyLong(),
+        inOrder.verify(mAlarmManager, never())
+                .set(anyInt(), anyLong(), anyLong(), anyLong(),
                         eq(TAG_DEADLINE), any(), any(), any());
     }
 }

@@ -61,6 +61,37 @@ int ResultToErrorCode(SkCodec::Result result) {
     }
 }
 
+const char* AImageDecoder_resultToString(int result) {
+    switch (result) {
+        case        ANDROID_IMAGE_DECODER_SUCCESS:
+            return "ANDROID_IMAGE_DECODER_SUCCESS";
+        case        ANDROID_IMAGE_DECODER_INCOMPLETE:
+            return "ANDROID_IMAGE_DECODER_INCOMPLETE";
+        case        ANDROID_IMAGE_DECODER_ERROR:
+            return "ANDROID_IMAGE_DECODER_ERROR";
+        case        ANDROID_IMAGE_DECODER_INVALID_CONVERSION:
+            return "ANDROID_IMAGE_DECODER_INVALID_CONVERSION";
+        case        ANDROID_IMAGE_DECODER_INVALID_SCALE:
+            return "ANDROID_IMAGE_DECODER_INVALID_SCALE";
+        case        ANDROID_IMAGE_DECODER_BAD_PARAMETER:
+            return "ANDROID_IMAGE_DECODER_BAD_PARAMETER";
+        case        ANDROID_IMAGE_DECODER_INVALID_INPUT:
+            return "ANDROID_IMAGE_DECODER_INVALID_INPUT";
+        case        ANDROID_IMAGE_DECODER_SEEK_ERROR:
+            return "ANDROID_IMAGE_DECODER_SEEK_ERROR";
+        case        ANDROID_IMAGE_DECODER_INTERNAL_ERROR:
+            return "ANDROID_IMAGE_DECODER_INTERNAL_ERROR";
+        case        ANDROID_IMAGE_DECODER_UNSUPPORTED_FORMAT:
+            return "ANDROID_IMAGE_DECODER_UNSUPPORTED_FORMAT";
+        case        ANDROID_IMAGE_DECODER_FINISHED:
+            return "ANDROID_IMAGE_DECODER_FINISHED";
+        case        ANDROID_IMAGE_DECODER_INVALID_STATE:
+            return "ANDROID_IMAGE_DECODER_INVALID_STATE";
+        default:
+            return nullptr;
+    }
+}
+
 static int createFromStream(std::unique_ptr<SkStreamRewindable> stream, AImageDecoder** outDecoder) {
     SkCodec::Result result;
     auto codec = SkCodec::MakeFromStream(std::move(stream), &result, nullptr,
@@ -173,7 +204,13 @@ int AImageDecoder_setAndroidBitmapFormat(AImageDecoder* decoder, int32_t format)
             || format > ANDROID_BITMAP_FORMAT_RGBA_F16) {
         return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
     }
-    return toDecoder(decoder)->setOutColorType(getColorType((AndroidBitmapFormat) format))
+
+    auto* imageDecoder = toDecoder(decoder);
+    if (imageDecoder->currentFrame() != 0) {
+        return ANDROID_IMAGE_DECODER_INVALID_STATE;
+    }
+
+    return imageDecoder->setOutColorType(getColorType((AndroidBitmapFormat) format))
             ? ANDROID_IMAGE_DECODER_SUCCESS : ANDROID_IMAGE_DECODER_INVALID_CONVERSION;
 }
 
@@ -185,6 +222,10 @@ int AImageDecoder_setDataSpace(AImageDecoder* decoder, int32_t dataspace) {
     }
 
     ImageDecoder* imageDecoder = toDecoder(decoder);
+    if (imageDecoder->currentFrame() != 0) {
+        return ANDROID_IMAGE_DECODER_INVALID_STATE;
+    }
+
     imageDecoder->setOutColorSpace(std::move(cs));
     return ANDROID_IMAGE_DECODER_SUCCESS;
 }
@@ -279,7 +320,12 @@ int AImageDecoder_setUnpremultipliedRequired(AImageDecoder* decoder, bool requir
         return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
     }
 
-    return toDecoder(decoder)->setUnpremultipliedRequired(required)
+    auto* imageDecoder = toDecoder(decoder);
+    if (imageDecoder->currentFrame() != 0) {
+        return ANDROID_IMAGE_DECODER_INVALID_STATE;
+    }
+
+    return imageDecoder->setUnpremultipliedRequired(required)
             ? ANDROID_IMAGE_DECODER_SUCCESS : ANDROID_IMAGE_DECODER_INVALID_CONVERSION;
 }
 
@@ -288,7 +334,12 @@ int AImageDecoder_setTargetSize(AImageDecoder* decoder, int32_t width, int32_t h
         return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
     }
 
-    return toDecoder(decoder)->setTargetSize(width, height)
+    auto* imageDecoder = toDecoder(decoder);
+    if (imageDecoder->currentFrame() != 0) {
+        return ANDROID_IMAGE_DECODER_INVALID_STATE;
+    }
+
+    return imageDecoder->setTargetSize(width, height)
             ? ANDROID_IMAGE_DECODER_SUCCESS : ANDROID_IMAGE_DECODER_INVALID_SCALE;
 }
 
@@ -309,10 +360,15 @@ int AImageDecoder_setCrop(AImageDecoder* decoder, ARect crop) {
         return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
     }
 
+    auto* imageDecoder = toDecoder(decoder);
+    if (imageDecoder->currentFrame() != 0) {
+        return ANDROID_IMAGE_DECODER_INVALID_STATE;
+    }
+
     SkIRect cropIRect;
     cropIRect.setLTRB(crop.left, crop.top, crop.right, crop.bottom);
     SkIRect* cropPtr = cropIRect == SkIRect::MakeEmpty() ? nullptr : &cropIRect;
-    return toDecoder(decoder)->setCropRect(cropPtr)
+    return imageDecoder->setCropRect(cropPtr)
             ? ANDROID_IMAGE_DECODER_SUCCESS : ANDROID_IMAGE_DECODER_BAD_PARAMETER;
 }
 
@@ -341,6 +397,10 @@ int AImageDecoder_decodeImage(AImageDecoder* decoder,
         return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
     }
 
+    if (imageDecoder->finished()) {
+        return ANDROID_IMAGE_DECODER_FINISHED;
+    }
+
     return ResultToErrorCode(imageDecoder->decode(pixels, stride));
 }
 
@@ -352,7 +412,7 @@ bool AImageDecoder_isAnimated(AImageDecoder* decoder) {
     if (!decoder) return false;
 
     ImageDecoder* imageDecoder = toDecoder(decoder);
-    return imageDecoder->mCodec->codec()->getFrameCount() > 1;
+    return imageDecoder->isAnimated();
 }
 
 int32_t AImageDecoder_getRepeatCount(AImageDecoder* decoder) {
@@ -368,4 +428,110 @@ int32_t AImageDecoder_getRepeatCount(AImageDecoder* decoder) {
         return ANDROID_IMAGE_DECODER_INFINITE;
     }
     return count;
+}
+
+int AImageDecoder_advanceFrame(AImageDecoder* decoder) {
+    if (!decoder) return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
+
+    ImageDecoder* imageDecoder = toDecoder(decoder);
+    if (!imageDecoder->isAnimated()) {
+        return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
+    }
+
+    if (imageDecoder->advanceFrame()) {
+        return ANDROID_IMAGE_DECODER_SUCCESS;
+    }
+
+    if (imageDecoder->finished()) {
+        return ANDROID_IMAGE_DECODER_FINISHED;
+    }
+
+    return ANDROID_IMAGE_DECODER_INCOMPLETE;
+}
+
+int AImageDecoder_rewind(AImageDecoder* decoder) {
+    if (!decoder) return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
+
+    ImageDecoder* imageDecoder = toDecoder(decoder);
+    if (!imageDecoder->isAnimated()) {
+        return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
+    }
+
+    return imageDecoder->rewind() ? ANDROID_IMAGE_DECODER_SUCCESS
+                                  : ANDROID_IMAGE_DECODER_SEEK_ERROR;
+}
+
+AImageDecoderFrameInfo* AImageDecoderFrameInfo_create() {
+    return reinterpret_cast<AImageDecoderFrameInfo*>(new SkCodec::FrameInfo);
+}
+
+static SkCodec::FrameInfo* toFrameInfo(AImageDecoderFrameInfo* info) {
+    return reinterpret_cast<SkCodec::FrameInfo*>(info);
+}
+
+static const SkCodec::FrameInfo* toFrameInfo(const AImageDecoderFrameInfo* info) {
+    return reinterpret_cast<const SkCodec::FrameInfo*>(info);
+}
+
+void AImageDecoderFrameInfo_delete(AImageDecoderFrameInfo* info) {
+    delete toFrameInfo(info);
+}
+
+int AImageDecoder_getFrameInfo(AImageDecoder* decoder,
+        AImageDecoderFrameInfo* info) {
+    if (!decoder || !info) {
+        return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
+    }
+
+    auto* imageDecoder = toDecoder(decoder);
+    if (imageDecoder->finished()) {
+        return ANDROID_IMAGE_DECODER_FINISHED;
+    }
+
+    *toFrameInfo(info) = imageDecoder->getCurrentFrameInfo();
+    return ANDROID_IMAGE_DECODER_SUCCESS;
+}
+
+int64_t AImageDecoderFrameInfo_getDuration(const AImageDecoderFrameInfo* info) {
+    if (!info) return 0;
+
+    return toFrameInfo(info)->fDuration * 1'000'000;
+}
+
+ARect AImageDecoderFrameInfo_getFrameRect(const AImageDecoderFrameInfo* info) {
+    if (!info) {
+        return { 0, 0, 0, 0};
+    }
+
+    const SkIRect& r = toFrameInfo(info)->fFrameRect;
+    return { r.left(), r.top(), r.right(), r.bottom() };
+}
+
+bool AImageDecoderFrameInfo_hasAlphaWithinBounds(const AImageDecoderFrameInfo* info) {
+    if (!info) return false;
+
+    return toFrameInfo(info)->fHasAlphaWithinBounds;
+}
+
+int32_t AImageDecoderFrameInfo_getDisposeOp(const AImageDecoderFrameInfo* info) {
+    if (!info) return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
+
+    static_assert(static_cast<int>(SkCodecAnimation::DisposalMethod::kKeep)
+                  == ANDROID_IMAGE_DECODER_DISPOSE_OP_NONE);
+    static_assert(static_cast<int>(SkCodecAnimation::DisposalMethod::kRestoreBGColor)
+                  == ANDROID_IMAGE_DECODER_DISPOSE_OP_BACKGROUND);
+    static_assert(static_cast<int>(SkCodecAnimation::DisposalMethod::kRestorePrevious)
+                  == ANDROID_IMAGE_DECODER_DISPOSE_OP_PREVIOUS);
+    return static_cast<int>(toFrameInfo(info)->fDisposalMethod);
+}
+
+int32_t AImageDecoderFrameInfo_getBlendOp(const AImageDecoderFrameInfo* info) {
+    if (!info) return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
+
+    switch (toFrameInfo(info)->fBlend) {
+        case SkCodecAnimation::Blend::kSrc:
+            return ANDROID_IMAGE_DECODER_BLEND_OP_SRC;
+        case SkCodecAnimation::Blend::kSrcOver:
+            return ANDROID_IMAGE_DECODER_BLEND_OP_SRC_OVER;
+    }
 }

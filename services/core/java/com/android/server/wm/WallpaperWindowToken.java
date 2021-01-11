@@ -96,6 +96,7 @@ class WallpaperWindowToken extends WindowToken {
 
     void updateWallpaperVisibility(boolean visible) {
         if (isVisible() != visible) {
+            mWmService.mAtmService.getTransitionController().collect(this);
             // Need to do a layout to ensure the wallpaper now has the correct size.
             mDisplayContent.setLayoutNeeded();
         }
@@ -126,6 +127,7 @@ class WallpaperWindowToken extends WindowToken {
         if (isVisible() != visible) {
             if (DEBUG_WALLPAPER_LIGHT) Slog.d(TAG,
                     "Wallpaper token " + token + " visible=" + visible);
+            mWmService.mAtmService.getTransitionController().collect(this);
             // Need to do a layout to ensure the wallpaper now has the correct size.
             mDisplayContent.setLayoutNeeded();
         }
@@ -198,6 +200,17 @@ class WallpaperWindowToken extends WindowToken {
     void forAllWallpaperWindows(Consumer<WallpaperWindowToken> callback) {
         callback.accept(this);
     }
+
+    @Override
+    boolean fillsParent() {
+        return true;
+    }
+
+    @Override
+    boolean showWallpaper() {
+        return false;
+    }
+
 
     @Override
     public String toString() {

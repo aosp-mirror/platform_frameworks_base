@@ -839,14 +839,22 @@ public abstract class IntentResolver<F, R extends Object> {
         }
     };
 
-    // Make <this> a copy of <orig>.  The presumption is that <this> is empty.
-    protected void doCopy(IntentResolver orig) {
+    // Make <this> a copy of <orig>.  The presumption is that <this> is empty but all
+    // arrays are cleared out explicitly, just to be sure.
+    protected void copyFrom(IntentResolver orig) {
+        mFilters.clear();
         mFilters.addAll(orig.mFilters);
+        mTypeToFilter.clear();
         mTypeToFilter.putAll(orig.mTypeToFilter);
+        mBaseTypeToFilter.clear();
         mBaseTypeToFilter.putAll(orig.mBaseTypeToFilter);
+        mWildTypeToFilter.clear();
         mWildTypeToFilter.putAll(orig.mWildTypeToFilter);
+        mSchemeToFilter.clear();
         mSchemeToFilter.putAll(orig.mSchemeToFilter);
+        mActionToFilter.clear();
         mActionToFilter.putAll(orig.mActionToFilter);
+        mTypedActionToFilter.clear();
         mTypedActionToFilter.putAll(orig.mTypedActionToFilter);
     }
 

@@ -17,10 +17,18 @@
 #include "ImageDecoder.h"
 
 #include <hwui/Bitmap.h>
+#include <log/log.h>
 
 #include <SkAndroidCodec.h>
+#include <SkBitmap.h>
+#include <SkBlendMode.h>
 #include <SkCanvas.h>
+#include <SkEncodedOrigin.h>
+#include <SkFilterQuality.h>
 #include <SkPaint.h>
+
+#undef LOG_TAG
+#define LOG_TAG "ImageDecoder"
 
 using namespace android;
 
@@ -44,15 +52,27 @@ ImageDecoder::ImageDecoder(std::unique_ptr<SkAndroidCodec> codec, sk_sp<SkPngChu
     , mOutColorType(mCodec->computeOutputColorType(kN32_SkColorType))
     , mUnpremultipliedRequired(false)
     , mOutColorSpace(getDefaultColorSpace())
-    , mSampleSize(1)
 {
     mTargetSize = swapWidthHeight() ? SkISize { mDecodeSize.height(), mDecodeSize.width() }
                                     : mDecodeSize;
+    this->rewind();
 }
+
+ImageDecoder::~ImageDecoder() = default;
 
 SkAlphaType ImageDecoder::getOutAlphaType() const {
     return opaque() ? kOpaque_SkAlphaType
                     : mUnpremultipliedRequired ? kUnpremul_SkAlphaType : kPremul_SkAlphaType;
+}
+
+static SkISize swapped(const SkISize& size) {
+    return SkISize { size.height(), size.width() };
+}
+
+static bool requires_matrix_scaling(bool swapWidthHeight, const SkISize& decodeSize,
+                                    const SkISize& targetSize) {
+    return (swapWidthHeight && decodeSize != swapped(targetSize))
+          || (!swapWidthHeight && decodeSize != targetSize);
 }
 
 bool ImageDecoder::setTargetSize(int width, int height) {
@@ -78,17 +98,21 @@ bool ImageDecoder::setTargetSize(int width, int height) {
         }
     }
 
-    SkISize targetSize = { width, height };
-    SkISize decodeSize = swapWidthHeight() ? SkISize { height, width } : targetSize;
+    const bool swap = swapWidthHeight();
+    const SkISize targetSize = { width, height };
+    SkISize decodeSize = swap ? SkISize { height, width } : targetSize;
     int sampleSize = mCodec->computeSampleSize(&decodeSize);
 
-    if (decodeSize != targetSize && mUnpremultipliedRequired && !opaque()) {
-        return false;
+    if (mUnpremultipliedRequired && !opaque()) {
+        // Allow using a matrix to handle orientation, but not scaling.
+        if (requires_matrix_scaling(swap, decodeSize, targetSize)) {
+            return false;
+        }
     }
 
     mTargetSize = targetSize;
     mDecodeSize = decodeSize;
-    mSampleSize = sampleSize;
+    mOptions.fSampleSize = sampleSize;
     return true;
 }
 
@@ -137,8 +161,10 @@ bool ImageDecoder::setOutColorType(SkColorType colorType) {
 }
 
 bool ImageDecoder::setUnpremultipliedRequired(bool required) {
-    if (required && !opaque() && mDecodeSize != mTargetSize) {
-        return false;
+    if (required && !opaque()) {
+        if (requires_matrix_scaling(swapWidthHeight(), mDecodeSize, mTargetSize)) {
+            return false;
+        }
     }
     mUnpremultipliedRequired = required;
     return true;
@@ -176,51 +202,179 @@ int ImageDecoder::height() const {
 }
 
 bool ImageDecoder::opaque() const {
-    return mCodec->getInfo().alphaType() == kOpaque_SkAlphaType;
+    return mCurrentFrameIsOpaque;
 }
 
 bool ImageDecoder::gray() const {
     return mCodec->getInfo().colorType() == kGray_8_SkColorType;
 }
 
+bool ImageDecoder::isAnimated() {
+    return mCodec->codec()->getFrameCount() > 1;
+}
+
+int ImageDecoder::currentFrame() const {
+    return mOptions.fFrameIndex;
+}
+
+bool ImageDecoder::rewind() {
+    mOptions.fFrameIndex = 0;
+    mOptions.fPriorFrame = SkCodec::kNoFrame;
+    mCurrentFrameIsIndependent = true;
+    mCurrentFrameIsOpaque = mCodec->getInfo().isOpaque();
+    mRestoreState = RestoreState::kDoNothing;
+    mRestoreFrame = nullptr;
+
+    // TODO: Rewind the input now instead of in the next call to decode, and
+    // plumb through whether rewind succeeded.
+    return true;
+}
+
+bool ImageDecoder::advanceFrame() {
+    const int frameIndex = ++mOptions.fFrameIndex;
+    const int frameCount = mCodec->codec()->getFrameCount();
+    if (frameIndex >= frameCount) {
+        // Prevent overflow from repeated calls to advanceFrame.
+        mOptions.fFrameIndex = frameCount;
+        return false;
+    }
+
+    SkCodec::FrameInfo frameInfo;
+    if (!mCodec->codec()->getFrameInfo(frameIndex, &frameInfo)
+            || !frameInfo.fFullyReceived) {
+        // Mark the decoder as finished, requiring a rewind.
+        mOptions.fFrameIndex = frameCount;
+        return false;
+    }
+
+    mCurrentFrameIsIndependent = frameInfo.fRequiredFrame == SkCodec::kNoFrame;
+    mCurrentFrameIsOpaque = frameInfo.fAlphaType == kOpaque_SkAlphaType;
+
+    if (frameInfo.fDisposalMethod == SkCodecAnimation::DisposalMethod::kRestorePrevious) {
+        switch (mRestoreState) {
+            case RestoreState::kDoNothing:
+            case RestoreState::kNeedsRestore:
+                mRestoreState = RestoreState::kFirstRPFrame;
+                break;
+            case RestoreState::kFirstRPFrame:
+                mRestoreState = RestoreState::kRPFrame;
+                break;
+            case RestoreState::kRPFrame:
+                // Unchanged.
+                break;
+        }
+    } else { // New frame is not restore previous
+        switch (mRestoreState) {
+            case RestoreState::kFirstRPFrame:
+            case RestoreState::kRPFrame:
+                mRestoreState = RestoreState::kNeedsRestore;
+                break;
+            case RestoreState::kNeedsRestore:
+                mRestoreState = RestoreState::kDoNothing;
+                mRestoreFrame = nullptr;
+                [[fallthrough]];
+            case RestoreState::kDoNothing:
+                mOptions.fPriorFrame = frameIndex - 1;
+                break;
+        }
+    }
+
+    return true;
+}
+
+SkCodec::FrameInfo ImageDecoder::getCurrentFrameInfo() {
+    LOG_ALWAYS_FATAL_IF(finished());
+
+    auto dims = mCodec->codec()->dimensions();
+    SkCodec::FrameInfo info;
+    if (!mCodec->codec()->getFrameInfo(mOptions.fFrameIndex, &info)) {
+        // SkCodec may return false for a non-animated image. Provide defaults.
+        info.fRequiredFrame = SkCodec::kNoFrame;
+        info.fDuration = 0;
+        info.fFullyReceived = true;
+        info.fAlphaType = mCodec->codec()->getInfo().alphaType();
+        info.fHasAlphaWithinBounds = info.fAlphaType != kOpaque_SkAlphaType;
+        info.fDisposalMethod = SkCodecAnimation::DisposalMethod::kKeep;
+        info.fBlend = SkCodecAnimation::Blend::kSrc;
+        info.fFrameRect = SkIRect::MakeSize(dims);
+    }
+
+    if (auto origin = mCodec->codec()->getOrigin(); origin != kDefault_SkEncodedOrigin) {
+        if (SkEncodedOriginSwapsWidthHeight(origin)) {
+            dims = swapped(dims);
+        }
+        auto matrix = SkEncodedOriginToMatrix(origin, dims.width(), dims.height());
+        auto rect = SkRect::Make(info.fFrameRect);
+        LOG_ALWAYS_FATAL_IF(!matrix.mapRect(&rect));
+        rect.roundIn(&info.fFrameRect);
+    }
+    return info;
+}
+
+bool ImageDecoder::finished() const {
+    return mOptions.fFrameIndex >= mCodec->codec()->getFrameCount();
+}
+
 SkCodec::Result ImageDecoder::decode(void* pixels, size_t rowBytes) {
+    // This was checked inside setTargetSize, but it's possible the first frame
+    // was opaque, so that method succeeded, but after calling advanceFrame, the
+    // current frame is not opaque.
+    if (mUnpremultipliedRequired && !opaque()) {
+        // Allow using a matrix to handle orientation, but not scaling.
+        if (requires_matrix_scaling(swapWidthHeight(), mDecodeSize, mTargetSize)) {
+            return SkCodec::kInvalidScale;
+        }
+    }
+
     void* decodePixels = pixels;
     size_t decodeRowBytes = rowBytes;
-    auto decodeInfo = SkImageInfo::Make(mDecodeSize, mOutColorType, getOutAlphaType(),
-                                        getOutputColorSpace());
+    const auto decodeInfo = SkImageInfo::Make(mDecodeSize, mOutColorType, getOutAlphaType(),
+                                              getOutputColorSpace());
+    const auto outputInfo = getOutputInfo();
+    switch (mRestoreState) {
+        case RestoreState::kFirstRPFrame:{
+            // This frame is marked kRestorePrevious. The prior frame should be in
+            // |pixels|, and it is what we'll restore after each consecutive
+            // kRestorePrevious frame. Cache it now.
+            if (!(mRestoreFrame = Bitmap::allocateHeapBitmap(outputInfo))) {
+                return SkCodec::kInternalError;
+            }
+
+            const uint8_t* srcRow = static_cast<uint8_t*>(pixels);
+                  uint8_t* dstRow = static_cast<uint8_t*>(mRestoreFrame->pixels());
+            for (int y = 0; y < outputInfo.height(); y++) {
+                memcpy(dstRow, srcRow, outputInfo.minRowBytes());
+                srcRow += rowBytes;
+                dstRow += mRestoreFrame->rowBytes();
+            }
+            break;
+        }
+        case RestoreState::kRPFrame:
+        case RestoreState::kNeedsRestore:
+            // Restore the cached frame. It's possible that the client skipped decoding a frame, so
+            // we never cached it.
+            if (mRestoreFrame) {
+                const uint8_t* srcRow = static_cast<uint8_t*>(mRestoreFrame->pixels());
+                      uint8_t* dstRow = static_cast<uint8_t*>(pixels);
+                for (int y = 0; y < outputInfo.height(); y++) {
+                    memcpy(dstRow, srcRow, outputInfo.minRowBytes());
+                    srcRow += mRestoreFrame->rowBytes();
+                    dstRow += rowBytes;
+                }
+            }
+            break;
+        case RestoreState::kDoNothing:
+            break;
+    }
+
     // Used if we need a temporary before scaling or subsetting.
     // FIXME: Use scanline decoding on only a couple lines to save memory. b/70709380.
     SkBitmap tmp;
     const bool scale = mDecodeSize != mTargetSize;
     const auto origin = mCodec->codec()->getOrigin();
     const bool handleOrigin = origin != kDefault_SkEncodedOrigin;
+    SkMatrix outputMatrix;
     if (scale || handleOrigin || mCropRect) {
-        if (!tmp.setInfo(decodeInfo)) {
-            return SkCodec::kInternalError;
-        }
-        if (!Bitmap::allocateHeapBitmap(&tmp)) {
-            return SkCodec::kInternalError;
-        }
-        decodePixels = tmp.getPixels();
-        decodeRowBytes = tmp.rowBytes();
-    }
-
-    SkAndroidCodec::AndroidOptions options;
-    options.fSampleSize = mSampleSize;
-    auto result = mCodec->getAndroidPixels(decodeInfo, decodePixels, decodeRowBytes, &options);
-
-    if (scale || handleOrigin || mCropRect) {
-        SkBitmap scaledBm;
-        if (!scaledBm.installPixels(getOutputInfo(), pixels, rowBytes)) {
-            return SkCodec::kInternalError;
-        }
-
-        SkPaint paint;
-        paint.setBlendMode(SkBlendMode::kSrc);
-        paint.setFilterQuality(kLow_SkFilterQuality);  // bilinear filtering
-
-        SkCanvas canvas(scaledBm, SkCanvas::ColorBehavior::kLegacy);
-        SkMatrix outputMatrix;
         if (mCropRect) {
             outputMatrix.setTranslate(-mCropRect->fLeft, -mCropRect->fTop);
         }
@@ -233,13 +387,54 @@ SkCodec::Result ImageDecoder::decode(void* pixels, size_t rowBytes) {
                 std::swap(targetWidth, targetHeight);
             }
         }
-
         if (scale) {
             float scaleX = (float) targetWidth  / mDecodeSize.width();
             float scaleY = (float) targetHeight / mDecodeSize.height();
             outputMatrix.preScale(scaleX, scaleY);
         }
+        // It's possible that this portion *does* have alpha, even if the
+        // composed frame does not. In that case, the SkBitmap needs to have
+        // alpha so it blends properly.
+        if (!tmp.setInfo(decodeInfo.makeAlphaType(mUnpremultipliedRequired ? kUnpremul_SkAlphaType
+                                                                           : kPremul_SkAlphaType)))
+        {
+            return SkCodec::kInternalError;
+        }
+        if (!Bitmap::allocateHeapBitmap(&tmp)) {
+            return SkCodec::kInternalError;
+        }
+        decodePixels = tmp.getPixels();
+        decodeRowBytes = tmp.rowBytes();
 
+        if (!mCurrentFrameIsIndependent) {
+            SkMatrix inverse;
+            if (outputMatrix.invert(&inverse)) {
+                SkCanvas canvas(tmp, SkCanvas::ColorBehavior::kLegacy);
+                canvas.setMatrix(inverse);
+                SkPaint paint;
+                paint.setFilterQuality(kLow_SkFilterQuality); // bilinear
+                SkBitmap priorFrame;
+                priorFrame.installPixels(outputInfo, pixels, rowBytes);
+                canvas.drawBitmap(priorFrame, 0, 0, &paint);
+            } else {
+                ALOGE("Failed to invert matrix!");
+            }
+        }
+    }
+
+    auto result = mCodec->getAndroidPixels(decodeInfo, decodePixels, decodeRowBytes, &mOptions);
+
+    if (scale || handleOrigin || mCropRect) {
+        SkBitmap scaledBm;
+        if (!scaledBm.installPixels(outputInfo, pixels, rowBytes)) {
+            return SkCodec::kInternalError;
+        }
+
+        SkPaint paint;
+        paint.setBlendMode(SkBlendMode::kSrc);
+        paint.setFilterQuality(kLow_SkFilterQuality);  // bilinear filtering
+
+        SkCanvas canvas(scaledBm, SkCanvas::ColorBehavior::kLegacy);
         canvas.setMatrix(outputMatrix);
         canvas.drawBitmap(tmp, 0.0f, 0.0f, &paint);
     }

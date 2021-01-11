@@ -146,7 +146,11 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // Underlying networks declared by the agent. Only set if supportsUnderlyingNetworks is true.
     // The networks in this list might be declared by a VPN app using setUnderlyingNetworks and are
     // not guaranteed to be current or correct, or even to exist.
-    public @Nullable Network[] declaredUnderlyingNetworks;
+    //
+    // This array is read and iterated on multiple threads with no locking so its contents must
+    // never be modified. When the list of networks changes, replace with a new array, on the
+    // handler thread.
+    public @Nullable volatile Network[] declaredUnderlyingNetworks;
 
     // The capabilities originally announced by the NetworkAgent, regardless of any capabilities
     // that were added or removed due to this network's underlying networks.

@@ -155,8 +155,9 @@ Status Idmap2Service::verifyIdmap(const std::string& target_apk_path,
     return overlay_crc_status;
   }
 
+  // TODO(162841629): Support passing overlay name to idmap2d verify
   auto up_to_date =
-      header->IsUpToDate(target_apk_path.c_str(), overlay_apk_path.c_str(), target_crc, overlay_crc,
+      header->IsUpToDate(target_apk_path, overlay_apk_path, "", target_crc, overlay_crc,
                          ConvertAidlArgToPolicyBitmask(fulfilled_policies), enforce_overlayable);
 
   *_aidl_return = static_cast<bool>(up_to_date);
@@ -190,8 +191,9 @@ Status Idmap2Service::createIdmap(const std::string& target_apk_path,
     return error("failed to load apk " + overlay_apk_path);
   }
 
+  // TODO(162841629): Support passing overlay name to idmap2d create
   const auto idmap =
-      Idmap::FromApkAssets(*target_apk, *overlay_apk, policy_bitmask, enforce_overlayable);
+      Idmap::FromApkAssets(*target_apk, *overlay_apk, "", policy_bitmask, enforce_overlayable);
   if (!idmap) {
     return error(idmap.GetErrorMessage());
   }

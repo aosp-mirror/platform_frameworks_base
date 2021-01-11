@@ -325,7 +325,8 @@ public class VoiceInteractionService extends Service {
             // Allow only one concurrent recognition via the APIs.
             safelyShutdownHotwordDetector();
             mHotwordDetector = new AlwaysOnHotwordDetector(keyphrase, locale, callback,
-                    mKeyphraseEnrollmentInfo, mSystemService);
+                    mKeyphraseEnrollmentInfo, mSystemService,
+                    getApplicationContext().getApplicationInfo().targetSdkVersion);
         }
         return mHotwordDetector;
     }

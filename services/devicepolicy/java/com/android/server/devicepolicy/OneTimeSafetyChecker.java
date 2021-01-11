@@ -21,6 +21,8 @@ import android.app.admin.DevicePolicyManager.DevicePolicyOperation;
 import android.app.admin.DevicePolicySafetyChecker;
 import android.util.Slog;
 
+import com.android.internal.os.IResultReceiver;
+
 import java.util.Objects;
 
 //TODO(b/172376923): add unit tests
@@ -61,7 +63,12 @@ final class OneTimeSafetyChecker implements DevicePolicySafetyChecker {
         }
         Slog.i(TAG, "isDevicePolicyOperationSafe(" + name + "): returning " + safe
                 + " and restoring DevicePolicySafetyChecker to " + mRealSafetyChecker);
-        mService.setDevicePolicySafetyChecker(mRealSafetyChecker);
+        mService.setDevicePolicySafetyCheckerUnchecked(mRealSafetyChecker);
         return safe;
+    }
+
+    @Override
+    public void onFactoryReset(IResultReceiver callback) {
+        throw new UnsupportedOperationException();
     }
 }

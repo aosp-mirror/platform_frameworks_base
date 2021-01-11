@@ -76,9 +76,9 @@ public class SurfaceTexture {
     /**
      * These fields are used by native code, do not access or modify.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage(trackingBug = 176388660)
     private long mSurfaceTexture;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage(trackingBug = 176388660)
     private long mProducer;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private long mFrameAvailableListener;

@@ -85,8 +85,6 @@ public class ImageExporterTest extends SysuiTestCase {
 
         assertEquals("Exif " + ExifInterface.TAG_OFFSET_TIME_ORIGINAL, "+00:00",
                 exifInterface.getAttribute(ExifInterface.TAG_OFFSET_TIME_ORIGINAL));
-        assertEquals("Exif " + ExifInterface.TAG_OFFSET_TIME_ORIGINAL, "+00:00",
-                exifInterface.getAttribute(ExifInterface.TAG_OFFSET_TIME_DIGITIZED));
     }
 
     @Test
@@ -127,13 +125,6 @@ public class ImageExporterTest extends SysuiTestCase {
                         exifInterface.getAttribute(ExifInterface.TAG_SUBSEC_TIME_ORIGINAL));
                 assertEquals("Exif " + ExifInterface.TAG_OFFSET_TIME_ORIGINAL, "-05:00",
                         exifInterface.getAttribute(ExifInterface.TAG_OFFSET_TIME_ORIGINAL));
-
-                assertEquals("Exif " + ExifInterface.TAG_DATETIME_DIGITIZED, "2020:12:15 13:15:00",
-                        exifInterface.getAttribute(ExifInterface.TAG_DATETIME_DIGITIZED));
-                assertEquals("Exif " + ExifInterface.TAG_SUBSEC_TIME_DIGITIZED, "000",
-                        exifInterface.getAttribute(ExifInterface.TAG_SUBSEC_TIME_DIGITIZED));
-                assertEquals("Exif " + ExifInterface.TAG_OFFSET_TIME_DIGITIZED, "-05:00",
-                        exifInterface.getAttribute(ExifInterface.TAG_OFFSET_TIME_DIGITIZED));
             }
         } finally {
             if (decoded != null) {

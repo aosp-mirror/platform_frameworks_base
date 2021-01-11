@@ -21,7 +21,6 @@ import static com.android.server.location.gnss.GnssManagerService.TAG;
 
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
-import android.location.GnssCapabilities;
 import android.location.IGnssNmeaListener;
 import android.location.util.identity.CallerIdentity;
 import android.util.Log;
@@ -81,10 +80,6 @@ class GnssNmeaProvider extends GnssListenerMultiplexer<Void, IGnssNmeaListener, 
     public void onHalRestarted() {
         resetService();
     }
-
-    @Override
-    public void onCapabilitiesChanged(GnssCapabilities oldCapabilities,
-            GnssCapabilities newCapabilities) {}
 
     @Override
     public void onReportNmea(long timestamp) {

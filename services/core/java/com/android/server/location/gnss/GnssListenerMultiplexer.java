@@ -96,11 +96,28 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         }
 
         @Override
-        protected void onBinderListenerRegister() {
+        protected final void onBinderListenerRegister() {
             mPermitted = mLocationPermissionsHelper.hasLocationPermissions(PERMISSION_FINE,
                     getIdentity());
             mForeground = mAppForegroundHelper.isAppForeground(getIdentity().getUid());
+
+            onGnssListenerRegister();
         }
+
+        @Override
+        protected final void onBinderListenerUnregister() {
+            onGnssListenerUnregister();
+        }
+
+        /**
+         * May be overridden in place of {@link #onBinderListenerRegister()}.
+         */
+        protected void onGnssListenerRegister() {}
+
+        /**
+         * May be overridden in place of {@link #onBinderListenerUnregister()}.
+         */
+        protected void onGnssListenerUnregister() {}
 
         boolean onLocationPermissionsChanged(String packageName) {
             if (getIdentity().getPackageName().equals(packageName)) {

@@ -614,6 +614,7 @@ public class StatsPullAtomService extends SystemService {
                             return pullRoleHolderLocked(atomTag, data);
                         }
                     case FrameworkStatsLog.DANGEROUS_PERMISSION_STATE:
+                        // fall-through - same call covers two cases
                     case FrameworkStatsLog.DANGEROUS_PERMISSION_STATE_SAMPLED:
                         synchronized (mDangerousPermissionStateLock) {
                             return pullDangerousPermissionStateLocked(atomTag, data);
@@ -3014,7 +3015,7 @@ public class StatsPullAtomService extends SystemService {
                     }
 
                     int numPerms = pkg.requestedPermissions.length;
-                    for (int permNum  = 0; permNum < numPerms; permNum++) {
+                    for (int permNum = 0; permNum < numPerms; permNum++) {
                         String permName = pkg.requestedPermissions[permNum];
 
                         PermissionInfo permissionInfo;
@@ -3024,10 +3025,6 @@ public class StatsPullAtomService extends SystemService {
                             permissionFlags =
                                     pm.getPermissionFlags(permName, pkg.packageName, user);
                         } catch (PackageManager.NameNotFoundException ignored) {
-                            continue;
-                        }
-
-                        if (permissionInfo.getProtection() != PROTECTION_DANGEROUS) {
                             continue;
                         }
 
@@ -3042,15 +3039,17 @@ public class StatsPullAtomService extends SystemService {
                                     (pkg.requestedPermissionsFlags[permNum]
                                             & REQUESTED_PERMISSION_GRANTED)
                                             != 0,
-                                    permissionFlags);
+                                    permissionFlags, permissionInfo.getProtection()
+                                            | permissionInfo.getProtectionFlags());
                         } else {
-                            // DangerousPermissionStateSampled atom.
+                            // DangeorusPermissionStateSampled atom.
                             e = FrameworkStatsLog.buildStatsEvent(atomTag, permName,
                                     pkg.applicationInfo.uid,
                                     (pkg.requestedPermissionsFlags[permNum]
                                             & REQUESTED_PERMISSION_GRANTED)
                                             != 0,
-                                    permissionFlags);
+                                    permissionFlags, permissionInfo.getProtection()
+                                            | permissionInfo.getProtectionFlags());
                         }
                         pulledData.add(e);
                     }
@@ -3198,7 +3197,11 @@ public class StatsPullAtomService extends SystemService {
     int pullFaceSettingsLocked(int atomTag, List<StatsEvent> pulledData) {
         final long callingToken = Binder.clearCallingIdentity();
         try {
-            List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
+            UserManager manager = mContext.getSystemService(UserManager.class);
+            if (manager == null) {
+                return StatsManager.PULL_SKIP;
+            }
+            List<UserInfo> users = manager.getUsers();
             int numUsers = users.size();
             for (int userNum = 0; userNum < numUsers; userNum++) {
                 int userId = users.get(userNum).getUserHandle().getIdentifier();

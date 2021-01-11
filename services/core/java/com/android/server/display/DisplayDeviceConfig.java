@@ -16,6 +16,7 @@
 
 package com.android.server.display;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.os.Environment;
 import android.os.PowerManager;
@@ -25,6 +26,8 @@ import android.view.DisplayAddress;
 import com.android.internal.BrightnessSynchronizer;
 import com.android.server.display.config.DisplayConfiguration;
 import com.android.server.display.config.DisplayQuirks;
+import com.android.server.display.config.HbmTiming;
+import com.android.server.display.config.HighBrightnessMode;
 import com.android.server.display.config.NitsMap;
 import com.android.server.display.config.Point;
 import com.android.server.display.config.XmlParser;
@@ -61,10 +64,11 @@ public class DisplayDeviceConfig {
     private static final String STABLE_ID_SUFFIX_FORMAT = "id_%d";
     private static final String NO_SUFFIX_FORMAT = "%d";
     private static final long STABLE_FLAG = 1L << 62;
-
     // Float.NaN (used as invalid for brightness) cannot be stored in config.xml
     // so -2 is used instead
     private static final float INVALID_BRIGHTNESS_IN_CONFIG = -2f;
+
+    private final Context mContext;
 
     private float[] mNits;
     private float[] mBrightness;
@@ -72,8 +76,8 @@ public class DisplayDeviceConfig {
     private float mBrightnessMaximum = Float.NaN;
     private float mBrightnessDefault = Float.NaN;
     private List<String> mQuirks;
-
-    private final Context mContext;
+    private boolean mIsHighBrightnessModeEnabled = false;
+    private HighBrightnessModeData mHbmData;
 
     private DisplayDeviceConfig(Context context) {
         mContext = context;
@@ -182,6 +186,19 @@ public class DisplayDeviceConfig {
         return mQuirks != null && mQuirks.contains(quirkValue);
     }
 
+    /**
+     * @return high brightness mode configuration data for the display.
+     */
+    public HighBrightnessModeData getHighBrightnessModeData() {
+        if (!mIsHighBrightnessModeEnabled || mHbmData == null) {
+            return null;
+        }
+
+        HighBrightnessModeData hbmData = new HighBrightnessModeData();
+        mHbmData.copyTo(hbmData);
+        return hbmData;
+    }
+
     @Override
     public String toString() {
         String str = "DisplayDeviceConfig{"
@@ -191,8 +208,14 @@ public class DisplayDeviceConfig {
                 + ", mBrightnessMaximum=" + mBrightnessMaximum
                 + ", mBrightnessDefault=" + mBrightnessDefault
                 + ", mQuirks=" + mQuirks
+                + ", isHbmEnabled=" + mIsHighBrightnessModeEnabled
+                + ", mHbmData=" + mHbmData
                 + "}";
         return str;
+    }
+
+    private float getMaxBrightness() {
+        return mBrightness[mBrightness.length - 1];
     }
 
     private static DisplayDeviceConfig getConfigFromSuffix(Context context, File baseDirectory,
@@ -240,6 +263,7 @@ public class DisplayDeviceConfig {
                 loadBrightnessMap(config);
                 loadBrightnessDefaultFromDdcXml(config);
                 loadBrightnessConstraintsFromConfigXml();
+                loadHighBrightnessModeData(config);
                 loadQuirks(config);
             } else {
                 Slog.w(TAG, "DisplayDeviceConfig file is null");
@@ -351,6 +375,68 @@ public class DisplayDeviceConfig {
         final DisplayQuirks quirks = config.getQuirks();
         if (quirks != null) {
             mQuirks = new ArrayList<>(quirks.getQuirk());
+        }
+    }
+
+    private void loadHighBrightnessModeData(DisplayConfiguration config) {
+        final HighBrightnessMode hbm = config.getHighBrightnessMode();
+        if (hbm != null) {
+            mIsHighBrightnessModeEnabled = hbm.getEnabled();
+            mHbmData = new HighBrightnessModeData();
+            mHbmData.minimumLux = hbm.getMinimumLux_all().floatValue();
+            mHbmData.transitionPoint = hbm.getTransitionPoint_all().floatValue();
+            if (mHbmData.transitionPoint >= getMaxBrightness()) {
+                throw new IllegalArgumentException("HBM transition point invalid. "
+                        + mHbmData.transitionPoint + " is not less than "
+                        + getMaxBrightness());
+            }
+            final HbmTiming hbmTiming = hbm.getTiming_all();
+            mHbmData.timeWindowMillis = hbmTiming.getTimeWindowSecs_all().longValue() * 1000;
+            mHbmData.timeMaxMillis = hbmTiming.getTimeMaxSecs_all().longValue() * 1000;
+            mHbmData.timeMinMillis = hbmTiming.getTimeMinSecs_all().longValue() * 1000;
+        }
+    }
+
+    /**
+     * Container for high brightness mode configuration data.
+     */
+    static class HighBrightnessModeData {
+        /** Minimum lux needed to enter high brightness mode */
+        public float minimumLux;
+
+        /** Brightness level at which we transition from normal to high-brightness. */
+        public float transitionPoint;
+
+        /** Time window for HBM. */
+        public long timeWindowMillis;
+
+        /** Maximum time HBM is allowed to be during in a {@code timeWindowMillis}. */
+        public long timeMaxMillis;
+
+        /** Minimum time that HBM can be on before being enabled. */
+        public long timeMinMillis;
+
+        /**
+         * Copies the HBM data to the specified parameter instance.
+         * @param other the instance to copy data to.
+         */
+        public void copyTo(@NonNull HighBrightnessModeData other) {
+            other.minimumLux = minimumLux;
+            other.transitionPoint = transitionPoint;
+            other.timeWindowMillis = timeWindowMillis;
+            other.timeMaxMillis = timeMaxMillis;
+            other.timeMinMillis = timeMinMillis;
+        }
+
+        @Override
+        public String toString() {
+            return "HBM{"
+                    + "minLux: " + minimumLux
+                    + ", transition: " + transitionPoint
+                    + ", timeWindow: " + timeWindowMillis + "ms"
+                    + ", timeMax: " + timeMaxMillis + "ms"
+                    + ", timeMin: " + timeMinMillis
+                    + "} ";
         }
     }
 }

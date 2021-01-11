@@ -19,8 +19,8 @@ package com.android.server.pm;
 import android.annotation.NonNull;
 import android.content.IntentFilter;
 
+import com.android.server.WatchableIntentResolver;
 import com.android.server.utils.Snappable;
-import com.android.server.utils.WatchableIntentResolver;
 
 import java.util.List;
 
@@ -57,7 +57,7 @@ class CrossProfileIntentResolver
      */
     public CrossProfileIntentResolver snapshot() {
         CrossProfileIntentResolver result = new CrossProfileIntentResolver();
-        result.doCopy(this);
+        result.copyFrom(this);
         return result;
     }
 }

@@ -153,11 +153,13 @@ public class PermissionUsageHelper {
      * @see PermissionManager.getIndicatorAppOpUsageData
      */
     public List<PermGroupUsage> getOpUsageData(boolean isMicMuted) {
+        List<PermGroupUsage> usages = new ArrayList<>();
+
         if (!shouldShowIndicators()) {
-            return null;
+            return usages;
         }
 
-        List<String> ops = CAMERA_OPS;
+        List<String> ops = new ArrayList<>(CAMERA_OPS);
         if (shouldShowLocationIndicator()) {
             ops.addAll(LOCATION_OPS);
         }
@@ -169,7 +171,6 @@ public class PermissionUsageHelper {
         Map<PackageAttribution, CharSequence> packagesWithAttributionLabels =
                 getTrustedAttributions(rawUsages.get(MICROPHONE));
 
-        List<PermGroupUsage> usages = new ArrayList<>();
         List<String> usedPermGroups = new ArrayList<>(rawUsages.keySet());
         for (int permGroupNum = 0; permGroupNum < usedPermGroups.size(); permGroupNum++) {
             boolean isPhone = false;
@@ -240,7 +241,7 @@ public class PermissionUsageHelper {
                             opEntry.getAttributedOpEntries().get(attributionTag);
 
                     long lastAccessTime = attrOpEntry.getLastAccessTime(opFlags);
-                    if (lastAccessTime < recentThreshold) {
+                    if (lastAccessTime < recentThreshold && !attrOpEntry.isRunning()) {
                         continue;
                     }
                     if (!isUserSensitive(packageName, user, op)

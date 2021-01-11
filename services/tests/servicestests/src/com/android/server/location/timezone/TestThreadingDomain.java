@@ -26,6 +26,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.concurrent.Callable;
 
 /**
  * A ThreadingDomain that simulates idealized post() semantics. Execution takes place in zero time,
@@ -79,6 +80,11 @@ class TestThreadingDomain extends ThreadingDomain {
     }
 
     @Override
+    <V> V postAndWait(Callable<V> callable, long durationMillis) {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
+    @Override
     void postDelayed(Runnable r, long delayMillis) {
         postDelayed(r, null, delayMillis);
     }
@@ -92,6 +98,10 @@ class TestThreadingDomain extends ThreadingDomain {
     @Override
     void removeQueuedRunnables(Object token) {
         mQueue.removeIf(runnable -> runnable.token != null && runnable.token == token);
+    }
+
+    void removeAllQueuedRunnables() {
+        mQueue.clear();
     }
 
     void assertSingleDelayedQueueItem(Duration expectedDelay) {

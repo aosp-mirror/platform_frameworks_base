@@ -20,7 +20,6 @@ import static com.android.server.location.gnss.GnssManagerService.D;
 import static com.android.server.location.gnss.GnssManagerService.TAG;
 
 import android.app.AppOpsManager;
-import android.location.GnssCapabilities;
 import android.location.GnssNavigationMessage;
 import android.location.IGnssNavigationMessageListener;
 import android.location.util.identity.CallerIdentity;
@@ -43,6 +42,21 @@ public class GnssNavigationMessageProvider extends
         GnssListenerMultiplexer<Void, IGnssNavigationMessageListener, Void> implements
         GnssNative.BaseCallbacks, GnssNative.NavigationMessageCallbacks {
 
+    private class GnssNavigationMessageListenerRegistration extends GnssListenerRegistration {
+
+        protected GnssNavigationMessageListenerRegistration(
+                CallerIdentity callerIdentity,
+                IGnssNavigationMessageListener listener) {
+            super(null, callerIdentity, listener);
+        }
+
+        @Override
+        protected void onGnssListenerRegister() {
+            executeOperation(listener -> listener.onStatusChanged(
+                    GnssNavigationMessage.Callback.STATUS_READY));
+        }
+    }
+
     private final AppOpsHelper mAppOpsHelper;
     private final GnssNative mGnssNative;
 
@@ -63,6 +77,12 @@ public class GnssNavigationMessageProvider extends
     @Override
     public void addListener(CallerIdentity identity, IGnssNavigationMessageListener listener) {
         super.addListener(identity, listener);
+    }
+
+    @Override
+    protected GnssListenerRegistration createRegistration(Void request,
+            CallerIdentity callerIdentity, IGnssNavigationMessageListener listener) {
+        return new GnssNavigationMessageListenerRegistration(callerIdentity, listener);
     }
 
     @Override
@@ -94,10 +114,6 @@ public class GnssNavigationMessageProvider extends
     public void onHalRestarted() {
         resetService();
     }
-
-    @Override
-    public void onCapabilitiesChanged(GnssCapabilities oldCapabilities,
-            GnssCapabilities newCapabilities) {}
 
     @Override
     public void onReportNavigationMessage(GnssNavigationMessage event) {

@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
-import android.app.IActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.ComponentName;
 import android.content.Context;

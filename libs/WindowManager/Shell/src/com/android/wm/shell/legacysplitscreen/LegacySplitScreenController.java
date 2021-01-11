@@ -30,7 +30,6 @@ import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.Slog;
@@ -44,10 +43,12 @@ import android.window.WindowContainerTransaction;
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.Transitions;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TaskStackListenerCallback;
@@ -79,7 +80,7 @@ public class LegacySplitScreenController implements LegacySplitScreen,
     private final DividerImeController mImePositionProcessor;
     private final DividerState mDividerState = new DividerState();
     private final ForcedResizableInfoActivityController mForcedResizableController;
-    private final Handler mHandler;
+    private final ShellExecutor mMainExecutor;
     private final LegacySplitScreenTaskListener mSplits;
     private final SystemWindows mSystemWindows;
     final TransactionPool mTransactionPool;
@@ -111,20 +112,23 @@ public class LegacySplitScreenController implements LegacySplitScreen,
 
     public LegacySplitScreenController(Context context,
             DisplayController displayController, SystemWindows systemWindows,
-            DisplayImeController imeController, Handler handler, TransactionPool transactionPool,
+            DisplayImeController imeController, TransactionPool transactionPool,
             ShellTaskOrganizer shellTaskOrganizer, SyncTransactionQueue syncQueue,
-            TaskStackListenerImpl taskStackListener) {
+            TaskStackListenerImpl taskStackListener, Transitions transitions,
+            ShellExecutor mainExecutor) {
         mContext = context;
         mDisplayController = displayController;
         mSystemWindows = systemWindows;
         mImeController = imeController;
-        mHandler = handler;
-        mForcedResizableController = new ForcedResizableInfoActivityController(context, this);
+        mMainExecutor = mainExecutor;
+        mForcedResizableController = new ForcedResizableInfoActivityController(context, this,
+                mainExecutor);
         mTransactionPool = transactionPool;
         mWindowManagerProxy = new WindowManagerProxy(syncQueue, shellTaskOrganizer);
         mTaskOrganizer = shellTaskOrganizer;
-        mSplits = new LegacySplitScreenTaskListener(this, shellTaskOrganizer, syncQueue);
-        mImePositionProcessor = new DividerImeController(mSplits, mTransactionPool, mHandler,
+        mSplits = new LegacySplitScreenTaskListener(this, shellTaskOrganizer, transitions,
+                syncQueue);
+        mImePositionProcessor = new DividerImeController(mSplits, mTransactionPool, mMainExecutor,
                 shellTaskOrganizer);
         mRotationController =
                 (display, fromRotation, toRotation, wct) -> {
@@ -269,11 +273,6 @@ public class LegacySplitScreenController implements LegacySplitScreen,
         }
     }
 
-    /** Posts task to handler dealing with divider. */
-    void post(Runnable task) {
-        mHandler.post(task);
-    }
-
     @Override
     public DividerView getDividerView() {
         return mView;
@@ -343,7 +342,7 @@ public class LegacySplitScreenController implements LegacySplitScreen,
     }
 
     void onTaskVanished() {
-        mHandler.post(this::removeDivider);
+        removeDivider();
     }
 
     private void updateVisibility(final boolean visible) {
@@ -377,7 +376,7 @@ public class LegacySplitScreenController implements LegacySplitScreen,
     @Override
     public void setMinimized(final boolean minimized) {
         if (DEBUG) Slog.d(TAG, "posting ext setMinimized " + minimized + " vis:" + mVisible);
-        mHandler.post(() -> {
+        mMainExecutor.execute(() -> {
             if (DEBUG) Slog.d(TAG, "run posted ext setMinimized " + minimized + " vis:" + mVisible);
             if (!mVisible) {
                 return;
@@ -553,8 +552,36 @@ public class LegacySplitScreenController implements LegacySplitScreen,
         mHomeStackResizable = mWindowManagerProxy.applyEnterSplit(mSplits, mSplitLayout);
     }
 
+    void prepareEnterSplitTransition(WindowContainerTransaction outWct) {
+        // Set resizable directly here because buildEnterSplit already resizes home stack.
+        mHomeStackResizable = mWindowManagerProxy.buildEnterSplit(outWct, mSplits, mSplitLayout);
+    }
+
+    void finishEnterSplitTransition(boolean minimized) {
+        update(mDisplayController.getDisplayContext(
+                mContext.getDisplayId()).getResources().getConfiguration());
+        if (minimized) {
+            ensureMinimizedSplit();
+        } else {
+            ensureNormalSplit();
+        }
+    }
+
     void startDismissSplit(boolean toPrimaryTask) {
+        startDismissSplit(toPrimaryTask, false /* snapped */);
+    }
+
+    void startDismissSplit(boolean toPrimaryTask, boolean snapped) {
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            mSplits.getSplitTransitions().dismissSplit(
+                    mSplits, mSplitLayout, !toPrimaryTask, snapped);
+        } else {
         mWindowManagerProxy.applyDismissSplit(mSplits, mSplitLayout, !toPrimaryTask);
+            onDismissSplit();
+        }
+    }
+
+    void onDismissSplit() {
         updateVisibility(false /* visible */);
         mMinimized = false;
         // Resets divider bar position to undefined, so new divider bar will apply default position

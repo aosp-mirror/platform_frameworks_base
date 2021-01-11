@@ -38,6 +38,7 @@ public abstract class LoggableMonitor {
     private final int mStatsAction;
     private final int mStatsClient;
     private long mFirstAcquireTimeMs;
+    private boolean mShouldLogMetrics = true;
 
     /**
      * Only valid for AuthenticationClient.
@@ -58,6 +59,10 @@ public abstract class LoggableMonitor {
         mStatsClient = statsClient;
     }
 
+    protected void setShouldLog(boolean shouldLog) {
+        mShouldLogMetrics = shouldLog;
+    }
+
     public int getStatsClient() {
         return mStatsClient;
     }
@@ -70,6 +75,9 @@ public abstract class LoggableMonitor {
 
     protected final void logOnAcquired(Context context, int acquiredInfo, int vendorCode,
             int targetUserId) {
+        if (!mShouldLogMetrics) {
+            return;
+        }
 
         final boolean isFace = mStatsModality == BiometricsProtoEnums.MODALITY_FACE;
         final boolean isFingerprint = mStatsModality == BiometricsProtoEnums.MODALITY_FINGERPRINT;
@@ -110,6 +118,10 @@ public abstract class LoggableMonitor {
 
     protected final void logOnError(Context context, int error, int vendorCode, int targetUserId) {
 
+        if (!mShouldLogMetrics) {
+            return;
+        }
+
         final long latency = mFirstAcquireTimeMs != 0
                 ? (System.currentTimeMillis() - mFirstAcquireTimeMs) : -1;
 
@@ -144,6 +156,10 @@ public abstract class LoggableMonitor {
 
     protected final void logOnAuthenticated(Context context, boolean authenticated,
             boolean requireConfirmation, int targetUserId, boolean isBiometricPrompt) {
+        if (!mShouldLogMetrics) {
+            return;
+        }
+
         int authState = FrameworkStatsLog.BIOMETRIC_AUTHENTICATED__STATE__UNKNOWN;
         if (!authenticated) {
             authState = FrameworkStatsLog.BIOMETRIC_AUTHENTICATED__STATE__REJECTED;
@@ -189,6 +205,10 @@ public abstract class LoggableMonitor {
     }
 
     protected final void logOnEnrolled(int targetUserId, long latency, boolean enrollSuccessful) {
+        if (!mShouldLogMetrics) {
+            return;
+        }
+
         if (DEBUG) {
             Slog.v(TAG, "Enrolled! Modality: " + mStatsModality
                     + ", User: " + targetUserId

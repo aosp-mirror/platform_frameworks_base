@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
-import android.app.IActivityTaskManager;
 import android.app.SynchronousUserSwitchObserver;
 import android.app.TaskStackListener;
 import android.app.UserSwitchObserver;
@@ -548,14 +547,16 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     @Override
     public void scheduleEnroll(int sensorId, @NonNull IBinder token,
             @NonNull byte[] hardwareAuthToken, int userId,
-            @NonNull IFingerprintServiceReceiver receiver, @NonNull String opPackageName) {
+            @NonNull IFingerprintServiceReceiver receiver, @NonNull String opPackageName,
+            boolean shouldLogMetrics) {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
             final FingerprintEnrollClient client = new FingerprintEnrollClient(mContext,
                     mLazyDaemon, token, new ClientMonitorCallbackConverter(receiver), userId,
                     hardwareAuthToken, opPackageName, FingerprintUtils.getLegacyInstance(mSensorId),
-                    ENROLL_TIMEOUT_SEC, mSensorProperties.sensorId, mUdfpsOverlayController);
+                    ENROLL_TIMEOUT_SEC, mSensorProperties.sensorId, mUdfpsOverlayController,
+                    shouldLogMetrics);
             mScheduler.scheduleClientMonitor(client, new ClientMonitor.Callback() {
                 @Override
                 public void onClientFinished(@NonNull ClientMonitor<?> clientMonitor,

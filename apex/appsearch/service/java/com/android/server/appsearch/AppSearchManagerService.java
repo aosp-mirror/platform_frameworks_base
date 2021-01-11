@@ -279,7 +279,7 @@ public class AppSearchManagerService extends SystemService {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
                 impl.invalidateNextPageToken(nextPageToken);
             } catch (Throwable t) {
-                Log.d(TAG, "Unable to invalidate the query page token", t);
+                Log.e(TAG, "Unable to invalidate the query page token", t);
             } finally {
                 Binder.restoreCallingIdentity(callingIdentity);
             }
@@ -348,6 +348,21 @@ public class AppSearchManagerService extends SystemService {
         }
 
         @Override
+        public void persistToDisk(@UserIdInt int userId) {
+            int callingUid = Binder.getCallingUidOrThrow();
+            int callingUserId = handleIncomingUser(userId, callingUid);
+            final long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
+                impl.persistToDisk();
+            } catch (Throwable t) {
+                Log.e(TAG, "Unable to persist the data to disk", t);
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
+        }
+
+        @Override
         public void initialize(@UserIdInt int userId, @NonNull IAppSearchResultCallback callback) {
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUid();
@@ -388,7 +403,7 @@ public class AppSearchManagerService extends SystemService {
             try {
                 callback.onResult(result);
             } catch (RemoteException e) {
-                Log.d(TAG, "Unable to send result to the callback", e);
+                Log.e(TAG, "Unable to send result to the callback", e);
             }
         }
 
@@ -398,7 +413,7 @@ public class AppSearchManagerService extends SystemService {
             try {
                 callback.onResult(result);
             } catch (RemoteException e) {
-                Log.d(TAG, "Unable to send result to the callback", e);
+                Log.e(TAG, "Unable to send result to the callback", e);
             }
         }
 
@@ -411,7 +426,7 @@ public class AppSearchManagerService extends SystemService {
             try {
                 callback.onResult(throwableToFailedResult(throwable));
             } catch (RemoteException e) {
-                Log.d(TAG, "Unable to send result to the callback", e);
+                Log.e(TAG, "Unable to send result to the callback", e);
             }
         }
 
@@ -425,7 +440,7 @@ public class AppSearchManagerService extends SystemService {
             try {
                 callback.onSystemError(new ParcelableException(throwable));
             } catch (RemoteException e) {
-                Log.d(TAG, "Unable to send error to the callback", e);
+                Log.e(TAG, "Unable to send error to the callback", e);
             }
         }
     }

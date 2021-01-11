@@ -1002,4 +1002,22 @@ public interface InputConnection {
      */
     boolean commitContent(@NonNull InputContentInfo inputContentInfo, int flags,
             @Nullable Bundle opts);
+
+    /**
+     * Called by the input method to indicate that it temporarily consumes all input for itself,
+     * or no longer does so.
+     *
+     * <p>Editors should reflect that they are temporarily not receiving input by hiding the
+     * cursor if {@code imeTemporarilyConsumesInput} is {@code true}, and resume showing the
+     * cursor if it is {@code false}.
+     *
+     * @param imeTemporarilyConsumesInput {@code true} when the IME is temporarily consuming input
+     * and the cursor should be hidden, {@code false} when input to the editor resumes and the
+     * cursor should be shown again.
+     * @return {@code true} on success, {@code false} if the input connection is no longer valid, or
+     * the protocol is not supported.
+     */
+    default boolean setImeTemporarilyConsumesInput(boolean imeTemporarilyConsumesInput) {
+        return false;
+    }
 }

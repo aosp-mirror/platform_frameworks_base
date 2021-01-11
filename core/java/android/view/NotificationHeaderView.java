@@ -156,11 +156,22 @@ public class NotificationHeaderView extends FrameLayout {
      * Sets the extra margin at the end of the top line of left-aligned text + icons.
      * This value will have the margin required to accommodate the expand button added to it.
      *
-     * @param extraMarginEnd extra margin
+     * @param extraMarginEnd extra margin in px
      */
-    @RemotableViewMethod
     public void setTopLineExtraMarginEnd(int extraMarginEnd) {
         mTopLineView.setHeaderTextMarginEnd(extraMarginEnd + mHeadingEndMargin);
+    }
+
+    /**
+     * Sets the extra margin at the end of the top line of left-aligned text + icons.
+     * This value will have the margin required to accommodate the expand button added to it.
+     *
+     * @param extraMarginEndDp extra margin in dp
+     */
+    @RemotableViewMethod
+    public void setTopLineExtraMarginEndDp(float extraMarginEndDp) {
+        setTopLineExtraMarginEnd(
+                (int) (extraMarginEndDp * getResources().getDisplayMetrics().density));
     }
 
     /**

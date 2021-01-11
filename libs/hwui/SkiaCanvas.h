@@ -147,6 +147,12 @@ public:
                             uirenderer::CanvasPropertyPrimitive* y,
                             uirenderer::CanvasPropertyPrimitive* radius,
                             uirenderer::CanvasPropertyPaint* paint) override;
+    virtual void drawRipple(uirenderer::CanvasPropertyPrimitive* x,
+                            uirenderer::CanvasPropertyPrimitive* y,
+                            uirenderer::CanvasPropertyPrimitive* radius,
+                            uirenderer::CanvasPropertyPaint* paint,
+                            uirenderer::CanvasPropertyPrimitive* progress,
+                            sk_sp<SkRuntimeEffect> runtimeEffect) override;
 
     virtual void drawLayer(uirenderer::DeferredLayerUpdater* layerHandle) override;
     virtual void drawRenderNode(uirenderer::RenderNode* renderNode) override;

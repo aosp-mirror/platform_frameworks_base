@@ -40,10 +40,12 @@ import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
 import androidx.annotation.BinderThread;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.view.IInputMethodManager;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -64,7 +66,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
     private static final int FLOATING_IME_BOTTOM_INSET = -80;
 
     protected final IWindowManager mWmService;
-    protected final Executor mExecutor;
+    protected final Executor mMainExecutor;
     private final TransactionPool mTransactionPool;
     private final DisplayController mDisplayController;
     private final SparseArray<PerDisplay> mImePerDisplay = new SparseArray<>();
@@ -73,10 +75,10 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
 
     public DisplayImeController(IWindowManager wmService, DisplayController displayController,
             Executor mainExecutor, TransactionPool transactionPool) {
-        mExecutor = mainExecutor;
         mWmService = wmService;
-        mTransactionPool = transactionPool;
         mDisplayController = displayController;
+        mMainExecutor = mainExecutor;
+        mTransactionPool = transactionPool;
     }
 
     /** Starts monitor displays changes and set insets controller for each displays. */
@@ -90,11 +92,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         // WM will defer IME inset handling to it in multi-window scenarious.
         PerDisplay pd = new PerDisplay(displayId,
                 mDisplayController.getDisplayLayout(displayId).rotation());
-        try {
-            mWmService.setDisplayWindowInsetsController(displayId, pd);
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Unable to set insets controller on display " + displayId);
-        }
+        pd.register();
         mImePerDisplay.put(displayId, pd);
     }
 
@@ -182,9 +180,11 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
     }
 
     /** An implementation of {@link IDisplayWindowInsetsController} for a given display id. */
-    public class PerDisplay extends IDisplayWindowInsetsController.Stub {
+    public class PerDisplay {
         final int mDisplayId;
         final InsetsState mInsetsState = new InsetsState();
+        protected final DisplayWindowInsetsControllerImpl mInsetsControllerImpl =
+                new DisplayWindowInsetsControllerImpl();
         InsetsSourceControl mImeSourceControl = null;
         int mAnimationDirection = DIRECTION_NONE;
         ValueAnimator mAnimation = null;
@@ -198,10 +198,16 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             mRotation = initialRotation;
         }
 
-        @BinderThread
-        @Override
-        public void insetsChanged(InsetsState insetsState) {
-            mExecutor.execute(() -> {
+        public void register() {
+            try {
+                mWmService.setDisplayWindowInsetsController(mDisplayId, mInsetsControllerImpl);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Unable to set insets controller on display " + mDisplayId);
+            }
+        }
+
+        protected void insetsChanged(InsetsState insetsState) {
+            mMainExecutor.execute(() -> {
                 if (mInsetsState.equals(insetsState)) {
                     return;
                 }
@@ -220,9 +226,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             });
         }
 
-        @BinderThread
-        @Override
-        public void insetsControlChanged(InsetsState insetsState,
+        @VisibleForTesting
+        protected void insetsControlChanged(InsetsState insetsState,
                 InsetsSourceControl[] activeControls) {
             insetsChanged(insetsState);
             if (activeControls != null) {
@@ -231,7 +236,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                         continue;
                     }
                     if (activeControl.getType() == InsetsState.ITYPE_IME) {
-                        mExecutor.execute(() -> {
+                        mMainExecutor.execute(() -> {
                             final Point lastSurfacePosition = mImeSourceControl != null
                                     ? mImeSourceControl.getSurfacePosition() : null;
                             final boolean positionChanged =
@@ -271,30 +276,25 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             }
         }
 
-        @BinderThread
-        @Override
-        public void showInsets(int types, boolean fromIme) {
+        protected void showInsets(int types, boolean fromIme) {
             if ((types & WindowInsets.Type.ime()) == 0) {
                 return;
             }
             if (DEBUG) Slog.d(TAG, "Got showInsets for ime");
-            mExecutor.execute(() -> startAnimation(true /* show */, false /* forceRestart */));
+            mMainExecutor.execute(() -> startAnimation(true /* show */, false /* forceRestart */));
         }
 
-        @BinderThread
-        @Override
-        public void hideInsets(int types, boolean fromIme) {
+
+        protected void hideInsets(int types, boolean fromIme) {
             if ((types & WindowInsets.Type.ime()) == 0) {
                 return;
             }
             if (DEBUG) Slog.d(TAG, "Got hideInsets for ime");
-            mExecutor.execute(() -> startAnimation(false /* show */, false /* forceRestart */));
+            mMainExecutor.execute(() -> startAnimation(false /* show */, false /* forceRestart */));
         }
 
-        @BinderThread
-        @Override
         public void topFocusedWindowChanged(String packageName) {
-            // no-op
+            // Do nothing
         }
 
         /**
@@ -455,6 +455,47 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 // When showing away, queue up insets change last, otherwise any bounds changes
                 // can have a "flicker" of ime-provided insets.
                 setVisibleDirectly(true /* visible */);
+            }
+        }
+
+        @VisibleForTesting
+        @BinderThread
+        public class DisplayWindowInsetsControllerImpl
+                extends IDisplayWindowInsetsController.Stub {
+            @Override
+            public void topFocusedWindowChanged(String packageName) throws RemoteException {
+                mMainExecutor.execute(() -> {
+                    PerDisplay.this.topFocusedWindowChanged(packageName);
+                });
+            }
+
+            @Override
+            public void insetsChanged(InsetsState insetsState) throws RemoteException {
+                mMainExecutor.execute(() -> {
+                    PerDisplay.this.insetsChanged(insetsState);
+                });
+            }
+
+            @Override
+            public void insetsControlChanged(InsetsState insetsState,
+                    InsetsSourceControl[] activeControls) throws RemoteException {
+                mMainExecutor.execute(() -> {
+                    PerDisplay.this.insetsControlChanged(insetsState, activeControls);
+                });
+            }
+
+            @Override
+            public void showInsets(int types, boolean fromIme) throws RemoteException {
+                mMainExecutor.execute(() -> {
+                    PerDisplay.this.showInsets(types, fromIme);
+                });
+            }
+
+            @Override
+            public void hideInsets(int types, boolean fromIme) throws RemoteException {
+                mMainExecutor.execute(() -> {
+                    PerDisplay.this.hideInsets(types, fromIme);
+                });
             }
         }
     }

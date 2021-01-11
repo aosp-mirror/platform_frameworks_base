@@ -352,4 +352,39 @@ public final class ResultCallbacks {
             }
         };
     }
+
+    /**
+     * Creates {@link IVoidResultCallback.Stub} that is to set {@link Completable.Void} when
+     * receiving the result.
+     *
+     * @param value {@link Completable.Void} to be set when receiving the result.
+     * @return {@link IVoidResultCallback.Stub} that can be passed as a binder IPC parameter.
+     */
+    @AnyThread
+    public static IVoidResultCallback.Stub of(@NonNull Completable.Void value) {
+        final AtomicReference<WeakReference<Completable.Void>> atomicRef =
+                new AtomicReference<>(new WeakReference<>(value));
+
+        return new IVoidResultCallback.Stub() {
+            @BinderThread
+            @Override
+            public void onResult() {
+                final Completable.Void value = unwrap(atomicRef);
+                if (value == null) {
+                    return;
+                }
+                value.onComplete();
+            }
+
+            @BinderThread
+            @Override
+            public void onError(ThrowableHolder throwableHolder) {
+                final Completable.Void value = unwrap(atomicRef);
+                if (value == null) {
+                    return;
+                }
+                value.onError(throwableHolder);
+            }
+        };
+    }
 }

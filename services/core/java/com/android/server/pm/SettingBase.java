@@ -49,6 +49,7 @@ public abstract class SettingBase implements Watchable {
      *
      * @param observer The {@link Watcher} to be notified when the {@link Watchable} changes.
      */
+    @Override
     public void registerObserver(@NonNull Watcher observer) {
         mWatchable.registerObserver(observer);
     }
@@ -59,8 +60,19 @@ public abstract class SettingBase implements Watchable {
      *
      * @param observer The {@link Watcher} that should not be in the notification list.
      */
+    @Override
     public void unregisterObserver(@NonNull Watcher observer) {
         mWatchable.unregisterObserver(observer);
+    }
+
+    /**
+     * Return true if the {@link Watcher) is a registered observer.
+     * @param observer A {@link Watcher} that might be registered
+     * @return true if the observer is registered with this {@link Watchable}.
+     */
+    @Override
+    public boolean isRegisteredObserver(@NonNull Watcher observer) {
+        return mWatchable.isRegisteredObserver(observer);
     }
 
     /**
@@ -70,9 +82,11 @@ public abstract class SettingBase implements Watchable {
      *
      * @param what The {@link Watchable} that generated the event.
      */
+    @Override
     public void dispatchChange(@Nullable Watchable what) {
         mWatchable.dispatchChange(what);
     }
+
     /**
      * Notify listeners that this object has changed.
      */

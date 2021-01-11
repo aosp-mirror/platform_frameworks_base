@@ -19,6 +19,7 @@ package com.android.server.location.timezone;
 import static com.android.server.location.timezone.LocationTimeZoneManagerService.debugLog;
 import static com.android.server.location.timezone.LocationTimeZoneManagerService.warnLog;
 import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState;
+import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_DESTROYED;
 import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_PERM_FAILED;
 import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_CERTAIN;
 import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_INITIALIZING;
@@ -151,6 +152,23 @@ class ControllerImpl extends LocationTimeZoneProviderController {
         return mUncertaintyTimeoutQueue.getQueuedDelayMillis();
     }
 
+    @Override
+    void destroy() {
+        mThreadingDomain.assertCurrentThread();
+
+        synchronized (mSharedLock) {
+            stopProviders();
+            mPrimaryProvider.destroy();
+            mSecondaryProvider.destroy();
+
+            // If the controller has made a "certain" suggestion, it should make an uncertain
+            // suggestion to cancel it.
+            if (mLastSuggestion != null && mLastSuggestion.getZoneIds() != null) {
+                makeSuggestion(createUncertainSuggestion("Controller is destroyed"));
+            }
+        }
+    }
+
     @GuardedBy("mSharedLock")
     private void stopProviders() {
         stopProviderIfStarted(mPrimaryProvider);
@@ -182,8 +200,9 @@ class ControllerImpl extends LocationTimeZoneProviderController {
                 provider.stopUpdates();
                 break;
             }
-            case PROVIDER_STATE_PERM_FAILED: {
-                debugLog("Unable to stop " + provider + ": it is perm failed");
+            case PROVIDER_STATE_PERM_FAILED:
+            case PROVIDER_STATE_DESTROYED: {
+                debugLog("Unable to stop " + provider + ": it is terminated.");
                 break;
             }
             default: {
@@ -285,8 +304,9 @@ class ControllerImpl extends LocationTimeZoneProviderController {
                 debugLog("No need to start " + provider + ": already started");
                 break;
             }
-            case PROVIDER_STATE_PERM_FAILED: {
-                debugLog("Unable to start " + provider + ": it is perm failed");
+            case PROVIDER_STATE_PERM_FAILED:
+            case PROVIDER_STATE_DESTROYED: {
+                debugLog("Unable to start " + provider + ": it is terminated");
                 break;
             }
             default: {
@@ -303,17 +323,20 @@ class ControllerImpl extends LocationTimeZoneProviderController {
 
         synchronized (mSharedLock) {
             switch (providerState.stateEnum) {
-                case PROVIDER_STATE_STOPPED: {
-                    // This should never happen: entering stopped does not trigger a state change.
-                    warnLog("onProviderStateChange: Unexpected state change for stopped provider,"
+                case PROVIDER_STATE_STARTED_INITIALIZING:
+                case PROVIDER_STATE_STOPPED:
+                case PROVIDER_STATE_DESTROYED: {
+                    // This should never happen: entering initializing, stopped or destroyed are
+                    // triggered by the controller so and should not trigger a state change
+                    // callback.
+                    warnLog("onProviderStateChange: Unexpected state change for provider,"
                             + " provider=" + provider);
                     break;
                 }
-                case PROVIDER_STATE_STARTED_INITIALIZING:
                 case PROVIDER_STATE_STARTED_CERTAIN:
                 case PROVIDER_STATE_STARTED_UNCERTAIN: {
-                    // Entering started does not trigger a state change, so this only happens if an
-                    // event is received while the provider is started.
+                    // These are valid and only happen if an event is received while the provider is
+                    // started.
                     debugLog("onProviderStateChange: Received notification of a state change while"
                             + " started, provider=" + provider);
                     handleProviderStartedStateChange(providerState);
@@ -349,17 +372,18 @@ class ControllerImpl extends LocationTimeZoneProviderController {
 
         // If a provider has failed, the other may need to be started.
         if (failedProvider == mPrimaryProvider) {
-            if (secondaryCurrentState.stateEnum != PROVIDER_STATE_PERM_FAILED) {
-                // The primary must have failed. Try to start the secondary. This does nothing if
-                // the provider is already started, and will leave the provider in
-                // {started initializing} if the provider is stopped.
+            if (!secondaryCurrentState.isTerminated()) {
+                // Try to start the secondary. This does nothing if the provider is already
+                // started, and will leave the provider in {started initializing} if the provider is
+                // stopped.
                 tryStartProvider(mSecondaryProvider, mCurrentUserConfiguration);
             }
         } else if (failedProvider == mSecondaryProvider) {
-            // No-op: The secondary will only be active if the primary is uncertain or is failed.
-            // So, there the primary should not need to be started when the secondary fails.
+            // No-op: The secondary will only be active if the primary is uncertain or is
+            // terminated. So, there the primary should not need to be started when the secondary
+            // fails.
             if (primaryCurrentState.stateEnum != PROVIDER_STATE_STARTED_UNCERTAIN
-                    && primaryCurrentState.stateEnum != PROVIDER_STATE_PERM_FAILED) {
+                    && !primaryCurrentState.isTerminated()) {
                 warnLog("Secondary provider unexpected reported a failure:"
                         + " failed provider=" + failedProvider.getName()
                         + ", primary provider=" + mPrimaryProvider
@@ -367,19 +391,18 @@ class ControllerImpl extends LocationTimeZoneProviderController {
             }
         }
 
-        // If both providers are now failed, the controller needs to tell the next component in the
-        // time zone detection process.
-        if (primaryCurrentState.stateEnum == PROVIDER_STATE_PERM_FAILED
-                && secondaryCurrentState.stateEnum == PROVIDER_STATE_PERM_FAILED) {
+        // If both providers are now terminated, the controller needs to tell the next component in
+        // the time zone detection process.
+        if (primaryCurrentState.isTerminated() && secondaryCurrentState.isTerminated()) {
 
-            // If both providers are newly failed then the controller is uncertain by definition
+            // If both providers are newly terminated then the controller is uncertain by definition
             // and it will never recover so it can send a suggestion immediately.
             cancelUncertaintyTimeout();
 
-            // If both providers are now failed, then a suggestion must be sent informing the time
-            // zone detector that there are no further updates coming in future.
+            // If both providers are now terminated, then a suggestion must be sent informing the
+            // time zone detector that there are no further updates coming in future.
             GeolocationTimeZoneSuggestion suggestion = createUncertainSuggestion(
-                    "Both providers are permanently failed:"
+                    "Both providers are terminated:"
                             + " primary=" + primaryCurrentState.provider
                             + ", secondary=" + secondaryCurrentState.provider);
             makeSuggestion(suggestion);
@@ -584,6 +607,38 @@ class ControllerImpl extends LocationTimeZoneProviderController {
                 warnLog("Unable to process test command:"
                         + " providerName=" + providerName + ", testCommand=" + testCommand, e);
             }
+        }
+    }
+
+    /**
+     * Sets whether the controller should record provider state changes for later dumping via
+     * {@link #getStateForTests()}.
+     */
+    void setProviderStateRecordingEnabled(boolean enabled) {
+        mThreadingDomain.assertCurrentThread();
+
+        synchronized (mSharedLock) {
+            mPrimaryProvider.setStateChangeRecordingEnabled(enabled);
+            mSecondaryProvider.setStateChangeRecordingEnabled(enabled);
+        }
+    }
+
+    /**
+     * Returns a snapshot of the current controller state for tests.
+     */
+    @NonNull
+    LocationTimeZoneManagerServiceState getStateForTests() {
+        mThreadingDomain.assertCurrentThread();
+
+        synchronized (mSharedLock) {
+            LocationTimeZoneManagerServiceState.Builder builder =
+                    new LocationTimeZoneManagerServiceState.Builder();
+            if (mLastSuggestion != null) {
+                builder.setLastSuggestion(mLastSuggestion);
+            }
+            builder.setPrimaryProviderStateChanges(mPrimaryProvider.getRecordedStates())
+                    .setSecondaryProviderStateChanges(mSecondaryProvider.getRecordedStates());
+            return builder.build();
         }
     }
 

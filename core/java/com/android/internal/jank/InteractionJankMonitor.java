@@ -463,7 +463,7 @@ public class InteractionJankMonitor {
         }
 
         public String getName() {
-            return "Cuj<" + getNameOfCuj(mCujType) + ">";
+            return "J<" + getNameOfCuj(mCujType) + ">";
         }
     }
 }

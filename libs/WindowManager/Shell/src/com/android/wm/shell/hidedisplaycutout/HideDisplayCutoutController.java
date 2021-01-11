@@ -25,6 +25,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.ShellExecutor;
 
 import java.io.PrintWriter;
 import java.util.concurrent.Executor;
@@ -37,12 +38,15 @@ public class HideDisplayCutoutController implements HideDisplayCutout {
 
     private final Context mContext;
     private final HideDisplayCutoutOrganizer mOrganizer;
+    private final ShellExecutor mMainExecutor;
     @VisibleForTesting
     boolean mEnabled;
 
-    HideDisplayCutoutController(Context context, HideDisplayCutoutOrganizer organizer) {
+    HideDisplayCutoutController(Context context, HideDisplayCutoutOrganizer organizer,
+            ShellExecutor mainExecutor) {
         mContext = context;
         mOrganizer = organizer;
+        mMainExecutor = mainExecutor;
         updateStatus();
     }
 
@@ -52,7 +56,7 @@ public class HideDisplayCutoutController implements HideDisplayCutout {
      */
     @Nullable
     public static HideDisplayCutoutController create(
-            Context context, DisplayController displayController, Executor executor) {
+            Context context, DisplayController displayController, ShellExecutor mainExecutor) {
         // The SystemProperty is set for devices that support this feature and is used to control
         // whether to create the HideDisplayCutout instance.
         // It's defined in the device.mk (e.g. device/google/crosshatch/device.mk).
@@ -61,8 +65,8 @@ public class HideDisplayCutoutController implements HideDisplayCutout {
         }
 
         HideDisplayCutoutOrganizer organizer =
-                new HideDisplayCutoutOrganizer(context, displayController, executor);
-        return new HideDisplayCutoutController(context, organizer);
+                new HideDisplayCutoutOrganizer(context, displayController, mainExecutor);
+        return new HideDisplayCutoutController(context, organizer, mainExecutor);
     }
 
     @VisibleForTesting

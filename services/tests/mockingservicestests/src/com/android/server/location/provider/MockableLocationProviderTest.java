@@ -15,7 +15,9 @@
  */
 package com.android.server.location.provider;
 
-import static com.android.internal.location.ProviderRequest.EMPTY_REQUEST;
+import static android.location.provider.ProviderProperties.ACCURACY_FINE;
+import static android.location.provider.ProviderProperties.POWER_USAGE_LOW;
+import static android.location.provider.ProviderRequest.EMPTY_REQUEST;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -24,17 +26,16 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertThrows;
 
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationResult;
-import android.location.ProviderProperties;
+import android.location.provider.ProviderProperties;
+import android.location.provider.ProviderRequest;
 import android.location.util.identity.CallerIdentity;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.location.ProviderRequest;
 import com.android.server.location.test.FakeProvider;
 import com.android.server.location.test.ProviderListenerCapture;
 
@@ -62,16 +63,14 @@ public class MockableLocationProviderTest {
 
         mRealMock = mock(FakeProvider.FakeProviderInterface.class);
         mRealProvider = new FakeProvider(mRealMock);
-        mMockProvider = new MockLocationProvider(new ProviderProperties(
-                false,
-                false,
-                false,
-                false,
-                true,
-                true,
-                true,
-                Criteria.POWER_LOW,
-                Criteria.ACCURACY_FINE),
+        mMockProvider = new MockLocationProvider(
+                new ProviderProperties.Builder()
+                        .setHasAltitudeSupport(true)
+                        .setHasSpeedSupport(true)
+                        .setHasBearingSupport(true)
+                        .setPowerUsage(POWER_USAGE_LOW)
+                        .setAccuracy(ACCURACY_FINE)
+                        .build(),
                 CallerIdentity.forTest(0, 1, "testpackage", "test"));
 
         mProvider = new MockableLocationProvider(lock);

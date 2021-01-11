@@ -33,6 +33,7 @@ import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
@@ -85,6 +86,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
     @Mock private lateinit var sharedPrefsEditor: SharedPreferences.Editor
     @Mock private lateinit var mockContext: Context
     @Mock private lateinit var pendingIntent: PendingIntent
+    @Mock private lateinit var dumpManager: DumpManager
 
     @Captor lateinit var callbackCaptor: ArgumentCaptor<ResumeMediaBrowser.Callback>
 
@@ -120,7 +122,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
 
         executor = FakeExecutor(FakeSystemClock())
         resumeListener = MediaResumeListener(mockContext, broadcastDispatcher, executor,
-                tunerService, resumeBrowserFactory)
+                tunerService, resumeBrowserFactory, dumpManager)
         resumeListener.setManager(mediaDataManager)
         mediaDataManager.addListener(resumeListener)
 
@@ -159,7 +161,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
 
         // When listener is created, we do NOT register a user change listener
         val listener = MediaResumeListener(context, broadcastDispatcher, executor, tunerService,
-                resumeBrowserFactory)
+                resumeBrowserFactory, dumpManager)
         listener.setManager(mediaDataManager)
         verify(broadcastDispatcher, never()).registerReceiver(eq(listener.userChangeReceiver),
             any(), any(), any())

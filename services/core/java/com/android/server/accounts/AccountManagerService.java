@@ -4756,7 +4756,7 @@ public class AccountManagerService
 
         IAccountManagerResponse getResponseAndClose() {
             if (mResponse == null) {
-                // this session has already been closed
+                close();
                 return null;
             }
             IAccountManagerResponse response = mResponse;

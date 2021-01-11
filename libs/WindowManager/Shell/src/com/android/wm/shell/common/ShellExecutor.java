@@ -51,6 +51,16 @@ public interface ShellExecutor extends Executor {
     }
 
     /**
+     * Convenience method to execute the blocking call with a default timeout.
+     *
+     * @throws InterruptedException if runnable does not return in the time specified by
+     *                              {@param waitTimeout}
+     */
+    default void executeBlocking(Runnable runnable) throws InterruptedException {
+        executeBlocking(runnable, 2, TimeUnit.SECONDS);
+    }
+
+    /**
      * See {@link android.os.Handler#postDelayed(Runnable, long)}.
      */
     void executeDelayed(Runnable r, long delayMillis);

@@ -17,9 +17,9 @@
 package com.android.server.location.provider;
 
 import android.annotation.Nullable;
+import android.location.provider.ProviderRequest;
 import android.os.Bundle;
 
-import com.android.internal.location.ProviderRequest;
 import com.android.server.location.provider.AbstractLocationProvider.Listener;
 import com.android.server.location.provider.AbstractLocationProvider.State;
 

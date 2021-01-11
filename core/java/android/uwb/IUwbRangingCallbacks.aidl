@@ -17,15 +17,32 @@
 package android.uwb;
 
 import android.os.PersistableBundle;
-import android.uwb.CloseReason;
+import android.uwb.RangingChangeReason;
 import android.uwb.RangingReport;
 import android.uwb.SessionHandle;
-import android.uwb.StartFailureReason;
 
 /**
  * @hide
  */
 interface IUwbRangingCallbacks {
+  /**
+   * Called when the ranging session has been opened
+   *
+   * @param sessionHandle the session the callback is being invoked for
+   */
+  void onRangingOpened(in SessionHandle sessionHandle);
+
+  /**
+   * Called when a ranging session fails to start
+   *
+   * @param sessionHandle the session the callback is being invoked for
+   * @param reason the reason the session failed to start
+   * @param parameters protocol specific parameters
+   */
+  void onRangingOpenFailed(in SessionHandle sessionHandle,
+                           RangingChangeReason reason,
+                           in PersistableBundle parameters);
+
   /**
    * Called when ranging has started
    *
@@ -47,8 +64,49 @@ interface IUwbRangingCallbacks {
    * @param reason the reason the session failed to start
    * @param parameters protocol specific parameters
    */
-  void onRangingStartFailed(in SessionHandle sessionHandle, StartFailureReason reason,
+  void onRangingStartFailed(in SessionHandle sessionHandle,
+                            RangingChangeReason reason,
                             in PersistableBundle parameters);
+
+   /**
+   * Called when ranging has been reconfigured
+   *
+   * @param sessionHandle the session the callback is being invoked for
+   * @param parameters the updated ranging configuration
+   */
+  void onRangingReconfigured(in SessionHandle sessionHandle,
+                             in PersistableBundle parameters);
+
+  /**
+   * Called when a ranging session fails to be reconfigured
+   *
+   * @param sessionHandle the session the callback is being invoked for
+   * @param reason the reason the session failed to reconfigure
+   * @param parameters protocol specific parameters
+   */
+  void onRangingReconfigureFailed(in SessionHandle sessionHandle,
+                                  RangingChangeReason reason,
+                                  in PersistableBundle parameters);
+
+  /**
+   * Called when the ranging session has been stopped
+   *
+   * @param sessionHandle the session the callback is being invoked for
+   */
+
+  void onRangingStopped(in SessionHandle sessionHandle);
+
+  /**
+   * Called when a ranging session fails to stop
+   *
+   * @param sessionHandle the session the callback is being invoked for
+   * @param reason the reason the session failed to stop
+   * @param parameters protocol specific parameters
+   */
+  void onRangingStopFailed(in SessionHandle sessionHandle,
+                           RangingChangeReason reason,
+                           in PersistableBundle parameters);
+
   /**
    * Called when a ranging session is closed
    *
@@ -56,7 +114,8 @@ interface IUwbRangingCallbacks {
    * @param reason the reason the session was closed
    * @param parameters protocol specific parameters
    */
-  void onRangingClosed(in SessionHandle sessionHandle, CloseReason reason,
+  void onRangingClosed(in SessionHandle sessionHandle,
+                       RangingChangeReason reason,
                        in PersistableBundle parameters);
 
   /**

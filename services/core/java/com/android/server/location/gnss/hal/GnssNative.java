@@ -141,9 +141,10 @@ public class GnssNative {
 
     /** Callbacks relevant to the entire HAL. */
     public interface BaseCallbacks {
+        default void onHalStarted() {}
         void onHalRestarted();
-        void onCapabilitiesChanged(GnssCapabilities oldCapabilities,
-                GnssCapabilities newCapabilities);
+        default void onCapabilitiesChanged(GnssCapabilities oldCapabilities,
+                GnssCapabilities newCapabilities) {}
     }
 
     /** Callbacks for status events. */
@@ -376,6 +377,7 @@ public class GnssNative {
     private volatile boolean mItarSpeedLimitExceeded;
 
     private GnssCapabilities mCapabilities = new GnssCapabilities.Builder().build();
+    private @GnssCapabilities.TopHalCapabilityFlags int mTopFlags;
     private @Nullable GnssPowerStats mPowerStats = null;
     private int mHardwareYear = 0;
     private @Nullable String mHardwareModelName = null;
@@ -480,10 +482,16 @@ public class GnssNative {
         mRegistered = true;
 
         initializeGnss(false);
+        Log.i(TAG, "gnss hal started");
+
+        for (int i = 0; i < mBaseCallbacks.length; i++) {
+            mBaseCallbacks[i].onHalStarted();
+        }
     }
 
     private void initializeGnss(boolean restart) {
         Preconditions.checkState(mRegistered);
+        mTopFlags = 0;
         mGnssHal.initOnce(GnssNative.this, restart);
 
         // gnss chipset appears to require an init/cleanup cycle on startup in order to properly
@@ -1025,8 +1033,12 @@ public class GnssNative {
 
     @NativeEntryPoint
     void setTopHalCapabilities(@GnssCapabilities.TopHalCapabilityFlags int capabilities) {
+        // Here the bits specified by 'capabilities' are turned on. It is handled differently from
+        // sub hal because top hal capabilities could be set by HIDL HAL and/or AIDL HAL. Each of
+        // them possesses a different set of capabilities.
+        mTopFlags |= capabilities;
         GnssCapabilities oldCapabilities = mCapabilities;
-        mCapabilities = oldCapabilities.withTopHalFlags(capabilities);
+        mCapabilities = oldCapabilities.withTopHalFlags(mTopFlags);
         onCapabilitiesChanged(oldCapabilities, mCapabilities);
     }
 
@@ -1413,6 +1425,8 @@ public class GnssNative {
     private static native boolean native_stop_navigation_message_collection();
 
     // antenna info APIS
+    // TODO: in a next version of the HAL, consider removing the necessity for listening to antenna
+    //   info changes, and simply report them always, same as capabilities.
 
     private static native boolean native_is_antenna_info_supported();
 

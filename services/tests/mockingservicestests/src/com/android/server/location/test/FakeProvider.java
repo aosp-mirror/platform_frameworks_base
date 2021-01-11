@@ -16,9 +16,9 @@
 
 package com.android.server.location.test;
 
+import android.location.provider.ProviderRequest;
 import android.os.Bundle;
 
-import com.android.internal.location.ProviderRequest;
 import com.android.server.location.provider.AbstractLocationProvider;
 
 import java.io.FileDescriptor;

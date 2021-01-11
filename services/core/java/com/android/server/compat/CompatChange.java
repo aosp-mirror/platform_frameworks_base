@@ -61,6 +61,7 @@ public final class CompatChange extends CompatibilityChangeInfo {
     ChangeListener mListener = null;
 
     private Map<String, Boolean> mPackageOverrides;
+    private Map<String, Boolean> mDeferredOverrides;
 
     public CompatChange(long changeId) {
         this(changeId, null, -1, -1, false, false, null);
@@ -121,6 +122,56 @@ public final class CompatChange extends CompatibilityChangeInfo {
     }
 
     /**
+     * Tentatively set the state of this change for a given package name.
+     * The override will only take effect after that package is installed, if applicable.
+     *
+     * <p>Note, this method is not thread safe so callers must ensure thread safety.
+     *
+     * @param packageName Package name to tentatively enable the change for.
+     * @param enabled Whether or not to enable the change.
+     */
+    void addPackageDeferredOverride(String packageName, boolean enabled) {
+        if (getLoggingOnly()) {
+            throw new IllegalArgumentException(
+                    "Can't add overrides for a logging only change " + toString());
+        }
+        if (mDeferredOverrides == null) {
+            mDeferredOverrides = new HashMap<>();
+        }
+        mDeferredOverrides.put(packageName, enabled);
+    }
+
+    /**
+     * Rechecks an existing (and possibly deferred) override.
+     *
+     * <p>For deferred overrides, check if they can be promoted to a regular override. For regular
+     * overrides, check if they need to be demoted to deferred.</p>
+     *
+     * @param packageName Package name to apply deferred overrides for.
+     * @param allowed Whether the override is allowed.
+     *
+     * @return {@code true} if the recheck yielded a result that requires invalidating caches
+     *         (a deferred override was consolidated or a regular override was removed).
+     */
+    boolean recheckOverride(String packageName, boolean allowed) {
+        // A deferred override now is allowed by the policy, so promote it to a regular override.
+        if (hasDeferredOverride(packageName) && allowed) {
+            boolean overrideValue = mDeferredOverrides.remove(packageName);
+            addPackageOverride(packageName, overrideValue);
+            return true;
+        }
+        // A previously set override is no longer allowed by the policy, so make it deferred.
+        if (hasOverride(packageName) && !allowed) {
+            boolean overrideValue = mPackageOverrides.remove(packageName);
+            addPackageDeferredOverride(packageName, overrideValue);
+            // Notify because the override was removed.
+            notifyListener(packageName);
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Remove any package override for the given package name, restoring the default behaviour.
      *
      * <p>Note, this method is not thread safe so callers must ensure thread safety.
@@ -132,6 +183,9 @@ public final class CompatChange extends CompatibilityChangeInfo {
             if (mPackageOverrides.remove(pname) != null) {
                 notifyListener(pname);
             }
+        }
+        if (mDeferredOverrides != null) {
+            mDeferredOverrides.remove(pname);
         }
     }
 
@@ -159,6 +213,19 @@ public final class CompatChange extends CompatibilityChangeInfo {
     }
 
     /**
+     * Find if this change will be enabled for the given package after installation.
+     *
+     * @param packageName The package name in question
+     * @return {@code true} if the change should be enabled for the package.
+     */
+    boolean willBeEnabled(String packageName) {
+        if (hasDeferredOverride(packageName)) {
+            return mDeferredOverrides.get(packageName);
+        }
+        return defaultValue();
+    }
+
+    /**
      * Returns the default value for the change id, assuming there are no overrides.
      *
      * @return {@code false} if it's a default disabled change, {@code true} otherwise.
@@ -174,6 +241,15 @@ public final class CompatChange extends CompatibilityChangeInfo {
      */
     boolean hasOverride(String packageName) {
         return mPackageOverrides != null && mPackageOverrides.containsKey(packageName);
+    }
+
+    /**
+     * Checks whether a change has a deferred override for a package.
+     * @param packageName name of the package
+     * @return true if there is such a deferred override
+     */
+    boolean hasDeferredOverride(String packageName) {
+        return mDeferredOverrides != null && mDeferredOverrides.containsKey(packageName);
     }
 
     @Override
@@ -194,6 +270,9 @@ public final class CompatChange extends CompatibilityChangeInfo {
         }
         if (mPackageOverrides != null && mPackageOverrides.size() > 0) {
             sb.append("; packageOverrides=").append(mPackageOverrides);
+        }
+        if (mDeferredOverrides != null && mDeferredOverrides.size() > 0) {
+            sb.append("; deferredOverrides=").append(mDeferredOverrides);
         }
         return sb.append(")").toString();
     }

@@ -32,6 +32,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
+import android.window.TaskOrganizer;
 
 import androidx.annotation.NonNull;
 
@@ -63,11 +64,17 @@ class LegacySplitScreenTaskListener implements ShellTaskOrganizer.TaskListener {
 
     final SurfaceSession mSurfaceSession = new SurfaceSession();
 
+    private final SplitScreenTransitions mSplitTransitions;
+
     LegacySplitScreenTaskListener(LegacySplitScreenController splitScreenController,
                     ShellTaskOrganizer shellTaskOrganizer,
+                    Transitions transitions,
                     SyncTransactionQueue syncQueue) {
         mSplitScreenController = splitScreenController;
         mTaskOrganizer = shellTaskOrganizer;
+        mSplitTransitions = new SplitScreenTransitions(splitScreenController.mTransactionPool,
+                transitions, mSplitScreenController, this);
+        transitions.addHandler(mSplitTransitions);
         mSyncQueue = syncQueue;
     }
 
@@ -96,6 +103,14 @@ class LegacySplitScreenTaskListener implements ShellTaskOrganizer.TaskListener {
 
     void releaseTransaction(SurfaceControl.Transaction t) {
         mSplitScreenController.mTransactionPool.release(t);
+    }
+
+    TaskOrganizer getTaskOrganizer() {
+        return mTaskOrganizer;
+    }
+
+    SplitScreenTransitions getSplitTransitions() {
+        return mSplitTransitions;
     }
 
     @Override
@@ -189,16 +204,18 @@ class LegacySplitScreenTaskListener implements ShellTaskOrganizer.TaskListener {
                 return;
             }
 
-            mSplitScreenController.post(() -> handleTaskInfoChanged(taskInfo));
+            handleTaskInfoChanged(taskInfo);
         }
     }
 
     private void handleChildTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) {
         mLeashByTaskId.put(taskInfo.taskId, leash);
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) return;
         updateChildTaskSurface(taskInfo, leash, true /* firstAppeared */);
     }
 
     private void handleChildTaskChanged(RunningTaskInfo taskInfo) {
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) return;
         final SurfaceControl leash = mLeashByTaskId.get(taskInfo.taskId);
         updateChildTaskSurface(taskInfo, leash, false /* firstAppeared */);
     }
@@ -241,14 +258,15 @@ class LegacySplitScreenTaskListener implements ShellTaskOrganizer.TaskListener {
         } else if (info.token.asBinder() == mSecondary.token.asBinder()) {
             mSecondary = info;
         }
+        if (DEBUG) {
+            Log.d(TAG, "onTaskInfoChanged " + mPrimary + "  " + mSecondary);
+        }
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) return;
         final boolean primaryIsEmpty = mPrimary.topActivityType == ACTIVITY_TYPE_UNDEFINED;
         final boolean secondaryIsEmpty = mSecondary.topActivityType == ACTIVITY_TYPE_UNDEFINED;
         final boolean secondaryImpliesMinimize = mSecondary.topActivityType == ACTIVITY_TYPE_HOME
                 || (mSecondary.topActivityType == ACTIVITY_TYPE_RECENTS
                         && mSplitScreenController.isHomeStackResizable());
-        if (DEBUG) {
-            Log.d(TAG, "onTaskInfoChanged " + mPrimary + "  " + mSecondary);
-        }
         if (primaryIsEmpty == primaryWasEmpty && secondaryWasEmpty == secondaryIsEmpty
                 && secondaryImpliedMinimize == secondaryImpliesMinimize) {
             // No relevant changes

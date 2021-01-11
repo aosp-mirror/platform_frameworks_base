@@ -74,11 +74,11 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
     public DragAndDropController(Context context, DisplayController displayController) {
         mContext = context;
         mDisplayController = displayController;
-        mDisplayController.addDisplayWindowListener(this);
     }
 
-    public void setSplitScreenController(Optional<LegacySplitScreen> splitscreen) {
+    public void initialize(Optional<LegacySplitScreen> splitscreen) {
         mLegacySplitScreen = splitscreen.orElse(null);
+        mDisplayController.addDisplayWindowListener(this);
     }
 
     @Override

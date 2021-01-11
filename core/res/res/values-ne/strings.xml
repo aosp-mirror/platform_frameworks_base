@@ -2009,14 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"माइक्रोफोन"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"तपाईंको स्क्रिनका अन्य एपहरूमा प्रदर्शन गरिँदै छ"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"प्रतिक्रिया दिनुहोस्"</string>
-    <!-- no translation found for notification_feedback_indicator_alerted (6552871804121942099) -->
-    <skip />
-    <!-- no translation found for notification_feedback_indicator_silenced (3799442124723177262) -->
-    <skip />
-    <!-- no translation found for notification_feedback_indicator_promoted (9030204303764698640) -->
-    <skip />
-    <!-- no translation found for notification_feedback_indicator_demoted (8880309924296450875) -->
-    <skip />
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"सिस्टमले स्वतः यस सूचनालाई महत्त्वपूर्ण ठानी यसका लागि पूर्वनिर्धारित मोड सेट गरिदिएको छ। प्रतिक्रिया दिन ट्याप गर्नुहोस्।"</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"यस सूचनालाई कम महत्त्वपूर्ण ठानी यसका लागि साइलेन्ट मोड सेट गरिएको छ। प्रतिक्रिया दिन ट्याप गर्नुहोस्।"</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"यस सूचनालाई धेरै महत्त्वपूर्ण सूचनाका रूपमा सेट गरिएको छ। प्रतिक्रिया दिन ट्याप गर्नुहोस्।"</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"यस सूचनालाई कम महत्त्वपूर्ण सूचनाका रूपमा सेट गरिएको छ। प्रतिक्रिया दिन ट्याप गर्नुहोस्।"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"दिनचर्या मोडको जानकारीमूलक सूचना"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"प्रायः चार्ज गर्ने समय हुनुभन्दा पहिले नै ब्याट्री सकिन सक्छ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ब्याट्रीको आयु बढाउन ब्याट्री सेभर सक्रिय गरियो"</string>

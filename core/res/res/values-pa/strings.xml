@@ -2009,14 +2009,10 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"ਮਾਈਕ੍ਰੋਫ਼ੋਨ"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ \'ਤੇ ਹੋਰਾਂ ਐਪਾਂ ਉੱਪਰ ਦਿਖਾਇਆ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"ਵਿਚਾਰ ਦਿਓ"</string>
-    <!-- no translation found for notification_feedback_indicator_alerted (6552871804121942099) -->
-    <skip />
-    <!-- no translation found for notification_feedback_indicator_silenced (3799442124723177262) -->
-    <skip />
-    <!-- no translation found for notification_feedback_indicator_promoted (9030204303764698640) -->
-    <skip />
-    <!-- no translation found for notification_feedback_indicator_demoted (8880309924296450875) -->
-    <skip />
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"ਇਸ ਸੂਚਨਾ ਦਾ ਦਰਜਾ ਵਧਾ ਕੇ ਪੂਰਵ-ਨਿਰਧਾਰਿਤ \'ਤੇ ਸੈੱਟ ਕੀਤਾ ਗਿਆ। ਵਿਚਾਰ ਮੁਹੱਈਆ ਕਰਵਾਉਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ਇਸ ਸੂਚਨਾ ਦਾ ਦਰਜਾ ਘਟਾ ਕੇ ਸ਼ਾਂਤ \'ਤੇ ਸੈੱਟ ਕੀਤਾ ਗਿਆ। ਵਿਚਾਰ ਮੁਹੱਈਆ ਕਰਵਾਉਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"ਇਸ ਸੂਚਨਾ ਦਾ ਦਰਜਾ ਵਧਾ ਦਿੱਤਾ ਗਿਆ। ਵਿਚਾਰ ਮੁਹੱਈਆ ਕਰਵਾਉਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"ਇਸ ਸੂਚਨਾ ਦਾ ਦਰਜਾ ਘਟਾ ਦਿੱਤਾ ਗਿਆ। ਵਿਚਾਰ ਮੁਹੱਈਆ ਕਰਵਾਉਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ਨਿਯਮਬੱਧ ਮੋਡ ਦੀ ਜਾਣਕਾਰੀ ਵਾਲੀ ਸੂਚਨਾ"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ਬੈਟਰੀ ਚਾਰਜ ਕਰਨ ਦੇ ਮਿੱਥੇ ਸਮੇਂ ਤੋਂ ਪਹਿਲਾਂ ਸ਼ਾਇਦ ਬੈਟਰੀ ਖਤਮ ਹੋ ਜਾਵੇ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ਬੈਟਰੀ ਲਾਈਫ਼ ਵਧਾਉਣ ਲਈ ਬੈਟਰੀ ਸੇਵਰ ਚਾਲੂ ਕੀਤਾ ਗਿਆ"</string>

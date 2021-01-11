@@ -30,10 +30,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /** Tests for {@link HandlerThreadingDomain}. */
 @Presubmit
@@ -115,6 +117,7 @@ public class HandlerThreadingDomainTest {
         });
         domain.post(testLogic);
         testLogic.assertCompletesWithin(60, TimeUnit.SECONDS);
+        assertTrue(testLogic.isComplete());
         assertTrue(ranOnExpectedThread.get());
     }
 
@@ -123,17 +126,65 @@ public class HandlerThreadingDomainTest {
         ThreadingDomain domain = new HandlerThreadingDomain(mTestHandler);
 
         long beforeExecutionNanos = System.nanoTime();
+        Duration executionDelay = Duration.ofSeconds(5);
+
+        AtomicReference<Long> executionNanosHolder = new AtomicReference<>();
         AtomicBoolean ranOnExpectedThread = new AtomicBoolean(false);
         LatchedRunnable testLogic = new LatchedRunnable(() -> {
             ranOnExpectedThread.set(Thread.currentThread() == mTestHandler.getLooper().getThread());
+            executionNanosHolder.set(System.nanoTime());
         });
-        domain.postDelayed(testLogic, 5000);
 
-        testLogic.assertCompletesWithin(60, TimeUnit.SECONDS);
+        domain.postDelayed(testLogic, executionDelay.toMillis());
+        long afterPostNanos = System.nanoTime();
+
+        testLogic.assertCompletesWithin(
+                executionDelay.multipliedBy(10).toMillis(), TimeUnit.MILLISECONDS);
+        long afterWaitNanos = System.nanoTime();
+
+        assertTrue(testLogic.isComplete());
         assertTrue(ranOnExpectedThread.get());
 
+        // The execution should not take place until at least delayDuration after postDelayed().
+        Duration actualExecutionDelay =
+                Duration.ofNanos(executionNanosHolder.get() - beforeExecutionNanos);
+        assertTrue(actualExecutionDelay.compareTo(executionDelay) >= 0);
+
+        // The time taken in postDelayed() should be negligible. Certainly less than the
+        // executionDelay.
+        Duration postDuration = Duration.ofNanos(afterPostNanos - beforeExecutionNanos);
+        assertTrue(postDuration.compareTo(executionDelay) < 0);
+
+        // The result should not be ready until at least executionDelay has elapsed.
+        Duration delayBeforeExecuted = Duration.ofNanos(afterWaitNanos - beforeExecutionNanos);
+        assertTrue(delayBeforeExecuted.compareTo(executionDelay) >= 0);
+    }
+
+    @Test
+    public void postAndWait() throws Exception {
+        ThreadingDomain domain = new HandlerThreadingDomain(mTestHandler);
+
+        Duration workDuration = Duration.ofSeconds(5);
+        AtomicBoolean ranOnExpectedThread = new AtomicBoolean(false);
+        LatchedRunnable testLogic = new LatchedRunnable(() -> {
+            ranOnExpectedThread.set(Thread.currentThread() == mTestHandler.getLooper().getThread());
+
+            // The work takes workDuration to complete.
+            try {
+                Thread.sleep(workDuration.toMillis());
+            } catch (InterruptedException e) {
+                throw new AssertionError(e);
+            }
+        });
+
+        long beforeExecutionNanos = System.nanoTime();
+        domain.postAndWait(testLogic, workDuration.multipliedBy(10).toMillis());
         long afterExecutionNanos = System.nanoTime();
-        assertTrue(afterExecutionNanos - beforeExecutionNanos >= TimeUnit.SECONDS.toNanos(5));
+        Duration waitDuration = Duration.ofNanos(afterExecutionNanos - beforeExecutionNanos);
+
+        assertTrue(waitDuration.compareTo(workDuration) >= 0);
+        assertTrue(testLogic.isComplete());
+        assertTrue(ranOnExpectedThread.get());
     }
 
     @Test

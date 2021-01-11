@@ -25,7 +25,7 @@ import android.os.UserHandle;
  * All parameters are verified on object creation unless the component name is null and the
  * caller is a delegate.
  */
-class CallerIdentity {
+final class CallerIdentity {
 
     private final int mUid;
     @Nullable
@@ -51,7 +51,7 @@ class CallerIdentity {
         return UserHandle.getUserHandleForUid(mUid);
     }
 
-    @Nullable  public String getPackageName() {
+    @Nullable public String getPackageName() {
         return mPackageName;
     }
 
@@ -65,5 +65,17 @@ class CallerIdentity {
 
     public boolean hasPackage() {
         return mPackageName != null;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder("CallerIdentity[uid=").append(mUid);
+        if (mPackageName != null) {
+            builder.append(", pkg=").append(mPackageName);
+        }
+        if (mComponentName != null) {
+            builder.append(", cmp=").append(mComponentName.flattenToShortString());
+        }
+        return builder.append("]").toString();
     }
 }

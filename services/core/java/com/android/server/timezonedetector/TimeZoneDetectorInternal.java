@@ -30,6 +30,12 @@ public interface TimeZoneDetectorInternal extends Dumpable.Container {
     /** Adds a listener that will be invoked when time zone detection configuration is changed. */
     void addConfigurationListener(ConfigurationChangeListener listener);
 
+    /**
+     * Removes a listener previously added via {@link
+     * #addConfigurationListener(ConfigurationChangeListener)}.
+     */
+    void removeConfigurationListener(ConfigurationChangeListener listener);
+
     /** Returns the {@link ConfigurationInternal} for the current user. */
     ConfigurationInternal getCurrentUserConfigurationInternal();
 

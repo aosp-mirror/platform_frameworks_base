@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
+import com.android.settingslib.AccessibilityContentDescriptions;
+import com.android.settingslib.SignalIcon.IconGroup;
 import com.android.systemui.R;
 
 public class WifiIcons {
@@ -40,6 +42,7 @@ public class WifiIcons {
             WIFI_NO_INTERNET_ICONS,
             WIFI_FULL_ICONS
     };
+
     static final int[][] WIFI_SIGNAL_STRENGTH = QS_WIFI_SIGNAL_STRENGTH;
 
     public static final int QS_WIFI_DISABLED = com.android.internal.R.drawable.ic_wifi_signal_0;
@@ -47,4 +50,16 @@ public class WifiIcons {
     static final int WIFI_NO_NETWORK = QS_WIFI_NO_NETWORK;
 
     static final int WIFI_LEVEL_COUNT = WIFI_SIGNAL_STRENGTH[0].length;
+
+    public static final IconGroup UNMERGED_WIFI = new IconGroup(
+            "Wi-Fi Icons",
+            WifiIcons.WIFI_SIGNAL_STRENGTH,
+            WifiIcons.QS_WIFI_SIGNAL_STRENGTH,
+            AccessibilityContentDescriptions.WIFI_CONNECTION_STRENGTH,
+            WifiIcons.WIFI_NO_NETWORK,
+            WifiIcons.QS_WIFI_NO_NETWORK,
+            WifiIcons.WIFI_NO_NETWORK,
+            WifiIcons.QS_WIFI_NO_NETWORK,
+            AccessibilityContentDescriptions.WIFI_NO_CONNECTION
+    );
 }

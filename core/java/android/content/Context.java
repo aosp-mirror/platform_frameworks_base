@@ -4821,16 +4821,6 @@ public abstract class Context {
     public static final String ROLE_SERVICE = "role";
 
     /**
-     * Official published name of the (internal) role controller service.
-     *
-     * @see #getSystemService(String)
-     * @see android.app.role.RoleControllerService
-     *
-     * @hide
-     */
-    public static final String ROLE_CONTROLLER_SERVICE = "role_controller";
-
-    /**
      * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.hardware.camera2.CameraManager} for interacting with
      * camera devices.
@@ -6014,10 +6004,13 @@ public abstract class Context {
     }
 
     /**
-     * A special version of {@link #createWindowContext(int, Bundle)} which also takes
-     * {@link Display}. The only difference between this API and
-     * {@link #createWindowContext(int, Bundle)} is that this API can create window context from
-     * any context even if the context which is not associated to a {@link Display} instance.
+     * Creates a {@code Context} for a non-{@link android.app.Activity activity} window on the given
+     * {@link Display}.
+     *
+     * <p>
+     * Similar to {@link #createWindowContext(int, Bundle)}, but the {@code display} is passed in,
+     * instead of implicitly using the {@link #getDisplay() original Context's Display}.
+     * </p>
      *
      * @param display The {@link Display} to associate with
      * @param type Window type in {@link WindowManager.LayoutParams}
@@ -6121,6 +6114,21 @@ public abstract class Context {
     @SuppressWarnings("HiddenAbstractMethod")
     @SystemApi
     public abstract Context createCredentialProtectedStorageContext();
+
+    /**
+     * Creates a UI context with a {@code token}. The users of this API should handle this context's
+     * configuration changes.
+     *
+     * @param token The token to associate with the {@link Resources}
+     * @param display The display to associate with the token context
+     *
+     * @hide
+     */
+    @UiContext
+    @NonNull
+    public Context createTokenContext(@NonNull IBinder token, @NonNull Display display) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /**
      * Gets the display adjustments holder for this context.  This information
