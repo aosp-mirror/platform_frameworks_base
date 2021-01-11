@@ -39,6 +39,10 @@ void PrettyPrintVisitor::visit(const IdmapHeader& header) {
           << TAB "target apk path  : " << header.GetTargetPath() << std::endl
           << TAB "overlay apk path : " << header.GetOverlayPath() << std::endl;
 
+  if (!header.GetOverlayName().empty()) {
+    stream_ << "Overlay name: " << header.GetOverlayName() << std::endl;
+  }
+
   const std::string& debug = header.GetDebugInfo();
   if (!debug.empty()) {
     std::istringstream debug_stream(debug);
@@ -49,12 +53,12 @@ void PrettyPrintVisitor::visit(const IdmapHeader& header) {
     }
   }
 
-  if (auto target_apk_ = ApkAssets::Load(header.GetTargetPath().to_string())) {
+  if (auto target_apk_ = ApkAssets::Load(header.GetTargetPath())) {
     target_am_.SetApkAssets({target_apk_.get()});
     apk_assets_.push_back(std::move(target_apk_));
   }
 
-  if (auto overlay_apk = ApkAssets::Load(header.GetOverlayPath().to_string())) {
+  if (auto overlay_apk = ApkAssets::Load(header.GetOverlayPath())) {
     overlay_am_.SetApkAssets({overlay_apk.get()});
     apk_assets_.push_back(std::move(overlay_apk));
   }

@@ -5586,6 +5586,10 @@ public class TelephonyManager {
      */
     @Deprecated
     public void listen(PhoneStateListener listener, int events) {
+        if (!listener.isExecutorSet()) {
+            throw new IllegalStateException("PhoneStateListener should be created on a thread "
+                    + "with Looper.myLooper() != null");
+        }
         boolean notifyNow = getITelephony() != null;
         mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
         if (mTelephonyRegistryMgr != null) {

@@ -38,7 +38,7 @@ public abstract class LoggableMonitor {
     private final int mStatsAction;
     private final int mStatsClient;
     private long mFirstAcquireTimeMs;
-    private boolean mShouldLogMetrics;
+    private boolean mShouldLogMetrics = true;
 
     /**
      * Only valid for AuthenticationClient.
@@ -52,14 +52,15 @@ public abstract class LoggableMonitor {
      * @param statsModality One of {@link BiometricsProtoEnums} MODALITY_* constants.
      * @param statsAction One of {@link BiometricsProtoEnums} ACTION_* constants.
      * @param statsClient One of {@link BiometricsProtoEnums} CLIENT_* constants.
-     * @param shouldLogMetrics If set to false, metrics will not be reported to statsd.
      */
-    public LoggableMonitor(int statsModality, int statsAction, int statsClient,
-            boolean shouldLogMetrics) {
+    public LoggableMonitor(int statsModality, int statsAction, int statsClient) {
         mStatsModality = statsModality;
         mStatsAction = statsAction;
         mStatsClient = statsClient;
-        mShouldLogMetrics = shouldLogMetrics;
+    }
+
+    protected void setShouldLog(boolean shouldLog) {
+        mShouldLogMetrics = shouldLog;
     }
 
     public int getStatsClient() {

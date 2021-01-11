@@ -16,23 +16,18 @@
 
 package com.android.server.biometrics.sensors.fingerprint;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.fingerprint.Fingerprint;
-import android.util.AtomicFile;
-import android.util.Slog;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
-import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.biometrics.sensors.BiometricUserState;
 
-import libcore.io.IoUtils;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -76,47 +71,27 @@ public class FingerprintUserState extends BiometricUserState<Fingerprint> {
     }
 
     @Override
-    protected void doWriteState() {
-        AtomicFile destination = new AtomicFile(mFile);
-
-        ArrayList<Fingerprint> fingerprints;
+    protected void doWriteState(@NonNull TypedXmlSerializer serializer) throws Exception {
+        final ArrayList<Fingerprint> fingerprints;
 
         synchronized (this) {
             fingerprints = getCopy(mBiometrics);
         }
 
-        FileOutputStream out = null;
-        try {
-            out = destination.startWrite();
+        serializer.startTag(null, TAG_FINGERPRINTS);
 
-            TypedXmlSerializer serializer = Xml.resolveSerializer(out);
-            serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
-            serializer.startDocument(null, true);
-            serializer.startTag(null, TAG_FINGERPRINTS);
-
-            final int count = fingerprints.size();
-            for (int i = 0; i < count; i++) {
-                Fingerprint fp = fingerprints.get(i);
-                serializer.startTag(null, TAG_FINGERPRINT);
-                serializer.attributeInt(null, ATTR_FINGER_ID, fp.getBiometricId());
-                serializer.attribute(null, ATTR_NAME, fp.getName().toString());
-                serializer.attributeInt(null, ATTR_GROUP_ID, fp.getGroupId());
-                serializer.attributeLong(null, ATTR_DEVICE_ID, fp.getDeviceId());
-                serializer.endTag(null, TAG_FINGERPRINT);
-            }
-
-            serializer.endTag(null, TAG_FINGERPRINTS);
-            serializer.endDocument();
-            destination.finishWrite(out);
-
-            // Any error while writing is fatal.
-        } catch (Throwable t) {
-            Slog.wtf(TAG, "Failed to write settings, restoring backup", t);
-            destination.failWrite(out);
-            throw new IllegalStateException("Failed to write fingerprints", t);
-        } finally {
-            IoUtils.closeQuietly(out);
+        final int count = fingerprints.size();
+        for (int i = 0; i < count; i++) {
+            Fingerprint fp = fingerprints.get(i);
+            serializer.startTag(null, TAG_FINGERPRINT);
+            serializer.attributeInt(null, ATTR_FINGER_ID, fp.getBiometricId());
+            serializer.attribute(null, ATTR_NAME, fp.getName().toString());
+            serializer.attributeInt(null, ATTR_GROUP_ID, fp.getGroupId());
+            serializer.attributeLong(null, ATTR_DEVICE_ID, fp.getDeviceId());
+            serializer.endTag(null, TAG_FINGERPRINT);
         }
+
+        serializer.endTag(null, TAG_FINGERPRINTS);
     }
 
     @GuardedBy("this")

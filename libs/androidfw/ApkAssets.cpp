@@ -385,7 +385,7 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadOverlay(const std::string& idmap
     return {};
   }
   
-  auto overlay_path = loaded_idmap->OverlayApkPath();
+  auto overlay_path = std::string(loaded_idmap->OverlayApkPath());
   auto assets = ZipAssetsProvider::Create(overlay_path);
   return (assets) ? LoadImpl(std::move(assets), overlay_path, flags | PROPERTY_OVERLAY,
                              nullptr /* override_asset */, std::move(idmap_asset),

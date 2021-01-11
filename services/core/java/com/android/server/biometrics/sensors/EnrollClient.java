@@ -49,10 +49,10 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> {
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String owner, @NonNull BiometricUtils utils,
             int timeoutSec, int statsModality, int sensorId,
-            boolean shouldVibrate, boolean shouldLogMetrics) {
+            boolean shouldVibrate) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
                 statsModality, BiometricsProtoEnums.ACTION_ENROLL,
-                BiometricsProtoEnums.CLIENT_UNKNOWN, shouldLogMetrics);
+                BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricUtils = utils;
         mHardwareAuthToken = Arrays.copyOf(hardwareAuthToken, hardwareAuthToken.length);
         mTimeoutSec = timeoutSec;

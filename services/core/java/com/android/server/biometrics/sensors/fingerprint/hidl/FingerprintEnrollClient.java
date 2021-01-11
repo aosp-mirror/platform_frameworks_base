@@ -56,8 +56,9 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
             boolean shouldLogMetrics) {
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
                 timeoutSec, BiometricsProtoEnums.MODALITY_FINGERPRINT, sensorId,
-                true /* shouldVibrate */, shouldLogMetrics);
+                true /* shouldVibrate */);
         mUdfpsOverlayController = udfpsOverlayController;
+        setShouldLog(shouldLogMetrics);
     }
 
     @Override

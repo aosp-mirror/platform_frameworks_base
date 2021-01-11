@@ -66,6 +66,10 @@
     <!-- The height of the navigation gesture area if the gesture is starting from the bottom. -->
     <dimen name="navigation_bar_gesture_height">@dimen/navigation_bar_frame_height</dimen>
 
+    <!-- The height of the navigation larger gesture area if the gesture is starting from
+         the bottom. -->
+    <dimen name="navigation_bar_gesture_larger_height">80dp</dimen>
+
     <!-- Height of the bottom navigation / system bar in car mode. -->
     <dimen name="navigation_bar_height_car_mode">96dp</dimen>
     <!-- Height of the bottom navigation bar in portrait; often the same as

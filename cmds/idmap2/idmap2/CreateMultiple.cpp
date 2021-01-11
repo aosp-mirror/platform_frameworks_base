@@ -105,7 +105,8 @@ Result<Unit> CreateMultiple(const std::vector<std::string>& args) {
       continue;
     }
 
-    if (!Verify(idmap_path, target_apk_path, overlay_apk_path, fulfilled_policies,
+    // TODO(b/175014391): Support multiple overlay tags in OverlayConfig
+    if (!Verify(idmap_path, target_apk_path, overlay_apk_path, "", fulfilled_policies,
                 !ignore_overlayable)) {
       const std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
       if (!overlay_apk) {
@@ -113,8 +114,8 @@ Result<Unit> CreateMultiple(const std::vector<std::string>& args) {
         continue;
       }
 
-      const auto idmap =
-          Idmap::FromApkAssets(*target_apk, *overlay_apk, fulfilled_policies, !ignore_overlayable);
+      const auto idmap = Idmap::FromApkAssets(*target_apk, *overlay_apk, "", fulfilled_policies,
+                                              !ignore_overlayable);
       if (!idmap) {
         LOG(WARNING) << "failed to create idmap";
         continue;

@@ -59,4 +59,26 @@ TEST_F(ResourceUtilsTests, ResToTypeEntryNameNoSuchResourceId) {
   ASSERT_FALSE(name);
 }
 
-}  // namespace android::idmap2
+TEST_F(ResourceUtilsTests, InvalidValidOverlayNameInvalidAttributes) {
+  auto info = utils::ExtractOverlayManifestInfo(GetTestDataPath() + "/overlay/overlay-invalid.apk",
+                                                "InvalidName");
+  ASSERT_FALSE(info);
+}
+
+TEST_F(ResourceUtilsTests, ValidOverlayNameInvalidAttributes) {
+  auto info = utils::ExtractOverlayManifestInfo(GetTestDataPath() + "/overlay/overlay-invalid.apk",
+                                                "ValidName");
+  ASSERT_FALSE(info);
+}
+
+TEST_F(ResourceUtilsTests, ValidOverlayNameAndTargetPackageInvalidAttributes) {
+  auto info = utils::ExtractOverlayManifestInfo(GetTestDataPath() + "/overlay/overlay-invalid.apk",
+                                                "ValidNameAndTargetPackage");
+  ASSERT_TRUE(info);
+  ASSERT_EQ("ValidNameAndTargetPackage", info->name);
+  ASSERT_EQ("Valid", info->target_package);
+  ASSERT_EQ("", info->target_name); // Attribute resource id could not be found
+  ASSERT_EQ(0, info->resource_mapping); // Attribute resource id could not be found
+}
+
+}// namespace android::idmap2

@@ -44,7 +44,7 @@
 namespace android {
 
 constexpr const static uint32_t kIdmapMagic = 0x504D4449u;
-constexpr const static uint32_t kIdmapCurrentVersion = 0x00000005u;
+constexpr const static uint32_t kIdmapCurrentVersion = 0x00000007u;
 
 /**
  * In C++11, char16_t is defined as *at least* 16 bits. We do a lot of
@@ -1699,56 +1699,6 @@ inline ResTable_overlayable_policy_header::PolicyFlags& operator |=(
   first = static_cast<ResTable_overlayable_policy_header::PolicyFlags>(first | second);
   return first;
 }
-
-struct Idmap_header {
-  // Always 0x504D4449 ('IDMP')
-  uint32_t magic;
-
-  uint32_t version;
-
-  uint32_t target_crc32;
-  uint32_t overlay_crc32;
-
-  uint32_t fulfilled_policies;
-  uint32_t enforce_overlayable;
-
-  uint8_t target_path[256];
-  uint8_t overlay_path[256];
-
-  uint32_t debug_info_size;
-  uint8_t debug_info[0];
-
-  size_t Size() const;
-};
-
-struct Idmap_data_header {
-  uint8_t target_package_id;
-  uint8_t overlay_package_id;
-
-  // Padding to ensure 4 byte alignment for target_entry_count
-  uint16_t p0;
-
-  uint32_t target_entry_count;
-  uint32_t target_inline_entry_count;
-  uint32_t overlay_entry_count;
-
-  uint32_t string_pool_index_offset;
-};
-
-struct Idmap_target_entry {
-  uint32_t target_id;
-  uint32_t overlay_id;
-};
-
-struct Idmap_target_entry_inline {
-  uint32_t target_id;
-  Res_value value;
-};
-
-struct Idmap_overlay_entry {
-  uint32_t overlay_id;
-  uint32_t target_id;
-};
 
 class AssetManager2;
 

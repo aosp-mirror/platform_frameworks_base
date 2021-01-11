@@ -107,8 +107,7 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
             @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, null /* token */, null /* ClientMonitorCallbackConverter */,
                 userId, owner, 0 /* cookie */, sensorId, statsModality,
-                BiometricsProtoEnums.ACTION_ENUMERATE, BiometricsProtoEnums.CLIENT_UNKNOWN,
-                true /* shouldLogMetrics */);
+                BiometricsProtoEnums.ACTION_ENUMERATE, BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricUtils = utils;
         mAuthenticatorIds = authenticatorIds;
         mEnrolledList = enrolledList;

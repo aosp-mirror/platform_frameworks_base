@@ -31,4 +31,6 @@ public interface BiometricUtils<T extends BiometricAuthenticator.Identifier> {
     void removeBiometricForUser(Context context, int userId, int biometricId);
     void renameBiometricForUser(Context context, int userId, int biometricId, CharSequence name);
     CharSequence getUniqueName(Context context, int userId);
+    void setInvalidationInProgress(Context context, int userId, boolean inProgress);
+    boolean isInvalidationInProgress(Context context, int userId);
 }
