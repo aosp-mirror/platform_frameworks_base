@@ -38,6 +38,7 @@ import android.net.metrics.IpConnectivityLog
 import android.os.ConditionVariable
 import android.os.IBinder
 import android.os.INetworkManagementService
+import android.os.SystemConfigManager
 import android.os.UserHandle
 import android.testing.TestableContext
 import android.util.Log
@@ -57,6 +58,7 @@ import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.AdditionalAnswers
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito.any
 import org.mockito.Mockito.anyInt
@@ -94,6 +96,8 @@ class ConnectivityServiceIntegrationTest {
     private lateinit var netd: INetd
     @Mock
     private lateinit var dnsResolver: IDnsResolver
+    @Mock
+    private lateinit var systemConfigManager: SystemConfigManager
     @Spy
     private var context = TestableContext(realContext)
 
@@ -151,6 +155,11 @@ class ConnectivityServiceIntegrationTest {
         doReturn(UserHandle.ALL).`when`(asUserCtx).user
         doReturn(asUserCtx).`when`(context).createContextAsUser(eq(UserHandle.ALL), anyInt())
         doNothing().`when`(context).sendStickyBroadcast(any(), any())
+        doReturn(Context.SYSTEM_CONFIG_SERVICE).`when`(context)
+                .getSystemServiceName(SystemConfigManager::class.java)
+        doReturn(systemConfigManager).`when`(context)
+                .getSystemService(Context.SYSTEM_CONFIG_SERVICE)
+        doReturn(IntArray(0)).`when`(systemConfigManager).getSystemPermissionUids(anyString())
 
         networkStackClient = TestNetworkStackClient(realContext)
         networkStackClient.init()
