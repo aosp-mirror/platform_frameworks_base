@@ -5521,32 +5521,40 @@ public class ConnectivityServiceTest {
         assertNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
         assertNetworkInfo(TYPE_WIFI, DetailedState.DISCONNECTED);
         assertNetworkInfo(TYPE_VPN, DetailedState.SUSPENDED);  // BUG: VPN caps have NOT_SUSPENDED.
-        assertNull(mCm.getActiveNetworkInfo());  // ???
+        assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
         // BUG: the device has connectivity, so this should return true.
         assertGetNetworkInfoOfGetActiveNetworkIsConnected(false);
 
-        // Suspending and resuming reveals other bugs.
+        // Re-suspending the current network fixes the problem.
         mCellNetworkAgent.suspend();
-        callback.assertNoCallback();  // BUG: should get callback that VPN is suspended.
+        callback.expectCapabilitiesThat(mMockVpn,
+                nc -> !nc.hasCapability(NET_CAPABILITY_NOT_SUSPENDED)
+                        && nc.hasTransport(TRANSPORT_CELLULAR));
+        callback.expectCallback(CallbackEntry.SUSPENDED, mMockVpn);
+        callback.assertNoCallback();
 
-        assertTrue(mCm.getNetworkCapabilities(mMockVpn.getNetwork())
-                .hasCapability(NET_CAPABILITY_NOT_SUSPENDED));  // BUG: VPN should be SUSPENDED.
+        assertFalse(mCm.getNetworkCapabilities(mMockVpn.getNetwork())
+                .hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
         assertNetworkInfo(TYPE_MOBILE, DetailedState.SUSPENDED);
         assertNetworkInfo(TYPE_WIFI, DetailedState.DISCONNECTED);
         assertNetworkInfo(TYPE_VPN, DetailedState.SUSPENDED);
-        assertNull(mCm.getActiveNetworkInfo());  // ???
+        assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.SUSPENDED);
         assertGetNetworkInfoOfGetActiveNetworkIsConnected(false);
 
         mCellNetworkAgent.resume();
-        callback.assertNoCallback();  // BUG: should get callback that VPN is no longer suspended.
+        callback.expectCapabilitiesThat(mMockVpn,
+                nc -> nc.hasCapability(NET_CAPABILITY_NOT_SUSPENDED)
+                        && nc.hasTransport(TRANSPORT_CELLULAR));
+        callback.expectCallback(CallbackEntry.RESUMED, mMockVpn);
+        callback.assertNoCallback();
 
         assertTrue(mCm.getNetworkCapabilities(mMockVpn.getNetwork())
                 .hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
         assertNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
         assertNetworkInfo(TYPE_WIFI, DetailedState.DISCONNECTED);
-        assertNetworkInfo(TYPE_VPN, DetailedState.SUSPENDED);
-        assertNull(mCm.getActiveNetworkInfo());  // ???
-        assertGetNetworkInfoOfGetActiveNetworkIsConnected(false);
+        assertNetworkInfo(TYPE_VPN, DetailedState.CONNECTED);
+        assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
+        assertGetNetworkInfoOfGetActiveNetworkIsConnected(true);
     }
 
     @Test
