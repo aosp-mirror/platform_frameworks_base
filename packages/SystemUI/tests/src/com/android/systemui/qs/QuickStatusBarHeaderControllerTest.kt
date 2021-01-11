@@ -27,6 +27,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.privacy.OngoingPrivacyChip
+import com.android.systemui.privacy.PrivacyDialogController
 import com.android.systemui.privacy.PrivacyItemController
 import com.android.systemui.privacy.logging.PrivacyLogger
 import com.android.systemui.qs.carrier.QSCarrierGroup
@@ -38,6 +39,7 @@ import com.android.systemui.statusbar.phone.StatusIconContainer
 import com.android.systemui.statusbar.policy.Clock
 import com.android.systemui.statusbar.policy.NextAlarmController
 import com.android.systemui.util.RingerModeTracker
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.utils.leaks.FakeZenModeController
@@ -98,6 +100,8 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var privacyChip: OngoingPrivacyChip
     @Mock
+    private lateinit var privacyDialogController: PrivacyDialogController
+    @Mock
     private lateinit var clock: Clock
     @Mock
     private lateinit var mockView: View
@@ -114,6 +118,7 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
         `when`(qsCarrierGroupControllerBuilder.build()).thenReturn(qsCarrierGroupController)
         `when`(view.resources).thenReturn(mContext.resources)
         `when`(view.isAttachedToWindow).thenReturn(true)
+        `when`(view.context).thenReturn(context)
 
         controller = QuickStatusBarHeaderController(
                 view,
@@ -131,7 +136,8 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
                 quickQSPanelController,
                 qsCarrierGroupControllerBuilder,
                 privacyLogger,
-                colorExtractor
+                colorExtractor,
+                privacyDialogController
         )
     }
 
@@ -220,6 +226,18 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
                 com.android.internal.R.string.status_bar_location)
 
         assertThat(captor.value).containsExactly(cameraString, micString, locationString)
+    }
+
+    @Test
+    fun testPrivacyChipClicked() {
+        controller.init()
+
+        val captor = argumentCaptor<View.OnClickListener>()
+        verify(privacyChip).setOnClickListener(capture(captor))
+
+        captor.value.onClick(privacyChip)
+
+        verify(privacyDialogController).showDialog(any(Context::class.java))
     }
 
     private fun stubViews() {

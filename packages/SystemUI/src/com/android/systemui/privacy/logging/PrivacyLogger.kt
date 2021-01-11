@@ -16,10 +16,12 @@
 
 package com.android.systemui.privacy.logging
 
+import android.permission.PermGroupUsage
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel
 import com.android.systemui.log.LogMessage
 import com.android.systemui.log.dagger.PrivacyLog
+import com.android.systemui.privacy.PrivacyDialog
 import javax.inject.Inject
 
 private const val TAG = "PrivacyLog"
@@ -85,15 +87,45 @@ class PrivacyLogger @Inject constructor(
 
     fun logStatusBarIconsVisible(
         showCamera: Boolean,
-        showMichrophone: Boolean,
+        showMicrophone: Boolean,
         showLocation: Boolean
     ) {
         log(LogLevel.INFO, {
             bool1 = showCamera
-            bool2 = showMichrophone
+            bool2 = showMicrophone
             bool3 = showLocation
         }, {
             "Status bar icons visible: camera=$bool1, microphone=$bool2, location=$bool3"
+        })
+    }
+
+    fun logUnfilteredPermGroupUsage(contents: List<PermGroupUsage>) {
+        log(LogLevel.DEBUG, {
+            str1 = contents.toString()
+        }, {
+            "Perm group usage: $str1"
+        })
+    }
+
+    fun logShowDialogContents(contents: List<PrivacyDialog.PrivacyElement>) {
+        log(LogLevel.INFO, {
+            str1 = contents.toString()
+        }, {
+            "Privacy dialog shown. Contents: $str1"
+        })
+    }
+
+    fun logPrivacyDialogDismissed() {
+        log(LogLevel.INFO, {}, {
+            "Privacy dialog dismissed"
+        })
+    }
+
+    fun logStartSettingsActivityFromDialog(permGroupName: String) {
+        log(LogLevel.INFO, {
+            str1 = permGroupName
+        }, {
+            "Start settings activity from dialog for perm group: $str1"
         })
     }
 
