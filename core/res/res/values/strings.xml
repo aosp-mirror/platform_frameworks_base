@@ -5519,6 +5519,8 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label">On-screen Accessibility Shortcut Chooser</string>
     <!-- Label for triggering hardware accessibility shortcut action [CHAR LIMIT=NONE] -->
     <string name="accessibility_system_action_hardware_a11y_shortcut_label">Accessibility Shortcut</string>
+    <!-- Label for dismissing the notification shade [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_dismiss_notification_shade">Dismiss Notification Shade</string>
     <!-- Accessibility description of caption view -->
     <string name="accessibility_freeform_caption">Caption bar of <xliff:g id="app_name">%1$s</xliff:g>.</string>
 

@@ -337,13 +337,6 @@ public class DependencyProvider {
     /** */
     @Provides
     @SysUISingleton
-    public SystemActions providesSystemActions(Context context) {
-        return new SystemActions(context);
-    }
-
-    /** */
-    @Provides
-    @SysUISingleton
     public Choreographer providesChoreographer() {
         return Choreographer.getInstance();
     }
