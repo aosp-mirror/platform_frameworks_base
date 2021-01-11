@@ -37,13 +37,14 @@ import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 import android.view.animation.AccelerateInterpolator;
 
 import androidx.test.InstrumentationRegistry;
-import androidx.test.filters.MediumTest;
+import androidx.test.filters.LargeTest;
 
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -54,7 +55,8 @@ import org.mockito.MockitoAnnotations;
 import java.util.concurrent.atomic.AtomicReference;
 
 
-@MediumTest
+@Ignore
+@LargeTest
 @RunWith(AndroidTestingRunner.class)
 public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
 
