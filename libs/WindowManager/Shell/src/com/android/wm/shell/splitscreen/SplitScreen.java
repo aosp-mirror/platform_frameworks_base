@@ -18,6 +18,8 @@ package com.android.wm.shell.splitscreen;
 
 import android.annotation.IntDef;
 import android.app.ActivityManager;
+import android.graphics.Rect;
+import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 
@@ -61,6 +63,12 @@ public interface SplitScreen {
     void setSideStagePosition(@SideStagePosition int sideStagePosition);
     /** Hides the side-stage if it is currently visible. */
     void setSideStageVisibility(boolean visible);
+    /** Removes the split-screen stages. */
+    void exitSplitScreen();
+    /** Gets the stage bounds. */
+    void getStageBounds(Rect outTopOrLeftBounds, Rect outBottomOrRightBounds);
+    /** Updates the launch activity options for the split position we want to launch it in. */
+    void updateActivityOptions(Bundle opts, @SideStagePosition int position);
     /** Dumps current status of split-screen. */
     void dump(@NonNull PrintWriter pw, String prefix);
     /** Called when the shell organizer has been registered. */

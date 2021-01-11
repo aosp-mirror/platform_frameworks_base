@@ -16,7 +16,10 @@
 
 package com.android.wm.shell.splitscreen;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import android.annotation.CallSuper;
 import android.app.ActivityManager;
@@ -45,6 +48,12 @@ import java.io.PrintWriter;
 class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     private static final String TAG = StageTaskListener.class.getSimpleName();
 
+    protected static final int[] CONTROLLED_ACTIVITY_TYPES = {ACTIVITY_TYPE_STANDARD};
+    protected static final int[] CONTROLLED_WINDOWING_MODES =
+            {WINDOWING_MODE_FULLSCREEN, WINDOWING_MODE_UNDEFINED};
+    protected static final int[] CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE =
+            {WINDOWING_MODE_FULLSCREEN, WINDOWING_MODE_UNDEFINED, WINDOWING_MODE_MULTI_WINDOW};
+
     /** Callback interface for listening to changes in a split-screen stage. */
     public interface StageListenerCallbacks {
         void onRootTaskAppeared();
@@ -69,7 +78,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     @Override
     @CallSuper
     public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
-        if (!taskInfo.hasParentTask()) {
+        if (mRootTaskInfo == null && !taskInfo.hasParentTask()) {
             mRootLeash = leash;
             mRootTaskInfo = taskInfo;
             mCallbacks.onRootTaskAppeared();
@@ -78,7 +87,8 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             mChildrenTaskInfo.put(taskInfo.taskId, taskInfo);
             updateChildTaskSurface(taskInfo, leash, true /* firstAppeared */);
         } else {
-            throw new IllegalArgumentException("Unknown task: " + taskInfo);
+            throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
+                    + "\n mRootTaskInfo: " + mRootTaskInfo);
         }
         sendStatusChanged();
     }
@@ -93,7 +103,8 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             updateChildTaskSurface(
                     taskInfo, mChildrenLeashes.get(taskInfo.taskId), false /* firstAppeared */);
         } else {
-            throw new IllegalArgumentException("Unknown task: " + taskInfo);
+            throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
+                    + "\n mRootTaskInfo: " + mRootTaskInfo);
         }
         sendStatusChanged();
     }
@@ -110,7 +121,8 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             mChildrenLeashes.remove(taskId);
             sendStatusChanged();
         } else {
-            throw new IllegalArgumentException("Unknown task: " + taskInfo);
+            throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
+                    + "\n mRootTaskInfo: " + mRootTaskInfo);
         }
     }
 
@@ -143,6 +155,8 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     @Override
     @CallSuper
     public void dump(@NonNull PrintWriter pw, String prefix) {
-
+        final String innerPrefix = prefix + "  ";
+        final String childPrefix = innerPrefix + "  ";
+        pw.println(prefix + this);
     }
 }

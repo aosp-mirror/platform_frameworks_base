@@ -38,12 +38,6 @@ class MainStage extends StageTaskListener {
 
     private boolean mIsActive = false;
 
-    private static final int[] CONTROLLED_ACTIVITY_TYPES = {ACTIVITY_TYPE_STANDARD};
-    private static final int[] CONTROLLED_WINDOWING_MODES =
-            {WINDOWING_MODE_FULLSCREEN, WINDOWING_MODE_UNDEFINED};
-    private static final int[] CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE =
-            {WINDOWING_MODE_FULLSCREEN, WINDOWING_MODE_UNDEFINED, WINDOWING_MODE_MULTI_WINDOW};
-
     MainStage(ShellTaskOrganizer taskOrganizer, int displayId,
             StageListenerCallbacks callbacks, SyncTransactionQueue syncQueue) {
         super(taskOrganizer, displayId, callbacks, syncQueue);
@@ -92,7 +86,7 @@ class MainStage extends StageTaskListener {
                         null /* newParent */,
                         CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE,
                         CONTROLLED_ACTIVITY_TYPES,
-                        true /* onTop */)
+                        false /* onTop */)
                 .reorder(rootToken, false /* onTop */);
     }
 

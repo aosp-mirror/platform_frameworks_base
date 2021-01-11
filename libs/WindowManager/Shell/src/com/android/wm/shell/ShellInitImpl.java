@@ -100,7 +100,7 @@ public class ShellInitImpl {
         mSplitScreenOptional.ifPresent(SplitScreen::onOrganizerRegistered);
 
         // Bind the splitscreen impl to the drag drop controller
-        mDragAndDropController.initialize(mLegacySplitScreenOptional);
+        mDragAndDropController.initialize(mSplitScreenOptional);
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             mTransitions.register(mShellTaskOrganizer);

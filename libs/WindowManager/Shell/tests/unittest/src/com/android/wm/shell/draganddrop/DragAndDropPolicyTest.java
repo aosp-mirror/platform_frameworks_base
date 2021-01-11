@@ -26,7 +26,9 @@ import static android.content.ClipDescription.MIMETYPE_APPLICATION_TASK;
 
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_FULLSCREEN;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_BOTTOM;
+import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_LEFT;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_RIGHT;
+import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_TOP;
 
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
@@ -35,7 +37,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -52,7 +53,6 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Insets;
-import android.graphics.Rect;
 import android.os.RemoteException;
 import android.view.DisplayInfo;
 
@@ -61,20 +61,17 @@ import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.draganddrop.DragAndDropPolicy.Target;
-import com.android.wm.shell.legacysplitscreen.DividerView;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
+import com.android.wm.shell.splitscreen.SplitScreen;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.function.Consumer;
 
 /**
  * Tests for the drag and drop policy.
@@ -90,12 +87,13 @@ public class DragAndDropPolicyTest {
     private ActivityTaskManager mActivityTaskManager;
 
     @Mock
-    private LegacySplitScreen mLegacySplitScreen;
+    private SplitScreen mSplitScreen;
 
     @Mock
     private DragAndDropPolicy.Starter mStarter;
 
-    private DisplayLayout mDisplayLayout;
+    private DisplayLayout mLandscapeDisplayLayout;
+    private DisplayLayout mPortraitDisplayLayout;
     private Insets mInsets;
     private DragAndDropPolicy mPolicy;
 
@@ -116,25 +114,19 @@ public class DragAndDropPolicyTest {
         Resources res = mock(Resources.class);
         Configuration config = new Configuration();
         doReturn(config).when(res).getConfiguration();
+        doReturn(res).when(mContext).getResources();
         DisplayInfo info = new DisplayInfo();
-        info.logicalWidth = 100;
+        info.logicalWidth = 200;
         info.logicalHeight = 100;
-        mDisplayLayout = new DisplayLayout(info, res, false, false);
+        mLandscapeDisplayLayout = new DisplayLayout(info, res, false, false);
+        DisplayInfo info2 = new DisplayInfo();
+        info.logicalWidth = 100;
+        info.logicalHeight = 200;
+        mPortraitDisplayLayout = new DisplayLayout(info2, res, false, false);
         mInsets = Insets.of(0, 0, 0, 0);
 
-        DividerView divider = mock(DividerView.class);
-        doReturn(divider).when(mLegacySplitScreen).getDividerView();
-        doReturn(new Rect(50, 0, 100, 100)).when(divider)
-                .getNonMinimizedSplitScreenSecondaryBounds();
-
-        doAnswer((Answer<Void>) invocation -> {
-            Consumer<Boolean> callback = invocation.getArgument(0);
-            callback.accept(true);
-            return null;
-        }).when(mLegacySplitScreen).registerInSplitScreenListener(any());
-
         mPolicy = new DragAndDropPolicy(
-                mContext, mActivityTaskManager, mLegacySplitScreen, mStarter);
+                mContext, mActivityTaskManager, mSplitScreen, mStarter);
         mActivityClipData = createClipData(MIMETYPE_APPLICATION_ACTIVITY);
         mNonResizeableActivityClipData = createClipData(MIMETYPE_APPLICATION_ACTIVITY);
         setClipDataResizeable(mNonResizeableActivityClipData, false);
@@ -149,7 +141,6 @@ public class DragAndDropPolicyTest {
         mSplitPrimaryAppTask = createTaskInfo(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY,
                 ACTIVITY_TYPE_STANDARD);
 
-        setIsPhone(false);
         setInSplitScreen(false);
         setRunningTask(mFullscreenAppTask);
     }
@@ -199,22 +190,14 @@ public class DragAndDropPolicyTest {
                 : ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
     }
 
-    private void setIsPhone(boolean isPhone) {
-        Resources res = mock(Resources.class);
-        Configuration config = mock(Configuration.class);
-        config.smallestScreenWidthDp = isPhone ? 400 : 800;
-        doReturn(config).when(res).getConfiguration();
-        doReturn(res).when(mContext).getResources();
-    }
-
     private void setInSplitScreen(boolean inSplitscreen) {
-        doReturn(inSplitscreen).when(mLegacySplitScreen).isDividerVisible();
+        doReturn(inSplitscreen).when(mSplitScreen).isSplitScreenVisible();
     }
 
     @Test
-    public void testDragAppOverFullscreenHome_expectOnlyFullscreenTarget() throws RemoteException {
+    public void testDragAppOverFullscreenHome_expectOnlyFullscreenTarget() {
         setRunningTask(mHomeTask);
-        mPolicy.start(mDisplayLayout, mActivityClipData);
+        mPolicy.start(mLandscapeDisplayLayout, mActivityClipData);
         ArrayList<Target> targets = assertExactTargetTypes(
                 mPolicy.getTargets(mInsets), TYPE_FULLSCREEN);
 
@@ -223,77 +206,66 @@ public class DragAndDropPolicyTest {
     }
 
     @Test
-    public void testDragAppOverFullscreenApp_expectSplitScreenAndFullscreenTargets()
-            throws RemoteException {
+    public void testDragAppOverFullscreenApp_expectSplitScreenAndFullscreenTargets() {
         setRunningTask(mFullscreenAppTask);
-        mPolicy.start(mDisplayLayout, mActivityClipData);
-        // TODO(b/169894807): For now, only allow splitting to the right/bottom until we have split
-        //                    pairs
+        mPolicy.start(mLandscapeDisplayLayout, mActivityClipData);
         ArrayList<Target> targets = assertExactTargetTypes(
-                mPolicy.getTargets(mInsets), TYPE_FULLSCREEN, TYPE_SPLIT_RIGHT);
+                mPolicy.getTargets(mInsets), TYPE_FULLSCREEN, TYPE_SPLIT_LEFT, TYPE_SPLIT_RIGHT);
 
         mPolicy.handleDrop(filterTargetByType(targets, TYPE_FULLSCREEN), mActivityClipData);
+        verify(mStarter).exitSplitScreen();
         verify(mStarter).startIntent(any(), any());
         reset(mStarter);
 
         mPolicy.handleDrop(filterTargetByType(targets, TYPE_SPLIT_RIGHT), mActivityClipData);
-        verify(mStarter).enterSplitScreen(anyInt(), eq(false));
         verify(mStarter).startIntent(any(), any());
     }
 
     @Test
-    public void testDragAppOverFullscreenAppPhone_expectVerticalSplitScreenAndFullscreenTargets()
-            throws RemoteException {
-        setIsPhone(true);
+    public void testDragAppOverFullscreenAppPhone_expectVerticalSplitScreenAndFullscreenTargets() {
         setRunningTask(mFullscreenAppTask);
-        mPolicy.start(mDisplayLayout, mActivityClipData);
-        // TODO(b/169894807): For now, only allow splitting to the right/bottom until we have split
-        //                    pairs
+        mPolicy.start(mPortraitDisplayLayout, mActivityClipData);
         ArrayList<Target> targets = assertExactTargetTypes(
-                mPolicy.getTargets(mInsets), TYPE_FULLSCREEN, TYPE_SPLIT_BOTTOM);
+                mPolicy.getTargets(mInsets), TYPE_FULLSCREEN, TYPE_SPLIT_TOP, TYPE_SPLIT_BOTTOM);
 
         mPolicy.handleDrop(filterTargetByType(targets, TYPE_FULLSCREEN), mActivityClipData);
+        verify(mStarter).exitSplitScreen();
         verify(mStarter).startIntent(any(), any());
         reset(mStarter);
 
         mPolicy.handleDrop(filterTargetByType(targets, TYPE_SPLIT_BOTTOM), mActivityClipData);
-        verify(mStarter).enterSplitScreen(anyInt(), eq(false));
         verify(mStarter).startIntent(any(), any());
     }
 
     @Test
-    public void testDragAppOverFullscreenNonResizeableApp_expectOnlyFullscreenTargets()
-            throws RemoteException {
+    public void testDragAppOverFullscreenNonResizeableApp_expectOnlyFullscreenTargets() {
         setRunningTask(mNonResizeableFullscreenAppTask);
-        mPolicy.start(mDisplayLayout, mActivityClipData);
+        mPolicy.start(mLandscapeDisplayLayout, mActivityClipData);
         ArrayList<Target> targets = assertExactTargetTypes(
-                mPolicy.getTargets(mInsets), TYPE_FULLSCREEN);
+                mPolicy.getTargets(mInsets), TYPE_FULLSCREEN, TYPE_SPLIT_LEFT, TYPE_SPLIT_RIGHT);
 
         mPolicy.handleDrop(filterTargetByType(targets, TYPE_FULLSCREEN), mActivityClipData);
         verify(mStarter).startIntent(any(), any());
     }
 
     @Test
-    public void testDragNonResizeableAppOverFullscreenApp_expectOnlyFullscreenTargets()
-            throws RemoteException {
+    public void testDragNonResizeableAppOverFullscreenApp_expectOnlyFullscreenTargets() {
         setRunningTask(mFullscreenAppTask);
-        mPolicy.start(mDisplayLayout, mNonResizeableActivityClipData);
+        mPolicy.start(mLandscapeDisplayLayout, mNonResizeableActivityClipData);
         ArrayList<Target> targets = assertExactTargetTypes(
-                mPolicy.getTargets(mInsets), TYPE_FULLSCREEN);
+                mPolicy.getTargets(mInsets), TYPE_FULLSCREEN, TYPE_SPLIT_LEFT, TYPE_SPLIT_RIGHT);
 
         mPolicy.handleDrop(filterTargetByType(targets, TYPE_FULLSCREEN), mActivityClipData);
         verify(mStarter).startIntent(any(), any());
     }
 
     @Test
-    public void testDragAppOverSplitApp_expectFullscreenAndSplitTargets() throws RemoteException {
+    public void testDragAppOverSplitApp_expectFullscreenAndSplitTargets() {
         setInSplitScreen(true);
         setRunningTask(mSplitPrimaryAppTask);
-        mPolicy.start(mDisplayLayout, mActivityClipData);
-        // TODO(b/169894807): For now, only allow splitting to the right/bottom until we have split
-        //                    pairs
+        mPolicy.start(mLandscapeDisplayLayout, mActivityClipData);
         ArrayList<Target> targets = assertExactTargetTypes(
-                mPolicy.getTargets(mInsets), TYPE_FULLSCREEN, TYPE_SPLIT_RIGHT);
+                mPolicy.getTargets(mInsets), TYPE_FULLSCREEN, TYPE_SPLIT_LEFT, TYPE_SPLIT_RIGHT);
 
         mPolicy.handleDrop(filterTargetByType(targets, TYPE_FULLSCREEN), mActivityClipData);
         verify(mStarter).startIntent(any(), any());
@@ -305,16 +277,12 @@ public class DragAndDropPolicyTest {
     }
 
     @Test
-    public void testDragAppOverSplitAppPhone_expectFullscreenAndVerticalSplitTargets()
-            throws RemoteException {
-        setIsPhone(true);
+    public void testDragAppOverSplitAppPhone_expectFullscreenAndVerticalSplitTargets() {
         setInSplitScreen(true);
         setRunningTask(mSplitPrimaryAppTask);
-        mPolicy.start(mDisplayLayout, mActivityClipData);
-        // TODO(b/169894807): For now, only allow splitting to the right/bottom until we have split
-        //                    pairs
+        mPolicy.start(mPortraitDisplayLayout, mActivityClipData);
         ArrayList<Target> targets = assertExactTargetTypes(
-                mPolicy.getTargets(mInsets), TYPE_FULLSCREEN, TYPE_SPLIT_BOTTOM);
+                mPolicy.getTargets(mInsets), TYPE_FULLSCREEN, TYPE_SPLIT_TOP, TYPE_SPLIT_BOTTOM);
 
         mPolicy.handleDrop(filterTargetByType(targets, TYPE_FULLSCREEN), mActivityClipData);
         verify(mStarter).startIntent(any(), any());
@@ -326,9 +294,9 @@ public class DragAndDropPolicyTest {
     }
 
     @Test
-    public void testTargetHitRects() throws RemoteException {
+    public void testTargetHitRects() {
         setRunningTask(mFullscreenAppTask);
-        mPolicy.start(mDisplayLayout, mActivityClipData);
+        mPolicy.start(mLandscapeDisplayLayout, mActivityClipData);
         ArrayList<Target> targets = mPolicy.getTargets(mInsets);
         for (Target t : targets) {
             assertTrue(mPolicy.getTargetAtLocation(t.hitRegion.left, t.hitRegion.top) == t);

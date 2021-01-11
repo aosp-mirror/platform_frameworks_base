@@ -20,6 +20,8 @@ import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.graphics.Rect;
+import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 
@@ -69,7 +71,10 @@ public class SplitScreenController implements SplitScreen {
     @Override
     public boolean moveToSideStage(int taskId, @SideStagePosition int sideStagePosition) {
         final ActivityManager.RunningTaskInfo task = mTaskOrganizer.getRunningTaskInfo(taskId);
-        return task != null && moveToSideStage(task, sideStagePosition);
+        if (task == null) {
+            throw new IllegalArgumentException("Unknown taskId" + taskId);
+        }
+        return moveToSideStage(task, sideStagePosition);
     }
 
     @Override
@@ -91,6 +96,21 @@ public class SplitScreenController implements SplitScreen {
     @Override
     public void setSideStageVisibility(boolean visible) {
         mStageCoordinator.setSideStageVisibility(visible);
+    }
+
+    @Override
+    public void exitSplitScreen() {
+        mStageCoordinator.exitSplitScreen();
+    }
+
+    @Override
+    public void getStageBounds(Rect outTopOrLeftBounds, Rect outBottomOrRightBounds) {
+        mStageCoordinator.getStageBounds(outTopOrLeftBounds, outBottomOrRightBounds);
+    }
+
+    @Override
+    public void updateActivityOptions(Bundle opts, @SideStagePosition int position) {
+        mStageCoordinator.updateActivityOptions(opts, position);
     }
 
     @Override
