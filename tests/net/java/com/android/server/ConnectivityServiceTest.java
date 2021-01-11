@@ -6853,6 +6853,7 @@ public class ConnectivityServiceTest {
         final int userId = UserHandle.getUserId(uid);
         final ArrayList<String> allowList = new ArrayList<>();
         mService.setAlwaysOnVpnPackage(userId, ALWAYS_ON_PACKAGE, true /* lockdown */, allowList);
+        waitForIdle();
 
         UidRangeParcel firstHalf = new UidRangeParcel(1, VPN_UID - 1);
         UidRangeParcel secondHalf = new UidRangeParcel(VPN_UID + 1, 99999);
@@ -6874,10 +6875,10 @@ public class ConnectivityServiceTest {
 
         // Disable lockdown, expect to see the network unblocked.
         mService.setAlwaysOnVpnPackage(userId, null, false /* lockdown */, allowList);
-        expectNetworkRejectNonSecureVpn(inOrder, false, firstHalf, secondHalf);
         callback.expectBlockedStatusCallback(false, mWiFiNetworkAgent);
         defaultCallback.expectBlockedStatusCallback(false, mWiFiNetworkAgent);
         vpnUidCallback.assertNoCallback();
+        expectNetworkRejectNonSecureVpn(inOrder, false, firstHalf, secondHalf);
         assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetworkForUid(VPN_UID));
         assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetwork());
         assertActiveNetworkInfo(TYPE_WIFI, DetailedState.CONNECTED);
@@ -6920,9 +6921,11 @@ public class ConnectivityServiceTest {
         // Disable lockdown, remove our UID from the allowlist, and re-enable lockdown.
         // Everything should now be blocked.
         mService.setAlwaysOnVpnPackage(userId, null, false /* lockdown */, allowList);
+        waitForIdle();
         expectNetworkRejectNonSecureVpn(inOrder, false, piece1, piece2, piece3);
         allowList.clear();
         mService.setAlwaysOnVpnPackage(userId, ALWAYS_ON_PACKAGE, true /* lockdown */, allowList);
+        waitForIdle();
         expectNetworkRejectNonSecureVpn(inOrder, true, firstHalf, secondHalf);
         defaultCallback.expectBlockedStatusCallback(true, mWiFiNetworkAgent);
         assertBlockedCallbackInAnyOrder(callback, true, mWiFiNetworkAgent, mCellNetworkAgent);
