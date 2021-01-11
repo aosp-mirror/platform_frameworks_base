@@ -3243,6 +3243,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void closeSystemDialogs(String reason) {
+        int callingPid = Binder.getCallingPid();
+        int callingUid = Binder.getCallingUid();
+        if (!mAtmInternal.checkCanCloseSystemDialogs(callingPid, callingUid, null)) {
+            return;
+        }
         synchronized (mGlobalLock) {
             mRoot.closeSystemDialogs(reason);
         }
