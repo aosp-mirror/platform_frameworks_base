@@ -33,9 +33,9 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.PackageParser;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.VersionedPackage;
+import android.content.pm.parsing.ApkLite;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
@@ -831,24 +831,24 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
         }
 
         // Get information about the package to be installed.
-        ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
-        ParseResult<PackageParser.ApkLite> parseResult = ApkLiteParseUtils.parseApkLite(
+        final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+        final ParseResult<ApkLite> parseResult = ApkLiteParseUtils.parseApkLite(
                 input.reset(), new File(session.resolvedBaseCodePath), 0);
         if (parseResult.isError()) {
             Slog.e(TAG, "Unable to parse new package: " + parseResult.getErrorMessage(),
                     parseResult.getException());
             return false;
         }
-        PackageParser.ApkLite newPackage = parseResult.getResult();
+        final ApkLite newPackage = parseResult.getResult();
 
-        String packageName = newPackage.packageName;
-        int rollbackDataPolicy = computeRollbackDataPolicy(
-                session.rollbackDataPolicy, newPackage.rollbackDataPolicy);
+        final String packageName = newPackage.getPackageName();
+        final int rollbackDataPolicy = computeRollbackDataPolicy(
+                session.rollbackDataPolicy, newPackage.getRollbackDataPolicy());
         Slog.i(TAG, "Enabling rollback for install of " + packageName
                 + ", session:" + session.sessionId
                 + ", rollbackDataPolicy=" + rollbackDataPolicy);
 
-        String installerPackageName = session.getInstallerPackageName();
+        final String installerPackageName = session.getInstallerPackageName();
         if (!enableRollbackAllowed(installerPackageName, packageName)) {
             Slog.e(TAG, "Installer " + installerPackageName
                     + " is not allowed to enable rollback on " + packageName);
@@ -900,7 +900,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
          * a rollback object is inconsistent because it doesn't count apk-in-apex.
          */
         ApplicationInfo appInfo = pkgInfo.applicationInfo;
-        return rollback.enableForPackage(packageName, newPackage.versionCode,
+        return rollback.enableForPackage(packageName, newPackage.getVersionCode(),
                 pkgInfo.getLongVersionCode(), isApex, appInfo.sourceDir,
                 appInfo.splitSourceDirs, rollbackDataPolicy);
     }
