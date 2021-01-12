@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-/*
- * Disable optimization of this file if we are compiling with the address
- * sanitizer.  This is a mitigation for b/122921367 and can be removed once the
- * bug is fixed.
- */
-#if __has_feature(address_sanitizer)
-#pragma clang optimize off
-#endif
-
 #define LOG_TAG "Zygote"
 #define ATRACE_TAG ATRACE_TAG_DALVIK
 
