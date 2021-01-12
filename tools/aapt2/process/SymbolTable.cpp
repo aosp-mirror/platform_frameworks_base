@@ -227,8 +227,7 @@ bool AssetManagerSymbolSource::AddAssetPath(const StringPiece& path) {
       apk_assets.push_back(apk_asset.get());
     }
 
-    asset_manager_.SetApkAssets(apk_assets, true /* invalidate_caches */,
-                                false /* filter_incompatible_configs */);
+    asset_manager_.SetApkAssets(apk_assets);
     return true;
   }
   return false;
@@ -351,9 +350,9 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindByName(
       return true;
     }
 
-    auto value = asset_manager_.GetResource(res_id.id, true /* may_be_bag */);
-    if (value.has_value()) {
-      type_spec_flags = value->flags;
+    auto flags = asset_manager_.GetResourceTypeSpecFlags(res_id.id);
+    if (flags.has_value()) {
+      type_spec_flags = *flags;
       found = true;
       return false;
     }
@@ -406,8 +405,8 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindById(
     return {};
   }
 
-  auto value = asset_manager_.GetResource(id.id, true /* may_be_bag */);
-  if (!value.has_value()) {
+  auto flags = asset_manager_.GetResourceTypeSpecFlags(id.id);
+  if (!flags.has_value()) {
     return {};
   }
 
@@ -422,7 +421,7 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindById(
   }
 
   if (s) {
-    s->is_public = (value->flags & android::ResTable_typeSpec::SPEC_PUBLIC) != 0;
+    s->is_public = (*flags & android::ResTable_typeSpec::SPEC_PUBLIC) != 0;
     return s;
   }
   return {};
