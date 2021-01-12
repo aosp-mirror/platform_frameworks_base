@@ -442,6 +442,24 @@ public class NetworkPolicyManager {
     }
 
     /**
+     * Check that networking is blocked for the given uid.
+     *
+     * @param uid The target uid.
+     * @param meteredNetwork True if the network is metered.
+     * @return true if networking is blocked for the given uid according to current networking
+     *         policies.
+     *
+     * @hide
+     */
+    public boolean isUidNetworkingBlocked(int uid, boolean meteredNetwork) {
+        try {
+            return mService.isUidNetworkingBlocked(uid, meteredNetwork);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Get multipath preference for the given network.
      */
     public int getMultipathPreference(Network network) {

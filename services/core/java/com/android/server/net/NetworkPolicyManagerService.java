@@ -5352,7 +5352,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     public boolean isUidNetworkingBlocked(int uid, boolean isNetworkMetered) {
         final long startTime = mStatLogger.getTime();
 
-        mContext.enforceCallingOrSelfPermission(OBSERVE_NETWORK_POLICY, TAG);
+        enforceAnyPermissionOf(OBSERVE_NETWORK_POLICY, PERMISSION_MAINLINE_NETWORK_STACK);
         final int uidRules;
         final boolean isBackgroundRestricted;
         synchronized (mUidRulesFirstLock) {
@@ -5449,32 +5449,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             return isBackgroundRestricted
                     && !hasRule(uidRules, RULE_ALLOW_METERED)
                     && !hasRule(uidRules, RULE_TEMPORARY_ALLOW_METERED);
-        }
-
-        /**
-         * @return true if networking is blocked on the given interface for the given uid according
-         * to current networking policies.
-         */
-        @Override
-        public boolean isUidNetworkingBlocked(int uid, String ifname) {
-            final long startTime = mStatLogger.getTime();
-
-            final int uidRules;
-            final boolean isBackgroundRestricted;
-            synchronized (mUidRulesFirstLock) {
-                uidRules = mUidRules.get(uid, RULE_NONE);
-                isBackgroundRestricted = mRestrictBackground;
-            }
-            final boolean isNetworkMetered;
-            synchronized (mMeteredIfacesLock) {
-                isNetworkMetered = mMeteredIfaces.contains(ifname);
-            }
-            final boolean ret = isUidNetworkingBlockedInternal(uid, uidRules, isNetworkMetered,
-                    isBackgroundRestricted, mLogger);
-
-            mStatLogger.logDurationStat(Stats.IS_UID_NETWORKING_BLOCKED, startTime);
-
-            return ret;
         }
 
         @Override
