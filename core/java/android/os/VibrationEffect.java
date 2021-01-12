@@ -1071,6 +1071,7 @@ public abstract class VibrationEffect implements Parcelable {
                 PRIMITIVE_SLOW_RISE,
                 PRIMITIVE_QUICK_FALL,
                 PRIMITIVE_TICK,
+                PRIMITIVE_LOW_TICK,
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface Primitive {}
@@ -1116,6 +1117,12 @@ public abstract class VibrationEffect implements Parcelable {
          */
         // Internally this maps to the HAL constant CompositePrimitive::LIGHT_TICK
         public static final int PRIMITIVE_TICK = 7;
+        /**
+         * This very short low frequency effect should produce a light crisp sensation
+         * intended to be used repetitively for dynamic feedback.
+         */
+        // Internally this maps to the HAL constant CompositePrimitive::LOW_TICK
+        public static final int PRIMITIVE_LOW_TICK = 8;
 
 
         private ArrayList<PrimitiveEffect> mEffects = new ArrayList<>();
@@ -1194,7 +1201,7 @@ public abstract class VibrationEffect implements Parcelable {
          *
          */
         static int checkPrimitive(int primitiveId) {
-            Preconditions.checkArgumentInRange(primitiveId, PRIMITIVE_NOOP, PRIMITIVE_TICK,
+            Preconditions.checkArgumentInRange(primitiveId, PRIMITIVE_NOOP, PRIMITIVE_LOW_TICK,
                     "primitiveId");
             return primitiveId;
         }
@@ -1223,6 +1230,8 @@ public abstract class VibrationEffect implements Parcelable {
                     return "PRIMITIVE_QUICK_FALL";
                 case PRIMITIVE_TICK:
                     return "PRIMITIVE_TICK";
+                case PRIMITIVE_LOW_TICK:
+                    return "PRIMITIVE_LOW_TICK";
                 default:
                     return Integer.toString(id);
             }

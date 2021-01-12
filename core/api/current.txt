@@ -31432,6 +31432,7 @@ package android.os {
     method @NonNull public android.os.VibrationEffect.Composition addPrimitive(int, @FloatRange(from=0.0f, to=1.0f) float, @IntRange(from=0) int);
     method @NonNull public android.os.VibrationEffect compose();
     field public static final int PRIMITIVE_CLICK = 1; // 0x1
+    field public static final int PRIMITIVE_LOW_TICK = 8; // 0x8
     field public static final int PRIMITIVE_QUICK_FALL = 6; // 0x6
     field public static final int PRIMITIVE_QUICK_RISE = 4; // 0x4
     field public static final int PRIMITIVE_SLOW_RISE = 5; // 0x5
