@@ -2470,11 +2470,9 @@ public final class SystemServer implements Dumpable {
             t.traceEnd();
         }
 
-        if (!isWatch) {
-            t.traceBegin("StartMediaProjectionManager");
-            mSystemServiceManager.startService(MediaProjectionManagerService.class);
-            t.traceEnd();
-        }
+        t.traceBegin("StartMediaProjectionManager");
+        mSystemServiceManager.startService(MediaProjectionManagerService.class);
+        t.traceEnd();
 
        if (isWatch) {
             // Must be started before services that depend it, e.g. WearConnectivityService
