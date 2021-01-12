@@ -1,6 +1,6 @@
 # OWNERS of Multiuser related files related to Enterprise
 
-# TODO: include /MULTIUSER_OWNERS
+include /MULTIUSER_OWNERS
 
 # Enterprise owners
 rubinxu@google.com
