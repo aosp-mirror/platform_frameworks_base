@@ -375,7 +375,7 @@ public class Sensor implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void onAuthenticatorIdInvalidated() {
+        public void onAuthenticatorIdInvalidated(long newAuthenticatorId) {
             // TODO(b/159667191)
         }
 
