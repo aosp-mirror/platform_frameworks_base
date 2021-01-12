@@ -21,6 +21,8 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricsProtoEnums;
 
+import java.util.Map;
+
 /**
  * ClientMonitor subclass for requesting authenticatorId invalidation. See
  * {@link InvalidationRequesterClient} for more info.
@@ -29,18 +31,21 @@ public abstract class InvalidationClient<S extends BiometricAuthenticator.Identi
         extends ClientMonitor<T> {
 
     private final BiometricUtils<S> mUtils;
+    private final Map<Integer, Long> mAuthenticatorIds;
 
     public InvalidationClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
-            int userId, int sensorId, @NonNull BiometricUtils<S> utils) {
+            int userId, int sensorId, @NonNull BiometricUtils<S> utils,
+            @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId,
                 context.getOpPackageName(), 0 /* cookie */, sensorId,
                 BiometricsProtoEnums.MODALITY_UNKNOWN, BiometricsProtoEnums.ACTION_UNKNOWN,
                 BiometricsProtoEnums.CLIENT_UNKNOWN);
         mUtils = utils;
+        mAuthenticatorIds = authenticatorIds;
     }
 
     public void onAuthenticatorIdInvalidated(long newAuthenticatorId) {
-        // TODO: Update framework w/ newAuthenticatorId
+        mAuthenticatorIds.put(getTargetUserId(), newAuthenticatorId);
         mCallback.onClientFinished(this, true /* success */);
     }
 
