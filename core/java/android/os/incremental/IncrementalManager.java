@@ -40,6 +40,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Objects;
 
 /**
  * Provides operations to open or create an IncrementalStorage, using IIncrementalService
@@ -104,10 +105,14 @@ public final class IncrementalManager {
             boolean autoStartDataLoader,
             @Nullable IDataLoaderStatusListener statusListener,
             @Nullable StorageHealthCheckParams healthCheckParams,
-            @Nullable IStorageHealthListener healthListener) {
+            @Nullable IStorageHealthListener healthListener,
+            @NonNull PerUidReadTimeouts[] perUidReadTimeouts) {
+        Objects.requireNonNull(path);
+        Objects.requireNonNull(params);
+        Objects.requireNonNull(perUidReadTimeouts);
         try {
             final int id = mService.createStorage(path, params.getData(), createMode,
-                    statusListener, healthCheckParams, healthListener);
+                    statusListener, healthCheckParams, healthListener, perUidReadTimeouts);
             if (id < 0) {
                 return null;
             }

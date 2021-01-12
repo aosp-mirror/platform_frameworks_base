@@ -206,6 +206,11 @@ public:
                                    std::vector<incfs::ReadInfo>* pendingReadsBuffer) const final {
         return incfs::waitForPendingReads(control, timeout, pendingReadsBuffer);
     }
+    ErrorCode setUidReadTimeouts(const Control& control,
+                                 const std::vector<android::os::incremental::PerUidReadTimeouts>&
+                                         perUidReadTimeouts) const final {
+        return -ENOTSUP;
+    }
 };
 
 static JNIEnv* getOrAttachJniEnv(JavaVM* jvm);

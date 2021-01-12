@@ -23,6 +23,7 @@
 #include <android/os/incremental/BnIncrementalServiceConnector.h>
 #include <android/os/incremental/BnStorageHealthListener.h>
 #include <android/os/incremental/BnStorageLoadingProgressListener.h>
+#include <android/os/incremental/PerUidReadTimeouts.h>
 #include <android/os/incremental/StorageHealthCheckParams.h>
 #include <binder/IAppOpsCallback.h>
 #include <utils/String16.h>
@@ -69,6 +70,8 @@ using StorageHealthListener = ::android::sp<IStorageHealthListener>;
 using IStorageLoadingProgressListener = ::android::os::incremental::IStorageLoadingProgressListener;
 using StorageLoadingProgressListener = ::android::sp<IStorageLoadingProgressListener>;
 
+using PerUidReadTimeouts = ::android::os::incremental::PerUidReadTimeouts;
+
 class IncrementalService final {
 public:
     explicit IncrementalService(ServiceManagerWrapper&& sm, std::string_view rootDir);
@@ -98,7 +101,23 @@ public:
     };
 
     enum StorageFlags {
-        ReadLogsEnabled = 1,
+        ReadLogsAllowed = 1 << 0,
+        ReadLogsEnabled = 1 << 1,
+    };
+
+    struct LoadingProgress {
+        ssize_t filledBlocks;
+        ssize_t totalBlocks;
+
+        bool isError() const { return totalBlocks < 0; }
+        bool started() const { return totalBlocks > 0; }
+        bool fullyLoaded() const { return !isError() && (totalBlocks == filledBlocks); }
+
+        float getProgress() const {
+            return totalBlocks < 0
+                    ? totalBlocks
+                    : totalBlocks > 0 ? double(filledBlocks) / double(totalBlocks) : 1.f;
+        }
     };
 
     static FileId idFromMetadata(std::span<const uint8_t> metadata);
@@ -114,7 +133,8 @@ public:
                             content::pm::DataLoaderParamsParcel&& dataLoaderParams,
                             CreateOptions options, const DataLoaderStatusListener& statusListener,
                             StorageHealthCheckParams&& healthCheckParams,
-                            const StorageHealthListener& healthListener);
+                            const StorageHealthListener& healthListener,
+                            const std::vector<PerUidReadTimeouts>& perUidReadTimeouts);
     StorageId createLinkedStorage(std::string_view mountPoint, StorageId linkedStorage,
                                   CreateOptions options = CreateOptions::Default);
     StorageId openStorage(std::string_view path);
@@ -123,7 +143,7 @@ public:
     int unbind(StorageId storage, std::string_view target);
     void deleteStorage(StorageId storage);
 
-    void disableReadLogs(StorageId storage);
+    void disallowReadLogs(StorageId storage);
     int setStorageParams(StorageId storage, bool enableReadLogs);
 
     int makeFile(StorageId storage, std::string_view path, int mode, FileId id,
@@ -135,8 +155,8 @@ public:
              std::string_view newPath);
     int unlink(StorageId storage, std::string_view path);
 
-    int isFileFullyLoaded(StorageId storage, const std::string& path) const;
-    float getLoadingProgress(StorageId storage) const;
+    int isFileFullyLoaded(StorageId storage, std::string_view filePath) const;
+    LoadingProgress getLoadingProgress(StorageId storage) const;
     bool registerLoadingProgressListener(StorageId storage,
                                          const StorageLoadingProgressListener& progressListener);
     bool unregisterLoadingProgressListener(StorageId storage);
@@ -282,7 +302,7 @@ private:
         const std::string root;
         Control control;
         /*const*/ MountId mountId;
-        int32_t flags = StorageFlags::ReadLogsEnabled;
+        int32_t flags = StorageFlags::ReadLogsAllowed;
         StorageMap storages;
         BindMap bindPoints;
         DataLoaderStubPtr dataLoaderStub;
@@ -301,7 +321,15 @@ private:
 
         StorageMap::iterator makeStorage(StorageId id);
 
-        void disableReadLogs() { flags &= ~StorageFlags::ReadLogsEnabled; }
+        void disallowReadLogs() { flags &= ~StorageFlags::ReadLogsAllowed; }
+        int32_t readLogsAllowed() const { return (flags & StorageFlags::ReadLogsAllowed); }
+
+        void setReadLogsEnabled(bool value) {
+            if (value)
+                flags |= StorageFlags::ReadLogsEnabled;
+            else
+                flags &= ~StorageFlags::ReadLogsEnabled;
+        }
         int32_t readLogsEnabled() const { return (flags & StorageFlags::ReadLogsEnabled); }
 
         static void cleanupFilesystem(std::string_view root);
@@ -312,6 +340,11 @@ private:
     using BindPathMap = std::map<std::string, IncFsMount::BindMap::iterator, path::PathLess>;
 
     static bool perfLoggingEnabled();
+
+    void setUidReadTimeouts(StorageId storage,
+                            const std::vector<PerUidReadTimeouts>& perUidReadTimeouts);
+    void clearUidReadTimeouts(StorageId storage);
+    void updateUidReadTimeouts(StorageId storage, Clock::time_point timeLimit);
 
     std::unordered_set<std::string_view> adoptMountedInstances();
     void mountExistingImages(const std::unordered_set<std::string_view>& mountedRootNames);
@@ -355,7 +388,7 @@ private:
     binder::Status applyStorageParams(IncFsMount& ifs, bool enableReadLogs);
 
     int isFileFullyLoadedFromPath(const IncFsMount& ifs, std::string_view filePath) const;
-    float getLoadingProgressFromPath(const IncFsMount& ifs, std::string_view path) const;
+    LoadingProgress getLoadingProgressFromPath(const IncFsMount& ifs, std::string_view path) const;
 
     int setFileContent(const IfsMountPtr& ifs, const incfs::FileId& fileId,
                        std::string_view debugFilePath, std::span<const uint8_t> data) const;
