@@ -4498,26 +4498,26 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         final boolean isDenied = (uidPolicy & POLICY_REJECT_METERED_BACKGROUND) != 0;
         final boolean isAllowed = (uidPolicy & POLICY_ALLOW_METERED_BACKGROUND) != 0;
-        final int oldRule = oldUidRules & MASK_METERED_NETWORKS;
-        int newRule = RULE_NONE;
+
+        // copy oldUidRules and clear out METERED_NETWORKS rules.
+        int newUidRules = oldUidRules & (~MASK_METERED_NETWORKS);
 
         // First step: define the new rule based on user restrictions and foreground state.
         if (isRestrictedByAdmin) {
-            newRule = RULE_REJECT_METERED;
+            newUidRules |= RULE_REJECT_METERED;
         } else if (isForeground) {
             if (isDenied || (mRestrictBackground && !isAllowed)) {
-                newRule = RULE_TEMPORARY_ALLOW_METERED;
+                newUidRules |= RULE_TEMPORARY_ALLOW_METERED;
             } else if (isAllowed) {
-                newRule = RULE_ALLOW_METERED;
+                newUidRules |= RULE_ALLOW_METERED;
             }
         } else {
             if (isDenied) {
-                newRule = RULE_REJECT_METERED;
+                newUidRules |= RULE_REJECT_METERED;
             } else if (mRestrictBackground && isAllowed) {
-                newRule = RULE_ALLOW_METERED;
+                newUidRules |= RULE_ALLOW_METERED;
             }
         }
-        final int newUidRules = newRule | (oldUidRules & MASK_ALL_NETWORKS);
 
         if (LOGV) {
             Log.v(TAG, "updateRuleForRestrictBackgroundUL(" + uid + ")"
@@ -4525,8 +4525,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     + ", isDenied=" + isDenied
                     + ", isAllowed=" + isAllowed
                     + ", isRestrictedByAdmin=" + isRestrictedByAdmin
-                    + ", oldRule=" + uidRulesToString(oldRule)
-                    + ", newRule=" + uidRulesToString(newRule)
+                    + ", oldRule=" + uidRulesToString(oldUidRules & MASK_METERED_NETWORKS)
+                    + ", newRule=" + uidRulesToString(newUidRules & MASK_METERED_NETWORKS)
                     + ", newUidRules=" + uidRulesToString(newUidRules)
                     + ", oldUidRules=" + uidRulesToString(oldUidRules));
         }
@@ -4538,8 +4538,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         // Second step: apply bw changes based on change of state.
-        if (newRule != oldRule) {
-            if (hasRule(newRule, RULE_TEMPORARY_ALLOW_METERED)) {
+        if (newUidRules != oldUidRules) {
+            if (hasRule(newUidRules, RULE_TEMPORARY_ALLOW_METERED)) {
                 // Temporarily allow foreground app, removing from denylist if necessary
                 // (since bw_penalty_box prevails over bw_happy_box).
 
@@ -4550,7 +4550,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 if (isDenied) {
                     setMeteredNetworkDenylist(uid, false);
                 }
-            } else if (hasRule(oldRule, RULE_TEMPORARY_ALLOW_METERED)) {
+            } else if (hasRule(oldUidRules, RULE_TEMPORARY_ALLOW_METERED)) {
                 // Remove temporary exemption from app that is not on foreground anymore.
 
                 // TODO: if statements below are used to avoid unnecessary calls to netd / iptables,
@@ -4563,18 +4563,18 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 if (isDenied || isRestrictedByAdmin) {
                     setMeteredNetworkDenylist(uid, true);
                 }
-            } else if (hasRule(newRule, RULE_REJECT_METERED)
-                    || hasRule(oldRule, RULE_REJECT_METERED)) {
+            } else if (hasRule(newUidRules, RULE_REJECT_METERED)
+                    || hasRule(oldUidRules, RULE_REJECT_METERED)) {
                 // Flip state because app was explicitly added or removed to denylist.
                 setMeteredNetworkDenylist(uid, (isDenied || isRestrictedByAdmin));
-                if (hasRule(oldRule, RULE_REJECT_METERED) && isAllowed) {
+                if (hasRule(oldUidRules, RULE_REJECT_METERED) && isAllowed) {
                     // Since denial prevails over allowance, we need to handle the special case
                     // where app is allowed and denied at the same time (although such
                     // scenario should be blocked by the UI), then it is removed from the denylist.
                     setMeteredNetworkAllowlist(uid, isAllowed);
                 }
-            } else if (hasRule(newRule, RULE_ALLOW_METERED)
-                    || hasRule(oldRule, RULE_ALLOW_METERED)) {
+            } else if (hasRule(newUidRules, RULE_ALLOW_METERED)
+                    || hasRule(oldUidRules, RULE_ALLOW_METERED)) {
                 // Flip state because app was explicitly added or removed to allowlist.
                 setMeteredNetworkAllowlist(uid, isAllowed);
             } else {
@@ -4660,8 +4660,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final boolean isForeground = isUidForegroundOnRestrictPowerUL(uid);
 
         final boolean isWhitelisted = isWhitelistedFromPowerSaveUL(uid, mDeviceIdleMode);
-        final int oldRule = oldUidRules & MASK_ALL_NETWORKS;
-        int newRule = RULE_NONE;
+
+        // Copy existing uid rules and clear ALL_NETWORK rules.
+        int newUidRules = oldUidRules & (~MASK_ALL_NETWORKS);
 
         // First step: define the new rule based on user restrictions and foreground state.
 
@@ -4669,13 +4670,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // by considering the foreground and non-foreground states.
         if (isForeground) {
             if (restrictMode) {
-                newRule = RULE_ALLOW_ALL;
+                newUidRules |= RULE_ALLOW_ALL;
             }
         } else if (restrictMode) {
-            newRule = isWhitelisted ? RULE_ALLOW_ALL : RULE_REJECT_ALL;
+            newUidRules |= isWhitelisted ? RULE_ALLOW_ALL : RULE_REJECT_ALL;
         }
-
-        final int newUidRules = (oldUidRules & MASK_METERED_NETWORKS) | newRule;
 
         if (LOGV) {
             Log.v(TAG, "updateRulesForPowerRestrictionsUL(" + uid + ")"
@@ -4684,17 +4683,18 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     + ", mDeviceIdleMode: " + mDeviceIdleMode
                     + ", isForeground=" + isForeground
                     + ", isWhitelisted=" + isWhitelisted
-                    + ", oldRule=" + uidRulesToString(oldRule)
-                    + ", newRule=" + uidRulesToString(newRule)
+                    + ", oldRule=" + uidRulesToString(oldUidRules & MASK_ALL_NETWORKS)
+                    + ", newRule=" + uidRulesToString(newUidRules & MASK_ALL_NETWORKS)
                     + ", newUidRules=" + uidRulesToString(newUidRules)
                     + ", oldUidRules=" + uidRulesToString(oldUidRules));
         }
 
         // Second step: notify listeners if state changed.
-        if (newRule != oldRule) {
-            if (newRule == RULE_NONE || hasRule(newRule, RULE_ALLOW_ALL)) {
+        if (newUidRules != oldUidRules) {
+            if ((newUidRules & MASK_ALL_NETWORKS) == RULE_NONE || hasRule(newUidRules,
+                    RULE_ALLOW_ALL)) {
                 if (LOGV) Log.v(TAG, "Allowing non-metered access for UID " + uid);
-            } else if (hasRule(newRule, RULE_REJECT_ALL)) {
+            } else if (hasRule(newUidRules, RULE_REJECT_ALL)) {
                 if (LOGV) Log.v(TAG, "Rejecting non-metered access for UID " + uid);
             } else {
                 // All scenarios should have been covered above
