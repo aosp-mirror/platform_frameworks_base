@@ -3624,51 +3624,55 @@ public class ConnectivityServiceTest {
         // Register the factory and expect it to start looking for a network.
         testFactory.expectAddRequestsWithScores(0);  // Score 0 as the request is not served yet.
         testFactory.register();
-        testFactory.waitForNetworkRequests(1);
-        assertTrue(testFactory.getMyStartRequested());
 
-        // Bring up wifi. The factory stops looking for a network.
-        mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
-        // Score 60 - 40 penalty for not validated yet, then 60 when it validates
-        testFactory.expectAddRequestsWithScores(20, 60);
-        mWiFiNetworkAgent.connect(true);
-        testFactory.waitForRequests();
-        assertFalse(testFactory.getMyStartRequested());
+        try {
+            testFactory.waitForNetworkRequests(1);
+            assertTrue(testFactory.getMyStartRequested());
 
-        ContentResolver cr = mServiceContext.getContentResolver();
+            // Bring up wifi. The factory stops looking for a network.
+            mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
+            // Score 60 - 40 penalty for not validated yet, then 60 when it validates
+            testFactory.expectAddRequestsWithScores(20, 60);
+            mWiFiNetworkAgent.connect(true);
+            testFactory.waitForRequests();
+            assertFalse(testFactory.getMyStartRequested());
 
-        // Turn on mobile data always on. The factory starts looking again.
-        testFactory.expectAddRequestsWithScores(0);  // Always on requests comes up with score 0
-        setAlwaysOnNetworks(true);
-        testFactory.waitForNetworkRequests(2);
-        assertTrue(testFactory.getMyStartRequested());
+            ContentResolver cr = mServiceContext.getContentResolver();
 
-        // Bring up cell data and check that the factory stops looking.
-        assertLength(1, mCm.getAllNetworks());
-        mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR);
-        testFactory.expectAddRequestsWithScores(10, 50);  // Unvalidated, then validated
-        mCellNetworkAgent.connect(true);
-        cellNetworkCallback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
-        testFactory.waitForNetworkRequests(2);
-        assertFalse(testFactory.getMyStartRequested());  // Because the cell network outscores us.
+            // Turn on mobile data always on. The factory starts looking again.
+            testFactory.expectAddRequestsWithScores(0);  // Always on requests comes up with score 0
+            setAlwaysOnNetworks(true);
+            testFactory.waitForNetworkRequests(2);
+            assertTrue(testFactory.getMyStartRequested());
 
-        // Check that cell data stays up.
-        waitForIdle();
-        verifyActiveNetwork(TRANSPORT_WIFI);
-        assertLength(2, mCm.getAllNetworks());
+            // Bring up cell data and check that the factory stops looking.
+            assertLength(1, mCm.getAllNetworks());
+            mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR);
+            testFactory.expectAddRequestsWithScores(10, 50);  // Unvalidated, then validated
+            mCellNetworkAgent.connect(true);
+            cellNetworkCallback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
+            testFactory.waitForNetworkRequests(2);
+            assertFalse(
+                    testFactory.getMyStartRequested());  // Because the cell network outscores us.
 
-        // Turn off mobile data always on and expect the request to disappear...
-        testFactory.expectRemoveRequests(1);
-        setAlwaysOnNetworks(false);
-        testFactory.waitForNetworkRequests(1);
+            // Check that cell data stays up.
+            waitForIdle();
+            verifyActiveNetwork(TRANSPORT_WIFI);
+            assertLength(2, mCm.getAllNetworks());
 
-        // ...  and cell data to be torn down.
-        cellNetworkCallback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
-        assertLength(1, mCm.getAllNetworks());
+            // Turn off mobile data always on and expect the request to disappear...
+            testFactory.expectRemoveRequests(1);
+            setAlwaysOnNetworks(false);
+            testFactory.waitForNetworkRequests(1);
 
-        testFactory.terminate();
-        mCm.unregisterNetworkCallback(cellNetworkCallback);
-        handlerThread.quit();
+            // ...  and cell data to be torn down.
+            cellNetworkCallback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
+            assertLength(1, mCm.getAllNetworks());
+        } finally {
+            testFactory.terminate();
+            mCm.unregisterNetworkCallback(cellNetworkCallback);
+            handlerThread.quit();
+        }
     }
 
     @Test
