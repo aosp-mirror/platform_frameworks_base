@@ -73,6 +73,10 @@ class ControllerImpl extends LocationTimeZoneProviderController {
     // Non-null after initialize()
     private Callback mCallback;
 
+    /** Indicates both providers have completed initialization. */
+    @GuardedBy("mSharedLock")
+    private boolean mProvidersInitialized;
+
     /**
      * Used for scheduling uncertainty timeouts, i.e after a provider has reported uncertainty.
      * This timeout is not provider-specific: it is started when the controller becomes uncertain
@@ -108,6 +112,7 @@ class ControllerImpl extends LocationTimeZoneProviderController {
                     ControllerImpl.this::onProviderStateChange;
             mPrimaryProvider.initialize(providerListener);
             mSecondaryProvider.initialize(providerListener);
+            mProvidersInitialized = true;
 
             alterProvidersStartedStateIfRequired(
                     null /* oldConfiguration */, mCurrentUserConfiguration);
@@ -322,6 +327,16 @@ class ControllerImpl extends LocationTimeZoneProviderController {
         assertProviderKnown(provider);
 
         synchronized (mSharedLock) {
+            // Ignore provider state changes during initialization. e.g. if the primary provider
+            // moves to PROVIDER_STATE_PERM_FAILED during initialization, the secondary will not
+            // be ready to take over yet.
+            if (!mProvidersInitialized) {
+                warnLog("onProviderStateChange: Ignoring provider state change because both"
+                        + " providers have not yet completed initialization."
+                        + " providerState=" + providerState);
+                return;
+            }
+
             switch (providerState.stateEnum) {
                 case PROVIDER_STATE_STARTED_INITIALIZING:
                 case PROVIDER_STATE_STOPPED:

@@ -41,6 +41,16 @@ message IncidentReportModelProto {
 }
 
 /**
+ * IncidentReportResidencyProto is used only in the parsing tool located
+ * in frameworks/base/tools which is used to parse this data out of
+ * incident reports.
+ */
+message IncidentReportResidencyProto {
+    /** Section number matches that in incident.proto */
+    optional PowerStatsServiceResidencyProto incident_report = 3056;
+}
+
+/**
  * EnergyConsumer (model) data is exposed by the PowerStats HAL.  This data
  * represents modeled energy consumption estimates and is provided per
  * subsystem.  The default subsystems are defined in EnergyConsumerId.aidl.
@@ -60,6 +70,99 @@ message PowerStatsServiceModelProto {
 message PowerStatsServiceMeterProto {
     repeated ChannelInfoProto channel_info = 1;
     repeated EnergyMeasurementProto energy_measurement = 2;
+}
+
+/**
+ * A PowerEntity is defined as a platform subsystem, peripheral, or power domain
+ * that impacts the total device power consumption.  PowerEntityInfo is
+ * information related to each power entity.  Each PowerEntity may reside in one
+ * of multiple states. It may also transition from one state to another.
+ * StateResidency is defined as an accumulation of time that a PowerEntity
+ * resided in each of its possible states, the number of times that each state
+ * was entered, and a timestamp corresponding to the last time that state was
+ * entered.
+ */
+message PowerStatsServiceResidencyProto {
+    repeated PowerEntityInfoProto power_entity_info = 1;
+    repeated StateResidencyResultProto state_residency_result = 2;
+}
+
+/**
+ * Information about the possible states for a particular PowerEntity.
+ */
+message StateInfoProto {
+    /**
+     * Unique (for a given PowerEntityInfo) ID of this StateInfo
+     */
+    optional int32 state_id = 1;
+    /**
+     * Unique (for a given PowerEntityInfo) name of the state. Vendor/device specific.
+     * Opaque to framework
+     */
+    optional string state_name = 2;
+}
+
+/**
+ * A PowerEntity is defined as a platform subsystem, peripheral, or power domain
+ * that impacts the total device power consumption.  PowerEntityInfo is
+ * information about a PowerEntity.  It includes an array of information about
+ * each possible state of the PowerEntity.
+ */
+message PowerEntityInfoProto {
+    /**
+     * Unique ID of this PowerEntityInfo
+     */
+    optional int32 power_entity_id = 1;
+    /**
+     * Unique name of the PowerEntity. Vendor/device specific. Opaque to framework
+     */
+    optional string power_entity_name = 2;
+    /**
+     * List of states that the PowerEntity may reside in
+     */
+    repeated StateInfoProto states = 3;
+}
+
+/**
+ * StateResidency is defined as an accumulation of time that a PowerEntity
+ * resided in each of its possible states, the number of times that each state
+ * was entered, and a timestamp corresponding to the last time that state was
+ * entered.  Data is accumulated starting at device boot.
+ */
+message StateResidencyProto {
+    /**
+     * ID of the state associated with this residency
+     */
+    optional int32 state_id = 1;
+    /**
+     * Total time in milliseconds that the corresponding PowerEntity resided
+     * in this state since boot
+     */
+    optional int64 total_time_in_state_ms = 2;
+    /**
+     * Total number of times that the state was entered since boot
+     */
+    optional int64 total_state_entry_count = 3;
+    /**
+     * Last time this state was entered. Time in milliseconds since boot
+     */
+    optional int64 last_entry_timestamp_ms = 4;
+}
+
+/**
+ * A StateResidencyResult is an array of StateResidencies for a particular
+ * PowerEntity.  The StateResidencyResult can be matched to its corresponding
+ * PowerEntityInfo through the power_entity_id field.
+ */
+message StateResidencyResultProto {
+    /**
+     * ID of the PowerEntity associated with this result
+     */
+    optional int32 power_entity_id = 1;
+    /**
+     * Residency for each state in the PowerEntity's state space
+     */
+    repeated StateResidencyProto state_residency_data = 2;
 }
 
 /**

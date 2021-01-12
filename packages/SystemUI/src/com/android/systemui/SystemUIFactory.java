@@ -111,7 +111,8 @@ public class SystemUIFactory {
                     .setBubbles(mWMComponent.getBubbles())
                     .setHideDisplayCutout(mWMComponent.getHideDisplayCutout())
                     .setShellCommandHandler(mWMComponent.getShellCommandHandler())
-                    .setAppPairs(mWMComponent.getAppPairs());
+                    .setAppPairs(mWMComponent.getAppPairs())
+                    .setTaskViewFactory(mWMComponent.getTaskViewFactory());
         } else {
             // TODO: Call on prepareSysUIComponentBuilder but not with real components. Other option
             // is separating this logic into newly creating SystemUITestsFactory.
@@ -122,7 +123,8 @@ public class SystemUIFactory {
                     .setBubbles(Optional.ofNullable(null))
                     .setHideDisplayCutout(Optional.ofNullable(null))
                     .setShellCommandHandler(Optional.ofNullable(null))
-                    .setAppPairs(Optional.ofNullable(null));
+                    .setAppPairs(Optional.ofNullable(null))
+                    .setTaskViewFactory(Optional.ofNullable(null));
         }
         mSysUIComponent = builder.build();
         if (initializeComponents) {

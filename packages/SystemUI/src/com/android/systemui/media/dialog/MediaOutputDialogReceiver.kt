@@ -20,7 +20,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.text.TextUtils
-import com.android.settingslib.media.MediaOutputSliceConstants
+import com.android.settingslib.media.MediaOutputConstants
 import javax.inject.Inject
 
 /**
@@ -30,10 +30,10 @@ class MediaOutputDialogReceiver @Inject constructor(
     private val mediaOutputDialogFactory: MediaOutputDialogFactory
 ) : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        if (TextUtils.equals(MediaOutputSliceConstants.ACTION_LAUNCH_MEDIA_OUTPUT_DIALOG,
+        if (TextUtils.equals(MediaOutputConstants.ACTION_LAUNCH_MEDIA_OUTPUT_DIALOG,
                         intent.action)) {
             mediaOutputDialogFactory.create(
-                    intent.getStringExtra(MediaOutputSliceConstants.EXTRA_PACKAGE_NAME), false)
+                    intent.getStringExtra(MediaOutputConstants.EXTRA_PACKAGE_NAME), false)
         }
     }
 }

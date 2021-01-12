@@ -672,6 +672,7 @@ public class AssistStructure implements Parcelable {
         static final int FLAGS_CONTEXT_CLICKABLE = 0x00004000;
         static final int FLAGS_OPAQUE = 0x00008000;
 
+        static final int FLAGS_HAS_MIME_TYPES = 0x80000000;
         static final int FLAGS_HAS_MATRIX = 0x40000000;
         static final int FLAGS_HAS_ALPHA = 0x20000000;
         static final int FLAGS_HAS_ELEVATION = 0x10000000;
@@ -715,6 +716,7 @@ public class AssistStructure implements Parcelable {
         String mWebDomain;
         Bundle mExtras;
         LocaleList mLocaleList;
+        String[] mOnReceiveContentMimeTypes;
 
         ViewNode[] mChildren;
 
@@ -880,6 +882,9 @@ public class AssistStructure implements Parcelable {
             if ((flags&FLAGS_HAS_LOCALE_LIST) != 0) {
                 mLocaleList = in.readParcelable(null);
             }
+            if ((flags & FLAGS_HAS_MIME_TYPES) != 0) {
+                mOnReceiveContentMimeTypes = in.readStringArray();
+            }
             if ((flags&FLAGS_HAS_EXTRAS) != 0) {
                 mExtras = in.readBundle();
             }
@@ -938,6 +943,9 @@ public class AssistStructure implements Parcelable {
             }
             if (mLocaleList != null) {
                 flags |= FLAGS_HAS_LOCALE_LIST;
+            }
+            if (mOnReceiveContentMimeTypes != null) {
+                flags |= FLAGS_HAS_MIME_TYPES;
             }
             if (mExtras != null) {
                 flags |= FLAGS_HAS_EXTRAS;
@@ -1108,6 +1116,9 @@ public class AssistStructure implements Parcelable {
             }
             if ((flags&FLAGS_HAS_LOCALE_LIST) != 0) {
                 out.writeParcelable(mLocaleList, 0);
+            }
+            if ((flags & FLAGS_HAS_MIME_TYPES) != 0) {
+                out.writeStringArray(mOnReceiveContentMimeTypes);
             }
             if ((flags&FLAGS_HAS_EXTRAS) != 0) {
                 out.writeBundle(mExtras);
@@ -1524,6 +1535,15 @@ public class AssistStructure implements Parcelable {
          */
         @Nullable public LocaleList getLocaleList() {
             return mLocaleList;
+        }
+
+        /**
+         * Returns the MIME types accepted by {@link View#performReceiveContent} for this view. See
+         * {@link View#getOnReceiveContentMimeTypes()} for details.
+         */
+        @Nullable
+        public String[] getOnReceiveContentMimeTypes() {
+            return mOnReceiveContentMimeTypes;
         }
 
         /**
@@ -2146,6 +2166,11 @@ public class AssistStructure implements Parcelable {
         }
 
         @Override
+        public void setOnReceiveContentMimeTypes(@Nullable String[] mimeTypes) {
+            mNode.mOnReceiveContentMimeTypes = mimeTypes;
+        }
+
+        @Override
         public void setInputType(int inputType) {
             mNode.mInputType = inputType;
         }
@@ -2421,6 +2446,10 @@ public class AssistStructure implements Parcelable {
         LocaleList localeList = node.getLocaleList();
         if (localeList != null) {
             Log.i(TAG, prefix + "  LocaleList: " + localeList);
+        }
+        String[] mimeTypes = node.getOnReceiveContentMimeTypes();
+        if (mimeTypes != null) {
+            Log.i(TAG, prefix + "  MIME types: " + Arrays.toString(mimeTypes));
         }
         String hint = node.getHint();
         if (hint != null) {

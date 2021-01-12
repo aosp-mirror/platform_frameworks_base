@@ -218,7 +218,7 @@ public class PowerStatsDataStorage {
      *             array and written to on-device storage.
      */
     public void write(byte[] data) {
-        if (data.length > 0) {
+        if (data != null && data.length > 0) {
             mLock.lock();
 
             long currentTimeMillis = System.currentTimeMillis();

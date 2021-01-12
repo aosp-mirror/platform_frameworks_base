@@ -19,7 +19,7 @@ package com.android.settingslib.media;
 /**
  * Class to access MediaOutput constants.
  */
-public class MediaOutputSliceConstants {
+public class MediaOutputConstants {
 
     /**
      * Key for the Remote Media slice.

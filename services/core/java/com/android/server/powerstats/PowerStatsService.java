@@ -49,6 +49,8 @@ public class PowerStatsService extends SystemService {
     private static final int DATA_STORAGE_VERSION = 0;
     private static final String METER_FILENAME = "log.powerstats.meter." + DATA_STORAGE_VERSION;
     private static final String MODEL_FILENAME = "log.powerstats.model." + DATA_STORAGE_VERSION;
+    private static final String RESIDENCY_FILENAME =
+            "log.powerstats.residency." + DATA_STORAGE_VERSION;
 
     private final Injector mInjector;
 
@@ -76,15 +78,19 @@ public class PowerStatsService extends SystemService {
             return MODEL_FILENAME;
         }
 
+        String createResidencyFilename() {
+            return RESIDENCY_FILENAME;
+        }
+
         IPowerStatsHALWrapper createPowerStatsHALWrapperImpl() {
             return PowerStatsHALWrapper.getPowerStatsHalImpl();
         }
 
         PowerStatsLogger createPowerStatsLogger(Context context, File dataStoragePath,
-                String meterFilename, String modelFilename,
+                String meterFilename, String modelFilename, String residencyFilename,
                 IPowerStatsHALWrapper powerStatsHALWrapper) {
             return new PowerStatsLogger(context, dataStoragePath, meterFilename,
-                modelFilename, powerStatsHALWrapper);
+                modelFilename, residencyFilename, powerStatsHALWrapper);
         }
 
         BatteryTrigger createBatteryTrigger(Context context, PowerStatsLogger powerStatsLogger) {
@@ -109,6 +115,8 @@ public class PowerStatsService extends SystemService {
                         mPowerStatsLogger.writeModelDataToFile(fd);
                     } else if ("meter".equals(args[1])) {
                         mPowerStatsLogger.writeMeterDataToFile(fd);
+                    } else if ("residency".equals(args[1])) {
+                        mPowerStatsLogger.writeResidencyDataToFile(fd);
                     }
                 } else if (args.length == 0) {
                     pw.println("PowerStatsService dumpsys: available PowerEntityInfos");
@@ -148,7 +156,8 @@ public class PowerStatsService extends SystemService {
             // Only start logger and triggers if initialization is successful.
             mPowerStatsLogger = mInjector.createPowerStatsLogger(mContext,
                 mInjector.createDataStoragePath(), mInjector.createMeterFilename(),
-                mInjector.createModelFilename(), mPowerStatsHALWrapper);
+                mInjector.createModelFilename(), mInjector.createResidencyFilename(),
+                mPowerStatsHALWrapper);
             mBatteryTrigger = mInjector.createBatteryTrigger(mContext, mPowerStatsLogger);
             mTimerTrigger = mInjector.createTimerTrigger(mContext, mPowerStatsLogger);
         } else {

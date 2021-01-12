@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.app.people;
+package com.android.systemui.people;
 
 import android.annotation.NonNull;
 import android.app.Person;

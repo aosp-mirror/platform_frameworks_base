@@ -29,7 +29,9 @@ import android.app.blob.BlobStoreManagerFrameworkInitializer;
 import android.app.contentsuggestions.ContentSuggestionsManager;
 import android.app.contentsuggestions.IContentSuggestionsManager;
 import android.app.job.JobSchedulerFrameworkInitializer;
+import android.app.people.PeopleManager;
 import android.app.prediction.AppPredictionManager;
+import android.app.role.RoleControllerManager;
 import android.app.role.RoleManager;
 import android.app.search.SearchUiManager;
 import android.app.slice.SliceManager;
@@ -583,6 +585,13 @@ public final class SystemServiceRegistry {
                 IBinder b = ServiceManager.getServiceOrThrow(Context.NSD_SERVICE);
                 INsdManager service = INsdManager.Stub.asInterface(b);
                 return new NsdManager(ctx.getOuterContext(), service);
+            }});
+
+        registerService(Context.PEOPLE_SERVICE, PeopleManager.class,
+                new CachedServiceFetcher<PeopleManager>() {
+            @Override
+            public PeopleManager createService(ContextImpl ctx) throws ServiceNotFoundException {
+                return new PeopleManager(ctx);
             }});
 
         registerService(Context.POWER_SERVICE, PowerManager.class,
@@ -1288,6 +1297,14 @@ public final class SystemServiceRegistry {
                     public RoleManager createService(ContextImpl ctx)
                             throws ServiceNotFoundException {
                         return new RoleManager(ctx.getOuterContext());
+                    }});
+
+        registerService(Context.ROLE_CONTROLLER_SERVICE, RoleControllerManager.class,
+                new CachedServiceFetcher<RoleControllerManager>() {
+                    @Override
+                    public RoleControllerManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        return new RoleControllerManager(ctx.getOuterContext());
                     }});
 
         registerService(Context.DYNAMIC_SYSTEM_SERVICE, DynamicSystemManager.class,

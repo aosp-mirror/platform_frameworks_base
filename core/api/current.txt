@@ -7135,7 +7135,7 @@ package android.app.admin {
     field public static final String ACTION_MANAGED_PROFILE_PROVISIONED = "android.app.action.MANAGED_PROFILE_PROVISIONED";
     field public static final String ACTION_PROFILE_OWNER_CHANGED = "android.app.action.PROFILE_OWNER_CHANGED";
     field public static final String ACTION_PROVISIONING_SUCCESSFUL = "android.app.action.PROVISIONING_SUCCESSFUL";
-    field public static final String ACTION_PROVISION_MANAGED_DEVICE = "android.app.action.PROVISION_MANAGED_DEVICE";
+    field @Deprecated public static final String ACTION_PROVISION_MANAGED_DEVICE = "android.app.action.PROVISION_MANAGED_DEVICE";
     field public static final String ACTION_PROVISION_MANAGED_PROFILE = "android.app.action.PROVISION_MANAGED_PROFILE";
     field public static final String ACTION_SET_NEW_PARENT_PROFILE_PASSWORD = "android.app.action.SET_NEW_PARENT_PROFILE_PASSWORD";
     field public static final String ACTION_SET_NEW_PASSWORD = "android.app.action.SET_NEW_PASSWORD";
@@ -7186,7 +7186,7 @@ package android.app.admin {
     field public static final String EXTRA_PROVISIONING_SERIAL_NUMBER = "android.app.extra.PROVISIONING_SERIAL_NUMBER";
     field public static final String EXTRA_PROVISIONING_SKIP_EDUCATION_SCREENS = "android.app.extra.PROVISIONING_SKIP_EDUCATION_SCREENS";
     field public static final String EXTRA_PROVISIONING_SKIP_ENCRYPTION = "android.app.extra.PROVISIONING_SKIP_ENCRYPTION";
-    field public static final String EXTRA_PROVISIONING_SKIP_USER_CONSENT = "android.app.extra.PROVISIONING_SKIP_USER_CONSENT";
+    field @Deprecated public static final String EXTRA_PROVISIONING_SKIP_USER_CONSENT = "android.app.extra.PROVISIONING_SKIP_USER_CONSENT";
     field public static final String EXTRA_PROVISIONING_TIME_ZONE = "android.app.extra.PROVISIONING_TIME_ZONE";
     field public static final String EXTRA_PROVISIONING_WIFI_ANONYMOUS_IDENTITY = "android.app.extra.PROVISIONING_WIFI_ANONYMOUS_IDENTITY";
     field public static final String EXTRA_PROVISIONING_WIFI_CA_CERTIFICATE = "android.app.extra.PROVISIONING_WIFI_CA_CERTIFICATE";
@@ -7492,6 +7492,7 @@ package android.app.assist {
     method public int getMaxTextEms();
     method public int getMaxTextLength();
     method public int getMinTextEms();
+    method @Nullable public String[] getOnReceiveContentMimeTypes();
     method public int getScrollX();
     method public int getScrollY();
     method @Nullable public CharSequence getText();
@@ -7822,6 +7823,52 @@ package android.app.job {
     method public android.content.Intent getIntent();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.job.JobWorkItem> CREATOR;
+  }
+
+}
+
+package android.app.people {
+
+  public final class ConversationStatus implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getActivity();
+    method public int getAvailability();
+    method @Nullable public CharSequence getDescription();
+    method public long getEndTimeMillis();
+    method @Nullable public android.graphics.drawable.Icon getIcon();
+    method @NonNull public String getId();
+    method public long getStartTimeMillis();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int ACTIVITY_ANNIVERSARY = 2; // 0x2
+    field public static final int ACTIVITY_BIRTHDAY = 1; // 0x1
+    field public static final int ACTIVITY_GAME = 5; // 0x5
+    field public static final int ACTIVITY_LOCATION = 6; // 0x6
+    field public static final int ACTIVITY_MEDIA = 4; // 0x4
+    field public static final int ACTIVITY_NEW_STORY = 3; // 0x3
+    field public static final int ACTIVITY_OTHER = 0; // 0x0
+    field public static final int ACTIVITY_UPCOMING_BIRTHDAY = 7; // 0x7
+    field public static final int AVAILABILITY_AVAILABLE = 0; // 0x0
+    field public static final int AVAILABILITY_BUSY = 1; // 0x1
+    field public static final int AVAILABILITY_OFFLINE = 2; // 0x2
+    field public static final int AVAILABILITY_UNKNOWN = -1; // 0xffffffff
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.people.ConversationStatus> CREATOR;
+  }
+
+  public static final class ConversationStatus.Builder {
+    ctor public ConversationStatus.Builder(@NonNull String, @NonNull int);
+    method @NonNull public android.app.people.ConversationStatus build();
+    method @NonNull public android.app.people.ConversationStatus.Builder setAvailability(int);
+    method @NonNull public android.app.people.ConversationStatus.Builder setDescription(@Nullable CharSequence);
+    method @NonNull public android.app.people.ConversationStatus.Builder setEndTimeMillis(long);
+    method @NonNull public android.app.people.ConversationStatus.Builder setIcon(@Nullable android.graphics.drawable.Icon);
+    method @NonNull public android.app.people.ConversationStatus.Builder setStartTimeMillis(long);
+  }
+
+  public final class PeopleManager {
+    method public void addOrUpdateStatus(@NonNull String, @NonNull android.app.people.ConversationStatus);
+    method public void clearStatus(@NonNull String, @NonNull String);
+    method public void clearStatuses(@NonNull String);
+    method @NonNull public java.util.List<android.app.people.ConversationStatus> getStatuses(@NonNull String);
   }
 
 }
@@ -10315,6 +10362,7 @@ package android.content {
     field public static final String NFC_SERVICE = "nfc";
     field public static final String NOTIFICATION_SERVICE = "notification";
     field public static final String NSD_SERVICE = "servicediscovery";
+    field public static final String PEOPLE_SERVICE = "people";
     field public static final String POWER_SERVICE = "power";
     field public static final String PRINT_SERVICE = "print";
     field public static final int RECEIVER_VISIBLE_TO_INSTANT_APPS = 1; // 0x1
@@ -48717,6 +48765,7 @@ package android.view {
     method public void setMaxTextEms(int);
     method public void setMaxTextLength(int);
     method public void setMinTextEms(int);
+    method public void setOnReceiveContentMimeTypes(@Nullable String[]);
     method public abstract void setOpaque(boolean);
     method public abstract void setSelected(boolean);
     method public abstract void setText(CharSequence);

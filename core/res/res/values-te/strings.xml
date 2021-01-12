@@ -100,7 +100,7 @@
     <string name="peerTtyModeHco" msgid="5626377160840915617">"అవతలి వారు HCO TTY మోడ్‌ని అభ్యర్థించారు"</string>
     <string name="peerTtyModeVco" msgid="572208600818270944">"అవతలి వారు VCO TTY మోడ్‌ని అభ్యర్థించారు"</string>
     <string name="peerTtyModeOff" msgid="2420380956369226583">"అవతలి వారు OFF TTY మోడ్‌ని అభ్యర్థించారు"</string>
-    <string name="serviceClassVoice" msgid="2065556932043454987">"వాయిస్"</string>
+    <string name="serviceClassVoice" msgid="2065556932043454987">"Voice"</string>
     <string name="serviceClassData" msgid="4148080018967300248">"డేటా"</string>
     <string name="serviceClassFAX" msgid="2561653371698904118">"ఫ్యాక్స్"</string>
     <string name="serviceClassSMS" msgid="1547664561704509004">"SMS"</string>

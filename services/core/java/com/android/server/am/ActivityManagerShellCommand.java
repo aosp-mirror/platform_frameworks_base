@@ -2596,8 +2596,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 return runStackList(pw);
             case "info":
                 return runRootTaskInfo(pw);
-            case "move-top-activity-to-pinned-stack":
-                return runMoveTopActivityToPinnedRootTask(pw);
             case "remove":
                 return runRootTaskRemove(pw);
             default:
@@ -2685,41 +2683,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
         int taskId = Integer.parseInt(taskIdStr);
         mTaskInterface.removeTask(taskId);
         return 0;
-    }
-
-    int runMoveTopActivityToPinnedRootTask(PrintWriter pw) throws RemoteException {
-        int rootTaskId = Integer.parseInt(getNextArgRequired());
-        final Rect bounds = getBounds();
-        if (bounds == null) {
-            getErrPrintWriter().println("Error: invalid input bounds");
-            return -1;
-        }
-
-        if (!mTaskInterface.moveTopActivityToPinnedRootTask(rootTaskId, bounds)) {
-            getErrPrintWriter().println("Didn't move top activity to pinned stack.");
-            return -1;
-        }
-        return 0;
-    }
-
-    void setBoundsSide(Rect bounds, String side, int value) {
-        switch (side) {
-            case "l":
-                bounds.left = value;
-                break;
-            case "r":
-                bounds.right = value;
-                break;
-            case "t":
-                bounds.top = value;
-                break;
-            case "b":
-                bounds.bottom = value;
-                break;
-            default:
-                getErrPrintWriter().println("Unknown set side: " + side);
-                break;
-        }
     }
 
     int runTask(PrintWriter pw) throws RemoteException {
@@ -3386,16 +3349,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("       move-task <TASK_ID> <STACK_ID> [true|false]");
             pw.println("           Move <TASK_ID> from its current stack to the top (true) or");
             pw.println("           bottom (false) of <STACK_ID>.");
-            pw.println("       resize-docked-stack <LEFT,TOP,RIGHT,BOTTOM> [<TASK_LEFT,TASK_TOP,TASK_RIGHT,TASK_BOTTOM>]");
-            pw.println("           Change docked stack to <LEFT,TOP,RIGHT,BOTTOM>");
-            pw.println("           and supplying temporary different task bounds indicated by");
-            pw.println("           <TASK_LEFT,TOP,RIGHT,BOTTOM>");
-            pw.println("       move-top-activity-to-pinned-stack: <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>");
-            pw.println("           Moves the top activity from");
-            pw.println("           <STACK_ID> to the pinned stack using <LEFT,TOP,RIGHT,BOTTOM> for the");
-            pw.println("           bounds of the pinned stack.");
-            pw.println("       positiontask <TASK_ID> <STACK_ID> <POSITION>");
-            pw.println("           Place <TASK_ID> in <STACK_ID> at <POSITION>");
             pw.println("       list");
             pw.println("           List all of the activity stacks and their sizes.");
             pw.println("       info <WINDOWING_MODE> <ACTIVITY_TYPE>");

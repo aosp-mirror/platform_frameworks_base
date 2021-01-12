@@ -19,6 +19,7 @@ package com.android.systemui.dagger;
 import com.android.systemui.wmshell.WMShellModule;
 import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.ShellInit;
+import com.android.wm.shell.TaskViewFactory;
 import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
@@ -79,4 +80,7 @@ public interface WMComponent {
 
     @WMSingleton
     Optional<HideDisplayCutout> getHideDisplayCutout();
+
+    @WMSingleton
+    Optional<TaskViewFactory> getTaskViewFactory();
 }

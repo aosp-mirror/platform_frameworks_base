@@ -41,6 +41,7 @@ import android.provider.Settings;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -131,6 +132,7 @@ public class BackgroundRestrictionsTest {
     }
 
     @Test
+    @FlakyTest
     public void testPowerWhiteList() throws Exception {
         scheduleAndAssertJobStarted();
         setAppOpsModeAllowed(false);

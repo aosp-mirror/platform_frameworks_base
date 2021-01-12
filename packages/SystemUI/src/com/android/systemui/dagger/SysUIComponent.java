@@ -25,6 +25,7 @@ import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.InjectionInflationController;
 import com.android.wm.shell.ShellCommandHandler;
+import com.android.wm.shell.TaskViewFactory;
 import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
@@ -69,6 +70,9 @@ public interface SysUIComponent {
 
         @BindsInstance
         Builder setBubbles(Optional<Bubbles> b);
+
+        @BindsInstance
+        Builder setTaskViewFactory(Optional<TaskViewFactory> t);
 
         @BindsInstance
         Builder setHideDisplayCutout(Optional<HideDisplayCutout> h);

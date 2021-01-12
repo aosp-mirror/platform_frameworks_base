@@ -40,6 +40,7 @@ import android.app.ActivityManager;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.VrManager;
+import android.app.people.PeopleManager;
 import android.app.time.TimeManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ApplicationInfo;
@@ -4821,6 +4822,16 @@ public abstract class Context {
     public static final String ROLE_SERVICE = "role";
 
     /**
+     * Official published name of the (internal) role controller service.
+     *
+     * @see #getSystemService(String)
+     * @see android.app.role.RoleControllerService
+     *
+     * @hide
+     */
+    public static final String ROLE_CONTROLLER_SERVICE = "role_controller";
+
+    /**
      * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.hardware.camera2.CameraManager} for interacting with
      * camera devices.
@@ -5301,10 +5312,10 @@ public abstract class Context {
     public static final String SMS_SERVICE = "sms";
 
     /**
-     * Use with {@link #getSystemService(String)} to access people service.
+     * Use with {@link #getSystemService(String)} to access a {@link PeopleManager} to interact
+     * with your published conversations.
      *
      * @see #getSystemService(String)
-     * @hide
      */
     public static final String PEOPLE_SERVICE = "people";
 

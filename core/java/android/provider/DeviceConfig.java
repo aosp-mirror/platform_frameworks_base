@@ -101,6 +101,13 @@ public final class DeviceConfig {
     public static final String NAMESPACE_APP_COMPAT = "app_compat";
 
     /**
+     * Namespace for all app hibernation related features.
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_APP_HIBERNATION = "app_hibernation";
+
+    /**
      * Namespace for app standby configurations.
      *
      * @hide
