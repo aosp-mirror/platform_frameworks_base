@@ -106,16 +106,25 @@ message SensorServiceStateProto {
 
 // State of a single sensor.
 message SensorStateProto {
+    enum Modality {
+        UNKNOWN = 0;
+        FINGERPRINT = 1;
+        FACE = 2;
+        IRIS = 3;
+    }
+
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
     // Unique sensorId
     optional int32 sensor_id = 1;
 
+    optional Modality modality = 2;
+
     // State of the sensor's scheduler. True if currently handling an operation, false if idle.
-    optional bool is_busy = 2;
+    optional bool is_busy = 3;
 
     // User states for this sensor.
-    repeated UserStateProto user_states = 3;
+    repeated UserStateProto user_states = 4;
 }
 
 // State of a specific user for a specific sensor.
