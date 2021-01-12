@@ -6233,6 +6233,16 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         }
 
+        @Nullable
+        @Override
+        public IBinder getUriPermissionOwnerForActivity(@NonNull IBinder activityToken) {
+            ActivityTaskManagerService.enforceNotIsolatedCaller("getUriPermissionOwnerForActivity");
+            synchronized (mGlobalLock) {
+                ActivityRecord r = ActivityRecord.isInRootTaskLocked(activityToken);
+                return (r == null) ? null : r.getUriPermissionsLocked().getExternalToken();
+            }
+        }
+
         @Override
         public TaskSnapshot getTaskSnapshotBlocking(
                 int taskId, boolean isLowResolution) {
