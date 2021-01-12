@@ -20,7 +20,10 @@ import static com.android.internal.content.om.OverlayConfig.TAG;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.pm.PackageParser;
+import android.content.pm.parsing.ApkLite;
+import android.content.pm.parsing.ApkLiteParseUtils;
+import android.content.pm.parsing.result.ParseResult;
+import android.content.pm.parsing.result.ParseTypeImpl;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -124,15 +127,17 @@ public class OverlayScanner {
     /** Extracts information about the overlay from its manifest. */
     @VisibleForTesting
     public ParsedOverlayInfo parseOverlayManifest(File overlayApk) {
-        try {
-            final PackageParser.ApkLite apkLite = PackageParser.parseApkLite(overlayApk, 0);
-            return apkLite.targetPackageName == null ? null :
-                    new ParsedOverlayInfo(apkLite.packageName, apkLite.targetPackageName,
-                            apkLite.targetSdkVersion, apkLite.overlayIsStatic,
-                            apkLite.overlayPriority, new File(apkLite.codePath));
-        } catch (PackageParser.PackageParserException e) {
-            Log.w(TAG, "Got exception loading overlay.", e);
+        final ParseTypeImpl input = ParseTypeImpl.forParsingWithoutPlatformCompat();
+        final ParseResult<ApkLite> ret = ApkLiteParseUtils.parseApkLite(input.reset(),
+                overlayApk, /* flags */ 0);
+        if (ret.isError()) {
+            Log.w(TAG, "Got exception loading overlay.", ret.getException());
             return null;
         }
+        final ApkLite apkLite = ret.getResult();
+        return apkLite.getTargetPackageName() == null ? null :
+                new ParsedOverlayInfo(apkLite.getPackageName(), apkLite.getTargetPackageName(),
+                        apkLite.getTargetSdkVersion(), apkLite.isOverlayIsStatic(),
+                        apkLite.getOverlayPriority(), new File(apkLite.getPath()));
     }
 }
