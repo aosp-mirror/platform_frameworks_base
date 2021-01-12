@@ -101,6 +101,7 @@ public:
     enum ReplayFlag { kReplayFlag_ClipChildren = 0x1 };
 
     void setStagingDisplayList(DisplayList* newData);
+    void discardStagingDisplayList();
 
     void output();
     int getUsageSize();

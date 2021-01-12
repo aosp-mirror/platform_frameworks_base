@@ -81,6 +81,10 @@ void RenderNode::setStagingDisplayList(DisplayList* displayList) {
     mStagingDisplayList = displayList;
 }
 
+void RenderNode::discardStagingDisplayList() {
+    setStagingDisplayList(nullptr);
+}
+
 /**
  * This function is a simplified version of replay(), where we simply retrieve and log the
  * display list. This function should remain in sync with the replay() function.
