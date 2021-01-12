@@ -16,6 +16,7 @@
 
 package android.app.appsearch;
 
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.testng.Assert.expectThrows;

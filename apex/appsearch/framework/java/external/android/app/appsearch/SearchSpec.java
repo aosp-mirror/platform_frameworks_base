@@ -19,8 +19,6 @@ package android.app.appsearch;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
-import android.annotation.SuppressLint;
-import android.app.appsearch.exceptions.AppSearchException;
 import android.app.appsearch.exceptions.IllegalSearchSpecException;
 import android.os.Bundle;
 import android.util.ArrayMap;
