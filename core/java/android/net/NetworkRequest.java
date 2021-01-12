@@ -40,6 +40,18 @@ import java.util.Set;
  */
 public class NetworkRequest implements Parcelable {
     /**
+     * The first requestId value that will be allocated.
+     * @hide only used by ConnectivityService.
+     */
+    public static final int FIRST_REQUEST_ID = 1;
+
+    /**
+     * The requestId value that represents the absence of a request.
+     * @hide only used by ConnectivityService.
+     */
+    public static final int REQUEST_ID_NONE = -1;
+
+    /**
      * The {@link NetworkCapabilities} that define this request.
      * @hide
      */
