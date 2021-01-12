@@ -720,6 +720,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         }
         // caller is instrumenting with background activity starts privileges
         callerApp.setInstrumenting(callerIsInstrumentingWithBackgroundActivityStartPrivileges,
+                callerIsInstrumentingWithBackgroundActivityStartPrivileges ? Process.SHELL_UID : -1,
                 callerIsInstrumentingWithBackgroundActivityStartPrivileges);
         // callingUid is the device owner
         doReturn(isCallingUidDeviceOwner).when(mAtm).isDeviceOwner(callingUid);
