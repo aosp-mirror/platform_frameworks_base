@@ -301,13 +301,14 @@ public class PendingIntentController {
     }
 
     void setPendingIntentWhitelistDuration(IIntentSender target, IBinder whitelistToken,
-            long duration) {
+            long duration, int type) {
         if (!(target instanceof PendingIntentRecord)) {
             Slog.w(TAG, "markAsSentFromNotification(): not a PendingIntentRecord: " + target);
             return;
         }
         synchronized (mLock) {
-            ((PendingIntentRecord) target).setWhitelistDurationLocked(whitelistToken, duration);
+            ((PendingIntentRecord) target).setWhitelistDurationLocked(whitelistToken, duration,
+                    type);
         }
     }
 

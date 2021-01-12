@@ -15312,10 +15312,10 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @GuardedBy("this")
     void tempWhitelistForPendingIntentLocked(int callerPid, int callerUid, int targetUid,
-            long duration, String tag) {
+            long duration, int type, String tag) {
         if (DEBUG_WHITELISTS) {
             Slog.d(TAG, "tempWhitelistForPendingIntentLocked(" + callerPid + ", " + callerUid + ", "
-                    + targetUid + ", " + duration + ")");
+                    + targetUid + ", " + duration + ", " + type + ")");
         }
 
         synchronized (mPidsSelfLocked) {
@@ -15327,7 +15327,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             if (!pr.whitelistManager) {
                 if (checkPermission(CHANGE_DEVICE_IDLE_TEMP_WHITELIST, callerPid, callerUid)
-                        != PackageManager.PERMISSION_GRANTED) {
+                        != PackageManager.PERMISSION_GRANTED
+                        && checkPermission(START_ACTIVITIES_FROM_BACKGROUND, callerPid, callerUid)
+                        != PackageManager.PERMISSION_GRANTED
+                        && checkPermission(START_FOREGROUND_SERVICES_FROM_BACKGROUND, callerPid,
+                        callerUid) != PackageManager.PERMISSION_GRANTED) {
                     if (DEBUG_WHITELISTS) {
                         Slog.d(TAG, "tempWhitelistForPendingIntentLocked() for target " + targetUid
                                 + ": pid " + callerPid + " is not allowed");
@@ -15337,8 +15341,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        tempWhitelistUidLocked(targetUid, duration, tag,
-                BroadcastOptions.TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED);
+        tempWhitelistUidLocked(targetUid, duration, tag, type);
     }
 
     /**
@@ -15941,9 +15944,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void setPendingIntentWhitelistDuration(IIntentSender target, IBinder whitelistToken,
-                long duration) {
+                long duration, int type) {
             mPendingIntentController.setPendingIntentWhitelistDuration(target, whitelistToken,
-                    duration);
+                    duration, type);
         }
 
         @Override
@@ -16359,10 +16362,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void tempWhitelistForPendingIntent(int callerPid, int callerUid, int targetUid,
-                long duration, String tag) {
+                long duration, int type, String tag) {
             synchronized (ActivityManagerService.this) {
                 ActivityManagerService.this.tempWhitelistForPendingIntentLocked(
-                        callerPid, callerUid, targetUid, duration, tag);
+                        callerPid, callerUid, targetUid, duration, type, tag);
             }
         }
 
