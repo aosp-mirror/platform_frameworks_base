@@ -819,6 +819,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             } else if (Intent.ACTION_PACKAGE_REMOVED.equals(action)
                     && !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
                 handlePackagesChanged(intent.getData().getSchemeSpecificPart(), userHandle);
+                removeCredentialManagementApp(intent.getData().getSchemeSpecificPart());
             } else if (Intent.ACTION_MANAGED_PROFILE_ADDED.equals(action)) {
                 clearWipeProfileNotification();
             } else if (Intent.ACTION_DATE_CHANGED.equals(action)
@@ -947,6 +948,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             // The removed admin might have disabled camera, so update user restrictions.
             pushUserRestrictions(userHandle);
         }
+    }
+
+    private void removeCredentialManagementApp(String packageName) {
+        mBackgroundHandler.post(() -> {
+            try (KeyChainConnection connection = mInjector.keyChainBind()) {
+                IKeyChainService service = connection.getService();
+                if (service.hasCredentialManagementApp()
+                        && packageName.equals(service.getCredentialManagementAppPackageName())) {
+                    service.removeCredentialManagementApp();
+                }
+            } catch (RemoteException | InterruptedException | IllegalStateException e) {
+                Log.e(LOG_TAG, "Unable to remove the credential management app");
+            }
+        });
     }
 
     private boolean isRemovedPackage(String changedPackage, String targetPackage, int userHandle) {
@@ -1417,6 +1432,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         boolean securityLogIsLoggingEnabled() {
             return SecurityLog.isLoggingEnabled();
+        }
+
+        KeyChainConnection keyChainBind() throws InterruptedException {
+            return KeyChain.bind(mContext);
         }
 
         KeyChainConnection keyChainBindAsUser(UserHandle user) throws InterruptedException {

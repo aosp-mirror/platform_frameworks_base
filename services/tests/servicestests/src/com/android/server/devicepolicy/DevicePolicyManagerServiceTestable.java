@@ -460,6 +460,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         }
 
         @Override
+        KeyChain.KeyChainConnection keyChainBind() {
+            return services.keyChainConnection;
+        }
+
+        @Override
         KeyChain.KeyChainConnection keyChainBindAsUser(UserHandle user) {
             return services.keyChainConnection;
         }
