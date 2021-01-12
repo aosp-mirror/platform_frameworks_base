@@ -61,15 +61,15 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
     private final FrameLayout mIconFrame;
     protected QSIconView mIcon;
     protected RippleDrawable mRipple;
-    private Drawable mTileBackground;
+    protected Drawable mTileBackground;
     private String mAccessibilityClass;
     private boolean mTileState;
     private boolean mCollapsedView;
-    private boolean mShowRippleEffect = true;
+    protected boolean mShowRippleEffect = true;
     private float mStrokeWidthActive;
     private float mStrokeWidthInactive;
 
-    private final ImageView mBg;
+    protected final ImageView mBg;
     private final int mColorActive;
     private final int mColorInactive;
     private final int mColorDisabled;
@@ -162,7 +162,7 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         }
     }
 
-    private void updateRippleSize() {
+    protected void updateRippleSize() {
         // center the touch feedback on the center of the icon, and dial it down a bit
         final int cx = mIconFrame.getMeasuredWidth() / 2 + mIconFrame.getLeft();
         final int cy = mIconFrame.getMeasuredHeight() / 2 + mIconFrame.getTop();
@@ -311,7 +311,7 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         return mLocInScreen[1] >= -getHeight();
     }
 
-    private int getCircleColor(int state) {
+    protected int getCircleColor(int state) {
         switch (state) {
             case Tile.STATE_ACTIVE:
                 return mColorActive;

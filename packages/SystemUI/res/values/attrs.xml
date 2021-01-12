@@ -167,5 +167,9 @@
         <attr name="android:drawable" />
         <attr name="android:alpha" />
     </declare-styleable>
+
+    <declare-styleable name="PagedTileLayout">
+        <attr name="sideLabels" format="boolean"/>
+    </declare-styleable>
 </resources>
 
