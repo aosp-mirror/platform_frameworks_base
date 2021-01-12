@@ -743,6 +743,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                         mControllers.get(c).onUserRemovedLocked(userId);
                     }
                 }
+                mConcurrencyManager.onUserRemoved(userId);
             } else if (Intent.ACTION_QUERY_PACKAGE_RESTART.equals(action)) {
                 // Has this package scheduled any jobs, such that we will take action
                 // if it were to be force-stopped?
