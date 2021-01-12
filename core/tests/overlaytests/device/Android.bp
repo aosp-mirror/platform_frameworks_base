@@ -16,11 +16,7 @@ android_test {
     name: "OverlayDeviceTests",
     srcs: ["src/**/*.java"],
     platform_apis: true,
-    certificate: "platform",
-    static_libs: [
-        "androidx.test.rules",
-        "testng",
-    ],
+    static_libs: ["androidx.test.rules"],
     test_suites: ["device-tests"],
     data: [
         ":OverlayDeviceTests_AppOverlayOne",
