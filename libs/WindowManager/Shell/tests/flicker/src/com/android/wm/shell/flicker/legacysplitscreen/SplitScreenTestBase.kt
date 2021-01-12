@@ -17,6 +17,15 @@
 package com.android.wm.shell.flicker.legacysplitscreen
 
 import android.support.test.launcherhelper.LauncherStrategyFactory
+import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.exitSplitScreen
+import com.android.server.wm.flicker.helpers.isInSplitScreen
+import com.android.server.wm.flicker.helpers.openQuickStepAndClearRecentAppsFromOverview
+import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
+import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import com.android.wm.shell.flicker.NonRotationTestBase
 import com.android.wm.shell.flicker.TEST_APP_NONRESIZEABLE_LABEL
 import com.android.wm.shell.flicker.TEST_APP_SPLITSCREEN_PRIMARY_LABEL
@@ -37,6 +46,39 @@ abstract class SplitScreenTestBase(
     protected val nonResizeableApp = SplitScreenHelper(instrumentation,
             TEST_APP_NONRESIZEABLE_LABEL,
             Components.NonResizeableActivity())
-    protected val launcherPackageName = LauncherStrategyFactory.getInstance(instrumentation)
+
+    protected val LAUNCHER_PACKAGE_NAME = LauncherStrategyFactory.getInstance(instrumentation)
             .launcherStrategy.supportedLauncherPackage
+    protected val LIVE_WALLPAPER_PACKAGE_NAME =
+            "com.breel.wallpapers18.soundviz.wallpaper.variations.SoundVizWallpaperV2"
+    protected val LETTER_BOX_NAME = "Letterbox"
+
+    protected val transitionSetup: FlickerBuilder
+        get() = FlickerBuilder(instrumentation).apply {
+                setup {
+                    eachRun {
+                        uiDevice.wakeUpAndGoToHomeScreen()
+                        uiDevice.openQuickStepAndClearRecentAppsFromOverview()
+                    }
+                }
+                teardown {
+                    eachRun {
+                        if (uiDevice.isInSplitScreen()) {
+                            uiDevice.exitSplitScreen()
+                        }
+                        splitScreenApp.exit()
+                        nonResizeableApp.exit()
+                    }
+                }
+                assertions {
+                    layersTrace {
+                        navBarLayerIsAlwaysVisible()
+                        statusBarLayerIsAlwaysVisible()
+                    }
+                    windowManagerTrace {
+                        navBarWindowIsAlwaysVisible()
+                        statusBarWindowIsAlwaysVisible()
+                    }
+                }
+            }
 }

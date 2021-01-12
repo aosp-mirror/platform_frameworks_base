@@ -82,7 +82,7 @@ class ExitLegacySplitScreenTest(
                 }
                 layersTrace {
                     visibleLayersShownMoreThanOneConsecutiveEntry(
-                            listOf(launcherPackageName))
+                            listOf(LAUNCHER_PACKAGE_NAME))
                 }
             }
         }

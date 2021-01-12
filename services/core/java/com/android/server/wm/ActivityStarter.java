@@ -1646,7 +1646,7 @@ class ActivityStarter {
         if (startedActivityStack != null && startedActivityStack.isAttached()
                 && !startedActivityStack.hasActivity()
                 && !startedActivityStack.isActivityTypeHome()) {
-            startedActivityStack.removeIfPossible();
+            startedActivityStack.removeIfPossible("handleStartResult");
             startedActivityStack = null;
         }
         return startedActivityStack;
@@ -1834,7 +1834,7 @@ class ActivityStarter {
                 return top.getTask();
             } else {
                 // Remove the stack if no activity in the stack.
-                stack.removeIfPossible();
+                stack.removeIfPossible("computeTargetTask");
             }
         }
         return null;

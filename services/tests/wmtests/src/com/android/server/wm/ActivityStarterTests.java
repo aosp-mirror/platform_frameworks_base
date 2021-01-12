@@ -485,8 +485,10 @@ public class ActivityStarterTests extends WindowTestsBase {
         final ActivityRecord splitSecondActivity =
                 new ActivityBuilder(mAtm).setCreateTask(true).build();
         final ActivityRecord splitPrimaryActivity = new TaskBuilder(mSupervisor)
-                .setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY).setCreateActivity(true)
-                .build().getTopMostActivity();
+                .setParentTask(splitOrg.mPrimary)
+                .setCreateActivity(true)
+                .build()
+                .getTopMostActivity();
         splitPrimaryActivity.mVisibleRequested = splitSecondActivity.mVisibleRequested = true;
 
         assertEquals(splitOrg.mPrimary, splitPrimaryActivity.getRootTask());
