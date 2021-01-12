@@ -29,6 +29,8 @@ import android.view.IWindowManager;
 import android.view.InputChannel;
 import android.view.InputEvent;
 
+import com.android.wm.shell.common.ShellExecutor;
+
 import java.io.PrintWriter;
 
 /**
@@ -81,6 +83,7 @@ public class PipInputConsumer {
     private final IWindowManager mWindowManager;
     private final IBinder mToken;
     private final String mName;
+    private final ShellExecutor mMainExecutor;
 
     private InputEventReceiver mInputEventReceiver;
     private InputListener mListener;
@@ -89,10 +92,12 @@ public class PipInputConsumer {
     /**
      * @param name the name corresponding to the input consumer that is defined in the system.
      */
-    public PipInputConsumer(IWindowManager windowManager, String name) {
+    public PipInputConsumer(IWindowManager windowManager, String name,
+            ShellExecutor mainExecutor) {
         mWindowManager = windowManager;
         mToken = new Binder();
         mName = name;
+        mMainExecutor = mainExecutor;
     }
 
     /**
@@ -107,9 +112,11 @@ public class PipInputConsumer {
      */
     public void setRegistrationListener(RegistrationListener listener) {
         mRegistrationListener = listener;
-        if (mRegistrationListener != null) {
-            mRegistrationListener.onRegistrationChanged(mInputEventReceiver != null);
-        }
+        mMainExecutor.execute(() -> {
+            if (mRegistrationListener != null) {
+                mRegistrationListener.onRegistrationChanged(mInputEventReceiver != null);
+            }
+        });
     }
 
     /**
@@ -125,14 +132,6 @@ public class PipInputConsumer {
      * Registers the input consumer.
      */
     public void registerInputConsumer() {
-        registerInputConsumer(false);
-    }
-
-    /**
-     * Registers the input consumer.
-     * @param withSfVsync the flag set using sf vsync signal or no
-     */
-    public void registerInputConsumer(boolean withSfVsync) {
         if (mInputEventReceiver != null) {
             return;
         }
@@ -144,11 +143,15 @@ public class PipInputConsumer {
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to create input consumer", e);
         }
-        mInputEventReceiver = new InputEventReceiver(inputChannel, Looper.myLooper(),
-                withSfVsync ? Choreographer.getSfInstance() : Choreographer.getInstance());
-        if (mRegistrationListener != null) {
-            mRegistrationListener.onRegistrationChanged(true /* isRegistered */);
-        }
+        mMainExecutor.execute(() -> {
+            // Choreographer.getSfInstance() must be called on the thread that the input event
+            // receiver should be receiving events
+            mInputEventReceiver = new InputEventReceiver(inputChannel,
+                mMainExecutor.getLooper(), Choreographer.getSfInstance());
+            if (mRegistrationListener != null) {
+                mRegistrationListener.onRegistrationChanged(true /* isRegistered */);
+            }
+        });
     }
 
     /**
@@ -166,9 +169,11 @@ public class PipInputConsumer {
         }
         mInputEventReceiver.dispose();
         mInputEventReceiver = null;
-        if (mRegistrationListener != null) {
-            mRegistrationListener.onRegistrationChanged(false /* isRegistered */);
-        }
+        mMainExecutor.execute(() -> {
+            if (mRegistrationListener != null) {
+                mRegistrationListener.onRegistrationChanged(false /* isRegistered */);
+            }
+        });
     }
 
     public void dump(PrintWriter pw, String prefix) {
