@@ -39,8 +39,8 @@ import android.window.WindowContainerTransaction;
 import android.window.WindowOrganizer;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.wm.shell.Transitions;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
 import java.util.List;

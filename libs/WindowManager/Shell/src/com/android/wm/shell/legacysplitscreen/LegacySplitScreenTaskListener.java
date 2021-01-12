@@ -38,8 +38,8 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.Transitions;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;

@@ -38,9 +38,9 @@ import android.view.WindowManager;
 import android.window.TransitionInfo;
 import android.window.WindowContainerTransaction;
 
-import com.android.wm.shell.Transitions;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
 

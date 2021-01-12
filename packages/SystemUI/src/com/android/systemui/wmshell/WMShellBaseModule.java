@@ -42,7 +42,6 @@ import com.android.wm.shell.ShellInitImpl;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.TaskViewFactory;
 import com.android.wm.shell.TaskViewFactoryController;
-import com.android.wm.shell.Transitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.bubbles.BubbleController;
@@ -71,6 +70,7 @@ import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.phone.PipAppOpsListener;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
+import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
 
@@ -176,6 +176,7 @@ public abstract class WMShellBaseModule {
             Optional<LegacySplitScreen> legacySplitScreenOptional,
             Optional<AppPairs> appPairsOptional,
             FullscreenTaskListener fullscreenTaskListener,
+            Transitions transitions,
             @ShellMainThread ShellExecutor shellMainExecutor) {
         return ShellInitImpl.create(displayImeController,
                 dragAndDropController,
@@ -183,6 +184,7 @@ public abstract class WMShellBaseModule {
                 legacySplitScreenOptional,
                 appPairsOptional,
                 fullscreenTaskListener,
+                transitions,
                 shellMainExecutor);
     }
 

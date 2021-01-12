@@ -24,9 +24,9 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
+import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 /**
  * The entry point implementation into the shell for initializing shell internal state.
@@ -41,6 +41,7 @@ public class ShellInitImpl {
     private final Optional<AppPairs> mAppPairsOptional;
     private final FullscreenTaskListener mFullscreenTaskListener;
     private final ShellExecutor mMainExecutor;
+    private final Transitions mTransitions;
 
     private final InitImpl mImpl = new InitImpl();
 
@@ -50,6 +51,7 @@ public class ShellInitImpl {
             Optional<LegacySplitScreen> legacySplitScreenOptional,
             Optional<AppPairs> appPairsOptional,
             FullscreenTaskListener fullscreenTaskListener,
+            Transitions transitions,
             ShellExecutor mainExecutor) {
         return new ShellInitImpl(displayImeController,
                 dragAndDropController,
@@ -57,6 +59,7 @@ public class ShellInitImpl {
                 legacySplitScreenOptional,
                 appPairsOptional,
                 fullscreenTaskListener,
+                transitions,
                 mainExecutor).mImpl;
     }
 
@@ -66,6 +69,7 @@ public class ShellInitImpl {
             Optional<LegacySplitScreen> legacySplitScreenOptional,
             Optional<AppPairs> appPairsOptional,
             FullscreenTaskListener fullscreenTaskListener,
+            Transitions transitions,
             ShellExecutor mainExecutor) {
         mDisplayImeController = displayImeController;
         mDragAndDropController = dragAndDropController;
@@ -73,6 +77,7 @@ public class ShellInitImpl {
         mLegacySplitScreenOptional = legacySplitScreenOptional;
         mAppPairsOptional = appPairsOptional;
         mFullscreenTaskListener = fullscreenTaskListener;
+        mTransitions = transitions;
         mMainExecutor = mainExecutor;
     }
 
@@ -89,6 +94,10 @@ public class ShellInitImpl {
 
         // Bind the splitscreen impl to the drag drop controller
         mDragAndDropController.initialize(mLegacySplitScreenOptional);
+
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            mTransitions.register(mShellTaskOrganizer);
+        }
     }
 
     @ExternalThread
