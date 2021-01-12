@@ -18,6 +18,7 @@ package com.android.server.net;
 
 import static android.Manifest.permission.ACCESS_NETWORK_STATE;
 import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
+import static android.Manifest.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS;
 import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
 import static android.Manifest.permission.MANAGE_SUBSCRIPTION_PLANS;
 import static android.Manifest.permission.NETWORK_SETTINGS;
@@ -44,6 +45,7 @@ import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_WHITELI
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.INetd.FIREWALL_CHAIN_DOZABLE;
 import static android.net.INetd.FIREWALL_CHAIN_POWERSAVE;
+import static android.net.INetd.FIREWALL_CHAIN_RESTRICTED;
 import static android.net.INetd.FIREWALL_CHAIN_STANDBY;
 import static android.net.INetd.FIREWALL_RULE_ALLOW;
 import static android.net.INetd.FIREWALL_RULE_DENY;
@@ -57,6 +59,7 @@ import static android.net.NetworkPolicyManager.EXTRA_NETWORK_TEMPLATE;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
 import static android.net.NetworkPolicyManager.MASK_ALL_NETWORKS;
 import static android.net.NetworkPolicyManager.MASK_METERED_NETWORKS;
+import static android.net.NetworkPolicyManager.MASK_RESTRICTED_MODE_NETWORKS;
 import static android.net.NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
@@ -65,6 +68,7 @@ import static android.net.NetworkPolicyManager.RULE_ALLOW_METERED;
 import static android.net.NetworkPolicyManager.RULE_NONE;
 import static android.net.NetworkPolicyManager.RULE_REJECT_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
+import static android.net.NetworkPolicyManager.RULE_REJECT_RESTRICTED_MODE;
 import static android.net.NetworkPolicyManager.RULE_TEMPORARY_ALLOW_METERED;
 import static android.net.NetworkPolicyManager.isProcStateAllowedWhileIdleOrPowerSaveMode;
 import static android.net.NetworkPolicyManager.isProcStateAllowedWhileOnRestrictBackground;
@@ -112,6 +116,7 @@ import static com.android.server.net.NetworkPolicyLogger.NTWK_ALLOWED_TMP_ALLOWL
 import static com.android.server.net.NetworkPolicyLogger.NTWK_BLOCKED_BG_RESTRICT;
 import static com.android.server.net.NetworkPolicyLogger.NTWK_BLOCKED_DENYLIST;
 import static com.android.server.net.NetworkPolicyLogger.NTWK_BLOCKED_POWER;
+import static com.android.server.net.NetworkPolicyLogger.NTWK_BLOCKED_RESTRICTED_MODE;
 import static com.android.server.net.NetworkStatsService.ACTION_NETWORK_STATS_UPDATED;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
@@ -446,7 +451,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     @GuardedBy("mUidRulesFirstLock") volatile boolean mRestrictPower;
     @GuardedBy("mUidRulesFirstLock") volatile boolean mDeviceIdleMode;
     // Store whether user flipped restrict background in battery saver mode
-    @GuardedBy("mUidRulesFirstLock") volatile boolean mRestrictBackgroundChangedInBsm;
+    @GuardedBy("mUidRulesFirstLock")
+    volatile boolean mRestrictBackgroundChangedInBsm;
+    @GuardedBy("mUidRulesFirstLock")
+    volatile boolean mRestrictedNetworkingMode;
 
     private final boolean mSuppressDefaultPolicy;
 
@@ -480,6 +488,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     final SparseIntArray mUidFirewallDozableRules = new SparseIntArray();
     @GuardedBy("mUidRulesFirstLock")
     final SparseIntArray mUidFirewallPowerSaveRules = new SparseIntArray();
+    @GuardedBy("mUidRulesFirstLock")
+    final SparseIntArray mUidFirewallRestrictedModeRules = new SparseIntArray();
 
     /** Set of states for the child firewall chains. True if the chain is active. */
     @GuardedBy("mUidRulesFirstLock")
@@ -786,6 +796,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                             });
                     mRestrictPower = mPowerManagerInternal.getLowPowerState(
                             ServiceType.NETWORK_FIREWALL).batterySaverEnabled;
+
+                    mRestrictedNetworkingMode = Settings.Global.getInt(
+                            mContext.getContentResolver(),
+                            Settings.Global.RESTRICTED_NETWORKING_MODE, 0) != 0;
 
                     mSystemReady = true;
 
@@ -3502,6 +3516,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 fout.print("Restrict background: "); fout.println(mRestrictBackground);
                 fout.print("Restrict power: "); fout.println(mRestrictPower);
                 fout.print("Device idle: "); fout.println(mDeviceIdleMode);
+                fout.print("Restricted networking mode: "); fout.println(mRestrictedNetworkingMode);
                 synchronized (mMeteredIfacesLock) {
                     fout.print("Metered ifaces: ");
                     fout.println(mMeteredIfaces);
@@ -3813,6 +3828,93 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    /**
+     * updates restricted mode state / access for all apps
+     * Called on initialization and when restricted mode is enabled / disabled.
+     */
+    @VisibleForTesting
+    @GuardedBy("mUidRulesFirstLock")
+    void updateRestrictedModeAllowlistUL() {
+        mUidFirewallRestrictedModeRules.clear();
+        forEachUid("updateRestrictedModeAllowlist", uid -> {
+            final int oldUidRule = mUidRules.get(uid);
+            final int newUidRule = getNewRestrictedModeUidRule(uid, oldUidRule);
+            final boolean hasUidRuleChanged = oldUidRule != newUidRule;
+            final int newFirewallRule = getRestrictedModeFirewallRule(newUidRule);
+
+            // setUidFirewallRulesUL will allowlist all uids that are passed to it, so only add
+            // non-default rules.
+            if (newFirewallRule != FIREWALL_RULE_DEFAULT) {
+                mUidFirewallRestrictedModeRules.append(uid, newFirewallRule);
+            }
+
+            if (hasUidRuleChanged) {
+                mUidRules.put(uid, newUidRule);
+                mHandler.obtainMessage(MSG_RULES_CHANGED, uid, newUidRule).sendToTarget();
+            }
+        });
+        if (mRestrictedNetworkingMode) {
+            // firewall rules only need to be set when this mode is being enabled.
+            setUidFirewallRulesUL(FIREWALL_CHAIN_RESTRICTED, mUidFirewallRestrictedModeRules);
+        }
+        enableFirewallChainUL(FIREWALL_CHAIN_RESTRICTED, mRestrictedNetworkingMode);
+    }
+
+    // updates restricted mode state / access for a single app / uid.
+    @VisibleForTesting
+    @GuardedBy("mUidRulesFirstLock")
+    void updateRestrictedModeForUidUL(int uid) {
+        final int oldUidRule = mUidRules.get(uid);
+        final int newUidRule = getNewRestrictedModeUidRule(uid, oldUidRule);
+        final boolean hasUidRuleChanged = oldUidRule != newUidRule;
+
+        if (hasUidRuleChanged) {
+            mUidRules.put(uid, newUidRule);
+            mHandler.obtainMessage(MSG_RULES_CHANGED, uid, newUidRule).sendToTarget();
+        }
+
+        // if restricted networking mode is on, and the app has an access exemption, the uid rule
+        // will not change, but the firewall rule will have to be updated.
+        if (mRestrictedNetworkingMode) {
+            // Note: setUidFirewallRule also updates mUidFirewallRestrictedModeRules.
+            // In this case, default firewall rules can also be added.
+            setUidFirewallRule(FIREWALL_CHAIN_RESTRICTED, uid,
+                    getRestrictedModeFirewallRule(newUidRule));
+        }
+    }
+
+    private int getNewRestrictedModeUidRule(int uid, int oldUidRule) {
+        int newRule = oldUidRule;
+        newRule &= ~MASK_RESTRICTED_MODE_NETWORKS;
+        if (mRestrictedNetworkingMode && !hasRestrictedModeAccess(uid)) {
+            newRule |= RULE_REJECT_RESTRICTED_MODE;
+        }
+        return newRule;
+    }
+
+    private static int getRestrictedModeFirewallRule(int uidRule) {
+        if ((uidRule & RULE_REJECT_RESTRICTED_MODE) != 0) {
+            // rejected in restricted mode, this is the default behavior.
+            return FIREWALL_RULE_DEFAULT;
+        } else {
+            return FIREWALL_RULE_ALLOW;
+        }
+    }
+
+    private boolean hasRestrictedModeAccess(int uid) {
+        try {
+            // TODO: this needs to be kept in sync with
+            // PermissionMonitor#hasRestrictedNetworkPermission
+            return mIPm.checkUidPermission(CONNECTIVITY_USE_RESTRICTED_NETWORKS, uid)
+                    == PERMISSION_GRANTED
+                    || mIPm.checkUidPermission(NETWORK_STACK, uid) == PERMISSION_GRANTED
+                    || mIPm.checkUidPermission(PERMISSION_MAINLINE_NETWORK_STACK, uid)
+                    == PERMISSION_GRANTED;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
     @GuardedBy("mUidRulesFirstLock")
     void updateRulesForPowerSaveUL() {
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "updateRulesForPowerSaveUL");
@@ -4034,6 +4136,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             updateRulesForAppIdleUL();
             updateRulesForRestrictPowerUL();
             updateRulesForRestrictBackgroundUL();
+            updateRestrictedModeAllowlistUL();
 
             // If the set of restricted networks may have changed, re-evaluate those.
             if (restrictedNetworksChanged) {
@@ -4250,6 +4353,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mPowerSaveWhitelistAppIds.delete(uid);
         mPowerSaveTempWhitelistAppIds.delete(uid);
         mAppIdleTempWhitelistAppIds.delete(uid);
+        mUidFirewallRestrictedModeRules.delete(uid);
 
         // ...then update iptables asynchronously.
         mHandler.obtainMessage(MSG_RESET_FIREWALL_RULES_BY_UID, uid, 0).sendToTarget();
@@ -4274,6 +4378,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         updateRuleForDeviceIdleUL(uid);
         updateRuleForAppIdleUL(uid);
         updateRuleForRestrictPowerUL(uid);
+
+        // If the uid has the necessary permissions, then it should be added to the restricted mode
+        // firewall allowlist.
+        updateRestrictedModeForUidUL(uid);
 
         // Update internal state for power-related modes.
         updateRulesForPowerRestrictionsUL(uid);
@@ -5000,6 +5108,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 mUidFirewallStandbyRules.put(uid, rule);
             } else if (chain == FIREWALL_CHAIN_POWERSAVE) {
                 mUidFirewallPowerSaveRules.put(uid, rule);
+            } else if (chain == FIREWALL_CHAIN_RESTRICTED) {
+                mUidFirewallRestrictedModeRules.put(uid, rule);
             }
 
             try {
@@ -5045,6 +5155,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             mNetworkManager.setFirewallUidRule(FIREWALL_CHAIN_STANDBY, uid, FIREWALL_RULE_DEFAULT);
             mNetworkManager
                     .setFirewallUidRule(FIREWALL_CHAIN_POWERSAVE, uid, FIREWALL_RULE_DEFAULT);
+            mNetworkManager
+                    .setFirewallUidRule(FIREWALL_CHAIN_RESTRICTED, uid, FIREWALL_RULE_DEFAULT);
             mNetworkManager.setUidOnMeteredNetworkAllowlist(uid, false);
             mNetworkManager.setUidOnMeteredNetworkDenylist(uid, false);
         } catch (IllegalStateException e) {
@@ -5231,26 +5343,21 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // Networks are never blocked for system components
         if (isSystem(uid)) {
             reason = NTWK_ALLOWED_SYSTEM;
-        }
-        else if (hasRule(uidRules, RULE_REJECT_ALL)) {
+        } else if (hasRule(uidRules, RULE_REJECT_RESTRICTED_MODE)) {
+            reason = NTWK_BLOCKED_RESTRICTED_MODE;
+        } else if (hasRule(uidRules, RULE_REJECT_ALL)) {
             reason = NTWK_BLOCKED_POWER;
-        }
-        else if (!isNetworkMetered) {
+        } else if (!isNetworkMetered) {
             reason = NTWK_ALLOWED_NON_METERED;
-        }
-        else if (hasRule(uidRules, RULE_REJECT_METERED)) {
+        } else if (hasRule(uidRules, RULE_REJECT_METERED)) {
             reason = NTWK_BLOCKED_DENYLIST;
-        }
-        else if (hasRule(uidRules, RULE_ALLOW_METERED)) {
+        } else if (hasRule(uidRules, RULE_ALLOW_METERED)) {
             reason = NTWK_ALLOWED_ALLOWLIST;
-        }
-        else if (hasRule(uidRules, RULE_TEMPORARY_ALLOW_METERED)) {
+        } else if (hasRule(uidRules, RULE_TEMPORARY_ALLOW_METERED)) {
             reason = NTWK_ALLOWED_TMP_ALLOWLIST;
-        }
-        else if (isBackgroundRestricted) {
+        } else if (isBackgroundRestricted) {
             reason = NTWK_BLOCKED_BG_RESTRICT;
-        }
-        else {
+        } else {
             reason = NTWK_ALLOWED_DEFAULT;
         }
 
@@ -5263,6 +5370,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             case NTWK_ALLOWED_SYSTEM:
                 blocked = false;
                 break;
+            case NTWK_BLOCKED_RESTRICTED_MODE:
             case NTWK_BLOCKED_POWER:
             case NTWK_BLOCKED_DENYLIST:
             case NTWK_BLOCKED_BG_RESTRICT:
