@@ -38,8 +38,10 @@
 
 using namespace std::literals;
 
-constexpr const char* kDataUsageStats = "android.permission.LOADER_USAGE_STATS";
+constexpr const char* kLoaderUsageStats = "android.permission.LOADER_USAGE_STATS";
 constexpr const char* kOpUsage = "android:loader_usage_stats";
+
+constexpr const char* kInteractAcrossUsers = "android.permission.INTERACT_ACROSS_USERS";
 
 namespace android::incremental {
 
@@ -684,10 +686,21 @@ int IncrementalService::setStorageParams(StorageId storageId, bool enableReadLog
             return -EPERM;
         }
 
-        if (auto status = mAppOpsManager->checkPermission(kDataUsageStats, kOpUsage,
+        // Check loader usage stats permission and apop.
+        if (auto status = mAppOpsManager->checkPermission(kLoaderUsageStats, kOpUsage,
                                                           params.packageName.c_str());
             !status.isOk()) {
-            LOG(ERROR) << "checkPermission failed: " << status.toString8();
+            LOG(ERROR) << " Permission: " << kLoaderUsageStats
+                       << " check failed: " << status.toString8();
+            return fromBinderStatus(status);
+        }
+
+        // Check multiuser permission.
+        if (auto status = mAppOpsManager->checkPermission(kInteractAcrossUsers, nullptr,
+                                                          params.packageName.c_str());
+            !status.isOk()) {
+            LOG(ERROR) << " Permission: " << kInteractAcrossUsers
+                       << " check failed: " << status.toString8();
             return fromBinderStatus(status);
         }
     }

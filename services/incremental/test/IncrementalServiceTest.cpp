@@ -397,6 +397,15 @@ public:
     void checkPermissionSuccess() {
         ON_CALL(*this, checkPermission(_, _, _)).WillByDefault(Return(android::incremental::Ok()));
     }
+    void checkPermissionNoCrossUsers() {
+        ON_CALL(*this,
+                checkPermission("android.permission.LOADER_USAGE_STATS",
+                                "android:loader_usage_stats", _))
+                .WillByDefault(Return(android::incremental::Ok()));
+        ON_CALL(*this, checkPermission("android.permission.INTERACT_ACROSS_USERS", nullptr, _))
+                .WillByDefault(
+                        Return(android::incremental::Exception(binder::Status::EX_SECURITY, {})));
+    }
     void checkPermissionFails() {
         ON_CALL(*this, checkPermission(_, _, _))
                 .WillByDefault(
@@ -1032,6 +1041,23 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccessAndPermissionChang
 
 TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsCheckPermissionFails) {
     mAppOpsManager->checkPermissionFails();
+
+    EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_));
+    EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
+    // checkPermission fails, no calls to set opitions,  start or stop WatchingMode.
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, true)).Times(0);
+    EXPECT_CALL(*mAppOpsManager, startWatchingMode(_, _, _)).Times(0);
+    EXPECT_CALL(*mAppOpsManager, stopWatchingMode(_)).Times(0);
+    TemporaryDir tempDir;
+    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
+                                                       IncrementalService::CreateOptions::CreateNew,
+                                                       {}, {}, {}, {});
+    ASSERT_GE(storageId, 0);
+    ASSERT_LT(mDataLoader->setStorageParams(true), 0);
+}
+
+TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsCheckPermissionNoCrossUsers) {
+    mAppOpsManager->checkPermissionNoCrossUsers();
 
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_));
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
