@@ -53,6 +53,8 @@ public class ControllerActivity extends Activity implements View.OnApplyWindowIn
                 R.array.behaviors, android.R.layout.simple_spinner_item);
         adapterBehavior.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerBehavior.setAdapter(adapterBehavior);
+        spinnerBehavior.setSelection(
+                spinnerBehavior.getWindowInsetsController().getSystemBarsBehavior());
         spinnerBehavior.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {

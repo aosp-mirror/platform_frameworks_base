@@ -112,6 +112,7 @@ import android.view.ThreadedRenderer;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsetsController.Appearance;
+import android.view.WindowInsetsController.Behavior;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
@@ -443,9 +444,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     private @Appearance int mAppearance;
 
     private boolean mTransientShown;
-
-    private boolean mAppFullscreen;
-    private boolean mAppImmersive;
 
     private final DisplayMetrics mDisplayMetrics;
 
@@ -921,10 +919,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (containsType(result.mTransientBarTypes, ITYPE_STATUS_BAR)) {
             showTransientUnchecked();
         }
-        onSystemBarAppearanceChanged(mDisplayId, result.mAppearance, result.mAppearanceRegions,
-                result.mNavbarColorManagedByIme);
-        mAppFullscreen = result.mAppFullscreen;
-        mAppImmersive = result.mAppImmersive;
+        onSystemBarAttributesChanged(mDisplayId, result.mAppearance, result.mAppearanceRegions,
+                result.mNavbarColorManagedByIme, result.mBehavior, result.mAppFullscreen);
 
         // StatusBarManagerService has a back up of IME token and it's restored here.
         setImeWindowStatus(mDisplayId, result.mImeToken, result.mImeWindowVis,
@@ -2345,8 +2341,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     @Override
-    public void onSystemBarAppearanceChanged(int displayId, @Appearance int appearance,
-            AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme) {
+    public void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
+            AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
+            @Behavior int behavior, boolean isFullscreen) {
         if (displayId != mDisplayId) {
             return;
         }
@@ -2359,6 +2356,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mStatusBarMode, navbarColorManagedByIme);
 
         updateBubblesVisibility();
+        mStatusBarStateController.setFullscreenState(isFullscreen);
     }
 
     @Override
@@ -2429,16 +2427,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         } else {
             return MODE_TRANSPARENT;
         }
-    }
-
-    @Override
-    public void topAppWindowChanged(int displayId, boolean isFullscreen, boolean isImmersive) {
-        if (displayId != mDisplayId) {
-            return;
-        }
-        mAppFullscreen = isFullscreen;
-        mAppImmersive = isImmersive;
-        mStatusBarStateController.setFullscreenState(isFullscreen, isImmersive);
     }
 
     @Override
@@ -2549,16 +2537,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mVolumeComponent != null) {
             mVolumeComponent.dismissNow();
         }
-    }
-
-    /** Returns whether the top activity is in fullscreen mode. */
-    public boolean inFullscreenMode() {
-        return mAppFullscreen;
-    }
-
-    /** Returns whether the top activity is in immersive mode. */
-    public boolean inImmersiveMode() {
-        return mAppImmersive;
     }
 
     public static String viewInfo(View v) {
