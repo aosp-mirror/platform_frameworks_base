@@ -6240,6 +6240,7 @@ package android.net {
     field public static final int NET_CAPABILITY_OEM_PAID = 22; // 0x16
     field public static final int NET_CAPABILITY_OEM_PRIVATE = 26; // 0x1a
     field public static final int NET_CAPABILITY_PARTIAL_CONNECTIVITY = 24; // 0x18
+    field public static final int NET_CAPABILITY_VEHICLE_INTERNAL = 27; // 0x1b
   }
 
   public static final class NetworkCapabilities.Builder {
