@@ -43,7 +43,7 @@ public final class BatteryTrigger extends PowerStatsLogTrigger {
 
                     if (newBatteryLevel < mBatteryLevel) {
                         if (DEBUG) Slog.d(TAG, "Battery level dropped.  Log rail data");
-                        logPowerStatsData();
+                        logPowerStatsData(PowerStatsLogger.MSG_LOG_TO_DATA_STORAGE_BATTERY_DROP);
                     }
 
                     mBatteryLevel = newBatteryLevel;

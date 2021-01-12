@@ -14630,6 +14630,34 @@ public final class Settings {
         public static final String BACKPORT_S_NOTIF_RULES = "backport_s_notif_rules";
 
         /**
+         * The decoration to put on fully custom views that target S.
+         *
+         * <p>Values are:
+         * <br>0: DECORATION_NONE: no decorations.
+         * <br>1: DECORATION_MINIMAL: most minimal template; just the icon and the expander.
+         * <br>2: DECORATION_PARTIAL: basic template without the top line.
+         * <br>3: DECORATION_FULL_COMPATIBLE: basic template with the top line; 40dp of height.
+         * <br>4: DECORATION_FULL_CONSTRAINED: basic template with the top line;  28dp of height.
+         * <p>See {@link android.app.Notification.DevFlags} for more details.
+         * @hide
+         */
+        public static final String FULLY_CUSTOM_VIEW_NOTIF_DECORATION =
+                "fully_custom_view_notif_decoration";
+
+        /**
+         * The decoration to put on decorated custom views that target S.
+         *
+         * <p>Values are:
+         * <br>2: DECORATION_PARTIAL: basic template without the top line.
+         * <br>3: DECORATION_FULL_COMPATIBLE: basic template with the top line; 40dp of height.
+         * <br>4: DECORATION_FULL_CONSTRAINED: basic template with the top line;  28dp of height.
+         * <p>See {@link android.app.Notification.DevFlags} for more details.
+         * @hide
+         */
+        public static final String DECORATED_CUSTOM_VIEW_NOTIF_DECORATION =
+                "decorated_custom_view_notif_decoration";
+
+        /**
          * Block untrusted touches mode.
          *
          * Can be one of:

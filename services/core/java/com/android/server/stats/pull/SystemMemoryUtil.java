@@ -27,6 +27,7 @@ final class SystemMemoryUtil {
 
     static Metrics getMetrics() {
         int totalIonKb = (int) Debug.getIonHeapsSizeKb();
+        int gpuTotalUsageKb = (int) Debug.getGpuTotalUsageKb();
 
         long[] mInfos = new long[Debug.MEMINFO_COUNT];
         Debug.getMemInfo(mInfos);
@@ -62,6 +63,7 @@ final class SystemMemoryUtil {
         result.pageTablesKb = (int) mInfos[Debug.MEMINFO_PAGE_TABLES];
         result.kernelStackKb = (int) mInfos[Debug.MEMINFO_KERNEL_STACK];
         result.totalIonKb = totalIonKb;
+        result.gpuTotalUsageKb = gpuTotalUsageKb;
         result.unaccountedKb = (int) (mInfos[Debug.MEMINFO_TOTAL] - accountedKb);
         return result;
     }
@@ -72,6 +74,7 @@ final class SystemMemoryUtil {
         public int pageTablesKb;
         public int kernelStackKb;
         public int totalIonKb;
+        public int gpuTotalUsageKb;
         public int unaccountedKb;
     }
 }

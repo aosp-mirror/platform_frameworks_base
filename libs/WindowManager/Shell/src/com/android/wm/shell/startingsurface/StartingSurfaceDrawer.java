@@ -222,7 +222,11 @@ public class StartingSurfaceDrawer {
         }
 
         Context context = mContext;
-        final int theme = activityInfo.getThemeResource();
+        int theme = activityInfo.getThemeResource();
+        if (theme == 0) {
+            // replace with the default theme if the application didn't set
+            theme = com.android.internal.R.style.Theme_DeviceDefault_DayNight;
+        }
         if (DEBUG_SPLASH_SCREEN) {
             Slog.d(TAG, "addSplashScreen " + activityInfo.packageName
                     + ": nonLocalizedLabel=" + nonLocalizedLabel + " theme="

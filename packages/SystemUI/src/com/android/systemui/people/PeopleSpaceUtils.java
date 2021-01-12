@@ -23,7 +23,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.people.ConversationChannel;
 import android.app.people.IPeopleManager;
-import android.app.people.PeopleSpaceTile;
+import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;

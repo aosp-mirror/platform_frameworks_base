@@ -11717,6 +11717,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     }
                 }
             }
+            String[] mimeTypes = getOnReceiveContentMimeTypes();
+            if (mimeTypes == null && mEditor != null) {
+                // If the app hasn't set a listener for receiving content on this view (ie,
+                // getOnReceiveContentMimeTypes() returns null), check if it implements the
+                // keyboard image API and, if possible, use those MIME types as fallback.
+                // This fallback is only in place for autofill, not other mechanisms for
+                // inserting content. See AUTOFILL_NON_TEXT_REQUIRES_ON_RECEIVE_CONTENT_LISTENER
+                // in TextViewOnReceiveContentListener for more info.
+                mimeTypes = mEditor.getDefaultOnReceiveContentListener()
+                        .getFallbackMimeTypesForAutofill(this);
+            }
+            structure.setOnReceiveContentMimeTypes(mimeTypes);
         }
 
         if (!isPassword || viewFor == VIEW_STRUCTURE_FOR_AUTOFILL

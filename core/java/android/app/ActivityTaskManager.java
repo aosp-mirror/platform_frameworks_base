@@ -295,21 +295,6 @@ public class ActivityTaskManager {
     }
 
     /**
-     * Moves the top activity in the input rootTaskId to the pinned root task.
-     * @param rootTaskId Id of root task to move the top activity to pinned root task.
-     * @param bounds Bounds to use for pinned root task.
-     * @return True if the top activity of root task was successfully moved to the pinned root task.
-     */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
-    public boolean moveTopActivityToPinnedRootTask(int rootTaskId, @NonNull Rect bounds) {
-        try {
-            return getService().moveTopActivityToPinnedRootTask(rootTaskId, bounds);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Start to enter lock task mode for given task by system(UI).
      * @param taskId Id of task to lock.
      */

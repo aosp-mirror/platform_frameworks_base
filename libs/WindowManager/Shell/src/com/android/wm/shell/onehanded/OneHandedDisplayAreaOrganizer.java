@@ -86,6 +86,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
             mSurfaceControlTransactionFactory;
     private OneHandedTutorialHandler mTutorialHandler;
     private List<OneHandedTransitionCallback> mTransitionCallbacks = new ArrayList<>();
+    private OneHandedBackgroundPanelOrganizer mBackgroundPanelOrganizer;
 
     @VisibleForTesting
     OneHandedAnimationCallback mOneHandedAnimationCallback =
@@ -152,7 +153,8 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
     public OneHandedDisplayAreaOrganizer(Context context,
             DisplayController displayController,
             OneHandedAnimationController animationController,
-            OneHandedTutorialHandler tutorialHandler, Executor executor) {
+            OneHandedTutorialHandler tutorialHandler, Executor executor,
+            OneHandedBackgroundPanelOrganizer oneHandedBackgroundGradientOrganizer) {
         super(executor);
         mUpdateHandler = new Handler(OneHandedThread.get().getLooper(), mUpdateCallback);
         mAnimationController = animationController;
@@ -166,6 +168,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
                         animationDurationConfig);
         mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
         mTutorialHandler = tutorialHandler;
+        mBackgroundPanelOrganizer = oneHandedBackgroundGradientOrganizer;
     }
 
     @Override
@@ -300,8 +303,10 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
                     mAnimationController.getAnimator(leash, fromBounds, toBounds);
             if (animator != null) {
                 animator.setTransitionDirection(direction)
-                        .setOneHandedAnimationCallbacks(mOneHandedAnimationCallback)
-                        .setOneHandedAnimationCallbacks(mTutorialHandler.getAnimationCallback())
+                        .addOneHandedAnimationCallback(mOneHandedAnimationCallback)
+                        .addOneHandedAnimationCallback(mTutorialHandler.getAnimationCallback())
+                        .addOneHandedAnimationCallback(
+                                mBackgroundPanelOrganizer.getOneHandedAnimationCallback())
                         .setDuration(durationMs)
                         .start();
             }

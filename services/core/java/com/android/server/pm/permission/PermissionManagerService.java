@@ -4463,12 +4463,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         final PermissionPolicyInternal permissionPolicyInternal = LocalServices.getService(
                 PermissionPolicyInternal.class);
-        permissionPolicyInternal.setOnInitializedCallback(userId -> {
-            // The SDK updated case is already handled when we run during the ctor.
-            synchronized (mLock) {
-                updateAllPermissions(StorageManager.UUID_PRIVATE_INTERNAL, false);
-            }
-        });
+        permissionPolicyInternal.setOnInitializedCallback(userId ->
+                // The SDK updated case is already handled when we run during the ctor.
+                updateAllPermissions(StorageManager.UUID_PRIVATE_INTERNAL, false)
+        );
 
         mSystemReady = true;
 

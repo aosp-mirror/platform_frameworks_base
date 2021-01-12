@@ -81,6 +81,7 @@ public final class ViewNode extends AssistStructure.ViewNode {
     private static final long FLAGS_HAS_AUTOFILL_HINTS = 1L << 33;
     private static final long FLAGS_HAS_AUTOFILL_OPTIONS = 1L << 34;
     private static final long FLAGS_HAS_HINT_ID_ENTRY = 1L << 35;
+    private static final long FLAGS_HAS_MIME_TYPES = 1L << 36;
 
     /** Flags used to optimize what's written to the parcel */
     private long mFlags;
@@ -113,6 +114,7 @@ public final class ViewNode extends AssistStructure.ViewNode {
     private String[] mAutofillHints;
     private AutofillValue mAutofillValue;
     private CharSequence[] mAutofillOptions;
+    private String[] mOnReceiveContentMimeTypes;
 
     /** @hide */
     public ViewNode() {
@@ -168,6 +170,9 @@ public final class ViewNode extends AssistStructure.ViewNode {
         }
         if ((nodeFlags & FLAGS_HAS_LOCALE_LIST) != 0) {
             mLocaleList = parcel.readParcelable(null);
+        }
+        if ((nodeFlags & FLAGS_HAS_MIME_TYPES) != 0) {
+            mOnReceiveContentMimeTypes = parcel.readStringArray();
         }
         if ((nodeFlags & FLAGS_HAS_INPUT_TYPE) != 0) {
             mInputType = parcel.readInt();
@@ -463,6 +468,12 @@ public final class ViewNode extends AssistStructure.ViewNode {
         return mAutofillOptions;
     }
 
+    @Override
+    @Nullable
+    public String[] getOnReceiveContentMimeTypes() {
+        return mOnReceiveContentMimeTypes;
+    }
+
     @Nullable
     @Override
     public LocaleList getLocaleList() {
@@ -507,6 +518,9 @@ public final class ViewNode extends AssistStructure.ViewNode {
         }
         if (mLocaleList != null) {
             nodeFlags |= FLAGS_HAS_LOCALE_LIST;
+        }
+        if (mOnReceiveContentMimeTypes != null) {
+            nodeFlags |= FLAGS_HAS_MIME_TYPES;
         }
         if (mInputType != 0) {
             nodeFlags |= FLAGS_HAS_INPUT_TYPE;
@@ -583,6 +597,9 @@ public final class ViewNode extends AssistStructure.ViewNode {
         }
         if ((nodeFlags & FLAGS_HAS_LOCALE_LIST) != 0) {
             parcel.writeParcelable(mLocaleList, 0);
+        }
+        if ((nodeFlags & FLAGS_HAS_MIME_TYPES) != 0) {
+            parcel.writeStringArray(mOnReceiveContentMimeTypes);
         }
         if ((nodeFlags & FLAGS_HAS_INPUT_TYPE) != 0) {
             parcel.writeInt(mInputType);
@@ -909,6 +926,11 @@ public final class ViewNode extends AssistStructure.ViewNode {
         @Override
         public void setAutofillType(@View.AutofillType int type) {
             mNode.mAutofillType = type;
+        }
+
+        @Override
+        public void setOnReceiveContentMimeTypes(@Nullable String[] mimeTypes) {
+            mNode.mOnReceiveContentMimeTypes = mimeTypes;
         }
 
         @Override

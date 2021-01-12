@@ -75,6 +75,8 @@ import android.view.RemotableViewMethod;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.MarginLayoutParams;
+import android.view.ViewManager;
+import android.view.ViewParent;
 import android.view.ViewStub;
 import android.widget.AdapterView.OnItemClickListener;
 
@@ -177,6 +179,7 @@ public class RemoteViews implements Parcelable, Filter {
     private static final int OVERRIDE_TEXT_COLORS_TAG = 20;
     private static final int SET_RIPPLE_DRAWABLE_COLOR_TAG = 21;
     private static final int SET_INT_TAG_TAG = 22;
+    private static final int REMOVE_FROM_PARENT_ACTION_TAG = 23;
 
     /** @hide **/
     @IntDef(prefix = "MARGIN_", value = {
@@ -1831,6 +1834,75 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * Action to remove a view from its parent.
+     */
+    private class RemoveFromParentAction extends Action {
+
+        RemoveFromParentAction(@IdRes int viewId) {
+            this.viewId = viewId;
+        }
+
+        RemoveFromParentAction(Parcel parcel) {
+            viewId = parcel.readInt();
+        }
+
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(viewId);
+        }
+
+        @Override
+        public void apply(View root, ViewGroup rootParent, OnClickHandler handler) {
+            final View target = root.findViewById(viewId);
+
+            if (target == null || target == root) {
+                return;
+            }
+
+            ViewParent parent = target.getParent();
+            if (parent instanceof ViewManager) {
+                ((ViewManager) parent).removeView(target);
+            }
+        }
+
+        @Override
+        public Action initActionAsync(ViewTree root, ViewGroup rootParent, OnClickHandler handler) {
+            // In the async implementation, update the view tree so that subsequent calls to
+            // findViewById return the correct view.
+            root.createTree();
+            ViewTree target = root.findViewTreeById(viewId);
+
+            if (target == null || target == root) {
+                return ACTION_NOOP;
+            }
+
+            ViewTree parent = root.findViewTreeParentOf(target);
+            if (parent == null || !(parent.mRoot instanceof ViewManager)) {
+                return ACTION_NOOP;
+            }
+            final ViewManager parentVg = (ViewManager) parent.mRoot;
+
+            parent.mChildren.remove(target);
+            return new RuntimeAction() {
+                @Override
+                public void apply(View root, ViewGroup rootParent, OnClickHandler handler)
+                        throws ActionException {
+                    parentVg.removeView(target.mRoot);
+                }
+            };
+        }
+
+        @Override
+        public int getActionTag() {
+            return REMOVE_FROM_PARENT_ACTION_TAG;
+        }
+
+        @Override
+        public int mergeBehavior() {
+            return MERGE_APPEND;
+        }
+    }
+
+    /**
      * Helper action to set compound drawables on a TextView. Supports relative
      * (s/t/e/b) or cardinal (l/t/r/b) arrangement.
      */
@@ -2537,6 +2609,8 @@ public class RemoteViews implements Parcelable, Filter {
                 return new SetRippleDrawableColor(parcel);
             case SET_INT_TAG_TAG:
                 return new SetIntTagAction(parcel);
+            case REMOVE_FROM_PARENT_ACTION_TAG:
+                return new RemoveFromParentAction(parcel);
             default:
                 throw new ActionException("Tag " + tag + " not found");
         }
@@ -2672,6 +2746,18 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void removeAllViewsExceptId(@IdRes int viewId, @IdRes int viewIdToKeep) {
         addAction(new ViewGroupActionRemove(viewId, viewIdToKeep));
+    }
+
+    /**
+     * Removes the {@link View} specified by the {@code viewId} from its parent {@link ViewManager}.
+     * This will do nothing if the viewId specifies the root view of this RemoteViews.
+     *
+     * @param viewId The id of the {@link View} to remove from its parent.
+     *
+     * @hide
+     */
+    public void removeFromParent(@IdRes int viewId) {
+        addAction(new RemoveFromParentAction(viewId));
     }
 
     /**
@@ -4018,6 +4104,22 @@ public class RemoteViews implements Parcelable, Filter {
             }
             for (ViewTree tree : mChildren) {
                 ViewTree result = tree.findViewTreeById(id);
+                if (result != null) {
+                    return result;
+                }
+            }
+            return null;
+        }
+
+        public ViewTree findViewTreeParentOf(ViewTree child) {
+            if (mChildren == null) {
+                return null;
+            }
+            for (ViewTree tree : mChildren) {
+                if (tree == child) {
+                    return this;
+                }
+                ViewTree result = tree.findViewTreeParentOf(child);
                 if (result != null) {
                     return result;
                 }

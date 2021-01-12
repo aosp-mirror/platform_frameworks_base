@@ -32,7 +32,6 @@ import static org.mockito.Mockito.when;
 
 import android.app.Notification;
 import android.app.Person;
-import android.app.people.PeopleSpaceTile;
 import android.appwidget.AppWidgetManager;
 import android.content.ContentResolver;
 import android.content.Context;

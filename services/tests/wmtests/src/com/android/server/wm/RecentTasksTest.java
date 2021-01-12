@@ -61,7 +61,6 @@ import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -1145,8 +1144,6 @@ public class RecentTasksTest extends WindowTestsBase {
                 () -> mAtm.setTaskWindowingMode(0, WINDOWING_MODE_UNDEFINED, true));
         assertSecurityException(expectCallable,
                 () -> mAtm.moveTaskToRootTask(0, INVALID_STACK_ID, true));
-        assertSecurityException(expectCallable,
-                () -> mAtm.moveTopActivityToPinnedRootTask(INVALID_STACK_ID, new Rect()));
         assertSecurityException(expectCallable, () -> mAtm.getAllRootTaskInfos());
         assertSecurityException(expectCallable,
                 () -> mAtm.getRootTaskInfo(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_UNDEFINED));

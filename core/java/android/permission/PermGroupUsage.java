@@ -30,17 +30,19 @@ public final class PermGroupUsage {
 
     private final String mPackageName;
     private final int mUid;
+    private final long mLastAccess;
     private final String mPermGroupName;
     private final boolean mIsActive;
     private final boolean mIsPhoneCall;
     private final CharSequence mAttribution;
 
     PermGroupUsage(@NonNull String packageName, int uid,
-            @NonNull String permGroupName, boolean isActive, boolean isPhoneCall,
+            @NonNull String permGroupName, long lastAccess, boolean isActive, boolean isPhoneCall,
             @Nullable CharSequence attribution) {
         this.mPackageName = packageName;
         this.mUid = uid;
         this.mPermGroupName = permGroupName;
+        this.mLastAccess = lastAccess;
         this.mIsActive = isActive;
         this.mIsPhoneCall = isPhoneCall;
         this.mAttribution = attribution;
@@ -56,6 +58,10 @@ public final class PermGroupUsage {
 
     public @NonNull String getPermGroupName() {
         return mPermGroupName;
+    }
+
+    public long getLastAccess() {
+        return mLastAccess;
     }
 
     public boolean isActive() {

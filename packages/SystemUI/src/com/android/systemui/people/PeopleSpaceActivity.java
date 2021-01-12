@@ -22,7 +22,6 @@ import static android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID;
 import android.app.Activity;
 import android.app.INotificationManager;
 import android.app.people.IPeopleManager;
-import android.app.people.PeopleSpaceTile;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;

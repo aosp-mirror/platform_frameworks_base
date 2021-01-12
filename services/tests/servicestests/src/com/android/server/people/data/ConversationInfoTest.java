@@ -16,11 +16,17 @@
 
 package com.android.server.people.data;
 
+import static android.app.people.ConversationStatus.ACTIVITY_ANNIVERSARY;
+import static android.app.people.ConversationStatus.ACTIVITY_GAME;
+
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import android.app.people.ConversationStatus;
 import android.content.LocusId;
 import android.content.pm.ShortcutInfo;
 import android.net.Uri;
@@ -41,6 +47,9 @@ public final class ConversationInfoTest {
 
     @Test
     public void testBuild() {
+        ConversationStatus cs = new ConversationStatus.Builder("id", ACTIVITY_ANNIVERSARY).build();
+        ConversationStatus cs2 = new ConversationStatus.Builder("id2", ACTIVITY_GAME).build();
+
         ConversationInfo conversationInfo = new ConversationInfo.Builder()
                 .setShortcutId(SHORTCUT_ID)
                 .setLocusId(LOCUS_ID)
@@ -58,6 +67,8 @@ public final class ConversationInfoTest {
                 .setPersonImportant(true)
                 .setPersonBot(true)
                 .setContactStarred(true)
+                .addOrUpdateStatus(cs)
+                .addOrUpdateStatus(cs2)
                 .build();
 
         assertEquals(SHORTCUT_ID, conversationInfo.getShortcutId());
@@ -77,6 +88,8 @@ public final class ConversationInfoTest {
         assertTrue(conversationInfo.isPersonImportant());
         assertTrue(conversationInfo.isPersonBot());
         assertTrue(conversationInfo.isContactStarred());
+        assertThat(conversationInfo.getStatuses()).contains(cs);
+        assertThat(conversationInfo.getStatuses()).contains(cs2);
     }
 
     @Test
@@ -101,10 +114,15 @@ public final class ConversationInfoTest {
         assertFalse(conversationInfo.isPersonImportant());
         assertFalse(conversationInfo.isPersonBot());
         assertFalse(conversationInfo.isContactStarred());
+        assertThat(conversationInfo.getStatuses()).isNotNull();
+        assertThat(conversationInfo.getStatuses()).isEmpty();
     }
 
     @Test
     public void testBuildFromAnotherConversationInfo() {
+        ConversationStatus cs = new ConversationStatus.Builder("id", ACTIVITY_ANNIVERSARY).build();
+        ConversationStatus cs2 = new ConversationStatus.Builder("id2", ACTIVITY_GAME).build();
+
         ConversationInfo source = new ConversationInfo.Builder()
                 .setShortcutId(SHORTCUT_ID)
                 .setLocusId(LOCUS_ID)
@@ -120,6 +138,8 @@ public final class ConversationInfoTest {
                 .setPersonImportant(true)
                 .setPersonBot(true)
                 .setContactStarred(true)
+                .addOrUpdateStatus(cs)
+                .addOrUpdateStatus(cs2)
                 .build();
 
         ConversationInfo destination = new ConversationInfo.Builder(source)
@@ -141,5 +161,7 @@ public final class ConversationInfoTest {
         assertTrue(destination.isPersonImportant());
         assertTrue(destination.isPersonBot());
         assertFalse(destination.isContactStarred());
+        assertThat(destination.getStatuses()).contains(cs);
+        assertThat(destination.getStatuses()).contains(cs2);
     }
 }

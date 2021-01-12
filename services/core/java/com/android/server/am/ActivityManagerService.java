@@ -5730,20 +5730,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         return mActivityTaskManager.getRecentTasks(maxNum, flags, userId);
     }
 
-    /**
-     * Moves the top activity in the input rootTaskId to the pinned root task.
-     *
-     * @param rootTaskId Id of root task to move the top activity to pinned root task.
-     * @param bounds Bounds to use for pinned root task.
-     *
-     * @return True if the top activity of the input root task was successfully moved to the pinned
-     *          root task.
-     */
-    @Override
-    public boolean moveTopActivityToPinnedRootTask(int rootTaskId, Rect bounds) {
-        return mActivityTaskManager.moveTopActivityToPinnedRootTask(rootTaskId, bounds);
-    }
-
     @Override
     public List<RootTaskInfo> getAllRootTaskInfos() {
         return mActivityTaskManager.getAllRootTaskInfos();

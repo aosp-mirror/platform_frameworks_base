@@ -461,14 +461,8 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     @Override
     public void draw(Canvas canvas) {
         if (mHasOvalBg) {
-            canvas.save();
-            int cx = (getLeft() + getRight()) / 2;
-            int cy = (getTop() + getBottom()) / 2;
-            canvas.translate(cx, cy);
             int d = Math.min(getWidth(), getHeight());
-            int r = d / 2;
-            canvas.drawOval(-r, -r, r, r, mOvalBgPaint);
-            canvas.restore();
+            canvas.drawOval(0, 0, d, d, mOvalBgPaint);
         }
         super.draw(canvas);
     }

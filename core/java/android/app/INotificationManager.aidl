@@ -228,4 +228,6 @@ interface INotificationManager
 
     NotificationListenerFilter getListenerFilter(in ComponentName cn, int userId);
     void setListenerFilter(in ComponentName cn, int userId, in NotificationListenerFilter nlf);
+
+    void setToastRateLimitingEnabled(boolean enable);
 }

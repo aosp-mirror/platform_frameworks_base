@@ -89,6 +89,81 @@ public class ControllerImplTest {
     }
 
     @Test
+    public void initializationFailure_primary() {
+        ControllerImpl controllerImpl = new ControllerImpl(mTestThreadingDomain,
+                mTestPrimaryLocationTimeZoneProvider, mTestSecondaryLocationTimeZoneProvider);
+        TestEnvironment testEnvironment = new TestEnvironment(
+                mTestThreadingDomain, controllerImpl, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        Duration expectedInitTimeout = testEnvironment.getProviderInitializationTimeout()
+                .plus(testEnvironment.getProviderInitializationTimeoutFuzz());
+
+        mTestPrimaryLocationTimeZoneProvider.setFailDuringInitialization(true);
+
+        // Initialize. After initialization the providers must be initialized and one should be
+        // started.
+        controllerImpl.initialize(testEnvironment, mTestCallback);
+
+        mTestPrimaryLocationTimeZoneProvider.assertInitialized();
+        mTestSecondaryLocationTimeZoneProvider.assertInitialized();
+
+        mTestPrimaryLocationTimeZoneProvider.assertIsPermFailedAndCommit();
+        mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
+                PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        mTestSecondaryLocationTimeZoneProvider.assertInitializationTimeoutSet(expectedInitTimeout);
+        mTestCallback.assertNoSuggestionMade();
+        assertFalse(controllerImpl.isUncertaintyTimeoutSet());
+    }
+
+    @Test
+    public void initializationFailure_secondary() {
+        ControllerImpl controllerImpl = new ControllerImpl(mTestThreadingDomain,
+                mTestPrimaryLocationTimeZoneProvider, mTestSecondaryLocationTimeZoneProvider);
+        TestEnvironment testEnvironment = new TestEnvironment(
+                mTestThreadingDomain, controllerImpl, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        Duration expectedInitTimeout = testEnvironment.getProviderInitializationTimeout()
+                .plus(testEnvironment.getProviderInitializationTimeoutFuzz());
+
+        mTestSecondaryLocationTimeZoneProvider.setFailDuringInitialization(true);
+
+        // Initialize. After initialization the providers must be initialized and one should be
+        // started.
+        controllerImpl.initialize(testEnvironment, mTestCallback);
+
+        mTestPrimaryLocationTimeZoneProvider.assertInitialized();
+        mTestSecondaryLocationTimeZoneProvider.assertInitialized();
+
+        mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
+                PROVIDER_STATE_STARTED_INITIALIZING, USER1_CONFIG_GEO_DETECTION_ENABLED);
+        mTestPrimaryLocationTimeZoneProvider.assertInitializationTimeoutSet(expectedInitTimeout);
+        mTestSecondaryLocationTimeZoneProvider.assertIsPermFailedAndCommit();
+        mTestCallback.assertNoSuggestionMade();
+        assertFalse(controllerImpl.isUncertaintyTimeoutSet());
+    }
+
+    @Test
+    public void initializationFailure_both() {
+        ControllerImpl controllerImpl = new ControllerImpl(mTestThreadingDomain,
+                mTestPrimaryLocationTimeZoneProvider, mTestSecondaryLocationTimeZoneProvider);
+        TestEnvironment testEnvironment = new TestEnvironment(
+                mTestThreadingDomain, controllerImpl, USER1_CONFIG_GEO_DETECTION_ENABLED);
+
+        mTestPrimaryLocationTimeZoneProvider.setFailDuringInitialization(true);
+        mTestSecondaryLocationTimeZoneProvider.setFailDuringInitialization(true);
+
+        // Initialize. After initialization the providers must be initialized and one should be
+        // started.
+        controllerImpl.initialize(testEnvironment, mTestCallback);
+
+        mTestPrimaryLocationTimeZoneProvider.assertInitialized();
+        mTestSecondaryLocationTimeZoneProvider.assertInitialized();
+
+        mTestPrimaryLocationTimeZoneProvider.assertIsPermFailedAndCommit();
+        mTestSecondaryLocationTimeZoneProvider.assertIsPermFailedAndCommit();
+        mTestCallback.assertUncertainSuggestionMadeAndCommit();
+        assertFalse(controllerImpl.isUncertaintyTimeoutSet());
+    }
+
+    @Test
     public void initialState_started() {
         ControllerImpl controllerImpl = new ControllerImpl(mTestThreadingDomain,
                 mTestPrimaryLocationTimeZoneProvider, mTestSecondaryLocationTimeZoneProvider);
@@ -1097,6 +1172,7 @@ public class ControllerImplTest {
 
         /** Used to track historic provider states for tests. */
         private final TestState<ProviderState> mTestProviderState = new TestState<>();
+        private boolean mFailDuringInitialization;
         private boolean mInitialized;
         private boolean mDestroyed;
 
@@ -1107,9 +1183,16 @@ public class ControllerImplTest {
             super(threadingDomain, providerName);
         }
 
+        public void setFailDuringInitialization(boolean failInitialization) {
+            mFailDuringInitialization = failInitialization;
+        }
+
         @Override
         void onInitialize() {
             mInitialized = true;
+            if (mFailDuringInitialization) {
+                throw new RuntimeException("Simulated initialization failure");
+            }
         }
 
         @Override
