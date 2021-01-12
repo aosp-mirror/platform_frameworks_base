@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,13 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
-import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.appWindowBecomesVisible
-import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
-import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
-import com.android.server.wm.flicker.layerBecomesVisible
-import com.android.server.wm.flicker.focusChanges
-import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.dsl.runWithFlicker
-import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
-import com.android.server.wm.flicker.noUncoveredRegions
-import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
-import com.android.wm.shell.flicker.appPairsDividerBecomesVisible
+import com.android.server.wm.flicker.helpers.WindowUtils
+import com.android.server.wm.flicker.helpers.launchSplitScreen
+import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
+import com.android.wm.shell.flicker.dockedStackDividerIsInvisible
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -39,50 +32,46 @@ import org.junit.runners.Parameterized
 
 /**
  * Test open app to split screen.
- * To run this test: `atest WMShellFlickerTests:OpenAppToLegacySplitScreenTest`
+ * To run this test: `atest WMShellFlickerTests:NonResizableLaunchInLegacySplitScreenTest`
  */
-// TODO: Add back to pre-submit when stable.
-//@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class OpenAppToLegacySplitScreenTest(
+class NonResizableLaunchInLegacySplitScreenTest(
     rotationName: String,
     rotation: Int
 ) : SplitScreenTestBase(rotationName, rotation) {
+
     @Test
-    fun OpenAppToLegacySplitScreenTest() {
-        val testTag = "OpenAppToLegacySplitScreenTest"
+    fun testNonResizableLaunchInLegacySplitScreenTest() {
+        val testTag = "NonResizableLaunchInLegacySplitScreenTest"
 
         runWithFlicker(transitionSetup) {
             withTestName { testTag }
             repeat { SplitScreenHelper.TEST_REPETITIONS }
             transitions {
+                nonResizeableApp.launchViaIntent()
                 splitScreenApp.launchViaIntent()
-                device.pressHome()
-                this.setRotation(rotation)
                 device.launchSplitScreen()
+                nonResizeableApp.reopenAppFromOverview()
             }
             assertions {
-                windowManagerTrace {
-                    visibleWindowsShownMoreThanOneConsecutiveEntry()
-                    appWindowBecomesVisible(splitScreenApp.getPackage())
-                }
-
                 layersTrace {
-                    navBarLayerIsAlwaysVisible(bugId = 140855415)
-                    noUncoveredRegions(rotation, enabled = false)
-                    statusBarLayerIsAlwaysVisible(bugId = 140855415)
+                    dockedStackDividerIsInvisible()
+                    end("appsEndingBounds", enabled = false) {
+                        val displayBounds = WindowUtils.getDisplayBounds(rotation)
+                        this.hasVisibleRegion(nonResizeableApp.defaultWindowName, displayBounds)
+                    }
                     visibleLayersShownMoreThanOneConsecutiveEntry(
-                            listOf(LAUNCHER_PACKAGE_NAME))
-                    appPairsDividerBecomesVisible()
-                    layerBecomesVisible(splitScreenApp.getPackage())
+                            listOf(LAUNCHER_PACKAGE_NAME, splitScreenApp.defaultWindowName,
+                                    nonResizeableApp.defaultWindowName, LETTER_BOX_NAME)
+                    )
                 }
-
-                eventLog {
-                    focusChanges(splitScreenApp.`package`,
-                            "recents_animation_input_consumer", "NexusLauncherActivity",
-                            bugId = 151179149)
+                windowManagerTrace {
+                    end {
+                        showsAppWindow(nonResizeableApp.defaultWindowName)
+                        hidesAppWindow(splitScreenApp.defaultWindowName)
+                    }
                 }
             }
         }
