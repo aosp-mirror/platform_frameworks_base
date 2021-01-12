@@ -581,4 +581,9 @@
     <integer name="controls_max_columns_adjust_below_width_dp">320</integer>
     <!-- If the config font scale is >= this value, potentially adjust the number of columns-->
     <item name="controls_max_columns_adjust_above_font_scale" translatable="false" format="float" type="dimen">1.25</item>
+
+    <!-- Whether or not to show a notification for an unknown battery state -->
+    <bool name="config_showNotificationForUnknownBatteryState">false</bool>
+    <!-- content URL in a notification when ACTION_BATTERY_CHANGED.EXTRA_PRESENT field is false -->
+    <string translatable="false" name="config_batteryStateUnknownUrl"></string>
 </resources>

@@ -16,7 +16,11 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static android.os.BatteryManager.EXTRA_PRESENT;
+
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Intent;
@@ -30,6 +34,7 @@ import android.testing.TestableLooper;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.power.EnhancedEstimates;
+import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -93,4 +98,36 @@ public class BatteryControllerTest extends SysuiTestCase {
         Assert.assertFalse(mBatteryController.isAodPowerSave());
     }
 
+    @Test
+    public void testBatteryPresentState_notPresent() {
+        // GIVEN a battery state callback listening for changes
+        BatteryStateChangeCallback cb = mock(BatteryStateChangeCallback.class);
+        mBatteryController.addCallback(cb);
+
+        // WHEN the state of the battery becomes unknown
+        Intent i = new Intent(Intent.ACTION_BATTERY_CHANGED);
+        i.putExtra(EXTRA_PRESENT, false);
+        mBatteryController.onReceive(getContext(), i);
+
+        // THEN the callback is notified
+        verify(cb, atLeastOnce()).onBatteryUnknownStateChanged(true);
+    }
+
+    @Test
+    public void testBatteryPresentState_callbackAddedAfterStateChange() {
+        // GIVEN a battery state callback
+        BatteryController.BatteryStateChangeCallback cb =
+                mock(BatteryController.BatteryStateChangeCallback.class);
+
+        // GIVEN the state has changed before adding a new callback
+        Intent i = new Intent(Intent.ACTION_BATTERY_CHANGED);
+        i.putExtra(EXTRA_PRESENT, false);
+        mBatteryController.onReceive(getContext(), i);
+
+        // WHEN a callback is added
+        mBatteryController.addCallback(cb);
+
+        // THEN it is informed about the battery state
+        verify(cb, atLeastOnce()).onBatteryUnknownStateChanged(true);
+    }
 }
