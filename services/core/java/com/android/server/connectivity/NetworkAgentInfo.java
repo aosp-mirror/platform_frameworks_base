@@ -175,12 +175,17 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // Set to true when partial connectivity was detected.
     public boolean partialConnectivity;
 
-    // Captive portal info of the network, if any.
+    // Captive portal info of the network from RFC8908, if any.
     // Obtained by ConnectivityService and merged into NetworkAgent-provided information.
-    public CaptivePortalData captivePortalData;
+    public CaptivePortalData capportApiData;
 
     // The UID of the remote entity that created this Network.
     public final int creatorUid;
+
+    // Network agent portal info of the network, if any. This information is provided from
+    // non-RFC8908 sources, such as Wi-Fi Passpoint, which can provide information such as Venue
+    // URL, Terms & Conditions URL, and network friendly name.
+    public CaptivePortalData networkAgentPortalData;
 
     // Networks are lingered when they become unneeded as a result of their NetworkRequests being
     // satisfied by a higher-scoring network. so as to allow communication to wrap up before the
