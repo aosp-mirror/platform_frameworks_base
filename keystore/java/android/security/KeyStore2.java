@@ -23,6 +23,7 @@ import android.os.Build;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
+import android.security.keymaster.KeymasterDefs;
 import android.system.keystore2.IKeystoreService;
 import android.system.keystore2.KeyDescriptor;
 import android.system.keystore2.KeyEntryResponse;
@@ -107,7 +108,7 @@ public class KeyStore2 {
                 return request.execute(service);
             } catch (ServiceSpecificException e) {
                 Log.e(TAG, "KeyStore exception", e);
-                throw new KeyStoreException(e.errorCode, "");
+                throw getKeyStoreException(e.errorCode);
             } catch (RemoteException e) {
                 if (firstTry) {
                     Log.w(TAG, "Looks like we may have lost connection to the Keystore "
@@ -271,6 +272,42 @@ public class KeyStore2 {
         }
         if (wasInterrupted) {
             Thread.currentThread().interrupt();
+        }
+    }
+
+    static KeyStoreException getKeyStoreException(int errorCode) {
+        if (errorCode > 0) {
+            // KeyStore layer error
+            switch (errorCode) {
+                case ResponseCode.LOCKED:
+                    return new KeyStoreException(errorCode, "User authentication required");
+                case ResponseCode.UNINITIALIZED:
+                    return new KeyStoreException(errorCode, "Keystore not initialized");
+                case ResponseCode.SYSTEM_ERROR:
+                    return new KeyStoreException(errorCode, "System error");
+                case ResponseCode.PERMISSION_DENIED:
+                    return new KeyStoreException(errorCode, "Permission denied");
+                case ResponseCode.KEY_NOT_FOUND:
+                    return new KeyStoreException(errorCode, "Key not found");
+                case ResponseCode.VALUE_CORRUPTED:
+                    return new KeyStoreException(errorCode, "Key blob corrupted");
+                case ResponseCode.KEY_PERMANENTLY_INVALIDATED:
+                    return new KeyStoreException(errorCode, "Key permanently invalidated");
+                default:
+                    return new KeyStoreException(errorCode, String.valueOf(errorCode));
+            }
+        } else {
+            // Keymaster layer error
+            switch (errorCode) {
+                case KeymasterDefs.KM_ERROR_INVALID_AUTHORIZATION_TIMEOUT:
+                    // The name of this parameter significantly differs between Keymaster and
+                    // framework APIs. Use the framework wording to make life easier for developers.
+                    return new KeyStoreException(errorCode,
+                            "Invalid user authentication validity duration");
+                default:
+                    return new KeyStoreException(errorCode,
+                            KeymasterDefs.getErrorMessage(errorCode));
+            }
         }
     }
 
