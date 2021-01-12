@@ -18,6 +18,7 @@ package com.android.wm.shell.common;
 
 import android.annotation.NonNull;
 import android.os.Handler;
+import android.os.Looper;
 
 /** Executor implementation which is backed by a Handler. */
 public class HandlerExecutor implements ShellExecutor {
@@ -48,5 +49,15 @@ public class HandlerExecutor implements ShellExecutor {
     @Override
     public void removeCallbacks(@NonNull Runnable r) {
         mHandler.removeCallbacks(r);
+    }
+
+    @Override
+    public boolean hasCallback(Runnable r) {
+        return mHandler.hasCallbacks(r);
+    }
+
+    @Override
+    public Looper getLooper() {
+        return mHandler.getLooper();
     }
 }
