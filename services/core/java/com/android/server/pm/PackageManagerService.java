@@ -5584,6 +5584,9 @@ public class PackageManagerService extends IPackageManager.Stub
         if (applicationInfo == null) {
             throw new ParcelableException(new PackageManager.NameNotFoundException(packageName));
         }
+        final InstallSourceInfo installSourceInfo = getInstallSourceInfo(packageName);
+        final String installerPackageName =
+                installSourceInfo != null ? installSourceInfo.getInitiatingPackageName() : null;
 
         List<Pair<String, File>> filesToChecksum = new ArrayList<>();
 
@@ -5605,9 +5608,10 @@ public class PackageManagerService extends IPackageManager.Stub
             ApkChecksums.Injector injector = new ApkChecksums.Injector(
                     () -> mContext,
                     () -> handler,
-                    () -> mInjector.getIncrementalManager());
-            ApkChecksums.getChecksums(filesToChecksum, optional, required, trustedCerts,
-                    statusReceiver, injector);
+                    () -> mInjector.getIncrementalManager(),
+                    () -> mPmInternal);
+            ApkChecksums.getChecksums(filesToChecksum, optional, required, installerPackageName,
+                    trustedCerts, statusReceiver, injector);
         });
     }
 

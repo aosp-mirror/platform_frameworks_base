@@ -36,12 +36,14 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ApkChecksum;
 import android.content.pm.Checksum;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
 import android.content.pm.Signature;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.os.incremental.IncrementalManager;
 import android.os.incremental.IncrementalStorage;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Pair;
@@ -57,6 +59,7 @@ import android.util.apk.SignatureNotFoundException;
 import android.util.apk.VerityBuilder;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.security.VerityUtils;
 
 import java.io.BufferedInputStream;
@@ -121,12 +124,15 @@ public class ApkChecksums {
         private final Producer<Context> mContext;
         private final Producer<Handler> mHandlerProducer;
         private final Producer<IncrementalManager> mIncrementalManagerProducer;
+        private final Producer<PackageManagerInternal> mPackageManagerInternalProducer;
 
         Injector(Producer<Context> context, Producer<Handler> handlerProducer,
-                Producer<IncrementalManager> incrementalManagerProducer) {
+                Producer<IncrementalManager> incrementalManagerProducer,
+                Producer<PackageManagerInternal> packageManagerInternalProducer) {
             mContext = context;
             mHandlerProducer = handlerProducer;
             mIncrementalManagerProducer = incrementalManagerProducer;
+            mPackageManagerInternalProducer = packageManagerInternalProducer;
         }
 
         public Context getContext() {
@@ -139,6 +145,10 @@ public class ApkChecksums {
 
         public IncrementalManager getIncrementalManager() {
             return mIncrementalManagerProducer.produce();
+        }
+
+        public PackageManagerInternal getPackageManagerInternal() {
+            return mPackageManagerInternalProducer.produce();
         }
     }
 
@@ -169,104 +179,56 @@ public class ApkChecksums {
     /**
      * Serialize checksums to the stream in binary format.
      */
-    public static void writeChecksums(OutputStream os, ApkChecksum[] checksums)
+    public static void writeChecksums(OutputStream os, Checksum[] checksums)
             throws IOException, CertificateException {
         try (DataOutputStream dos = new DataOutputStream(os)) {
             dos.writeInt(checksums.length);
-            for (ApkChecksum checksum : checksums) {
-                final String splitName = checksum.getSplitName();
-                if (splitName == null) {
-                    dos.writeInt(-1);
-                } else {
-                    dos.writeInt(splitName.length());
-                    dos.writeUTF(splitName);
-                }
-
+            for (Checksum checksum : checksums) {
                 dos.writeInt(checksum.getType());
 
                 final byte[] valueBytes = checksum.getValue();
                 dos.writeInt(valueBytes.length);
                 dos.write(valueBytes);
-
-                final String packageName = checksum.getInstallerPackageName();
-                if (packageName == null) {
-                    dos.writeInt(-1);
-                } else {
-                    dos.writeInt(packageName.length());
-                    dos.writeUTF(packageName);
-                }
-
-                final Certificate cert = checksum.getInstallerCertificate();
-                final byte[] certBytes = (cert == null) ? null : cert.getEncoded();
-                if (certBytes == null) {
-                    dos.writeInt(-1);
-                } else {
-                    dos.writeInt(certBytes.length);
-                    dos.write(certBytes);
-                }
             }
         }
     }
 
     /**
      * Deserialize array of checksums previously stored in
-     * {@link #writeChecksums(File, ApkChecksum[])}.
+     * {@link #writeChecksums(OutputStream, Checksum[])}.
      */
-    private static ApkChecksum[] readChecksums(File file) throws IOException {
+    private static Checksum[] readChecksums(File file) throws IOException {
         try (InputStream is = new FileInputStream(file);
              DataInputStream dis = new DataInputStream(is)) {
             final int size = dis.readInt();
-            ApkChecksum[] checksums = new ApkChecksum[size];
+            Checksum[] checksums = new Checksum[size];
             for (int i = 0; i < size; ++i) {
-                final String splitName;
-                if (dis.readInt() < 0) {
-                    splitName = null;
-                } else {
-                    splitName = dis.readUTF();
-                }
-
                 final int type = dis.readInt();
 
                 final byte[] valueBytes = new byte[dis.readInt()];
                 dis.read(valueBytes);
-
-                final String packageName;
-                if (dis.readInt() < 0) {
-                    packageName = null;
-                } else {
-                    packageName = dis.readUTF();
-                }
-
-                final byte[] certBytes;
-                final int certBytesLength = dis.readInt();
-                if (certBytesLength < 0) {
-                    certBytes = null;
-                } else {
-                    certBytes = new byte[certBytesLength];
-                    dis.read(certBytes);
-                }
-                checksums[i] = new ApkChecksum(splitName, new Checksum(type, valueBytes),
-                        packageName, certBytes);
+                checksums[i] = new Checksum(type, valueBytes);
             }
             return checksums;
         }
     }
 
-
     /**
      * Fetch or calculate checksums for the collection of files.
      *
-     * @param filesToChecksum   split name, null for base and File to fetch checksums for
-     * @param optional          mask to fetch readily available checksums
-     * @param required          mask to forcefully calculate if not available
-     * @param trustedInstallers array of certificate to trust, two specific cases:
-     *                          null - trust anybody,
-     *                          [] - trust nobody.
-     * @param statusReceiver    to receive the resulting checksums
+     * @param filesToChecksum       split name, null for base and File to fetch checksums for
+     * @param optional              mask to fetch readily available checksums
+     * @param required              mask to forcefully calculate if not available
+     * @param installerPackageName  package name of the installer of the packages
+     * @param trustedInstallers     array of certificate to trust, two specific cases:
+     *                              null - trust anybody,
+     *                              [] - trust nobody.
+     * @param statusReceiver        to receive the resulting checksums
      */
     public static void getChecksums(List<Pair<String, File>> filesToChecksum,
             @Checksum.Type int optional,
             @Checksum.Type int required,
+            @Nullable String installerPackageName,
             @Nullable Certificate[] trustedInstallers,
             @NonNull IntentSender statusReceiver,
             @NonNull Injector injector) {
@@ -278,8 +240,8 @@ public class ApkChecksums {
             result.add(checksums);
 
             try {
-                getAvailableApkChecksums(split, file, optional | required, trustedInstallers,
-                        checksums);
+                getAvailableApkChecksums(split, file, optional | required, installerPackageName,
+                        trustedInstallers, checksums, injector);
             } catch (Throwable e) {
                 Slog.e(TAG, "Preferred checksum calculation error", e);
             }
@@ -337,18 +299,21 @@ public class ApkChecksums {
     /**
      * Fetch readily available checksums - enforced by kernel or provided by Installer.
      *
-     * @param split             split name, null for base
-     * @param file              to fetch checksums for
-     * @param types             mask to fetch checksums
-     * @param trustedInstallers array of certificate to trust, two specific cases:
-     *                          null - trust anybody,
-     *                          [] - trust nobody.
-     * @param checksums         resulting checksums
+     * @param split                 split name, null for base
+     * @param file                  to fetch checksums for
+     * @param types                 mask to fetch checksums
+     * @param installerPackageName  package name of the installer of the packages
+     * @param trustedInstallers     array of certificate to trust, two specific cases:
+     *                              null - trust anybody,
+     *                              [] - trust nobody.
+     * @param checksums             resulting checksums
      */
     private static void getAvailableApkChecksums(String split, File file,
             @Checksum.Type int types,
+            @Nullable String installerPackageName,
             @Nullable Certificate[] trustedInstallers,
-            Map<Integer, ApkChecksum> checksums) {
+            Map<Integer, ApkChecksum> checksums,
+            @NonNull Injector injector) {
         final String filePath = file.getAbsolutePath();
 
         // Always available: FSI or IncFs.
@@ -370,24 +335,72 @@ public class ApkChecksums {
             }
         }
 
-        if (trustedInstallers == null || trustedInstallers.length > 0) {
-            final File digestsFile = new File(buildDigestsPathForApk(filePath));
-            if (digestsFile.exists()) {
-                try {
-                    final ApkChecksum[] digests = readChecksums(digestsFile);
-                    final Set<Signature> trusted = convertToSet(trustedInstallers);
-                    for (ApkChecksum digest : digests) {
-                        if (isRequired(digest.getType(), types, checksums) && isTrusted(digest,
-                                trusted)) {
-                            checksums.put(digest.getType(), digest);
-                        }
-                    }
-                } catch (IOException e) {
-                    Slog.e(TAG, "Error reading .digests", e);
-                } catch (CertificateEncodingException e) {
-                    Slog.e(TAG, "Error encoding trustedInstallers", e);
+        getInstallerChecksums(split, file, types, installerPackageName, trustedInstallers,
+                checksums, injector);
+    }
+
+    private static void getInstallerChecksums(String split, File file,
+            @Checksum.Type int types,
+            @Nullable String installerPackageName,
+            @Nullable Certificate[] trustedInstallers,
+            Map<Integer, ApkChecksum> checksums,
+            @NonNull Injector injector) {
+        if (TextUtils.isEmpty(installerPackageName)) {
+            return;
+        }
+        if (trustedInstallers != null && trustedInstallers.length == 0) {
+            return;
+        }
+
+        final File digestsFile = new File(buildDigestsPathForApk(file.getAbsolutePath()));
+        if (!digestsFile.exists()) {
+            return;
+        }
+
+        final AndroidPackage installer = injector.getPackageManagerInternal().getPackage(
+                installerPackageName);
+        if (installer == null) {
+            Slog.e(TAG, "Installer package not found.");
+            return;
+        }
+
+        // Obtaining array of certificates used for signing the installer package.
+        final Signature[] certs = installer.getSigningDetails().signatures;
+        final Signature[] pastCerts = installer.getSigningDetails().pastSigningCertificates;
+        if (certs == null || certs.length == 0 || certs[0] == null) {
+            Slog.e(TAG, "Can't obtain calling installer package's certificates.");
+            return;
+        }
+        // According to V2/V3 signing schema, the first certificate corresponds to the public key
+        // in the signing block.
+        byte[] trustedCertBytes = certs[0].toByteArray();
+
+        try {
+            final Checksum[] digests = readChecksums(digestsFile);
+            final Set<Signature> trusted = convertToSet(trustedInstallers);
+
+            if (trusted != null && !trusted.isEmpty()) {
+                // Obtaining array of certificates used for signing the installer package.
+                Signature trustedCert = isTrusted(certs, trusted);
+                if (trustedCert == null) {
+                    trustedCert = isTrusted(pastCerts, trusted);
+                }
+                if (trustedCert == null) {
+                    return;
+                }
+                trustedCertBytes = trustedCert.toByteArray();
+            }
+
+            for (Checksum digest : digests) {
+                if (isRequired(digest.getType(), types, checksums)) {
+                    checksums.put(digest.getType(),
+                            new ApkChecksum(split, digest, installerPackageName, trustedCertBytes));
                 }
             }
+        } catch (IOException e) {
+            Slog.e(TAG, "Error reading .digests", e);
+        } catch (CertificateEncodingException e) {
+            Slog.e(TAG, "Error encoding trustedInstallers", e);
         }
     }
 
@@ -494,12 +507,16 @@ public class ApkChecksums {
         return set;
     }
 
-    private static boolean isTrusted(ApkChecksum checksum, Set<Signature> trusted) {
-        if (trusted == null) {
-            return true;
+    private static Signature isTrusted(Signature[] signatures, Set<Signature> trusted) {
+        if (signatures == null) {
+            return null;
         }
-        final Signature signature = new Signature(checksum.getInstallerCertificateBytes());
-        return trusted.contains(signature);
+        for (Signature signature : signatures) {
+            if (trusted.contains(signature)) {
+                return signature;
+            }
+        }
+        return null;
     }
 
     private static ApkChecksum extractHashFromFS(String split, String filePath) {
