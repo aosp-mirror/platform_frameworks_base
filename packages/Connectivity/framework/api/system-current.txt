@@ -312,7 +312,14 @@ package android.net {
     method public int getProviderId();
     method public void onNetworkRequestWithdrawn(@NonNull android.net.NetworkRequest);
     method public void onNetworkRequested(@NonNull android.net.NetworkRequest, @IntRange(from=0, to=99) int, int);
+    method @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public void registerNetworkOffer(@NonNull android.net.NetworkScore, @NonNull android.net.NetworkCapabilities, @NonNull java.util.concurrent.Executor, @NonNull android.net.NetworkProvider.NetworkOfferCallback);
+    method @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public void unregisterNetworkOffer(@NonNull android.net.NetworkProvider.NetworkOfferCallback);
     field public static final int ID_NONE = -1; // 0xffffffff
+  }
+
+  public static interface NetworkProvider.NetworkOfferCallback {
+    method public void onNetworkNeeded(@NonNull android.net.NetworkRequest);
+    method public void onNetworkUnneeded(@NonNull android.net.NetworkRequest);
   }
 
   public class NetworkReleasedException extends java.lang.Exception {
