@@ -233,8 +233,10 @@ public class RescuePartyTest {
                 verifiedTimesMap);
 
         noteBoot(4);
+        assertTrue(RescueParty.isRebootPropertySet());
 
-        assertTrue(RescueParty.isAttemptingFactoryReset());
+        noteBoot(5);
+        assertTrue(RescueParty.isFactoryResetPropertySet());
     }
 
     @Test
@@ -255,7 +257,10 @@ public class RescuePartyTest {
                 /*configResetVerifiedTimesMap=*/ null);
 
         notePersistentAppCrash(4);
-        assertTrue(RescueParty.isAttemptingFactoryReset());
+        assertTrue(RescueParty.isRebootPropertySet());
+
+        notePersistentAppCrash(5);
+        assertTrue(RescueParty.isFactoryResetPropertySet());
     }
 
     @Test
@@ -306,7 +311,11 @@ public class RescuePartyTest {
 
         observer.execute(new VersionedPackage(
                 CALLING_PACKAGE1, 1), PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 4);
-        assertTrue(RescueParty.isAttemptingFactoryReset());
+        assertTrue(RescueParty.isRebootPropertySet());
+
+        observer.execute(new VersionedPackage(
+                CALLING_PACKAGE1, 1), PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 5);
+        assertTrue(RescueParty.isFactoryResetPropertySet());
     }
 
     @Test
@@ -367,7 +376,11 @@ public class RescuePartyTest {
 
         observer.execute(new VersionedPackage(
                 CALLING_PACKAGE1, 1), PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 4);
-        assertTrue(RescueParty.isAttemptingFactoryReset());
+        assertTrue(RescueParty.isRebootPropertySet());
+
+        observer.execute(new VersionedPackage(
+                CALLING_PACKAGE1, 1), PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 5);
+        assertTrue(RescueParty.isFactoryResetPropertySet());
     }
 
     @Test
@@ -376,6 +389,7 @@ public class RescuePartyTest {
             noteBoot(i + 1);
         }
         assertTrue(RescueParty.isAttemptingFactoryReset());
+        assertTrue(RescueParty.isFactoryResetPropertySet());
     }
 
     @Test
@@ -424,7 +438,7 @@ public class RescuePartyTest {
         for (int i = 0; i < LEVEL_FACTORY_RESET; i++) {
             noteBoot(i + 1);
         }
-        assertFalse(RescueParty.isAttemptingFactoryReset());
+        assertFalse(RescueParty.isFactoryResetPropertySet());
 
         // Restore the property value initialized in SetUp()
         SystemProperties.set(PROP_DISABLE_FACTORY_RESET_FLAG, "");
