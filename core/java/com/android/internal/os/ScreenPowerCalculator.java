@@ -16,7 +16,11 @@
 
 package com.android.internal.os;
 
+import android.os.BatteryConsumer;
 import android.os.BatteryStats;
+import android.os.BatteryUsageStats;
+import android.os.BatteryUsageStatsQuery;
+import android.os.SystemBatteryConsumer;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.SparseArray;
@@ -30,10 +34,29 @@ public class ScreenPowerCalculator extends PowerCalculator {
     private static final String TAG = "ScreenPowerCalculator";
     private static final boolean DEBUG = BatteryStatsHelper.DEBUG;
 
-    private final PowerProfile mPowerProfile;
+    private final UsageBasedPowerEstimator mScreenOnPowerEstimator;
+    private final UsageBasedPowerEstimator mScreenFullPowerEstimator;
 
     public ScreenPowerCalculator(PowerProfile powerProfile) {
-        mPowerProfile = powerProfile;
+        mScreenOnPowerEstimator = new UsageBasedPowerEstimator(
+                powerProfile.getAveragePower(PowerProfile.POWER_SCREEN_ON));
+        mScreenFullPowerEstimator = new UsageBasedPowerEstimator(
+                powerProfile.getAveragePower(PowerProfile.POWER_SCREEN_FULL));
+    }
+
+    @Override
+    public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
+            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query,
+            SparseArray<UserHandle> asUsers) {
+        final long durationMs = computeDuration(batteryStats, rawRealtimeUs,
+                BatteryStats.STATS_SINCE_CHARGED);
+        final double powerMah = computePower(batteryStats, rawRealtimeUs,
+                BatteryStats.STATS_SINCE_CHARGED, durationMs);
+        if (powerMah != 0) {
+            builder.getOrCreateSystemBatteryConsumerBuilder(SystemBatteryConsumer.DRAIN_TYPE_SCREEN)
+                    .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_USAGE, durationMs)
+                    .setConsumedPower(BatteryConsumer.POWER_COMPONENT_USAGE, powerMah);
+        }
     }
 
     /**
@@ -42,30 +65,35 @@ public class ScreenPowerCalculator extends PowerCalculator {
     @Override
     public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
-        double power = 0;
-        final long screenOnTimeMs = batteryStats.getScreenOnTime(rawRealtimeUs, statsType) / 1000;
-        power += screenOnTimeMs * mPowerProfile.getAveragePower(PowerProfile.POWER_SCREEN_ON);
-        final double screenFullPower =
-                mPowerProfile.getAveragePower(PowerProfile.POWER_SCREEN_FULL);
-        for (int i = 0; i < BatteryStats.NUM_SCREEN_BRIGHTNESS_BINS; i++) {
-            final double screenBinPower = screenFullPower * (i + 0.5f)
-                    / BatteryStats.NUM_SCREEN_BRIGHTNESS_BINS;
-            final long brightnessTime =
-                    batteryStats.getScreenBrightnessTime(i, rawRealtimeUs, statsType) / 1000;
-            final double p = screenBinPower * brightnessTime;
-            if (DEBUG && p != 0) {
-                Log.d(TAG, "Screen bin #" + i + ": time=" + brightnessTime
-                        + " power=" + formatCharge(p / (60 * 60 * 1000)));
-            }
-            power += p;
-        }
-        power /= (60 * 60 * 1000); // To hours
-        if (power != 0) {
+        final long durationMs = computeDuration(batteryStats, rawRealtimeUs, statsType);
+        final double powerMah = computePower(batteryStats, rawRealtimeUs, statsType, durationMs);
+        if (powerMah != 0) {
             final BatterySipper bs = new BatterySipper(BatterySipper.DrainType.SCREEN, null, 0);
-            bs.usagePowerMah = power;
-            bs.usageTimeMs = screenOnTimeMs;
+            bs.usagePowerMah = powerMah;
+            bs.usageTimeMs = durationMs;
             bs.sumPower();
             sippers.add(bs);
         }
+    }
+
+    private long computeDuration(BatteryStats batteryStats, long rawRealtimeUs, int statsType) {
+        return batteryStats.getScreenOnTime(rawRealtimeUs, statsType) / 1000;
+    }
+
+    private double computePower(BatteryStats batteryStats, long rawRealtimeUs, int statsType,
+            long durationMs) {
+        double power = mScreenOnPowerEstimator.calculatePower(durationMs);
+        for (int i = 0; i < BatteryStats.NUM_SCREEN_BRIGHTNESS_BINS; i++) {
+            final long brightnessTime =
+                    batteryStats.getScreenBrightnessTime(i, rawRealtimeUs, statsType) / 1000;
+            final double binPowerMah = mScreenFullPowerEstimator.calculatePower(brightnessTime)
+                    * (i + 0.5f) / BatteryStats.NUM_SCREEN_BRIGHTNESS_BINS;
+            if (DEBUG && binPowerMah != 0) {
+                Log.d(TAG, "Screen bin #" + i + ": time=" + brightnessTime
+                        + " power=" + formatCharge(binPowerMah));
+            }
+            power += binPowerMah;
+        }
+        return power;
     }
 }
