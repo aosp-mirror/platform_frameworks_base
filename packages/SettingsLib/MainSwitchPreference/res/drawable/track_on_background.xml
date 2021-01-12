@@ -20,7 +20,8 @@
     android:width="48dp"
     android:height="24dp"
     android:viewportWidth="48"
-    android:viewportHeight="24">
+    android:viewportHeight="24"
+    android:tint="@*android:color/switch_track_material">
 
   <group>
     <clip-path
@@ -28,7 +29,7 @@
 
     <path
         android:pathData="M0 0V24H48V0"
-        android:fillColor="@color/track_on" />
+        android:fillColor="@*android:color/white_disabled_material" />
   </group>
 
 </vector>
