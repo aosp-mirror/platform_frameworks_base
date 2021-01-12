@@ -10436,11 +10436,27 @@ public final class Settings {
 
         /**
          * Whether to allow non-resizable apps to be freeform.
+         *
+         * TODO(b/176061101) remove after update all usages
+         * @deprecated use {@link #DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW}
          * @hide
          */
+        @Deprecated
         @Readable
         public static final String DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM =
                 "enable_sizecompat_freeform";
+
+        /**
+         * Whether to allow non-resizable apps to be shown in multi-window. The app will be
+         * letterboxed if the request orientation is not met, and will be shown in size-compat
+         * mode if the container size has changed.
+         * @hide
+         */
+        @TestApi
+        @Readable
+        @SuppressLint("NoSettingsProvider")
+        public static final String DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW =
+                "enable_non_resizable_multi_window";
 
         /**
          * If true, shadows drawn around the window will be rendered by the system compositor. If

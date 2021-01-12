@@ -1963,7 +1963,20 @@ class Task extends WindowContainer<WindowContainer> {
                 && mAtmService.mSupportsSplitScreenMultiWindow
                 && (mAtmService.mForceResizableActivities
                         || (isResizeable(false /* checkSupportsPip */)
-                                && !ActivityInfo.isPreserveOrientationMode(mResizeMode)));
+                                && !ActivityInfo.isPreserveOrientationMode(mResizeMode))
+                        || mAtmService.mSupportsNonResizableMultiWindow);
+    }
+
+    boolean supportsFreeform() {
+        return mAtmService.mSupportsFreeformWindowManagement
+                && (isResizeable(false /* checkSupportsPip */)
+                        || mAtmService.mSupportsNonResizableMultiWindow);
+    }
+
+    boolean supportsNonPipMultiWindow() {
+        return mAtmService.mSupportsMultiWindow
+                && (isResizeable(false /* checkSupportsPip */)
+                    || mAtmService.mSupportsNonResizableMultiWindow);
     }
 
     /**
@@ -2809,14 +2822,15 @@ class Task extends WindowContainer<WindowContainer> {
         }
 
         // Do not allow non-resizable tasks to be in a multi-window mode, unless it is in pinned
-        // windowing mode or is in size compat freeform mode
+        // windowing mode or supports non-resizable tasks in multi-window mode.
         if (!isResizeable()) {
             final int candidateWindowingMode =
                     windowingMode != WINDOWING_MODE_UNDEFINED ? windowingMode : parentWindowingMode;
             if (WindowConfiguration.inMultiWindowMode(candidateWindowingMode)
                     && candidateWindowingMode != WINDOWING_MODE_PINNED
                     && (candidateWindowingMode != WINDOWING_MODE_FREEFORM
-                            || !mTaskSupervisor.mService.mSizeCompatFreeform)) {
+                            || !mTaskSupervisor.mService.mSizeCompatFreeform)
+                    && !mTaskSupervisor.mService.mSupportsNonResizableMultiWindow) {
                 getResolvedOverrideConfiguration().windowConfiguration.setWindowingMode(
                         WINDOWING_MODE_FULLSCREEN);
             }
@@ -5352,7 +5366,7 @@ class Task extends WindowContainer<WindowContainer> {
         }
         if (likelyResolvedMode != WINDOWING_MODE_FULLSCREEN
                 && topActivity != null && !topActivity.noDisplay
-                && topActivity.isNonResizableOrForcedResizable(likelyResolvedMode)) {
+                && topActivity.canForceResizeNonResizable(likelyResolvedMode)) {
             // Inform the user that they are starting an app that may not work correctly in
             // multi-window mode.
             final String packageName = topActivity.info.applicationInfo.packageName;

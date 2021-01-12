@@ -40,6 +40,7 @@ import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.myPid;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
+import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
@@ -795,6 +796,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES);
         private final Uri mSizeCompatFreeformUri = Settings.Global.getUriFor(
                 DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM);
+        private final Uri mSupportsNonResizableMultiWindowUri = Settings.Global.getUriFor(
+                DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW);
         private final Uri mRenderShadowsInCompositorUri = Settings.Global.getUriFor(
                 DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR);
         private final Uri mDisplaySettingsPathUri = Settings.Global.getUriFor(
@@ -820,6 +823,8 @@ public class WindowManagerService extends IWindowManager.Stub
             resolver.registerContentObserver(mFreeformWindowUri, false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(mForceResizableUri, false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(mSizeCompatFreeformUri, false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(mSupportsNonResizableMultiWindowUri, false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(mRenderShadowsInCompositorUri, false, this,
                     UserHandle.USER_ALL);
@@ -860,6 +865,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (mSizeCompatFreeformUri.equals(uri)) {
                 updateSizeCompatFreeform();
+                return;
+            }
+
+            if (mSupportsNonResizableMultiWindowUri.equals(uri)) {
+                updateSupportsNonResizableMultiWindow();
                 return;
             }
 
@@ -961,6 +971,14 @@ public class WindowManagerService extends IWindowManager.Stub
                     DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM, 0) != 0;
 
             mAtmService.mSizeCompatFreeform = sizeCompatFreeform;
+        }
+
+        void updateSupportsNonResizableMultiWindow() {
+            ContentResolver resolver = mContext.getContentResolver();
+            final boolean supportsNonResizableMultiWindow = Settings.Global.getInt(resolver,
+                    DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW, 0) != 0;
+
+            mAtmService.mSupportsNonResizableMultiWindow = supportsNonResizableMultiWindow;
         }
 
         void updateDisplaySettingsLocation() {

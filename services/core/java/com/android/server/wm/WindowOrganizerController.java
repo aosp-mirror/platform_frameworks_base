@@ -490,15 +490,23 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     return 0;
                 }
                 if (task.getParent() != newParent) {
-                    if (newParent instanceof TaskDisplayArea) {
+                    if (newParent.asTaskDisplayArea() != null) {
                         // For now, reparenting to displayarea is different from other reparents...
-                        as.reparent((TaskDisplayArea) newParent, hop.getToTop());
-                    } else if (newParent.inMultiWindowMode() && !task.isResizeable()
-                            && task.isLeafTask()) {
-                        Slog.w(TAG, "Can't support task that doesn't support multi-window mode in"
-                                + " multi-window mode... newParent=" + newParent + " task=" + task);
-                        return 0;
+                        as.reparent(newParent.asTaskDisplayArea(), hop.getToTop());
                     } else {
+                        if (newParent.inMultiWindowMode() && task.isLeafTask()) {
+                            if (newParent.inPinnedWindowingMode()) {
+                                Slog.w(TAG, "Can't support moving a task to another PIP window..."
+                                        + " newParent=" + newParent + " task=" + task);
+                                return 0;
+                            }
+                            if (!task.supportsNonPipMultiWindow()) {
+                                Slog.w(TAG, "Can't support task that doesn't support multi-window"
+                                        + " mode in multi-window mode... newParent=" + newParent
+                                        + " task=" + task);
+                                return 0;
+                            }
+                        }
                         task.reparent((Task) newParent,
                                 hop.getToTop() ? POSITION_TOP : POSITION_BOTTOM,
                                 false /*moveParents*/, "sanitizeAndApplyHierarchyOp");
@@ -550,6 +558,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     + newParent + " hop=" + hop);
             return 0;
         }
+        if (newParent.inPinnedWindowingMode()) {
+            Slog.e(TAG, "reparentChildrenTasksHierarchyOp newParent in PIP="
+                    + newParent + " hop=" + hop);
+            return 0;
+        }
 
         final boolean newParentInMultiWindow = newParent.inMultiWindowMode();
         final WindowContainer finalCurrentParent = currentParent;
@@ -567,11 +580,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 // are reparenting from.
                 return;
             }
-
-            if (newParentInMultiWindow && !task.isResizeable()) {
-                Slog.e(TAG, "reparentChildrenTasksHierarchyOp non-resizeable task=" + task);
+            if (newParentInMultiWindow && !task.supportsNonPipMultiWindow()) {
+                Slog.e(TAG, "reparentChildrenTasksHierarchyOp non-resizeable task to multi window,"
+                        + " task=" + task);
+                return;
             }
-
             if (!ArrayUtils.contains(hop.getActivityTypes(), task.getActivityType())) return;
             if (!ArrayUtils.contains(hop.getWindowingModes(), task.getWindowingMode())) return;
 
