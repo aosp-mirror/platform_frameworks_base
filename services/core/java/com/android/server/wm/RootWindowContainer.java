@@ -2104,30 +2104,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 onTop);
     }
 
-    boolean moveTopRootTaskActivityToPinnedRootTask(int rootTaskId) {
-        final Task rootTask = getRootTask(rootTaskId);
-        if (rootTask == null) {
-            throw new IllegalArgumentException(
-                    "moveTopStackActivityToPinnedRootTask: Unknown rootTaskId=" + rootTaskId);
-        }
-
-        final ActivityRecord r = rootTask.topRunningActivity();
-        if (r == null) {
-            Slog.w(TAG, "moveTopStackActivityToPinnedRootTask: No top running activity"
-                    + " in rootTask=" + rootTask);
-            return false;
-        }
-
-        if (!mService.mForceResizableActivities && !r.supportsPictureInPicture()) {
-            Slog.w(TAG, "moveTopStackActivityToPinnedRootTask: Picture-In-Picture not supported "
-                    + "for r=" + r);
-            return false;
-        }
-
-        moveActivityToPinnedRootTask(r, "moveTopStackActivityToPinnedRootTask");
-        return true;
-    }
-
     void moveActivityToPinnedRootTask(ActivityRecord r, String reason) {
         mService.deferWindowLayout();
 
@@ -2153,13 +2129,16 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 rootTask = task;
             } else {
                 // In the case of multiple activities, we will create a new task for it and then
-                // move the PIP activity into the task.
+                // move the PIP activity into the task. Note that we explicitly defer the task
+                // appear being sent in this case and mark this newly created task to been visible.
                 rootTask = new Task.Builder(mService)
                         .setActivityType(r.getActivityType())
                         .setOnTop(true)
                         .setActivityInfo(r.info)
                         .setParent(taskDisplayArea)
                         .setIntent(r.intent)
+                        .setDeferTaskAppear(true)
+                        .setHasBeenVisible(true)
                         .build();
                 // It's possible the task entering PIP is in freeform, so save the last
                 // non-fullscreen bounds. Then when this new PIP task exits PIP, it can restore
@@ -2167,11 +2146,18 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 rootTask.setLastNonFullscreenBounds(task.mLastNonFullscreenBounds);
                 rootTask.setBounds(task.getBounds());
 
+                // Move reparent bounds from original task to the new one.
+                rootTask.mLastRecentsAnimationBounds.set(task.mLastRecentsAnimationBounds);
+                task.mLastRecentsAnimationBounds.setEmpty();
+
                 // There are multiple activities in the task and moving the top activity should
                 // reveal/leave the other activities in their original task.
                 // On the other hand, ActivityRecord#onParentChanged takes care of setting the
                 // up-to-dated pinned stack information on this newly created stack.
                 r.reparent(rootTask, MAX_VALUE, reason);
+
+                // Ensure the leash of new task is in sync with its current bounds after reparent.
+                rootTask.maybeApplyLastRecentsAnimationBounds();
 
                 // In the case of this activity entering PIP due to it being moved to the back,
                 // the old activity would have a TRANSIT_TASK_TO_BACK transition that needs to be
@@ -2201,6 +2187,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // TODO(task-org): Figure-out more structured way to do this long term.
             r.setWindowingMode(intermediateWindowingMode);
             rootTask.setWindowingMode(WINDOWING_MODE_PINNED);
+            rootTask.setDeferTaskAppear(false);
 
             // Reset the state that indicates it can enter PiP while pausing after we've moved it
             // to the pinned stack

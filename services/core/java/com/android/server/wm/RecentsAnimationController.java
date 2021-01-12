@@ -33,7 +33,6 @@ import static com.android.server.wm.WindowManagerInternal.AppTransitionListener;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.window.TaskSnapshot;
 import android.app.WindowConfiguration;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -54,6 +53,7 @@ import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowInsets.Type;
+import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
@@ -1014,6 +1014,7 @@ public class RecentsAnimationController implements DeathRecipient {
                         .setPosition(taskSurface, mFinishBounds.left, mFinishBounds.top)
                         .setWindowCrop(taskSurface, mFinishBounds.width(), mFinishBounds.height())
                         .apply();
+                mTask.mLastRecentsAnimationBounds.set(mFinishBounds);
                 mFinishBounds.setEmpty();
             } else if (!mTask.isAttached()) {
                 // Apply the task's pending transaction in case it is detached and its transaction
