@@ -105,7 +105,7 @@ private:
 struct FrontendClient : public RefBase {
 
 public:
-    FrontendClient(shared_ptr<ITunerFrontend> tunerFrontend, int frontendHandle);
+    FrontendClient(shared_ptr<ITunerFrontend> tunerFrontend, int id);
     ~FrontendClient();
 
     /**
@@ -135,10 +135,6 @@ public:
 
     int getId();
 
-    static int getResourceIdFromHandle(int handle) {
-        return (handle & 0x00ff0000) >> 16;
-    }
-
 private:
     /**
      * An AIDL Tuner Frontend Singleton assigned at the first time when the Tuner Client
@@ -163,7 +159,7 @@ private:
     shared_ptr<TunerFrontendCallback> mAidlCallback;
     sp<HidlFrontendCallback> mHidlCallback;
 
-    int mFrontendHandle;
+    int mId;
 };
 }  // namespace android
 

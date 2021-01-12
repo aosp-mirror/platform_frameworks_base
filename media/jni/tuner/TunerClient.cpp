@@ -99,9 +99,10 @@ sp<FrontendClient> TunerClient::openFrontend(int frontendHandle) {
     }
 
     if (mTuner != NULL) {
-        sp<IFrontend> hidlFrontend = openHidlFrontendByHandle(frontendHandle);
+        int id = getResourceIdFromHandle(frontendHandle, FRONTEND);
+        sp<IFrontend> hidlFrontend = openHidlFrontendById(id);
         if (hidlFrontend != NULL) {
-            sp<FrontendClient> frontendClient = new FrontendClient(NULL, frontendHandle);
+            sp<FrontendClient> frontendClient = new FrontendClient(NULL, id);
             frontendClient->setHidlFrontend(hidlFrontend);
             return frontendClient;
         }
@@ -193,10 +194,9 @@ sp<ITuner> TunerClient::getHidlTuner() {
      return mTuner;
 }
 
-sp<IFrontend> TunerClient::openHidlFrontendByHandle(int frontendHandle) {
+sp<IFrontend> TunerClient::openHidlFrontendById(int id) {
     sp<IFrontend> fe;
     Result res;
-    uint32_t id = getResourceIdFromHandle(frontendHandle);
     mTuner->openFrontendById(id, [&](Result r, const sp<IFrontend>& frontend) {
         fe = frontend;
         res = r;
@@ -245,5 +245,16 @@ FrontendInfo TunerClient::FrontendInfoAidlToHidl(TunerServiceFrontendInfo aidlFr
     // TODO: handle Frontend caps
 
     return hidlFrontendInfo;
+}
+
+int TunerClient::getResourceIdFromHandle(int handle, int /*resourceType*/) {
+    return (handle & 0x00ff0000) >> 16;
+}
+
+int TunerClient::getResourceHandleFromId(int id, int resourceType) {
+    // TODO: build up randomly generated id to handle mapping
+    return (resourceType & 0x000000ff) << 24
+            | (id << 16)
+            | (mResourceRequestCount++ & 0xffff);
 }
 }  // namespace android

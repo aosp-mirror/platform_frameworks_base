@@ -37,6 +37,13 @@ using namespace std;
 
 namespace android {
 
+typedef enum {
+    FRONTEND,
+    LNB,
+    DEMUX,
+    DESCRAMBLER,
+} TunerResourceType;
+
 struct TunerClient : public RefBase {
 
 public:
@@ -95,9 +102,16 @@ public:
      */
     int getHalTunerVersion() { return mTunerVersion; }
 
-    static int getResourceIdFromHandle(int handle) {
-        return (handle & 0x00ff0000) >> 16;
-    }
+private:
+    sp<ITuner> getHidlTuner();
+    sp<IFrontend> openHidlFrontendById(int id);
+    sp<IDemux> openHidlDemux();
+    Result getHidlFrontendInfo(int id, FrontendInfo& info);
+    FrontendInfo FrontendInfoAidlToHidl(TunerServiceFrontendInfo aidlFrontendInfo);
+
+    int getResourceIdFromHandle(int handle, int resourceType);
+
+    int getResourceHandleFromId(int id, int resourceType);
 
 private:
     /**
@@ -124,11 +138,7 @@ private:
     // while the low 16 bits are the minor version. Default value is unknown version 0.
     static int mTunerVersion;
 
-    sp<ITuner> getHidlTuner();
-    sp<IFrontend> openHidlFrontendByHandle(int frontendHandle);
-    sp<IDemux> openHidlDemux();
-    Result getHidlFrontendInfo(int id, FrontendInfo& info);
-    FrontendInfo FrontendInfoAidlToHidl(TunerServiceFrontendInfo aidlFrontendInfo);
+    int mResourceRequestCount = 0;
 };
 }  // namespace android
 

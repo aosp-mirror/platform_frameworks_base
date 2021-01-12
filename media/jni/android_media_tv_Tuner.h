@@ -217,7 +217,6 @@ struct JTuner : public RefBase {
     int stopScan();
     int setLnb(int id);
     int setLna(bool enable);
-    jintArray getLnbIds();
     jobject openLnbById(int id);
     jobject openLnbByName(jstring name);
     jobject openFilter(DemuxFilterType type, int bufferSize);
@@ -247,7 +246,6 @@ private:
     sp<::android::hardware::tv::tuner::V1_1::IFrontend> mFe_1_1;
     sp<FrontendClient> mFeClient;
     int mFeId;
-    hidl_vec<LnbId> mLnbIds;
     // TODO: remove after migrate to client lib
     sp<ILnb> mLnb;
     // TODO: remove after migrate to client lib
