@@ -973,6 +973,12 @@ Status StatsService::informOnePackageRemoved(const string& app, int32_t uid) {
     return Status::ok();
 }
 
+Status StatsService::informAnomalyAlarmFired() {
+    ENFORCE_UID(AID_SYSTEM);
+    // Anomaly alarms are handled internally now. This code should be fully deleted.
+    return Status::ok();
+}
+
 Status StatsService::informAlarmForSubscriberTriggeringFired() {
     ENFORCE_UID(AID_SYSTEM);
 
