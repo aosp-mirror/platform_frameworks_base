@@ -1329,6 +1329,13 @@ public class ConnectivityServiceTest {
     private static final UserInfo PRIMARY_USER_INFO = new UserInfo(PRIMARY_USER, "",
             UserInfo.FLAG_PRIMARY);
 
+    private static final int RESTRICTED_USER = 1;
+    private static final UserInfo RESTRICTED_USER_INFO = new UserInfo(RESTRICTED_USER, "",
+            UserInfo.FLAG_RESTRICTED);
+    static {
+        RESTRICTED_USER_INFO.restrictedProfileParentId = PRIMARY_USER;
+    }
+
     @Before
     public void setUp() throws Exception {
         mNetIdManager = new TestNetIdManager();
@@ -1340,6 +1347,10 @@ public class ConnectivityServiceTest {
 
         when(mUserManager.getAliveUsers()).thenReturn(Arrays.asList(PRIMARY_USER_INFO));
         when(mUserManager.getUserInfo(PRIMARY_USER)).thenReturn(PRIMARY_USER_INFO);
+        // canHaveRestrictedProfile does not take a userId. It applies to the userId of the context
+        // it was started from, i.e., PRIMARY_USER.
+        when(mUserManager.canHaveRestrictedProfile()).thenReturn(true);
+        when(mUserManager.getUserInfo(RESTRICTED_USER)).thenReturn(RESTRICTED_USER_INFO);
 
         final ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.targetSdkVersion = Build.VERSION_CODES.Q;
@@ -6366,7 +6377,7 @@ public class ConnectivityServiceTest {
     }
 
     @Test
-    public void testVpnRestrictedUsers() throws Exception {
+    public void testRestrictedProfileAffectsVpnUidRanges() throws Exception {
         // NETWORK_SETTINGS is necessary to see the UID ranges in NetworkCapabilities.
         mServiceContext.setPermission(Manifest.permission.NETWORK_SETTINGS,
                 PERMISSION_GRANTED);
@@ -6398,19 +6409,11 @@ public class ConnectivityServiceTest {
         callback.expectCapabilitiesThat(mWiFiNetworkAgent, (caps)
                 -> caps.hasCapability(NET_CAPABILITY_VALIDATED));
 
-        // Create a fake restricted profile whose parent is our user ID.
-        final int userId = UserHandle.getUserId(uid);
-        when(mUserManager.canHaveRestrictedProfile()).thenReturn(true);
-        final int restrictedUserId = userId + 1;
-        final UserInfo info = new UserInfo(restrictedUserId, "user", UserInfo.FLAG_RESTRICTED);
-        info.restrictedProfileParentId = userId;
-        assertTrue(info.isRestricted());
-        when(mUserManager.getUserInfo(restrictedUserId)).thenReturn(info);
-        when(mPackageManager.getPackageUidAsUser(ALWAYS_ON_PACKAGE, restrictedUserId))
-                .thenReturn(UserHandle.getUid(restrictedUserId, VPN_UID));
+        when(mPackageManager.getPackageUidAsUser(ALWAYS_ON_PACKAGE, RESTRICTED_USER))
+                .thenReturn(UserHandle.getUid(RESTRICTED_USER, VPN_UID));
 
         final Intent addedIntent = new Intent(ACTION_USER_ADDED);
-        addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, restrictedUserId);
+        addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, RESTRICTED_USER);
 
         // Send a USER_ADDED broadcast for it.
         // The BroadcastReceiver for this broadcast checks that is being run on the handler thread.
@@ -6422,7 +6425,7 @@ public class ConnectivityServiceTest {
         callback.expectCapabilitiesThat(mMockVpn, (caps)
                 -> caps.getUids().size() == 2
                 && caps.getUids().contains(new UidRange(uid, uid))
-                && caps.getUids().contains(UidRange.createForUser(restrictedUserId))
+                && caps.getUids().contains(UidRange.createForUser(RESTRICTED_USER))
                 && caps.hasTransport(TRANSPORT_VPN)
                 && caps.hasTransport(TRANSPORT_WIFI));
 
@@ -6432,13 +6435,13 @@ public class ConnectivityServiceTest {
         callback.expectCapabilitiesThat(mMockVpn, (caps)
                 -> caps.getUids().size() == 2
                 && caps.getUids().contains(new UidRange(uid, uid))
-                && caps.getUids().contains(UidRange.createForUser(restrictedUserId))
+                && caps.getUids().contains(UidRange.createForUser(RESTRICTED_USER))
                 && caps.hasTransport(TRANSPORT_VPN)
                 && !caps.hasTransport(TRANSPORT_WIFI));
 
         // Send a USER_REMOVED broadcast and expect to lose the UID range for the restricted user.
         final Intent removedIntent = new Intent(ACTION_USER_REMOVED);
-        removedIntent.putExtra(Intent.EXTRA_USER_HANDLE, restrictedUserId);
+        removedIntent.putExtra(Intent.EXTRA_USER_HANDLE, RESTRICTED_USER);
         handler.post(() -> mServiceContext.sendBroadcast(removedIntent));
 
         // Expect that the VPN gains the UID range for the restricted user, and that the capability
@@ -6448,24 +6451,35 @@ public class ConnectivityServiceTest {
                 && caps.getUids().contains(new UidRange(uid, uid))
                 && caps.hasTransport(TRANSPORT_VPN)
                 && !caps.hasTransport(TRANSPORT_WIFI));
+    }
 
-        // Test lockdown with restricted profiles.
+    @Test
+    public void testLockdownVpnWithRestrictedProfiles() throws Exception {
+        // NETWORK_SETTINGS is necessary to see the UID ranges in NetworkCapabilities.
         mServiceContext.setPermission(
                 Manifest.permission.CONTROL_ALWAYS_ON_VPN, PERMISSION_GRANTED);
         mServiceContext.setPermission(
                 Manifest.permission.NETWORK_SETTINGS, PERMISSION_GRANTED);
 
+        final NetworkRequest request = new NetworkRequest.Builder()
+                .removeCapability(NET_CAPABILITY_NOT_VPN)
+                .build();
+        final TestNetworkCallback callback = new TestNetworkCallback();
+        mCm.registerNetworkCallback(request, callback);
+
+        final int uid = Process.myUid();
+
         // Connect wifi and check that UIDs in the main and restricted profiles have network access.
-        mMockVpn.disconnect();
         mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
         mWiFiNetworkAgent.connect(true /* validated */);
-        final int restrictedUid = UserHandle.getUid(restrictedUserId, 42 /* appId */);
+        final int restrictedUid = UserHandle.getUid(RESTRICTED_USER, 42 /* appId */);
         assertNotNull(mCm.getActiveNetworkForUid(uid));
         assertNotNull(mCm.getActiveNetworkForUid(restrictedUid));
 
         // Enable always-on VPN lockdown. The main user loses network access because no VPN is up.
         final ArrayList<String> allowList = new ArrayList<>();
-        mService.setAlwaysOnVpnPackage(userId, ALWAYS_ON_PACKAGE, true /* lockdown */, allowList);
+        mService.setAlwaysOnVpnPackage(PRIMARY_USER, ALWAYS_ON_PACKAGE, true /* lockdown */,
+                allowList);
         waitForIdle();
         assertNull(mCm.getActiveNetworkForUid(uid));
         // This is arguably overspecified: a UID that is not running doesn't have an active network.
@@ -6474,8 +6488,14 @@ public class ConnectivityServiceTest {
         assertNotNull(mCm.getActiveNetworkForUid(restrictedUid));
 
         // Start the restricted profile, and check that the UID within it loses network access.
-        when(mUserManager.getAliveUsers()).thenReturn(Arrays.asList(PRIMARY_USER_INFO, info));
+        when(mPackageManager.getPackageUidAsUser(ALWAYS_ON_PACKAGE, RESTRICTED_USER))
+                .thenReturn(UserHandle.getUid(RESTRICTED_USER, VPN_UID));
+        when(mUserManager.getAliveUsers()).thenReturn(Arrays.asList(PRIMARY_USER_INFO,
+                RESTRICTED_USER_INFO));
         // TODO: check that VPN app within restricted profile still has access, etc.
+        final Intent addedIntent = new Intent(ACTION_USER_ADDED);
+        addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, RESTRICTED_USER);
+        final Handler handler = new Handler(mCsHandlerThread.getLooper());
         handler.post(() -> mServiceContext.sendBroadcast(addedIntent));
         waitForIdle();
         assertNull(mCm.getActiveNetworkForUid(uid));
@@ -6483,12 +6503,16 @@ public class ConnectivityServiceTest {
 
         // Stop the restricted profile, and check that the UID within it has network access again.
         when(mUserManager.getAliveUsers()).thenReturn(Arrays.asList(PRIMARY_USER_INFO));
+
+        // Send a USER_REMOVED broadcast and expect to lose the UID range for the restricted user.
+        final Intent removedIntent = new Intent(ACTION_USER_REMOVED);
+        removedIntent.putExtra(Intent.EXTRA_USER_HANDLE, RESTRICTED_USER);
         handler.post(() -> mServiceContext.sendBroadcast(removedIntent));
         waitForIdle();
         assertNull(mCm.getActiveNetworkForUid(uid));
         assertNotNull(mCm.getActiveNetworkForUid(restrictedUid));
 
-        mService.setAlwaysOnVpnPackage(userId, null, false /* lockdown */, allowList);
+        mService.setAlwaysOnVpnPackage(PRIMARY_USER, null, false /* lockdown */, allowList);
         waitForIdle();
     }
 
