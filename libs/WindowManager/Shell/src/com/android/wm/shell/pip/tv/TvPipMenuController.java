@@ -42,7 +42,7 @@ import java.util.List;
  */
 public class TvPipMenuController implements PipMenuController, TvPipMenuView.Listener {
     private static final String TAG = "TvPipMenuController";
-    private static final boolean DEBUG = PipController.DEBUG;
+    private static final boolean DEBUG = TvPipController.DEBUG;
 
     private final Context mContext;
     private final SystemWindows mSystemWindows;
@@ -134,10 +134,18 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     }
 
     void hideMenu() {
-        if (DEBUG) Log.d(TAG, "hideMenu()");
+        hideMenu(true);
+    }
 
-        if (isMenuVisible()) {
-            mMenuView.hide();
+    void hideMenu(boolean movePipWindow) {
+        if (DEBUG) Log.d(TAG, "hideMenu(), movePipWindow=" + movePipWindow);
+
+        if (!isMenuVisible()) {
+            return;
+        }
+
+        mMenuView.hide();
+        if (movePipWindow) {
             mDelegate.movePipToNormalPosition();
         }
     }
