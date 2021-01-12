@@ -84,7 +84,7 @@ public class FingerprintSensorPropertiesInternal extends SensorPropertiesInterna
         // TODO: Value should be provided from the HAL
         this(sensorId, strength, maxEnrollmentsPerUser, sensorType,
                 resetLockoutRequiresHardwareAuthToken, 540 /* sensorLocationX */,
-                1636 /* sensorLocationY */, 130 /* sensorRadius */);
+                1769 /* sensorLocationY */, 130 /* sensorRadius */);
     }
 
     protected FingerprintSensorPropertiesInternal(Parcel in) {
