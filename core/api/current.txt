@@ -45462,6 +45462,7 @@ package android.util {
     method public void remove(int);
     method public void removeAt(int);
     method public void removeAtRange(int, int);
+    method public void set(int, E);
     method public void setValueAt(int, E);
     method public int size();
     method public E valueAt(int);
