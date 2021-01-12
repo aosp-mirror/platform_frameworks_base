@@ -6272,17 +6272,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void setCompanionAppPackages(int userId, Set<String> companionAppPackages) {
-            // Translate package names into UIDs
-            final Set<Integer> result = new HashSet<>();
-            for (String pkg : companionAppPackages) {
-                final int uid = getPackageManagerInternalLocked().getPackageUid(pkg, 0, userId);
-                if (uid >= 0) {
-                    result.add(uid);
-                }
-            }
+        public void setCompanionAppUids(int userId, Set<Integer> companionAppUids) {
             synchronized (mGlobalLock) {
-                mCompanionAppUidsMap.put(userId, result);
+                mCompanionAppUidsMap.put(userId, companionAppUids);
             }
         }
 

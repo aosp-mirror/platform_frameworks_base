@@ -2069,6 +2069,13 @@ class ProcessRecord implements WindowProcessListener {
         }
 
         if (!mAllowStartFgs) {
+            if (mService.mInternal != null) {
+                mAllowStartFgs = mService.mInternal.isAssociatedCompanionApp(
+                        UserHandle.getUserId(info.uid), info.uid);
+            }
+        }
+
+        if (!mAllowStartFgs) {
             // uid is on DeviceIdleController's user/system allowlist
             // or AMS's FgsStartTempAllowList.
             mAllowStartFgs = mService.isWhitelistedForFgsStartLocked(info.uid);
