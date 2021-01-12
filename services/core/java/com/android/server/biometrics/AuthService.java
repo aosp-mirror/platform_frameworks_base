@@ -38,6 +38,7 @@ import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
+import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.biometrics.SensorPropertiesInternal;
@@ -290,6 +291,19 @@ public class AuthService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 mBiometricService.registerEnabledOnKeyguardCallback(callback, callingUserId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void invalidateAuthenticatorIds(int userId, int fromSensorId,
+                IInvalidationCallback callback) throws RemoteException {
+            checkInternalPermission();
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mBiometricService.invalidateAuthenticatorIds(userId, fromSensorId, callback);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
