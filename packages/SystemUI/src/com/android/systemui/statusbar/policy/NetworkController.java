@@ -21,9 +21,9 @@ import android.content.Intent;
 import android.telephony.SubscriptionInfo;
 
 import com.android.settingslib.net.DataUsageController;
-import com.android.settingslib.wifi.AccessPoint;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
+import com.android.wifitrackerlib.WifiEntry;
 
 import java.util.List;
 
@@ -123,12 +123,12 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
         void addAccessPointCallback(AccessPointCallback callback);
         void removeAccessPointCallback(AccessPointCallback callback);
         void scanForAccessPoints();
-        int getIcon(AccessPoint ap);
-        boolean connect(AccessPoint ap);
+        int getIcon(WifiEntry ap);
+        boolean connect(WifiEntry ap);
         boolean canConfigWifi();
 
         public interface AccessPointCallback {
-            void onAccessPointsChanged(List<AccessPoint> accessPoints);
+            void onAccessPointsChanged(List<WifiEntry> accessPoints);
             void onSettingsActivityTriggered(Intent settingsIntent);
         }
     }
