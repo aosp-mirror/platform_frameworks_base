@@ -137,6 +137,15 @@ public final class TextSelection implements Parcelable {
         return mExtras;
     }
 
+    /** @hide */
+    public TextSelection.Builder toBuilder() {
+        return new TextSelection.Builder(mStartIndex, mEndIndex)
+                .setId(mId)
+                .setEntityConfidence(mEntityConfidence)
+                .setTextClassification(mTextClassification)
+                .setExtras(mExtras);
+    }
+
     @Override
     public String toString() {
         return String.format(
@@ -185,6 +194,12 @@ public final class TextSelection implements Parcelable {
                 @FloatRange(from = 0.0, to = 1.0) float confidenceScore) {
             Objects.requireNonNull(type);
             mEntityConfidence.put(type, confidenceScore);
+            return this;
+        }
+
+        Builder setEntityConfidence(EntityConfidence scores) {
+            mEntityConfidence.clear();
+            mEntityConfidence.putAll(scores.toMap());
             return this;
         }
 
