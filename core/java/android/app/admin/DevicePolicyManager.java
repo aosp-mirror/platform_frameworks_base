@@ -2729,6 +2729,17 @@ public class DevicePolicyManager {
         return DebugUtils.constantToString(DevicePolicyManager.class, PREFIX_OPERATION, operation);
     }
 
+    /** @hide */
+    public void resetNewUserDisclaimer() {
+        if (mService != null) {
+            try {
+                mService.resetNewUserDisclaimer();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
     /**
      * Return true if the given administrator component is currently active (enabled) in the system.
      *
@@ -5204,6 +5215,16 @@ public class DevicePolicyManager {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_MANAGED_USER_CREATED =
             "android.app.action.MANAGED_USER_CREATED";
+
+    /**
+     * Broadcast action: notify system that a new (Android) user was added when the device is
+     * managed by a device owner, so receivers can show the proper disclaimer to the (human) user.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SHOW_NEW_USER_DISCLAIMER =
+            "android.app.action.ACTION_SHOW_NEW_USER_DISCLAIMER";
 
     /**
      * Widgets are enabled in keyguard
