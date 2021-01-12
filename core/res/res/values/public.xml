@@ -3050,6 +3050,10 @@
     <!-- @hide -->
     <public name="windowBackgroundBlurRadius"/>
     <public name="requireDeviceScreenOn" />
+    <public name="pathSuffix" />
+    <public name="sspSuffix" />
+    <public name="pathAdvancedPattern" />
+    <public name="sspAdvancedPattern" />
   </public-group>
 
   <public-group type="drawable" first-id="0x010800b5">
