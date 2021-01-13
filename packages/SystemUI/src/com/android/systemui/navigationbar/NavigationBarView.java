@@ -1209,6 +1209,7 @@ public class NavigationBarView extends FrameLayout implements
         Dependency.get(NavigationBarOverlayController.class).registerListeners();
 
         getViewTreeObserver().addOnComputeInternalInsetsListener(mOnComputeInternalInsetsListener);
+        updateNavButtonIcons();
     }
 
     @Override
