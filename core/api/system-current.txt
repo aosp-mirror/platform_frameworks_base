@@ -8568,6 +8568,7 @@ package android.provider {
   }
 
   public static class CallLog.CallComposerLoggingException extends java.lang.Throwable {
+    ctor public CallLog.CallComposerLoggingException(int);
     method public int getErrorCode();
     field public static final int ERROR_INPUT_CLOSED = 3; // 0x3
     field public static final int ERROR_REMOTE_END_CLOSED = 1; // 0x1

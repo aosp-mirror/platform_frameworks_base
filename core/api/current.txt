@@ -41820,6 +41820,8 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void switchMultiSimConfig(int);
     method public void unregisterPhoneStateListener(@NonNull android.telephony.PhoneStateListener);
     method public void updateAvailableNetworks(@NonNull java.util.List<android.telephony.AvailableNetworkInfo>, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Integer>);
+    method public void uploadCallComposerPicture(@NonNull java.nio.file.Path, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.os.ParcelUuid,android.telephony.TelephonyManager.CallComposerException>);
+    method public void uploadCallComposerPicture(@NonNull java.io.InputStream, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.os.ParcelUuid,android.telephony.TelephonyManager.CallComposerException>);
     field public static final String ACTION_CARRIER_MESSAGING_CLIENT_SERVICE = "android.telephony.action.CARRIER_MESSAGING_CLIENT_SERVICE";
     field public static final String ACTION_CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE = "android.telephony.action.CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE";
     field public static final String ACTION_CARRIER_SIGNAL_PCO_VALUE = "android.telephony.action.CARRIER_SIGNAL_PCO_VALUE";
@@ -41960,6 +41962,18 @@ package android.telephony {
     field public static final int USSD_RETURN_FAILURE = -1; // 0xffffffff
     field public static final String VVM_TYPE_CVVM = "vvm_type_cvvm";
     field public static final String VVM_TYPE_OMTP = "vvm_type_omtp";
+  }
+
+  public static class TelephonyManager.CallComposerException extends java.lang.Exception {
+    ctor public TelephonyManager.CallComposerException(int, @Nullable java.io.IOException);
+    method public int getErrorCode();
+    method @Nullable public java.io.IOException getIOException();
+    field public static final int ERROR_AUTHENTICATION_FAILED = 3; // 0x3
+    field public static final int ERROR_FILE_TOO_LARGE = 2; // 0x2
+    field public static final int ERROR_INPUT_CLOSED = 4; // 0x4
+    field public static final int ERROR_IO_EXCEPTION = 5; // 0x5
+    field public static final int ERROR_REMOTE_END_CLOSED = 1; // 0x1
+    field public static final int ERROR_UNKNOWN = 0; // 0x0
   }
 
   public abstract static class TelephonyManager.CellInfoCallback {
