@@ -1114,6 +1114,30 @@ public class FullScreenMagnificationControllerTest {
                 argThat(closeTo(newEndSpec)));
     }
 
+    @Test
+    public void testSetScale_toMagnifying_shouldNotifyActivatedState() {
+        setScaleToMagnifying();
+
+        verify(mRequestObserver).onFullScreenMagnificationActivationState(eq(true));
+    }
+
+    @Test
+    public void testReset_afterMagnifying_shouldNotifyDeactivatedState() {
+        setScaleToMagnifying();
+
+        mFullScreenMagnificationController.reset(DISPLAY_0, mAnimationCallback);
+        verify(mRequestObserver).onFullScreenMagnificationActivationState(eq(false));
+    }
+
+    private void setScaleToMagnifying() {
+        register(DISPLAY_0);
+        float scale = 2.0f;
+        PointF pivotPoint = INITIAL_BOUNDS_LOWER_RIGHT_2X_CENTER;
+
+        mFullScreenMagnificationController.setScale(DISPLAY_0, scale, pivotPoint.x, pivotPoint.y,
+                false, SERVICE_ID_1);
+    }
+
     private void initMockWindowManager() {
         for (int i = 0; i < DISPLAY_COUNT; i++) {
             when(mMockWindowManager.setMagnificationCallbacks(eq(i), any())).thenReturn(true);
