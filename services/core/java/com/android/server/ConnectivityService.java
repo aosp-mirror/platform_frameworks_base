@@ -2973,7 +2973,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 case EVENT_CAPPORT_DATA_CHANGED: {
                     final NetworkAgentInfo nai = getNetworkAgentInfoForNetId(msg.arg2);
                     if (nai == null) break;
-                    handleCaptivePortalDataUpdate(nai, (CaptivePortalData) msg.obj);
+                    handleCapportApiDataUpdate(nai, (CaptivePortalData) msg.obj);
                     break;
                 }
             }
@@ -3311,9 +3311,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         handleUpdateLinkProperties(nai, new LinkProperties(nai.linkProperties));
     }
 
-    private void handleCaptivePortalDataUpdate(@NonNull final NetworkAgentInfo nai,
+    private void handleCapportApiDataUpdate(@NonNull final NetworkAgentInfo nai,
             @Nullable final CaptivePortalData data) {
-        nai.captivePortalData = data;
+        nai.capportApiData = data;
         // CaptivePortalData will be merged into LinkProperties from NetworkAgentInfo
         handleUpdateLinkProperties(nai, new LinkProperties(nai.linkProperties));
     }
@@ -6123,6 +6123,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void processLinkPropertiesFromAgent(NetworkAgentInfo nai, LinkProperties lp) {
         lp.ensureDirectlyConnectedRoutes();
         nai.clatd.setNat64PrefixFromRa(lp.getNat64Prefix());
+        nai.networkAgentPortalData = lp.getCaptivePortalData();
     }
 
     private void updateLinkProperties(NetworkAgentInfo networkAgent, LinkProperties newLp,
@@ -6166,9 +6167,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         updateWakeOnLan(newLp);
 
-        // Captive portal data is obtained from NetworkMonitor and stored in NetworkAgentInfo,
-        // it is not contained in LinkProperties sent from NetworkAgents so needs to be merged here.
-        newLp.setCaptivePortalData(networkAgent.captivePortalData);
+        // Captive portal data is obtained from NetworkMonitor and stored in NetworkAgentInfo.
+        // It is not always contained in the LinkProperties sent from NetworkAgents, and if it
+        // does, it needs to be merged here.
+        newLp.setCaptivePortalData(mergeCaptivePortalData(networkAgent.networkAgentPortalData,
+                networkAgent.capportApiData));
 
         // TODO - move this check to cover the whole function
         if (!Objects.equals(newLp, oldLp)) {
@@ -6186,6 +6189,57 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         mKeepaliveTracker.handleCheckKeepalivesStillValid(networkAgent);
+    }
+
+    /**
+     * @param naData captive portal data from NetworkAgent
+     * @param apiData captive portal data from capport API
+     */
+    @Nullable
+    private CaptivePortalData mergeCaptivePortalData(CaptivePortalData naData,
+            CaptivePortalData apiData) {
+        if (naData == null || apiData == null) {
+            return naData == null ? apiData : naData;
+        }
+        final CaptivePortalData.Builder captivePortalBuilder =
+                new CaptivePortalData.Builder(naData);
+
+        if (apiData.isCaptive()) {
+            captivePortalBuilder.setCaptive(true);
+        }
+        if (apiData.isSessionExtendable()) {
+            captivePortalBuilder.setSessionExtendable(true);
+        }
+        if (apiData.getExpiryTimeMillis() >= 0 || apiData.getByteLimit() >= 0) {
+            // Expiry time, bytes remaining, refresh time all need to come from the same source,
+            // otherwise data would be inconsistent. Prefer the capport API info if present,
+            // as it can generally be refreshed more often.
+            captivePortalBuilder.setExpiryTime(apiData.getExpiryTimeMillis());
+            captivePortalBuilder.setBytesRemaining(apiData.getByteLimit());
+            captivePortalBuilder.setRefreshTime(apiData.getRefreshTimeMillis());
+        } else if (naData.getExpiryTimeMillis() < 0 && naData.getByteLimit() < 0) {
+            // No source has time / bytes remaining information: surface the newest refresh time
+            // for other fields
+            captivePortalBuilder.setRefreshTime(
+                    Math.max(naData.getRefreshTimeMillis(), apiData.getRefreshTimeMillis()));
+        }
+
+        // Prioritize the user portal URL from the network agent.
+        if (apiData.getUserPortalUrl() != null && (naData.getUserPortalUrl() == null
+                || TextUtils.isEmpty(naData.getUserPortalUrl().toSafeString()))) {
+            captivePortalBuilder.setUserPortalUrl(apiData.getUserPortalUrl());
+        }
+        // Prioritize the venue information URL from the network agent.
+        if (apiData.getVenueInfoUrl() != null && (naData.getVenueInfoUrl() == null
+                || TextUtils.isEmpty(naData.getVenueInfoUrl().toSafeString()))) {
+            captivePortalBuilder.setVenueInfoUrl(apiData.getVenueInfoUrl());
+
+            // Note that venue friendly name can only come from the network agent because it is not
+            // in use in RFC8908. However, if using the Capport venue URL, make sure that the
+            // friendly name is not set from the network agent.
+            captivePortalBuilder.setVenueFriendlyName(null);
+        }
+        return captivePortalBuilder.build();
     }
 
     private void wakeupModifyInterface(String iface, NetworkCapabilities caps, boolean add) {
