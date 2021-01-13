@@ -28,7 +28,7 @@ import android.util.SparseLongArray;
 final class FgsStartTempAllowList {
     private static final int MAX_SIZE = 100;
     /**
-     * The key is the UID, the value is expiration elapse time in ms of this temp-allowed UID.
+     * The key is the uid, the value is expiration elapse time in ms of this temp-allowed uid.
      */
     private final SparseLongArray mTempAllowListFgs = new SparseLongArray();
 
@@ -37,7 +37,8 @@ final class FgsStartTempAllowList {
 
     void add(int uid, long duration) {
         if (duration <= 0) {
-            Slog.e(TAG_AM, "FgsStartTempAllowList bad duration:" + duration + " uid: " + uid);
+            Slog.e(TAG_AM, "FgsStartTempAllowList bad duration:" + duration + " uid: "
+                    + uid);
             return;
         }
         // The temp allowlist should be a short list with only a few entries in it.

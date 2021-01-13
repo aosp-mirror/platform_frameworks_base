@@ -21,6 +21,8 @@ import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
+import android.app.BroadcastOptions;
+import android.app.BroadcastOptions.TempAllowListType;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -1941,9 +1943,9 @@ public class DeviceIdleController extends SystemService
 
         // duration in milliseconds
         @Override
-        public void addPowerSaveTempWhitelistAppDirect(int uid, long duration, boolean sync,
-                String reason) {
-            addPowerSaveTempWhitelistAppDirectInternal(0, uid, duration, sync, reason);
+        public void addPowerSaveTempWhitelistAppDirect(int uid, long duration,
+                @TempAllowListType int type, boolean sync, String reason) {
+            addPowerSaveTempWhitelistAppDirectInternal(0, uid, duration, type, sync, reason);
         }
 
         // duration in milliseconds
@@ -2719,7 +2721,9 @@ public class DeviceIdleController extends SystemService
             long duration, int userId, boolean sync, String reason) {
         try {
             int uid = getContext().getPackageManager().getPackageUidAsUser(packageName, userId);
-            addPowerSaveTempWhitelistAppDirectInternal(callingUid, uid, duration, sync, reason);
+            addPowerSaveTempWhitelistAppDirectInternal(callingUid, uid, duration,
+                    BroadcastOptions.TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED, sync,
+                    reason);
         } catch (NameNotFoundException e) {
         }
     }
@@ -2729,7 +2733,7 @@ public class DeviceIdleController extends SystemService
      * app an exemption to access network and acquire wakelocks.
      */
     void addPowerSaveTempWhitelistAppDirectInternal(int callingUid, int uid,
-            long duration, boolean sync, String reason) {
+            long duration, @TempAllowListType int type, boolean sync, String reason) {
         final long timeNow = SystemClock.elapsedRealtime();
         boolean informWhitelistChanged = false;
         int appId = UserHandle.getAppId(uid);
@@ -2761,7 +2765,7 @@ public class DeviceIdleController extends SystemService
                 } catch (RemoteException e) {
                 }
                 postTempActiveTimeoutMessage(uid, duration);
-                updateTempWhitelistAppIdsLocked(appId, true);
+                updateTempWhitelistAppIdsLocked(uid, true, duration, type);
                 if (sync) {
                     informWhitelistChanged = true;
                 } else {
@@ -2786,8 +2790,7 @@ public class DeviceIdleController extends SystemService
         try {
             final int uid = getContext().getPackageManager().getPackageUidAsUser(
                     packageName, userId);
-            final int appId = UserHandle.getAppId(uid);
-            removePowerSaveTempWhitelistAppDirectInternal(appId);
+            removePowerSaveTempWhitelistAppDirectInternal(uid);
         } catch (NameNotFoundException e) {
         }
     }
@@ -2821,7 +2824,8 @@ public class DeviceIdleController extends SystemService
             Slog.d(TAG, "checkTempAppWhitelistTimeout: uid=" + uid + ", timeNow=" + timeNow);
         }
         synchronized (this) {
-            Pair<MutableLong, String> entry = mTempWhitelistAppIdEndTimes.get(appId);
+            Pair<MutableLong, String> entry =
+                    mTempWhitelistAppIdEndTimes.get(appId);
             if (entry == null) {
                 // Nothing to do
                 return;
@@ -2832,7 +2836,7 @@ public class DeviceIdleController extends SystemService
             } else {
                 // Need more time
                 if (DEBUG) {
-                    Slog.d(TAG, "Time to remove AppId " + appId + ": " + entry.first.value);
+                    Slog.d(TAG, "Time to remove uid " + uid + ": " + entry.first.value);
                 }
                 postTempActiveTimeoutMessage(uid, entry.first.value - timeNow);
             }
@@ -2841,12 +2845,12 @@ public class DeviceIdleController extends SystemService
 
     @GuardedBy("this")
     private void onAppRemovedFromTempWhitelistLocked(int uid, String reason) {
-        final int appId = UserHandle.getAppId(uid);
         if (DEBUG) {
             Slog.d(TAG, "Removing uid " + uid + " from temp whitelist");
         }
-        updateTempWhitelistAppIdsLocked(appId, false);
-        mHandler.obtainMessage(MSG_REPORT_TEMP_APP_WHITELIST_CHANGED_TO_NPMS, appId, 0)
+        final int appId = UserHandle.getAppId(uid);
+        updateTempWhitelistAppIdsLocked(uid, false, 0, 0);
+        mHandler.obtainMessage(MSG_REPORT_TEMP_APP_WHITELIST_CHANGED, appId, 0)
                 .sendToTarget();
         reportTempWhitelistChangedLocked(uid, false);
         try {
@@ -3869,7 +3873,16 @@ public class DeviceIdleController extends SystemService
         passWhiteListsToForceAppStandbyTrackerLocked();
     }
 
-    private void updateTempWhitelistAppIdsLocked(int appId, boolean adding) {
+    /**
+     * update temp allowlist.
+     * @param uid uid to add or remove from temp allowlist.
+     * @param adding true to add to temp allowlist, false to remove from temp allowlist.
+     * @param durationMs duration in milliseconds to add to temp allowlist, only valid when
+     *                   param adding is true.
+     * @param type temp allowlist type defined at {@link BroadcastOptions.TempAllowListType}
+     */
+    private void updateTempWhitelistAppIdsLocked(int uid, boolean adding, long durationMs,
+            @TempAllowListType int type) {
         final int size = mTempWhitelistAppIdEndTimes.size();
         if (mTempWhitelistAppIdArray.length != size) {
             mTempWhitelistAppIdArray = new int[size];
@@ -3882,8 +3895,8 @@ public class DeviceIdleController extends SystemService
                 Slog.d(TAG, "Setting activity manager temp whitelist to "
                         + Arrays.toString(mTempWhitelistAppIdArray));
             }
-            mLocalActivityManager.updateDeviceIdleTempWhitelist(mTempWhitelistAppIdArray, appId,
-                    adding);
+            mLocalActivityManager.updateDeviceIdleTempWhitelist(mTempWhitelistAppIdArray, uid,
+                    adding, durationMs, type);
         }
         if (mLocalPowerManager != null) {
             if (DEBUG) {

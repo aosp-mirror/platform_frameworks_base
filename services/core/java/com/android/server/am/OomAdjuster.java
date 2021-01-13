@@ -92,7 +92,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.Trace;
-import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.LongSparseArray;
@@ -2731,11 +2730,11 @@ public final class OomAdjuster {
     }
 
     @GuardedBy("mService")
-    final void setAppIdTempWhitelistStateLocked(int appId, boolean onWhitelist) {
+    final void setAppIdTempWhitelistStateLocked(int uid, boolean onWhitelist) {
         boolean changed = false;
         for (int i = mActiveUids.size() - 1; i >= 0; i--) {
             final UidRecord uidRec = mActiveUids.valueAt(i);
-            if (UserHandle.getAppId(uidRec.uid) == appId && uidRec.curWhitelist != onWhitelist) {
+            if (uidRec.uid == uid && uidRec.curWhitelist != onWhitelist) {
                 uidRec.curWhitelist = onWhitelist;
                 changed = true;
             }
