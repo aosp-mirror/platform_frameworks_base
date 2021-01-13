@@ -1,5 +1,6 @@
-# Wifi Unit Tests
-This package contains unit tests for the android wifi framework APIs based on the
+# Wifi Non-Updatable Framework Unit Tests
+This package contains unit tests for the non-updatable part (i.e. outside the Wifi module) of the
+Android Wifi framework APIs based on the
 [Android Testing Support Library](http://developer.android.com/tools/testing-support-library/index.html).
 The test cases are built using the [JUnit](http://junit.org/) and [Mockito](http://mockito.org/)
 libraries.

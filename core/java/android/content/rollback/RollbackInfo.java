@@ -18,7 +18,6 @@ package android.content.rollback;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.content.pm.VersionedPackage;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -31,7 +30,7 @@ import java.util.List;
  *
  * @hide
  */
-@SystemApi @TestApi
+@SystemApi
 public final class RollbackInfo implements Parcelable {
 
     /**

@@ -113,6 +113,14 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         // Default is no-op
     }
 
+    /**
+     * Callback indicating that the given document has been deleted or moved. This gives
+     * the provider a hook to revoke the uri permissions.
+     */
+    protected void onDocIdDeleted(String docId) {
+        // Default is no-op
+    }
+
     @Override
     public boolean onCreate() {
         throw new UnsupportedOperationException(
@@ -283,6 +291,7 @@ public abstract class FileSystemProvider extends DocumentsProvider {
 
         final String afterDocId = getDocIdForFile(after);
         onDocIdChanged(docId);
+        onDocIdDeleted(docId);
         onDocIdChanged(afterDocId);
 
         final File afterVisibleFile = getFileForDocId(afterDocId, true);
@@ -312,6 +321,7 @@ public abstract class FileSystemProvider extends DocumentsProvider {
 
         final String docId = getDocIdForFile(after);
         onDocIdChanged(sourceDocumentId);
+        onDocIdDeleted(sourceDocumentId);
         onDocIdChanged(docId);
         moveInMediaStore(visibleFileBefore, getFileForDocId(docId, true));
 
@@ -343,6 +353,7 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         }
 
         onDocIdChanged(docId);
+        onDocIdDeleted(docId);
         removeFromMediaStore(visibleFile);
     }
 
