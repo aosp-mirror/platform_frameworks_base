@@ -16,12 +16,21 @@
 
 package com.android.internal.jank;
 
-import static com.android.internal.jank.FrameTracker.*;
+import static com.android.internal.jank.FrameTracker.ChoreographerWrapper;
+import static com.android.internal.jank.FrameTracker.SurfaceControlWrapper;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_CLOSE_TO_HOME;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_CLOSE_TO_PIP;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_LAUNCH_FROM_ICON;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_LAUNCH_FROM_RECENTS;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_QUICK_SWITCH;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PASSWORD_APPEAR;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PASSWORD_DISAPPEAR;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PATTERN_APPEAR;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PATTERN_DISAPPEAR;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PIN_APPEAR;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PIN_DISAPPEAR;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_TRANSITION_FROM_AOD;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_TRANSITION_TO_AOD;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__NOTIFICATION_SHADE_SWIPE;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_EXPAND_COLLAPSE_LOCK;
@@ -44,7 +53,6 @@ import android.provider.DeviceConfig;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Choreographer;
-import android.view.SurfaceControl;
 import android.view.View;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -97,6 +105,14 @@ public class InteractionJankMonitor {
     public static final int CUJ_NOTIFICATION_ADD = 14;
     public static final int CUJ_NOTIFICATION_REMOVE = 15;
     public static final int CUJ_NOTIFICATION_APP_START = 16;
+    public static final int CUJ_LOCKSCREEN_PASSWORD_APPEAR = 17;
+    public static final int CUJ_LOCKSCREEN_PATTERN_APPEAR = 18;
+    public static final int CUJ_LOCKSCREEN_PIN_APPEAR = 19;
+    public static final int CUJ_LOCKSCREEN_PASSWORD_DISAPPEAR = 20;
+    public static final int CUJ_LOCKSCREEN_PATTERN_DISAPPEAR = 21;
+    public static final int CUJ_LOCKSCREEN_PIN_DISAPPEAR = 22;
+    public static final int CUJ_LOCKSCREEN_TRANSITION_FROM_AOD = 23;
+    public static final int CUJ_LOCKSCREEN_TRANSITION_TO_AOD = 24;
 
     private static final int NO_STATSD_LOGGING = -1;
 
@@ -122,6 +138,14 @@ public class InteractionJankMonitor {
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_NOTIFICATION_ADD,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_NOTIFICATION_REMOVE,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PASSWORD_APPEAR,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PATTERN_APPEAR,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PIN_APPEAR,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PASSWORD_DISAPPEAR,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PATTERN_DISAPPEAR,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PIN_DISAPPEAR,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_TRANSITION_FROM_AOD,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_TRANSITION_TO_AOD,
     };
 
     private static volatile InteractionJankMonitor sInstance;
@@ -158,6 +182,14 @@ public class InteractionJankMonitor {
             CUJ_NOTIFICATION_ADD,
             CUJ_NOTIFICATION_REMOVE,
             CUJ_NOTIFICATION_APP_START,
+            CUJ_LOCKSCREEN_PASSWORD_APPEAR,
+            CUJ_LOCKSCREEN_PATTERN_APPEAR,
+            CUJ_LOCKSCREEN_PIN_APPEAR,
+            CUJ_LOCKSCREEN_PASSWORD_DISAPPEAR,
+            CUJ_LOCKSCREEN_PATTERN_DISAPPEAR,
+            CUJ_LOCKSCREEN_PIN_DISAPPEAR,
+            CUJ_LOCKSCREEN_TRANSITION_FROM_AOD,
+            CUJ_LOCKSCREEN_TRANSITION_TO_AOD,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -366,7 +398,13 @@ public class InteractionJankMonitor {
         return getNameOfCuj(interactionType - 1);
     }
 
-    private static String getNameOfCuj(int cujType) {
+    /**
+     * A helper method to translate CUJ type to CUJ name.
+     *
+     * @param cujType the cuj type defined in this file
+     * @return the name of the cuj type
+     */
+    public static String getNameOfCuj(int cujType) {
         switch (cujType) {
             case CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE:
                 return "SHADE_EXPAND_COLLAPSE";
@@ -402,6 +440,22 @@ public class InteractionJankMonitor {
                 return "NOTIFICATION_REMOVE";
             case CUJ_NOTIFICATION_APP_START:
                 return "NOTIFICATION_APP_START";
+            case CUJ_LOCKSCREEN_PASSWORD_APPEAR:
+                return "CUJ_LOCKSCREEN_PASSWORD_APPEAR";
+            case CUJ_LOCKSCREEN_PATTERN_APPEAR:
+                return "CUJ_LOCKSCREEN_PATTERN_APPEAR";
+            case CUJ_LOCKSCREEN_PIN_APPEAR:
+                return "CUJ_LOCKSCREEN_PIN_APPEAR";
+            case CUJ_LOCKSCREEN_PASSWORD_DISAPPEAR:
+                return "CUJ_LOCKSCREEN_PASSWORD_DISAPPEAR";
+            case CUJ_LOCKSCREEN_PATTERN_DISAPPEAR:
+                return "CUJ_LOCKSCREEN_PATTERN_DISAPPEAR";
+            case CUJ_LOCKSCREEN_PIN_DISAPPEAR:
+                return "CUJ_LOCKSCREEN_PIN_DISAPPEAR";
+            case CUJ_LOCKSCREEN_TRANSITION_FROM_AOD:
+                return "CUJ_LOCKSCREEN_TRANSITION_FROM_AOD";
+            case CUJ_LOCKSCREEN_TRANSITION_TO_AOD:
+                return "CUJ_LOCKSCREEN_TRANSITION_TO_AOD";
         }
         return "UNKNOWN";
     }
