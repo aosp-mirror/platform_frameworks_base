@@ -201,6 +201,7 @@ import android.net.metrics.IpConnectivityLog;
 import android.net.shared.NetworkMonitorUtils;
 import android.net.shared.PrivateDnsConfig;
 import android.net.util.MultinetworkPolicyTracker;
+import android.net.wifi.WifiInfo;
 import android.os.BadParcelableException;
 import android.os.Binder;
 import android.os.Build;
@@ -7643,51 +7644,76 @@ public class ConnectivityServiceTest {
     private int getOwnerUidNetCapsForCallerPermission(int ownerUid, int callerUid) {
         final NetworkCapabilities netCap = new NetworkCapabilities().setOwnerUid(ownerUid);
 
-        return mService
-                .maybeSanitizeLocationInfoForCaller(netCap, callerUid, mContext.getPackageName())
-                .getOwnerUid();
+        return mService.createWithLocationInfoSanitizedIfNecessaryWhenParceled(
+                netCap, callerUid, mContext.getPackageName()).getOwnerUid();
+    }
+
+    private void verifyWifiInfoCopyNetCapsForCallerPermission(
+            int callerUid, boolean shouldMakeCopyWithLocationSensitiveFieldsParcelable) {
+        final WifiInfo wifiInfo = mock(WifiInfo.class);
+        when(wifiInfo.hasLocationSensitiveFields()).thenReturn(true);
+        final NetworkCapabilities netCap = new NetworkCapabilities().setTransportInfo(wifiInfo);
+
+        mService.createWithLocationInfoSanitizedIfNecessaryWhenParceled(
+                netCap, callerUid, mContext.getPackageName());
+        verify(wifiInfo).makeCopy(eq(shouldMakeCopyWithLocationSensitiveFieldsParcelable));
     }
 
     @Test
-    public void testMaybeSanitizeLocationInfoForCallerWithFineLocationAfterQ() throws Exception {
+    public void testCreateForCallerWithLocationInfoSanitizedWithFineLocationAfterQ()
+            throws Exception {
         setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_FINE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION);
 
         final int myUid = Process.myUid();
         assertEquals(myUid, getOwnerUidNetCapsForCallerPermission(myUid, myUid));
+
+        verifyWifiInfoCopyNetCapsForCallerPermission(myUid,
+                true /* shouldMakeCopyWithLocationSensitiveFieldsParcelable */);
     }
 
     @Test
-    public void testMaybeSanitizeLocationInfoForCallerWithCoarseLocationPreQ() throws Exception {
+    public void testCreateForCallerWithLocationInfoSanitizedWithCoarseLocationPreQ()
+            throws Exception {
         setupLocationPermissions(Build.VERSION_CODES.P, true, AppOpsManager.OPSTR_COARSE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION);
 
         final int myUid = Process.myUid();
         assertEquals(myUid, getOwnerUidNetCapsForCallerPermission(myUid, myUid));
+
+        verifyWifiInfoCopyNetCapsForCallerPermission(myUid,
+                true /* shouldMakeCopyWithLocationSensitiveFieldsParcelable */);
     }
 
     @Test
-    public void testMaybeSanitizeLocationInfoForCallerLocationOff() throws Exception {
+    public void testCreateForCallerWithLocationInfoSanitizedLocationOff() throws Exception {
         // Test that even with fine location permission, and UIDs matching, the UID is sanitized.
         setupLocationPermissions(Build.VERSION_CODES.Q, false, AppOpsManager.OPSTR_FINE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION);
 
         final int myUid = Process.myUid();
         assertEquals(Process.INVALID_UID, getOwnerUidNetCapsForCallerPermission(myUid, myUid));
+
+        verifyWifiInfoCopyNetCapsForCallerPermission(myUid,
+                false/* shouldMakeCopyWithLocationSensitiveFieldsParcelable */);
     }
 
     @Test
-    public void testMaybeSanitizeLocationInfoForCallerWrongUid() throws Exception {
+    public void testCreateForCallerWithLocationInfoSanitizedWrongUid() throws Exception {
         // Test that even with fine location permission, not being the owner leads to sanitization.
         setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_FINE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION);
 
         final int myUid = Process.myUid();
         assertEquals(Process.INVALID_UID, getOwnerUidNetCapsForCallerPermission(myUid + 1, myUid));
+
+        verifyWifiInfoCopyNetCapsForCallerPermission(myUid,
+                true /* shouldMakeCopyWithLocationSensitiveFieldsParcelable */);
     }
 
     @Test
-    public void testMaybeSanitizeLocationInfoForCallerWithCoarseLocationAfterQ() throws Exception {
+    public void testCreateForCallerWithLocationInfoSanitizedWithCoarseLocationAfterQ()
+            throws Exception {
         // Test that not having fine location permission leads to sanitization.
         setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_COARSE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION);
@@ -7695,15 +7721,22 @@ public class ConnectivityServiceTest {
         // Test that without the location permission, the owner field is sanitized.
         final int myUid = Process.myUid();
         assertEquals(Process.INVALID_UID, getOwnerUidNetCapsForCallerPermission(myUid, myUid));
+
+        verifyWifiInfoCopyNetCapsForCallerPermission(myUid,
+                false/* shouldMakeCopyWithLocationSensitiveFieldsParcelable */);
     }
 
     @Test
-    public void testMaybeSanitizeLocationInfoForCallerWithoutLocationPermission() throws Exception {
+    public void testCreateForCallerWithLocationInfoSanitizedWithoutLocationPermission()
+            throws Exception {
         setupLocationPermissions(Build.VERSION_CODES.Q, true, null /* op */, null /* perm */);
 
         // Test that without the location permission, the owner field is sanitized.
         final int myUid = Process.myUid();
         assertEquals(Process.INVALID_UID, getOwnerUidNetCapsForCallerPermission(myUid, myUid));
+
+        verifyWifiInfoCopyNetCapsForCallerPermission(myUid,
+                false/* shouldMakeCopyWithLocationSensitiveFieldsParcelable */);
     }
 
     private void setupConnectionOwnerUid(int vpnOwnerUid, @VpnManager.VpnType int vpnType)

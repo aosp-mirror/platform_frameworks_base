@@ -1581,7 +1581,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (nc != null) {
             result.put(
                     nai.network,
-                    maybeSanitizeLocationInfoForCaller(
+                    createWithLocationInfoSanitizedIfNecessaryWhenParceled(
                             nc, mDeps.getCallingUid(), callingPackageName));
         }
 
@@ -1591,7 +1591,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
             for (Network network : networks) {
                 nc = getNetworkCapabilitiesInternal(network);
                 if (nc != null) {
-                    result.put(network, maybeSanitizeLocationInfoForCaller(
+                    result.put(
+                            network,
+                            createWithLocationInfoSanitizedIfNecessaryWhenParceled(
                                     nc, mDeps.getCallingUid(), callingPackageName));
                 }
             }
@@ -1673,7 +1675,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public NetworkCapabilities getNetworkCapabilities(Network network, String callingPackageName) {
         mAppOpsManager.checkPackage(mDeps.getCallingUid(), callingPackageName);
         enforceAccessPermission();
-        return maybeSanitizeLocationInfoForCaller(
+        return createWithLocationInfoSanitizedIfNecessaryWhenParceled(
                 getNetworkCapabilitiesInternal(network),
                 mDeps.getCallingUid(), callingPackageName);
     }
@@ -1694,37 +1696,51 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return newNc;
     }
 
+    private boolean hasLocationPermission(int callerUid, @NonNull String callerPkgName) {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return mLocationPermissionChecker.checkLocationPermission(
+                    callerPkgName, null /* featureId */, callerUid, null /* message */);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
     @VisibleForTesting
     @Nullable
-    NetworkCapabilities maybeSanitizeLocationInfoForCaller(
+    NetworkCapabilities createWithLocationInfoSanitizedIfNecessaryWhenParceled(
             @Nullable NetworkCapabilities nc, int callerUid, @NonNull String callerPkgName) {
         if (nc == null) {
             return null;
         }
-        final NetworkCapabilities newNc = new NetworkCapabilities(nc);
-        if (callerUid != newNc.getOwnerUid()) {
+        Boolean hasLocationPermission = null;
+        final NetworkCapabilities newNc;
+        // Avoid doing location permission check if the transport info has no location sensitive
+        // data.
+        if (nc.getTransportInfo() != null && nc.getTransportInfo().hasLocationSensitiveFields()) {
+            hasLocationPermission = hasLocationPermission(callerUid, callerPkgName);
+            newNc = new NetworkCapabilities(nc, hasLocationPermission);
+        } else {
+            newNc = new NetworkCapabilities(nc, false /* parcelLocationSensitiveFields */);
+        }
+        // Reset owner uid if not destined for the owner app.
+        if (callerUid != nc.getOwnerUid()) {
             newNc.setOwnerUid(INVALID_UID);
             return newNc;
         }
-
         // Allow VPNs to see ownership of their own VPN networks - not location sensitive.
         if (nc.hasTransport(TRANSPORT_VPN)) {
             // Owner UIDs already checked above. No need to re-check.
             return newNc;
         }
-
-        final long token = Binder.clearCallingIdentity();
-        try {
-            if (!mLocationPermissionChecker.checkLocationPermission(
-                    callerPkgName, null /* featureId */, callerUid, null /* message */)) {
-                // Caller does not have the requisite location permissions. Reset the
-                // owner's UID in the NetworkCapabilities.
-                newNc.setOwnerUid(INVALID_UID);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(token);
+        if (hasLocationPermission == null) {
+            // Location permission not checked yet, check now for masking owner UID.
+            hasLocationPermission = hasLocationPermission(callerUid, callerPkgName);
         }
-
+        // Reset owner uid if the app has no location permission.
+        if (!hasLocationPermission) {
+            newNc.setOwnerUid(INVALID_UID);
+        }
         return newNc;
     }
 
@@ -6909,7 +6925,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                                 networkAgent.networkCapabilities, nri.mPid, nri.mUid);
                 putParcelable(
                         bundle,
-                        maybeSanitizeLocationInfoForCaller(
+                        createWithLocationInfoSanitizedIfNecessaryWhenParceled(
                                 nc, nri.mUid, nri.request.getRequestorPackageName()));
                 putParcelable(bundle, linkPropertiesRestrictedForCallerPermissions(
                         networkAgent.linkProperties, nri.mPid, nri.mUid));
@@ -6928,7 +6944,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                                 networkAgent.networkCapabilities, nri.mPid, nri.mUid);
                 putParcelable(
                         bundle,
-                        maybeSanitizeLocationInfoForCaller(
+                        createWithLocationInfoSanitizedIfNecessaryWhenParceled(
                                 netCap, nri.mUid, nri.request.getRequestorPackageName()));
                 break;
             }
