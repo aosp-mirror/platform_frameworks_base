@@ -21,4 +21,6 @@ package android.media.tv.tunerresourcemanager;
  *
  * @hide
  */
-parcelable TunerDescramblerRequest;
+parcelable TunerDescramblerRequest {
+    int clientId;
+}

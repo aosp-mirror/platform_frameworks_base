@@ -17,8 +17,13 @@
 package android.media.tv.tunerresourcemanager;
 
 /**
- * Information required to request a Tuner Lnb.
+ * A profile of a resource client. This profile is used to register the client info
+ * with the Tuner Resource Manager.
  *
  * @hide
  */
-parcelable TunerLnbRequest;
+parcelable ResourceClientProfile {
+    String tvInputSessionId;
+
+    int useCase;
+}

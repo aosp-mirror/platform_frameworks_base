@@ -44,9 +44,9 @@ import android.media.tv.tuner.frontend.FrontendStatus.FrontendStatusType;
 import android.media.tv.tuner.frontend.OnTuneEventListener;
 import android.media.tv.tuner.frontend.ScanCallback;
 import android.media.tv.tunerresourcemanager.ResourceClientProfile;
+import android.media.tv.tunerresourcemanager.TunerCiCamRequest;
 import android.media.tv.tunerresourcemanager.TunerDemuxRequest;
 import android.media.tv.tunerresourcemanager.TunerDescramblerRequest;
-import android.media.tv.tunerresourcemanager.TunerFrontendInfo;
 import android.media.tv.tunerresourcemanager.TunerFrontendRequest;
 import android.media.tv.tunerresourcemanager.TunerLnbRequest;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
@@ -298,6 +298,8 @@ public class Tuner implements AutoCloseable  {
     private Executor mOnResourceLostListenerExecutor;
 
     private Integer mDemuxHandle;
+    private Integer mFrontendCiCamHandle;
+    private Integer mFrontendCiCamId;
     private Map<Integer, WeakReference<Descrambler>> mDescramblers = new HashMap<>();
     private List<WeakReference<Filter>> mFilters = new ArrayList<WeakReference<Filter>>();
 
@@ -343,33 +345,14 @@ public class Tuner implements AutoCloseable  {
 
         mHandler = createEventHandler();
         int[] clientId = new int[1];
-        ResourceClientProfile profile = new ResourceClientProfile(tvInputSessionId, useCase);
+        ResourceClientProfile profile = new ResourceClientProfile();
+        profile.tvInputSessionId = tvInputSessionId;
+        profile.useCase = useCase;
         mTunerResourceManager.registerClientProfile(
                 profile, new HandlerExecutor(mHandler), mResourceListener, clientId);
         mClientId = clientId[0];
 
         mUserId = ActivityManager.getCurrentUser();
-
-        setFrontendInfoList();
-    }
-
-    private void setFrontendInfoList() {
-        List<Integer> ids = getFrontendIds();
-        if (ids == null) {
-            return;
-        }
-        TunerFrontendInfo[] infos = new TunerFrontendInfo[ids.size()];
-        for (int i = 0; i < ids.size(); i++) {
-            int id = ids.get(i);
-            FrontendInfo frontendInfo = getFrontendInfoById(id);
-            if (frontendInfo == null) {
-                continue;
-            }
-            TunerFrontendInfo tunerFrontendInfo = new TunerFrontendInfo(
-                    id, frontendInfo.getType(), frontendInfo.getExclusiveGroupId());
-            infos[i] = tunerFrontendInfo;
-        }
-        mTunerResourceManager.setFrontendInfoList(infos);
     }
 
     /**
@@ -488,6 +471,14 @@ public class Tuner implements AutoCloseable  {
         }
         if (mLnb != null) {
             mLnb.close();
+        }
+        if (mFrontendCiCamHandle != null) {
+            int result = nativeUnlinkCiCam(mFrontendCiCamId);
+            if (result == RESULT_SUCCESS) {
+                mTunerResourceManager.releaseCiCam(mFrontendCiCamHandle, mClientId);
+                mFrontendCiCamId = null;
+                mFrontendCiCamHandle = null;
+            }
         }
         synchronized (mDescramblers) {
             if (!mDescramblers.isEmpty()) {
@@ -804,7 +795,9 @@ public class Tuner implements AutoCloseable  {
 
     private boolean requestFrontend() {
         int[] feHandle = new int[1];
-        TunerFrontendRequest request = new TunerFrontendRequest(mClientId, mFrontendType);
+        TunerFrontendRequest request = new TunerFrontendRequest();
+        request.clientId = mClientId;
+        request.frontendType = mFrontendType;
         boolean granted = mTunerResourceManager.requestFrontend(request, feHandle);
         if (granted) {
             mFrontendHandle = feHandle[0];
@@ -935,7 +928,8 @@ public class Tuner implements AutoCloseable  {
     public int connectFrontendToCiCam(int ciCamId) {
         if (TunerVersionChecker.checkHigherOrEqualVersionTo(TunerVersionChecker.TUNER_VERSION_1_1,
                 "linkFrontendToCiCam")) {
-            if (checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND)) {
+            if (checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND)
+                    && checkCiCamResource(ciCamId)) {
                 return nativeLinkCiCam(ciCamId);
             }
         }
@@ -954,7 +948,7 @@ public class Tuner implements AutoCloseable  {
      */
     @Result
     public int disconnectCiCam() {
-        if (checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX)) {
+        if (mDemuxHandle != null) {
             return nativeDisconnectCiCam();
         }
         return RESULT_UNAVAILABLE;
@@ -980,8 +974,14 @@ public class Tuner implements AutoCloseable  {
     public int disconnectFrontendToCiCam(int ciCamId) {
         if (TunerVersionChecker.checkHigherOrEqualVersionTo(TunerVersionChecker.TUNER_VERSION_1_1,
                 "unlinkFrontendToCiCam")) {
-            if (checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND)) {
-                return nativeUnlinkCiCam(ciCamId);
+            if (mFrontendCiCamHandle != null && mFrontendCiCamId == ciCamId) {
+                int result = nativeUnlinkCiCam(ciCamId);
+                if (result == RESULT_SUCCESS) {
+                    mTunerResourceManager.releaseCiCam(mFrontendCiCamHandle, mClientId);
+                    mFrontendCiCamId = null;
+                    mFrontendCiCamHandle = null;
+                }
+                return result;
             }
         }
         return RESULT_UNAVAILABLE;
@@ -1258,7 +1258,8 @@ public class Tuner implements AutoCloseable  {
 
     private boolean requestLnb() {
         int[] lnbHandle = new int[1];
-        TunerLnbRequest request = new TunerLnbRequest(mClientId);
+        TunerLnbRequest request = new TunerLnbRequest();
+        request.clientId = mClientId;
         boolean granted = mTunerResourceManager.requestLnb(request, lnbHandle);
         if (granted) {
             mLnbHandle = lnbHandle[0];
@@ -1346,7 +1347,8 @@ public class Tuner implements AutoCloseable  {
 
     private boolean requestDemux() {
         int[] demuxHandle = new int[1];
-        TunerDemuxRequest request = new TunerDemuxRequest(mClientId);
+        TunerDemuxRequest request = new TunerDemuxRequest();
+        request.clientId = mClientId;
         boolean granted = mTunerResourceManager.requestDemux(request, demuxHandle);
         if (granted) {
             mDemuxHandle = demuxHandle[0];
@@ -1357,7 +1359,8 @@ public class Tuner implements AutoCloseable  {
 
     private Descrambler requestDescrambler() {
         int[] descramblerHandle = new int[1];
-        TunerDescramblerRequest request = new TunerDescramblerRequest(mClientId);
+        TunerDescramblerRequest request = new TunerDescramblerRequest();
+        request.clientId = mClientId;
         boolean granted = mTunerResourceManager.requestDescrambler(request, descramblerHandle);
         if (!granted) {
             return null;
@@ -1373,6 +1376,18 @@ public class Tuner implements AutoCloseable  {
             mTunerResourceManager.releaseDescrambler(handle, mClientId);
         }
         return descrambler;
+    }
+
+    private boolean requestFrontendCiCam(int ciCamId) {
+        int[] ciCamHandle = new int[1];
+        TunerCiCamRequest request = new TunerCiCamRequest();
+        request.clientId = mClientId;
+        request.ciCamId = ciCamId;
+        boolean granted = mTunerResourceManager.requestCiCam(request, ciCamHandle);
+        if (granted) {
+            mFrontendCiCamHandle = ciCamHandle[0];
+        }
+        return granted;
     }
 
     private boolean checkResource(int resourceType)  {
@@ -1397,6 +1412,13 @@ public class Tuner implements AutoCloseable  {
             }
             default:
                 return false;
+        }
+        return true;
+    }
+
+    private boolean checkCiCamResource(int ciCamId) {
+        if (mFrontendCiCamHandle == null && !requestFrontendCiCam(ciCamId)) {
+            return false;
         }
         return true;
     }

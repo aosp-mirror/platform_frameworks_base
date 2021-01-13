@@ -19,6 +19,7 @@ package android.media.tv.tunerresourcemanager;
 import android.media.tv.tunerresourcemanager.CasSessionRequest;
 import android.media.tv.tunerresourcemanager.IResourcesReclaimListener;
 import android.media.tv.tunerresourcemanager.ResourceClientProfile;
+import android.media.tv.tunerresourcemanager.TunerCiCamRequest;
 import android.media.tv.tunerresourcemanager.TunerDemuxRequest;
 import android.media.tv.tunerresourcemanager.TunerDescramblerRequest;
 import android.media.tv.tunerresourcemanager.TunerFrontendInfo;
@@ -225,6 +226,31 @@ interface ITunerResourceManager {
     boolean requestCasSession(in CasSessionRequest request, out int[] casSessionHandle);
 
     /*
+     * This API is used by the Tuner framework to request an available CuCam.
+     *
+     * <p>There are three possible scenarios:
+     * <ul>
+     * <li>If there is CiCam available, the API would send the handle back.
+     *
+     * <li>If no CiCma is available but the current request info can show higher priority than
+     * other uses of the ciCam, the API will send
+     * {@link ITunerResourceManagerCallback#onReclaimResources()} to the {@link Tuner}. Tuner would
+     * handle the resource reclaim on the holder of lower priority and notify the holder of its
+     * resource loss.
+     *
+     * <li>If no CiCam can be granted, the API would return false.
+     * <ul>
+     *
+     * <p><strong>Note:</strong> {@link #updateCasInfo(int, int)} must be called before this request.
+     *
+     * @param request {@link TunerCiCamRequest} information of the current request.
+     * @param ciCamHandle a one-element array to return the granted ciCam handle.
+     *
+     * @return true if there is CiCam granted.
+     */
+    boolean requestCiCam(in TunerCiCamRequest request, out int[] ciCamHandle);
+
+    /*
      * This API is used by the Tuner framework to request an available Lnb from the TunerHAL.
      *
      * <p>There are three possible scenarios:
@@ -292,6 +318,19 @@ interface ITunerResourceManager {
      * @param clientId the id of the client that is releasing the cas session.
      */
     void releaseCasSession(in int casSessionHandle, int clientId);
+
+    /**
+     * Notifies the TRM that the given CiCam has been released.
+     *
+     * <p>Client must call this whenever it releases a CiCam.
+     *
+     * <p><strong>Note:</strong> {@link #updateCasInfo(int, int)} must be called before this
+     * release.
+     *
+     * @param ciCamHandle the handle of the releasing CiCam.
+     * @param clientId the id of the client that is releasing the CiCam.
+     */
+    void releaseCiCam(in int ciCamHandle, int clientId);
 
     /*
      * Notifies the TRM that the Lnb with the given handle was released.

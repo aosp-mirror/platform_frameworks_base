@@ -17,9 +17,12 @@
 package android.media.tv.tunerresourcemanager;
 
 /**
- * A profile of a resource client. This profile is used to register the client info
- * with the Tuner Resource Manager.
+ * A wrapper of a cas session requests that contains all the request info of the client.
  *
  * @hide
  */
-parcelable ResourceClientProfile;
+parcelable CasSessionRequest {
+    int clientId;
+
+    int casSystemId;
+}

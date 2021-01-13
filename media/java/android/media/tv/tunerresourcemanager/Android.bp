@@ -1,17 +1,36 @@
 filegroup {
-    name: "framework-media-tv-tunerresourcemanager-sources",
+    name: "framework-media-tv-tunerresourcemanager-sources-aidl",
     srcs: [
-        "*.java",
-        "*.aidl",
+        "aidl/android/media/tv/tunerresourcemanager/CasSessionRequest.aidl",
+        "aidl/android/media/tv/tunerresourcemanager/IResourcesReclaimListener.aidl",
+        "aidl/android/media/tv/tunerresourcemanager/ResourceClientProfile.aidl",
+        "aidl/android/media/tv/tunerresourcemanager/TunerCiCamRequest.aidl",
+        "aidl/android/media/tv/tunerresourcemanager/TunerDemuxRequest.aidl",
+        "aidl/android/media/tv/tunerresourcemanager/TunerDescramblerRequest.aidl",
+        "aidl/android/media/tv/tunerresourcemanager/TunerFrontendInfo.aidl",
+        "aidl/android/media/tv/tunerresourcemanager/TunerFrontendRequest.aidl",
+        "aidl/android/media/tv/tunerresourcemanager/TunerLnbRequest.aidl",
+        "aidl/android/media/tv/tunerresourcemanager/ITunerResourceManager.aidl",
     ],
-    path: ".",
+    path: "aidl",
 }
 
-java_library {
-    name: "framework-media-tv-trm-sources",
-    srcs: [":framework-media-tv-tunerresourcemanager-sources"],
-    installable: true,
-    visibility: [
-        "//frameworks/base",
+aidl_interface {
+    name: "tv_tuner_resource_manager_aidl_interface",
+    unstable: true,
+    local_include_dir: "aidl",
+    backend: {
+        java: {
+            sdk_version: "current",
+        },
+        cpp: {
+            enabled: true,
+        },
+        ndk: {
+            enabled: true,
+        },
+    },
+    srcs: [
+        ":framework-media-tv-tunerresourcemanager-sources-aidl",
     ],
 }

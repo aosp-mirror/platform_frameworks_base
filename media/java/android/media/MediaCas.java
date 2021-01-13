@@ -716,8 +716,9 @@ public final class MediaCas implements AutoCloseable {
             context.getSystemService(Context.TV_TUNER_RESOURCE_MGR_SERVICE);
         if (mTunerResourceManager != null) {
             int[] clientId = new int[1];
-            ResourceClientProfile profile =
-                    new ResourceClientProfile(tvInputServiceSessionId, priorityHint);
+            ResourceClientProfile profile = new ResourceClientProfile();
+            profile.tvInputSessionId = tvInputServiceSessionId;
+            profile.useCase = priorityHint;
             mTunerResourceManager.registerClientProfile(
                     profile, context.getMainExecutor(), mResourceListener, clientId);
             mClientId = clientId[0];
@@ -921,7 +922,9 @@ public final class MediaCas implements AutoCloseable {
         int[] sessionResourceHandle = new int[1];
         sessionResourceHandle[0] = -1;
         if (mTunerResourceManager != null) {
-            CasSessionRequest casSessionRequest = new CasSessionRequest(mClientId, mCasSystemId);
+            CasSessionRequest casSessionRequest = new CasSessionRequest();
+            casSessionRequest.clientId = mClientId;
+            casSessionRequest.casSystemId = mCasSystemId;
             if (!mTunerResourceManager
                     .requestCasSession(casSessionRequest, sessionResourceHandle)) {
                 throw new MediaCasException.InsufficientResourceException(
