@@ -33,7 +33,6 @@ import java.util.Arrays;
  * @hide
  */
 @SystemApi
-@TestApi
 public class NetworkStack {
     /**
      * Permission granted only to the NetworkStack APK, defined in NetworkStackStub with signature
@@ -41,7 +40,6 @@ public class NetworkStack {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final String PERMISSION_MAINLINE_NETWORK_STACK =
             "android.permission.MAINLINE_NETWORK_STACK";
 
@@ -54,7 +52,6 @@ public class NetworkStack {
      */
     @Nullable
     @SystemApi
-    @TestApi
     public static IBinder getService() {
         final IBinder mockService = sMockService;
         if (mockService != null) return mockService;

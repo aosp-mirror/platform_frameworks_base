@@ -19,7 +19,6 @@ package android.net.metrics;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -28,7 +27,6 @@ import android.os.Parcelable;
  * {@hide}
  */
 @SystemApi
-@TestApi
 public final class RaEvent implements IpConnectivityLog.Event {
 
     private static final long NO_LIFETIME = -1L;

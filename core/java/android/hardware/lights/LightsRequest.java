@@ -18,7 +18,6 @@ package android.hardware.lights;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.util.SparseArray;
 
 import com.android.internal.util.Preconditions;
@@ -29,7 +28,6 @@ import com.android.internal.util.Preconditions;
  * @hide
  */
 @SystemApi
-@TestApi
 public final class LightsRequest {
 
     /** Visible to {@link LightsManager.Session}. */
