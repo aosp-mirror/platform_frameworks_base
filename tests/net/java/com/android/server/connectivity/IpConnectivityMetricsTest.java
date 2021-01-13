@@ -124,6 +124,22 @@ public class IpConnectivityMetricsTest {
         assertEquals("", output2);
     }
 
+    private void logDefaultNetworkEvent(long timeMs, NetworkAgentInfo nai,
+            NetworkAgentInfo oldNai) {
+        final Network network = (nai != null) ? nai.network() : null;
+        final int score = (nai != null) ? nai.getCurrentScore() : 0;
+        final boolean validated = (nai != null) ? nai.lastValidated : false;
+        final LinkProperties lp = (nai != null) ? nai.linkProperties : null;
+        final NetworkCapabilities nc = (nai != null) ? nai.networkCapabilities : null;
+
+        final Network prevNetwork = (oldNai != null) ? oldNai.network() : null;
+        final int prevScore = (oldNai != null) ? oldNai.getCurrentScore() : 0;
+        final LinkProperties prevLp = (oldNai != null) ? oldNai.linkProperties : null;
+        final NetworkCapabilities prevNc = (oldNai != null) ? oldNai.networkCapabilities : null;
+
+        mService.mDefaultNetworkMetrics.logDefaultNetworkEvent(timeMs, network, score, validated,
+                lp, nc, prevNetwork, prevScore, prevLp, prevNc);
+    }
     @Test
     public void testDefaultNetworkEvents() throws Exception {
         final long cell = BitUtils.packBits(new int[]{NetworkCapabilities.TRANSPORT_CELLULAR});
@@ -147,7 +163,7 @@ public class IpConnectivityMetricsTest {
         for (NetworkAgentInfo[] pair : defaultNetworks) {
             timeMs += durationMs;
             durationMs += durationMs;
-            mService.mDefaultNetworkMetrics.logDefaultNetworkEvent(timeMs, pair[1], pair[0]);
+            logDefaultNetworkEvent(timeMs, pair[1], pair[0]);
         }
 
         String want = String.join("\n",
@@ -331,8 +347,8 @@ public class IpConnectivityMetricsTest {
         final long wifi = BitUtils.packBits(new int[]{NetworkCapabilities.TRANSPORT_WIFI});
         NetworkAgentInfo cellNai = makeNai(100, 50, false, true, cell);
         NetworkAgentInfo wifiNai = makeNai(101, 60, true, false, wifi);
-        mService.mDefaultNetworkMetrics.logDefaultNetworkEvent(timeMs + 200, cellNai, null);
-        mService.mDefaultNetworkMetrics.logDefaultNetworkEvent(timeMs + 300, wifiNai, cellNai);
+        logDefaultNetworkEvent(timeMs + 200L, cellNai, null);
+        logDefaultNetworkEvent(timeMs + 300L, wifiNai, cellNai);
 
         String want = String.join("\n",
                 "dropped_events: 0",
