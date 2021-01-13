@@ -123,6 +123,9 @@ public class TakeScreenshotService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (mScreenshot != null) {
+            mScreenshot.releaseContext();
+        }
         if (DEBUG_SERVICE) {
             Log.d(TAG, "onDestroy");
         }
