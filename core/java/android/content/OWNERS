@@ -1,3 +1,7 @@
 # Remain no owner because multiple modules may touch this file.
 per-file Context.java = *
 per-file ContextWrapper.java = *
+per-file IntentFilter.java = toddke@google.com
+per-file IntentFilter.java = patb@google.com
+per-file Intent.java = toddke@google.com
+per-file Intent.java = patb@google.com
