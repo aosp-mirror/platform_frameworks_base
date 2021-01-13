@@ -234,19 +234,28 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             }
         }
 
-        // STEP 2.3: Adjust launch parameters as needed for freeform display. We enforce the policy
-        // that legacy (pre-D) apps and those apps that can't handle multiple screen density well
-        // are forced to be maximized. The rest of this step is to define the default policy when
-        // there is no initial bounds or a fully resolved current params from callers.
+        // STEP 2.3: Adjust launch parameters as needed for freeform display. We enforce the
+        // policies related to unresizable apps here. If an app is unresizable and the freeform
+        // size-compat mode is enabled, it can be launched in freeform depending on other properties
+        // such as orientation. Otherwise, the app is forcefully launched in maximized. The rest of
+        // this step is to define the default policy when there is no initial bounds or a fully
+        // resolved current params from callers.
         if (display.inFreeformWindowingMode()) {
             if (launchMode == WINDOWING_MODE_PINNED) {
                 if (DEBUG) appendLog("picture-in-picture");
-            } else if (!mSupervisor.mService.mSizeCompatFreeform && !root.isResizeable()) {
-                // We're launching an activity in size-compat mode and they aren't allowed in
-                // freeform, so force it to be maximized.
-                launchMode = WINDOWING_MODE_FULLSCREEN;
-                outParams.mBounds.setEmpty();
-                if (DEBUG) appendLog("forced-maximize");
+            } else if (!root.isResizeable()) {
+                if (shouldLaunchUnresizableAppInFreeform(root, suggestedDisplayArea)) {
+                    launchMode = WINDOWING_MODE_FREEFORM;
+                    if (outParams.mBounds.isEmpty()) {
+                        getTaskBounds(root, display, layout, launchMode, hasInitialBounds,
+                                outParams.mBounds);
+                    }
+                    if (DEBUG) appendLog("unresizable-freeform");
+                } else {
+                    launchMode = WINDOWING_MODE_FULLSCREEN;
+                    outParams.mBounds.setEmpty();
+                    if (DEBUG) appendLog("unresizable-forced-maximize");
+                }
             }
         } else {
             if (DEBUG) appendLog("non-freeform-display");
@@ -322,7 +331,6 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             }
             getTaskBounds(root, display, layout, resolvedMode, hasInitialBounds, outParams.mBounds);
         }
-
         return RESULT_CONTINUE;
     }
 
@@ -560,6 +568,28 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         final int xOffset = (int) (fractionOfHorizontalOffset * (defaultWidth - width));
         final int yOffset = (int) (fractionOfVerticalOffset * (defaultHeight - height));
         outBounds.offset(xOffset, yOffset);
+    }
+
+    private boolean shouldLaunchUnresizableAppInFreeform(ActivityRecord activity,
+            TaskDisplayArea displayArea) {
+        // TODO(176061101): Migrate |mSizeCompatFreeform| to |mSupportsNonResizableMultiWindow|.
+        if (!mSupervisor.mService.mSizeCompatFreeform || activity.isResizeable()) {
+            return false;
+        }
+        final DisplayContent display = displayArea.getDisplayContent();
+        if (display == null) {
+            return false;
+        }
+
+        final int displayOrientation = orientationFromBounds(displayArea.getBounds());
+        final int activityOrientation = resolveOrientation(activity, display,
+                displayArea.getBounds());
+        if (displayArea.getWindowingMode() == WINDOWING_MODE_FREEFORM
+                && displayOrientation != activityOrientation) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
