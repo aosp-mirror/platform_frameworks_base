@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.app.Activity;
 import android.app.Application;
 import android.app.PendingIntent;
@@ -285,7 +284,6 @@ public final class CompanionDeviceManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
     public boolean isDeviceAssociatedForWifiConnection(
             @NonNull String packageName,
