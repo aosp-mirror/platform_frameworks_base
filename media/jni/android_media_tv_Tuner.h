@@ -178,7 +178,7 @@ private:
 };
 
 struct FrontendClientCallbackImpl : public FrontendClientCallback {
-    FrontendClientCallbackImpl(jweak tunerObj, FrontendId id);
+    FrontendClientCallbackImpl(jweak tunerObj);
 
     virtual void onEvent(FrontendEventType frontendEventType);
     virtual void onScanMessage(
@@ -187,7 +187,6 @@ struct FrontendClientCallbackImpl : public FrontendClientCallback {
             FrontendScanMessageTypeExt1_1 type, const FrontendScanMessageExt1_1& messageExt);
 
     jweak mObject;
-    FrontendId mId;
 };
 
 struct TimeFilter : public RefBase {
@@ -244,10 +243,6 @@ private:
     static sp<ITuner> mTuner;
     static sp<::android::hardware::tv::tuner::V1_1::ITuner> mTuner_1_1;
     static sp<TunerClient> mTunerClient;
-    // TODO: remove after migrate to client lib
-    sp<IFrontend> mFe;
-    // TODO: remove after migrate to client lib
-    sp<::android::hardware::tv::tuner::V1_1::IFrontend> mFe_1_1;
     sp<FrontendClient> mFeClient;
     int mFeId;
     sp<LnbClient> mLnbClient;
@@ -267,9 +262,6 @@ private:
     static jobject getDtmbFrontendCaps(JNIEnv *env, int id);
 
     bool isV1_1ExtendedStatusType(jint type);
-    static uint32_t getResourceIdFromHandle(jint handle) {
-        return (handle & 0x00ff0000) >> 16;
-    }
 };
 
 class C2DataIdInfo : public C2Param {

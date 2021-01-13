@@ -862,8 +862,7 @@ sp<ITimeFilter> TimeFilter::getITimeFilter() {
 
 /////////////// FrontendClientCallbackImpl ///////////////////////
 
-FrontendClientCallbackImpl::FrontendClientCallbackImpl(
-        jweak tunerObj, FrontendId id) : mObject(tunerObj), mId(id) {}
+FrontendClientCallbackImpl::FrontendClientCallbackImpl(jweak tunerObj) : mObject(tunerObj) {}
 
 void FrontendClientCallbackImpl::onEvent(FrontendEventType frontendEventType) {
     ALOGD("FrontendClientCallbackImpl::onEvent, type=%d", frontendEventType);
@@ -1126,8 +1125,8 @@ JTuner::JTuner(JNIEnv *env, jobject thiz)
 }
 
 JTuner::~JTuner() {
-    if (mFe != NULL) {
-        mFe->close();
+    if (mFeClient != NULL) {
+        mFeClient->close();
     }
     if (mDemux != NULL) {
         mDemux->close();
@@ -1137,7 +1136,6 @@ JTuner::~JTuner() {
     env->DeleteWeakGlobalRef(mObject);
     env->DeleteGlobalRef(mClass);
     mTuner = NULL;
-    mFe = NULL;
     mDemux = NULL;
     mTunerClient = NULL;
     mFeClient = NULL;
@@ -1192,27 +1190,6 @@ jobject JTuner::getFrontendIds() {
 }
 
 jobject JTuner::openFrontendByHandle(int feHandle) {
-    sp<IFrontend> fe;
-    Result res;
-    uint32_t id = getResourceIdFromHandle(feHandle);
-
-    mTuner->openFrontendById(id, [&](Result r, const sp<IFrontend>& frontend) {
-        fe = frontend;
-        res = r;
-    });
-    if (res != Result::SUCCESS || fe == nullptr) {
-        ALOGE("Failed to open frontend");
-        return NULL;
-    }
-    mFe = fe;
-    mFe_1_1 = ::android::hardware::tv::tuner::V1_1::IFrontend::castFrom(mFe);
-    mFeId = id;
-    if (mDemux != NULL) {
-        mDemux->setFrontendDataSource(mFeId);
-    }
-
-    jint jId = (jint) id;
-
     // TODO: Handle reopening frontend with different handle
     sp<FrontendClient> feClient = mTunerClient->openFrontend(feHandle);
     if (feClient == NULL) {
@@ -1222,11 +1199,10 @@ jobject JTuner::openFrontendByHandle(int feHandle) {
     mFeClient = feClient;
 
     mFeId = mFeClient->getId();
-    jId = (jint) id;
     if (mDemuxClient != NULL) {
         mDemuxClient->setFrontendDataSource(mFeClient);
     }
-    sp<FrontendClientCallbackImpl> feClientCb = new FrontendClientCallbackImpl(mObject, id);
+    sp<FrontendClientCallbackImpl> feClientCb = new FrontendClientCallbackImpl(mObject);
     mFeClient->setCallback(feClientCb);
 
     JNIEnv *env = AndroidRuntime::getJNIEnv();
@@ -1235,7 +1211,7 @@ jobject JTuner::openFrontendByHandle(int feHandle) {
             env->FindClass("android/media/tv/tuner/Tuner$Frontend"),
             gFields.frontendInitID,
             mObject,
-            (jint) jId);
+            (jint) mFeId);
 }
 
 jobject JTuner::getAnalogFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps) {
@@ -1539,29 +1515,20 @@ int JTuner::stopTune() {
 
 int JTuner::scan(const FrontendSettings& settings, FrontendScanType scanType,
         const FrontendSettingsExt1_1& settingsExt1_1) {
-    if (mFe == NULL) {
-        ALOGE("frontend is not initialized");
+    if (mFeClient == NULL) {
+        ALOGE("frontend client is not initialized");
         return (int)Result::INVALID_STATE;
     }
-    Result result;
-    sp<::android::hardware::tv::tuner::V1_1::IFrontend> fe_1_1 =
-            ::android::hardware::tv::tuner::V1_1::IFrontend::castFrom(mFe);
-    if (fe_1_1 == NULL) {
-        ALOGD("1.1 frontend is not found. Using 1.0 instead.");
-        result = mFe->scan(settings, scanType);
-        return (int)result;
-    }
-
-    result = fe_1_1->scan_1_1(settings, scanType, settingsExt1_1);
+    Result result = mFeClient->scan(settings, scanType, settingsExt1_1);
     return (int)result;
 }
 
 int JTuner::stopScan() {
-    if (mFe == NULL) {
-        ALOGE("frontend is not initialized");
+    if (mFeClient == NULL) {
+        ALOGE("frontend client is not initialized");
         return (int)Result::INVALID_STATE;
     }
-    Result result = mFe->stopScan();
+    Result result = mFeClient->stopScan();
     return (int)result;
 }
 
@@ -1579,11 +1546,11 @@ int JTuner::setLnb(sp<LnbClient> lnbClient) {
 }
 
 int JTuner::setLna(bool enable) {
-    if (mFe == NULL) {
-        ALOGE("frontend is not initialized");
+    if (mFeClient == NULL) {
+        ALOGE("frontend client is not initialized");
         return (int)Result::INVALID_STATE;
     }
-    Result result = mFe->setLna(enable);
+    Result result = mFeClient->setLna(enable);
     return (int)result;
 }
 
@@ -1606,9 +1573,6 @@ Result JTuner::openDemux() {
         if (res == Result::SUCCESS) {
             mDemux = demuxSp;
             mDemuxId = id;
-            if (mFe != NULL) {
-                mDemux->setFrontendDataSource(mFeId);
-            }
         } else {
             return res;
         }
@@ -1634,12 +1598,6 @@ Result JTuner::openDemux() {
 
 jint JTuner::close() {
     Result res = Result::SUCCESS;
-    if (mFe != NULL) {
-        res = mFe->close();
-        if (res != Result::SUCCESS) {
-            return (jint) res;
-        }
-    }
     if (mDemux != NULL) {
         res = mDemux->close();
         if (res != Result::SUCCESS) {
@@ -1705,24 +1663,11 @@ int JTuner::connectCiCam(jint id) {
 }
 
 int JTuner::linkCiCam(int id) {
-    if (mFe_1_1 == NULL) {
-        ALOGE("frontend 1.1 is not initialized");
+    if (mFeClient == NULL) {
+        ALOGE("frontend client is not initialized");
         return (int)Constant::INVALID_LTS_ID;
     }
-
-    Result res;
-    uint32_t ltsId;
-    mFe_1_1->linkCiCam(static_cast<uint32_t>(id),
-            [&](Result r, uint32_t id) {
-                res = r;
-                ltsId = id;
-            });
-
-    if (res != Result::SUCCESS) {
-        return (int)Constant::INVALID_LTS_ID;
-    }
-
-    return (int) ltsId;
+    return mFeClient->linkCiCamToFrontend(id);
 }
 
 int JTuner::disconnectCiCam() {
@@ -1738,12 +1683,12 @@ int JTuner::disconnectCiCam() {
 
 
 int JTuner::unlinkCiCam(int id) {
-    if (mFe_1_1 == NULL) {
-        ALOGE("frontend 1.1 is not initialized");
+    if (mFeClient == NULL) {
+        ALOGE("frontend client is not initialized");
         return (int)Result::INVALID_STATE;
     }
 
-    Result r = mFe_1_1->unlinkCiCam(static_cast<uint32_t>(id));
+    Result r = mFeClient->unlinkCiCamToFrontend(id);
 
     return (int) r;
 }
@@ -1913,7 +1858,7 @@ jobject JTuner::getDemuxCaps() {
 }
 
 jobject JTuner::getFrontendStatus(jintArray types) {
-    if (mFe == NULL) {
+    if (mFeClient == NULL) {
         return NULL;
     }
     JNIEnv *env = AndroidRuntime::getJNIEnv();
@@ -1930,38 +1875,8 @@ jobject JTuner::getFrontendStatus(jintArray types) {
         }
     }
 
-    Result res;
-    hidl_vec<FrontendStatus> status;
-    hidl_vec<FrontendStatusExt1_1> status_1_1;
-
-    if (v.size() > 0) {
-        mFe->getStatus(v,
-                [&](Result r, const hidl_vec<FrontendStatus>& s) {
-                    res = r;
-                    status = s;
-                });
-        if (res != Result::SUCCESS) {
-            return NULL;
-        }
-    }
-
-    if (v_1_1.size() > 0) {
-        sp<::android::hardware::tv::tuner::V1_1::IFrontend> iFeSp_1_1;
-        iFeSp_1_1 = ::android::hardware::tv::tuner::V1_1::IFrontend::castFrom(mFe);
-
-        if (iFeSp_1_1 != NULL) {
-            iFeSp_1_1->getStatusExt1_1(v_1_1,
-                [&](Result r, const hidl_vec<FrontendStatusExt1_1>& s) {
-                    res = r;
-                    status_1_1 = s;
-                });
-            if (res != Result::SUCCESS) {
-                return NULL;
-            }
-        } else {
-            ALOGW("getStatusExt1_1 is not supported with the current HAL implementation.");
-        }
-    }
+    hidl_vec<FrontendStatus> status = mFeClient->getStatus(v);
+    hidl_vec<FrontendStatusExt1_1> status_1_1 = mFeClient->getStatusExtended_1_1(v_1_1);
 
     jclass clazz = env->FindClass("android/media/tv/tuner/frontend/FrontendStatus");
     jmethodID init = env->GetMethodID(clazz, "<init>", "()V");
@@ -2507,15 +2422,6 @@ bool JTuner::isV1_1ExtendedStatusType(int type) {
 
 jint JTuner::closeFrontend() {
     Result r = Result::SUCCESS;
-    if (mFe != NULL) {
-        r = mFe->close();
-    }
-    if (r == Result::SUCCESS) {
-        mFe = NULL;
-        mFe_1_1 = NULL;
-    } else {
-        return (jint) r;
-    }
 
     if (mFeClient != NULL) {
         r = mFeClient->close();
@@ -2571,10 +2477,6 @@ static sp<JTuner> getTuner(JNIEnv *env, jobject thiz) {
 
 static sp<DescramblerClient> getDescramblerClient(JNIEnv *env, jobject descrambler) {
     return (DescramblerClient *)env->GetLongField(descrambler, gFields.descramblerContext);
-}
-
-static uint32_t getResourceIdFromHandle(jint handle) {
-    return (handle & 0x00ff0000) >> 16;
 }
 
 static DemuxPid getDemuxPid(int pidType, int pid) {
