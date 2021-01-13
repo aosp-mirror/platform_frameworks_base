@@ -96,7 +96,7 @@ public:
      *
      * @return the demux’s capabilities.
      */
-    DemuxCapabilities getDemuxCaps();
+    shared_ptr<DemuxCapabilities> getDemuxCaps();
 
     /**
      * Open a new interface of DescramblerClient given a descramblerHandle.

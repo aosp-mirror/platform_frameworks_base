@@ -173,9 +173,22 @@ sp<DemuxClient> TunerClient::openDemux(int /*demuxHandle*/) {
     return NULL;
 }
 
-DemuxCapabilities TunerClient::getDemuxCaps() {
-    DemuxCapabilities caps;
-    return caps;
+shared_ptr<DemuxCapabilities> TunerClient::getDemuxCaps() {
+    // pending aidl interface
+
+    if (mTuner != NULL) {
+        Result res;
+        DemuxCapabilities caps;
+        mTuner->getDemuxCaps([&](Result r, const DemuxCapabilities& demuxCaps) {
+            caps = demuxCaps;
+            res = r;
+        });
+        if (res == Result::SUCCESS) {
+            return make_shared<DemuxCapabilities>(caps);
+        }
+    }
+
+    return NULL;
 }
 
 sp<DescramblerClient> TunerClient::openDescrambler(int /*descramblerHandle*/) {

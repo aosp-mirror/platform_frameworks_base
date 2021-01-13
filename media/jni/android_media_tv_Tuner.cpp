@@ -841,25 +841,6 @@ void FilterClientCallbackImpl::setFilter(jweak filterObj, sp<FilterClient> filte
     mFilterClient = filterClient;
 }
 
-/////////////// TimeFilter ///////////////////////
-
-TimeFilter::TimeFilter(sp<ITimeFilter> sp, jobject obj) : mTimeFilterSp(sp) {
-    JNIEnv *env = AndroidRuntime::getJNIEnv();
-    mTimeFilterObj = env->NewWeakGlobalRef(obj);
-}
-
-TimeFilter::~TimeFilter() {
-    ALOGD("~TimeFilter");
-    JNIEnv *env = AndroidRuntime::getJNIEnv();
-
-    env->DeleteWeakGlobalRef(mTimeFilterObj);
-    mTimeFilterObj = NULL;
-}
-
-sp<ITimeFilter> TimeFilter::getITimeFilter() {
-    return mTimeFilterSp;
-}
-
 /////////////// FrontendClientCallbackImpl ///////////////////////
 
 FrontendClientCallbackImpl::FrontendClientCallbackImpl(jweak tunerObj) : mObject(tunerObj) {}
@@ -1104,8 +1085,6 @@ void FrontendClientCallbackImpl::onScanMessageExt1_1(FrontendScanMessageTypeExt1
 
 /////////////// Tuner ///////////////////////
 
-sp<ITuner> JTuner::mTuner;
-sp<::android::hardware::tv::tuner::V1_1::ITuner> JTuner::mTuner_1_1;
 sp<TunerClient> JTuner::mTunerClient;
 
 JTuner::JTuner(JNIEnv *env, jobject thiz)
@@ -1115,10 +1094,6 @@ JTuner::JTuner(JNIEnv *env, jobject thiz)
 
     mClass = (jclass)env->NewGlobalRef(clazz);
     mObject = env->NewWeakGlobalRef(thiz);
-    // TODO: remove after migrate to client lib
-    if (mTuner == NULL) {
-        mTuner = getTunerService();
-    }
     if (mTunerClient == NULL) {
         mTunerClient = new TunerClient();
     }
@@ -1128,37 +1103,18 @@ JTuner::~JTuner() {
     if (mFeClient != NULL) {
         mFeClient->close();
     }
-    if (mDemux != NULL) {
-        mDemux->close();
+    if (mDemuxClient != NULL) {
+        mDemuxClient->close();
     }
     JNIEnv *env = AndroidRuntime::getJNIEnv();
 
     env->DeleteWeakGlobalRef(mObject);
     env->DeleteGlobalRef(mClass);
-    mTuner = NULL;
-    mDemux = NULL;
     mTunerClient = NULL;
     mFeClient = NULL;
     mDemuxClient = NULL;
     mClass = NULL;
     mObject = NULL;
-}
-
-sp<ITuner> JTuner::getTunerService() {
-    if (mTuner == nullptr) {
-        mTuner_1_1 = ::android::hardware::tv::tuner::V1_1::ITuner::getService();
-
-        if (mTuner_1_1 == nullptr) {
-            ALOGW("Failed to get tuner 1.1 service.");
-            mTuner = ITuner::getService();
-            if (mTuner == nullptr) {
-                ALOGW("Failed to get tuner 1.0 service.");
-            }
-        } else {
-            mTuner = static_cast<sp<ITuner>>(mTuner_1_1);
-         }
-     }
-     return mTuner;
 }
 
 jint JTuner::getTunerVersion() {
@@ -1554,56 +1510,27 @@ int JTuner::setLna(bool enable) {
     return (int)result;
 }
 
-Result JTuner::openDemux() {
-    if (mTuner == nullptr || mTunerClient == nullptr) {
+Result JTuner::openDemux(int handle) {
+    if (mTunerClient == nullptr) {
         return Result::NOT_INITIALIZED;
     }
 
-    Result res = Result::SUCCESS;
-
-    if (mDemux == nullptr) {
-        uint32_t id;
-        sp<IDemux> demuxSp;
-        mTuner->openDemux([&](Result r, uint32_t demuxId, const sp<IDemux>& demux) {
-            demuxSp = demux;
-            id = demuxId;
-            res = r;
-            ALOGD("open demux, id = %d", demuxId);
-        });
-        if (res == Result::SUCCESS) {
-            mDemux = demuxSp;
-            mDemuxId = id;
-        } else {
-            return res;
-        }
-    }
-
-    // TODO: replace demux opening with mTunerClient->openDemux(handle)
-    // when DemuxClient is fully ready
     if (mDemuxClient == nullptr) {
-        sp<DemuxClient> demuxClient = new DemuxClient();
-        if (demuxClient == NULL) {
+        mDemuxClient = mTunerClient->openDemux(handle);
+        if (mDemuxClient == NULL) {
             ALOGE("Failed to open demux");
             return Result::UNKNOWN_ERROR;
         }
-        mDemuxClient = demuxClient;
-        mDemuxClient->setHidlDemux(mDemux);
         if (mFeClient != NULL) {
             mDemuxClient->setFrontendDataSource(mFeClient);
         }
     }
 
-    return res;
+    return Result::SUCCESS;
 }
 
 jint JTuner::close() {
     Result res = Result::SUCCESS;
-    if (mDemux != NULL) {
-        res = mDemux->close();
-        if (res != Result::SUCCESS) {
-            return (jint) res;
-        }
-    }
 
     if (mFeClient != NULL) {
         res = mFeClient->close();
@@ -1653,10 +1580,7 @@ jobject JTuner::getAvSyncTime(jint id) {
 
 int JTuner::connectCiCam(jint id) {
     if (mDemuxClient == NULL) {
-        Result r = openDemux();
-        if (r != Result::SUCCESS) {
-            return (int) r;
-        }
+        return (int)Result::NOT_INITIALIZED;
     }
     Result r = mDemuxClient->connectCiCam((int)id);
     return (int) r;
@@ -1672,10 +1596,7 @@ int JTuner::linkCiCam(int id) {
 
 int JTuner::disconnectCiCam() {
     if (mDemuxClient == NULL) {
-        Result r = openDemux();
-        if (r != Result::SUCCESS) {
-            return (int) r;
-        }
+        return (int)Result::NOT_INITIALIZED;
     }
     Result r = mDemuxClient->disconnectCiCam();
     return (int) r;
@@ -1720,7 +1641,7 @@ jobject JTuner::openDescrambler() {
 }
 
 jobject JTuner::openFilter(DemuxFilterType type, int bufferSize) {
-    if (mDemux == NULL || mDemuxClient == NULL) {
+    if (mDemuxClient == NULL) {
         return NULL;
     }
 
@@ -1754,20 +1675,7 @@ jobject JTuner::openFilter(DemuxFilterType type, int bufferSize) {
 }
 
 jobject JTuner::openTimeFilter() {
-    if (mDemux == NULL) {
-        if (openDemux() != Result::SUCCESS) {
-            return NULL;
-        }
-    }
-    sp<ITimeFilter> iTimeFilterSp;
-    Result res;
-    mDemux->openTimeFilter(
-            [&](Result r, const sp<ITimeFilter>& filter) {
-                iTimeFilterSp = filter;
-                res = r;
-            });
-
-    if (res != Result::SUCCESS || iTimeFilterSp == NULL) {
+    if (mDemuxClient == NULL) {
         return NULL;
     }
 
@@ -1776,9 +1684,13 @@ jobject JTuner::openTimeFilter() {
             env->NewObject(
                     env->FindClass("android/media/tv/tuner/filter/TimeFilter"),
                     gFields.timeFilterInitID);
-    sp<TimeFilter> timeFilterSp = new TimeFilter(iTimeFilterSp, timeFilterObj);
-    timeFilterSp->incStrong(timeFilterObj);
-    env->SetLongField(timeFilterObj, gFields.timeFilterContext, (jlong)timeFilterSp.get());
+    sp<TimeFilterClient> timeFilterClient = mDemuxClient->openTimeFilter();
+    if (timeFilterClient == NULL) {
+        ALOGD("Failed to open time filter.");
+        return NULL;
+    }
+    timeFilterClient->incStrong(timeFilterObj);
+    env->SetLongField(timeFilterObj, gFields.timeFilterContext, (jlong)timeFilterClient.get());
 
     return timeFilterObj;
 }
@@ -1822,35 +1734,36 @@ jobject JTuner::openDvr(DvrType type, jlong bufferSize) {
 }
 
 jobject JTuner::getDemuxCaps() {
-    DemuxCapabilities caps;
-    Result res;
-    mTuner->getDemuxCaps([&](Result r, const DemuxCapabilities& demuxCaps) {
-        caps = demuxCaps;
-        res = r;
-    });
-    if (res != Result::SUCCESS) {
+    if (mTunerClient == NULL) {
         return NULL;
     }
+
+    shared_ptr<DemuxCapabilities> caps;
+    caps = mTunerClient->getDemuxCaps();
+    if (caps == NULL) {
+        return NULL;
+    }
+
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     jclass clazz = env->FindClass("android/media/tv/tuner/DemuxCapabilities");
     jmethodID capsInit = env->GetMethodID(clazz, "<init>", "(IIIIIIIIIJI[IZ)V");
 
-    jint numDemux = caps.numDemux;
-    jint numRecord = caps.numRecord;
-    jint numPlayback = caps.numPlayback;
-    jint numTsFilter = caps.numTsFilter;
-    jint numSectionFilter = caps.numSectionFilter;
-    jint numAudioFilter = caps.numAudioFilter;
-    jint numVideoFilter = caps.numVideoFilter;
-    jint numPesFilter = caps.numPesFilter;
-    jint numPcrFilter = caps.numPcrFilter;
-    jlong numBytesInSectionFilter = caps.numBytesInSectionFilter;
-    jint filterCaps = static_cast<jint>(caps.filterCaps);
-    jboolean bTimeFilter = caps.bTimeFilter;
+    jint numDemux = caps->numDemux;
+    jint numRecord = caps->numRecord;
+    jint numPlayback = caps->numPlayback;
+    jint numTsFilter = caps->numTsFilter;
+    jint numSectionFilter = caps->numSectionFilter;
+    jint numAudioFilter = caps->numAudioFilter;
+    jint numVideoFilter = caps->numVideoFilter;
+    jint numPesFilter = caps->numPesFilter;
+    jint numPcrFilter = caps->numPcrFilter;
+    jlong numBytesInSectionFilter = caps->numBytesInSectionFilter;
+    jint filterCaps = static_cast<jint>(caps->filterCaps);
+    jboolean bTimeFilter = caps->bTimeFilter;
 
-    jintArray linkCaps = env->NewIntArray(caps.linkCaps.size());
+    jintArray linkCaps = env->NewIntArray(caps->linkCaps.size());
     env->SetIntArrayRegion(
-            linkCaps, 0, caps.linkCaps.size(), reinterpret_cast<jint*>(&caps.linkCaps[0]));
+            linkCaps, 0, caps->linkCaps.size(), reinterpret_cast<jint*>(&caps->linkCaps[0]));
 
     return env->NewObject(clazz, capsInit, numDemux, numRecord, numPlayback, numTsFilter,
             numSectionFilter, numAudioFilter, numVideoFilter, numPesFilter, numPcrFilter,
@@ -2434,14 +2347,6 @@ jint JTuner::closeFrontend() {
 
 jint JTuner::closeDemux() {
     Result r = Result::SUCCESS;
-    if (mDemux != NULL) {
-        r = mDemux->close();
-    }
-    if (r == Result::SUCCESS) {
-        mDemux = NULL;
-    } else {
-        return (jint) r;
-    }
 
     if (mDemuxClient != NULL) {
         r = mDemuxClient->close();
@@ -3897,49 +3802,39 @@ static jint android_media_tv_Tuner_close_filter(JNIEnv *env, jobject filter) {
     return (jint) filterClient->close();
 }
 
-static sp<TimeFilter> getTimeFilter(JNIEnv *env, jobject filter) {
-    return (TimeFilter *)env->GetLongField(filter, gFields.timeFilterContext);
+static sp<TimeFilterClient> getTimeFilterClient(JNIEnv *env, jobject filter) {
+    return (TimeFilterClient *)env->GetLongField(filter, gFields.timeFilterContext);
 }
 
 static int android_media_tv_Tuner_time_filter_set_timestamp(
         JNIEnv *env, jobject filter, jlong timestamp) {
-    sp<TimeFilter> filterSp = getTimeFilter(env, filter);
-    if (filterSp == NULL) {
-        ALOGD("Failed set timestamp: time filter not found");
+    sp<TimeFilterClient> timeFilterClient = getTimeFilterClient(env, filter);
+    if (timeFilterClient == NULL) {
+        ALOGD("Failed set timestamp: time filter client not found");
         return (int) Result::INVALID_STATE;
     }
-    sp<ITimeFilter> iFilterSp = filterSp->getITimeFilter();
-    Result r = iFilterSp->setTimeStamp(static_cast<uint64_t>(timestamp));
+    Result r = timeFilterClient->setTimeStamp(static_cast<uint64_t>(timestamp));
     return (int) r;
 }
 
 static int android_media_tv_Tuner_time_filter_clear_timestamp(JNIEnv *env, jobject filter) {
-    sp<TimeFilter> filterSp = getTimeFilter(env, filter);
-    if (filterSp == NULL) {
-        ALOGD("Failed clear timestamp: time filter not found");
+    sp<TimeFilterClient> timeFilterClient = getTimeFilterClient(env, filter);
+    if (timeFilterClient == NULL) {
+        ALOGD("Failed clear timestamp: time filter client not found");
         return (int) Result::INVALID_STATE;
     }
-    sp<ITimeFilter> iFilterSp = filterSp->getITimeFilter();
-    Result r = iFilterSp->clearTimeStamp();
+    Result r = timeFilterClient->clearTimeStamp();
     return (int) r;
 }
 
 static jobject android_media_tv_Tuner_time_filter_get_timestamp(JNIEnv *env, jobject filter) {
-    sp<TimeFilter> filterSp = getTimeFilter(env, filter);
-    if (filterSp == NULL) {
-        ALOGD("Failed get timestamp: time filter not found");
+    sp<TimeFilterClient> timeFilterClient = getTimeFilterClient(env, filter);
+    if (timeFilterClient == NULL) {
+        ALOGD("Failed get timestamp: time filter client not found");
         return NULL;
     }
-
-    sp<ITimeFilter> iFilterSp = filterSp->getITimeFilter();
-    Result res;
-    uint64_t timestamp;
-    iFilterSp->getTimeStamp(
-            [&](Result r, uint64_t t) {
-                res = r;
-                timestamp = t;
-            });
-    if (res != Result::SUCCESS) {
+    uint64_t timestamp = timeFilterClient->getTimeStamp();
+    if (timestamp == (long)Constant64Bit::INVALID_PRESENTATION_TIME_STAMP) {
         return NULL;
     }
 
@@ -3951,21 +3846,13 @@ static jobject android_media_tv_Tuner_time_filter_get_timestamp(JNIEnv *env, job
 }
 
 static jobject android_media_tv_Tuner_time_filter_get_source_time(JNIEnv *env, jobject filter) {
-    sp<TimeFilter> filterSp = getTimeFilter(env, filter);
-    if (filterSp == NULL) {
-        ALOGD("Failed get source time: time filter not found");
+    sp<TimeFilterClient> timeFilterClient = getTimeFilterClient(env, filter);
+    if (timeFilterClient == NULL) {
+        ALOGD("Failed get source time: time filter client not found");
         return NULL;
     }
-
-    sp<ITimeFilter> iFilterSp = filterSp->getITimeFilter();
-    Result res;
-    uint64_t timestamp;
-    iFilterSp->getSourceTime(
-            [&](Result r, uint64_t t) {
-                res = r;
-                timestamp = t;
-            });
-    if (res != Result::SUCCESS) {
+    uint64_t timestamp = timeFilterClient->getSourceTime();
+    if (timestamp == (long)Constant64Bit::INVALID_PRESENTATION_TIME_STAMP) {
         return NULL;
     }
 
@@ -3977,15 +3864,15 @@ static jobject android_media_tv_Tuner_time_filter_get_source_time(JNIEnv *env, j
 }
 
 static int android_media_tv_Tuner_time_filter_close(JNIEnv *env, jobject filter) {
-    sp<TimeFilter> filterSp = getTimeFilter(env, filter);
-    if (filterSp == NULL) {
-        ALOGD("Failed close time filter: time filter not found");
+    sp<TimeFilterClient> timeFilterClient = getTimeFilterClient(env, filter);
+    if (timeFilterClient == NULL) {
+        ALOGD("Failed close time filter: time filter client not found");
         return (int) Result::INVALID_STATE;
     }
 
-    Result r = filterSp->getITimeFilter()->close();
+    Result r = timeFilterClient->close();
     if (r == Result::SUCCESS) {
-        filterSp->decStrong(filter);
+        timeFilterClient->decStrong(filter);
         env->SetLongField(filter, gFields.timeFilterContext, 0);
     }
     return (int) r;
@@ -4060,9 +3947,9 @@ static jobject android_media_tv_Tuner_get_demux_caps(JNIEnv* env, jobject thiz) 
     return tuner->getDemuxCaps();
 }
 
-static jint android_media_tv_Tuner_open_demux(JNIEnv* env, jobject thiz, jint /* handle */) {
+static jint android_media_tv_Tuner_open_demux(JNIEnv* env, jobject thiz, jint handle) {
     sp<JTuner> tuner = getTuner(env, thiz);
-    return (jint) tuner->openDemux();
+    return (jint) tuner->openDemux(handle);
 }
 
 static jint android_media_tv_Tuner_close_tuner(JNIEnv* env, jobject thiz) {

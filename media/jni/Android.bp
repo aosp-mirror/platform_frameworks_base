@@ -145,6 +145,7 @@ cc_library_shared {
         "tuner/FilterClient.cpp",
         "tuner/FrontendClient.cpp",
         "tuner/LnbClient.cpp",
+        "tuner/TimeFilterClient.cpp",
         "tuner/TunerClient.cpp",
     ],
 

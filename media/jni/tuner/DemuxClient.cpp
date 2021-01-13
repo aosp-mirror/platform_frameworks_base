@@ -79,6 +79,21 @@ sp<FilterClient> DemuxClient::openFilter(DemuxFilterType type, int bufferSize,
     return NULL;
 }
 
+sp<TimeFilterClient> DemuxClient::openTimeFilter() {
+    // TODO: pending aidl interface
+
+    if (mDemux != NULL) {
+        sp<ITimeFilter> hidlTimeFilter = openHidlTimeFilter();
+        if (hidlTimeFilter != NULL) {
+            sp<TimeFilterClient> timeFilterClient = new TimeFilterClient();
+            timeFilterClient->setHidlTimeFilter(hidlTimeFilter);
+            return timeFilterClient;
+        }
+    }
+
+    return NULL;
+}
+
 int DemuxClient::getAvSyncHwId(sp<FilterClient> filterClient) {
     // pending aidl interface
 
@@ -188,6 +203,26 @@ sp<IFilter> DemuxClient::openHidlFilter(DemuxFilterType type, int bufferSize,
     }
 
     return hidlFilter;
+}
+
+sp<ITimeFilter> DemuxClient::openHidlTimeFilter() {
+    if (mDemux == NULL) {
+        return NULL;
+    }
+
+    sp<ITimeFilter> timeFilter;
+    Result res;
+    mDemux->openTimeFilter(
+            [&](Result r, const sp<ITimeFilter>& timeFilterSp) {
+                timeFilter = timeFilterSp;
+                res = r;
+            });
+
+    if (res != Result::SUCCESS || timeFilter == NULL) {
+        return NULL;
+    }
+
+    return timeFilter;
 }
 
 sp<IDvr> DemuxClient::openHidlDvr(DvrType dvrType, int bufferSize,
