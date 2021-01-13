@@ -20,6 +20,7 @@ import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -33,6 +34,12 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
     private static final int MIN_RSSI = -100;
     private static final int MAX_RSSI = -55;
     private WifiInfo mWifiInfo = mock(WifiInfo.class);
+
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        when(mWifiInfo.makeCopy(anyBoolean())).thenReturn(mWifiInfo);
+    }
 
     @Test
     public void testWifiIcon() {
