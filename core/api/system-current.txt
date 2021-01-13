@@ -6641,6 +6641,7 @@ package android.net {
     method public long getExpiryTimeMillis();
     method public long getRefreshTimeMillis();
     method @Nullable public android.net.Uri getUserPortalUrl();
+    method @Nullable public String getVenueFriendlyName();
     method @Nullable public android.net.Uri getVenueInfoUrl();
     method public boolean isCaptive();
     method public boolean isSessionExtendable();
@@ -6658,6 +6659,7 @@ package android.net {
     method @NonNull public android.net.CaptivePortalData.Builder setRefreshTime(long);
     method @NonNull public android.net.CaptivePortalData.Builder setSessionExtendable(boolean);
     method @NonNull public android.net.CaptivePortalData.Builder setUserPortalUrl(@Nullable android.net.Uri);
+    method @NonNull public android.net.CaptivePortalData.Builder setVenueFriendlyName(@Nullable String);
     method @NonNull public android.net.CaptivePortalData.Builder setVenueInfoUrl(@Nullable android.net.Uri);
   }
 
