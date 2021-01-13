@@ -32,9 +32,11 @@ public class GlobalSaturationTintControllerTest {
     public void setAndGetMatrix() {
         final GlobalSaturationTintController tintController = new GlobalSaturationTintController();
         tintController.setMatrix(50);
-        assertThat(tintController.getMatrix()).hasValuesWithin(0.00001f)
-                .of(new float[]{0.6155f, 0.1155f, 0.1155f, 0.0f, 0.3575f, 0.85749996f, 0.3575f,
-                        0.0f, 0.036f, 0.036f, 0.536f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f});
+        assertThat(tintController.getMatrix()).usingTolerance(0.00001f)
+                .containsExactly(
+                        0.6155f, 0.1155f, 0.1155f, 0.0f, 0.3575f, 0.85749996f, 0.3575f,
+                        0.0f, 0.036f, 0.036f, 0.536f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f)
+                .inOrder();
     }
 
     @Test
@@ -43,6 +45,7 @@ public class GlobalSaturationTintControllerTest {
         tintController.setMatrix(100);
         final float[] matrix = new float[16];
         Matrix.setIdentityM(matrix, 0);
-        assertThat(tintController.getMatrix()).hasValuesWithin(0.00001f).of(matrix);
+        assertThat(tintController.getMatrix()).usingTolerance(0.00001f)
+                .containsExactly(matrix).inOrder();
     }
 }
