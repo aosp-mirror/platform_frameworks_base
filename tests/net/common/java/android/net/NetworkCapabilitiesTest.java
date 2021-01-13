@@ -42,11 +42,9 @@ import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI_AWARE;
 import static android.net.NetworkCapabilities.UNRESTRICTED_CAPABILITIES;
-import static android.os.Process.INVALID_UID;
 
 import static com.android.testutils.ParcelUtils.assertParcelSane;
 import static com.android.testutils.ParcelUtils.assertParcelingIsLossless;
-import static com.android.testutils.ParcelUtils.parcelingRoundTrip;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -55,19 +53,18 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeTrue;
 
-import android.net.wifi.WifiInfo;
 import android.net.wifi.aware.DiscoverySession;
 import android.net.wifi.aware.PeerHandle;
 import android.net.wifi.aware.WifiAwareNetworkSpecifier;
 import android.os.Build;
+import android.os.Process;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArraySet;
 
+import androidx.core.os.BuildCompat;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.modules.utils.build.SdkLevel;
 import com.android.testutils.DevSdkIgnoreRule;
 import com.android.testutils.DevSdkIgnoreRule.IgnoreUpTo;
 
@@ -92,11 +89,10 @@ public class NetworkCapabilitiesTest {
     private PeerHandle mPeerHandle = Mockito.mock(PeerHandle.class);
 
     private boolean isAtLeastR() {
-        return SdkLevel.isAtLeastR();
-    }
-
-    private boolean isAtLeastS() {
-        return SdkLevel.isAtLeastS();
+        // BuildCompat.isAtLeastR() is used to check the Android version before releasing Android R.
+        // Build.VERSION.SDK_INT > Build.VERSION_CODES.Q is used to check the Android version after
+        // releasing Android R.
+        return BuildCompat.isAtLeastR() || Build.VERSION.SDK_INT > Build.VERSION_CODES.Q;
     }
 
     @Test
@@ -328,59 +324,8 @@ public class NetworkCapabilitiesTest {
         testParcelSane(netCap);
     }
 
-    private NetworkCapabilities createNetworkCapabilitiesWithWifiInfo() {
-        // uses a real WifiInfo to test parceling of sensitive data.
-        final WifiInfo wifiInfo = new WifiInfo.Builder()
-                .setSsid("sssid1234".getBytes())
-                .setBssid("00:11:22:33:44:55")
-                .build();
-        return new NetworkCapabilities()
-                .addCapability(NET_CAPABILITY_INTERNET)
-                .addCapability(NET_CAPABILITY_EIMS)
-                .addCapability(NET_CAPABILITY_NOT_METERED)
-                .setSSID(TEST_SSID)
-                .setTransportInfo(wifiInfo)
-                .setRequestorPackageName("com.android.test")
-                .setRequestorUid(9304);
-    }
-
-    @Test
-    public void testParcelNetworkCapabilitiesWithLocationSensitiveFields() {
-        assumeTrue(isAtLeastS());
-
-        final NetworkCapabilities netCap = createNetworkCapabilitiesWithWifiInfo();
-        final NetworkCapabilities netCapWithLocationSensitiveFields =
-                new NetworkCapabilities(netCap, true);
-
-        assertParcelingIsLossless(netCapWithLocationSensitiveFields);
-        testParcelSane(netCapWithLocationSensitiveFields);
-
-        assertEquals(netCapWithLocationSensitiveFields,
-                parcelingRoundTrip(netCapWithLocationSensitiveFields));
-    }
-
-    @Test
-    public void testParcelNetworkCapabilitiesWithoutLocationSensitiveFields() {
-        assumeTrue(isAtLeastS());
-
-        final NetworkCapabilities netCap = createNetworkCapabilitiesWithWifiInfo();
-        final NetworkCapabilities netCapWithoutLocationSensitiveFields =
-                new NetworkCapabilities(netCap, false);
-
-        final NetworkCapabilities sanitizedNetCap =
-                new NetworkCapabilities(netCapWithoutLocationSensitiveFields);
-        final WifiInfo sanitizedWifiInfo = new WifiInfo.Builder()
-                .setSsid(new byte[0])
-                .setBssid(WifiInfo.DEFAULT_MAC_ADDRESS)
-                .build();
-        sanitizedNetCap.setTransportInfo(sanitizedWifiInfo);
-        assertEquals(sanitizedNetCap, parcelingRoundTrip(netCapWithoutLocationSensitiveFields));
-    }
-
     private void testParcelSane(NetworkCapabilities cap) {
-        if (isAtLeastS()) {
-            assertParcelSane(cap, 16);
-        } else if (isAtLeastR()) {
+        if (isAtLeastR()) {
             assertParcelSane(cap, 15);
         } else {
             assertParcelSane(cap, 11);
@@ -694,23 +639,26 @@ public class NetworkCapabilitiesTest {
         // Sequence 1: Transport + Transport + TransportInfo
         NetworkCapabilities nc1 = new NetworkCapabilities();
         nc1.addTransportType(TRANSPORT_CELLULAR).addTransportType(TRANSPORT_WIFI)
-                .setTransportInfo(new TestTransportInfo());
+                .setTransportInfo(new TransportInfo() {});
 
         // Sequence 2: Transport + NetworkSpecifier + Transport
         NetworkCapabilities nc2 = new NetworkCapabilities();
-        nc2.addTransportType(TRANSPORT_CELLULAR).setTransportInfo(new TestTransportInfo())
+        nc2.addTransportType(TRANSPORT_CELLULAR).setTransportInfo(new TransportInfo() {})
                 .addTransportType(TRANSPORT_WIFI);
     }
 
     @Test
     public void testCombineTransportInfo() {
         NetworkCapabilities nc1 = new NetworkCapabilities();
-        nc1.setTransportInfo(new TestTransportInfo());
-
+        nc1.setTransportInfo(new TransportInfo() {
+            // empty
+        });
         NetworkCapabilities nc2 = new NetworkCapabilities();
         // new TransportInfo so that object is not #equals to nc1's TransportInfo (that's where
         // combine fails)
-        nc2.setTransportInfo(new TestTransportInfo());
+        nc2.setTransportInfo(new TransportInfo() {
+            // empty
+        });
 
         try {
             nc1.combineCapabilities(nc2);
@@ -813,7 +761,7 @@ public class NetworkCapabilitiesTest {
         // Test default owner uid.
         // If the owner uid is not set, the default value should be Process.INVALID_UID.
         final NetworkCapabilities nc1 = new NetworkCapabilities.Builder().build();
-        assertEquals(INVALID_UID, nc1.getOwnerUid());
+        assertEquals(Process.INVALID_UID, nc1.getOwnerUid());
         // Test setAdministratorUids and getAdministratorUids.
         final int[] administratorUids = {1001, 10001};
         final NetworkCapabilities nc2 = new NetworkCapabilities.Builder()
@@ -957,16 +905,6 @@ public class NetworkCapabilitiesTest {
 
     private class TestTransportInfo implements TransportInfo {
         TestTransportInfo() {
-        }
-
-        @Override
-        public TransportInfo makeCopy(boolean parcelLocationSensitiveFields) {
-            return this;
-        }
-
-        @Override
-        public boolean hasLocationSensitiveFields() {
-            return false;
         }
     }
 
