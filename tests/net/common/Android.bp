@@ -24,7 +24,6 @@ java_library {
         "androidx.test.rules",
         "junit",
         "mockito-target-minus-junit4",
-        "modules-utils-build",
         "net-tests-utils",
         "net-utils-framework-common",
         "platform-test-annotations",
