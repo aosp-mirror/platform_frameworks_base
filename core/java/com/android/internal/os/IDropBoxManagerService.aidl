@@ -17,6 +17,7 @@
 package com.android.internal.os;
 
 import android.os.DropBoxManager;
+import android.os.ParcelFileDescriptor;
 
 /**
  * "Backend" interface used by {@link android.os.DropBoxManager} to talk to the
@@ -26,12 +27,8 @@ import android.os.DropBoxManager;
  * @hide
  */
 interface IDropBoxManagerService {
-    /**
-     * @see DropBoxManager#addText
-     * @see DropBoxManager#addData
-     * @see DropBoxManager#addFile
-     */
-    void add(in DropBoxManager.Entry entry);
+    void addData(String tag, in byte[] data, int flags);
+    void addFile(String tag, in ParcelFileDescriptor fd, int flags);
 
     /** @see DropBoxManager#getNextEntry */
     boolean isTagEnabled(String tag);
