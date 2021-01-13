@@ -1317,11 +1317,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             mContext.getSystemService(PowerManager.class).reboot(reason);
         }
 
-        boolean recoverySystemRebootWipeUserData(boolean shutdown, String reason, boolean force,
+        void recoverySystemRebootWipeUserData(boolean shutdown, String reason, boolean force,
                 boolean wipeEuicc, boolean wipeExtRequested, boolean wipeResetProtectionData)
                         throws IOException {
-            return FactoryResetter.newBuilder(mContext).setSafetyChecker(mSafetyChecker)
-                    .setReason(reason).setShutdown(shutdown).setForce(force).setWipeEuicc(wipeEuicc)
+            FactoryResetter.newBuilder(mContext).setSafetyChecker(mSafetyChecker)
+                    .setReason(reason).setShutdown(shutdown)
+                    .setForce(force).setWipeEuicc(wipeEuicc)
                     .setWipeAdoptableStorage(wipeExtRequested)
                     .setWipeFactoryResetProtection(wipeResetProtectionData)
                     .build().factoryReset();
@@ -2783,10 +2784,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 maybeStartSecurityLogMonitorOnActivityManagerReady();
                 break;
             case SystemService.PHASE_BOOT_COMPLETED:
-                // Ideally it should be done earlier, but currently it relies on RecoverySystem,
-                // which would hang on earlier phases
-                factoryResetIfDelayedEarlier();
-
                 ensureDeviceOwnerUserStarted(); // TODO Consider better place to do this.
                 break;
         }
@@ -6220,63 +6217,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             boolean wipeResetProtectionData) {
         wtfIfInLock();
         boolean success = false;
-
         try {
-            boolean delayed = !mInjector.recoverySystemRebootWipeUserData(
+            mInjector.recoverySystemRebootWipeUserData(
                     /* shutdown= */ false, reason, /* force= */ true, /* wipeEuicc= */ wipeEuicc,
                     wipeExtRequested, wipeResetProtectionData);
-            if (delayed) {
-                // Persist the request so the device is automatically factory-reset on next start if
-                // the system crashes or reboots before the {@code DevicePolicySafetyChecker} calls
-                // its callback.
-                Slog.i(LOG_TAG, String.format("Persisting factory reset request as it could be "
-                        + "delayed by %s", mSafetyChecker));
-                synchronized (getLockObject()) {
-                    DevicePolicyData policy = getUserData(UserHandle.USER_SYSTEM);
-                    policy.setDelayedFactoryReset(reason, wipeExtRequested, wipeEuicc,
-                            wipeResetProtectionData);
-                    saveSettingsLocked(UserHandle.USER_SYSTEM);
-                }
-            }
             success = true;
         } catch (IOException | SecurityException e) {
             Slog.w(LOG_TAG, "Failed requesting data wipe", e);
         } finally {
             if (!success) SecurityLog.writeEvent(SecurityLog.TAG_WIPE_FAILURE);
-        }
-    }
-
-    private void factoryResetIfDelayedEarlier() {
-        synchronized (getLockObject()) {
-            DevicePolicyData policy = getUserData(UserHandle.USER_SYSTEM);
-
-            if (policy.mFactoryResetFlags == 0) return;
-
-            if (policy.mFactoryResetReason == null) {
-                // Shouldn't happen.
-                Slog.e(LOG_TAG, "no persisted reason for factory resetting");
-                policy.mFactoryResetReason = "requested before boot";
-            }
-            FactoryResetter factoryResetter = FactoryResetter.newBuilder(mContext)
-                    .setReason(policy.mFactoryResetReason).setForce(true)
-                    .setWipeEuicc((policy.mFactoryResetFlags & DevicePolicyData
-                            .FACTORY_RESET_FLAG_WIPE_EUICC) != 0)
-                    .setWipeAdoptableStorage((policy.mFactoryResetFlags & DevicePolicyData
-                            .FACTORY_RESET_FLAG_WIPE_EXTERNAL_STORAGE) != 0)
-                    .setWipeFactoryResetProtection((policy.mFactoryResetFlags & DevicePolicyData
-                            .FACTORY_RESET_FLAG_WIPE_FACTORY_RESET_PROTECTION) != 0)
-                    .build();
-            Slog.i(LOG_TAG, "Factory resetting on boot using " + factoryResetter);
-            try {
-                if (!factoryResetter.factoryReset()) {
-                    // Shouldn't happen because FactoryResetter was created without a
-                    // DevicePolicySafetyChecker.
-                    Slog.wtf(LOG_TAG, "Factory reset using " + factoryResetter + " failed.");
-                }
-            } catch (IOException e) {
-                // Shouldn't happen.
-                Slog.wtf(LOG_TAG, "Could not factory reset using " + factoryResetter, e);
-            }
         }
     }
 
