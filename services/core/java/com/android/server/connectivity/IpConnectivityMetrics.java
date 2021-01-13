@@ -20,11 +20,15 @@ import android.content.Context;
 import android.net.ConnectivityMetricsEvent;
 import android.net.IIpConnectivityMetrics;
 import android.net.INetdEventCallback;
+import android.net.LinkProperties;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.NetworkStack;
 import android.net.metrics.ApfProgramEvent;
 import android.net.metrics.IpConnectivityLog;
 import android.os.Binder;
 import android.os.Process;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
@@ -122,8 +126,6 @@ final public class IpConnectivityMetrics extends SystemService {
 
     public IpConnectivityMetrics(Context ctx, ToIntFunction<Context> capacityGetter) {
         super(ctx);
-        // Load JNI libraries used by the IpConnectivityMetrics service and its dependencies
-        System.loadLibrary("service-connectivity");
         mCapacityGetter = capacityGetter;
         initBuffer();
     }
@@ -363,6 +365,21 @@ final public class IpConnectivityMetrics extends SystemService {
             }
             return mNetdListener.removeNetdEventCallback(callerType);
         }
+
+        @Override
+        public void logDefaultNetworkValidity(boolean valid) {
+            mDefaultNetworkMetrics.logDefaultNetworkValidity(SystemClock.elapsedRealtime(), valid);
+        }
+
+        @Override
+        public void logDefaultNetworkEvent(Network defaultNetwork, int score, boolean validated,
+                LinkProperties lp, NetworkCapabilities nc, Network previousDefaultNetwork,
+                int previousScore, LinkProperties previousLp, NetworkCapabilities previousNc) {
+            final long timeMs = SystemClock.elapsedRealtime();
+            mDefaultNetworkMetrics.logDefaultNetworkEvent(timeMs, defaultNetwork, score, validated,
+                    lp, nc,  previousDefaultNetwork, previousScore, previousLp, previousNc);
+        }
+
     };
 
     private static final ToIntFunction<Context> READ_BUFFER_SIZE = (ctx) -> {
