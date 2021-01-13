@@ -28,6 +28,7 @@ import android.hardware.tv.cec.V1_0.Result;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.icu.util.IllformedLocaleException;
 import android.icu.util.ULocale;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IHwBinder;
 import android.os.Looper;
@@ -525,12 +526,14 @@ final class HdmiCecController {
     // Run a Runnable on IO thread.
     // It should be careful to access member variables on IO thread because
     // it can be accessed from system thread as well.
-    private void runOnIoThread(Runnable runnable) {
-        mIoHandler.post(runnable);
+    @VisibleForTesting
+    void runOnIoThread(Runnable runnable) {
+        mIoHandler.post(new WorkSourceUidPreservingRunnable(runnable));
     }
 
-    private void runOnServiceThread(Runnable runnable) {
-        mControlHandler.post(runnable);
+    @VisibleForTesting
+    void runOnServiceThread(Runnable runnable) {
+        mControlHandler.post(new WorkSourceUidPreservingRunnable(runnable));
     }
 
     @ServiceThreadOnly
@@ -591,6 +594,18 @@ final class HdmiCecController {
         sendCommand(cecMessage, null);
     }
 
+    /**
+     * Returns the calling UID of the original Binder call that triggered this code.
+     * If this code was not triggered by a Binder call, returns the UID of this process.
+     */
+    private int getCallingUid() {
+        int workSourceUid = Binder.getCallingWorkSourceUid();
+        if (workSourceUid == -1) {
+            return Binder.getCallingUid();
+        }
+        return workSourceUid;
+    }
+
     @ServiceThreadOnly
     void sendCommand(final HdmiCecMessage cecMessage,
             final HdmiControlService.SendMessageCallback callback) {
@@ -621,6 +636,7 @@ final class HdmiCecController {
                         mHdmiCecAtomWriter.messageReported(
                                 cecMessage,
                                 FrameworkStatsLog.HDMI_CEC_MESSAGE_REPORTED__DIRECTION__OUTGOING,
+                                getCallingUid(),
                                 finalError
                         );
                         if (callback != null) {
@@ -643,7 +659,7 @@ final class HdmiCecController {
         addCecMessageToHistory(true /* isReceived */, command);
 
         mHdmiCecAtomWriter.messageReported(command,
-                incomingMessageDirection(srcAddress, dstAddress));
+                incomingMessageDirection(srcAddress, dstAddress), getCallingUid());
 
         onReceiveCommand(command);
     }

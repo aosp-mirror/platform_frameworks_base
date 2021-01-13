@@ -25,6 +25,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
+import static junit.framework.TestCase.assertEquals;
 
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -34,6 +35,7 @@ import android.content.ContextWrapper;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiCecVolumeControlFeatureListener;
+import android.os.Binder;
 import android.os.IPowerManager;
 import android.os.IThermalService;
 import android.os.Looper;
@@ -55,6 +57,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * Tests for {@link HdmiControlService} class.
@@ -554,6 +557,23 @@ public class HdmiControlServiceTest {
                 mMyPlaybackDevice.getRcProfile(), mMyPlaybackDevice.getRcFeatures(),
                 mMyPlaybackDevice.getDeviceFeatures());
         assertThat(mNativeWrapper.getResultMessages()).contains(reportFeatures);
+    }
+
+    @Test
+    public void runOnServiceThread_preservesAndRestoresWorkSourceUid() {
+        int callerUid = 1234;
+        int runnerUid = 5678;
+
+        Binder.setCallingWorkSourceUid(callerUid);
+        WorkSourceUidReadingRunnable uidReadingRunnable = new WorkSourceUidReadingRunnable();
+        mHdmiControlService.runOnServiceThread(uidReadingRunnable);
+
+        Binder.setCallingWorkSourceUid(runnerUid);
+
+        mTestLooper.dispatchAll();
+
+        assertEquals(Optional.of(callerUid), uidReadingRunnable.getWorkSourceUid());
+        assertEquals(runnerUid, Binder.getCallingWorkSourceUid());
     }
 
     private static class VolumeControlFeatureCallback extends
