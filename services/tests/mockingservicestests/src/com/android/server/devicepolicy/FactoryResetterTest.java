@@ -20,8 +20,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
-import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.never;
@@ -160,11 +158,10 @@ public final class FactoryResetterTest {
     public void testFactoryReset_storageOnly() throws Exception {
         allowFactoryReset();
 
-        boolean success = FactoryResetter.newBuilder(mContext)
+        FactoryResetter.newBuilder(mContext)
                 .setWipeAdoptableStorage(true).build()
                 .factoryReset();
 
-        assertThat(success).isTrue();
         verifyWipeAdoptableStorageCalled();
         verifyWipeFactoryResetProtectionNotCalled();
         verifyRebootWipeUserDataMinimumArgsCalled();
@@ -174,11 +171,10 @@ public final class FactoryResetterTest {
     public void testFactoryReset_frpOnly() throws Exception {
         allowFactoryReset();
 
-        boolean success = FactoryResetter.newBuilder(mContext)
+        FactoryResetter.newBuilder(mContext)
                 .setWipeFactoryResetProtection(true)
                 .build().factoryReset();
 
-        assertThat(success).isTrue();
         verifyWipeAdoptableStorageNotCalled();
         verifyWipeFactoryResetProtectionCalled();
         verifyRebootWipeUserDataMinimumArgsCalled();
@@ -188,7 +184,7 @@ public final class FactoryResetterTest {
     public void testFactoryReset_allArgs() throws Exception {
         allowFactoryReset();
 
-        boolean success = FactoryResetter.newBuilder(mContext)
+        FactoryResetter.newBuilder(mContext)
                 .setReason(REASON)
                 .setForce(true)
                 .setShutdown(true)
@@ -197,7 +193,6 @@ public final class FactoryResetterTest {
                 .setWipeFactoryResetProtection(true)
                 .build().factoryReset();
 
-        assertThat(success).isTrue();
         verifyWipeAdoptableStorageCalled();
         verifyWipeFactoryResetProtectionCalled();
         verifyRebootWipeUserDataAllArgsCalled();
@@ -207,10 +202,9 @@ public final class FactoryResetterTest {
     public void testFactoryReset_minimumArgs_safetyChecker_neverReplied() throws Exception {
         allowFactoryReset();
 
-        boolean success = FactoryResetter.newBuilder(mContext)
-                .setSafetyChecker(mSafetyChecker).build().factoryReset();
+        FactoryResetter.newBuilder(mContext).setSafetyChecker(mSafetyChecker).build()
+                .factoryReset();
 
-        assertThat(success).isFalse();
         verifyWipeAdoptableStorageNotCalled();
         verifyWipeFactoryResetProtectionNotCalled();
         verifyRebootWipeUserDataNotCalled();
@@ -227,7 +221,7 @@ public final class FactoryResetterTest {
             return null;
         }).when(mSafetyChecker).onFactoryReset(any());
 
-        boolean success = FactoryResetter.newBuilder(mContext)
+        FactoryResetter.newBuilder(mContext)
                 .setSafetyChecker(mSafetyChecker)
                 .setReason(REASON)
                 .setForce(true)
@@ -237,7 +231,6 @@ public final class FactoryResetterTest {
                 .setWipeFactoryResetProtection(true)
                 .build().factoryReset();
 
-        assertThat(success).isFalse();
         verifyWipeAdoptableStorageCalled();
         verifyWipeFactoryResetProtectionCalled();
         verifyRebootWipeUserDataAllArgsCalled();

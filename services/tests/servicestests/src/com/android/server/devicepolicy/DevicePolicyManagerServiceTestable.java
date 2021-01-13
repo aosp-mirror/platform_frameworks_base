@@ -319,10 +319,10 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         }
 
         @Override
-        boolean recoverySystemRebootWipeUserData(boolean shutdown, String reason, boolean force,
+        void recoverySystemRebootWipeUserData(boolean shutdown, String reason, boolean force,
                 boolean wipeEuicc, boolean wipeExtRequested, boolean wipeResetProtectionData)
                         throws IOException {
-            return services.recoverySystem.rebootWipeUserData(shutdown, reason, force, wipeEuicc,
+            services.recoverySystem.rebootWipeUserData(shutdown, reason, force, wipeEuicc,
                     wipeExtRequested, wipeResetProtectionData);
         }
 
