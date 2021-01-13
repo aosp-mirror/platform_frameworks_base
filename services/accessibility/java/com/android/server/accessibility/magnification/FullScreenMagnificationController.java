@@ -118,6 +118,7 @@ public class FullScreenMagnificationController {
 
         private static final int INVALID_ID = -1;
         private int mIdOfLastServiceToMagnify = INVALID_ID;
+        private boolean mMagnificationActivated = false;
 
         DisplayMagnification(int displayId) {
             mDisplayId = displayId;
@@ -321,6 +322,13 @@ public class FullScreenMagnificationController {
                         SpecAnimationBridge::updateSentSpecMainThread,
                         mSpecAnimationBridge, spec, animationCallback);
                 mControllerCtx.getHandler().sendMessage(m);
+            }
+
+            final boolean lastMagnificationActivated = mMagnificationActivated;
+            mMagnificationActivated = spec.scale > 1.0f;
+            if (mMagnificationActivated != lastMagnificationActivated) {
+                mMagnificationRequestObserver.onFullScreenMagnificationActivationState(
+                        mMagnificationActivated);
             }
         }
 
@@ -1506,5 +1514,14 @@ public class FullScreenMagnificationController {
          * @param serviceId the ID of the service requesting the change
          */
         void onRequestMagnificationSpec(int displayId, int serviceId);
+
+        /**
+         * Called when the state of the magnification activation is changed.
+         * It is for the logging data of the magnification activation state.
+         *
+         * @param activated {@code true} if the magnification is activated, otherwise {@code false}.
+         */
+        @GuardedBy("mLock")
+        void onFullScreenMagnificationActivationState(boolean activated);
     }
 }
