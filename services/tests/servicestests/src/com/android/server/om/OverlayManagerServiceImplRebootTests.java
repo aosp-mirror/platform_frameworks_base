@@ -78,7 +78,7 @@ public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceI
     }
 
     @Test
-    public void testImmutableEnabledChange() throws Exception {
+    public void testImmutableEnabledChange() {
         final OverlayManagerServiceImpl impl = getImpl();
         installNewPackage(target(TARGET), USER);
         installNewPackage(overlay(OVERLAY, TARGET), USER);
@@ -106,7 +106,7 @@ public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceI
     }
 
     @Test
-    public void testMutableEnabledChangeHasNoEffect() throws Exception {
+    public void testMutableEnabledChangeHasNoEffect() {
         final OverlayManagerServiceImpl impl = getImpl();
         installNewPackage(target(TARGET), USER);
         installNewPackage(overlay(OVERLAY, TARGET), USER);
@@ -134,7 +134,7 @@ public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceI
     }
 
     @Test
-    public void testMutableEnabledToImmutableEnabled() throws Exception {
+    public void testMutableEnabledToImmutableEnabled() {
         final OverlayManagerServiceImpl impl = getImpl();
         installNewPackage(target(TARGET), USER);
         installNewPackage(overlay(OVERLAY, TARGET), USER);
@@ -178,7 +178,7 @@ public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceI
     }
 
     @Test
-    public void testMutablePriorityChange() throws Exception {
+    public void testMutablePriorityChange() {
         final OverlayManagerServiceImpl impl = getImpl();
         installNewPackage(target(TARGET), USER);
         installNewPackage(overlay(OVERLAY, TARGET), USER);
@@ -218,7 +218,7 @@ public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceI
     }
 
     @Test
-    public void testImmutablePriorityChange() throws Exception {
+    public void testImmutablePriorityChange() {
         final OverlayManagerServiceImpl impl = getImpl();
         installNewPackage(target(TARGET), USER);
         installNewPackage(overlay(OVERLAY, TARGET), USER);
