@@ -201,8 +201,6 @@ public final class InputManager {
      * Prevent touches from being consumed by apps if these touches passed through a non-trusted
      * window from a different UID and are considered unsafe.
      *
-     * TODO(b/158002302): Turn the feature on by default
-     *
      * @hide
      */
     @TestApi
