@@ -4117,10 +4117,10 @@ public class PackageManagerService extends IPackageManager.Stub
                         final long packedStatus = getDomainVerificationStatusLPr(ps, userId);
                         final int status = (int) (packedStatus >> 32);
                         if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS
-                            || status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK) {
+                                || status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK) {
                             if (DEBUG_INSTANT) {
                                 Slog.v(TAG, "DENY instant app;"
-                                    + " pkg: " + packageName + ", status: " + status);
+                                        + " pkg: " + packageName + ", status: " + status);
                             }
                             return false;
                         }
@@ -4450,7 +4450,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             if (checkShell) {
                 PackageManagerServiceUtils.enforceShellRestriction(
-                    mInjector.getUserManagerInternal(),
+                        mInjector.getUserManagerInternal(),
                         UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, userId);
             }
             final int callingUserId = UserHandle.getUserId(callingUid);
@@ -4506,7 +4506,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             if (checkShell) {
                 PackageManagerServiceUtils.enforceShellRestriction(
-                    mInjector.getUserManagerInternal(),
+                        mInjector.getUserManagerInternal(),
                         UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, userId);
             }
             final int callingUserId = UserHandle.getUserId(callingUid);
@@ -4609,8 +4609,8 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
         public ArrayList<ResolveInfo> filterCandidatesWithDomainPreferredActivitiesLPrBody(
-            Intent intent, int matchFlags, List<ResolveInfo> candidates,
-            CrossProfileDomainInfo xpDomainInfo, int userId, boolean debug) {
+                Intent intent, int matchFlags, List<ResolveInfo> candidates,
+                CrossProfileDomainInfo xpDomainInfo, int userId, boolean debug) {
             synchronized (mLock) {
                 return super.filterCandidatesWithDomainPreferredActivitiesLPrBody(intent,
                         matchFlags, candidates, xpDomainInfo, userId, debug);
@@ -4699,47 +4699,54 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final boolean SNAPSHOT_ENABLED = true;
 
     /**
-     * Return the live or cached computer.  The method will rebuild the
-     * cached computer if necessary.
+     * Return the live computer.
      */
-    private Computer computer(boolean live) {
-        if (live || !SNAPSHOT_ENABLED) {
+    private Computer liveComputer() {
+        return mLiveComputer;
+    }
+
+    /**
+     * Return the cached computer.  The method will rebuild the cached computer if necessary.
+     * The live computer will be returned if snapshots are disabled.
+     */
+    private Computer snapshotComputer() {
+        if (!SNAPSHOT_ENABLED) {
             return mLiveComputer;
-        } else {
-            int hits = 0;
-            if (TRACE_CACHES) {
-                hits = mSnapshotHits.incrementAndGet();
-            }
-            Computer c = mSnapshotComputer;
-            if ((sSnapshotInvalid || (c == null)) && !sSnapshotCorked) {
-                synchronized (mLock) {
-                    // Rebuild the computer if it is invalid and if the cache is not
-                    // corked.  The lock is taken inside the rebuild method.  Note that
-                    // the cache might be invalidated as it is rebuilt.  However, the
-                    // cache is still consistent and is current as of the time this
-                    // function is entered.
-                    if (sSnapshotInvalid) {
-                        rebuildSnapshot(hits);
-                    }
-                    // Guaranteed to be non-null
-                    c = mSnapshotComputer;
-                }
-            }
+        }
+        int hits = 0;
+        if (TRACE_CACHES) {
+            hits = mSnapshotHits.incrementAndGet();
+        }
+        Computer c = mSnapshotComputer;
+        if (sSnapshotCorked && (c != null)) {
+            // Snapshots are corked, which means new ones should not be built right now.
             return c;
         }
+        if (sSnapshotInvalid || (c == null)) {
+            // The snapshot is invalid if it is marked as invalid or if it is null.  If it
+            // is null, then it is currently being rebuilt by rebuildSnapshot().
+            synchronized (mLock) {
+                // Rebuild the snapshot if it is invalid.  Note that the snapshot might be
+                // invalidated as it is rebuilt.  However, the snapshot is still
+                // self-consistent (the lock is being held)and is current as of the time
+                // this function is entered.
+                if (sSnapshotInvalid) {
+                    rebuildSnapshot(hits);
+                }
+
+                // Guaranteed to be non-null.  mSnapshotComputer is only be set to null
+                // temporarily in rebuildSnapshot(), which is guarded by mLock().  Since
+                // the mLock is held in this block and since rebuildSnapshot() is
+                // complete, the attribute can not now be null.
+                c = mSnapshotComputer;
+            }
+        }
+        return c;
     }
 
     /**
-     * Return the live computer if the thread holds the lock, and the cached
-     * computer otehrwise.  This method is for functions that are unsure
-     * which computer to use.
-     **/
-    private Computer computer() {
-        return computer(Thread.holdsLock(mLock));
-    }
-
-    /**
-     * Rebuild the cached computer.
+     * Rebuild the cached computer.  mSnapshotComputer is temporarily set to null to block
+     * other threads from using the invalid computer until it is rebuilt.
      */
     @GuardedBy("mLock")
     private void rebuildSnapshot(int hits) {
@@ -4759,7 +4766,7 @@ public class PackageManagerService extends IPackageManager.Stub
     /**
      * Create a live computer
      */
-    private ComputerLocked liveComputer() {
+    private ComputerLocked createLiveComputer() {
         return new ComputerLocked(new Snapshot(Snapshot.LIVE));
     }
 
@@ -6058,7 +6065,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // corked initially to ensure a cached computer is not built until the end of the
         // constructor.
         sSnapshotCorked = true;
-        mLiveComputer = liveComputer();
+        mLiveComputer = createLiveComputer();
         mSnapshotComputer = mLiveComputer;
 
         // Link up the watchers
@@ -6234,7 +6241,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // corked initially to ensure a cached computer is not built until the end of the
         // constructor.
         sSnapshotCorked = true;
-        mLiveComputer = liveComputer();
+        mLiveComputer = createLiveComputer();
         mSnapshotComputer = mLiveComputer;
 
         // CHECKSTYLE:OFF IndentationCheck
@@ -7615,11 +7622,11 @@ public class PackageManagerService extends IPackageManager.Stub
      * </ol>
      */
     private boolean canViewInstantApps(int callingUid, int userId) {
-        return computer(true).canViewInstantApps(callingUid, userId);
+        return liveComputer().canViewInstantApps(callingUid, userId);
     }
 
     private PackageInfo generatePackageInfo(PackageSetting ps, int flags, int userId) {
-        return computer(true).generatePackageInfo(ps, flags, userId);
+        return liveComputer().generatePackageInfo(ps, flags, userId);
     }
 
     @Override
@@ -7684,8 +7691,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public PackageInfo getPackageInfo(String packageName, int flags, int userId) {
-        // SNAPSHOT
-        return computer(false).getPackageInfo(packageName, flags, userId);
+        return snapshotComputer().getPackageInfo(packageName, flags, userId);
     }
 
     @Override
@@ -7703,23 +7709,23 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private PackageInfo getPackageInfoInternal(String packageName, long versionCode,
             int flags, int filterCallingUid, int userId) {
-        return computer(true).getPackageInfoInternal(packageName, versionCode,
+        return liveComputer().getPackageInfoInternal(packageName, versionCode,
                 flags, filterCallingUid, userId);
     }
 
     private PackageInfo getPackageInfoInternalBody(String packageName, long versionCode,
             int flags, int filterCallingUid, int userId) {
-        return computer(true).getPackageInfoInternalBody(packageName, versionCode,
+        return liveComputer().getPackageInfoInternalBody(packageName, versionCode,
                 flags, filterCallingUid, userId);
     }
 
     private boolean isComponentVisibleToInstantApp(@Nullable ComponentName component) {
-        return computer(true).isComponentVisibleToInstantApp(component);
+        return liveComputer().isComponentVisibleToInstantApp(component);
     }
 
     private boolean isComponentVisibleToInstantApp(
             @Nullable ComponentName component, @ComponentType int type) {
-        return computer(true).isComponentVisibleToInstantApp(
+        return liveComputer().isComponentVisibleToInstantApp(
             component, type);
     }
 
@@ -7734,7 +7740,7 @@ public class PackageManagerService extends IPackageManager.Stub
     @GuardedBy("mLock")
     private boolean shouldFilterApplicationLocked(@Nullable PackageSetting ps, int callingUid,
             @Nullable ComponentName component, @ComponentType int componentType, int userId) {
-        return computer(true).shouldFilterApplicationLocked(ps, callingUid,
+        return liveComputer().shouldFilterApplicationLocked(ps, callingUid,
                 component, componentType, userId);
     }
 
@@ -7744,14 +7750,14 @@ public class PackageManagerService extends IPackageManager.Stub
     @GuardedBy("mLock")
     private boolean shouldFilterApplicationLocked(
             @Nullable PackageSetting ps, int callingUid, int userId) {
-        return computer(true).shouldFilterApplicationLocked(
+        return liveComputer().shouldFilterApplicationLocked(
             ps, callingUid, userId);
     }
 
     @GuardedBy("mLock")
     private boolean filterSharedLibPackageLPr(@Nullable PackageSetting ps, int uid, int userId,
             int flags) {
-        return computer(true).filterSharedLibPackageLPr(ps, uid, userId,
+        return liveComputer().filterSharedLibPackageLPr(ps, uid, userId,
                 flags);
     }
 
@@ -7822,7 +7828,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private int getPackageUidInternal(String packageName, int flags, int userId, int callingUid) {
-        return computer(true).getPackageUidInternal(packageName, flags, userId, callingUid);
+        return liveComputer().getPackageUidInternal(packageName, flags, userId, callingUid);
     }
 
     @Override
@@ -7869,14 +7875,13 @@ public class PackageManagerService extends IPackageManager.Stub
     @GuardedBy("mLock")
     private ApplicationInfo generateApplicationInfoFromSettingsLPw(String packageName, int flags,
             int filterCallingUid, int userId) {
-        return computer(true).generateApplicationInfoFromSettingsLPw(packageName, flags,
+        return liveComputer().generateApplicationInfoFromSettingsLPw(packageName, flags,
                 filterCallingUid, userId);
     }
 
     @Override
     public ApplicationInfo getApplicationInfo(String packageName, int flags, int userId) {
-        // SNAPSHOT
-        return computer(false).getApplicationInfo(packageName, flags, userId);
+        return snapshotComputer().getApplicationInfo(packageName, flags, userId);
     }
 
     /**
@@ -7887,13 +7892,13 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private ApplicationInfo getApplicationInfoInternal(String packageName, int flags,
             int filterCallingUid, int userId) {
-        return computer(true).getApplicationInfoInternal(packageName, flags,
+        return liveComputer().getApplicationInfoInternal(packageName, flags,
                 filterCallingUid, userId);
     }
 
     private ApplicationInfo getApplicationInfoInternalBody(String packageName, int flags,
             int filterCallingUid, int userId) {
-        return computer(true).getApplicationInfoInternalBody(packageName, flags,
+        return liveComputer().getApplicationInfoInternalBody(packageName, flags,
                 filterCallingUid, userId);
     }
 
@@ -8126,28 +8131,28 @@ public class PackageManagerService extends IPackageManager.Stub
      * Update given flags based on encryption status of current user.
      */
     private int updateFlags(int flags, int userId) {
-        return computer(true).updateFlags(flags, userId);
+        return liveComputer().updateFlags(flags, userId);
     }
 
     /**
      * Update given flags when being used to request {@link PackageInfo}.
      */
     private int updateFlagsForPackage(int flags, int userId) {
-        return computer(true).updateFlagsForPackage(flags, userId);
+        return liveComputer().updateFlagsForPackage(flags, userId);
     }
 
     /**
      * Update given flags when being used to request {@link ApplicationInfo}.
      */
     private int updateFlagsForApplication(int flags, int userId) {
-        return computer(true).updateFlagsForApplication(flags, userId);
+        return liveComputer().updateFlagsForApplication(flags, userId);
     }
 
     /**
      * Update given flags when being used to request {@link ComponentInfo}.
      */
     private int updateFlagsForComponent(int flags, int userId) {
-        return computer(true).updateFlagsForComponent(flags, userId);
+        return liveComputer().updateFlagsForComponent(flags, userId);
     }
 
     /**
@@ -8177,14 +8182,14 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private int updateFlagsForResolve(int flags, int userId, int callingUid,
             boolean wantInstantApps, boolean isImplicitImageCaptureIntentAndNotSetByDpc) {
-        return computer(true).updateFlagsForResolve(flags, userId, callingUid,
+        return liveComputer().updateFlagsForResolve(flags, userId, callingUid,
                 wantInstantApps, isImplicitImageCaptureIntentAndNotSetByDpc);
     }
 
     private int updateFlagsForResolve(int flags, int userId, int callingUid,
             boolean wantInstantApps, boolean onlyExposedExplicitly,
             boolean isImplicitImageCaptureIntentAndNotSetByDpc) {
-        return computer(true).updateFlagsForResolve(flags, userId, callingUid,
+        return liveComputer().updateFlagsForResolve(flags, userId, callingUid,
                 wantInstantApps, onlyExposedExplicitly,
                 isImplicitImageCaptureIntentAndNotSetByDpc);
     }
@@ -8208,8 +8213,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public ActivityInfo getActivityInfo(ComponentName component, int flags, int userId) {
-        // SNAPSHOT
-        return computer(false).getActivityInfo(component, flags, userId);
+        return snapshotComputer().getActivityInfo(component, flags, userId);
     }
 
     /**
@@ -8220,18 +8224,18 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private ActivityInfo getActivityInfoInternal(ComponentName component, int flags,
             int filterCallingUid, int userId) {
-        return computer(true).getActivityInfoInternal(component, flags,
+        return liveComputer().getActivityInfoInternal(component, flags,
                 filterCallingUid, userId);
     }
 
     private ActivityInfo getActivityInfoInternalBody(ComponentName component, int flags,
             int filterCallingUid, int userId) {
-        return computer(true).getActivityInfoInternalBody(component, flags,
+        return liveComputer().getActivityInfoInternalBody(component, flags,
                 filterCallingUid, userId);
     }
 
     private boolean isRecentsAccessingChildProfiles(int callingUid, int targetUserId) {
-        return computer(true).isRecentsAccessingChildProfiles(callingUid, targetUserId);
+        return liveComputer().isRecentsAccessingChildProfiles(callingUid, targetUserId);
     }
 
     @Override
@@ -8494,13 +8498,12 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public ServiceInfo getServiceInfo(ComponentName component, int flags, int userId) {
-        // SNAPSHOT
-        return computer(false).getServiceInfo(component, flags, userId);
+        return snapshotComputer().getServiceInfo(component, flags, userId);
     }
 
     private ServiceInfo getServiceInfoBody(ComponentName component, int flags, int userId,
                                              int callingUid) {
-        return computer(true).getServiceInfoBody(component, flags, userId,
+        return liveComputer().getServiceInfoBody(component, flags, userId,
                 callingUid);
     }
 
@@ -8712,8 +8715,7 @@ public class PackageManagerService extends IPackageManager.Stub
     // NOTE: Can't remove without a major refactor. Keep around for now.
     @Override
     public int checkUidPermission(String permName, int uid) {
-        // SNAPSHOT
-        return computer(false).checkUidPermission(permName, uid);
+        return snapshotComputer().checkUidPermission(permName, uid);
     }
 
     @Override
@@ -9028,17 +9030,16 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     @Override
     public String[] getPackagesForUid(int uid) {
-        // SNAPSHOT
-        return computer(false).getPackagesForUid(uid);
+        return snapshotComputer().getPackagesForUid(uid);
     }
 
     private String[] getPackagesForUidInternal(int uid, int callingUid) {
-        return computer(true).getPackagesForUidInternal(uid, callingUid);
+        return liveComputer().getPackagesForUidInternal(uid, callingUid);
     }
 
     private String[] getPackagesForUidInternalBody(int callingUid, int userId, int appId,
                                                      boolean isCallerInstantApp) {
-        return computer(true).getPackagesForUidInternalBody(callingUid, userId, appId,
+        return liveComputer().getPackagesForUidInternalBody(callingUid, userId, appId,
                 isCallerInstantApp);
     }
 
@@ -9327,13 +9328,13 @@ public class PackageManagerService extends IPackageManager.Stub
      * Returns whether or not instant apps have been disabled remotely.
      */
     private boolean areWebInstantAppsDisabled(int userId) {
-        return computer(true).areWebInstantAppsDisabled(userId);
+        return liveComputer().areWebInstantAppsDisabled(userId);
     }
 
     private boolean isInstantAppResolutionAllowed(
             Intent intent, List<ResolveInfo> resolvedActivities, int userId,
             boolean skipPackageCheck) {
-        return computer(true).isInstantAppResolutionAllowed(
+        return liveComputer().isInstantAppResolutionAllowed(
             intent, resolvedActivities, userId,
             skipPackageCheck);
     }
@@ -9343,7 +9344,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private boolean isInstantAppResolutionAllowedBody(
             Intent intent, List<ResolveInfo> resolvedActivities, int userId,
             boolean skipPackageCheck) {
-        return computer(true).isInstantAppResolutionAllowedBody(
+        return liveComputer().isInstantAppResolutionAllowedBody(
             intent, resolvedActivities, userId,
             skipPackageCheck);
     }
@@ -9482,13 +9483,13 @@ public class PackageManagerService extends IPackageManager.Stub
     @GuardedBy("mLock")
     private boolean isImplicitImageCaptureIntentAndNotSetByDpcLocked(Intent intent, int userId,
             String resolvedType, int flags) {
-        return computer(true).isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId,
+        return liveComputer().isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId,
                 resolvedType, flags);
     }
 
     private boolean isPersistentPreferredActivitySetByDpm(Intent intent, int userId,
             String resolvedType, int flags) {
-        return computer(true).isPersistentPreferredActivitySetByDpm(intent, userId,
+        return liveComputer().isPersistentPreferredActivitySetByDpm(intent, userId,
                 resolvedType, flags);
     }
 
@@ -9813,12 +9814,12 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private UserInfo getProfileParent(int userId) {
-        return computer(true).getProfileParent(userId);
+        return liveComputer().getProfileParent(userId);
     }
 
     private List<CrossProfileIntentFilter> getMatchingCrossProfileIntentFilters(Intent intent,
             String resolvedType, int userId) {
-        return computer(true).getMatchingCrossProfileIntentFilters(intent,
+        return liveComputer().getMatchingCrossProfileIntentFilters(intent,
                 resolvedType, userId);
     }
 
@@ -9840,13 +9841,12 @@ public class PackageManagerService extends IPackageManager.Stub
      * instant, returns {@code null}.
      */
     private String getInstantAppPackageName(int callingUid) {
-        // SNAPSHOT
-        return computer(false).getInstantAppPackageName(callingUid);
+        return snapshotComputer().getInstantAppPackageName(callingUid);
     }
 
     private @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
             String resolvedType, int flags, int userId) {
-        return computer(true).queryIntentActivitiesInternal(intent,
+        return liveComputer().queryIntentActivitiesInternal(intent,
                 resolvedType, flags, userId);
     }
 
@@ -9870,7 +9870,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
             String resolvedType, int flags, @PrivateResolveFlags int privateResolveFlags,
             int filterCallingUid, int userId, boolean resolveForStart, boolean allowDynamicSplits) {
-        return computer(true).queryIntentActivitiesInternal(intent,
+        return liveComputer().queryIntentActivitiesInternal(intent,
                 resolvedType, flags, privateResolveFlags,
                 filterCallingUid, userId, resolveForStart, allowDynamicSplits);
     }
@@ -9879,7 +9879,7 @@ public class PackageManagerService extends IPackageManager.Stub
             Intent intent, String resolvedType, int flags, int filterCallingUid, int userId,
             boolean resolveForStart, boolean allowDynamicSplits, String pkgName,
             String instantAppPkgName) {
-        return computer(true).queryIntentActivitiesInternalBody(
+        return liveComputer().queryIntentActivitiesInternalBody(
             intent, resolvedType, flags, filterCallingUid, userId,
             resolveForStart, allowDynamicSplits, pkgName,
             instantAppPkgName);
@@ -9888,7 +9888,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private List<ResolveInfo> maybeAddInstantAppInstaller(List<ResolveInfo> result, Intent intent,
             String resolvedType, int flags, int userId, boolean resolveForStart,
             boolean isRequesterInstantApp) {
-        return computer(true).maybeAddInstantAppInstaller(result, intent,
+        return liveComputer().maybeAddInstantAppInstaller(result, intent,
                 resolvedType, flags, userId, resolveForStart,
                 isRequesterInstantApp);
     }
@@ -9902,7 +9902,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private CrossProfileDomainInfo getCrossProfileDomainPreferredLpr(Intent intent,
             String resolvedType, int flags, int sourceUserId, int parentUserId) {
-        return computer(true).getCrossProfileDomainPreferredLpr(intent,
+        return liveComputer().getCrossProfileDomainPreferredLpr(intent,
                 resolvedType, flags, sourceUserId, parentUserId);
     }
 
@@ -9911,11 +9911,11 @@ public class PackageManagerService extends IPackageManager.Stub
      * INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER, which is the worse.
      */
     private int bestDomainVerificationStatus(int status1, int status2) {
-        return computer(true).bestDomainVerificationStatus(status1, status2);
+        return liveComputer().bestDomainVerificationStatus(status1, status2);
     }
 
     private boolean isUserEnabled(int userId) {
-        return computer(true).isUserEnabled(userId);
+        return liveComputer().isUserEnabled(userId);
     }
 
     /**
@@ -9924,7 +9924,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * @return filtered list
      */
     private List<ResolveInfo> filterIfNotSystemUser(List<ResolveInfo> resolveInfos, int userId) {
-        return computer(true).filterIfNotSystemUser(resolveInfos, userId);
+        return liveComputer().filterIfNotSystemUser(resolveInfos, userId);
     }
 
     /**
@@ -9941,7 +9941,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private List<ResolveInfo> applyPostResolutionFilter(@NonNull List<ResolveInfo> resolveInfos,
             String ephemeralPkgName, boolean allowDynamicSplits, int filterCallingUid,
             boolean resolveForStart, int userId, Intent intent) {
-        return computer(true).applyPostResolutionFilter(resolveInfos,
+        return liveComputer().applyPostResolutionFilter(resolveInfos,
                 ephemeralPkgName, allowDynamicSplits, filterCallingUid,
                 resolveForStart, userId, intent);
     }
@@ -9955,7 +9955,7 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private @Nullable ComponentName findInstallFailureActivity(
             String packageName, int filterCallingUid, int userId) {
-        return computer(true).findInstallFailureActivity(
+        return liveComputer().findInstallFailureActivity(
             packageName, filterCallingUid, userId);
     }
 
@@ -9964,13 +9964,13 @@ public class PackageManagerService extends IPackageManager.Stub
      * @return if the list contains a resolve info with non-negative priority
      */
     private boolean hasNonNegativePriority(List<ResolveInfo> resolveInfos) {
-        return computer(true).hasNonNegativePriority(resolveInfos);
+        return liveComputer().hasNonNegativePriority(resolveInfos);
     }
 
     private List<ResolveInfo> filterCandidatesWithDomainPreferredActivitiesLPr(Intent intent,
             int matchFlags, List<ResolveInfo> candidates, CrossProfileDomainInfo xpDomainInfo,
             int userId) {
-        return computer(true).filterCandidatesWithDomainPreferredActivitiesLPr(intent,
+        return liveComputer().filterCandidatesWithDomainPreferredActivitiesLPr(intent,
                 matchFlags, candidates, xpDomainInfo,
                 userId);
     }
@@ -9978,7 +9978,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private ArrayList<ResolveInfo> filterCandidatesWithDomainPreferredActivitiesLPrBody(
             Intent intent, int matchFlags, List<ResolveInfo> candidates,
             CrossProfileDomainInfo xpDomainInfo, int userId, boolean debug) {
-        return computer(true).filterCandidatesWithDomainPreferredActivitiesLPrBody(
+        return liveComputer().filterCandidatesWithDomainPreferredActivitiesLPrBody(
             intent, matchFlags, candidates,
             xpDomainInfo, userId, debug);
     }
@@ -9988,13 +9988,13 @@ public class PackageManagerService extends IPackageManager.Stub
     // high 'int'-sized word: link status: undefined/ask/never/always.
     // low 'int'-sized word: relative priority among 'always' results.
     private long getDomainVerificationStatusLPr(PackageSetting ps, int userId) {
-        return computer(true).getDomainVerificationStatusLPr(ps, userId);
+        return liveComputer().getDomainVerificationStatusLPr(ps, userId);
     }
 
     private ResolveInfo querySkipCurrentProfileIntents(
             List<CrossProfileIntentFilter> matchingFilters, Intent intent, String resolvedType,
             int flags, int sourceUserId) {
-        return computer(true).querySkipCurrentProfileIntents(
+        return liveComputer().querySkipCurrentProfileIntents(
             matchingFilters, intent, resolvedType,
             flags, sourceUserId);
     }
@@ -10003,7 +10003,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private ResolveInfo queryCrossProfileIntents(
             List<CrossProfileIntentFilter> matchingFilters, Intent intent, String resolvedType,
             int flags, int sourceUserId, boolean matchInCurrentProfile) {
-        return computer(true).queryCrossProfileIntents(
+        return liveComputer().queryCrossProfileIntents(
             matchingFilters, intent, resolvedType,
             flags, sourceUserId, matchInCurrentProfile);
     }
@@ -10015,13 +10015,13 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private ResolveInfo createForwardingResolveInfo(CrossProfileIntentFilter filter, Intent intent,
             String resolvedType, int flags, int sourceUserId) {
-        return computer(true).createForwardingResolveInfo(filter, intent,
+        return liveComputer().createForwardingResolveInfo(filter, intent,
                 resolvedType, flags, sourceUserId);
     }
 
     private ResolveInfo createForwardingResolveInfoUnchecked(IntentFilter filter,
             int sourceUserId, int targetUserId) {
-        return computer(true).createForwardingResolveInfoUnchecked(filter,
+        return liveComputer().createForwardingResolveInfoUnchecked(filter,
                 sourceUserId, targetUserId);
     }
 
@@ -10341,7 +10341,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private @NonNull List<ResolveInfo> queryIntentServicesInternal(Intent intent,
             String resolvedType, int flags, int userId, int callingUid,
             boolean includeInstantApps) {
-        return computer(true).queryIntentServicesInternal(intent,
+        return liveComputer().queryIntentServicesInternal(intent,
                 resolvedType, flags, userId, callingUid,
                 includeInstantApps);
     }
@@ -10349,14 +10349,14 @@ public class PackageManagerService extends IPackageManager.Stub
     private @NonNull List<ResolveInfo> queryIntentServicesInternalBody(Intent intent,
             String resolvedType, int flags, int userId, int callingUid,
             String instantAppPkgName) {
-        return computer(true).queryIntentServicesInternalBody(intent,
+        return liveComputer().queryIntentServicesInternalBody(intent,
                 resolvedType, flags, userId, callingUid,
                 instantAppPkgName);
     }
 
     private List<ResolveInfo> applyPostServiceResolutionFilter(List<ResolveInfo> resolveInfos,
             String instantAppPkgName, @UserIdInt int userId, int filterCallingUid) {
-        return computer(true).applyPostServiceResolutionFilter(resolveInfos,
+        return liveComputer().applyPostServiceResolutionFilter(resolveInfos,
                 instantAppPkgName, userId, filterCallingUid);
     }
 
@@ -10502,13 +10502,12 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public ParceledListSlice<PackageInfo> getInstalledPackages(int flags, int userId) {
-        // SNAPSHOT
-        return computer(false).getInstalledPackages(flags, userId);
+        return snapshotComputer().getInstalledPackages(flags, userId);
     }
 
     private ParceledListSlice<PackageInfo> getInstalledPackagesBody(int flags, int userId,
                                                                       int callingUid) {
-        return computer(true).getInstalledPackagesBody(flags, userId,
+        return liveComputer().getInstalledPackagesBody(flags, userId,
                 callingUid);
     }
 
@@ -10686,19 +10685,18 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public boolean isInstantApp(String packageName, int userId) {
-        // SNAPSHOT
-        return computer(false).isInstantApp(packageName, userId);
+        return snapshotComputer().isInstantApp(packageName, userId);
     }
 
     private boolean isInstantAppInternal(String packageName, @UserIdInt int userId,
             int callingUid) {
-        return computer(true).isInstantAppInternal(packageName, userId,
+        return liveComputer().isInstantAppInternal(packageName, userId,
                 callingUid);
     }
 
     private boolean isInstantAppInternalBody(String packageName, @UserIdInt int userId,
             int callingUid) {
-        return computer(true).isInstantAppInternalBody(packageName, userId,
+        return liveComputer().isInstantAppInternalBody(packageName, userId,
                 callingUid);
     }
 
@@ -10756,7 +10754,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private boolean isCallerSameApp(String packageName, int uid) {
-        return computer(true).isCallerSameApp(packageName, uid);
+        return liveComputer().isCallerSameApp(packageName, uid);
     }
 
     @Override
@@ -11514,7 +11512,7 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     void enforceCrossUserPermission(int callingUid, @UserIdInt int userId,
             boolean requireFullPermission, boolean checkShell, String message) {
-        computer(true).enforceCrossUserPermission(callingUid, userId,
+        liveComputer().enforceCrossUserPermission(callingUid, userId,
                 requireFullPermission, checkShell, message);
     }
 
@@ -11531,7 +11529,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private void enforceCrossUserPermission(int callingUid, @UserIdInt int userId,
             boolean requireFullPermission, boolean checkShell,
             boolean requirePermissionWhenSameUser, String message) {
-        computer(true).enforceCrossUserPermission(callingUid, userId,
+        liveComputer().enforceCrossUserPermission(callingUid, userId,
                 requireFullPermission, checkShell,
                 requirePermissionWhenSameUser, message);
     }
@@ -11552,24 +11550,24 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private void enforceCrossUserOrProfilePermission(int callingUid, @UserIdInt int userId,
             boolean requireFullPermission, boolean checkShell, String message) {
-        computer(true).enforceCrossUserOrProfilePermission(callingUid, userId,
+        liveComputer().enforceCrossUserOrProfilePermission(callingUid, userId,
                 requireFullPermission, checkShell, message);
     }
 
     private boolean hasCrossUserPermission(
             int callingUid, int callingUserId, int userId, boolean requireFullPermission,
             boolean requirePermissionWhenSameUser) {
-        return computer(true).hasCrossUserPermission(
+        return liveComputer().hasCrossUserPermission(
             callingUid, callingUserId, userId, requireFullPermission,
             requirePermissionWhenSameUser);
     }
 
     private boolean hasPermission(String permission) {
-        return computer(true).hasPermission(permission);
+        return liveComputer().hasPermission(permission);
     }
 
     private boolean isSameProfileGroup(@UserIdInt int callerUserId, @UserIdInt int userId) {
-        return computer(true).isSameProfileGroup(callerUserId, userId);
+        return liveComputer().isSameProfileGroup(callerUserId, userId);
     }
 
     private static String buildInvalidCrossUserPermissionMessage(int callingUid,
@@ -12207,7 +12205,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Nullable
     private SharedLibraryInfo getSharedLibraryInfoLPr(String name, long version) {
-        return computer(true).getSharedLibraryInfoLPr(name, version);
+        return liveComputer().getSharedLibraryInfoLPr(name, version);
     }
 
     @Nullable
@@ -20638,17 +20636,17 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private String resolveExternalPackageNameLPr(AndroidPackage pkg) {
-        return computer(true).resolveExternalPackageNameLPr(pkg);
+        return liveComputer().resolveExternalPackageNameLPr(pkg);
     }
 
     @GuardedBy("mLock")
     private String resolveInternalPackageNameLPr(String packageName, long versionCode) {
-        return computer(true).resolveInternalPackageNameLPr(packageName, versionCode);
+        return liveComputer().resolveInternalPackageNameLPr(packageName, versionCode);
     }
 
     private String resolveInternalPackageNameInternalLocked(
             String packageName, long versionCode, int callingUid) {
-        return computer(true).resolveInternalPackageNameInternalLocked(
+        return liveComputer().resolveInternalPackageNameInternalLocked(
             packageName, versionCode, callingUid);
     }
 
@@ -22699,11 +22697,11 @@ public class PackageManagerService extends IPackageManager.Stub
      * then reports the most likely home activity or null if there are more than one.
      */
     private ComponentName getDefaultHomeActivity(int userId) {
-        return computer(true).getDefaultHomeActivity(userId);
+        return liveComputer().getDefaultHomeActivity(userId);
     }
 
     private Intent getHomeIntent() {
-        return computer(true).getHomeIntent();
+        return liveComputer().getHomeIntent();
     }
 
     private IntentFilter getHomeFilter() {
@@ -22715,7 +22713,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     ComponentName getHomeActivitiesAsUser(List<ResolveInfo> allHomeCandidates,
             int userId) {
-        return computer(true).getHomeActivitiesAsUser(allHomeCandidates,
+        return liveComputer().getHomeActivitiesAsUser(allHomeCandidates,
                 userId);
     }
 
@@ -26330,13 +26328,11 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private AndroidPackage getPackage(String packageName) {
-        // SNAPSHOT
-        return computer(false).getPackage(packageName);
+        return snapshotComputer().getPackage(packageName);
     }
 
     private AndroidPackage getPackage(int uid) {
-        // SNAPSHOT
-        return computer(false).getPackage(uid);
+        return snapshotComputer().getPackage(uid);
     }
 
     private class PackageManagerInternalImpl extends PackageManagerInternal {
@@ -27587,12 +27583,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Nullable
     public PackageSetting getPackageSetting(String packageName) {
-        // SNAPSHOT
-        return computer(false).getPackageSetting(packageName);
+        return snapshotComputer().getPackageSetting(packageName);
     }
 
     private PackageSetting getPackageSettingInternal(String packageName, int callingUid) {
-        return computer(true).getPackageSettingInternal(packageName, callingUid);
+        return liveComputer().getPackageSettingInternal(packageName, callingUid);
     }
 
     void forEachPackage(Consumer<AndroidPackage> actionLocked) {
