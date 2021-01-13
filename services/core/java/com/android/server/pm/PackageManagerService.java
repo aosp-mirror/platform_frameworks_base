@@ -23767,7 +23767,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // Clear cache on flags changes.
         DeviceConfig.addOnPropertiesChangedListener(
-                NAMESPACE_PACKAGE_MANAGER_SERVICE, FgThread.getExecutor(),
+                NAMESPACE_PACKAGE_MANAGER_SERVICE, mInjector.getBackgroundExecutor(),
                 properties -> {
                     final Set<String> keyset = properties.getKeyset();
                     if (keyset.contains(PROPERTY_INCFS_DEFAULT_TIMEOUTS) || keyset.contains(
