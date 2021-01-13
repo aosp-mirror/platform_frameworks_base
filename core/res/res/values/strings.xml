@@ -450,6 +450,8 @@
          understand which sub-unit of an application is requesting permissions and using power.
          [CHAR LIMIT=NONE]-->
     <string name="offline_location_time_zone_detection_service_attribution">Time Zone Detector (No connectivity)</string>
+    <!-- Attribution for Gnss Time Update service. [CHAR LIMIT=NONE]-->
+    <string name="gnss_time_update_service">GNSS Time Update Service</string>
 
     <!-- Factory reset warning dialog strings--> <skip />
     <!-- Shows up in the dialog's title to warn about an impeding factory reset. [CHAR LIMIT=NONE] -->
