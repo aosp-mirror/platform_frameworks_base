@@ -274,11 +274,8 @@ public class AppStateTrackerImpl implements AppStateTracker {
                 int uid, @NonNull String packageName) {
             updateJobsForUidPackage(uid, packageName, sender.isUidActive(uid));
 
-            if (!sender.areAlarmsRestricted(uid, packageName, /*allowWhileIdle=*/ false)) {
+            if (!sender.areAlarmsRestricted(uid, packageName)) {
                 unblockAlarmsForUidPackage(uid, packageName);
-            } else if (!sender.areAlarmsRestricted(uid, packageName, /*allowWhileIdle=*/ true)) {
-                // we need to deliver the allow-while-idle alarms for this uid, package
-                unblockAllUnrestrictedAlarms();
             }
 
             if (!sender.isRunAnyInBackgroundAppOpsAllowed(uid, packageName)) {
@@ -302,6 +299,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
             final boolean isActive = sender.isUidActive(uid);
 
             updateJobsForUid(uid, isActive);
+            updateAlarmsForUid(uid);
 
             if (isActive) {
                 unblockAlarmsForUid(uid);
@@ -313,7 +311,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
          */
         private void onPowerSaveUnexempted(AppStateTrackerImpl sender) {
             updateAllJobs();
-            unblockAllUnrestrictedAlarms();
+            updateAllAlarms();
         }
 
         /**
@@ -322,6 +320,8 @@ public class AppStateTrackerImpl implements AppStateTracker {
          */
         private void onPowerSaveExemptionListChanged(AppStateTrackerImpl sender) {
             updateAllJobs();
+            updateAllAlarms();
+            unblockAllUnrestrictedAlarms();
         }
 
         /**
@@ -344,7 +344,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
         private void onExemptedBucketChanged(AppStateTrackerImpl sender) {
             // This doesn't happen very often, so just re-evaluate all jobs / alarms.
             updateAllJobs();
-            unblockAllUnrestrictedAlarms();
+            updateAllAlarms();
         }
 
         /**
@@ -352,10 +352,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
          */
         private void onForceAllAppsStandbyChanged(AppStateTrackerImpl sender) {
             updateAllJobs();
-
-            if (!sender.isForceAllAppsStandbyEnabled()) {
-                unblockAllUnrestrictedAlarms();
-            }
+            updateAllAlarms();
         }
 
         /**
@@ -384,6 +381,19 @@ public class AppStateTrackerImpl implements AppStateTracker {
          * services need to be removed from that state.
          */
         public void stopForegroundServicesForUidPackage(int uid, String packageName) {
+        }
+
+        /**
+         * Called when all alarms need to be re-evaluated for eligibility based on
+         * {@link #areAlarmsRestrictedByBatterySaver}.
+         */
+        public void updateAllAlarms() {
+        }
+
+        /**
+         * Called when the given uid state changes to active / idle.
+         */
+        public void updateAlarmsForUid(int uid) {
         }
 
         /**
@@ -918,7 +928,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
                     // Feature flag for forced app standby changed.
                     final boolean unblockAlarms;
                     synchronized (mLock) {
-                        unblockAlarms = !mForcedAppStandbyEnabled && !mForceAllAppsStandby;
+                        unblockAlarms = !mForcedAppStandbyEnabled;
                     }
                     for (Listener l : cloneListeners()) {
                         l.updateAllJobs();
@@ -1109,38 +1119,11 @@ public class AppStateTrackerImpl implements AppStateTracker {
     }
 
     /**
-     * @return whether alarms should be restricted for a UID package-name.
+     * @return whether alarms should be restricted for a UID package-name, due to explicit
+     * user-forced app standby. Use {{@link #areAlarmsRestrictedByBatterySaver} to check for
+     * restrictions induced by battery saver.
      */
-    public boolean areAlarmsRestricted(int uid, @NonNull String packageName,
-            boolean isExemptOnBatterySaver) {
-        return isRestricted(uid, packageName, /*useTempExemptionListToo=*/ false,
-                isExemptOnBatterySaver);
-    }
-
-    /**
-     * @return whether jobs should be restricted for a UID package-name.
-     */
-    public boolean areJobsRestricted(int uid, @NonNull String packageName,
-            boolean hasForegroundExemption) {
-        return isRestricted(uid, packageName, /*useTempExemptionListToo=*/ true,
-                hasForegroundExemption);
-    }
-
-    /**
-     * @return whether foreground services should be suppressed in the background
-     * due to forced app standby for the given app
-     */
-    public boolean areForegroundServicesRestricted(int uid, @NonNull String packageName) {
-        synchronized (mLock) {
-            return isRunAnyRestrictedLocked(uid, packageName);
-        }
-    }
-
-    /**
-     * @return whether force-app-standby is effective for a UID package-name.
-     */
-    private boolean isRestricted(int uid, @NonNull String packageName,
-            boolean useTempExemptionListToo, boolean exemptOnBatterySaver) {
+    public boolean areAlarmsRestricted(int uid, @NonNull String packageName) {
         if (isUidActive(uid)) {
             return false;
         }
@@ -1149,13 +1132,51 @@ public class AppStateTrackerImpl implements AppStateTracker {
             if (ArrayUtils.contains(mPowerExemptAllAppIds, appId)) {
                 return false;
             }
-            if (useTempExemptionListToo && ArrayUtils.contains(mTempExemptAppIds, appId)) {
+            return (mForcedAppStandbyEnabled && isRunAnyRestrictedLocked(uid, packageName));
+        }
+    }
+
+    /**
+     * @return whether alarms should be restricted when due to battery saver.
+     */
+    public boolean areAlarmsRestrictedByBatterySaver(int uid, @NonNull String packageName) {
+        if (isUidActive(uid)) {
+            return false;
+        }
+        synchronized (mLock) {
+            final int appId = UserHandle.getAppId(uid);
+            if (ArrayUtils.contains(mPowerExemptAllAppIds, appId)) {
+                return false;
+            }
+            final int userId = UserHandle.getUserId(uid);
+            if (mAppStandbyInternal.isAppIdleEnabled() && !mAppStandbyInternal.isInParole()
+                    && mExemptedBucketPackages.contains(userId, packageName)) {
+                return false;
+            }
+            return mForceAllAppsStandby;
+        }
+    }
+
+
+    /**
+     * @return whether jobs should be restricted for a UID package-name. This could be due to
+     * battery saver or user-forced app standby
+     */
+    public boolean areJobsRestricted(int uid, @NonNull String packageName,
+            boolean hasForegroundExemption) {
+        if (isUidActive(uid)) {
+            return false;
+        }
+        synchronized (mLock) {
+            final int appId = UserHandle.getAppId(uid);
+            if (ArrayUtils.contains(mPowerExemptAllAppIds, appId)
+                    || ArrayUtils.contains(mTempExemptAppIds, appId)) {
                 return false;
             }
             if (mForcedAppStandbyEnabled && isRunAnyRestrictedLocked(uid, packageName)) {
                 return true;
             }
-            if (exemptOnBatterySaver) {
+            if (hasForegroundExemption) {
                 return false;
             }
             final int userId = UserHandle.getUserId(uid);

@@ -17,37 +17,22 @@
 package com.android.wm.shell.flicker.legacysplitscreen
 
 import android.platform.test.annotations.Presubmit
-import android.support.test.launcherhelper.LauncherStrategyFactory
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
-import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.Flicker
-import com.android.server.wm.flicker.FlickerTestRunner
-import com.android.server.wm.flicker.FlickerTestRunnerFactory
-import com.android.server.wm.flicker.helpers.StandardAppHelper
-import com.android.server.wm.flicker.endRotation
-import com.android.server.wm.flicker.focusChanges
-import com.android.server.wm.flicker.helpers.buildTestTag
-import com.android.server.wm.flicker.helpers.exitSplitScreen
-import com.android.server.wm.flicker.helpers.isInSplitScreen
-import com.android.server.wm.flicker.helpers.launchSplitScreen
-import com.android.server.wm.flicker.helpers.openQuickStepAndClearRecentAppsFromOverview
-import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
-import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
-import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.appWindowBecomesVisible
-import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
+import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
 import com.android.server.wm.flicker.layerBecomesVisible
-import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.focusChanges
+import com.android.server.wm.flicker.helpers.launchSplitScreen
+import com.android.server.wm.flicker.dsl.runWithFlicker
+import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.noUncoveredRegions
-import com.android.server.wm.flicker.repetitions
-import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
-import com.android.server.wm.flicker.statusBarLayerRotatesScales
-import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
-import com.android.wm.shell.flicker.dockedStackDividerBecomesVisible
+import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
+import com.android.wm.shell.flicker.appPairsDividerBecomesVisible
+import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -56,85 +41,59 @@ import org.junit.runners.Parameterized
  * Test open app to split screen.
  * To run this test: `atest WMShellFlickerTests:OpenAppToLegacySplitScreenTest`
  */
-@Presubmit
+// TODO: Add back to pre-submit when stable.
+//@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class OpenAppToLegacySplitScreenTest(
-    testName: String,
-    flickerSpec: Flicker
-) : FlickerTestRunner(testName, flickerSpec) {
+    rotationName: String,
+    rotation: Int
+) : SplitScreenTestBase(rotationName, rotation) {
+    @Test
+    fun OpenAppToLegacySplitScreenTest() {
+        val testTag = "OpenAppToLegacySplitScreenTest"
+
+        runWithFlicker(transitionSetup) {
+            withTestName { testTag }
+            repeat { SplitScreenHelper.TEST_REPETITIONS }
+            transitions {
+                splitScreenApp.launchViaIntent()
+                device.pressHome()
+                this.setRotation(rotation)
+                device.launchSplitScreen()
+            }
+            assertions {
+                windowManagerTrace {
+                    visibleWindowsShownMoreThanOneConsecutiveEntry()
+                    appWindowBecomesVisible(splitScreenApp.getPackage())
+                }
+
+                layersTrace {
+                    navBarLayerIsAlwaysVisible(bugId = 140855415)
+                    noUncoveredRegions(rotation, enabled = false)
+                    statusBarLayerIsAlwaysVisible(bugId = 140855415)
+                    visibleLayersShownMoreThanOneConsecutiveEntry(
+                            listOf(LAUNCHER_PACKAGE_NAME))
+                    appPairsDividerBecomesVisible()
+                    layerBecomesVisible(splitScreenApp.getPackage())
+                }
+
+                eventLog {
+                    focusChanges(splitScreenApp.`package`,
+                            "recents_animation_input_consumer", "NexusLauncherActivity",
+                            bugId = 151179149)
+                }
+            }
+        }
+    }
+
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<Array<Any>> {
-            val instrumentation = InstrumentationRegistry.getInstrumentation()
-            val launcherPackageName = LauncherStrategyFactory.getInstance(instrumentation)
-                    .launcherStrategy.supportedLauncherPackage
-            val testApp = StandardAppHelper(instrumentation,
-                "com.android.wm.shell.flicker.testapp", "SimpleApp")
-
-            // b/161435597 causes the test not to work on 90 degrees
-            return FlickerTestRunnerFactory(instrumentation, listOf(Surface.ROTATION_0))
-                .buildTest { configuration ->
-                    withTestName {
-                        buildTestTag("appToSplitScreen", testApp, configuration)
-                    }
-                    repeat { configuration.repetitions }
-                    setup {
-                        test {
-                            device.wakeUpAndGoToHomeScreen()
-                            device.openQuickStepAndClearRecentAppsFromOverview()
-                        }
-                        eachRun {
-                            testApp.open()
-                            device.pressHome()
-                            this.setRotation(configuration.endRotation)
-                        }
-                    }
-                    teardown {
-                        eachRun {
-                            if (device.isInSplitScreen()) {
-                                device.exitSplitScreen()
-                            }
-                        }
-                        test {
-                            testApp.exit()
-                        }
-                    }
-                    transitions {
-                        device.launchSplitScreen()
-                    }
-                    assertions {
-                        windowManagerTrace {
-                            navBarWindowIsAlwaysVisible()
-                            statusBarWindowIsAlwaysVisible()
-                            visibleWindowsShownMoreThanOneConsecutiveEntry()
-
-                            appWindowBecomesVisible(testApp.getPackage())
-                        }
-
-                        layersTrace {
-                            navBarLayerIsAlwaysVisible(bugId = 140855415)
-                            statusBarLayerIsAlwaysVisible()
-                            noUncoveredRegions(configuration.endRotation, enabled = false)
-                            navBarLayerRotatesAndScales(configuration.endRotation,
-                                bugId = 140855415)
-                            statusBarLayerRotatesScales(configuration.endRotation)
-                            visibleLayersShownMoreThanOneConsecutiveEntry(
-                                    listOf(launcherPackageName))
-
-                            dockedStackDividerBecomesVisible()
-                            layerBecomesVisible(testApp.getPackage())
-                        }
-
-                        eventLog {
-                            focusChanges(testApp.`package`,
-                                "recents_animation_input_consumer", "NexusLauncherActivity",
-                                bugId = 151179149)
-                        }
-                    }
-                }
+            val supportedRotations = intArrayOf(Surface.ROTATION_0, Surface.ROTATION_90)
+            return supportedRotations.map { arrayOf(Surface.rotationToString(it), it) }
         }
     }
 }

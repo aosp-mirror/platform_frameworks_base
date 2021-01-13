@@ -873,7 +873,9 @@ public class BatteryStatsImpl extends BatteryStats {
     protected StopwatchTimer mScreenDozeTimer;
 
     int mScreenBrightnessBin = -1;
-    final StopwatchTimer[] mScreenBrightnessTimer = new StopwatchTimer[NUM_SCREEN_BRIGHTNESS_BINS];
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    protected final StopwatchTimer[] mScreenBrightnessTimer =
+            new StopwatchTimer[NUM_SCREEN_BRIGHTNESS_BINS];
 
     boolean mPretendScreenOff;
 

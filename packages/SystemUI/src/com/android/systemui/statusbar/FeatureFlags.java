@@ -50,18 +50,26 @@ public class FeatureFlags {
     @Inject
     public FeatureFlags(@Background Executor executor) {
         DeviceConfig.addOnPropertiesChangedListener(
-                "systemui",
+                /* namespace= */ "systemui",
                 executor,
                 this::onPropertiesChanged);
     }
 
     public boolean isNewNotifPipelineEnabled() {
-        return getDeviceConfigFlag("notification.newpipeline.enabled", true);
+        return getDeviceConfigFlag("notification.newpipeline.enabled", /* defaultValue= */ true);
     }
 
     public boolean isNewNotifPipelineRenderingEnabled() {
         return isNewNotifPipelineEnabled()
-                && getDeviceConfigFlag("notification.newpipeline.rendering", false);
+                && getDeviceConfigFlag("notification.newpipeline.rendering", /* defaultValue= */
+                false);
+    }
+
+    /**
+     * Flag used for guarding development of b/171917882.
+     */
+    public boolean isTwoColumnNotificationShadeEnabled() {
+        return getDeviceConfigFlag("notification.twocolumn", /* defaultValue= */ false);
     }
 
     private void onPropertiesChanged(@NonNull DeviceConfig.Properties properties) {
@@ -76,7 +84,7 @@ public class FeatureFlags {
         synchronized (mCachedDeviceConfigFlags) {
             Boolean flag = mCachedDeviceConfigFlags.get(key);
             if (flag == null) {
-                flag = DeviceConfig.getBoolean("systemui", key, defaultValue);
+                flag = DeviceConfig.getBoolean(/* namespace= */ "systemui", key, defaultValue);
                 mCachedDeviceConfigFlags.put(key, flag);
             }
             return flag;

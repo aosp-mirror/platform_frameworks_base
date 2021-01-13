@@ -111,6 +111,7 @@ import android.os.UserHandle;
 import android.os.incremental.IStorageHealthListener;
 import android.os.incremental.IncrementalFileStorages;
 import android.os.incremental.IncrementalManager;
+import android.os.incremental.PerUidReadTimeouts;
 import android.os.incremental.StorageHealthCheckParams;
 import android.os.storage.StorageManager;
 import android.provider.Settings.Secure;
@@ -3006,7 +3007,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean isInstallerShell = (mInstallerUid == Process.SHELL_UID);
         if (isInstallerShell && isIncrementalInstallation() && mIncrementalFileStorages != null) {
             if (!packageLite.debuggable && !packageLite.profilableByShell) {
-                mIncrementalFileStorages.disableReadLogs();
+                mIncrementalFileStorages.disallowReadLogs();
             }
         }
     }
@@ -3720,12 +3721,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         };
 
         if (!manualStartAndDestroy) {
+            final PerUidReadTimeouts[] perUidReadTimeouts = mPm.getPerUidReadTimeouts();
+
             final StorageHealthCheckParams healthCheckParams = new StorageHealthCheckParams();
             healthCheckParams.blockedTimeoutMs = INCREMENTAL_STORAGE_BLOCKED_TIMEOUT_MS;
             healthCheckParams.unhealthyTimeoutMs = INCREMENTAL_STORAGE_UNHEALTHY_TIMEOUT_MS;
             healthCheckParams.unhealthyMonitoringMs = INCREMENTAL_STORAGE_UNHEALTHY_MONITORING_MS;
+
             final boolean systemDataLoader =
                     params.getComponentName().getPackageName() == SYSTEM_DATA_LOADER_PACKAGE;
+
             final IStorageHealthListener healthListener = new IStorageHealthListener.Stub() {
                 @Override
                 public void onHealthStatus(int storageId, int status) {
@@ -3760,7 +3765,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
             try {
                 mIncrementalFileStorages = IncrementalFileStorages.initialize(mContext, stageDir,
-                        params, statusListener, healthCheckParams, healthListener, addedFiles);
+                        params, statusListener, healthCheckParams, healthListener, addedFiles,
+                        perUidReadTimeouts);
                 return false;
             } catch (IOException e) {
                 throw new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE, e.getMessage(),

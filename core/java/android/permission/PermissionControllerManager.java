@@ -663,6 +663,34 @@ public final class PermissionControllerManager {
     }
 
     /**
+     * Gets the description of the privileges associated with the given device profiles
+     *
+     * @param profileName Name of the device profile
+     * @param executor Executor on which to invoke the callback
+     * @param callback Callback to receive the result
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_COMPANION_DEVICES)
+    public void getPrivilegesDescriptionStringForProfile(
+            @NonNull String profileName,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<String> callback) {
+        mRemoteService.postAsync(service -> {
+            AndroidFuture<String> future = new AndroidFuture<>();
+            service.getPrivilegesDescriptionStringForProfile(profileName, future);
+            return future;
+        }).whenCompleteAsync((description, err) -> {
+            if (err != null) {
+                Log.e(TAG, "Error from getPrivilegesDescriptionStringForProfile", err);
+                callback.accept(null);
+            } else {
+                callback.accept(description);
+            }
+        }, executor);
+    }
+
+    /**
      * @see PermissionControllerManager#updateUserSensitiveForApp
      * @hide
      */

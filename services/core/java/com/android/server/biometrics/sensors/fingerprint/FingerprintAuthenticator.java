@@ -19,13 +19,13 @@ package com.android.server.biometrics.sensors.fingerprint;
 import android.annotation.NonNull;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricSensorReceiver;
+import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.SensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintService;
 import android.os.IBinder;
 import android.os.RemoteException;
 
-import com.android.server.biometrics.SensorConfig;
 import com.android.server.biometrics.sensors.LockoutTracker;
 
 /**
@@ -91,6 +91,12 @@ public final class FingerprintAuthenticator extends IBiometricAuthenticator.Stub
     public @LockoutTracker.LockoutMode int getLockoutModeForUser(int userId)
             throws RemoteException {
         return mFingerprintService.getLockoutModeForUser(mSensorId, userId);
+    }
+
+    @Override
+    public void invalidateAuthenticatorId(int userId, IInvalidationCallback callback)
+            throws RemoteException {
+        mFingerprintService.invalidateAuthenticatorId(mSensorId, userId, callback);
     }
 
     @Override

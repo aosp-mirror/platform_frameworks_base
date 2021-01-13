@@ -3406,6 +3406,14 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device supports translation of text-to-text in multiple languages via integration with
+     * the system {@link android.service.translation.TranslationService translation provider}.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_TRANSLATION = "android.software.translation";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
      * The device implements headtracking suitable for a VR device.
      */
     @SdkConstant(SdkConstantType.FEATURE)

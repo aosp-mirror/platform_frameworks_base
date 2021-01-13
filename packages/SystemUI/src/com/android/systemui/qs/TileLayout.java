@@ -42,7 +42,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     private final boolean mLessRows;
     private int mMinRows = 1;
     private int mMaxColumns = NO_MAX_COLUMNS;
-    private int mResourceColumns;
+    protected int mResourceColumns;
 
     public TileLayout(Context context) {
         this(context, null);
@@ -216,7 +216,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         return MeasureSpec.makeMeasureSpec(size, MeasureSpec.EXACTLY);
     }
 
-    private int getCellHeight() {
+    protected int getCellHeight() {
         return mShowLabels ? mMaxCellHeight : mMaxCellHeight / 2;
     }
 
@@ -259,5 +259,19 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     @Override
     public int getNumVisibleTiles() {
         return mRecords.size();
+    }
+
+    public boolean isFull() {
+        return false;
+    }
+
+    /**
+     * @return The maximum number of tiles this layout can hold
+     */
+    public int maxTiles() {
+        // Each layout should be able to hold at least one tile. If there's not enough room to
+        // show even 1 or there are no tiles, it probably means we are in the middle of setting
+        // up.
+        return Math.max(mColumns * mRows, 1);
     }
 }

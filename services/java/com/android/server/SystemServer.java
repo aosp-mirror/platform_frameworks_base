@@ -237,6 +237,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.companion.CompanionDeviceManagerService";
     private static final String STATS_COMPANION_APEX_PATH =
             "/apex/com.android.os.statsd/javalib/service-statsd.jar";
+    private static final String CONNECTIVITY_SERVICE_APEX_PATH =
+            "/apex/com.android.tethering/javalib/service-connectivity.jar";
     private static final String STATS_COMPANION_LIFECYCLE_CLASS =
             "com.android.server.stats.StatsCompanion$Lifecycle";
     private static final String STATS_PULL_ATOM_SERVICE_CLASS =
@@ -297,6 +299,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.autofill.AutofillManagerService";
     private static final String CONTENT_CAPTURE_MANAGER_SERVICE_CLASS =
             "com.android.server.contentcapture.ContentCaptureManagerService";
+    private static final String TRANSLATION_MANAGER_SERVICE_CLASS =
+            "com.android.server.translation.TranslationManagerService";
     private static final String MUSIC_RECOGNITION_MANAGER_SERVICE_CLASS =
             "com.android.server.musicrecognition.MusicRecognitionManagerService";
     private static final String SYSTEM_CAPTIONS_MANAGER_SERVICE_CLASS =
@@ -1356,7 +1360,8 @@ public final class SystemServer implements Dumpable {
             }
 
             t.traceBegin("IpConnectivityMetrics");
-            mSystemServiceManager.startService(IP_CONNECTIVITY_METRICS_CLASS);
+            mSystemServiceManager.startServiceFromJar(IP_CONNECTIVITY_METRICS_CLASS,
+                    CONNECTIVITY_SERVICE_APEX_PATH);
             t.traceEnd();
 
             t.traceBegin("NetworkWatchlistService");
@@ -1721,8 +1726,8 @@ public final class SystemServer implements Dumpable {
             // This has to be called after NetworkManagementService, NetworkStatsService
             // and NetworkPolicyManager because ConnectivityService needs to take these
             // services to initialize.
-            // TODO: Dynamically load service-connectivity.jar by using startServiceFromJar.
-            mSystemServiceManager.startService(CONNECTIVITY_SERVICE_INITIALIZER_CLASS);
+            mSystemServiceManager.startServiceFromJar(CONNECTIVITY_SERVICE_INITIALIZER_CLASS,
+                    CONNECTIVITY_SERVICE_APEX_PATH);
             connectivity = IConnectivityManager.Stub.asInterface(
                     ServiceManager.getService(Context.CONNECTIVITY_SERVICE));
             // TODO: Use ConnectivityManager instead of ConnectivityService.
@@ -2285,6 +2290,13 @@ public final class SystemServer implements Dumpable {
         if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTOFILL)) {
             t.traceBegin("StartAutoFillService");
             mSystemServiceManager.startService(AUTO_FILL_MANAGER_SERVICE_CLASS);
+            t.traceEnd();
+        }
+
+        // Translation manager service
+        if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_TRANSLATION)) {
+            t.traceBegin("StartTranslationManagerService");
+            mSystemServiceManager.startService(TRANSLATION_MANAGER_SERVICE_CLASS);
             t.traceEnd();
         }
 

@@ -52,9 +52,12 @@ import com.android.server.display.utils.AmbientFilterFactory;
 import com.android.server.utils.DeviceConfigInterface;
 
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 
@@ -1299,7 +1302,8 @@ public class DisplayModeDirector {
         // mShouldObserveAmbientHighChange is true, screen is on, peak refresh rate
         // changeable and low power mode off. After initialization, these states will
         // be updated from the same handler thread.
-        private boolean mDefaultDisplayOn = false;
+        private int mDefaultDisplayState = Display.STATE_UNKNOWN;
+        private boolean mIsDeviceActive = false;
         private boolean mRefreshRateChangeable = false;
         private boolean mLowPowerModeEnabled = false;
 
@@ -1480,7 +1484,8 @@ public class DisplayModeDirector {
             pw.println("  BrightnessObserver");
             pw.println("    mAmbientLux: " + mAmbientLux);
             pw.println("    mBrightness: " + mBrightness);
-            pw.println("    mDefaultDisplayOn: " + mDefaultDisplayOn);
+            pw.println("    mDefaultDisplayState: " + mDefaultDisplayState);
+            pw.println("    mIsDeviceActive: " + mIsDeviceActive);
             pw.println("    mLowPowerModeEnabled: " + mLowPowerModeEnabled);
             pw.println("    mRefreshRateChangeable: " + mRefreshRateChangeable);
             pw.println("    mShouldObserveDisplayLowChange: " + mShouldObserveDisplayLowChange);
@@ -1706,14 +1711,17 @@ public class DisplayModeDirector {
         private void updateDefaultDisplayState() {
             Display display = mContext.getSystemService(DisplayManager.class)
                     .getDisplay(Display.DEFAULT_DISPLAY);
-            boolean defaultDisplayOn = display != null && display.getState() != Display.STATE_OFF;
-            setDefaultDisplayState(defaultDisplayOn);
+            if (display == null) {
+                return;
+            }
+
+            setDefaultDisplayState(display.getState());
         }
 
         @VisibleForTesting
-        public void setDefaultDisplayState(boolean on) {
-            if (mDefaultDisplayOn != on) {
-                mDefaultDisplayOn = on;
+        public void setDefaultDisplayState(int state) {
+            if (mDefaultDisplayState != state) {
+                mDefaultDisplayState = state;
                 updateSensorStatus();
             }
         }
@@ -1734,15 +1742,19 @@ public class DisplayModeDirector {
         }
 
         private boolean isDeviceActive() {
-            return mDefaultDisplayOn && mInjector.isDeviceInteractive(mContext);
+            mIsDeviceActive = mInjector.isDeviceInteractive(mContext);
+            return (mDefaultDisplayState == Display.STATE_ON)
+                    && mIsDeviceActive;
         }
 
         private final class LightSensorEventListener implements SensorEventListener {
             final private static int INJECT_EVENTS_INTERVAL_MS = LIGHT_SENSOR_RATE_MS;
             private float mLastSensorData;
+            private long mTimestamp;
 
             public void dumpLocked(PrintWriter pw) {
                 pw.println("    mLastSensorData: " + mLastSensorData);
+                pw.println("    mTimestamp: " + formatTimestamp(mTimestamp));
             }
 
             @Override
@@ -1766,6 +1778,7 @@ public class DisplayModeDirector {
                 }
 
                 long now = SystemClock.uptimeMillis();
+                mTimestamp = System.currentTimeMillis();
                 if (mAmbientFilter != null) {
                     mAmbientFilter.addValue(now, mLastSensorData);
                 }
@@ -1790,6 +1803,12 @@ public class DisplayModeDirector {
 
             public void removeCallbacks() {
                 mHandler.removeCallbacks(mInjectSensorEventRunnable);
+            }
+
+            private String formatTimestamp(long time) {
+                SimpleDateFormat dateFormat =
+                        new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US);
+                return dateFormat.format(new Date(time));
             }
 
             private void processSensorData(long now) {

@@ -127,7 +127,6 @@ public class OneHandedAnimationController {
                 mSurfaceControlTransactionFactory;
 
         private @TransitionDirection int mTransitionDirection;
-        private int mTransitionOffset;
 
         private OneHandedTransitionAnimator(SurfaceControl leash, T startValue, T endValue) {
             mLeash = leash;
@@ -228,11 +227,6 @@ public class OneHandedAnimationController {
 
         OneHandedTransitionAnimator<T> setTransitionDirection(int direction) {
             mTransitionDirection = direction;
-            return this;
-        }
-
-        OneHandedTransitionAnimator<T> setTransitionOffset(int offset) {
-            mTransitionOffset = offset;
             return this;
         }
 

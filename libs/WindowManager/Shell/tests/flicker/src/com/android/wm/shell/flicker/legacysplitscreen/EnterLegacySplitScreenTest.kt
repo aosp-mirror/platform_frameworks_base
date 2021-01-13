@@ -21,7 +21,6 @@ import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.dsl.runWithFlicker
-import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.canSplitScreen
 import com.android.server.wm.flicker.helpers.exitSplitScreen
 import com.android.server.wm.flicker.helpers.isInSplitScreen
@@ -35,6 +34,7 @@ import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
+
 import com.android.wm.shell.flicker.dockedStackPrimaryBoundsIsVisible
 import com.android.wm.shell.flicker.dockedStackSecondaryBoundsIsVisible
 import org.junit.Assert
@@ -59,8 +59,6 @@ class EnterLegacySplitScreenTest(
     rotationName: String,
     rotation: Int
 ) : SplitScreenTestBase(rotationName, rotation) {
-    private val letterBox = "Letterbox"
-
     private val splitScreenSetup: FlickerBuilder
         get() = FlickerBuilder(instrumentation).apply {
             val testLaunchActivity = "launch_splitScreen_test_activity"
@@ -91,7 +89,6 @@ class EnterLegacySplitScreenTest(
                 windowManagerTrace {
                     navBarWindowIsAlwaysVisible()
                     statusBarWindowIsAlwaysVisible()
-                    visibleWindowsShownMoreThanOneConsecutiveEntry(listOf(launcherPackageName))
                 }
             }
         }
@@ -114,7 +111,8 @@ class EnterLegacySplitScreenTest(
                             rotation, splitScreenApp.defaultWindowName, 169271943)
                     dockedStackDividerBecomesVisible()
                     visibleLayersShownMoreThanOneConsecutiveEntry(
-                            listOf(launcherPackageName, splitScreenApp.defaultWindowName)
+                            listOf(LAUNCHER_PACKAGE_NAME, splitScreenApp.defaultWindowName,
+                                    LIVE_WALLPAPER_PACKAGE_NAME)
                     )
                 }
                 windowManagerTrace {
@@ -148,7 +146,7 @@ class EnterLegacySplitScreenTest(
                             rotation, secondaryApp.defaultWindowName, 169271943)
                     dockedStackDividerBecomesVisible()
                     visibleLayersShownMoreThanOneConsecutiveEntry(
-                            listOf(launcherPackageName, splitScreenApp.defaultWindowName,
+                            listOf(LAUNCHER_PACKAGE_NAME, splitScreenApp.defaultWindowName,
                                     secondaryApp.defaultWindowName)
                     )
                 }
@@ -157,6 +155,7 @@ class EnterLegacySplitScreenTest(
                         showsAppWindow(splitScreenApp.defaultWindowName)
                                 .and().showsAppWindow(secondaryApp.defaultWindowName)
                     }
+                    visibleWindowsShownMoreThanOneConsecutiveEntry(listOf(LAUNCHER_PACKAGE_NAME))
                 }
             }
         }
@@ -181,85 +180,14 @@ class EnterLegacySplitScreenTest(
                 layersTrace {
                     dockedStackDividerIsInvisible()
                     visibleLayersShownMoreThanOneConsecutiveEntry(
-                            listOf(launcherPackageName, nonResizeableApp.defaultWindowName)
+                            listOf(LAUNCHER_PACKAGE_NAME, nonResizeableApp.defaultWindowName)
                     )
                 }
                 windowManagerTrace {
                     end {
                         hidesAppWindow(nonResizeableApp.defaultWindowName)
                     }
-                }
-            }
-        }
-    }
-
-    @Test
-    fun testNonResizeableWhenAlreadyInSplitScreenPrimary() {
-        val testTag = "testNonResizeableWhenAlreadyInSplitScreenPrimary"
-        runWithFlicker(splitScreenSetup) {
-            withTestName { testTag }
-            repeat {
-                TEST_REPETITIONS
-            }
-            transitions {
-                nonResizeableApp.launchViaIntent()
-                splitScreenApp.launchViaIntent()
-                uiDevice.launchSplitScreen()
-                nonResizeableApp.reopenAppFromOverview()
-            }
-            assertions {
-                layersTrace {
-                    dockedStackDividerIsInvisible()
-                    end("appsEndingBounds", enabled = false) {
-                        val displayBounds = WindowUtils.getDisplayBounds(rotation)
-                        this.hasVisibleRegion(nonResizeableApp.defaultWindowName, displayBounds)
-                    }
-                    visibleLayersShownMoreThanOneConsecutiveEntry(
-                            listOf(launcherPackageName, splitScreenApp.defaultWindowName,
-                                    nonResizeableApp.defaultWindowName, letterBox)
-                    )
-                }
-                windowManagerTrace {
-                    end {
-                        showsAppWindow(nonResizeableApp.defaultWindowName)
-                        hidesAppWindow(splitScreenApp.defaultWindowName)
-                    }
-                }
-            }
-        }
-    }
-
-    @Test
-    fun testNonResizeableWhenAlreadyInSplitScreenSecondary() {
-        val testTag = "testNonResizeableWhenAlreadyInSplitScreenSecondary"
-        runWithFlicker(splitScreenSetup) {
-            withTestName { testTag }
-            repeat {
-                TEST_REPETITIONS
-            }
-            transitions {
-                splitScreenApp.launchViaIntent()
-                uiDevice.launchSplitScreen()
-                uiDevice.pressBack()
-                nonResizeableApp.launchViaIntent()
-            }
-            assertions {
-                layersTrace {
-                    dockedStackDividerIsInvisible()
-                    end("appsEndingBounds", enabled = false) {
-                        val displayBounds = WindowUtils.getDisplayBounds(rotation)
-                        this.hasVisibleRegion(nonResizeableApp.defaultWindowName, displayBounds)
-                    }
-                    visibleLayersShownMoreThanOneConsecutiveEntry(
-                            listOf(launcherPackageName, splitScreenApp.defaultWindowName,
-                                    nonResizeableApp.defaultWindowName, letterBox)
-                    )
-                }
-                windowManagerTrace {
-                    end {
-                        showsAppWindow(nonResizeableApp.defaultWindowName)
-                        hidesAppWindow(splitScreenApp.defaultWindowName)
-                    }
+                    visibleWindowsShownMoreThanOneConsecutiveEntry(listOf(LAUNCHER_PACKAGE_NAME))
                 }
             }
         }

@@ -100,6 +100,7 @@ package android.app.appsearch {
     method public long getCreationTimestampMillis();
     method public static int getMaxIndexedProperties();
     method @NonNull public String getNamespace();
+    method @Nullable public Object getProperty(@NonNull String);
     method public boolean getPropertyBoolean(@NonNull String);
     method @Nullable public boolean[] getPropertyBooleanArray(@NonNull String);
     method @Nullable public byte[] getPropertyBytes(@NonNull String);
@@ -146,6 +147,12 @@ package android.app.appsearch {
     method @NonNull public android.app.appsearch.GetByUriRequest.Builder addUri(@NonNull java.util.Collection<java.lang.String>);
     method @NonNull public android.app.appsearch.GetByUriRequest build();
     method @NonNull public android.app.appsearch.GetByUriRequest.Builder setNamespace(@NonNull String);
+  }
+
+  public class PackageIdentifier {
+    ctor public PackageIdentifier(@NonNull String, @NonNull byte[]);
+    method @NonNull public String getPackageName();
+    method @NonNull public byte[] getSha256Certificate();
   }
 
   public final class PutDocumentsRequest {
@@ -233,6 +240,8 @@ package android.app.appsearch {
 
   public final class SetSchemaRequest {
     method @NonNull public java.util.Set<android.app.appsearch.AppSearchSchema> getSchemas();
+    method @NonNull public java.util.Set<java.lang.String> getSchemasNotVisibleToSystemUi();
+    method @NonNull public java.util.Map<java.lang.String,java.util.Set<android.app.appsearch.PackageIdentifier>> getSchemasVisibleToPackages();
     method public boolean isForceOverride();
   }
 
@@ -242,6 +251,17 @@ package android.app.appsearch {
     method @NonNull public android.app.appsearch.SetSchemaRequest.Builder addSchema(@NonNull java.util.Collection<android.app.appsearch.AppSearchSchema>);
     method @NonNull public android.app.appsearch.SetSchemaRequest build();
     method @NonNull public android.app.appsearch.SetSchemaRequest.Builder setForceOverride(boolean);
+    method @NonNull public android.app.appsearch.SetSchemaRequest.Builder setSchemaTypeVisibilityForPackage(@NonNull String, boolean, @NonNull android.app.appsearch.PackageIdentifier);
+    method @NonNull public android.app.appsearch.SetSchemaRequest.Builder setSchemaTypeVisibilityForSystemUi(@NonNull String, boolean);
+  }
+
+}
+
+package android.app.appsearch.exceptions {
+
+  public class AppSearchException extends java.lang.Exception {
+    method public int getResultCode();
+    method @NonNull public <T> android.app.appsearch.AppSearchResult<T> toAppSearchResult();
   }
 
 }

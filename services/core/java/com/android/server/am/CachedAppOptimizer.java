@@ -1101,15 +1101,26 @@ public final class CachedAppOptimizer {
         }
 
         private void freezeProcess(ProcessRecord proc) {
-            final int pid;
-            final String name;
+            final int pid = proc.pid;
+            final String name = proc.processName;
             final long unfrozenDuration;
             final boolean frozen;
 
-            synchronized (mAm) {
-                pid = proc.pid;
-                name = proc.processName;
+            try {
+                // pre-check for locks to avoid unnecessary freeze/unfreeze operations
+                if (Process.hasFileLocks(pid)) {
+                    if (DEBUG_FREEZER) {
+                        Slog.d(TAG_AM, name + " (" + pid + ") holds file locks, not freezing");
+                    }
+                    return;
+                }
+            } catch (IOException e) {
+                Slog.e(TAG_AM, "Not freezing. Unable to check file locks for " + name + "(" + pid
+                        + "): " + e);
+                return;
+            }
 
+            synchronized (mAm) {
                 if (proc.curAdj < ProcessList.CACHED_APP_MIN_ADJ
                         || proc.shouldNotFreeze) {
                     if (DEBUG_FREEZER) {
@@ -1141,29 +1152,50 @@ public final class CachedAppOptimizer {
                 frozen = proc.frozen;
             }
 
-            if (frozen) {
-                if (DEBUG_FREEZER) {
-                    Slog.d(TAG_AM, "froze " + pid + " " + name);
+            if (!frozen) {
+                return;
+            }
+
+
+            if (DEBUG_FREEZER) {
+                Slog.d(TAG_AM, "froze " + pid + " " + name);
+            }
+
+            EventLog.writeEvent(EventLogTags.AM_FREEZE, pid, name);
+
+            try {
+                freezeBinder(pid, true);
+            } catch (RuntimeException e) {
+                Slog.e(TAG_AM, "Unable to freeze binder for " + pid + " " + name);
+                proc.kill("Unable to freeze binder interface",
+                        ApplicationExitInfo.REASON_OTHER,
+                        ApplicationExitInfo.SUBREASON_INVALID_STATE, true);
+            }
+
+            // See above for why we're not taking mPhenotypeFlagLock here
+            if (mRandom.nextFloat() < mFreezerStatsdSampleRate) {
+                FrameworkStatsLog.write(FrameworkStatsLog.APP_FREEZE_CHANGED,
+                        FrameworkStatsLog.APP_FREEZE_CHANGED__ACTION__FREEZE_APP,
+                        pid,
+                        name,
+                        unfrozenDuration);
+            }
+
+            try {
+                // post-check to prevent races
+                if (Process.hasFileLocks(pid)) {
+                    if (DEBUG_FREEZER) {
+                        Slog.d(TAG_AM, name + " (" + pid + ") holds file locks, reverting freeze");
+                    }
+
+                    synchronized (mAm) {
+                        unfreezeAppLocked(proc);
+                    }
                 }
-
-                EventLog.writeEvent(EventLogTags.AM_FREEZE, pid, name);
-
-                try {
-                    freezeBinder(pid, true);
-                } catch (RuntimeException e) {
-                    Slog.e(TAG_AM, "Unable to freeze binder for " + pid + " " + name);
-                    proc.kill("Unable to freeze binder interface",
-                            ApplicationExitInfo.REASON_OTHER,
-                            ApplicationExitInfo.SUBREASON_INVALID_STATE, true);
-                }
-
-                // See above for why we're not taking mPhenotypeFlagLock here
-                if (mRandom.nextFloat() < mFreezerStatsdSampleRate) {
-                    FrameworkStatsLog.write(FrameworkStatsLog.APP_FREEZE_CHANGED,
-                            FrameworkStatsLog.APP_FREEZE_CHANGED__ACTION__FREEZE_APP,
-                            pid,
-                            name,
-                            unfrozenDuration);
+            } catch (IOException e) {
+                Slog.e(TAG_AM, "Unable to check file locks for " + name + "(" + pid + "): " + e);
+                synchronized (mAm) {
+                    unfreezeAppLocked(proc);
                 }
             }
         }

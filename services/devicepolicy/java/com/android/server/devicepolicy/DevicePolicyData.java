@@ -78,6 +78,12 @@ class DevicePolicyData {
     private static final String ATTR_DEVICE_PROVISIONING_CONFIG_APPLIED =
             "device-provisioning-config-applied";
     private static final String ATTR_DEVICE_PAIRED = "device-paired";
+    private static final String ATTR_NEW_USER_DISCLAIMER = "new-user-disclaimer";
+
+    // Values of ATTR_NEW_USER_DISCLAIMER
+    static final String NEW_USER_DISCLAIMER_SHOWN = "shown";
+    static final String NEW_USER_DISCLAIMER_NOT_NEEDED = "not_needed";
+    static final String NEW_USER_DISCLAIMER_NEEDED = "needed";
 
     private static final String TAG = DevicePolicyManagerService.LOG_TAG;
     private static final boolean VERBOSE_LOG = false; // DO NOT SUBMIT WITH TRUE
@@ -146,6 +152,10 @@ class DevicePolicyData {
     // apps were suspended or unsuspended.
     boolean mAppsSuspended = false;
 
+    // Whether it's necessary to show a disclaimer (that the device is managed) after the user
+    // starts.
+    String mNewUserDisclaimer = NEW_USER_DISCLAIMER_NOT_NEEDED;
+
     DevicePolicyData(@UserIdInt int userId) {
         mUserId = userId;
     }
@@ -185,6 +195,9 @@ class DevicePolicyData {
             }
             if (policyData.mPermissionPolicy != DevicePolicyManager.PERMISSION_POLICY_PROMPT) {
                 out.attributeInt(null, ATTR_PERMISSION_POLICY, policyData.mPermissionPolicy);
+            }
+            if (NEW_USER_DISCLAIMER_NEEDED.equals(policyData.mNewUserDisclaimer)) {
+                out.attribute(null, ATTR_NEW_USER_DISCLAIMER, policyData.mNewUserDisclaimer);
             }
 
             // Serialize delegations.
@@ -412,6 +425,7 @@ class DevicePolicyData {
             if (permissionPolicy != -1) {
                 policy.mPermissionPolicy = permissionPolicy;
             }
+            policy.mNewUserDisclaimer = parser.getAttributeValue(null, ATTR_NEW_USER_DISCLAIMER);
 
             int outerDepth = parser.getDepth();
             policy.mLockTaskPackages.clear();
@@ -588,6 +602,7 @@ class DevicePolicyData {
         pw.print("mAppsSuspended="); pw.println(mAppsSuspended);
         pw.print("mUserSetupComplete="); pw.println(mUserSetupComplete);
         pw.print("mAffiliationIds="); pw.println(mAffiliationIds);
+        pw.print("mNewUserDisclaimer="); pw.println(mNewUserDisclaimer);
         pw.decreaseIndent();
     }
 }

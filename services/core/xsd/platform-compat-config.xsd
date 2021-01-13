@@ -31,6 +31,7 @@
                 <xs:attribute type="xs:int" name="enableAfterTargetSdk"/>
                 <xs:attribute type="xs:int" name="enableSinceTargetSdk"/>
                 <xs:attribute type="xs:string" name="description"/>
+                <xs:attribute type="xs:boolean" name="overridable"/>
             </xs:extension>
         </xs:simpleContent>
     </xs:complexType>
@@ -48,7 +49,3 @@
         </xs:unique>
     </xs:element>
 </xs:schema>
-
-
-
-

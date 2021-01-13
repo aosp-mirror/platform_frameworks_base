@@ -17,13 +17,10 @@
 package com.android.systemui.wmshell;
 
 import android.content.Context;
-import android.os.Handler;
 import android.view.IWindowManager;
 
 import com.android.systemui.dagger.WMSingleton;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.Transitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.apppairs.AppPairsController;
@@ -49,9 +46,9 @@ import com.android.wm.shell.pip.phone.PhonePipMenuController;
 import com.android.wm.shell.pip.phone.PipAppOpsListener;
 import com.android.wm.shell.pip.phone.PipController;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
+import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
-import java.util.concurrent.Executor;
 
 import dagger.Module;
 import dagger.Provides;
@@ -65,9 +62,9 @@ public class WMShellModule {
     @WMSingleton
     @Provides
     static DisplayImeController provideDisplayImeController(IWindowManager wmService,
-            DisplayController displayController, @ShellMainThread ShellExecutor shellMainExecutor,
+            DisplayController displayController, @ShellMainThread ShellExecutor mainExecutor,
             TransactionPool transactionPool) {
-        return new DisplayImeController(wmService, displayController, shellMainExecutor,
+        return new DisplayImeController(wmService, displayController, mainExecutor,
                 transactionPool);
     }
 
@@ -99,11 +96,11 @@ public class WMShellModule {
             PhonePipMenuController phonePipMenuController, PipTaskOrganizer pipTaskOrganizer,
             PipTouchHandler pipTouchHandler, WindowManagerShellWrapper windowManagerShellWrapper,
             TaskStackListenerImpl taskStackListener,
-            @ShellMainThread ShellExecutor shellMainExecutor) {
+            @ShellMainThread ShellExecutor mainExecutor) {
         return Optional.ofNullable(PipController.create(context, displayController,
                 pipAppOpsListener, pipBoundsAlgorithm, pipBoundsState, pipMediaController,
                 phonePipMenuController, pipTaskOrganizer, pipTouchHandler,
-                windowManagerShellWrapper, taskStackListener, shellMainExecutor));
+                windowManagerShellWrapper, taskStackListener, mainExecutor));
     }
 
     @WMSingleton
@@ -134,10 +131,10 @@ public class WMShellModule {
             PipTaskOrganizer pipTaskOrganizer,
             FloatingContentCoordinator floatingContentCoordinator,
             PipUiEventLogger pipUiEventLogger,
-            @ShellMainThread ShellExecutor shellMainExecutor) {
+            @ShellMainThread ShellExecutor mainExecutor) {
         return new PipTouchHandler(context, menuPhoneController, pipBoundsAlgorithm,
                 pipBoundsState, pipTaskOrganizer, floatingContentCoordinator, pipUiEventLogger,
-                shellMainExecutor);
+                mainExecutor);
     }
 
     @WMSingleton

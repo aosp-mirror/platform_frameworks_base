@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-/*
- * Disable optimization of this file if we are compiling with the address
- * sanitizer.  This is a mitigation for b/122921367 and can be removed once the
- * bug is fixed.
- */
-#if __has_feature(address_sanitizer)
-#pragma clang optimize off
-#endif
-
 #define LOG_TAG "Zygote"
 #define ATRACE_TAG ATRACE_TAG_DALVIK
 
@@ -843,7 +834,7 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
   PrepareDir(user_source, 0710, user_id ? AID_ROOT : AID_SHELL,
              multiuser_get_uid(user_id, AID_EVERYBODY), fail_fn);
 
-  bool isAppDataIsolationEnabled = GetBoolProperty(kVoldAppDataIsolation, true);
+  bool isAppDataIsolationEnabled = GetBoolProperty(kVoldAppDataIsolation, false);
 
   if (mount_mode == MOUNT_EXTERNAL_PASS_THROUGH) {
       const std::string pass_through_source = StringPrintf("/mnt/pass_through/%d", user_id);

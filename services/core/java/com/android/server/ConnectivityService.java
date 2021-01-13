@@ -56,12 +56,14 @@ import static android.net.NetworkPolicyManager.RULE_NONE;
 import static android.net.NetworkPolicyManager.uidRulesToString;
 import static android.net.shared.NetworkMonitorUtils.isPrivateDnsValidationRequired;
 import static android.os.Process.INVALID_UID;
+import static android.os.Process.VPN_UID;
 import static android.system.OsConstants.IPPROTO_TCP;
 import static android.system.OsConstants.IPPROTO_UDP;
 
 import static java.util.Map.Entry;
 
 import android.Manifest;
+import android.annotation.BoolRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
@@ -620,7 +622,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private LingerMonitor mLingerMonitor;
 
     // sequence number of NetworkRequests
-    private int mNextNetworkRequestId = 1;
+    private int mNextNetworkRequestId = NetworkRequest.FIRST_REQUEST_ID;
 
     // Sequence number for NetworkProvider IDs.
     private final AtomicInteger mNextNetworkProviderId = new AtomicInteger(
@@ -973,6 +975,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mDefaultWifiRequest = createDefaultInternetRequestForTransport(
                 NetworkCapabilities.TRANSPORT_WIFI, NetworkRequest.Type.BACKGROUND_REQUEST);
 
+        mDefaultVehicleRequest = createAlwaysOnRequestForCapability(
+                NetworkCapabilities.NET_CAPABILITY_VEHICLE_INTERNAL,
+                NetworkRequest.Type.BACKGROUND_REQUEST);
+
         mHandlerThread = mDeps.makeHandlerThread();
         mHandlerThread.start();
         mHandler = new InternalHandler(mHandlerThread.getLooper());
@@ -1172,6 +1178,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return new NetworkRequest(netCap, TYPE_NONE, nextNetworkRequestId(), type);
     }
 
+    private NetworkRequest createAlwaysOnRequestForCapability(int capability,
+            NetworkRequest.Type type) {
+        final NetworkCapabilities netCap = new NetworkCapabilities();
+        netCap.clearAll();
+        netCap.addCapability(capability);
+        netCap.setRequestorUidAndPackageName(Process.myUid(), mContext.getPackageName());
+        return new NetworkRequest(netCap, TYPE_NONE, nextNetworkRequestId(), type);
+    }
+
     // Used only for testing.
     // TODO: Delete this and either:
     // 1. Give FakeSettingsProvider the ability to send settings change notifications (requires
@@ -1189,10 +1204,19 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mHandler.sendEmptyMessage(EVENT_PRIVATE_DNS_SETTINGS_CHANGED);
     }
 
+    private void handleAlwaysOnNetworkRequest(NetworkRequest networkRequest, @BoolRes int id) {
+        final boolean enable = mContext.getResources().getBoolean(id);
+        handleAlwaysOnNetworkRequest(networkRequest, enable);
+    }
+
     private void handleAlwaysOnNetworkRequest(
             NetworkRequest networkRequest, String settingName, boolean defaultValue) {
         final boolean enable = toBool(Settings.Global.getInt(
                 mContext.getContentResolver(), settingName, encodeBool(defaultValue)));
+        handleAlwaysOnNetworkRequest(networkRequest, enable);
+    }
+
+    private void handleAlwaysOnNetworkRequest(NetworkRequest networkRequest, boolean enable) {
         final boolean isEnabled = (mNetworkRequests.get(networkRequest) != null);
         if (enable == isEnabled) {
             return;  // Nothing to do.
@@ -1209,9 +1233,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void handleConfigureAlwaysOnNetworks() {
         handleAlwaysOnNetworkRequest(
-                mDefaultMobileDataRequest,Settings.Global.MOBILE_DATA_ALWAYS_ON, true);
+                mDefaultMobileDataRequest, Settings.Global.MOBILE_DATA_ALWAYS_ON, true);
         handleAlwaysOnNetworkRequest(mDefaultWifiRequest, Settings.Global.WIFI_ALWAYS_REQUESTED,
                 false);
+        handleAlwaysOnNetworkRequest(mDefaultVehicleRequest,
+                com.android.internal.R.bool.config_vehicleInternalNetworkAlwaysRequested);
     }
 
     private void registerSettingsCallbacks() {
@@ -1238,6 +1264,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private synchronized int nextNetworkRequestId() {
+        // TODO: Consider handle wrapping and exclude {@link NetworkRequest#REQUEST_ID_NONE} if
+        //  doing that.
         return mNextNetworkRequestId++;
     }
 
@@ -1329,15 +1357,20 @@ public class ConnectivityService extends IConnectivityManager.Stub
     /**
      * Check if UID should be blocked from using the specified network.
      */
-    private boolean isNetworkWithLinkPropertiesBlocked(LinkProperties lp, int uid,
-            boolean ignoreBlocked) {
+    private boolean isNetworkWithCapabilitiesBlocked(@Nullable final NetworkCapabilities nc,
+            final int uid, final boolean ignoreBlocked) {
         // Networks aren't blocked when ignoring blocked status
         if (ignoreBlocked) {
             return false;
         }
         if (isUidBlockedByVpn(uid, mVpnBlockedUidRanges)) return true;
-        final String iface = (lp == null ? "" : lp.getInterfaceName());
-        return mPolicyManagerInternal.isUidNetworkingBlocked(uid, iface);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            final boolean metered = nc == null ? true : nc.isMetered();
+            return mPolicyManager.isUidNetworkingBlocked(uid, metered);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     private void maybeLogBlockedNetworkInfo(NetworkInfo ni, int uid) {
@@ -1375,12 +1408,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
     /**
      * Apply any relevant filters to {@link NetworkState} for the given UID. For
      * example, this may mark the network as {@link DetailedState#BLOCKED} based
-     * on {@link #isNetworkWithLinkPropertiesBlocked}.
+     * on {@link #isNetworkWithCapabilitiesBlocked}.
      */
     private void filterNetworkStateForUid(NetworkState state, int uid, boolean ignoreBlocked) {
         if (state == null || state.networkInfo == null || state.linkProperties == null) return;
 
-        if (isNetworkWithLinkPropertiesBlocked(state.linkProperties, uid, ignoreBlocked)) {
+        if (isNetworkWithCapabilitiesBlocked(state.networkCapabilities, uid,
+                ignoreBlocked)) {
             state.networkInfo.setDetailedState(DetailedState.BLOCKED, null, null);
         }
         synchronized (mVpns) {
@@ -1440,8 +1474,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
         nai = getDefaultNetwork();
-        if (nai != null
-                && isNetworkWithLinkPropertiesBlocked(nai.linkProperties, uid, ignoreBlocked)) {
+        if (nai != null && isNetworkWithCapabilitiesBlocked(
+                nai.networkCapabilities, uid, ignoreBlocked)) {
             nai = null;
         }
         return nai != null ? nai.network : null;
@@ -1513,7 +1547,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         enforceAccessPermission();
         final int uid = mDeps.getCallingUid();
         NetworkState state = getFilteredNetworkState(networkType, uid);
-        if (!isNetworkWithLinkPropertiesBlocked(state.linkProperties, uid, false)) {
+        if (!isNetworkWithCapabilitiesBlocked(state.networkCapabilities, uid, false)) {
             return state.network;
         }
         return null;
@@ -4471,7 +4505,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (!nai.everConnected) {
             return;
         }
-        if (isNetworkWithLinkPropertiesBlocked(nai.linkProperties, uid, false)) {
+        final NetworkCapabilities nc = getNetworkCapabilitiesInternal(nai);
+        if (isNetworkWithCapabilitiesBlocked(nc, uid, false)) {
             return;
         }
         nai.networkMonitor().forceReevaluation(uid);
@@ -5956,6 +5991,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // priority networks like ethernet are active.
     private final NetworkRequest mDefaultWifiRequest;
 
+    // Request used to optionally keep vehicle internal network always active
+    private final NetworkRequest mDefaultVehicleRequest;
+
     private NetworkAgentInfo getDefaultNetwork() {
         return mDefaultNetworkNai;
     }
@@ -6666,6 +6704,39 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return stableRanges;
     }
 
+    private void maybeCloseSockets(NetworkAgentInfo nai, UidRangeParcel[] ranges,
+            int[] exemptUids) {
+        if (nai.isVPN() && !nai.networkAgentConfig.allowBypass) {
+            try {
+                mNetd.socketDestroy(ranges, exemptUids);
+            } catch (Exception e) {
+                loge("Exception in socket destroy: ", e);
+            }
+        }
+    }
+
+    private void updateUidRanges(boolean add, NetworkAgentInfo nai, Set<UidRange> uidRanges) {
+        int[] exemptUids = new int[2];
+        // TODO: Excluding VPN_UID is necessary in order to not to kill the TCP connection used
+        // by PPTP. Fix this by making Vpn set the owner UID to VPN_UID instead of system when
+        // starting a legacy VPN, and remove VPN_UID here. (b/176542831)
+        exemptUids[0] = VPN_UID;
+        exemptUids[1] = nai.networkCapabilities.getOwnerUid();
+        UidRangeParcel[] ranges = toUidRangeStableParcels(uidRanges);
+
+        maybeCloseSockets(nai, ranges, exemptUids);
+        try {
+            if (add) {
+                mNetd.networkAddUidRanges(nai.network.netId, ranges);
+            } else {
+                mNetd.networkRemoveUidRanges(nai.network.netId, ranges);
+            }
+        } catch (Exception e) {
+            loge("Exception while " + (add ? "adding" : "removing") + " uid ranges " + uidRanges +
+                    " on netId " + nai.network.netId + ". " + e);
+        }
+        maybeCloseSockets(nai, ranges, exemptUids);
+    }
 
     private void updateUids(NetworkAgentInfo nai, NetworkCapabilities prevNc,
             NetworkCapabilities newNc) {
@@ -6685,12 +6756,21 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // in both ranges are not subject to any VPN routing rules. Adding new range before
             // removing old range works because, unlike the filtering rules below, it's possible to
             // add duplicate UID routing rules.
+            // TODO: calculate the intersection of add & remove. Imagining that we are trying to
+            // remove uid 3 from a set containing 1-5. Intersection of the prev and new sets is:
+            //   [1-5] & [1-2],[4-5] == [3]
+            // Then we can do:
+            //   maybeCloseSockets([3])
+            //   mNetd.networkAddUidRanges([1-2],[4-5])
+            //   mNetd.networkRemoveUidRanges([1-5])
+            //   maybeCloseSockets([3])
+            // This can prevent the sockets of uid 1-2, 4-5 from being closed. It also reduce the
+            // number of binder calls from 6 to 4.
             if (!newRanges.isEmpty()) {
-                mNetd.networkAddUidRanges(nai.network.netId, toUidRangeStableParcels(newRanges));
+                updateUidRanges(true, nai, newRanges);
             }
             if (!prevRanges.isEmpty()) {
-                mNetd.networkRemoveUidRanges(
-                        nai.network.netId, toUidRangeStableParcels(prevRanges));
+                updateUidRanges(false, nai, prevRanges);
             }
             final boolean wasFiltering = requiresVpnIsolation(nai, prevNc, nai.linkProperties);
             final boolean shouldFilter = requiresVpnIsolation(nai, newNc, nai.linkProperties);
@@ -7065,11 +7145,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     log("   accepting network in place of " + previousSatisfier.toShortString());
                 }
                 previousSatisfier.removeRequest(nri.request.requestId);
-                previousSatisfier.lingerRequest(nri.request, now, mLingerDelayMs);
+                previousSatisfier.lingerRequest(nri.request.requestId, now, mLingerDelayMs);
             } else {
                 if (VDBG || DDBG) log("   accepting network in place of null");
             }
-            newSatisfier.unlingerRequest(nri.request);
+            newSatisfier.unlingerRequest(nri.request.requestId);
             if (!newSatisfier.addRequest(nri.request)) {
                 Log.wtf(TAG, "BUG: " + newSatisfier.toShortString() + " already has "
                         + nri.request);

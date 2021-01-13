@@ -358,6 +358,27 @@ public class BiometricManager {
     }
 
     /**
+     * Requests all {@link Authenticators.Types#BIOMETRIC_STRONG} sensors to have their
+     * authenticatorId invalidated for the specified user. This happens when enrollments have been
+     * added on devices with multiple biometric sensors.
+     *
+     * @param userId userId that the authenticatorId should be invalidated for
+     * @param fromSensorId sensor that triggered the invalidation request
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void invalidateAuthenticatorIds(int userId, int fromSensorId,
+            @NonNull IInvalidationCallback callback) {
+        if (mService != null) {
+            try {
+                mService.invalidateAuthenticatorIds(userId, fromSensorId, callback);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
      * Get a list of AuthenticatorIDs for biometric authenticators which have 1) enrolled templates,
      * and 2) meet the requirements for integrating with Keystore. The AuthenticatorIDs are known
      * in Keystore land as SIDs, and are used during key generation.

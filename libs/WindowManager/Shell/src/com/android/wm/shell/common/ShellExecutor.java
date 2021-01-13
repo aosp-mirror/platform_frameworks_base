@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.common;
 
+import android.os.Looper;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -69,4 +71,14 @@ public interface ShellExecutor extends Executor {
      * See {@link android.os.Handler#removeCallbacks}.
      */
     void removeCallbacks(Runnable r);
+
+    /**
+     * See {@link android.os.Handler#hasCallbacks(Runnable)}.
+     */
+    boolean hasCallback(Runnable r);
+
+    /**
+     * Returns the looper that this executor is running on.
+     */
+    Looper getLooper();
 }

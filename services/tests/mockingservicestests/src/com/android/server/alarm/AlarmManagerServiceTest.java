@@ -52,6 +52,7 @@ import static com.android.server.alarm.AlarmManagerService.Constants.KEY_LISTENE
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MAX_INTERVAL;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MIN_FUTURITY;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MIN_INTERVAL;
+import static com.android.server.alarm.AlarmManagerService.INDEFINITE_DELAY;
 import static com.android.server.alarm.AlarmManagerService.IS_WAKEUP_MASK;
 import static com.android.server.alarm.AlarmManagerService.TIME_CHANGED_MASK;
 import static com.android.server.alarm.AlarmManagerService.WORKING_INDEX;
@@ -71,6 +72,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.never;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -817,14 +819,14 @@ public class AlarmManagerServiceTest {
     }
 
     @Test
-    public void testAlarmRestrictedInBatterySaver() throws Exception {
+    public void testAlarmRestrictedByFAS() throws Exception {
         final ArgumentCaptor<AppStateTrackerImpl.Listener> listenerArgumentCaptor =
                 ArgumentCaptor.forClass(AppStateTrackerImpl.Listener.class);
         verify(mAppStateTracker).addListener(listenerArgumentCaptor.capture());
 
         final PendingIntent alarmPi = getNewMockPendingIntent();
-        when(mAppStateTracker.areAlarmsRestricted(TEST_CALLING_UID, TEST_CALLING_PACKAGE,
-                false)).thenReturn(true);
+        when(mAppStateTracker.areAlarmsRestricted(TEST_CALLING_UID,
+                TEST_CALLING_PACKAGE)).thenReturn(true);
         setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 2, alarmPi);
         assertEquals(mNowElapsedTest + 2, mTestTimer.getElapsed());
 
@@ -1301,7 +1303,6 @@ public class AlarmManagerServiceTest {
 
         final long awiDelayForTest = 23;
         setDeviceConfigLong(KEY_ALLOW_WHILE_IDLE_LONG_TIME, awiDelayForTest);
-        setDeviceConfigLong(KEY_ALLOW_WHILE_IDLE_SHORT_TIME, 0);
 
         setIdleUntilAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 1000,
                 getNewMockPendingIntent());
@@ -1336,7 +1337,7 @@ public class AlarmManagerServiceTest {
     }
 
     @Test
-    public void allowWhileIdleUnrestricted() throws Exception {
+    public void allowWhileIdleUnrestrictedInIdle() throws Exception {
         doReturn(0).when(mService).fuzzForDuration(anyLong());
 
         final long awiDelayForTest = 127;
@@ -1361,7 +1362,7 @@ public class AlarmManagerServiceTest {
     }
 
     @Test
-    public void deviceIdleThrottling() throws Exception {
+    public void deviceIdleDeferralOnSet() throws Exception {
         doReturn(0).when(mService).fuzzForDuration(anyLong());
 
         final long deviceIdleUntil = mNowElapsedTest + 1234;
@@ -1383,6 +1384,123 @@ public class AlarmManagerServiceTest {
             verify(pis[i]).send(eq(mMockContext), eq(0), any(Intent.class), any(),
                     any(Handler.class), isNull(), any());
         }
+    }
+
+    @Test
+    public void deviceIdleStateChanges() throws Exception {
+        doReturn(0).when(mService).fuzzForDuration(anyLong());
+
+        final int numAlarms = 10;
+        final PendingIntent[] pis = new PendingIntent[numAlarms];
+        for (int i = 0; i < numAlarms; i++) {
+            setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + i + 1,
+                    pis[i] = getNewMockPendingIntent());
+            assertEquals(mNowElapsedTest + 1, mTestTimer.getElapsed());
+        }
+
+        final PendingIntent idleUntil = getNewMockPendingIntent();
+        setIdleUntilAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 1234, idleUntil);
+
+        assertEquals(mNowElapsedTest + 1234, mTestTimer.getElapsed());
+
+        mNowElapsedTest += 5;
+        mTestTimer.expire();
+        // Nothing should happen.
+        verify(pis[0], never()).send(eq(mMockContext), eq(0), any(Intent.class), any(),
+                any(Handler.class), isNull(), any());
+
+        mService.removeLocked(idleUntil, null);
+        mTestTimer.expire();
+        // Now, the first 5 alarms (upto i = 4) should expire.
+        for (int i = 0; i < 5; i++) {
+            verify(pis[i]).send(eq(mMockContext), eq(0), any(Intent.class), any(),
+                    any(Handler.class), isNull(), any());
+        }
+        // Rest should be restored, so the timer should reflect the next alarm.
+        assertEquals(mNowElapsedTest + 1, mTestTimer.getElapsed());
+    }
+
+    @Test
+    public void batterySaverThrottling() {
+        final ArgumentCaptor<AppStateTrackerImpl.Listener> listenerArgumentCaptor =
+                ArgumentCaptor.forClass(AppStateTrackerImpl.Listener.class);
+        verify(mAppStateTracker).addListener(listenerArgumentCaptor.capture());
+        final AppStateTrackerImpl.Listener listener = listenerArgumentCaptor.getValue();
+
+        final PendingIntent alarmPi = getNewMockPendingIntent();
+        when(mAppStateTracker.areAlarmsRestrictedByBatterySaver(TEST_CALLING_UID,
+                TEST_CALLING_PACKAGE)).thenReturn(true);
+        setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 7, alarmPi);
+        assertEquals(mNowElapsedTest + INDEFINITE_DELAY, mTestTimer.getElapsed());
+
+        when(mAppStateTracker.areAlarmsRestrictedByBatterySaver(TEST_CALLING_UID,
+                TEST_CALLING_PACKAGE)).thenReturn(false);
+        listener.updateAllAlarms();
+        assertEquals(mNowElapsedTest + 7, mTestTimer.getElapsed());
+
+        when(mAppStateTracker.areAlarmsRestrictedByBatterySaver(TEST_CALLING_UID,
+                TEST_CALLING_PACKAGE)).thenReturn(true);
+        listener.updateAlarmsForUid(TEST_CALLING_UID);
+        assertEquals(mNowElapsedTest + INDEFINITE_DELAY, mTestTimer.getElapsed());
+    }
+
+    @Test
+    public void allowWhileIdleAlarmsInBatterySaver() throws Exception {
+        final ArgumentCaptor<AppStateTrackerImpl.Listener> listenerArgumentCaptor =
+                ArgumentCaptor.forClass(AppStateTrackerImpl.Listener.class);
+        verify(mAppStateTracker).addListener(listenerArgumentCaptor.capture());
+        final AppStateTrackerImpl.Listener listener = listenerArgumentCaptor.getValue();
+
+        final long longDelay = 23;
+        final long shortDelay = 7;
+        setDeviceConfigLong(KEY_ALLOW_WHILE_IDLE_LONG_TIME, longDelay);
+        setDeviceConfigLong(KEY_ALLOW_WHILE_IDLE_SHORT_TIME, shortDelay);
+
+        when(mAppStateTracker.areAlarmsRestrictedByBatterySaver(TEST_CALLING_UID,
+                TEST_CALLING_PACKAGE)).thenReturn(true);
+        setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 1,
+                getNewMockPendingIntent(), false);
+        setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 2,
+                getNewMockPendingIntent(), false);
+
+        assertEquals(mNowElapsedTest + 1, mTestTimer.getElapsed());
+
+        mNowElapsedTest += 1;
+        mTestTimer.expire();
+
+        assertEquals(mNowElapsedTest + longDelay, mTestTimer.getElapsed());
+        listener.onUidForeground(TEST_CALLING_UID, true);
+        // The next alarm should be deferred by shortDelay.
+        assertEquals(mNowElapsedTest + shortDelay, mTestTimer.getElapsed());
+
+        mNowElapsedTest = mTestTimer.getElapsed();
+        setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 1,
+                getNewMockPendingIntent(), false);
+
+        when(mAppStateTracker.isUidInForeground(TEST_CALLING_UID)).thenReturn(true);
+        mTestTimer.expire();
+        // The next alarm should be deferred by shortDelay again.
+        assertEquals(mNowElapsedTest + shortDelay, mTestTimer.getElapsed());
+
+        mNowElapsedTest = mTestTimer.getElapsed();
+        setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 1,
+                getNewMockPendingIntent(), true);
+        when(mAppStateTracker.isUidInForeground(TEST_CALLING_UID)).thenReturn(false);
+        mTestTimer.expire();
+        final long lastAwiDispatch = mNowElapsedTest;
+        // Unrestricted, so should not be changed.
+        assertEquals(mNowElapsedTest + 1, mTestTimer.getElapsed());
+
+        mNowElapsedTest = mTestTimer.getElapsed();
+        // AWI_unrestricted should not affect normal AWI bookkeeping.
+        // The next alarm is after the short delay but before the long delay.
+        setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, lastAwiDispatch + shortDelay + 1,
+                getNewMockPendingIntent(), false);
+        mTestTimer.expire();
+        assertEquals(lastAwiDispatch + longDelay, mTestTimer.getElapsed());
+
+        listener.onUidForeground(TEST_CALLING_UID, true);
+        assertEquals(lastAwiDispatch + shortDelay + 1, mTestTimer.getElapsed());
     }
 
     @Test

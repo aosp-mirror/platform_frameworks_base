@@ -26,6 +26,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.ShellExecutor;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -36,17 +37,20 @@ import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
 public class OneHandedGestureHandlerTest extends OneHandedTestCase {
     OneHandedTutorialHandler mTutorialHandler;
     OneHandedGestureHandler mGestureHandler;
     @Mock
     DisplayController mMockDisplayController;
+    @Mock
+    ShellExecutor mMockShellMainExecutor;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mTutorialHandler = new OneHandedTutorialHandler(mContext);
-        mGestureHandler = new OneHandedGestureHandler(mContext, mMockDisplayController);
+        mTutorialHandler = new OneHandedTutorialHandler(mContext, mMockShellMainExecutor);
+        mGestureHandler = new OneHandedGestureHandler(mContext, mMockDisplayController,
+                mMockShellMainExecutor);
     }
 
     @Test

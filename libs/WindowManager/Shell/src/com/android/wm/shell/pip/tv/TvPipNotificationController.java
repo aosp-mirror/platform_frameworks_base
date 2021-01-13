@@ -19,14 +19,17 @@ package com.android.wm.shell.pip.tv;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.media.MediaMetadata;
+import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.wm.shell.R;
@@ -39,22 +42,27 @@ import java.util.Objects;
  * <p>Once it's created, it will manage the PIP notification UI by itself except for handling
  * configuration changes.
  */
-public class PipNotification {
-    private static final boolean DEBUG = PipController.DEBUG;
-    private static final String TAG = "PipNotification";
+public class TvPipNotificationController {
+    private static final String TAG = "TvPipNotification";
+    private static final boolean DEBUG = TvPipController.DEBUG;
 
-    private static final String NOTIFICATION_TAG = PipNotification.class.getSimpleName();
-    public static final String NOTIFICATION_CHANNEL_TVPIP = "TPP";
+    // Referenced in com.android.systemui.util.NotificationChannels.
+    public static final String NOTIFICATION_CHANNEL = "TVPIP";
+    private static final String NOTIFICATION_TAG = "TvPip";
 
-    static final String ACTION_MENU = "PipNotification.menu";
-    static final String ACTION_CLOSE = "PipNotification.close";
+    private static final String ACTION_SHOW_PIP_MENU =
+            "com.android.wm.shell.pip.tv.notification.action.SHOW_PIP_MENU";
+    private static final String ACTION_CLOSE_PIP =
+            "com.android.wm.shell.pip.tv.notification.action.CLOSE_PIP";
 
+    private final Context mContext;
     private final PackageManager mPackageManager;
     private final NotificationManager mNotificationManager;
     private final Notification.Builder mNotificationBuilder;
+    private final ActionBroadcastReceiver mActionBroadcastReceiver;
+    private Delegate mDelegate;
 
     private String mDefaultTitle;
-    private int mDefaultIconResId;
 
     /** Package name for the application that owns PiP window. */
     private String mPackageName;
@@ -62,32 +70,56 @@ public class PipNotification {
     private String mMediaTitle;
     private Bitmap mArt;
 
-    public PipNotification(Context context, PipMediaController pipMediaController) {
+    public TvPipNotificationController(Context context, PipMediaController pipMediaController) {
+        mContext = context;
         mPackageManager = context.getPackageManager();
         mNotificationManager = context.getSystemService(NotificationManager.class);
 
-        mNotificationBuilder = new Notification.Builder(context, NOTIFICATION_CHANNEL_TVPIP)
+        mNotificationBuilder = new Notification.Builder(context, NOTIFICATION_CHANNEL)
                 .setLocalOnly(true)
                 .setOngoing(false)
                 .setCategory(Notification.CATEGORY_SYSTEM)
+                .setShowWhen(true)
+                .setSmallIcon(R.drawable.pip_icon)
                 .extend(new Notification.TvExtender()
-                        .setContentIntent(createPendingIntent(context, ACTION_MENU))
-                        .setDeleteIntent(createPendingIntent(context, ACTION_CLOSE)));
+                        .setContentIntent(createPendingIntent(context, ACTION_SHOW_PIP_MENU))
+                        .setDeleteIntent(createPendingIntent(context, ACTION_CLOSE_PIP)));
+
+        mActionBroadcastReceiver = new ActionBroadcastReceiver();
 
         pipMediaController.addMetadataListener(this::onMediaMetadataChanged);
 
         onConfigurationChanged(context);
     }
 
+    void setDelegate(Delegate delegate) {
+        if (DEBUG) Log.d(TAG, "setDelegate(), delegate=" + delegate);
+        if (mDelegate != null) {
+            throw new IllegalStateException(
+                    "The delegate has already been set and should not change.");
+        }
+        if (delegate == null) {
+            throw new IllegalArgumentException("The delegate must not be null.");
+        }
+
+        mDelegate = delegate;
+    }
+
     void show(String packageName) {
+        if (mDelegate == null) {
+            throw new IllegalStateException("Delegate is not set.");
+        }
+
         mPackageName = packageName;
         update();
+        mActionBroadcastReceiver.register();
     }
 
     void dismiss() {
         mNotificationManager.cancel(NOTIFICATION_TAG, SystemMessage.NOTE_TV_PIP);
         mNotified = false;
         mPackageName = null;
+        mActionBroadcastReceiver.unregister();
     }
 
     private void onMediaMetadataChanged(MediaMetadata metadata) {
@@ -101,11 +133,9 @@ public class PipNotification {
      * Called by {@link PipController} when the configuration is changed.
      */
     void onConfigurationChanged(Context context) {
-        Resources res = context.getResources();
-        mDefaultTitle = res.getString(R.string.pip_notification_unknown_title);
-        mDefaultIconResId = R.drawable.pip_icon;
+        mDefaultTitle = context.getResources().getString(R.string.pip_notification_unknown_title);
         if (mNotified) {
-            // update notification
+            // Update the notification.
             update();
         }
     }
@@ -113,9 +143,7 @@ public class PipNotification {
     private void update() {
         mNotified = true;
         mNotificationBuilder
-                .setShowWhen(true)
                 .setWhen(System.currentTimeMillis())
-                .setSmallIcon(mDefaultIconResId)
                 .setContentTitle(getNotificationTitle());
         if (mArt != null) {
             mNotificationBuilder.setStyle(new Notification.BigPictureStyle()
@@ -177,5 +205,46 @@ public class PipNotification {
     private static PendingIntent createPendingIntent(Context context, String action) {
         return PendingIntent.getBroadcast(context, 0, new Intent(action),
                 PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+    }
+
+    private class ActionBroadcastReceiver extends BroadcastReceiver {
+        final IntentFilter mIntentFilter;
+        {
+            mIntentFilter = new IntentFilter();
+            mIntentFilter.addAction(ACTION_CLOSE_PIP);
+            mIntentFilter.addAction(ACTION_SHOW_PIP_MENU);
+        }
+        boolean mRegistered = false;
+
+        void register() {
+            if (mRegistered) return;
+
+            mContext.registerReceiver(this, mIntentFilter, UserHandle.USER_ALL);
+            mRegistered = true;
+        }
+
+        void unregister() {
+            if (!mRegistered) return;
+
+            mContext.unregisterReceiver(this);
+            mRegistered = false;
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (DEBUG) Log.d(TAG, "on(Broadcast)Receive(), action=" + action);
+
+            if (ACTION_SHOW_PIP_MENU.equals(action)) {
+                mDelegate.showPictureInPictureMenu();
+            } else if (ACTION_CLOSE_PIP.equals(action)) {
+                mDelegate.closePip();
+            }
+        }
+    }
+
+    interface Delegate {
+        void showPictureInPictureMenu();
+        void closePip();
     }
 }

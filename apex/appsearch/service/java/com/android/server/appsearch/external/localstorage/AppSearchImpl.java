@@ -37,6 +37,7 @@ import com.android.server.appsearch.external.localstorage.converter.SearchResult
 import com.android.server.appsearch.external.localstorage.converter.SearchSpecToProtoConverter;
 
 import com.google.android.icing.IcingSearchEngine;
+import com.google.android.icing.proto.DeleteByQueryResultProto;
 import com.google.android.icing.proto.DeleteResultProto;
 import com.google.android.icing.proto.DocumentProto;
 import com.google.android.icing.proto.GetAllNamespacesResultProto;
@@ -609,7 +610,7 @@ public final class AppSearchImpl {
         SearchSpecProto searchSpecProto = SearchSpecToProtoConverter.toSearchSpecProto(searchSpec);
         SearchSpecProto.Builder searchSpecBuilder =
                 searchSpecProto.toBuilder().setQuery(queryExpression);
-        DeleteResultProto deleteResultProto;
+        DeleteByQueryResultProto deleteResultProto;
         mReadWriteLock.writeLock().lock();
         try {
             // Only rewrite SearchSpec for non empty prefixes.
@@ -797,11 +798,27 @@ public final class AppSearchImpl {
      * Removes any prefixes from types and namespaces mentioned anywhere in {@code documentBuilder}.
      *
      * @param documentBuilder The document to mutate
+     * @return Prefix name that was removed from the document.
+     * @throws AppSearchException if there are unexpected database prefixing errors.
      */
+    @NonNull
     @VisibleForTesting
-    static void removePrefixesFromDocument(@NonNull DocumentProto.Builder documentBuilder)
+    static String removePrefixesFromDocument(@NonNull DocumentProto.Builder documentBuilder)
             throws AppSearchException {
         // Rewrite the type name and namespace to remove the prefix.
+        String schemaPrefix = getPrefix(documentBuilder.getSchema());
+        String namespacePrefix = getPrefix(documentBuilder.getNamespace());
+
+        if (!schemaPrefix.equals(namespacePrefix)) {
+            throw new AppSearchException(
+                    AppSearchResult.RESULT_INTERNAL_ERROR,
+                    "Found unexpected"
+                            + " multiple prefix names in document: "
+                            + schemaPrefix
+                            + ", "
+                            + namespacePrefix);
+        }
+
         documentBuilder.setSchema(removePrefix(documentBuilder.getSchema()));
         documentBuilder.setNamespace(removePrefix(documentBuilder.getNamespace()));
 
@@ -816,12 +833,22 @@ public final class AppSearchImpl {
                 for (int documentIdx = 0; documentIdx < documentCount; documentIdx++) {
                     DocumentProto.Builder derivedDocumentBuilder =
                             propertyBuilder.getDocumentValues(documentIdx).toBuilder();
-                    removePrefixesFromDocument(derivedDocumentBuilder);
+                    String nestedPrefix = removePrefixesFromDocument(derivedDocumentBuilder);
+                    if (!nestedPrefix.equals(schemaPrefix)) {
+                        throw new AppSearchException(
+                                AppSearchResult.RESULT_INTERNAL_ERROR,
+                                "Found unexpected multiple prefix names in document: "
+                                        + schemaPrefix
+                                        + ", "
+                                        + nestedPrefix);
+                    }
                     propertyBuilder.setDocumentValues(documentIdx, derivedDocumentBuilder);
                 }
                 documentBuilder.setProperties(propertyIdx, propertyBuilder);
             }
         }
+
+        return schemaPrefix;
     }
 
     /**
@@ -929,6 +956,25 @@ public final class AppSearchImpl {
         return packageName + PACKAGE_DELIMITER + databaseName + DATABASE_DELIMITER;
     }
 
+    /**
+     * Returns the package name that's contained within the {@code prefix}.
+     *
+     * @param prefix Prefix string that contains the package name inside of it. The package name
+     *     must be in the front of the string, and separated from the rest of the string by the
+     *     {@link #PACKAGE_DELIMITER}.
+     * @return Valid package name.
+     */
+    @NonNull
+    private static String getPackageName(@NonNull String prefix) {
+        int delimiterIndex = prefix.indexOf(PACKAGE_DELIMITER);
+        if (delimiterIndex == -1) {
+            // This should never happen if we construct our prefixes properly
+            Log.wtf(TAG, "Malformed prefix doesn't contain package name: " + prefix);
+            return "";
+        }
+        return prefix.substring(0, delimiterIndex);
+    }
+
     @NonNull
     private static String removePrefix(@NonNull String prefixedString) throws AppSearchException {
         // The prefix is made up of the package, then the database. So we only need to find the
@@ -949,7 +995,7 @@ public final class AppSearchImpl {
         if (databaseDelimiterIndex == -1) {
             throw new AppSearchException(
                     AppSearchResult.RESULT_UNKNOWN_ERROR,
-                    "The databaseName prefixed value doesn't contains a valid database name.");
+                    "The databaseName prefixed value doesn't contain a valid database name.");
         }
 
         // Add 1 to include the char size of the DATABASE_DELIMITER
@@ -1034,20 +1080,24 @@ public final class AppSearchImpl {
     }
 
     /** Remove the rewritten schema types from any result documents. */
-    private static SearchResultPage rewriteSearchResultProto(
-            @NonNull SearchResultProto searchResultProto) throws AppSearchException {
+    @NonNull
+    @VisibleForTesting
+    static SearchResultPage rewriteSearchResultProto(@NonNull SearchResultProto searchResultProto)
+            throws AppSearchException {
+        // Parallel array of package names for each document search result.
+        List<String> packageNames = new ArrayList<>(searchResultProto.getResultsCount());
+
         SearchResultProto.Builder resultsBuilder = searchResultProto.toBuilder();
         for (int i = 0; i < searchResultProto.getResultsCount(); i++) {
-            if (searchResultProto.getResults(i).hasDocument()) {
-                SearchResultProto.ResultProto.Builder resultBuilder =
-                        searchResultProto.getResults(i).toBuilder();
-                DocumentProto.Builder documentBuilder = resultBuilder.getDocument().toBuilder();
-                removePrefixesFromDocument(documentBuilder);
-                resultBuilder.setDocument(documentBuilder);
-                resultsBuilder.setResults(i, resultBuilder);
-            }
+            SearchResultProto.ResultProto.Builder resultBuilder =
+                    searchResultProto.getResults(i).toBuilder();
+            DocumentProto.Builder documentBuilder = resultBuilder.getDocument().toBuilder();
+            String prefix = removePrefixesFromDocument(documentBuilder);
+            packageNames.add(getPackageName(prefix));
+            resultBuilder.setDocument(documentBuilder);
+            resultsBuilder.setResults(i, resultBuilder);
         }
-        return SearchResultToProtoConverter.toSearchResultPage(resultsBuilder);
+        return SearchResultToProtoConverter.toSearchResultPage(resultsBuilder, packageNames);
     }
 
     @GuardedBy("mReadWriteLock")

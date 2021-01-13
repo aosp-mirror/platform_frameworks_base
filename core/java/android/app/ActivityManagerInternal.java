@@ -36,6 +36,7 @@ import android.os.WorkSource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Activity manager local system service interface.
@@ -445,6 +446,22 @@ public abstract class ActivityManagerInternal {
      * Called by DevicePolicyManagerService to set the uid of the device owner.
      */
     public abstract void setDeviceOwnerUid(int uid);
+
+    /**
+     * Set all associated companion app that belongs to a userId.
+     * @param userId
+     * @param companionAppUids  ActivityManager will take ownership of this Set, the caller
+     *                          shouldn't touch this Set after calling this interface.
+     */
+    public abstract void setCompanionAppUids(int userId, Set<Integer> companionAppUids);
+
+    /**
+     * is the uid an associated companion app of a userId?
+     * @param userId
+     * @param uid
+     * @return
+     */
+    public abstract boolean isAssociatedCompanionApp(int userId, int uid);
 
     /**
      * Sends a broadcast, assuming the caller to be the system and allowing the inclusion of an

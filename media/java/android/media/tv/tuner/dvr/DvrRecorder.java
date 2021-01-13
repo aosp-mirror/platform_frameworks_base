@@ -47,7 +47,7 @@ public class DvrRecorder implements AutoCloseable {
     private static int sInstantId = 0;
     private int mSegmentId = 0;
     private int mOverflow;
-    private Boolean mIsStopped = null;
+    private Boolean mIsStopped = true;
 
     private native int nativeAttachFilter(Filter filter);
     private native int nativeDetachFilter(Filter filter);

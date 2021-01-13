@@ -39,7 +39,6 @@ import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.app.IServiceConnection;
 import android.app.KeyguardManager;
-import android.app.admin.DevicePolicyManager.DevicePolicyOperation;
 import android.app.admin.SecurityLog.SecurityEvent;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -2730,6 +2729,17 @@ public class DevicePolicyManager {
         return DebugUtils.constantToString(DevicePolicyManager.class, PREFIX_OPERATION, operation);
     }
 
+    /** @hide */
+    public void resetNewUserDisclaimer() {
+        if (mService != null) {
+            try {
+                mService.resetNewUserDisclaimer();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
     /**
      * Return true if the given administrator component is currently active (enabled) in the system.
      *
@@ -3021,6 +3031,10 @@ public class DevicePolicyManager {
      *
      * <p><strong>Note:</strong> Specifying password requirements using this method clears the
      * password complexity requirements set using {@link #setRequiredPasswordComplexity(int)}.
+     * If this method is called on the {@link DevicePolicyManager} instance returned by
+     * {@link #getParentProfileInstance(ComponentName)}, then password complexity requirements
+     * set on the primary {@link DevicePolicyManager} must be cleared first by calling
+     * {@link #setRequiredPasswordComplexity} with {@link #PASSWORD_COMPLEXITY_NONE) first.
      *
      * @deprecated Prefer using {@link #setRequiredPasswordComplexity(int)}, to require a password
      * that satisfies a complexity level defined by the platform, rather than specifying custom
@@ -3040,6 +3054,9 @@ public class DevicePolicyManager {
      *             calling app is targeting {@link android.os.Build.VERSION_CODES#S} and above,
      *             and is calling the method the {@link DevicePolicyManager} instance returned by
      *             {@link #getParentProfileInstance(ComponentName)}.
+     * @throws IllegalStateException if the caller is trying to set password quality on the parent
+     *             {@link DevicePolicyManager} instance while password complexity was set on the
+     *             primary {@link DevicePolicyManager} instance.
      */
     @Deprecated
     public void setPasswordQuality(@NonNull ComponentName admin, int quality) {
@@ -4056,10 +4073,18 @@ public class DevicePolicyManager {
      * <p><strong>Note:</strong> Specifying password requirements using this method clears any
      * password requirements set using the obsolete {@link #setPasswordQuality(ComponentName, int)}
      * and any of its associated methods.
+     * Additionally, if there are password requirements set using the obsolete
+     * {@link #setPasswordQuality(ComponentName, int)} on the parent {@code DevicePolicyManager}
+     * instance, they must be cleared by calling {@link #setPasswordQuality(ComponentName, int)}
+     * with {@link #PASSWORD_QUALITY_UNSPECIFIED} on that instance prior to setting complexity
+     * requirement for the managed profile.
      *
      * @throws SecurityException if the calling application is not a device owner or a profile
      * owner.
      * @throws IllegalArgumentException if the complexity level is not one of the four above.
+     * @throws IllegalStateException if the caller is trying to set password complexity while there
+     * are password requirements specified using {@link #setPasswordQuality(ComponentName, int)}
+     * on the parent {@code DevicePolicyManager} instance.
      */
     public void setRequiredPasswordComplexity(@PasswordComplexity int passwordComplexity) {
         if (mService == null) {
@@ -5190,6 +5215,16 @@ public class DevicePolicyManager {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_MANAGED_USER_CREATED =
             "android.app.action.MANAGED_USER_CREATED";
+
+    /**
+     * Broadcast action: notify system that a new (Android) user was added when the device is
+     * managed by a device owner, so receivers can show the proper disclaimer to the (human) user.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SHOW_NEW_USER_DISCLAIMER =
+            "android.app.action.ACTION_SHOW_NEW_USER_DISCLAIMER";
 
     /**
      * Widgets are enabled in keyguard
@@ -12812,6 +12847,68 @@ public class DevicePolicyManager {
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
+        }
+    }
+
+    /**
+     * Returns an enrollment-specific identifier of this device, which is guaranteed to be the same
+     * value for the same device, enrolled into the same organization by the same managing app.
+     * This identifier is high-entropy, useful for uniquely identifying individual devices within
+     * the same organisation.
+     * It is available both in a work profile and on a fully-managed device.
+     * The identifier would be consistent even if the work profile is removed and enrolled again
+     * (to the same organization), or the device is factory reset and re-enrolled.
+
+     * Can only be called by the Profile Owner or Device Owner, if the
+     * {@link #setOrganizationId(String)} was previously called.
+     * If {@link #setOrganizationId(String)} was not called, then the returned value will be an
+     * empty string.
+     *
+     * @return A stable, enrollment-specific identifier.
+     * @throws SecurityException if the caller is not a profile owner or device owner.
+     */
+    @NonNull public String getEnrollmentSpecificId() {
+        if (mService == null) {
+            return "";
+        }
+
+        try {
+            return mService.getEnrollmentSpecificId();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the Enterprise ID for the work profile or managed device. This is a requirement for
+     * generating an enrollment-specific ID for the device, see {@link #getEnrollmentSpecificId()}.
+     *
+     * It is recommended that the Enterprise ID is at least 6 characters long, and no more than
+     * 64 characters.
+     *
+     * @param enterpriseId An identifier of the organization this work profile or device is
+     *                     enrolled into.
+     */
+    public void setOrganizationId(@NonNull String enterpriseId) {
+        setOrganizationIdForUser(mContext.getPackageName(), enterpriseId, myUserId());
+    }
+
+    /**
+     * Sets the Enterprise ID for the work profile or managed device. This is a requirement for
+     * generating an enrollment-specific ID for the device, see
+     * {@link #getEnrollmentSpecificId()}.
+     *
+     * @hide
+     */
+    public void setOrganizationIdForUser(@NonNull String packageName,
+            @NonNull String enterpriseId, @UserIdInt int userId) {
+        if (mService == null) {
+            return;
+        }
+        try {
+            mService.setOrganizationIdForUser(packageName, enterpriseId, userId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
         }
     }
 }

@@ -174,6 +174,10 @@ class ActivityMetricsLogger {
         boolean allDrawn() {
             return mAssociatedTransitionInfo != null && mAssociatedTransitionInfo.allDrawn();
         }
+
+        boolean contains(ActivityRecord r) {
+            return mAssociatedTransitionInfo != null && mAssociatedTransitionInfo.contains(r);
+        }
     }
 
     /** The information created when an activity is confirmed to be launched. */
@@ -793,6 +797,7 @@ class ActivityMetricsLogger {
 
         stopLaunchTrace(info);
         if (abort) {
+            mSupervisor.stopWaitingForActivityVisible(info.mLastLaunchedActivity);
             launchObserverNotifyActivityLaunchCancelled(info);
         } else {
             if (info.isInterestingToLoggerAndObserver()) {

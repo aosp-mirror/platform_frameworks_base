@@ -707,6 +707,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         public void onUserStopping(@NonNull TargetUser user) {
             mService.handleStopUser(user.getUserIdentifier());
         }
+
+        @Override
+        public void onUserUnlocked(@NonNull TargetUser user) {
+            mService.handleOnUserUnlocked(user.getUserIdentifier());
+        }
     }
 
     @GuardedBy("getLockObject()")
@@ -819,6 +824,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             } else if (Intent.ACTION_PACKAGE_REMOVED.equals(action)
                     && !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
                 handlePackagesChanged(intent.getData().getSchemeSpecificPart(), userHandle);
+                removeCredentialManagementApp(intent.getData().getSchemeSpecificPart());
             } else if (Intent.ACTION_MANAGED_PROFILE_ADDED.equals(action)) {
                 clearWipeProfileNotification();
             } else if (Intent.ACTION_DATE_CHANGED.equals(action)
@@ -885,6 +891,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    private final class UserLifecycleListener implements UserManagerInternal.UserLifecycleListener {
+
+        @Override
+        public void onUserCreated(UserInfo user) {
+            mHandler.post(() -> handleNewUserCreated(user));
+        }
+    }
+
     private void handlePackagesChanged(@Nullable String packageName, int userHandle) {
         boolean removedAdmin = false;
         if (VERBOSE_LOG) {
@@ -947,6 +961,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             // The removed admin might have disabled camera, so update user restrictions.
             pushUserRestrictions(userHandle);
         }
+    }
+
+    private void removeCredentialManagementApp(String packageName) {
+        mBackgroundHandler.post(() -> {
+            try (KeyChainConnection connection = mInjector.keyChainBind()) {
+                IKeyChainService service = connection.getService();
+                if (service.hasCredentialManagementApp()
+                        && packageName.equals(service.getCredentialManagementAppPackageName())) {
+                    service.removeCredentialManagementApp();
+                }
+            } catch (RemoteException | InterruptedException | IllegalStateException e) {
+                Log.e(LOG_TAG, "Unable to remove the credential management app");
+            }
+        });
     }
 
     private boolean isRemovedPackage(String changedPackage, String targetPackage, int userHandle) {
@@ -1419,6 +1447,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return SecurityLog.isLoggingEnabled();
         }
 
+        KeyChainConnection keyChainBind() throws InterruptedException {
+            return KeyChain.bind(mContext);
+        }
+
         KeyChainConnection keyChainBindAsUser(UserHandle user) throws InterruptedException {
             return KeyChain.bindAsUser(mContext, user);
         }
@@ -1542,6 +1574,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mSetupContentObserver = new SetupContentObserver(mHandler);
 
         mUserManagerInternal.addUserRestrictionsListener(new RestrictionsListener(mContext));
+        mUserManagerInternal.addUserLifecycleListener(new UserLifecycleListener());
 
         loadOwners();
     }
@@ -2883,6 +2916,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
+    void handleOnUserUnlocked(int userId) {
+        showNewUserDisclaimerIfNecessary(userId);
+    }
+
+    @Override
     void handleStopUser(int userId) {
         stopOwnerService(userId, "stop-user");
     }
@@ -3413,6 +3451,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             ActiveAdmin ap = getActiveAdminForCallerLocked(
                     who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
+
+            // If setPasswordQuality is called on the parent, ensure that
+            // the primary admin does not have password complexity state (this is an
+            // unsupported state).
+            if (parent) {
+                final ActiveAdmin primaryAdmin = getActiveAdminForCallerLocked(
+                        who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, false);
+                final boolean hasComplexitySet =
+                        primaryAdmin.mPasswordComplexity != PASSWORD_COMPLEXITY_NONE;
+                Preconditions.checkState(!hasComplexitySet,
+                        "Cannot set password quality when complexity is set on the primary admin."
+                        + " Set the primary admin's complexity to NONE first.");
+            }
             mInjector.binderWithCleanCallingIdentity(() -> {
                 final PasswordPolicy passwordPolicy = ap.mPasswordPolicy;
                 if (passwordPolicy.quality != quality) {
@@ -4378,6 +4429,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final ActiveAdmin admin = getParentOfAdminIfRequired(
                     getProfileOwnerOrDeviceOwnerLocked(caller), calledOnParent);
             if (admin.mPasswordComplexity != passwordComplexity) {
+                // We require the caller to explicitly clear any password quality requirements set
+                // on the parent DPM instance, to avoid the case where password requirements are
+                // specified in the form of quality on the parent but complexity on the profile
+                // itself.
+                if (!calledOnParent) {
+                    final boolean hasQualityRequirementsOnParent = admin.hasParentActiveAdmin()
+                            && admin.getParentActiveAdmin().mPasswordPolicy.quality
+                            != PASSWORD_QUALITY_UNSPECIFIED;
+                    Preconditions.checkState(!hasQualityRequirementsOnParent,
+                            "Password quality is set on the parent when attempting to set password"
+                            + "complexity. Clear the quality by setting the password quality "
+                            + "on the parent to PASSWORD_QUALITY_UNSPECIFIED first");
+                }
+
                 mInjector.binderWithCleanCallingIdentity(() -> {
                     admin.mPasswordComplexity = passwordComplexity;
                     // Reset the password policy.
@@ -7641,8 +7706,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 // Sets profile owner on current foreground user since
                 // the human user will complete the DO setup workflow from there.
                 manageUserUnchecked(/* deviceOwner= */ admin, /* profileOwner= */ admin,
-                            /* managedUser= */ currentForegroundUser,
-                            /* adminExtras= */ null);
+                        /* managedUser= */ currentForegroundUser, /* adminExtras= */ null,
+                        /* showDisclaimer= */ false);
             }
             return true;
         }
@@ -9694,7 +9759,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final long id = mInjector.binderClearCallingIdentity();
         try {
-            manageUserUnchecked(admin, profileOwner, userHandle, adminExtras);
+            manageUserUnchecked(admin, profileOwner, userHandle, adminExtras,
+                    /* showDisclaimer= */ true);
 
             if ((flags & DevicePolicyManager.SKIP_SETUP_WIZARD) != 0) {
                 Settings.Secure.putIntForUser(mContext.getContentResolver(),
@@ -9716,7 +9782,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void manageUserUnchecked(ComponentName admin, ComponentName profileOwner,
-            @UserIdInt int userId, PersistableBundle adminExtras) {
+            @UserIdInt int userId, PersistableBundle adminExtras, boolean showDisclaimer) {
         final String adminPkg = admin.getPackageName();
         try {
             // Install the profile owner if not present.
@@ -9742,9 +9808,58 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             DevicePolicyData policyData = getUserData(userId);
             policyData.mInitBundle = adminExtras;
             policyData.mAdminBroadcastPending = true;
-
+            policyData.mNewUserDisclaimer = showDisclaimer
+                    ? DevicePolicyData.NEW_USER_DISCLAIMER_NEEDED
+                    : DevicePolicyData.NEW_USER_DISCLAIMER_NOT_NEEDED;
             saveSettingsLocked(userId);
         }
+    }
+
+    private void handleNewUserCreated(UserInfo user) {
+        if (!mOwners.hasDeviceOwner()) return;
+
+        final int userId = user.id;
+        Log.i(LOG_TAG, "User " + userId + " added on DO mode; setting ShowNewUserDisclaimer");
+
+        setShowNewUserDisclaimer(userId, DevicePolicyData.NEW_USER_DISCLAIMER_NEEDED);
+    }
+
+    @Override
+    public void resetNewUserDisclaimer() {
+        CallerIdentity callerIdentity = getCallerIdentity();
+        canManageUsers(callerIdentity);
+
+        setShowNewUserDisclaimer(callerIdentity.getUserId(),
+                DevicePolicyData.NEW_USER_DISCLAIMER_SHOWN);
+    }
+
+    private void setShowNewUserDisclaimer(@UserIdInt int userId, String value) {
+        Slog.i(LOG_TAG, "Setting new user disclaimer for user " + userId + " as " + value);
+        synchronized (getLockObject()) {
+            DevicePolicyData policyData = getUserData(userId);
+            policyData.mNewUserDisclaimer = value;
+            saveSettingsLocked(userId);
+        }
+    }
+
+    private void showNewUserDisclaimerIfNecessary(@UserIdInt int userId) {
+        boolean mustShow;
+        synchronized (getLockObject()) {
+            DevicePolicyData policyData = getUserData(userId);
+            if (VERBOSE_LOG) {
+                Slog.v(LOG_TAG, "showNewUserDisclaimerIfNecessary(" + userId + "): "
+                        + policyData.mNewUserDisclaimer + ")");
+            }
+            mustShow = DevicePolicyData.NEW_USER_DISCLAIMER_NEEDED
+                    .equals(policyData.mNewUserDisclaimer);
+        }
+        if (!mustShow) return;
+
+        Intent intent = new Intent(DevicePolicyManager.ACTION_SHOW_NEW_USER_DISCLAIMER);
+
+        // TODO(b/172691310): add CTS tests to make sure disclaimer is shown
+        Slog.i(LOG_TAG, "Dispatching ACTION_SHOW_NEW_USER_DISCLAIMER intent");
+        mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
     }
 
     @Override
@@ -15579,6 +15694,71 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             Slog.d(LOG_TAG, "PO should be able to reset password from direct boot");
             return true;
+        }
+    }
+
+    @Override
+    public String getEnrollmentSpecificId() {
+        if (!mHasFeature) {
+            return "";
+        }
+
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(
+                isDeviceOwner(caller) || isProfileOwner(caller));
+
+        synchronized (getLockObject()) {
+            final ActiveAdmin requiredAdmin = getDeviceOrProfileOwnerAdminLocked(
+                    caller.getUserId());
+            final String esid = requiredAdmin.mEnrollmentSpecificId;
+            return esid != null ? esid : "";
+        }
+    }
+
+    @Override
+    public void setOrganizationIdForUser(
+            @NonNull String callerPackage, @NonNull String organizationId, int userId) {
+        if (!mHasFeature) {
+            return;
+        }
+        Objects.requireNonNull(callerPackage);
+
+        final CallerIdentity caller = getCallerIdentity(callerPackage);
+        // Only the DPC can set this ID.
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller),
+                "Only a Device Owner or Profile Owner may set the Enterprise ID.");
+        // Empty enterprise ID must not be provided in calls to this method.
+        Preconditions.checkArgument(!TextUtils.isEmpty(organizationId),
+                "Enterprise ID may not be empty.");
+
+        Log.i(LOG_TAG,
+                String.format("Setting Enterprise ID to %s for user %d", organizationId, userId));
+
+        synchronized (getLockObject()) {
+            ActiveAdmin owner = getDeviceOrProfileOwnerAdminLocked(userId);
+            // As the caller is the system, it must specify the component name of the profile owner
+            // as a safety check.
+            Preconditions.checkCallAuthorization(
+                    owner != null && owner.getUserHandle().getIdentifier() == userId,
+                    String.format("The Profile Owner or Device Owner may only set the Enterprise ID"
+                            + " on its own user, called on user %d but owner user is %d", userId,
+                            owner.getUserHandle().getIdentifier()));
+            Preconditions.checkState(
+                    TextUtils.isEmpty(owner.mOrganizationId) || owner.mOrganizationId.equals(
+                            organizationId),
+                    "The organization ID has been previously set to a different value and cannot "
+                            + "be changed");
+            final String dpcPackage = owner.info.getPackageName();
+            mInjector.binderWithCleanCallingIdentity(() -> {
+                EnterpriseSpecificIdCalculator esidCalculator =
+                        new EnterpriseSpecificIdCalculator(mContext);
+
+                final String esid = esidCalculator.calculateEnterpriseId(dpcPackage,
+                        organizationId);
+                owner.mOrganizationId = organizationId;
+                owner.mEnrollmentSpecificId = esid;
+                saveSettingsLocked(userId);
+            });
         }
     }
 }

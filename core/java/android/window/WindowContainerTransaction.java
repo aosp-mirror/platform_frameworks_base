@@ -30,6 +30,7 @@ import android.util.ArrayMap;
 import android.view.SurfaceControl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -263,8 +264,9 @@ public final class WindowContainerTransaction implements Parcelable {
     @NonNull
     public WindowContainerTransaction reparent(@NonNull WindowContainerToken child,
             @Nullable WindowContainerToken parent, boolean onTop) {
-        mHierarchyOps.add(new HierarchyOp(child.asBinder(),
-                parent == null ? null : parent.asBinder(), onTop));
+        mHierarchyOps.add(HierarchyOp.createForReparent(child.asBinder(),
+                parent == null ? null : parent.asBinder(),
+                onTop));
         return this;
     }
 
@@ -276,7 +278,47 @@ public final class WindowContainerTransaction implements Parcelable {
      */
     @NonNull
     public WindowContainerTransaction reorder(@NonNull WindowContainerToken child, boolean onTop) {
-        mHierarchyOps.add(new HierarchyOp(child.asBinder(), onTop));
+        mHierarchyOps.add(HierarchyOp.createForReorder(child.asBinder(), onTop));
+        return this;
+    }
+
+    /**
+     * Reparent's all children tasks of {@param currentParent} in the specified
+     * {@param windowingMode} and {@param activityType} to {@param newParent} in their current
+     * z-order.
+     *
+     * @param currentParent of the tasks to perform the operation no.
+     *                      {@code null} will perform the operation on the display.
+     * @param newParent for the tasks. {@code null} will perform the operation on the display.
+     * @param windowingModes of the tasks to reparent.
+     * @param activityTypes of the tasks to reparent.
+     * @param onTop When {@code true}, the child goes to the top of parent; otherwise it goes to
+     *              the bottom.
+     */
+    @NonNull
+    public WindowContainerTransaction reparentTasks(@Nullable WindowContainerToken currentParent,
+            @Nullable WindowContainerToken newParent, @Nullable int[] windowingModes,
+            @Nullable int[] activityTypes, boolean onTop) {
+        mHierarchyOps.add(HierarchyOp.createForChildrenTasksReparent(
+                currentParent != null ? currentParent.asBinder() : null,
+                newParent != null ? newParent.asBinder() : null,
+                windowingModes,
+                activityTypes,
+                onTop));
+        return this;
+    }
+
+    /**
+     * Sets whether a container should be the launch root for the specified windowing mode and
+     * activity type. This currently only applies to Task containers created by organizer.
+     */
+    @NonNull
+    public WindowContainerTransaction setLaunchRoot(@NonNull WindowContainerToken container,
+            @Nullable int[] windowingModes, @Nullable int[] activityTypes) {
+        mHierarchyOps.add(HierarchyOp.createForSetLaunchRoot(
+                container.asBinder(),
+                windowingModes,
+                activityTypes));
         return this;
     }
 
@@ -363,6 +405,7 @@ public final class WindowContainerTransaction implements Parcelable {
         private boolean mFocusable = true;
         private boolean mHidden = false;
         private boolean mIgnoreOrientationRequest = false;
+
         private int mChangeMask = 0;
         private @ActivityInfo.Config int mConfigSetMask = 0;
         private @WindowConfiguration.WindowConfig int mWindowSetMask = 0;
@@ -595,6 +638,14 @@ public final class WindowContainerTransaction implements Parcelable {
      * @hide
      */
     public static class HierarchyOp implements Parcelable {
+        public static final int HIERARCHY_OP_TYPE_REPARENT = 0;
+        public static final int HIERARCHY_OP_TYPE_REORDER = 1;
+        public static final int HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT = 2;
+        public static final int HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT = 3;
+
+        private final int mType;
+
+        // Container we are performing the operation on.
         private final IBinder mContainer;
 
         // If this is same as mContainer, then only change position, don't reparent.
@@ -603,32 +654,68 @@ public final class WindowContainerTransaction implements Parcelable {
         // Moves/reparents to top of parent when {@code true}, otherwise moves/reparents to bottom.
         private final boolean mToTop;
 
-        public HierarchyOp(@NonNull IBinder container, @Nullable IBinder reparent, boolean toTop) {
-            mContainer = container;
-            mReparent = reparent;
-            mToTop = toTop;
+        final private int[]  mWindowingModes;
+        final private int[] mActivityTypes;
+
+        public static HierarchyOp createForReparent(
+                @NonNull IBinder container, @Nullable IBinder reparent, boolean toTop) {
+            return new HierarchyOp(HIERARCHY_OP_TYPE_REPARENT,
+                    container, reparent, null, null, toTop);
         }
 
-        public HierarchyOp(@NonNull IBinder container, boolean toTop) {
+        public static HierarchyOp createForReorder(@NonNull IBinder container, boolean toTop) {
+            return new HierarchyOp(HIERARCHY_OP_TYPE_REORDER,
+                    container, container, null, null, toTop);
+        }
+
+        public static HierarchyOp createForChildrenTasksReparent(IBinder currentParent,
+                IBinder newParent, int[] windowingModes, int[] activityTypes, boolean onTop) {
+            return new HierarchyOp(HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT,
+                    currentParent, newParent, windowingModes, activityTypes, onTop);
+        }
+
+        public static HierarchyOp createForSetLaunchRoot(IBinder container,
+                int[] windowingModes, int[] activityTypes) {
+            return new HierarchyOp(HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT,
+                    container, null, windowingModes, activityTypes, false);
+        }
+
+        private HierarchyOp(int type, @NonNull IBinder container, @Nullable IBinder reparent,
+                int[] windowingModes, int[] activityTypes, boolean toTop) {
+            mType = type;
             mContainer = container;
-            mReparent = container;
+            mReparent = reparent;
+            mWindowingModes = windowingModes != null ?
+                    Arrays.copyOf(windowingModes, windowingModes.length) : null;
+            mActivityTypes = activityTypes != null ?
+                    Arrays.copyOf(activityTypes, activityTypes.length) : null;
             mToTop = toTop;
         }
 
         public HierarchyOp(@NonNull HierarchyOp copy) {
+            mType = copy.mType;
             mContainer = copy.mContainer;
             mReparent = copy.mReparent;
             mToTop = copy.mToTop;
+            mWindowingModes = copy.mWindowingModes;
+            mActivityTypes = copy.mActivityTypes;
         }
 
         protected HierarchyOp(Parcel in) {
+            mType = in.readInt();
             mContainer = in.readStrongBinder();
             mReparent = in.readStrongBinder();
             mToTop = in.readBoolean();
+            mWindowingModes = in.createIntArray();
+            mActivityTypes = in.createIntArray();
+        }
+
+        public int getType() {
+            return mType;
         }
 
         public boolean isReparent() {
-            return mContainer != mReparent;
+            return mType == HIERARCHY_OP_TYPE_REPARENT;
         }
 
         @Nullable
@@ -645,21 +732,45 @@ public final class WindowContainerTransaction implements Parcelable {
             return mToTop;
         }
 
+        public int[] getWindowingModes() {
+            return mWindowingModes;
+        }
+
+        public int[] getActivityTypes() {
+            return mActivityTypes;
+        }
+
         @Override
         public String toString() {
-            if (isReparent()) {
-                return "{reparent: " + mContainer + " to " + (mToTop ? "top of " : "bottom of ")
-                        + mReparent + "}";
-            } else {
-                return "{reorder: " + mContainer + " to " + (mToTop ? "top" : "bottom") + "}";
+            switch (mType) {
+                case HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT:
+                    return "{ChildrenTasksReparent: from=" + mContainer + " to=" + mReparent
+                            + " mToTop=" + mToTop + " mWindowingMode=" + mWindowingModes
+                            + " mActivityType=" + mActivityTypes + "}";
+                case HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT:
+                    return "{SetLaunchRoot: container=" + mContainer
+                            + " mWindowingMode=" + mWindowingModes
+                            + " mActivityType=" + mActivityTypes + "}";
+                case HIERARCHY_OP_TYPE_REPARENT:
+                    return "{reparent: " + mContainer + " to " + (mToTop ? "top of " : "bottom of ")
+                            + mReparent + "}";
+                case HIERARCHY_OP_TYPE_REORDER:
+                    return "{reorder: " + mContainer + " to " + (mToTop ? "top" : "bottom") + "}";
+                default:
+                    return "{mType=" + mType + " container=" + mContainer + " reparent=" + mReparent
+                            + " mToTop=" + mToTop + " mWindowingMode=" + mWindowingModes
+                            + " mActivityType=" + mActivityTypes + "}";
             }
         }
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(mType);
             dest.writeStrongBinder(mContainer);
             dest.writeStrongBinder(mReparent);
             dest.writeBoolean(mToTop);
+            dest.writeIntArray(mWindowingModes);
+            dest.writeIntArray(mActivityTypes);
         }
 
         @Override

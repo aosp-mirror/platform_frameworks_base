@@ -41,6 +41,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.ShellExecutor;
 
 /**
  * The class manage swipe up and down gesture for 3-Button mode navigation,
@@ -70,7 +71,8 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
     InputMonitor mInputMonitor;
     @VisibleForTesting
     InputEventReceiver mInputEventReceiver;
-    private DisplayController mDisplayController;
+    private final DisplayController mDisplayController;
+    private final ShellExecutor mMainExecutor;
     @VisibleForTesting
     @Nullable
     OneHandedGestureEventCallback mGestureEventCallback;
@@ -84,8 +86,10 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
      * @param context                  {@link Context}
      * @param displayController        {@link DisplayController}
      */
-    public OneHandedGestureHandler(Context context, DisplayController displayController) {
+    public OneHandedGestureHandler(Context context, DisplayController displayController,
+            ShellExecutor mainExecutor) {
         mDisplayController = displayController;
+        mMainExecutor = mainExecutor;
         displayController.addDisplayChangingController(this);
         mNavGestureHeight = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.navigation_bar_gesture_larger_height);
@@ -93,6 +97,7 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
                 R.dimen.gestures_onehanded_drag_threshold);
         final float slop = ViewConfiguration.get(context).getScaledTouchSlop();
         mSquaredSlop = slop * slop;
+
         updateIsEnabled();
     }
 
@@ -217,7 +222,7 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
             mInputMonitor = InputManager.getInstance().monitorGestureInput(
                     "onehanded-gesture-offset", DEFAULT_DISPLAY);
             mInputEventReceiver = new EventReceiver(
-                    mInputMonitor.getInputChannel(), Looper.getMainLooper());
+                    mInputMonitor.getInputChannel(), mMainExecutor.getLooper());
         }
     }
 
@@ -233,6 +238,7 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
         mRotation = toRotation;
     }
 
+    // TODO: Use BatchedInputEventReceiver
     private class EventReceiver extends InputEventReceiver {
         EventReceiver(InputChannel channel, Looper looper) {
             super(channel, looper);

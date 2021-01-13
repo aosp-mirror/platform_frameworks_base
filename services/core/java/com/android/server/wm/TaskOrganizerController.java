@@ -510,7 +510,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
                 ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Delete root task display=%d winMode=%d",
                         task.getDisplayId(), task.getWindowingMode());
-                task.removeImmediately();
+                task.removeImmediately("deleteRootTask");
                 return true;
             }
         } finally {
@@ -594,45 +594,6 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                     return null;
                 }
                 return task.getRootTask().mRemoteToken.toWindowContainerToken();
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
-    }
-
-    @Override
-    public void setLaunchRoot(int displayId, @Nullable WindowContainerToken token) {
-        enforceTaskPermission("setLaunchRoot()");
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                TaskDisplayArea defaultTaskDisplayArea = mService.mRootWindowContainer
-                        .getDisplayContent(displayId).getDefaultTaskDisplayArea();
-                if (defaultTaskDisplayArea == null) {
-                    return;
-                }
-                WindowContainer wc = null;
-                if (token != null) {
-                    wc = WindowContainer.fromBinder(token.asBinder());
-                    if (wc == null) {
-                        throw new IllegalArgumentException("Can't resolve window from token");
-                    }
-                }
-                final Task task = wc == null ? null : wc.asTask();
-                if (task == null) {
-                    defaultTaskDisplayArea.mLaunchRootTask = null;
-                    return;
-                }
-                if (!task.mCreatedByOrganizer) {
-                    throw new IllegalArgumentException("Attempt to set task not created by "
-                            + "organizer as launch root task=" + task);
-                }
-                if (task.getDisplayArea() == null
-                        || task.getDisplayArea().getDisplayId() != displayId) {
-                    throw new RuntimeException("Can't set launch root for display " + displayId
-                            + " to task on display " + task.getDisplayContent().getDisplayId());
-                }
-                task.getDisplayArea().mLaunchRootTask = task;
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

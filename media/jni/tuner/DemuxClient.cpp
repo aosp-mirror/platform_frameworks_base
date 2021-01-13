@@ -32,11 +32,13 @@ namespace android {
 // TODO: pending aidl interface
 DemuxClient::DemuxClient() {
     //mTunerDemux = tunerDemux;
+    mId = -1;
 }
 
 DemuxClient::~DemuxClient() {
     //mTunerDemux = NULL;
     mDemux = NULL;
+    mId = -1;
 }
 
 // TODO: remove after migration to Tuner Service is done.
@@ -71,6 +73,21 @@ sp<FilterClient> DemuxClient::openFilter(DemuxFilterType type, int bufferSize,
             sp<FilterClient> filterClient = new FilterClient(type);
             filterClient->setHidlFilter(hidlFilter);
             return filterClient;
+        }
+    }
+
+    return NULL;
+}
+
+sp<TimeFilterClient> DemuxClient::openTimeFilter() {
+    // TODO: pending aidl interface
+
+    if (mDemux != NULL) {
+        sp<ITimeFilter> hidlTimeFilter = openHidlTimeFilter();
+        if (hidlTimeFilter != NULL) {
+            sp<TimeFilterClient> timeFilterClient = new TimeFilterClient();
+            timeFilterClient->setHidlTimeFilter(hidlTimeFilter);
+            return timeFilterClient;
         }
     }
 
@@ -186,6 +203,26 @@ sp<IFilter> DemuxClient::openHidlFilter(DemuxFilterType type, int bufferSize,
     }
 
     return hidlFilter;
+}
+
+sp<ITimeFilter> DemuxClient::openHidlTimeFilter() {
+    if (mDemux == NULL) {
+        return NULL;
+    }
+
+    sp<ITimeFilter> timeFilter;
+    Result res;
+    mDemux->openTimeFilter(
+            [&](Result r, const sp<ITimeFilter>& timeFilterSp) {
+                timeFilter = timeFilterSp;
+                res = r;
+            });
+
+    if (res != Result::SUCCESS || timeFilter == NULL) {
+        return NULL;
+    }
+
+    return timeFilter;
 }
 
 sp<IDvr> DemuxClient::openHidlDvr(DvrType dvrType, int bufferSize,

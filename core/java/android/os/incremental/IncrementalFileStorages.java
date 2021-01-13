@@ -69,7 +69,8 @@ public final class IncrementalFileStorages {
             @Nullable IDataLoaderStatusListener statusListener,
             @Nullable StorageHealthCheckParams healthCheckParams,
             @Nullable IStorageHealthListener healthListener,
-            List<InstallationFileParcel> addedFiles) throws IOException {
+            @NonNull List<InstallationFileParcel> addedFiles,
+            @NonNull PerUidReadTimeouts[] perUidReadTimeouts) throws IOException {
         // TODO(b/136132412): validity check if session should not be incremental
         IncrementalManager incrementalManager = (IncrementalManager) context.getSystemService(
                 Context.INCREMENTAL_SERVICE);
@@ -80,7 +81,7 @@ public final class IncrementalFileStorages {
 
         final IncrementalFileStorages result = new IncrementalFileStorages(stageDir,
                 incrementalManager, dataLoaderParams, statusListener, healthCheckParams,
-                healthListener);
+                healthListener, perUidReadTimeouts);
         for (InstallationFileParcel file : addedFiles) {
             if (file.location == LOCATION_DATA_APP) {
                 try {
@@ -105,7 +106,8 @@ public final class IncrementalFileStorages {
             @NonNull DataLoaderParams dataLoaderParams,
             @Nullable IDataLoaderStatusListener statusListener,
             @Nullable StorageHealthCheckParams healthCheckParams,
-            @Nullable IStorageHealthListener healthListener) throws IOException {
+            @Nullable IStorageHealthListener healthListener,
+            @NonNull PerUidReadTimeouts[] perUidReadTimeouts) throws IOException {
         try {
             mStageDir = stageDir;
             mIncrementalManager = incrementalManager;
@@ -124,7 +126,7 @@ public final class IncrementalFileStorages {
                 mDefaultStorage = mIncrementalManager.createStorage(stageDir.getAbsolutePath(),
                         dataLoaderParams, IncrementalManager.CREATE_MODE_CREATE
                                 | IncrementalManager.CREATE_MODE_TEMPORARY_BIND, false,
-                        statusListener, healthCheckParams, healthListener);
+                        statusListener, healthCheckParams, healthListener, perUidReadTimeouts);
                 if (mDefaultStorage == null) {
                     throw new IOException(
                             "Couldn't create incremental storage at " + stageDir);
@@ -163,8 +165,8 @@ public final class IncrementalFileStorages {
     /**
      * Permanently disables readlogs.
      */
-    public void disableReadLogs() {
-        mDefaultStorage.disableReadLogs();
+    public void disallowReadLogs() {
+        mDefaultStorage.disallowReadLogs();
     }
 
     /**

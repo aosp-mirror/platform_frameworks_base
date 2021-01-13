@@ -23,6 +23,10 @@ per-file BatteryStats* = file:/BATTERY_STATS_OWNERS
 per-file BatteryUsageStats* = file:/BATTERY_STATS_OWNERS
 per-file PowerComponents.java = file:/BATTERY_STATS_OWNERS
 
+# Multiuser
+per-file IUser* = file:/MULTIUSER_OWNERS
+per-file User* = file:/MULTIUSER_OWNERS
+
 # Binder
 per-file BadParcelableException.java = file:platform/frameworks/native:/libs/binder/OWNERS
 per-file Binder.java = file:platform/frameworks/native:/libs/binder/OWNERS

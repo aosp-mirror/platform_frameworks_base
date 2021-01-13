@@ -450,6 +450,10 @@
         -->
     </string-array>
 
+    <!-- Whether the internal vehicle network should remain active even when no
+         apps requested it. -->
+    <bool name="config_vehicleInternalNetworkAlwaysRequested">false</bool>
+
     <!-- Configuration of network interfaces that support WakeOnLAN -->
     <string-array translatable="false" name="config_wakeonlan_supported_interfaces">
         <!--
@@ -3723,6 +3727,14 @@
          Example: "com.android.augmentedautofill/.AugmentedAutofillService"
     -->
     <string name="config_defaultAugmentedAutofillService" translatable="false"></string>
+
+    <!-- The package name for the system's translation service.
+     This service must be trusted, as it can be activated without explicit consent of the user.
+     If no service with the specified name exists on the device, translation wil be
+     disabled.
+     Example: "com.android.translation/.TranslationService"
+-->
+    <string name="config_defaultTranslationService" translatable="false"></string>
 
     <!-- The package name for the system's app prediction service.
          This service must be trusted, as it can be activated without explicit consent of the user.

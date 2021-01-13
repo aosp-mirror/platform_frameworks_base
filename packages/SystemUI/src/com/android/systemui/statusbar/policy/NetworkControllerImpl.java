@@ -187,6 +187,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             TelephonyManager telephonyManager,
             @Nullable WifiManager wifiManager,
             NetworkScoreManager networkScoreManager,
+            AccessPointControllerImpl accessPointController,
             DemoModeController demoModeController) {
         this(context, connectivityManager,
                 telephonyManager,
@@ -194,7 +195,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 networkScoreManager,
                 SubscriptionManager.from(context), Config.readConfig(context), bgLooper,
                 new CallbackHandler(),
-                new AccessPointControllerImpl(context),
+                accessPointController,
                 new DataUsageController(context),
                 new SubscriptionDefaults(),
                 deviceProvisionedController,
