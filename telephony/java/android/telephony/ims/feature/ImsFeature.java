@@ -337,7 +337,7 @@ public abstract class ImsFeature {
     /**
      * @hide
      */
-    public final void initialize(Context context, int slotId) {
+    public void initialize(Context context, int slotId) {
         mContext = context;
         mSlotId = slotId;
     }
