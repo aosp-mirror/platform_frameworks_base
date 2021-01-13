@@ -45,6 +45,7 @@ public:
             const ::android::sp<::android::content::pm::IDataLoaderStatusListener>& statusListener,
             const ::android::os::incremental::StorageHealthCheckParams& healthCheckParams,
             const ::android::sp<IStorageHealthListener>& healthListener,
+            const ::std::vector<::android::os::incremental::PerUidReadTimeouts>& perUidReadTimeouts,
             int32_t* _aidl_return) final;
     binder::Status createLinkedStorage(const std::string& path, int32_t otherStorageId,
                                        int32_t createMode, int32_t* _aidl_return) final;
@@ -77,7 +78,7 @@ public:
                                    std::vector<uint8_t>* _aidl_return) final;
     binder::Status startLoading(int32_t storageId, bool* _aidl_return) final;
     binder::Status deleteStorage(int32_t storageId) final;
-    binder::Status disableReadLogs(int32_t storageId) final;
+    binder::Status disallowReadLogs(int32_t storageId) final;
     binder::Status configureNativeBinaries(int32_t storageId, const std::string& apkFullPath,
                                            const std::string& libDirRelativePath,
                                            const std::string& abi, bool extractNativeLibs,

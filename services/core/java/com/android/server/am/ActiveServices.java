@@ -170,6 +170,7 @@ public final class ActiveServices {
     public static final int FGS_FEATURE_ALLOWED_BY_PROCESS_RECORD = 19;
     public static final int FGS_FEATURE_ALLOWED_BY_EXEMPTED_PACKAGES = 20;
     public static final int FGS_FEATURE_ALLOWED_BY_ACTIVITY_STARTER = 21;
+    public static final int FGS_FEATURE_ALLOWED_BY_COMPANION_APP = 22;
 
     @IntDef(flag = true, prefix = { "FGS_FEATURE_" }, value = {
             FGS_FEATURE_DENIED,
@@ -192,7 +193,8 @@ public final class ActiveServices {
             FGS_FEATURE_ALLOWED_BY_DEVICE_DEMO_MODE,
             FGS_FEATURE_ALLOWED_BY_PROCESS_RECORD,
             FGS_FEATURE_ALLOWED_BY_EXEMPTED_PACKAGES,
-            FGS_FEATURE_ALLOWED_BY_ACTIVITY_STARTER
+            FGS_FEATURE_ALLOWED_BY_ACTIVITY_STARTER,
+            FGS_FEATURE_ALLOWED_BY_COMPANION_APP
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FgsFeatureRetCode {}
@@ -5379,6 +5381,14 @@ public final class ActiveServices {
             }
         }
 
+        if (ret == FGS_FEATURE_DENIED) {
+            final boolean isCompanionApp = mAm.mInternal.isAssociatedCompanionApp(
+                    UserHandle.getUserId(callingUid), callingUid);
+            if (isCompanionApp) {
+                ret = FGS_FEATURE_ALLOWED_BY_COMPANION_APP;
+            }
+        }
+
         final String debugInfo =
                 "[callingPackage: " + callingPackage
                         + "; callingUid: " + callingUid
@@ -5462,6 +5472,8 @@ public final class ActiveServices {
                 return "FGS_FEATURE_ALLOWED_BY_EXEMPTED_PACKAGES";
             case FGS_FEATURE_ALLOWED_BY_ACTIVITY_STARTER:
                 return "ALLOWED_BY_ACTIVITY_STARTER";
+            case FGS_FEATURE_ALLOWED_BY_COMPANION_APP:
+                return "ALLOWED_BY_COMPANION_APP";
             default:
                 return "";
         }

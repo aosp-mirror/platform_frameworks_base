@@ -171,6 +171,7 @@ public final class NetworkCapabilities implements Parcelable {
             NET_CAPABILITY_PARTIAL_CONNECTIVITY,
             NET_CAPABILITY_TEMPORARILY_NOT_METERED,
             NET_CAPABILITY_OEM_PRIVATE,
+            NET_CAPABILITY_VEHICLE_INTERNAL,
     })
     public @interface NetCapability { }
 
@@ -357,8 +358,17 @@ public final class NetworkCapabilities implements Parcelable {
     @SystemApi
     public static final int NET_CAPABILITY_OEM_PRIVATE = 26;
 
+    /**
+     * Indicates this is an internal vehicle network, meant to communicate with other
+     * automotive systems.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int NET_CAPABILITY_VEHICLE_INTERNAL = 27;
+
     private static final int MIN_NET_CAPABILITY = NET_CAPABILITY_MMS;
-    private static final int MAX_NET_CAPABILITY = NET_CAPABILITY_OEM_PRIVATE;
+    private static final int MAX_NET_CAPABILITY = NET_CAPABILITY_VEHICLE_INTERNAL;
 
     /**
      * Network capabilities that are expected to be mutable, i.e., can change while a particular
@@ -401,15 +411,16 @@ public final class NetworkCapabilities implements Parcelable {
      */
     @VisibleForTesting
     /* package */ static final long RESTRICTED_CAPABILITIES =
-            (1 << NET_CAPABILITY_CBS) |
-            (1 << NET_CAPABILITY_DUN) |
-            (1 << NET_CAPABILITY_EIMS) |
-            (1 << NET_CAPABILITY_FOTA) |
-            (1 << NET_CAPABILITY_IA) |
-            (1 << NET_CAPABILITY_IMS) |
-            (1 << NET_CAPABILITY_RCS) |
-            (1 << NET_CAPABILITY_XCAP) |
-            (1 << NET_CAPABILITY_MCX);
+            (1 << NET_CAPABILITY_CBS)
+            | (1 << NET_CAPABILITY_DUN)
+            | (1 << NET_CAPABILITY_EIMS)
+            | (1 << NET_CAPABILITY_FOTA)
+            | (1 << NET_CAPABILITY_IA)
+            | (1 << NET_CAPABILITY_IMS)
+            | (1 << NET_CAPABILITY_MCX)
+            | (1 << NET_CAPABILITY_RCS)
+            | (1 << NET_CAPABILITY_VEHICLE_INTERNAL)
+            | (1 << NET_CAPABILITY_XCAP);
 
     /**
      * Capabilities that force network to be restricted.
@@ -1939,6 +1950,7 @@ public final class NetworkCapabilities implements Parcelable {
             case NET_CAPABILITY_PARTIAL_CONNECTIVITY: return "PARTIAL_CONNECTIVITY";
             case NET_CAPABILITY_TEMPORARILY_NOT_METERED:    return "TEMPORARILY_NOT_METERED";
             case NET_CAPABILITY_OEM_PRIVATE:          return "OEM_PRIVATE";
+            case NET_CAPABILITY_VEHICLE_INTERNAL:     return "NET_CAPABILITY_VEHICLE_INTERNAL";
             default:                                  return Integer.toString(capability);
         }
     }

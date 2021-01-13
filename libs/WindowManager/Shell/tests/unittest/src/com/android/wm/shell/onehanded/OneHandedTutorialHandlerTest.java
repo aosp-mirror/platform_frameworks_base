@@ -19,12 +19,14 @@ package com.android.wm.shell.onehanded;
 import static org.mockito.Mockito.verify;
 
 import android.content.om.IOverlayManager;
+import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 
 import org.junit.Before;
@@ -35,12 +37,12 @@ import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
 public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
     @Mock
     OneHandedTouchHandler mTouchHandler;
     OneHandedTutorialHandler mTutorialHandler;
     OneHandedGestureHandler mGestureHandler;
+    OneHandedTimeoutHandler mTimeoutHandler;
     OneHandedController mOneHandedController;
     @Mock
     DisplayController mMockDisplayController;
@@ -52,12 +54,18 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
     IOverlayManager mMockOverlayManager;
     @Mock
     TaskStackListenerImpl mMockTaskStackListener;
+    @Mock
+    ShellExecutor mMockShellMainExecutor;
+    @Mock
+    Handler mMockShellMainHandler;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mTutorialHandler = new OneHandedTutorialHandler(mContext);
-        mGestureHandler = new OneHandedGestureHandler(mContext, mMockDisplayController);
+        mTutorialHandler = new OneHandedTutorialHandler(mContext, mMockShellMainExecutor);
+        mTimeoutHandler = new OneHandedTimeoutHandler(mMockShellMainExecutor);
+        mGestureHandler = new OneHandedGestureHandler(mContext, mMockDisplayController,
+                mMockShellMainExecutor);
         mOneHandedController = new OneHandedController(
                 getContext(),
                 mMockDisplayController,
@@ -66,8 +74,11 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
                 mTouchHandler,
                 mTutorialHandler,
                 mGestureHandler,
+                mTimeoutHandler,
                 mMockOverlayManager,
-                mMockTaskStackListener);
+                mMockTaskStackListener,
+                mMockShellMainExecutor,
+                mMockShellMainHandler);
     }
 
     @Test

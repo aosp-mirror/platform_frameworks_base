@@ -1,0 +1,6 @@
+# Bug component: 24939
+
+include /graphics/java/android/graphics/OWNERS
+
+per-file Font* = file:/graphics/java/android/graphics/fonts/OWNERS
+per-file Typeface* = file:/graphics/java/android/graphics/fonts/OWNERS

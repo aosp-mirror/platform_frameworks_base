@@ -42,7 +42,6 @@ import com.android.wm.shell.ShellInitImpl;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.TaskViewFactory;
 import com.android.wm.shell.TaskViewFactoryController;
-import com.android.wm.shell.Transitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.bubbles.BubbleController;
@@ -71,6 +70,7 @@ import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.phone.PipAppOpsListener;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
+import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
 
@@ -110,9 +110,9 @@ public abstract class WMShellBaseModule {
     @ShellMainThread
     public static Handler provideShellMainHandler(@Main Handler sysuiMainHandler) {
         if (ENABLE_SHELL_MAIN_THREAD) {
-             HandlerThread shellMainThread = new HandlerThread("wmshell.main");
-             shellMainThread.start();
-             return shellMainThread.getThreadHandler();
+             HandlerThread mainThread = new HandlerThread("wmshell.main");
+             mainThread.start();
+             return mainThread.getThreadHandler();
         }
         return sysuiMainHandler;
     }
@@ -123,10 +123,10 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     @ShellMainThread
-    public static ShellExecutor provideShellMainExecutor(@ShellMainThread Handler shellMainHandler,
+    public static ShellExecutor provideShellMainExecutor(@ShellMainThread Handler mainHandler,
             @Main ShellExecutor sysuiMainExecutor) {
         if (ENABLE_SHELL_MAIN_THREAD) {
-            return new HandlerExecutor(shellMainHandler);
+            return new HandlerExecutor(mainHandler);
         }
         return sysuiMainExecutor;
     }
@@ -176,14 +176,16 @@ public abstract class WMShellBaseModule {
             Optional<LegacySplitScreen> legacySplitScreenOptional,
             Optional<AppPairs> appPairsOptional,
             FullscreenTaskListener fullscreenTaskListener,
-            @ShellMainThread ShellExecutor shellMainExecutor) {
+            Transitions transitions,
+            @ShellMainThread ShellExecutor mainExecutor) {
         return ShellInitImpl.create(displayImeController,
                 dragAndDropController,
                 shellTaskOrganizer,
                 legacySplitScreenOptional,
                 appPairsOptional,
                 fullscreenTaskListener,
-                shellMainExecutor);
+                transitions,
+                mainExecutor);
     }
 
     /**
@@ -199,10 +201,10 @@ public abstract class WMShellBaseModule {
             Optional<OneHanded> oneHandedOptional,
             Optional<HideDisplayCutout> hideDisplayCutout,
             Optional<AppPairs> appPairsOptional,
-            @ShellMainThread ShellExecutor shellMainExecutor) {
+            @ShellMainThread ShellExecutor mainExecutor) {
         return Optional.of(ShellCommandHandlerImpl.create(shellTaskOrganizer,
                 legacySplitScreenOptional, pipOptional, oneHandedOptional, hideDisplayCutout,
-                appPairsOptional, shellMainExecutor));
+                appPairsOptional, mainExecutor));
     }
 
     @WMSingleton
@@ -214,8 +216,8 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static DisplayController provideDisplayController(Context context,
-            IWindowManager wmService, @ShellMainThread ShellExecutor shellMainExecutor) {
-        return new DisplayController(context, wmService, shellMainExecutor);
+            IWindowManager wmService, @ShellMainThread ShellExecutor mainExecutor) {
+        return new DisplayController(context, wmService, mainExecutor);
     }
 
     @WMSingleton
@@ -234,8 +236,8 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static WindowManagerShellWrapper provideWindowManagerShellWrapper(
-            @ShellMainThread ShellExecutor shellMainExecutor) {
-        return new WindowManagerShellWrapper(shellMainExecutor);
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return new WindowManagerShellWrapper(mainExecutor);
     }
 
     @WMSingleton
@@ -275,8 +277,8 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static SyncTransactionQueue provideSyncTransactionQueue(TransactionPool pool,
-            @ShellMainThread ShellExecutor shellMainExecutor) {
-        return new SyncTransactionQueue(pool, shellMainExecutor);
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return new SyncTransactionQueue(pool, mainExecutor);
     }
 
     @WMSingleton
@@ -297,8 +299,8 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static TaskStackListenerImpl providerTaskStackListenerImpl(
-            @ShellMainThread Handler shellMainHandler) {
-        return new TaskStackListenerImpl(shellMainHandler);
+            @ShellMainThread Handler mainHandler) {
+        return new TaskStackListenerImpl(mainHandler);
     }
 
     @BindsOptionalOf
@@ -317,20 +319,22 @@ public abstract class WMShellBaseModule {
             LauncherApps launcherApps,
             UiEventLogger uiEventLogger,
             ShellTaskOrganizer organizer,
-            @ShellMainThread ShellExecutor shellMainExecutor) {
+            @ShellMainThread ShellExecutor mainExecutor) {
         return Optional.of(BubbleController.create(context, null /* synchronizer */,
                 floatingContentCoordinator, statusBarService, windowManager,
                 windowManagerShellWrapper, launcherApps, uiEventLogger, organizer,
-                shellMainExecutor));
+                mainExecutor));
     }
 
+    // Needs the shell main handler for ContentObserver callbacks
     @WMSingleton
     @Provides
     static Optional<OneHanded> provideOneHandedController(Context context,
             DisplayController displayController, TaskStackListenerImpl taskStackListener,
-            @ShellMainThread ShellExecutor mainExecutor) {
+            @ShellMainThread ShellExecutor mainExecutor,
+            @ShellMainThread Handler mainHandler) {
         return Optional.ofNullable(OneHandedController.create(context, displayController,
-                taskStackListener, mainExecutor));
+                taskStackListener, mainExecutor, mainHandler));
     }
 
     @WMSingleton

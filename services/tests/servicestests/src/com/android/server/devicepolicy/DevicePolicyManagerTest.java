@@ -1628,6 +1628,33 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 )), eq(user));
     }
 
+    @Test
+    public void testRemoveCredentialManagementApp() throws Exception {
+        final String packageName = "com.test.cred.mng";
+        Intent intent = new Intent(Intent.ACTION_PACKAGE_REMOVED);
+        intent.setData(Uri.parse("package:" + packageName));
+        dpms.mReceiver.setPendingResult(
+                new BroadcastReceiver.PendingResult(Activity.RESULT_OK,
+                        "resultData",
+                        /* resultExtras= */ null,
+                        BroadcastReceiver.PendingResult.TYPE_UNREGISTERED,
+                        /* ordered= */ true,
+                        /* sticky= */ false,
+                        /* token= */ null,
+                        CALLER_USER_HANDLE,
+                        /* flags= */ 0));
+        when(getServices().keyChainConnection.getService().hasCredentialManagementApp())
+                .thenReturn(true);
+        when(getServices().keyChainConnection.getService().getCredentialManagementAppPackageName())
+                .thenReturn(packageName);
+
+        dpms.mReceiver.onReceive(mContext, intent);
+
+        flushTasks(dpms);
+        verify(getServices().keyChainConnection.getService()).hasCredentialManagementApp();
+        verify(getServices().keyChainConnection.getService()).removeCredentialManagementApp();
+    }
+
     /**
      * Simple test for delegate set/get and general delegation. Tests verifying that delegated
      * privileges can acually be exercised by a delegate are not covered here.
@@ -6889,6 +6916,35 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpm.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_HIGH);
         assertThat(dpm.getPasswordQuality(admin1)).isEqualTo(
                 DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
+    }
+
+    @Test
+    public void testSetRequiredPasswordComplexityFailsWithQualityOnParent() throws Exception {
+        final int managedProfileUserId = CALLER_USER_HANDLE;
+        final int managedProfileAdminUid =
+                UserHandle.getUid(managedProfileUserId, DpmMockContext.SYSTEM_UID);
+        mContext.binder.callingUid = managedProfileAdminUid;
+        addManagedProfile(admin1, managedProfileAdminUid, admin1, VERSION_CODES.R);
+
+        parentDpm.setPasswordQuality(admin1, DevicePolicyManager.PASSWORD_QUALITY_COMPLEX);
+
+        assertThrows(IllegalStateException.class,
+                () -> dpm.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_HIGH));
+    }
+
+    @Test
+    public void testSetQualityOnParentFailsWithComplexityOnProfile() throws Exception {
+        final int managedProfileUserId = CALLER_USER_HANDLE;
+        final int managedProfileAdminUid =
+                UserHandle.getUid(managedProfileUserId, DpmMockContext.SYSTEM_UID);
+        mContext.binder.callingUid = managedProfileAdminUid;
+        addManagedProfile(admin1, managedProfileAdminUid, admin1, VERSION_CODES.R);
+
+        dpm.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_HIGH);
+
+        assertThrows(IllegalStateException.class,
+                () -> parentDpm.setPasswordQuality(admin1,
+                        DevicePolicyManager.PASSWORD_QUALITY_COMPLEX));
     }
 
     private void setUserUnlocked(int userHandle, boolean unlocked) {

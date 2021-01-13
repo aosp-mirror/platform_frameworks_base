@@ -99,9 +99,10 @@ sp<FrontendClient> TunerClient::openFrontend(int frontendHandle) {
     }
 
     if (mTuner != NULL) {
-        sp<IFrontend> hidlFrontend = openHidlFrontendByHandle(frontendHandle);
+        int id = getResourceIdFromHandle(frontendHandle, FRONTEND);
+        sp<IFrontend> hidlFrontend = openHidlFrontendById(id);
         if (hidlFrontend != NULL) {
-            sp<FrontendClient> frontendClient = new FrontendClient(NULL, frontendHandle);
+            sp<FrontendClient> frontendClient = new FrontendClient(NULL, id);
             frontendClient->setHidlFrontend(hidlFrontend);
             return frontendClient;
         }
@@ -160,10 +161,96 @@ sp<DemuxClient> TunerClient::openDemux(int /*demuxHandle*/) {
     if (mTuner != NULL) {
         // TODO: pending aidl interface
         sp<DemuxClient> demuxClient = new DemuxClient();
-        sp<IDemux> hidlDemux = openHidlDemux();
+        int demuxId;
+        sp<IDemux> hidlDemux = openHidlDemux(demuxId);
         if (hidlDemux != NULL) {
             demuxClient->setHidlDemux(hidlDemux);
+            demuxClient->setId(demuxId);
             return demuxClient;
+        }
+    }
+
+    return NULL;
+}
+
+shared_ptr<DemuxCapabilities> TunerClient::getDemuxCaps() {
+    // pending aidl interface
+
+    if (mTuner != NULL) {
+        Result res;
+        DemuxCapabilities caps;
+        mTuner->getDemuxCaps([&](Result r, const DemuxCapabilities& demuxCaps) {
+            caps = demuxCaps;
+            res = r;
+        });
+        if (res == Result::SUCCESS) {
+            return make_shared<DemuxCapabilities>(caps);
+        }
+    }
+
+    return NULL;
+}
+
+sp<DescramblerClient> TunerClient::openDescrambler(int /*descramblerHandle*/) {
+    if (mTunerService != NULL) {
+        // TODO: handle error code
+        /*shared_ptr<ITunerDescrambler> tunerDescrambler;
+        mTunerService->openDescrambler(demuxHandle, &tunerDescrambler);
+        return new DescramblerClient(tunerDescrambler);*/
+    }
+
+    if (mTuner != NULL) {
+        // TODO: pending aidl interface
+        sp<DescramblerClient> descramblerClient = new DescramblerClient();
+        sp<IDescrambler> hidlDescrambler = openHidlDescrambler();
+        if (hidlDescrambler != NULL) {
+            descramblerClient->setHidlDescrambler(hidlDescrambler);
+            return descramblerClient;
+        }
+    }
+
+    return NULL;}
+
+sp<LnbClient> TunerClient::openLnb(int lnbHandle) {
+    if (mTunerService != NULL) {
+        // TODO: handle error code
+        /*shared_ptr<ITunerLnb> tunerLnb;
+        mTunerService->openLnb(demuxHandle, &tunerLnb);
+        return new LnbClient(tunerLnb);*/
+    }
+
+    if (mTuner != NULL) {
+        int id = getResourceIdFromHandle(lnbHandle, LNB);
+        // TODO: pending aidl interface
+        sp<LnbClient> lnbClient = new LnbClient();
+        sp<ILnb> hidlLnb = openHidlLnbById(id);
+        if (hidlLnb != NULL) {
+            lnbClient->setHidlLnb(hidlLnb);
+            lnbClient->setId(id);
+            return lnbClient;
+        }
+    }
+
+    return NULL;
+}
+
+sp<LnbClient> TunerClient::openLnbByName(string lnbName) {
+    if (mTunerService != NULL) {
+        // TODO: handle error code
+        /*shared_ptr<ITunerLnb> tunerLnb;
+        mTunerService->openLnbByName(lnbName, &tunerLnb);
+        return new LnbClient(tunerLnb);*/
+    }
+
+    if (mTuner != NULL) {
+        // TODO: pending aidl interface
+        sp<LnbClient> lnbClient = new LnbClient();
+        LnbId id;
+        sp<ILnb> hidlLnb = openHidlLnbByName(lnbName, id);
+        if (hidlLnb != NULL) {
+            lnbClient->setHidlLnb(hidlLnb);
+            lnbClient->setId(id);
+            return lnbClient;
         }
     }
 
@@ -193,10 +280,9 @@ sp<ITuner> TunerClient::getHidlTuner() {
      return mTuner;
 }
 
-sp<IFrontend> TunerClient::openHidlFrontendByHandle(int frontendHandle) {
+sp<IFrontend> TunerClient::openHidlFrontendById(int id) {
     sp<IFrontend> fe;
     Result res;
-    uint32_t id = getResourceIdFromHandle(frontendHandle);
     mTuner->openFrontendById(id, [&](Result r, const sp<IFrontend>& frontend) {
         fe = frontend;
         res = r;
@@ -217,12 +303,13 @@ Result TunerClient::getHidlFrontendInfo(int id, FrontendInfo& feInfo) {
     return res;
 }
 
-sp<IDemux> TunerClient::openHidlDemux() {
+sp<IDemux> TunerClient::openHidlDemux(int& demuxId) {
     sp<IDemux> demux;
     Result res;
 
-    mTuner->openDemux([&](Result result, uint32_t /*id*/, const sp<IDemux>& demuxSp) {
+    mTuner->openDemux([&](Result result, uint32_t id, const sp<IDemux>& demuxSp) {
         demux = demuxSp;
+        demuxId = id;
         res = result;
     });
     if (res != Result::SUCCESS || demux == nullptr) {
@@ -230,6 +317,53 @@ sp<IDemux> TunerClient::openHidlDemux() {
         return NULL;
     }
     return demux;
+}
+
+sp<ILnb> TunerClient::openHidlLnbById(int id) {
+    sp<ILnb> lnb;
+    Result res;
+
+    mTuner->openLnbById(id, [&](Result r, const sp<ILnb>& lnbSp) {
+        res = r;
+        lnb = lnbSp;
+    });
+    if (res != Result::SUCCESS || lnb == nullptr) {
+        ALOGE("Failed to open lnb by id");
+        return NULL;
+    }
+    return lnb;
+}
+
+sp<ILnb> TunerClient::openHidlLnbByName(string name, LnbId& lnbId) {
+    sp<ILnb> lnb;
+    Result res;
+
+    mTuner->openLnbByName(name, [&](Result r, LnbId id, const sp<ILnb>& lnbSp) {
+        res = r;
+        lnb = lnbSp;
+        lnbId = id;
+    });
+    if (res != Result::SUCCESS || lnb == nullptr) {
+        ALOGE("Failed to open lnb by name");
+        return NULL;
+    }
+    return lnb;
+}
+
+sp<IDescrambler> TunerClient::openHidlDescrambler() {
+    sp<IDescrambler> descrambler;
+    Result res;
+
+    mTuner->openDescrambler([&](Result r, const sp<IDescrambler>& descramblerSp) {
+        res = r;
+        descrambler = descramblerSp;
+    });
+
+    if (res != Result::SUCCESS || descrambler == NULL) {
+        return NULL;
+    }
+
+    return descrambler;
 }
 
 FrontendInfo TunerClient::FrontendInfoAidlToHidl(TunerServiceFrontendInfo aidlFrontendInfo) {
@@ -245,5 +379,16 @@ FrontendInfo TunerClient::FrontendInfoAidlToHidl(TunerServiceFrontendInfo aidlFr
     // TODO: handle Frontend caps
 
     return hidlFrontendInfo;
+}
+
+int TunerClient::getResourceIdFromHandle(int handle, int /*resourceType*/) {
+    return (handle & 0x00ff0000) >> 16;
+}
+
+int TunerClient::getResourceHandleFromId(int id, int resourceType) {
+    // TODO: build up randomly generated id to handle mapping
+    return (resourceType & 0x000000ff) << 24
+            | (id << 16)
+            | (mResourceRequestCount++ & 0xffff);
 }
 }  // namespace android

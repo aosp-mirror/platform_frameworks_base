@@ -59,7 +59,6 @@ public final class SetSchemaRequest {
 
     /**
      * Returns the set of schema types that have opted out of being visible on system UI surfaces.
-     * @hide
      */
     @NonNull
     public Set<String> getSchemasNotVisibleToSystemUi() {
@@ -72,7 +71,6 @@ public final class SetSchemaRequest {
      * certificate.
      *
      * <p>This method is inefficient to call repeatedly.
-     * @hide
      */
     @NonNull
     public Map<String, Set<PackageIdentifier>> getSchemasVisibleToPackages() {
@@ -141,7 +139,6 @@ public final class SetSchemaRequest {
          *
          * @param schemaType The schema type to set visibility on.
          * @param visible Whether the {@code schemaType} will be visible or not.
-         * @hide
          */
         // Merged list available from getSchemasNotVisibleToSystemUi
         @SuppressLint("MissingGetterMatchingBuilder")
@@ -165,7 +162,6 @@ public final class SetSchemaRequest {
          * @param schemaType The schema type to set visibility on.
          * @param visible Whether the {@code schemaType} will be visible or not.
          * @param packageIdentifier Represents the package that will be granted visibility.
-         * @hide
          */
         // Merged list available from getSchemasVisibleToPackages
         @SuppressLint("MissingGetterMatchingBuilder")

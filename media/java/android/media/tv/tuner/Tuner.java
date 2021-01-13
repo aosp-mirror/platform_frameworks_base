@@ -351,7 +351,6 @@ public class Tuner implements AutoCloseable  {
         mUserId = ActivityManager.getCurrentUser();
 
         setFrontendInfoList();
-        setLnbIds();
     }
 
     private void setFrontendInfoList() {
@@ -403,14 +402,6 @@ public class Tuner implements AutoCloseable  {
     /** @hide */
     public List<Integer> getFrontendIds() {
         return nativeGetFrontendIds();
-    }
-
-    private void setLnbIds() {
-        int[] ids = nativeGetLnbIds();
-        if (ids == null) {
-            return;
-        }
-        mTunerResourceManager.setLnbInfoList(ids);
     }
 
     /**
@@ -561,7 +552,7 @@ public class Tuner implements AutoCloseable  {
     private native int nativeStopTune();
     private native int nativeScan(int settingsType, FrontendSettings settings, int scanType);
     private native int nativeStopScan();
-    private native int nativeSetLnb(int lnbId);
+    private native int nativeSetLnb(Lnb lnb);
     private native int nativeSetLna(boolean enable);
     private native FrontendStatus nativeGetFrontendStatus(int[] statusTypes);
     private native Integer nativeGetAvSyncHwId(Filter filter);
@@ -574,7 +565,6 @@ public class Tuner implements AutoCloseable  {
     private native Filter nativeOpenFilter(int type, int subType, long bufferSize);
     private native TimeFilter nativeOpenTimeFilter();
 
-    private native int[] nativeGetLnbIds();
     private native Lnb nativeOpenLnbByHandle(int handle);
     private native Lnb nativeOpenLnbByName(String name);
 
@@ -835,7 +825,7 @@ public class Tuner implements AutoCloseable  {
      */
     @Result
     private int setLnb(@NonNull Lnb lnb) {
-        return nativeSetLnb(lnb.mId);
+        return nativeSetLnb(lnb);
     }
 
     /**

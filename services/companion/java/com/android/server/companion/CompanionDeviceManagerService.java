@@ -33,6 +33,7 @@ import android.annotation.CheckResult;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
+import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.app.role.RoleManager;
@@ -53,6 +54,7 @@ import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
 import android.net.NetworkPolicyManager;
 import android.os.Binder;
@@ -111,7 +113,6 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -169,6 +170,10 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     @GuardedBy("mLock")
     private @Nullable SparseArray<Set<Association>> mCachedAssociations = new SparseArray<>();
 
+    ActivityTaskManagerInternal mAtmInternal;
+    ActivityManagerInternal mAmInternal;
+    PackageManagerInternal mPackageManagerInternal;
+
     public CompanionDeviceManagerService(Context context) {
         super(context);
         mImpl = new CompanionDeviceManagerImpl();
@@ -176,6 +181,9 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         mRoleManager = context.getSystemService(RoleManager.class);
         mAppOpsManager = IAppOpsService.Stub.asInterface(
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
+        mAtmInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
+        mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
+        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
 
         Intent serviceIntent = new Intent().setComponent(SERVICE_TO_BIND_TO);
         mServiceConnectors = new PerUser<ServiceConnector<ICompanionDeviceDiscoveryService>>() {
@@ -236,15 +244,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         if (associations == null || associations.isEmpty()) {
             return;
         }
-        Set<String> companionAppPackages = new HashSet<>();
-        for (Association association : associations) {
-            companionAppPackages.add(association.getPackageName());
-        }
-        ActivityTaskManagerInternal atmInternal = LocalServices.getService(
-                ActivityTaskManagerInternal.class);
-        if (atmInternal != null) {
-            atmInternal.setCompanionAppPackages(userHandle, companionAppPackages);
-        }
+        updateAtm(userHandle, associations);
 
         BackgroundThread.getHandler().sendMessageDelayed(
                 obtainMessage(CompanionDeviceManagerService::maybeGrantAutoRevokeExemptions, this),
@@ -727,12 +727,6 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             final Set<Association> old = getAllAssociations(userId);
             Set<Association> associations = new ArraySet<>(old);
             associations = update.apply(associations);
-
-            Set<String> companionAppPackages = new HashSet<>();
-            for (Association association : associations) {
-                companionAppPackages.add(association.getPackageName());
-            }
-
             if (DEBUG) {
                 Slog.i(LOG_TAG, "Updating associations: " + old + "  -->  " + associations);
             }
@@ -741,9 +735,25 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                     CompanionDeviceManagerService::persistAssociations,
                     this, associations, userId));
 
-            ActivityTaskManagerInternal atmInternal = LocalServices.getService(
-                    ActivityTaskManagerInternal.class);
-            atmInternal.setCompanionAppPackages(userId, companionAppPackages);
+            updateAtm(userId, associations);
+        }
+    }
+
+    private void updateAtm(int userId, Set<Association> associations) {
+        final Set<Integer> companionAppUids = new ArraySet<>();
+        for (Association association : associations) {
+            final int uid = mPackageManagerInternal.getPackageUid(association.getPackageName(),
+                    0, userId);
+            if (uid >= 0) {
+                companionAppUids.add(uid);
+            }
+        }
+        if (mAtmInternal != null) {
+            mAtmInternal.setCompanionAppUids(userId, companionAppUids);
+        }
+        if (mAmInternal != null) {
+            // Make a copy of companionAppUids and send it to ActivityManager.
+            mAmInternal.setCompanionAppUids(userId, new ArraySet<>(companionAppUids));
         }
     }
 

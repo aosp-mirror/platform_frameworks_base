@@ -174,7 +174,6 @@ import android.app.ProfilerInfo;
 import android.app.WaitResult;
 import android.app.backup.BackupManager.OperationType;
 import android.app.backup.IBackupManager;
-import android.app.compat.CompatChanges;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStatsManager;
@@ -572,6 +571,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     String mDeviceOwnerName;
 
     private int mDeviceOwnerUid = Process.INVALID_UID;
+
+    // A map userId and all its companion app uids
+    private final Map<Integer, Set<Integer>> mCompanionAppUidsMap = new ArrayMap<>();
 
     final UserController mUserController;
     @VisibleForTesting
@@ -13707,34 +13709,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                             false, false, userId, "package unstartable");
                     break;
                 case Intent.ACTION_CLOSE_SYSTEM_DIALOGS:
-                    if (!canCloseSystemDialogs(callingPid, callingUid, callerApp)) {
-                        // The app can't close system dialogs, throw only if it targets S+
-                        if (CompatChanges.isChangeEnabled(
-                                ActivityManager.LOCK_DOWN_CLOSE_SYSTEM_DIALOGS, callingUid)) {
-                            throw new SecurityException(
-                                    "Permission Denial: " + Intent.ACTION_CLOSE_SYSTEM_DIALOGS
-                                            + " broadcast from " + callerPackage + " (pid="
-                                            + callingPid + ", uid=" + callingUid + ")"
-                                            + " requires "
-                                            + permission.BROADCAST_CLOSE_SYSTEM_DIALOGS + ".");
-                        } else if (CompatChanges.isChangeEnabled(
-                                ActivityManager.DROP_CLOSE_SYSTEM_DIALOGS, callingUid)) {
-                            Slog.w(TAG, "Permission Denial: " + intent.getAction()
-                                    + " broadcast from " + callerPackage + " (pid=" + callingPid
-                                    + ", uid=" + callingUid + ")"
-                                    + " requires "
-                                    + permission.BROADCAST_CLOSE_SYSTEM_DIALOGS
-                                    + ", dropping broadcast.");
-                            // Returning success seems to be the pattern here
-                            return ActivityManager.BROADCAST_SUCCESS;
-                        } else {
-                            Slog.w(TAG, intent.getAction()
-                                    + " broadcast from " + callerPackage + " (pid=" + callingPid
-                                    + ", uid=" + callingUid + ")"
-                                    + " will require  "
-                                    + permission.BROADCAST_CLOSE_SYSTEM_DIALOGS
-                                    + " in future builds.");
-                        }
+                    if (!mAtmInternal.checkCanCloseSystemDialogs(callingPid, callingUid,
+                            callerPackage)) {
+                        // Returning success seems to be the pattern here
+                        return ActivityManager.BROADCAST_SUCCESS;
                     }
                     break;
             }
@@ -14027,39 +14005,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         return ActivityManager.BROADCAST_SUCCESS;
-    }
-
-    private boolean canCloseSystemDialogs(int pid, int uid, @Nullable ProcessRecord callerApp) {
-        if (checkPermission(permission.BROADCAST_CLOSE_SYSTEM_DIALOGS, pid, uid)
-                == PERMISSION_GRANTED) {
-            return true;
-        }
-        if (callerApp == null) {
-            synchronized (mPidsSelfLocked) {
-                callerApp = mPidsSelfLocked.get(pid);
-            }
-        }
-
-        if (callerApp != null) {
-            // Check if the instrumentation of the process has the permission. This covers the usual
-            // test started from the shell (which has the permission) case. This is needed for apps
-            // targeting SDK level < S but we are also allowing for targetSdk S+ as a convenience to
-            // avoid breaking a bunch of existing tests and asking them to adopt shell permissions
-            // to do this.
-            ActiveInstrumentation instrumentation = callerApp.getActiveInstrumentation();
-            if (instrumentation != null && checkPermission(
-                    permission.BROADCAST_CLOSE_SYSTEM_DIALOGS, -1, instrumentation.mSourceUid)
-                    == PERMISSION_GRANTED) {
-                return true;
-            }
-            // This is the notification trampoline use-case for example, where apps use Intent.ACSD
-            // to close the shade prior to starting an activity.
-            WindowProcessController wmApp = callerApp.getWindowProcessController();
-            if (wmApp.canCloseSystemDialogsByToken()) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -16781,6 +16726,22 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (ActivityManagerService.this) {
                 return uid >= 0 && mDeviceOwnerUid == uid;
             }
+        }
+
+        @Override
+        public void setCompanionAppUids(int userId, Set<Integer> companionAppUids) {
+            synchronized (ActivityManagerService.this) {
+                mCompanionAppUidsMap.put(userId, companionAppUids);
+            }
+        }
+
+        @Override
+        public boolean isAssociatedCompanionApp(int userId, int uid) {
+            final Set<Integer> allUids = mCompanionAppUidsMap.get(userId);
+            if (allUids == null) {
+                return false;
+            }
+            return allUids.contains(uid);
         }
 
         @Override

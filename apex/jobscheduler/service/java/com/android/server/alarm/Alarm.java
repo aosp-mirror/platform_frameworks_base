@@ -42,7 +42,7 @@ import java.util.Date;
  */
 class Alarm {
     @VisibleForTesting
-    public static final int NUM_POLICIES = 3;
+    public static final int NUM_POLICIES = 4;
     /**
      * Index used to store the time the alarm was requested to expire. To be used with
      * {@link #setPolicyElapsed(int, long)}.
@@ -58,6 +58,12 @@ class Alarm {
      * To be used with {@link #setPolicyElapsed(int, long)}.
      */
     public static final int DEVICE_IDLE_POLICY_INDEX = 2;
+
+    /**
+     * Index used to store the earliest time the alarm can expire based on battery saver policy.
+     * To be used with {@link #setPolicyElapsed(int, long)}.
+     */
+    public static final int BATTERY_SAVER_POLICY_INDEX = 3;
 
     public final int type;
     /**
@@ -223,6 +229,8 @@ class Alarm {
                 return "app_standby";
             case DEVICE_IDLE_POLICY_INDEX:
                 return "device_idle";
+            case BATTERY_SAVER_POLICY_INDEX:
+                return "battery_saver";
             default:
                 return "--unknown--";
         }

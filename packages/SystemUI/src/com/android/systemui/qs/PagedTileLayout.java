@@ -8,6 +8,7 @@ import android.animation.PropertyValuesHolder;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.AttributeSet;
@@ -47,7 +48,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     };
 
     private final ArrayList<TileRecord> mTiles = new ArrayList<>();
-    private final ArrayList<TilePage> mPages = new ArrayList<>();
+    private final ArrayList<TileLayout> mPages = new ArrayList<>();
 
     private PageIndicator mPageIndicator;
     private float mPageIndicatorPosition;
@@ -71,6 +72,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private int mMaxColumns = TileLayout.NO_MAX_COLUMNS;
 
     private boolean mShowLabels = true;
+    private final boolean mSideLabels;
 
     public PagedTileLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -81,13 +83,18 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         mLayoutOrientation = getResources().getConfiguration().orientation;
         mLayoutDirection = getLayoutDirection();
         mClippingRect = new Rect();
+
+        TypedArray t = context.getTheme().obtainStyledAttributes(
+                attrs, R.styleable.PagedTileLayout, 0, 0);
+        mSideLabels = t.getBoolean(R.styleable.PagedTileLayout_sideLabels, false);
+        t.recycle();
     }
     private int mLastMaxHeight = -1;
 
     @Override
     public void setShowLabels(boolean show) {
         mShowLabels = show;
-        for (TilePage p : mPages) {
+        for (TileLayout p : mPages) {
             p.setShowLabels(show);
         }
         mDistributeTiles = true;
@@ -145,7 +152,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     }
 
     // This will dump to the ui log all the tiles that are visible in this page
-    private void logVisibleTiles(TilePage page) {
+    private void logVisibleTiles(TileLayout page) {
         for (int i = 0; i < page.mRecords.size(); i++) {
             QSTile t = page.mRecords.get(i).tile;
             mUiEventLogger.logWithInstanceId(QSEvent.QS_TILE_VISIBLE, 0, t.getMetricsSpec(),
@@ -161,7 +168,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     }
 
     private void updateListening() {
-        for (TilePage tilePage : mPages) {
+        for (TileLayout tilePage : mPages) {
             tilePage.setListening(tilePage.getParent() != null && mListening);
         }
     }
@@ -222,13 +229,14 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mPages.add(createTilePage());
+        mPages.add(createTileLayout());
         mAdapter.notifyDataSetChanged();
     }
 
-    private TilePage createTilePage() {
-        TilePage page = (TilePage) LayoutInflater.from(getContext())
-                .inflate(R.layout.qs_paged_page, this, false);
+    private TileLayout createTileLayout() {
+        TileLayout page = (TileLayout) LayoutInflater.from(getContext())
+                .inflate(mSideLabels ? R.layout.qs_paged_page_side_labels
+                        : R.layout.qs_paged_page, this, false);
         page.setMinRows(mMinRows);
         page.setMaxColumns(mMaxColumns);
         page.setShowLabels(mShowLabels);
@@ -283,7 +291,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
         int currentItem = getCurrentPageNumber();
         for (int i = 0; i < mPages.size(); i++) {
-            TilePage page = mPages.get(i);
+            TileLayout page = mPages.get(i);
             page.setSelected(i == currentItem ? selected : false);
             if (page.isSelected()) {
                 logVisibleTiles(page);
@@ -325,7 +333,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         }
         while (mPages.size() < numPages) {
             if (DEBUG) Log.d(TAG, "Adding page");
-            mPages.add(createTilePage());
+            mPages.add(createTileLayout());
         }
         while (mPages.size() > numPages) {
             if (DEBUG) Log.d(TAG, "Removing page");
@@ -422,7 +430,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
             final int nRows = mPages.get(0).mRows;
             for (int i = 0; i < mPages.size(); i++) {
-                TilePage t = mPages.get(i);
+                TileLayout t = mPages.get(i);
                 t.mRows = nRows;
             }
         }
@@ -465,19 +473,19 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     public int getNumVisibleTiles() {
         if (mPages.size() == 0) return 0;
-        TilePage currentPage = mPages.get(getCurrentPageNumber());
+        TileLayout currentPage = mPages.get(getCurrentPageNumber());
         return currentPage.mRecords.size();
     }
 
     public void startTileReveal(Set<String> tileSpecs, final Runnable postAnimation) {
         if (tileSpecs.isEmpty() || mPages.size() < 2 || getScrollX() != 0 || !beginFakeDrag()) {
             // Do not start the reveal animation unless there are tiles to animate, multiple
-            // TilePages available and the user has not already started dragging.
+            // TileLayouts available and the user has not already started dragging.
             return;
         }
 
         final int lastPageNumber = mPages.size() - 1;
-        final TilePage lastPage = mPages.get(lastPageNumber);
+        final TileLayout lastPage = mPages.get(lastPageNumber);
         final ArrayList<Animator> bounceAnims = new ArrayList<>();
         for (TileRecord tr : lastPage.mRecords) {
             if (tileSpecs.contains(tr.tile.getTileSpec())) {
@@ -557,12 +565,6 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             return mRecords.size() >= maxTiles();
         }
 
-        public int maxTiles() {
-            // Each page should be able to hold at least one tile. If there's not enough room to
-            // show even 1 or there are no tiles, it probably means we are in the middle of setting
-            // up.
-            return Math.max(mColumns * mRows, 1);
-        }
     }
 
     private final PagerAdapter mAdapter = new PagerAdapter() {

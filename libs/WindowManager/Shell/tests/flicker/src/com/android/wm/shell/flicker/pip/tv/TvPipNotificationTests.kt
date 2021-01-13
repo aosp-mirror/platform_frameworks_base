@@ -171,4 +171,4 @@ private val StatusBarNotification.deleteIntent: PendingIntent?
     get() = tvExtensions?.getParcelable("delete_intent")
 
 private fun StatusBarNotification.isPipNotificationWithTitle(expectedTitle: String): Boolean =
-    tag == "PipNotification" && title == expectedTitle
+    tag == "TvPip" && title == expectedTitle

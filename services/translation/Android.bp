@@ -1,0 +1,13 @@
+filegroup {
+    name: "services.translation-sources",
+    srcs: ["java/**/*.java"],
+    path: "java",
+    visibility: ["//frameworks/base/services"],
+}
+
+java_library_static {
+    name: "services.translation",
+    defaults: ["platform_service_defaults"],
+    srcs: [":services.translation-sources"],
+    libs: ["services.core"],
+}

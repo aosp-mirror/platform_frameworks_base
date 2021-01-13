@@ -18,6 +18,7 @@ package com.android.server.biometrics.sensors.fingerprint;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
@@ -108,6 +109,16 @@ public interface ServiceProvider {
 
     @LockoutTracker.LockoutMode
     int getLockoutModeForUser(int sensorId, int userId);
+
+    /**
+     * Requests for the authenticatorId (whose source of truth is in the TEE or equivalent) to
+     * be invalidated. See {@link com.android.server.biometrics.sensors.InvalidationRequesterClient}
+     */
+    default void scheduleInvalidateAuthenticatorId(int sensorId, int userId,
+            @NonNull IInvalidationCallback callback) {
+        throw new IllegalStateException("Providers that support invalidation must override"
+                + " this method");
+    }
 
     long getAuthenticatorId(int sensorId, int userId);
 

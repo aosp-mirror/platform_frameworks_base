@@ -44,6 +44,18 @@ fun LayersAssertion.appPairsDividerIsInvisible(
 }
 
 @JvmOverloads
+fun LayersAssertion.appPairsDividerBecomesVisible(
+    bugId: Int = 0,
+    enabled: Boolean = bugId == 0
+) {
+    all("dividerLayerBecomesVisible") {
+        this.hidesLayer(FlickerTestBase.DOCKED_STACK_DIVIDER)
+                .then()
+                .showsLayer(FlickerTestBase.DOCKED_STACK_DIVIDER)
+    }
+}
+
+@JvmOverloads
 fun LayersAssertion.dockedStackDividerIsVisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0

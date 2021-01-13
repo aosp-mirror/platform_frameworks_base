@@ -23,10 +23,7 @@ import com.android.internal.util.Preconditions;
 import java.util.Arrays;
 import java.util.Objects;
 
-/**
- * This class represents a uniquely identifiable package.
- * @hide
- */
+/** This class represents a uniquely identifiable package. */
 public class PackageIdentifier {
     private final String mPackageName;
     private final byte[] mSha256Certificate;

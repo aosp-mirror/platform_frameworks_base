@@ -29,6 +29,8 @@ import com.android.server.appsearch.proto.SnippetProto;
 
 import org.junit.Test;
 
+import java.util.Collections;
+
 public class SnippetTest {
 
     // TODO(tytytyww): Add tests for Double and Long Snippets.
@@ -83,7 +85,8 @@ public class SnippetTest {
 
         // Making ResultReader and getting Snippet values.
         SearchResultPage searchResultPage =
-                SearchResultToProtoConverter.toSearchResultPage(searchResultProto);
+                SearchResultToProtoConverter.toSearchResultPage(
+                        searchResultProto, Collections.singletonList("packageName"));
         for (SearchResult result : searchResultPage.getResults()) {
             SearchResult.MatchInfo match = result.getMatches().get(0);
             assertThat(match.getPropertyPath()).isEqualTo(propertyKeyString);
@@ -131,7 +134,8 @@ public class SnippetTest {
                 SearchResultProto.newBuilder().addResults(resultProto).build();
 
         SearchResultPage searchResultPage =
-                SearchResultToProtoConverter.toSearchResultPage(searchResultProto);
+                SearchResultToProtoConverter.toSearchResultPage(
+                        searchResultProto, Collections.singletonList("packageName"));
         for (SearchResult result : searchResultPage.getResults()) {
             assertThat(result.getMatches()).isEmpty();
         }
@@ -196,7 +200,8 @@ public class SnippetTest {
 
         // Making ResultReader and getting Snippet values.
         SearchResultPage searchResultPage =
-                SearchResultToProtoConverter.toSearchResultPage(searchResultProto);
+                SearchResultToProtoConverter.toSearchResultPage(
+                        searchResultProto, Collections.singletonList("packageName"));
         for (SearchResult result : searchResultPage.getResults()) {
 
             SearchResult.MatchInfo match1 = result.getMatches().get(0);

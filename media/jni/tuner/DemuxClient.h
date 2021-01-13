@@ -26,12 +26,14 @@
 #include "FilterClient.h"
 #include "FilterClientCallback.h"
 #include "FrontendClient.h"
+#include "TimeFilterClient.h"
 
 //using ::aidl::android::media::tv::tuner::ITunerDemux;
 
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterType;
 using ::android::hardware::tv::tuner::V1_0::DvrType;
 using ::android::hardware::tv::tuner::V1_0::IDemux;
+using ::android::hardware::tv::tuner::V1_0::ITimeFilter;
 
 using namespace std;
 
@@ -56,7 +58,10 @@ public:
      */
     sp<FilterClient> openFilter(DemuxFilterType type, int bufferSize, sp<FilterClientCallback> cb);
 
-    // TODO: handle TimeFilterClient
+    /**
+     * Open time filter of the demux.
+     */
+    sp<TimeFilterClient> openTimeFilter();
 
     /**
      * Get hardware sync ID for audio and video.
@@ -88,8 +93,12 @@ public:
      */
     Result close();
 
+    void setId(int id) { mId = id; }
+    int getId() { return mId; }
+
 private:
     sp<IFilter> openHidlFilter(DemuxFilterType type, int bufferSize, sp<HidlFilterCallback> cb);
+    sp<ITimeFilter> openHidlTimeFilter();
     sp<IDvr> openHidlDvr(DvrType type, int bufferSize, sp<HidlDvrCallback> cb);
 
     /**
@@ -105,6 +114,8 @@ private:
      * Default null when the HAL service does not exist.
      */
     sp<IDemux> mDemux;
+
+    int mId;
 };
 }  // namespace android
 

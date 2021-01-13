@@ -1431,7 +1431,9 @@ class ProcessRecord implements WindowProcessListener {
     void setActiveInstrumentation(ActiveInstrumentation instr) {
         mInstr = instr;
         boolean isInstrumenting = instr != null;
-        mWindowProcessController.setInstrumenting(isInstrumenting,
+        mWindowProcessController.setInstrumenting(
+                isInstrumenting,
+                isInstrumenting ? instr.mSourceUid : -1,
                 isInstrumenting && instr.mHasBackgroundActivityStartsPermission);
     }
 
@@ -2065,6 +2067,13 @@ class ProcessRecord implements WindowProcessListener {
             // Is the calling UID a device owner app?
             if (mService.mInternal != null) {
                 mAllowStartFgs = mService.mInternal.isDeviceOwner(info.uid);
+            }
+        }
+
+        if (!mAllowStartFgs) {
+            if (mService.mInternal != null) {
+                mAllowStartFgs = mService.mInternal.isAssociatedCompanionApp(
+                        UserHandle.getUserId(info.uid), info.uid);
             }
         }
 

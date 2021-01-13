@@ -21,6 +21,7 @@
 #include <android/content/pm/FileSystemControlParcel.h>
 #include <android/content/pm/IDataLoader.h>
 #include <android/content/pm/IDataLoaderStatusListener.h>
+#include <android/os/incremental/PerUidReadTimeouts.h>
 #include <binder/IAppOpsCallback.h>
 #include <binder/IServiceManager.h>
 #include <binder/Status.h>
@@ -103,6 +104,10 @@ public:
     virtual WaitResult waitForPendingReads(
             const Control& control, std::chrono::milliseconds timeout,
             std::vector<incfs::ReadInfo>* pendingReadsBuffer) const = 0;
+    virtual ErrorCode setUidReadTimeouts(
+            const Control& control,
+            const std::vector<::android::os::incremental::PerUidReadTimeouts>& perUidReadTimeouts)
+            const = 0;
 };
 
 class AppOpsManagerWrapper {
