@@ -44,7 +44,6 @@ public final class UserHandle implements Parcelable {
 
     /** @hide A user handle to indicate all users on the device */
     @SystemApi
-    @TestApi
     public static final @NonNull UserHandle ALL = new UserHandle(USER_ALL);
 
     /** @hide A user id to indicate the currently active user */
@@ -53,7 +52,6 @@ public final class UserHandle implements Parcelable {
 
     /** @hide A user handle to indicate the current user of the device */
     @SystemApi
-    @TestApi
     public static final @NonNull UserHandle CURRENT = new UserHandle(USER_CURRENT);
 
     /** @hide A user id to indicate that we would like to send to the current
@@ -104,7 +102,6 @@ public final class UserHandle implements Parcelable {
 
     /** @hide A user handle to indicate the "system" user of the device */
     @SystemApi
-    @TestApi
     public static final @NonNull UserHandle SYSTEM = new UserHandle(USER_SYSTEM);
 
     /**
@@ -257,7 +254,6 @@ public final class UserHandle implements Parcelable {
     }
 
     /** @hide */
-    @TestApi
     @SystemApi
     public static UserHandle of(@UserIdInt int userId) {
         if (userId == USER_SYSTEM) {
@@ -302,7 +298,6 @@ public final class UserHandle implements Parcelable {
      * Returns the app id (or base uid) for a given uid, stripping out the user id from it.
      * @hide
      */
-    @TestApi
     @SystemApi
     public static @AppIdInt int getAppId(int uid) {
         return uid % PER_USER_RANGE;
@@ -460,7 +455,6 @@ public final class UserHandle implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static @UserIdInt int myUserId() {
         return getUserId(Process.myUid());
     }
@@ -499,7 +493,6 @@ public final class UserHandle implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public @UserIdInt int getIdentifier() {
         return mHandle;
     }

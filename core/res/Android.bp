@@ -46,6 +46,13 @@ android_app {
     },
 }
 
+java_genrule {
+    name: "framework-res-package-jar",
+    srcs: [":framework-res{.export-package.apk}"],
+    out: ["framework-res-package.jar"],
+    cmd: "cp $(in) $(out)",
+}
+
 // This logic can be removed once robolectric's transition to binary resources is complete
 filegroup {
     name: "robolectric_framework_raw_res_files",

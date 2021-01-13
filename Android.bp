@@ -500,7 +500,7 @@ java_library {
         // TODO(b/147128803) remove the below lines
         "//frameworks/base/apex/blobstore/framework",
         "//frameworks/base/apex/jobscheduler/framework",
-        "//frameworks/base/packages/Tethering/tests/unit",
+        "//packages/modules/Connectivity/Tethering/tests/unit",
     ],
 }
 
@@ -607,6 +607,7 @@ gensrcs {
 
     srcs: [
         ":ipconnectivity-proto-src",
+        ":libstats_atom_enum_protos",
         "core/proto/**/*.proto",
         "libs/incident/**/*.proto",
     ],
@@ -633,6 +634,7 @@ gensrcs {
 
     srcs: [
         ":ipconnectivity-proto-src",
+        ":libstats_atom_enum_protos",
         "core/proto/**/*.proto",
         "libs/incident/**/*.proto",
     ],
@@ -655,6 +657,7 @@ filegroup {
         "core/java/android/annotation/RequiresPermission.java",
         "core/java/android/annotation/SdkConstant.java",
         "core/java/android/annotation/StringDef.java",
+        "core/java/android/annotation/SuppressLint.java",
         "core/java/android/annotation/SystemApi.java",
         "core/java/android/annotation/SystemService.java",
         "core/java/android/annotation/TestApi.java",
@@ -748,13 +751,19 @@ java_library_host {
     name: "platformprotos",
     srcs: [
         ":ipconnectivity-proto-src",
+        ":libstats_atom_enum_protos",
+        ":libstats_internal_protos",
+        ":statsd_internal_protos",
         "cmds/am/proto/instrumentation_data.proto",
         "cmds/statsd/src/**/*.proto",
         "core/proto/**/*.proto",
         "libs/incident/proto/**/*.proto",
     ],
     proto: {
-        include_dirs: ["external/protobuf/src"],
+        include_dirs: [
+            "external/protobuf/src",
+            "frameworks/proto_logging/stats",
+        ],
         type: "full",
     },
     errorprone: {
@@ -777,6 +786,7 @@ java_library {
     sdk_version: "9",
     srcs: [
         ":ipconnectivity-proto-src",
+        ":libstats_atom_enum_protos",
         "core/proto/**/*.proto",
         "libs/incident/proto/android/os/**/*.proto",
     ],
@@ -792,6 +802,7 @@ java_library {
 
     srcs: [
         ":ipconnectivity-proto-src",
+        ":libstats_atom_enum_protos",
         "core/proto/**/*.proto",
         "libs/incident/proto/android/os/**/*.proto",
     ],
@@ -812,7 +823,9 @@ cc_defaults {
 
     proto: {
         export_proto_headers: true,
-        include_dirs: ["external/protobuf/src"],
+        include_dirs: [
+            "external/protobuf/src",
+        ],
     },
 
     cflags: [
@@ -823,6 +836,7 @@ cc_defaults {
 
     srcs: [
         ":ipconnectivity-proto-src",
+        ":libstats_atom_enum_protos",
         "core/proto/**/*.proto",
     ],
 }
@@ -1177,6 +1191,7 @@ java_library {
     visibility: [
         "//frameworks/base/wifi",
         "//frameworks/base/services/net",
+        "//packages/modules/Wifi/framework",
     ],
 }
 
@@ -1202,7 +1217,10 @@ filegroup {
         "core/java/com/android/internal/util/StateMachine.java",
         "core/java/com/android/internal/util/WakeupMessage.java",
     ],
-    visibility: ["//frameworks/opt/net/wifi/service"],
+    visibility: [
+        "//frameworks/opt/net/wifi/service",
+        "//packages/modules/Wifi/service",
+    ],
 }
 
 // TODO(b/145644363): move this to under StubLibraries.bp or ApiDocs.bp
