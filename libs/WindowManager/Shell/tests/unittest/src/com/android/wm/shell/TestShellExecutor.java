@@ -16,6 +16,8 @@
 
 package com.android.wm.shell;
 
+import android.os.Looper;
+
 import com.android.wm.shell.common.ShellExecutor;
 
 import java.util.ArrayList;
@@ -40,6 +42,16 @@ public class TestShellExecutor implements ShellExecutor {
     @Override
     public void removeCallbacks(Runnable r) {
         mRunnables.remove(r);
+    }
+
+    @Override
+    public boolean hasCallback(Runnable r) {
+        return !mRunnables.isEmpty();
+    }
+
+    @Override
+    public Looper getLooper() {
+        return null;
     }
 
     public void flushAll() {
