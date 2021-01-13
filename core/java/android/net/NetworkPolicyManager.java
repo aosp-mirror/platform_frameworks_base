@@ -32,8 +32,8 @@ import android.content.pm.Signature;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.os.Build;
+import android.os.Process;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.telephony.SubscriptionPlan;
 import android.util.DebugUtils;
 import android.util.Pair;
@@ -500,7 +500,7 @@ public class NetworkPolicyManager {
     @Deprecated
     public static boolean isUidValidForPolicy(Context context, int uid) {
         // first, quick-reject non-applications
-        if (!UserHandle.isApp(uid)) {
+        if (!Process.isApplicationUid(uid)) {
             return false;
         }
 
