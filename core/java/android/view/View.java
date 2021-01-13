@@ -10379,7 +10379,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage(trackingBug = 171933273)
     protected boolean isVisibleToUser(Rect boundInView) {
         if (mAttachInfo != null) {
             // Attached to invisible window means this view is not visible.
