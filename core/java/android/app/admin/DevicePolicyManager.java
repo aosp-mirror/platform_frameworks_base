@@ -12852,7 +12852,7 @@ public class DevicePolicyManager {
         }
 
         try {
-            return mService.getEnrollmentSpecificId();
+            return mService.getEnrollmentSpecificId(mContext.getPackageName());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

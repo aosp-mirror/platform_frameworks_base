@@ -15629,14 +15629,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public String getEnrollmentSpecificId() {
+    public String getEnrollmentSpecificId(String callerPackage) {
         if (!mHasFeature) {
             return "";
         }
 
-        final CallerIdentity caller = getCallerIdentity();
+        final CallerIdentity caller = getCallerIdentity(callerPackage);
         Preconditions.checkCallAuthorization(
-                isDeviceOwner(caller) || isProfileOwner(caller));
+                isDeviceOwner(caller) || isProfileOwner(caller)
+                        || isCallerDelegate(caller, DELEGATION_CERT_INSTALL));
 
         synchronized (getLockObject()) {
             final ActiveAdmin requiredAdmin = getDeviceOrProfileOwnerAdminLocked(

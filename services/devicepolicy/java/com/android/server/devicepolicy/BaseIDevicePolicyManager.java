@@ -103,7 +103,7 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
         return false;
     }
 
-    public String getEnrollmentSpecificId() {
+    public String getEnrollmentSpecificId(String callerPackage) {
         return "";
     }
 

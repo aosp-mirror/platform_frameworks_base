@@ -490,6 +490,6 @@ interface IDevicePolicyManager {
 
     void setNextOperationSafety(int operation, boolean safe);
 
-    String getEnrollmentSpecificId();
+    String getEnrollmentSpecificId(String callerPackage);
     void setOrganizationIdForUser(in String callerPackage, in String enterpriseId, int userId);
 }
