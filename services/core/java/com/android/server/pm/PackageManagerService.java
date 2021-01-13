@@ -8802,7 +8802,17 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public String getPermissionControllerPackageName() {
         synchronized (mLock) {
-            return mRequiredPermissionControllerPackage;
+            if (mRequiredPermissionControllerPackage != null) {
+                final PackageSetting ps = getPackageSetting(mRequiredPermissionControllerPackage);
+                if (ps != null) {
+                    final int callingUid = Binder.getCallingUid();
+                    final int callingUserId = UserHandle.getUserId(callingUid);
+                    if (!shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
+                        return mRequiredPermissionControllerPackage;
+                    }
+                }
+            }
+            throw new IllegalStateException("PermissionController is not found");
         }
     }
 

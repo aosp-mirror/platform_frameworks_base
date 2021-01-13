@@ -4821,15 +4821,17 @@ public abstract class PackageManager {
     /**
      * Gets the package name of the component controlling runtime permissions.
      *
-     * @return The package name.
+     * @return the package name of the component controlling runtime permissions
      *
      * @hide
      */
-    @SuppressWarnings("HiddenAbstractMethod")
-    @UnsupportedAppUsage
     @NonNull
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @TestApi
-    public abstract String getPermissionControllerPackageName();
+    @UnsupportedAppUsage
+    public String getPermissionControllerPackageName() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /**
      * Add a new dynamic permission to the system.  For this to work, your
