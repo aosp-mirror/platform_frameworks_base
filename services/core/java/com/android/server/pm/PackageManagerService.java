@@ -582,6 +582,52 @@ public class PackageManagerService extends IPackageManager.Stub
     @Retention(RetentionPolicy.SOURCE)
     public @interface ScanFlags {}
 
+    /**
+     * Used as the result code of the {@link #getPackageStartability}.
+     */
+    @IntDef(value = {
+        PACKAGE_STARTABILITY_OK,
+        PACKAGE_STARTABILITY_NOT_FOUND,
+        PACKAGE_STARTABILITY_NOT_SYSTEM,
+        PACKAGE_STARTABILITY_FROZEN,
+        PACKAGE_STARTABILITY_DIRECT_BOOT_UNSUPPORTED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PackageStartability {}
+
+    /**
+     * Used as the result code of the {@link #getPackageStartability} to indicate
+     * the given package is allowed to start.
+     */
+    static final int PACKAGE_STARTABILITY_OK = 0;
+
+    /**
+     * Used as the result code of the {@link #getPackageStartability} to indicate
+     * the given package is <b>not</b> allowed to start because it's not found
+     * (could be due to that package is invisible to the given user).
+     */
+    static final int PACKAGE_STARTABILITY_NOT_FOUND = 1;
+
+    /**
+     * Used as the result code of the {@link #getPackageStartability} to indicate
+     * the given package is <b>not</b> allowed to start because it's not a system app
+     * and the system is running in safe mode.
+     */
+    static final int PACKAGE_STARTABILITY_NOT_SYSTEM = 2;
+
+    /**
+     * Used as the result code of the {@link #getPackageStartability} to indicate
+     * the given package is <b>not</b> allowed to start because it's currently frozen.
+     */
+    static final int PACKAGE_STARTABILITY_FROZEN = 3;
+
+    /**
+     * Used as the result code of the {@link #getPackageStartability} to indicate
+     * the given package is <b>not</b> allowed to start because it doesn't support
+     * direct boot.
+     */
+    static final int PACKAGE_STARTABILITY_DIRECT_BOOT_UNSUPPORTED = 4;
+
     private static final String STATIC_SHARED_LIB_DELIMITER = "_";
     /** Extension of the compressed packages */
     public final static String COMPRESSED_EXTENSION = ".gz";
@@ -7639,30 +7685,44 @@ public class PackageManagerService extends IPackageManager.Stub
             throw new SecurityException("User doesn't exist");
         }
         enforceCrossUserPermission(callingUid, userId, false, false, "checkPackageStartable");
+        switch (getPackageStartability(packageName, callingUid, userId)) {
+            case PACKAGE_STARTABILITY_NOT_FOUND:
+                throw new SecurityException("Package " + packageName + " was not found!");
+            case PACKAGE_STARTABILITY_NOT_SYSTEM:
+                throw new SecurityException("Package " + packageName + " not a system app!");
+            case PACKAGE_STARTABILITY_FROZEN:
+                throw new SecurityException("Package " + packageName + " is currently frozen!");
+            case PACKAGE_STARTABILITY_DIRECT_BOOT_UNSUPPORTED:
+                throw new SecurityException("Package " + packageName + " is not encryption aware!");
+            case PACKAGE_STARTABILITY_OK:
+            default:
+                return;
+        }
+    }
+
+    private @PackageStartability int getPackageStartability(String packageName,
+            int callingUid, int userId) {
         final boolean userKeyUnlocked = StorageManager.isUserKeyUnlocked(userId);
         synchronized (mLock) {
             final PackageSetting ps = mSettings.getPackageLPr(packageName);
-            if (ps == null || shouldFilterApplicationLocked(ps, callingUid, userId)) {
-                throw new SecurityException("Package " + packageName + " was not found!");
-            }
-
-            if (!ps.getInstalled(userId)) {
-                throw new SecurityException(
-                        "Package " + packageName + " was not installed for user " + userId + "!");
+            if (ps == null || shouldFilterApplicationLocked(ps, callingUid, userId)
+                    || !ps.getInstalled(userId)) {
+                return PACKAGE_STARTABILITY_NOT_FOUND;
             }
 
             if (mSafeMode && !ps.isSystem()) {
-                throw new SecurityException("Package " + packageName + " not a system app!");
+                return PACKAGE_STARTABILITY_NOT_SYSTEM;
             }
 
             if (mFrozenPackages.contains(packageName)) {
-                throw new SecurityException("Package " + packageName + " is currently frozen!");
+                return PACKAGE_STARTABILITY_FROZEN;
             }
 
             if (!userKeyUnlocked && !AndroidPackageUtils.isEncryptionAware(ps.pkg)) {
-                throw new SecurityException("Package " + packageName + " is not encryption aware!");
+                return PACKAGE_STARTABILITY_DIRECT_BOOT_UNSUPPORTED;
             }
         }
+        return PACKAGE_STARTABILITY_OK;
     }
 
     @Override
@@ -27495,6 +27555,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 @NonNull Executor executor, @NonNull Handler handler) {
             requestChecksumsInternal(packageName, includeSplits, optional, required,
                     trustedInstallers, statusReceiver, userId, executor, handler);
+        }
+
+        @Override
+        public boolean isPackageFrozen(@NonNull String packageName,
+                int callingUid, int userId) {
+            return PackageManagerService.this.getPackageStartability(
+                    packageName, callingUid, userId) == PACKAGE_STARTABILITY_FROZEN;
         }
     }
 
