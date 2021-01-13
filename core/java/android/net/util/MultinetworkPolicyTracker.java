@@ -34,7 +34,7 @@ import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
-import android.util.Slog;
+import android.util.Log;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -204,13 +204,13 @@ public class MultinetworkPolicyTracker {
 
         @Override
         public void onChange(boolean selfChange) {
-            Slog.wtf(TAG, "Should never be reached.");
+            Log.wtf(TAG, "Should never be reached.");
         }
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             if (!mSettingsUris.contains(uri)) {
-                Slog.wtf(TAG, "Unexpected settings observation: " + uri);
+                Log.wtf(TAG, "Unexpected settings observation: " + uri);
             }
             reevaluate();
         }
