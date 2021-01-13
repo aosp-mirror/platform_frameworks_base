@@ -17325,15 +17325,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // send to integrity component only.
             integrityVerification.setPackage("android");
 
-            DeviceIdleInternal idleController =
-                    mInjector.getLocalService(DeviceIdleInternal.class);
-            final long idleDuration = getVerificationTimeout();
-
-            idleController.addPowerSaveTempWhitelistAppDirect(Process.myUid(),
-                    idleDuration,
-                    false, "integrity component");
             final BroadcastOptions options = BroadcastOptions.makeBasic();
-            options.setTemporaryAppWhitelistDuration(idleDuration);
 
             mContext.sendOrderedBroadcastAsUser(integrityVerification, UserHandle.SYSTEM,
                     /* receiverPermission= */ null,
