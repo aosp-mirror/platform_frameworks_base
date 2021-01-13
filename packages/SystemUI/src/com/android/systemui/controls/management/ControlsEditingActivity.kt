@@ -139,7 +139,6 @@ class ControlsEditingActivity @Inject constructor(
     }
 
     private fun bindButtons() {
-        val rootView = requireViewById<ViewGroup>(R.id.controls_management_root)
         saveButton = requireViewById<Button>(R.id.done).apply {
             isEnabled = false
             setText(R.string.save)
