@@ -16723,16 +16723,13 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void setDeviceOwnerUid(int uid) {
-            synchronized (ActivityManagerService.this) {
-                mDeviceOwnerUid = uid;
-            }
+            mDeviceOwnerUid = uid;
         }
 
         @Override
         public boolean isDeviceOwner(int uid) {
-            synchronized (ActivityManagerService.this) {
-                return uid >= 0 && mDeviceOwnerUid == uid;
-            }
+            int cachedUid = mDeviceOwnerUid;
+            return uid >= 0 && cachedUid == uid;
         }
 
 
@@ -16768,7 +16765,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void addPendingTopUid(int uid, int pid) {
-                mPendingStartActivityUids.add(uid, pid);
+            mPendingStartActivityUids.add(uid, pid);
         }
 
         @Override
