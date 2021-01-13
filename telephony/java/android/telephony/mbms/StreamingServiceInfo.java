@@ -17,7 +17,6 @@
 package android.telephony.mbms;
 
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -42,7 +41,6 @@ public final class StreamingServiceInfo extends ServiceInfo implements Parcelabl
      * @hide
      */
     @SystemApi
-    @TestApi
     public StreamingServiceInfo(Map<Locale, String> names, String className,
             List<Locale> locales, String serviceId, Date start, Date end) {
         super(names, className, locales, serviceId, start, end);
