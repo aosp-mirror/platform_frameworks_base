@@ -171,6 +171,7 @@ public final class ActiveServices {
     public static final int FGS_FEATURE_ALLOWED_BY_EXEMPTED_PACKAGES = 20;
     public static final int FGS_FEATURE_ALLOWED_BY_ACTIVITY_STARTER = 21;
     public static final int FGS_FEATURE_ALLOWED_BY_COMPANION_APP = 22;
+    public static final int FGS_FEATURE_ALLOWED_BY_PROFILE_OWNER = 23;
 
     @IntDef(flag = true, prefix = { "FGS_FEATURE_" }, value = {
             FGS_FEATURE_DENIED,
@@ -194,7 +195,8 @@ public final class ActiveServices {
             FGS_FEATURE_ALLOWED_BY_PROCESS_RECORD,
             FGS_FEATURE_ALLOWED_BY_EXEMPTED_PACKAGES,
             FGS_FEATURE_ALLOWED_BY_ACTIVITY_STARTER,
-            FGS_FEATURE_ALLOWED_BY_COMPANION_APP
+            FGS_FEATURE_ALLOWED_BY_COMPANION_APP,
+            FGS_FEATURE_ALLOWED_BY_PROFILE_OWNER
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FgsFeatureRetCode {}
@@ -5373,6 +5375,14 @@ public final class ActiveServices {
             }
         }
 
+        if (ret == FGS_FEATURE_DENIED) {
+            // Is the calling UID a profile owner app?
+            final boolean isProfileOwner = mAm.mInternal.isProfileOwner(callingUid);
+            if (isProfileOwner) {
+                ret = FGS_FEATURE_ALLOWED_BY_PROFILE_OWNER;
+            }
+        }
+
         // NOTE this should always be the last check.
         if (ret == FGS_FEATURE_DENIED) {
             if (isPackageExemptedFromFgsRestriction(r.appInfo.packageName, r.appInfo.uid)
@@ -5474,6 +5484,8 @@ public final class ActiveServices {
                 return "ALLOWED_BY_ACTIVITY_STARTER";
             case FGS_FEATURE_ALLOWED_BY_COMPANION_APP:
                 return "ALLOWED_BY_COMPANION_APP";
+            case FGS_FEATURE_ALLOWED_BY_PROFILE_OWNER:
+                return "ALLOWED_BY_PROFILE_OWNER";
             default:
                 return "";
         }

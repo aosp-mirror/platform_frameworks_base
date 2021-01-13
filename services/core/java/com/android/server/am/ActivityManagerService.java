@@ -572,8 +572,15 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private int mDeviceOwnerUid = Process.INVALID_UID;
 
-    // A map userId and all its companion app uids
+    /**
+     * Map userId to its companion app uids.
+     */
     private final Map<Integer, Set<Integer>> mCompanionAppUidsMap = new ArrayMap<>();
+
+    /**
+     * The profile owner UIDs.
+     */
+    private ArraySet<Integer> mProfileOwnerUids = null;
 
     final UserController mUserController;
     @VisibleForTesting
@@ -16725,6 +16732,21 @@ public class ActivityManagerService extends IActivityManager.Stub
         public boolean isDeviceOwner(int uid) {
             synchronized (ActivityManagerService.this) {
                 return uid >= 0 && mDeviceOwnerUid == uid;
+            }
+        }
+
+
+        @Override
+        public void setProfileOwnerUid(ArraySet<Integer> profileOwnerUids) {
+            synchronized (ActivityManagerService.this) {
+                mProfileOwnerUids = profileOwnerUids;
+            }
+        }
+
+        @Override
+        public boolean isProfileOwner(int uid) {
+            synchronized (ActivityManagerService.this) {
+                return mProfileOwnerUids != null && mProfileOwnerUids.indexOf(uid) >= 0;
             }
         }
 
