@@ -18,76 +18,60 @@ package com.android.overlaytest;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-import android.annotation.NonNull;
-import android.content.Context;
-import android.content.om.OverlayManager;
-import android.content.om.OverlayManagerTransaction;
-import android.os.UserHandle;
+import android.app.UiAutomation;
+import android.content.res.Resources;
+import android.os.ParcelFileDescriptor;
 
 import androidx.test.InstrumentationRegistry;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
 
 class LocalOverlayManager {
     private static final long TIMEOUT = 30;
 
-    public static void toggleOverlaysAndWait(@NonNull final String[] overlaysToEnable,
-            @NonNull final String[] overlaysToDisable) throws Exception {
-        final int userId = UserHandle.myUserId();
-        OverlayManagerTransaction.Builder builder = new OverlayManagerTransaction.Builder();
-        for (String pkg : overlaysToEnable) {
-            builder.setEnabled(pkg, true, userId);
+    public static void setEnabledAndWait(Executor executor, final String packageName,
+            boolean enable) throws Exception {
+        final String pattern = (enable ? "[x]" : "[ ]") + " " + packageName;
+        if (executeShellCommand("cmd overlay list").contains(pattern)) {
+            // nothing to do, overlay already in the requested state
+            return;
         }
-        for (String pkg : overlaysToDisable) {
-            builder.setEnabled(pkg, false, userId);
-        }
-        OverlayManagerTransaction transaction = builder.build();
 
-        final Context ctx = InstrumentationRegistry.getTargetContext();
+        final Resources res = InstrumentationRegistry.getContext().getResources();
+        final String[] oldApkPaths = res.getAssets().getApkPaths();
         FutureTask<Boolean> task = new FutureTask<>(() -> {
             while (true) {
-                final String[] paths = ctx.getResources().getAssets().getApkPaths();
-                if (arrayTailContains(paths, overlaysToEnable)
-                        && arrayDoesNotContain(paths, overlaysToDisable)) {
+                if (!Arrays.equals(oldApkPaths, res.getAssets().getApkPaths())) {
                     return true;
                 }
                 Thread.sleep(10);
             }
         });
-
-        OverlayManager om = ctx.getSystemService(OverlayManager.class);
-        om.commit(transaction);
-
-        Executor executor = (cmd) -> new Thread(cmd).start();
         executor.execute(task);
+        executeShellCommand("cmd overlay " + (enable ? "enable " : "disable ") + packageName);
         task.get(TIMEOUT, SECONDS);
     }
 
-    private static boolean arrayTailContains(@NonNull final String[] array,
-            @NonNull final String[] substrings) {
-        if (array.length < substrings.length) {
-            return false;
-        }
-        for (int i = 0; i < substrings.length; i++) {
-            String a = array[array.length - substrings.length + i];
-            String s = substrings[i];
-            if (!a.contains(s)) {
-                return false;
+    private static String executeShellCommand(final String command)
+            throws Exception {
+        final UiAutomation uiAutomation =
+                InstrumentationRegistry.getInstrumentation().getUiAutomation();
+        final ParcelFileDescriptor pfd = uiAutomation.executeShellCommand(command);
+        try (InputStream in = new ParcelFileDescriptor.AutoCloseInputStream(pfd)) {
+            final BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(in, StandardCharsets.UTF_8));
+            StringBuilder str = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                str.append(line);
             }
+            return str.toString();
         }
-        return true;
-    }
-
-    private static boolean arrayDoesNotContain(@NonNull final String[] array,
-            @NonNull final String[] substrings) {
-        for (String s : substrings) {
-            for (String a : array) {
-                if (a.contains(s)) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 }
