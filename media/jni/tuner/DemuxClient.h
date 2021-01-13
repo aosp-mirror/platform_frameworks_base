@@ -88,6 +88,9 @@ public:
      */
     Result close();
 
+    void setId(int id) { mId = id; }
+    int getId() { return mId; }
+
 private:
     sp<IFilter> openHidlFilter(DemuxFilterType type, int bufferSize, sp<HidlFilterCallback> cb);
     sp<IDvr> openHidlDvr(DvrType type, int bufferSize, sp<HidlDvrCallback> cb);
@@ -105,6 +108,8 @@ private:
      * Default null when the HAL service does not exist.
      */
     sp<IDemux> mDemux;
+
+    int mId;
 };
 }  // namespace android
 

@@ -1750,21 +1750,17 @@ int JTuner::unlinkCiCam(int id) {
 
 jobject JTuner::openDescrambler() {
     ALOGD("JTuner::openDescrambler");
-    if (mTuner == nullptr || mDemux == nullptr) {
+    if (mTunerClient == nullptr || mDemuxClient == nullptr) {
         return NULL;
     }
-    sp<IDescrambler> descramblerSp;
-    Result res;
-    mTuner->openDescrambler([&](Result r, const sp<IDescrambler>& descrambler) {
-        res = r;
-        descramblerSp = descrambler;
-    });
+    sp<DescramblerClient> descramblerClient = mTunerClient->openDescrambler(0/*unused*/);
 
-    if (res != Result::SUCCESS || descramblerSp == NULL) {
+    if (descramblerClient == NULL) {
+        ALOGD("Failed to open descrambler");
         return NULL;
     }
 
-    descramblerSp->setDemuxSource(mDemuxId);
+    descramblerClient->setDemuxSource(mDemuxClient);
 
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     jobject descramblerObj =
@@ -1772,8 +1768,8 @@ jobject JTuner::openDescrambler() {
                     env->FindClass("android/media/tv/tuner/Descrambler"),
                     gFields.descramblerInitID);
 
-    descramblerSp->incStrong(descramblerObj);
-    env->SetLongField(descramblerObj, gFields.descramblerContext, (jlong)descramblerSp.get());
+    descramblerClient->incStrong(descramblerObj);
+    env->SetLongField(descramblerObj, gFields.descramblerContext, (jlong)descramblerClient.get());
 
     return descramblerObj;
 }
@@ -2573,8 +2569,8 @@ static sp<JTuner> getTuner(JNIEnv *env, jobject thiz) {
     return (JTuner *)env->GetLongField(thiz, gFields.tunerContext);
 }
 
-static sp<IDescrambler> getDescrambler(JNIEnv *env, jobject descrambler) {
-    return (IDescrambler *)env->GetLongField(descrambler, gFields.descramblerContext);
+static sp<DescramblerClient> getDescramblerClient(JNIEnv *env, jobject descrambler) {
+    return (DescramblerClient *)env->GetLongField(descrambler, gFields.descramblerContext);
 }
 
 static uint32_t getResourceIdFromHandle(jint handle) {
@@ -4100,49 +4096,47 @@ static jobject android_media_tv_Tuner_open_descrambler(JNIEnv *env, jobject thiz
 
 static jint android_media_tv_Tuner_descrambler_add_pid(
         JNIEnv *env, jobject descrambler, jint pidType, jint pid, jobject filter) {
-    sp<IDescrambler> descramblerSp = getDescrambler(env, descrambler);
-    if (descramblerSp == NULL) {
+    sp<DescramblerClient> descramblerClient = getDescramblerClient(env, descrambler);
+    if (descramblerClient == NULL) {
         return (jint) Result::NOT_INITIALIZED;
     }
-    // TODO: use filter client once descramblerClient is ready
-    sp<IFilter> iFilterSp = getFilterClient(env, filter)->getHalFilter();
-    Result result = descramblerSp->addPid(getDemuxPid((int)pidType, (int)pid), iFilterSp);
+    sp<FilterClient> filterClient = getFilterClient(env, filter);
+    Result result = descramblerClient->addPid(getDemuxPid((int)pidType, (int)pid), filterClient);
     return (jint) result;
 }
 
 static jint android_media_tv_Tuner_descrambler_remove_pid(
         JNIEnv *env, jobject descrambler, jint pidType, jint pid, jobject filter) {
-    sp<IDescrambler> descramblerSp = getDescrambler(env, descrambler);
-    if (descramblerSp == NULL) {
+    sp<DescramblerClient> descramblerClient = getDescramblerClient(env, descrambler);
+    if (descramblerClient == NULL) {
         return (jint) Result::NOT_INITIALIZED;
     }
-    // TODO: use filter client once descramblerClient is ready
-    sp<IFilter> iFilterSp = getFilterClient(env, filter)->getHalFilter();
-    Result result = descramblerSp->removePid(getDemuxPid((int)pidType, (int)pid), iFilterSp);
+    sp<FilterClient> filterClient = getFilterClient(env, filter);
+    Result result = descramblerClient->removePid(getDemuxPid((int)pidType, (int)pid), filterClient);
     return (jint) result;
 }
 
 static jint android_media_tv_Tuner_descrambler_set_key_token(
         JNIEnv* env, jobject descrambler, jbyteArray keyToken) {
-    sp<IDescrambler> descramblerSp = getDescrambler(env, descrambler);
-    if (descramblerSp == NULL) {
+    sp<DescramblerClient> descramblerClient = getDescramblerClient(env, descrambler);
+    if (descramblerClient == NULL) {
         return (jint) Result::NOT_INITIALIZED;
     }
     int size = env->GetArrayLength(keyToken);
     std::vector<uint8_t> v(size);
     env->GetByteArrayRegion(keyToken, 0, size, reinterpret_cast<jbyte*>(&v[0]));
-    Result result = descramblerSp->setKeyToken(v);
+    Result result = descramblerClient->setKeyToken(v);
     return (jint) result;
 }
 
 static jint android_media_tv_Tuner_close_descrambler(JNIEnv* env, jobject descrambler) {
-    sp<IDescrambler> descramblerSp = getDescrambler(env, descrambler);
-    if (descramblerSp == NULL) {
+    sp<DescramblerClient> descramblerClient = getDescramblerClient(env, descrambler);
+    if (descramblerClient == NULL) {
         return (jint) Result::NOT_INITIALIZED;
     }
-    Result r = descramblerSp->close();
+    Result r = descramblerClient->close();
     if (r == Result::SUCCESS) {
-        descramblerSp->decStrong(descrambler);
+        descramblerClient->decStrong(descrambler);
     }
     return (jint) r;
 }
