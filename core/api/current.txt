@@ -10729,7 +10729,7 @@ package android.content {
     field public static final String ACTION_CAMERA_BUTTON = "android.intent.action.CAMERA_BUTTON";
     field public static final String ACTION_CARRIER_SETUP = "android.intent.action.CARRIER_SETUP";
     field public static final String ACTION_CHOOSER = "android.intent.action.CHOOSER";
-    field public static final String ACTION_CLOSE_SYSTEM_DIALOGS = "android.intent.action.CLOSE_SYSTEM_DIALOGS";
+    field @Deprecated @RequiresPermission("android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS") public static final String ACTION_CLOSE_SYSTEM_DIALOGS = "android.intent.action.CLOSE_SYSTEM_DIALOGS";
     field public static final String ACTION_CONFIGURATION_CHANGED = "android.intent.action.CONFIGURATION_CHANGED";
     field public static final String ACTION_CREATE_DOCUMENT = "android.intent.action.CREATE_DOCUMENT";
     field public static final String ACTION_CREATE_REMINDER = "android.intent.action.CREATE_REMINDER";
