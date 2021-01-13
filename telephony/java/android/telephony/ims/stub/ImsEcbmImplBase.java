@@ -17,7 +17,6 @@
 package android.telephony.ims.stub;
 
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -34,7 +33,6 @@ import com.android.ims.internal.IImsEcbmListener;
  * @hide
  */
 @SystemApi
-@TestApi
 public class ImsEcbmImplBase {
     private static final String TAG = "ImsEcbmImplBase";
 

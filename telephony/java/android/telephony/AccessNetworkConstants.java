@@ -18,7 +18,6 @@ package android.telephony;
 
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.hardware.radio.V1_1.GeranBands;
 import android.hardware.radio.V1_5.AccessNetwork;
 import android.hardware.radio.V1_5.EutranBands;
@@ -49,7 +48,6 @@ public final class AccessNetworkConstants {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int TRANSPORT_TYPE_INVALID = -1;
 
     /**
@@ -438,7 +436,6 @@ public final class AccessNetworkConstants {
          * @hide
          */
         @SystemApi
-        @TestApi
         public static final int FREQUENCY_RANGE_GROUP_UNKNOWN = 0;
 
         /**
@@ -447,7 +444,6 @@ public final class AccessNetworkConstants {
          * @hide
          */
         @SystemApi
-        @TestApi
         public static final int FREQUENCY_RANGE_GROUP_1 = 1;
 
         /**
@@ -456,7 +452,6 @@ public final class AccessNetworkConstants {
          * @hide
          */
         @SystemApi
-        @TestApi
         public static final int FREQUENCY_RANGE_GROUP_2 = 2;
 
         /**
@@ -481,7 +476,6 @@ public final class AccessNetworkConstants {
          * @hide
          */
         @SystemApi
-        @TestApi
         public static @FrequencyRangeGroup int getFrequencyRangeGroup(@NgranBand int band) {
             switch (band) {
                 case BAND_1:

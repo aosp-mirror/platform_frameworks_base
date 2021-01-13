@@ -37,7 +37,6 @@ import java.util.concurrent.Executor;
  * @hide
  */
 @SystemApi
-@TestApi
 @SystemService(Context.ETHERNET_SERVICE)
 public class EthernetManager {
     private static final String TAG = "EthernetManager";

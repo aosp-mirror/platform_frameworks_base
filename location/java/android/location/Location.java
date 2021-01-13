@@ -17,7 +17,6 @@
 package android.location;
 
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Bundle;
@@ -73,7 +72,6 @@ public class Location implements Parcelable {
      * gps locations separate from other locations for coarsening. Providers that do not need to
      * support platforms below Android R should not use this constant.
      */
-    @TestApi
     @SystemApi
     @Deprecated
     public static final String EXTRA_NO_GPS_LOCATION = "noGPSLocation";
@@ -1062,7 +1060,6 @@ public class Location implements Parcelable {
      * @see #isComplete
      * @hide
      */
-    @TestApi
     @SystemApi
     public void makeComplete() {
         if (mProvider == null) mProvider = "?";
