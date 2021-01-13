@@ -1964,6 +1964,16 @@ interface ITelephony {
     void setVoWiFiSettingEnabled(int subId, boolean isEnabled);
 
     /**
+     * return true if the user's setting for Voice over Cross SIM is enabled and false if it is not
+     */
+    boolean isCrossSimCallingEnabledByUser(int subId);
+
+    /**
+     * Sets the user's setting for whether or not Voice over Cross SIM is enabled.
+     */
+    void setCrossSimCallingEnabled(int subId, boolean isEnabled);
+
+    /**
      * return true if the user's setting for Voice over WiFi while roaming is enabled.
      */
     boolean isVoWiFiRoamingSettingEnabled(int subId);

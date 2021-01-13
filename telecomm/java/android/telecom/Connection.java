@@ -527,9 +527,17 @@ public abstract class Connection extends Conferenceable {
      */
     public static final int PROPERTY_IS_ADHOC_CONFERENCE = 1 << 12;
 
+    /**
+     * Connection is using cross sim technology.
+     * <p>
+     * Indicates that the {@link Connection} is using a cross sim technology which would
+     * register IMS over internet APN of default data subscription.
+     * <p>
+     */
+    public static final int PROPERTY_CROSS_SIM = 1 << 13;
 
     //**********************************************************************************************
-    // Next PROPERTY value: 1<<13
+    // Next PROPERTY value: 1<<14
     //**********************************************************************************************
 
     /**
