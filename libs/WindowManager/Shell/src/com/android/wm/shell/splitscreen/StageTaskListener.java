@@ -118,6 +118,10 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         wct.setBounds(mRootTaskInfo.token, bounds);
     }
 
+    void setVisibility(boolean visible, WindowContainerTransaction wct) {
+        wct.reorder(mRootTaskInfo.token, visible /* onTop */);
+    }
+
     private void updateChildTaskSurface(ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl leash, boolean firstAppeared) {
         final Point taskPositionInParent = taskInfo.positionInParent;

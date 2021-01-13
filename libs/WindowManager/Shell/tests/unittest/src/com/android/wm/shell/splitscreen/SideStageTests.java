@@ -74,10 +74,10 @@ public class SideStageTests {
     @Test
     public void testRemoveTask() {
         final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder().build();
-        assertThat(mSideStage.removeTask(task.taskId, mWct)).isFalse();
+        assertThat(mSideStage.removeTask(task.taskId, null, mWct)).isFalse();
 
         mSideStage.mChildrenTaskInfo.put(task.taskId, task);
-        assertThat(mSideStage.removeTask(task.taskId, mWct)).isTrue();
+        assertThat(mSideStage.removeTask(task.taskId, null, mWct)).isTrue();
         verify(mWct).reparent(eq(task.token), isNull(), eq(false));
     }
 }

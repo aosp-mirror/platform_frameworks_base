@@ -16,6 +16,8 @@
 
 package com.android.wm.shell;
 
+import static com.android.wm.shell.splitscreen.SplitScreen.SIDE_STAGE_POSITION_BOTTOM_OR_RIGHT;
+
 import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
@@ -107,10 +109,14 @@ public final class ShellCommandHandlerImpl {
                 return runPair(args, pw);
             case "unpair":
                 return runUnpair(args, pw);
-            case "pinTask":
-                return runPinTask(args, pw);
-            case "unpinTask":
-                return runUnpinTask(args, pw);
+            case "moveToSideStage":
+                return runMoveToSideStage(args, pw);
+            case "removeFromSideStage":
+                return runRemoveFromSideStage(args, pw);
+            case "setSideStagePosition":
+                return runSetSideStagePosition(args, pw);
+            case "setSideStageVisibility":
+                return runSetSideStageVisibility(args, pw);
             case "help":
                 return runHelp(pw);
             default:
@@ -141,25 +147,50 @@ public final class ShellCommandHandlerImpl {
         return true;
     }
 
-    private boolean runPinTask(String[] args, PrintWriter pw) {
+    private boolean runMoveToSideStage(String[] args, PrintWriter pw) {
         if (args.length < 3) {
             // First arguments are "WMShell" and command name.
             pw.println("Error: task id should be provided as arguments");
             return false;
         }
         final int taskId = new Integer(args[2]);
-        mSplitScreenOptional.ifPresent(split -> split.pinTask(taskId));
+        final int sideStagePosition = args.length > 3
+                ? new Integer(args[3]) : SIDE_STAGE_POSITION_BOTTOM_OR_RIGHT;
+        mSplitScreenOptional.ifPresent(split -> split.moveToSideStage(taskId, sideStagePosition));
         return true;
     }
 
-    private boolean runUnpinTask(String[] args, PrintWriter pw) {
+    private boolean runRemoveFromSideStage(String[] args, PrintWriter pw) {
         if (args.length < 3) {
             // First arguments are "WMShell" and command name.
             pw.println("Error: task id should be provided as arguments");
             return false;
         }
         final int taskId = new Integer(args[2]);
-        mSplitScreenOptional.ifPresent(split -> split.unpinTask(taskId));
+        mSplitScreenOptional.ifPresent(split -> split.removeFromSideStage(taskId));
+        return true;
+    }
+
+    private boolean runSetSideStagePosition(String[] args, PrintWriter pw) {
+        if (args.length < 3) {
+            // First arguments are "WMShell" and command name.
+            pw.println("Error: side stage position should be provided as arguments");
+            return false;
+        }
+        final int position = new Integer(args[2]);
+        mSplitScreenOptional.ifPresent(split -> split.setSideStagePosition(position));
+        return true;
+    }
+
+    private boolean runSetSideStageVisibility(String[] args, PrintWriter pw) {
+        if (args.length < 3) {
+            // First arguments are "WMShell" and command name.
+            pw.println("Error: side stage position should be provided as arguments");
+            return false;
+        }
+        final Boolean visible = new Boolean(args[2]);
+
+        mSplitScreenOptional.ifPresent(split -> split.setSideStageVisibility(visible));
         return true;
     }
 
@@ -172,9 +203,14 @@ public final class ShellCommandHandlerImpl {
         pw.println("  pair <taskId1> <taskId2>");
         pw.println("  unpair <taskId>");
         pw.println("    Pairs/unpairs tasks with given ids.");
-        pw.println("  pinTask <taskId>");
-        pw.println("  unpinTask <taskId>");
-        pw.println("    Pin/Unpin a task with given id in split-screen mode.");
+        pw.println("  moveToSideStage <taskId> <SideStagePosition>");
+        pw.println("    Move a task with given id in split-screen mode.");
+        pw.println("  removeFromSideStage <taskId>");
+        pw.println("    Remove a task with given id in split-screen mode.");
+        pw.println("  setSideStagePosition <SideStagePosition>");
+        pw.println("    Sets the position of the side-stage.");
+        pw.println("  setSideStageVisibility <true/false>");
+        pw.println("    Show/hide side-stage.");
         return true;
     }
 
