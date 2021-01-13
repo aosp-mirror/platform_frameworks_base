@@ -16,15 +16,14 @@
 
 #pragma once
 
+#include "pipeline/skia/SkiaDisplayList.h"
+
 namespace android {
 namespace uirenderer {
 
 namespace VectorDrawable {
 class Tree;
 };
-namespace skiapipeline {
-class SkiaDisplayList;
-}
 typedef uirenderer::VectorDrawable::Tree VectorDrawableRoot;
 
 /**

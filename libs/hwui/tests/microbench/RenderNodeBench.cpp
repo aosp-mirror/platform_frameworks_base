@@ -16,6 +16,7 @@
 
 #include <benchmark/benchmark.h>
 
+#include "hwui/Canvas.h"
 #include "RenderNode.h"
 
 using namespace android;
