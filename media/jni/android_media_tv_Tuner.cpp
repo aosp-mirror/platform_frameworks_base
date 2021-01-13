@@ -1473,28 +1473,6 @@ jobject JTuner::getFrontendInfo(int id) {
             maxSymbolRate, acquireRange, exclusiveGroupId, statusCaps, jcaps);
 }
 
-jintArray JTuner::getLnbIds() {
-    ALOGD("JTuner::getLnbIds()");
-    Result res;
-    hidl_vec<LnbId> lnbIds;
-    mTuner->getLnbIds([&](Result r, const hidl_vec<LnbId>& ids) {
-        lnbIds = ids;
-        res = r;
-    });
-    if (res != Result::SUCCESS || lnbIds.size() == 0) {
-        ALOGW("Lnb isn't available");
-        return NULL;
-    }
-
-    mLnbIds = lnbIds;
-    JNIEnv *env = AndroidRuntime::getJNIEnv();
-
-    jintArray ids = env->NewIntArray(mLnbIds.size());
-    env->SetIntArrayRegion(ids, 0, mLnbIds.size(), reinterpret_cast<jint*>(&mLnbIds[0]));
-
-    return ids;
-}
-
 jobject JTuner::openLnbById(int id) {
     sp<ILnb> iLnbSp;
     Result r;
@@ -3433,11 +3411,6 @@ static jobject android_media_tv_Tuner_get_frontend_info(JNIEnv *env, jobject thi
     return tuner->getFrontendInfo(id);
 }
 
-static jintArray android_media_tv_Tuner_get_lnb_ids(JNIEnv *env, jobject thiz) {
-    sp<JTuner> tuner = getTuner(env, thiz);
-    return tuner->getLnbIds();
-}
-
 static jobject android_media_tv_Tuner_open_lnb_by_handle(JNIEnv *env, jobject thiz, jint handle) {
     sp<JTuner> tuner = getTuner(env, thiz);
     uint32_t id = getResourceIdFromHandle(handle);
@@ -4484,7 +4457,6 @@ static const JNINativeMethod gTunerMethods[] = {
             (void *)android_media_tv_Tuner_open_filter },
     { "nativeOpenTimeFilter", "()Landroid/media/tv/tuner/filter/TimeFilter;",
             (void *)android_media_tv_Tuner_open_time_filter },
-    { "nativeGetLnbIds", "()[I", (void *)android_media_tv_Tuner_get_lnb_ids },
     { "nativeOpenLnbByHandle", "(I)Landroid/media/tv/tuner/Lnb;",
             (void *)android_media_tv_Tuner_open_lnb_by_handle },
     { "nativeOpenLnbByName", "(Ljava/lang/String;)Landroid/media/tv/tuner/Lnb;",
