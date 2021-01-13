@@ -3014,7 +3014,9 @@ public class DevicePolicyManager {
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
-     * profile. Apps targeting {@link android.os.Build.VERSION_CODES#S} and above will get a
+     * profile. Apps targeting {@link android.os.Build.VERSION_CODES#S} and above, with the
+     * exception of a profile owner on an organization-owned device (as can be identified by
+     * {@link #isOrganizationOwnedDeviceWithManagedProfile}), will get a
      * {@code IllegalArgumentException} when calling this method on the parent
      * {@link DevicePolicyManager} instance.
      *
