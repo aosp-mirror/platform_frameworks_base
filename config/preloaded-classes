@@ -1838,11 +1838,9 @@ android.database.sqlite.SqliteWrapper
 android.ddm.DdmHandleAppName$Names
 android.ddm.DdmHandleAppName
 android.ddm.DdmHandleExit
-android.ddm.DdmHandleHeap
 android.ddm.DdmHandleHello
 android.ddm.DdmHandleNativeHeap
 android.ddm.DdmHandleProfiling
-android.ddm.DdmHandleThread
 android.ddm.DdmHandleViewDebug
 android.ddm.DdmRegister
 android.debug.AdbManager
