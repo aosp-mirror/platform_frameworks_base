@@ -57,6 +57,8 @@ java_library {
     visibility: [
         "//frameworks/opt/net/wifi/service",
         "//frameworks/opt/net/wifi/tests/wifitests",
+        "//packages/modules/Wifi/service",
+        "//packages/modules/Wifi/service/tests/wifitests",
     ],
 }
 
@@ -66,5 +68,5 @@ filegroup {
         ":framework-annotations",
         "java/android/net/util/NetworkConstants.java",
     ],
-    visibility: ["//frameworks/base/packages/Tethering"],
+    visibility: ["//packages/modules/Connectivity/Tethering"],
 }

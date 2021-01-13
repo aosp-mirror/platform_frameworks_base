@@ -66,7 +66,7 @@
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Disconnesso"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Disconnessione…"</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Connessione…"</string>
-    <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> connesso"</string>
+    <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> Connesso"</string>
     <string name="bluetooth_pairing" msgid="4269046942588193600">"Accoppiamento…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> connesso (telefono escluso)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> connesso (contenuti multimediali esclusi)"</string>
