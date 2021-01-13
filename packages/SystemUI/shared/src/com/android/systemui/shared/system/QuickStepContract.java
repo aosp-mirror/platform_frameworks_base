@@ -90,6 +90,8 @@ public class QuickStepContract {
     public static final int SYSUI_STATE_GLOBAL_ACTIONS_SHOWING = 1 << 15;
     // The one-handed mode is active
     public static final int SYSUI_STATE_ONE_HANDED_ACTIVE = 1 << 16;
+    // Allow system gesture no matter the system bar(s) is visible or not
+    public static final int SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY = 1 << 17;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
@@ -107,8 +109,9 @@ public class QuickStepContract {
             SYSUI_STATE_TRACING_ENABLED,
             SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED,
             SYSUI_STATE_BUBBLES_EXPANDED,
+            SYSUI_STATE_GLOBAL_ACTIONS_SHOWING,
             SYSUI_STATE_ONE_HANDED_ACTIVE,
-            SYSUI_STATE_GLOBAL_ACTIONS_SHOWING
+            SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY
     })
     public @interface SystemUiStateFlags {}
 
@@ -133,6 +136,8 @@ public class QuickStepContract {
                 ? "asst_gesture_constrain" : "");
         str.add((flags & SYSUI_STATE_BUBBLES_EXPANDED) != 0 ? "bubbles_expanded" : "");
         str.add((flags & SYSUI_STATE_ONE_HANDED_ACTIVE) != 0 ? "one_handed_active" : "");
+        str.add((flags & SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY) != 0
+                ? "allow_gesture" : "");
         return str.toString();
     }
 
@@ -175,6 +180,9 @@ public class QuickStepContract {
      * disabled.
      */
     public static boolean isAssistantGestureDisabled(int sysuiStateFlags) {
+        if ((sysuiStateFlags & SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY) != 0) {
+            sysuiStateFlags &= ~SYSUI_STATE_NAV_BAR_HIDDEN;
+        }
         // Disable when in quick settings, screen pinning, immersive, the bouncer is showing, 
         // or search is disabled
         int disableFlags = SYSUI_STATE_SCREEN_PINNING
@@ -204,6 +212,9 @@ public class QuickStepContract {
         if ((sysuiStateFlags & SYSUI_STATE_BOUNCER_SHOWING) != 0
                 || (sysuiStateFlags & SYSUI_STATE_GLOBAL_ACTIONS_SHOWING) != 0) {
             return false;
+        }
+        if ((sysuiStateFlags & SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY) != 0) {
+            sysuiStateFlags &= ~SYSUI_STATE_NAV_BAR_HIDDEN;
         }
         // Disable when in immersive, or the notifications are interactive
         int disableFlags = SYSUI_STATE_NAV_BAR_HIDDEN
