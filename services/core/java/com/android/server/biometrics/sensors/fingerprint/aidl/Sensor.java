@@ -473,6 +473,7 @@ class Sensor implements IBinder.DeathRecipient {
         final long sensorToken = proto.start(SensorServiceStateProto.SENSOR_STATES);
 
         proto.write(SensorStateProto.SENSOR_ID, mSensorProperties.sensorId);
+        proto.write(SensorStateProto.MODALITY, SensorStateProto.FINGERPRINT);
         proto.write(SensorStateProto.IS_BUSY, mScheduler.getCurrentClient() != null);
 
         for (UserInfo user : UserManager.get(mContext).getUsers()) {
