@@ -33,7 +33,6 @@ oneway interface IOptionsRequestCallback {
     /**
      * Respond to a remote capability request from the contact specified with the
      * specified error.
-     * @param contactUri A URI containing the remote contact.
      * @param code The SIP response code to respond with.
      * @param reason A non-null String containing the reason associated with the SIP code.
      */
