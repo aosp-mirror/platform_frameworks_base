@@ -51,22 +51,23 @@ import com.android.wm.shell.R;
  */
 public final class SplitWindowManager extends WindowlessWindowManager {
     private static final String TAG = SplitWindowManager.class.getSimpleName();
-    private static final String DIVIDER_WINDOW_TITLE = "SplitDivider";
 
     private final ParentContainerCallbacks mParentContainerCallbacks;
     private Context mContext;
     private SurfaceControlViewHost mViewHost;
     private boolean mResizingSplits;
+    private final String mWindowName;
 
     public interface ParentContainerCallbacks {
         void attachToParentSurface(SurfaceControl.Builder b);
     }
 
-    public SplitWindowManager(Context context, Configuration config,
+    public SplitWindowManager(String windowName, Context context, Configuration config,
             ParentContainerCallbacks parentContainerCallbacks) {
         super(config, null /* rootSurface */, null /* hostInputToken */);
         mContext = context.createConfigurationContext(config);
         mParentContainerCallbacks = parentContainerCallbacks;
+        mWindowName = windowName;
     }
 
     @Override
@@ -106,7 +107,7 @@ public final class SplitWindowManager extends WindowlessWindowManager {
                         | FLAG_SPLIT_TOUCH | FLAG_SLIPPERY,
                 PixelFormat.TRANSLUCENT);
         lp.token = new Binder();
-        lp.setTitle(DIVIDER_WINDOW_TITLE);
+        lp.setTitle(mWindowName);
         lp.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION | PRIVATE_FLAG_TRUSTED_OVERLAY;
         mViewHost.setView(dividerView, lp);
         dividerView.setup(splitLayout, mViewHost);

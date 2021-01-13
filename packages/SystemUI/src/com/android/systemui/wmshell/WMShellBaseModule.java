@@ -70,6 +70,7 @@ import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.phone.PipAppOpsListener;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
+import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
@@ -174,6 +175,7 @@ public abstract class WMShellBaseModule {
             DragAndDropController dragAndDropController,
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<LegacySplitScreen> legacySplitScreenOptional,
+            Optional<SplitScreen> splitScreenOptional,
             Optional<AppPairs> appPairsOptional,
             FullscreenTaskListener fullscreenTaskListener,
             Transitions transitions,
@@ -182,6 +184,7 @@ public abstract class WMShellBaseModule {
                 dragAndDropController,
                 shellTaskOrganizer,
                 legacySplitScreenOptional,
+                splitScreenOptional,
                 appPairsOptional,
                 fullscreenTaskListener,
                 transitions,
@@ -197,14 +200,15 @@ public abstract class WMShellBaseModule {
     static Optional<ShellCommandHandler> provideShellCommandHandler(
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<LegacySplitScreen> legacySplitScreenOptional,
+            Optional<SplitScreen> splitScreenOptional,
             Optional<Pip> pipOptional,
             Optional<OneHanded> oneHandedOptional,
             Optional<HideDisplayCutout> hideDisplayCutout,
             Optional<AppPairs> appPairsOptional,
             @ShellMainThread ShellExecutor mainExecutor) {
         return Optional.of(ShellCommandHandlerImpl.create(shellTaskOrganizer,
-                legacySplitScreenOptional, pipOptional, oneHandedOptional, hideDisplayCutout,
-                appPairsOptional, mainExecutor));
+                legacySplitScreenOptional, splitScreenOptional, pipOptional, oneHandedOptional,
+                hideDisplayCutout, appPairsOptional, mainExecutor));
     }
 
     @WMSingleton
@@ -305,6 +309,9 @@ public abstract class WMShellBaseModule {
 
     @BindsOptionalOf
     abstract LegacySplitScreen optionalLegacySplitScreen();
+
+    @BindsOptionalOf
+    abstract SplitScreen optionalSplitScreen();
 
     @BindsOptionalOf
     abstract AppPairs optionalAppPairs();

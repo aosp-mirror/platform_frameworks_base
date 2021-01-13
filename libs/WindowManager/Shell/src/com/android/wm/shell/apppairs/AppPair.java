@@ -94,7 +94,7 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.LayoutChan
 
         mTaskInfo1 = task1;
         mTaskInfo2 = task2;
-        mSplitLayout = new SplitLayout(
+        mSplitLayout = new SplitLayout(TAG + "SplitDivider",
                 mDisplayController.getDisplayContext(mRootTaskInfo.displayId),
                 mRootTaskInfo.configuration, this /* layoutChangeListener */,
                 b -> b.setParent(mRootTaskLeash));
@@ -248,13 +248,13 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.LayoutChan
         final Rect bounds1 = layout.getBounds1();
         final Rect bounds2 = layout.getBounds2();
         mSyncQueue.runInSync(t -> t
-                // Ignores the original surface bounds so that the app could fill up the gap
-                // between each surface with corresponding background while resizing.
-                .setWindowCrop(mTaskLeash1, bounds1.width(), bounds1.height())
-                .setWindowCrop(mTaskLeash2, bounds2.width(), bounds2.height())
                 .setPosition(dividerLeash, dividerBounds.left, dividerBounds.top)
                 .setPosition(mTaskLeash1, bounds1.left, bounds1.top)
-                .setPosition(mTaskLeash2, bounds2.left, bounds2.top));
+                .setPosition(mTaskLeash2, bounds2.left, bounds2.top)
+                // Sets crop to prevent visible region of tasks overlap with each other when
+                // re-positioning surfaces while resizing.
+                .setWindowCrop(mTaskLeash1, bounds1.width(), bounds1.height())
+                .setWindowCrop(mTaskLeash2, bounds2.width(), bounds2.height()));
     }
 
     @Override
@@ -271,10 +271,11 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.LayoutChan
         mSyncQueue.runInSync(t -> t
                 // Resets layer of divider bar to make sure it is always on top.
                 .setLayer(dividerLeash, Integer.MAX_VALUE)
-                .setWindowCrop(mTaskLeash1, bounds1.width(), bounds1.height())
-                .setWindowCrop(mTaskLeash2, bounds2.width(), bounds2.height())
                 .setPosition(dividerLeash, dividerBounds.left, dividerBounds.top)
                 .setPosition(mTaskLeash1, bounds1.left, bounds1.top)
-                .setPosition(mTaskLeash2, bounds2.left, bounds2.top));
+                .setPosition(mTaskLeash2, bounds2.left, bounds2.top)
+                // Resets crop to apply new surface bounds directly.
+                .setWindowCrop(mTaskLeash1, null)
+                .setWindowCrop(mTaskLeash2, null));
     }
 }
