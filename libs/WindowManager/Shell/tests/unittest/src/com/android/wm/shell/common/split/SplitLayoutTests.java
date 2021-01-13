@@ -83,6 +83,12 @@ public class SplitLayoutTests extends ShellTestCase {
     }
 
     @Test
+    public void testOnDoubleTappedDivider() {
+        mSplitLayout.onDoubleTappedDivider();
+        verify(mLayoutChangeListener).onDoubleTappedDivider();
+    }
+
+    @Test
     @UiThreadTest
     public void testSnapToDismissTarget() {
         // verify it callbacks properly when the snap target indicates dismissing split.

@@ -271,6 +271,12 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
     }
 
     @Override
+    public void onDoubleTappedDivider() {
+        setSideStagePosition(mSideStagePosition == SIDE_STAGE_POSITION_TOP_OR_LEFT
+                ? SIDE_STAGE_POSITION_BOTTOM_OR_RIGHT : SIDE_STAGE_POSITION_TOP_OR_LEFT);
+    }
+
+    @Override
     public void onBoundsChanged(SplitLayout layout) {
         final SurfaceControl dividerLeash = mSplitLayout.getDividerLeash();
         if (dividerLeash == null) return;
