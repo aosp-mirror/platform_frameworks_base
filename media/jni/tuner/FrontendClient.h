@@ -24,6 +24,7 @@
 #include <android/hardware/tv/tuner/1.1/types.h>
 
 #include "FrontendClientCallback.h"
+#include "LnbClient.h"
 
 using Status = ::ndk::ScopedAStatus;
 
@@ -125,6 +126,11 @@ public:
      * Stop tune Frontend.
      */
     Result stopTune();
+
+    /**
+     * Sets Low-Noise Block downconverter (LNB) for satellite frontend.
+     */
+    Result setLnb(sp<LnbClient> lnbClient);
 
     /**
      * Close Frontend.

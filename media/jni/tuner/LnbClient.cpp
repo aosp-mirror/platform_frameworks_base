@@ -30,11 +30,13 @@ namespace android {
 // TODO: pending aidl interface
 LnbClient::LnbClient() {
     //mTunerLnb = tunerLnb;
+    mId = -1;
 }
 
 LnbClient::~LnbClient() {
     //mTunerLnb = NULL;
     mLnb = NULL;
+    mId = -1;
 }
 
 // TODO: remove after migration to Tuner Service is done.
@@ -42,28 +44,66 @@ void LnbClient::setHidlLnb(sp<ILnb> lnb) {
     mLnb = lnb;
 }
 
-Result LnbClient::setCallback(sp<LnbClientCallback> /*cb*/) {
-    return Result::SUCCESS;
+Result LnbClient::setCallback(sp<LnbClientCallback> cb) {
+    // TODO: pending aidl interface
+    /*if (mTunerFrontend != NULL) {
+        mAidlCallback = ::ndk::SharedRefBase::make<TunerLnbCallback>(cb);
+        mTunerLnb->setCallback(mAidlCallback);
+        return Result::SUCCESS;
+    }*/
+
+    mHidlCallback = new HidlLnbCallback(cb);
+    return mLnb->setCallback(mHidlCallback);
 }
 
-Result LnbClient::setVoltage(int /*voltage*/) {
-    return Result::SUCCESS;
+Result LnbClient::setVoltage(LnbVoltage voltage) {
+    // TODO: pending aidl interface
+
+    if (mLnb != NULL) {
+        return mLnb->setVoltage(voltage);
+    }
+
+    return Result::INVALID_STATE;
 }
 
-Result LnbClient::setTone(int /*tone*/) {
-    return Result::SUCCESS;
+Result LnbClient::setTone(LnbTone tone) {
+    // TODO: pending aidl interface
+
+    if (mLnb != NULL) {
+        return mLnb->setTone(tone);
+    }
+
+    return Result::INVALID_STATE;
 }
 
-Result LnbClient::setSatellitePosition(int /*position*/) {
-    return Result::SUCCESS;
+Result LnbClient::setSatellitePosition(LnbPosition position) {
+    // TODO: pending aidl interface
+
+    if (mLnb != NULL) {
+        return mLnb->setSatellitePosition(position);
+    }
+
+    return Result::INVALID_STATE;
 }
 
-Result LnbClient::sendDiseqcMessage(vector<uint8_t> /*diseqcMessage*/) {
-    return Result::SUCCESS;
+Result LnbClient::sendDiseqcMessage(vector<uint8_t> diseqcMessage) {
+    // TODO: pending aidl interface
+
+    if (mLnb != NULL) {
+        return mLnb->sendDiseqcMessage(diseqcMessage);
+    }
+
+    return Result::INVALID_STATE;
 }
 
 Result LnbClient::close() {
-    return Result::SUCCESS;
+    // TODO: pending aidl interface
+
+    if (mLnb != NULL) {
+        return mLnb->close();
+    }
+
+    return Result::INVALID_STATE;
 }
 
 /////////////// ILnbCallback ///////////////////////

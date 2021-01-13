@@ -99,6 +99,21 @@ Result FrontendClient::stopTune() {
     return Result::INVALID_STATE;
 }
 
+Result FrontendClient::setLnb(sp<LnbClient> lnbClient) {
+    if (mTunerFrontend != NULL) {
+        // TODO: handle error message.
+        /*mTunerFrontend->setLnb(lnbClient->getAidlLnb());
+        return Result::SUCCESS;*/
+    }
+
+    if (mFrontend != NULL) {
+        Result result = mFrontend->setLnb(lnbClient->getId());
+        return result;
+    }
+
+    return Result::INVALID_STATE;
+}
+
 Result FrontendClient::close() {
     if (mTunerFrontend != NULL) {
         // TODO: handle error message.

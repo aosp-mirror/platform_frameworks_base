@@ -211,59 +211,46 @@ void DestroyCallback(const C2Buffer * buf, void *arg) {
 }
 
 namespace android {
-/////////////// LnbCallback ///////////////////////
-LnbCallback::LnbCallback(jobject lnbObj, LnbId id) : mId(id) {
-    JNIEnv *env = AndroidRuntime::getJNIEnv();
-    mLnb = env->NewWeakGlobalRef(lnbObj);
-}
 
-LnbCallback::~LnbCallback() {
-    JNIEnv *env = AndroidRuntime::getJNIEnv();
-    env->DeleteWeakGlobalRef(mLnb);
-    mLnb = NULL;
-}
+/////////////// LnbClientCallbackImpl ///////////////////////
 
-Return<void> LnbCallback::onEvent(LnbEventType lnbEventType) {
-    ALOGD("LnbCallback::onEvent, type=%d", lnbEventType);
+void LnbClientCallbackImpl::onEvent(const LnbEventType lnbEventType) {
+    ALOGD("LnbClientCallbackImpl::onEvent, type=%d", lnbEventType);
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     env->CallVoidMethod(
-            mLnb,
+            mLnbObj,
             gFields.onLnbEventID,
             (jint)lnbEventType);
-    return Void();
 }
-Return<void> LnbCallback::onDiseqcMessage(const hidl_vec<uint8_t>& diseqcMessage) {
-    ALOGD("LnbCallback::onDiseqcMessage");
+
+void LnbClientCallbackImpl::onDiseqcMessage(const hidl_vec<uint8_t>& diseqcMessage) {
+    ALOGD("LnbClientCallbackImpl::onDiseqcMessage");
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     jbyteArray array = env->NewByteArray(diseqcMessage.size());
     env->SetByteArrayRegion(
             array, 0, diseqcMessage.size(), reinterpret_cast<jbyte*>(diseqcMessage[0]));
 
     env->CallVoidMethod(
-            mLnb,
+            mLnbObj,
             gFields.onLnbDiseqcMessageID,
             array);
-    return Void();
 }
 
-/////////////// Lnb ///////////////////////
+void LnbClientCallbackImpl::setLnb(jweak lnbObj) {
+    ALOGD("LnbClientCallbackImpl::setLnb");
+    mLnbObj = lnbObj;
+}
 
-Lnb::Lnb(sp<ILnb> sp, jobject obj) : mLnbSp(sp) {
+LnbClientCallbackImpl::~LnbClientCallbackImpl() {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    mLnbObj = env->NewWeakGlobalRef(obj);
-}
-
-Lnb::~Lnb() {
-    JNIEnv *env = AndroidRuntime::getJNIEnv();
-    env->DeleteWeakGlobalRef(mLnbObj);
-    mLnbObj = NULL;
-}
-
-sp<ILnb> Lnb::getILnb() {
-    return mLnbSp;
+    if (mLnbObj != NULL) {
+        env->DeleteWeakGlobalRef(mLnbObj);
+        mLnbObj = NULL;
+    }
 }
 
 /////////////// DvrClientCallbackImpl ///////////////////////
+
 void DvrClientCallbackImpl::onRecordStatus(RecordStatus status) {
     ALOGD("DvrClientCallbackImpl::onRecordStatus");
     JNIEnv *env = AndroidRuntime::getJNIEnv();
@@ -1473,63 +1460,63 @@ jobject JTuner::getFrontendInfo(int id) {
             maxSymbolRate, acquireRange, exclusiveGroupId, statusCaps, jcaps);
 }
 
-jobject JTuner::openLnbById(int id) {
-    sp<ILnb> iLnbSp;
-    Result r;
-    mTuner->openLnbById(id, [&](Result res, const sp<ILnb>& lnb) {
-        r = res;
-        iLnbSp = lnb;
-    });
-    if (r != Result::SUCCESS || iLnbSp == nullptr) {
-        ALOGE("Failed to open lnb");
+jobject JTuner::openLnbByHandle(int handle) {
+    if (mTunerClient == NULL) {
         return NULL;
     }
-    mLnb = iLnbSp;
+
+    sp<LnbClient> lnbClient;
+    sp<LnbClientCallbackImpl> callback = new LnbClientCallbackImpl();
+    lnbClient = mTunerClient->openLnb(handle);
+    if (lnbClient == NULL) {
+        ALOGD("Failed to open lnb, handle = %d", handle);
+        return NULL;
+    }
+
+    if (lnbClient->setCallback(callback) != Result::SUCCESS) {
+        ALOGD("Failed to set lnb callback");
+        return NULL;
+    }
 
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     jobject lnbObj = env->NewObject(
             env->FindClass("android/media/tv/tuner/Lnb"),
-            gFields.lnbInitID,
-            (jint) id);
+            gFields.lnbInitID);
 
-    sp<LnbCallback> lnbCb = new LnbCallback(lnbObj, id);
-    mLnb->setCallback(lnbCb);
-
-    sp<Lnb> lnbSp = new Lnb(iLnbSp, lnbObj);
-    lnbSp->incStrong(lnbObj);
-    env->SetLongField(lnbObj, gFields.lnbContext, (jlong) lnbSp.get());
+    lnbClient->incStrong(lnbObj);
+    env->SetLongField(lnbObj, gFields.lnbContext, (jlong)lnbClient.get());
+    callback->setLnb(env->NewWeakGlobalRef(lnbObj));
 
     return lnbObj;
 }
 
 jobject JTuner::openLnbByName(jstring name) {
-    JNIEnv *env = AndroidRuntime::getJNIEnv();
-    std::string lnbName(env->GetStringUTFChars(name, nullptr));
-    sp<ILnb> iLnbSp;
-    Result res;
-    LnbId id;
-    mTuner->openLnbByName(lnbName, [&](Result r, LnbId lnbId, const sp<ILnb>& lnb) {
-        res = r;
-        iLnbSp = lnb;
-        id = lnbId;
-    });
-    if (res != Result::SUCCESS || iLnbSp == nullptr) {
-        ALOGE("Failed to open lnb");
+    if (mTunerClient == NULL) {
         return NULL;
     }
-    mLnb = iLnbSp;
+
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    std::string lnbName(env->GetStringUTFChars(name, nullptr));
+    sp<LnbClient> lnbClient;
+    sp<LnbClientCallbackImpl> callback = new LnbClientCallbackImpl();
+    lnbClient = mTunerClient->openLnbByName(lnbName);
+    if (lnbClient == NULL) {
+        ALOGD("Failed to open lnb by name, name = %s", lnbName.c_str());
+        return NULL;
+    }
+
+    if (lnbClient->setCallback(callback) != Result::SUCCESS) {
+        ALOGD("Failed to set lnb callback");
+        return NULL;
+    }
 
     jobject lnbObj = env->NewObject(
             env->FindClass("android/media/tv/tuner/Lnb"),
-            gFields.lnbInitID,
-            id);
+            gFields.lnbInitID);
 
-    sp<LnbCallback> lnbCb = new LnbCallback(lnbObj, id);
-    mLnb->setCallback(lnbCb);
-
-    sp<Lnb> lnbSp = new Lnb(iLnbSp, lnbObj);
-    lnbSp->incStrong(lnbObj);
-    env->SetLongField(lnbObj, gFields.lnbContext, (jlong) lnbSp.get());
+    lnbClient->incStrong(lnbObj);
+    env->SetLongField(lnbObj, gFields.lnbContext, (jlong)lnbClient.get());
+    callback->setLnb(env->NewWeakGlobalRef(lnbObj));
 
     return lnbObj;
 }
@@ -1578,12 +1565,16 @@ int JTuner::stopScan() {
     return (int)result;
 }
 
-int JTuner::setLnb(int id) {
-    if (mFe == NULL) {
-        ALOGE("frontend is not initialized");
+int JTuner::setLnb(sp<LnbClient> lnbClient) {
+    if (mFeClient == NULL) {
+        ALOGE("frontend client is not initialized");
         return (int)Result::INVALID_STATE;
     }
-    Result result = mFe->setLnb(id);
+    if (lnbClient == NULL) {
+        ALOGE("lnb is not initialized");
+        return (int)Result::INVALID_STATE;
+    }
+    Result result = mFeClient->setLnb(lnbClient);
     return (int)result;
 }
 
@@ -3202,6 +3193,10 @@ static sp<FilterClient> getFilterClient(JNIEnv *env, jobject filter) {
     return (FilterClient *)env->GetLongField(filter, gFields.filterContext);
 }
 
+static sp<LnbClient> getLnbClient(JNIEnv *env, jobject lnb) {
+    return (LnbClient *)env->GetLongField(lnb, gFields.lnbContext);
+}
+
 static DvrSettings getDvrSettings(JNIEnv *env, jobject settings, bool isRecorder) {
     DvrSettings dvrSettings;
     jclass clazz = env->FindClass("android/media/tv/tuner/dvr/DvrSettings");
@@ -3265,7 +3260,7 @@ static void android_media_tv_Tuner_native_init(JNIEnv *env) {
 
     jclass lnbClazz = env->FindClass("android/media/tv/tuner/Lnb");
     gFields.lnbContext = env->GetFieldID(lnbClazz, "mNativeContext", "J");
-    gFields.lnbInitID = env->GetMethodID(lnbClazz, "<init>", "(I)V");
+    gFields.lnbInitID = env->GetMethodID(lnbClazz, "<init>", "()V");
     gFields.onLnbEventID = env->GetMethodID(lnbClazz, "onEvent", "(I)V");
     gFields.onLnbDiseqcMessageID = env->GetMethodID(lnbClazz, "onDiseqcMessage", "([B)V");
 
@@ -3354,9 +3349,14 @@ static int android_media_tv_Tuner_stop_scan(JNIEnv *env, jobject thiz) {
     return tuner->stopScan();
 }
 
-static int android_media_tv_Tuner_set_lnb(JNIEnv *env, jobject thiz, jint id) {
+static int android_media_tv_Tuner_set_lnb(JNIEnv *env, jobject thiz, jobject lnb) {
     sp<JTuner> tuner = getTuner(env, thiz);
-    return tuner->setLnb(id);
+    sp<LnbClient> lnbClient = getLnbClient(env, lnb);
+    if (lnbClient == NULL) {
+        ALOGE("lnb is not initialized");
+        return (int)Result::INVALID_STATE;
+    }
+    return tuner->setLnb(lnbClient);
 }
 
 static int android_media_tv_Tuner_set_lna(JNIEnv *env, jobject thiz, jboolean enable) {
@@ -3413,8 +3413,7 @@ static jobject android_media_tv_Tuner_get_frontend_info(JNIEnv *env, jobject thi
 
 static jobject android_media_tv_Tuner_open_lnb_by_handle(JNIEnv *env, jobject thiz, jint handle) {
     sp<JTuner> tuner = getTuner(env, thiz);
-    uint32_t id = getResourceIdFromHandle(handle);
-    return tuner->openLnbById(id);
+    return tuner->openLnbByHandle(handle);
 }
 
 static jobject android_media_tv_Tuner_open_lnb_by_name(JNIEnv *env, jobject thiz, jstring name) {
@@ -4262,42 +4261,38 @@ static jint android_media_tv_Tuner_close_dvr(JNIEnv* env, jobject dvr) {
     return (jint) dvrClient->close();
 }
 
-static sp<Lnb> getLnb(JNIEnv *env, jobject lnb) {
-    return (Lnb *)env->GetLongField(lnb, gFields.lnbContext);
-}
-
 static jint android_media_tv_Tuner_lnb_set_voltage(JNIEnv* env, jobject lnb, jint voltage) {
-    sp<ILnb> iLnbSp = getLnb(env, lnb)->getILnb();
-    Result r = iLnbSp->setVoltage(static_cast<LnbVoltage>(voltage));
+    sp<LnbClient> lnbClient = getLnbClient(env, lnb);
+    Result r = lnbClient->setVoltage(static_cast<LnbVoltage>(voltage));
     return (jint) r;
 }
 
 static int android_media_tv_Tuner_lnb_set_tone(JNIEnv* env, jobject lnb, jint tone) {
-    sp<ILnb> iLnbSp = getLnb(env, lnb)->getILnb();
-    Result r = iLnbSp->setTone(static_cast<LnbTone>(tone));
+    sp<LnbClient> lnbClient = getLnbClient(env, lnb);
+    Result r = lnbClient->setTone(static_cast<LnbTone>(tone));
     return (jint) r;
 }
 
 static int android_media_tv_Tuner_lnb_set_position(JNIEnv* env, jobject lnb, jint position) {
-    sp<ILnb> iLnbSp = getLnb(env, lnb)->getILnb();
-    Result r = iLnbSp->setSatellitePosition(static_cast<LnbPosition>(position));
+    sp<LnbClient> lnbClient = getLnbClient(env, lnb);
+    Result r = lnbClient->setSatellitePosition(static_cast<LnbPosition>(position));
     return (jint) r;
 }
 
 static int android_media_tv_Tuner_lnb_send_diseqc_msg(JNIEnv* env, jobject lnb, jbyteArray msg) {
-    sp<ILnb> iLnbSp = getLnb(env, lnb)->getILnb();
+    sp<LnbClient> lnbClient = getLnbClient(env, lnb);
     int size = env->GetArrayLength(msg);
     std::vector<uint8_t> v(size);
     env->GetByteArrayRegion(msg, 0, size, reinterpret_cast<jbyte*>(&v[0]));
-    Result r = iLnbSp->sendDiseqcMessage(v);
+    Result r = lnbClient->sendDiseqcMessage(v);
     return (jint) r;
 }
 
 static int android_media_tv_Tuner_close_lnb(JNIEnv* env, jobject lnb) {
-    sp<Lnb> lnbSp = getLnb(env, lnb);
-    Result r = lnbSp->getILnb()->close();
+    sp<LnbClient> lnbClient = getLnbClient(env, lnb);
+    Result r = lnbClient->close();
     if (r == Result::SUCCESS) {
-        lnbSp->decStrong(lnb);
+        lnbClient->decStrong(lnb);
         env->SetLongField(lnb, gFields.lnbContext, 0);
     }
     return (jint) r;
@@ -4437,7 +4432,7 @@ static const JNINativeMethod gTunerMethods[] = {
     { "nativeScan", "(ILandroid/media/tv/tuner/frontend/FrontendSettings;I)I",
             (void *)android_media_tv_Tuner_scan },
     { "nativeStopScan", "()I", (void *)android_media_tv_Tuner_stop_scan },
-    { "nativeSetLnb", "(I)I", (void *)android_media_tv_Tuner_set_lnb },
+    { "nativeSetLnb", "(Landroid/media/tv/tuner/Lnb;)I", (void *)android_media_tv_Tuner_set_lnb },
     { "nativeSetLna", "(Z)I", (void *)android_media_tv_Tuner_set_lna },
     { "nativeGetFrontendStatus", "([I)Landroid/media/tv/tuner/frontend/FrontendStatus;",
             (void *)android_media_tv_Tuner_get_frontend_status },

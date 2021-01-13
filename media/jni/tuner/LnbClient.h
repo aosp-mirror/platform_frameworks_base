@@ -31,6 +31,10 @@ using ::android::hardware::Void;
 using ::android::hardware::hidl_vec;
 using ::android::hardware::tv::tuner::V1_0::ILnb;
 using ::android::hardware::tv::tuner::V1_0::ILnbCallback;
+using ::android::hardware::tv::tuner::V1_0::LnbId;
+using ::android::hardware::tv::tuner::V1_0::LnbPosition;
+using ::android::hardware::tv::tuner::V1_0::LnbTone;
+using ::android::hardware::tv::tuner::V1_0::LnbVoltage;
 using ::android::hardware::tv::tuner::V1_0::Result;
 
 using namespace std;
@@ -79,17 +83,17 @@ public:
     /**
      * Set the lnb's power voltage.
      */
-    Result setVoltage(int voltage);
+    Result setVoltage(LnbVoltage voltage);
 
     /**
      * Set the lnb's tone mode.
      */
-    Result setTone(int tone);
+    Result setTone(LnbTone tone);
 
     /**
      * Select the lnb's position.
      */
-    Result setSatellitePosition(int position);
+    Result setSatellitePosition(LnbPosition position);
 
     /**
      * Sends DiSEqC (Digital Satellite Equipment Control) message.
@@ -100,6 +104,10 @@ public:
      * Releases the LNB instance.
      */
     Result close();
+
+    //shared_ptr<ITunerLnb> getAidlLnb() { return mTunerLnb; }
+    void setId(LnbId id) { mId = id; }
+    LnbId getId() { return mId; }
 
 private:
     /**
@@ -115,6 +123,11 @@ private:
      * Default null when the HAL service does not exist.
      */
     sp<ILnb> mLnb;
+
+    //shared_ptr<TunerLnbCallback> mAidlCallback;
+    sp<HidlLnbCallback> mHidlCallback;
+
+    LnbId mId;
 };
 }  // namespace android
 
