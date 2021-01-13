@@ -1128,10 +1128,10 @@
     <string name="whichViewApplication" msgid="5733194231473132945">"Mở bằng"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"Mở bằng %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"Mở"</string>
-    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Mở đường dẫn liên kết <xliff:g id="HOST">%1$s</xliff:g> bằng"</string>
-    <string name="whichOpenLinksWith" msgid="1120936181362907258">"Mở đường dẫn liên kết bằng"</string>
-    <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"Mở đường dẫn liên kết bằng <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
-    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Mở đường dẫn liên kết <xliff:g id="HOST">%1$s</xliff:g> bằng <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Mở đường liên kết <xliff:g id="HOST">%1$s</xliff:g> bằng"</string>
+    <string name="whichOpenLinksWith" msgid="1120936181362907258">"Mở đường liên kết bằng"</string>
+    <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"Mở đường liên kết bằng <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
+    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Mở đường liên kết <xliff:g id="HOST">%1$s</xliff:g> bằng <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"Cấp quyền truy cập"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"Chỉnh sửa bằng"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"Chỉnh sửa bằng %1$s"</string>
