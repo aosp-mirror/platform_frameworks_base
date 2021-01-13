@@ -27,7 +27,7 @@
     <item msgid="8356618438494652335">"Autentifikacija…"</item>
     <item msgid="2837871868181677206">"Dobivanje IP adrese…"</item>
     <item msgid="4613015005934755724">"Povezano"</item>
-    <item msgid="3763530049995655072">"Suspendirano"</item>
+    <item msgid="3763530049995655072">"Obustavljeno"</item>
     <item msgid="7852381437933824454">"Prekidanje veze…"</item>
     <item msgid="5046795712175415059">"Isključen"</item>
     <item msgid="2473654476624070462">"Neuspješno"</item>
@@ -41,7 +41,7 @@
     <item msgid="3028983857109369308">"Autentifikacija s mrežom <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
     <item msgid="4287401332778341890">"Dobivanje IP adrese iz mreže <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
     <item msgid="1043944043827424501">"Povezano s mrežom <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</item>
-    <item msgid="7445993821842009653">"Suspendirano"</item>
+    <item msgid="7445993821842009653">"Obustavljeno"</item>
     <item msgid="1175040558087735707">"Prekidanje veze s mrežom <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
     <item msgid="699832486578171722">"Isključen"</item>
     <item msgid="522383512264986901">"Neuspješno"</item>
@@ -187,7 +187,7 @@
     <item msgid="97587758561106269">"Isključeno"</item>
     <item msgid="7126170197336963369">"Međuspremnici svih zapisnika"</item>
     <item msgid="7167543126036181392">"Međuspremnici svih zapisnika osim radija"</item>
-    <item msgid="5135340178556563979">"samo međuspremnik zapisnika kernela"</item>
+    <item msgid="5135340178556563979">"samo međumemorija zapisnika kernela"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="2675263395797191850">"Animacija isključena"</item>

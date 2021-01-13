@@ -19,7 +19,6 @@ package android.os;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 
 import libcore.util.NativeAllocationRegistry;
 
@@ -30,7 +29,6 @@ import libcore.util.NativeAllocationRegistry;
  * @hide
  */
 @SystemApi
-@TestApi
 public class HwBlob {
     private static final String TAG = "HwBlob";
 
