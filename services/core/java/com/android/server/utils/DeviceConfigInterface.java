@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.utils;
+package com.android.server.utils;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -52,6 +52,11 @@ public interface DeviceConfigInterface {
      * @see DeviceConfig#getBoolean
      */
     boolean getBoolean(@NonNull String namespace, @NonNull String name, boolean defaultValue);
+
+    /**
+     * @see DeviceConfig#getFloat
+     */
+    float getFloat(@NonNull String namespace, @NonNull String name, float defaultValue);
 
     /**
      * @see DeviceConfig#addOnPropertiesChangedListener
@@ -93,6 +98,12 @@ public interface DeviceConfigInterface {
         public boolean getBoolean(@NonNull String namespace, @NonNull String name,
                 boolean defaultValue) {
             return DeviceConfig.getBoolean(namespace, name, defaultValue);
+        }
+
+        @Override
+        public float getFloat(@NonNull String namespace, @NonNull String name,
+                float defaultValue) {
+            return DeviceConfig.getFloat(namespace, name, defaultValue);
         }
 
         @Override
