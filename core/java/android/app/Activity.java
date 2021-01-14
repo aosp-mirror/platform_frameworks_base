@@ -5183,20 +5183,14 @@ public class Activity extends ContextThemeWrapper
      * #checkSelfPermission(String)}.
      * </p>
      * <p>
-     * Calling this API for permissions already granted to your app would show UI
-     * to the user to decide whether the app can still hold these permissions. This
-     * can be useful if the way your app uses data guarded by the permissions
-     * changes significantly.
-     * </p>
-     * <p>
      * You cannot request a permission if your activity sets {@link
      * android.R.styleable#AndroidManifestActivity_noHistory noHistory} to
      * <code>true</code> because in this case the activity would not receive
      * result callbacks including {@link #onRequestPermissionsResult(int, String[], int[])}.
      * </p>
      * <p>
-     * The <a href="https://github.com/googlesamples/android-RuntimePermissions">
-     * RuntimePermissions</a> sample app demonstrates how to use this method to
+     * The <a href="https://github.com/android/permissions-samples">
+     * RuntimePermissions</a> sample apps demonstrate how to use this method to
      * request permissions at run time.
      * </p>
      *
