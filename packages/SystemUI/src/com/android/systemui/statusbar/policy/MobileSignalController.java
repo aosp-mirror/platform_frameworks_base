@@ -458,9 +458,23 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         mCurrentState.dataSim = mobileStatus.dataSim;
         mCurrentState.carrierNetworkChangeMode = mobileStatus.carrierNetworkChangeMode;
         mDataState = mobileStatus.dataState;
-        mServiceState = mobileStatus.serviceState;
         mSignalStrength = mobileStatus.signalStrength;
         mTelephonyDisplayInfo = mobileStatus.telephonyDisplayInfo;
+        int lastVoiceState = mServiceState != null ? mServiceState.getState() : -1;
+        mServiceState = mobileStatus.serviceState;
+        int currentVoiceState =  mServiceState != null ? mServiceState.getState() : -1;
+        // Only update the no calling Status in the below scenarios
+        // 1. The first valid voice state has been received
+        // 2. The voice state has been changed and either the last or current state is
+        //    ServiceState.STATE_IN_SERVICE
+        if (lastVoiceState != currentVoiceState
+                && (lastVoiceState == -1
+                        || (lastVoiceState == ServiceState.STATE_IN_SERVICE
+                                || currentVoiceState == ServiceState.STATE_IN_SERVICE))) {
+            notifyNoCallingStatusChange(
+                    currentVoiceState != ServiceState.STATE_IN_SERVICE,
+                    mSubscriptionInfo.getSubscriptionId());
+        }
     }
 
     /**
