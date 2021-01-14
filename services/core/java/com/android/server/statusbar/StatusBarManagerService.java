@@ -384,6 +384,16 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
+        public void collapsePanels() {
+            if (mBar != null) {
+                try {
+                    mBar.animateCollapsePanels();
+                } catch (RemoteException ex) {
+                }
+            }
+        }
+
+        @Override
         public void dismissKeyboardShortcutsMenu() {
             if (mBar != null) {
                 try {
