@@ -2150,6 +2150,15 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     @Override
+    public void updateShortcutVisibility(String callingPkg, String packageName, byte[] certificate,
+            boolean visible, int userId) {
+        synchronized (mLock) {
+            getPackageShortcutsForPublisherLocked(callingPkg, userId)
+                    .updateVisibility(packageName, certificate, visible);
+        }
+    }
+
+    @Override
     public boolean requestPinShortcut(String packageName, ShortcutInfo shortcut,
             IntentSender resultIntent, int userId) {
         Objects.requireNonNull(shortcut);
