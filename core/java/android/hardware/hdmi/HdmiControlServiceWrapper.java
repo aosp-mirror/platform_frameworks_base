@@ -306,6 +306,18 @@ public final class HdmiControlServiceWrapper {
         }
 
         @Override
+        public void addCecSettingChangeListener(String name,
+                IHdmiCecSettingChangeListener listener) {
+            HdmiControlServiceWrapper.this.addCecSettingChangeListener(name, listener);
+        }
+
+        @Override
+        public void removeCecSettingChangeListener(String name,
+                IHdmiCecSettingChangeListener listener) {
+            HdmiControlServiceWrapper.this.removeCecSettingChangeListener(name, listener);
+        }
+
+        @Override
         public List<String> getUserCecSettings() {
             return HdmiControlServiceWrapper.this.getUserCecSettings();
         }
@@ -520,6 +532,14 @@ public final class HdmiControlServiceWrapper {
     /** @hide */
     public void removeHdmiCecVolumeControlFeatureListener(
             IHdmiCecVolumeControlFeatureListener listener) {}
+
+    /** @hide */
+    public void addCecSettingChangeListener(String name,
+            IHdmiCecSettingChangeListener listener) {}
+
+    /** @hide */
+    public void removeCecSettingChangeListener(String name,
+            IHdmiCecSettingChangeListener listener) {}
 
     /** @hide */
     public List<String> getUserCecSettings() {
