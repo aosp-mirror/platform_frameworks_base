@@ -3986,6 +3986,7 @@ package android.location {
     method @Deprecated public boolean hasNavMessages();
     method @Deprecated public boolean hasSatelliteBlacklist();
     method public boolean hasSatelliteBlocklist();
+    method public boolean hasSatellitePvt();
   }
 
   public static final class GnssCapabilities.Builder {
@@ -3996,6 +3997,12 @@ package android.location {
     method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrectionsLosSats(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrectionsReflectingPlane(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasSatelliteBlocklist(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasSatellitePvt(boolean);
+  }
+
+  public final class GnssMeasurement implements android.os.Parcelable {
+    method @Nullable public android.location.SatellitePvt getSatellitePvt();
+    method public boolean hasSatellitePvt();
   }
 
   public final class GnssMeasurementCorrections implements android.os.Parcelable {
@@ -4408,6 +4415,59 @@ package android.location {
 
   public final class LocationResult implements android.os.Parcelable {
     method @NonNull public static android.location.LocationResult wrap(@NonNull android.location.Location);
+  }
+
+  public final class SatellitePvt implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.location.SatellitePvt.ClockInfo getClockInfo();
+    method @FloatRange public double getIonoDelayMeters();
+    method @NonNull public android.location.SatellitePvt.PositionEcef getPositionEcef();
+    method @FloatRange public double getTropoDelayMeters();
+    method @NonNull public android.location.SatellitePvt.VelocityEcef getVelocityEcef();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.SatellitePvt> CREATOR;
+  }
+
+  public static final class SatellitePvt.Builder {
+    ctor public SatellitePvt.Builder();
+    method @NonNull public android.location.SatellitePvt build();
+    method @NonNull public android.location.SatellitePvt.Builder setClockInfo(@NonNull android.location.SatellitePvt.ClockInfo);
+    method @NonNull public android.location.SatellitePvt.Builder setIonoDelayMeters(@FloatRange double);
+    method @NonNull public android.location.SatellitePvt.Builder setPositionEcef(@NonNull android.location.SatellitePvt.PositionEcef);
+    method @NonNull public android.location.SatellitePvt.Builder setTropoDelayMeters(@FloatRange double);
+    method @NonNull public android.location.SatellitePvt.Builder setVelocityEcef(@NonNull android.location.SatellitePvt.VelocityEcef);
+  }
+
+  public static final class SatellitePvt.ClockInfo implements android.os.Parcelable {
+    ctor public SatellitePvt.ClockInfo(double, double, double);
+    method public int describeContents();
+    method @FloatRange public double getClockDriftMetersPerSecond();
+    method @FloatRange public double getHardwareCodeBiasMeters();
+    method @FloatRange public double getTimeCorrectionMeters();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.SatellitePvt.ClockInfo> CREATOR;
+  }
+
+  public static final class SatellitePvt.PositionEcef implements android.os.Parcelable {
+    ctor public SatellitePvt.PositionEcef(double, double, double, double);
+    method public int describeContents();
+    method @FloatRange(from=0.0f, fromInclusive=false) public double getUreMeters();
+    method @FloatRange public double getXMeters();
+    method @FloatRange public double getYMeters();
+    method @FloatRange public double getZMeters();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.SatellitePvt.PositionEcef> CREATOR;
+  }
+
+  public static final class SatellitePvt.VelocityEcef implements android.os.Parcelable {
+    ctor public SatellitePvt.VelocityEcef(double, double, double, double);
+    method public int describeContents();
+    method @FloatRange(from=0.0f, fromInclusive=false) public double getUreRateMetersPerSecond();
+    method @FloatRange public double getXMetersPerSecond();
+    method @FloatRange public double getYMetersPerSecond();
+    method @FloatRange public double getZMetersPerSecond();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.SatellitePvt.VelocityEcef> CREATOR;
   }
 
 }
