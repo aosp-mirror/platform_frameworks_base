@@ -257,7 +257,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
                                 .setContentText("Restart SysUI for changes to take effect.");
                 Intent i = new Intent("com.android.systemui.action.RESTART").setData(
                             Uri.parse("package://" + pkg));
-                PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, i, 0);
+                PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, i, PendingIntent.FLAG_MUTABLE_UNAUDITED);
                 nb.addAction(new Action.Builder(null, "Restart SysUI", pi).build());
                 mContext.getSystemService(NotificationManager.class)
                         .notify(SystemMessage.NOTE_PLUGIN, nb.build());

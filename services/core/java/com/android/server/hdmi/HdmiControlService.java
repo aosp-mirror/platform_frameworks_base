@@ -991,12 +991,14 @@ public class HdmiControlService extends SystemService {
         return mCecController.isConnected(portId);
     }
 
+    /**
+     * Executes a Runnable on the service thread.
+     * During execution, sets the work source UID to the parent's work source UID.
+     *
+     * @param runnable The runnable to execute on the service thread
+     */
     void runOnServiceThread(Runnable runnable) {
-        mHandler.post(runnable);
-    }
-
-    void runOnServiceThreadAtFrontOfQueue(Runnable runnable) {
-        mHandler.postAtFrontOfQueue(runnable);
+        mHandler.post(new WorkSourceUidPreservingRunnable(runnable));
     }
 
     private void assertRunOnServiceThread() {
@@ -1475,14 +1477,30 @@ public class HdmiControlService extends SystemService {
         }
     }
 
+    /**
+     * Sets the work source UID to the Binder calling UID.
+     * Work source UID allows access to the original calling UID of a Binder call in the Runnables
+     * that it spawns.
+     * This is necessary because Runnables that are executed on the service thread
+     * take on the calling UID of the service thread.
+     */
+    private void setWorkSourceUidToCallingUid() {
+        Binder.setCallingWorkSourceUid(Binder.getCallingUid());
+    }
+
     private void enforceAccessPermission() {
         getContext().enforceCallingOrSelfPermission(PERMISSION, TAG);
+    }
+
+    private void initBinderCall() {
+        enforceAccessPermission();
+        setWorkSourceUidToCallingUid();
     }
 
     private final class BinderService extends IHdmiControlService.Stub {
         @Override
         public int[] getSupportedTypes() {
-            enforceAccessPermission();
+            initBinderCall();
             // mLocalDevices is an unmodifiable list - no lock necesary.
             int[] localDevices = new int[mLocalDevices.size()];
             for (int i = 0; i < localDevices.length; ++i) {
@@ -1494,14 +1512,14 @@ public class HdmiControlService extends SystemService {
         @Override
         @Nullable
         public HdmiDeviceInfo getActiveSource() {
-            enforceAccessPermission();
+            initBinderCall();
 
             return HdmiControlService.this.getActiveSource();
         }
 
         @Override
         public void deviceSelect(final int deviceId, final IHdmiControlCallback callback) {
-            enforceAccessPermission();
+            initBinderCall();
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
@@ -1548,7 +1566,7 @@ public class HdmiControlService extends SystemService {
 
         @Override
         public void portSelect(final int portId, final IHdmiControlCallback callback) {
-            enforceAccessPermission();
+            initBinderCall();
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
@@ -1586,7 +1604,7 @@ public class HdmiControlService extends SystemService {
 
         @Override
         public void sendKeyEvent(final int deviceType, final int keyCode, final boolean isPressed) {
-            enforceAccessPermission();
+            initBinderCall();
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
@@ -1610,7 +1628,7 @@ public class HdmiControlService extends SystemService {
         @Override
         public void sendVolumeKeyEvent(
             final int deviceType, final int keyCode, final boolean isPressed) {
-            enforceAccessPermission();
+            initBinderCall();
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
@@ -1631,7 +1649,7 @@ public class HdmiControlService extends SystemService {
 
         @Override
         public void oneTouchPlay(final IHdmiControlCallback callback) {
-            enforceAccessPermission();
+            initBinderCall();
             int pid = Binder.getCallingPid();
             Slog.d(TAG, "Process pid: " + pid + " is calling oneTouchPlay.");
             runOnServiceThread(new Runnable() {
@@ -1644,7 +1662,7 @@ public class HdmiControlService extends SystemService {
 
         @Override
         public void toggleAndFollowTvPower() {
-            enforceAccessPermission();
+            initBinderCall();
             int pid = Binder.getCallingPid();
             Slog.d(TAG, "Process pid: " + pid + " is calling toggleAndFollowTvPower.");
             runOnServiceThread(new Runnable() {
@@ -1657,13 +1675,13 @@ public class HdmiControlService extends SystemService {
 
         @Override
         public boolean shouldHandleTvPowerKey() {
-            enforceAccessPermission();
+            initBinderCall();
             return HdmiControlService.this.shouldHandleTvPowerKey();
         }
 
         @Override
         public void queryDisplayStatus(final IHdmiControlCallback callback) {
-            enforceAccessPermission();
+            initBinderCall();
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
@@ -1675,53 +1693,53 @@ public class HdmiControlService extends SystemService {
         @Override
         public void addHdmiControlStatusChangeListener(
                 final IHdmiControlStatusChangeListener listener) {
-            enforceAccessPermission();
+            initBinderCall();
             HdmiControlService.this.addHdmiControlStatusChangeListener(listener);
         }
 
         @Override
         public void removeHdmiControlStatusChangeListener(
                 final IHdmiControlStatusChangeListener listener) {
-            enforceAccessPermission();
+            initBinderCall();
             HdmiControlService.this.removeHdmiControlStatusChangeListener(listener);
         }
 
         @Override
         public void addHdmiCecVolumeControlFeatureListener(
                 final IHdmiCecVolumeControlFeatureListener listener) {
-            enforceAccessPermission();
+            initBinderCall();
             HdmiControlService.this.addHdmiCecVolumeControlFeatureListener(listener);
         }
 
         @Override
         public void removeHdmiCecVolumeControlFeatureListener(
                 final IHdmiCecVolumeControlFeatureListener listener) {
-            enforceAccessPermission();
+            initBinderCall();
             HdmiControlService.this.removeHdmiControlVolumeControlStatusChangeListener(listener);
         }
 
 
         @Override
         public void addHotplugEventListener(final IHdmiHotplugEventListener listener) {
-            enforceAccessPermission();
+            initBinderCall();
             HdmiControlService.this.addHotplugEventListener(listener);
         }
 
         @Override
         public void removeHotplugEventListener(final IHdmiHotplugEventListener listener) {
-            enforceAccessPermission();
+            initBinderCall();
             HdmiControlService.this.removeHotplugEventListener(listener);
         }
 
         @Override
         public void addDeviceEventListener(final IHdmiDeviceEventListener listener) {
-            enforceAccessPermission();
+            initBinderCall();
             HdmiControlService.this.addDeviceEventListener(listener);
         }
 
         @Override
         public List<HdmiPortInfo> getPortInfo() {
-            enforceAccessPermission();
+            initBinderCall();
             return HdmiControlService.this.getPortInfo() == null
                 ? Collections.<HdmiPortInfo>emptyList()
                 : HdmiControlService.this.getPortInfo();
@@ -1729,7 +1747,7 @@ public class HdmiControlService extends SystemService {
 
         @Override
         public boolean canChangeSystemAudioMode() {
-            enforceAccessPermission();
+            initBinderCall();
             HdmiCecLocalDeviceTv tv = tv();
             if (tv == null) {
                 return false;
@@ -1740,7 +1758,7 @@ public class HdmiControlService extends SystemService {
         @Override
         public boolean getSystemAudioMode() {
             // TODO(shubang): handle getSystemAudioMode() for all device types
-            enforceAccessPermission();
+            initBinderCall();
             HdmiCecLocalDeviceTv tv = tv();
             HdmiCecLocalDeviceAudioSystem audioSystem = audioSystem();
             return (tv != null && tv.isSystemAudioActivated())
@@ -1749,7 +1767,7 @@ public class HdmiControlService extends SystemService {
 
         @Override
         public int getPhysicalAddress() {
-            enforceAccessPermission();
+            initBinderCall();
             synchronized (mLock) {
                 return mHdmiCecNetwork.getPhysicalAddress();
             }
@@ -1757,7 +1775,7 @@ public class HdmiControlService extends SystemService {
 
         @Override
         public void setSystemAudioMode(final boolean enabled, final IHdmiControlCallback callback) {
-            enforceAccessPermission();
+            initBinderCall();
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
@@ -1775,26 +1793,26 @@ public class HdmiControlService extends SystemService {
         @Override
         public void addSystemAudioModeChangeListener(
                 final IHdmiSystemAudioModeChangeListener listener) {
-            enforceAccessPermission();
+            initBinderCall();
             HdmiControlService.this.addSystemAudioModeChangeListner(listener);
         }
 
         @Override
         public void removeSystemAudioModeChangeListener(
                 final IHdmiSystemAudioModeChangeListener listener) {
-            enforceAccessPermission();
+            initBinderCall();
             HdmiControlService.this.removeSystemAudioModeChangeListener(listener);
         }
 
         @Override
         public void setInputChangeListener(final IHdmiInputChangeListener listener) {
-            enforceAccessPermission();
+            initBinderCall();
             HdmiControlService.this.setInputChangeListener(listener);
         }
 
         @Override
         public List<HdmiDeviceInfo> getInputDevices() {
-            enforceAccessPermission();
+            initBinderCall();
             // No need to hold the lock for obtaining TV device as the local device instance
             // is preserved while the HDMI control is enabled.
             return HdmiUtils.mergeToUnmodifiableList(mHdmiCecNetwork.getSafeExternalInputsLocked(),
@@ -1805,13 +1823,13 @@ public class HdmiControlService extends SystemService {
         // even those of reserved type.
         @Override
         public List<HdmiDeviceInfo> getDeviceList() {
-            enforceAccessPermission();
+            initBinderCall();
             return mHdmiCecNetwork.getSafeCecDevicesLocked();
         }
 
         @Override
         public void powerOffRemoteDevice(int logicalAddress, int powerStatus) {
-            enforceAccessPermission();
+            initBinderCall();
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
@@ -1826,7 +1844,7 @@ public class HdmiControlService extends SystemService {
 
         @Override
         public void powerOnRemoteDevice(int logicalAddress, int powerStatus) {
-            enforceAccessPermission();
+            initBinderCall();
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
@@ -1846,7 +1864,7 @@ public class HdmiControlService extends SystemService {
         @Override
         // TODO(b/128427908): add a result callback
         public void askRemoteDeviceToBecomeActiveSource(int physicalAddress) {
-            enforceAccessPermission();
+            initBinderCall();
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
@@ -1867,7 +1885,7 @@ public class HdmiControlService extends SystemService {
         @Override
         public void setSystemAudioVolume(final int oldIndex, final int newIndex,
                 final int maxIndex) {
-            enforceAccessPermission();
+            initBinderCall();
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
@@ -1883,7 +1901,7 @@ public class HdmiControlService extends SystemService {
 
         @Override
         public void setSystemAudioMute(final boolean mute) {
-            enforceAccessPermission();
+            initBinderCall();
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
@@ -1899,7 +1917,7 @@ public class HdmiControlService extends SystemService {
 
         @Override
         public void setArcMode(final boolean enabled) {
-            enforceAccessPermission();
+            initBinderCall();
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
@@ -1914,7 +1932,7 @@ public class HdmiControlService extends SystemService {
 
         @Override
         public void setProhibitMode(final boolean enabled) {
-            enforceAccessPermission();
+            initBinderCall();
             if (!isTvDevice()) {
                 return;
             }
@@ -1924,14 +1942,14 @@ public class HdmiControlService extends SystemService {
         @Override
         public void addVendorCommandListener(final IHdmiVendorCommandListener listener,
                 final int deviceType) {
-            enforceAccessPermission();
+            initBinderCall();
             HdmiControlService.this.addVendorCommandListener(listener, deviceType);
         }
 
         @Override
         public void sendVendorCommand(final int deviceType, final int targetAddress,
                 final byte[] params, final boolean hasVendorId) {
-            enforceAccessPermission();
+            initBinderCall();
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
@@ -1954,7 +1972,7 @@ public class HdmiControlService extends SystemService {
 
         @Override
         public void sendStandby(final int deviceType, final int deviceId) {
-            enforceAccessPermission();
+            initBinderCall();
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
@@ -1978,13 +1996,13 @@ public class HdmiControlService extends SystemService {
 
         @Override
         public void setHdmiRecordListener(IHdmiRecordListener listener) {
-            enforceAccessPermission();
+            initBinderCall();
             HdmiControlService.this.setHdmiRecordListener(listener);
         }
 
         @Override
         public void startOneTouchRecord(final int recorderAddress, final byte[] recordSource) {
-            enforceAccessPermission();
+            initBinderCall();
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
@@ -1999,7 +2017,7 @@ public class HdmiControlService extends SystemService {
 
         @Override
         public void stopOneTouchRecord(final int recorderAddress) {
-            enforceAccessPermission();
+            initBinderCall();
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
@@ -2015,7 +2033,7 @@ public class HdmiControlService extends SystemService {
         @Override
         public void startTimerRecording(final int recorderAddress, final int sourceType,
                 final byte[] recordSource) {
-            enforceAccessPermission();
+            initBinderCall();
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
@@ -2031,7 +2049,7 @@ public class HdmiControlService extends SystemService {
         @Override
         public void clearTimerRecording(final int recorderAddress, final int sourceType,
                 final byte[] recordSource) {
-            enforceAccessPermission();
+            initBinderCall();
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
@@ -2047,7 +2065,7 @@ public class HdmiControlService extends SystemService {
         @Override
         public void sendMhlVendorCommand(final int portId, final int offset, final int length,
                 final byte[] data) {
-            enforceAccessPermission();
+            initBinderCall();
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
@@ -2068,13 +2086,13 @@ public class HdmiControlService extends SystemService {
         @Override
         public void addHdmiMhlVendorCommandListener(
                 IHdmiMhlVendorCommandListener listener) {
-            enforceAccessPermission();
+            initBinderCall();
             HdmiControlService.this.addHdmiMhlVendorCommandListener(listener);
         }
 
         @Override
         public void setStandbyMode(final boolean isStandbyModeOn) {
-            enforceAccessPermission();
+            initBinderCall();
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
@@ -2085,13 +2103,13 @@ public class HdmiControlService extends SystemService {
 
         @Override
         public boolean isHdmiCecVolumeControlEnabled() {
-            enforceAccessPermission();
+            initBinderCall();
             return HdmiControlService.this.isHdmiCecVolumeControlEnabled();
         }
 
         @Override
         public void setHdmiCecVolumeControlEnabled(final boolean isHdmiCecVolumeControlEnabled) {
-            enforceAccessPermission();
+            initBinderCall();
             final long token = Binder.clearCallingIdentity();
             try {
                 HdmiControlService.this.setHdmiCecVolumeControlEnabled(
@@ -2104,7 +2122,7 @@ public class HdmiControlService extends SystemService {
         @Override
         public void reportAudioStatus(final int deviceType, final int volume, final int maxVolume,
                 final boolean isMute) {
-            enforceAccessPermission();
+            initBinderCall();
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
@@ -2128,7 +2146,7 @@ public class HdmiControlService extends SystemService {
 
         @Override
         public void setSystemAudioModeOnForAudioOnlySource() {
-            enforceAccessPermission();
+            initBinderCall();
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
@@ -2156,7 +2174,7 @@ public class HdmiControlService extends SystemService {
                 @Nullable FileDescriptor err, String[] args,
                 @Nullable ShellCallback callback, ResultReceiver resultReceiver)
                 throws RemoteException {
-            enforceAccessPermission();
+            initBinderCall();
             new HdmiControlShellCommand(this)
                     .exec(this, in, out, err, args, callback, resultReceiver);
         }
@@ -2212,7 +2230,7 @@ public class HdmiControlService extends SystemService {
 
         @Override
         public List<String> getUserCecSettings() {
-            enforceAccessPermission();
+            initBinderCall();
             long token = Binder.clearCallingIdentity();
             try {
                 return HdmiControlService.this.getHdmiCecConfig().getUserSettings();
@@ -2223,7 +2241,7 @@ public class HdmiControlService extends SystemService {
 
         @Override
         public List<String> getAllowedCecSettingStringValues(String name) {
-            enforceAccessPermission();
+            initBinderCall();
             long token = Binder.clearCallingIdentity();
             try {
                 return HdmiControlService.this.getHdmiCecConfig().getAllowedStringValues(name);
@@ -2234,7 +2252,7 @@ public class HdmiControlService extends SystemService {
 
         @Override
         public int[] getAllowedCecSettingIntValues(String name) {
-            enforceAccessPermission();
+            initBinderCall();
             long token = Binder.clearCallingIdentity();
             try {
                 List<Integer> allowedValues =
@@ -2247,7 +2265,7 @@ public class HdmiControlService extends SystemService {
 
         @Override
         public String getCecSettingStringValue(String name) {
-            enforceAccessPermission();
+            initBinderCall();
             long token = Binder.clearCallingIdentity();
             try {
                 return HdmiControlService.this.getHdmiCecConfig().getStringValue(name);
@@ -2258,7 +2276,7 @@ public class HdmiControlService extends SystemService {
 
         @Override
         public void setCecSettingStringValue(String name, String value) {
-            enforceAccessPermission();
+            initBinderCall();
             long token = Binder.clearCallingIdentity();
             try {
                 HdmiControlService.this.getHdmiCecConfig().setStringValue(name, value);
@@ -2269,7 +2287,7 @@ public class HdmiControlService extends SystemService {
 
         @Override
         public int getCecSettingIntValue(String name) {
-            enforceAccessPermission();
+            initBinderCall();
             long token = Binder.clearCallingIdentity();
             try {
                 return HdmiControlService.this.getHdmiCecConfig().getIntValue(name);
@@ -2280,7 +2298,7 @@ public class HdmiControlService extends SystemService {
 
         @Override
         public void setCecSettingIntValue(String name, int value) {
-            enforceAccessPermission();
+            initBinderCall();
             long token = Binder.clearCallingIdentity();
             try {
                 HdmiControlService.this.getHdmiCecConfig().setIntValue(name, value);

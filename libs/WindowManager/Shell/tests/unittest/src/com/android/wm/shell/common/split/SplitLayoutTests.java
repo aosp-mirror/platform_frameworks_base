@@ -55,6 +55,7 @@ public class SplitLayoutTests extends ShellTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mSplitLayout = new SplitLayout(
+                "TestSplitLayout",
                 mContext,
                 getConfiguration(false),
                 mLayoutChangeListener,
@@ -64,6 +65,7 @@ public class SplitLayoutTests extends ShellTestCase {
     @Test
     @UiThreadTest
     public void testUpdateConfiguration() {
+        mSplitLayout.init();
         assertThat(mSplitLayout.updateConfiguration(getConfiguration(false))).isFalse();
         assertThat(mSplitLayout.updateConfiguration(getConfiguration(true))).isTrue();
     }

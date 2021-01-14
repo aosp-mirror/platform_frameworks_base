@@ -304,7 +304,7 @@ public class ManagedApplicationService {
             }
             if (mSettingsAction != null) {
                 intent.putExtra(Intent.EXTRA_CLIENT_INTENT,
-                        PendingIntent.getActivity(mContext, 0, new Intent(mSettingsAction), 0));
+                        PendingIntent.getActivity(mContext, 0, new Intent(mSettingsAction), PendingIntent.FLAG_MUTABLE_UNAUDITED));
             }
 
             mConnection = new ServiceConnection() {

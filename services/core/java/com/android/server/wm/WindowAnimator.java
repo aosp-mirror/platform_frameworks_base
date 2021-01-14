@@ -134,8 +134,6 @@ public class WindowAnimator {
         // Schedule next frame already such that back-pressure happens continuously.
         scheduleAnimation();
 
-        mTransaction.setFrameTimelineVsync(vsyncId);
-
         mCurrentTime = frameTimeNs / TimeUtils.NANOS_PER_MS;
         mBulkUpdateParams = SET_ORIENTATION_CHANGE_COMPLETE;
         if (DEBUG_WINDOW_TRACE) {
@@ -224,6 +222,7 @@ public class WindowAnimator {
 
         mService.destroyPreservedSurfaceLocked();
 
+        mService.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
         executeAfterPrepareSurfacesRunnables();
 
         if (DEBUG_WINDOW_TRACE) {

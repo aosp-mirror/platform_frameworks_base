@@ -140,6 +140,8 @@ public final class MediaSessionManager {
     @NonNull
     public ISession createSession(@NonNull MediaSession.CallbackStub cbStub, @NonNull String tag,
             @Nullable Bundle sessionInfo) {
+        Objects.requireNonNull(cbStub, "cbStub shouldn't be null");
+        Objects.requireNonNull(tag, "tag shouldn't be null");
         try {
             return mService.createSession(mContext.getPackageName(), cbStub, tag, sessionInfo,
                     UserHandle.myUserId());
@@ -163,9 +165,7 @@ public final class MediaSessionManager {
      * @param token newly created session2 token
      */
     public void notifySession2Created(@NonNull Session2Token token) {
-        if (token == null) {
-            throw new IllegalArgumentException("token shouldn't be null");
-        }
+        Objects.requireNonNull(token, "token shouldn't be null");
         if (token.getType() != Session2Token.TYPE_SESSION) {
             throw new IllegalArgumentException("token's type should be TYPE_SESSION");
         }
@@ -209,16 +209,24 @@ public final class MediaSessionManager {
      * retrieve sessions for user ids that do not belong to current process.
      *
      * @param notificationListener The enabled notification listener component. May be null.
-     * @param userId The user id to fetch sessions for.
+     * @param userHandle The user handle to fetch sessions for.
      * @return A list of controllers for ongoing sessions.
      * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SuppressLint("UserHandle")
     public @NonNull List<MediaController> getActiveSessionsForUser(
-            @Nullable ComponentName notificationListener, int userId) {
+            @Nullable ComponentName notificationListener, @NonNull UserHandle userHandle) {
+        Objects.requireNonNull(userHandle, "userHandle shouldn't be null");
+        return getActiveSessionsForUser(notificationListener, userHandle.getIdentifier());
+    }
+
+    private List<MediaController> getActiveSessionsForUser(ComponentName notificationListener,
+            int userId) {
         ArrayList<MediaController> controllers = new ArrayList<MediaController>();
         try {
-            List<MediaSession.Token> tokens = mService.getSessions(notificationListener, userId);
+            List<MediaSession.Token> tokens = mService.getSessions(notificationListener,
+                    userId);
             int size = tokens.size();
             for (int i = 0; i < size; i++) {
                 MediaController controller = new MediaController(mContext, tokens.get(i));
@@ -257,12 +265,19 @@ public final class MediaSessionManager {
      * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permission in order to
      * retrieve session tokens for user ids that do not belong to current process.
      *
-     * @param userId The user id to fetch sessions for.
+     * @param userHandle The user handle to fetch sessions for.
      * @return A list of {@link Session2Token}
      * @hide
      */
     @NonNull
-    public List<Session2Token> getSession2Tokens(int userId) {
+    @SuppressLint("UserHandle")
+    public List<Session2Token> getSession2Tokens(@NonNull UserHandle userHandle) {
+        Objects.requireNonNull(userHandle, "userHandle shouldn't be null");
+        return getSession2Tokens(userHandle.getIdentifier());
+
+    }
+
+    private List<Session2Token> getSession2Tokens(int userId) {
         try {
             ParceledListSlice slice = mService.getSession2Tokens(userId);
             return slice == null ? new ArrayList<>() : slice.getList();
@@ -324,18 +339,26 @@ public final class MediaSessionManager {
      *
      * @param sessionListener The listener to add.
      * @param notificationListener The enabled notification listener component. May be null.
-     * @param userId The userId to listen for changes on.
+     * @param userHandle The user handle to listen for changes on.
      * @param handler The handler to post updates on.
      * @hide
      */
-    @SuppressLint({"ExecutorRegistration", "SamShouldBeLast"})
+    @SuppressLint({"ExecutorRegistration", "SamShouldBeLast", "UserHandle"})
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public void addOnActiveSessionsChangedListener(
             @NonNull OnActiveSessionsChangedListener sessionListener,
-            @Nullable ComponentName notificationListener, int userId, @Nullable Handler handler) {
-        if (sessionListener == null) {
-            throw new IllegalArgumentException("listener may not be null");
-        }
+            @Nullable ComponentName notificationListener, @NonNull UserHandle userHandle,
+            @Nullable Handler handler) {
+        Objects.requireNonNull(userHandle, "userHandle shouldn't be null");
+        addOnActiveSessionsChangedListener(sessionListener, notificationListener,
+                userHandle.getIdentifier(), handler);
+    }
+
+    private void addOnActiveSessionsChangedListener(
+            @NonNull OnActiveSessionsChangedListener sessionListener,
+            @Nullable ComponentName notificationListener, int userId,
+            @Nullable Handler handler) {
+        Objects.requireNonNull(sessionListener, "sessionListener shouldn't be null");
         if (handler == null) {
             handler = new Handler();
         }
@@ -358,15 +381,13 @@ public final class MediaSessionManager {
     /**
      * Stop receiving active sessions updates on the specified listener.
      *
-     * @param listener The listener to remove.
+     * @param sessionListener The listener to remove.
      */
     public void removeOnActiveSessionsChangedListener(
-            @NonNull OnActiveSessionsChangedListener listener) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener may not be null");
-        }
+            @NonNull OnActiveSessionsChangedListener sessionListener) {
+        Objects.requireNonNull(sessionListener, "sessionListener shouldn't be null");
         synchronized (mLock) {
-            SessionsChangedWrapper wrapper = mListeners.remove(listener);
+            SessionsChangedWrapper wrapper = mListeners.remove(sessionListener);
             if (wrapper != null) {
                 try {
                     mService.removeSessionsListener(wrapper.mStub);
@@ -422,17 +443,23 @@ public final class MediaSessionManager {
      * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permission in order to
      * add listeners for user ids that do not belong to current process.
      *
-     * @param userId The userId to listen for changes on
+     * @param userHandle The userHandle to listen for changes on
      * @param listener The listener to add
      * @param handler The handler to call listener on. If {@code null}, calling thread's looper will
      *                be used.
      * @hide
      */
-    public void addOnSession2TokensChangedListener(int userId,
-            @NonNull OnSession2TokensChangedListener listener, @Nullable Handler handler) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener shouldn't be null");
-        }
+    @SuppressLint("UserHandle")
+    public void addOnSession2TokensChangedListener(@NonNull UserHandle userHandle,
+            @NonNull OnSession2TokensChangedListener listener, @NonNull Handler handler) {
+        Objects.requireNonNull(userHandle, "userHandle shouldn't be null");
+        addOnSession2TokensChangedListener(userHandle.getIdentifier(), listener, handler);
+    }
+
+    private void addOnSession2TokensChangedListener(int userId,
+            OnSession2TokensChangedListener listener, Handler handler) {
+        Objects.requireNonNull(handler, "handler shouldn't be null");
+        Objects.requireNonNull(listener, "listener shouldn't be null");
         synchronized (mLock) {
             if (mSession2TokensListeners.get(listener) != null) {
                 Log.w(TAG, "Attempted to add session listener twice, ignoring.");
@@ -462,9 +489,7 @@ public final class MediaSessionManager {
      */
     public void removeOnSession2TokensChangedListener(
             @NonNull OnSession2TokensChangedListener listener) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener may not be null");
-        }
+        Objects.requireNonNull(listener, "listener shouldn't be null");
         final Session2TokensChangedWrapper wrapper;
         synchronized (mLock) {
             wrapper = mSession2TokensListeners.remove(listener);
@@ -581,9 +606,7 @@ public final class MediaSessionManager {
 
     private void dispatchMediaKeyEventInternal(KeyEvent keyEvent, boolean asSystemService,
             boolean needWakeLock) {
-        if (keyEvent == null) {
-            throw new NullPointerException("keyEvent shouldn't be null");
-        }
+        Objects.requireNonNull(keyEvent, "keyEvent shouldn't be null");
         try {
             mService.dispatchMediaKeyEvent(mContext.getPackageName(), asSystemService, keyEvent,
                     needWakeLock);
@@ -606,12 +629,8 @@ public final class MediaSessionManager {
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public boolean dispatchMediaKeyEventToSessionAsSystemService(@NonNull KeyEvent keyEvent,
             @NonNull MediaSession.Token sessionToken) {
-        if (sessionToken == null) {
-            throw new NullPointerException("sessionToken shouldn't be null");
-        }
-        if (keyEvent == null) {
-            throw new NullPointerException("keyEvent shouldn't be null");
-        }
+        Objects.requireNonNull(sessionToken, "sessionToken shouldn't be null");
+        Objects.requireNonNull(keyEvent, "keyEvent shouldn't be null");
         if (!KeyEvent.isMediaSessionKey(keyEvent.getKeyCode())) {
             return false;
         }
@@ -662,9 +681,7 @@ public final class MediaSessionManager {
 
     private void dispatchVolumeKeyEventInternal(@NonNull KeyEvent keyEvent, int stream,
             boolean musicOnly, boolean asSystemService) {
-        if (keyEvent == null) {
-            throw new NullPointerException("keyEvent shouldn't be null");
-        }
+        Objects.requireNonNull(keyEvent, "keyEvent shouldn't be null");
         try {
             mService.dispatchVolumeKeyEvent(mContext.getPackageName(), mContext.getOpPackageName(),
                     asSystemService, keyEvent, stream, musicOnly);
@@ -686,12 +703,8 @@ public final class MediaSessionManager {
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public void dispatchVolumeKeyEventToSessionAsSystemService(@NonNull KeyEvent keyEvent,
             @NonNull MediaSession.Token sessionToken) {
-        if (sessionToken == null) {
-            throw new NullPointerException("sessionToken shouldn't be null");
-        }
-        if (keyEvent == null) {
-            throw new NullPointerException("keyEvent shouldn't be null");
-        }
+        Objects.requireNonNull(sessionToken, "sessionToken shouldn't be null");
+        Objects.requireNonNull(keyEvent, "keyEvent shouldn't be null");
         try {
             mService.dispatchVolumeKeyEventToSessionAsSystemService(mContext.getPackageName(),
                     mContext.getOpPackageName(), keyEvent, sessionToken);
@@ -735,9 +748,7 @@ public final class MediaSessionManager {
      *            {@code false} otherwise.
      */
     public boolean isTrustedForMediaControl(@NonNull RemoteUserInfo userInfo) {
-        if (userInfo == null) {
-            throw new IllegalArgumentException("userInfo may not be null");
-        }
+        Objects.requireNonNull(userInfo, "userInfo shouldn't be null");
         if (userInfo.getPackageName() == null) {
             return false;
         }
@@ -845,12 +856,8 @@ public final class MediaSessionManager {
     public void addOnMediaKeyEventDispatchedListener(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OnMediaKeyEventDispatchedListener listener) {
-        if (executor == null) {
-            throw new NullPointerException("executor shouldn't be null");
-        }
-        if (listener == null) {
-            throw new NullPointerException("listener shouldn't be null");
-        }
+        Objects.requireNonNull(executor, "executor shouldn't be null");
+        Objects.requireNonNull(listener, "listener shouldn't be null");
         synchronized (mLock) {
             try {
                 mOnMediaKeyEventDispatchedListeners.put(listener, executor);
@@ -874,9 +881,7 @@ public final class MediaSessionManager {
     @RequiresPermission(value = android.Manifest.permission.MEDIA_CONTENT_CONTROL)
     public void removeOnMediaKeyEventDispatchedListener(
             @NonNull OnMediaKeyEventDispatchedListener listener) {
-        if (listener == null) {
-            throw new NullPointerException("listener shouldn't be null");
-        }
+        Objects.requireNonNull(listener, "listener shouldn't be null");
         synchronized (mLock) {
             try {
                 mOnMediaKeyEventDispatchedListeners.remove(listener);
@@ -902,12 +907,8 @@ public final class MediaSessionManager {
     public void addOnMediaKeyEventSessionChangedListener(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OnMediaKeyEventSessionChangedListener listener) {
-        if (executor == null) {
-            throw new NullPointerException("executor shouldn't be null");
-        }
-        if (listener == null) {
-            throw new NullPointerException("listener shouldn't be null");
-        }
+        Objects.requireNonNull(executor, "executor shouldn't be null");
+        Objects.requireNonNull(listener, "listener shouldn't be null");
         synchronized (mLock) {
             try {
                 mMediaKeyEventSessionChangedCallbacks.put(listener, executor);
@@ -934,9 +935,7 @@ public final class MediaSessionManager {
     @RequiresPermission(value = android.Manifest.permission.MEDIA_CONTENT_CONTROL)
     public void removeOnMediaKeyEventSessionChangedListener(
             @NonNull OnMediaKeyEventSessionChangedListener listener) {
-        if (listener == null) {
-            throw new NullPointerException("listener shouldn't be null");
-        }
+        Objects.requireNonNull(listener, "listener shouldn't be null");
         synchronized (mLock) {
             try {
                 mMediaKeyEventSessionChangedCallbacks.remove(listener);

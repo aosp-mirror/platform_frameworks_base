@@ -24,6 +24,7 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
+import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
@@ -38,6 +39,7 @@ public class ShellInitImpl {
     private final DragAndDropController mDragAndDropController;
     private final ShellTaskOrganizer mShellTaskOrganizer;
     private final Optional<LegacySplitScreen> mLegacySplitScreenOptional;
+    private final Optional<SplitScreen> mSplitScreenOptional;
     private final Optional<AppPairs> mAppPairsOptional;
     private final FullscreenTaskListener mFullscreenTaskListener;
     private final ShellExecutor mMainExecutor;
@@ -49,6 +51,7 @@ public class ShellInitImpl {
             DragAndDropController dragAndDropController,
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<LegacySplitScreen> legacySplitScreenOptional,
+            Optional<SplitScreen> splitScreenOptional,
             Optional<AppPairs> appPairsOptional,
             FullscreenTaskListener fullscreenTaskListener,
             Transitions transitions,
@@ -57,6 +60,7 @@ public class ShellInitImpl {
                 dragAndDropController,
                 shellTaskOrganizer,
                 legacySplitScreenOptional,
+                splitScreenOptional,
                 appPairsOptional,
                 fullscreenTaskListener,
                 transitions,
@@ -67,6 +71,7 @@ public class ShellInitImpl {
             DragAndDropController dragAndDropController,
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<LegacySplitScreen> legacySplitScreenOptional,
+            Optional<SplitScreen> splitScreenOptional,
             Optional<AppPairs> appPairsOptional,
             FullscreenTaskListener fullscreenTaskListener,
             Transitions transitions,
@@ -75,6 +80,7 @@ public class ShellInitImpl {
         mDragAndDropController = dragAndDropController;
         mShellTaskOrganizer = shellTaskOrganizer;
         mLegacySplitScreenOptional = legacySplitScreenOptional;
+        mSplitScreenOptional = splitScreenOptional;
         mAppPairsOptional = appPairsOptional;
         mFullscreenTaskListener = fullscreenTaskListener;
         mTransitions = transitions;
@@ -91,6 +97,7 @@ public class ShellInitImpl {
         mShellTaskOrganizer.registerOrganizer();
 
         mAppPairsOptional.ifPresent(AppPairs::onOrganizerRegistered);
+        mSplitScreenOptional.ifPresent(SplitScreen::onOrganizerRegistered);
 
         // Bind the splitscreen impl to the drag drop controller
         mDragAndDropController.initialize(mLegacySplitScreenOptional);

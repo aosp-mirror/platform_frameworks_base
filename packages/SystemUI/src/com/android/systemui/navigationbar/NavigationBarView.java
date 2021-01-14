@@ -92,8 +92,8 @@ import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
+import com.android.wm.shell.pip.Pip;
 
 import java.io.PrintWriter;
 import java.util.function.Consumer;
@@ -287,6 +287,13 @@ public class NavigationBarView extends FrameLayout implements
         notifyActiveTouchRegions();
     };
 
+    private final Consumer<Boolean> mNavbarOverlayVisibilityChangeCallback = (visible) -> {
+        if (visible) {
+            mAutoHideController.touchAutoHide();
+        }
+        notifyActiveTouchRegions();
+    };
+
     public NavigationBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
@@ -326,6 +333,9 @@ public class NavigationBarView extends FrameLayout implements
                 mLightIconColor, mDarkIconColor,
                 isGesturalMode ? mFloatingRotationButton : rotateSuggestionButton,
                 mRotationButtonListener);
+
+        Dependency.get(NavigationBarOverlayController.class).init(
+                mNavbarOverlayVisibilityChangeCallback, mLightIconColor, mDarkIconColor);
 
         mConfiguration = new Configuration();
         mTmpLastConfiguration = new Configuration();
@@ -413,6 +423,11 @@ public class NavigationBarView extends FrameLayout implements
 
     void onTransientStateChanged(boolean isTransient) {
         mEdgeBackGestureHandler.onNavBarTransientStateChanged(isTransient);
+
+        // The visibility of the navigation bar buttons is dependent on the transient state of
+        // the navigation bar.
+        Dependency.get(NavigationBarOverlayController.class).setButtonState(
+                isTransient, /* force */ false);
     }
 
     void onBarTransition(int newMode) {
@@ -642,6 +657,7 @@ public class NavigationBarView extends FrameLayout implements
         }
         mImeVisible = visible;
         mRotationButtonController.getRotationButton().setCanShowRotationButton(!mImeVisible);
+        Dependency.get(NavigationBarOverlayController.class).setCanShow(!mImeVisible);
     }
 
     public void setDisabledFlags(int disabledFlags) {
@@ -965,6 +981,11 @@ public class NavigationBarView extends FrameLayout implements
         } else {
             updateButtonLocation(getRotateSuggestionButton(), inScreenSpace);
         }
+        final NavigationBarOverlayController navBarButtonsController =
+                Dependency.get(NavigationBarOverlayController.class);
+        if (navBarButtonsController.isVisible()) {
+            updateButtonLocation(navBarButtonsController.getCurrentView(), inScreenSpace);
+        }
         return mTmpRegion;
     }
 
@@ -1185,8 +1206,10 @@ public class NavigationBarView extends FrameLayout implements
         if (mRotationButtonController != null) {
             mRotationButtonController.registerListeners();
         }
+        Dependency.get(NavigationBarOverlayController.class).registerListeners();
 
         getViewTreeObserver().addOnComputeInternalInsetsListener(mOnComputeInternalInsetsListener);
+        updateNavButtonIcons();
     }
 
     @Override
@@ -1200,6 +1223,7 @@ public class NavigationBarView extends FrameLayout implements
         if (mRotationButtonController != null) {
             mRotationButtonController.unregisterListeners();
         }
+        Dependency.get(NavigationBarOverlayController.class).unregisterListeners();
 
         mEdgeBackGestureHandler.onNavBarDetached();
         getViewTreeObserver().removeOnComputeInternalInsetsListener(

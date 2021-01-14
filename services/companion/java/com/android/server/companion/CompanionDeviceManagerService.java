@@ -27,6 +27,7 @@ import static com.android.internal.util.Preconditions.checkState;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainRunnable;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
 import android.annotation.CheckResult;
@@ -72,6 +73,7 @@ import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.permission.PermissionControllerManager;
 import android.provider.Settings;
 import android.provider.SettingsStringUtil.ComponentNameSet;
 import android.text.BidiFormatter;
@@ -159,6 +161,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     private AssociationRequest mRequest;
     private String mCallingPackage;
     private AndroidFuture<Association> mOngoingDeviceDiscovery;
+    private PermissionControllerManager mPermissionControllerManager;
 
     private BluetoothDeviceConnectedListener mBluetoothDeviceConnectedListener =
             new BluetoothDeviceConnectedListener();
@@ -184,6 +187,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         mAtmInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
         mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
+        mPermissionControllerManager = requireNonNull(
+                context.getSystemService(PermissionControllerManager.class));
 
         Intent serviceIntent = new Intent().setComponent(SERVICE_TO_BIND_TO);
         mServiceConnectors = new PerUser<ServiceConnector<ICompanionDeviceDiscoveryService>>() {
@@ -344,13 +349,25 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             request.setCallingPackage(callingPackage);
             callback.asBinder().linkToDeath(CompanionDeviceManagerService.this /* recipient */, 0);
 
-            final long callingIdentity = Binder.clearCallingIdentity();
-            try {
-                mOngoingDeviceDiscovery = mServiceConnectors.forUser(userId).postAsync(service -> {
+            AndroidFuture<String> fetchProfileDescription =
+                    request.getDeviceProfile() == null
+                            ? AndroidFuture.completedFuture(null)
+                            : getDeviceProfilePermissionDescription(
+                                    request.getDeviceProfile());
+
+            mOngoingDeviceDiscovery = fetchProfileDescription.thenComposeAsync(description -> {
+                request.setDeviceProfilePrivilegesDescription(description);
+
+                return mServiceConnectors.forUser(userId).postAsync(service -> {
                     AndroidFuture<Association> future = new AndroidFuture<>();
                     service.startDiscovery(request, callingPackage, callback, future);
                     return future;
-                }).cancelTimeout().whenComplete(uncheckExceptions((association, err) -> {
+                }).cancelTimeout();
+
+            }, FgThread.getExecutor()).whenComplete(uncheckExceptions((association, err) -> {
+
+                final long callingIdentity = Binder.clearCallingIdentity();
+                try {
                     if (err == null) {
                         addAssociation(association);
                     } else {
@@ -358,10 +375,10 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                         callback.onFailure("No devices found: " + err.getMessage());
                     }
                     cleanup();
-                }));
-            } finally {
-                Binder.restoreCallingIdentity(callingIdentity);
-            }
+                } finally {
+                    Binder.restoreCallingIdentity(callingIdentity);
+                }
+            }));
         }
 
         @Override
@@ -902,6 +919,19 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
     void onDeviceDisconnected(String address) {
         mCurrentlyConnectedDevices.remove(address);
+    }
+
+    private AndroidFuture<String> getDeviceProfilePermissionDescription(String deviceProfile) {
+        AndroidFuture<String> result = new AndroidFuture<>();
+        mPermissionControllerManager.getPrivilegesDescriptionStringForProfile(
+                deviceProfile, FgThread.getExecutor(), desc -> {
+                        try {
+                            result.complete(requireNonNull(desc));
+                        } catch (Exception e) {
+                            result.completeExceptionally(e);
+                        }
+                });
+        return result;
     }
 
     private class ShellCmd extends ShellCommand {

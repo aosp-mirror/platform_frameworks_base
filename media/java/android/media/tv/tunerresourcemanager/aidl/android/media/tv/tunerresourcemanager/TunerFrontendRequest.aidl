@@ -17,8 +17,12 @@
 package android.media.tv.tunerresourcemanager;
 
 /**
- * Information required to request a Tuner Demux.
+ * Information required to request a Tuner Frontend.
  *
  * @hide
  */
-parcelable TunerDemuxRequest;
+parcelable TunerFrontendRequest {
+    int clientId;
+
+    int frontendType;
+}

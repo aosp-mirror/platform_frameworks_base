@@ -32,6 +32,7 @@ import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
+import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.util.Optional;
 
@@ -61,6 +62,9 @@ public interface SysUIComponent {
 
         @BindsInstance
         Builder setLegacySplitScreen(Optional<LegacySplitScreen> s);
+
+        @BindsInstance
+        Builder setSplitScreen(Optional<SplitScreen> s);
 
         @BindsInstance
         Builder setAppPairs(Optional<AppPairs> s);

@@ -17,6 +17,8 @@
 #ifndef _ANDROID_MEDIA_TV_TUNER_CLIENT_H_
 #define _ANDROID_MEDIA_TV_TUNER_CLIENT_H_
 
+#include <aidl/android/media/tv/tunerresourcemanager/ITunerResourceManager.h>
+#include <aidl/android/media/tv/tunerresourcemanager/TunerFrontendInfo.h>
 #include <aidl/android/media/tv/tuner/ITunerService.h>
 #include <android/hardware/tv/tuner/1.1/ITuner.h>
 #include <android/hardware/tv/tuner/1.1/types.h>
@@ -28,10 +30,12 @@
 
 using ::aidl::android::media::tv::tuner::ITunerService;
 using ::aidl::android::media::tv::tuner::TunerServiceFrontendInfo;
+using ::aidl::android::media::tv::tunerresourcemanager::ITunerResourceManager;
 
 using ::android::hardware::tv::tuner::V1_0::DemuxCapabilities;
 using ::android::hardware::tv::tuner::V1_0::FrontendId;
 using ::android::hardware::tv::tuner::V1_0::ITuner;
+using ::android::hardware::tv::tuner::V1_0::LnbId;
 using ::android::hardware::tv::tuner::V1_0::Result;
 using ::android::hardware::tv::tuner::V1_1::FrontendDtmbCapabilities;
 
@@ -136,13 +140,16 @@ private:
     sp<ILnb> openHidlLnbById(int id);
     sp<ILnb> openHidlLnbByName(string name, LnbId& lnbId);
     sp<IDescrambler> openHidlDescrambler();
+    vector<int> getLnbHandles();
     FrontendInfo FrontendInfoAidlToHidl(TunerServiceFrontendInfo aidlFrontendInfo);
+    void updateTunerResources();
+    void updateFrontendResources();
+    void updateLnbResources();
 
     int getResourceIdFromHandle(int handle, int resourceType);
 
     int getResourceHandleFromId(int id, int resourceType);
 
-private:
     /**
      * An AIDL Tuner Service Singleton assigned at the first time the Tuner Client
      * connects with the Tuner Service. Default null when the service does not exist.
@@ -166,6 +173,8 @@ private:
     // An integer that carries the Tuner version. The high 16 bits are the major version number
     // while the low 16 bits are the minor version. Default value is unknown version 0.
     static int mTunerVersion;
+
+    shared_ptr<ITunerResourceManager> mTunerResourceManager;
 
     int mResourceRequestCount = 0;
 };

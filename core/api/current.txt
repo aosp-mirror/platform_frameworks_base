@@ -10729,7 +10729,7 @@ package android.content {
     field public static final String ACTION_CAMERA_BUTTON = "android.intent.action.CAMERA_BUTTON";
     field public static final String ACTION_CARRIER_SETUP = "android.intent.action.CARRIER_SETUP";
     field public static final String ACTION_CHOOSER = "android.intent.action.CHOOSER";
-    field public static final String ACTION_CLOSE_SYSTEM_DIALOGS = "android.intent.action.CLOSE_SYSTEM_DIALOGS";
+    field @Deprecated @RequiresPermission("android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS") public static final String ACTION_CLOSE_SYSTEM_DIALOGS = "android.intent.action.CLOSE_SYSTEM_DIALOGS";
     field public static final String ACTION_CONFIGURATION_CHANGED = "android.intent.action.CONFIGURATION_CHANGED";
     field public static final String ACTION_CREATE_DOCUMENT = "android.intent.action.CREATE_DOCUMENT";
     field public static final String ACTION_CREATE_REMINDER = "android.intent.action.CREATE_REMINDER";
@@ -19911,6 +19911,7 @@ package android.media {
     field public static final int FLAG_REMOVE_SOUND_AND_VIBRATE = 8; // 0x8
     field public static final int FLAG_SHOW_UI = 1; // 0x1
     field public static final int FLAG_VIBRATE = 16; // 0x10
+    field public static final int FX_BACK = 10; // 0xa
     field public static final int FX_FOCUS_NAVIGATION_DOWN = 2; // 0x2
     field public static final int FX_FOCUS_NAVIGATION_LEFT = 3; // 0x3
     field public static final int FX_FOCUS_NAVIGATION_RIGHT = 4; // 0x4
@@ -30378,9 +30379,9 @@ package android.os {
 
   public class DropBoxManager {
     ctor protected DropBoxManager();
-    method public void addData(String, byte[], int);
-    method public void addFile(String, java.io.File, int) throws java.io.IOException;
-    method public void addText(String, String);
+    method public void addData(@NonNull String, @Nullable byte[], int);
+    method public void addFile(@NonNull String, @NonNull java.io.File, int) throws java.io.IOException;
+    method public void addText(@NonNull String, @NonNull String);
     method @Nullable @RequiresPermission(allOf={android.Manifest.permission.READ_LOGS, android.Manifest.permission.PACKAGE_USAGE_STATS}) public android.os.DropBoxManager.Entry getNextEntry(String, long);
     method public boolean isTagEnabled(String);
     field public static final String ACTION_DROPBOX_ENTRY_ADDED = "android.intent.action.DROPBOX_ENTRY_ADDED";
@@ -30393,17 +30394,17 @@ package android.os {
   }
 
   public static class DropBoxManager.Entry implements java.io.Closeable android.os.Parcelable {
-    ctor public DropBoxManager.Entry(String, long);
-    ctor public DropBoxManager.Entry(String, long, String);
-    ctor public DropBoxManager.Entry(String, long, byte[], int);
-    ctor public DropBoxManager.Entry(String, long, android.os.ParcelFileDescriptor, int);
-    ctor public DropBoxManager.Entry(String, long, java.io.File, int) throws java.io.IOException;
+    ctor public DropBoxManager.Entry(@NonNull String, long);
+    ctor public DropBoxManager.Entry(@NonNull String, long, @NonNull String);
+    ctor public DropBoxManager.Entry(@NonNull String, long, @Nullable byte[], int);
+    ctor public DropBoxManager.Entry(@NonNull String, long, @Nullable android.os.ParcelFileDescriptor, int);
+    ctor public DropBoxManager.Entry(@NonNull String, long, @NonNull java.io.File, int) throws java.io.IOException;
     method public void close();
     method public int describeContents();
     method public int getFlags();
-    method public java.io.InputStream getInputStream() throws java.io.IOException;
-    method public String getTag();
-    method public String getText(int);
+    method @Nullable public java.io.InputStream getInputStream() throws java.io.IOException;
+    method @NonNull public String getTag();
+    method @Nullable public String getText(int);
     method public long getTimeMillis();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.DropBoxManager.Entry> CREATOR;
@@ -38768,6 +38769,7 @@ package android.telecom {
     field public static final int DIRECTION_UNKNOWN = -1; // 0xffffffff
     field public static final int PROPERTY_ASSISTED_DIALING = 512; // 0x200
     field public static final int PROPERTY_CONFERENCE = 1; // 0x1
+    field public static final int PROPERTY_CROSS_SIM = 16384; // 0x4000
     field public static final int PROPERTY_EMERGENCY_CALLBACK_MODE = 4; // 0x4
     field public static final int PROPERTY_ENTERPRISE_CALL = 32; // 0x20
     field public static final int PROPERTY_GENERIC_CONFERENCE = 2; // 0x2
@@ -39061,6 +39063,7 @@ package android.telecom {
     field public static final String EXTRA_LAST_FORWARDED_NUMBER = "android.telecom.extra.LAST_FORWARDED_NUMBER";
     field public static final String EXTRA_SIP_INVITE = "android.telecom.extra.SIP_INVITE";
     field public static final int PROPERTY_ASSISTED_DIALING = 512; // 0x200
+    field public static final int PROPERTY_CROSS_SIM = 8192; // 0x2000
     field public static final int PROPERTY_HAS_CDMA_VOICE_PRIVACY = 32; // 0x20
     field public static final int PROPERTY_HIGH_DEF_AUDIO = 4; // 0x4
     field public static final int PROPERTY_IS_ADHOC_CONFERENCE = 4096; // 0x1000
@@ -41818,6 +41821,8 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void switchMultiSimConfig(int);
     method public void unregisterPhoneStateListener(@NonNull android.telephony.PhoneStateListener);
     method public void updateAvailableNetworks(@NonNull java.util.List<android.telephony.AvailableNetworkInfo>, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Integer>);
+    method public void uploadCallComposerPicture(@NonNull java.nio.file.Path, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.os.ParcelUuid,android.telephony.TelephonyManager.CallComposerException>);
+    method public void uploadCallComposerPicture(@NonNull java.io.InputStream, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.os.ParcelUuid,android.telephony.TelephonyManager.CallComposerException>);
     field public static final String ACTION_CARRIER_MESSAGING_CLIENT_SERVICE = "android.telephony.action.CARRIER_MESSAGING_CLIENT_SERVICE";
     field public static final String ACTION_CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE = "android.telephony.action.CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE";
     field public static final String ACTION_CARRIER_SIGNAL_PCO_VALUE = "android.telephony.action.CARRIER_SIGNAL_PCO_VALUE";
@@ -41958,6 +41963,18 @@ package android.telephony {
     field public static final int USSD_RETURN_FAILURE = -1; // 0xffffffff
     field public static final String VVM_TYPE_CVVM = "vvm_type_cvvm";
     field public static final String VVM_TYPE_OMTP = "vvm_type_omtp";
+  }
+
+  public static class TelephonyManager.CallComposerException extends java.lang.Exception {
+    ctor public TelephonyManager.CallComposerException(int, @Nullable java.io.IOException);
+    method public int getErrorCode();
+    method @Nullable public java.io.IOException getIOException();
+    field public static final int ERROR_AUTHENTICATION_FAILED = 3; // 0x3
+    field public static final int ERROR_FILE_TOO_LARGE = 2; // 0x2
+    field public static final int ERROR_INPUT_CLOSED = 4; // 0x4
+    field public static final int ERROR_IO_EXCEPTION = 5; // 0x5
+    field public static final int ERROR_REMOTE_END_CLOSED = 1; // 0x1
+    field public static final int ERROR_UNKNOWN = 0; // 0x0
   }
 
   public abstract static class TelephonyManager.CellInfoCallback {
@@ -42364,6 +42381,7 @@ package android.telephony.ims {
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PRECISE_PHONE_STATE}) public void getRegistrationTransportType(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PRECISE_PHONE_STATE}) public int getVoWiFiModeSetting();
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PRECISE_PHONE_STATE}) public boolean isAdvancedCallingSettingEnabled();
+    method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PRECISE_PHONE_STATE}) public boolean isCrossSimCallingEnabledByUser() throws android.telephony.ims.ImsException;
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PRECISE_PHONE_STATE}) public boolean isTtyOverVolteEnabled();
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PRECISE_PHONE_STATE}) public boolean isVoWiFiRoamingSettingEnabled();
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PRECISE_PHONE_STATE}) public boolean isVoWiFiSettingEnabled();
@@ -42580,6 +42598,7 @@ package android.telephony.ims {
     method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public void getRegistrationTransportType(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public void registerImsRegistrationCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.RegistrationManager.RegistrationCallback) throws android.telephony.ims.ImsException;
     method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public void unregisterImsRegistrationCallback(@NonNull android.telephony.ims.RegistrationManager.RegistrationCallback);
+    field public static final int ATTR_EPDG_OVER_CELL_INTERNET = 1; // 0x1
     field public static final int REGISTRATION_STATE_NOT_REGISTERED = 0; // 0x0
     field public static final int REGISTRATION_STATE_REGISTERED = 2; // 0x2
     field public static final int REGISTRATION_STATE_REGISTERING = 1; // 0x1
@@ -42587,8 +42606,10 @@ package android.telephony.ims {
 
   public static class RegistrationManager.RegistrationCallback {
     ctor public RegistrationManager.RegistrationCallback();
-    method public void onRegistered(int);
-    method public void onRegistering(int);
+    method @Deprecated public void onRegistered(int);
+    method public void onRegistered(int, int);
+    method @Deprecated public void onRegistering(int);
+    method public void onRegistering(int, int);
     method public void onTechnologyChangeFailed(int, @NonNull android.telephony.ims.ImsReasonInfo);
     method public void onUnregistered(@NonNull android.telephony.ims.ImsReasonInfo);
   }

@@ -233,7 +233,8 @@ public class ActivityLaunchAnimator {
 
                     @Override
                     public void onAnimationStart(Animator animation) {
-                        InteractionJankMonitor.getInstance().begin(CUJ_NOTIFICATION_APP_START);
+                        InteractionJankMonitor.getInstance().begin(mSourceNotification,
+                                CUJ_NOTIFICATION_APP_START);
                     }
 
                     @Override

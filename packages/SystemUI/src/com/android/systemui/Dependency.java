@@ -49,6 +49,7 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBarController;
+import com.android.systemui.navigationbar.NavigationBarOverlayController;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.DarkIconDispatcher;
@@ -340,6 +341,7 @@ public class Dependency {
     @Inject Lazy<ProtoTracer> mProtoTracer;
     @Inject Lazy<MediaOutputDialogFactory> mMediaOutputDialogFactory;
     @Inject Lazy<DeviceConfigProxy> mDeviceConfigProxy;
+    @Inject Lazy<NavigationBarOverlayController> mNavbarButtonsControllerLazy;
 
     @Inject
     public Dependency() {
@@ -535,6 +537,8 @@ public class Dependency {
         mProviders.put(RecordingController.class, mRecordingController::get);
 
         mProviders.put(MediaOutputDialogFactory.class, mMediaOutputDialogFactory::get);
+
+        mProviders.put(NavigationBarOverlayController.class, mNavbarButtonsControllerLazy::get);
 
         Dependency.setInstance(this);
     }

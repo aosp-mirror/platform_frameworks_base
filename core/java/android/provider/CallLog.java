@@ -148,7 +148,6 @@ public class CallLog {
 
         private final int mErrorCode;
 
-        /** @hide */
         public CallComposerLoggingException(@CallComposerLoggingError int errorCode) {
             mErrorCode = errorCode;
         }
