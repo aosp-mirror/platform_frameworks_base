@@ -31,7 +31,7 @@ import java.util.Map;
  * {@link InvalidationRequesterClient} for more info.
  */
 public abstract class InvalidationClient<S extends BiometricAuthenticator.Identifier, T>
-        extends ClientMonitor<T> {
+        extends BaseClientMonitor<T> {
 
     private static final String TAG = "InvalidationClient";
 

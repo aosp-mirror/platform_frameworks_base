@@ -56,7 +56,7 @@ import android.hardware.biometrics.IInvalidationCallback;
  * the framework should re-start the invalidation process described above.
  */
 public abstract class InvalidationRequesterClient<S extends BiometricAuthenticator.Identifier, T>
-        extends ClientMonitor<T> {
+        extends BaseClientMonitor<T> {
 
     private final BiometricManager mBiometricManager;
     @NonNull private final BiometricUtils<S> mUtils;

@@ -58,8 +58,8 @@ import com.android.server.biometrics.fingerprint.PerformanceStatsProto;
 import com.android.server.biometrics.sensors.AcquisitionClient;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.AuthenticationConsumer;
+import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
-import com.android.server.biometrics.sensors.ClientMonitor;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.EnumerateConsumer;
 import com.android.server.biometrics.sensors.Interruptable;
@@ -103,7 +103,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     private final LockoutResetDispatcher mLockoutResetDispatcher;
     private final LockoutFrameworkImpl mLockoutTracker;
     private final BiometricTaskStackListener mTaskStackListener;
-    private final ClientMonitor.LazyDaemon<IBiometricsFingerprint> mLazyDaemon;
+    private final BaseClientMonitor.LazyDaemon<IBiometricsFingerprint> mLazyDaemon;
     private final Map<Integer, Long> mAuthenticatorIds;
 
     @Nullable private IBiometricsFingerprint mDaemon;
@@ -116,7 +116,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         @Override
         public void onTaskStackChanged() {
             mHandler.post(() -> {
-                final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                final BaseClientMonitor<?> client = mScheduler.getCurrentClient();
                 if (!(client instanceof AuthenticationClient)) {
                     Slog.e(TAG, "Task stack changed for client: " + client);
                     return;
@@ -188,7 +188,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         @Override
         public void onEnrollResult(long deviceId, int fingerId, int groupId, int remaining) {
             mHandler.post(() -> {
-                final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                final BaseClientMonitor<?> client = mScheduler.getCurrentClient();
                 if (!(client instanceof FingerprintEnrollClient)) {
                     Slog.e(TAG, "onEnrollResult for non-enroll client: "
                             + Utils.getClientName(client));
@@ -213,7 +213,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         @Override
         public void onAcquired_2_2(long deviceId, int acquiredInfo, int vendorCode) {
             mHandler.post(() -> {
-                final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                final BaseClientMonitor<?> client = mScheduler.getCurrentClient();
                 if (!(client instanceof AcquisitionClient)) {
                     Slog.e(TAG, "onAcquired for non-acquisition client: "
                             + Utils.getClientName(client));
@@ -229,7 +229,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         public void onAuthenticated(long deviceId, int fingerId, int groupId,
                 ArrayList<Byte> token) {
             mHandler.post(() -> {
-                final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                final BaseClientMonitor<?> client = mScheduler.getCurrentClient();
                 if (!(client instanceof AuthenticationConsumer)) {
                     Slog.e(TAG, "onAuthenticated for non-authentication consumer: "
                             + Utils.getClientName(client));
@@ -247,7 +247,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         @Override
         public void onError(long deviceId, int error, int vendorCode) {
             mHandler.post(() -> {
-                final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                final BaseClientMonitor<?> client = mScheduler.getCurrentClient();
                 Slog.d(TAG, "handleError"
                         + ", client: " + Utils.getClientName(client)
                         + ", error: " + error
@@ -273,7 +273,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         public void onRemoved(long deviceId, int fingerId, int groupId, int remaining) {
             mHandler.post(() -> {
                 Slog.d(TAG, "Removed, fingerId: " + fingerId + ", remaining: " + remaining);
-                final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                final BaseClientMonitor<?> client = mScheduler.getCurrentClient();
                 if (!(client instanceof RemovalConsumer)) {
                     Slog.e(TAG, "onRemoved for non-removal consumer: "
                             + Utils.getClientName(client));
@@ -289,7 +289,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         @Override
         public void onEnumerate(long deviceId, int fingerId, int groupId, int remaining) {
             mHandler.post(() -> {
-                final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                final BaseClientMonitor<?> client = mScheduler.getCurrentClient();
                 if (!(client instanceof EnumerateConsumer)) {
                     Slog.e(TAG, "onEnumerate for non-enumerate consumer: "
                             + Utils.getClientName(client));
@@ -379,7 +379,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
             mDaemon = null;
             mCurrentUserId = UserHandle.USER_NULL;
 
-            final ClientMonitor<?> client = mScheduler.getCurrentClient();
+            final BaseClientMonitor<?> client = mScheduler.getCurrentClient();
             if (client instanceof Interruptable) {
                 Slog.e(TAG, "Sending ERROR_HW_UNAVAILABLE for client: " + client);
                 final Interruptable interruptable = (Interruptable) client;
@@ -484,9 +484,10 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
                 new FingerprintUpdateActiveUserClient(mContext, mLazyDaemon, targetUserId,
                         mContext.getOpPackageName(), mSensorProperties.sensorId, mCurrentUserId,
                         hasEnrolled, mAuthenticatorIds);
-        mScheduler.scheduleClientMonitor(client, new ClientMonitor.Callback() {
+        mScheduler.scheduleClientMonitor(client, new BaseClientMonitor.Callback() {
             @Override
-            public void onClientFinished(@NonNull ClientMonitor<?> clientMonitor, boolean success) {
+            public void onClientFinished(@NonNull BaseClientMonitor<?> clientMonitor,
+                    boolean success) {
                 if (success) {
                     mCurrentUserId = targetUserId;
                 }
@@ -557,9 +558,9 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
                     hardwareAuthToken, opPackageName, FingerprintUtils.getLegacyInstance(mSensorId),
                     ENROLL_TIMEOUT_SEC, mSensorProperties.sensorId, mUdfpsOverlayController,
                     shouldLogMetrics);
-            mScheduler.scheduleClientMonitor(client, new ClientMonitor.Callback() {
+            mScheduler.scheduleClientMonitor(client, new BaseClientMonitor.Callback() {
                 @Override
-                public void onClientFinished(@NonNull ClientMonitor<?> clientMonitor,
+                public void onClientFinished(@NonNull BaseClientMonitor<?> clientMonitor,
                         boolean success) {
                     if (success) {
                         // Update authenticatorIds
@@ -686,7 +687,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
 
     @Override
     public void onPointerDown(int sensorId, int x, int y, float minor, float major) {
-        final ClientMonitor<?> client = mScheduler.getCurrentClient();
+        final BaseClientMonitor<?> client = mScheduler.getCurrentClient();
         if (!(client instanceof Udfps)) {
             Slog.w(TAG, "onFingerDown received during client: " + client);
             return;
@@ -697,7 +698,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
 
     @Override
     public void onPointerUp(int sensorId) {
-        final ClientMonitor<?> client = mScheduler.getCurrentClient();
+        final BaseClientMonitor<?> client = mScheduler.getCurrentClient();
         if (!(client instanceof Udfps)) {
             Slog.w(TAG, "onFingerDown received during client: " + client);
             return;
