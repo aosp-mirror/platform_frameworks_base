@@ -23,6 +23,7 @@ import android.app.ActivityManager.RunningAppProcessInfo;
 import android.content.Context;
 import android.media.IResourceManagerService;
 import android.media.tv.TvInputManager;
+import android.media.tv.tuner.TunerFrontendInfo;
 import android.media.tv.tunerresourcemanager.CasSessionRequest;
 import android.media.tv.tunerresourcemanager.IResourcesReclaimListener;
 import android.media.tv.tunerresourcemanager.ITunerResourceManager;
@@ -30,7 +31,6 @@ import android.media.tv.tunerresourcemanager.ResourceClientProfile;
 import android.media.tv.tunerresourcemanager.TunerCiCamRequest;
 import android.media.tv.tunerresourcemanager.TunerDemuxRequest;
 import android.media.tv.tunerresourcemanager.TunerDescramblerRequest;
-import android.media.tv.tunerresourcemanager.TunerFrontendInfo;
 import android.media.tv.tunerresourcemanager.TunerFrontendRequest;
 import android.media.tv.tunerresourcemanager.TunerLnbRequest;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
@@ -578,7 +578,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             } else {
                 // Add a new fe resource
                 FrontendResource newFe = new FrontendResource.Builder(infos[i].handle)
-                                                 .type(infos[i].frontendType)
+                                                 .type(infos[i].type)
                                                  .exclusiveGroupId(infos[i].exclusiveGroupId)
                                                  .build();
                 addFrontendResource(newFe);
