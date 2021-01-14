@@ -22,6 +22,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.AndroidException;
 import android.util.Log;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -68,35 +69,73 @@ import java.util.Set;
 public final class ApplicationMediaCapabilities implements Parcelable {
     private static final String TAG = "ApplicationMediaCapabilities";
 
+    /**
+     * This exception is thrown when a given format is not specified in the media capabilities.
+     */
+    public static class FormatNotFoundException extends AndroidException {
+        public FormatNotFoundException(@NonNull String format) {
+            super(format);
+        }
+    }
+
     /** List of supported video codec mime types. */
     // TODO: init it with avc and mpeg4 as application is assuming to support them.
     private Set<String> mSupportedVideoMimeTypes = new HashSet<>();
 
+    /** List of unsupported video codec mime types. */
+    private Set<String> mUnsupportedVideoMimeTypes = new HashSet<>();
+
     /** List of supported hdr types. */
     private Set<String> mSupportedHdrTypes = new HashSet<>();
+
+    /** List of unsupported hdr types. */
+    private Set<String> mUnsupportedHdrTypes = new HashSet<>();
 
     private boolean mIsSlowMotionSupported = false;
 
     private ApplicationMediaCapabilities(Builder b) {
         mSupportedVideoMimeTypes.addAll(b.getSupportedVideoMimeTypes());
+        mUnsupportedVideoMimeTypes.addAll(b.getUnsupportedVideoMimeTypes());
         mSupportedHdrTypes.addAll(b.getSupportedHdrTypes());
+        mUnsupportedHdrTypes.addAll(b.getUnsupportedHdrTypes());
         mIsSlowMotionSupported = b.mIsSlowMotionSupported;
     }
 
     /**
-     * Query if an video codec is supported by the application.
+     * Query if a video codec format is supported by the application.
+     * @param videoMime The mime type of the video codec format. Must be the one used in
+     * {@link MediaFormat#KEY_MIME}.
+     * @return true if application supports the video codec format, false otherwise.
+     * @throws FormatNotFoundException if the application did not specify the codec either in the
+     * supported or unsupported formats.
      */
     public boolean isVideoMimeTypeSupported(
-            @NonNull String videoMime) {
-        return mSupportedVideoMimeTypes.contains(videoMime);
+            @NonNull String videoMime) throws FormatNotFoundException {
+        if (mUnsupportedVideoMimeTypes.contains(videoMime)) {
+            return false;
+        } else if (mSupportedVideoMimeTypes.contains(videoMime)) {
+            return true;
+        } else {
+            throw new FormatNotFoundException(videoMime);
+        }
     }
 
     /**
-     * Query if a hdr type is supported by the application.
+     * Query if a HDR type is supported by the application.
+     * @param hdrType The type of the HDR format.
+     * @return true if application supports the HDR format, false otherwise.
+     * @throws FormatNotFoundException if the application did not specify the format either in the
+     * supported or unsupported formats.
      */
     public boolean isHdrTypeSupported(
-            @NonNull @MediaFeature.MediaHdrType String hdrType) {
-        return mSupportedHdrTypes.contains(hdrType);
+            @NonNull @MediaFeature.MediaHdrType String hdrType) throws FormatNotFoundException {
+        if (mUnsupportedHdrTypes.contains(hdrType)) {
+            return false;
+        } else if (mSupportedHdrTypes.contains(hdrType)) {
+            return true;
+        } else {
+            throw new FormatNotFoundException(hdrType);
+        }
     }
 
     @Override
@@ -111,9 +150,19 @@ public final class ApplicationMediaCapabilities implements Parcelable {
         for (String cap : mSupportedVideoMimeTypes) {
             dest.writeString(cap);
         }
+        // Write out the unsupported video mime types.
+        dest.writeInt(mUnsupportedVideoMimeTypes.size());
+        for (String cap : mUnsupportedVideoMimeTypes) {
+            dest.writeString(cap);
+        }
         // Write out the supported hdr types.
         dest.writeInt(mSupportedHdrTypes.size());
         for (String cap : mSupportedHdrTypes) {
+            dest.writeString(cap);
+        }
+        // Write out the unsupported hdr types.
+        dest.writeInt(mUnsupportedHdrTypes.size());
+        for (String cap : mUnsupportedHdrTypes) {
             dest.writeString(cap);
         }
         // Write out the supported slow motion.
@@ -124,7 +173,9 @@ public final class ApplicationMediaCapabilities implements Parcelable {
     public String toString() {
         String caps = new String(
                 "Supported Video MimeTypes: " + mSupportedVideoMimeTypes.toString());
+        caps += "Unsupported Video MimeTypes: " + mUnsupportedVideoMimeTypes.toString();
         caps += "Supported HDR types: " + mSupportedHdrTypes.toString();
+        caps += "Unsupported HDR types: " + mUnsupportedHdrTypes.toString();
         caps += "Supported slow motion: " + mIsSlowMotionSupported;
         return caps;
     }
@@ -159,9 +210,8 @@ public final class ApplicationMediaCapabilities implements Parcelable {
             };
 
     /*
-     * Returns a list that contains all the video codec mime types supported by the application.
-     * The list will be empty if no codecs are supported by the application.
-     * @return List of supported video codec mime types.
+     * Query the video codec mime types supported by the application.
+     * @return List of supported video codec mime types. The list will be empty if there are none.
      */
     @NonNull
     public List<String> getSupportedVideoMimeTypes() {
@@ -169,13 +219,30 @@ public final class ApplicationMediaCapabilities implements Parcelable {
     }
 
     /*
-     * Returns a list that contains all hdr types supported by the application.
-     * The list will be empty if no hdr types are supported by the application.
-     * @return List of supported hdr types.
+     * Query the video codec mime types that are not supported by the application.
+     * @return List of unsupported video codec mime types. The list will be empty if there are none.
+     */
+    @NonNull
+    public List<String> getUnsupportedVideoMimeTypes() {
+        return new ArrayList<>(mSupportedVideoMimeTypes);
+    }
+
+    /*
+     * Query all hdr types that are supported by the application.
+     * @return List of supported hdr types. The list will be empty if there are none.
      */
     @NonNull
     public List<String> getSupportedHdrTypes() {
         return new ArrayList<>(mSupportedHdrTypes);
+    }
+
+    /*
+     * Query all hdr types that are not supported by the application.
+     * @return List of unsupported hdr types. The list will be empty if there are none.
+     */
+    @NonNull
+    public List<String> getUnsupportedHdrTypes()  {
+        return new ArrayList<>(mUnsupportedHdrTypes);
     }
 
     /*
@@ -212,6 +279,12 @@ public final class ApplicationMediaCapabilities implements Parcelable {
 
         /** List of supported hdr types. */
         private Set<String> mSupportedHdrTypes = new HashSet<>();
+
+        /** List of unsupported video codec mime types. */
+        private Set<String> mUnsupportedVideoMimeTypes = new HashSet<>();
+
+        /** List of unsupported hdr types. */
+        private Set<String> mUnsupportedHdrTypes = new HashSet<>();
 
         private boolean mIsSlowMotionSupported = false;
 
@@ -299,26 +372,50 @@ public final class ApplicationMediaCapabilities implements Parcelable {
                     case "HEVC":
                         if (isSupported) {
                             mSupportedVideoMimeTypes.add(MediaFormat.MIMETYPE_VIDEO_HEVC);
+                        } else {
+                            mUnsupportedVideoMimeTypes.add(MediaFormat.MIMETYPE_VIDEO_HEVC);
+                        }
+                        break;
+                    case "VP9":
+                        if (isSupported) {
+                            mSupportedVideoMimeTypes.add(MediaFormat.MIMETYPE_VIDEO_VP9);
+                        } else {
+                            mUnsupportedVideoMimeTypes.add(MediaFormat.MIMETYPE_VIDEO_VP9);
+                        }
+                        break;
+                    case "AV1":
+                        if (isSupported) {
+                            mSupportedVideoMimeTypes.add(MediaFormat.MIMETYPE_VIDEO_AV1);
+                        } else {
+                            mUnsupportedVideoMimeTypes.add(MediaFormat.MIMETYPE_VIDEO_AV1);
                         }
                         break;
                     case "HDR10":
                         if (isSupported) {
                             mSupportedHdrTypes.add(MediaFeature.HdrType.HDR10);
+                        } else {
+                            mUnsupportedHdrTypes.add(MediaFeature.HdrType.HDR10);
                         }
                         break;
                     case "HDR10Plus":
                         if (isSupported) {
                             mSupportedHdrTypes.add(MediaFeature.HdrType.HDR10_PLUS);
+                        } else {
+                            mUnsupportedHdrTypes.add(MediaFeature.HdrType.HDR10_PLUS);
                         }
                         break;
                     case "Dolby-Vision":
                         if (isSupported) {
                             mSupportedHdrTypes.add(MediaFeature.HdrType.DOLBY_VISION);
+                        } else {
+                            mUnsupportedHdrTypes.add(MediaFeature.HdrType.DOLBY_VISION);
                         }
                         break;
                     case "HLG":
                         if (isSupported) {
                             mSupportedHdrTypes.add(MediaFeature.HdrType.HLG);
+                        } else {
+                            mUnsupportedHdrTypes.add(MediaFeature.HdrType.HLG);
                         }
                         break;
                     case "SlowMotion":
@@ -348,8 +445,11 @@ public final class ApplicationMediaCapabilities implements Parcelable {
         @NonNull
         public ApplicationMediaCapabilities build() {
             Log.d(TAG,
-                    "Building ApplicationMediaCapabilities with: " + mSupportedHdrTypes.toString()
-                            + " " + mSupportedVideoMimeTypes.toString() + " "
+                    "Building ApplicationMediaCapabilities with: (Supported HDR: "
+                            + mSupportedHdrTypes.toString() + " Unsupported HDR: "
+                            + mUnsupportedHdrTypes.toString() + ") (Supported Codec: "
+                            + " " + mSupportedVideoMimeTypes.toString() + " Unsupported Codec:"
+                            + mUnsupportedVideoMimeTypes.toString() + ") "
                             + mIsSlowMotionSupported);
 
             // If hdr is supported, application must also support hevc.
@@ -365,8 +465,7 @@ public final class ApplicationMediaCapabilities implements Parcelable {
          *
          * @param codecMime Supported codec mime types. Must be one of the mime type defined
          *                  in {@link MediaFormat}.
-         * @throws UnsupportedOperationException if the codec mime type is not supported.
-         * @throws IllegalArgumentException      if mime type is not valid.
+         * @throws IllegalArgumentException if mime type is not valid.
          */
         @NonNull
         public Builder addSupportedVideoMimeType(
@@ -379,22 +478,86 @@ public final class ApplicationMediaCapabilities implements Parcelable {
             return new ArrayList<>(mSupportedVideoMimeTypes);
         }
 
+        private boolean isValidVideoCodecMimeType(@NonNull String codecMime) {
+            if (!codecMime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_HEVC)
+                    && !codecMime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_VP9)
+                    && !codecMime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_AV1)) {
+                return false;
+            }
+            return true;
+        }
+
+        /**
+         * Adds an unsupported video codec mime type.
+         *
+         * @param codecMime Unsupported codec mime type. Must be one of the mime type defined
+         *                  in {@link MediaFormat}.
+         * @throws IllegalArgumentException if mime type is not valid.
+         */
+        @NonNull
+        public Builder addUnsupportedVideoMimeType(
+                @NonNull String codecMime) {
+            if (!isValidVideoCodecMimeType(codecMime)) {
+                throw new IllegalArgumentException("Invalid codec mime type: " + codecMime);
+            }
+            mUnsupportedVideoMimeTypes.add(codecMime);
+            return this;
+        }
+
+        private List<String> getUnsupportedVideoMimeTypes() {
+            return new ArrayList<>(mUnsupportedVideoMimeTypes);
+        }
+
         /**
          * Adds a supported hdr type.
          *
-         * @param hdrType Supported hdr types. Must be one of the String defined in
+         * @param hdrType Supported hdr type. Must be one of the String defined in
          *                {@link MediaFeature.HdrType}.
          * @throws IllegalArgumentException if hdrType is not valid.
          */
         @NonNull
         public Builder addSupportedHdrType(
                 @NonNull @MediaFeature.MediaHdrType String hdrType) {
+            if (!isValidVideoCodecHdrType(hdrType)) {
+                throw new IllegalArgumentException("Invalid hdr type: " + hdrType);
+            }
             mSupportedHdrTypes.add(hdrType);
             return this;
         }
 
         private List<String> getSupportedHdrTypes() {
             return new ArrayList<>(mSupportedHdrTypes);
+        }
+
+        private boolean isValidVideoCodecHdrType(@NonNull String hdrType) {
+            if (!hdrType.equals(MediaFeature.HdrType.DOLBY_VISION)
+                    && !hdrType.equals(MediaFeature.HdrType.HDR10)
+                    && !hdrType.equals(MediaFeature.HdrType.HDR10_PLUS)
+                    && !hdrType.equals(MediaFeature.HdrType.HLG)) {
+                return false;
+            }
+            return true;
+        }
+
+        /**
+         * Adds an unsupported hdr type.
+         *
+         * @param hdrType Unsupported hdr type. Must be one of the String defined in
+         *                {@link MediaFeature.HdrType}.
+         * @throws IllegalArgumentException if hdrType is not valid.
+         */
+        @NonNull
+        public Builder addUnsupportedHdrType(
+                @NonNull @MediaFeature.MediaHdrType String hdrType) {
+            if (!isValidVideoCodecHdrType(hdrType)) {
+                throw new IllegalArgumentException("Invalid hdr type: " + hdrType);
+            }
+            mUnsupportedHdrTypes.add(hdrType);
+            return this;
+        }
+
+        private List<String> getUnsupportedHdrTypes() {
+            return new ArrayList<>(mUnsupportedHdrTypes);
         }
 
         /**
