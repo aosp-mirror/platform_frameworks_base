@@ -543,9 +543,9 @@ public abstract class WindowManagerInternal {
     public abstract void removeNonHighRefreshRatePackage(@NonNull String packageName);
 
     /**
-     * Checks if this display is touchable.
+     * Checks if the device supports touch or faketouch.
      */
-    public abstract boolean isTouchableDisplay(int displayId);
+    public abstract boolean isTouchOrFaketouchDevice();
 
     /**
      * Returns the info associated with the input token used to determine if a key should be

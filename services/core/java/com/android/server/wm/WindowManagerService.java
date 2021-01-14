@@ -753,6 +753,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final TaskSnapshotController mTaskSnapshotController;
 
     boolean mIsTouchDevice;
+    boolean mIsFakeTouchDevice;
 
     final H mH = new H();
 
@@ -5030,6 +5031,8 @@ public class WindowManagerService extends IWindowManager.Stub
             mRoot.forAllDisplays(DisplayContent::reconfigureDisplayLocked);
             mIsTouchDevice = mContext.getPackageManager().hasSystemFeature(
                     PackageManager.FEATURE_TOUCHSCREEN);
+            mIsFakeTouchDevice = mContext.getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_FAKETOUCH);
         }
 
         try {
@@ -8018,13 +8021,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public boolean isTouchableDisplay(int displayId) {
+        public boolean isTouchOrFaketouchDevice() {
             synchronized (mGlobalLock) {
-                final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-                final Configuration configuration =
-                        displayContent != null ? displayContent.getConfiguration() : null;
-                return configuration != null
-                        && configuration.touchscreen == Configuration.TOUCHSCREEN_FINGER;
+                // All touchable devices are also faketouchable.
+                return mIsFakeTouchDevice;
             }
         }
 
