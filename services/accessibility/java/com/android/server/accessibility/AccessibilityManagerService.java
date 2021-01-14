@@ -44,6 +44,7 @@ import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityShortcutInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
+import android.accessibilityservice.TouchInteractionController;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
@@ -101,6 +102,7 @@ import android.view.Display;
 import android.view.IWindow;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
+import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityInteractionClient;
@@ -1198,7 +1200,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     /**
-     * Called when a gesture is detected on a display.
+     * Called when a gesture is detected on a display by the framework.
      *
      * @param gestureEvent the detail of the gesture.
      * @return true if the event is handled.
@@ -1210,6 +1212,29 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 handled = notifyGestureLocked(gestureEvent, true);
             }
             return handled;
+        }
+    }
+
+    /** Send a motion event to the service to allow it to perform gesture detection. */
+    public boolean sendMotionEventToListeningServices(MotionEvent event) {
+        synchronized (mLock) {
+            if (DEBUG) {
+                Slog.d(LOG_TAG, "Sending event to service: " + event);
+            }
+            return notifyMotionEvent(event);
+        }
+    }
+
+    /**
+     * Notifies services that the touch state on a given display has changed.
+     */
+    public boolean onTouchStateChanged(int displayId, int state) {
+        synchronized (mLock) {
+            if (DEBUG) {
+                Slog.d(LOG_TAG, "Notifying touch state:"
+                        + TouchInteractionController.stateToString(state));
+            }
+            return notifyTouchState(displayId, state);
         }
     }
 
@@ -1521,6 +1546,30 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             AccessibilityServiceConnection service = state.mBoundServices.get(i);
             if (service.mRequestTouchExplorationMode && service.mIsDefault == isDefault) {
                 service.notifyGesture(gestureEvent);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean notifyMotionEvent(MotionEvent event) {
+        AccessibilityUserState state = getCurrentUserStateLocked();
+        for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
+            AccessibilityServiceConnection service = state.mBoundServices.get(i);
+            if (service.mRequestTouchExplorationMode) {
+                service.notifyMotionEvent(event);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean notifyTouchState(int displayId, int touchState) {
+        AccessibilityUserState state = getCurrentUserStateLocked();
+        for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
+            AccessibilityServiceConnection service = state.mBoundServices.get(i);
+            if (service.mRequestTouchExplorationMode) {
+                service.notifyTouchState(displayId, touchState);
                 return true;
             }
         }
@@ -2083,7 +2132,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if (userState.isSendMotionEventsEnabled()) {
                 flags |= AccessibilityInputFilter.FLAG_SEND_MOTION_EVENTS;
             }
-
             if (userState.isAutoclickEnabledLocked()) {
                 flags |= AccessibilityInputFilter.FLAG_FEATURE_AUTOCLICK;
             }
@@ -3956,6 +4004,93 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         synchronized (mLock) {
             if (mHasInputFilter && mInputFilter != null) {
                 mInputFilter.setGestureDetectionPassthroughRegion(displayId, region);
+            }
+        }
+    }
+
+    @Override
+    public void setServiceDetectsGesturesEnabled(int displayId, boolean mode) {
+        mMainHandler.sendMessage(
+                obtainMessage(AccessibilityManagerService::setServiceDetectsGesturesInternal, this,
+                        displayId, mode));
+    }
+
+    private void setServiceDetectsGesturesInternal(int displayId, boolean mode) {
+        synchronized (mLock) {
+            if (mHasInputFilter && mInputFilter != null) {
+                mInputFilter.setServiceDetectsGesturesEnabled(displayId, mode);
+            }
+        }
+    }
+
+    @Override
+    public void requestTouchExploration(int displayId) {
+        mMainHandler.sendMessage(obtainMessage(
+                AccessibilityManagerService::requestTouchExplorationInternal, this, displayId));
+    }
+
+    private void requestTouchExplorationInternal(int displayId) {
+        synchronized (mLock) {
+            if (mHasInputFilter && mInputFilter != null) {
+                mInputFilter.requestTouchExploration(displayId);
+            }
+        }
+    }
+
+    @Override
+    public void requestDragging(int displayId, int pointerId) {
+        mMainHandler.sendMessage(obtainMessage(AccessibilityManagerService::requestDraggingInternal,
+                this, displayId, pointerId));
+    }
+
+    private void requestDraggingInternal(int displayId, int pointerId) {
+        synchronized (mLock) {
+            if (mHasInputFilter && mInputFilter != null) {
+                mInputFilter.requestDragging(displayId, pointerId);
+            }
+        }
+    }
+
+    @Override
+    public void requestDelegating(int displayId) {
+        mMainHandler.sendMessage(
+                obtainMessage(
+                        AccessibilityManagerService::requestDelegatingInternal, this, displayId));
+    }
+
+    private void requestDelegatingInternal(int displayId) {
+        synchronized (mLock) {
+            if (mHasInputFilter && mInputFilter != null) {
+                mInputFilter.requestDelegating(displayId);
+            }
+        }
+    }
+
+    @Override
+    public void onDoubleTap(int displayId) {
+        mMainHandler.sendMessage(obtainMessage(AccessibilityManagerService::onDoubleTapInternal,
+                this, displayId));
+    }
+
+    private void onDoubleTapInternal(int displayId) {
+        synchronized (mLock) {
+            if (mHasInputFilter && mInputFilter != null) {
+                mInputFilter.onDoubleTap(displayId);
+            }
+        }
+    }
+
+    @Override
+    public void onDoubleTapAndHold(int displayId) {
+        mMainHandler
+                .sendMessage(obtainMessage(AccessibilityManagerService::onDoubleTapAndHoldInternal,
+                        this, displayId));
+    }
+
+    private void onDoubleTapAndHoldInternal(int displayId) {
+        synchronized (mLock) {
+            if (mHasInputFilter && mInputFilter != null) {
+                mInputFilter.onDoubleTapAndHold(displayId);
             }
         }
     }

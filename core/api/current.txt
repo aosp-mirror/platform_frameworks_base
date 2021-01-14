@@ -2994,6 +2994,7 @@ package android.accessibilityservice {
   }
 
   public final class AccessibilityGestureEvent implements android.os.Parcelable {
+    ctor public AccessibilityGestureEvent(int, int, @NonNull java.util.List<android.view.MotionEvent>);
     method public int describeContents();
     method @NonNull public static String gestureIdToString(int);
     method public int getDisplayId();
@@ -3016,6 +3017,7 @@ package android.accessibilityservice {
     method public final android.accessibilityservice.AccessibilityServiceInfo getServiceInfo();
     method @NonNull public final android.accessibilityservice.AccessibilityService.SoftKeyboardController getSoftKeyboardController();
     method @NonNull public final java.util.List<android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction> getSystemActions();
+    method @NonNull public final android.accessibilityservice.TouchInteractionController getTouchInteractionController(int);
     method public java.util.List<android.view.accessibility.AccessibilityWindowInfo> getWindows();
     method @NonNull public final android.util.SparseArray<java.util.List<android.view.accessibility.AccessibilityWindowInfo>> getWindowsOnAllDisplays();
     method public abstract void onAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
@@ -3248,6 +3250,31 @@ package android.accessibilityservice {
     method public android.graphics.Path getPath();
     method public long getStartTime();
     method public boolean willContinue();
+  }
+
+  public final class TouchInteractionController {
+    method public void addListener(@Nullable java.util.concurrent.Executor, @NonNull android.accessibilityservice.TouchInteractionController.Listener);
+    method public int getDisplayId();
+    method public int getMaxPointerCount();
+    method public int getState();
+    method public void performClick();
+    method public void performLongClickAndStartDrag();
+    method public void removeAllListeners();
+    method public boolean removeListener(@NonNull android.accessibilityservice.TouchInteractionController.Listener);
+    method public void requestDelegating();
+    method public void requestDragging(int);
+    method public void requestTouchExploration();
+    method @NonNull public static String stateToString(int);
+    field public static final int STATE_CLEAR = 0; // 0x0
+    field public static final int STATE_DELEGATING = 4; // 0x4
+    field public static final int STATE_DRAGGING = 3; // 0x3
+    field public static final int STATE_TOUCH_EXPLORING = 2; // 0x2
+    field public static final int STATE_TOUCH_INTERACTING = 1; // 0x1
+  }
+
+  public static interface TouchInteractionController.Listener {
+    method public void onMotionEvent(@NonNull android.view.MotionEvent);
+    method public void onStateChanged(int);
   }
 
 }
