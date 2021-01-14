@@ -49,6 +49,12 @@ class LocationShellCommand extends BasicShellCommandHandler {
         }
 
         switch (cmd) {
+            case "is-location-enabled": {
+                int userId = parseUserId();
+                boolean enabled = mService.isLocationEnabledForUser(userId);
+                getOutPrintWriter().println(enabled);
+                return 0;
+            }
             case "set-location-enabled": {
                 int userId = parseUserId();
                 boolean enabled = Boolean.parseBoolean(getNextArgRequired());
@@ -238,6 +244,8 @@ class LocationShellCommand extends BasicShellCommandHandler {
         pw.println("Location service commands:");
         pw.println("  help or -h");
         pw.println("    Print this help text.");
+        pw.println("  is-location-enabled [--user <USER_ID>]");
+        pw.println("    Gets the master location switch enabled state.");
         pw.println("  set-location-enabled [--user <USER_ID>] true|false");
         pw.println("    Sets the master location switch enabled state.");
         pw.println("  providers");
