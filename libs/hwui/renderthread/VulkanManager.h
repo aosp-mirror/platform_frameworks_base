@@ -17,6 +17,10 @@
 #ifndef VULKANMANAGER_H
 #define VULKANMANAGER_H
 
+#include <functional>
+#include <mutex>
+
+#include "vulkan/vulkan_core.h"
 #if !defined(VK_USE_PLATFORM_ANDROID_KHR)
 #define VK_USE_PLATFORM_ANDROID_KHR
 #endif
@@ -161,8 +165,25 @@ private:
     VkDevice mDevice = VK_NULL_HANDLE;
 
     uint32_t mGraphicsQueueIndex;
+
+    std::mutex mGraphicsQueueMutex;
     VkQueue mGraphicsQueue = VK_NULL_HANDLE;
-    VkQueue mAHBUploadQueue = VK_NULL_HANDLE;
+
+    static VKAPI_ATTR VkResult interceptedVkQueueSubmit(VkQueue queue, uint32_t submitCount,
+                                                        const VkSubmitInfo* pSubmits,
+                                                        VkFence fence) {
+        sp<VulkanManager> manager = VulkanManager::getInstance();
+        std::lock_guard<std::mutex> lock(manager->mGraphicsQueueMutex);
+        return manager->mQueueSubmit(queue, submitCount, pSubmits, fence);
+    }
+
+    static VKAPI_ATTR VkResult interceptedVkQueueWaitIdle(VkQueue queue) {
+        sp<VulkanManager> manager = VulkanManager::getInstance();
+        std::lock_guard<std::mutex> lock(manager->mGraphicsQueueMutex);
+        return manager->mQueueWaitIdle(queue);
+    }
+
+    static GrVkGetProc sSkiaGetProp;
 
     // Variables saved to populate VkFunctorInitParams.
     static const uint32_t mAPIVersion = VK_MAKE_VERSION(1, 1, 0);
