@@ -16,6 +16,9 @@
 package android.net;
 
 import static android.net.IpSecManager.INVALID_RESOURCE_ID;
+import static android.net.NetworkRequest.Type.LISTEN;
+import static android.net.NetworkRequest.Type.REQUEST;
+import static android.net.NetworkRequest.Type.TRACK_DEFAULT;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
@@ -3730,14 +3733,12 @@ public class ConnectivityManager {
     private static final HashMap<NetworkRequest, NetworkCallback> sCallbacks = new HashMap<>();
     private static CallbackHandler sCallbackHandler;
 
-    private static final int LISTEN  = 1;
-    private static final int REQUEST = 2;
-
     private NetworkRequest sendRequestForNetwork(NetworkCapabilities need, NetworkCallback callback,
-            int timeoutMs, int action, int legacyType, CallbackHandler handler) {
+            int timeoutMs, NetworkRequest.Type reqType, int legacyType, CallbackHandler handler) {
         printStackTrace();
         checkCallbackNotNull(callback);
-        Preconditions.checkArgument(action == REQUEST || need != null, "null NetworkCapabilities");
+        Preconditions.checkArgument(
+                reqType == TRACK_DEFAULT || need != null, "null NetworkCapabilities");
         final NetworkRequest request;
         final String callingPackageName = mContext.getOpPackageName();
         try {
@@ -3750,13 +3751,13 @@ public class ConnectivityManager {
                 }
                 Messenger messenger = new Messenger(handler);
                 Binder binder = new Binder();
-                if (action == LISTEN) {
+                if (reqType == LISTEN) {
                     request = mService.listenForNetwork(
                             need, messenger, binder, callingPackageName);
                 } else {
                     request = mService.requestNetwork(
-                            need, messenger, timeoutMs, binder, legacyType, callingPackageName,
-                            getAttributionTag());
+                            need, reqType.ordinal(), messenger, timeoutMs, binder, legacyType,
+                            callingPackageName, getAttributionTag());
                 }
                 if (request != null) {
                     sCallbacks.put(request, callback);
@@ -4260,7 +4261,7 @@ public class ConnectivityManager {
         // request, i.e., the system default network.
         CallbackHandler cbHandler = new CallbackHandler(handler);
         sendRequestForNetwork(null /* NetworkCapabilities need */, networkCallback, 0,
-                REQUEST, TYPE_NONE, cbHandler);
+                TRACK_DEFAULT, TYPE_NONE, cbHandler);
     }
 
     /**
