@@ -2131,6 +2131,16 @@ public interface WindowManager extends ViewManager {
          */
         public static final int PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS = 0x00000004;
 
+        /**
+         * When set {@link LayoutParams#TYPE_APPLICATION_OVERLAY} windows will stay visible, even if
+         * {@link LayoutParams#SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS} is set for another
+         * visible window.
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(permission.SYSTEM_APPLICATION_OVERLAY)
+        public static final int SYSTEM_FLAG_SYSTEM_APPLICATION_OVERLAY = 0x00000008;
+
         /** In a multiuser system if this flag is set and the owner is a system process then this
          * window will appear on all user screens. This overrides the default behavior of window
          * types that normally only appear on the owning user's screen. Refer to each window type
@@ -2328,6 +2338,7 @@ public interface WindowManager extends ViewManager {
         @IntDef(flag = true, prefix = { "SYSTEM_FLAG_" }, value = {
                 SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
                 SYSTEM_FLAG_SHOW_FOR_ALL_USERS,
+                SYSTEM_FLAG_SYSTEM_APPLICATION_OVERLAY,
         })
         public @interface SystemFlags {}
 
@@ -2361,6 +2372,7 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_TRUSTED_OVERLAY,
                 PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME,
                 PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP,
+                SYSTEM_FLAG_SYSTEM_APPLICATION_OVERLAY,
         })
         public @interface PrivateFlags {}
 
@@ -2473,7 +2485,11 @@ public interface WindowManager extends ViewManager {
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP,
                         equals = PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP,
-                        name = "INTERCEPT_GLOBAL_DRAG_AND_DROP")
+                        name = "INTERCEPT_GLOBAL_DRAG_AND_DROP"),
+                @ViewDebug.FlagToString(
+                        mask = SYSTEM_FLAG_SYSTEM_APPLICATION_OVERLAY,
+                        equals = SYSTEM_FLAG_SYSTEM_APPLICATION_OVERLAY,
+                        name = "SYSTEM_FLAG_SYSTEM_APPLICATION_OVERLAY")
         })
         @PrivateFlags
         @TestApi
