@@ -21,7 +21,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.app.TaskInfo;
 import android.content.ComponentName;
 import android.content.Context;
@@ -58,7 +57,6 @@ public final class ContentCaptureContext implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int FLAG_DISABLED_BY_APP = 0x1;
 
     /**
@@ -69,7 +67,6 @@ public final class ContentCaptureContext implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int FLAG_DISABLED_BY_FLAG_SECURE = 0x2;
 
     /**
@@ -79,7 +76,6 @@ public final class ContentCaptureContext implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int FLAG_RECONNECTED = 0x4;
 
     /** @hide */
@@ -173,7 +169,6 @@ public final class ContentCaptureContext implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public int getTaskId() {
         return mTaskId;
     }
@@ -184,7 +179,6 @@ public final class ContentCaptureContext implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public @Nullable ComponentName getActivityComponent() {
         return mComponentName;
     }
@@ -197,7 +191,6 @@ public final class ContentCaptureContext implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public @Nullable ContentCaptureSessionId getParentSessionId() {
         return mParentSessionId == NO_SESSION_ID ? null
                 : new ContentCaptureSessionId(mParentSessionId);
@@ -215,7 +208,6 @@ public final class ContentCaptureContext implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public int getDisplayId() {
         return mDisplayId;
     }
@@ -229,7 +221,6 @@ public final class ContentCaptureContext implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public @ContextCreationFlags int getFlags() {
         return mFlags;
     }

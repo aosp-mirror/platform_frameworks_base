@@ -22,7 +22,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -68,7 +67,6 @@ import java.util.concurrent.Executor;
  * @hide
  */
 @SystemApi
-@TestApi
 public class DynamicSystemClient {
     /** @hide */
     @IntDef(prefix = { "STATUS_" }, value = {
@@ -286,7 +284,6 @@ public class DynamicSystemClient {
      * @hide
      */
     @SystemApi
-    @TestApi
     public DynamicSystemClient(@NonNull Context context) {
         mContext = context;
         mConnection = new DynSystemServiceConnection();
@@ -322,7 +319,6 @@ public class DynamicSystemClient {
      */
     @RequiresPermission(android.Manifest.permission.INSTALL_DYNAMIC_SYSTEM)
     @SystemApi
-    @TestApi
     public void bind() {
         if (!featureFlagEnabled()) {
             Slog.w(TAG, FeatureFlagUtils.DYNAMIC_SYSTEM + " not enabled; bind() aborted.");
@@ -345,7 +341,6 @@ public class DynamicSystemClient {
      */
     @RequiresPermission(android.Manifest.permission.INSTALL_DYNAMIC_SYSTEM)
     @SystemApi
-    @TestApi
     public void unbind() {
         if (!mBound) {
             return;
@@ -381,7 +376,6 @@ public class DynamicSystemClient {
      */
     @RequiresPermission(android.Manifest.permission.INSTALL_DYNAMIC_SYSTEM)
     @SystemApi
-    @TestApi
     public void start(@NonNull Uri systemUrl, @BytesLong long systemSize) {
         start(systemUrl, systemSize, 0 /* Use the default userdata size */);
     }

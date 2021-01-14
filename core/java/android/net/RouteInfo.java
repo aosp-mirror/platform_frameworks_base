@@ -20,12 +20,12 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.net.util.NetUtils;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.net.module.util.NetUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -87,17 +87,14 @@ public final class RouteInfo implements Parcelable {
 
     /** Unicast route. @hide */
     @SystemApi
-    @TestApi
     public static final int RTN_UNICAST = 1;
 
     /** Unreachable route. @hide */
     @SystemApi
-    @TestApi
     public static final int RTN_UNREACHABLE = 7;
 
     /** Throw route. @hide */
     @SystemApi
-    @TestApi
     public static final int RTN_THROW = 9;
 
     /**
@@ -135,7 +132,6 @@ public final class RouteInfo implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public RouteInfo(@Nullable IpPrefix destination, @Nullable InetAddress gateway,
             @Nullable String iface, @RouteType int type) {
         this(destination, gateway, iface, type, 0);
@@ -397,7 +393,6 @@ public final class RouteInfo implements Parcelable {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     @RouteType
     public int getType() {
