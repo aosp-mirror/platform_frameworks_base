@@ -2536,6 +2536,22 @@ public class DevicePolicyManager {
             "android.app.extra.PROVISIONING_SUPPORTED_MODES";
 
     /**
+     * A boolean extra which determines whether to skip the ownership disclaimer screen during the
+     * provisioning flow. The default value is {@code false}.
+     *
+     * If the value is {@code true}, it is the responsibility of the provisioning initiator to
+     * show the relevant disclaimer.
+     *
+     * <p>This extra is only respected when provided alongside the {@link
+     * #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} intent action.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_PROVISIONING_SKIP_OWNERSHIP_DISCLAIMER =
+            "android.app.extra.PROVISIONING_SKIP_OWNERSHIP_DISCLAIMER";
+
+    /**
      * An {@link ArrayList} of {@link Integer} extra specifying the allowed provisioning modes.
      * <p>This extra will be passed to the admin app's {@link #ACTION_GET_PROVISIONING_MODE}
      * activity, whose result intent must contain {@link #EXTRA_PROVISIONING_MODE} set to one of
