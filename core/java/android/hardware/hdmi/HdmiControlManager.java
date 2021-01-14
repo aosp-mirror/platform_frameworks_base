@@ -327,17 +327,19 @@ public final class HdmiControlManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int HDMI_CEC_CONTROL_ENABLED = 1;
     /**
      * HDMI CEC disabled.
      *
      * @hide
      */
+    @SystemApi
     public static final int HDMI_CEC_CONTROL_DISABLED = 0;
     /**
      * @hide
      */
-    @IntDef({
+    @IntDef(prefix = { "HDMI_CEC_CONTROL_" }, value = {
             HDMI_CEC_CONTROL_ENABLED,
             HDMI_CEC_CONTROL_DISABLED
     })
@@ -350,17 +352,19 @@ public final class HdmiControlManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int HDMI_CEC_VERSION_1_4_B = 0x05;
     /**
      * Version constant for HDMI-CEC v2.0.
      *
      * @hide
      */
+    @SystemApi
     public static final int HDMI_CEC_VERSION_2_0 = 0x06;
     /**
      * @hide
      */
-    @IntDef({
+    @IntDef(prefix = { "HDMI_CEC_VERSION_" }, value = {
             HDMI_CEC_VERSION_1_4_B,
             HDMI_CEC_VERSION_2_0
     })
@@ -373,23 +377,26 @@ public final class HdmiControlManager {
      *
      * @hide
      */
+    @SystemApi
     public static final String POWER_CONTROL_MODE_TV = "to_tv";
     /**
      * Broadcast CEC power control messages to all devices in the network.
      *
      * @hide
      */
+    @SystemApi
     public static final String POWER_CONTROL_MODE_BROADCAST = "broadcast";
     /**
      * Don't send any CEC power control messages.
      *
      * @hide
      */
+    @SystemApi
     public static final String POWER_CONTROL_MODE_NONE = "none";
     /**
      * @hide
      */
-    @StringDef({
+    @StringDef(prefix = { "POWER_CONTROL_MODE_" }, value = {
             POWER_CONTROL_MODE_TV,
             POWER_CONTROL_MODE_BROADCAST,
             POWER_CONTROL_MODE_NONE
@@ -403,17 +410,19 @@ public final class HdmiControlManager {
      *
      * @hide
      */
+    @SystemApi
     public static final String POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_NONE = "none";
     /**
      * Go to standby immediately.
      *
      * @hide
      */
+    @SystemApi
     public static final String POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW = "standby_now";
     /**
      * @hide
      */
-    @StringDef({
+    @StringDef(prefix = { "POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_" }, value = {
             POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_NONE,
             POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW
     })
@@ -426,17 +435,19 @@ public final class HdmiControlManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int SYSTEM_AUDIO_MODE_MUTING_ENABLED = 1;
     /**
      * System Audio Mode muting disabled.
      *
      * @hide
      */
+    @SystemApi
     public static final int SYSTEM_AUDIO_MODE_MUTING_DISABLED = 0;
     /**
      * @hide
      */
-    @IntDef({
+    @IntDef(prefix = { "SYSTEM_AUDIO_MODE_MUTING_" }, value = {
             SYSTEM_AUDIO_MODE_MUTING_ENABLED,
             SYSTEM_AUDIO_MODE_MUTING_DISABLED
     })
@@ -449,24 +460,28 @@ public final class HdmiControlManager {
      *
      * @hide
      */
+    @SystemApi
     public static final String CEC_SETTING_NAME_HDMI_CEC_ENABLED = "hdmi_cec_enabled";
     /**
      * Name of a setting controlling the version of HDMI-CEC used.
      *
      * @hide
      */
+    @SystemApi
     public static final String CEC_SETTING_NAME_HDMI_CEC_VERSION = "hdmi_cec_version";
     /**
      * Name of a setting deciding on the power control mode.
      *
      * @hide
      */
+    @SystemApi
     public static final String CEC_SETTING_NAME_POWER_CONTROL_MODE = "send_standby_on_sleep";
     /**
      * Name of a setting deciding on power state action when losing Active Source.
      *
      * @hide
      */
+    @SystemApi
     public static final String CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST =
             "power_state_change_on_active_source_lost";
     /**
@@ -474,12 +489,13 @@ public final class HdmiControlManager {
      *
      * @hide
      */
+    @SystemApi
     public static final String CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING =
             "system_audio_mode_muting";
     /**
      * @hide
      */
-    @StringDef({
+    @StringDef(prefix = { "CEC_SETTING_NAME_" }, value = {
         CEC_SETTING_NAME_HDMI_CEC_ENABLED,
         CEC_SETTING_NAME_HDMI_CEC_VERSION,
         CEC_SETTING_NAME_POWER_CONTROL_MODE,
@@ -1363,6 +1379,7 @@ public final class HdmiControlManager {
      *
      * @hide
      */
+    @SystemApi
     @NonNull
     @CecSettingName
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
@@ -1389,6 +1406,7 @@ public final class HdmiControlManager {
      *
      * @hide
      */
+    @SystemApi
     @NonNull
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public List<String> getAllowedCecSettingStringValues(@NonNull @CecSettingName String name) {
@@ -1414,6 +1432,7 @@ public final class HdmiControlManager {
      *
      * @hide
      */
+    @SystemApi
     @NonNull
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public List<Integer> getAllowedCecSettingIntValues(@NonNull @CecSettingName String name) {
@@ -1430,14 +1449,13 @@ public final class HdmiControlManager {
     }
 
     /**
-     * Set the 'hdmi_cec_enabled' option.
+     * Set the global status of HDMI CEC.
      *
-     * @param value the desired value
-     * @throws IllegalArgumentException when the new value is not allowed.
-     * @throws RuntimeException when the HdmiControlService is not available.
+     * <p>This allows to enable/disable HDMI CEC on the device.
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public void setHdmiCecEnabled(@NonNull @HdmiCecControl int value) {
         if (mService == null) {
@@ -1452,13 +1470,13 @@ public final class HdmiControlManager {
     }
 
     /**
-     * Get the value of 'hdmi_cec_enabled' option.
+     * Get the current global status of HDMI CEC.
      *
-     * @return the current value.
-     * @throws RuntimeException when the HdmiControlService is not available.
+     * <p>Reflects whether HDMI CEC is currently enabled on the device.
      *
      * @hide
      */
+    @SystemApi
     @NonNull
     @HdmiCecControl
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
@@ -1475,14 +1493,13 @@ public final class HdmiControlManager {
     }
 
     /**
-     * Set the 'hdmi_cec_version' option.
+     * Set the version of the HDMI CEC specification currently used.
      *
-     * @param value the desired value
-     * @throws IllegalArgumentException when the new value is not allowed.
-     * @throws RuntimeException when the HdmiControlService is not available.
+     * <p>Allows to select either CEC 1.4b or 2.0 to be used by the device.
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public void setHdmiCecVersion(@NonNull @HdmiCecVersion int value) {
         if (mService == null) {
@@ -1497,13 +1514,13 @@ public final class HdmiControlManager {
     }
 
     /**
-     * Get the value of 'hdmi_cec_enabled' option.
+     * Get the version of the HDMI CEC specification currently used.
      *
-     * @return the current value.
-     * @throws RuntimeException when the HdmiControlService is not available.
+     * <p>Reflects which CEC version 1.4b or 2.0 is currently used by the device.
      *
      * @hide
      */
+    @SystemApi
     @NonNull
     @HdmiCecVersion
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
@@ -1520,14 +1537,14 @@ public final class HdmiControlManager {
     }
 
     /**
-     * Set the 'power_control_mode' option.
+     * Set the status of Power Control.
      *
-     * @param value the desired value
-     * @throws IllegalArgumentException when the new value is not allowed.
-     * @throws RuntimeException when the HdmiControlService is not available.
+     * <p>Specifies to which devices Power Control messages should be sent:
+     * only to the TV, broadcast to all devices, no power control messages.
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public void setPowerControlMode(@NonNull @PowerControlMode String value) {
         if (mService == null) {
@@ -1542,13 +1559,14 @@ public final class HdmiControlManager {
     }
 
     /**
-     * Get the value of 'power_control_mode' option.
+     * Get the status of Power Control.
      *
-     * @return the current value.
-     * @throws RuntimeException when the HdmiControlService is not available.
+     * <p>Reflects to which devices Power Control messages should be sent:
+     * only to the TV, broadcast to all devices, no power control messages.
      *
      * @hide
      */
+    @SystemApi
     @NonNull
     @PowerControlMode
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
@@ -1565,14 +1583,13 @@ public final class HdmiControlManager {
     }
 
     /**
-     * Set the 'power_state_change_on_active_source_lost' option.
+     * Set the current power state behaviour when Active Source is lost.
      *
-     * @param value the desired value
-     * @throws IllegalArgumentException when the new value is not allowed
-     * @throws RuntimeException when the HdmiControlService is not available.
+     * <p>Sets the action taken: do nothing or go to sleep immediately.
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public void setPowerStateChangeOnActiveSourceLost(
             @NonNull @ActiveSourceLostBehavior String value) {
@@ -1589,13 +1606,13 @@ public final class HdmiControlManager {
     }
 
     /**
-     * Get the value of 'power_state_change_on_active_source_lost' option.
+     * Get the current power state behaviour when Active Source is lost.
      *
-     * @return the current value.
-     * @throws RuntimeException when the HdmiControlService is not available.
+     * <p>Reflects the action taken: do nothing or go to sleep immediately.
      *
      * @hide
      */
+    @SystemApi
     @NonNull
     @ActiveSourceLostBehavior
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
@@ -1613,14 +1630,13 @@ public final class HdmiControlManager {
     }
 
     /**
-     * Set the 'system_audio_mode_muting' option.
+     * Set the current status of System Audio Mode muting.
      *
-     * @param value the desired value
-     * @throws IllegalArgumentException when the new value is not allowed.
-     * @throws RuntimeException when the HdmiControlService is not available.
+     * <p>Sets whether the device should be muted when System Audio Mode is turned off.
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public void setSystemAudioModeMuting(@NonNull @SystemAudioModeMuting int value) {
         if (mService == null) {
@@ -1635,13 +1651,13 @@ public final class HdmiControlManager {
     }
 
     /**
-     * Get the value of 'system_audio_mode_muting' option.
+     * Get the current status of System Audio Mode muting.
      *
-     * @return the current value.
-     * @throws RuntimeException when the HdmiControlService is not available.
+     * <p>Reflects whether the device should be muted when System Audio Mode is turned off.
      *
      * @hide
      */
+    @SystemApi
     @NonNull
     @SystemAudioModeMuting
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
