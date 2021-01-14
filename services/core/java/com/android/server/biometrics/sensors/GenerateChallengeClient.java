@@ -23,7 +23,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
-public abstract class GenerateChallengeClient<T> extends BaseClientMonitor<T> {
+public abstract class GenerateChallengeClient<T> extends HalClientMonitor<T> {
 
     private static final String TAG = "GenerateChallengeClient";
 

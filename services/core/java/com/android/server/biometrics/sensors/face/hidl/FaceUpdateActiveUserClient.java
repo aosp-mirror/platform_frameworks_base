@@ -24,12 +24,12 @@ import android.os.Environment;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.server.biometrics.sensors.BaseClientMonitor;
+import com.android.server.biometrics.sensors.HalClientMonitor;
 
 import java.io.File;
 import java.util.Map;
 
-public class FaceUpdateActiveUserClient extends BaseClientMonitor<IBiometricsFace> {
+public class FaceUpdateActiveUserClient extends HalClientMonitor<IBiometricsFace> {
     private static final String TAG = "FaceUpdateActiveUserClient";
     private static final String FACE_DATA_DIR = "facedata";
 

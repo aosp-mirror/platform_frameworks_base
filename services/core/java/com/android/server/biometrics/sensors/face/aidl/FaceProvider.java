@@ -46,6 +46,7 @@ import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
+import com.android.server.biometrics.sensors.HalClientMonitor;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.PerformanceTracker;
 import com.android.server.biometrics.sensors.face.FaceUtils;
@@ -73,7 +74,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     @NonNull private final String mHalInstanceName;
     @NonNull @VisibleForTesting
     final SparseArray<Sensor> mSensors; // Map of sensors that this HAL supports
-    @NonNull private final BaseClientMonitor.LazyDaemon<IFace> mLazyDaemon;
+    @NonNull private final HalClientMonitor.LazyDaemon<IFace> mLazyDaemon;
     @NonNull private final Handler mHandler;
     @NonNull private final LockoutResetDispatcher mLockoutResetDispatcher;
     @NonNull private final UsageStats mUsageStats;
@@ -87,7 +88,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         public void onTaskStackChanged() {
             mHandler.post(() -> {
                 for (int i = 0; i < mSensors.size(); i++) {
-                    final BaseClientMonitor<?> client = mSensors.valueAt(i).getScheduler()
+                    final BaseClientMonitor client = mSensors.valueAt(i).getScheduler()
                             .getCurrentClient();
                     if (!(client instanceof AuthenticationClient)) {
                         Slog.e(getTag(), "Task stack changed for client: " + client);
@@ -181,7 +182,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         return mDaemon;
     }
 
-    private void scheduleForSensor(int sensorId, @NonNull BaseClientMonitor<?> client) {
+    private void scheduleForSensor(int sensorId, @NonNull BaseClientMonitor client) {
         if (!mSensors.contains(sensorId)) {
             throw new IllegalStateException("Unable to schedule client: " + client
                     + " for sensor: " + sensorId);
@@ -189,7 +190,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
     }
 
-    private void scheduleForSensor(int sensorId, @NonNull BaseClientMonitor<?> client,
+    private void scheduleForSensor(int sensorId, @NonNull BaseClientMonitor client,
             BaseClientMonitor.Callback callback) {
         if (!mSensors.contains(sensorId)) {
             throw new IllegalStateException("Unable to schedule client: " + client
@@ -390,7 +391,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                         ENROLL_TIMEOUT_SEC, previewSurface, sensorId, maxTemplatesPerUser);
                 scheduleForSensor(sensorId, client, new BaseClientMonitor.Callback() {
                     @Override
-                    public void onClientFinished(@NonNull BaseClientMonitor<?> clientMonitor,
+                    public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
                             boolean success) {
                         if (success) {
                             scheduleLoadAuthenticatorIdsForUser(sensorId, userId);

@@ -23,7 +23,7 @@ import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.server.biometrics.sensors.BaseClientMonitor;
+import com.android.server.biometrics.sensors.HalClientMonitor;
 
 import java.util.ArrayList;
 
@@ -31,7 +31,7 @@ import java.util.ArrayList;
  * Face-specific resetLockout client supporting the {@link android.hardware.biometrics.face.V1_0}
  * and {@link android.hardware.biometrics.face.V1_1} HIDL interfaces.
  */
-public class FaceResetLockoutClient extends BaseClientMonitor<IBiometricsFace> {
+public class FaceResetLockoutClient extends HalClientMonitor<IBiometricsFace> {
 
     private static final String TAG = "FaceResetLockoutClient";
 
