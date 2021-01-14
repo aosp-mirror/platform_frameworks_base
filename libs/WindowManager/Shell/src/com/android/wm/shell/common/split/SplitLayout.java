@@ -201,6 +201,10 @@ public class SplitLayout {
         }
     }
 
+    void onDoubleTappedDivider() {
+        mLayoutChangeListener.onDoubleTappedDivider();
+    }
+
     /**
      * Returns {@link DividerSnapAlgorithm.SnapTarget} which matches passing position and velocity.
      */
@@ -249,9 +253,15 @@ public class SplitLayout {
     public interface LayoutChangeListener {
         /** Calls when dismissing split. */
         void onSnappedToDismiss(boolean snappedToEnd);
+
         /** Calls when the bounds is changing due to animation or dragging divider bar. */
         void onBoundsChanging(SplitLayout layout);
+
         /** Calls when the target bounds changed. */
         void onBoundsChanged(SplitLayout layout);
+
+        /** Calls when user double tapped on the divider bar. */
+        default void onDoubleTappedDivider() {
+        }
     }
 }
