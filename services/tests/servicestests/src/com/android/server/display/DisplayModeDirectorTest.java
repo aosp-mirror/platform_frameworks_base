@@ -34,6 +34,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 import android.annotation.NonNull;
 import android.content.ContentResolver;
@@ -410,7 +411,7 @@ public class DisplayModeDirectorTest {
                 createDirectorFromRefreshRateArray(new float[] {60.f, 90.f}, 0);
         setPeakRefreshRate(90);
         director.getSettingsObserver().setDefaultRefreshRate(90);
-        director.getBrightnessObserver().setDefaultDisplayState(true);
+        director.getBrightnessObserver().setDefaultDisplayState(Display.STATE_ON);
 
         final FakeDeviceConfig config = mInjector.getDeviceConfig();
         config.setRefreshRateInLowZone(90);
@@ -453,7 +454,7 @@ public class DisplayModeDirectorTest {
                 createDirectorFromRefreshRateArray(new float[] {60.f, 90.f}, 0);
         setPeakRefreshRate(90 /*fps*/);
         director.getSettingsObserver().setDefaultRefreshRate(90);
-        director.getBrightnessObserver().setDefaultDisplayState(true);
+        director.getBrightnessObserver().setDefaultDisplayState(Display.STATE_ON);
 
         final FakeDeviceConfig config = mInjector.getDeviceConfig();
         config.setRefreshRateInHighZone(60);
@@ -488,6 +489,43 @@ public class DisplayModeDirectorTest {
 
         vote = director.getVote(Display.DEFAULT_DISPLAY, PRIORITY_FLICKER);
         assertVoteForRefreshRateLocked(vote, 60 /*fps*/);
+    }
+
+    @Test
+    public void testSensorRegistration() {
+        DisplayModeDirector director =
+                createDirectorFromRefreshRateArray(new float[] {60.f, 90.f}, 0);
+        setPeakRefreshRate(90 /*fps*/);
+        director.getSettingsObserver().setDefaultRefreshRate(90);
+        director.getBrightnessObserver().setDefaultDisplayState(Display.STATE_ON);
+
+        Sensor lightSensor = createLightSensor();
+        SensorManager sensorManager = createMockSensorManager(lightSensor);
+
+        director.start(sensorManager);
+        ArgumentCaptor<SensorEventListener> listenerCaptor =
+                ArgumentCaptor.forClass(SensorEventListener.class);
+        Mockito.verify(sensorManager, Mockito.timeout(TimeUnit.SECONDS.toMillis(1)))
+                .registerListener(
+                        listenerCaptor.capture(),
+                        eq(lightSensor),
+                        anyInt(),
+                        any(Handler.class));
+
+        // Dispaly state changed from On to Doze
+        director.getBrightnessObserver().setDefaultDisplayState(Display.STATE_DOZE);
+        Mockito.verify(sensorManager)
+                .unregisterListener(listenerCaptor.capture());
+
+        // Dispaly state changed from Doze to On
+        director.getBrightnessObserver().setDefaultDisplayState(Display.STATE_ON);
+        Mockito.verify(sensorManager, times(2))
+                .registerListener(
+                        listenerCaptor.capture(),
+                        eq(lightSensor),
+                        anyInt(),
+                        any(Handler.class));
+
     }
 
     private void assertVoteForRefreshRateLocked(Vote vote, float refreshRate) {
