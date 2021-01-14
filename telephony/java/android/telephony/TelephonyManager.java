@@ -8689,11 +8689,18 @@ public class TelephonyManager {
      */
     public static final int CALL_COMPOSER_STATUS_ON = 1;
 
+    /**
+     * Call composer status indicating that sending/receiving pictures is disabled.
+     * All other attachments are still enabled in this state.
+     */
+    public static final int CALL_COMPOSER_STATUS_ON_NO_PICTURES = 2;
+
     /** @hide */
     @IntDef(prefix = {"CALL_COMPOSER_STATUS_"},
             value = {
                 CALL_COMPOSER_STATUS_ON,
                 CALL_COMPOSER_STATUS_OFF,
+                CALL_COMPOSER_STATUS_ON_NO_PICTURES,
             })
     public @interface CallComposerStatus {}
 
@@ -8701,8 +8708,9 @@ public class TelephonyManager {
      * Set the user-set status for enriched calling with call composer.
      *
      * @param status user-set status for enriched calling with call composer;
-     *               it must be a value of either {@link #CALL_COMPOSER_STATUS_ON}
-     *               or {@link #CALL_COMPOSER_STATUS_OFF}.
+     *               it must be any of {@link #CALL_COMPOSER_STATUS_ON}
+     *               {@link #CALL_COMPOSER_STATUS_OFF},
+     *               or {@link #CALL_COMPOSER_STATUS_ON_NO_PICTURES}
      *
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
      * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
@@ -8712,7 +8720,8 @@ public class TelephonyManager {
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setCallComposerStatus(@CallComposerStatus int status) {
-        if (status != CALL_COMPOSER_STATUS_ON && status != CALL_COMPOSER_STATUS_OFF) {
+        if (status > CALL_COMPOSER_STATUS_ON_NO_PICTURES
+                || status < CALL_COMPOSER_STATUS_OFF) {
             throw new IllegalArgumentException("requested status is invalid");
         }
         try {
@@ -8734,8 +8743,9 @@ public class TelephonyManager {
      *
      * @throws SecurityException if the caller does not have the permission.
      *
-     * @return the user-set status for enriched calling with call composer either
-     * {@link #CALL_COMPOSER_STATUS_ON} or {@link #CALL_COMPOSER_STATUS_OFF}.
+     * @return the user-set status for enriched calling with call composer, any of
+     * {@link #CALL_COMPOSER_STATUS_ON}, {@link #CALL_COMPOSER_STATUS_OFF}, or
+     * {@link #CALL_COMPOSER_STATUS_ON_NO_PICTURES}.
      */
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @CallComposerStatus int getCallComposerStatus() {
