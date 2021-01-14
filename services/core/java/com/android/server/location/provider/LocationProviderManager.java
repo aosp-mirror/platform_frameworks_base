@@ -43,6 +43,7 @@ import static java.lang.Math.min;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.AlarmManager.OnAlarmListener;
+import android.app.BroadcastOptions;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -86,7 +87,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
-import com.android.server.PendingIntentUtils;
 import com.android.server.location.LocationPermissions;
 import com.android.server.location.LocationPermissions.PermissionLevel;
 import com.android.server.location.fudger.LocationFudger;
@@ -130,6 +130,9 @@ public class LocationProviderManager extends
 
     private static final String WAKELOCK_TAG = "*location*";
     private static final long WAKELOCK_TIMEOUT_MS = 30 * 1000;
+
+    // duration PI location clients are put on the allowlist to start a fg service
+    private static final long TEMPORARY_APP_ALLOWLIST_DURATION_MS = 10 * 1000;
 
     // fastest interval at which clients may receive coarse locations
     private static final long MIN_COARSE_INTERVAL_MS = 10 * 60 * 1000;
@@ -215,6 +218,11 @@ public class LocationProviderManager extends
         public void deliverOnLocationChanged(LocationResult locationResult,
                 @Nullable Runnable onCompleteCallback)
                 throws PendingIntent.CanceledException {
+            BroadcastOptions options = BroadcastOptions.makeBasic();
+            options.setDontSendToRestrictedApps(true);
+            // allows apps to start a fg service in response to a location PI
+            options.setTemporaryAppWhitelistDuration(TEMPORARY_APP_ALLOWLIST_DURATION_MS);
+
             mPendingIntent.send(
                     mContext,
                     0,
@@ -225,22 +233,26 @@ public class LocationProviderManager extends
                             : null,
                     null,
                     null,
-                    PendingIntentUtils.createDontSendToRestrictedAppsBundle(null));
+                    options.toBundle());
         }
 
         @Override
         public void deliverOnFlushComplete(int requestCode) throws PendingIntent.CanceledException {
+            BroadcastOptions options = BroadcastOptions.makeBasic();
+            options.setDontSendToRestrictedApps(true);
+
             mPendingIntent.send(mContext, 0, new Intent().putExtra(KEY_FLUSH_COMPLETE, requestCode),
-                    null, null, null,
-                    PendingIntentUtils.createDontSendToRestrictedAppsBundle(null));
+                    null, null, null, options.toBundle());
         }
 
         @Override
         public void deliverOnProviderEnabledChanged(String provider, boolean enabled)
                 throws PendingIntent.CanceledException {
+            BroadcastOptions options = BroadcastOptions.makeBasic();
+            options.setDontSendToRestrictedApps(true);
+
             mPendingIntent.send(mContext, 0, new Intent().putExtra(KEY_PROVIDER_ENABLED, enabled),
-                    null, null, null,
-                    PendingIntentUtils.createDontSendToRestrictedAppsBundle(null));
+                    null, null, null, options.toBundle());
         }
     }
 
