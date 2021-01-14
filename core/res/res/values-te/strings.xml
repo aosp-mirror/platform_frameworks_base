@@ -146,6 +146,10 @@
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Wi-Fi ద్వారా కాల్"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"మొబైల్ నెట్‌వర్క్ ద్వారా కాల్"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Wi-Fi మాత్రమే"</string>
+    <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
+    <skip />
+    <!-- no translation found for crossSimFormat_spn_cross_sim_calling (779976494687695991) -->
+    <skip />
     <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ఫార్వార్డ్ చేయబడలేదు"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="TIME_DELAY">{2}</xliff:g> సెకన్ల తర్వాత <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
