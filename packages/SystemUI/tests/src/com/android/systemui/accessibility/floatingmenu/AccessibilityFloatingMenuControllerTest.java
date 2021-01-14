@@ -24,10 +24,12 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -36,8 +38,12 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 /** Test for {@link AccessibilityFloatingMenuController}. */
 @RunWith(AndroidTestingRunner.class)
@@ -47,9 +53,14 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
 
     private static final String TEST_A11Y_BTN_TARGETS = "Magnification";
 
+    @Rule
+    public MockitoRule mockito = MockitoJUnit.rule();
+
     private AccessibilityFloatingMenuController mController;
     private AccessibilityButtonTargetsObserver mTargetsObserver;
     private AccessibilityButtonModeObserver mModeObserver;
+    @Mock
+    private AccessibilityManager mMockA11yManager;
 
     @Test
     public void initController_registerListeners() {
@@ -59,6 +70,37 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
                 any(AccessibilityButtonTargetsObserver.TargetsChangedListener.class));
         verify(mModeObserver).addListener(
                 any(AccessibilityButtonModeObserver.ModeChangedListener.class));
+        verify(mMockA11yManager).addAccessibilityStateChangeListener(any(
+                AccessibilityManager.AccessibilityStateChangeListener.class));
+    }
+
+    @Test
+    public void initController_accessibilityManagerEnabled_showWidget() {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_BUTTON_MODE, ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU);
+        Settings.Secure.putString(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, TEST_A11Y_BTN_TARGETS);
+        when(mMockA11yManager.isEnabled()).thenReturn(true);
+
+        mController = setUpController();
+
+        assertThat(mController.mFloatingMenu).isNotNull();
+        verify(mMockA11yManager).removeAccessibilityStateChangeListener(mController);
+    }
+
+    @Test
+    public void initController_accessibilityManagerDisabledThenCallbackToEnabled_showWidget() {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_BUTTON_MODE, ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU);
+        Settings.Secure.putString(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, TEST_A11Y_BTN_TARGETS);
+        when(mMockA11yManager.isEnabled()).thenReturn(false);
+
+        mController = setUpController();
+        mController.onAccessibilityStateChanged(true);
+
+        assertThat(mController.mFloatingMenu).isNotNull();
+        verify(mMockA11yManager).removeAccessibilityStateChangeListener(mController);
     }
 
     @Test
@@ -154,7 +196,9 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
     private AccessibilityFloatingMenuController setUpController() {
         mTargetsObserver = spy(Dependency.get(AccessibilityButtonTargetsObserver.class));
         mModeObserver = spy(Dependency.get(AccessibilityButtonModeObserver.class));
+        mContext.addMockSystemService(AccessibilityManager.class, mMockA11yManager);
 
-        return new AccessibilityFloatingMenuController(mContext, mTargetsObserver, mModeObserver);
+        return new AccessibilityFloatingMenuController(mContext, mTargetsObserver,
+                mModeObserver);
     }
 }

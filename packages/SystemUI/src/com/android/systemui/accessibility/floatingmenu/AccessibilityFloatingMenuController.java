@@ -20,6 +20,7 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATIN
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.MainThread;
 
@@ -36,9 +37,11 @@ import javax.inject.Inject;
 @SysUISingleton
 public class AccessibilityFloatingMenuController implements
         AccessibilityButtonModeObserver.ModeChangedListener,
-        AccessibilityButtonTargetsObserver.TargetsChangedListener {
+        AccessibilityButtonTargetsObserver.TargetsChangedListener,
+        AccessibilityManager.AccessibilityStateChangeListener {
 
     private final Context mContext;
+    private final AccessibilityManager mAccessibilityManager;
     private final AccessibilityButtonModeObserver mAccessibilityButtonModeObserver;
     private final AccessibilityButtonTargetsObserver mAccessibilityButtonTargetsObserver;
 
@@ -54,13 +57,21 @@ public class AccessibilityFloatingMenuController implements
         mContext = context;
         mAccessibilityButtonTargetsObserver = accessibilityButtonTargetsObserver;
         mAccessibilityButtonModeObserver = accessibilityButtonModeObserver;
+        mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
 
         mAccessibilityButtonModeObserver.addListener(this);
         mAccessibilityButtonTargetsObserver.addListener(this);
         mBtnMode = mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode();
         mBtnTargets = mAccessibilityButtonTargetsObserver.getCurrentAccessibilityButtonTargets();
 
-        handleFloatingMenuVisibility(mBtnMode, mBtnTargets);
+        // Accessibility floating menu widget needs accessibility service to work, but system
+        // accessibility might be unavailable during the phone get booted, hence it needs to wait
+        // for accessibility manager callback to work.
+        mAccessibilityManager.addAccessibilityStateChangeListener(this);
+        if (mAccessibilityManager.isEnabled()) {
+            handleFloatingMenuVisibility(mBtnMode, mBtnTargets);
+            mAccessibilityManager.removeAccessibilityStateChangeListener(this);
+        }
     }
 
     /**
@@ -84,6 +95,23 @@ public class AccessibilityFloatingMenuController implements
     public void onAccessibilityButtonTargetsChanged(String targets) {
         mBtnTargets = targets;
         handleFloatingMenuVisibility(mBtnMode, mBtnTargets);
+    }
+
+    /**
+     * Handles visibility of the accessibility floating menu when system accessibility state
+     * changes.
+     * If system accessibility become available onAccessibilityStateChanged(true), then we don't
+     * need to listen to this listener anymore.
+     *
+     * @param enabled Whether accessibility is enabled.
+     */
+    @Override
+    public void onAccessibilityStateChanged(boolean enabled) {
+        if (enabled) {
+            handleFloatingMenuVisibility(mBtnMode, mBtnTargets);
+        }
+
+        mAccessibilityManager.removeAccessibilityStateChangeListener(this);
     }
 
     private void handleFloatingMenuVisibility(@AccessibilityButtonMode int mode, String targets) {
