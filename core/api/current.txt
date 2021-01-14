@@ -1054,9 +1054,11 @@ package android {
     field public static final int parentActivityName = 16843687; // 0x10103a7
     field @Deprecated public static final int password = 16843100; // 0x101015c
     field public static final int path = 16842794; // 0x101002a
+    field public static final int pathAdvancedPattern = 16844318; // 0x101061e
     field public static final int pathData = 16843781; // 0x1010405
     field public static final int pathPattern = 16842796; // 0x101002c
     field public static final int pathPrefix = 16842795; // 0x101002b
+    field public static final int pathSuffix = 16844316; // 0x101061c
     field public static final int patternPathData = 16843978; // 0x10104ca
     field public static final int permission = 16842758; // 0x1010006
     field public static final int permissionFlags = 16843719; // 0x10103c7
@@ -1290,8 +1292,10 @@ package android {
     field public static final int spotShadowAlpha = 16843967; // 0x10104bf
     field public static final int src = 16843033; // 0x1010119
     field public static final int ssp = 16843747; // 0x10103e3
+    field public static final int sspAdvancedPattern = 16844319; // 0x101061f
     field public static final int sspPattern = 16843749; // 0x10103e5
     field public static final int sspPrefix = 16843748; // 0x10103e4
+    field public static final int sspSuffix = 16844317; // 0x101061d
     field public static final int stackFromBottom = 16843005; // 0x10100fd
     field public static final int stackViewStyle = 16843838; // 0x101043e
     field public static final int starStyle = 16842882; // 0x1010082
@@ -30943,6 +30947,7 @@ package android.os {
     field public static final int PATTERN_LITERAL = 0; // 0x0
     field public static final int PATTERN_PREFIX = 1; // 0x1
     field public static final int PATTERN_SIMPLE_GLOB = 2; // 0x2
+    field public static final int PATTERN_SUFFIX = 4; // 0x4
   }
 
   public final class PersistableBundle extends android.os.BaseBundle implements java.lang.Cloneable android.os.Parcelable {
