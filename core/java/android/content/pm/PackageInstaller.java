@@ -1247,12 +1247,15 @@ public class PackageInstaller {
         }
 
         /**
-         * Adds installer-provided checksums for the APK file in session.
+         * Sets installer-provided checksums for the APK file in session.
          *
          * @param name      previously written as part of this session.
          *                  {@link #openWrite}
          * @param checksums installer intends to make available via
          *                  {@link PackageManager#requestChecksums}.
+         * @param signature PKCS#7 detached signature bytes over serialized checksums to enable
+         *                  fs-verity for the checksums or null if fs-verity should not be enabled.
+         *                  @see <a href="https://www.kernel.org/doc/html/latest/filesystems/fsverity.html#built-in-signature-verification">fs-verity</a>
          * @throws SecurityException if called after the session has been
          *                           committed or abandoned.
          * @throws IllegalStateException if checksums for this file have already been added.
@@ -1262,13 +1265,14 @@ public class PackageInstaller {
          *              in {@link PackageManager#requestChecksums}.
          */
         @Deprecated
-        public void addChecksums(@NonNull String name, @NonNull List<Checksum> checksums)
-                throws IOException {
+        public void setChecksums(@NonNull String name, @NonNull List<Checksum> checksums,
+                @Nullable byte[] signature) throws IOException {
             Objects.requireNonNull(name);
             Objects.requireNonNull(checksums);
 
             try {
-                mSession.addChecksums(name, checksums.toArray(new Checksum[checksums.size()]));
+                mSession.setChecksums(name, checksums.toArray(new Checksum[checksums.size()]),
+                        signature);
             } catch (RuntimeException e) {
                 ExceptionUtils.maybeUnwrapIOException(e);
                 throw e;

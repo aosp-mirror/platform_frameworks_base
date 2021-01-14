@@ -12050,7 +12050,6 @@ package android.content.pm {
 
   public static class PackageInstaller.Session implements java.io.Closeable {
     method public void abandon();
-    method @Deprecated public void addChecksums(@NonNull String, @NonNull java.util.List<android.content.pm.Checksum>) throws java.io.IOException;
     method public void addChildSessionId(int);
     method public void close();
     method public void commit(@NonNull android.content.IntentSender);
@@ -12064,6 +12063,7 @@ package android.content.pm {
     method @NonNull public java.io.OutputStream openWrite(@NonNull String, long, long) throws java.io.IOException;
     method public void removeChildSessionId(int);
     method public void removeSplit(@NonNull String) throws java.io.IOException;
+    method @Deprecated public void setChecksums(@NonNull String, @NonNull java.util.List<android.content.pm.Checksum>, @Nullable byte[]) throws java.io.IOException;
     method public void setStagingProgress(float);
     method public void transfer(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
   }
