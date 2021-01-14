@@ -100,16 +100,17 @@ public:
     // See flags defined in DisplayList.java
     enum ReplayFlag { kReplayFlag_ClipChildren = 0x1 };
 
-    void setStagingDisplayList(DisplayList* newData);
+    void setStagingDisplayList(DisplayList&& newData);
+    void discardStagingDisplayList();
 
     void output();
     int getUsageSize();
     int getAllocatedSize();
 
-    bool isRenderable() const { return mDisplayList && !mDisplayList->isEmpty(); }
+    bool isRenderable() const { return mDisplayList.hasContent(); }
 
     bool hasProjectionReceiver() const {
-        return mDisplayList && mDisplayList->containsProjectionReceiver();
+        return mDisplayList.containsProjectionReceiver();
     }
 
     const char* getName() const { return mName.string(); }
@@ -168,12 +169,14 @@ public:
 
     bool nothingToDraw() const {
         const Outline& outline = properties().getOutline();
-        return mDisplayList == nullptr || properties().getAlpha() <= 0 ||
+        return !mDisplayList.isValid() || properties().getAlpha() <= 0 ||
                (outline.getShouldClip() && outline.isEmpty()) || properties().getScaleX() == 0 ||
                properties().getScaleY() == 0;
     }
 
-    const DisplayList* getDisplayList() const { return mDisplayList; }
+    const DisplayList& getDisplayList() const { return mDisplayList; }
+    // TODO: can this be cleaned up?
+    DisplayList& getDisplayList() { return mDisplayList; }
 
     // Note: The position callbacks are relying on the listener using
     // the frameNumber to appropriately batch/synchronize these transactions.
@@ -252,8 +255,8 @@ private:
 
     bool mNeedsDisplayListSync;
     // WARNING: Do not delete this directly, you must go through deleteDisplayList()!
-    DisplayList* mDisplayList;
-    DisplayList* mStagingDisplayList;
+    DisplayList mDisplayList;
+    DisplayList mStagingDisplayList;
 
     int64_t mDamageGenerationId;
 

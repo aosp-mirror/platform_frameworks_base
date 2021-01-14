@@ -18,7 +18,6 @@
 
 #include "CanvasTransform.h"
 #include "hwui/Bitmap.h"
-#include "hwui/Canvas.h"
 #include "utils/Macros.h"
 #include "utils/TypeLogic.h"
 
@@ -29,7 +28,6 @@
 #include "SkPaint.h"
 #include "SkPath.h"
 #include "SkRect.h"
-#include "SkTemplates.h"
 
 #include <vector>
 
@@ -39,6 +37,11 @@ namespace uirenderer {
 namespace skiapipeline {
 class FunctorDrawable;
 }
+
+namespace VectorDrawable {
+class Tree;
+}
+typedef uirenderer::VectorDrawable::Tree VectorDrawableRoot;
 
 enum class DisplayListOpType : uint8_t {
 #define X(T) T,
