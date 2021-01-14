@@ -3105,7 +3105,7 @@
     <!-- @SystemApi Allows an application to read system update info.
          @hide -->
     <permission android:name="android.permission.READ_SYSTEM_UPDATE_INFO"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|privileged" />
 
     <!-- Allows the system to bind to an application's task services
          @hide -->
