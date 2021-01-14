@@ -160,14 +160,16 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
     @Test
     public void showUdfpsOverlay_addsViewToWindow() throws RemoteException {
-        mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID);
+        mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
+                IUdfpsOverlayController.REASON_AUTH);
         mFgExecutor.runAllReady();
         verify(mWindowManager).addView(eq(mUdfpsView), any());
     }
 
     @Test
     public void hideUdfpsOverlay_removesViewFromWindow() throws RemoteException {
-        mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID);
+        mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
+                IUdfpsOverlayController.REASON_AUTH);
         mOverlayController.hideUdfpsOverlay(TEST_UDFPS_SENSOR_ID);
         mFgExecutor.runAllReady();
         verify(mWindowManager).removeView(eq(mUdfpsView));
@@ -180,7 +182,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
         when(mUdfpsView.isValidTouch(anyFloat(), anyFloat(), anyFloat())).thenReturn(true);
 
         // GIVEN that the overlay is showing
-        mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID);
+        mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
+                IUdfpsOverlayController.REASON_AUTH);
         mFgExecutor.runAllReady();
         // WHEN ACTION_DOWN is received
         verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
@@ -197,7 +200,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Test
     public void aodInterrupt() throws RemoteException {
         // GIVEN that the overlay is showing
-        mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID);
+        mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
+                IUdfpsOverlayController.REASON_AUTH);
         mFgExecutor.runAllReady();
         // WHEN fingerprint is requested because of AOD interrupt
         mUdfpsController.onAodInterrupt(0, 0, 2f, 3f);
@@ -211,7 +215,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Test
     public void cancelAodInterrupt() throws RemoteException {
         // GIVEN AOD interrupt
-        mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID);
+        mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
+                IUdfpsOverlayController.REASON_AUTH);
         mFgExecutor.runAllReady();
         mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
         // WHEN it is cancelled
@@ -223,7 +228,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Test
     public void aodInterruptTimeout() throws RemoteException {
         // GIVEN AOD interrupt
-        mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID);
+        mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
+                IUdfpsOverlayController.REASON_AUTH);
         mFgExecutor.runAllReady();
         mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
         // WHEN it times out

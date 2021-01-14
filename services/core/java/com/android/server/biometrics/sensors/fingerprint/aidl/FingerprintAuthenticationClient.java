@@ -80,7 +80,8 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
 
     @Override
     protected void startHalOperation() {
-        UdfpsHelper.showUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
+        UdfpsHelper.showUdfpsOverlay(getSensorId(), IUdfpsOverlayController.REASON_AUTH,
+                mUdfpsOverlayController);
         try {
             mCancellationSignal = getFreshDaemon().authenticate(mSequentialId, mOperationId);
         } catch (RemoteException e) {

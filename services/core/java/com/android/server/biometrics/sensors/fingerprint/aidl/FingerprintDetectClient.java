@@ -69,7 +69,8 @@ class FingerprintDetectClient extends AcquisitionClient<ISession> {
 
     @Override
     protected void startHalOperation() {
-        UdfpsHelper.showUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
+        UdfpsHelper.showUdfpsOverlay(getSensorId(), IUdfpsOverlayController.REASON_AUTH,
+                mUdfpsOverlayController);
         try {
             mCancellationSignal = getFreshDaemon().detectInteraction(mSequentialId);
         } catch (RemoteException e) {
