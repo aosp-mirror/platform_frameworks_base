@@ -56,12 +56,14 @@ import android.os.Looper;
 import android.os.PatternMatcher;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.Log;
 import android.view.InputMonitor;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.accessibility.AccessibilityManager;
+import android.window.IRemoteTransition;
 
 import androidx.annotation.NonNull;
 
@@ -86,6 +88,7 @@ import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.InputMonitorCompat;
 import com.android.systemui.shared.system.QuickStepContract;
+import com.android.systemui.shared.system.RemoteTransitionCompat;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -96,6 +99,7 @@ import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedEvents;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
+import com.android.wm.shell.transition.Transitions;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -142,6 +146,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private final ScreenshotHelper mScreenshotHelper;
     private final Optional<OneHanded> mOneHandedOptional;
     private final CommandQueue mCommandQueue;
+    private final Transitions mShellTransitions;
 
     private Region mActiveNavBarRegion;
 
@@ -158,6 +163,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private float mWindowCornerRadius;
     private boolean mSupportsRoundedCornersOnWindows;
     private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
+    private final ArraySet<IRemoteTransition> mRemoteTransitions = new ArraySet<>();
 
     @VisibleForTesting
     public ISystemUiProxy mSysUiProxy = new ISystemUiProxy.Stub() {
@@ -530,6 +536,31 @@ public class OverviewProxyService extends CurrentUserTracker implements
             }
         }
 
+        @Override
+        public void registerRemoteTransition(RemoteTransitionCompat remoteTransition) {
+            if (!verifyCaller("registerRemoteTransition")) return;
+            final long binderToken = Binder.clearCallingIdentity();
+            try {
+                mRemoteTransitions.add(remoteTransition.getTransition());
+                mShellTransitions.registerRemote(
+                        remoteTransition.getFilter(), remoteTransition.getTransition());
+            } finally {
+                Binder.restoreCallingIdentity(binderToken);
+            }
+        }
+
+        @Override
+        public void unregisterRemoteTransition(RemoteTransitionCompat remoteTransition) {
+            if (!verifyCaller("registerRemoteTransition")) return;
+            final long binderToken = Binder.clearCallingIdentity();
+            try {
+                mRemoteTransitions.remove(remoteTransition.getTransition());
+                mShellTransitions.unregisterRemote(remoteTransition.getTransition());
+            } finally {
+                Binder.restoreCallingIdentity(binderToken);
+            }
+        }
+
         private boolean verifyCaller(String reason) {
             final int callerId = Binder.getCallingUserHandle().getIdentifier();
             if (callerId != mCurrentBoundedUserId) {
@@ -639,7 +670,8 @@ public class OverviewProxyService extends CurrentUserTracker implements
             Optional<LegacySplitScreen> splitScreenOptional,
             Optional<Lazy<StatusBar>> statusBarOptionalLazy,
             Optional<OneHanded> oneHandedOptional,
-            BroadcastDispatcher broadcastDispatcher) {
+            BroadcastDispatcher broadcastDispatcher,
+            Transitions shellTransitions) {
         super(broadcastDispatcher);
         mContext = context;
         mPipOptional = pipOptional;
@@ -658,6 +690,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         mSysUiState = sysUiState;
         mSysUiState.addCallback(this::notifySystemUiStateFlags);
         mOneHandedOptional = oneHandedOptional;
+        mShellTransitions = shellTransitions;
 
         // Assumes device always starts with back button until launcher tells it that it does not
         mNavBarButtonAlpha = 1.0f;
@@ -806,6 +839,12 @@ public class OverviewProxyService extends CurrentUserTracker implements
         // Clean up the minimized state if launcher dies
         mSplitScreenOptional.ifPresent(
                 splitScreen -> splitScreen.setMinimized(false));
+
+        // Clean up any registered remote transitions
+        for (int i = mRemoteTransitions.size() - 1; i >= 0; --i) {
+            mShellTransitions.unregisterRemote(mRemoteTransitions.valueAt(i));
+        }
+        mRemoteTransitions.clear();
     }
 
     public void startConnectionToCurrentUser() {
