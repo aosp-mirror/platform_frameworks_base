@@ -16,15 +16,29 @@
 
 package com.android.server.utils.quota;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.when;
+
+import android.content.ContextWrapper;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.os.UserHandle;
 import android.testing.TestableContext;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoSession;
+import org.mockito.quality.Strictness;
 
 import java.time.Duration;
 
@@ -32,15 +46,20 @@ import java.time.Duration;
 public class MultiRateLimiterTest {
 
     private static final int USER_ID = 1;
+    private static final int UID_1 = 10_001;
     private static final String PACKAGE_NAME_1 = "com.android.package.one";
     private static final String PACKAGE_NAME_2 = "com.android.package.two";
     private static final String TAG = "tag";
 
     @Rule
-    public final TestableContext mContext =
+    public final TestableContext mTestableContext =
             new TestableContext(InstrumentationRegistry.getContext(), null);
 
     private final InjectorForTest mInjector = new InjectorForTest();
+    private MockitoSession mMockingSession;
+    private ContextWrapper mContext;
+
+    @Mock private PackageManager mPackageManager;
 
     private static class InjectorForTest extends QuotaTracker.Injector {
         Duration mElapsedTime = Duration.ZERO;
@@ -53,6 +72,35 @@ public class MultiRateLimiterTest {
         @Override
         public boolean isAlarmManagerReady() {
             return true;
+        }
+    }
+
+    @Before
+    public void setup() throws Exception {
+        mMockingSession = mockitoSession()
+                .initMocks(this)
+                .strictness(Strictness.LENIENT)
+                .mockStatic(UserHandle.class)
+                .startMocking();
+        doReturn(USER_ID).when(() -> UserHandle.getUserId(UID_1));
+
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.uid = UID_1;
+        when(mPackageManager.getApplicationInfoAsUser(PACKAGE_NAME_1, 0, USER_ID))
+                .thenReturn(applicationInfo);
+
+        mContext = new ContextWrapper(mTestableContext) {
+            @Override
+            public PackageManager getPackageManager() {
+                return mPackageManager;
+            }
+        };
+    }
+
+    @After
+    public void tearDown() {
+        if (mMockingSession != null) {
+            mMockingSession.finishMocking();
         }
     }
 
@@ -193,5 +241,49 @@ public class MultiRateLimiterTest {
         mInjector.mElapsedTime = Duration.ofSeconds(21);
         assertThat(multiRateLimiter.isWithinQuota(USER_ID, PACKAGE_NAME_1, TAG)).isTrue();
         assertThat(multiRateLimiter.isWithinQuota(USER_ID, PACKAGE_NAME_2, TAG)).isTrue();
+    }
+
+    @Test
+    public void clearRateLimiterForPackage_afterReachingQuota_quotaIsReset() {
+        MultiRateLimiter multiRateLimiter =  new MultiRateLimiter.Builder(mContext, mInjector)
+                .addRateLimit(1, Duration.ofSeconds(100))
+                .build();
+
+        mInjector.mElapsedTime = Duration.ZERO;
+        assertThat(multiRateLimiter.isWithinQuota(USER_ID, PACKAGE_NAME_1, TAG)).isTrue();
+        multiRateLimiter.noteEvent(USER_ID, PACKAGE_NAME_1, TAG);
+
+        mInjector.mElapsedTime = Duration.ofSeconds(1);
+        assertThat(multiRateLimiter.isWithinQuota(USER_ID, PACKAGE_NAME_1, TAG)).isFalse();
+
+        multiRateLimiter.clear(USER_ID, PACKAGE_NAME_1);
+
+        // Quota for that package is reset.
+        mInjector.mElapsedTime = Duration.ofSeconds(1);
+        assertThat(multiRateLimiter.isWithinQuota(USER_ID, PACKAGE_NAME_1, TAG)).isTrue();
+
+        // Quota is enforced again.
+        mInjector.mElapsedTime = Duration.ofSeconds(1);
+        multiRateLimiter.noteEvent(USER_ID, PACKAGE_NAME_1, TAG);
+        assertThat(multiRateLimiter.isWithinQuota(USER_ID, PACKAGE_NAME_1, TAG)).isFalse();
+    }
+
+    @Test
+    public void clearRateLimiterForPackage_doesntAffectOtherPackages() {
+        MultiRateLimiter multiRateLimiter =  new MultiRateLimiter.Builder(mContext, mInjector)
+                .addRateLimit(1, Duration.ofSeconds(100))
+                .build();
+
+        mInjector.mElapsedTime = Duration.ZERO;
+        assertThat(multiRateLimiter.isWithinQuota(USER_ID, PACKAGE_NAME_2, TAG)).isTrue();
+        multiRateLimiter.noteEvent(USER_ID, PACKAGE_NAME_2, TAG);
+
+        mInjector.mElapsedTime = Duration.ofSeconds(1);
+        assertThat(multiRateLimiter.isWithinQuota(USER_ID, PACKAGE_NAME_2, TAG)).isFalse();
+
+        multiRateLimiter.clear(USER_ID, PACKAGE_NAME_1);
+
+        // Doesn't affect the other package.
+        assertThat(multiRateLimiter.isWithinQuota(USER_ID, PACKAGE_NAME_2, TAG)).isFalse();
     }
 }
