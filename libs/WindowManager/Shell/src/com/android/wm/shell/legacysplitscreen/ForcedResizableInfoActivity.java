@@ -34,6 +34,8 @@ import com.android.wm.shell.R;
 /**
  * Translucent activity that gets started on top of a task in multi-window to inform the user that
  * we forced the activity below to be resizable.
+ *
+ * Note: This activity runs on the main thread of the process hosting the Shell lib.
  */
 public class ForcedResizableInfoActivity extends Activity implements OnTouchListener {
 

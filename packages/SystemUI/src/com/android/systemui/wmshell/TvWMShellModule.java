@@ -16,6 +16,7 @@
 
 package com.android.systemui.wmshell;
 
+import android.animation.AnimationHandler;
 import android.content.Context;
 import android.view.IWindowManager;
 
@@ -28,6 +29,7 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.common.annotations.ChoreographerSfVsync;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
@@ -58,9 +60,10 @@ public class TvWMShellModule {
             DisplayImeController displayImeController, TransactionPool transactionPool,
             ShellTaskOrganizer shellTaskOrganizer, SyncTransactionQueue syncQueue,
             TaskStackListenerImpl taskStackListener, Transitions transitions,
-            @ShellMainThread ShellExecutor mainExecutor) {
-        return new LegacySplitScreenController(context, displayController, systemWindows,
+            @ShellMainThread ShellExecutor mainExecutor,
+            @ChoreographerSfVsync AnimationHandler sfVsyncAnimationHandler) {
+        return LegacySplitScreenController.create(context, displayController, systemWindows,
                 displayImeController, transactionPool, shellTaskOrganizer, syncQueue,
-                taskStackListener, transitions, mainExecutor);
+                taskStackListener, transitions, mainExecutor, sfVsyncAnimationHandler);
     }
 }
