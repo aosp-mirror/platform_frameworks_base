@@ -468,7 +468,9 @@ public class HdmiControlService extends SystemService {
 
         mPowerStatusController.setPowerStatus(getInitialPowerStatus());
         mProhibitMode = false;
-        mHdmiControlEnabled = readBooleanSetting(Global.HDMI_CONTROL_ENABLED, true);
+        mHdmiControlEnabled = mHdmiCecConfig.getIntValue(
+                                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED)
+                                    == HdmiControlManager.HDMI_CEC_CONTROL_ENABLED;
         mHdmiCecVolumeControlEnabled = readBooleanSetting(
                 Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED, true);
         mMhlInputChangeEnabled = readBooleanSetting(Global.MHL_INPUT_SWITCHING_ENABLED, true);
@@ -498,7 +500,24 @@ public class HdmiControlService extends SystemService {
         if (mMessageValidator == null) {
             mMessageValidator = new HdmiCecMessageValidator(this);
         }
-        mHdmiCecConfig.registerGlobalSettingsObserver(mIoLooper);
+        mHdmiCecConfig.registerGlobalSettingsObserver(mHandler.getLooper());
+        mHdmiCecConfig.registerChangeListener(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+                new HdmiCecConfig.SettingChangeListener() {
+                    @Override
+                    public void onChange(String setting) {
+                        boolean enabled = mHdmiCecConfig.getIntValue(
+                                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED)
+                                    == HdmiControlManager.HDMI_CEC_CONTROL_ENABLED;
+                        setControlEnabled(enabled);
+                    }
+                });
+        mHdmiCecConfig.registerChangeListener(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
+                new HdmiCecConfig.SettingChangeListener() {
+                    @Override
+                    public void onChange(String setting) {
+                        initializeCec(INITIATED_BY_ENABLE_CEC);
+                    }
+                });
     }
 
     private void bootCompleted() {
@@ -623,9 +642,7 @@ public class HdmiControlService extends SystemService {
     private void registerContentObserver() {
         ContentResolver resolver = getContext().getContentResolver();
         String[] settings = new String[] {
-                Global.HDMI_CONTROL_ENABLED,
                 Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED,
-                Global.HDMI_CEC_VERSION,
                 Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED,
                 Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
                 Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED,
@@ -651,12 +668,6 @@ public class HdmiControlService extends SystemService {
             String option = uri.getLastPathSegment();
             boolean enabled = readBooleanSetting(option, true);
             switch (option) {
-                case Global.HDMI_CONTROL_ENABLED:
-                    setControlEnabled(enabled);
-                    break;
-                case Global.HDMI_CEC_VERSION:
-                    initializeCec(INITIATED_BY_ENABLE_CEC);
-                    break;
                 case Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED:
                     setHdmiCecVolumeControlEnabledInternal(enabled);
                     break;
