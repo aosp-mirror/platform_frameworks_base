@@ -3360,8 +3360,8 @@ public class ConnectivityServiceTest {
             NetworkCapabilities networkCapabilities = new NetworkCapabilities();
             networkCapabilities.addTransportType(TRANSPORT_WIFI)
                     .setNetworkSpecifier(new MatchAllNetworkSpecifier());
-            mService.requestNetwork(networkCapabilities, null, 0, null,
-                    ConnectivityManager.TYPE_WIFI, mContext.getPackageName(),
+            mService.requestNetwork(networkCapabilities, NetworkRequest.Type.REQUEST.ordinal(),
+                    null, 0, null, ConnectivityManager.TYPE_WIFI, mContext.getPackageName(),
                     getAttributionTag());
         });
 
