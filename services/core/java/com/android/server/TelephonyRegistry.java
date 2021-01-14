@@ -358,10 +358,15 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             switch (msg.what) {
                 case MSG_USER_SWITCHED: {
                     if (VDBG) log("MSG_USER_SWITCHED userId=" + msg.arg1);
-                    int numPhones = getTelephonyManager().getPhoneCount();
-                    for (int sub = 0; sub < numPhones; sub++) {
-                        TelephonyRegistry.this.notifyCellLocationForSubscriber(sub,
-                                mCellIdentity[sub]);
+                    int numPhones = getTelephonyManager().getActiveModemCount();
+                    for (int phoneId = 0; phoneId < numPhones; phoneId++) {
+                        int[] subIds = SubscriptionManager.getSubId(phoneId);
+                        int subId =
+                                (subIds != null) && (subIds.length > 0)
+                                        ? subIds[0]
+                                        : SubscriptionManager.DEFAULT_SUBSCRIPTION_ID;
+                        TelephonyRegistry.this.notifyCellLocationForSubscriber(
+                                subId, mCellIdentity[phoneId], true /* hasUserSwitched */);
                     }
                     break;
                 }
@@ -1781,20 +1786,20 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     @Override
-    public void notifyCellLocation(CellIdentity cellLocation) {
-        notifyCellLocationForSubscriber(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID, cellLocation);
+    public void notifyCellLocationForSubscriber(int subId, CellIdentity cellIdentity) {
+        notifyCellLocationForSubscriber(subId, cellIdentity, false /* hasUserSwitched */);
     }
 
-    @Override
-    public void notifyCellLocationForSubscriber(int subId, CellIdentity cellIdentity) {
-        log("notifyCellLocationForSubscriber: subId=" + subId
-                + " cellIdentity=" + cellIdentity);
+    private void notifyCellLocationForSubscriber(int subId, CellIdentity cellIdentity,
+            boolean hasUserSwitched) {
+        log("notifyCellLocationForSubscriber: subId=" + subId + " cellIdentity=" + cellIdentity);
         if (!checkNotifyPermission("notifyCellLocation()")) {
             return;
         }
         int phoneId = getPhoneIdFromSubId(subId);
         synchronized (mRecords) {
-            if (validatePhoneId(phoneId) && !Objects.equals(cellIdentity, mCellIdentity[phoneId])) {
+            if (validatePhoneId(phoneId)
+                    && (hasUserSwitched || !Objects.equals(cellIdentity, mCellIdentity[phoneId]))) {
                 mCellIdentity[phoneId] = cellIdentity;
                 for (Record r : mRecords) {
                     if (validateEventsAndUserLocked(r, PhoneStateListener.LISTEN_CELL_LOCATION) &&
@@ -2269,7 +2274,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             final int recordCount = mRecords.size();
             pw.println("last known state:");
             pw.increaseIndent();
-            for (int i = 0; i < getTelephonyManager().getPhoneCount(); i++) {
+            for (int i = 0; i < getTelephonyManager().getActiveModemCount(); i++) {
                 pw.println("Phone Id=" + i);
                 pw.increaseIndent();
                 pw.println("mCallState=" + mCallState[i]);
