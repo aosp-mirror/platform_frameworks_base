@@ -32,8 +32,6 @@ import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.FlashlightControllerImpl;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.HotspotControllerImpl;
-import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
-import com.android.systemui.statusbar.policy.IndividualSensorPrivacyControllerImpl;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.KeyguardStateControllerImpl;
 import com.android.systemui.statusbar.policy.LocationController;
@@ -119,11 +117,6 @@ public interface StatusBarPolicyModule {
     @Binds
     NetworkController.AccessPointController provideAccessPointController(
             AccessPointControllerImpl accessPointControllerImpl);
-
-    /** */
-    @Binds
-    IndividualSensorPrivacyController provideIndividualSensorPrivacyController(
-            IndividualSensorPrivacyControllerImpl controllerImpl);
 
     /** */
     @SysUISingleton

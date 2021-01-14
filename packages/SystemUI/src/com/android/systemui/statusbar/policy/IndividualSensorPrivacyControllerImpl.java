@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.policy;
 import static android.service.SensorPrivacyIndividualEnabledSensorProto.CAMERA;
 import static android.service.SensorPrivacyIndividualEnabledSensorProto.MICROPHONE;
 
-import android.content.Context;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManager.IndividualSensor;
 import android.util.ArraySet;
@@ -29,22 +28,21 @@ import androidx.annotation.NonNull;
 
 import java.util.Set;
 
-import javax.inject.Inject;
-
 public class IndividualSensorPrivacyControllerImpl implements IndividualSensorPrivacyController {
 
     private static final int[] SENSORS = new int[] {CAMERA, MICROPHONE};
 
-    private final @NonNull Context mContext;
     private final @NonNull SensorPrivacyManager mSensorPrivacyManager;
     private final SparseBooleanArray mState = new SparseBooleanArray();
     private final Set<Callback> mCallbacks = new ArraySet<>();
 
-    @Inject
-    public IndividualSensorPrivacyControllerImpl(@NonNull Context context) {
-        mContext = context;
-        mSensorPrivacyManager = context.getSystemService(SensorPrivacyManager.class);
+    public IndividualSensorPrivacyControllerImpl(
+            @NonNull SensorPrivacyManager sensorPrivacyManager) {
+        mSensorPrivacyManager = sensorPrivacyManager;
+    }
 
+    @Override
+    public void init() {
         for (int sensor : SENSORS) {
             mSensorPrivacyManager.addSensorPrivacyListener(sensor,
                     (enabled) -> onSensorPrivacyChanged(sensor, enabled));

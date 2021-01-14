@@ -20,6 +20,7 @@ import android.hardware.SensorPrivacyManager.IndividualSensor;
 
 public interface IndividualSensorPrivacyController extends
         CallbackController<IndividualSensorPrivacyController.Callback> {
+    void init();
 
     boolean isSensorBlocked(@IndividualSensor int sensor);
 

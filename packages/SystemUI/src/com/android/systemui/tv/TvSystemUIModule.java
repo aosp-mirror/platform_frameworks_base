@@ -64,6 +64,8 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedControllerImpl;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
+import com.android.systemui.statusbar.policy.IndividualSensorPrivacyControllerImpl;
 import com.android.systemui.statusbar.policy.SensorPrivacyController;
 import com.android.systemui.statusbar.policy.SensorPrivacyControllerImpl;
 import com.android.systemui.statusbar.tv.notifications.TvNotificationHandler;
@@ -117,6 +119,16 @@ public abstract class TvSystemUIModule {
     static SensorPrivacyController provideSensorPrivacyController(
             SensorPrivacyManager sensorPrivacyManager) {
         SensorPrivacyController spC = new SensorPrivacyControllerImpl(sensorPrivacyManager);
+        spC.init();
+        return spC;
+    }
+
+    @Provides
+    @SysUISingleton
+    static IndividualSensorPrivacyController provideIndividualSensorPrivacyController(
+            SensorPrivacyManager sensorPrivacyManager) {
+        IndividualSensorPrivacyController spC = new IndividualSensorPrivacyControllerImpl(
+                sensorPrivacyManager);
         spC.init();
         return spC;
     }
