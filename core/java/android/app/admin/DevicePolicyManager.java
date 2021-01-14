@@ -12847,6 +12847,7 @@ public class DevicePolicyManager {
      * @throws SecurityException if the caller is not a profile owner or device owner.
      */
     @NonNull public String getEnrollmentSpecificId() {
+        throwIfParentInstance("getEnrollmentSpecificId");
         if (mService == null) {
             return "";
         }
@@ -12869,6 +12870,7 @@ public class DevicePolicyManager {
      *                     enrolled into.
      */
     public void setOrganizationId(@NonNull String enterpriseId) {
+        throwIfParentInstance("setOrganizationId");
         setOrganizationIdForUser(mContext.getPackageName(), enterpriseId, myUserId());
     }
 
