@@ -169,8 +169,8 @@ public final class GnssMeasurement implements Parcelable {
      * @hide
      */
     @IntDef(flag = true, prefix = { "ADR_STATE_" }, value = {
-            ADR_STATE_VALID, ADR_STATE_RESET, ADR_STATE_CYCLE_SLIP, ADR_STATE_HALF_CYCLE_RESOLVED,
-            ADR_STATE_HALF_CYCLE_REPORTED
+            ADR_STATE_UNKNOWN, ADR_STATE_VALID, ADR_STATE_RESET, ADR_STATE_CYCLE_SLIP,
+            ADR_STATE_HALF_CYCLE_RESOLVED, ADR_STATE_HALF_CYCLE_REPORTED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AdrState {}
