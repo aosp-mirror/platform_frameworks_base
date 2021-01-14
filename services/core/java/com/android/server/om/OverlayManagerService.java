@@ -249,7 +249,7 @@ public final class OverlayManagerService extends SystemService {
         FgThread.getHandler().post(() -> {
             List<String> affectedTargets = updatePackageManager(pair.packageName, pair.userId);
             updateActivityManager(affectedTargets, pair.userId);
-            broadcastActionOverlayChanged(affectedTargets, pair.userId);
+            broadcastActionOverlayChanged(pair.packageName, pair.userId);
         });
     };
 
@@ -922,20 +922,24 @@ public final class OverlayManagerService extends SystemService {
                 throw new IllegalArgumentException("null transaction");
             }
 
-            // map: userId -> list<targetPackageName>
-            SparseArray<List<String>> affectedTargetsToUpdate = new SparseArray<>();
+            // map: userId -> set<package-name>: target packages of overlays in
+            // this transaction
+            SparseArray<Set<String>> transactionTargets = new SparseArray<>();
+
+            // map: userId -> set<package-name>: packages that need to reload
+            // their resources due to changes to the overlays in this
+            // transaction
+            SparseArray<List<String>> affectedPackagesToUpdate = new SparseArray<>();
 
             synchronized (mLock) {
-                // map: userId -> set<targetPackageName>
-                SparseArray<Set<String>> targetsToUpdate = new SparseArray<>();
 
                 // execute the requests (as calling user)
                 for (final OverlayManagerTransaction.Request request : transaction) {
                     executeRequest(request).ifPresent(target -> {
-                        Set<String> userTargets = targetsToUpdate.get(target.userId);
+                        Set<String> userTargets = transactionTargets.get(target.userId);
                         if (userTargets == null) {
                             userTargets = new ArraySet<String>();
-                            targetsToUpdate.put(target.userId, userTargets);
+                            transactionTargets.put(target.userId, userTargets);
                         }
                         userTargets.add(target.packageName);
                     });
@@ -949,11 +953,11 @@ public final class OverlayManagerService extends SystemService {
                     persistSettings();
 
                     // inform the package manager about the new paths
-                    for (int index = 0; index < targetsToUpdate.size(); index++) {
-                        final int userId = targetsToUpdate.keyAt(index);
+                    for (int index = 0; index < transactionTargets.size(); index++) {
+                        final int userId = transactionTargets.keyAt(index);
                         final List<String> affectedTargets =
-                                updatePackageManager(targetsToUpdate.valueAt(index), userId);
-                        affectedTargetsToUpdate.put(userId, affectedTargets);
+                                updatePackageManager(transactionTargets.valueAt(index), userId);
+                        affectedPackagesToUpdate.put(userId, affectedTargets);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(ident);
@@ -963,13 +967,18 @@ public final class OverlayManagerService extends SystemService {
             FgThread.getHandler().post(() -> {
                 final long ident = Binder.clearCallingIdentity();
                 try {
-                    // schedule apps to refresh + broadcast the ACTION_OVERLAY_CHANGED intents
-                    for (int index = 0; index < affectedTargetsToUpdate.size(); index++) {
-                        final int userId = affectedTargetsToUpdate.keyAt(index);
-                        final List<String> packageNames = affectedTargetsToUpdate.valueAt(index);
+                    // schedule apps to refresh
+                    for (int index = 0; index < affectedPackagesToUpdate.size(); index++) {
+                        final int userId = affectedPackagesToUpdate.keyAt(index);
+                        updateActivityManager(affectedPackagesToUpdate.valueAt(index), userId);
+                    }
 
-                        updateActivityManager(packageNames, userId);
-                        broadcastActionOverlayChanged(packageNames, userId);
+                    // broadcast the ACTION_OVERLAY_CHANGED intents
+                    for (int index = 0; index < transactionTargets.size(); index++) {
+                        final int userId = transactionTargets.keyAt(index);
+                        for (String pkg: transactionTargets.valueAt(index)) {
+                            broadcastActionOverlayChanged(pkg, userId);
+                        }
                     }
                 } finally {
                     Binder.restoreCallingIdentity(ident);
@@ -1311,13 +1320,6 @@ public final class OverlayManagerService extends SystemService {
 
     // Helper methods to update other parts of the system or read/write
     // settings: these methods should never call into each other!
-
-    private void broadcastActionOverlayChanged(@NonNull final Collection<String> packageNames,
-            final int userId) {
-        for (final String packageName : packageNames) {
-            broadcastActionOverlayChanged(packageName, userId);
-        }
-    }
 
     private void broadcastActionOverlayChanged(@NonNull final String targetPackageName,
             final int userId) {
