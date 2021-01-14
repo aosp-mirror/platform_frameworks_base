@@ -45,19 +45,19 @@ BENCHMARK(BM_DisplayList_alloc_theoretical);
 
 void BM_DisplayListCanvas_record_empty(benchmark::State& benchState) {
     std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(100, 100));
-    delete canvas->finishRecording();
+    static_cast<void>(canvas->finishRecording());
 
     while (benchState.KeepRunning()) {
         canvas->resetRecording(100, 100);
         benchmark::DoNotOptimize(canvas.get());
-        delete canvas->finishRecording();
+        static_cast<void>(canvas->finishRecording());
     }
 }
 BENCHMARK(BM_DisplayListCanvas_record_empty);
 
 void BM_DisplayListCanvas_record_saverestore(benchmark::State& benchState) {
     std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(100, 100));
-    delete canvas->finishRecording();
+    static_cast<void>(canvas->finishRecording());
 
     while (benchState.KeepRunning()) {
         canvas->resetRecording(100, 100);
@@ -66,20 +66,20 @@ void BM_DisplayListCanvas_record_saverestore(benchmark::State& benchState) {
         benchmark::DoNotOptimize(canvas.get());
         canvas->restore();
         canvas->restore();
-        delete canvas->finishRecording();
+        static_cast<void>(canvas->finishRecording());
     }
 }
 BENCHMARK(BM_DisplayListCanvas_record_saverestore);
 
 void BM_DisplayListCanvas_record_translate(benchmark::State& benchState) {
     std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(100, 100));
-    delete canvas->finishRecording();
+    static_cast<void>(canvas->finishRecording());
 
     while (benchState.KeepRunning()) {
         canvas->resetRecording(100, 100);
         canvas->scale(10, 10);
         benchmark::DoNotOptimize(canvas.get());
-        delete canvas->finishRecording();
+        static_cast<void>(canvas->finishRecording());
     }
 }
 BENCHMARK(BM_DisplayListCanvas_record_translate);
@@ -92,7 +92,7 @@ BENCHMARK(BM_DisplayListCanvas_record_translate);
  */
 void BM_DisplayListCanvas_record_simpleBitmapView(benchmark::State& benchState) {
     std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(100, 100));
-    delete canvas->finishRecording();
+    static_cast<void>(canvas->finishRecording());
 
     Paint rectPaint;
     sk_sp<Bitmap> iconBitmap(TestUtils::createBitmap(80, 80));
@@ -111,7 +111,7 @@ void BM_DisplayListCanvas_record_simpleBitmapView(benchmark::State& benchState) 
             canvas->restore();
         }
         benchmark::DoNotOptimize(canvas.get());
-        delete canvas->finishRecording();
+        static_cast<void>(canvas->finishRecording());
     }
 }
 BENCHMARK(BM_DisplayListCanvas_record_simpleBitmapView);
@@ -122,7 +122,7 @@ void BM_DisplayListCanvas_basicViewGroupDraw(benchmark::State& benchState) {
     });
 
     std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(100, 100));
-    delete canvas->finishRecording();
+    static_cast<void>(canvas->finishRecording());
 
     while (benchState.KeepRunning()) {
         canvas->resetRecording(200, 200);
@@ -143,7 +143,7 @@ void BM_DisplayListCanvas_basicViewGroupDraw(benchmark::State& benchState) {
         canvas->enableZ(false);
         canvas->restoreToCount(clipRestoreCount);
 
-        delete canvas->finishRecording();
+        static_cast<void>(canvas->finishRecording());
     }
 }
 BENCHMARK(BM_DisplayListCanvas_basicViewGroupDraw)->Arg(1)->Arg(5)->Arg(10);

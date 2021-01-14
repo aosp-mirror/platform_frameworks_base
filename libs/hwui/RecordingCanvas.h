@@ -28,7 +28,6 @@
 #include "SkPaint.h"
 #include "SkPath.h"
 #include "SkRect.h"
-#include "SkTemplates.h"
 
 #include <vector>
 

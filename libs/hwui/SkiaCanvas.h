@@ -53,9 +53,9 @@ public:
         LOG_ALWAYS_FATAL("SkiaCanvas cannot be reset as a recording canvas");
     }
 
-    virtual uirenderer::DisplayList* finishRecording() override {
+    virtual uirenderer::DisplayList finishRecording() override {
         LOG_ALWAYS_FATAL("SkiaCanvas does not produce a DisplayList");
-        return nullptr;
+        return uirenderer::DisplayList();
     }
     virtual void enableZ(bool enableZ) override {
         LOG_ALWAYS_FATAL("SkiaCanvas does not support enableZ");

@@ -61,12 +61,11 @@ void RenderNodeDrawable::drawBackwardsProjectedNodes(SkCanvas* canvas,
             SkAutoCanvasRestore acr(canvas, true);
             SkMatrix nodeMatrix;
             mat4 hwuiMatrix(child.getRecordedMatrix());
-            auto childNode = child.getRenderNode();
+            const RenderNode* childNode = child.getRenderNode();
             childNode->applyViewPropertyTransforms(hwuiMatrix);
             hwuiMatrix.copyTo(nodeMatrix);
             canvas->concat(nodeMatrix);
-            SkiaDisplayList* childDisplayList = static_cast<SkiaDisplayList*>(
-                    (const_cast<DisplayList*>(childNode->getDisplayList())));
+            const SkiaDisplayList* childDisplayList = childNode->getDisplayList().asSkiaDl();
             if (childDisplayList) {
                 drawBackwardsProjectedNodes(canvas, *childDisplayList, nestLevel + 1);
             }
@@ -144,7 +143,7 @@ void RenderNodeDrawable::forceDraw(SkCanvas* canvas) const {
         return;
     }
 
-    SkiaDisplayList* displayList = (SkiaDisplayList*)renderNode->getDisplayList();
+    SkiaDisplayList* displayList = renderNode->getDisplayList().asSkiaDl();
 
     SkAutoCanvasRestore acr(canvas, true);
     const RenderProperties& properties = this->getNodeProperties();
@@ -213,14 +212,14 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
     if (mComposeLayer) {
         setViewProperties(properties, canvas, &alphaMultiplier);
     }
-    SkiaDisplayList* displayList = (SkiaDisplayList*)mRenderNode->getDisplayList();
+    SkiaDisplayList* displayList = mRenderNode->getDisplayList().asSkiaDl();
     displayList->mParentMatrix = canvas->getTotalMatrix();
 
     // TODO should we let the bound of the drawable do this for us?
     const SkRect bounds = SkRect::MakeWH(properties.getWidth(), properties.getHeight());
     bool quickRejected = properties.getClipToBounds() && canvas->quickReject(bounds);
     if (!quickRejected) {
-        SkiaDisplayList* displayList = (SkiaDisplayList*)renderNode->getDisplayList();
+        SkiaDisplayList* displayList = renderNode->getDisplayList().asSkiaDl();
         const LayerProperties& layerProperties = properties.layerProperties();
         // composing a hardware layer
         if (renderNode->getLayerSurface() && mComposeLayer) {

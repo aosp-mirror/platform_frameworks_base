@@ -212,7 +212,8 @@ public:
             int left, int top, int right, int bottom,
             std::function<void(RenderProperties& props, skiapipeline::SkiaRecordingCanvas& canvas)>
                     setup,
-            const char* name = nullptr, skiapipeline::SkiaDisplayList* displayList = nullptr) {
+            const char* name = nullptr,
+            std::unique_ptr<skiapipeline::SkiaDisplayList> displayList = nullptr) {
         sp<RenderNode> node = new RenderNode();
         if (name) {
             node->setName(name);
@@ -220,7 +221,7 @@ public:
         RenderProperties& props = node->mutateStagingProperties();
         props.setLeftTopRightBottom(left, top, right, bottom);
         if (displayList) {
-            node->setStagingDisplayList(displayList);
+            node->setStagingDisplayList(DisplayList(std::move(displayList)));
         }
         if (setup) {
             std::unique_ptr<skiapipeline::SkiaRecordingCanvas> canvas(
@@ -348,13 +349,11 @@ private:
             node->mNeedsDisplayListSync = false;
             node->syncDisplayList(observer, nullptr);
         }
-        auto displayList = node->getDisplayList();
+        auto& displayList = node->getDisplayList();
         if (displayList) {
-            for (auto&& childDr :
-                 static_cast<skiapipeline::SkiaDisplayList*>(const_cast<DisplayList*>(displayList))
-                         ->mChildNodes) {
-                syncHierarchyPropertiesAndDisplayListImpl(childDr.getRenderNode());
-            }
+            displayList.updateChildren([](RenderNode* child) {
+                syncHierarchyPropertiesAndDisplayListImpl(child);
+            });
         }
     }
 
