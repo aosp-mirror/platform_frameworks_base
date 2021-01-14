@@ -16581,18 +16581,18 @@ public final class Settings {
             public static final String COMPANION_ADDRESS = "companion_address";
 
             /**
-             * What bluetooth mode we are in.
+             * What OS does paired device has.
              * @hide
              */
-            public static final String BLUETOOTH_MODE = "bluetooth_mode";
+            public static final String PAIRED_DEVICE_OS_TYPE = "paired_device_os_type";
 
-            // Possible values of BLUETOOTH_MODE
+            // Possible values of PAIRED_DEVICE_OS_TYPE
             /** @hide */
-            public static final int BLUETOOTH_MODE_UNKNOWN = 0;
+            public static final int PAIRED_DEVICE_OS_TYPE_UNKNOWN = 0;
             /** @hide */
-            public static final int BLUETOOTH_MODE_NON_ALT = 1;
+            public static final int PAIRED_DEVICE_OS_TYPE_ANDROID = 1;
             /** @hide */
-            public static final int BLUETOOTH_MODE_ALT = 2;
+            public static final int PAIRED_DEVICE_OS_TYPE_IOS = 2;
 
             /**
              * The bluetooth settings selected BLE role for the companion.

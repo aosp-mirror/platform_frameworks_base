@@ -5357,8 +5357,8 @@ public class SettingsProvider extends ContentProvider {
                         initGlobalSettingsDefaultValForWearLocked(
                                 Settings.Global.Wearable.COMPANION_ADDRESS, "");
                         initGlobalSettingsDefaultValForWearLocked(
-                                Settings.Global.Wearable.BLUETOOTH_MODE,
-                                Settings.Global.Wearable.BLUETOOTH_MODE_UNKNOWN);
+                                Settings.Global.Wearable.PAIRED_DEVICE_OS_TYPE,
+                                Settings.Global.Wearable.PAIRED_DEVICE_OS_TYPE_UNKNOWN);
                         initGlobalSettingsDefaultValForWearLocked(
                                 Settings.Global.Wearable.USER_HFP_CLIENT_SETTING,
                                 Settings.Global.Wearable.HFP_CLIENT_UNSET);

@@ -647,7 +647,7 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.AMBIENT_LOW_BIT_ENABLED,
                     Settings.Global.Wearable.AMBIENT_PLUGGED_TIMEOUT_MIN,
                     Settings.Global.Wearable.COMPANION_ADDRESS,
-                    Settings.Global.Wearable.BLUETOOTH_MODE,
+                    Settings.Global.Wearable.PAIRED_DEVICE_OS_TYPE,
                     Settings.Global.Wearable.COMPANION_BLE_ROLE,
                     Settings.Global.Wearable.COMPANION_NAME,
                     Settings.Global.Wearable.USER_HFP_CLIENT_SETTING,

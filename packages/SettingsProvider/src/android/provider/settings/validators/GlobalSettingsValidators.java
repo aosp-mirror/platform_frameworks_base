@@ -266,12 +266,12 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.Wearable.AMBIENT_PLUGGED_TIMEOUT_MIN, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.Wearable.AMBIENT_TILT_TO_BRIGHT, BOOLEAN_VALIDATOR);
         VALIDATORS.put(
-                Global.Wearable.BLUETOOTH_MODE,
+                Global.Wearable.PAIRED_DEVICE_OS_TYPE,
                 new DiscreteValueValidator(
                         new String[] {
-                            String.valueOf(Global.Wearable.BLUETOOTH_MODE_UNKNOWN),
-                            String.valueOf(Global.Wearable.BLUETOOTH_MODE_ALT),
-                            String.valueOf(Global.Wearable.BLUETOOTH_MODE_NON_ALT)
+                            String.valueOf(Global.Wearable.PAIRED_DEVICE_OS_TYPE_UNKNOWN),
+                            String.valueOf(Global.Wearable.PAIRED_DEVICE_OS_TYPE_ANDROID),
+                            String.valueOf(Global.Wearable.PAIRED_DEVICE_OS_TYPE_IOS)
                         }));
         VALIDATORS.put(
                 Global.Wearable.COMPANION_BLE_ROLE,
