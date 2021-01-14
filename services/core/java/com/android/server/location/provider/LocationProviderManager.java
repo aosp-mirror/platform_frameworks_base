@@ -18,7 +18,6 @@ package com.android.server.location.provider;
 
 import static android.app.compat.CompatChanges.isChangeEnabled;
 import static android.location.LocationManager.DELIVER_HISTORICAL_LOCATIONS;
-import static android.location.LocationManager.FUSED_PROVIDER;
 import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.KEY_FLUSH_COMPLETE;
 import static android.location.LocationManager.KEY_LOCATION_CHANGED;
@@ -2344,8 +2343,8 @@ public class LocationProviderManager extends
 
         // do not send change notifications if we just saw this user for the first time
         if (wasEnabled != null) {
-            // fused and passive provider never get public updates for legacy reasons
-            if (!FUSED_PROVIDER.equals(mName) && !PASSIVE_PROVIDER.equals(mName)) {
+            // passive provider never get public updates for legacy reasons
+            if (!PASSIVE_PROVIDER.equals(mName)) {
                 Intent intent = new Intent(LocationManager.PROVIDERS_CHANGED_ACTION)
                         .putExtra(LocationManager.EXTRA_PROVIDER_NAME, mName)
                         .putExtra(LocationManager.EXTRA_PROVIDER_ENABLED, enabled)
