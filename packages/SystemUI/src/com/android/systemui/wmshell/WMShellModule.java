@@ -17,6 +17,7 @@
 package com.android.systemui.wmshell;
 
 import android.animation.AnimationHandler;
+import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.view.IWindowManager;
 
@@ -85,15 +86,6 @@ public class WMShellModule {
         return LegacySplitScreenController.create(context, displayController, systemWindows,
                 displayImeController, transactionPool, shellTaskOrganizer, syncQueue,
                 taskStackListener, transitions, mainExecutor, sfVsyncAnimationHandler);
-    }
-
-    @WMSingleton
-    @Provides
-    static SplitScreen provideSplitScreen(ShellTaskOrganizer shellTaskOrganizer,
-            SyncTransactionQueue syncQueue, Context context,
-            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
-        return new SplitScreenController(shellTaskOrganizer, syncQueue, context,
-                rootTaskDisplayAreaOrganizer);
     }
 
     @WMSingleton

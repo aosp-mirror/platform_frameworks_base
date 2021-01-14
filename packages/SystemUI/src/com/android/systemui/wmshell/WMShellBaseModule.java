@@ -19,6 +19,7 @@ package com.android.systemui.wmshell;
 import static android.os.Process.THREAD_PRIORITY_DISPLAY;
 
 import android.animation.AnimationHandler;
+import android.app.ActivityTaskManager;
 import android.app.IActivityManager;
 import android.content.Context;
 import android.content.pm.LauncherApps;
@@ -71,6 +72,7 @@ import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.phone.PipAppOpsListener;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
@@ -310,8 +312,18 @@ public abstract class WMShellBaseModule {
     @BindsOptionalOf
     abstract LegacySplitScreen optionalLegacySplitScreen();
 
-    @BindsOptionalOf
-    abstract SplitScreen optionalSplitScreen();
+    @WMSingleton
+    @Provides
+    static Optional<SplitScreen> provideSplitScreen(ShellTaskOrganizer shellTaskOrganizer,
+            SyncTransactionQueue syncQueue, Context context,
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
+        if (ActivityTaskManager.supportsSplitScreenMultiWindow(context)) {
+            return Optional.of(new SplitScreenController(shellTaskOrganizer, syncQueue, context,
+                    rootTaskDisplayAreaOrganizer));
+        } else {
+            return Optional.empty();
+        }
+    }
 
     @BindsOptionalOf
     abstract AppPairs optionalAppPairs();
