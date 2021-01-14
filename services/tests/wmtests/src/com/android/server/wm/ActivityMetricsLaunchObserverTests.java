@@ -312,6 +312,22 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
     }
 
     @Test
+    public void testActivityDrawnBeforeTransition() {
+        mTopActivity.setVisible(false);
+        notifyActivityLaunching(mTopActivity.intent);
+        // Assume the activity is launched the second time consecutively. The drawn event is from
+        // the first time (omitted in test) launch that is earlier than transition.
+        mTopActivity.mDrawn = true;
+        notifyWindowsDrawn(mTopActivity);
+        notifyActivityLaunched(START_SUCCESS, mTopActivity);
+        // If the launching activity was drawn when starting transition, the launch event should
+        // be reported successfully.
+        notifyTransitionStarting(mTopActivity);
+
+        verifyOnActivityLaunchFinished(mTopActivity);
+    }
+
+    @Test
     public void testActivityRecordProtoIsNotTooBig() {
         // The ActivityRecordProto must not be too big, otherwise converting it at runtime
         // will become prohibitively expensive.
