@@ -1403,6 +1403,15 @@
         android:description="@string/permgroupdesc_sensors"
         android:priority="800" />
 
+    <!-- Allows an app to access sensor data with a sampling rate greater than 200 Hz.
+        <p>Protection level: normal
+    -->
+    <permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS"
+                android:permissionGroup="android.permission-group.SENSORS"
+                android:label="@string/permlab_highSamplingRateSensors"
+                android:description="@string/permdesc_highSamplingRateSensors"
+                android:protectionLevel="normal" />
+
     <!-- Allows an application to access data from sensors that the user uses to
          measure what is happening inside their body, such as heart rate.
          <p>Protection level: dangerous -->
