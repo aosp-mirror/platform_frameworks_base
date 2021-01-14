@@ -262,7 +262,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         setConnectivityViaBroadcast(mMobileSignalController.mTransportType, false, false);
         setConnectivityViaBroadcast(NetworkCapabilities.TRANSPORT_WIFI, true, true);
 
-        verifyLastMobileDataIndicators(true, DEFAULT_LEVEL, 0);
+        verifyLastMobileDataIndicators(false, DEFAULT_LEVEL, 0);
     }
 
     // Some tests of actual NetworkController code, just internals not display stuff

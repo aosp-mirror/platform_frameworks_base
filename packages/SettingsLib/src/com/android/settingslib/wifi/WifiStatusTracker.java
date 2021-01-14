@@ -171,6 +171,10 @@ public class WifiStatusTracker {
                 } else {
                     ssid = getValidSsid(mWifiInfo);
                 }
+                if (mProviderModel) {
+                    isCarrierMerged = mWifiInfo.isCarrierMerged();
+                    subId = mWifiInfo.getSubscriptionId();
+                }
                 updateRssi(mWifiInfo.getRssi());
                 maybeRequestNetworkScore();
             }
@@ -211,6 +215,8 @@ public class WifiStatusTracker {
     private void updateWifiState() {
         state = mWifiManager.getWifiState();
         enabled = state == WifiManager.WIFI_STATE_ENABLED;
+        isCarrierMerged = false;
+        subId = 0;
     }
 
     private void updateRssi(int newRssi) {

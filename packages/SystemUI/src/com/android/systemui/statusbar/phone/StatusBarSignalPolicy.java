@@ -39,6 +39,7 @@ import java.util.Objects;
 public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallback,
         SecurityController.SecurityControllerCallback, Tunable {
     private static final String TAG = "StatusBarSignalPolicy";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final String mSlotAirplane;
     private final String mSlotMobile;
@@ -61,6 +62,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
 
     // Track as little state as possible, and only for padding purposes
     private boolean mIsAirplaneMode = false;
+    private boolean mIsWifiEnabled = false;
     private boolean mWifiVisible = false;
 
     private ArrayList<MobileIconState> mMobileStates = new ArrayList<MobileIconState>();
@@ -139,24 +141,43 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     public void setWifiIndicators(boolean enabled, IconState statusIcon, IconState qsIcon,
             boolean activityIn, boolean activityOut, String description, boolean isTransient,
             String statusLabel) {
-
+        if (DEBUG) {
+            Log.d(TAG, "setWifiIndicators: "
+                    + "enabled = " + enabled + ","
+                    + "statusIcon = " + (statusIcon == null ? "" : statusIcon.toString()) + ","
+                    + "qsIcon = " + (qsIcon == null ? "" : qsIcon.toString()) + ","
+                    + "activityIn = " + activityIn + ","
+                    + "activityOut = " + activityOut + ","
+                    + "description = " + description + ","
+                    + "isTransient = " + isTransient + ","
+                    + "statusLabel = " + statusLabel);
+        }
         boolean visible = statusIcon.visible && !mHideWifi;
         boolean in = activityIn && mActivityEnabled && visible;
         boolean out = activityOut && mActivityEnabled && visible;
+        mIsWifiEnabled = enabled;
 
         WifiIconState newState = mWifiIconState.copy();
 
-        newState.visible = visible;
-        newState.resId = statusIcon.icon;
-        newState.activityIn = in;
-        newState.activityOut = out;
+        if (mWifiIconState.noDefaultNetwork && mWifiIconState.noNetworksAvailable
+                && !mIsAirplaneMode) {
+            newState.visible = true;
+            newState.resId = R.drawable.ic_qs_no_internet_unavailable;
+        } else if (mWifiIconState.noValidatedNetwork && !mWifiIconState.noNetworksAvailable
+                && (!mIsAirplaneMode || (mIsAirplaneMode && mIsWifiEnabled))) {
+            newState.visible = true;
+            newState.resId = R.drawable.ic_qs_no_internet_available;
+        } else {
+            newState.visible = visible;
+            newState.resId = statusIcon.icon;
+            newState.activityIn = in;
+            newState.activityOut = out;
+            newState.contentDescription = statusIcon.contentDescription;
+            MobileIconState first = getFirstMobileState();
+            newState.signalSpacerVisible = first != null && first.typeId != 0;
+        }
         newState.slot = mSlotWifi;
         newState.airplaneSpacerVisible = mIsAirplaneMode;
-        newState.contentDescription = statusIcon.contentDescription;
-
-        MobileIconState first = getFirstMobileState();
-        newState.signalSpacerVisible = first != null && first.typeId != 0;
-
         updateWifiIconWithState(newState);
         mWifiIconState = newState;
     }
@@ -167,6 +188,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     }
 
     private void updateWifiIconWithState(WifiIconState state) {
+        if (DEBUG) Log.d(TAG, "WifiIconState: " + state == null ? "" : state.toString());
         if (state.visible && state.resId > 0) {
             mIconController.setSignalIcon(mSlotWifi, state);
             mIconController.setIconVisibility(mSlotWifi, true);
@@ -181,6 +203,21 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
             CharSequence typeContentDescription,
             CharSequence typeContentDescriptionHtml, CharSequence description,
             boolean isWide, int subId, boolean roaming) {
+        if (DEBUG) {
+            Log.d(TAG, "setMobileDataIndicators: "
+                    + "statusIcon = " + (statusIcon == null ? "" : statusIcon.toString()) + ","
+                    + "qsIcon = " + (qsIcon == null ? "" : qsIcon.toString()) + ","
+                    + "statusType = " + statusType + ","
+                    + "qsType = " + qsType + ","
+                    + "activityIn = " + activityIn + ","
+                    + "activityOut = " + activityOut + ","
+                    + "typeContentDescription = " + typeContentDescription + ","
+                    + "typeContentDescriptionHtml = " + typeContentDescriptionHtml + ","
+                    + "description = " + description + ","
+                    + "isWide = " + isWide + ","
+                    + "subId = " + subId + ","
+                    + "roaming = " + roaming);
+        }
         MobileIconState state = getState(subId);
         if (state == null) {
             return;
@@ -198,6 +235,10 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
         state.activityIn = activityIn && mActivityEnabled;
         state.activityOut = activityOut && mActivityEnabled;
 
+        if (DEBUG) {
+            Log.d(TAG, "MobileIconStates: "
+                    + (mMobileStates == null ? "" : mMobileStates.toString()));
+        }
         // Always send a copy to maintain value type semantics
         mIconController.setMobileIcons(mSlotMobile, MobileIconState.copyStates(mMobileStates));
 
@@ -237,6 +278,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
      */
     @Override
     public void setSubs(List<SubscriptionInfo> subs) {
+        if (DEBUG) Log.d(TAG, "setSubs: " + (subs == null ? "" : subs.toString()));
         if (hasCorrectSubs(subs)) {
             return;
         }
@@ -267,6 +309,36 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
         // Noop yay!
     }
 
+    @Override
+    public void setConnectivityStatus(boolean noDefaultNetwork, boolean noValidatedNetwork,
+            boolean noNetworksAvailable) {
+        if (DEBUG) {
+            Log.d(TAG, "setConnectivityStatus: "
+                    + "noDefaultNetwork = " + noDefaultNetwork + ","
+                    + "noValidatedNetwork = " + noValidatedNetwork + ","
+                    + "noNetworksAvailable = " + noNetworksAvailable);
+        }
+        WifiIconState newState = mWifiIconState.copy();
+        newState.noDefaultNetwork = noDefaultNetwork;
+        newState.noValidatedNetwork = noValidatedNetwork;
+        newState.noNetworksAvailable = noNetworksAvailable;
+        newState.slot = mSlotWifi;
+        newState.airplaneSpacerVisible = mIsAirplaneMode;
+        if (noDefaultNetwork && noNetworksAvailable && !mIsAirplaneMode) {
+            newState.visible = true;
+            newState.resId = R.drawable.ic_qs_no_internet_unavailable;
+        } else if (noValidatedNetwork && !noNetworksAvailable
+                && (!mIsAirplaneMode || (mIsAirplaneMode && mIsWifiEnabled))) {
+            newState.visible = true;
+            newState.resId = R.drawable.ic_qs_no_internet_available;
+        } else {
+            newState.visible = false;
+            newState.resId = 0;
+        }
+        updateWifiIconWithState(newState);
+        mWifiIconState = newState;
+    }
+
 
     @Override
     public void setEthernetIndicators(IconState state) {
@@ -284,6 +356,10 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
 
     @Override
     public void setIsAirplaneMode(IconState icon) {
+        if (DEBUG) {
+            Log.d(TAG, "setIsAirplaneMode: "
+                    + "icon = " + (icon == null ? "" : icon.toString()));
+        }
         mIsAirplaneMode = icon.visible && !mHideAirplane;
         int resId = icon.icon;
         String description = icon.contentDescription;
@@ -340,6 +416,9 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
         public int resId;
         public boolean airplaneSpacerVisible;
         public boolean signalSpacerVisible;
+        public boolean noDefaultNetwork;
+        public boolean noValidatedNetwork;
+        public boolean noNetworksAvailable;
 
         @Override
         public boolean equals(Object o) {
@@ -351,9 +430,12 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
                 return false;
             }
             WifiIconState that = (WifiIconState) o;
-            return resId == that.resId &&
-                    airplaneSpacerVisible == that.airplaneSpacerVisible &&
-                    signalSpacerVisible == that.signalSpacerVisible;
+            return resId == that.resId
+                    && airplaneSpacerVisible == that.airplaneSpacerVisible
+                    && signalSpacerVisible == that.signalSpacerVisible
+                    && noDefaultNetwork == that.noDefaultNetwork
+                    && noValidatedNetwork == that.noValidatedNetwork
+                    && noNetworksAvailable == that.noNetworksAvailable;
         }
 
         public void copyTo(WifiIconState other) {
@@ -361,6 +443,9 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
             other.resId = resId;
             other.airplaneSpacerVisible = airplaneSpacerVisible;
             other.signalSpacerVisible = signalSpacerVisible;
+            other.noDefaultNetwork = noDefaultNetwork;
+            other.noValidatedNetwork = noValidatedNetwork;
+            other.noNetworksAvailable = noNetworksAvailable;
         }
 
         public WifiIconState copy() {
@@ -372,7 +457,8 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
         @Override
         public int hashCode() {
             return Objects.hash(super.hashCode(),
-                    resId, airplaneSpacerVisible, signalSpacerVisible);
+                    resId, airplaneSpacerVisible, signalSpacerVisible, noDefaultNetwork,
+                    noValidatedNetwork, noNetworksAvailable);
         }
 
         @Override public String toString() {
