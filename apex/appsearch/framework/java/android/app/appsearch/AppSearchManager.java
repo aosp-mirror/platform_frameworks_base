@@ -28,6 +28,7 @@ import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -234,6 +235,7 @@ public class AppSearchManager {
                     DEFAULT_DATABASE_NAME,
                     schemaBundles,
                     new ArrayList<>(request.getSchemasNotVisibleToSystemUi()),
+                    /*schemasPackageAccessible=*/ Collections.emptyMap(),
                     request.isForceOverride(),
                     mContext.getUserId(),
                     new IAppSearchResultCallback.Stub() {
