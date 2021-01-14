@@ -61,6 +61,9 @@ import org.mockito.ArgumentCaptor;
 import java.io.File;
 import java.util.ArrayList;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
 @SmallTest
 @Presubmit
 @RunWith(AndroidJUnit4.class)
@@ -77,15 +80,25 @@ public class RebootEscrowManagerTests {
             0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
     };
 
+    // Hex encoding of a randomly generated AES key for test.
+    private static final byte[] TEST_AES_KEY = new byte[] {
+            0x48, 0x19, 0x12, 0x54, 0x13, 0x13, 0x52, 0x31,
+            0x44, 0x74, 0x61, 0x54, 0x29, 0x74, 0x37, 0x61,
+            0x70, 0x70, 0x75, 0x25, 0x27, 0x31, 0x49, 0x09,
+            0x26, 0x52, 0x72, 0x63, 0x63, 0x61, 0x78, 0x23,
+    };
+
     private Context mContext;
     private UserManager mUserManager;
     private RebootEscrowManager.Callbacks mCallbacks;
     private IRebootEscrow mRebootEscrow;
+    private RebootEscrowKeyStoreManager mKeyStoreManager;
 
     LockSettingsStorageTestable mStorage;
 
     private MockableRebootEscrowInjected mInjected;
     private RebootEscrowManager mService;
+    private SecretKey mAesKey;
 
     public interface MockableRebootEscrowInjected {
         int getBootCount();
@@ -98,9 +111,11 @@ public class RebootEscrowManagerTests {
         private final RebootEscrowProviderInterface mRebootEscrowProvider;
         private final UserManager mUserManager;
         private final MockableRebootEscrowInjected mInjected;
+        private final RebootEscrowKeyStoreManager mKeyStoreManager;
 
         MockInjector(Context context, UserManager userManager,
                 IRebootEscrow rebootEscrow,
+                RebootEscrowKeyStoreManager keyStoreManager,
                 MockableRebootEscrowInjected injected) {
             super(context);
             mRebootEscrow = rebootEscrow;
@@ -114,6 +129,7 @@ public class RebootEscrowManagerTests {
                     };
             mRebootEscrowProvider = new RebootEscrowProviderHalImpl(halInjector);
             mUserManager = userManager;
+            mKeyStoreManager = keyStoreManager;
             mInjected = injected;
         }
 
@@ -125,6 +141,11 @@ public class RebootEscrowManagerTests {
         @Override
         public RebootEscrowProviderInterface getRebootEscrowProvider() {
             return mRebootEscrowProvider;
+        }
+
+        @Override
+        public RebootEscrowKeyStoreManager getKeyStoreManager() {
+            return mKeyStoreManager;
         }
 
         @Override
@@ -144,6 +165,11 @@ public class RebootEscrowManagerTests {
         mUserManager = mock(UserManager.class);
         mCallbacks = mock(RebootEscrowManager.Callbacks.class);
         mRebootEscrow = mock(IRebootEscrow.class);
+        mKeyStoreManager = mock(RebootEscrowKeyStoreManager.class);
+        mAesKey = new SecretKeySpec(TEST_AES_KEY, "AES");
+
+        when(mKeyStoreManager.getKeyStoreEncryptionKey()).thenReturn(mAesKey);
+        when(mKeyStoreManager.generateKeyStoreEncryptionKeyIfNeeded()).thenReturn(mAesKey);
 
         mStorage = new LockSettingsStorageTestable(mContext,
                 new File(InstrumentationRegistry.getContext().getFilesDir(), "locksettings"));
@@ -160,7 +186,7 @@ public class RebootEscrowManagerTests {
         when(mCallbacks.isUserSecure(SECURE_SECONDARY_USER_ID)).thenReturn(true);
         mInjected = mock(MockableRebootEscrowInjected.class);
         mService = new RebootEscrowManager(new MockInjector(mContext, mUserManager, mRebootEscrow,
-                mInjected), mCallbacks, mStorage);
+                mKeyStoreManager, mInjected), mCallbacks, mStorage);
     }
 
     @Test
@@ -213,6 +239,7 @@ public class RebootEscrowManagerTests {
         assertNotNull(
                 mStorage.getString(RebootEscrowManager.REBOOT_ESCROW_ARMED_KEY, null, USER_SYSTEM));
         verify(mRebootEscrow).storeKey(any());
+        verify(mKeyStoreManager).getKeyStoreEncryptionKey();
 
         assertTrue(mStorage.hasRebootEscrow(PRIMARY_USER_ID));
         assertFalse(mStorage.hasRebootEscrow(NONSECURE_SECONDARY_USER_ID));
@@ -300,6 +327,7 @@ public class RebootEscrowManagerTests {
         ArgumentCaptor<byte[]> keyByteCaptor = ArgumentCaptor.forClass(byte[].class);
         assertTrue(mService.armRebootEscrowIfNeeded());
         verify(mRebootEscrow).storeKey(keyByteCaptor.capture());
+        verify(mKeyStoreManager).getKeyStoreEncryptionKey();
 
         assertTrue(mStorage.hasRebootEscrow(PRIMARY_USER_ID));
         assertFalse(mStorage.hasRebootEscrow(NONSECURE_SECONDARY_USER_ID));
@@ -314,6 +342,7 @@ public class RebootEscrowManagerTests {
         mService.loadRebootEscrowDataIfAvailable();
         verify(mRebootEscrow).retrieveKey();
         assertTrue(metricsSuccessCaptor.getValue());
+        verify(mKeyStoreManager).clearKeyStoreEncryptionKey();
     }
 
     @Test
