@@ -72,4 +72,5 @@ cc_fuzz {
     fuzz_config: {
         cc: ["scroggo@google.com"],
     },
+    corpus: ["corpus/*"],
 }
