@@ -1221,6 +1221,45 @@ public class ConnectivityManager {
     }
 
     /**
+     * Informs ConnectivityService of whether the legacy lockdown VPN, as implemented by
+     * LockdownVpnTracker, is in use. This is deprecated for new devices starting from Android 12
+     * but is still supported for backwards compatibility.
+     * <p>
+     * This type of VPN is assumed always to use the system default network, and must always declare
+     * exactly one underlying network, which is the network that was the default when the VPN
+     * connected.
+     * <p>
+     * Calling this method with {@code true} enables legacy behaviour, specifically:
+     * <ul>
+     *     <li>Any VPN that applies to userId 0 behaves specially with respect to deprecated
+     *     {@link #CONNECTIVITY_ACTION} broadcasts. Any such broadcasts will have the state in the
+     *     {@link #EXTRA_NETWORK_INFO} replaced by state of the VPN network. Also, any time the VPN
+     *     connects, a {@link #CONNECTIVITY_ACTION} broadcast will be sent for the network
+     *     underlying the VPN.</li>
+     *     <li>Deprecated APIs that return {@link NetworkInfo} objects will have their state
+     *     similarly replaced by the VPN network state.</li>
+     *     <li>Information on current network interfaces passed to NetworkStatsService will not
+     *     include any VPN interfaces.</li>
+     * </ul>
+     *
+     * @param enabled whether legacy lockdown VPN is enabled or disabled
+     *
+     * TODO: @SystemApi(client = MODULE_LIBRARIES)
+     *
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_SETTINGS})
+    public void setLegacyLockdownVpnEnabled(boolean enabled) {
+        try {
+            mService.setLegacyLockdownVpnEnabled(enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns details about the currently active default data network
      * for a given uid.  This is for internal use only to avoid spying
      * other apps.

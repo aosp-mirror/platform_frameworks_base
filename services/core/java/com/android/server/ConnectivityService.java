@@ -318,7 +318,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // TODO: investigate if mLockdownEnabled can be removed and replaced everywhere by
     // a direct call to LockdownVpnTracker.isEnabled().
     @GuardedBy("mVpns")
-    private boolean mLockdownEnabled;
+    private volatile boolean mLockdownEnabled;
     @GuardedBy("mVpns")
     private LockdownVpnTracker mLockdownTracker;
 
@@ -755,6 +755,27 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
 
+        // When a lockdown VPN connects, send another CONNECTED broadcast for the underlying
+        // network type, to preserve previous behaviour.
+        private void maybeSendLegacyLockdownBroadcast(@NonNull NetworkAgentInfo vpnNai) {
+            if (vpnNai != mService.getLegacyLockdownNai()) return;
+
+            if (vpnNai.declaredUnderlyingNetworks == null
+                    || vpnNai.declaredUnderlyingNetworks.length != 1) {
+                Log.wtf(TAG, "Legacy lockdown VPN must have exactly one underlying network: "
+                        + Arrays.toString(vpnNai.declaredUnderlyingNetworks));
+                return;
+            }
+            final NetworkAgentInfo underlyingNai =  mService.getNetworkAgentInfoForNetwork(
+                    vpnNai.declaredUnderlyingNetworks[0]);
+            if (underlyingNai == null) return;
+
+            final int type = underlyingNai.networkInfo.getType();
+            final DetailedState state = DetailedState.CONNECTED;
+            maybeLogBroadcast(underlyingNai, state, type, true /* isDefaultNetwork */);
+            mService.sendLegacyNetworkBroadcast(underlyingNai, state, type);
+        }
+
         /** Adds the given network to the specified legacy type list. */
         public void add(int type, NetworkAgentInfo nai) {
             if (!isTypeSupported(type)) {
@@ -772,9 +793,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
             // Send a broadcast if this is the first network of its type or if it's the default.
             final boolean isDefaultNetwork = mService.isDefaultNetwork(nai);
+
+            // If a legacy lockdown VPN is active, override the NetworkInfo state in all broadcasts
+            // to preserve previous behaviour.
+            final DetailedState state = mService.getLegacyLockdownState(DetailedState.CONNECTED);
             if ((list.size() == 1) || isDefaultNetwork) {
-                maybeLogBroadcast(nai, DetailedState.CONNECTED, type, isDefaultNetwork);
-                mService.sendLegacyNetworkBroadcast(nai, DetailedState.CONNECTED, type);
+                maybeLogBroadcast(nai, state, type, isDefaultNetwork);
+                mService.sendLegacyNetworkBroadcast(nai, state, type);
+            }
+
+            if (type == TYPE_VPN && state == DetailedState.CONNECTED) {
+                maybeSendLegacyLockdownBroadcast(nai);
             }
         }
 
@@ -1474,11 +1503,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (isNetworkWithCapabilitiesBlocked(nc, uid, ignoreBlocked)) {
             networkInfo.setDetailedState(DetailedState.BLOCKED, null, null);
         }
-        synchronized (mVpns) {
-            if (mLockdownTracker != null) {
-                mLockdownTracker.augmentNetworkInfo(networkInfo);
-            }
-        }
+        networkInfo.setDetailedState(
+                getLegacyLockdownState(networkInfo.getDetailedState()),
+                "" /* reason */, null /* extraInfo */);
     }
 
     /**
@@ -1535,14 +1562,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return null;
         }
         return nai.network;
-    }
-
-    // Public because it's used by mLockdownTracker.
-    public NetworkInfo getActiveNetworkInfoUnfiltered() {
-        enforceAccessPermission();
-        final int uid = mDeps.getCallingUid();
-        NetworkState state = getUnfilteredActiveNetworkState(uid);
-        return state.networkInfo;
     }
 
     @Override
@@ -2340,13 +2359,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private Intent makeGeneralIntent(NetworkInfo info, String bcastType) {
-        synchronized (mVpns) {
-            if (mLockdownTracker != null) {
-                info = new NetworkInfo(info);
-                mLockdownTracker.augmentNetworkInfo(info);
-            }
-        }
-
         Intent intent = new Intent(bcastType);
         intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, new NetworkInfo(info));
         intent.putExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, info.getType());
@@ -2887,7 +2899,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         Log.wtf(TAG, "Non-virtual networks cannot have underlying networks");
                         break;
                     }
+
                     final List<Network> underlying = (List<Network>) arg.second;
+
+                    if (isLegacyLockdownNai(nai)
+                            && (underlying == null || underlying.size() != 1)) {
+                        Log.wtf(TAG, "Legacy lockdown VPN " + nai.toShortString()
+                                + " must have exactly one underlying network: " + underlying);
+                    }
+
                     final Network[] oldUnderlying = nai.declaredUnderlyingNetworks;
                     nai.declaredUnderlyingNetworks = (underlying != null)
                             ? underlying.toArray(new Network[0]) : null;
@@ -3496,7 +3516,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     //  incorrect) behavior.
                     mNetworkActivityTracker.updateDataActivityTracking(
                             null /* newNetwork */, nai);
-                    notifyLockdownVpn(nai);
                     ensureNetworkTransitionWakelock(nai.toShortString());
                 }
             }
@@ -5071,8 +5090,57 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mVpnBlockedUidRanges = newVpnBlockedUidRanges;
     }
 
+    @Override
+    public void setLegacyLockdownVpnEnabled(boolean enabled) {
+        enforceSettingsPermission();
+        mHandler.post(() -> mLockdownEnabled = enabled);
+    }
+
+    // TODO: remove when the VPN code moves out.
     private boolean isLockdownVpnEnabled() {
         return mKeyStore.contains(Credentials.LOCKDOWN_VPN);
+    }
+
+    private boolean isLegacyLockdownNai(NetworkAgentInfo nai) {
+        return mLockdownEnabled
+                && getVpnType(nai) == VpnManager.TYPE_VPN_LEGACY
+                && nai.networkCapabilities.appliesToUid(Process.FIRST_APPLICATION_UID);
+    }
+
+    private NetworkAgentInfo getLegacyLockdownNai() {
+        if (!mLockdownEnabled) {
+            return null;
+        }
+        // The legacy lockdown VPN always only applies to UID 0.
+        final NetworkAgentInfo nai = getVpnForUid(Process.FIRST_APPLICATION_UID);
+        if (nai == null || !isLegacyLockdownNai(nai)) return null;
+
+        // The legacy lockdown VPN must always have exactly one underlying network.
+        if (nai.declaredUnderlyingNetworks == null ||  nai.declaredUnderlyingNetworks.length != 1) {
+            return null;
+        }
+
+        // The legacy lockdown VPN always uses the default network.
+        // If the VPN's underlying network is no longer the current default network, it means that
+        // the default network has just switched, and the VPN is about to disconnect.
+        // Report that the VPN is not connected, so when the state of NetworkInfo objects
+        // overwritten by getLegacyLockdownState will be set to CONNECTING and not CONNECTED.
+        final NetworkAgentInfo defaultNetwork = getDefaultNetwork();
+        if (defaultNetwork == null
+                || !defaultNetwork.network.equals(nai.declaredUnderlyingNetworks[0])) {
+            return null;
+        }
+
+        return nai;
+    };
+
+    private DetailedState getLegacyLockdownState(DetailedState origState) {
+        if (origState != DetailedState.CONNECTED) {
+            return origState;
+        }
+        return (mLockdownEnabled && getLegacyLockdownNai() == null)
+                ? DetailedState.CONNECTING
+                : DetailedState.CONNECTED;
     }
 
     @Override
@@ -5087,32 +5155,32 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         synchronized (mVpns) {
             // Tear down existing lockdown if profile was removed
-            mLockdownEnabled = isLockdownVpnEnabled();
-            if (mLockdownEnabled) {
-                byte[] profileTag = mKeyStore.get(Credentials.LOCKDOWN_VPN);
-                if (profileTag == null) {
-                    loge("Lockdown VPN configured but cannot be read from keystore");
-                    return false;
-                }
-                String profileName = new String(profileTag);
-                final VpnProfile profile = VpnProfile.decode(
-                        profileName, mKeyStore.get(Credentials.VPN + profileName));
-                if (profile == null) {
-                    loge("Lockdown VPN configured invalid profile " + profileName);
-                    setLockdownTracker(null);
-                    return true;
-                }
-                int user = UserHandle.getUserId(mDeps.getCallingUid());
-                Vpn vpn = mVpns.get(user);
-                if (vpn == null) {
-                    logw("VPN for user " + user + " not ready yet. Skipping lockdown");
-                    return false;
-                }
-                setLockdownTracker(
-                        new LockdownVpnTracker(mContext, this, mHandler, mKeyStore, vpn,  profile));
-            } else {
+            if (!isLockdownVpnEnabled()) {
                 setLockdownTracker(null);
+                return true;
             }
+
+            byte[] profileTag = mKeyStore.get(Credentials.LOCKDOWN_VPN);
+            if (profileTag == null) {
+                loge("Lockdown VPN configured but cannot be read from keystore");
+                return false;
+            }
+            String profileName = new String(profileTag);
+            final VpnProfile profile = VpnProfile.decode(
+                    profileName, mKeyStore.get(Credentials.VPN + profileName));
+            if (profile == null) {
+                loge("Lockdown VPN configured invalid profile " + profileName);
+                setLockdownTracker(null);
+                return true;
+            }
+            int user = UserHandle.getUserId(mDeps.getCallingUid());
+            Vpn vpn = mVpns.get(user);
+            if (vpn == null) {
+                logw("VPN for user " + user + " not ready yet. Skipping lockdown");
+                return false;
+            }
+            setLockdownTracker(
+                    new LockdownVpnTracker(mContext, mHandler, mKeyStore, vpn,  profile));
         }
 
         return true;
@@ -7341,7 +7409,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             mLingerMonitor.noteLingerDefaultNetwork(oldDefaultNetwork, newDefaultNetwork);
         }
         mNetworkActivityTracker.updateDataActivityTracking(newDefaultNetwork, oldDefaultNetwork);
-        notifyLockdownVpn(newDefaultNetwork);
         handleApplyDefaultProxy(null != newDefaultNetwork
                 ? newDefaultNetwork.linkProperties.getHttpProxy() : null);
         updateTcpBufferSizes(null != newDefaultNetwork
@@ -7799,12 +7866,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 mDefaultInetConditionPublished = newDefaultNetwork.lastValidated ? 100 : 0;
                 mLegacyTypeTracker.add(
                         newDefaultNetwork.networkInfo.getType(), newDefaultNetwork);
-                // If the legacy VPN is connected, notifyLockdownVpn may end up sending a broadcast
-                // to reflect the NetworkInfo of this new network. This broadcast has to be sent
-                // after the disconnect broadcasts above, but before the broadcasts sent by the
-                // legacy type tracker below.
-                // TODO : refactor this, it's too complex
-                notifyLockdownVpn(newDefaultNetwork);
             }
         }
 
@@ -7862,18 +7923,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         sendInetConditionBroadcast(nai.networkInfo);
     }
 
-    private void notifyLockdownVpn(NetworkAgentInfo nai) {
-        synchronized (mVpns) {
-            if (mLockdownTracker != null) {
-                if (nai != null && nai.isVPN()) {
-                    mLockdownTracker.onVpnStateChanged(nai.networkInfo);
-                } else {
-                    mLockdownTracker.onNetworkInfoChanged();
-                }
-            }
-        }
-    }
-
     @NonNull
     private NetworkInfo mixInInfo(@NonNull final NetworkAgentInfo nai, @NonNull NetworkInfo info) {
         final NetworkInfo newInfo = new NetworkInfo(info);
@@ -7912,7 +7961,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             oldInfo = networkAgent.networkInfo;
             networkAgent.networkInfo = newInfo;
         }
-        notifyLockdownVpn(networkAgent);
 
         if (DBG) {
             log(networkAgent.toShortString() + " EVENT_NETWORK_INFO_CHANGED, going from "

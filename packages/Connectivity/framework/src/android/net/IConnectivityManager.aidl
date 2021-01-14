@@ -151,6 +151,7 @@ interface IConnectivityManager
     boolean isVpnLockdownEnabled(int userId);
     List<String> getVpnLockdownWhitelist(int userId);
     void setRequireVpnForUids(boolean requireVpn, in UidRange[] ranges);
+    void setLegacyLockdownVpnEnabled(boolean enabled);
 
     void setProvisioningNotificationVisible(boolean visible, int networkType, in String action);
 
