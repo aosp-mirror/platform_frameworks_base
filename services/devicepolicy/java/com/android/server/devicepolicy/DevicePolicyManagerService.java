@@ -375,6 +375,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private static final String CALLED_FROM_PARENT = "calledFromParent";
     private static final String NOT_CALLED_FROM_PARENT = "notCalledFromParent";
 
+    private static final String CREDENTIAL_MANAGEMENT_APP = "credentialManagementApp";
+    private static final String NOT_CREDENTIAL_MANAGEMENT_APP = "notCredentialManagementApp";
+
     // Comprehensive list of delegations.
     private static final String DELEGATIONS[] = {
         DELEGATION_CERT_INSTALL,
@@ -5191,10 +5194,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             byte[] cert, byte[] chain, String alias, boolean requestAccess,
             boolean isUserSelectable) {
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
+        final boolean isCallerDelegate = isCallerDelegate(caller, DELEGATION_CERT_INSTALL);
+        final boolean isCredentialManagementApp =
+                isCredentialManagementApp(caller, alias, isUserSelectable);
         Preconditions.checkCallAuthorization((caller.hasAdminComponent()
                 && (isProfileOwner(caller) || isDeviceOwner(caller)))
-                || (caller.hasPackage() && (isCallerDelegate(caller, DELEGATION_CERT_INSTALL)
-                || isCredentialManagementApp(caller, alias, isUserSelectable))));
+                || (caller.hasPackage() && (isCallerDelegate || isCredentialManagementApp)));
 
         final long id = mInjector.binderClearCallingIdentity();
         try {
@@ -5203,6 +5208,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             try {
                 IKeyChainService keyChain = keyChainConnection.getService();
                 if (!keyChain.installKeyPair(privKey, cert, chain, alias, KeyStore.UID_SELF)) {
+                    logInstallKeyPairFailure(caller, isCredentialManagementApp);
                     return false;
                 }
                 if (requestAccess) {
@@ -5212,7 +5218,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 DevicePolicyEventLogger
                         .createEvent(DevicePolicyEnums.INSTALL_KEY_PAIR)
                         .setAdmin(caller.getPackageName())
-                        .setBoolean(/* isDelegate */ who == null)
+                        .setBoolean(/* isDelegate */ isCallerDelegate)
+                        .setStrings(isCredentialManagementApp
+                                ? CREDENTIAL_MANAGEMENT_APP : NOT_CREDENTIAL_MANAGEMENT_APP)
                         .write();
                 return true;
             } catch (RemoteException e) {
@@ -5226,16 +5234,29 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
         }
+        logInstallKeyPairFailure(caller, isCredentialManagementApp);
         return false;
+    }
+
+    private void logInstallKeyPairFailure(CallerIdentity caller,
+            boolean isCredentialManagementApp) {
+        if (!isCredentialManagementApp) {
+            return;
+        }
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.CREDENTIAL_MANAGEMENT_APP_INSTALL_KEY_PAIR_FAILED)
+                .setStrings(caller.getPackageName())
+                .write();
     }
 
     @Override
     public boolean removeKeyPair(ComponentName who, String callerPackage, String alias) {
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
+        final boolean isCallerDelegate = isCallerDelegate(caller, DELEGATION_CERT_INSTALL);
+        final boolean isCredentialManagementApp = isCredentialManagementApp(caller, alias);
         Preconditions.checkCallAuthorization((caller.hasAdminComponent()
                 && (isProfileOwner(caller) || isDeviceOwner(caller)))
-                || (caller.hasPackage() && (isCallerDelegate(caller, DELEGATION_CERT_INSTALL)
-                || isCredentialManagementApp(caller, alias))));
+                || (caller.hasPackage() && (isCallerDelegate || isCredentialManagementApp)));
 
         final long id = Binder.clearCallingIdentity();
         try {
@@ -5246,7 +5267,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 DevicePolicyEventLogger
                         .createEvent(DevicePolicyEnums.REMOVE_KEY_PAIR)
                         .setAdmin(caller.getPackageName())
-                        .setBoolean(/* isDelegate */ who == null)
+                        .setBoolean(/* isDelegate */ isCallerDelegate)
+                        .setStrings(isCredentialManagementApp
+                                ? CREDENTIAL_MANAGEMENT_APP : NOT_CREDENTIAL_MANAGEMENT_APP)
                         .write();
                 return keyChain.removeKeyPair(alias);
             } catch (RemoteException e) {
@@ -5470,6 +5493,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 "Requested Device ID attestation but challenge is empty");
 
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
+        final boolean isCallerDelegate = isCallerDelegate(caller, DELEGATION_CERT_INSTALL);
+        final boolean isCredentialManagementApp = isCredentialManagementApp(caller, alias);
         if (deviceIdAttestationRequired && attestationUtilsFlags.length > 0) {
             // TODO: replace enforce methods
             enforceCallerCanRequestDeviceIdAttestation(caller);
@@ -5477,14 +5502,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         } else {
             Preconditions.checkCallAuthorization((caller.hasAdminComponent()
                     && (isProfileOwner(caller) || isDeviceOwner(caller)))
-                    || (caller.hasPackage() && (isCallerDelegate(caller, DELEGATION_CERT_INSTALL)
-                    || isCredentialManagementApp(caller, alias))));
+                    || (caller.hasPackage() && (isCallerDelegate || isCredentialManagementApp)));
         }
 
         // As the caller will be granted access to the key, ensure no UID was specified, as
         // it will not have the desired effect.
         if (keySpec.getUid() != KeyStore.UID_SELF) {
             Log.e(LOG_TAG, "Only the caller can be granted access to the generated keypair.");
+            logGenerateKeyPairFailure(caller, isCredentialManagementApp);
             return false;
         }
 
@@ -5510,6 +5535,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                                     DevicePolicyManager.KEY_GEN_STRONGBOX_UNAVAILABLE,
                                     String.format("KeyChain error: %d", generationResult));
                         default:
+                            logGenerateKeyPairFailure(caller, isCredentialManagementApp);
                             return false;
                     }
                 }
@@ -5534,15 +5560,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             throw new UnsupportedOperationException(
                                     "Device does not support Device ID attestation.");
                         }
+                        logGenerateKeyPairFailure(caller, isCredentialManagementApp);
                         return false;
                     }
                 }
                 DevicePolicyEventLogger
                         .createEvent(DevicePolicyEnums.GENERATE_KEY_PAIR)
                         .setAdmin(caller.getPackageName())
-                        .setBoolean(/* isDelegate */ who == null)
+                        .setBoolean(/* isDelegate */ isCallerDelegate)
                         .setInt(idAttestationFlags)
-                        .setStrings(algorithm)
+                        .setStrings(algorithm, isCredentialManagementApp
+                                ? CREDENTIAL_MANAGEMENT_APP : NOT_CREDENTIAL_MANAGEMENT_APP)
                         .write();
                 return true;
             }
@@ -5554,7 +5582,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
         }
+        logGenerateKeyPairFailure(caller, isCredentialManagementApp);
         return false;
+    }
+
+    private void logGenerateKeyPairFailure(CallerIdentity caller,
+            boolean isCredentialManagementApp) {
+        if (!isCredentialManagementApp) {
+            return;
+        }
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.CREDENTIAL_MANAGEMENT_APP_GENERATE_KEY_PAIR_FAILED)
+                .setStrings(caller.getPackageName())
+                .write();
     }
 
     private void enforceIndividualAttestationSupportedIfRequested(int[] attestationUtilsFlags) {
@@ -5572,10 +5612,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public boolean setKeyPairCertificate(ComponentName who, String callerPackage, String alias,
             byte[] cert, byte[] chain, boolean isUserSelectable) {
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
+        final boolean isCallerDelegate = isCallerDelegate(caller, DELEGATION_CERT_INSTALL);
+        final boolean isCredentialManagementApp = isCredentialManagementApp(caller, alias);
         Preconditions.checkCallAuthorization((caller.hasAdminComponent()
                 && (isProfileOwner(caller) || isDeviceOwner(caller)))
-                || (caller.hasPackage() && (isCallerDelegate(caller, DELEGATION_CERT_INSTALL)
-                || isCredentialManagementApp(caller, alias))));
+                || (caller.hasPackage() && (isCallerDelegate || isCredentialManagementApp)));
 
         final long id = mInjector.binderClearCallingIdentity();
         try (final KeyChainConnection keyChainConnection =
@@ -5588,7 +5629,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.SET_KEY_PAIR_CERTIFICATE)
                     .setAdmin(caller.getPackageName())
-                    .setBoolean(/* isDelegate */ who == null)
+                    .setBoolean(/* isDelegate */ isCallerDelegate)
+                    .setStrings(isCredentialManagementApp
+                            ? CREDENTIAL_MANAGEMENT_APP : NOT_CREDENTIAL_MANAGEMENT_APP)
                     .write();
             return true;
         } catch (InterruptedException e) {
