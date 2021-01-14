@@ -3410,9 +3410,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 getTargetSdk(profileOwner.getPackageName(), userHandle) > Build.VERSION_CODES.M;
     }
 
-    private boolean canSetPasswordQualityOnParent(String packageName, int userId) {
+    private boolean canSetPasswordQualityOnParent(String packageName, final CallerIdentity caller) {
         return !mInjector.isChangeEnabled(
-                PREVENT_SETTING_PASSWORD_QUALITY_ON_PARENT, packageName, userId);
+                PREVENT_SETTING_PASSWORD_QUALITY_ON_PARENT, packageName, caller.getUserId())
+            || isProfileOwnerOfOrganizationOwnedDevice(caller);
     }
 
     private boolean isPasswordLimitingAdminTargetingP(CallerIdentity caller) {
@@ -3441,7 +3442,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 || isPasswordLimitingAdminTargetingP(caller));
 
         final boolean qualityMayApplyToParent =
-                canSetPasswordQualityOnParent(who.getPackageName(), caller.getUserId());
+                canSetPasswordQualityOnParent(who.getPackageName(), caller);
         if (!qualityMayApplyToParent) {
             Preconditions.checkCallAuthorization(!parent,
                     "Profile Owner may not apply password quality requirements device-wide");
