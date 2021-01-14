@@ -6911,6 +6911,7 @@ package android.net {
   }
 
   public final class NetworkCapabilities implements android.os.Parcelable {
+    ctor public NetworkCapabilities(@Nullable android.net.NetworkCapabilities, boolean);
     method @NonNull public int[] getAdministratorUids();
     method @Nullable public String getSsid();
     method @NonNull public int[] getTransportTypes();
@@ -7131,6 +7132,11 @@ package android.net {
     field public static final int TAG_NETWORK_STACK_RANGE_START = -768; // 0xfffffd00
     field public static final int TAG_SYSTEM_IMPERSONATION_RANGE_END = -241; // 0xffffff0f
     field public static final int TAG_SYSTEM_IMPERSONATION_RANGE_START = -256; // 0xffffff00
+  }
+
+  public interface TransportInfo {
+    method public default boolean hasLocationSensitiveFields();
+    method @NonNull public default android.net.TransportInfo makeCopy(boolean);
   }
 
   public abstract class Uri implements java.lang.Comparable<android.net.Uri> android.os.Parcelable {
