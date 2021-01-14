@@ -51,8 +51,6 @@ import com.android.server.hdmi.DeviceDiscoveryAction.DeviceDiscoveryCallback;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 
-import com.google.android.collect.Lists;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -1486,7 +1484,11 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     @Override
     protected List<Integer> getRcFeatures() {
-        return Lists.newArrayList(Constants.RC_PROFILE_TV_NONE);
+        List<Integer> features = new ArrayList<>();
+        @HdmiControlManager.RcProfileTv int profile = mService.getHdmiCecConfig().getIntValue(
+                        HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_TV);
+        features.add(profile);
+        return features;
     }
 
     @Override

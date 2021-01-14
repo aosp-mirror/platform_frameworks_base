@@ -267,4 +267,14 @@ public class HdmiCecLocalDeviceTvTest {
         mTestLooper.dispatchAll();
         assertThat(mWokenUp).isFalse();
     }
+
+    @Test
+    public void getRcFeatures() {
+        ArrayList<Integer> features = new ArrayList<>(mHdmiCecLocalDeviceTv.getRcFeatures());
+        assertThat(features.contains(Constants.RC_PROFILE_TV_NONE)).isTrue();
+        assertThat(features.contains(Constants.RC_PROFILE_TV_ONE)).isFalse();
+        assertThat(features.contains(Constants.RC_PROFILE_TV_TWO)).isFalse();
+        assertThat(features.contains(Constants.RC_PROFILE_TV_THREE)).isFalse();
+        assertThat(features.contains(Constants.RC_PROFILE_TV_FOUR)).isFalse();
+    }
 }

@@ -303,6 +303,19 @@ public class HdmiCecConfig {
                 return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY:
                 return STORAGE_GLOBAL_SETTINGS;
+            case HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_TV:
+                return STORAGE_SHARED_PREFS;
+            case HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_ROOT_MENU:
+                return STORAGE_SHARED_PREFS;
+            case HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_SETUP_MENU:
+                return STORAGE_SHARED_PREFS;
+            case HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_CONTENTS_MENU:
+                return STORAGE_SHARED_PREFS;
+            case HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_TOP_MENU:
+                return STORAGE_SHARED_PREFS;
+            case HdmiControlManager
+                    .CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU:
+                return STORAGE_SHARED_PREFS;
             default:
                 throw new RuntimeException("Invalid CEC setting '" + setting.getName()
                         + "' storage.");
@@ -325,6 +338,19 @@ public class HdmiCecConfig {
                 return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY:
                 return Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED;
+            case HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_TV:
+                return setting.getName();
+            case HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_ROOT_MENU:
+                return setting.getName();
+            case HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_SETUP_MENU:
+                return setting.getName();
+            case HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_CONTENTS_MENU:
+                return setting.getName();
+            case HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_TOP_MENU:
+                return setting.getName();
+            case HdmiControlManager
+                    .CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU:
+                return setting.getName();
             default:
                 throw new RuntimeException("Invalid CEC setting '" + setting.getName()
                     + "' storage key.");
