@@ -725,7 +725,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     static final int BLAST_TIMEOUT_DURATION = 5000; /* milliseconds */
 
-    private final WindowProcessController mWpcForDisplayConfigChanges;
+    private final WindowProcessController mWpcForDisplayAreaConfigChanges;
 
     /**
      * Returns the visibility of the given {@link InternalInsetsType type} requested by the client.
@@ -917,7 +917,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mBaseLayer = 0;
             mSubLayer = 0;
             mWinAnimator = null;
-            mWpcForDisplayConfigChanges = null;
+            mWpcForDisplayAreaConfigChanges = null;
             return;
         }
         mDeathRecipient = deathRecipient;
@@ -971,8 +971,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             parentWindow.addChild(this, sWindowSubLayerComparator);
         }
 
-        // System process or invalid process cannot register to display config change.
-        mWpcForDisplayConfigChanges = (s.mPid == MY_PID || s.mPid < 0)
+        // System process or invalid process cannot register to display area config change.
+        mWpcForDisplayAreaConfigChanges = (s.mPid == MY_PID || s.mPid < 0)
                 ? null
                 : service.mAtmService.getProcessController(s.mPid, s.mUid);
     }
@@ -3533,9 +3533,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return mActivityRecord.mFrozenMergedConfig.peek();
         }
 
-        // If the process has not registered to any display to listen to the configuration change,
-        // we can simply return the mFullConfiguration as default.
-        if (!registeredForDisplayConfigChanges()) {
+        // If the process has not registered to any display area to listen to the configuration
+        // change, we can simply return the mFullConfiguration as default.
+        if (!registeredForDisplayAreaConfigChanges()) {
             return super.getConfiguration();
         }
 
@@ -3546,13 +3546,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mTempConfiguration;
     }
 
-    /** @return {@code true} if the process registered to a display as a config listener. */
-    private boolean registeredForDisplayConfigChanges() {
+    /** @return {@code true} if the process registered to a display area as a config listener. */
+    private boolean registeredForDisplayAreaConfigChanges() {
         final WindowState parentWindow = getParentWindow();
         final WindowProcessController wpc = parentWindow != null
-                ? parentWindow.mWpcForDisplayConfigChanges
-                : mWpcForDisplayConfigChanges;
-        return wpc != null && wpc.registeredForDisplayConfigChanges();
+                ? parentWindow.mWpcForDisplayAreaConfigChanges
+                : mWpcForDisplayAreaConfigChanges;
+        return wpc != null && wpc.registeredForDisplayAreaConfigChanges();
     }
 
     void fillClientWindowFrames(ClientWindowFrames outFrames) {

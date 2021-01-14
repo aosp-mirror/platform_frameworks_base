@@ -20,7 +20,6 @@ import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.os.Build.VERSION_CODES.Q;
 import static android.os.IInputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
-import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.util.Preconditions.checkArgument;
@@ -201,8 +200,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private final Configuration mLastReportedConfiguration = new Configuration();
     /** Whether the process configuration is waiting to be dispatched to the process. */
     private boolean mHasPendingConfigurationChange;
-    // Registered display id as a listener to override config change
-    private int mDisplayId;
+
+    /**
+     * Registered {@link DisplayArea} as a listener to override config changes. {@code null} if not
+     * registered.
+     */
+    @Nullable
+    private DisplayArea mDisplayArea;
     private ActivityRecord mConfigActivityRecord;
     // Whether the activity config override is allowed for this process.
     private volatile boolean mIsActivityConfigOverrideAllowed = true;
@@ -252,7 +256,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mOwner = owner;
         mListener = listener;
         mAtm = atm;
-        mDisplayId = INVALID_DISPLAY;
         mBackgroundActivityStartCallback = mAtm.getBackgroundActivityStartCallback();
 
         boolean isSysUiPackage = info.packageName.equals(
@@ -393,9 +396,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return mPendingUiClean;
     }
 
-    /** @return {@code true} if the process registered to a display as a config listener. */
-    boolean registeredForDisplayConfigChanges() {
-        return mDisplayId != INVALID_DISPLAY;
+    /** @return {@code true} if the process registered to a display area as a config listener. */
+    boolean registeredForDisplayAreaConfigChanges() {
+        return mDisplayArea != null;
     }
 
     /** @return {@code true} if the process registered to an activity as a config listener. */
@@ -443,11 +446,14 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return mRequiredAbi;
     }
 
-    /** Returns ID of display overriding the configuration for this process, or
-     *  INVALID_DISPLAY if no display is overriding. */
+    /**
+     * Registered {@link DisplayArea} as a listener to override config changes. {@code null} if not
+     * registered.
+     */
     @VisibleForTesting
-    int getDisplayId() {
-        return mDisplayId;
+    @Nullable
+    DisplayArea getDisplayArea() {
+        return mDisplayArea;
     }
 
     public void setDebugging(boolean debugging) {
@@ -1317,29 +1323,22 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return hasVisibleActivities;
     }
 
-    void registerDisplayConfigurationListener(DisplayContent displayContent) {
-        if (displayContent == null) {
+    void registerDisplayAreaConfigurationListener(@Nullable DisplayArea displayArea) {
+        if (displayArea == null || displayArea.containsListener(this)) {
             return;
         }
-        // A process can only register to one display to listen to the override configuration
-        // change. Unregister existing listener if it has one before register the new one.
-        unregisterDisplayConfigurationListener();
-        unregisterActivityConfigurationListener();
-        mDisplayId = displayContent.mDisplayId;
-        displayContent.registerConfigurationChangeListener(this);
+        unregisterConfigurationListeners();
+        mDisplayArea = displayArea;
+        displayArea.registerConfigurationChangeListener(this);
     }
 
     @VisibleForTesting
-    void unregisterDisplayConfigurationListener() {
-        if (mDisplayId == INVALID_DISPLAY) {
+    void unregisterDisplayAreaConfigurationListener() {
+        if (mDisplayArea == null) {
             return;
         }
-        final DisplayContent displayContent =
-                mAtm.mRootWindowContainer.getDisplayContent(mDisplayId);
-        if (displayContent != null) {
-            displayContent.unregisterConfigurationChangeListener(this);
-        }
-        mDisplayId = INVALID_DISPLAY;
+        mDisplayArea.unregisterConfigurationChangeListener(this);
+        mDisplayArea = null;
         onMergedOverrideConfigurationChanged(Configuration.EMPTY);
     }
 
@@ -1349,10 +1348,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 || !mIsActivityConfigOverrideAllowed) {
             return;
         }
-        // A process can only register to one activityRecord to listen to the override configuration
-        // change. Unregister existing listener if it has one before register the new one.
-        unregisterDisplayConfigurationListener();
-        unregisterActivityConfigurationListener();
+        unregisterConfigurationListeners();
         mConfigActivityRecord = activityRecord;
         activityRecord.registerConfigurationChangeListener(this);
     }
@@ -1364,6 +1360,16 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mConfigActivityRecord.unregisterConfigurationChangeListener(this);
         mConfigActivityRecord = null;
         onMergedOverrideConfigurationChanged(Configuration.EMPTY);
+    }
+
+    /**
+     * A process can only register to one {@link WindowContainer} to listen to the override
+     * configuration changes. Unregisters the existing listener if it has one before registers a
+     * new one.
+     */
+    private void unregisterConfigurationListeners() {
+        unregisterActivityConfigurationListener();
+        unregisterDisplayAreaConfigurationListener();
     }
 
     /**

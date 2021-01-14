@@ -5014,6 +5014,34 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    /**
+     * Sets the corresponding {@link DisplayArea} information for the process global
+     * configuration. To be called when we need to show IME on a different {@link DisplayArea}
+     * or display.
+     *
+     * @param pid The process id associated with the IME window.
+     * @param imeContainer The DisplayArea that contains the IME window.
+     */
+    void onImeWindowSetOnDisplayArea(final int pid, @NonNull final DisplayArea imeContainer) {
+        // Don't update process-level configuration for Multi-Client IME process since other
+        // IMEs on other displays will also receive this configuration change due to IME
+        // services use the same application config/context.
+        if (InputMethodSystemProperty.MULTI_CLIENT_IME_ENABLED) return;
+
+        if (pid == MY_PID || pid < 0) {
+            ProtoLog.w(WM_DEBUG_CONFIGURATION,
+                    "Trying to update display configuration for system/invalid process.");
+            return;
+        }
+        final WindowProcessController process = mProcessMap.getProcess(pid);
+        if (process == null) {
+            ProtoLog.w(WM_DEBUG_CONFIGURATION, "Trying to update display "
+                    + "configuration for invalid process, pid=%d", pid);
+            return;
+        }
+        process.registerDisplayAreaConfigurationListener(imeContainer);
+    }
+
     final class H extends Handler {
         static final int REPORT_TIME_TRACKER_MSG = 1;
 
@@ -5514,44 +5542,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public CompatibilityInfo compatibilityInfoForPackage(ApplicationInfo ai) {
             synchronized (mGlobalLock) {
                 return compatibilityInfoForPackageLocked(ai);
-            }
-        }
-
-        /**
-         * Set the corresponding display information for the process global configuration. To be
-         * called when we need to show IME on a different display.
-         *
-         * @param pid       The process id associated with the IME window.
-         * @param displayId The ID of the display showing the IME.
-         */
-        @Override
-        public void onImeWindowSetOnDisplay(final int pid, final int displayId) {
-            // Don't update process-level configuration for Multi-Client IME process since other
-            // IMEs on other displays will also receive this configuration change due to IME
-            // services use the same application config/context.
-            if (InputMethodSystemProperty.MULTI_CLIENT_IME_ENABLED) return;
-
-            if (pid == MY_PID || pid < 0) {
-                ProtoLog.w(WM_DEBUG_CONFIGURATION,
-                        "Trying to update display configuration for system/invalid process.");
-                return;
-            }
-            synchronized (mGlobalLock) {
-                final DisplayContent displayContent =
-                        mRootWindowContainer.getDisplayContent(displayId);
-                if (displayContent == null) {
-                    // Call might come when display is not yet added or has been removed.
-                    ProtoLog.w(WM_DEBUG_CONFIGURATION, "Trying to update display "
-                            + "configuration for non-existing displayId=%d", displayId);
-                    return;
-                }
-                final WindowProcessController process = mProcessMap.getProcess(pid);
-                if (process == null) {
-                    ProtoLog.w(WM_DEBUG_CONFIGURATION, "Trying to update display "
-                            + "configuration for invalid process, pid=%d", pid);
-                    return;
-                }
-                process.registerDisplayConfigurationListener(displayContent);
             }
         }
 
