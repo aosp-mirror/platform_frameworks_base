@@ -1658,6 +1658,7 @@ package android {
     field public static final int windowSplashScreenAnimatedIcon = 16844333; // 0x101062d
     field public static final int windowSplashScreenAnimationDuration = 16844334; // 0x101062e
     field public static final int windowSplashScreenBackground = 16844332; // 0x101062c
+    field public static final int windowSplashScreenBrandingImage = 16844335; // 0x101062f
     field public static final int windowSplashscreenContent = 16844132; // 0x1010564
     field @Deprecated public static final int windowSwipeToDismiss = 16843763; // 0x10103f3
     field public static final int windowTitleBackgroundStyle = 16842844; // 0x101005c

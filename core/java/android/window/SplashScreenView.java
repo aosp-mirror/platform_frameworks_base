@@ -68,7 +68,9 @@ public final class SplashScreenView extends FrameLayout {
     private boolean mNotCopyable;
     private int mInitBackgroundColor;
     private View mIconView;
-    private Bitmap mParceledBitmap;
+    private Bitmap mParceledIconBitmap;
+    private View mBrandingImageView;
+    private Bitmap mParceledBrandingBitmap;
 
     private Animatable mAnimatableIcon;
     private ValueAnimator mAnimator;
@@ -88,9 +90,13 @@ public final class SplashScreenView extends FrameLayout {
         private final Context mContext;
         private int mIconSize;
         private @ColorInt int mBackgroundColor;
-        private Bitmap mParceledBitmap;
+        private Bitmap mParceledIconBitmap;
         private Drawable mIconDrawable;
         private int mIconAnimationDuration;
+        private int mBrandingImageWidth;
+        private int mBrandingImageHeight;
+        private Drawable mBrandingDrawable;
+        private Bitmap mParceledBrandingBitmap;
 
         public Builder(@NonNull Context context) {
             mContext = context;
@@ -103,9 +109,15 @@ public final class SplashScreenView extends FrameLayout {
         public Builder createFromParcel(SplashScreenViewParcelable parcelable) {
             mIconSize = parcelable.getIconSize();
             mBackgroundColor = parcelable.getBackgroundColor();
-            if (parcelable.getBitmap() != null) {
-                mIconDrawable = new BitmapDrawable(mContext.getResources(), parcelable.getBitmap());
-                mParceledBitmap = parcelable.getBitmap();
+            if (parcelable.mIconBitmap != null) {
+                mIconDrawable = new BitmapDrawable(mContext.getResources(), parcelable.mIconBitmap);
+                mParceledIconBitmap = parcelable.mIconBitmap;
+            }
+            if (parcelable.mBrandingBitmap != null) {
+                setBrandingDrawable(new BitmapDrawable(mContext.getResources(),
+                                parcelable.mBrandingBitmap), parcelable.mBrandingWidth,
+                        parcelable.mBrandingHeight);
+                mParceledBrandingBitmap = parcelable.mBrandingBitmap;
             }
             return this;
         }
@@ -143,6 +155,16 @@ public final class SplashScreenView extends FrameLayout {
         }
 
         /**
+         * Set the Drawable object and size for the branding view.
+         */
+        public Builder setBrandingDrawable(Drawable branding, int width, int height) {
+            mBrandingDrawable = branding;
+            mBrandingImageWidth = width;
+            mBrandingImageHeight = height;
+            return this;
+        }
+
+        /**
          * Create SplashScreenWindowView object from materials.
          */
         public SplashScreenView build() {
@@ -152,6 +174,8 @@ public final class SplashScreenView extends FrameLayout {
             view.mInitBackgroundColor = mBackgroundColor;
             view.setBackgroundColor(mBackgroundColor);
             view.mIconView = view.findViewById(R.id.splashscreen_icon_view);
+            view.mBrandingImageView = view.findViewById(R.id.splashscreen_branding_view);
+            // center icon
             if (mIconSize != 0) {
                 final ViewGroup.LayoutParams params = view.mIconView.getLayoutParams();
                 params.width = mIconSize;
@@ -162,12 +186,27 @@ public final class SplashScreenView extends FrameLayout {
                 view.mIconView.setBackground(mIconDrawable);
                 view.initIconAnimation(mIconDrawable, mIconAnimationDuration);
             }
-            if (mParceledBitmap != null) {
-                view.mParceledBitmap = mParceledBitmap;
+            if (mParceledIconBitmap != null) {
+                view.mParceledIconBitmap = mParceledIconBitmap;
+            }
+            // branding image
+            if (mBrandingImageHeight > 0 && mBrandingImageWidth > 0) {
+                final ViewGroup.LayoutParams params = view.mBrandingImageView.getLayoutParams();
+                params.width = mBrandingImageWidth;
+                params.height = mBrandingImageHeight;
+                view.mBrandingImageView.setLayoutParams(params);
+            }
+            if (mBrandingDrawable != null) {
+                view.mBrandingImageView.setBackground(mBrandingDrawable);
+            }
+            if (mParceledBrandingBitmap != null) {
+                view.mParceledBrandingBitmap = mParceledBrandingBitmap;
             }
             if (DEBUG) {
-                Log.d(TAG, " build " + view + " center view? " + view.mIconView
-                        + " iconSize " + mIconSize);
+                Log.d(TAG, " build " + view + " Icon: view: " + view.mIconView + " drawable: "
+                        + mIconDrawable + " size: " + mIconSize + "\n Branding: view: "
+                        + view.mBrandingImageView + " drawable: " + mBrandingDrawable
+                        + " size w: " + mBrandingImageWidth + " h: " + mBrandingImageHeight);
             }
             return view;
         }
@@ -266,10 +305,15 @@ public final class SplashScreenView extends FrameLayout {
      */
     public void remove() {
         setVisibility(GONE);
-        if (mParceledBitmap != null) {
+        if (mParceledIconBitmap != null) {
             mIconView.setBackground(null);
-            mParceledBitmap.recycle();
-            mParceledBitmap = null;
+            mParceledIconBitmap.recycle();
+            mParceledIconBitmap = null;
+        }
+        if (mParceledBrandingBitmap != null) {
+            mBrandingImageView.setBackground(null);
+            mParceledBrandingBitmap.recycle();
+            mParceledBrandingBitmap = null;
         }
         if (mWindow != null) {
             final DecorView decorView = (DecorView) mWindow.peekDecorView();
@@ -330,6 +374,15 @@ public final class SplashScreenView extends FrameLayout {
     }
 
     /**
+     * Get the branding image view.
+     * @hide
+     */
+    @TestApi
+    public @Nullable View getBrandingView() {
+        return mBrandingImageView;
+    }
+
+    /**
      * Get the initial background color of this view.
      * @hide
      */
@@ -344,27 +397,40 @@ public final class SplashScreenView extends FrameLayout {
     public static class SplashScreenViewParcelable implements Parcelable {
         private int mIconSize;
         private int mBackgroundColor;
-        private Bitmap mBitmap;
+
+        private Bitmap mIconBitmap;
+        private int mBrandingWidth;
+        private int mBrandingHeight;
+        private Bitmap mBrandingBitmap;
 
         public SplashScreenViewParcelable(SplashScreenView view) {
-            final ViewGroup.LayoutParams params = view.getIconView().getLayoutParams();
+            ViewGroup.LayoutParams params = view.getIconView().getLayoutParams();
             mIconSize = params.height;
             mBackgroundColor = view.getInitBackgroundColor();
 
-            final Drawable background = view.getIconView().getBackground();
-            if (background != null) {
-                final Rect initialBounds = background.copyBounds();
+            mIconBitmap = copyDrawable(view.getIconView().getBackground());
+            mBrandingBitmap = copyDrawable(view.getBrandingView().getBackground());
+            params = view.getBrandingView().getLayoutParams();
+            mBrandingWidth = params.width;
+            mBrandingHeight = params.height;
+
+        }
+
+        private Bitmap copyDrawable(Drawable drawable) {
+            if (drawable != null) {
+                final Rect initialBounds = drawable.copyBounds();
                 final int width = initialBounds.width();
                 final int height = initialBounds.height();
 
-                final Bitmap iconSnapshot = Bitmap.createBitmap(width, height,
-                        Bitmap.Config.ARGB_8888);
-                final Canvas bmpCanvas = new Canvas(iconSnapshot);
-                background.setBounds(0, 0, width, height);
-                background.draw(bmpCanvas);
-                mBitmap = iconSnapshot.createAshmemBitmap();
-                iconSnapshot.recycle();
+                final Bitmap snapshot = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                final Canvas bmpCanvas = new Canvas(snapshot);
+                drawable.setBounds(0, 0, width, height);
+                drawable.draw(bmpCanvas);
+                final Bitmap copyBitmap = snapshot.createAshmemBitmap();
+                snapshot.recycle();
+                return copyBitmap;
             }
+            return null;
         }
 
         private SplashScreenViewParcelable(@NonNull Parcel source) {
@@ -374,7 +440,10 @@ public final class SplashScreenView extends FrameLayout {
         private void readParcel(@NonNull Parcel source) {
             mIconSize = source.readInt();
             mBackgroundColor = source.readInt();
-            mBitmap = source.readTypedObject(Bitmap.CREATOR);
+            mIconBitmap = source.readTypedObject(Bitmap.CREATOR);
+            mBrandingWidth = source.readInt();
+            mBrandingHeight = source.readInt();
+            mBrandingBitmap = source.readTypedObject(Bitmap.CREATOR);
         }
 
         @Override
@@ -386,7 +455,10 @@ public final class SplashScreenView extends FrameLayout {
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(mIconSize);
             dest.writeInt(mBackgroundColor);
-            dest.writeTypedObject(mBitmap, flags);
+            dest.writeTypedObject(mIconBitmap, flags);
+            dest.writeInt(mBrandingWidth);
+            dest.writeInt(mBrandingHeight);
+            dest.writeTypedObject(mBrandingBitmap, flags);
         }
 
         public static final @NonNull Parcelable.Creator<SplashScreenViewParcelable> CREATOR =
@@ -403,9 +475,13 @@ public final class SplashScreenView extends FrameLayout {
          * Release the bitmap if another process cannot handle it.
          */
         public void clearIfNeeded() {
-            if (mBitmap != null) {
-                mBitmap.recycle();
-                mBitmap = null;
+            if (mIconBitmap != null) {
+                mIconBitmap.recycle();
+                mIconBitmap = null;
+            }
+            if (mBrandingBitmap != null) {
+                mBrandingBitmap.recycle();
+                mBrandingBitmap = null;
             }
         }
 
@@ -415,10 +491,6 @@ public final class SplashScreenView extends FrameLayout {
 
         int getBackgroundColor() {
             return mBackgroundColor;
-        }
-
-        Bitmap getBitmap() {
-            return mBitmap;
         }
     }
 }

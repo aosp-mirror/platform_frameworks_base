@@ -2730,6 +2730,7 @@ package android.window {
   }
 
   public final class SplashScreenView extends android.widget.FrameLayout {
+    method @Nullable public android.view.View getBrandingView();
     method public boolean isIconAnimating();
   }
 

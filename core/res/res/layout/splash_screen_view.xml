@@ -25,4 +25,10 @@
     android:layout_width="wrap_content"
     android:layout_gravity="center"/>
 
+    <View android:id="@+id/splashscreen_branding_view"
+          android:layout_height="wrap_content"
+          android:layout_width="wrap_content"
+          android:layout_gravity="center_horizontal|bottom"
+          android:layout_marginBottom="60dp"/>
+
 </android.window.SplashScreenView>

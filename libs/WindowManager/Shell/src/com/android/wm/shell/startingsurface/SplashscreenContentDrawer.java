@@ -59,6 +59,8 @@ public class SplashscreenContentDrawer {
     private final int mMaxIconAnimationDuration;
 
     private int mIconSize;
+    private int mBrandingImageWidth;
+    private int mBrandingImageHeight;
 
     SplashscreenContentDrawer(Context context, int maxIconAnimationDuration) {
         mContext = context;
@@ -68,6 +70,10 @@ public class SplashscreenContentDrawer {
     private void updateDensity() {
         mIconSize = mContext.getResources().getDimensionPixelSize(
                 com.android.wm.shell.R.dimen.starting_surface_icon_size);
+        mBrandingImageWidth = mContext.getResources().getDimensionPixelSize(
+                com.android.wm.shell.R.dimen.starting_surface_brand_image_width);
+        mBrandingImageHeight = mContext.getResources().getDimensionPixelSize(
+                com.android.wm.shell.R.dimen.starting_surface_brand_image_height);
     }
 
     private int getSystemBGColor() {
@@ -124,13 +130,15 @@ public class SplashscreenContentDrawer {
                 .setContext(context)
                 .setThemeDrawable(themeBGDrawable)
                 .setIconDrawable(iconDrawable)
-                .setIconAnimationDuration(animationDuration).build();
+                .setIconAnimationDuration(animationDuration)
+                .setBrandingDrawable(attrs.mBrandingImage).build();
     }
 
     private static class SplashScreenWindowAttrs {
         private int mWindowBgResId = 0;
         private int mWindowBgColor = Color.TRANSPARENT;
         private Drawable mReplaceIcon = null;
+        private Drawable mBrandingImage = null;
         private int mAnimationDuration = 0;
 
         static SplashScreenWindowAttrs createWindowAttrs(Context context) {
@@ -144,11 +152,14 @@ public class SplashscreenContentDrawer {
                     R.styleable.Window_windowSplashScreenAnimatedIcon);
             attrs.mAnimationDuration = typedArray.getInt(
                     R.styleable.Window_windowSplashScreenAnimationDuration, 0);
+            attrs.mBrandingImage = typedArray.getDrawable(
+                    R.styleable.Window_windowSplashScreenBrandingImage);
             typedArray.recycle();
             if (DEBUG) {
                 Slog.d(TAG, "window attributes color: "
                         + Integer.toHexString(attrs.mWindowBgColor)
-                        + " icon " + attrs.mReplaceIcon + " duration " + attrs.mAnimationDuration);
+                        + " icon " + attrs.mReplaceIcon + " duration " + attrs.mAnimationDuration
+                        + " brandImage " + attrs.mBrandingImage);
             }
             return attrs;
         }
@@ -160,6 +171,7 @@ public class SplashscreenContentDrawer {
         private Window mWindow;
         private int mIconAnimationDuration;
         private Context mContext;
+        private Drawable mBrandingDrawable;
 
         // result
         private boolean mBuildComplete = false;
@@ -188,6 +200,12 @@ public class SplashscreenContentDrawer {
 
         StartingWindowViewBuilder setIconAnimationDuration(int iconAnimationDuration) {
             mIconAnimationDuration = iconAnimationDuration;
+            mBuildComplete = false;
+            return this;
+        }
+
+        StartingWindowViewBuilder setBrandingDrawable(Drawable branding) {
+            mBrandingDrawable = branding;
             mBuildComplete = false;
             return this;
         }
@@ -302,6 +320,10 @@ public class SplashscreenContentDrawer {
                 builder.setCenterViewDrawable(iconDrawable);
             }
             builder.setAnimationDuration(mIconAnimationDuration);
+            if (mBrandingDrawable != null) {
+                builder.setBrandingDrawable(mBrandingDrawable, mBrandingImageWidth,
+                        mBrandingImageHeight);
+            }
             final SplashScreenView splashScreenView = builder.build();
             if (DEBUG) {
                 Slog.d(TAG, "fillViewWithIcon surfaceWindowView " + splashScreenView);
