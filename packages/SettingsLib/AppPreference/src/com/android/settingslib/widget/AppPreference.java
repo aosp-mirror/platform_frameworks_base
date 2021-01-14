@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.widget.apppreference;
+package com.android.settingslib.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -24,12 +24,23 @@ import android.widget.ProgressBar;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
-import com.android.settingslib.widget.R;
-
+/**
+ * The Preference for the pages need to show apps icon.
+ */
 public class AppPreference extends Preference {
 
     private int mProgress;
     private boolean mProgressVisible;
+
+    public AppPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+        setLayoutResource(R.layout.preference_app);
+    }
+
+    public AppPreference(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        setLayoutResource(R.layout.preference_app);
+    }
 
     public AppPreference(Context context) {
         super(context);
@@ -41,6 +52,12 @@ public class AppPreference extends Preference {
         setLayoutResource(R.layout.preference_app);
     }
 
+    /**
+     * Sets the current progress.
+     * @param amount the current progress
+     *
+     * @see ProgressBar#setProgress(int)
+     */
     public void setProgress(int amount) {
         mProgress = amount;
         mProgressVisible = true;
