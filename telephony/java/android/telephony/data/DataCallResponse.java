@@ -22,7 +22,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.LinkAddress;
-import android.net.LinkProperties;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Annotation.DataFailureCause;
@@ -425,7 +424,7 @@ public final class DataCallResponse implements Parcelable {
            .append(" mtu=").append(getMtu())
            .append(" mtuV4=").append(getMtuV4())
            .append(" mtuV6=").append(getMtuV6())
-           .append(" handoverFailureMode=").append(getHandoverFailureMode())
+           .append(" handoverFailureMode=").append(failureModeToString(mHandoverFailureMode))
            .append(" pduSessionId=").append(getPduSessionId())
            .append(" defaultQos=").append(mDefaultQos)
            .append(" qosSessions=").append(mQosSessions)
