@@ -1,11 +1,11 @@
-/**
- * Copyright (c) 2013, The Android Open Source Project
+/*
+ * Copyright (C) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.android.server.connectivity;
 
 import android.annotation.WorkerThread;
@@ -52,7 +53,7 @@ import java.net.URLConnection;
 /**
  * @hide
  */
-public class PacManager {
+public class PacProxyInstaller {
     private static final String PAC_PACKAGE = "com.android.pacprocessor";
     private static final String PAC_SERVICE = "com.android.pacprocessor.PacService";
     private static final String PAC_SERVICE_NAME = "com.android.net.IProxyService";
@@ -60,7 +61,7 @@ public class PacManager {
     private static final String PROXY_PACKAGE = "com.android.proxyhandler";
     private static final String PROXY_SERVICE = "com.android.proxyhandler.ProxyService";
 
-    private static final String TAG = "PacManager";
+    private static final String TAG = "PacProxyInstaller";
 
     private static final String ACTION_PAC_REFRESH = "android.net.proxy.PAC_REFRESH";
 
@@ -145,10 +146,10 @@ public class PacManager {
         }
     }
 
-    public PacManager(Context context, Handler handler, int proxyMessage) {
+    public PacProxyInstaller(Context context, Handler handler, int proxyMessage) {
         mContext = context;
         mLastPort = -1;
-        final HandlerThread netThread = new HandlerThread("android.pacmanager",
+        final HandlerThread netThread = new HandlerThread("android.pacproxyinstaller",
                 android.os.Process.THREAD_PRIORITY_DEFAULT);
         netThread.start();
         mNetThreadHandler = new Handler(netThread.getLooper());
@@ -163,16 +164,16 @@ public class PacManager {
 
     private AlarmManager getAlarmManager() {
         if (mAlarmManager == null) {
-            mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
+            mAlarmManager = mContext.getSystemService(AlarmManager.class);
         }
         return mAlarmManager;
     }
 
     /**
-     * Updates the PAC Manager with current Proxy information. This is called by
+     * Updates the PAC Proxy Installer with current Proxy information. This is called by
      * the ProxyTracker directly before a broadcast takes place to allow
-     * the PacManager to indicate that the broadcast should not be sent and the
-     * PacManager will trigger a new broadcast when it is ready.
+     * the PacProxyInstaller to indicate that the broadcast should not be sent and the
+     * PacProxyInstaller will trigger a new broadcast when it is ready.
      *
      * @param proxy Proxy information that is about to be broadcast.
      * @return Returns whether the broadcast should be sent : either DO_ or DONT_SEND_BROADCAST
@@ -233,10 +234,10 @@ public class PacManager {
     }
 
     private int getNextDelay(int currentDelay) {
-       if (++currentDelay > DELAY_4) {
-           return DELAY_4;
-       }
-       return currentDelay;
+        if (++currentDelay > DELAY_4) {
+            return DELAY_4;
+        }
+        return currentDelay;
     }
 
     private void longSchedule() {
