@@ -293,6 +293,11 @@ public abstract class ActivityTaskManagerInternal {
             @Nullable String packageName);
 
     /**
+     * Returns whether the app can close system dialogs or not.
+     */
+    public abstract boolean canCloseSystemDialogs(int pid, int uid);
+
+    /**
      * Called after the voice interaction service has changed.
      */
     public abstract void notifyActiveVoiceInteractionServiceChanged(ComponentName component);

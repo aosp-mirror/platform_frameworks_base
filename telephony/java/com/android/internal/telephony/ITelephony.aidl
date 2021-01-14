@@ -629,7 +629,7 @@ interface ITelephony {
      *            successful iccOpenLogicalChannel.
      * @return true if the channel was closed successfully.
      */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage(trackingBug = 171933273)
     boolean iccCloseLogicalChannel(int subId, int channel);
 
     /**
@@ -671,7 +671,7 @@ interface ITelephony {
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
      */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage(trackingBug = 171933273)
     String iccTransmitApduLogicalChannel(int subId, int channel, int cla, int instruction,
             int p1, int p2, int p3, String data);
 
@@ -1260,6 +1260,9 @@ interface ITelephony {
      * @return phone radio type and access technology
      */
     int getRadioAccessFamily(in int phoneId, String callingPackage);
+
+    void uploadCallComposerPicture(int subscriptionId, String callingPackage,
+            in ParcelFileDescriptor fd, in ResultReceiver callback);
 
     /**
      * Enables or disables video calling.
@@ -1962,6 +1965,16 @@ interface ITelephony {
      * sets the user's setting for Voice over WiFi enabled state.
      */
     void setVoWiFiSettingEnabled(int subId, boolean isEnabled);
+
+    /**
+     * return true if the user's setting for Voice over Cross SIM is enabled and false if it is not
+     */
+    boolean isCrossSimCallingEnabledByUser(int subId);
+
+    /**
+     * Sets the user's setting for whether or not Voice over Cross SIM is enabled.
+     */
+    void setCrossSimCallingEnabled(int subId, boolean isEnabled);
 
     /**
      * return true if the user's setting for Voice over WiFi while roaming is enabled.

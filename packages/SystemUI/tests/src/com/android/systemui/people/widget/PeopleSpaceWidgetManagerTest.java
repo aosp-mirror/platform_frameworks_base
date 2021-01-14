@@ -207,7 +207,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
             throws RemoteException {
         Settings.Global.putInt(mContext.getContentResolver(),
                 Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0);
-        when(mINotificationManager.getConversations(true)).thenReturn(
+        when(mINotificationManager.getConversations(false)).thenReturn(
                 new ParceledListSlice(getConversationWithShortcutId()));
         int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT};
         when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
@@ -229,7 +229,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
             throws RemoteException {
         Settings.Global.putInt(mContext.getContentResolver(),
                 Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0);
-        when(mINotificationManager.getConversations(true)).thenReturn(
+        when(mINotificationManager.getConversations(false)).thenReturn(
                 new ParceledListSlice(getConversationWithShortcutId()));
         int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT};
         when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
@@ -326,7 +326,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     public void testDoNotUpdateNotificationPostedIfNoExistingTile() throws RemoteException {
         Settings.Global.putInt(mContext.getContentResolver(),
                 Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0);
-        when(mINotificationManager.getConversations(true)).thenReturn(
+        when(mINotificationManager.getConversations(false)).thenReturn(
                 new ParceledListSlice(getConversationWithShortcutId()));
         int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT};
         when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
@@ -346,7 +346,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     public void testDoNotUpdateNotificationRemovedIfNoExistingTile() throws RemoteException {
         Settings.Global.putInt(mContext.getContentResolver(),
                 Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0);
-        when(mINotificationManager.getConversations(true)).thenReturn(
+        when(mINotificationManager.getConversations(false)).thenReturn(
                 new ParceledListSlice(getConversationWithShortcutId()));
         int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT};
         when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
@@ -368,7 +368,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     public void testUpdateNotificationPostedIfExistingTile() throws RemoteException {
         Settings.Global.putInt(mContext.getContentResolver(),
                 Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0);
-        when(mINotificationManager.getConversations(true)).thenReturn(
+        when(mINotificationManager.getConversations(false)).thenReturn(
                 new ParceledListSlice(getConversationWithShortcutId()));
         int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT};
         when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
@@ -389,7 +389,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
             throws RemoteException {
         Settings.Global.putInt(mContext.getContentResolver(),
                 Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0);
-        when(mINotificationManager.getConversations(true)).thenReturn(
+        when(mINotificationManager.getConversations(false)).thenReturn(
                 new ParceledListSlice(getConversationWithShortcutId()));
         int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT};
         when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
@@ -416,7 +416,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     public void testUpdateNotificationRemovedIfExistingTile() throws RemoteException {
         Settings.Global.putInt(mContext.getContentResolver(),
                 Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0);
-        when(mINotificationManager.getConversations(true)).thenReturn(
+        when(mINotificationManager.getConversations(false)).thenReturn(
                 new ParceledListSlice(getConversationWithShortcutId()));
         int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT, WIDGET_ID_WITHOUT_SHORTCUT};
         when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);

@@ -1266,7 +1266,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private void traceQsJank(boolean startTracing, boolean wasCancelled) {
         InteractionJankMonitor monitor = InteractionJankMonitor.getInstance();
         if (startTracing) {
-            monitor.begin(CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE);
+            monitor.begin(mView, CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE);
         } else {
             if (wasCancelled) {
                 monitor.cancel(CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE);
@@ -1479,7 +1479,7 @@ public class NotificationPanelViewController extends PanelViewController {
             return;
         }
         mExpectingSynthesizedDown = true;
-        InteractionJankMonitor.getInstance().begin(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+        InteractionJankMonitor.getInstance().begin(mView, CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
         onTrackingStarted();
         updatePanelExpanded();
     }

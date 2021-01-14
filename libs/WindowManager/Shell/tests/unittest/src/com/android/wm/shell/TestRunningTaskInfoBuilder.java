@@ -14,27 +14,37 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.apppairs;
+package com.android.wm.shell;
+
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 
 import android.app.ActivityManager;
 import android.graphics.Rect;
 import android.window.IWindowContainerToken;
 import android.window.WindowContainerToken;
 
-public class TestRunningTaskInfoBuilder {
+public final class TestRunningTaskInfoBuilder {
     static int sNextTaskId = 500;
     private Rect mBounds = new Rect(0, 0, 100, 100);
     private WindowContainerToken mToken =
             new WindowContainerToken(new IWindowContainerToken.Default());
+    private int mParentTaskId = INVALID_TASK_ID;
 
-    TestRunningTaskInfoBuilder setBounds(Rect bounds) {
+    public TestRunningTaskInfoBuilder setBounds(Rect bounds) {
         mBounds.set(bounds);
         return this;
     }
 
-    ActivityManager.RunningTaskInfo build() {
+    public TestRunningTaskInfoBuilder setParentTaskId(int taskId) {
+        mParentTaskId = taskId;
+        return this;
+    }
+
+    public ActivityManager.RunningTaskInfo build() {
         final ActivityManager.RunningTaskInfo info = new ActivityManager.RunningTaskInfo();
+        info.parentTaskId = INVALID_TASK_ID;
         info.taskId = sNextTaskId++;
+        info.parentTaskId = mParentTaskId;
         info.configuration.windowConfiguration.setBounds(mBounds);
         info.token = mToken;
         info.isResizeable = true;

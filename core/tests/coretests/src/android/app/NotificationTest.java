@@ -186,8 +186,8 @@ public class NotificationTest {
 
     @Test
     public void allPendingIntents_recollectedAfterReusingBuilder() {
-        PendingIntent intent1 = PendingIntent.getActivity(mContext, 0, new Intent("test1"), 0);
-        PendingIntent intent2 = PendingIntent.getActivity(mContext, 0, new Intent("test2"), 0);
+        PendingIntent intent1 = PendingIntent.getActivity(mContext, 0, new Intent("test1"), PendingIntent.FLAG_MUTABLE_UNAUDITED);
+        PendingIntent intent2 = PendingIntent.getActivity(mContext, 0, new Intent("test2"), PendingIntent.FLAG_MUTABLE_UNAUDITED);
 
         Notification.Builder builder = new Notification.Builder(mContext, "channel");
         builder.setContentIntent(intent1);
@@ -206,7 +206,7 @@ public class NotificationTest {
 
     @Test
     public void allPendingIntents_containsCustomRemoteViews() {
-        PendingIntent intent = PendingIntent.getActivity(mContext, 0, new Intent("test"), 0);
+        PendingIntent intent = PendingIntent.getActivity(mContext, 0, new Intent("test"), PendingIntent.FLAG_MUTABLE_UNAUDITED);
 
         RemoteViews contentView = new RemoteViews(mContext.getPackageName(), 0 /* layoutId */);
         contentView.setOnClickPendingIntent(1 /* id */, intent);

@@ -17,8 +17,12 @@
 package android.media.tv.tunerresourcemanager;
 
 /**
- * A wrapper of a cas session requests that contains all the request info of the client.
+ * A wrapper of a ciCam requests that contains all the request info of the client.
  *
  * @hide
  */
-parcelable CasSessionRequest;
+parcelable TunerCiCamRequest {
+    int clientId;
+
+    int ciCamId;
+}

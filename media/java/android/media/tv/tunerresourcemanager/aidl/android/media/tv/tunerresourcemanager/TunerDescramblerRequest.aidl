@@ -17,9 +17,10 @@
 package android.media.tv.tunerresourcemanager;
 
 /**
- * A profile of a resource client. This profile is used to register the client info
- * with the Tuner Resource Manager.
+ * Information required to request a Tuner Descrambler.
  *
  * @hide
  */
-parcelable ResourceClientProfile;
+parcelable TunerDescramblerRequest {
+    int clientId;
+}

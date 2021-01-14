@@ -1360,8 +1360,7 @@ public final class SystemServer implements Dumpable {
             }
 
             t.traceBegin("IpConnectivityMetrics");
-            mSystemServiceManager.startServiceFromJar(IP_CONNECTIVITY_METRICS_CLASS,
-                    CONNECTIVITY_SERVICE_APEX_PATH);
+            mSystemServiceManager.startService(IP_CONNECTIVITY_METRICS_CLASS);
             t.traceEnd();
 
             t.traceBegin("NetworkWatchlistService");

@@ -1139,4 +1139,15 @@ public abstract class PackageManagerInternal {
             @Checksum.Type int optional, @Checksum.Type int required,
             @Nullable List trustedInstallers, @NonNull IntentSender statusReceiver, int userId,
             @NonNull Executor executor, @NonNull Handler handler);
+
+    /**
+     * Returns true if the given {@code packageName} and {@code userId} is frozen.
+     *
+     * @param packageName a specific package
+     * @param callingUid The uid of the caller
+     * @param userId The user for whom the package is installed
+     * @return {@code true} If the package is current frozen (due to install/update etc.)
+     */
+    public abstract boolean isPackageFrozen(
+            @NonNull String packageName, int callingUid, int userId);
 }

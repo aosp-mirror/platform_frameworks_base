@@ -31,6 +31,7 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
@@ -203,6 +204,7 @@ class Owners {
             }
             pushToPackageManagerLocked();
             pushToActivityTaskManagerLocked();
+            pushToActivityManagerLocked();
             pushToAppOpsLocked();
         }
     }
@@ -218,12 +220,34 @@ class Owners {
     }
 
     private void pushToActivityTaskManagerLocked() {
-        final int uid = mDeviceOwner != null ? mPackageManagerInternal.getPackageUid(
-                mDeviceOwner.packageName,
-                PackageManager.MATCH_ALL | PackageManager.MATCH_KNOWN_PACKAGES, mDeviceOwnerUserId)
-                : Process.INVALID_UID;
-        mActivityTaskManagerInternal.setDeviceOwnerUid(uid);
-        mActivityManagerInternal.setDeviceOwnerUid(uid);
+        mActivityTaskManagerInternal.setDeviceOwnerUid(getDeviceOwnerUidLocked());
+    }
+
+    private void pushToActivityManagerLocked() {
+        mActivityManagerInternal.setDeviceOwnerUid(getDeviceOwnerUidLocked());
+
+        final ArraySet<Integer> profileOwners = new ArraySet<>();
+        for (int poi = mProfileOwners.size() - 1; poi >= 0; poi--) {
+            final int userId = mProfileOwners.keyAt(poi);
+            final int profileOwnerUid = mPackageManagerInternal.getPackageUid(
+                    mProfileOwners.valueAt(poi).packageName,
+                    PackageManager.MATCH_ALL | PackageManager.MATCH_KNOWN_PACKAGES,
+                    userId);
+            if (profileOwnerUid >= 0) {
+                profileOwners.add(profileOwnerUid);
+            }
+        }
+        mActivityManagerInternal.setProfileOwnerUid(profileOwners);
+    }
+
+    int getDeviceOwnerUidLocked() {
+        if (mDeviceOwner != null) {
+            return mPackageManagerInternal.getPackageUid(mDeviceOwner.packageName,
+                    PackageManager.MATCH_ALL | PackageManager.MATCH_KNOWN_PACKAGES,
+                    mDeviceOwnerUserId);
+        } else {
+            return Process.INVALID_UID;
+        }
     }
 
     String getDeviceOwnerPackageName() {
@@ -301,6 +325,7 @@ class Owners {
             mUserManagerInternal.setDeviceManaged(true);
             pushToPackageManagerLocked();
             pushToActivityTaskManagerLocked();
+            pushToActivityManagerLocked();
             pushToAppOpsLocked();
         }
     }
@@ -313,6 +338,7 @@ class Owners {
             mUserManagerInternal.setDeviceManaged(false);
             pushToPackageManagerLocked();
             pushToActivityTaskManagerLocked();
+            pushToActivityManagerLocked();
             pushToAppOpsLocked();
         }
     }
@@ -325,6 +351,7 @@ class Owners {
                     /* remoteBugreportHash =*/ null, /* isOrganizationOwnedDevice =*/ false));
             mUserManagerInternal.setUserManaged(userId, true);
             pushToPackageManagerLocked();
+            pushToActivityManagerLocked();
             pushToAppOpsLocked();
         }
     }
@@ -334,6 +361,7 @@ class Owners {
             mProfileOwners.remove(userId);
             mUserManagerInternal.setUserManaged(userId, false);
             pushToPackageManagerLocked();
+            pushToActivityManagerLocked();
             pushToAppOpsLocked();
         }
     }
@@ -347,6 +375,7 @@ class Owners {
                     ownerInfo.isOrganizationOwnedDevice);
             mProfileOwners.put(userId, newOwnerInfo);
             pushToPackageManagerLocked();
+            pushToActivityManagerLocked();
             pushToAppOpsLocked();
         }
     }
@@ -361,6 +390,7 @@ class Owners {
                     mDeviceOwner.isOrganizationOwnedDevice);
             pushToPackageManagerLocked();
             pushToActivityTaskManagerLocked();
+            pushToActivityManagerLocked();
             pushToAppOpsLocked();
         }
     }
@@ -665,9 +695,7 @@ class Owners {
         try {
             final SparseIntArray owners = new SparseIntArray();
             if (mDeviceOwner != null) {
-                final int uid = mPackageManagerInternal.getPackageUid(mDeviceOwner.packageName,
-                        PackageManager.MATCH_ALL | PackageManager.MATCH_KNOWN_PACKAGES,
-                        mDeviceOwnerUserId);
+                final int uid = getDeviceOwnerUidLocked();
                 if (uid >= 0) {
                     owners.put(mDeviceOwnerUserId, uid);
                 }
@@ -695,6 +723,7 @@ class Owners {
     public void systemReady() {
         synchronized (mLock) {
             mSystemReady = true;
+            pushToActivityManagerLocked();
             pushToAppOpsLocked();
         }
     }

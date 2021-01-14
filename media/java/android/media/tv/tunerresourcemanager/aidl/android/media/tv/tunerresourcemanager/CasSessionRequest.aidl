@@ -17,8 +17,12 @@
 package android.media.tv.tunerresourcemanager;
 
 /**
- * Simple container of the FrontendInfo struct defined in the TunerHAL 1.0 interface.
+ * A wrapper of a cas session requests that contains all the request info of the client.
  *
  * @hide
  */
-parcelable TunerFrontendInfo;
+parcelable CasSessionRequest {
+    int clientId;
+
+    int casSystemId;
+}

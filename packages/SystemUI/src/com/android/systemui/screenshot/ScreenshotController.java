@@ -38,6 +38,7 @@ import android.app.ActivityOptions;
 import android.app.ExitTransitionCoordinator;
 import android.app.ExitTransitionCoordinator.ExitTransitionCallbacks;
 import android.app.Notification;
+import android.app.WindowContext;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -165,7 +166,7 @@ public class ScreenshotController {
     // From WizardManagerHelper.java
     private static final String SETTINGS_SECURE_USER_SETUP_COMPLETE = "user_setup_complete";
 
-    private final Context mContext;
+    private final WindowContext mContext;
     private final ScreenshotNotificationsController mNotificationsController;
     private final ScreenshotSmartActions mScreenshotSmartActions;
     private final UiEventLogger mUiEventLogger;
@@ -240,7 +241,7 @@ public class ScreenshotController {
         final DisplayManager dm = requireNonNull(context.getSystemService(DisplayManager.class));
         final Display display = dm.getDisplay(DEFAULT_DISPLAY);
         final Context displayContext = context.createDisplayContext(display);
-        mContext = displayContext.createWindowContext(TYPE_SCREENSHOT, null);
+        mContext = (WindowContext) displayContext.createWindowContext(TYPE_SCREENSHOT, null);
         mWindowManager = mContext.getSystemService(WindowManager.class);
 
         mAccessibilityManager = AccessibilityManager.getInstance(mContext);
@@ -349,6 +350,13 @@ public class ScreenshotController {
         } else {
             mScreenshotView.animateDismissal();
         }
+    }
+
+    /**
+     * Release the constructed window context.
+     */
+    void releaseContext() {
+        mContext.release();
     }
 
     /**

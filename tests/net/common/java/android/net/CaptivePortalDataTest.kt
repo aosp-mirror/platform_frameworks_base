@@ -41,13 +41,14 @@ class CaptivePortalDataTest {
             .setBytesRemaining(456L)
             .setExpiryTime(789L)
             .setCaptive(true)
+            .setVenueFriendlyName("venue friendly name")
             .build()
 
     private fun makeBuilder() = CaptivePortalData.Builder(data)
 
     @Test
     fun testParcelUnparcel() {
-        assertParcelSane(data, fieldCount = 7)
+        assertParcelSane(data, fieldCount = 8)
 
         assertParcelingIsLossless(makeBuilder().setUserPortalUrl(null).build())
         assertParcelingIsLossless(makeBuilder().setVenueInfoUrl(null).build())
@@ -66,6 +67,8 @@ class CaptivePortalDataTest {
         assertNotEqualsAfterChange { it.setBytesRemaining(789L) }
         assertNotEqualsAfterChange { it.setExpiryTime(12L) }
         assertNotEqualsAfterChange { it.setCaptive(false) }
+        assertNotEqualsAfterChange { it.setVenueFriendlyName("another friendly name") }
+        assertNotEqualsAfterChange { it.setVenueFriendlyName(null) }
     }
 
     @Test
@@ -106,6 +109,11 @@ class CaptivePortalDataTest {
     fun testIsCaptive() {
         assertTrue(data.isCaptive)
         assertFalse(makeBuilder().setCaptive(false).build().isCaptive)
+    }
+
+    @Test
+    fun testVenueFriendlyName() {
+        assertEquals("venue friendly name", data.venueFriendlyName)
     }
 
     private fun CaptivePortalData.mutate(mutator: (CaptivePortalData.Builder) -> Unit) =

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
-package android.content.om;
+package android.media.tv.tunerresourcemanager;
 
-parcelable OverlayManagerTransaction;
+/**
+ * Information required to request a Tuner Demux.
+ *
+ * @hide
+ */
+parcelable TunerDemuxRequest {
+    int clientId;
+}

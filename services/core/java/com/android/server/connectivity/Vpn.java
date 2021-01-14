@@ -1229,7 +1229,8 @@ public class Vpn {
     private boolean canHaveRestrictedProfile(int userId) {
         final long token = Binder.clearCallingIdentity();
         try {
-            return UserManager.get(mContext).canHaveRestrictedProfile(userId);
+            final Context userContext = mContext.createContextAsUser(UserHandle.of(userId), 0);
+            return userContext.getSystemService(UserManager.class).canHaveRestrictedProfile();
         } finally {
             Binder.restoreCallingIdentity(token);
         }
