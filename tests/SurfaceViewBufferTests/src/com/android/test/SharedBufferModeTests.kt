@@ -30,12 +30,12 @@ class SharedBufferModeTests(useBlastAdapter: Boolean) : SurfaceTracingTestBase(u
     @Test
     fun testCanPresentBuffers() {
         val numFrames = 15L
-        val trace = withTrace {
-            assertEquals(0, it.mSurfaceProxy.NativeWindowSetSharedBufferMode(true))
+        val trace = withTrace { activity ->
+            assertEquals(0, activity.mSurfaceProxy.NativeWindowSetSharedBufferMode(true))
             for (i in 1..numFrames) {
-                assertEquals(0, it.mSurfaceProxy.SurfaceDequeueBuffer(0, 1 /* ms */))
-                it.mSurfaceProxy.SurfaceQueueBuffer(0)
-                assertEquals(0, it.mSurfaceProxy.waitUntilBufferDisplayed(i, 5000 /* ms */))
+                assertEquals(0, activity.mSurfaceProxy.SurfaceDequeueBuffer(0, 1 /* ms */))
+                activity.mSurfaceProxy.SurfaceQueueBuffer(0)
+                assertEquals(0, activity.mSurfaceProxy.waitUntilBufferDisplayed(i, 5000 /* ms */))
             }
         }
 
@@ -47,13 +47,14 @@ class SharedBufferModeTests(useBlastAdapter: Boolean) : SurfaceTracingTestBase(u
     @Test
     fun testFastQueueBuffers() {
         val numFrames = 15L
-        val trace = withTrace {
-            assertEquals(0, it.mSurfaceProxy.NativeWindowSetSharedBufferMode(true))
+        val trace = withTrace { activity ->
+            assertEquals(0, activity.mSurfaceProxy.NativeWindowSetSharedBufferMode(true))
             for (i in 1..numFrames) {
-                assertEquals(0, it.mSurfaceProxy.SurfaceDequeueBuffer(0, 1 /* ms */))
-                it.mSurfaceProxy.SurfaceQueueBuffer(0)
+                assertEquals(0, activity.mSurfaceProxy.SurfaceDequeueBuffer(0, 1 /* ms */))
+                activity.mSurfaceProxy.SurfaceQueueBuffer(0)
             }
-            assertEquals(0, it.mSurfaceProxy.waitUntilBufferDisplayed(numFrames, 5000 /* ms */))
+            assertEquals(0, activity.mSurfaceProxy.waitUntilBufferDisplayed(numFrames,
+                    5000 /* ms */))
         }
 
         assertThat(trace).hasFrameSequence("SurfaceView", numFrames..numFrames)

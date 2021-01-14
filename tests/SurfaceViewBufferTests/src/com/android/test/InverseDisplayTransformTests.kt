@@ -44,28 +44,28 @@ class InverseDisplayTransformTests(useBlastAdapter: Boolean) :
                 "fixed scaling mode.", useBlastAdapter)
 
         val rotatedBufferSize = Point(defaultBufferSize.y, defaultBufferSize.x)
-        val trace = withTrace {
+        val trace = withTrace { activity ->
             // Inverse display transforms are sticky AND they are only consumed by the sf after
             // a valid buffer has been acquired.
-            it.mSurfaceProxy.ANativeWindowSetBuffersTransform(Transform.INVERSE_DISPLAY.value)
-            assertEquals(0, it.mSurfaceProxy.SurfaceDequeueBuffer(0, 1000 /* ms */))
-            it.mSurfaceProxy.SurfaceQueueBuffer(0)
+            activity.mSurfaceProxy.ANativeWindowSetBuffersTransform(Transform.INVERSE_DISPLAY.value)
+            assertEquals(0, activity.mSurfaceProxy.SurfaceDequeueBuffer(0, 1000 /* ms */))
+            activity.mSurfaceProxy.SurfaceQueueBuffer(0)
 
-            assertEquals(it.mSurfaceProxy.waitUntilBufferDisplayed(1, 500 /* ms */), 0)
-            it.mSurfaceProxy.ANativeWindowSetBuffersGeometry(it.surface!!, rotatedBufferSize,
-                    R8G8B8A8_UNORM)
-            assertEquals(0, it.mSurfaceProxy.SurfaceDequeueBuffer(0, 1000 /* ms */))
-            assertEquals(0, it.mSurfaceProxy.SurfaceDequeueBuffer(1, 1000 /* ms */))
+            assertEquals(activity.mSurfaceProxy.waitUntilBufferDisplayed(1, 500 /* ms */), 0)
+            activity.mSurfaceProxy.ANativeWindowSetBuffersGeometry(activity.surface!!,
+                    rotatedBufferSize, R8G8B8A8_UNORM)
+            assertEquals(0, activity.mSurfaceProxy.SurfaceDequeueBuffer(0, 1000 /* ms */))
+            assertEquals(0, activity.mSurfaceProxy.SurfaceDequeueBuffer(1, 1000 /* ms */))
             // Change buffer size and set scaling mode to freeze
-            it.mSurfaceProxy.ANativeWindowSetBuffersGeometry(it.surface!!, Point(0, 0),
+            activity.mSurfaceProxy.ANativeWindowSetBuffersGeometry(activity.surface!!, Point(0, 0),
                     R8G8B8A8_UNORM)
 
             // first dequeued buffer does not have the new size so it should be rejected.
-            it.mSurfaceProxy.ANativeWindowSetBuffersTransform(Transform.ROT_90.value)
-            it.mSurfaceProxy.SurfaceQueueBuffer(0)
-            it.mSurfaceProxy.ANativeWindowSetBuffersTransform(0)
-            it.mSurfaceProxy.SurfaceQueueBuffer(1)
-            assertEquals(it.mSurfaceProxy.waitUntilBufferDisplayed(3, 500 /* ms */), 0)
+            activity.mSurfaceProxy.ANativeWindowSetBuffersTransform(Transform.ROT_90.value)
+            activity.mSurfaceProxy.SurfaceQueueBuffer(0)
+            activity.mSurfaceProxy.ANativeWindowSetBuffersTransform(0)
+            activity.mSurfaceProxy.SurfaceQueueBuffer(1)
+            assertEquals(activity.mSurfaceProxy.waitUntilBufferDisplayed(3, 500 /* ms */), 0)
         }
 
         // verify buffer size is reset to default buffer size
