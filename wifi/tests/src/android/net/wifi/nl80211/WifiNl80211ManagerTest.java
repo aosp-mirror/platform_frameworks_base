@@ -44,6 +44,7 @@ import android.net.wifi.SoftApInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiScanner;
 import android.net.wifi.util.HexEncoding;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -506,7 +507,51 @@ public class WifiNl80211ManagerTest {
                 SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST));
         verify(mWifiScannerImpl).scan(argThat(new ScanMatcher(
                 IWifiScannerImpl.SCAN_TYPE_LOW_POWER,
-                SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST)));
+                SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST, false)));
+    }
+
+    /**
+     * Verify the new startScan() API can convert input parameters to SingleScanSettings correctly.
+     */
+    @Test
+    public void testScanWithBundle() throws Exception {
+        when(mWifiScannerImpl.scan(any(SingleScanSettings.class))).thenReturn(true);
+        Bundle bundle = new Bundle();
+        bundle.putBoolean(WifiNl80211Manager.SCANNING_PARAM_ENABLE_6GHZ_RNR, true);
+        assertTrue(mWificondControl.startScan(
+                TEST_INTERFACE_NAME, WifiScanner.SCAN_TYPE_LOW_POWER,
+                SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST, bundle));
+        verify(mWifiScannerImpl).scan(argThat(new ScanMatcher(
+                IWifiScannerImpl.SCAN_TYPE_LOW_POWER,
+                SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST, true)));
+    }
+
+    /**
+     * Verify default values in SingleScanSettings when the input Bundle to startScan is null.
+     */
+    @Test
+    public void testScanWithNullBundle() throws Exception {
+        when(mWifiScannerImpl.scan(any(SingleScanSettings.class))).thenReturn(true);
+        assertTrue(mWificondControl.startScan(
+                TEST_INTERFACE_NAME, WifiScanner.SCAN_TYPE_LOW_POWER,
+                SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST, null));
+        verify(mWifiScannerImpl).scan(argThat(new ScanMatcher(
+                IWifiScannerImpl.SCAN_TYPE_LOW_POWER,
+                SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST, false)));
+    }
+
+    /**
+     * Verify default values in SingleScanSettings when the input Bundle to startScan is empty.
+     */
+    @Test
+    public void testScanWithEmptyBundle() throws Exception {
+        when(mWifiScannerImpl.scan(any(SingleScanSettings.class))).thenReturn(true);
+        assertTrue(mWificondControl.startScan(
+                TEST_INTERFACE_NAME, WifiScanner.SCAN_TYPE_LOW_POWER,
+                SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST, new Bundle()));
+        verify(mWifiScannerImpl).scan(argThat(new ScanMatcher(
+                IWifiScannerImpl.SCAN_TYPE_LOW_POWER,
+                SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST, false)));
     }
 
     /**
@@ -527,7 +572,7 @@ public class WifiNl80211ManagerTest {
         // But the argument passed down should have the duplicate removed.
         verify(mWifiScannerImpl).scan(argThat(new ScanMatcher(
                 IWifiScannerImpl.SCAN_TYPE_LOW_POWER,
-                SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST)));
+                SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST, false)));
     }
 
     /**
@@ -539,7 +584,7 @@ public class WifiNl80211ManagerTest {
         assertTrue(mWificondControl.startScan(
                 TEST_INTERFACE_NAME, WifiScanner.SCAN_TYPE_HIGH_ACCURACY, null, null));
         verify(mWifiScannerImpl).scan(argThat(new ScanMatcher(
-                IWifiScannerImpl.SCAN_TYPE_HIGH_ACCURACY, null, null)));
+                IWifiScannerImpl.SCAN_TYPE_HIGH_ACCURACY, null, null, false)));
     }
 
     /**
@@ -1068,16 +1113,22 @@ public class WifiNl80211ManagerTest {
         int mExpectedScanType;
         private final Set<Integer> mExpectedFreqs;
         private final List<byte[]> mExpectedSsids;
+        private final boolean mExpectedEnable6GhzRnr;
 
-        ScanMatcher(int expectedScanType, Set<Integer> expectedFreqs, List<byte[]> expectedSsids) {
+        ScanMatcher(int expectedScanType, Set<Integer> expectedFreqs, List<byte[]> expectedSsids,
+                boolean expectedEnable6GhzRnr) {
             this.mExpectedScanType = expectedScanType;
             this.mExpectedFreqs = expectedFreqs;
             this.mExpectedSsids = expectedSsids;
+            this.mExpectedEnable6GhzRnr = expectedEnable6GhzRnr;
         }
 
         @Override
         public boolean matches(SingleScanSettings settings) {
             if (settings.scanType != mExpectedScanType) {
+                return false;
+            }
+            if (settings.enable6GhzRnr != mExpectedEnable6GhzRnr) {
                 return false;
             }
             ArrayList<ChannelSettings> channelSettings = settings.channelSettings;
