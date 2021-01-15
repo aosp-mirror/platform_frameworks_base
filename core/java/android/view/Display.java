@@ -79,10 +79,8 @@ public final class Display {
 
     private final DisplayManagerGlobal mGlobal;
     private final int mDisplayId;
-    private final int mLayerStack;
     private final int mFlags;
     private final int mType;
-    private final DisplayAddress mAddress;
     private final int mOwnerUid;
     private final String mOwnerPackageName;
     private final Resources mResources;
@@ -501,10 +499,8 @@ public final class Display {
         mIsValid = true;
 
         // Cache properties that cannot change as long as the display is valid.
-        mLayerStack = displayInfo.layerStack;
         mFlags = displayInfo.flags;
         mType = displayInfo.type;
-        mAddress = displayInfo.address;
         mOwnerUid = displayInfo.ownerUid;
         mOwnerPackageName = displayInfo.ownerPackageName;
     }
@@ -579,7 +575,10 @@ public final class Display {
      * @hide
      */
     public int getLayerStack() {
-        return mLayerStack;
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            return mDisplayInfo.layerStack;
+        }
     }
 
     /**
@@ -623,7 +622,10 @@ public final class Display {
      * @hide
      */
     public DisplayAddress getAddress() {
-        return mAddress;
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            return mDisplayInfo.address;
+        }
     }
 
     /**
