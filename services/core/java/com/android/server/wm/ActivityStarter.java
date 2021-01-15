@@ -110,6 +110,7 @@ import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.Pools.SynchronizedPool;
 import android.util.Slog;
+import android.window.IRemoteTransition;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
@@ -1573,6 +1574,10 @@ class ActivityStarter {
         final Transition newTransition = (!mService.getTransitionController().isCollecting()
                 && mService.getTransitionController().getTransitionPlayer() != null)
                 ? mService.getTransitionController().createTransition(TRANSIT_OPEN) : null;
+        IRemoteTransition remoteTransition = r.takeRemoteTransition();
+        if (newTransition != null && remoteTransition != null) {
+            newTransition.setRemoteTransition(remoteTransition);
+        }
         mService.getTransitionController().collect(r);
         try {
             mService.deferWindowLayout();
@@ -1611,7 +1616,7 @@ class ActivityStarter {
                 }
                 if (newTransition != null) {
                     mService.getTransitionController().requestStartTransition(newTransition,
-                            r.getTask());
+                            mTargetTask, remoteTransition);
                 } else {
                     // Make the collecting transition wait until this request is ready.
                     mService.getTransitionController().setReady(false);

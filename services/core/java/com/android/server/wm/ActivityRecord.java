@@ -294,6 +294,7 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.TransitionOldType;
 import android.view.animation.Animation;
+import android.window.IRemoteTransition;
 import android.window.TaskSnapshot;
 import android.window.WindowContainerToken;
 
@@ -467,6 +468,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private ActivityOptions mPendingOptions;
     /** Non-null if {@link #mPendingOptions} specifies the remote animation. */
     private RemoteAnimationAdapter mPendingRemoteAnimation;
+    private IRemoteTransition mPendingRemoteTransition;
     ActivityOptions returningOptions; // options that are coming back via convertToTranslucent
     AppTimeTracker appTimeTracker; // set if we are tracking the time in this app/task/activity
     ActivityServiceConnectionsHolder mServiceConnectionsHolder; // Service connections.
@@ -893,6 +895,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             pw.print(prefix);
             pw.print("pendingRemoteAnimationCallingPid=");
             pw.println(mPendingRemoteAnimation.getCallingPid());
+        }
+        if (mPendingRemoteTransition != null) {
+            pw.print(prefix + " pendingRemoteTransition=" + mPendingRemoteTransition);
         }
         if (appTimeTracker != null) {
             appTimeTracker.dumpWithHeader(pw, prefix, false);
@@ -3884,6 +3889,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (options.getAnimationType() == ANIM_REMOTE_ANIMATION) {
             mPendingRemoteAnimation = options.getRemoteAnimationAdapter();
         }
+        mPendingRemoteTransition = options.getRemoteTransition();
     }
 
     void applyOptionsAnimation() {
@@ -4064,6 +4070,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void clearOptionsAnimation() {
         mPendingOptions = null;
         mPendingRemoteAnimation = null;
+        mPendingRemoteTransition = null;
     }
 
     ActivityOptions getOptions() {
@@ -4076,6 +4083,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final ActivityOptions opts = mPendingOptions;
         mPendingOptions = null;
         return opts;
+    }
+
+    IRemoteTransition takeRemoteTransition() {
+        IRemoteTransition out = mPendingRemoteTransition;
+        mPendingRemoteTransition = null;
+        return out;
     }
 
     boolean allowMoveToFront() {

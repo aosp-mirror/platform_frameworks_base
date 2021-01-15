@@ -54,6 +54,7 @@ import android.view.RemoteAnimationAdapter;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.window.IRemoteTransition;
 import android.window.WindowContainerToken;
 
 import java.lang.annotation.Retention;
@@ -298,6 +299,8 @@ public class ActivityOptions {
     private static final String KEY_SPECS_FUTURE = "android:activity.specsFuture";
     private static final String KEY_REMOTE_ANIMATION_ADAPTER
             = "android:activity.remoteAnimationAdapter";
+    private static final String KEY_REMOTE_TRANSITION =
+            "android:activity.remoteTransition";
 
     /**
      * @see #setLaunchCookie
@@ -380,6 +383,7 @@ public class ActivityOptions {
     private IAppTransitionAnimationSpecsFuture mSpecsFuture;
     private RemoteAnimationAdapter mRemoteAnimationAdapter;
     private IBinder mLaunchCookie;
+    private IRemoteTransition mRemoteTransition;
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -959,6 +963,21 @@ public class ActivityOptions {
         return opts;
     }
 
+    /**
+     * Create an {@link ActivityOptions} instance that lets the application control the entire
+     * animation using a {@link RemoteAnimationAdapter}.
+     * @hide
+     */
+    @RequiresPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS)
+    public static ActivityOptions makeRemoteAnimation(RemoteAnimationAdapter remoteAnimationAdapter,
+            IRemoteTransition remoteTransition) {
+        final ActivityOptions opts = new ActivityOptions();
+        opts.mRemoteAnimationAdapter = remoteAnimationAdapter;
+        opts.mAnimationType = ANIM_REMOTE_ANIMATION;
+        opts.mRemoteTransition = remoteTransition;
+        return opts;
+    }
+
     /** @hide */
     public boolean getLaunchTaskBehind() {
         return mAnimationType == ANIM_LAUNCH_TASK_BEHIND;
@@ -1064,6 +1083,8 @@ public class ActivityOptions {
         }
         mRemoteAnimationAdapter = opts.getParcelable(KEY_REMOTE_ANIMATION_ADAPTER);
         mLaunchCookie = opts.getBinder(KEY_LAUNCH_COOKIE);
+        mRemoteTransition = IRemoteTransition.Stub.asInterface(opts.getBinder(
+                KEY_REMOTE_TRANSITION));
     }
 
     /**
@@ -1220,6 +1241,11 @@ public class ActivityOptions {
     /** @hide */
     public void setRemoteAnimationAdapter(RemoteAnimationAdapter remoteAnimationAdapter) {
         mRemoteAnimationAdapter = remoteAnimationAdapter;
+    }
+
+    /** @hide */
+    public IRemoteTransition getRemoteTransition() {
+        return mRemoteTransition;
     }
 
     /** @hide */
@@ -1723,6 +1749,9 @@ public class ActivityOptions {
         }
         if (mLaunchCookie != null) {
             b.putBinder(KEY_LAUNCH_COOKIE, mLaunchCookie);
+        }
+        if (mRemoteTransition != null) {
+            b.putBinder(KEY_REMOTE_TRANSITION, mRemoteTransition.asBinder());
         }
         return b;
     }

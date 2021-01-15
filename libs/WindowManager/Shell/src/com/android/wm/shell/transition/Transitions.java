@@ -25,15 +25,18 @@ import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPI
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+import android.window.IRemoteTransition;
 import android.window.ITransitionPlayer;
+import android.window.TransitionFilter;
 import android.window.TransitionInfo;
+import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
 import android.window.WindowOrganizer;
 
@@ -44,6 +47,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.util.ArrayList;
@@ -51,7 +55,7 @@ import java.util.Arrays;
 
 /** Plays transition animations */
 public class Transitions {
-    private static final String TAG = "ShellTransitions";
+    static final String TAG = "ShellTransitions";
 
     /** Set to {@code true} to enable shell transitions. */
     public static final boolean ENABLE_SHELL_TRANSITIONS =
@@ -61,6 +65,7 @@ public class Transitions {
     private final ShellExecutor mMainExecutor;
     private final ShellExecutor mAnimExecutor;
     private final TransitionPlayerImpl mPlayerImpl;
+    private final RemoteTransitionHandler mRemoteTransitionHandler;
 
     /** List of possible handlers. Ordered by specificity (eg. tapped back to front). */
     private final ArrayList<TransitionHandler> mHandlers = new ArrayList<>();
@@ -80,10 +85,28 @@ public class Transitions {
         mPlayerImpl = new TransitionPlayerImpl();
         // The very last handler (0 in the list) should be the default one.
         mHandlers.add(new DefaultTransitionHandler(pool, mainExecutor, animExecutor));
+        // Next lowest priority is remote transitions.
+        mRemoteTransitionHandler = new RemoteTransitionHandler(mainExecutor);
+        mHandlers.add(mRemoteTransitionHandler);
+    }
+
+    private Transitions() {
+        mOrganizer = null;
+        mMainExecutor = null;
+        mAnimExecutor = null;
+        mPlayerImpl = null;
+        mRemoteTransitionHandler = null;
+    }
+
+    /** Create an empty/non-registering transitions object for system-ui tests. */
+    @VisibleForTesting
+    public static Transitions createEmptyForTesting() {
+        return new Transitions();
     }
 
     /** Register this transition handler with Core */
     public void register(ShellTaskOrganizer taskOrganizer) {
+        if (mPlayerImpl == null) return;
         taskOrganizer.registerTransitionPlayer(mPlayerImpl);
     }
 
@@ -109,6 +132,19 @@ public class Transitions {
         mHandlers.set(0, handler);
     }
 
+    /** Register a remote transition to be used when `filter` matches an incoming transition */
+    @ExternalThread
+    public void registerRemote(@NonNull TransitionFilter filter,
+            @NonNull IRemoteTransition remoteTransition) {
+        mMainExecutor.execute(() -> mRemoteTransitionHandler.addFiltered(filter, remoteTransition));
+    }
+
+    /** Unregisters a remote transition and all associated filters */
+    @ExternalThread
+    public void unregisterRemote(@NonNull IRemoteTransition remoteTransition) {
+        mMainExecutor.execute(() -> mRemoteTransitionHandler.removeFiltered(remoteTransition));
+    }
+
     /** @return true if the transition was triggered by opening something vs closing something */
     public static boolean isOpeningType(@WindowManager.TransitionType int type) {
         return type == TRANSIT_OPEN
@@ -126,6 +162,8 @@ public class Transitions {
         if (info.getRootLeash().isValid()) {
             t.show(info.getRootLeash());
         }
+        // Put animating stuff above this line and put static stuff below it.
+        int zSplitLine = info.getChanges().size();
         // changes should be ordered top-to-bottom in z
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
@@ -152,7 +190,7 @@ public class Transitions {
                 t.setMatrix(leash, 1, 0, 0, 1);
                 if (isOpening) {
                     // put on top with 0 alpha
-                    t.setLayer(leash, info.getChanges().size() - i);
+                    t.setLayer(leash, zSplitLine + info.getChanges().size() - i);
                     if ((change.getFlags() & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0) {
                         // This received a transferred starting window, so make it immediately
                         // visible.
@@ -162,19 +200,19 @@ public class Transitions {
                     }
                 } else {
                     // put on bottom and leave it visible
-                    t.setLayer(leash, -i);
+                    t.setLayer(leash, zSplitLine - i);
                     t.setAlpha(leash, 1.f);
                 }
             } else if (mode == TRANSIT_CLOSE || mode == TRANSIT_TO_BACK) {
                 if (isOpening) {
                     // put on bottom and leave visible
-                    t.setLayer(leash, -i);
+                    t.setLayer(leash, zSplitLine - i);
                 } else {
                     // put on top
-                    t.setLayer(leash, info.getChanges().size() - i);
+                    t.setLayer(leash, zSplitLine + info.getChanges().size() - i);
                 }
             } else { // CHANGE
-                t.setLayer(leash, info.getChanges().size() - i);
+                t.setLayer(leash, zSplitLine + info.getChanges().size() - i);
             }
         }
     }
@@ -219,7 +257,8 @@ public class Transitions {
 
     private void onFinish(IBinder transition) {
         if (!mActiveTransitions.containsKey(transition)) {
-            throw new IllegalStateException("Trying to finish an already-finished transition.");
+            Log.e(TAG, "Trying to finish a non-running transition. Maybe remote crashed?");
+            return;
         }
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
                 "Transition animations finished, notifying core %s", transition);
@@ -227,24 +266,24 @@ public class Transitions {
         mOrganizer.finishTransition(transition, null, null);
     }
 
-    void requestStartTransition(int type, @NonNull IBinder transitionToken,
-            @Nullable ActivityManager.RunningTaskInfo triggerTask) {
-        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition requested: type=%d %s",
-                type, transitionToken);
-
+    void requestStartTransition(@NonNull IBinder transitionToken,
+            @Nullable TransitionRequestInfo request) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition requested: %s %s",
+                transitionToken, request);
         if (mActiveTransitions.containsKey(transitionToken)) {
             throw new RuntimeException("Transition already started " + transitionToken);
         }
         final ActiveTransition active = new ActiveTransition();
         WindowContainerTransaction wct = null;
         for (int i = mHandlers.size() - 1; i >= 0; --i) {
-            wct = mHandlers.get(i).handleRequest(type, transitionToken, triggerTask);
+            wct = mHandlers.get(i).handleRequest(transitionToken, request);
             if (wct != null) {
                 active.mFirstHandler = mHandlers.get(i);
                 break;
             }
         }
-        IBinder transition = mOrganizer.startTransition(type, transitionToken, wct);
+        IBinder transition = mOrganizer.startTransition(
+                request.getType(), transitionToken, wct);
         mActiveTransitions.put(transition, active);
     }
 
@@ -267,6 +306,7 @@ public class Transitions {
          * for a particular transition. Otherwise, it is only called if no other handler before
          * it handled the transition.
          *
+         * @param finishCallback Call this when finished. This MUST be called on main thread.
          * @return true if transition was handled, false if not (falls-back to default).
          */
         boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
@@ -274,15 +314,15 @@ public class Transitions {
 
         /**
          * Potentially handles a startTransition request.
-         * @param type The transition type
-         * @param triggerTask The task which triggered this transition request.
-         * @return WCT to apply with transition-start or null if this handler isn't handling
-         *         the request.
+         *
+         * @param transition The transition whose start is being requested.
+         * @param request Information about what is requested.
+         * @return WCT to apply with transition-start or null. If a WCT is returned here, this
+         *         handler will be the first in line to animate.
          */
         @Nullable
-        WindowContainerTransaction handleRequest(@WindowManager.TransitionType int type,
-                @NonNull IBinder transition,
-                @Nullable ActivityManager.RunningTaskInfo triggerTask);
+        WindowContainerTransaction handleRequest(@NonNull IBinder transition,
+                @NonNull TransitionRequestInfo request);
     }
 
     @BinderThread
@@ -296,11 +336,9 @@ public class Transitions {
         }
 
         @Override
-        public void requestStartTransition(int i, IBinder iBinder,
-                ActivityManager.RunningTaskInfo runningTaskInfo) throws RemoteException {
-            mMainExecutor.execute(() -> {
-                Transitions.this.requestStartTransition(i, iBinder, runningTaskInfo);
-            });
+        public void requestStartTransition(IBinder iBinder,
+                TransitionRequestInfo request) throws RemoteException {
+            mMainExecutor.execute(() -> Transitions.this.requestStartTransition(iBinder, request));
         }
     }
 }
