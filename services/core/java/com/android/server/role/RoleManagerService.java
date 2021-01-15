@@ -636,7 +636,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                 getContext().enforceCallingOrSelfPermission(
                         android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
             }
-            if (mPackageManagerInternal.getInstantAppPackageName(callingUid) != null) {
+            if (isInstantApp(callingUid)) {
                 return null;
             }
 
@@ -644,6 +644,25 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             try {
                 return CollectionUtils.firstOrNull(getRoleHoldersAsUser(RoleManager.ROLE_BROWSER,
                         userId));
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        private boolean isInstantApp(int uid) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                final UserHandle user = UserHandle.getUserHandleForUid(uid);
+                final Context userContext = getContext().createContextAsUser(user, 0);
+                final PackageManager userPackageManager = userContext.getPackageManager();
+                // Instant apps can not have shared UID, so it's safe to check only the first
+                // package name here.
+                final String packageName = ArrayUtils.firstOrNull(
+                        userPackageManager.getPackagesForUid(uid));
+                if (packageName == null) {
+                    return false;
+                }
+                return userPackageManager.isInstantApp(packageName);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
