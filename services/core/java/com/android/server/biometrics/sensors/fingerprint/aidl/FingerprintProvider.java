@@ -44,7 +44,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AuthenticationClient;
-import com.android.server.biometrics.sensors.ClientMonitor;
+import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.PerformanceTracker;
@@ -74,7 +74,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     @NonNull private final String mHalInstanceName;
     @NonNull @VisibleForTesting
     final SparseArray<Sensor> mSensors; // Map of sensors that this HAL supports
-    @NonNull private final ClientMonitor.LazyDaemon<IFingerprint> mLazyDaemon;
+    @NonNull private final BaseClientMonitor.LazyDaemon<IFingerprint> mLazyDaemon;
     @NonNull private final Handler mHandler;
     @NonNull private final LockoutResetDispatcher mLockoutResetDispatcher;
     @NonNull private final ActivityTaskManager mActivityTaskManager;
@@ -88,7 +88,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         public void onTaskStackChanged() {
             mHandler.post(() -> {
                 for (int i = 0; i < mSensors.size(); i++) {
-                    final ClientMonitor<?> client = mSensors.valueAt(i).getScheduler()
+                    final BaseClientMonitor<?> client = mSensors.valueAt(i).getScheduler()
                             .getCurrentClient();
                     if (!(client instanceof AuthenticationClient)) {
                         Slog.e(getTag(), "Task stack changed for client: " + client);
@@ -187,7 +187,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         return mDaemon;
     }
 
-    private void scheduleForSensor(int sensorId, @NonNull ClientMonitor<?> client) {
+    private void scheduleForSensor(int sensorId, @NonNull BaseClientMonitor<?> client) {
         if (!mSensors.contains(sensorId)) {
             throw new IllegalStateException("Unable to schedule client: " + client
                     + " for sensor: " + sensorId);
@@ -195,8 +195,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
     }
 
-    private void scheduleForSensor(int sensorId, @NonNull ClientMonitor<?> client,
-            ClientMonitor.Callback callback) {
+    private void scheduleForSensor(int sensorId, @NonNull BaseClientMonitor<?> client,
+            BaseClientMonitor.Callback callback) {
         if (!mSensors.contains(sensorId)) {
             throw new IllegalStateException("Unable to schedule client: " + client
                     + " for sensor: " + sensorId);
@@ -371,9 +371,9 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                         new ClientMonitorCallbackConverter(receiver), userId, hardwareAuthToken,
                         opPackageName, FingerprintUtils.getInstance(sensorId), sensorId,
                         mUdfpsOverlayController, maxTemplatesPerUser, shouldLogMetrics);
-                scheduleForSensor(sensorId, client, new ClientMonitor.Callback() {
+                scheduleForSensor(sensorId, client, new BaseClientMonitor.Callback() {
                     @Override
-                    public void onClientFinished(@NonNull ClientMonitor<?> clientMonitor,
+                    public void onClientFinished(@NonNull BaseClientMonitor<?> clientMonitor,
                             boolean success) {
                         if (success) {
                             scheduleLoadAuthenticatorIdsForUser(sensorId, userId);
@@ -581,7 +581,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
 
     @Override
     public void onPointerDown(int sensorId, int x, int y, float minor, float major) {
-        final ClientMonitor<?> client = mSensors.get(sensorId).getScheduler().getCurrentClient();
+        final BaseClientMonitor<?> client =
+                mSensors.get(sensorId).getScheduler().getCurrentClient();
         if (!(client instanceof Udfps)) {
             Slog.e(getTag(), "onPointerDown received during client: " + client);
             return;
@@ -592,7 +593,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
 
     @Override
     public void onPointerUp(int sensorId) {
-        final ClientMonitor<?> client = mSensors.get(sensorId).getScheduler().getCurrentClient();
+        final BaseClientMonitor<?> client =
+                mSensors.get(sensorId).getScheduler().getCurrentClient();
         if (!(client instanceof Udfps)) {
             Slog.e(getTag(), "onPointerUp received during client: " + client);
             return;

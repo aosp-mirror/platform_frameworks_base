@@ -31,7 +31,8 @@ import java.util.NoSuchElementException;
  * the current client.  Subclasses are responsible for coordinating the interaction with
  * the biometric's HAL for the specific action (e.g. authenticate, enroll, enumerate, etc.).
  */
-public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinder.DeathRecipient {
+public abstract class BaseClientMonitor<T> extends LoggableMonitor
+        implements IBinder.DeathRecipient {
 
     private static final String TAG = "Biometrics/ClientMonitor";
     protected static final boolean DEBUG = true;
@@ -49,7 +50,7 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
          *
          * @param clientMonitor Reference of the ClientMonitor that is starting.
          */
-        default void onClientStarted(@NonNull ClientMonitor<?> clientMonitor) {}
+        default void onClientStarted(@NonNull BaseClientMonitor<?> clientMonitor) {}
 
         /**
          * Invoked when the ClientMonitor operation is complete. This abstracts away asynchronous
@@ -60,7 +61,8 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
          * @param clientMonitor Reference of the ClientMonitor that finished.
          * @param success True if the operation completed successfully.
          */
-        default void onClientFinished(@NonNull ClientMonitor<?> clientMonitor, boolean success) {}
+        default void onClientFinished(@NonNull BaseClientMonitor<?> clientMonitor,
+                boolean success) {}
     }
 
     /**
@@ -102,7 +104,7 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
      * @param statsAction   One of {@link BiometricsProtoEnums} ACTION_* constants
      * @param statsClient   One of {@link BiometricsProtoEnums} CLIENT_* constants
      */
-    public ClientMonitor(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+    public BaseClientMonitor(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
             @Nullable IBinder token, @Nullable ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int cookie, int sensorId, int statsModality, int statsAction,
             int statsClient) {

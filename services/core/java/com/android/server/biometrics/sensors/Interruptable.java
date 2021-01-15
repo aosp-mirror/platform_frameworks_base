@@ -19,7 +19,7 @@ package com.android.server.biometrics.sensors;
 import android.annotation.NonNull;
 
 /**
- * Interface that {@link ClientMonitor} subclasses eligible/interested in error callbacks should
+ * Interface that {@link BaseClientMonitor} subclasses eligible/interested in error callbacks should
  * implement.
  */
 public interface Interruptable {
@@ -37,10 +37,10 @@ public interface Interruptable {
 
     /**
      * Notifies the client that it needs to finish before
-     * {@link ClientMonitor#start(ClientMonitor.Callback)} was invoked. This usually happens
+     * {@link BaseClientMonitor#start(BaseClientMonitor.Callback)} was invoked. This usually happens
      * if the client is still waiting in the pending queue and got notified that a subsequent
      * operation is preempting it.
      * @param callback invoked when the operation is completed.
      */
-    void cancelWithoutStarting(@NonNull ClientMonitor.Callback callback);
+    void cancelWithoutStarting(@NonNull BaseClientMonitor.Callback callback);
 }
