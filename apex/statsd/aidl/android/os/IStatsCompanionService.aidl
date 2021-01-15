@@ -27,6 +27,17 @@ interface IStatsCompanionService {
     oneway void statsdReady();
 
     /**
+    * Register an alarm for anomaly detection to fire at the given timestamp (ms since epoch).
+    * If anomaly alarm had already been registered, it will be replaced with the new timestamp.
+    * Uses AlarmManager.set API, so  if the timestamp is in the past, alarm fires immediately, and
+    * alarm is inexact.
+    */
+    oneway void setAnomalyAlarm(long timestampMs);
+
+    /** Cancel any anomaly detection alarm. */
+    oneway void cancelAnomalyAlarm();
+
+    /**
       * Register a repeating alarm for pulling to fire at the given timestamp and every
       * intervalMs thereafter (in ms since epoch).
       * If polling alarm had already been registered, it will be replaced by new one.
