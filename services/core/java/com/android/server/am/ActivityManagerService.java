@@ -4645,7 +4645,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 String data, Bundle extras, boolean ordered,
                                 boolean sticky, int sendingUser) {
                             synchronized (ActivityManagerService.this) {
-                                mOomAdjuster.mCachedAppOptimizer.compactAllSystem();
                                 mAppProfiler.requestPssAllProcsLocked(
                                         SystemClock.uptimeMillis(), true, false);
                             }
