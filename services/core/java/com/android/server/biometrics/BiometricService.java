@@ -252,12 +252,14 @@ public class BiometricService extends SystemService {
         @NonNull private final IInvalidationCallback mClientCallback;
         @NonNull private final Set<Integer> mSensorsPendingInvalidation;
 
-        public static InvalidationTracker start(@NonNull ArrayList<BiometricSensor> sensors,
+        public static InvalidationTracker start(@NonNull Context context,
+                @NonNull ArrayList<BiometricSensor> sensors,
                 int userId, int fromSensorId, @NonNull IInvalidationCallback clientCallback) {
-            return new InvalidationTracker(sensors, userId, fromSensorId, clientCallback);
+            return new InvalidationTracker(context, sensors, userId, fromSensorId, clientCallback);
         }
 
-        private InvalidationTracker(@NonNull ArrayList<BiometricSensor> sensors, int userId,
+        private InvalidationTracker(@NonNull Context context,
+                @NonNull ArrayList<BiometricSensor> sensors, int userId,
                 int fromSensorId, @NonNull IInvalidationCallback clientCallback) {
             mClientCallback = clientCallback;
             mSensorsPendingInvalidation = new ArraySet<>();
@@ -269,6 +271,14 @@ public class BiometricService extends SystemService {
 
                 if (!Utils.isAtLeastStrength(sensor.oemStrength, Authenticators.BIOMETRIC_STRONG)) {
                     continue;
+                }
+
+                try {
+                    if (!sensor.impl.hasEnrolledTemplates(userId, context.getOpPackageName())) {
+                        continue;
+                    }
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Remote Exception", e);
                 }
 
                 Slog.d(TAG, "Requesting authenticatorId invalidation for sensor: " + sensor.id);
@@ -286,6 +296,17 @@ public class BiometricService extends SystemService {
                     });
                 } catch (RemoteException e) {
                     Slog.d(TAG, "RemoteException", e);
+                }
+            }
+
+            synchronized (this) {
+                if (mSensorsPendingInvalidation.isEmpty()) {
+                    try {
+                        Slog.d(TAG, "No sensors require invalidation");
+                        mClientCallback.onCompleted();
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Remote Exception", e);
+                    }
                 }
             }
         }
@@ -742,7 +763,7 @@ public class BiometricService extends SystemService {
                 IInvalidationCallback callback) {
             checkInternalPermission();
 
-            InvalidationTracker.start(mSensors, userId, fromSensorId, callback);
+            InvalidationTracker.start(getContext(), mSensors, userId, fromSensorId, callback);
         }
 
         @Override // Binder call

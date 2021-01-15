@@ -47,6 +47,7 @@ import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.HalClientMonitor;
+import com.android.server.biometrics.sensors.InvalidationRequesterClient;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.PerformanceTracker;
 import com.android.server.biometrics.sensors.face.FaceUtils;
@@ -206,6 +207,12 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         // this method "withoutHandler" means it should only ever be invoked from the worker thread,
         // so callers will never be blocked.
         mSensors.get(sensorId).createNewSession(daemon, sensorId, userId);
+
+        if (FaceUtils.getInstance(sensorId).isInvalidationInProgress(mContext, userId)) {
+            Slog.w(getTag(), "Scheduling unfinished invalidation request for sensor: " + sensorId
+                    + ", user: " + userId);
+            scheduleInvalidationRequest(sensorId, userId);
+        }
     }
 
 
@@ -239,6 +246,15 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                         + ", sensorId: " + sensorId
                         + ", userId: " + userId, e);
             }
+        });
+    }
+
+    private void scheduleInvalidationRequest(int sensorId, int userId) {
+        mHandler.post(() -> {
+            final InvalidationRequesterClient<Face> client =
+                    new InvalidationRequesterClient<>(mContext, userId, sensorId,
+                            FaceUtils.getInstance(sensorId));
+            mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
         });
     }
 
@@ -395,6 +411,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                             boolean success) {
                         if (success) {
                             scheduleLoadAuthenticatorIdsForUser(sensorId, userId);
+                            scheduleInvalidationRequest(sensorId, userId);
                         }
                     }
                 });

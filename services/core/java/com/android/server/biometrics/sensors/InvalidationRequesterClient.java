@@ -55,7 +55,7 @@ import android.hardware.biometrics.IInvalidationCallback;
  * switches, the framework can check if any sensor has the "invalidationInProgress" flag set. If so,
  * the framework should re-start the invalidation process described above.
  */
-public abstract class InvalidationRequesterClient<S extends BiometricAuthenticator.Identifier>
+public class InvalidationRequesterClient<S extends BiometricAuthenticator.Identifier>
         extends BaseClientMonitor {
 
     private final BiometricManager mBiometricManager;
