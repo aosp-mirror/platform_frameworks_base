@@ -164,24 +164,24 @@ public class ApplicationExitInfoTest {
     }
 
     private void updateExitInfo(ProcessRecord app) {
-        ApplicationExitInfo raw = mAppExitInfoTracker.obtainRawRecordLocked(app);
+        ApplicationExitInfo raw = mAppExitInfoTracker.obtainRawRecord(app);
         mAppExitInfoTracker.handleNoteProcessDiedLocked(raw);
-        mAppExitInfoTracker.recycleRawRecordLocked(raw);
+        mAppExitInfoTracker.recycleRawRecord(raw);
     }
 
     private void noteAppKill(ProcessRecord app, int reason, int subReason, String msg) {
-        ApplicationExitInfo raw = mAppExitInfoTracker.obtainRawRecordLocked(app);
+        ApplicationExitInfo raw = mAppExitInfoTracker.obtainRawRecord(app);
         raw.setReason(reason);
         raw.setSubReason(subReason);
         raw.setDescription(msg);
         mAppExitInfoTracker.handleNoteAppKillLocked(raw);
-        mAppExitInfoTracker.recycleRawRecordLocked(raw);
+        mAppExitInfoTracker.recycleRawRecord(raw);
     }
 
     @Test
     public void testApplicationExitInfo() throws Exception {
         mAppExitInfoTracker.clearProcessExitInfo(true);
-        mAppExitInfoTracker.mAppExitInfoLoaded = true;
+        mAppExitInfoTracker.mAppExitInfoLoaded.set(true);
         mAppExitInfoTracker.mProcExitStoreDir = new File(mContext.getFilesDir(),
                 AppExitInfoTracker.APP_EXIT_STORE_DIR);
         assertTrue(FileUtils.createDir(mAppExitInfoTracker.mProcExitStoreDir));
@@ -1001,9 +1001,9 @@ public class ApplicationExitInfoTest {
         }
         app.connectionGroup = connectionGroup;
         app.setProcState = procState;
-        app.lastMemInfo = spy(new Debug.MemoryInfo());
-        app.lastPss = pss;
-        app.mLastRss = rss;
+        app.mProfile.setLastMemInfo(spy(new Debug.MemoryInfo()));
+        app.mProfile.setLastPss(pss);
+        app.mProfile.setLastRss(rss);
         return app;
     }
 

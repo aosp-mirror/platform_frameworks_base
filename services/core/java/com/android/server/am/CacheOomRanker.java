@@ -60,6 +60,9 @@ public class CacheOomRanker {
 
     private final Object mPhenotypeFlagLock = new Object();
 
+    private final ActivityManagerService mService;
+    private final Object mProfilerLock;
+
     @GuardedBy("mPhenotypeFlagLock")
     private boolean mUseOomReRanking = DEFAULT_USE_OOM_RE_RANKING;
     // Weight to apply to the LRU ordering.
@@ -100,6 +103,11 @@ public class CacheOomRanker {
                     }
                 }
             };
+
+    CacheOomRanker(final ActivityManagerService service) {
+        mService = service;
+        mProfilerLock = service.mAppProfiler.mProfilerLock;
+    }
 
     /** Load settings from device config and register a listener for changes. */
     public void init(Executor executor) {
@@ -223,7 +231,9 @@ public class CacheOomRanker {
             addToScore(scoredProcessRecords, lruWeight);
         }
         if (rssWeight > 0.0f) {
-            Arrays.sort(scoredProcessRecords, LAST_RSS_COMPARATOR);
+            synchronized (mService.mAppProfiler.mProfilerLock) {
+                Arrays.sort(scoredProcessRecords, LAST_RSS_COMPARATOR);
+            }
             addToScore(scoredProcessRecords, rssWeight);
         }
         if (usesWeight > 0.0f) {
@@ -297,7 +307,7 @@ public class CacheOomRanker {
         @Override
         public int compare(RankedProcessRecord o1, RankedProcessRecord o2) {
             // High RSS first to match least recently used.
-            return Long.compare(o2.proc.mLastRss, o1.proc.mLastRss);
+            return Long.compare(o2.proc.mProfile.getLastRss(), o1.proc.mProfile.getLastRss());
         }
     }
 

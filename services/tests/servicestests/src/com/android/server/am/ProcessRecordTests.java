@@ -42,6 +42,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Collections;
 
 /**
@@ -67,6 +69,11 @@ public class ProcessRecordTests {
             sService.mActivityTaskManager = new ActivityTaskManagerService(sContext);
             sService.mActivityTaskManager.initialize(null, null, sContext.getMainLooper());
             sService.mAtmInternal = sService.mActivityTaskManager.getAtmInternal();
+            final AppProfiler profiler = mock(AppProfiler.class);
+            setFieldValue(AppProfiler.class, profiler, "mProfilerLock", new Object());
+            setFieldValue(ActivityManagerService.class, sService, "mAppProfiler", profiler);
+            final ProcessList processList = new ProcessList();
+            setFieldValue(ActivityManagerService.class, sService, "mProcessList", processList);
         });
 
         // Avoid NPE when initializing {@link ProcessRecord#mWindowProcessController}.
@@ -74,6 +81,18 @@ public class ProcessRecordTests {
         LocalServices.addService(PackageManagerInternal.class, packageManagerInternal);
         final ComponentName sysUiName = new ComponentName(sContext.getPackageName(), "test");
         doReturn(sysUiName).when(packageManagerInternal).getSystemUiServiceComponent();
+    }
+
+    private static <T> void setFieldValue(Class clazz, Object obj, String fieldName, T val) {
+        try {
+            Field field = clazz.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            Field mfield = Field.class.getDeclaredField("accessFlags");
+            mfield.setAccessible(true);
+            mfield.setInt(field, mfield.getInt(field) & ~(Modifier.FINAL | Modifier.PRIVATE));
+            field.set(obj, val);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+        }
     }
 
     @AfterClass
