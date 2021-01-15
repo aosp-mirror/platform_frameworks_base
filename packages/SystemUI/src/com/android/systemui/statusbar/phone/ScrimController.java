@@ -48,6 +48,7 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.statusbar.FeatureFlags;
@@ -65,6 +66,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -150,6 +152,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private final AlarmTimeout mTimeTicker;
     private final KeyguardVisibilityCallback mKeyguardVisibilityCallback;
     private final Handler mHandler;
+    private final Executor mMainExecutor;
     private final BlurUtils mBlurUtils;
 
     private GradientColors mColors;
@@ -214,8 +217,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             DelayedWakeLock.Builder delayedWakeLockBuilder, Handler handler,
             KeyguardUpdateMonitor keyguardUpdateMonitor, DockManager dockManager,
             BlurUtils blurUtils, ConfigurationController configurationController,
-            FeatureFlags featureFlags) {
-
+            FeatureFlags featureFlags, @Main Executor mainExecutor) {
         mScrimStateListener = lightBarController::setScrimState;
         mDefaultScrimAlpha = featureFlags.isShadeOpaque() ? BUSY_SCRIM_ALPHA : GAR_SCRIM_ALPHA;
         ScrimState.BUBBLE_EXPANDED.setBubbleAlpha(featureFlags.isShadeOpaque()
@@ -228,6 +230,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mKeyguardVisibilityCallback = new KeyguardVisibilityCallback();
         mHandler = handler;
+        mMainExecutor = mainExecutor;
         mTimeTicker = new AlarmTimeout(alarmManager, this::onHideWallpaperTimeout,
                 "hide_aod_wallpaper", mHandler);
         mWakeLock = delayedWakeLockBuilder.setHandler(mHandler).setTag("Scrims").build();
@@ -273,7 +276,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         updateThemeColors();
 
         if (mScrimBehindChangeRunnable != null) {
-            mScrimBehind.setChangeRunnable(mScrimBehindChangeRunnable);
+            mScrimBehind.setChangeRunnable(mScrimBehindChangeRunnable, mMainExecutor);
             mScrimBehindChangeRunnable = null;
         }
 
@@ -1022,7 +1025,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         if (mScrimBehind == null) {
             mScrimBehindChangeRunnable = changeRunnable;
         } else {
-            mScrimBehind.setChangeRunnable(changeRunnable);
+            mScrimBehind.setChangeRunnable(changeRunnable, mMainExecutor);
         }
     }
 

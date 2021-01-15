@@ -39,6 +39,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTestCase;
+import com.android.wm.shell.common.ShellExecutor;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -54,6 +55,8 @@ public class BubbleTest extends ShellTestCase {
     private Notification mNotif;
     @Mock
     private StatusBarNotification mSbn;
+    @Mock
+    private ShellExecutor mMainExecutor;
 
     private BubbleEntry mBubbleEntry;
     private Bundle mExtras;
@@ -78,7 +81,7 @@ public class BubbleTest extends ShellTestCase {
         when(mNotif.getBubbleMetadata()).thenReturn(metadata);
         when(mSbn.getKey()).thenReturn("mock");
         mBubbleEntry = new BubbleEntry(mSbn, null, true, false, false, false);
-        mBubble = new Bubble(mBubbleEntry, mSuppressionListener, null);
+        mBubble = new Bubble(mBubbleEntry, mSuppressionListener, null, mMainExecutor);
     }
 
     @Test

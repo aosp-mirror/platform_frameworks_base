@@ -841,8 +841,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mBubbleExpandListener =
                 (isExpanding, key) -> {
-                    mNotificationsController.requestNotificationUpdate("onBubbleExpandChanged");
-                    updateScrimController();
+                    mContext.getMainExecutor().execute(() -> {
+                        mNotificationsController.requestNotificationUpdate("onBubbleExpandChanged");
+                        updateScrimController();
+                    });
                 };
 
         mActivityIntentHelper = new ActivityIntentHelper(mContext);
