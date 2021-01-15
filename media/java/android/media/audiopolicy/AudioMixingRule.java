@@ -46,11 +46,11 @@ import java.util.Objects;
 public class AudioMixingRule {
 
     private AudioMixingRule(int mixType, ArrayList<AudioMixMatchCriterion> criteria,
-                            boolean allowPrivilegedPlaybackCapture,
+                            boolean allowPrivilegedMediaPlaybackCapture,
                             boolean voiceCommunicationCaptureAllowed) {
         mCriteria = criteria;
         mTargetMixType = mixType;
-        mAllowPrivilegedPlaybackCapture = allowPrivilegedPlaybackCapture;
+        mAllowPrivilegedPlaybackCapture = allowPrivilegedMediaPlaybackCapture;
         mVoiceCommunicationCaptureAllowed = voiceCommunicationCaptureAllowed;
     }
 
@@ -204,13 +204,17 @@ public class AudioMixingRule {
     private final ArrayList<AudioMixMatchCriterion> mCriteria;
     /** @hide */
     public ArrayList<AudioMixMatchCriterion> getCriteria() { return mCriteria; }
+    /** Indicates that this rule is intended to capture media or game playback by a system component
+      * with permission CAPTURE_MEDIA_OUTPUT or CAPTURE_AUDIO_OUTPUT.
+      */
+    //TODO b/177061175: rename to mAllowPrivilegedMediaPlaybackCapture
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private boolean mAllowPrivilegedPlaybackCapture = false;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private boolean mVoiceCommunicationCaptureAllowed = false;
 
     /** @hide */
-    public boolean allowPrivilegedPlaybackCapture() {
+    public boolean allowPrivilegedMediaPlaybackCapture() {
         return mAllowPrivilegedPlaybackCapture;
     }
 
@@ -311,7 +315,7 @@ public class AudioMixingRule {
     public static class Builder {
         private ArrayList<AudioMixMatchCriterion> mCriteria;
         private int mTargetMixType = AudioMix.MIX_TYPE_INVALID;
-        private boolean mAllowPrivilegedPlaybackCapture = false;
+        private boolean mAllowPrivilegedMediaPlaybackCapture = false;
         // This value should be set internally according to a permission check
         private boolean mVoiceCommunicationCaptureAllowed = false;
 
@@ -434,7 +438,7 @@ public class AudioMixingRule {
          * @return the same Builder instance.
          */
         public @NonNull Builder allowPrivilegedPlaybackCapture(boolean allow) {
-            mAllowPrivilegedPlaybackCapture = allow;
+            mAllowPrivilegedMediaPlaybackCapture = allow;
             return this;
         }
 
@@ -639,7 +643,7 @@ public class AudioMixingRule {
          */
         public AudioMixingRule build() {
             return new AudioMixingRule(mTargetMixType, mCriteria,
-                mAllowPrivilegedPlaybackCapture, mVoiceCommunicationCaptureAllowed);
+                mAllowPrivilegedMediaPlaybackCapture, mVoiceCommunicationCaptureAllowed);
         }
     }
 }
