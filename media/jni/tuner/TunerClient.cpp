@@ -229,15 +229,15 @@ sp<DescramblerClient> TunerClient::openDescrambler(int /*descramblerHandle*/) {
 sp<LnbClient> TunerClient::openLnb(int lnbHandle) {
     if (mTunerService != NULL) {
         // TODO: handle error code
-        /*shared_ptr<ITunerLnb> tunerLnb;
-        mTunerService->openLnb(demuxHandle, &tunerLnb);
-        return new LnbClient(tunerLnb);*/
+        shared_ptr<ITunerLnb> tunerLnb;
+        mTunerService->openLnb(lnbHandle, &tunerLnb);
+        return new LnbClient(tunerLnb);
     }
 
     if (mTuner != NULL) {
         int id = getResourceIdFromHandle(lnbHandle, LNB);
         // TODO: pending aidl interface
-        sp<LnbClient> lnbClient = new LnbClient();
+        sp<LnbClient> lnbClient = new LnbClient(NULL);
         sp<ILnb> hidlLnb = openHidlLnbById(id);
         if (hidlLnb != NULL) {
             lnbClient->setHidlLnb(hidlLnb);
@@ -252,14 +252,14 @@ sp<LnbClient> TunerClient::openLnb(int lnbHandle) {
 sp<LnbClient> TunerClient::openLnbByName(string lnbName) {
     if (mTunerService != NULL) {
         // TODO: handle error code
-        /*shared_ptr<ITunerLnb> tunerLnb;
+        shared_ptr<ITunerLnb> tunerLnb;
         mTunerService->openLnbByName(lnbName, &tunerLnb);
-        return new LnbClient(tunerLnb);*/
+        return new LnbClient(tunerLnb);
     }
 
     if (mTuner != NULL) {
         // TODO: pending aidl interface
-        sp<LnbClient> lnbClient = new LnbClient();
+        sp<LnbClient> lnbClient = new LnbClient(NULL);
         LnbId id;
         sp<ILnb> hidlLnb = openHidlLnbByName(lnbName, id);
         if (hidlLnb != NULL) {
