@@ -190,6 +190,7 @@ import android.util.SparseBooleanArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.DisplayCutout;
+import android.view.DisplayCutout.CutoutPathParserInfo;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IDisplayWindowInsetsController;
@@ -1937,18 +1938,22 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (cutout == null || cutout == DisplayCutout.NO_CUTOUT) {
             return WmDisplayCutout.NO_CUTOUT;
         }
-        final Insets waterfallInsets =
-                RotationUtils.rotateInsets(cutout.getWaterfallInsets(), rotation);
         if (rotation == ROTATION_0) {
             return WmDisplayCutout.computeSafeInsets(
                     cutout, mInitialDisplayWidth, mInitialDisplayHeight);
         }
+        final Insets waterfallInsets =
+                RotationUtils.rotateInsets(cutout.getWaterfallInsets(), rotation);
         final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
         final Rect[] newBounds = mRotationUtil.getRotatedBounds(
                 cutout.getBoundingRectsAll(),
                 rotation, mInitialDisplayWidth, mInitialDisplayHeight);
+        final CutoutPathParserInfo info = cutout.getCutoutPathParserInfo();
+        final CutoutPathParserInfo newInfo = new CutoutPathParserInfo(
+                info.getDisplayWidth(), info.getDisplayHeight(), info.getDensity(),
+                info.getCutoutSpec(), rotation, info.getScale());
         return WmDisplayCutout.computeSafeInsets(
-                DisplayCutout.fromBoundsAndWaterfall(newBounds, waterfallInsets),
+                DisplayCutout.constructDisplayCutout(newBounds, waterfallInsets, newInfo),
                 rotated ? mInitialDisplayHeight : mInitialDisplayWidth,
                 rotated ? mInitialDisplayWidth : mInitialDisplayHeight);
     }

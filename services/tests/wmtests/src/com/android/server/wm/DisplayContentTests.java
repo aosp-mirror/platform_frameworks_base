@@ -27,7 +27,6 @@ import static android.os.Build.VERSION_CODES.P;
 import static android.os.Build.VERSION_CODES.Q;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_PRIVATE;
-import static android.view.DisplayCutout.BOUNDS_POSITION_LEFT;
 import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
 import static android.view.DisplayCutout.fromBoundingRect;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
@@ -96,6 +95,7 @@ import android.app.ActivityTaskManager;
 import android.app.WindowConfiguration;
 import android.app.servertransaction.FixedRotationAdjustmentsItem;
 import android.content.res.Configuration;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.metrics.LogMaker;
@@ -707,6 +707,7 @@ public class DisplayContentTests extends WindowTestsBase {
         // same width and height.
         final int displayWidth = dc.mInitialDisplayWidth;
         final int displayHeight = dc.mInitialDisplayHeight;
+        final float density = dc.mInitialDisplayDensity;
         final int cutoutWidth = 40;
         final int cutoutHeight = 10;
         final int left = (displayWidth - cutoutWidth) / 2;
@@ -714,9 +715,13 @@ public class DisplayContentTests extends WindowTestsBase {
         final int right = (displayWidth + cutoutWidth) / 2;
         final int bottom = cutoutHeight;
 
-        final Rect r1 = new Rect(left, top, right, bottom);
+        final Rect zeroRect = new Rect();
+        final Rect[] bounds = new Rect[]{zeroRect, new Rect(left, top, right, bottom), zeroRect,
+                zeroRect};
+        final DisplayCutout.CutoutPathParserInfo info = new DisplayCutout.CutoutPathParserInfo(
+                displayWidth, displayHeight, density, "", Surface.ROTATION_0, 1f);
         final DisplayCutout cutout = new WmDisplayCutout(
-                fromBoundingRect(r1.left, r1.top, r1.right, r1.bottom, BOUNDS_POSITION_TOP), null)
+                DisplayCutout.constructDisplayCutout(bounds, Insets.NONE, info), null)
                         .computeSafeInsets(displayWidth, displayHeight).getDisplayCutout();
 
         dc.mInitialDisplayCutout = cutout;
@@ -731,9 +736,12 @@ public class DisplayContentTests extends WindowTestsBase {
         // |             |      ---o
         // |             |      |
         // |             |      -------------
-        final Rect r = new Rect(top, left, bottom, right);
+        final Rect[] bounds90 = new Rect[]{new Rect(top, left, bottom, right), zeroRect, zeroRect,
+                zeroRect};
+        final DisplayCutout.CutoutPathParserInfo info90 = new DisplayCutout.CutoutPathParserInfo(
+                displayWidth, displayHeight, density, "", Surface.ROTATION_90, 1f);
         assertEquals(new WmDisplayCutout(
-                fromBoundingRect(r.left, r.top, r.right, r.bottom, BOUNDS_POSITION_LEFT), null)
+                        DisplayCutout.constructDisplayCutout(bounds90, Insets.NONE, info90), null)
                         .computeSafeInsets(displayHeight, displayWidth).getDisplayCutout(),
                 dc.getDisplayInfo().displayCutout);
     }
