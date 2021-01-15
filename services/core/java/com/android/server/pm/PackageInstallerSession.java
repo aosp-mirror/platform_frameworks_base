@@ -881,6 +881,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             + mParentSessionId +  " and may not be committed directly.");
         }
         if (!markAsCommitted(statusReceiver, forTransfer)) {
+            if (isStaged()) {
+                // cleanStageDir calls mSessionProvider to get hold of child sessions, which in turn
+                // needs PackageInstallerService#mSessions lock. So we should not call cleanStageDir
+                // while holding mLock to avoid lock inversion.
+                cleanStageDir();
+            }
             return;
         }
         if (isMultiPackage()) {

@@ -3417,16 +3417,8 @@ public final class Settings {
          */
         public static final String FONT_SCALE = "font_scale";
 
-        private static final Validator FONT_SCALE_VALIDATOR = new Validator() {
-            @Override
-            public boolean validate(@Nullable String value) {
-                try {
-                    return Float.parseFloat(value) >= 0;
-                } catch (NumberFormatException | NullPointerException e) {
-                    return false;
-                }
-            }
-        };
+        private static final Validator FONT_SCALE_VALIDATOR =
+                new SettingsValidators.InclusiveFloatRangeValidator(0.85f, 1.3f);
 
         /**
          * The serialized system locale value.
