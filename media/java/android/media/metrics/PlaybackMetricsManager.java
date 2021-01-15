@@ -48,6 +48,17 @@ public class PlaybackMetricsManager {
             throw e.rethrowFromSystemServer();
         }
     }
+    /**
+     * Reports network event.
+     * @hide
+     */
+    public void reportNetworkEvent(@NonNull String sessionId, NetworkEvent event) {
+        try {
+            mService.reportNetworkEvent(sessionId, event, mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 
     /**
      * Creates a playback session.

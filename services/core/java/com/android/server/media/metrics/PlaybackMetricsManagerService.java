@@ -18,6 +18,7 @@ package com.android.server.media.metrics;
 
 import android.content.Context;
 import android.media.metrics.IPlaybackMetricsManager;
+import android.media.metrics.NetworkEvent;
 import android.media.metrics.PlaybackErrorEvent;
 import android.media.metrics.PlaybackMetrics;
 import android.util.Base64;
@@ -73,6 +74,18 @@ public final class PlaybackMetricsManagerService extends SystemService {
                     .writeString(event.getExceptionStack())
                     .writeInt(event.getErrorCode())
                     .writeInt(event.getSubErrorCode())
+                    .writeLong(event.getTimeSincePlaybackCreatedMillis())
+                    .usePooledBuffer()
+                    .build();
+            StatsLog.write(statsEvent);
+        }
+
+        public void reportNetworkEvent(
+                String sessionId, NetworkEvent event, int userId) {
+            StatsEvent statsEvent = StatsEvent.newBuilder()
+                    .setAtomId(321)
+                    .writeString(sessionId)
+                    .writeInt(event.getType())
                     .writeLong(event.getTimeSincePlaybackCreatedMillis())
                     .usePooledBuffer()
                     .build();
