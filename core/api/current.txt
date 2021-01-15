@@ -41124,12 +41124,13 @@ package android.telephony {
   public class PhoneNumberUtils {
     ctor public PhoneNumberUtils();
     method public static void addTtsSpan(android.text.Spannable, int, int);
+    method public static boolean areSamePhoneNumber(@NonNull String, @NonNull String, @NonNull String);
     method @Deprecated public static String calledPartyBCDFragmentToString(byte[], int, int);
     method public static String calledPartyBCDFragmentToString(byte[], int, int, int);
     method @Deprecated public static String calledPartyBCDToString(byte[], int, int);
     method public static String calledPartyBCDToString(byte[], int, int, int);
-    method public static boolean compare(String, String);
-    method public static boolean compare(android.content.Context, String, String);
+    method @Deprecated public static boolean compare(String, String);
+    method @Deprecated public static boolean compare(android.content.Context, String, String);
     method public static String convertKeypadLettersToDigits(String);
     method public static android.text.style.TtsSpan createTtsSpan(String);
     method public static CharSequence createTtsSpannable(CharSequence);
