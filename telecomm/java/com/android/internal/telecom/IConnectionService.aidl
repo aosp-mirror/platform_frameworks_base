@@ -118,6 +118,9 @@ oneway interface IConnectionService {
 
     void sendCallEvent(String callId, String event, in Bundle extras, in Session.Info sessionInfo);
 
+    void onCallFilteringCompleted(String callId, boolean isBlocked, boolean isInContacts,
+            in Session.Info sessionInfo);
+
     void onExtrasChanged(String callId, in Bundle extras, in Session.Info sessionInfo);
 
     void startRtt(String callId, in ParcelFileDescriptor fromInCall,

@@ -147,6 +147,7 @@ public abstract class ConnectionService extends Service {
     private static final String SESSION_POST_DIAL_CONT = "CS.oPDC";
     private static final String SESSION_PULL_EXTERNAL_CALL = "CS.pEC";
     private static final String SESSION_SEND_CALL_EVENT = "CS.sCE";
+    private static final String SESSION_CALL_FILTERING_COMPLETED = "CS.oCFC";
     private static final String SESSION_HANDOVER_COMPLETE = "CS.hC";
     private static final String SESSION_EXTRAS_CHANGED = "CS.oEC";
     private static final String SESSION_START_RTT = "CS.+RTT";
@@ -200,6 +201,7 @@ public abstract class ConnectionService extends Service {
     private static final int MSG_ADD_PARTICIPANT = 39;
     private static final int MSG_EXPLICIT_CALL_TRANSFER = 40;
     private static final int MSG_EXPLICIT_CALL_TRANSFER_CONSULTATIVE = 41;
+    private static final int MSG_ON_CALL_FILTERING_COMPLETED = 42;
 
     private static Connection sNullConnection;
 
@@ -716,6 +718,22 @@ public abstract class ConnectionService extends Service {
                 args.arg3 = extras;
                 args.arg4 = Log.createSubsession();
                 mHandler.obtainMessage(MSG_SEND_CALL_EVENT, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
+        }
+
+        @Override
+        public void onCallFilteringCompleted(String callId, boolean isBlocked, boolean isInContacts,
+                Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_CALL_FILTERING_COMPLETED);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = isBlocked;
+                args.arg3 = isInContacts;
+                args.arg4 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_ON_CALL_FILTERING_COMPLETED, args).sendToTarget();
             } finally {
                 Log.endSession();
             }
@@ -1348,6 +1366,21 @@ public abstract class ConnectionService extends Service {
                         String event = (String) args.arg2;
                         Bundle extras = (Bundle) args.arg3;
                         sendCallEvent(callId, event, extras);
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
+                    break;
+                }
+                case MSG_ON_CALL_FILTERING_COMPLETED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        Log.continueSession((Session) args.arg4,
+                                SESSION_HANDLER + SESSION_CALL_FILTERING_COMPLETED);
+                        String callId = (String) args.arg1;
+                        boolean isBlocked = (boolean) args.arg2;
+                        boolean isInContacts = (boolean) args.arg3;
+                        onCallFilteringCompleted(callId, isBlocked, isInContacts);
                     } finally {
                         args.recycle();
                         Log.endSession();
@@ -2342,6 +2375,14 @@ public abstract class ConnectionService extends Service {
         Connection connection = findConnectionForAction(callId, "sendCallEvent");
         if (connection != null) {
             connection.onCallEvent(event, extras);
+        }
+    }
+
+    private void onCallFilteringCompleted(String callId, boolean isBlocked, boolean isInContacts) {
+        Log.i(this, "onCallFilteringCompleted(%s, %b, %b)", isBlocked, isInContacts);
+        Connection connection = findConnectionForAction(callId, "onCallFilteringCompleted");
+        if (connection != null) {
+            connection.onCallFilteringCompleted(isBlocked, isInContacts);
         }
     }
 
