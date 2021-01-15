@@ -20,6 +20,8 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
+import dalvik.annotation.optimization.FastNative;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -131,4 +133,44 @@ public class FontFileUtil {
             buffer.order(originalOrder);
         }
     }
+
+    /**
+     * Analyze head OpenType table and return fontRevision value as 32bit integer.
+     *
+     * The font revision is stored in 16.16 bit fixed point value. This function returns this fixed
+     * point value as 32 bit integer, i.e. the value multiplied with 65536.
+     *
+     * IllegalArgumentException will be thrown for invalid font data.
+     * If the font file is invalid, returns -1L.
+     *
+     * @param buffer a buffer of OpenType font
+     * @param index a font index
+     * @return font revision that shifted 16 bits left.
+     */
+    public static long getRevision(@NonNull ByteBuffer buffer, @IntRange(from = 0) int index) {
+        return nGetFontRevision(buffer, index);
+    }
+
+    /**
+     * Analyze name OpenType table and return PostScript name.
+     *
+     * IllegalArgumentException will be thrown for invalid font data.
+     * null will be returned if not found or the PostScript name is invalid.
+     *
+     * @param buffer a buffer of OpenType font
+     * @param index a font index
+     * @return a post script name or null if it is invalid or not found.
+     */
+    public static String getPostScriptName(@NonNull ByteBuffer buffer,
+            @IntRange(from = 0) int index) {
+        return nGetFontPostScriptName(buffer, index);
+    }
+
+    @FastNative
+    private static native long nGetFontRevision(@NonNull ByteBuffer buffer,
+            @IntRange(from = 0) int index);
+
+    @FastNative
+    private static native String nGetFontPostScriptName(@NonNull ByteBuffer buffer,
+            @IntRange(from = 0) int index);
 }

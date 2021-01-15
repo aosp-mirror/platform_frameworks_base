@@ -16,6 +16,8 @@
 
 package com.android.internal.jank;
 
+import static com.android.internal.jank.FrameTracker.SurfaceControlWrapper;
+import static com.android.internal.jank.FrameTracker.ViewRootWrapper;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_TO_STATSD_INTERACTION_TYPE;
 
@@ -27,6 +29,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -85,21 +88,19 @@ public class InteractionJankMonitorTest {
     public void testBeginEnd() {
         // Should return false if the view is not attached.
         InteractionJankMonitor monitor = spy(new InteractionJankMonitor(mWorker));
-        assertThat(monitor.init(new View(mActivity))).isFalse();
-
-        // Verify we init InteractionJankMonitor correctly.
-        assertThat(monitor.init(mView)).isTrue();
         verify(mWorker).start();
 
         Session session = new Session(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
         FrameTracker tracker = spy(new FrameTracker(session, mWorker.getThreadHandler(),
                 new ThreadedRendererWrapper(mView.getThreadedRenderer()),
+                new ViewRootWrapper(mView.getViewRootImpl()), new SurfaceControlWrapper(),
+                mock(FrameTracker.ChoreographerWrapper.class),
                 new FrameMetricsWrapper(), /*traceThresholdMissedFrames=*/ 1,
                 /*traceThresholdFrameTimeMillis=*/ -1));
-        doReturn(tracker).when(monitor).createFrameTracker(any());
+        doReturn(tracker).when(monitor).createFrameTracker(any(), any());
 
         // Simulate a trace session and see if begin / end are invoked.
-        assertThat(monitor.begin(session.getCuj())).isTrue();
+        assertThat(monitor.begin(mView, session.getCuj())).isTrue();
         verify(tracker).begin();
         assertThat(monitor.end(session.getCuj())).isTrue();
         verify(tracker).end();
@@ -108,7 +109,6 @@ public class InteractionJankMonitorTest {
     @Test
     public void testDisabledThroughDeviceConfig() {
         InteractionJankMonitor monitor = new InteractionJankMonitor(mWorker);
-        monitor.init(mView);
 
         HashMap<String, String> propertiesValues = new HashMap<>();
         propertiesValues.put("enabled", "false");
@@ -116,7 +116,7 @@ public class InteractionJankMonitorTest {
                 DeviceConfig.NAMESPACE_INTERACTION_JANK_MONITOR, propertiesValues);
         monitor.getPropertiesChangedListener().onPropertiesChanged(properties);
 
-        assertThat(monitor.begin(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE)).isFalse();
+        assertThat(monitor.begin(mView, CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE)).isFalse();
         assertThat(monitor.end(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE)).isFalse();
     }
 
@@ -125,14 +125,13 @@ public class InteractionJankMonitorTest {
         InteractionJankMonitor monitor = new InteractionJankMonitor(mWorker);
 
         // Should return false if invoking begin / end without init invocation.
-        assertThat(monitor.begin(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE)).isFalse();
+        assertThat(monitor.begin(mView, CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE)).isFalse();
         assertThat(monitor.end(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE)).isFalse();
 
         // Everything should be fine if invoking init first.
         boolean thrown = false;
         try {
-            monitor.init(mView);
-            assertThat(monitor.begin(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE)).isTrue();
+            assertThat(monitor.begin(mView, CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE)).isTrue();
             assertThat(monitor.end(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE)).isTrue();
         } catch (Exception ex) {
             thrown = true;
@@ -146,16 +145,17 @@ public class InteractionJankMonitorTest {
         InteractionJankMonitor monitor = spy(new InteractionJankMonitor(mWorker));
 
         ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
-        assertThat(monitor.init(mView)).isTrue();
 
         Session session = new Session(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
         FrameTracker tracker = spy(new FrameTracker(session, mWorker.getThreadHandler(),
                 new ThreadedRendererWrapper(mView.getThreadedRenderer()),
+                new ViewRootWrapper(mView.getViewRootImpl()), new SurfaceControlWrapper(),
+                mock(FrameTracker.ChoreographerWrapper.class),
                 new FrameMetricsWrapper(), /*traceThresholdMissedFrames=*/ 1,
                 /*traceThresholdFrameTimeMillis=*/ -1));
-        doReturn(tracker).when(monitor).createFrameTracker(any());
+        doReturn(tracker).when(monitor).createFrameTracker(any(), any());
 
-        assertThat(monitor.begin(session.getCuj())).isTrue();
+        assertThat(monitor.begin(mView, session.getCuj())).isTrue();
         verify(tracker).begin();
         verify(mWorker.getThreadHandler(), atLeastOnce()).sendMessageAtTime(captor.capture(),
                 anyLong());

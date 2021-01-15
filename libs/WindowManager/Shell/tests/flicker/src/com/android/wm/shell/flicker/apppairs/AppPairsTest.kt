@@ -107,7 +107,7 @@ class AppPairsTest(
                     end("appsEndingBounds", enabled = false) {
                         val entry = this.trace.entries.firstOrNull()
                                 ?: throw IllegalStateException("Trace is empty")
-                        val dividerRegion = entry.getVisibleBounds(SPLIT_DIVIDER)
+                        val dividerRegion = entry.getVisibleBounds(APP_PAIR_SPLIT_DIVIDER)
                         this.hasVisibleRegion(primaryApp.defaultWindowName,
                                 appPairsHelper.getPrimaryBounds(dividerRegion))
                                 .and()
@@ -151,7 +151,7 @@ class AppPairsTest(
                     start("appsStartingBounds", enabled = false) {
                         val entry = this.trace.entries.firstOrNull()
                                 ?: throw IllegalStateException("Trace is empty")
-                        val dividerRegion = entry.getVisibleBounds(SPLIT_DIVIDER)
+                        val dividerRegion = entry.getVisibleBounds(APP_PAIR_SPLIT_DIVIDER)
                         this.hasVisibleRegion(primaryApp.defaultWindowName,
                                 appPairsHelper.getPrimaryBounds(dividerRegion))
                                 .and()

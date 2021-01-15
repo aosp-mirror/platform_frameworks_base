@@ -36,7 +36,6 @@ import android.graphics.Region;
 import android.graphics.Region.Op;
 import android.hardware.display.DisplayManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.Slog;
@@ -60,7 +59,6 @@ import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
 
-import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.policy.DividerSnapAlgorithm;
@@ -146,8 +144,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private LegacySplitDisplayLayout mSplitLayout;
     private DividerImeController mImeController;
     private DividerCallbacks mCallback;
-    private final AnimationHandler mAnimationHandler = new AnimationHandler();
 
+    private AnimationHandler mSfVsyncAnimationHandler;
     private ValueAnimator mCurrentAnimator;
     private boolean mEntranceAnimationRunning;
     private boolean mExitAnimationRunning;
@@ -171,8 +169,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     // Whether the surface for this view has been hidden regardless of actual visibility. This is
     // used interact with keyguard.
     private boolean mSurfaceHidden = false;
-
-    private final Handler mHandler = new Handler();
 
     private final AccessibilityDelegate mHandleDelegate = new AccessibilityDelegate() {
         @Override
@@ -284,7 +280,10 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         final DisplayManager displayManager =
                 (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
         mDefaultDisplay = displayManager.getDisplay(Display.DEFAULT_DISPLAY);
-        mAnimationHandler.setProvider(new SfVsyncFrameCallbackProvider());
+    }
+
+    public void setAnimationHandler(AnimationHandler sfVsyncAnimationHandler) {
+        mSfVsyncAnimationHandler = sfVsyncAnimationHandler;
     }
 
     @Override
@@ -669,12 +668,12 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 } else {
                     final Boolean cancelled = mCancelled;
                     if (DEBUG) Slog.d(TAG, "Posting endFling " + cancelled + " d:" + delay + "ms");
-                    mHandler.postDelayed(() -> endAction.accept(cancelled), delay);
+                    getHandler().postDelayed(() -> endAction.accept(cancelled), delay);
                 }
             }
         });
-        anim.setAnimationHandler(mAnimationHandler);
         mCurrentAnimator = anim;
+        mCurrentAnimator.setAnimationHandler(mSfVsyncAnimationHandler);
         return anim;
     }
 
@@ -1061,8 +1060,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             }
         }
         if (getViewRootImpl() != null) {
-            mHandler.removeCallbacks(mUpdateEmbeddedMatrix);
-            mHandler.post(mUpdateEmbeddedMatrix);
+            getHandler().removeCallbacks(mUpdateEmbeddedMatrix);
+            getHandler().post(mUpdateEmbeddedMatrix);
         }
     }
 

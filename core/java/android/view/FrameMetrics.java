@@ -207,7 +207,7 @@ public final class FrameMetrics {
             Index.FRAME_COMPLETED,
     })
     @Retention(RetentionPolicy.SOURCE)
-    private @interface Index {
+    public @interface Index {
         int FLAGS = 0;
         int FRAME_TIMELINE_VSYNC_ID = 1;
         int INTENDED_VSYNC = 2;

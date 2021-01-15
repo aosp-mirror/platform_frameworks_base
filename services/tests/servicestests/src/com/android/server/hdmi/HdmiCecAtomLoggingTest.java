@@ -15,12 +15,16 @@
  */
 package com.android.server.hdmi;
 
+import static com.android.server.SystemService.PHASE_BOOT_COMPLETED;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
 import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.Constants.PATH_RELATIONSHIP_ANCESTOR;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
@@ -29,8 +33,10 @@ import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IPowerManager;
 import android.os.IThermalService;
@@ -70,6 +76,7 @@ public class HdmiCecAtomLoggingTest {
     private FakeNativeWrapper mNativeWrapper;
     private HdmiCecNetwork mHdmiCecNetwork;
     private Looper mLooper;
+    private Context mContextSpy;
     private TestLooper mTestLooper = new TestLooper();
     private int mPhysicalAddress = 0x1110;
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
@@ -86,7 +93,7 @@ public class HdmiCecAtomLoggingTest {
 
         mLooper = mTestLooper.getLooper();
 
-        Context mContextSpy = spy(new ContextWrapper(
+        mContextSpy = spy(new ContextWrapper(
                 InstrumentationRegistry.getInstrumentation().getTargetContext()));
 
         PowerManager powerManager = new PowerManager(
@@ -155,9 +162,10 @@ public class HdmiCecAtomLoggingTest {
         mHdmiCecController.sendCommand(message);
 
         verify(mHdmiCecAtomWriterSpy, times(1)).messageReported(
-                message,
-                HdmiStatsEnums.OUTGOING,
-                SendMessageResult.SUCCESS);
+                eq(message),
+                eq(HdmiStatsEnums.OUTGOING),
+                anyInt(),
+                eq(SendMessageResult.SUCCESS));
     }
 
     @Test
@@ -168,7 +176,32 @@ public class HdmiCecAtomLoggingTest {
         mTestLooper.dispatchAll();
 
         verify(mHdmiCecAtomWriterSpy, times(1)).messageReported(
-                message,
-                HdmiStatsEnums.INCOMING);
+                eq(message),
+                eq(HdmiStatsEnums.INCOMING),
+                anyInt());
+    }
+
+    @Test
+    public void testMessageReported_calledWithUid() {
+        int callerUid = 1234;
+        int runnerUid = 5678;
+
+        mHdmiControlServiceSpy.setPowerStatus(HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON);
+        mHdmiControlServiceSpy.onBootPhase(PHASE_BOOT_COMPLETED);
+
+        Binder.setCallingWorkSourceUid(callerUid);
+
+        mHdmiControlServiceSpy.runOnServiceThread(
+                () -> mHdmiControlServiceSpy.setStandbyMode(true));
+
+        Binder.setCallingWorkSourceUid(runnerUid);
+
+        mTestLooper.dispatchAll();
+
+        verify(mHdmiCecAtomWriterSpy, times(1)).messageReported(
+                any(),
+                anyInt(),
+                eq(callerUid),
+                anyInt());
     }
 }

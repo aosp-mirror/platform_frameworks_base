@@ -28,6 +28,8 @@ import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.REMOVE_TASKS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.Manifest.permission.STOP_APP_SWITCHES;
+import static android.app.ActivityManager.DROP_CLOSE_SYSTEM_DIALOGS;
+import static android.app.ActivityManager.LOCK_DOWN_CLOSE_SYSTEM_DIALOGS;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
@@ -253,6 +255,7 @@ import com.android.server.firewall.IntentFirewall;
 import com.android.server.inputmethod.InputMethodSystemProperty;
 import com.android.server.pm.UserManagerService;
 import com.android.server.policy.PermissionPolicyInternal;
+import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriGrantsManagerInternal;
 
@@ -342,6 +345,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /** The cached sys ui service component name from package manager. */
     private ComponentName mSysUiServiceComponent;
     private PermissionPolicyInternal mPermissionPolicyInternal;
+    private StatusBarManagerInternal mStatusBarManagerInternal;
     @VisibleForTesting
     final ActivityTaskManagerInternal mInternal;
     PowerManagerInternal mPowerManagerInternal;
@@ -2927,14 +2931,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
         if (!canCloseSystemDialogs(pid, uid, process)) {
             // The app can't close system dialogs, throw only if it targets S+
-            if (CompatChanges.isChangeEnabled(
-                    ActivityManager.LOCK_DOWN_CLOSE_SYSTEM_DIALOGS, uid)) {
+            if (CompatChanges.isChangeEnabled(LOCK_DOWN_CLOSE_SYSTEM_DIALOGS, uid)) {
                 throw new SecurityException(
                         "Permission Denial: " + Intent.ACTION_CLOSE_SYSTEM_DIALOGS
                                 + " broadcast from " + caller + " requires "
                                 + Manifest.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS + ".");
-            } else if (CompatChanges.isChangeEnabled(
-                    ActivityManager.DROP_CLOSE_SYSTEM_DIALOGS, uid)) {
+            } else if (CompatChanges.isChangeEnabled(DROP_CLOSE_SYSTEM_DIALOGS, uid)) {
                 Slog.e(TAG,
                         "Permission Denial: " + Intent.ACTION_CLOSE_SYSTEM_DIALOGS
                                 + " broadcast from " + caller + " requires "
@@ -2958,6 +2960,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 == PERMISSION_GRANTED) {
             return true;
         }
+        if (process == null) {
+            synchronized (mGlobalLock) {
+                process = mProcessMap.getProcess(pid);
+            }
+        }
         if (process != null) {
             // Check if the instrumentation of the process has the permission. This covers the
             // usual test started from the shell (which has the permission) case. This is needed
@@ -2976,6 +2983,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             // to close the shade prior to starting an activity.
             if (process.canCloseSystemDialogsByToken()) {
                 return true;
+            }
+        }
+        // This covers the case where the app is displaying some UI on top of the notification shade
+        // and wants to start an activity. The app then sends the intent in order to move the
+        // notification shade out of the way and show the activity to the user. This is fine since
+        // the caller already has privilege to show a visible window on top of the notification
+        // shade, so it can already prevent the user from accessing the shade if it wants to.
+        // We only allow for targetSdk < S, for S+ we automatically collapse the shade on
+        // startActivity() for these apps.
+        if (!CompatChanges.isChangeEnabled(LOCK_DOWN_CLOSE_SYSTEM_DIALOGS, uid)) {
+            synchronized (mGlobalLock) {
+                if (mRootWindowContainer.hasVisibleWindowAboveNotificationShade(uid)) {
+                    return true;
+                }
             }
         }
         return false;
@@ -4782,6 +4803,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return mPermissionPolicyInternal;
     }
 
+    StatusBarManagerInternal getStatusBarManagerInternal() {
+        if (mStatusBarManagerInternal == null) {
+            mStatusBarManagerInternal = LocalServices.getService(StatusBarManagerInternal.class);
+        }
+        return mStatusBarManagerInternal;
+    }
+
     AppWarnings getAppWarningsLocked() {
         return mAppWarnings;
     }
@@ -4984,6 +5012,34 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             throw e;
         }
+    }
+
+    /**
+     * Sets the corresponding {@link DisplayArea} information for the process global
+     * configuration. To be called when we need to show IME on a different {@link DisplayArea}
+     * or display.
+     *
+     * @param pid The process id associated with the IME window.
+     * @param imeContainer The DisplayArea that contains the IME window.
+     */
+    void onImeWindowSetOnDisplayArea(final int pid, @NonNull final DisplayArea imeContainer) {
+        // Don't update process-level configuration for Multi-Client IME process since other
+        // IMEs on other displays will also receive this configuration change due to IME
+        // services use the same application config/context.
+        if (InputMethodSystemProperty.MULTI_CLIENT_IME_ENABLED) return;
+
+        if (pid == MY_PID || pid < 0) {
+            ProtoLog.w(WM_DEBUG_CONFIGURATION,
+                    "Trying to update display configuration for system/invalid process.");
+            return;
+        }
+        final WindowProcessController process = mProcessMap.getProcess(pid);
+        if (process == null) {
+            ProtoLog.w(WM_DEBUG_CONFIGURATION, "Trying to update display "
+                    + "configuration for invalid process, pid=%d", pid);
+            return;
+        }
+        process.registerDisplayAreaConfigurationListener(imeContainer);
     }
 
     final class H extends Handler {
@@ -5237,6 +5293,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
+        public boolean canCloseSystemDialogs(int pid, int uid) {
+            return ActivityTaskManagerService.this.canCloseSystemDialogs(pid, uid,
+                    null /* process */);
+        }
+
+        @Override
         public void notifyActiveVoiceInteractionServiceChanged(ComponentName component) {
             synchronized (mGlobalLock) {
                 mActiveVoiceInteractionServiceComponent = component;
@@ -5480,44 +5542,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public CompatibilityInfo compatibilityInfoForPackage(ApplicationInfo ai) {
             synchronized (mGlobalLock) {
                 return compatibilityInfoForPackageLocked(ai);
-            }
-        }
-
-        /**
-         * Set the corresponding display information for the process global configuration. To be
-         * called when we need to show IME on a different display.
-         *
-         * @param pid       The process id associated with the IME window.
-         * @param displayId The ID of the display showing the IME.
-         */
-        @Override
-        public void onImeWindowSetOnDisplay(final int pid, final int displayId) {
-            // Don't update process-level configuration for Multi-Client IME process since other
-            // IMEs on other displays will also receive this configuration change due to IME
-            // services use the same application config/context.
-            if (InputMethodSystemProperty.MULTI_CLIENT_IME_ENABLED) return;
-
-            if (pid == MY_PID || pid < 0) {
-                ProtoLog.w(WM_DEBUG_CONFIGURATION,
-                        "Trying to update display configuration for system/invalid process.");
-                return;
-            }
-            synchronized (mGlobalLock) {
-                final DisplayContent displayContent =
-                        mRootWindowContainer.getDisplayContent(displayId);
-                if (displayContent == null) {
-                    // Call might come when display is not yet added or has been removed.
-                    ProtoLog.w(WM_DEBUG_CONFIGURATION, "Trying to update display "
-                            + "configuration for non-existing displayId=%d", displayId);
-                    return;
-                }
-                final WindowProcessController process = mProcessMap.getProcess(pid);
-                if (process == null) {
-                    ProtoLog.w(WM_DEBUG_CONFIGURATION, "Trying to update display "
-                            + "configuration for invalid process, pid=%d", pid);
-                    return;
-                }
-                process.registerDisplayConfigurationListener(displayContent);
             }
         }
 

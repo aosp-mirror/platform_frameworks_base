@@ -141,6 +141,7 @@ import com.android.internal.os.BinderCallsStats.ExportedCallStat;
 import com.android.internal.os.KernelCpuThreadReader;
 import com.android.internal.os.KernelCpuThreadReaderDiff;
 import com.android.internal.os.KernelCpuThreadReaderSettingsObserver;
+import com.android.internal.os.KernelCpuTotalBpfMapReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidActiveTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidClusterTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
@@ -350,6 +351,7 @@ public class StatsPullAtomService extends SystemService {
     private final Object mDataBytesTransferLock = new Object();
     private final Object mBluetoothBytesTransferLock = new Object();
     private final Object mKernelWakelockLock = new Object();
+    private final Object mCpuTimePerClusterFreqLock = new Object();
     private final Object mCpuTimePerUidLock = new Object();
     private final Object mCpuTimePerUidFreqLock = new Object();
     private final Object mCpuActiveTimeLock = new Object();
@@ -437,6 +439,10 @@ public class StatsPullAtomService extends SystemService {
                     case FrameworkStatsLog.KERNEL_WAKELOCK:
                         synchronized (mKernelWakelockLock) {
                             return pullKernelWakelockLocked(atomTag, data);
+                        }
+                    case FrameworkStatsLog.CPU_TIME_PER_CLUSTER_FREQ:
+                        synchronized (mCpuTimePerClusterFreqLock) {
+                            return pullCpuTimePerClusterFreqLocked(atomTag, data);
                         }
                     case FrameworkStatsLog.CPU_TIME_PER_UID:
                         synchronized (mCpuTimePerUidLock) {
@@ -773,6 +779,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsCallbackImpl = new StatsPullAtomCallbackImpl();
         registerBluetoothBytesTransfer();
         registerKernelWakelock();
+        registerCpuTimePerClusterFreq();
         registerCpuTimePerUid();
         registerCpuCyclesPerUidCluster();
         registerCpuTimePerUidFreq();
@@ -1440,6 +1447,31 @@ public class StatsPullAtomService extends SystemService {
             KernelWakelockStats.Entry kws = ent.getValue();
             pulledData.add(FrameworkStatsLog.buildStatsEvent(
                     atomTag, name, kws.mCount, kws.mVersion, kws.mTotalTime));
+        }
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    private void registerCpuTimePerClusterFreq() {
+        if (KernelCpuTotalBpfMapReader.isSupported()) {
+            int tagId = FrameworkStatsLog.CPU_TIME_PER_CLUSTER_FREQ;
+            PullAtomMetadata metadata = new PullAtomMetadata.Builder()
+                    .setAdditiveFields(new int[] {3})
+                    .build();
+            mStatsManager.setPullAtomCallback(
+                    tagId,
+                    metadata,
+                    DIRECT_EXECUTOR,
+                    mStatsCallbackImpl
+            );
+        }
+    }
+
+    int pullCpuTimePerClusterFreqLocked(int atomTag, List<StatsEvent> pulledData) {
+        boolean success = KernelCpuTotalBpfMapReader.read((cluster, freq, timeMs) -> {
+            pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag, cluster, freq, timeMs));
+        });
+        if (!success) {
+            return StatsManager.PULL_SKIP;
         }
         return StatsManager.PULL_SUCCESS;
     }

@@ -76,12 +76,33 @@ public final class NetworkCapabilities implements Parcelable {
      */
     private String mRequestorPackageName;
 
+    /**
+     * Indicates whether parceling should preserve fields that are set based on permissions of
+     * the process receiving the {@link NetworkCapabilities}.
+     */
+    private final boolean mParcelLocationSensitiveFields;
+
     public NetworkCapabilities() {
+        mParcelLocationSensitiveFields = false;
         clearAll();
         mNetworkCapabilities = DEFAULT_CAPABILITIES;
     }
 
     public NetworkCapabilities(NetworkCapabilities nc) {
+        this(nc, false /* parcelLocationSensitiveFields */);
+    }
+
+    /**
+     * Make a copy of NetworkCapabilities.
+     *
+     * @param nc Original NetworkCapabilities
+     * @param parcelLocationSensitiveFields Whether to parcel location sensitive data or not.
+     * @hide
+     */
+    @SystemApi
+    public NetworkCapabilities(
+            @Nullable NetworkCapabilities nc, boolean parcelLocationSensitiveFields) {
+        mParcelLocationSensitiveFields = parcelLocationSensitiveFields;
         if (nc != null) {
             set(nc);
         }
@@ -93,6 +114,12 @@ public final class NetworkCapabilities implements Parcelable {
      * @hide
      */
     public void clearAll() {
+        // Ensures that the internal copies maintained by the connectivity stack does not set
+        // this bit.
+        if (mParcelLocationSensitiveFields) {
+            throw new UnsupportedOperationException(
+                    "Cannot clear NetworkCapabilities when parcelLocationSensitiveFields is set");
+        }
         mNetworkCapabilities = mTransportTypes = mUnwantedNetworkCapabilities = 0;
         mLinkUpBandwidthKbps = mLinkDownBandwidthKbps = LINK_BANDWIDTH_UNSPECIFIED;
         mNetworkSpecifier = null;
@@ -109,6 +136,8 @@ public final class NetworkCapabilities implements Parcelable {
 
     /**
      * Set all contents of this object to the contents of a NetworkCapabilities.
+     *
+     * @param nc Original NetworkCapabilities
      * @hide
      */
     public void set(@NonNull NetworkCapabilities nc) {
@@ -117,7 +146,11 @@ public final class NetworkCapabilities implements Parcelable {
         mLinkUpBandwidthKbps = nc.mLinkUpBandwidthKbps;
         mLinkDownBandwidthKbps = nc.mLinkDownBandwidthKbps;
         mNetworkSpecifier = nc.mNetworkSpecifier;
-        mTransportInfo = nc.mTransportInfo;
+        if (nc.getTransportInfo() != null) {
+            setTransportInfo(nc.getTransportInfo().makeCopy(mParcelLocationSensitiveFields));
+        } else {
+            setTransportInfo(null);
+        }
         mSignalStrength = nc.mSignalStrength;
         setUids(nc.mUids); // Will make the defensive copy
         setAdministratorUids(nc.getAdministratorUids());
@@ -436,10 +469,10 @@ public final class NetworkCapabilities implements Parcelable {
      */
     @VisibleForTesting
     /* package */ static final long UNRESTRICTED_CAPABILITIES =
-            (1 << NET_CAPABILITY_INTERNET) |
-            (1 << NET_CAPABILITY_MMS) |
-            (1 << NET_CAPABILITY_SUPL) |
-            (1 << NET_CAPABILITY_WIFI_P2P);
+            (1 << NET_CAPABILITY_INTERNET)
+            | (1 << NET_CAPABILITY_MMS)
+            | (1 << NET_CAPABILITY_SUPL)
+            | (1 << NET_CAPABILITY_WIFI_P2P);
 
     /**
      * Capabilities that are managed by ConnectivityService.
@@ -907,8 +940,8 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     private boolean satisfiedByTransportTypes(NetworkCapabilities nc) {
-        return ((this.mTransportTypes == 0) ||
-                ((this.mTransportTypes & nc.mTransportTypes) != 0));
+        return ((this.mTransportTypes == 0)
+                || ((this.mTransportTypes & nc.mTransportTypes) != 0));
     }
 
     /** @hide */
@@ -1162,12 +1195,12 @@ public final class NetworkCapabilities implements Parcelable {
                 Math.max(this.mLinkDownBandwidthKbps, nc.mLinkDownBandwidthKbps);
     }
     private boolean satisfiedByLinkBandwidths(NetworkCapabilities nc) {
-        return !(this.mLinkUpBandwidthKbps > nc.mLinkUpBandwidthKbps ||
-                this.mLinkDownBandwidthKbps > nc.mLinkDownBandwidthKbps);
+        return !(this.mLinkUpBandwidthKbps > nc.mLinkUpBandwidthKbps
+                || this.mLinkDownBandwidthKbps > nc.mLinkDownBandwidthKbps);
     }
     private boolean equalsLinkBandwidths(NetworkCapabilities nc) {
-        return (this.mLinkUpBandwidthKbps == nc.mLinkUpBandwidthKbps &&
-                this.mLinkDownBandwidthKbps == nc.mLinkDownBandwidthKbps);
+        return (this.mLinkUpBandwidthKbps == nc.mLinkUpBandwidthKbps
+                && this.mLinkDownBandwidthKbps == nc.mLinkDownBandwidthKbps);
     }
     /** @hide */
     public static int minBandwidth(int a, int b) {
@@ -1682,9 +1715,9 @@ public final class NetworkCapabilities implements Parcelable {
      */
     public boolean equalRequestableCapabilities(@Nullable NetworkCapabilities nc) {
         if (nc == null) return false;
-        return (equalsNetCapabilitiesRequestable(nc) &&
-                equalsTransportTypes(nc) &&
-                equalsSpecifier(nc));
+        return (equalsNetCapabilitiesRequestable(nc)
+                && equalsTransportTypes(nc)
+                && equalsSpecifier(nc));
     }
 
     @Override

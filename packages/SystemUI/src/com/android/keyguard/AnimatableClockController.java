@@ -85,10 +85,9 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
     }
 
     private void initColors() {
-        mLockScreenColors[0] = Utils.getColorAttrDefaultColor(getContext(),
-                com.android.systemui.R.attr.wallpaperTextColor);
-        mLockScreenColors[1] = Utils.getColorAttrDefaultColor(getContext(),
-                        com.android.systemui.R.attr.wallpaperTextColorSecondary);
+        mLockScreenColors[0] = Utils.getColorAttr(getContext(),
+                android.R.attr.textColorPrimary).getDefaultColor();
+        mLockScreenColors[1] = mLockScreenColors[0]; // same color
         mView.setColors(mDozingColors, mLockScreenColors);
         mView.animateDoze(mIsDozing, false);
     }

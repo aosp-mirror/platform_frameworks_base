@@ -19,11 +19,11 @@
 #include <private/hwui/WebViewFunctor.h>
 #ifdef __ANDROID__ // Layoutlib does not support render thread
 #include <renderthread/RenderProxy.h>
-#else
-#include <utils/Log.h>
 #endif
 
 #include <utils/LightRefBase.h>
+#include <utils/Log.h>
+#include <utils/StrongPointer.h>
 #include <mutex>
 #include <vector>
 

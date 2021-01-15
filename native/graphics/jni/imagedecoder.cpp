@@ -535,3 +535,9 @@ int32_t AImageDecoderFrameInfo_getBlendOp(const AImageDecoderFrameInfo* info) {
             return ANDROID_IMAGE_DECODER_BLEND_OP_SRC_OVER;
     }
 }
+
+void AImageDecoder_setInternallyHandleDisposePrevious(AImageDecoder* decoder, bool handle) {
+    if (decoder) {
+        toDecoder(decoder)->setHandleRestorePrevious(handle);
+    }
+}

@@ -154,6 +154,7 @@ import android.app.usage.UsageStatsManagerInternal;
 import android.companion.ICompanionDeviceManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
+import android.compat.annotation.LoggingOnly;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentProvider;
@@ -250,6 +251,7 @@ import android.widget.Toast;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.InstanceIdSequence;
@@ -446,6 +448,17 @@ public class NotificationManagerService extends SystemService {
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.R)
     private static final long NOTIFICATION_TRAMPOLINE_BLOCK = 167676448L;
 
+    /**
+     * Rate limit showing toasts, on a per package basis.
+     *
+     * It limits the number of {@link android.widget.Toast#show()} calls to prevent overburdening
+     * the user with too many toasts in a limited time. Any attempt to show more toasts than allowed
+     * in a certain time frame will result in the toast being discarded.
+     */
+    @ChangeId
+    @LoggingOnly
+    private static final long RATE_LIMIT_TOASTS = 174840628L;
+
     private IActivityManager mAm;
     private ActivityTaskManagerInternal mAtm;
     private ActivityManager mActivityManager;
@@ -466,6 +479,7 @@ public class NotificationManagerService extends SystemService {
     private UriGrantsManagerInternal mUgmInternal;
     private RoleObserver mRoleObserver;
     private UserManager mUm;
+    private IPlatformCompat mPlatformCompat;
     private ShortcutHelper mShortcutHelper;
 
     final IBinder mForegroundToken = new Binder();
@@ -1988,6 +2002,8 @@ public class NotificationManagerService extends SystemService {
         mDeviceIdleManager = getContext().getSystemService(DeviceIdleManager.class);
         mDpm = dpm;
         mUm = userManager;
+        mPlatformCompat = IPlatformCompat.Stub.asInterface(
+                ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
 
         mUiHandler = new Handler(UiThread.get().getLooper());
         String[] extractorNames;
@@ -6062,7 +6078,6 @@ public class NotificationManagerService extends SystemService {
         if (!isAppForeground && metadata != null) {
             int flags = metadata.getFlags();
             flags &= ~Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE;
-            flags &= ~Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
             metadata.setFlags(flags);
         }
     }
@@ -7412,6 +7427,7 @@ public class NotificationManagerService extends SystemService {
     private boolean tryShowToast(ToastRecord record, boolean rateLimitingEnabled,
             boolean isWithinQuota) {
         if (rateLimitingEnabled && !isWithinQuota) {
+            reportCompatRateLimitingToastsChange(record.uid);
             Slog.w(TAG, "Package " + record.pkg + " is above allowed toast quota, the "
                     + "following toast was blocked and discarded: " + record);
             return false;
@@ -7422,6 +7438,19 @@ public class NotificationManagerService extends SystemService {
             return false;
         }
         return record.show();
+    }
+
+    /** Reports rate limiting toasts compat change (used when the toast was blocked). */
+    private void reportCompatRateLimitingToastsChange(int uid) {
+        final long id = Binder.clearCallingIdentity();
+        try {
+            mPlatformCompat.reportChangeByUid(RATE_LIMIT_TOASTS, uid);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Unexpected exception while reporting toast was blocked due to rate"
+                    + " limiting", e);
+        } finally {
+            Binder.restoreCallingIdentity(id);
+        }
     }
 
     @GuardedBy("mToastQueue")

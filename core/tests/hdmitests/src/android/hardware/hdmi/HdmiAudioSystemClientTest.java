@@ -395,6 +395,16 @@ public class HdmiAudioSystemClientTest {
         }
 
         @Override
+        public void addCecSettingChangeListener(String name,
+                IHdmiCecSettingChangeListener listener) {
+        }
+
+        @Override
+        public void removeCecSettingChangeListener(String name,
+                IHdmiCecSettingChangeListener listener) {
+        }
+
+        @Override
         public int[] getAllowedCecSettingIntValues(String name) {
             return new int[0];
         }

@@ -23,8 +23,6 @@ import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 
-import android.animation.Animator;
-import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -41,6 +39,7 @@ import android.window.WindowOrganizer;
 
 import androidx.annotation.BinderThread;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.ShellExecutor;
@@ -48,6 +47,7 @@ import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /** Plays transition animations */
 public class Transitions {
@@ -58,7 +58,6 @@ public class Transitions {
             SystemProperties.getBoolean("persist.debug.shell_transit", false);
 
     private final WindowOrganizer mOrganizer;
-    private final TransactionPool mTransactionPool;
     private final ShellExecutor mMainExecutor;
     private final ShellExecutor mAnimExecutor;
     private final TransitionPlayerImpl mPlayerImpl;
@@ -67,7 +66,6 @@ public class Transitions {
     private final ArrayList<TransitionHandler> mHandlers = new ArrayList<>();
 
     private static final class ActiveTransition {
-        ArrayList<Animator> mAnimations = null;
         TransitionHandler mFirstHandler = null;
     }
 
@@ -77,10 +75,11 @@ public class Transitions {
     public Transitions(@NonNull WindowOrganizer organizer, @NonNull TransactionPool pool,
             @NonNull ShellExecutor mainExecutor, @NonNull ShellExecutor animExecutor) {
         mOrganizer = organizer;
-        mTransactionPool = pool;
         mMainExecutor = mainExecutor;
         mAnimExecutor = animExecutor;
         mPlayerImpl = new TransitionPlayerImpl();
+        // The very last handler (0 in the list) should be the default one.
+        mHandlers.add(new DefaultTransitionHandler(pool, mainExecutor, animExecutor));
     }
 
     /** Register this transition handler with Core */
@@ -104,47 +103,10 @@ public class Transitions {
         return mAnimExecutor;
     }
 
-    // TODO(shell-transitions): real animations
-    private void startExampleAnimation(@NonNull IBinder transition, @NonNull SurfaceControl leash,
-            boolean show) {
-        final float end = show ? 1.f : 0.f;
-        final float start = 1.f - end;
-        final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
-        final ValueAnimator va = ValueAnimator.ofFloat(start, end);
-        va.setDuration(500);
-        va.addUpdateListener(animation -> {
-            float fraction = animation.getAnimatedFraction();
-            transaction.setAlpha(leash, start * (1.f - fraction) + end * fraction);
-            transaction.apply();
-        });
-        final Runnable finisher = () -> {
-            transaction.setAlpha(leash, end);
-            transaction.apply();
-            mTransactionPool.release(transaction);
-            mMainExecutor.execute(() -> {
-                mActiveTransitions.get(transition).mAnimations.remove(va);
-                onFinish(transition);
-            });
-        };
-        va.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) { }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                finisher.run();
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                finisher.run();
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) { }
-        });
-        mActiveTransitions.get(transition).mAnimations.add(va);
-        mAnimExecutor.execute(va::start);
+    /** Only use this in tests. This is used to avoid running animations during tests. */
+    @VisibleForTesting
+    void replaceDefaultHandlerForTest(TransitionHandler handler) {
+        mHandlers.set(0, handler);
     }
 
     /** @return true if the transition was triggered by opening something vs closing something */
@@ -217,18 +179,16 @@ public class Transitions {
         }
     }
 
-    private void onTransitionReady(@NonNull IBinder transitionToken, @NonNull TransitionInfo info,
+    @VisibleForTesting
+    void onTransitionReady(@NonNull IBinder transitionToken, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "onTransitionReady %s: %s",
                 transitionToken, info);
         final ActiveTransition active = mActiveTransitions.get(transitionToken);
         if (active == null) {
             throw new IllegalStateException("Got transitionReady for non-active transition "
-                    + transitionToken + ". expecting one of " + mActiveTransitions.keySet());
-        }
-        if (active.mAnimations != null) {
-            throw new IllegalStateException("Got a duplicate onTransitionReady call for "
-                    + transitionToken);
+                    + transitionToken + ". expecting one of "
+                    + Arrays.toString(mActiveTransitions.keySet().toArray()));
         }
         if (!info.getRootLeash().isValid()) {
             // Invalid root-leash implies that the transition is empty/no-op, so just do
@@ -253,44 +213,21 @@ public class Transitions {
                 return;
             }
         }
-
-        // No handler chose to perform this animation, so fall-back to the
-        // default animation handling.
-        final boolean isOpening = isOpeningType(info.getType());
-        active.mAnimations = new ArrayList<>(); // Play fade animations
-        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
-            final TransitionInfo.Change change = info.getChanges().get(i);
-
-            // Don't animate anything with an animating parent
-            if (change.getParent() != null) continue;
-
-            final int mode = info.getChanges().get(i).getMode();
-            if (isOpening && (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT)) {
-                if ((change.getFlags() & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0) {
-                    // This received a transferred starting window, so don't animate
-                    continue;
-                }
-                // fade in
-                startExampleAnimation(transitionToken, change.getLeash(), true /* show */);
-            } else if (!isOpening && (mode == TRANSIT_CLOSE || mode == TRANSIT_TO_BACK)) {
-                // fade out
-                startExampleAnimation(transitionToken, change.getLeash(), false /* show */);
-            }
-        }
-        t.apply();
-        onFinish(transitionToken);
+        throw new IllegalStateException(
+                "This shouldn't happen, maybe the default handler is broken.");
     }
 
     private void onFinish(IBinder transition) {
-        final ActiveTransition active = mActiveTransitions.get(transition);
-        if (active.mAnimations != null && !active.mAnimations.isEmpty()) return;
+        if (!mActiveTransitions.containsKey(transition)) {
+            throw new IllegalStateException("Trying to finish an already-finished transition.");
+        }
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
                 "Transition animations finished, notifying core %s", transition);
         mActiveTransitions.remove(transition);
         mOrganizer.finishTransition(transition, null, null);
     }
 
-    private void requestStartTransition(int type, @NonNull IBinder transitionToken,
+    void requestStartTransition(int type, @NonNull IBinder transitionToken,
             @Nullable ActivityManager.RunningTaskInfo triggerTask) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition requested: type=%d %s",
                 type, transitionToken);

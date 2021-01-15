@@ -16,6 +16,12 @@
 
 package com.android.internal.jank;
 
+import static android.view.SurfaceControl.JankData.JANK_APP_DEADLINE_MISSED;
+import static android.view.SurfaceControl.JankData.JANK_NONE;
+import static android.view.SurfaceControl.JankData.JANK_SURFACEFLINGER_DEADLINE_MISSED;
+
+import static com.android.internal.jank.FrameTracker.SurfaceControlWrapper;
+import static com.android.internal.jank.FrameTracker.ViewRootWrapper;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -23,6 +29,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.verify;
@@ -30,12 +37,17 @@ import static org.mockito.Mockito.when;
 
 import android.os.Handler;
 import android.view.FrameMetrics;
+import android.view.SurfaceControl;
+import android.view.SurfaceControl.JankData;
+import android.view.SurfaceControl.JankData.JankType;
+import android.view.SurfaceControl.OnJankDataListener;
 import android.view.View;
 import android.view.ViewAttachTestActivity;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.rule.ActivityTestRule;
 
+import com.android.internal.jank.FrameTracker.ChoreographerWrapper;
 import com.android.internal.jank.FrameTracker.FrameMetricsWrapper;
 import com.android.internal.jank.FrameTracker.ThreadedRendererWrapper;
 import com.android.internal.jank.InteractionJankMonitor.Session;
@@ -43,6 +55,7 @@ import com.android.internal.jank.InteractionJankMonitor.Session;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.util.concurrent.TimeUnit;
@@ -58,6 +71,11 @@ public class FrameTrackerTest {
     private FrameTracker mTracker;
     private ThreadedRendererWrapper mRenderer;
     private FrameMetricsWrapper mWrapper;
+    private SurfaceControlWrapper mSurfaceControlWrapper;
+    private ViewRootWrapper mViewRootWrapper;
+    private ChoreographerWrapper mChoreographer;
+    private ArgumentCaptor<OnJankDataListener> mListenerCapture;
+    private SurfaceControl mSurfaceControl;
 
     @Before
     public void setup() {
@@ -68,63 +86,116 @@ public class FrameTrackerTest {
 
         Handler handler = mRule.getActivity().getMainThreadHandler();
         mWrapper = Mockito.spy(new FrameMetricsWrapper());
-        // For simplicity - provide current timestamp anytime mWrapper asked for VSYNC_TIMESTAMP
-        when(mWrapper.getMetric(FrameMetrics.VSYNC_TIMESTAMP))
-                .then(unusedInvocation -> System.nanoTime());
         mRenderer = Mockito.spy(new ThreadedRendererWrapper(view.getThreadedRenderer()));
         doNothing().when(mRenderer).addObserver(any());
         doNothing().when(mRenderer).removeObserver(any());
 
+        mSurfaceControl = new SurfaceControl.Builder().setName("Surface").build();
+        mViewRootWrapper = mock(ViewRootWrapper.class);
+        when(mViewRootWrapper.getSurfaceControl()).thenReturn(mSurfaceControl);
+        mSurfaceControlWrapper = mock(SurfaceControlWrapper.class);
+
+        mListenerCapture = ArgumentCaptor.forClass(OnJankDataListener.class);
+        doNothing().when(mSurfaceControlWrapper).addJankStatsListener(
+                mListenerCapture.capture(), any());
+        mChoreographer = mock(ChoreographerWrapper.class);
+
+
         Session session = new Session(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
         mTracker = Mockito.spy(
-                new FrameTracker(session, handler, mRenderer, mWrapper,
+                new FrameTracker(session, handler, mRenderer, mViewRootWrapper,
+                        mSurfaceControlWrapper, mChoreographer, mWrapper,
                         /*traceThresholdMissedFrames=*/ 1, /*traceThresholdFrameTimeMillis=*/ -1));
         doNothing().when(mTracker).triggerPerfetto();
     }
 
     @Test
-    public void testOnlyFirstFrameOverThreshold() {
+    public void testOnlyFirstWindowFrameOverThreshold() {
         // Just provide current timestamp anytime mWrapper asked for VSYNC_TIMESTAMP
         when(mWrapper.getMetric(FrameMetrics.VSYNC_TIMESTAMP))
                 .then(unusedInvocation -> System.nanoTime());
 
+        when(mChoreographer.getVsyncId()).thenReturn(100L);
         mTracker.begin();
         verify(mRenderer, only()).addObserver(any());
 
         // send first frame with a long duration - should not be taken into account
-        setupFirstFrameMockWithDuration(100);
-        mTracker.onFrameMetricsAvailable(0);
+        sendFirstWindowFrame(100, JANK_APP_DEADLINE_MISSED, 100L);
 
         // send another frame with a short duration - should not be considered janky
-        setupOtherFrameMockWithDuration(5);
-        mTracker.onFrameMetricsAvailable(0);
+        sendFirstWindowFrame(5, JANK_NONE, 101L);
 
         // end the trace session, the last janky frame is after the end() so is discarded.
+        when(mChoreographer.getVsyncId()).thenReturn(101L);
         mTracker.end();
-        setupOtherFrameMockWithDuration(500);
-        mTracker.onFrameMetricsAvailable(0);
+        sendFrame(500, JANK_APP_DEADLINE_MISSED, 102L);
 
         verify(mRenderer).removeObserver(any());
         verify(mTracker, never()).triggerPerfetto();
     }
 
     @Test
-    public void testOtherFrameOverThreshold() {
+    public void testSfJank() {
+        when(mChoreographer.getVsyncId()).thenReturn(100L);
         mTracker.begin();
         verify(mRenderer, only()).addObserver(any());
 
         // send first frame - not janky
-        setupFirstFrameMockWithDuration(4);
-        mTracker.onFrameMetricsAvailable(0);
+        sendFrame(4, JANK_NONE, 100L);
 
         // send another frame - should be considered janky
-        setupOtherFrameMockWithDuration(40);
-        mTracker.onFrameMetricsAvailable(0);
+        sendFrame(40, JANK_SURFACEFLINGER_DEADLINE_MISSED, 101L);
 
         // end the trace session
+        when(mChoreographer.getVsyncId()).thenReturn(101L);
         mTracker.end();
-        setupOtherFrameMockWithDuration(5);
-        mTracker.onFrameMetricsAvailable(0);
+        sendFrame(4, JANK_NONE, 102L);
+
+        verify(mRenderer).removeObserver(any());
+
+        // We detected a janky frame - trigger Perfetto
+        verify(mTracker).triggerPerfetto();
+    }
+
+    @Test
+    public void testFirstFrameJankyNoTrigger() {
+        when(mChoreographer.getVsyncId()).thenReturn(100L);
+        mTracker.begin();
+        verify(mRenderer, only()).addObserver(any());
+
+        // send first frame - janky
+        sendFrame(40, JANK_APP_DEADLINE_MISSED, 100L);
+
+        // send another frame - not jank
+        sendFrame(4, JANK_NONE, 101L);
+
+        // end the trace session
+        when(mChoreographer.getVsyncId()).thenReturn(101L);
+        mTracker.end();
+        sendFrame(4, JANK_NONE, 102L);
+
+        verify(mRenderer).removeObserver(any());
+
+        // We detected a janky frame - trigger Perfetto
+        verify(mTracker, never()).triggerPerfetto();
+    }
+
+    @Test
+    public void testOtherFrameOverThreshold() {
+        when(mChoreographer.getVsyncId()).thenReturn(100L);
+        mTracker.begin();
+        verify(mRenderer, only()).addObserver(any());
+
+        // send first frame - not janky
+        sendFrame(4, JANK_NONE, 100L);
+
+        // send another frame - should be considered janky
+        sendFrame(40, JANK_APP_DEADLINE_MISSED, 101L);
+
+        // end the trace session
+        when(mChoreographer.getVsyncId()).thenReturn(101L);
+        mTracker.end();
+        sendFrame(4, JANK_NONE, 102L);
 
         verify(mRenderer).removeObserver(any());
 
@@ -134,29 +205,23 @@ public class FrameTrackerTest {
 
     @Test
     public void testLastFrameOverThresholdBeforeEnd() {
+        when(mChoreographer.getVsyncId()).thenReturn(100L);
         mTracker.begin();
         verify(mRenderer, only()).addObserver(any());
 
         // send first frame - not janky
-        setupFirstFrameMockWithDuration(4);
-        mTracker.onFrameMetricsAvailable(0);
+        sendFrame(4, JANK_NONE, 100L);
 
         // send another frame - not janky
-        setupOtherFrameMockWithDuration(4);
-        mTracker.onFrameMetricsAvailable(0);
+        sendFrame(4, JANK_NONE, 101L);
 
         // end the trace session, simulate one more valid callback came after the end call.
-        when(mWrapper.getMetric(FrameMetrics.VSYNC_TIMESTAMP))
-                .thenReturn(System.nanoTime());
-        setupOtherFrameMockWithDuration(50);
+        when(mChoreographer.getVsyncId()).thenReturn(102L);
         mTracker.end();
-        mTracker.onFrameMetricsAvailable(0);
+        sendFrame(50, JANK_APP_DEADLINE_MISSED, 102L);
 
-        // One more callback with VSYNC after the end() timestamp.
-        when(mWrapper.getMetric(FrameMetrics.VSYNC_TIMESTAMP))
-                .thenReturn(System.nanoTime());
-        setupOtherFrameMockWithDuration(5);
-        mTracker.onFrameMetricsAvailable(0);
+        // One more callback with VSYNC after the end() vsync id.
+        sendFrame(4, JANK_NONE, 103L);
 
         verify(mRenderer).removeObserver(any());
 
@@ -166,20 +231,18 @@ public class FrameTrackerTest {
 
     @Test
     public void testBeginCancel() {
+        when(mChoreographer.getVsyncId()).thenReturn(100L);
         mTracker.begin();
         verify(mRenderer).addObserver(any());
 
         // First frame - not janky
-        setupFirstFrameMockWithDuration(4);
-        mTracker.onFrameMetricsAvailable(0);
+        sendFrame(4, JANK_NONE, 100L);
 
         // normal frame - not janky
-        setupOtherFrameMockWithDuration(12);
-        mTracker.onFrameMetricsAvailable(0);
+        sendFrame(4, JANK_NONE, 101L);
 
         // a janky frame
-        setupOtherFrameMockWithDuration(30);
-        mTracker.onFrameMetricsAvailable(0);
+        sendFrame(50, JANK_APP_DEADLINE_MISSED, 102L);
 
         mTracker.cancel();
         verify(mRenderer).removeObserver(any());
@@ -187,15 +250,26 @@ public class FrameTrackerTest {
         verify(mTracker, never()).triggerPerfetto();
     }
 
-    private void setupFirstFrameMockWithDuration(long durationMillis) {
-        doReturn(1L).when(mWrapper).getMetric(FrameMetrics.FIRST_DRAW_FRAME);
-        doReturn(TimeUnit.MILLISECONDS.toNanos(durationMillis))
-                .when(mWrapper).getMetric(FrameMetrics.TOTAL_DURATION);
+    private void sendFirstWindowFrame(long durationMillis,
+            @JankType int jankType, long vsyncId) {
+        sendFrame(durationMillis, jankType, vsyncId, true /* firstWindowFrame */);
     }
 
-    private void setupOtherFrameMockWithDuration(long durationMillis) {
-        doReturn(0L).when(mWrapper).getMetric(FrameMetrics.FIRST_DRAW_FRAME);
+    private void sendFrame(long durationMillis,
+            @JankType int jankType, long vsyncId) {
+        sendFrame(durationMillis, jankType, vsyncId, false /* firstWindowFrame */);
+    }
+
+    private void sendFrame(long durationMillis,
+            @JankType int jankType, long vsyncId, boolean firstWindowFrame) {
+        when(mWrapper.getTiming()).thenReturn(new long[] { 0, vsyncId });
+        doReturn(firstWindowFrame ? 1L : 0L).when(mWrapper)
+                .getMetric(FrameMetrics.FIRST_DRAW_FRAME);
         doReturn(TimeUnit.MILLISECONDS.toNanos(durationMillis))
                 .when(mWrapper).getMetric(FrameMetrics.TOTAL_DURATION);
+        mTracker.onFrameMetricsAvailable(0);
+        mListenerCapture.getValue().onJankDataAvailable(new JankData[] {
+                new JankData(vsyncId, jankType)
+        });
     }
 }

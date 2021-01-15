@@ -26,9 +26,9 @@ import android.os.Looper
 import android.os.Message
 import android.os.UserHandle
 import android.text.TextUtils
+import android.util.IndentingPrintWriter
 import android.util.SparseArray
 import com.android.internal.annotations.VisibleForTesting
-import com.android.internal.util.IndentingPrintWriter
 import com.android.systemui.Dumpable
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
 import com.android.systemui.dump.DumpManager

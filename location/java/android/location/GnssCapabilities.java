@@ -57,6 +57,8 @@ public final class GnssCapabilities implements Parcelable {
     public static final int TOP_HAL_CAPABILITY_MEASUREMENT_CORRECTIONS = 1024;
     /** @hide */
     public static final int TOP_HAL_CAPABILITY_ANTENNA_INFO = 2048;
+    /** @hide */
+    public static final int TOP_HAL_CAPABILITY_SATELLITE_PVT = 8192;
 
     /** @hide */
     @IntDef(flag = true, prefix = {"TOP_HAL_CAPABILITY_"}, value = {TOP_HAL_CAPABILITY_SCHEDULING,
@@ -64,7 +66,8 @@ public final class GnssCapabilities implements Parcelable {
             TOP_HAL_CAPABILITY_ON_DEMAND_TIME, TOP_HAL_CAPABILITY_GEOFENCING,
             TOP_HAL_CAPABILITY_MEASUREMENTS, TOP_HAL_CAPABILITY_NAV_MESSAGES,
             TOP_HAL_CAPABILITY_LOW_POWER_MODE, TOP_HAL_CAPABILITY_SATELLITE_BLOCKLIST,
-            TOP_HAL_CAPABILITY_MEASUREMENT_CORRECTIONS, TOP_HAL_CAPABILITY_ANTENNA_INFO})
+            TOP_HAL_CAPABILITY_MEASUREMENT_CORRECTIONS, TOP_HAL_CAPABILITY_ANTENNA_INFO,
+            TOP_HAL_CAPABILITY_SATELLITE_PVT})
     @Retention(RetentionPolicy.SOURCE)
     public @interface TopHalCapabilityFlags {}
 
@@ -294,6 +297,16 @@ public final class GnssCapabilities implements Parcelable {
     }
 
     /**
+     * Returns {@code true} if GNSS chipset supports satellite PVT, {@code false} otherwise.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean hasSatellitePvt() {
+        return (mTopFlags & TOP_HAL_CAPABILITY_SATELLITE_PVT) != 0;
+    }
+
+    /**
      * Returns {@code true} if GNSS chipset supports measurement corrections, {@code false}
      * otherwise.
      *
@@ -511,6 +524,9 @@ public final class GnssCapabilities implements Parcelable {
         if (hasSatelliteBlocklist()) {
             builder.append("SATELLITE_BLOCKLIST ");
         }
+        if (hasSatellitePvt()) {
+            builder.append("SATELLITE_PVT ");
+        }
         if (hasMeasurementCorrections()) {
             builder.append("MEASUREMENT_CORRECTIONS ");
         }
@@ -670,6 +686,17 @@ public final class GnssCapabilities implements Parcelable {
         @SystemApi
         public @NonNull Builder setHasSatelliteBlocklist(boolean capable) {
             mTopFlags = setFlag(mTopFlags, TOP_HAL_CAPABILITY_SATELLITE_BLOCKLIST, capable);
+            return this;
+        }
+
+        /**
+         * Sets satellite PVT capability.
+         *
+         * @hide
+         */
+        @SystemApi
+        public @NonNull Builder setHasSatellitePvt(boolean capable) {
+            mTopFlags = setFlag(mTopFlags, TOP_HAL_CAPABILITY_SATELLITE_PVT, capable);
             return this;
         }
 

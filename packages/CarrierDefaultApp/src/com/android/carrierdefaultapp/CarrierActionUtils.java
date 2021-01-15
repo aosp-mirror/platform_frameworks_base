@@ -171,7 +171,7 @@ public class CarrierActionUtils {
         portalIntent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT
                 | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, portalIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
         Notification notification = getNotification(context, R.string.portal_notification_id,
                 R.string.portal_notification_detail, pendingIntent);
         try {

@@ -18,6 +18,7 @@ package android.hardware.hdmi;
 
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
+import android.hardware.hdmi.IHdmiCecSettingChangeListener;
 import android.hardware.hdmi.IHdmiCecVolumeControlFeatureListener;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.hdmi.IHdmiControlStatusChangeListener;
@@ -89,6 +90,8 @@ interface IHdmiControlService {
     boolean isHdmiCecVolumeControlEnabled();
     void reportAudioStatus(int deviceType, int volume, int maxVolume, boolean isMute);
     void setSystemAudioModeOnForAudioOnlySource();
+    void addCecSettingChangeListener(String name, IHdmiCecSettingChangeListener listener);
+    void removeCecSettingChangeListener(String name, IHdmiCecSettingChangeListener listener);
     List<String> getUserCecSettings();
     List<String> getAllowedCecSettingStringValues(String name);
     int[] getAllowedCecSettingIntValues(String name);

@@ -137,6 +137,7 @@ cc_library_shared {
 
 cc_library_shared {
     name: "libmedia_tv_tuner",
+
     srcs: [
         "android_media_tv_Tuner.cpp",
         "tuner/DemuxClient.cpp",
@@ -163,6 +164,7 @@ cc_library_shared {
         "libnativehelper",
         "libutils",
         "tv_tuner_aidl_interface-ndk_platform",
+        "tv_tuner_resource_manager_aidl_interface-ndk_platform"
     ],
     defaults: [
         "libcodec2-impl-defaults",

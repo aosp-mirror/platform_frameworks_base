@@ -18,13 +18,13 @@ package com.android.server.biometrics.sensors.face.aidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.face.Face;
 import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.sensors.InvalidationClient;
-import com.android.server.biometrics.sensors.face.FaceUtils;
 
 import java.util.Map;
 
@@ -33,8 +33,8 @@ public class FaceInvalidationClient extends InvalidationClient<Face, ISession> {
 
     public FaceInvalidationClient(@NonNull Context context,
             @NonNull LazyDaemon<ISession> lazyDaemon, int userId, int sensorId,
-            @NonNull FaceUtils utils, @NonNull Map<Integer, Long> authenticatorIds) {
-        super(context, lazyDaemon, userId, sensorId, utils, authenticatorIds);
+            @NonNull Map<Integer, Long> authenticatorIds, @NonNull IInvalidationCallback callback) {
+        super(context, lazyDaemon, userId, sensorId, authenticatorIds, callback);
     }
 
     @Override

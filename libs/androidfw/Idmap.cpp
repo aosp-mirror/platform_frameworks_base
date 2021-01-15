@@ -326,6 +326,11 @@ std::unique_ptr<const LoadedIdmap> LoadedIdmap::Load(const StringPiece& idmap_pa
     }
   }
 
+  if (data_size != 0) {
+    LOG(ERROR) << "idmap parsed with " << data_size << "bytes remaining";
+    return {};
+  }
+
   // Can't use make_unique because LoadedIdmap constructor is private.
   return std::unique_ptr<LoadedIdmap>(
       new LoadedIdmap(idmap_path.to_string(), header, data_header, target_entries,

@@ -16,10 +16,13 @@
 
 package com.android.systemui.wmshell;
 
+import android.animation.AnimationHandler;
+import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.view.IWindowManager;
 
 import com.android.systemui.dagger.WMSingleton;
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.apppairs.AppPairs;
@@ -32,6 +35,7 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.common.annotations.ChoreographerSfVsync;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
@@ -46,6 +50,8 @@ import com.android.wm.shell.pip.phone.PhonePipMenuController;
 import com.android.wm.shell.pip.phone.PipAppOpsListener;
 import com.android.wm.shell.pip.phone.PipController;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
+import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
@@ -75,17 +81,20 @@ public class WMShellModule {
             DisplayImeController displayImeController, TransactionPool transactionPool,
             ShellTaskOrganizer shellTaskOrganizer, SyncTransactionQueue syncQueue,
             TaskStackListenerImpl taskStackListener, Transitions transitions,
-            @ShellMainThread ShellExecutor mainExecutor) {
-        return new LegacySplitScreenController(context, displayController, systemWindows,
+            @ShellMainThread ShellExecutor mainExecutor,
+            @ChoreographerSfVsync AnimationHandler sfVsyncAnimationHandler) {
+        return LegacySplitScreenController.create(context, displayController, systemWindows,
                 displayImeController, transactionPool, shellTaskOrganizer, syncQueue,
-                taskStackListener, transitions, mainExecutor);
+                taskStackListener, transitions, mainExecutor, sfVsyncAnimationHandler);
     }
 
     @WMSingleton
     @Provides
     static AppPairs provideAppPairs(ShellTaskOrganizer shellTaskOrganizer,
-            SyncTransactionQueue syncQueue, DisplayController displayController) {
-        return new AppPairsController(shellTaskOrganizer, syncQueue, displayController);
+            SyncTransactionQueue syncQueue, DisplayController displayController,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return AppPairsController.create(shellTaskOrganizer, syncQueue, displayController,
+                mainExecutor);
     }
 
     @WMSingleton

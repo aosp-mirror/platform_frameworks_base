@@ -79,7 +79,7 @@ public final class PermGroupUsage {
     @Override
     public String toString() {
         return getClass().getSimpleName() + "@" + Integer.toHexString(System.identityHashCode(this))
-                + "packageName: " + mPackageName + ", UID: " + mUid + ", permGroup: "
-                + mPermGroupName + ", isActive: " + mIsActive + ",attribution: " + mAttribution;
+                + " packageName: " + mPackageName + ", UID: " + mUid + ", permGroup: "
+                + mPermGroupName + ", isActive: " + mIsActive + ", attribution: " + mAttribution;
     }
 }

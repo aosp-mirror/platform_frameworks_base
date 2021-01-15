@@ -445,6 +445,15 @@ public final class ImsCallProfile implements Parcelable {
     public static final String EXTRA_FORWARDED_NUMBER =
             "android.telephony.ims.extra.FORWARDED_NUMBER";
 
+    /**
+     * Extra key with an {@code boolean} value which can be set in
+     * {@link #setCallExtraBoolean(String, boolean)} to indicate whether call is a cross sim call.
+     * <p>
+     * Valid values are true if call is cross sim call else false.
+     */
+    public static final String EXTRA_IS_CROSS_SIM_CALL =
+            "android.telephony.ims.extra.IS_CROSS_SIM_CALL";
+
     /** @hide */
     public int mServiceType;
     /** @hide */

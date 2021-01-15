@@ -40,6 +40,9 @@ public interface StatusBarManagerInternal {
 
     void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
 
+    /** Collapses the notification shade. */
+    void collapsePanels();
+
     void dismissKeyboardShortcutsMenu();
     void toggleKeyboardShortcutsMenu(int deviceId);
 

@@ -1795,7 +1795,6 @@ class ContextImpl extends Context {
     @Override
     public boolean bindService(
             Intent service, int flags, Executor executor, ServiceConnection conn) {
-        warnIfCallingFromSystemProcess();
         return bindServiceCommon(service, conn, flags, null, null, executor, getUser());
     }
 

@@ -138,7 +138,7 @@ public class PipMediaController {
     public void onActivityPinned() {
         // Once we enter PiP, try to find the active media controller for the top most activity
         resolveActiveMediaController(mMediaSessionManager.getActiveSessionsForUser(null,
-                UserHandle.USER_CURRENT));
+                UserHandle.CURRENT));
     }
 
     /**
@@ -245,7 +245,7 @@ public class PipMediaController {
     public void registerSessionListenerForCurrentUser() {
         mMediaSessionManager.removeOnActiveSessionsChangedListener(mSessionsChangedListener);
         mMediaSessionManager.addOnActiveSessionsChangedListener(mSessionsChangedListener, null,
-                UserHandle.USER_CURRENT, null);
+                UserHandle.CURRENT, null);
     }
 
     /**

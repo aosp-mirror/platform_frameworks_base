@@ -24,6 +24,7 @@ namespace android {
 namespace skia {
     class BitmapRegionDecoder;
 }
+class Canvas;
 class Paint;
 struct Typeface;
 }

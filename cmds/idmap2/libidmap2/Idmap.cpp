@@ -103,9 +103,18 @@ Result<uint32_t> GetPackageCrc(const ZipFile& zip) {
 
 std::unique_ptr<const IdmapHeader> IdmapHeader::FromBinaryStream(std::istream& stream) {
   std::unique_ptr<IdmapHeader> idmap_header(new IdmapHeader());
+  if (!Read32(stream, &idmap_header->magic_) || !Read32(stream, &idmap_header->version_)) {
+    return nullptr;
+  }
+
+  if (idmap_header->magic_ != kIdmapMagic ||
+      idmap_header->version_ != kIdmapCurrentVersion) {
+    // Do not continue parsing if the file is not a current version idmap.
+    return nullptr;
+  }
+
   uint32_t enforce_overlayable;
-  if (!Read32(stream, &idmap_header->magic_) || !Read32(stream, &idmap_header->version_) ||
-      !Read32(stream, &idmap_header->target_crc_) || !Read32(stream, &idmap_header->overlay_crc_) ||
+  if (!Read32(stream, &idmap_header->target_crc_) || !Read32(stream, &idmap_header->overlay_crc_) ||
       !Read32(stream, &idmap_header->fulfilled_policies_) ||
       !Read32(stream, &enforce_overlayable) || !ReadString(stream, &idmap_header->target_path_) ||
       !ReadString(stream, &idmap_header->overlay_path_) ||

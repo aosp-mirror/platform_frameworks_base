@@ -79,7 +79,7 @@ public class TextClassificationTest {
         final String primaryDescription = "primaryDescription";
         final Intent primaryIntent = new Intent("primaryIntentAction");
         final PendingIntent primaryPendingIntent = PendingIntent.getActivity(context, 0,
-                primaryIntent, 0);
+                primaryIntent, PendingIntent.FLAG_MUTABLE_UNAUDITED);
         final RemoteAction remoteAction0 = new RemoteAction(primaryIcon, primaryLabel,
                 primaryDescription, primaryPendingIntent);
 
@@ -88,7 +88,7 @@ public class TextClassificationTest {
         final String secondaryDescription = "secondaryDescription";
         final Intent secondaryIntent = new Intent("secondaryIntentAction");
         final PendingIntent secondaryPendingIntent = PendingIntent.getActivity(context, 0,
-                secondaryIntent, 0);
+                secondaryIntent, PendingIntent.FLAG_MUTABLE_UNAUDITED);
         final RemoteAction remoteAction1 = new RemoteAction(secondaryIcon, secondaryLabel,
                 secondaryDescription, secondaryPendingIntent);
 
@@ -156,7 +156,7 @@ public class TextClassificationTest {
         final int iconColor = Color.RED;
         final String label = "label";
         final PendingIntent pendingIntent = PendingIntent.getActivity(
-                context, 0, new Intent("ACTION_0"), 0);
+                context, 0, new Intent("ACTION_0"), PendingIntent.FLAG_MUTABLE_UNAUDITED);
         final RemoteAction remoteAction = new RemoteAction(
                 generateTestIcon(width, height, iconColor),
                 label,
@@ -239,7 +239,7 @@ public class TextClassificationTest {
                 .setIntent(new Intent("action"))
                 .setOnClickListener(view -> { })
                 .addAction(new RemoteAction(icon1, "title1", "desc1",
-                          PendingIntent.getActivity(context, 0, new Intent("action1"), 0)))
+                          PendingIntent.getActivity(context, 0, new Intent("action1"), PendingIntent.FLAG_MUTABLE_UNAUDITED)))
                 .addAction(new RemoteAction(icon1, "title2", "desc2",
                           PendingIntent.getActivity(context, 0, new Intent("action2"), 0)))
                 .setEntityType(TextClassifier.TYPE_EMAIL, 0.5f)

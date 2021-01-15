@@ -111,7 +111,7 @@ public class NotificationStressTest extends InstrumentationTestCase {
     private void sendNotification(int id, CharSequence text) {
         // Fill in arbitrary content
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
+        PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_MUTABLE_UNAUDITED);
         CharSequence title = text + " " + id;
         CharSequence subtitle = String.valueOf(System.currentTimeMillis());
         // Create "typical" notification with random icon

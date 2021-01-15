@@ -78,7 +78,8 @@ class PackageSessionTests {
         }
 
         fun makeIntentSender(sessionId: Int) = PendingIntent.getBroadcast(context, sessionId,
-                Intent(INTENT_ACTION), PendingIntent.FLAG_UPDATE_CURRENT).intentSender
+                Intent(INTENT_ACTION),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE_UNAUDITED).intentSender
 
         fun getResult(unit: TimeUnit, timeout: Long) = results.poll(timeout, unit)
 

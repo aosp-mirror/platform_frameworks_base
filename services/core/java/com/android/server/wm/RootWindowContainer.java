@@ -36,6 +36,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
 import static android.view.WindowManager.TRANSIT_NONE;
@@ -3137,6 +3138,27 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         });
     }
 
+    /**
+     * Returns {@code true} if {@code uid} has a visible window that's above a window of type {@link
+     * WindowManager.LayoutParams#TYPE_NOTIFICATION_SHADE}. If there is no window with type {@link
+     * WindowManager.LayoutParams#TYPE_NOTIFICATION_SHADE}, it returns {@code false}.
+     */
+    boolean hasVisibleWindowAboveNotificationShade(int uid) {
+        boolean[] visibleWindowFound = {false};
+        // We only return true if we found the notification shade (ie. window of type
+        // TYPE_NOTIFICATION_SHADE). Usually, it should always be there, but if for some reason
+        // it isn't, we should better be on the safe side and return false for this.
+        return forAllWindows(w -> {
+            if (w.mOwnerUid == uid && w.isVisible()) {
+                visibleWindowFound[0] = true;
+            }
+            if (w.mAttrs.type == TYPE_NOTIFICATION_SHADE) {
+                return visibleWindowFound[0];
+            }
+            return false;
+        }, true /* traverseTopToBottom */);
+    }
+
     private boolean shouldCloseAssistant(ActivityRecord r, String reason) {
         if (!r.isActivityTypeAssistant()) return false;
         if (reason == SYSTEM_DIALOG_REASON_ASSIST) return false;
@@ -3572,7 +3594,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     public void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         super.dump(pw, prefix, dumpAll);
         pw.print(prefix);
-        pw.println("topDisplayFocusedStack=" + getTopDisplayFocusedRootTask());
+        pw.println("topDisplayFocusedRootTask=" + getTopDisplayFocusedRootTask());
         for (int i = getChildCount() - 1; i >= 0; --i) {
             final DisplayContent display = getChildAt(i);
             display.dump(pw, prefix, dumpAll);

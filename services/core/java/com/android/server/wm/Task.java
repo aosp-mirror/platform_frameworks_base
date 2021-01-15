@@ -1407,7 +1407,6 @@ class Task extends WindowContainer<WindowContainer> {
         //                    from the display, so we should probably consolidate it there instead.
 
         if (getParent() == null && mDisplayContent != null) {
-            EventLogTags.writeWmStackRemoved(getRootTaskId());
             mDisplayContent = null;
             mWmService.mWindowPlacerLocked.requestTraversal();
         }
@@ -4413,7 +4412,8 @@ class Task extends WindowContainer<WindowContainer> {
         if (mRootProcess != null) {
             pw.print(prefix); pw.print("mRootProcess="); pw.println(mRootProcess);
         }
-        pw.print(prefix); pw.print("taskId=" + mTaskId); pw.println(" stackId=" + getRootTaskId());
+        pw.print(prefix); pw.print("taskId=" + mTaskId);
+        pw.println(" rootTaskId=" + getRootTaskId());
         pw.print(prefix); pw.print("mHasBeenVisible="); pw.println(getHasBeenVisible());
         pw.print(prefix); pw.print("mResizeMode=");
         pw.print(ActivityInfo.resizeModeToString(mResizeMode));
@@ -7161,7 +7161,7 @@ class Task extends WindowContainer<WindowContainer> {
             if (needSep) {
                 pw.println();
             }
-            pw.println("  Stack #" + getRootTaskId()
+            pw.println("  RootTask #" + getRootTaskId()
                     + ": type=" + activityTypeToString(getActivityType())
                     + " mode=" + windowingModeToString(getWindowingMode()));
             pw.println("  isSleeping=" + shouldSleepActivities());

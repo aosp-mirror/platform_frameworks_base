@@ -388,8 +388,19 @@ class Sensor implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void onAuthenticatorIdInvalidated() {
-            // TODO(159667191)
+        public void onAuthenticatorIdInvalidated(long newAuthenticatorId) {
+            mHandler.post(() -> {
+                final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                if (!(client instanceof FingerprintInvalidationClient)) {
+                    Slog.e(mTag, "onAuthenticatorIdInvalidated for wrong consumer: "
+                            + Utils.getClientName(client));
+                    return;
+                }
+
+                final FingerprintInvalidationClient invalidationClient =
+                        (FingerprintInvalidationClient) client;
+                invalidationClient.onAuthenticatorIdInvalidated(newAuthenticatorId);
+            });
         }
     }
 
@@ -473,6 +484,7 @@ class Sensor implements IBinder.DeathRecipient {
         final long sensorToken = proto.start(SensorServiceStateProto.SENSOR_STATES);
 
         proto.write(SensorStateProto.SENSOR_ID, mSensorProperties.sensorId);
+        proto.write(SensorStateProto.MODALITY, SensorStateProto.FINGERPRINT);
         proto.write(SensorStateProto.IS_BUSY, mScheduler.getCurrentClient() != null);
 
         for (UserInfo user : UserManager.get(mContext).getUsers()) {

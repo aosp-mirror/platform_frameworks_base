@@ -49,16 +49,12 @@ public final class InteractionJankMonitorWrapper {
     public @interface CujType {
     }
 
-    public static void init(@NonNull View view) {
-        InteractionJankMonitor.getInstance().init(view);
+    public static boolean begin(View v, @CujType int cujType) {
+        return InteractionJankMonitor.getInstance().begin(v, cujType);
     }
 
-    public static boolean begin(@CujType int cujType) {
-        return InteractionJankMonitor.getInstance().begin(cujType);
-    }
-
-    public static boolean begin(@CujType int cujType, long timeout) {
-        return InteractionJankMonitor.getInstance().begin(cujType, timeout);
+    public static boolean begin(View v, @CujType int cujType, long timeout) {
+        return InteractionJankMonitor.getInstance().begin(v, cujType, timeout);
     }
 
     public static boolean end(@CujType int cujType) {

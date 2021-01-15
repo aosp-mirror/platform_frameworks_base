@@ -19,11 +19,11 @@ package com.android.systemui.statusbar
 import android.app.ActivityManager
 import android.content.res.Resources
 import android.os.SystemProperties
+import android.util.IndentingPrintWriter
 import android.util.MathUtils
 import android.view.SurfaceControl
 import android.view.ViewRootImpl
 import androidx.annotation.VisibleForTesting
-import com.android.internal.util.IndentingPrintWriter
 import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton

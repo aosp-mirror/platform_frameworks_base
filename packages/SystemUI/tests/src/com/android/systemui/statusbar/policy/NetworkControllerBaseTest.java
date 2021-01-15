@@ -25,7 +25,6 @@ import static junit.framework.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.atLeastOnce;
@@ -58,6 +57,7 @@ import android.telephony.TelephonyDisplayInfo;
 import android.telephony.TelephonyManager;
 import android.testing.TestableLooper;
 import android.testing.TestableResources;
+import android.util.FeatureFlagUtils;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
@@ -75,6 +75,7 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceP
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestWatcher;
@@ -121,7 +122,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected int mSubId;
 
     private NetworkCapabilities mNetCapabilities;
-    private ConnectivityManager.NetworkCallback mDefaultNetworkCallback;
+    private ConnectivityManager.NetworkCallback mDefaultCallbackInWifiTracker;
+    private ConnectivityManager.NetworkCallback mDefaultCallbackInNetworkController;
     private ConnectivityManager.NetworkCallback mNetworkCallback;
 
     @Rule
@@ -143,6 +145,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
+        FeatureFlagUtils.setEnabled(mContext, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL, true);
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
         Settings.Global.putInt(mContext.getContentResolver(), Global.AIRPLANE_MODE_ON, 0);
         TestableResources res = mContext.getOrCreateTestableResources();
@@ -222,6 +225,11 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         mNetworkController.addEmergencyListener(null);
     }
 
+    @After
+    public void tearDown() throws Exception {
+        FeatureFlagUtils.setEnabled(mContext, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL, false);
+    }
+
     protected void setupNetworkController() {
         // For now just pretend to be the data sim, so we can test that too.
         mSubId = SubscriptionManager.DEFAULT_SUBSCRIPTION_ID;
@@ -235,8 +243,10 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
             ArgumentCaptor.forClass(ConnectivityManager.NetworkCallback.class);
         verify(mMockCm, atLeastOnce())
             .registerDefaultNetworkCallback(callbackArg.capture(), isA(Handler.class));
-        mDefaultNetworkCallback = callbackArg.getValue();
-        assertNotNull(mDefaultNetworkCallback);
+        mDefaultCallbackInWifiTracker = callbackArg.getAllValues().get(0);
+        mDefaultCallbackInNetworkController = callbackArg.getAllValues().get(1);
+        assertNotNull(mDefaultCallbackInWifiTracker);
+        assertNotNull(mDefaultCallbackInNetworkController);
         verify(mMockCm, atLeastOnce()).registerNetworkCallback(
                 isA(NetworkRequest.class), callbackArg.capture(), isA(Handler.class));
         mNetworkCallback = callbackArg.getValue();
@@ -294,12 +304,22 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         mNetworkController.onReceive(mContext, i);
     }
 
-    public void setConnectivityViaCallback(
+    public void setConnectivityViaCallbackInNetworkController(
             int networkType, boolean validated, boolean isConnected, WifiInfo wifiInfo) {
-        mNetCapabilities.setTransportInfo(wifiInfo);
+        if (networkType == NetworkCapabilities.TRANSPORT_WIFI) {
+            mNetCapabilities.setTransportInfo(wifiInfo);
+        }
         setConnectivityCommon(networkType, validated, isConnected);
-        mDefaultNetworkCallback.onCapabilitiesChanged(
-            mock(Network.class), new NetworkCapabilities(mNetCapabilities));
+        mDefaultCallbackInNetworkController.onCapabilitiesChanged(
+                mock(Network.class), new NetworkCapabilities(mNetCapabilities));
+    }
+
+    public void setConnectivityViaCallbackInWifiTracker(
+            int networkType, boolean validated, boolean isConnected, WifiInfo wifiInfo) {
+        if (networkType == NetworkCapabilities.TRANSPORT_WIFI) {
+            mNetCapabilities.setTransportInfo(wifiInfo);
+        }
+        setConnectivityCommon(networkType, validated, isConnected);
         if (networkType == NetworkCapabilities.TRANSPORT_WIFI) {
             if (isConnected) {
                 mNetworkCallback.onCapabilitiesChanged(
@@ -308,6 +328,16 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 mNetworkCallback.onLost(mock(Network.class));
             }
         }
+    }
+
+    public void setConnectivityViaDefaultCallbackInWifiTracker(
+            int networkType, boolean validated, boolean isConnected, WifiInfo wifiInfo) {
+        if (networkType == NetworkCapabilities.TRANSPORT_WIFI) {
+            mNetCapabilities.setTransportInfo(wifiInfo);
+        }
+        setConnectivityCommon(networkType, validated, isConnected);
+        mDefaultCallbackInWifiTracker.onCapabilitiesChanged(
+                mock(Network.class), new NetworkCapabilities(mNetCapabilities));
     }
 
     private void setConnectivityCommon(
@@ -457,10 +487,9 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 any(),
                 typeIconArg.capture(),
                 anyInt(), anyBoolean(), anyBoolean(),
-                any(CharSequence.class), any(CharSequence.class), any(CharSequence.class),
+                any(CharSequence.class), any(CharSequence.class), any(),
                 anyBoolean(), anyInt(), eq(roaming));
         IconState iconState = iconArg.getValue();
-
         int state = icon == -1 ? 0
                 : SignalDrawable.getState(icon, CellSignalStrength.getNumSignalStrengthLevels(),
                         !inet);
@@ -507,7 +536,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 dataOutArg.capture(),
                 typeContentDescriptionArg.capture(),
                 typeContentDescriptionHtmlArg.capture(),
-                anyString(), anyBoolean(), anyInt(), anyBoolean());
+                any(), anyBoolean(), anyInt(), anyBoolean());
 
         IconState iconState = iconArg.getValue();
 
@@ -522,8 +551,12 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         assertEquals("Visibility in status bar", visible, iconState.visible);
 
         iconState = qsIconArg.getValue();
-        assertEquals("Visibility in quick settings", qsVisible, iconState.visible);
-        assertEquals("Signal icon in quick settings", state, iconState.icon);
+        if (visible) {
+            assertEquals("Visibility in quick settings", qsVisible, iconState.visible);
+            assertEquals("Signal icon in quick settings", state, iconState.icon);
+        } else {
+            assertEquals("Cellular is not default", null, iconState);
+        }
         assertEquals("Data icon in quick settings", qsTypeIcon, (int) qsTypeIconArg.getValue());
         assertEquals("Data direction in in quick settings", dataIn,
                 (boolean) dataInArg.getValue());

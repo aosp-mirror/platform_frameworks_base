@@ -32,6 +32,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.TransactionTooLargeException;
 import android.os.WorkSource;
+import android.util.ArraySet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -446,6 +447,16 @@ public abstract class ActivityManagerInternal {
      * Called by DevicePolicyManagerService to set the uid of the device owner.
      */
     public abstract void setDeviceOwnerUid(int uid);
+
+    /** Is this a profile owner app? */
+    public abstract boolean isProfileOwner(int uid);
+
+    /**
+     * Called by DevicePolicyManagerService to set the uid of the profile owner.
+     * @param profileOwnerUids The profile owner UIDs. The ownership of the array is
+     *                         passed to callee.
+     */
+    public abstract void setProfileOwnerUid(ArraySet<Integer> profileOwnerUids);
 
     /**
      * Set all associated companion app that belongs to a userId.

@@ -58,3 +58,19 @@ ndk_library {
     first_version: "9",
     unversioned_until: "current",
 }
+
+cc_fuzz {
+    name: "imagedecoder_fuzzer",
+    srcs: ["fuzz_imagedecoder.cpp"],
+    header_libs: ["jni_headers"],
+    shared_libs: [
+        "libbinder",
+        "libjnigraphics",
+        "libutils",
+    ],
+    static_libs: ["libarect"],
+    fuzz_config: {
+        cc: ["scroggo@google.com"],
+    },
+    corpus: ["corpus/*"],
+}

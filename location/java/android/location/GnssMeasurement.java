@@ -30,6 +30,8 @@ import static android.hardware.gnss.V2_1.IGnssMeasurementCallback.GnssMeasuremen
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -67,12 +69,14 @@ public final class GnssMeasurement implements Parcelable {
     private double mFullInterSignalBiasUncertaintyNanos;
     private double mSatelliteInterSignalBiasNanos;
     private double mSatelliteInterSignalBiasUncertaintyNanos;
+    @Nullable private SatellitePvt mSatellitePvt;
 
     // The following enumerations must be in sync with the values declared in GNSS HAL.
 
     private static final int HAS_NO_FLAGS = 0;
     private static final int HAS_CODE_TYPE = (1 << 14);
     private static final int HAS_BASEBAND_CN0 = (1 << 15);
+    private static final int HAS_SATELLITE_PVT = (1 << 20);
 
     /**
      * The status of the multipath indicator.
@@ -274,6 +278,7 @@ public final class GnssMeasurement implements Parcelable {
         mSatelliteInterSignalBiasNanos = measurement.mSatelliteInterSignalBiasNanos;
         mSatelliteInterSignalBiasUncertaintyNanos =
                 measurement.mSatelliteInterSignalBiasUncertaintyNanos;
+        mSatellitePvt = measurement.mSatellitePvt;
     }
 
     /**
@@ -1691,6 +1696,55 @@ public final class GnssMeasurement implements Parcelable {
         resetFlag(HAS_SATELLITE_ISB_UNCERTAINTY);
     }
 
+    /**
+     * Returns {@code true} if {@link #getSatellitePvt()} is available,
+     * {@code false} otherwise.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean hasSatellitePvt() {
+        return isFlagSet(HAS_SATELLITE_PVT);
+    }
+
+    /**
+     * Gets the Satellite PVT data.
+     *
+     * <p>The value is only available if {@link #hasSatellitePvt()} is
+     * {@code true}.
+     * @hide
+     */
+    @Nullable
+    @SystemApi
+    public SatellitePvt getSatellitePvt() {
+        return mSatellitePvt;
+    }
+
+    /**
+     * Sets the Satellite PVT.
+     *
+     * @hide
+     */
+    @TestApi
+    public void setSatellitePvt(@Nullable SatellitePvt satellitePvt) {
+        if (satellitePvt == null) {
+            resetSatellitePvt();
+        } else {
+            setFlag(HAS_SATELLITE_PVT);
+            mSatellitePvt = satellitePvt;
+        }
+    }
+
+    /**
+     * Resets the Satellite PVT.
+     *
+     * @hide
+     */
+    @TestApi
+    public void resetSatellitePvt() {
+        resetFlag(HAS_SATELLITE_PVT);
+    }
+
 
     public static final @NonNull Creator<GnssMeasurement> CREATOR = new Creator<GnssMeasurement>() {
         @Override
@@ -1723,7 +1777,10 @@ public final class GnssMeasurement implements Parcelable {
             gnssMeasurement.mFullInterSignalBiasUncertaintyNanos = parcel.readDouble();
             gnssMeasurement.mSatelliteInterSignalBiasNanos = parcel.readDouble();
             gnssMeasurement.mSatelliteInterSignalBiasUncertaintyNanos = parcel.readDouble();
-
+            if (gnssMeasurement.hasSatellitePvt()) {
+                ClassLoader classLoader = getClass().getClassLoader();
+                gnssMeasurement.mSatellitePvt = parcel.readParcelable(classLoader);
+            }
             return gnssMeasurement;
         }
 
@@ -1761,6 +1818,9 @@ public final class GnssMeasurement implements Parcelable {
         parcel.writeDouble(mFullInterSignalBiasUncertaintyNanos);
         parcel.writeDouble(mSatelliteInterSignalBiasNanos);
         parcel.writeDouble(mSatelliteInterSignalBiasUncertaintyNanos);
+        if (hasSatellitePvt()) {
+            parcel.writeParcelable(mSatellitePvt, flags);
+        }
     }
 
     @Override
@@ -1864,6 +1924,10 @@ public final class GnssMeasurement implements Parcelable {
                             : null));
         }
 
+        if (hasSatellitePvt()) {
+            builder.append(mSatellitePvt.toString());
+        }
+
         return builder.toString();
     }
 
@@ -1893,6 +1957,7 @@ public final class GnssMeasurement implements Parcelable {
         resetFullInterSignalBiasUncertaintyNanos();
         resetSatelliteInterSignalBiasNanos();
         resetSatelliteInterSignalBiasUncertaintyNanos();
+        resetSatellitePvt();
     }
 
     private void setFlag(int flag) {
