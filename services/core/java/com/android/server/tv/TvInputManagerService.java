@@ -20,6 +20,7 @@ import static android.media.AudioManager.DEVICE_NONE;
 import static android.media.tv.TvInputManager.INPUT_STATE_CONNECTED;
 import static android.media.tv.TvInputManager.INPUT_STATE_CONNECTED_STANDBY;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
@@ -1720,6 +1721,46 @@ public final class TvInputManagerService extends SystemService {
                         getSessionLocked(sessionToken, callingUid, resolvedUserId).stopRecording();
                     } catch (RemoteException | SessionNotFoundException e) {
                         Slog.e(TAG, "error in stopRecording", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void pauseRecording(IBinder sessionToken, @NonNull Bundle params, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "pauseRecording");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        getSessionLocked(sessionToken, callingUid, resolvedUserId)
+                                .pauseRecording(params);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slog.e(TAG, "error in pauseRecording", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void resumeRecording(IBinder sessionToken, @NonNull Bundle params, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "resumeRecording");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        getSessionLocked(sessionToken, callingUid, resolvedUserId)
+                                .resumeRecording(params);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slog.e(TAG, "error in resumeRecording", e);
                     }
                 }
             } finally {
