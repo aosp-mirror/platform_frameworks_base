@@ -40,12 +40,12 @@ class MainActivity : CapturedActivity() {
     private var mSurfaceHolder: SurfaceHolder? = null
     private val mDrawLock = ReentrantLock()
     var mSurfaceView: SurfaceView? = null
+    private var mCountDownLatch: CountDownLatch? = null
 
     val surface: Surface? get() = mSurfaceHolder?.surface
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        addSurfaceView(Point(500, 200))
         window.decorView.apply {
             systemUiVisibility =
                     View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN
@@ -60,11 +60,21 @@ class MainActivity : CapturedActivity() {
         val layout = findViewById<FrameLayout>(android.R.id.content)
         val surfaceReadyLatch = CountDownLatch(1)
         mSurfaceView = createSurfaceView(applicationContext, size, surfaceReadyLatch)
-        layout.addView(mSurfaceView!!,
+        layout!!.addView(mSurfaceView!!,
                 FrameLayout.LayoutParams(size.x, size.y, Gravity.TOP or Gravity.LEFT)
                         .also { it.setMargins(100, 100, 0, 0) })
 
         return surfaceReadyLatch
+    }
+
+    fun resizeSurfaceView(size: Point): CountDownLatch {
+        mCountDownLatch = CountDownLatch(1)
+        mSurfaceView!!.layoutParams.also {
+            it.width = size.x
+            it.height = size.y
+        }
+        mSurfaceView!!.requestLayout()
+        return mCountDownLatch!!
     }
 
     fun enableSeamlessRotation() {
@@ -88,7 +98,6 @@ class MainActivity : CapturedActivity() {
     ): SurfaceView {
         val surfaceView = SurfaceView(context)
         surfaceView.setWillNotDraw(false)
-        surfaceView.holder.setFixedSize(size.x, size.y)
         surfaceView.holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
                 mDrawLock.withLock {
@@ -104,6 +113,7 @@ class MainActivity : CapturedActivity() {
                 width: Int,
                 height: Int
             ) {
+                mCountDownLatch?.countDown()
             }
 
             override fun surfaceDestroyed(holder: SurfaceHolder) {

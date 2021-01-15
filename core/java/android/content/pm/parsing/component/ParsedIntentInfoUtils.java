@@ -209,6 +209,25 @@ public class ParsedIntentInfoUtils {
                         PatternMatcher.PATTERN_SIMPLE_GLOB);
             }
 
+            str = sa.getNonConfigurationString(
+                    R.styleable.AndroidManifestData_sspAdvancedPattern, 0);
+            if (str != null) {
+                if (!allowGlobs) {
+                    return input.error(
+                            "sspAdvancedPattern not allowed here; ssp must be literal");
+                }
+                intentInfo.addDataSchemeSpecificPart(str,
+                        PatternMatcher.PATTERN_ADVANCED_GLOB);
+            }
+
+            str = sa.getNonConfigurationString(
+                    R.styleable.AndroidManifestData_sspSuffix, 0);
+            if (str != null) {
+                intentInfo.addDataSchemeSpecificPart(str,
+                        PatternMatcher.PATTERN_SUFFIX);
+            }
+
+
             String host = sa.getNonConfigurationString(
                     R.styleable.AndroidManifestData_host, 0);
             String port = sa.getNonConfigurationString(
@@ -248,6 +267,13 @@ public class ParsedIntentInfoUtils {
                 }
                 intentInfo.addDataPath(str, PatternMatcher.PATTERN_ADVANCED_GLOB);
             }
+
+            str = sa.getNonConfigurationString(
+                    R.styleable.AndroidManifestData_pathSuffix, 0);
+            if (str != null) {
+                intentInfo.addDataPath(str, PatternMatcher.PATTERN_SUFFIX);
+            }
+
 
             return input.success(null);
         } finally {

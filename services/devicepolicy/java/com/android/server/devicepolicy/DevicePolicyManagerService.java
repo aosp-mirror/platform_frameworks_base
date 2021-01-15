@@ -375,6 +375,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private static final String CALLED_FROM_PARENT = "calledFromParent";
     private static final String NOT_CALLED_FROM_PARENT = "notCalledFromParent";
 
+    private static final String CREDENTIAL_MANAGEMENT_APP = "credentialManagementApp";
+    private static final String NOT_CREDENTIAL_MANAGEMENT_APP = "notCredentialManagementApp";
+
     // Comprehensive list of delegations.
     private static final String DELEGATIONS[] = {
         DELEGATION_CERT_INSTALL,
@@ -1317,12 +1320,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             mContext.getSystemService(PowerManager.class).reboot(reason);
         }
 
-        void recoverySystemRebootWipeUserData(boolean shutdown, String reason, boolean force,
+        boolean recoverySystemRebootWipeUserData(boolean shutdown, String reason, boolean force,
                 boolean wipeEuicc, boolean wipeExtRequested, boolean wipeResetProtectionData)
                         throws IOException {
-            FactoryResetter.newBuilder(mContext).setSafetyChecker(mSafetyChecker)
-                    .setReason(reason).setShutdown(shutdown)
-                    .setForce(force).setWipeEuicc(wipeEuicc)
+            return FactoryResetter.newBuilder(mContext).setSafetyChecker(mSafetyChecker)
+                    .setReason(reason).setShutdown(shutdown).setForce(force).setWipeEuicc(wipeEuicc)
                     .setWipeAdoptableStorage(wipeExtRequested)
                     .setWipeFactoryResetProtection(wipeResetProtectionData)
                     .build().factoryReset();
@@ -2784,6 +2786,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 maybeStartSecurityLogMonitorOnActivityManagerReady();
                 break;
             case SystemService.PHASE_BOOT_COMPLETED:
+                // Ideally it should be done earlier, but currently it relies on RecoverySystem,
+                // which would hang on earlier phases
+                factoryResetIfDelayedEarlier();
+
                 ensureDeviceOwnerUserStarted(); // TODO Consider better place to do this.
                 break;
         }
@@ -3410,9 +3416,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 getTargetSdk(profileOwner.getPackageName(), userHandle) > Build.VERSION_CODES.M;
     }
 
-    private boolean canSetPasswordQualityOnParent(String packageName, int userId) {
+    private boolean canSetPasswordQualityOnParent(String packageName, final CallerIdentity caller) {
         return !mInjector.isChangeEnabled(
-                PREVENT_SETTING_PASSWORD_QUALITY_ON_PARENT, packageName, userId);
+                PREVENT_SETTING_PASSWORD_QUALITY_ON_PARENT, packageName, caller.getUserId())
+            || isProfileOwnerOfOrganizationOwnedDevice(caller);
     }
 
     private boolean isPasswordLimitingAdminTargetingP(CallerIdentity caller) {
@@ -3441,7 +3448,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 || isPasswordLimitingAdminTargetingP(caller));
 
         final boolean qualityMayApplyToParent =
-                canSetPasswordQualityOnParent(who.getPackageName(), caller.getUserId());
+                canSetPasswordQualityOnParent(who.getPackageName(), caller);
         if (!qualityMayApplyToParent) {
             Preconditions.checkCallAuthorization(!parent,
                     "Profile Owner may not apply password quality requirements device-wide");
@@ -5190,10 +5197,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             byte[] cert, byte[] chain, String alias, boolean requestAccess,
             boolean isUserSelectable) {
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
+        final boolean isCallerDelegate = isCallerDelegate(caller, DELEGATION_CERT_INSTALL);
+        final boolean isCredentialManagementApp =
+                isCredentialManagementApp(caller, alias, isUserSelectable);
         Preconditions.checkCallAuthorization((caller.hasAdminComponent()
                 && (isProfileOwner(caller) || isDeviceOwner(caller)))
-                || (caller.hasPackage() && (isCallerDelegate(caller, DELEGATION_CERT_INSTALL)
-                || isCredentialManagementApp(caller, alias, isUserSelectable))));
+                || (caller.hasPackage() && (isCallerDelegate || isCredentialManagementApp)));
 
         final long id = mInjector.binderClearCallingIdentity();
         try {
@@ -5202,6 +5211,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             try {
                 IKeyChainService keyChain = keyChainConnection.getService();
                 if (!keyChain.installKeyPair(privKey, cert, chain, alias, KeyStore.UID_SELF)) {
+                    logInstallKeyPairFailure(caller, isCredentialManagementApp);
                     return false;
                 }
                 if (requestAccess) {
@@ -5211,7 +5221,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 DevicePolicyEventLogger
                         .createEvent(DevicePolicyEnums.INSTALL_KEY_PAIR)
                         .setAdmin(caller.getPackageName())
-                        .setBoolean(/* isDelegate */ who == null)
+                        .setBoolean(/* isDelegate */ isCallerDelegate)
+                        .setStrings(isCredentialManagementApp
+                                ? CREDENTIAL_MANAGEMENT_APP : NOT_CREDENTIAL_MANAGEMENT_APP)
                         .write();
                 return true;
             } catch (RemoteException e) {
@@ -5225,16 +5237,29 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
         }
+        logInstallKeyPairFailure(caller, isCredentialManagementApp);
         return false;
+    }
+
+    private void logInstallKeyPairFailure(CallerIdentity caller,
+            boolean isCredentialManagementApp) {
+        if (!isCredentialManagementApp) {
+            return;
+        }
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.CREDENTIAL_MANAGEMENT_APP_INSTALL_KEY_PAIR_FAILED)
+                .setStrings(caller.getPackageName())
+                .write();
     }
 
     @Override
     public boolean removeKeyPair(ComponentName who, String callerPackage, String alias) {
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
+        final boolean isCallerDelegate = isCallerDelegate(caller, DELEGATION_CERT_INSTALL);
+        final boolean isCredentialManagementApp = isCredentialManagementApp(caller, alias);
         Preconditions.checkCallAuthorization((caller.hasAdminComponent()
                 && (isProfileOwner(caller) || isDeviceOwner(caller)))
-                || (caller.hasPackage() && (isCallerDelegate(caller, DELEGATION_CERT_INSTALL)
-                || isCredentialManagementApp(caller, alias))));
+                || (caller.hasPackage() && (isCallerDelegate || isCredentialManagementApp)));
 
         final long id = Binder.clearCallingIdentity();
         try {
@@ -5245,7 +5270,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 DevicePolicyEventLogger
                         .createEvent(DevicePolicyEnums.REMOVE_KEY_PAIR)
                         .setAdmin(caller.getPackageName())
-                        .setBoolean(/* isDelegate */ who == null)
+                        .setBoolean(/* isDelegate */ isCallerDelegate)
+                        .setStrings(isCredentialManagementApp
+                                ? CREDENTIAL_MANAGEMENT_APP : NOT_CREDENTIAL_MANAGEMENT_APP)
                         .write();
                 return keyChain.removeKeyPair(alias);
             } catch (RemoteException e) {
@@ -5469,6 +5496,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 "Requested Device ID attestation but challenge is empty");
 
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
+        final boolean isCallerDelegate = isCallerDelegate(caller, DELEGATION_CERT_INSTALL);
+        final boolean isCredentialManagementApp = isCredentialManagementApp(caller, alias);
         if (deviceIdAttestationRequired && attestationUtilsFlags.length > 0) {
             // TODO: replace enforce methods
             enforceCallerCanRequestDeviceIdAttestation(caller);
@@ -5476,14 +5505,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         } else {
             Preconditions.checkCallAuthorization((caller.hasAdminComponent()
                     && (isProfileOwner(caller) || isDeviceOwner(caller)))
-                    || (caller.hasPackage() && (isCallerDelegate(caller, DELEGATION_CERT_INSTALL)
-                    || isCredentialManagementApp(caller, alias))));
+                    || (caller.hasPackage() && (isCallerDelegate || isCredentialManagementApp)));
         }
 
         // As the caller will be granted access to the key, ensure no UID was specified, as
         // it will not have the desired effect.
         if (keySpec.getUid() != KeyStore.UID_SELF) {
             Log.e(LOG_TAG, "Only the caller can be granted access to the generated keypair.");
+            logGenerateKeyPairFailure(caller, isCredentialManagementApp);
             return false;
         }
 
@@ -5509,6 +5538,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                                     DevicePolicyManager.KEY_GEN_STRONGBOX_UNAVAILABLE,
                                     String.format("KeyChain error: %d", generationResult));
                         default:
+                            logGenerateKeyPairFailure(caller, isCredentialManagementApp);
                             return false;
                     }
                 }
@@ -5533,15 +5563,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             throw new UnsupportedOperationException(
                                     "Device does not support Device ID attestation.");
                         }
+                        logGenerateKeyPairFailure(caller, isCredentialManagementApp);
                         return false;
                     }
                 }
                 DevicePolicyEventLogger
                         .createEvent(DevicePolicyEnums.GENERATE_KEY_PAIR)
                         .setAdmin(caller.getPackageName())
-                        .setBoolean(/* isDelegate */ who == null)
+                        .setBoolean(/* isDelegate */ isCallerDelegate)
                         .setInt(idAttestationFlags)
-                        .setStrings(algorithm)
+                        .setStrings(algorithm, isCredentialManagementApp
+                                ? CREDENTIAL_MANAGEMENT_APP : NOT_CREDENTIAL_MANAGEMENT_APP)
                         .write();
                 return true;
             }
@@ -5553,7 +5585,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
         }
+        logGenerateKeyPairFailure(caller, isCredentialManagementApp);
         return false;
+    }
+
+    private void logGenerateKeyPairFailure(CallerIdentity caller,
+            boolean isCredentialManagementApp) {
+        if (!isCredentialManagementApp) {
+            return;
+        }
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.CREDENTIAL_MANAGEMENT_APP_GENERATE_KEY_PAIR_FAILED)
+                .setStrings(caller.getPackageName())
+                .write();
     }
 
     private void enforceIndividualAttestationSupportedIfRequested(int[] attestationUtilsFlags) {
@@ -5571,10 +5615,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public boolean setKeyPairCertificate(ComponentName who, String callerPackage, String alias,
             byte[] cert, byte[] chain, boolean isUserSelectable) {
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
+        final boolean isCallerDelegate = isCallerDelegate(caller, DELEGATION_CERT_INSTALL);
+        final boolean isCredentialManagementApp = isCredentialManagementApp(caller, alias);
         Preconditions.checkCallAuthorization((caller.hasAdminComponent()
                 && (isProfileOwner(caller) || isDeviceOwner(caller)))
-                || (caller.hasPackage() && (isCallerDelegate(caller, DELEGATION_CERT_INSTALL)
-                || isCredentialManagementApp(caller, alias))));
+                || (caller.hasPackage() && (isCallerDelegate || isCredentialManagementApp)));
 
         final long id = mInjector.binderClearCallingIdentity();
         try (final KeyChainConnection keyChainConnection =
@@ -5587,7 +5632,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.SET_KEY_PAIR_CERTIFICATE)
                     .setAdmin(caller.getPackageName())
-                    .setBoolean(/* isDelegate */ who == null)
+                    .setBoolean(/* isDelegate */ isCallerDelegate)
+                    .setStrings(isCredentialManagementApp
+                            ? CREDENTIAL_MANAGEMENT_APP : NOT_CREDENTIAL_MANAGEMENT_APP)
                     .write();
             return true;
         } catch (InterruptedException e) {
@@ -6217,15 +6264,63 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             boolean wipeResetProtectionData) {
         wtfIfInLock();
         boolean success = false;
+
         try {
-            mInjector.recoverySystemRebootWipeUserData(
+            boolean delayed = !mInjector.recoverySystemRebootWipeUserData(
                     /* shutdown= */ false, reason, /* force= */ true, /* wipeEuicc= */ wipeEuicc,
                     wipeExtRequested, wipeResetProtectionData);
+            if (delayed) {
+                // Persist the request so the device is automatically factory-reset on next start if
+                // the system crashes or reboots before the {@code DevicePolicySafetyChecker} calls
+                // its callback.
+                Slog.i(LOG_TAG, String.format("Persisting factory reset request as it could be "
+                        + "delayed by %s", mSafetyChecker));
+                synchronized (getLockObject()) {
+                    DevicePolicyData policy = getUserData(UserHandle.USER_SYSTEM);
+                    policy.setDelayedFactoryReset(reason, wipeExtRequested, wipeEuicc,
+                            wipeResetProtectionData);
+                    saveSettingsLocked(UserHandle.USER_SYSTEM);
+                }
+            }
             success = true;
         } catch (IOException | SecurityException e) {
             Slog.w(LOG_TAG, "Failed requesting data wipe", e);
         } finally {
             if (!success) SecurityLog.writeEvent(SecurityLog.TAG_WIPE_FAILURE);
+        }
+    }
+
+    private void factoryResetIfDelayedEarlier() {
+        synchronized (getLockObject()) {
+            DevicePolicyData policy = getUserData(UserHandle.USER_SYSTEM);
+
+            if (policy.mFactoryResetFlags == 0) return;
+
+            if (policy.mFactoryResetReason == null) {
+                // Shouldn't happen.
+                Slog.e(LOG_TAG, "no persisted reason for factory resetting");
+                policy.mFactoryResetReason = "requested before boot";
+            }
+            FactoryResetter factoryResetter = FactoryResetter.newBuilder(mContext)
+                    .setReason(policy.mFactoryResetReason).setForce(true)
+                    .setWipeEuicc((policy.mFactoryResetFlags & DevicePolicyData
+                            .FACTORY_RESET_FLAG_WIPE_EUICC) != 0)
+                    .setWipeAdoptableStorage((policy.mFactoryResetFlags & DevicePolicyData
+                            .FACTORY_RESET_FLAG_WIPE_EXTERNAL_STORAGE) != 0)
+                    .setWipeFactoryResetProtection((policy.mFactoryResetFlags & DevicePolicyData
+                            .FACTORY_RESET_FLAG_WIPE_FACTORY_RESET_PROTECTION) != 0)
+                    .build();
+            Slog.i(LOG_TAG, "Factory resetting on boot using " + factoryResetter);
+            try {
+                if (!factoryResetter.factoryReset()) {
+                    // Shouldn't happen because FactoryResetter was created without a
+                    // DevicePolicySafetyChecker.
+                    Slog.wtf(LOG_TAG, "Factory reset using " + factoryResetter + " failed.");
+                }
+            } catch (IOException e) {
+                // Shouldn't happen.
+                Slog.wtf(LOG_TAG, "Could not factory reset using " + factoryResetter, e);
+            }
         }
     }
 
@@ -15698,14 +15793,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public String getEnrollmentSpecificId() {
+    public String getEnrollmentSpecificId(String callerPackage) {
         if (!mHasFeature) {
             return "";
         }
 
-        final CallerIdentity caller = getCallerIdentity();
+        final CallerIdentity caller = getCallerIdentity(callerPackage);
         Preconditions.checkCallAuthorization(
-                isDeviceOwner(caller) || isProfileOwner(caller));
+                isDeviceOwner(caller) || isProfileOwner(caller)
+                        || isCallerDelegate(caller, DELEGATION_CERT_INSTALL));
 
         synchronized (getLockObject()) {
             final ActiveAdmin requiredAdmin = getDeviceOrProfileOwnerAdminLocked(

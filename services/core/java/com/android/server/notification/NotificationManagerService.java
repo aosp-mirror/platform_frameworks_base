@@ -6078,7 +6078,6 @@ public class NotificationManagerService extends SystemService {
         if (!isAppForeground && metadata != null) {
             int flags = metadata.getFlags();
             flags &= ~Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE;
-            flags &= ~Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
             metadata.setFlags(flags);
         }
     }

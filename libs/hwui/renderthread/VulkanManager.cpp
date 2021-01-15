@@ -27,6 +27,8 @@
 #include <vk/GrVkExtensions.h>
 #include <vk/GrVkTypes.h>
 
+#include <cstring>
+
 #include "Properties.h"
 #include "RenderThread.h"
 #include "renderstate/RenderState.h"
@@ -52,6 +54,19 @@ static void free_features_extensions_structs(const VkPhysicalDeviceFeatures2& fe
         free(current);
     }
 }
+
+GrVkGetProc VulkanManager::sSkiaGetProp = [](const char* proc_name, VkInstance instance,
+                                             VkDevice device) {
+    if (device != VK_NULL_HANDLE) {
+        if (strcmp("vkQueueSubmit", proc_name) == 0) {
+            return (PFN_vkVoidFunction)VulkanManager::interceptedVkQueueSubmit;
+        } else if (strcmp("vkQueueWaitIdle", proc_name) == 0) {
+            return (PFN_vkVoidFunction)VulkanManager::interceptedVkQueueWaitIdle;
+        }
+        return vkGetDeviceProcAddr(device, proc_name);
+    }
+    return vkGetInstanceProcAddr(instance, proc_name);
+};
 
 #define GET_PROC(F) m##F = (PFN_vk##F)vkGetInstanceProcAddr(VK_NULL_HANDLE, "vk" #F)
 #define GET_INST_PROC(F) m##F = (PFN_vk##F)vkGetInstanceProcAddr(mInstance, "vk" #F)
@@ -83,7 +98,6 @@ VulkanManager::~VulkanManager() {
     }
 
     mGraphicsQueue = VK_NULL_HANDLE;
-    mAHBUploadQueue = VK_NULL_HANDLE;
     mDevice = VK_NULL_HANDLE;
     mPhysicalDevice = VK_NULL_HANDLE;
     mInstance = VK_NULL_HANDLE;
@@ -185,7 +199,6 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     for (uint32_t i = 0; i < queueCount; i++) {
         if (queueProps[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
             mGraphicsQueueIndex = i;
-            LOG_ALWAYS_FATAL_IF(queueProps[i].queueCount < 2);
             break;
         }
     }
@@ -210,14 +223,7 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
         LOG_ALWAYS_FATAL_IF(!hasKHRSwapchainExtension);
     }
 
-    auto getProc = [](const char* proc_name, VkInstance instance, VkDevice device) {
-        if (device != VK_NULL_HANDLE) {
-            return vkGetDeviceProcAddr(device, proc_name);
-        }
-        return vkGetInstanceProcAddr(instance, proc_name);
-    };
-
-    grExtensions.init(getProc, mInstance, mPhysicalDevice, mInstanceExtensions.size(),
+    grExtensions.init(sSkiaGetProp, mInstance, mPhysicalDevice, mInstanceExtensions.size(),
                       mInstanceExtensions.data(), mDeviceExtensions.size(),
                       mDeviceExtensions.data());
 
@@ -289,7 +295,7 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
             queueNextPtr,                                // pNext
             0,                                           // VkDeviceQueueCreateFlags
             mGraphicsQueueIndex,                         // queueFamilyIndex
-            2,                                           // queueCount
+            1,                                           // queueCount
             queuePriorities,                             // pQueuePriorities
     };
 
@@ -344,7 +350,6 @@ void VulkanManager::initialize() {
     this->setupDevice(mExtensions, mPhysicalDeviceFeatures2);
 
     mGetDeviceQueue(mDevice, mGraphicsQueueIndex, 0, &mGraphicsQueue);
-    mGetDeviceQueue(mDevice, mGraphicsQueueIndex, 1, &mAHBUploadQueue);
 
     if (Properties::enablePartialUpdates && Properties::useBufferAge) {
         mSwapBehavior = SwapBehavior::BufferAge;
@@ -353,24 +358,17 @@ void VulkanManager::initialize() {
 
 sk_sp<GrDirectContext> VulkanManager::createContext(const GrContextOptions& options,
                                                     ContextType contextType) {
-    auto getProc = [](const char* proc_name, VkInstance instance, VkDevice device) {
-        if (device != VK_NULL_HANDLE) {
-            return vkGetDeviceProcAddr(device, proc_name);
-        }
-        return vkGetInstanceProcAddr(instance, proc_name);
-    };
 
     GrVkBackendContext backendContext;
     backendContext.fInstance = mInstance;
     backendContext.fPhysicalDevice = mPhysicalDevice;
     backendContext.fDevice = mDevice;
-    backendContext.fQueue = (contextType == ContextType::kRenderThread) ? mGraphicsQueue
-                                                                        : mAHBUploadQueue;
+    backendContext.fQueue = mGraphicsQueue;
     backendContext.fGraphicsQueueIndex = mGraphicsQueueIndex;
     backendContext.fMaxAPIVersion = mAPIVersion;
     backendContext.fVkExtensions = &mExtensions;
     backendContext.fDeviceFeatures2 = &mPhysicalDeviceFeatures2;
-    backendContext.fGetProc = std::move(getProc);
+    backendContext.fGetProc = sSkiaGetProp;
 
     return GrDirectContext::MakeVulkan(backendContext, options);
 }
@@ -530,6 +528,8 @@ void VulkanManager::swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect)
         ALOGE_IF(VK_SUCCESS != err, "VulkanManager::swapBuffers(): Failed to get semaphore Fd");
     } else {
         ALOGE("VulkanManager::swapBuffers(): Semaphore submission failed");
+
+        std::lock_guard<std::mutex> lock(mGraphicsQueueMutex);
         mQueueWaitIdle(mGraphicsQueue);
     }
     destroy_semaphore(destroyInfo);
@@ -540,6 +540,7 @@ void VulkanManager::swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect)
 void VulkanManager::destroySurface(VulkanSurface* surface) {
     // Make sure all submit commands have finished before starting to destroy objects.
     if (VK_NULL_HANDLE != mGraphicsQueue) {
+        std::lock_guard<std::mutex> lock(mGraphicsQueueMutex);
         mQueueWaitIdle(mGraphicsQueue);
     }
     mDeviceWaitIdle(mDevice);

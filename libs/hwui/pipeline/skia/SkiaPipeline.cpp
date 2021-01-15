@@ -98,7 +98,7 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque)
             continue;
         }
         SkASSERT(layerNode->getLayerSurface());
-        SkiaDisplayList* displayList = (SkiaDisplayList*)layerNode->getDisplayList();
+        SkiaDisplayList* displayList = layerNode->getDisplayList().asSkiaDl();
         if (!displayList || displayList->isEmpty()) {
             ALOGE("%p drawLayers(%s) : missing drawable", layerNode, layerNode->getName());
             return;
@@ -288,7 +288,7 @@ bool SkiaPipeline::setupMultiFrameCapture() {
 
 // recurse through the rendernode's children, add any nodes which are layers to the queue.
 static void collectLayers(RenderNode* node, LayerUpdateQueue* layers) {
-    SkiaDisplayList* dl = (SkiaDisplayList*)node->getDisplayList();
+    SkiaDisplayList* dl = node->getDisplayList().asSkiaDl();
     if (dl) {
         const auto& prop = node->properties();
         if (node->hasLayer()) {

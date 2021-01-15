@@ -22,6 +22,7 @@ import android.annotation.UserIdInt;
 import android.os.Bundle;
 import android.os.ParcelableException;
 import android.os.RemoteException;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -161,11 +162,22 @@ public final class AppSearchSession {
         for (AppSearchSchema schema : request.getSchemas()) {
             schemaBundles.add(schema.getBundle());
         }
+        Map<String, List<Bundle>> schemasPackageAccessibleBundles =
+                new ArrayMap<>(request.getSchemasVisibleToPackagesInternal().size());
+        for (Map.Entry<String, Set<PackageIdentifier>> entry :
+                request.getSchemasVisibleToPackagesInternal().entrySet()) {
+            List<Bundle> packageIdentifierBundles = new ArrayList<>(entry.getValue().size());
+            for (PackageIdentifier packageIdentifier : entry.getValue()) {
+                packageIdentifierBundles.add(packageIdentifier.getBundle());
+            }
+            schemasPackageAccessibleBundles.put(entry.getKey(), packageIdentifierBundles);
+        }
         try {
             mService.setSchema(
                     mDatabaseName,
                     schemaBundles,
                     new ArrayList<>(request.getSchemasNotVisibleToSystemUi()),
+                    schemasPackageAccessibleBundles,
                     request.isForceOverride(),
                     mUserId,
                     new IAppSearchResultCallback.Stub() {

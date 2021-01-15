@@ -30,7 +30,6 @@ import android.view.View;
 import com.android.internal.util.ArrayUtils;
 
 import dalvik.annotation.optimization.CriticalNative;
-import dalvik.annotation.optimization.FastNative;
 
 import libcore.util.NativeAllocationRegistry;
 
@@ -406,8 +405,7 @@ public final class RenderNode {
         }
         RecordingCanvas canvas = mCurrentRecordingCanvas;
         mCurrentRecordingCanvas = null;
-        long displayList = canvas.finishRecording();
-        nSetDisplayList(mNativeRenderNode, displayList);
+        canvas.finishRecording(this);
         canvas.recycle();
     }
 
@@ -438,7 +436,7 @@ public final class RenderNode {
      * obsolete resources after related resources are gone.
      */
     public void discardDisplayList() {
-        nSetDisplayList(mNativeRenderNode, 0);
+        nDiscardDisplayList(mNativeRenderNode);
     }
 
     /**
@@ -1528,18 +1526,12 @@ public final class RenderNode {
 
     private static native void nEndAllAnimators(long renderNode);
 
-
-    ///////////////////////////////////////////////////////////////////////////
-    // @FastNative methods
-    ///////////////////////////////////////////////////////////////////////////
-
-    @FastNative
-    private static native void nSetDisplayList(long renderNode, long newData);
-
-
     ///////////////////////////////////////////////////////////////////////////
     // @CriticalNative methods
     ///////////////////////////////////////////////////////////////////////////
+
+    @CriticalNative
+    private static native void nDiscardDisplayList(long renderNode);
 
     @CriticalNative
     private static native boolean nIsValid(long renderNode);

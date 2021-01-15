@@ -20,7 +20,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
-import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
@@ -41,6 +40,7 @@ import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 
 import org.junit.Before;
@@ -74,41 +74,69 @@ public class WindowProcessControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testDisplayConfigurationListener() {
+    public void testDisplayAreaConfigurationListener() {
+        // By default, the process should not listen to any display area.
+        assertNull(mWpc.getDisplayArea());
 
-        //By default, the process should not listen to any display.
-        assertEquals(INVALID_DISPLAY, mWpc.getDisplayId());
+        // Register to ImeContainer on display 1 as a listener.
+        final TestDisplayContent testDisplayContent1 = createTestDisplayContentInContainer();
+        final DisplayArea imeContainer1 = testDisplayContent1.getImeContainer();
+        mWpc.registerDisplayAreaConfigurationListener(imeContainer1);
+        assertTrue(imeContainer1.containsListener(mWpc));
+        assertEquals(imeContainer1, mWpc.getDisplayArea());
 
-        // Register to display 1 as a listener.
-        TestDisplayContent testDisplayContent1 = createTestDisplayContentInContainer();
-        mWpc.registerDisplayConfigurationListener(testDisplayContent1);
-        assertTrue(testDisplayContent1.containsListener(mWpc));
-        assertEquals(testDisplayContent1.mDisplayId, mWpc.getDisplayId());
+        // Register to ImeContainer on display 2 as a listener.
+        final TestDisplayContent testDisplayContent2 = createTestDisplayContentInContainer();
+        final DisplayArea imeContainer2 = testDisplayContent2.getImeContainer();
+        mWpc.registerDisplayAreaConfigurationListener(imeContainer2);
+        assertFalse(imeContainer1.containsListener(mWpc));
+        assertTrue(imeContainer2.containsListener(mWpc));
+        assertEquals(imeContainer2, mWpc.getDisplayArea());
 
-        // Move to display 2.
-        TestDisplayContent testDisplayContent2 = createTestDisplayContentInContainer();
-        mWpc.registerDisplayConfigurationListener(testDisplayContent2);
-        assertFalse(testDisplayContent1.containsListener(mWpc));
-        assertTrue(testDisplayContent2.containsListener(mWpc));
-        assertEquals(testDisplayContent2.mDisplayId, mWpc.getDisplayId());
+        // Null DisplayArea will not change anything.
+        mWpc.registerDisplayAreaConfigurationListener(null);
+        assertTrue(imeContainer2.containsListener(mWpc));
+        assertEquals(imeContainer2, mWpc.getDisplayArea());
 
-        // Null DisplayContent will not change anything.
-        mWpc.registerDisplayConfigurationListener(null);
-        assertTrue(testDisplayContent2.containsListener(mWpc));
-        assertEquals(testDisplayContent2.mDisplayId, mWpc.getDisplayId());
-
-        // Unregister listener will remove the wpc from registered displays.
-        mWpc.unregisterDisplayConfigurationListener();
-        assertFalse(testDisplayContent1.containsListener(mWpc));
-        assertFalse(testDisplayContent2.containsListener(mWpc));
-        assertEquals(INVALID_DISPLAY, mWpc.getDisplayId());
+        // Unregister listener will remove the wpc from registered display area.
+        mWpc.unregisterDisplayAreaConfigurationListener();
+        assertFalse(imeContainer1.containsListener(mWpc));
+        assertFalse(imeContainer2.containsListener(mWpc));
+        assertNull(mWpc.getDisplayArea());
 
         // Unregistration still work even if the display was removed.
-        mWpc.registerDisplayConfigurationListener(testDisplayContent1);
-        assertEquals(testDisplayContent1.mDisplayId, mWpc.getDisplayId());
+        mWpc.registerDisplayAreaConfigurationListener(imeContainer1);
+        assertEquals(imeContainer1, mWpc.getDisplayArea());
         mRootWindowContainer.removeChild(testDisplayContent1);
-        mWpc.unregisterDisplayConfigurationListener();
-        assertEquals(INVALID_DISPLAY, mWpc.getDisplayId());
+        mWpc.unregisterDisplayAreaConfigurationListener();
+        assertNull(mWpc.getDisplayArea());
+    }
+
+    @Test
+    public void testDisplayAreaConfigurationListener_verifyConfig() {
+        final Rect displayBounds = new Rect(0, 0, 2000, 1000);
+        final DisplayContent display = new TestDisplayContent.Builder(
+                mAtm, displayBounds.width(), displayBounds.height())
+                .setDensityDpi(300)
+                .setPosition(DisplayContent.POSITION_TOP)
+                .build();
+        final DisplayArea imeContainer = display.getImeContainer();
+
+        // Register to the ime container.
+        mWpc.registerDisplayAreaConfigurationListener(imeContainer);
+
+        assertEquals(displayBounds, mWpc.getConfiguration().windowConfiguration.getBounds());
+
+        // Resize the ime container.
+        final Rect resizeImeBounds = new Rect(0, 0, 1000, 1000);
+        imeContainer.setBounds(resizeImeBounds);
+
+        assertEquals(resizeImeBounds, mWpc.getConfiguration().windowConfiguration.getBounds());
+
+        // Register to the display.
+        mWpc.registerDisplayAreaConfigurationListener(display);
+
+        assertEquals(displayBounds, mWpc.getConfiguration().windowConfiguration.getBounds());
     }
 
     @Test
@@ -149,18 +177,19 @@ public class WindowProcessControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testConfigurationForSecondaryScreen() {
-        // By default, the process should not listen to any display.
-        assertEquals(INVALID_DISPLAY, mWpc.getDisplayId());
+    public void testConfigurationForSecondaryScreenDisplayArea() {
+        // By default, the process should not listen to any display area.
+        assertNull(mWpc.getDisplayArea());
 
-        // Register to a new display as a listener.
+        // Register to the ImeContainer on the new display as a listener.
         final DisplayContent display = new TestDisplayContent.Builder(mAtm, 2000, 1000)
                 .setDensityDpi(300).setPosition(DisplayContent.POSITION_TOP).build();
-        mWpc.registerDisplayConfigurationListener(display);
+        final DisplayArea imeContainer = display.getImeContainer();
+        mWpc.registerDisplayAreaConfigurationListener(imeContainer);
 
-        assertEquals(display.mDisplayId, mWpc.getDisplayId());
+        assertEquals(imeContainer, mWpc.getDisplayArea());
         final Configuration expectedConfig = mAtm.mRootWindowContainer.getConfiguration();
-        expectedConfig.updateFrom(display.getConfiguration());
+        expectedConfig.updateFrom(imeContainer.getConfiguration());
         assertEquals(expectedConfig, mWpc.getConfiguration());
     }
 

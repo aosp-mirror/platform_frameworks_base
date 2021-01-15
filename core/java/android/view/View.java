@@ -17914,6 +17914,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #setOutlineProvider(ViewOutlineProvider)
      * @see #getClipToOutline()
      */
+    @RemotableViewMethod
     public void setClipToOutline(boolean clipToOutline) {
         damageInParent();
         if (getClipToOutline() != clipToOutline) {

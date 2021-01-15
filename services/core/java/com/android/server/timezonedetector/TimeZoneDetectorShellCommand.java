@@ -18,7 +18,6 @@ package com.android.server.timezonedetector;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_IS_AUTO_DETECTION_ENABLED;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_IS_GEO_DETECTION_ENABLED;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_IS_GEO_DETECTION_SUPPORTED;
-import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_IS_LOCATION_ENABLED;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SET_AUTO_DETECTION_ENABLED;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SET_GEO_DETECTION_ENABLED;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SUGGEST_GEO_LOCATION_TIME_ZONE;
@@ -57,8 +56,6 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
                 return runSetAutoDetectionEnabled();
             case SHELL_COMMAND_IS_GEO_DETECTION_SUPPORTED:
                 return runIsGeoDetectionSupported();
-            case SHELL_COMMAND_IS_LOCATION_ENABLED:
-                return runIsLocationEnabled();
             case SHELL_COMMAND_IS_GEO_DETECTION_ENABLED:
                 return runIsGeoDetectionEnabled();
             case SHELL_COMMAND_SET_GEO_DETECTION_ENABLED:
@@ -88,14 +85,6 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
     private int runIsGeoDetectionSupported() {
         final PrintWriter pw = getOutPrintWriter();
         boolean enabled = mInterface.isGeoTimeZoneDetectionSupported();
-        pw.println(enabled);
-        return 0;
-    }
-
-    private int runIsLocationEnabled() {
-        final PrintWriter pw = getOutPrintWriter();
-        int userId = UserHandle.USER_CURRENT;
-        boolean enabled = mInterface.isLocationEnabled(userId);
         pw.println(enabled);
         return 0;
     }
@@ -176,9 +165,6 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
         pw.printf("  %s\n", SHELL_COMMAND_IS_GEO_DETECTION_SUPPORTED);
         pw.println("    Prints true/false according to whether geolocation time zone detection is"
                 + " supported on this device");
-        pw.printf("  %s\n", SHELL_COMMAND_IS_LOCATION_ENABLED);
-        pw.println("    Prints true/false according to whether the master location toggle is"
-                + " enabled for the current user");
         pw.printf("  %s\n", SHELL_COMMAND_IS_GEO_DETECTION_ENABLED);
         pw.println("    Prints true/false according to the geolocation tz detection setting");
         pw.printf("  %s true|false\n", SHELL_COMMAND_SET_GEO_DETECTION_ENABLED);

@@ -3025,7 +3025,9 @@ public class DevicePolicyManager {
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
-     * profile. Apps targeting {@link android.os.Build.VERSION_CODES#S} and above will get a
+     * profile. Apps targeting {@link android.os.Build.VERSION_CODES#S} and above, with the
+     * exception of a profile owner on an organization-owned device (as can be identified by
+     * {@link #isOrganizationOwnedDeviceWithManagedProfile}), will get a
      * {@code IllegalArgumentException} when calling this method on the parent
      * {@link DevicePolicyManager} instance.
      *
@@ -12868,12 +12870,13 @@ public class DevicePolicyManager {
      * @throws SecurityException if the caller is not a profile owner or device owner.
      */
     @NonNull public String getEnrollmentSpecificId() {
+        throwIfParentInstance("getEnrollmentSpecificId");
         if (mService == null) {
             return "";
         }
 
         try {
-            return mService.getEnrollmentSpecificId();
+            return mService.getEnrollmentSpecificId(mContext.getPackageName());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -12890,6 +12893,7 @@ public class DevicePolicyManager {
      *                     enrolled into.
      */
     public void setOrganizationId(@NonNull String enterpriseId) {
+        throwIfParentInstance("setOrganizationId");
         setOrganizationIdForUser(mContext.getPackageName(), enterpriseId, myUserId());
     }
 

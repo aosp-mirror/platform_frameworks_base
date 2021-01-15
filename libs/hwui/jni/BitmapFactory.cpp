@@ -8,9 +8,11 @@
 #include "MimeType.h"
 #include "NinePatchPeeker.h"
 #include "SkAndroidCodec.h"
+#include "SkCanvas.h"
 #include "SkMath.h"
 #include "SkPixelRef.h"
 #include "SkStream.h"
+#include "SkString.h"
 #include "SkUtils.h"
 #include "Utils.h"
 

@@ -1054,9 +1054,11 @@ package android {
     field public static final int parentActivityName = 16843687; // 0x10103a7
     field @Deprecated public static final int password = 16843100; // 0x101015c
     field public static final int path = 16842794; // 0x101002a
+    field public static final int pathAdvancedPattern = 16844318; // 0x101061e
     field public static final int pathData = 16843781; // 0x1010405
     field public static final int pathPattern = 16842796; // 0x101002c
     field public static final int pathPrefix = 16842795; // 0x101002b
+    field public static final int pathSuffix = 16844316; // 0x101061c
     field public static final int patternPathData = 16843978; // 0x10104ca
     field public static final int permission = 16842758; // 0x1010006
     field public static final int permissionFlags = 16843719; // 0x10103c7
@@ -1290,8 +1292,10 @@ package android {
     field public static final int spotShadowAlpha = 16843967; // 0x10104bf
     field public static final int src = 16843033; // 0x1010119
     field public static final int ssp = 16843747; // 0x10103e3
+    field public static final int sspAdvancedPattern = 16844319; // 0x101061f
     field public static final int sspPattern = 16843749; // 0x10103e5
     field public static final int sspPrefix = 16843748; // 0x10103e4
+    field public static final int sspSuffix = 16844317; // 0x101061d
     field public static final int stackFromBottom = 16843005; // 0x10100fd
     field public static final int stackViewStyle = 16843838; // 0x101043e
     field public static final int starStyle = 16842882; // 0x1010082
@@ -1686,6 +1690,30 @@ package android {
     field @Deprecated public static final int secondary_text_dark_nodisable = 17170438; // 0x1060006
     field @Deprecated public static final int secondary_text_light = 17170439; // 0x1060007
     field @Deprecated public static final int secondary_text_light_nodisable = 17170440; // 0x1060008
+    field public static final int system_accent_0 = 17170473; // 0x1060029
+    field public static final int system_accent_100 = 17170475; // 0x106002b
+    field public static final int system_accent_1000 = 17170484; // 0x1060034
+    field public static final int system_accent_200 = 17170476; // 0x106002c
+    field public static final int system_accent_300 = 17170477; // 0x106002d
+    field public static final int system_accent_400 = 17170478; // 0x106002e
+    field public static final int system_accent_50 = 17170474; // 0x106002a
+    field public static final int system_accent_500 = 17170479; // 0x106002f
+    field public static final int system_accent_600 = 17170480; // 0x1060030
+    field public static final int system_accent_700 = 17170481; // 0x1060031
+    field public static final int system_accent_800 = 17170482; // 0x1060032
+    field public static final int system_accent_900 = 17170483; // 0x1060033
+    field public static final int system_main_0 = 17170461; // 0x106001d
+    field public static final int system_main_100 = 17170463; // 0x106001f
+    field public static final int system_main_1000 = 17170472; // 0x1060028
+    field public static final int system_main_200 = 17170464; // 0x1060020
+    field public static final int system_main_300 = 17170465; // 0x1060021
+    field public static final int system_main_400 = 17170466; // 0x1060022
+    field public static final int system_main_50 = 17170462; // 0x106001e
+    field public static final int system_main_500 = 17170467; // 0x1060023
+    field public static final int system_main_600 = 17170468; // 0x1060024
+    field public static final int system_main_700 = 17170469; // 0x1060025
+    field public static final int system_main_800 = 17170470; // 0x1060026
+    field public static final int system_main_900 = 17170471; // 0x1060027
     field public static final int tab_indicator_text = 17170441; // 0x1060009
     field @Deprecated public static final int tertiary_text_dark = 17170448; // 0x1060010
     field @Deprecated public static final int tertiary_text_light = 17170449; // 0x1060011
@@ -30943,6 +30971,7 @@ package android.os {
     field public static final int PATTERN_LITERAL = 0; // 0x0
     field public static final int PATTERN_PREFIX = 1; // 0x1
     field public static final int PATTERN_SIMPLE_GLOB = 2; // 0x2
+    field public static final int PATTERN_SUFFIX = 4; // 0x4
   }
 
   public final class PersistableBundle extends android.os.BaseBundle implements java.lang.Cloneable android.os.Parcelable {
@@ -42205,6 +42234,14 @@ package android.telephony.euicc {
     method @Nullable public String getEncodedActivationCode();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.euicc.DownloadableSubscription> CREATOR;
+  }
+
+  public static final class DownloadableSubscription.Builder {
+    ctor public DownloadableSubscription.Builder(@NonNull android.telephony.euicc.DownloadableSubscription);
+    ctor public DownloadableSubscription.Builder(@NonNull String);
+    method @NonNull public android.telephony.euicc.DownloadableSubscription build();
+    method @NonNull public android.telephony.euicc.DownloadableSubscription.Builder setConfirmationCode(@NonNull String);
+    method @NonNull public android.telephony.euicc.DownloadableSubscription.Builder setEncodedActivationCode(@NonNull String);
   }
 
   public final class EuiccInfo implements android.os.Parcelable {

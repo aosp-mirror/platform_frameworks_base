@@ -62,13 +62,13 @@ public class UdfpsHelper {
         }
     }
 
-    public static void showUdfpsOverlay(int sensorId,
+    public static void showUdfpsOverlay(int sensorId, int reason,
             @Nullable IUdfpsOverlayController udfpsOverlayController) {
         if (udfpsOverlayController == null) {
             return;
         }
         try {
-            udfpsOverlayController.showUdfpsOverlay(sensorId);
+            udfpsOverlayController.showUdfpsOverlay(sensorId, reason);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when showing the UDFPS overlay", e);
         }

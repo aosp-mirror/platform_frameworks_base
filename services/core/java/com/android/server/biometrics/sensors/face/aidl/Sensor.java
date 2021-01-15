@@ -376,7 +376,17 @@ public class Sensor implements IBinder.DeathRecipient {
 
         @Override
         public void onAuthenticatorIdInvalidated(long newAuthenticatorId) {
-            // TODO(b/159667191)
+            mHandler.post(() -> {
+                final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                if (!(client instanceof FaceInvalidationClient)) {
+                    Slog.e(mTag, "onAuthenticatorIdInvalidated for wrong consumer: "
+                            + Utils.getClientName(client));
+                    return;
+                }
+
+                final FaceInvalidationClient invalidationClient = (FaceInvalidationClient) client;
+                invalidationClient.onAuthenticatorIdInvalidated(newAuthenticatorId);
+            });
         }
 
     }

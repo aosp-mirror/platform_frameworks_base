@@ -162,7 +162,7 @@ package android.app.appsearch {
   public static final class PutDocumentsRequest.Builder {
     ctor public PutDocumentsRequest.Builder();
     method @NonNull public android.app.appsearch.PutDocumentsRequest.Builder addGenericDocument(@NonNull android.app.appsearch.GenericDocument...);
-    method @NonNull public android.app.appsearch.PutDocumentsRequest.Builder addGenericDocument(@NonNull java.util.Collection<android.app.appsearch.GenericDocument>);
+    method @NonNull public android.app.appsearch.PutDocumentsRequest.Builder addGenericDocument(@NonNull java.util.Collection<? extends android.app.appsearch.GenericDocument>);
     method @NonNull public android.app.appsearch.PutDocumentsRequest build();
   }
 
@@ -182,6 +182,7 @@ package android.app.appsearch {
   public final class SearchResult {
     method @NonNull public android.app.appsearch.GenericDocument getDocument();
     method @NonNull public java.util.List<android.app.appsearch.SearchResult.MatchInfo> getMatches();
+    method @NonNull public String getPackageName();
   }
 
   public static final class SearchResult.MatchInfo {
@@ -204,9 +205,11 @@ package android.app.appsearch {
   }
 
   public final class SearchSpec {
+    method @NonNull public java.util.List<java.lang.String> getFilterPackageNames();
     method public int getMaxSnippetSize();
     method @NonNull public java.util.List<java.lang.String> getNamespaces();
     method public int getOrder();
+    method @NonNull public java.util.Map<java.lang.String,java.util.List<java.lang.String>> getProjections();
     method public int getRankingStrategy();
     method public int getResultCountPerPage();
     method @NonNull public java.util.List<java.lang.String> getSchemaTypes();
@@ -215,17 +218,23 @@ package android.app.appsearch {
     method public int getTermMatch();
     field public static final int ORDER_ASCENDING = 1; // 0x1
     field public static final int ORDER_DESCENDING = 0; // 0x0
+    field public static final String PROJECTION_SCHEMA_TYPE_WILDCARD = "*";
     field public static final int RANKING_STRATEGY_CREATION_TIMESTAMP = 2; // 0x2
     field public static final int RANKING_STRATEGY_DOCUMENT_SCORE = 1; // 0x1
     field public static final int RANKING_STRATEGY_NONE = 0; // 0x0
+    field public static final int RANKING_STRATEGY_RELEVANCE_SCORE = 3; // 0x3
     field public static final int TERM_MATCH_EXACT_ONLY = 1; // 0x1
     field public static final int TERM_MATCH_PREFIX = 2; // 0x2
   }
 
   public static final class SearchSpec.Builder {
     ctor public SearchSpec.Builder();
+    method @NonNull public android.app.appsearch.SearchSpec.Builder addFilterPackageNames(@NonNull java.lang.String...);
+    method @NonNull public android.app.appsearch.SearchSpec.Builder addFilterPackageNames(@NonNull java.util.Collection<java.lang.String>);
     method @NonNull public android.app.appsearch.SearchSpec.Builder addNamespace(@NonNull java.lang.String...);
     method @NonNull public android.app.appsearch.SearchSpec.Builder addNamespace(@NonNull java.util.Collection<java.lang.String>);
+    method @NonNull public android.app.appsearch.SearchSpec.Builder addProjection(@NonNull String, @NonNull java.lang.String...);
+    method @NonNull public android.app.appsearch.SearchSpec.Builder addProjection(@NonNull String, @NonNull java.util.Collection<java.lang.String>);
     method @NonNull public android.app.appsearch.SearchSpec.Builder addSchemaType(@NonNull java.lang.String...);
     method @NonNull public android.app.appsearch.SearchSpec.Builder addSchemaType(@NonNull java.util.Collection<java.lang.String>);
     method @NonNull public android.app.appsearch.SearchSpec build();

@@ -26,7 +26,6 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.app.ActivityManager;
 import android.content.Context;
-import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -189,13 +188,18 @@ public final class BugreportManager {
         }
     }
 
-    /*
-     * Cancels a currently running bugreport.
+    /**
+     * Cancels the currently running bugreport.
+     *
+     * <p>Apps are only able to cancel their own bugreports. App A cannot cancel a bugreport started
+     * by app B.
+     *
+     * @throws SecurityException if trying to cancel another app's bugreport in progress
      */
     @RequiresPermission(android.Manifest.permission.DUMP)
     public void cancelBugreport() {
         try {
-            mBinder.cancelBugreport();
+            mBinder.cancelBugreport(-1 /* callingUid */, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

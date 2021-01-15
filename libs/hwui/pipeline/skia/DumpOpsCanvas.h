@@ -29,7 +29,7 @@ namespace skiapipeline {
  */
 class DumpOpsCanvas : public SkCanvas {
 public:
-    DumpOpsCanvas(std::ostream& output, int level, SkiaDisplayList& displayList)
+    DumpOpsCanvas(std::ostream& output, int level, const SkiaDisplayList& displayList)
             : mOutput(output)
             , mLevel(level)
             , mDisplayList(displayList)
@@ -127,7 +127,7 @@ protected:
     }
 
 private:
-    RenderNodeDrawable* getRenderNodeDrawable(SkDrawable* drawable) {
+    const RenderNodeDrawable* getRenderNodeDrawable(SkDrawable* drawable) {
         for (auto& child : mDisplayList.mChildNodes) {
             if (drawable == &child) {
                 return &child;
@@ -147,7 +147,7 @@ private:
 
     std::ostream& mOutput;
     int mLevel;
-    SkiaDisplayList& mDisplayList;
+    const SkiaDisplayList& mDisplayList;
     std::string mIdent;
 };
 

@@ -94,9 +94,12 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
 
     @Override
     @RequiresPermission(android.Manifest.permission.DUMP)
-    public void cancelBugreport() {
+    public void cancelBugreport(int callingUidUnused, String callingPackage) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP,
                 "cancelBugreport");
+        int callingUid = Binder.getCallingUid();
+        mAppOps.checkPackage(callingUid, callingPackage);
+
         synchronized (mLock) {
             IDumpstate ds = getDumpstateBinderServiceLocked();
             if (ds == null) {
@@ -104,7 +107,11 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
                 return;
             }
             try {
-                ds.cancelBugreport();
+                // Note: this may throw SecurityException back out to the caller if they aren't
+                // allowed to cancel the report, in which case we should NOT be setting ctl.stop,
+                // since that would unintentionally kill some other app's bugreport, which we
+                // specifically disallow.
+                ds.cancelBugreport(callingUid, callingPackage);
             } catch (RemoteException e) {
                 Slog.e(TAG, "RemoteException in cancelBugreport", e);
             }
@@ -182,7 +189,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
             // lifecycle correctly. If we don't subsequent callers will get
             // BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS error.
             // Note that listener will be notified by the death recipient below.
-            cancelBugreport();
+            cancelBugreport(callingUid, callingPackage);
         }
     }
 

@@ -20,10 +20,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
-import android.app.IActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.Context;
 import android.content.pm.UserInfo;
+import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.SensorProps;
@@ -266,6 +266,32 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     @Override
     public List<Face> getEnrolledFaces(int sensorId, int userId) {
         return FaceUtils.getInstance(sensorId).getBiometricsForUser(mContext, userId);
+    }
+
+    @Override
+    public void scheduleInvalidateAuthenticatorId(int sensorId, int userId,
+            @NonNull IInvalidationCallback callback) {
+        mHandler.post(() -> {
+            final IFace daemon = getHalInstance();
+            if (daemon == null) {
+                Slog.e(getTag(), "Null daemon during scheduleInvalidateAuthenticatorId: "
+                        + sensorId);
+                return;
+            }
+
+            try {
+                if (!mSensors.get(sensorId).hasSessionForUser(userId)) {
+                    createNewSessionWithoutHandler(daemon, sensorId, userId);
+                }
+
+                final FaceInvalidationClient client = new FaceInvalidationClient(mContext,
+                        mSensors.get(sensorId).getLazySession(), userId, sensorId,
+                        mSensors.get(sensorId).getAuthenticatorIds(), callback);
+                mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
+            } catch (RemoteException e) {
+                Slog.e(getTag(), "Remote exception", e);
+            }
+        });
     }
 
     @Override

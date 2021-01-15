@@ -109,10 +109,9 @@ public final class SearchResult {
     }
 
     /**
-     * Contains the package name that stored the {@link GenericDocument}.
+     * Contains the package name of the app that stored the {@link GenericDocument}.
      *
      * @return Package name that stored the document
-     * @hide
      */
     @NonNull
     public String getPackageName() {

@@ -36,6 +36,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
 import static android.view.WindowManager.TRANSIT_NONE;
@@ -861,9 +862,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                         "<<< CLOSE TRANSACTION performLayoutAndPlaceSurfaces");
             }
         }
-
-        // Send any pending task-info changes that were queued-up during a layout deferment
-        mWmService.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
         mWmService.mAnimator.executeAfterPrepareSurfacesRunnables();
 
         checkAppTransitionReady(surfacePlacer);
@@ -1015,6 +1013,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mWmService.enableScreenIfNeededLocked();
 
         mWmService.scheduleAnimationLocked();
+
+        // Send any pending task-info changes that were queued-up during a layout deferment
+        mWmService.mAtmService.mTaskOrganizerController.dispatchPendingTaskInfoChanges();
 
         if (DEBUG_WINDOW_TRACE) Slog.e(TAG, "performSurfacePlacementInner exit");
     }
@@ -3135,6 +3136,27 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 r.finishIfPossible(reason, true /* oomAdj */);
             }
         });
+    }
+
+    /**
+     * Returns {@code true} if {@code uid} has a visible window that's above a window of type {@link
+     * WindowManager.LayoutParams#TYPE_NOTIFICATION_SHADE}. If there is no window with type {@link
+     * WindowManager.LayoutParams#TYPE_NOTIFICATION_SHADE}, it returns {@code false}.
+     */
+    boolean hasVisibleWindowAboveNotificationShade(int uid) {
+        boolean[] visibleWindowFound = {false};
+        // We only return true if we found the notification shade (ie. window of type
+        // TYPE_NOTIFICATION_SHADE). Usually, it should always be there, but if for some reason
+        // it isn't, we should better be on the safe side and return false for this.
+        return forAllWindows(w -> {
+            if (w.mOwnerUid == uid && w.isVisible()) {
+                visibleWindowFound[0] = true;
+            }
+            if (w.mAttrs.type == TYPE_NOTIFICATION_SHADE) {
+                return visibleWindowFound[0];
+            }
+            return false;
+        }, true /* traverseTopToBottom */);
     }
 
     private boolean shouldCloseAssistant(ActivityRecord r, String reason) {

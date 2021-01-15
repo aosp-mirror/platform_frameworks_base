@@ -211,22 +211,34 @@ public class ParsedProviderUtils {
                 R.styleable.AndroidManifestGrantUriPermission);
         try {
             String name = parser.getName();
-            // Pattern has priority over prefix over literal path
+            // Pattern has priority over pre/suffix over literal path
             PatternMatcher pa = null;
             String str = sa.getNonConfigurationString(
-                    R.styleable.AndroidManifestGrantUriPermission_pathPattern, 0);
+                    R.styleable.AndroidManifestGrantUriPermission_pathAdvancedPattern, 0);
             if (str != null) {
-                pa = new PatternMatcher(str, PatternMatcher.PATTERN_SIMPLE_GLOB);
+                pa = new PatternMatcher(str, PatternMatcher.PATTERN_ADVANCED_GLOB);
             } else {
                 str = sa.getNonConfigurationString(
-                        R.styleable.AndroidManifestGrantUriPermission_pathPrefix, 0);
+                        R.styleable.AndroidManifestGrantUriPermission_pathPattern, 0);
                 if (str != null) {
-                    pa = new PatternMatcher(str, PatternMatcher.PATTERN_PREFIX);
+                    pa = new PatternMatcher(str, PatternMatcher.PATTERN_SIMPLE_GLOB);
                 } else {
                     str = sa.getNonConfigurationString(
-                            R.styleable.AndroidManifestGrantUriPermission_path, 0);
+                            R.styleable.AndroidManifestGrantUriPermission_pathPrefix, 0);
                     if (str != null) {
-                        pa = new PatternMatcher(str, PatternMatcher.PATTERN_LITERAL);
+                        pa = new PatternMatcher(str, PatternMatcher.PATTERN_PREFIX);
+                    } else {
+                        str = sa.getNonConfigurationString(
+                                R.styleable.AndroidManifestGrantUriPermission_pathSuffix, 0);
+                        if (str != null) {
+                            pa = new PatternMatcher(str, PatternMatcher.PATTERN_SUFFIX);
+                        } else {
+                            str = sa.getNonConfigurationString(
+                                    R.styleable.AndroidManifestGrantUriPermission_path, 0);
+                            if (str != null) {
+                                pa = new PatternMatcher(str, PatternMatcher.PATTERN_LITERAL);
+                            }
+                        }
                     }
                 }
             }
@@ -318,10 +330,18 @@ public class ParsedProviderUtils {
                         pa = new PathPermission(path, PatternMatcher.PATTERN_PREFIX, readPermission,
                                 writePermission);
                     } else {
-                        path = sa.getNonConfigurationString(R.styleable.AndroidManifestPathPermission_path, 0);
+                        path = sa.getNonConfigurationString(
+                                R.styleable.AndroidManifestPathPermission_pathSuffix, 0);
                         if (path != null) {
-                            pa = new PathPermission(path, PatternMatcher.PATTERN_LITERAL,
+                            pa = new PathPermission(path, PatternMatcher.PATTERN_SUFFIX,
                                     readPermission, writePermission);
+                        } else {
+                            path = sa.getNonConfigurationString(
+                                    R.styleable.AndroidManifestPathPermission_path, 0);
+                            if (path != null) {
+                                pa = new PathPermission(path, PatternMatcher.PATTERN_LITERAL,
+                                        readPermission, writePermission);
+                            }
                         }
                     }
                 }

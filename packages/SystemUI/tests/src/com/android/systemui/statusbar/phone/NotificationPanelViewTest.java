@@ -40,6 +40,7 @@ import android.os.PowerManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.DisplayMetrics;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -84,7 +85,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.util.InjectionInflationController;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import org.junit.Before;
@@ -139,7 +139,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private NotificationPanelView mView;
     @Mock
-    private InjectionInflationController mInjectionInflationController;
+    private LayoutInflater mLayoutInflater;
     @Mock
     private DynamicPrivacyController mDynamicPrivacyController;
     @Mock
@@ -264,7 +264,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 .thenReturn(mKeyguardStatusViewController);
         mNotificationPanelViewController = new NotificationPanelViewController(mView,
                 mResources,
-                mInjectionInflationController,
+                mLayoutInflater,
                 coordinator, expansionHandler, mDynamicPrivacyController, mKeyguardBypassController,
                 new FalsingManagerFake(), new FalsingCollectorFake(), mShadeController,
                 mNotificationLockscreenUserManager, mNotificationEntryManager,

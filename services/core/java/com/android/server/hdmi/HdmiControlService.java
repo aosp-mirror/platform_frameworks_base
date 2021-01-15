@@ -40,6 +40,7 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiHotplugEvent;
 import android.hardware.hdmi.HdmiPortInfo;
+import android.hardware.hdmi.IHdmiCecSettingChangeListener;
 import android.hardware.hdmi.IHdmiCecVolumeControlFeatureListener;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.hdmi.IHdmiControlService;
@@ -74,6 +75,7 @@ import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.sysprop.HdmiProperties;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -308,6 +310,11 @@ public class HdmiControlService extends SystemService {
     private final ArrayList<VendorCommandListenerRecord> mVendorCommandListenerRecords =
             new ArrayList<>();
 
+    // List of records for CEC setting change listener to handle the caller killed in action.
+    @GuardedBy("mLock")
+    private final ArrayMap<String, RemoteCallbackList<IHdmiCecSettingChangeListener>>
+            mHdmiCecSettingChangeListenerRecords = new ArrayMap<>();
+
     @GuardedBy("mLock")
     private InputChangeListenerRecord mInputChangeListenerRecord;
 
@@ -468,7 +475,9 @@ public class HdmiControlService extends SystemService {
 
         mPowerStatusController.setPowerStatus(getInitialPowerStatus());
         mProhibitMode = false;
-        mHdmiControlEnabled = readBooleanSetting(Global.HDMI_CONTROL_ENABLED, true);
+        mHdmiControlEnabled = mHdmiCecConfig.getIntValue(
+                                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED)
+                                    == HdmiControlManager.HDMI_CEC_CONTROL_ENABLED;
         mHdmiCecVolumeControlEnabled = readBooleanSetting(
                 Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED, true);
         mMhlInputChangeEnabled = readBooleanSetting(Global.MHL_INPUT_SWITCHING_ENABLED, true);
@@ -498,7 +507,24 @@ public class HdmiControlService extends SystemService {
         if (mMessageValidator == null) {
             mMessageValidator = new HdmiCecMessageValidator(this);
         }
-        mHdmiCecConfig.registerGlobalSettingsObserver(mIoLooper);
+        mHdmiCecConfig.registerGlobalSettingsObserver(mHandler.getLooper());
+        mHdmiCecConfig.registerChangeListener(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+                new HdmiCecConfig.SettingChangeListener() {
+                    @Override
+                    public void onChange(String setting) {
+                        boolean enabled = mHdmiCecConfig.getIntValue(
+                                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED)
+                                    == HdmiControlManager.HDMI_CEC_CONTROL_ENABLED;
+                        setControlEnabled(enabled);
+                    }
+                });
+        mHdmiCecConfig.registerChangeListener(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
+                new HdmiCecConfig.SettingChangeListener() {
+                    @Override
+                    public void onChange(String setting) {
+                        initializeCec(INITIATED_BY_ENABLE_CEC);
+                    }
+                });
     }
 
     private void bootCompleted() {
@@ -623,9 +649,7 @@ public class HdmiControlService extends SystemService {
     private void registerContentObserver() {
         ContentResolver resolver = getContext().getContentResolver();
         String[] settings = new String[] {
-                Global.HDMI_CONTROL_ENABLED,
                 Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED,
-                Global.HDMI_CEC_VERSION,
                 Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED,
                 Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
                 Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED,
@@ -651,12 +675,6 @@ public class HdmiControlService extends SystemService {
             String option = uri.getLastPathSegment();
             boolean enabled = readBooleanSetting(option, true);
             switch (option) {
-                case Global.HDMI_CONTROL_ENABLED:
-                    setControlEnabled(enabled);
-                    break;
-                case Global.HDMI_CEC_VERSION:
-                    initializeCec(INITIATED_BY_ENABLE_CEC);
-                    break;
                 case Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED:
                     setHdmiCecVolumeControlEnabledInternal(enabled);
                     break;
@@ -2229,6 +2247,20 @@ public class HdmiControlService extends SystemService {
         }
 
         @Override
+        public void addCecSettingChangeListener(String name,
+                final IHdmiCecSettingChangeListener listener) {
+            enforceAccessPermission();
+            HdmiControlService.this.addCecSettingChangeListener(name, listener);
+        }
+
+        @Override
+        public void removeCecSettingChangeListener(String name,
+                final IHdmiCecSettingChangeListener listener) {
+            enforceAccessPermission();
+            HdmiControlService.this.removeCecSettingChangeListener(name, listener);
+        }
+
+        @Override
         public List<String> getUserCecSettings() {
             initBinderCall();
             long token = Binder.clearCallingIdentity();
@@ -3456,5 +3488,54 @@ public class HdmiControlService extends SystemService {
     @VisibleForTesting
     protected HdmiCecConfig getHdmiCecConfig() {
         return mHdmiCecConfig;
+    }
+
+    private HdmiCecConfig.SettingChangeListener mSettingChangeListener =
+            new HdmiCecConfig.SettingChangeListener() {
+                @Override
+                public void onChange(String name) {
+                    synchronized (mLock) {
+                        if (!mHdmiCecSettingChangeListenerRecords.containsKey(name)) {
+                            return;
+                        }
+                        mHdmiCecSettingChangeListenerRecords.get(name).broadcast(listener -> {
+                            invokeCecSettingChangeListenerLocked(name, listener);
+                        });
+                    }
+                }
+            };
+
+    private void addCecSettingChangeListener(String name,
+            final IHdmiCecSettingChangeListener listener) {
+        synchronized (mLock) {
+            if (!mHdmiCecSettingChangeListenerRecords.containsKey(name)) {
+                mHdmiCecSettingChangeListenerRecords.put(name, new RemoteCallbackList<>());
+                mHdmiCecConfig.registerChangeListener(name, mSettingChangeListener);
+            }
+            mHdmiCecSettingChangeListenerRecords.get(name).register(listener);
+        }
+    }
+
+    private void removeCecSettingChangeListener(String name,
+            final IHdmiCecSettingChangeListener listener) {
+        synchronized (mLock) {
+            if (!mHdmiCecSettingChangeListenerRecords.containsKey(name)) {
+                return;
+            }
+            mHdmiCecSettingChangeListenerRecords.get(name).unregister(listener);
+            if (mHdmiCecSettingChangeListenerRecords.get(name).getRegisteredCallbackCount() == 0) {
+                mHdmiCecSettingChangeListenerRecords.remove(name);
+                mHdmiCecConfig.removeChangeListener(name, mSettingChangeListener);
+            }
+        }
+    }
+
+    private void invokeCecSettingChangeListenerLocked(String name,
+            final IHdmiCecSettingChangeListener listener) {
+        try {
+            listener.onChange(name);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to report setting change", e);
+        }
     }
 }

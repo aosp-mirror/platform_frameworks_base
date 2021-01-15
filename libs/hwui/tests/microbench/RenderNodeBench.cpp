@@ -16,6 +16,7 @@
 
 #include <benchmark/benchmark.h>
 
+#include "hwui/Canvas.h"
 #include "RenderNode.h"
 
 using namespace android;
@@ -34,7 +35,7 @@ BENCHMARK(BM_RenderNode_create);
 void BM_RenderNode_recordSimple(benchmark::State& state) {
     sp<RenderNode> node = new RenderNode();
     std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(100, 100));
-    delete canvas->finishRecording();
+    static_cast<void>(canvas->finishRecording());
 
     while (state.KeepRunning()) {
         canvas->resetRecording(100, 100, node.get());
@@ -47,12 +48,12 @@ BENCHMARK(BM_RenderNode_recordSimple);
 void BM_RenderNode_recordSimpleWithReuse(benchmark::State& state) {
     sp<RenderNode> node = new RenderNode();
     std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(100, 100));
-    delete canvas->finishRecording();
+    static_cast<void>(canvas->finishRecording());
 
     while (state.KeepRunning()) {
         canvas->resetRecording(100, 100, node.get());
         canvas->drawColor(0x00000000, SkBlendMode::kSrcOver);
-        canvas->finishRecording()->reuseDisplayList(node.get());
+        canvas->finishRecording().clear(node.get());
     }
 }
 BENCHMARK(BM_RenderNode_recordSimpleWithReuse);
