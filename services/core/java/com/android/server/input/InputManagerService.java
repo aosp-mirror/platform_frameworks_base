@@ -235,10 +235,6 @@ public class InputManagerService extends IInputManager.Stub
     IInputFilter mInputFilter; // guarded by mInputFilterLock
     InputFilterHost mInputFilterHost; // guarded by mInputFilterLock
 
-    private final Object mGestureMonitorPidsLock = new Object();
-    @GuardedBy("mGestureMonitorPidsLock")
-    private final ArrayMap<IBinder, Integer> mGestureMonitorPidsByToken = new ArrayMap<>();
-
     // The associations of input devices to displays by port. Maps from input device port (String)
     // to display id (int). Currently only accessed by InputReader.
     private final Map<String, Integer> mStaticAssociations;
@@ -640,9 +636,6 @@ public class InputManagerService extends IInputManager.Stub
             InputChannel inputChannel = nativeCreateInputMonitor(
                     mPtr, displayId, true /*isGestureMonitor*/, inputChannelName, pid);
             InputMonitorHost host = new InputMonitorHost(inputChannel.getToken());
-            synchronized (mGestureMonitorPidsLock) {
-                mGestureMonitorPidsByToken.put(inputChannel.getToken(), pid);
-            }
             return new InputMonitor(inputChannel, host);
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -665,9 +658,6 @@ public class InputManagerService extends IInputManager.Stub
     public void removeInputChannel(IBinder connectionToken) {
         if (connectionToken == null) {
             throw new IllegalArgumentException("connectionToken must not be null.");
-        }
-        synchronized (mGestureMonitorPidsLock) {
-            mGestureMonitorPidsByToken.remove(connectionToken);
         }
 
         nativeRemoveInputChannel(mPtr, connectionToken);
@@ -2167,7 +2157,6 @@ public class InputManagerService extends IInputManager.Stub
         if (dumpStr != null) {
             pw.println(dumpStr);
             dumpAssociations(pw);
-            dumpGestureMonitorPidsByToken(pw);
         }
     }
 
@@ -2187,19 +2176,6 @@ public class InputManagerService extends IInputManager.Stub
                     pw.print("  port: " + k);
                     pw.println("  display: " + v);
                 });
-            }
-        }
-    }
-
-    private void dumpGestureMonitorPidsByToken(PrintWriter pw) {
-        synchronized (mGestureMonitorPidsLock) {
-            if (!mGestureMonitorPidsByToken.isEmpty()) {
-                pw.println("Gesture monitor pids by token:");
-                for (int i = 0; i < mGestureMonitorPidsByToken.size(); i++) {
-                    pw.print("  " + i + ": ");
-                    pw.print(" token: " + mGestureMonitorPidsByToken.keyAt(i));
-                    pw.println(" pid: " + mGestureMonitorPidsByToken.valueAt(i));
-                }
             }
         }
     }
@@ -2226,7 +2202,6 @@ public class InputManagerService extends IInputManager.Stub
     public void monitor() {
         synchronized (mInputFilterLock) { }
         synchronized (mAssociationsLock) { /* Test if blocked by associations lock. */}
-        synchronized (mGestureMonitorPidsLock) { /* Test if blocked by gesture monitor pids lock */}
         synchronized (mLidSwitchLock) { /* Test if blocked by lid switch lock. */ }
         nativeMonitor(mPtr);
     }
@@ -2296,9 +2271,6 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback.
     private void notifyInputChannelBroken(IBinder token) {
-        synchronized (mGestureMonitorPidsLock) {
-            mGestureMonitorPidsByToken.remove(token);
-        }
         mWindowManagerCallbacks.notifyInputChannelBroken(token);
     }
 
