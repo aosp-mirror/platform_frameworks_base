@@ -722,10 +722,12 @@ public final class CachedAppOptimizer {
 
     // This will ensure app will be out of the freezer for at least FREEZE_TIMEOUT_MS
     void unfreezeTemporarily(ProcessRecord app) {
-        synchronized (mAm) {
-            if (app.frozen) {
-                unfreezeAppLocked(app);
-                freezeAppAsync(app);
+        if (mUseFreezer) {
+            synchronized (mAm) {
+                if (app.frozen) {
+                    unfreezeAppLocked(app);
+                    freezeAppAsync(app);
+                }
             }
         }
     }
