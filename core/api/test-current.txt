@@ -377,6 +377,7 @@ package android.app {
 package android.app.admin {
 
   public class DevicePolicyManager {
+    method @Nullable public android.os.UserHandle createAndProvisionManagedProfile(@NonNull android.app.admin.ManagedProfileProvisioningParams) throws android.app.admin.ProvisioningException;
     method public void forceUpdateUserSetupComplete();
     method public long getLastBugReportRequestTime();
     method public long getLastNetworkLogRetrievalTime();
@@ -387,6 +388,7 @@ package android.app.admin {
     method @NonNull public static String operationToString(int);
     method @RequiresPermission("android.permission.MANAGE_DEVICE_ADMINS") public void setNextOperationSafety(int, boolean);
     field public static final String ACTION_DATA_SHARING_RESTRICTION_APPLIED = "android.app.action.DATA_SHARING_RESTRICTION_APPLIED";
+    field public static final String ACTION_MANAGED_PROFILE_CREATED = "android.app.action.MANAGED_PROFILE_CREATED";
     field public static final int OPERATION_CLEAR_APPLICATION_USER_DATA = 23; // 0x17
     field public static final int OPERATION_CREATE_AND_MANAGE_USER = 5; // 0x5
     field public static final int OPERATION_INSTALL_CA_CERT = 24; // 0x18
@@ -427,6 +429,39 @@ package android.app.admin {
     field public static final int OPERATION_SWITCH_USER = 2; // 0x2
     field public static final int OPERATION_UNINSTALL_CA_CERT = 40; // 0x28
     field public static final int OPERATION_WIPE_DATA = 8; // 0x8
+    field public static final int PROVISIONING_RESULT_ADMIN_PACKAGE_INSTALLATION_FAILED = 3; // 0x3
+    field public static final int PROVISIONING_RESULT_PRE_CONDITION_FAILED = 1; // 0x1
+    field public static final int PROVISIONING_RESULT_PROFILE_CREATION_FAILED = 2; // 0x2
+    field public static final int PROVISIONING_RESULT_SETTING_PROFILE_OWNER_FAILED = 4; // 0x4
+    field public static final int PROVISIONING_RESULT_STARTING_PROFILE_FAILED = 5; // 0x5
+  }
+
+  public final class ManagedProfileProvisioningParams implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public android.accounts.Account getAccountToMigrate();
+    method @NonNull public String getOwnerName();
+    method @NonNull public android.content.ComponentName getProfileAdminComponentName();
+    method @Nullable public String getProfileName();
+    method public boolean isKeepAccountMigrated();
+    method public boolean isLeaveAllSystemAppsEnabled();
+    method public boolean isOrganizationOwnedProvisioning();
+    method public void writeToParcel(@NonNull android.os.Parcel, @Nullable int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.ManagedProfileProvisioningParams> CREATOR;
+  }
+
+  public static final class ManagedProfileProvisioningParams.Builder {
+    ctor public ManagedProfileProvisioningParams.Builder(@NonNull android.content.ComponentName, @NonNull String);
+    method @NonNull public android.app.admin.ManagedProfileProvisioningParams build();
+    method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setAccountToMigrate(@Nullable android.accounts.Account);
+    method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setKeepAccountMigrated(boolean);
+    method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setLeaveAllSystemAppsEnabled(boolean);
+    method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setOrganizationOwnedProvisioning(boolean);
+    method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setProfileName(@Nullable String);
+  }
+
+  public class ProvisioningException extends android.util.AndroidException {
+    ctor public ProvisioningException(@NonNull Exception, int);
+    method public int getProvisioningResult();
   }
 
   public static final class SecurityLog.SecurityEvent implements android.os.Parcelable {
