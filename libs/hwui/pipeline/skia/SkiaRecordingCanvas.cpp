@@ -304,10 +304,13 @@ void SkiaRecordingCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& ch
     SkRect dst = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
     sk_sp<SkImage> image = bitmap.makeImage();
 
+    // HWUI always draws 9-patches with linear filtering, regardless of the Paint.
+    const SkFilterMode filter = SkFilterMode::kLinear;
+
     applyLooper(get_looper(paint), filterBitmap(paint), [&](SkScalar x, SkScalar y,
                 const SkPaint* p) {
-        mRecorder.drawImageLattice(image, lattice, dst.makeOffset(x, y), Paint_to_filter(p),
-                                   p, bitmap.palette());
+        mRecorder.drawImageLattice(image, lattice, dst.makeOffset(x, y), filter, p,
+                                   bitmap.palette());
     });
 
     if (!bitmap.isImmutable() && image.get() && !image->unique() && !dst.isEmpty()) {
