@@ -50,8 +50,9 @@ GnssMeasurement::GnssMeasurement(const sp<IGnssMeasurementInterface>& iGnssMeasu
       : mIGnssMeasurement(iGnssMeasurement) {}
 
 jboolean GnssMeasurement::setCallback(const std::unique_ptr<GnssMeasurementCallback>& callback,
-                                      bool enableFullTracking) {
-    auto status = mIGnssMeasurement->setCallback(callback->getAidl(), enableFullTracking);
+                                      bool enableFullTracking, bool enableCorrVecOutputs) {
+    auto status = mIGnssMeasurement->setCallback(callback->getAidl(), enableFullTracking,
+                                                 enableCorrVecOutputs);
     return checkAidlStatus(status, "IGnssMeasurement setCallback() failed.");
 }
 
@@ -66,9 +67,12 @@ GnssMeasurement_V1_0::GnssMeasurement_V1_0(const sp<IGnssMeasurement_V1_0>& iGns
       : mIGnssMeasurement_V1_0(iGnssMeasurement) {}
 
 jboolean GnssMeasurement_V1_0::setCallback(const std::unique_ptr<GnssMeasurementCallback>& callback,
-                                           bool enableFullTracking) {
+                                           bool enableFullTracking, bool enableCorrVecOutputs) {
     if (enableFullTracking == true) {
-        ALOGW("Full tracking is mode not supported in 1.0 GNSS HAL.");
+        ALOGW("Full tracking mode is not supported in 1.0 GNSS HAL.");
+    }
+    if (enableCorrVecOutputs == true) {
+        ALOGW("Correlation vector output is not supported in 1.0 GNSS HAL.");
     }
     auto status = mIGnssMeasurement_V1_0->setCallback(callback->getHidl());
     if (!checkHidlReturn(status, "IGnssMeasurement setCallback() failed.")) {
@@ -89,7 +93,10 @@ GnssMeasurement_V1_1::GnssMeasurement_V1_1(const sp<IGnssMeasurement_V1_1>& iGns
       : GnssMeasurement_V1_0{iGnssMeasurement}, mIGnssMeasurement_V1_1(iGnssMeasurement) {}
 
 jboolean GnssMeasurement_V1_1::setCallback(const std::unique_ptr<GnssMeasurementCallback>& callback,
-                                           bool enableFullTracking) {
+                                           bool enableFullTracking, bool enableCorrVecOutputs) {
+    if (enableCorrVecOutputs == true) {
+        ALOGW("Correlation vector output is not supported in 1.1 GNSS HAL.");
+    }
     auto status = mIGnssMeasurement_V1_1->setCallback_1_1(callback->getHidl(), enableFullTracking);
     if (!checkHidlReturn(status, "IGnssMeasurement setCallback_V1_1() failed.")) {
         return JNI_FALSE;
@@ -104,7 +111,10 @@ GnssMeasurement_V2_0::GnssMeasurement_V2_0(const sp<IGnssMeasurement_V2_0>& iGns
       : GnssMeasurement_V1_1{iGnssMeasurement}, mIGnssMeasurement_V2_0(iGnssMeasurement) {}
 
 jboolean GnssMeasurement_V2_0::setCallback(const std::unique_ptr<GnssMeasurementCallback>& callback,
-                                           bool enableFullTracking) {
+                                           bool enableFullTracking, bool enableCorrVecOutputs) {
+    if (enableCorrVecOutputs == true) {
+        ALOGW("Correlation vector output is not supported in 2.0 GNSS HAL.");
+    }
     auto status = mIGnssMeasurement_V2_0->setCallback_2_0(callback->getHidl(), enableFullTracking);
     if (!checkHidlReturn(status, "IGnssMeasurement setCallback_2_0() failed.")) {
         return JNI_FALSE;
@@ -119,7 +129,10 @@ GnssMeasurement_V2_1::GnssMeasurement_V2_1(const sp<IGnssMeasurement_V2_1>& iGns
       : GnssMeasurement_V2_0{iGnssMeasurement}, mIGnssMeasurement_V2_1(iGnssMeasurement) {}
 
 jboolean GnssMeasurement_V2_1::setCallback(const std::unique_ptr<GnssMeasurementCallback>& callback,
-                                           bool enableFullTracking) {
+                                           bool enableFullTracking, bool enableCorrVecOutputs) {
+    if (enableCorrVecOutputs == true) {
+        ALOGW("Correlation vector output is not supported in 2.1 GNSS HAL.");
+    }
     auto status = mIGnssMeasurement_V2_1->setCallback_2_1(callback->getHidl(), enableFullTracking);
     if (!checkHidlReturn(status, "IGnssMeasurement setCallback_2_1() failed.")) {
         return JNI_FALSE;

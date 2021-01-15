@@ -17,20 +17,38 @@
 package android.location;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.util.Objects;
 
 /**
  * This class contains extra parameters to pass in a GNSS measurement request.
  */
 public final class GnssMeasurementRequest implements Parcelable {
+    private final boolean mCorrelationVectorOutputsEnabled;
     private final boolean mFullTracking;
 
     /**
      * Creates a {@link GnssMeasurementRequest} with a full list of parameters.
      */
-    private GnssMeasurementRequest(boolean fullTracking) {
+    private GnssMeasurementRequest(boolean fullTracking, boolean correlationVectorOutputsEnabled) {
         mFullTracking = fullTracking;
+        mCorrelationVectorOutputsEnabled = correlationVectorOutputsEnabled;
+    }
+
+    /**
+     * Represents whether to enable correlation vector outputs.
+     *
+     * <p>If true, enable correlation vectors as part of the raw GNSS measurements outputs.
+     * If false, disable correlation vectors.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean isCorrelationVectorOutputsEnabled() {
+        return mCorrelationVectorOutputsEnabled;
     }
 
     /**
@@ -56,7 +74,7 @@ public final class GnssMeasurementRequest implements Parcelable {
                 @Override
                 @NonNull
                 public GnssMeasurementRequest createFromParcel(@NonNull Parcel parcel) {
-                    return new GnssMeasurementRequest(parcel.readBoolean());
+                    return new GnssMeasurementRequest(parcel.readBoolean(), parcel.readBoolean());
                 }
 
                 @Override
@@ -68,6 +86,7 @@ public final class GnssMeasurementRequest implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel parcel, int flags) {
         parcel.writeBoolean(mFullTracking);
+        parcel.writeBoolean(mCorrelationVectorOutputsEnabled);
     }
 
     @NonNull
@@ -77,6 +96,9 @@ public final class GnssMeasurementRequest implements Parcelable {
         s.append("GnssMeasurementRequest[");
         if (mFullTracking) {
             s.append("FullTracking");
+        }
+        if (mCorrelationVectorOutputsEnabled) {
+            s.append(", CorrelationVectorOutPuts");
         }
         s.append(']');
         return s.toString();
@@ -90,13 +112,15 @@ public final class GnssMeasurementRequest implements Parcelable {
 
         GnssMeasurementRequest other = (GnssMeasurementRequest) obj;
         if (mFullTracking != other.mFullTracking) return false;
-
+        if (mCorrelationVectorOutputsEnabled != other.mCorrelationVectorOutputsEnabled) {
+            return false;
+        }
         return true;
     }
 
     @Override
     public int hashCode() {
-        return mFullTracking ? 1 : 0;
+        return Objects.hash(mFullTracking, mCorrelationVectorOutputsEnabled);
     }
 
     @Override
@@ -106,6 +130,7 @@ public final class GnssMeasurementRequest implements Parcelable {
 
     /** Builder for {@link GnssMeasurementRequest} */
     public static final class Builder {
+        private boolean mCorrelationVectorOutputsEnabled;
         private boolean mFullTracking;
 
         /**
@@ -118,7 +143,22 @@ public final class GnssMeasurementRequest implements Parcelable {
          * Constructs a {@link Builder} instance by copying a {@link GnssMeasurementRequest}.
          */
         public Builder(@NonNull GnssMeasurementRequest request) {
+            mCorrelationVectorOutputsEnabled = request.isCorrelationVectorOutputsEnabled();
             mFullTracking = request.isFullTracking();
+        }
+
+        /**
+         * Set the value of whether to enable correlation vector outputs, which is false by default.
+         *
+         * <p>If true, enable correlation vectors as part of the raw GNSS measurements outputs.
+         * If false, disable correlation vectors.
+         *
+         * @hide
+         */
+        @SystemApi
+        @NonNull public Builder setCorrelationVectorOutputsEnabled(boolean value) {
+            mCorrelationVectorOutputsEnabled = value;
+            return this;
         }
 
         /**
@@ -146,7 +186,7 @@ public final class GnssMeasurementRequest implements Parcelable {
         /** Builds a {@link GnssMeasurementRequest} instance as specified by this builder. */
         @NonNull
         public GnssMeasurementRequest build() {
-            return new GnssMeasurementRequest(mFullTracking);
+            return new GnssMeasurementRequest(mFullTracking, mCorrelationVectorOutputsEnabled);
         }
     }
 }

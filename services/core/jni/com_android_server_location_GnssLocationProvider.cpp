@@ -2709,7 +2709,7 @@ static jboolean android_location_gnss_hal_GnssNative_is_measurement_supported(JN
 }
 
 static jboolean android_location_gnss_hal_GnssNative_start_measurement_collection(
-        JNIEnv* /* env */, jclass, jboolean enableFullTracking) {
+        JNIEnv* /* env */, jclass, jboolean enableFullTracking, jboolean enableCorrVecOutputs) {
     if (gnssMeasurementIface == nullptr) {
         ALOGE("%s: IGnssMeasurement interface not available.", __func__);
         return JNI_FALSE;
@@ -2717,7 +2717,7 @@ static jboolean android_location_gnss_hal_GnssNative_start_measurement_collectio
 
     return gnssMeasurementIface->setCallback(std::make_unique<gnss::GnssMeasurementCallback>(
                                                      mCallbacksObj),
-                                             enableFullTracking);
+                                             enableFullTracking, enableCorrVecOutputs);
 }
 
 static jboolean android_location_gnss_hal_GnssNative_stop_measurement_collection(JNIEnv* env,
@@ -3211,7 +3211,7 @@ static const JNINativeMethod sMeasurementMethods[] = {
         /* name, signature, funcPtr */
         {"native_is_measurement_supported", "()Z",
          reinterpret_cast<void*>(android_location_gnss_hal_GnssNative_is_measurement_supported)},
-        {"native_start_measurement_collection", "(Z)Z",
+        {"native_start_measurement_collection", "(ZZ)Z",
          reinterpret_cast<void*>(
                  android_location_gnss_hal_GnssNative_start_measurement_collection)},
         {"native_stop_measurement_collection", "()Z",
