@@ -137,7 +137,7 @@ public class IpConnectivityLog {
      * @return true if the event was successfully logged.
      */
     public boolean log(@NonNull Network network, @NonNull int[] transports, @NonNull Event data) {
-        return log(network.netId, transports, data);
+        return log(network.getNetId(), transports, data);
     }
 
     /**
