@@ -41,4 +41,7 @@ interface ISensorPrivacyManager {
 
     void setIndividualSensorPrivacyForProfileGroup(int userId, int sensor, boolean enable);
     // =============== End of transactions used on native side as well ============================
+
+    void suppressIndividualSensorPrivacyReminders(int userId, String packageName, IBinder token,
+            boolean suppress);
 }
