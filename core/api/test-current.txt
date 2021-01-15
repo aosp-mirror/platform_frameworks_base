@@ -730,6 +730,18 @@ package android.graphics.drawable {
 
 }
 
+package android.hardware {
+
+  public final class SensorPrivacyManager {
+    method public boolean isIndividualSensorPrivacyEnabled(int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setIndividualSensorPrivacy(int, boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setIndividualSensorPrivacyForProfileGroup(int, boolean);
+    field public static final int INDIVIDUAL_SENSOR_CAMERA = 2; // 0x2
+    field public static final int INDIVIDUAL_SENSOR_MICROPHONE = 1; // 0x1
+  }
+
+}
+
 package android.hardware.biometrics {
 
   public class BiometricManager {
