@@ -17,7 +17,6 @@
 package android.graphics;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 
 import libcore.util.NativeAllocationRegistry;
 
@@ -33,14 +32,12 @@ public class RuntimeShader extends Shader {
                 RuntimeShader.class.getClassLoader(), nativeGetFinalizer());
     }
 
-    private byte[] mUniforms;
-    private Shader[] mInputShaders;
     private boolean mIsOpaque;
 
     /**
-     * Current native shader factory instance.
+     * Current native shader builder instance.
      */
-    private long mNativeInstanceRuntimeShaderFactory;
+    private long mNativeInstanceRuntimeShaderBuilder;
 
     /**
      * Creates a new RuntimeShader.
@@ -50,80 +47,86 @@ public class RuntimeShader extends Shader {
      *                 on number of uniforms declared by sksl.
      * @param isOpaque True if all pixels have alpha 1.0f.
      */
-    public RuntimeShader(@NonNull String sksl, @Nullable byte[] uniforms, boolean isOpaque) {
-        this(sksl, uniforms, null, isOpaque, ColorSpace.get(ColorSpace.Named.SRGB));
-    }
-
-    /**
-     * Creates a new RuntimeShader.
-     *
-     * @param sksl The text of SKSL program to run on the GPU.
-     * @param uniforms Array of parameters passed by the SKSL shader. Array size depends
-     *                 on number of uniforms declared by sksl.
-     * @param shaderInputs Array of shaders passed to the SKSL shader. Array size depends
-     *                     on the number of input shaders declared in the sksl
-     * @param isOpaque True if all pixels have alpha 1.0f.
-     */
-    public  RuntimeShader(@NonNull String sksl, @Nullable byte[] uniforms,
-                          @Nullable Shader[] shaderInputs, boolean isOpaque) {
-        this(sksl, uniforms, shaderInputs, isOpaque, ColorSpace.get(ColorSpace.Named.SRGB));
-    }
-
-    private RuntimeShader(@NonNull String sksl, @Nullable byte[] uniforms,
-                          @Nullable Shader[] shaderInputs, boolean isOpaque,
-                          ColorSpace colorSpace) {
-        super(colorSpace);
-        mUniforms = uniforms;
-        mInputShaders = shaderInputs;
+    public RuntimeShader(@NonNull String sksl, boolean isOpaque) {
+        super(ColorSpace.get(ColorSpace.Named.SRGB));
         mIsOpaque = isOpaque;
-        mNativeInstanceRuntimeShaderFactory = nativeCreateShaderFactory(sksl);
-        NoImagePreloadHolder.sRegistry.registerNativeAllocation(this,
-                mNativeInstanceRuntimeShaderFactory);
+        mNativeInstanceRuntimeShaderBuilder = nativeCreateBuilder(sksl);
+        NoImagePreloadHolder.sRegistry.registerNativeAllocation(
+                this, mNativeInstanceRuntimeShaderBuilder);
     }
 
     /**
-     * Sets new value for shader parameters.
+     * Sets the uniform value corresponding to this shader.  If the shader does not have a uniform
+     * with that name or if the uniform is declared with a type other than float then an
+     * IllegalArgumentException is thrown.
      *
-     * @param uniforms Array of parameters passed by the SKSL shader. Array size depends
-     *                 on number of uniforms declared by mSksl.
+     * @param uniformName name matching the uniform declared in the SKSL shader
+     * @param value
      */
-    public void updateUniforms(@Nullable byte[] uniforms) {
-        mUniforms = uniforms;
+    public void setUniform(@NonNull String uniformName, float value) {
+        setUniform(uniformName, new float[] {value});
+    }
+
+    /**
+     * Sets the uniform value corresponding to this shader.  If the shader does not have a uniform
+     * with that name or if the uniform is declared with a type other than float2/vec2 then an
+     * IllegalArgumentException is thrown.
+     *
+     * @param uniformName name matching the uniform declared in the SKSL shader
+     * @param value1
+     * @param value2
+     */
+    public void setUniform(@NonNull String uniformName, float value1, float value2) {
+        setUniform(uniformName, new float[] {value1, value2});
+    }
+
+    /**
+     * Sets the uniform value corresponding to this shader.  If the shader does not have a uniform
+     * with that name or if the uniform is declared with a type other than a vecN/floatN where N is
+     * the size of the values array then an IllegalArgumentException is thrown.
+     *
+     * @param uniformName name matching the uniform declared in the SKSL shader
+     * @param values
+     */
+    public void setUniform(@NonNull String uniformName, float[] values) {
+        nativeUpdateUniforms(mNativeInstanceRuntimeShaderBuilder, uniformName, values);
         discardNativeInstance();
     }
 
     /**
-     * Sets new values for the shaders that serve as inputs to this shader.
+     * Sets the uniform shader that is declares as input to this shader.  If the shader does not
+     * have a uniform shader with that name then an IllegalArgumentException is thrown.
      *
-     * @param shaderInputs Array of Shaders passed into the SKSL shader. Array size depends
-     *                     on number of input shaders declared by sksl.
+     * @param shaderName name matching the uniform declared in the SKSL shader
+     * @param shader shader passed into the SKSL shader for sampling
      */
-    public void updateInputShaders(@Nullable Shader[] shaderInputs) {
-        mInputShaders = shaderInputs;
+    public void setInputShader(@NonNull String shaderName, @NonNull Shader shader) {
+        nativeUpdateShader(
+                    mNativeInstanceRuntimeShaderBuilder, shaderName, shader.getNativeInstance());
         discardNativeInstance();
     }
 
     /** @hide */
     @Override
     protected long createNativeInstance(long nativeMatrix, boolean filterFromPaint) {
-        long[] nativeShaders = mInputShaders.length > 0 ? new long[mInputShaders.length] : null;
-        for (int i = 0; i < mInputShaders.length; i++) {
-            nativeShaders[i] = mInputShaders[i].getNativeInstance(filterFromPaint);
-        }
-
-        return nativeCreate(mNativeInstanceRuntimeShaderFactory, nativeMatrix, mUniforms,
-                nativeShaders, colorSpace().getNativeInstance(), mIsOpaque);
+        return nativeCreateShader(mNativeInstanceRuntimeShaderBuilder, nativeMatrix, mIsOpaque);
     }
 
-    public long getNativeShaderFactory() {
-        return mNativeInstanceRuntimeShaderFactory;
+    public long getNativeShaderBuilder() {
+        return mNativeInstanceRuntimeShaderBuilder;
     }
 
-    private static native long nativeCreate(long shaderFactory, long matrix, byte[] inputs,
-            long[] shaderInputs, long colorSpaceHandle, boolean isOpaque);
-
-    private static native long nativeCreateShaderFactory(String sksl);
+    public boolean isOpaque() {
+        return mIsOpaque;
+    }
 
     private static native long nativeGetFinalizer();
+    private static native long nativeCreateBuilder(String sksl);
+    private static native long nativeCreateShader(
+            long shaderBuilder, long matrix, boolean isOpaque);
+    private static native void nativeUpdateUniforms(
+            long shaderBuilder, String uniformName, float[] uniforms);
+    private static native void nativeUpdateShader(
+            long shaderBuilder, String shaderName, long shader);
 }
 

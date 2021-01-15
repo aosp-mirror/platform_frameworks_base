@@ -161,7 +161,7 @@ struct CanvasOp<CanvasOpType::DrawRippleProperty> {
         }
 
         SkRuntimeShaderBuilder::BuilderUniform radiusU =
-                runtimeEffectBuilder.uniform("in_maxRadius");
+                runtimeEffectBuilder.uniform("in_radius");
         if (radiusU.fVar != nullptr) {
             radiusU = radius->value;
         }
