@@ -23,21 +23,30 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Provider for legacy role state.
- * <p>
- * The role state may come from two sources, either the different pre-role default app settings, or
- * the pre-modularization roles.xml file stored in platform.
+ * Helper inside the platform for role service.
  *
  * @hide
  */
 //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-public interface LegacyRoleStateProvider {
+public interface RoleServicePlatformHelper {
     /**
      * Get the legacy role state stored in the platform.
+     * <p>
+     * The role state may come from two sources, either the different pre-role default app settings,
+     * or the pre-modularization roles.xml file stored in platform.
      *
      * @param userId the user ID
      * @return a mapping of role name to its set of holders
      */
     @NonNull
     Map<String, Set<String>> getLegacyRoleState(@UserIdInt int userId);
+
+    /**
+     * Compute a hash for the current package state in the system.
+     *
+     * @param userId the user ID
+     * @return the computed hash
+     */
+    @NonNull
+    String computePackageStateHash(@UserIdInt int userId);
 }

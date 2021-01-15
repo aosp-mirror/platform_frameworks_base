@@ -33,8 +33,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
-import android.content.pm.Signature;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
@@ -48,7 +46,6 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
-import android.util.PackageUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
@@ -66,11 +63,8 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.UserManagerInternal;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -95,15 +89,13 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
     @NonNull
     private final AppOpsManager mAppOpsManager;
     @NonNull
-    private final PackageManagerInternal mPackageManagerInternal;
-    @NonNull
     private final UserManagerInternal mUserManagerInternal;
 
     @NonNull
     private final Object mLock = new Object();
 
     @NonNull
-    private final LegacyRoleStateProvider mLegacyRoleStateProvider;
+    private final RoleServicePlatformHelper mPlatformHelper;
 
     /**
      * Maps user id to its state.
@@ -139,15 +131,14 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             new SparseArray<>();
 
     public RoleManagerService(@NonNull Context context,
-            @NonNull LegacyRoleStateProvider legacyRoleStateProvider) {
+            @NonNull RoleServicePlatformHelper platformHelper) {
         super(context);
 
-        mLegacyRoleStateProvider = legacyRoleStateProvider;
+        mPlatformHelper = platformHelper;
 
         RoleControllerManager.initializeRemoteServiceComponentName(context);
 
         mAppOpsManager = context.getSystemService(AppOpsManager.class);
-        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
 
         LocalServices.addService(RoleManagerInternal.class, new Internal());
@@ -232,7 +223,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
     private AndroidFuture<Void> maybeGrantDefaultRolesInternal(@UserIdInt int userId) {
         RoleUserState userState = getOrCreateUserState(userId);
         String oldPackagesHash = userState.getPackagesHash();
-        String newPackagesHash = computePackageStateHash(userId);
+        String newPackagesHash = mPlatformHelper.computePackageStateHash(userId);
         if (Objects.equals(oldPackagesHash, newPackagesHash)) {
             if (DEBUG) {
                 Slog.i(LOG_TAG, "Already granted default roles for packages hash "
@@ -256,51 +247,12 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         return future;
     }
 
-    @Nullable
-    private String computePackageStateHash(@UserIdInt int userId) {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
-
-        mPackageManagerInternal.forEachInstalledPackage(pkg -> {
-            try {
-                dataOutputStream.writeUTF(pkg.getPackageName());
-                dataOutputStream.writeLong(pkg.getLongVersionCode());
-                dataOutputStream.writeInt(mPackageManagerInternal.getApplicationEnabledState(
-                        pkg.getPackageName(), userId));
-
-                ArraySet<String> enabledComponents =
-                        mPackageManagerInternal.getEnabledComponents(pkg.getPackageName(), userId);
-                int numComponents = CollectionUtils.size(enabledComponents);
-                dataOutputStream.writeInt(numComponents);
-                for (int i = 0; i < numComponents; i++) {
-                    dataOutputStream.writeUTF(enabledComponents.valueAt(i));
-                }
-
-                ArraySet<String> disabledComponents =
-                        mPackageManagerInternal.getDisabledComponents(pkg.getPackageName(), userId);
-                numComponents = CollectionUtils.size(disabledComponents);
-                for (int i = 0; i < numComponents; i++) {
-                    dataOutputStream.writeUTF(disabledComponents.valueAt(i));
-                }
-
-                for (Signature signature : pkg.getSigningDetails().signatures) {
-                    dataOutputStream.write(signature.toByteArray());
-                }
-            } catch (IOException e) {
-                // Never happens for ByteArrayOutputStream and DataOutputStream.
-                throw new AssertionError(e);
-            }
-        }, userId);
-
-        return PackageUtils.computeSha256Digest(byteArrayOutputStream.toByteArray());
-    }
-
     @NonNull
     private RoleUserState getOrCreateUserState(@UserIdInt int userId) {
         synchronized (mLock) {
             RoleUserState userState = mUserStates.get(userId);
             if (userState == null) {
-                userState = new RoleUserState(userId, mLegacyRoleStateProvider, this);
+                userState = new RoleUserState(userId, mPlatformHelper, this);
                 mUserStates.put(userId, userState);
             }
             return userState;
