@@ -8429,6 +8429,7 @@ public class ConnectivityServiceTest {
         mCm.registerNetworkCallback(genericRequest, genericNetworkCallback);
         mCm.registerNetworkCallback(wifiRequest, wifiNetworkCallback);
         mCm.registerNetworkCallback(cellRequest, cellNetworkCallback);
+        waitForIdle();
 
         final ConnectivityService.NetworkRequestInfo[] nriOutput = mService.requestsSortedById();
 
