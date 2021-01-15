@@ -28,8 +28,11 @@ import android.telephony.ims.SipMessage;
 import android.telephony.ims.stub.DelegateConnectionMessageCallback;
 import android.telephony.ims.stub.DelegateConnectionStateCallback;
 import android.telephony.ims.stub.SipDelegate;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
+
+import com.android.internal.telephony.SipMessageParsingUtils;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -265,9 +268,13 @@ public class SipDelegateConnectionAidlWrapper implements SipDelegateConnection,
     }
 
     private void notifyLocalMessageFailedToSend(SipMessage m, int reason) {
-        //TODO: parse transaction ID or throw IllegalArgumentException if the SipMessage
-        // transaction ID can not be parsed.
+        String transactionId = SipMessageParsingUtils.getTransactionId(m.getHeaderSection());
+        if (TextUtils.isEmpty(transactionId)) {
+            Log.w(LOG_TAG, "sendMessage detected a malformed SipMessage and can not get a "
+                    + "transaction ID.");
+            throw new IllegalArgumentException("Could not send SipMessage due to malformed header");
+        }
         mExecutor.execute(() ->
-                mMessageCallback.onMessageSendFailure(null, reason));
+                mMessageCallback.onMessageSendFailure(transactionId, reason));
     }
 }
