@@ -18,6 +18,7 @@ package com.android.wm.shell.bubbles
 
 import android.graphics.PointF
 import android.os.Handler
+import android.os.Looper
 import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.View
@@ -90,7 +91,7 @@ abstract class RelativeTouchListener : View.OnTouchListener {
     private var touchSlop: Int = -1
     private var movedEnough = false
 
-    private val handler = Handler()
+    private val handler = Handler(Looper.myLooper()!!)
     private var performedLongClick = false
 
     @Suppress("UNCHECKED_CAST")
