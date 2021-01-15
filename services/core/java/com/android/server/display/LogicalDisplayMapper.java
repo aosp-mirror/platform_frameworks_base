@@ -103,12 +103,16 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
 
     private final DisplayDeviceRepository mDisplayDeviceRepo;
     private final Listener mListener;
+    private final int mFoldedDeviceState;
 
     LogicalDisplayMapper(Context context, DisplayDeviceRepository repo, Listener listener) {
         mDisplayDeviceRepo = repo;
         mListener = listener;
         mSingleDisplayDemoMode = SystemProperties.getBoolean("persist.demo.singledisplay", false);
         mDisplayDeviceRepo.addListener(this);
+
+        mFoldedDeviceState = context.getResources().getInteger(
+                com.android.internal.R.integer.config_foldedDeviceState);
 
         loadFoldedDisplayConfig(context);
     }
@@ -209,6 +213,10 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             ipw.decreaseIndent();
             ipw.println();
         }
+    }
+
+    void setDeviceStateLocked(int state) {
+        setDeviceFoldedLocked(state == mFoldedDeviceState);
     }
 
     void setDeviceFoldedLocked(boolean isFolded) {
