@@ -3565,12 +3565,12 @@ public final class BluetoothAdapter {
         }
 
         @Override
-        public void onDeviceDisconnected(BluetoothDevice device) {
+        public void onDeviceDisconnected(BluetoothDevice device, int hciReason) {
             for (Map.Entry<BluetoothConnectionCallback, Executor> callbackExecutorEntry:
                     mBluetoothConnectionCallbackExecutorMap.entrySet()) {
                 BluetoothConnectionCallback callback = callbackExecutorEntry.getKey();
                 Executor executor = callbackExecutorEntry.getValue();
-                executor.execute(() -> callback.onDeviceDisconnected(device));
+                executor.execute(() -> callback.onDeviceDisconnected(device, hciReason));
             }
         }
     };
@@ -3675,8 +3675,155 @@ public final class BluetoothAdapter {
         /**
          * Callback triggered when a bluetooth device (classic or BLE) is disconnected
          * @param device is the disconnected bluetooth device
+         * @param reason is the disconnect reason
          */
-        public void onDeviceDisconnected(BluetoothDevice device) {}
+        public void onDeviceDisconnected(BluetoothDevice device, @DisconnectReason int reason) {}
+
+        /**
+         * @hide
+         */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(prefix = { "REASON_" }, value = {
+                REASON_UNKNOWN,
+                REASON_LOCAL_REQUEST,
+                REASON_REMOTE_REQUEST,
+                REASON_LOCAL_ERROR,
+                REASON_REMOTE_ERROR,
+                REASON_TIMEOUT,
+                REASON_SECURITY,
+                REASON_SYSTEM_POLICY,
+                REASON_RESOURCE_LIMIT_REACHED,
+                REASON_CONNECTION_EXISTS,
+                REASON_BAD_PARAMETERS})
+        public @interface DisconnectReason {}
+
+        /**
+         * Indicates that the ACL disconnected due to an unknown reason.
+         */
+        public static final int REASON_UNKNOWN = 0;
+
+        /**
+         * Indicates that the ACL disconnected due to an explicit request from the local device.
+         * <p>
+         * Example cause: This is a normal disconnect reason, e.g., user/app initiates
+         * disconnection.
+         */
+        public static final int REASON_LOCAL_REQUEST = 1;
+
+        /**
+         * Indicates that the ACL disconnected due to an explicit request from the remote device.
+         * <p>
+         * Example cause: This is a normal disconnect reason, e.g., user/app initiates
+         * disconnection.
+         * <p>
+         * Example solution: The app can also prompt the user to check their remote device.
+         */
+        public static final int REASON_REMOTE_REQUEST = 2;
+
+        /**
+         * Generic disconnect reason indicating the ACL disconnected due to an error on the local
+         * device.
+         * <p>
+         * Example solution: Prompt the user to check their local device (e.g., phone, car
+         * headunit).
+         */
+        public static final int REASON_LOCAL_ERROR = 3;
+
+        /**
+         * Generic disconnect reason indicating the ACL disconnected due to an error on the remote
+         * device.
+         * <p>
+         * Example solution: Prompt the user to check their remote device (e.g., headset, car
+         * headunit, watch).
+         */
+        public static final int REASON_REMOTE_ERROR = 4;
+
+        /**
+         * Indicates that the ACL disconnected due to a timeout.
+         * <p>
+         * Example cause: remote device might be out of range.
+         * <p>
+         * Example solution: Prompt user to verify their remote device is on or in
+         * connection/pairing mode.
+         */
+        public static final int REASON_TIMEOUT = 5;
+
+        /**
+         * Indicates that the ACL disconnected due to link key issues.
+         * <p>
+         * Example cause: Devices are either unpaired or remote device is refusing our pairing
+         * request.
+         * <p>
+         * Example solution: Prompt user to unpair and pair again.
+         */
+        public static final int REASON_SECURITY = 6;
+
+        /**
+         * Indicates that the ACL disconnected due to the local device's system policy.
+         * <p>
+         * Example cause: privacy policy, power management policy, permissions, etc.
+         * <p>
+         * Example solution: Prompt the user to check settings, or check with their system
+         * administrator (e.g. some corp-managed devices do not allow OPP connection).
+         */
+        public static final int REASON_SYSTEM_POLICY = 7;
+
+        /**
+         * Indicates that the ACL disconnected due to resource constraints, either on the local
+         * device or the remote device.
+         * <p>
+         * Example cause: controller is busy, memory limit reached, maximum number of connections
+         * reached.
+         * <p>
+         * Example solution: The app should wait and try again. If still failing, prompt the user
+         * to disconnect some devices, or toggle Bluetooth on the local and/or the remote device.
+         */
+        public static final int REASON_RESOURCE_LIMIT_REACHED = 8;
+
+        /**
+         * Indicates that the ACL disconnected because another ACL connection already exists.
+         */
+        public static final int REASON_CONNECTION_EXISTS = 9;
+
+        /**
+         * Indicates that the ACL disconnected due to incorrect parameters passed in from the app.
+         * <p>
+         * Example solution: Change parameters and try again. If error persists, the app can report
+         * telemetry and/or log the error in a bugreport.
+         */
+        public static final int REASON_BAD_PARAMETERS = 10;
+
+        /**
+         * Returns human-readable strings corresponding to {@link DisconnectReason}.
+         */
+        public static String disconnectReasonText(@DisconnectReason int reason) {
+            switch (reason) {
+                case REASON_UNKNOWN:
+                    return "Reason unknown";
+                case REASON_LOCAL_REQUEST:
+                    return "Local request";
+                case REASON_REMOTE_REQUEST:
+                    return "Remote request";
+                case REASON_LOCAL_ERROR:
+                    return "Local error";
+                case REASON_REMOTE_ERROR:
+                    return "Remote error";
+                case REASON_TIMEOUT:
+                    return "Timeout";
+                case REASON_SECURITY:
+                    return "Security";
+                case REASON_SYSTEM_POLICY:
+                    return "System policy";
+                case REASON_RESOURCE_LIMIT_REACHED:
+                    return "Resource constrained";
+                case REASON_CONNECTION_EXISTS:
+                    return "Connection already exists";
+                case REASON_BAD_PARAMETERS:
+                    return "Bad parameters";
+                default:
+                    return "Unrecognized disconnect reason: " + reason;
+            }
+        }
     }
 
     /**
