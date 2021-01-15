@@ -73,6 +73,11 @@ public interface ShellExecutor extends Executor {
     void executeDelayed(Runnable runnable, long delayMillis);
 
     /**
+     * Removes all pending callbacks.
+     */
+    void removeAllCallbacks();
+
+    /**
      * See {@link android.os.Handler#removeCallbacks}.
      */
     void removeCallbacks(Runnable runnable);
@@ -81,9 +86,4 @@ public interface ShellExecutor extends Executor {
      * See {@link android.os.Handler#hasCallbacks(Runnable)}.
      */
     boolean hasCallback(Runnable runnable);
-
-    /**
-     * Returns the looper that this executor is running on.
-     */
-    Looper getLooper();
 }

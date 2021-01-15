@@ -95,7 +95,6 @@ public class PipTouchHandler {
     private int mDeferResizeToNormalBoundsUntilRotation = -1;
     private int mDisplayRotation;
 
-    private final Handler mHandler = new Handler();
     private final PipAccessibilityInteractionConnection mConnection;
 
     // Behaviour states
