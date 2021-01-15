@@ -30,6 +30,7 @@ import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.tiles.AirplaneModeTile;
 import com.android.systemui.qs.tiles.BatterySaverTile;
 import com.android.systemui.qs.tiles.BluetoothTile;
+import com.android.systemui.qs.tiles.CameraToggleTile;
 import com.android.systemui.qs.tiles.CastTile;
 import com.android.systemui.qs.tiles.CellularTile;
 import com.android.systemui.qs.tiles.ColorInversionTile;
@@ -39,6 +40,7 @@ import com.android.systemui.qs.tiles.FlashlightTile;
 import com.android.systemui.qs.tiles.HotspotTile;
 import com.android.systemui.qs.tiles.InternetTile;
 import com.android.systemui.qs.tiles.LocationTile;
+import com.android.systemui.qs.tiles.MicrophoneToggleTile;
 import com.android.systemui.qs.tiles.NfcTile;
 import com.android.systemui.qs.tiles.NightDisplayTile;
 import com.android.systemui.qs.tiles.ReduceBrightColorsTile;
@@ -83,6 +85,8 @@ public class QSFactoryImpl implements QSFactory {
     private final Provider<UiModeNightTile> mUiModeNightTileProvider;
     private final Provider<ScreenRecordTile> mScreenRecordTileProvider;
     private final Provider<ReduceBrightColorsTile> mReduceBrightColorsTileProvider;
+    private final Provider<CameraToggleTile> mCameraToggleTileProvider;
+    private final Provider<MicrophoneToggleTile> mMicrophoneToggleTileProvider;
 
     private final Lazy<QSHost> mQsHostLazy;
     private final Provider<CustomTile.Builder> mCustomTileBuilderProvider;
@@ -115,7 +119,9 @@ public class QSFactoryImpl implements QSFactory {
             Provider<GarbageMonitor.MemoryTile> memoryTileProvider,
             Provider<UiModeNightTile> uiModeNightTileProvider,
             Provider<ScreenRecordTile> screenRecordTileProvider,
-            Provider<ReduceBrightColorsTile> reduceBrightColorsTileProvider) {
+            Provider<ReduceBrightColorsTile> reduceBrightColorsTileProvider,
+            Provider<CameraToggleTile> cameraToggleTileProvider,
+            Provider<MicrophoneToggleTile> microphoneToggleTileProvider) {
         mQsHostLazy = qsHostLazy;
         mCustomTileBuilderProvider = customTileBuilderProvider;
 
@@ -143,6 +149,8 @@ public class QSFactoryImpl implements QSFactory {
         mUiModeNightTileProvider = uiModeNightTileProvider;
         mScreenRecordTileProvider = screenRecordTileProvider;
         mReduceBrightColorsTileProvider = reduceBrightColorsTileProvider;
+        mCameraToggleTileProvider = cameraToggleTileProvider;
+        mMicrophoneToggleTileProvider = microphoneToggleTileProvider;
     }
 
     public QSTile createTile(String tileSpec) {
@@ -198,6 +206,10 @@ public class QSFactoryImpl implements QSFactory {
                 return mScreenRecordTileProvider.get();
             case "reduce_brightness":
                 return mReduceBrightColorsTileProvider.get();
+            case "cameratoggle":
+                return mCameraToggleTileProvider.get();
+            case "mictoggle":
+                return mMicrophoneToggleTileProvider.get();
         }
 
         // Custom tiles
