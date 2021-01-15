@@ -29,6 +29,7 @@ import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
 import android.annotation.AnyRes;
 import android.annotation.CheckResult;
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -112,6 +113,8 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -129,6 +132,82 @@ import java.util.StringTokenizer;
 public class ParsingPackageUtils {
 
     private static final String TAG = ParsingUtils.TAG;
+
+    public static final boolean DEBUG_JAR = false;
+    public static final boolean DEBUG_BACKUP = false;
+    public static final float DEFAULT_PRE_O_MAX_ASPECT_RATIO = 1.86f;
+
+    /** File name in an APK for the Android manifest. */
+    public static final String ANDROID_MANIFEST_FILENAME = "AndroidManifest.xml";
+
+    /** Path prefix for apps on expanded storage */
+    public static final String MNT_EXPAND = "/mnt/expand/";
+
+    public static final String TAG_ADOPT_PERMISSIONS = "adopt-permissions";
+    public static final String TAG_APPLICATION = "application";
+    public static final String TAG_COMPATIBLE_SCREENS = "compatible-screens";
+    public static final String TAG_EAT_COMMENT = "eat-comment";
+    public static final String TAG_FEATURE_GROUP = "feature-group";
+    public static final String TAG_INSTRUMENTATION = "instrumentation";
+    public static final String TAG_KEY_SETS = "key-sets";
+    public static final String TAG_MANIFEST = "manifest";
+    public static final String TAG_ORIGINAL_PACKAGE = "original-package";
+    public static final String TAG_OVERLAY = "overlay";
+    public static final String TAG_PACKAGE = "package";
+    public static final String TAG_PACKAGE_VERIFIER = "package-verifier";
+    public static final String TAG_ATTRIBUTION = "attribution";
+    public static final String TAG_PERMISSION = "permission";
+    public static final String TAG_PERMISSION_GROUP = "permission-group";
+    public static final String TAG_PERMISSION_TREE = "permission-tree";
+    public static final String TAG_PROTECTED_BROADCAST = "protected-broadcast";
+    public static final String TAG_QUERIES = "queries";
+    public static final String TAG_RESTRICT_UPDATE = "restrict-update";
+    public static final String TAG_SUPPORT_SCREENS = "supports-screens";
+    public static final String TAG_SUPPORTS_INPUT = "supports-input";
+    public static final String TAG_USES_CONFIGURATION = "uses-configuration";
+    public static final String TAG_USES_FEATURE = "uses-feature";
+    public static final String TAG_USES_GL_TEXTURE = "uses-gl-texture";
+    public static final String TAG_USES_PERMISSION = "uses-permission";
+    public static final String TAG_USES_PERMISSION_SDK_23 = "uses-permission-sdk-23";
+    public static final String TAG_USES_PERMISSION_SDK_M = "uses-permission-sdk-m";
+    public static final String TAG_USES_SDK = "uses-sdk";
+    public static final String TAG_USES_SPLIT = "uses-split";
+    public static final String TAG_PROFILEABLE = "profileable";
+
+    public static final String METADATA_MAX_ASPECT_RATIO = "android.max_aspect";
+    public static final String METADATA_SUPPORTS_SIZE_CHANGES = "android.supports_size_changes";
+    public static final String METADATA_ACTIVITY_WINDOW_LAYOUT_AFFINITY =
+            "android.activity_window_layout_affinity";
+
+    public static final int SDK_VERSION = Build.VERSION.SDK_INT;
+    public static final String[] SDK_CODENAMES = Build.VERSION.ACTIVE_CODENAMES;
+
+    public static boolean sCompatibilityModeEnabled = true;
+    public static boolean sUseRoundIcon = false;
+
+    public static final int PARSE_DEFAULT_INSTALL_LOCATION =
+            PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
+    public static final int PARSE_DEFAULT_TARGET_SANDBOX = 1;
+
+    public static final int PARSE_MUST_BE_APK = 1 << 0;
+    public static final int PARSE_IGNORE_PROCESSES = 1 << 1;
+    public static final int PARSE_EXTERNAL_STORAGE = 1 << 3;
+    public static final int PARSE_IS_SYSTEM_DIR = 1 << 4;
+    public static final int PARSE_COLLECT_CERTIFICATES = 1 << 5;
+    public static final int PARSE_ENFORCE_CODE = 1 << 6;
+    public static final int PARSE_CHATTY = 1 << 31;
+
+    @IntDef(flag = true, prefix = { "PARSE_" }, value = {
+            PARSE_CHATTY,
+            PARSE_COLLECT_CERTIFICATES,
+            PARSE_ENFORCE_CODE,
+            PARSE_EXTERNAL_STORAGE,
+            PARSE_IGNORE_PROCESSES,
+            PARSE_IS_SYSTEM_DIR,
+            PARSE_MUST_BE_APK,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ParseFlags {}
 
     /**
      * For those names would be used as a part of the file name. Limits size to 223 and reserves 32

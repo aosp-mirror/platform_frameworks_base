@@ -21,6 +21,7 @@ import static android.content.pm.parsing.component.ComponentParseUtils.flag;
 
 import android.annotation.NonNull;
 import android.app.ActivityTaskManager;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageParser;
 import android.content.pm.parsing.ParsingPackage;
@@ -33,6 +34,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.os.Build;
+import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
@@ -50,11 +52,20 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /** @hide */
 public class ParsedActivityUtils {
 
     private static final String TAG = ParsingUtils.TAG;
+
+    public static final boolean LOG_UNSAFE_BROADCASTS = false;
+
+    // Set of broadcast actions that are safe for manifest receivers
+    public static final Set<String> SAFE_BROADCASTS = new ArraySet<>();
+    static {
+        SAFE_BROADCASTS.add(Intent.ACTION_BOOT_COMPLETED);
+    }
 
     @NonNull
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
