@@ -73,6 +73,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
         return 0;
     }
 
-    AImageDecoder_decodeImage(decoder.get(), pixels.get(), stride, pixelSize);
+    while (true) {
+        int result = AImageDecoder_decodeImage(decoder.get(), pixels.get(), stride, pixelSize);
+        if (result != ANDROID_IMAGE_DECODER_SUCCESS) break;
+
+        result = AImageDecoder_advanceFrame(decoder.get());
+        if (result != ANDROID_IMAGE_DECODER_SUCCESS) break;
+    }
     return 0;
 }
