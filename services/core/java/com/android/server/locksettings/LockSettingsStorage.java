@@ -753,8 +753,9 @@ class LockSettingsStorage {
             pw.increaseIndent();
             File[] files = userPath.listFiles();
             if (files != null) {
+                Arrays.sort(files);
                 for (File file : files) {
-                    pw.println(String.format("%4d %s %s", file.length(),
+                    pw.println(String.format("%6d %s %s", file.length(),
                             LockSettingsService.timestampToString(file.lastModified()),
                             file.getName()));
                 }
