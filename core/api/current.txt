@@ -15543,7 +15543,6 @@ package android.graphics {
     ctor public Point(int, int);
     ctor public Point(@NonNull android.graphics.Point);
     method public int describeContents();
-    method public final void dump(@NonNull java.io.PrintWriter);
     method public final boolean equals(int, int);
     method public final void negate();
     method public final void offset(int, int);
