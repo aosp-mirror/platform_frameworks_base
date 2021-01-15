@@ -6569,7 +6569,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         return !isResizeable() && (info.isFixedOrientation() || info.hasFixedAspectRatio())
                 // The configuration of non-standard type should be enforced by system.
-                && isActivityTypeStandard()
+                // {@link WindowConfiguration#ACTIVITY_TYPE_STANDARD} is set when this activity is
+                // added to a task, but this function is called when resolving the launch params, at
+                // which point, the activity type is still undefined if it will be standard.
+                // For other non-standard types, the type is set in the constructor, so this should
+                // not be a problem.
+                && isActivityTypeStandardOrUndefined()
                 && !mAtmService.mForceResizableActivities;
     }
 
