@@ -320,4 +320,11 @@ public final class DelegateRegistrationState implements Parcelable {
     public int hashCode() {
         return Objects.hash(mRegisteredTags, mDeregisteringTags, mDeregisteredTags);
     }
+
+    @Override
+    public String toString() {
+        return "DelegateRegistrationState{ registered={" + mRegisteredTags
+                + "}, deregistering={" + mDeregisteringTags + "}, deregistered={"
+                + mDeregisteredTags + "}}";
+    }
 }
