@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.StatusBarMobileView;
 import com.android.systemui.statusbar.StatusBarWifiView;
 import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
+import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.NoCallingIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
 
 import java.util.List;
@@ -62,6 +63,10 @@ public interface StatusBarIconController {
     public void setIcon(String slot, StatusBarIcon icon);
     public void setSignalIcon(String slot, WifiIconState state);
     public void setMobileIcons(String slot, List<MobileIconState> states);
+    /**
+     * Display the no calling & SMS icons.
+     */
+    void setNoCallingIcons(String slot, List<NoCallingIconState> states);
     public void setIconVisibility(String slot, boolean b);
 
     /**
