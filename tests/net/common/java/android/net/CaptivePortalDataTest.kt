@@ -18,12 +18,15 @@ package android.net
 
 import android.os.Build
 import androidx.test.filters.SmallTest
+import com.android.modules.utils.build.SdkLevel
 import com.android.testutils.assertParcelSane
 import com.android.testutils.assertParcelingIsLossless
+import com.android.testutils.DevSdkIgnoreRule
 import com.android.testutils.DevSdkIgnoreRule.IgnoreUpTo
 import com.android.testutils.DevSdkIgnoreRunner
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.test.assertEquals
@@ -33,6 +36,9 @@ import kotlin.test.assertNotEquals
 @RunWith(DevSdkIgnoreRunner::class)
 @IgnoreUpTo(Build.VERSION_CODES.Q)
 class CaptivePortalDataTest {
+    @Rule @JvmField
+    val ignoreRule = DevSdkIgnoreRule()
+
     private val data = CaptivePortalData.Builder()
             .setRefreshTime(123L)
             .setUserPortalUrl(Uri.parse("https://portal.example.com/test"))
@@ -41,7 +47,11 @@ class CaptivePortalDataTest {
             .setBytesRemaining(456L)
             .setExpiryTime(789L)
             .setCaptive(true)
-            .setVenueFriendlyName("venue friendly name")
+            .apply {
+                if (SdkLevel.isAtLeastS()) {
+                    setVenueFriendlyName("venue friendly name")
+                }
+            }
             .build()
 
     private fun makeBuilder() = CaptivePortalData.Builder(data)
@@ -67,8 +77,11 @@ class CaptivePortalDataTest {
         assertNotEqualsAfterChange { it.setBytesRemaining(789L) }
         assertNotEqualsAfterChange { it.setExpiryTime(12L) }
         assertNotEqualsAfterChange { it.setCaptive(false) }
-        assertNotEqualsAfterChange { it.setVenueFriendlyName("another friendly name") }
-        assertNotEqualsAfterChange { it.setVenueFriendlyName(null) }
+
+        if (SdkLevel.isAtLeastS()) {
+            assertNotEqualsAfterChange { it.setVenueFriendlyName("another friendly name") }
+            assertNotEqualsAfterChange { it.setVenueFriendlyName(null) }
+        }
     }
 
     @Test
@@ -111,7 +124,7 @@ class CaptivePortalDataTest {
         assertFalse(makeBuilder().setCaptive(false).build().isCaptive)
     }
 
-    @Test
+    @Test @IgnoreUpTo(Build.VERSION_CODES.R)
     fun testVenueFriendlyName() {
         assertEquals("venue friendly name", data.venueFriendlyName)
     }
