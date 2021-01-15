@@ -6590,7 +6590,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         // Don't modify caller's NetworkCapabilities.
-        NetworkCapabilities newNc = new NetworkCapabilities(nc);
+        final NetworkCapabilities newNc = new NetworkCapabilities(nc);
         if (nai.lastValidated) {
             newNc.addCapability(NET_CAPABILITY_VALIDATED);
         } else {
@@ -6678,26 +6678,21 @@ public class ConnectivityService extends IConnectivityManager.Stub
             notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_CAP_CHANGED);
         }
 
-        // TODO : static analysis indicates that prevNc can't be null here (getAndSetNetworkCaps
-        // never returns null), so mark the relevant members and functions in nai as @NonNull and
-        // remove this test
-        if (prevNc != null) {
-            final boolean oldMetered = prevNc.isMetered();
-            final boolean newMetered = newNc.isMetered();
-            final boolean meteredChanged = oldMetered != newMetered;
+        final boolean oldMetered = prevNc.isMetered();
+        final boolean newMetered = newNc.isMetered();
+        final boolean meteredChanged = oldMetered != newMetered;
 
-            if (meteredChanged) {
-                maybeNotifyNetworkBlocked(nai, oldMetered, newMetered, mRestrictBackground,
-                        mRestrictBackground, mVpnBlockedUidRanges, mVpnBlockedUidRanges);
-            }
+        if (meteredChanged) {
+            maybeNotifyNetworkBlocked(nai, oldMetered, newMetered, mRestrictBackground,
+                    mRestrictBackground, mVpnBlockedUidRanges, mVpnBlockedUidRanges);
+        }
 
-            final boolean roamingChanged = prevNc.hasCapability(NET_CAPABILITY_NOT_ROAMING) !=
-                    newNc.hasCapability(NET_CAPABILITY_NOT_ROAMING);
+        final boolean roamingChanged = prevNc.hasCapability(NET_CAPABILITY_NOT_ROAMING)
+                != newNc.hasCapability(NET_CAPABILITY_NOT_ROAMING);
 
-            // Report changes that are interesting for network statistics tracking.
-            if (meteredChanged || roamingChanged) {
-                notifyIfacesChangedForNetworkStats();
-            }
+        // Report changes that are interesting for network statistics tracking.
+        if (meteredChanged || roamingChanged) {
+            notifyIfacesChangedForNetworkStats();
         }
 
         // This network might have been underlying another network. Propagate its capabilities.
