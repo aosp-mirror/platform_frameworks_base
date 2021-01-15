@@ -9854,8 +9854,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final long id = mInjector.binderClearCallingIdentity();
         try {
-            manageUserUnchecked(admin, profileOwner, userHandle, adminExtras,
-                    /* showDisclaimer= */ true);
+            if (!mInjector.userManagerIsHeadlessSystemUserMode()) {
+                manageUserUnchecked(admin, profileOwner, userHandle, adminExtras,
+                        /* showDisclaimer= */ true);
+            } else if (VERBOSE_LOG) {
+                Slog.v(LOG_TAG, "createAndManageUser(): skipping manageUserUnchecked() on user "
+                        + userHandle + " on headless system user as it will be called by "
+                                + "handleNewUserCreated()");
+            }
 
             if ((flags & DevicePolicyManager.SKIP_SETUP_WIZARD) != 0) {
                 Settings.Secure.putIntForUser(mContext.getContentResolver(),
@@ -9911,12 +9917,24 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void handleNewUserCreated(UserInfo user) {
-        if (!mOwners.hasDeviceOwner()) return;
+        if (VERBOSE_LOG) Slog.v(LOG_TAG, "handleNewUserCreated(): " + user.toFullString());
+
+        if (!mOwners.hasDeviceOwner() || !user.isFull() || user.isManagedProfile()) return;
 
         final int userId = user.id;
-        Log.i(LOG_TAG, "User " + userId + " added on DO mode; setting ShowNewUserDisclaimer");
 
-        setShowNewUserDisclaimer(userId, DevicePolicyData.NEW_USER_DISCLAIMER_NEEDED);
+        // TODO(b/177547285): add CTS test
+        if (mInjector.userManagerIsHeadlessSystemUserMode()) {
+            ComponentName admin = mOwners.getDeviceOwnerComponent();
+            Slog.i(LOG_TAG, "Automatically setting profile owner (" + admin + ") on new user "
+                    + userId);
+            manageUserUnchecked(/* deviceOwner= */ admin, /* profileOwner= */ admin,
+                    /* managedUser= */ userId, /* adminExtras= */ null,
+                    /* showDisclaimer= */ true);
+        } else {
+            Log.i(LOG_TAG, "User " + userId + " added on DO mode; setting ShowNewUserDisclaimer");
+            setShowNewUserDisclaimer(userId, DevicePolicyData.NEW_USER_DISCLAIMER_NEEDED);
+        }
     }
 
     @Override
