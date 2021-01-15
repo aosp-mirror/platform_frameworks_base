@@ -90,7 +90,7 @@ class ConversationStore {
      * after the device powers on and the user has been unlocked.
      */
     @WorkerThread
-    synchronized void loadConversationsFromDisk() {
+    void loadConversationsFromDisk() {
         ConversationInfosProtoDiskReadWriter conversationInfosProtoDiskReadWriter =
                 getConversationInfosProtoDiskReadWriter();
         if (conversationInfosProtoDiskReadWriter == null) {
@@ -111,54 +111,64 @@ class ConversationStore {
      * powering off.
      */
     @MainThread
-    synchronized void saveConversationsToDisk() {
+    void saveConversationsToDisk() {
         ConversationInfosProtoDiskReadWriter conversationInfosProtoDiskReadWriter =
                 getConversationInfosProtoDiskReadWriter();
         if (conversationInfosProtoDiskReadWriter != null) {
-            conversationInfosProtoDiskReadWriter.saveConversationsImmediately(
-                    new ArrayList<>(mConversationInfoMap.values()));
+            List<ConversationInfo> conversations;
+            synchronized (this) {
+                conversations = new ArrayList<>(mConversationInfoMap.values());
+            }
+            conversationInfosProtoDiskReadWriter.saveConversationsImmediately(conversations);
         }
     }
 
     @MainThread
-    synchronized void addOrUpdate(@NonNull ConversationInfo conversationInfo) {
+    void addOrUpdate(@NonNull ConversationInfo conversationInfo) {
         updateConversationsInMemory(conversationInfo);
         scheduleUpdateConversationsOnDisk();
     }
 
     @MainThread
     @Nullable
-    synchronized ConversationInfo deleteConversation(@NonNull String shortcutId) {
-        ConversationInfo conversationInfo = mConversationInfoMap.remove(shortcutId);
-        if (conversationInfo == null) {
-            return null;
-        }
+    ConversationInfo deleteConversation(@NonNull String shortcutId) {
+        ConversationInfo conversationInfo;
+        synchronized (this) {
+            conversationInfo = mConversationInfoMap.remove(shortcutId);
+            if (conversationInfo == null) {
+                return null;
+            }
 
-        LocusId locusId = conversationInfo.getLocusId();
-        if (locusId != null) {
-            mLocusIdToShortcutIdMap.remove(locusId);
-        }
+            LocusId locusId = conversationInfo.getLocusId();
+            if (locusId != null) {
+                mLocusIdToShortcutIdMap.remove(locusId);
+            }
 
-        Uri contactUri = conversationInfo.getContactUri();
-        if (contactUri != null) {
-            mContactUriToShortcutIdMap.remove(contactUri);
-        }
+            Uri contactUri = conversationInfo.getContactUri();
+            if (contactUri != null) {
+                mContactUriToShortcutIdMap.remove(contactUri);
+            }
 
-        String phoneNumber = conversationInfo.getContactPhoneNumber();
-        if (phoneNumber != null) {
-            mPhoneNumberToShortcutIdMap.remove(phoneNumber);
-        }
+            String phoneNumber = conversationInfo.getContactPhoneNumber();
+            if (phoneNumber != null) {
+                mPhoneNumberToShortcutIdMap.remove(phoneNumber);
+            }
 
-        String notifChannelId = conversationInfo.getNotificationChannelId();
-        if (notifChannelId != null) {
-            mNotifChannelIdToShortcutIdMap.remove(notifChannelId);
+            String notifChannelId = conversationInfo.getNotificationChannelId();
+            if (notifChannelId != null) {
+                mNotifChannelIdToShortcutIdMap.remove(notifChannelId);
+            }
         }
         scheduleUpdateConversationsOnDisk();
         return conversationInfo;
     }
 
-    synchronized void forAllConversations(@NonNull Consumer<ConversationInfo> consumer) {
-        for (ConversationInfo ci : mConversationInfoMap.values()) {
+    void forAllConversations(@NonNull Consumer<ConversationInfo> consumer) {
+        List<ConversationInfo> conversations;
+        synchronized (this) {
+            conversations = new ArrayList<>(mConversationInfoMap.values());
+        }
+        for (ConversationInfo ci : conversations) {
             consumer.accept(ci);
         }
     }
@@ -184,16 +194,19 @@ class ConversationStore {
     }
 
     @Nullable
-    ConversationInfo getConversationByNotificationChannelId(@NonNull String notifChannelId) {
+    synchronized ConversationInfo getConversationByNotificationChannelId(
+            @NonNull String notifChannelId) {
         return getConversation(mNotifChannelIdToShortcutIdMap.get(notifChannelId));
     }
 
-    synchronized void onDestroy() {
-        mConversationInfoMap.clear();
-        mContactUriToShortcutIdMap.clear();
-        mLocusIdToShortcutIdMap.clear();
-        mNotifChannelIdToShortcutIdMap.clear();
-        mPhoneNumberToShortcutIdMap.clear();
+    void onDestroy() {
+        synchronized (this) {
+            mConversationInfoMap.clear();
+            mContactUriToShortcutIdMap.clear();
+            mLocusIdToShortcutIdMap.clear();
+            mNotifChannelIdToShortcutIdMap.clear();
+            mPhoneNumberToShortcutIdMap.clear();
+        }
         ConversationInfosProtoDiskReadWriter writer = getConversationInfosProtoDiskReadWriter();
         if (writer != null) {
             writer.deleteConversationsFile();
@@ -201,22 +214,21 @@ class ConversationStore {
     }
 
     @Nullable
-    synchronized byte[] getBackupPayload() {
+    byte[] getBackupPayload() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream conversationInfosOut = new DataOutputStream(baos);
-        for (ConversationInfo conversationInfo : mConversationInfoMap.values()) {
+        forAllConversations(conversationInfo -> {
             byte[] backupPayload = conversationInfo.getBackupPayload();
             if (backupPayload == null) {
-                continue;
+                return;
             }
             try {
                 conversationInfosOut.writeInt(backupPayload.length);
                 conversationInfosOut.write(backupPayload);
             } catch (IOException e) {
                 Slog.e(TAG, "Failed to write conversation info to backup payload.", e);
-                return null;
             }
-        }
+        });
         try {
             conversationInfosOut.writeInt(CONVERSATION_INFOS_END_TOKEN);
         } catch (IOException e) {
@@ -226,7 +238,7 @@ class ConversationStore {
         return baos.toByteArray();
     }
 
-    synchronized void restore(@NonNull byte[] payload) {
+    void restore(@NonNull byte[] payload) {
         DataInputStream in = new DataInputStream(new ByteArrayInputStream(payload));
         try {
             for (int conversationInfoSize = in.readInt();
@@ -245,7 +257,6 @@ class ConversationStore {
         }
     }
 
-    @MainThread
     private synchronized void updateConversationsInMemory(
             @NonNull ConversationInfo conversationInfo) {
         mConversationInfoMap.put(conversationInfo.getShortcutId(), conversationInfo);
@@ -273,12 +284,15 @@ class ConversationStore {
 
     /** Schedules a dump of all conversations onto disk, overwriting existing values. */
     @MainThread
-    private synchronized void scheduleUpdateConversationsOnDisk() {
+    private void scheduleUpdateConversationsOnDisk() {
         ConversationInfosProtoDiskReadWriter conversationInfosProtoDiskReadWriter =
                 getConversationInfosProtoDiskReadWriter();
         if (conversationInfosProtoDiskReadWriter != null) {
-            conversationInfosProtoDiskReadWriter.scheduleConversationsSave(
-                    new ArrayList<>(mConversationInfoMap.values()));
+            List<ConversationInfo> conversations;
+            synchronized (this) {
+                conversations = new ArrayList<>(mConversationInfoMap.values());
+            }
+            conversationInfosProtoDiskReadWriter.scheduleConversationsSave(conversations);
         }
     }
 
