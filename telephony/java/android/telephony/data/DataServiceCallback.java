@@ -191,6 +191,8 @@ public class DataServiceCallback {
      * Called to indicate result for the request {@link DataService#startHandover}.
      *
      * @param result The result code. Must be one of the {@link ResultCode}
+     *
+     * @hide
      */
     public void onHandoverStarted(@ResultCode int result) {
         if (mCallback != null) {
@@ -209,6 +211,8 @@ public class DataServiceCallback {
      * Called to indicate result for the request {@link DataService#cancelHandover}.
      *
      * @param result The result code. Must be one of the {@link ResultCode}
+     *
+     * @hide
      */
     public void onHandoverCancelled(@ResultCode int result) {
         if (mCallback != null) {
