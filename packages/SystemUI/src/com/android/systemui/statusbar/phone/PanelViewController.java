@@ -739,6 +739,8 @@ public abstract class PanelViewController {
      */
     protected abstract boolean isTrackingBlocked();
 
+    protected abstract void setIsShadeOpening(boolean isShadeOpening);
+
     protected abstract void setOverExpansion(float overExpansion, boolean isPixels);
 
     protected abstract void onHeightUpdated(float expandedHeight);

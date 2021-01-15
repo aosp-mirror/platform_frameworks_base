@@ -271,6 +271,10 @@ public class NotificationStackScrollLayoutController {
         }
     };
 
+    public void setIsShadeOpening(boolean isOpening) {
+        mView.setIsShadeOpening(isOpening);
+    }
+
     private final OnMenuEventListener mMenuEventListener = new OnMenuEventListener() {
         @Override
         public void onMenuClicked(

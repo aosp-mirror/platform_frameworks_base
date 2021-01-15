@@ -77,6 +77,7 @@ public class AmbientState {
     private Runnable mOnPulseHeightChangedListener;
     private ExpandableNotificationRow mTrackedHeadsUpRow;
     private float mAppearFraction;
+    private boolean mIsShadeOpening;
 
     /** Tracks the state from AlertingNotificationManager#hasNotifications() */
     private boolean mHasAlertEntries;
@@ -94,6 +95,14 @@ public class AmbientState {
     public void reload(Context context) {
         mZDistanceBetweenElements = getZDistanceBetweenElements(context);
         mBaseZHeight = getBaseHeight(mZDistanceBetweenElements);
+    }
+
+    void setIsShadeOpening(boolean isOpening) {
+        mIsShadeOpening = isOpening;
+    }
+
+    public boolean isShadeOpening() {
+        return mIsShadeOpening;
     }
 
     private static int getZDistanceBetweenElements(Context context) {
