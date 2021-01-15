@@ -43,6 +43,7 @@ public abstract class BatteryConsumer {
             POWER_COMPONENT_AUDIO,
             POWER_COMPONENT_VIDEO,
             POWER_COMPONENT_FLASHLIGHT,
+            POWER_COMPONENT_MOBILE_RADIO,
             POWER_COMPONENT_SYSTEM_SERVICES,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -57,8 +58,9 @@ public abstract class BatteryConsumer {
     public static final int POWER_COMPONENT_VIDEO = 5;
     public static final int POWER_COMPONENT_FLASHLIGHT = 6;
     public static final int POWER_COMPONENT_SYSTEM_SERVICES = 7;
+    public static final int POWER_COMPONENT_MOBILE_RADIO = 8;
 
-    public static final int POWER_COMPONENT_COUNT = 8;
+    public static final int POWER_COMPONENT_COUNT = 9;
 
     public static final int FIRST_CUSTOM_POWER_COMPONENT_ID = 1000;
     public static final int LAST_CUSTOM_POWER_COMPONENT_ID = 9999;
@@ -87,6 +89,7 @@ public abstract class BatteryConsumer {
             TIME_COMPONENT_BLUETOOTH,
             TIME_COMPONENT_CAMERA,
             TIME_COMPONENT_FLASHLIGHT,
+            TIME_COMPONENT_MOBILE_RADIO,
     })
     @Retention(RetentionPolicy.SOURCE)
     public static @interface TimeComponent {
@@ -100,8 +103,9 @@ public abstract class BatteryConsumer {
     public static final int TIME_COMPONENT_AUDIO = 5;
     public static final int TIME_COMPONENT_VIDEO = 6;
     public static final int TIME_COMPONENT_FLASHLIGHT = 7;
+    public static final int TIME_COMPONENT_MOBILE_RADIO = 8;
 
-    public static final int TIME_COMPONENT_COUNT = 8;
+    public static final int TIME_COMPONENT_COUNT = 9;
 
     public static final int FIRST_CUSTOM_TIME_COMPONENT_ID = 1000;
     public static final int LAST_CUSTOM_TIME_COMPONENT_ID = 9999;

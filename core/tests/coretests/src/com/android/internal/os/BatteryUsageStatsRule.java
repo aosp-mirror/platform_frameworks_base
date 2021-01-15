@@ -16,10 +16,13 @@
 
 package com.android.internal.os;
 
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.net.NetworkStats;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
@@ -32,6 +35,7 @@ import androidx.test.InstrumentationRegistry;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
+import org.mockito.stubbing.Answer;
 
 public class BatteryUsageStatsRule implements TestRule {
     private final PowerProfile mPowerProfile;
@@ -53,6 +57,14 @@ public class BatteryUsageStatsRule implements TestRule {
 
     public BatteryUsageStatsRule setAveragePower(String key, double value) {
         when(mPowerProfile.getAveragePower(key)).thenReturn(value);
+        when(mPowerProfile.getAveragePowerOrDefault(eq(key), anyDouble())).thenReturn(value);
+        return this;
+    }
+
+    public BatteryUsageStatsRule setAveragePowerUnspecified(String key) {
+        when(mPowerProfile.getAveragePower(key)).thenReturn(0.0);
+        when(mPowerProfile.getAveragePowerOrDefault(eq(key), anyDouble()))
+                .thenAnswer((Answer<Double>) invocation -> (Double) invocation.getArguments()[1]);
         return this;
     }
 
@@ -62,6 +74,10 @@ public class BatteryUsageStatsRule implements TestRule {
             when(mPowerProfile.getAveragePower(key, i)).thenReturn(values[i]);
         }
         return this;
+    }
+
+    public void setNetworkStats(NetworkStats networkStats) {
+        mBatteryStats.setNetworkStats(networkStats);
     }
 
     @Override
@@ -76,6 +92,7 @@ public class BatteryUsageStatsRule implements TestRule {
     }
 
     private void noteOnBattery() {
+        mBatteryStats.setOnBatteryInternal(true);
         mBatteryStats.getOnBatteryTimeBase().setRunning(true, 0, 0);
     }
 

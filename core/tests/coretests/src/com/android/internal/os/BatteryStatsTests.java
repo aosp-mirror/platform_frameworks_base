@@ -58,6 +58,7 @@ import org.junit.runners.Suite;
         KernelWakelockReaderTest.class,
         LongSamplingCounterTest.class,
         LongSamplingCounterArrayTest.class,
+        MobileRadioPowerCalculatorTest.class,
         PowerCalculatorTest.class,
         PowerProfileTest.class,
         ScreenPowerCalculatorTest.class,
