@@ -359,9 +359,13 @@ public class PipTouchHandler {
                 mPipBoundsState.getExpandedBounds(), insetBounds, expandedMovementBounds,
                 bottomOffset);
 
-        mPipResizeGestureHandler.updateMinSize(normalBounds.width(), normalBounds.height());
-        mPipResizeGestureHandler.updateMaxSize(mPipBoundsState.getExpandedBounds().width(),
-                mPipBoundsState.getExpandedBounds().height());
+        if (mPipResizeGestureHandler.isUsingPinchToZoom()) {
+            updatePinchResizeSizeConstraints(insetBounds, normalBounds, aspectRatio);
+        } else {
+            mPipResizeGestureHandler.updateMinSize(normalBounds.width(), normalBounds.height());
+            mPipResizeGestureHandler.updateMaxSize(mPipBoundsState.getExpandedBounds().width(),
+                    mPipBoundsState.getExpandedBounds().height());
+        }
 
         // The extra offset does not really affect the movement bounds, but are applied based on the
         // current state (ime showing, or shelf offset) when we need to actually shift
@@ -428,6 +432,30 @@ public class PipTouchHandler {
             mSavedSnapFraction = -1f;
             mDeferResizeToNormalBoundsUntilRotation = -1;
         }
+    }
+
+    private void updatePinchResizeSizeConstraints(Rect insetBounds, Rect normalBounds,
+            float aspectRatio) {
+        final int shorterLength = Math.min(mPipBoundsState.getDisplayBounds().width(),
+                mPipBoundsState.getDisplayBounds().height());
+        final int padding = insetBounds.left;
+        final int minWidth, minHeight, maxWidth, maxHeight;
+        if (aspectRatio > 1f) {
+            minWidth = (int) Math.min(normalBounds.width(), shorterLength * 0.4);
+            minHeight = (int) (minWidth / aspectRatio);
+            maxWidth = (int) Math.max(normalBounds.width(), shorterLength - 2 * padding);
+            maxHeight = (int) (maxWidth / aspectRatio);
+        } else {
+            minHeight = (int) Math.min(normalBounds.height(), shorterLength * 0.4);
+            minWidth = (int) (minHeight * aspectRatio);
+            maxHeight = (int) Math.max(normalBounds.height(), shorterLength - 2 * padding);
+            maxWidth = (int) (maxHeight * aspectRatio);
+        }
+
+        mPipResizeGestureHandler.updateMinSize(minWidth, minHeight);
+        mPipResizeGestureHandler.updateMaxSize(maxWidth, maxHeight);
+        mPipBoundsState.setMaxSize(maxWidth, maxHeight);
+        mPipBoundsState.setMinSize(minWidth, minHeight);
     }
 
     /**
@@ -640,11 +668,34 @@ public class PipTouchHandler {
         }
     }
 
-    private void animateToExpandedState(Runnable callback) {
-        Rect expandedBounds = new Rect(mPipBoundsState.getExpandedBounds());
-        mSavedSnapFraction = mMotionHelper.animateToExpandedState(expandedBounds,
-                mPipBoundsState.getMovementBounds(), mPipBoundsState.getExpandedMovementBounds(),
+    private void animateToMaximizedState(Runnable callback) {
+        Rect maxMovementBounds = new Rect();
+        Rect maxBounds = new Rect(0, 0, mPipBoundsState.getMaxSize().x,
+                mPipBoundsState.getMaxSize().y);
+        mPipBoundsAlgorithm.getMovementBounds(maxBounds, mInsetBounds, maxMovementBounds,
+                mIsImeShowing ? mImeHeight : 0);
+        mSavedSnapFraction = mMotionHelper.animateToExpandedState(maxBounds,
+                mPipBoundsState.getMovementBounds(), maxMovementBounds,
                 callback);
+    }
+
+    private void animateToMinimizedState() {
+        animateToUnexpandedState(new Rect(0, 0, mPipBoundsState.getMinSize().x,
+                mPipBoundsState.getMinSize().y));
+    }
+
+    private void animateToExpandedState(Runnable callback) {
+        mPipResizeGestureHandler.setUserResizeBounds(mPipBoundsState.getBounds());
+        final Rect currentBounds = mPipBoundsState.getBounds();
+        final Rect expandedBounds = mPipBoundsState.getExpandedBounds();
+        Rect finalExpandedBounds = new Rect(expandedBounds.width() > expandedBounds.width()
+                        && expandedBounds.height() > expandedBounds.height()
+                        ? currentBounds : expandedBounds);
+        Rect restoredMovementBounds = new Rect();
+        mPipBoundsAlgorithm.getMovementBounds(finalExpandedBounds,
+                mInsetBounds, restoredMovementBounds, mIsImeShowing ? mImeHeight : 0);
+        mSavedSnapFraction = mMotionHelper.animateToExpandedState(finalExpandedBounds,
+                mPipBoundsState.getMovementBounds(), restoredMovementBounds, callback);
     }
 
     private void animateToUnexpandedState(Rect restoreBounds) {
@@ -789,17 +840,15 @@ public class PipTouchHandler {
                 // If using pinch to zoom, double-tap functions as resizing between max/min size
                 if (mPipResizeGestureHandler.isUsingPinchToZoom()) {
                     final boolean toExpand = mPipBoundsState.getBounds().width()
-                            < mPipBoundsState.getExpandedBounds().width()
+                            < mPipBoundsState.getMaxSize().x
                             && mPipBoundsState.getBounds().height()
-                            < mPipBoundsState.getExpandedBounds().height();
-                    mPipResizeGestureHandler.setUserResizeBounds(toExpand
-                            ? mPipBoundsState.getExpandedBounds()
-                            : mPipBoundsState.getNormalBounds());
+                            < mPipBoundsState.getMaxSize().y;
                     if (toExpand) {
-                        animateToExpandedState(null);
+                        animateToMaximizedState(null);
                     } else {
-                        animateToUnexpandedState(mPipBoundsState.getNormalBounds());
+                        animateToMinimizedState();
                     }
+                    mPipResizeGestureHandler.setUserResizeBounds(mPipBoundsState.getBounds());
                 } else {
                     // Expand to fullscreen if this is a double tap
                     // the PiP should be frozen until the transition ends

@@ -85,21 +85,21 @@ public class PipPinchResizingAlgorithm {
         } else {
             // Assuming that the width is our target we calculate the height.
             width1 = Math.max(minVisibleWidth, Math.min(maxSize.x, width));
-            height1 = Math.round((float) width1 * aspect);
+            height1 = Math.round((float) width1 / aspect);
             if (height1 < minVisibleHeight) {
                 // If the resulting height is too small we adjust to the minimal size.
                 height1 = minVisibleHeight;
                 width1 = Math.max(minVisibleWidth,
-                        Math.min(maxSize.x, Math.round((float) height1 / aspect)));
+                        Math.min(maxSize.x, Math.round((float) height1 * aspect)));
             }
             // Assuming that the height is our target we calculate the width.
             height2 = Math.max(minVisibleHeight, Math.min(maxSize.y, height));
-            width2 = Math.round((float) height2 / aspect);
+            width2 = Math.round((float) height2 * aspect);
             if (width2 < minVisibleWidth) {
                 // If the resulting width is too small we adjust to the minimal size.
                 width2 = minVisibleWidth;
                 height2 = Math.max(minVisibleHeight,
-                        Math.min(maxSize.y, Math.round((float) width2 * aspect)));
+                        Math.min(maxSize.y, Math.round((float) width2 / aspect)));
             }
         }
 
