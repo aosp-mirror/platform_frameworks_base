@@ -14,6 +14,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.qs.dagger.QSFlagsModule.RBC_AVAILABLE;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.hardware.display.ColorDisplayManager;
@@ -27,6 +29,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.qs.AutoAddTracker;
 import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.ReduceBrightColorsController;
 import com.android.systemui.qs.SecureSetting;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.statusbar.policy.CastController;
@@ -40,6 +43,8 @@ import com.android.systemui.util.settings.SecureSettings;
 
 import java.util.ArrayList;
 import java.util.Objects;
+
+import javax.inject.Named;
 
 /**
  * Manages which tiles should be automatically added to QS.
@@ -69,6 +74,8 @@ public class AutoTileManager implements UserAwareController {
     private final ManagedProfileController mManagedProfileController;
     private final NightDisplayListener mNightDisplayListener;
     private final CastController mCastController;
+    private final ReduceBrightColorsController mReduceBrightColorsController;
+    private final boolean mIsReduceBrightColorsAvailable;
     private final ArrayList<AutoAddSetting> mAutoAddSettingList = new ArrayList<>();
 
     public AutoTileManager(Context context, AutoAddTracker.Builder autoAddTrackerBuilder,
@@ -79,7 +86,9 @@ public class AutoTileManager implements UserAwareController {
             DataSaverController dataSaverController,
             ManagedProfileController managedProfileController,
             NightDisplayListener nightDisplayListener,
-            CastController castController) {
+            CastController castController,
+            ReduceBrightColorsController reduceBrightColorsController,
+            @Named(RBC_AVAILABLE) boolean isReduceBrightColorsAvailable) {
         mContext = context;
         mHost = host;
         mSecureSettings = secureSettings;
@@ -91,6 +100,8 @@ public class AutoTileManager implements UserAwareController {
         mManagedProfileController = managedProfileController;
         mNightDisplayListener = nightDisplayListener;
         mCastController = castController;
+        mReduceBrightColorsController = reduceBrightColorsController;
+        mIsReduceBrightColorsAvailable = isReduceBrightColorsAvailable;
     }
 
     /**
@@ -124,9 +135,9 @@ public class AutoTileManager implements UserAwareController {
         if (!mAutoTracker.isAdded(CAST)) {
             mCastController.addCallback(mCastCallback);
         }
-
-        // TODO(b/170970675): Set a listener/controller and callback for Reduce Bright Colors
-        // state changes. Call into ColorDisplayService to get availability/config status
+        if (!mAutoTracker.isAdded(BRIGHTNESS) && mIsReduceBrightColorsAvailable) {
+            mReduceBrightColorsController.addCallback(mReduceBrightColorsCallback);
+        }
 
         int settingsN = mAutoAddSettingList.size();
         for (int i = 0; i < settingsN; i++) {
@@ -142,6 +153,9 @@ public class AutoTileManager implements UserAwareController {
         mManagedProfileController.removeCallback(mProfileCallback);
         if (ColorDisplayManager.isNightDisplayAvailable(mContext)) {
             mNightDisplayListener.setCallback(null);
+        }
+        if (mIsReduceBrightColorsAvailable) {
+            mReduceBrightColorsController.removeCallback(mReduceBrightColorsCallback);
         }
         mCastController.removeCallback(mCastCallback);
         int settingsN = mAutoAddSettingList.size();
@@ -285,6 +299,24 @@ public class AutoTileManager implements UserAwareController {
             mHandler.post(() -> mNightDisplayListener.setCallback(null));
         }
     };
+
+    @VisibleForTesting
+    final ReduceBrightColorsController.Listener mReduceBrightColorsCallback =
+            new ReduceBrightColorsController.Listener() {
+                @Override
+                public void onActivated(boolean activated) {
+                    if (activated) {
+                        addReduceBrightColorsTile();
+                    }
+                }
+
+                private void addReduceBrightColorsTile() {
+                    if (mAutoTracker.isAdded(BRIGHTNESS)) return;
+                    mHost.addTile(BRIGHTNESS);
+                    mAutoTracker.setTileAdded(BRIGHTNESS);
+                    mHandler.post(() -> mReduceBrightColorsController.removeCallback(this));
+                }
+            };
 
     @VisibleForTesting
     final CastController.Callback mCastCallback = new CastController.Callback() {
