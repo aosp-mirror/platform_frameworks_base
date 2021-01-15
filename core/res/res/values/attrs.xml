@@ -8968,6 +8968,11 @@
              changed at runtime by calling
              {@link android.media.tv.TvInputManager#updateTvInputInfo(android.media.tv.TvInputInfo)}. -->
         <attr name="tunerCount" format="integer" />
+        <!-- Attribute whether the TV input service can pause recording programs.
+             This value can be changed at runtime by calling
+             {@link android.media.tv.TvInputManager#updateTvInputInfo(android.media.tv.TvInputInfo)}
+             . -->
+        <attr name="canPauseRecording" format="boolean" />
     </declare-styleable>
 
     <!-- Attributes that can be used with <code>rating-system-definition</code> tags inside of the
