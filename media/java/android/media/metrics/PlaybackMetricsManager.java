@@ -61,4 +61,16 @@ public class PlaybackMetricsManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Reports error event.
+     * @hide
+     */
+    public void reportPlaybackErrorEvent(@NonNull String sessionId, PlaybackErrorEvent event) {
+        try {
+            mService.reportPlaybackErrorEvent(sessionId, event, mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }
