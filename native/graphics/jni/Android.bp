@@ -74,9 +74,9 @@ ndk_library {
     unversioned_until: "current",
 }
 
-cc_fuzz {
-    name: "imagedecoder_fuzzer",
-    srcs: ["fuzz_imagedecoder.cpp"],
+cc_defaults {
+    name: "imagedecoder_fuzzer_defaults",
+    srcs: ["fuzz/fuzz_imagedecoder.cpp"],
     header_libs: ["jni_headers"],
     shared_libs: [
         "libbinder",
@@ -97,6 +97,22 @@ cc_fuzz {
             "allocator_may_return_null = 1",
         ],
     },
-    corpus: ["corpus/*"],
     host_supported: true,
+}
+
+cc_fuzz {
+    name: "imagedecoder_fuzzer",
+    defaults: ["imagedecoder_fuzzer_defaults"],
+    corpus: ["fuzz/corpus/*"],
+}
+
+cc_fuzz {
+    name: "imagedecoder_png_fuzzer",
+    defaults: ["imagedecoder_fuzzer_defaults"],
+    shared_libs: [
+        "libz",
+    ],
+    cflags: [
+        "-DPNG_MUTATOR_DEFINE_LIBFUZZER_CUSTOM_MUTATOR",
+    ],
 }
