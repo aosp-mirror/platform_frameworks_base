@@ -27,6 +27,7 @@ import android.app.appsearch.GenericDocument;
 import android.app.appsearch.IAppSearchBatchResultCallback;
 import android.app.appsearch.IAppSearchManager;
 import android.app.appsearch.IAppSearchResultCallback;
+import android.app.appsearch.PackageIdentifier;
 import android.app.appsearch.SearchResultPage;
 import android.app.appsearch.SearchSpec;
 import android.content.Context;
@@ -34,6 +35,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.ParcelableException;
 import android.os.RemoteException;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
@@ -42,6 +44,7 @@ import com.android.server.appsearch.external.localstorage.AppSearchImpl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * TODO(b/142567528): add comments when implement this class
@@ -64,6 +67,7 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull String databaseName,
                 @NonNull List<Bundle> schemaBundles,
                 @NonNull List<String> schemasNotPlatformSurfaceable,
+                @NonNull Map<String, List<Bundle>> schemasPackageAccessibleBundles,
                 boolean forceOverride,
                 @UserIdInt int userId,
                 @NonNull IAppSearchResultCallback callback) {
@@ -78,9 +82,25 @@ public class AppSearchManagerService extends SystemService {
                 for (int i = 0; i < schemaBundles.size(); i++) {
                     schemas.add(new AppSearchSchema(schemaBundles.get(i)));
                 }
+                Map<String, List<PackageIdentifier>> schemasPackageAccessible =
+                        new ArrayMap<>(schemasPackageAccessibleBundles.size());
+                for (Map.Entry<String, List<Bundle>> entry :
+                        schemasPackageAccessibleBundles.entrySet()) {
+                    List<PackageIdentifier> packageIdentifiers =
+                            new ArrayList<>(entry.getValue().size());
+                    for (int i = 0; i < packageIdentifiers.size(); i++) {
+                        packageIdentifiers.add(new PackageIdentifier(entry.getValue().get(i)));
+                    }
+                    schemasPackageAccessible.put(entry.getKey(), packageIdentifiers);
+                }
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
                 String packageName = convertUidToPackageName(callingUid);
-                impl.setSchema(packageName, databaseName, schemas, schemasNotPlatformSurfaceable,
+                impl.setSchema(
+                        packageName,
+                        databaseName,
+                        schemas,
+                        schemasNotPlatformSurfaceable,
+                        schemasPackageAccessible,
                         forceOverride);
                 invokeCallbackOnResult(callback,
                         AppSearchResult.newSuccessfulResult(/*result=*/ null));

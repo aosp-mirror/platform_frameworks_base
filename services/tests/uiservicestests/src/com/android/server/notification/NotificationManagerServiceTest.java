@@ -6531,9 +6531,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Notification notif = mService.getNotificationRecord(nr.getSbn().getKey()).getNotification();
         assertTrue(notif.isBubbleNotification());
 
-        // Our flags should have failed since we're not foreground
+        // The flag should have failed since we're not foreground
         assertFalse(notif.getBubbleMetadata().getAutoExpandBubble());
-        assertFalse(notif.getBubbleMetadata().isNotificationSuppressed());
     }
 
     @Test

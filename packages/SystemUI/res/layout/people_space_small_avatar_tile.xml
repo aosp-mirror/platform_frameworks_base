@@ -168,6 +168,7 @@
                 </LinearLayout>
             </LinearLayout>
             <LinearLayout
+                android:id="@+id/content_background"
                 android:background="@drawable/people_space_content_background"
                 android:layout_gravity="center"
                 android:layout_width="match_parent"
@@ -187,7 +188,8 @@
                     android:id="@+id/image"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:visibility="gone"/>
+                    android:visibility="gone"
+                    android:scaleType="centerCrop"/>
             </LinearLayout>
         </LinearLayout>
     </RelativeLayout>

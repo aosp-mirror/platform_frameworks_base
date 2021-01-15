@@ -98,9 +98,11 @@ static void android_view_DisplayListCanvas_enableZ(CRITICAL_JNI_PARAMS_COMMA jlo
     canvas->enableZ(reorderEnable);
 }
 
-static jlong android_view_DisplayListCanvas_finishRecording(CRITICAL_JNI_PARAMS_COMMA jlong canvasPtr) {
+static void android_view_DisplayListCanvas_finishRecording(
+        CRITICAL_JNI_PARAMS_COMMA jlong canvasPtr, jlong renderNodePtr) {
     Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
-    return reinterpret_cast<jlong>(canvas->finishRecording());
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->setStagingDisplayList(canvas->finishRecording());
 }
 
 static void android_view_DisplayListCanvas_drawRenderNode(CRITICAL_JNI_PARAMS_COMMA jlong canvasPtr, jlong renderNodePtr) {
@@ -172,7 +174,7 @@ static JNINativeMethod gMethods[] = {
     { "nGetMaximumTextureWidth",  "()I",        (void*) android_view_DisplayListCanvas_getMaxTextureSize },
     { "nGetMaximumTextureHeight", "()I",        (void*) android_view_DisplayListCanvas_getMaxTextureSize },
     { "nEnableZ",                 "(JZ)V",      (void*) android_view_DisplayListCanvas_enableZ },
-    { "nFinishRecording",         "(J)J",       (void*) android_view_DisplayListCanvas_finishRecording },
+    { "nFinishRecording",         "(JJ)V",      (void*) android_view_DisplayListCanvas_finishRecording },
     { "nDrawRenderNode",          "(JJ)V",      (void*) android_view_DisplayListCanvas_drawRenderNode },
     { "nDrawTextureLayer",        "(JJ)V",      (void*) android_view_DisplayListCanvas_drawTextureLayer },
     { "nDrawCircle",              "(JJJJJ)V",   (void*) android_view_DisplayListCanvas_drawCircleProps },

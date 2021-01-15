@@ -129,7 +129,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
-import com.android.systemui.util.InjectionInflationController;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import java.io.FileDescriptor;
@@ -266,8 +265,7 @@ public class NotificationPanelViewController extends PanelViewController {
                             && mAuthController.getUdfpsRegion() != null
                             && mAuthController.isUdfpsEnrolled(
                                    KeyguardUpdateMonitor.getCurrentUser())) {
-                        LayoutInflater.from(mView.getContext())
-                                .inflate(R.layout.disabled_udfps_view, mView);
+                        mLayoutInflater.inflate(R.layout.disabled_udfps_view, mView);
                         mDisabledUdfpsController = new DisabledUdfpsController(
                                 mView.findViewById(R.id.disabled_udfps_view),
                                 mStatusBarStateController,
@@ -279,7 +277,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 }
     };
 
-    private final InjectionInflationController mInjectionInflationController;
+    private final LayoutInflater mLayoutInflater;
     private final PowerManager mPowerManager;
     private final AccessibilityManager mAccessibilityManager;
     private final NotificationWakeUpCoordinator mWakeUpCoordinator;
@@ -523,7 +521,7 @@ public class NotificationPanelViewController extends PanelViewController {
     @Inject
     public NotificationPanelViewController(NotificationPanelView view,
             @Main Resources resources,
-            InjectionInflationController injectionInflationController,
+            LayoutInflater layoutInflater,
             NotificationWakeUpCoordinator coordinator, PulseExpansionHandler pulseExpansionHandler,
             DynamicPrivacyController dynamicPrivacyController,
             KeyguardBypassController bypassController, FalsingManager falsingManager,
@@ -568,7 +566,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardStatusViewComponentFactory = keyguardStatusViewComponentFactory;
         mQSDetailDisplayer = qsDetailDisplayer;
         mView.setWillNotDraw(!DEBUG);
-        mInjectionInflationController = injectionInflationController;
+        mLayoutInflater = layoutInflater;
         mFalsingManager = falsingManager;
         mFalsingCollector = falsingCollector;
         mPowerManager = powerManager;
@@ -774,8 +772,7 @@ public class NotificationPanelViewController extends PanelViewController {
         KeyguardStatusView keyguardStatusView = mView.findViewById(R.id.keyguard_status_view);
         int index = mView.indexOfChild(keyguardStatusView);
         mView.removeView(keyguardStatusView);
-        keyguardStatusView = (KeyguardStatusView) mInjectionInflationController.injectable(
-                LayoutInflater.from(mView.getContext())).inflate(
+        keyguardStatusView = (KeyguardStatusView) mLayoutInflater.inflate(
                 R.layout.keyguard_status_view, mView, false);
         mView.addView(keyguardStatusView, index);
 
@@ -786,8 +783,7 @@ public class NotificationPanelViewController extends PanelViewController {
         index = mView.indexOfChild(mKeyguardBottomArea);
         mView.removeView(mKeyguardBottomArea);
         KeyguardBottomAreaView oldBottomArea = mKeyguardBottomArea;
-        mKeyguardBottomArea = (KeyguardBottomAreaView) mInjectionInflationController.injectable(
-                LayoutInflater.from(mView.getContext())).inflate(
+        mKeyguardBottomArea = (KeyguardBottomAreaView) mLayoutInflater.inflate(
                 R.layout.keyguard_bottom_area, mView, false);
         mKeyguardBottomArea.initFrom(oldBottomArea);
         mView.addView(mKeyguardBottomArea, index);

@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.app.WallpaperManager
 import android.os.SystemClock
+import android.util.IndentingPrintWriter
 import android.util.Log
 import android.util.MathUtils
 import android.view.Choreographer
@@ -29,7 +30,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
-import com.android.internal.util.IndentingPrintWriter
 import com.android.systemui.Dumpable
 import com.android.systemui.Interpolators
 import com.android.systemui.dagger.SysUISingleton

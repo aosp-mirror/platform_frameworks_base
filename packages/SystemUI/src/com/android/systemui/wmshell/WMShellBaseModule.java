@@ -19,6 +19,7 @@ package com.android.systemui.wmshell;
 import static android.os.Process.THREAD_PRIORITY_DISPLAY;
 
 import android.animation.AnimationHandler;
+import android.app.ActivityTaskManager;
 import android.app.IActivityManager;
 import android.content.Context;
 import android.content.pm.LauncherApps;
@@ -71,6 +72,7 @@ import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.phone.PipAppOpsListener;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
@@ -146,18 +148,18 @@ public abstract class WMShellBaseModule {
     }
 
     /**
-     * Provide a Shell animation-thread AnimationHandler.  The AnimationHandler can be set on
+     * Provide a Shell main-thread AnimationHandler.  The AnimationHandler can be set on
      * {@link android.animation.ValueAnimator}s and will ensure that the animation will run on
-     * the Shell animation-thread.
+     * the Shell main-thread with the SF vsync.
      */
     @WMSingleton
     @Provides
     @ChoreographerSfVsync
-    public static AnimationHandler provideShellAnimationExecutorSfVsyncAnimationHandler(
-            @ShellAnimationThread ShellExecutor shellAnimationExecutor) {
+    public static AnimationHandler provideShellMainExecutorSfVsyncAnimationHandler(
+            @ShellMainThread ShellExecutor mainExecutor) {
         try {
             AnimationHandler handler = new AnimationHandler();
-            shellAnimationExecutor.executeBlocking(() -> {
+            mainExecutor.executeBlocking(() -> {
                 // This is called on the animation thread since it calls
                 // Choreographer.getSfInstance() which returns a thread-local Choreographer instance
                 // that uses the SF vsync
@@ -310,8 +312,18 @@ public abstract class WMShellBaseModule {
     @BindsOptionalOf
     abstract LegacySplitScreen optionalLegacySplitScreen();
 
-    @BindsOptionalOf
-    abstract SplitScreen optionalSplitScreen();
+    @WMSingleton
+    @Provides
+    static Optional<SplitScreen> provideSplitScreen(ShellTaskOrganizer shellTaskOrganizer,
+            SyncTransactionQueue syncQueue, Context context,
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
+        if (ActivityTaskManager.supportsSplitScreenMultiWindow(context)) {
+            return Optional.of(new SplitScreenController(shellTaskOrganizer, syncQueue, context,
+                    rootTaskDisplayAreaOrganizer));
+        } else {
+            return Optional.empty();
+        }
+    }
 
     @BindsOptionalOf
     abstract AppPairs optionalAppPairs();

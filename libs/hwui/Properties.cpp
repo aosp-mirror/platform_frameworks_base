@@ -15,7 +15,9 @@
  */
 
 #include "Properties.h"
+
 #include "Debug.h"
+#include "log/log_main.h"
 #ifdef __ANDROID__
 #include "HWUIProperties.sysprop.h"
 #endif
@@ -190,15 +192,12 @@ RenderPipelineType Properties::getRenderPipelineType() {
     return sRenderPipelineType;
 }
 
-void Properties::overrideRenderPipelineType(RenderPipelineType type) {
+void Properties::overrideRenderPipelineType(RenderPipelineType type, bool inUnitTest) {
     // If we're doing actual rendering then we can't change the renderer after it's been set.
-    // Unit tests can freely change this as often as it wants, though, as there's no actual
-    // GL rendering happening
-    if (sRenderPipelineType != RenderPipelineType::NotInitialized) {
-        LOG_ALWAYS_FATAL_IF(sRenderPipelineType != type,
-                "Trying to change pipeline but it's already set");
-        return;
-    }
+    // Unit tests can freely change this as often as it wants.
+    LOG_ALWAYS_FATAL_IF(sRenderPipelineType != RenderPipelineType::NotInitialized &&
+                                sRenderPipelineType != type && !inUnitTest,
+                        "Trying to change pipeline but it's already set.");
     sRenderPipelineType = type;
 }
 

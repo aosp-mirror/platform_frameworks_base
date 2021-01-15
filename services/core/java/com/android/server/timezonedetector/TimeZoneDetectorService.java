@@ -27,7 +27,6 @@ import android.app.timezonedetector.ITimeZoneDetectorService;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.content.Context;
-import android.location.LocationManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -35,7 +34,6 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.SystemProperties;
-import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
@@ -333,19 +331,6 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
         enforceManageTimeZoneDetectorPermission();
 
         return isGeoLocationTimeZoneDetectionEnabled(mContext);
-    }
-
-    boolean isLocationEnabled(@UserIdInt int userId) {
-        enforceManageTimeZoneDetectorPermission();
-
-        final long token = mCallerIdentityInjector.clearCallingIdentity();
-        try {
-            UserHandle user = UserHandle.of(userId);
-            LocationManager locationManager = mContext.getSystemService(LocationManager.class);
-            return locationManager.isLocationEnabledForUser(user);
-        } finally {
-            mCallerIdentityInjector.restoreCallingIdentity(token);
-        }
     }
 
     @Override

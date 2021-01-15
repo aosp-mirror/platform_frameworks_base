@@ -73,6 +73,9 @@ public:
 
     SkCodec::FrameInfo getCurrentFrameInfo();
 
+    // Set whether the ImageDecoder should handle RestorePrevious frames.
+    void setHandleRestorePrevious(bool handle);
+
 private:
     // State machine for keeping track of how to handle RestorePrevious (RP)
     // frames in decode().
@@ -105,6 +108,7 @@ private:
     SkAndroidCodec::AndroidOptions mOptions;
     bool mCurrentFrameIsIndependent;
     bool mCurrentFrameIsOpaque;
+    bool mHandleRestorePrevious;
     RestoreState mRestoreState;
     sk_sp<Bitmap> mRestoreFrame;
     std::optional<SkIRect> mCropRect;
@@ -115,6 +119,8 @@ private:
     SkAlphaType getOutAlphaType() const;
     sk_sp<SkColorSpace> getOutputColorSpace() const;
     bool swapWidthHeight() const;
+    // Store/restore a frame if necessary. Returns false on error.
+    bool handleRestorePrevious(const SkImageInfo&, void* pixels, size_t rowBytes);
 };
 
 } // namespace android

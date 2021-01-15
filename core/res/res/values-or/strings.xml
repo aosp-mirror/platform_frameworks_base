@@ -146,6 +146,10 @@
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"ୱାଇ-ଫାଇ ମାଧ୍ୟମରେ କଲ୍ କରନ୍ତୁ"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"ମୋବାଇଲ ନେଟ୍‌ୱର୍କ ମାଧ୍ୟମରେ କଲ୍ କରନ୍ତୁ"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"କେବଳ ୱାଇ-ଫାଇ"</string>
+    <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
+    <skip />
+    <!-- no translation found for crossSimFormat_spn_cross_sim_calling (779976494687695991) -->
+    <skip />
     <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ଫରୱାର୍ଡ କରାଯାଇନାହିଁ"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> <xliff:g id="TIME_DELAY">{2}</xliff:g> ସେକେଣ୍ଡ ପରେ"</string>
@@ -1124,9 +1128,9 @@
     <string name="app_running_notification_title" msgid="8985999749231486569">"<xliff:g id="APP_NAME">%1$s</xliff:g> ଚାଲୁଛି"</string>
     <string name="app_running_notification_text" msgid="5120815883400228566">"ଅଧିକ ସୂଚନା ପାଇଁ କିମ୍ବା ଆପ୍‍ ବନ୍ଦ କରିବାକୁ ଟାପ୍‍ କରନ୍ତୁ।"</string>
     <string name="ok" msgid="2646370155170753815">"ଠିକ୍‍ ଅଛି"</string>
-    <string name="cancel" msgid="6908697720451760115">"କ୍ୟାନ୍ସଲ୍‍ କରନ୍ତୁ"</string>
+    <string name="cancel" msgid="6908697720451760115">"ବାତିଲ୍‍ କରନ୍ତୁ"</string>
     <string name="yes" msgid="9069828999585032361">"ଠିକ୍‍ ଅଛି"</string>
-    <string name="no" msgid="5122037903299899715">"କ୍ୟାନ୍ସଲ୍‍ କରନ୍ତୁ"</string>
+    <string name="no" msgid="5122037903299899715">"ବାତିଲ୍‍ କରନ୍ତୁ"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"ଧ୍ୟାନଦିଅନ୍ତୁ"</string>
     <string name="loading" msgid="3138021523725055037">"ଲୋଡ୍ କରାଯାଉଛି…"</string>
     <string name="capital_on" msgid="2770685323900821829">"ଚାଲୁ"</string>
@@ -1282,7 +1286,7 @@
     <string name="sms_short_code_details" msgid="2723725738333388351">"ଏହା ଦ୍ୱାରା "<b>" ଆପଣଙ୍କ ମୋବାଇଲ୍ ଆକାଉଣ୍ଟରୁ ପଇସା କଟିପାରେ। "</b></string>
     <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>" ଆପଣଙ୍କ ମୋବାଇଲ୍ ଆକାଉଣ୍ଟରୁ ପଇସା କଟିପାରେ। "</b></string>
     <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"ପଠାନ୍ତୁ"</string>
-    <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"କ୍ୟାନ୍ସଲ୍‍ କରନ୍ତୁ"</string>
+    <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"ବାତିଲ୍‍ କରନ୍ତୁ"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"ମୋ ପସନ୍ଦ ମନେରଖନ୍ତୁ"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"ଏହାକୁ ଆପଣ ସେଟିଙ୍ଗ ଓ ଆପ୍‍ରେ ପରବର୍ତ୍ତୀ ସମୟରେ ବଦଳାଇପାରିବେ"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"ସର୍ବଦା ଅନୁମତି ଦିଅନ୍ତୁ"</string>
@@ -1500,7 +1504,7 @@
     <string name="date_picker_prev_month_button" msgid="3418694374017868369">"ପୂର୍ବ ମାସ"</string>
     <string name="date_picker_next_month_button" msgid="4858207337779144840">"ପରବର୍ତ୍ତୀ ମାସ"</string>
     <string name="keyboardview_keycode_alt" msgid="8997420058584292385">"ALT"</string>
-    <string name="keyboardview_keycode_cancel" msgid="2134624484115716975">"କ୍ୟାନ୍ସଲ୍‍ କରନ୍ତୁ"</string>
+    <string name="keyboardview_keycode_cancel" msgid="2134624484115716975">"ବାତିଲ୍‍ କରନ୍ତୁ"</string>
     <string name="keyboardview_keycode_delete" msgid="2661117313730098650">"ଡିଲିଟ୍‍ କରନ୍ତୁ"</string>
     <string name="keyboardview_keycode_done" msgid="2524518019001653851">"ହୋଇଗଲା"</string>
     <string name="keyboardview_keycode_mode_change" msgid="2743735349997999020">"ମୋଡ୍‍ ପରିବର୍ତ୍ତନ"</string>
@@ -1761,7 +1765,7 @@
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"ଅଜଣା ପୋର୍ଟ୍ରେଟ୍‍"</string>
     <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"ଅଜଣା ଲ୍ୟାଣ୍ଡସ୍କେପ୍‌"</string>
-    <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"କ୍ୟାନ୍ସଲ୍‍ କରାଗଲା"</string>
+    <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"ବାତିଲ୍‍ କରାଗଲା"</string>
     <string name="write_fail_reason_cannot_write" msgid="432118118378451508">"କଣ୍ଟେଣ୍ଟ ଲେଖିବାବେଳେ ତ୍ରୁଟି"</string>
     <string name="reason_unknown" msgid="5599739807581133337">"ଅଜଣା"</string>
     <string name="reason_service_unavailable" msgid="5288405248063804713">"ପ୍ରିଣ୍ଟ ସେବାକୁ ସକ୍ଷମ କରାଯାଇନାହିଁ"</string>
