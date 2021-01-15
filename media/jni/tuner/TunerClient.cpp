@@ -98,14 +98,28 @@ sp<FrontendClient> TunerClient::openFrontend(int frontendHandle) {
         // TODO: handle error code
         shared_ptr<ITunerFrontend> tunerFrontend;
         mTunerService->openFrontend(frontendHandle, &tunerFrontend);
-        return new FrontendClient(tunerFrontend, frontendHandle);
+        if (tunerFrontend == NULL) {
+            return NULL;
+        }
+        int id;
+        // TODO: handle error code
+        tunerFrontend->getFrontendId(&id);
+        TunerServiceFrontendInfo aidlFrontendInfo;
+        // TODO: handle error code
+        mTunerService->getFrontendInfo(id, &aidlFrontendInfo);
+        return new FrontendClient(tunerFrontend, frontendHandle, aidlFrontendInfo.type);
     }
 
     if (mTuner != NULL) {
         int id = getResourceIdFromHandle(frontendHandle, FRONTEND);
         sp<IFrontend> hidlFrontend = openHidlFrontendById(id);
         if (hidlFrontend != NULL) {
-            sp<FrontendClient> frontendClient = new FrontendClient(NULL, id);
+            FrontendInfo hidlInfo;
+            Result res = getHidlFrontendInfo(id, hidlInfo);
+            if (res != Result::SUCCESS) {
+                return NULL;
+            }
+            sp<FrontendClient> frontendClient = new FrontendClient(NULL, id, (int)hidlInfo.type);
             frontendClient->setHidlFrontend(hidlFrontend);
             return frontendClient;
         }
