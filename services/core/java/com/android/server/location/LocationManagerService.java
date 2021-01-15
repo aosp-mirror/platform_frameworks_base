@@ -807,22 +807,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public LocationTime getGnssTimeMillis() {
-        synchronized (mLock) {
-            LocationProviderManager gpsManager = getLocationProviderManager(GPS_PROVIDER);
-            if (gpsManager == null) {
-                return null;
-            }
-
-            Location location = gpsManager.getLastLocationUnsafe(UserHandle.USER_ALL,
-                    PERMISSION_FINE, false, Long.MAX_VALUE);
-            if (location == null) {
-                return null;
-            }
-
-            long currentNanos = SystemClock.elapsedRealtimeNanos();
-            long deltaMs = NANOSECONDS.toMillis(location.getElapsedRealtimeAgeNanos(currentNanos));
-            return new LocationTime(location.getTime() + deltaMs, currentNanos);
-        }
+        return mLocalService.getGnssTimeMillis();
     }
 
     @Override
@@ -1291,6 +1276,25 @@ public class LocationManagerService extends ILocationManager.Stub {
             if (mGnssManagerService != null) {
                 mGnssManagerService.sendNiResponse(notifId, userResponse);
             }
+        }
+
+        @Override
+        public @Nullable LocationTime getGnssTimeMillis() {
+            LocationProviderManager gpsManager = getLocationProviderManager(GPS_PROVIDER);
+            if (gpsManager == null) {
+                return null;
+            }
+
+            Location location = gpsManager.getLastLocationUnsafe(UserHandle.USER_ALL,
+                    PERMISSION_FINE, false, Long.MAX_VALUE);
+            if (location == null) {
+                return null;
+            }
+
+            long currentNanos = SystemClock.elapsedRealtimeNanos();
+            long deltaMs = NANOSECONDS.toMillis(
+                    location.getElapsedRealtimeAgeNanos(currentNanos));
+            return new LocationTime(location.getTime() + deltaMs, currentNanos);
         }
     }
 

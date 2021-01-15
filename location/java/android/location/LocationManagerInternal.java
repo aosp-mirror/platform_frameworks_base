@@ -80,4 +80,12 @@ public abstract class LocationManagerInternal {
      */
     // TODO: there is no reason for this to exist as part of any API. move all the logic into gnss
     public abstract void sendNiResponse(int notifId, int userResponse);
+
+    /**
+     * Returns the GNSS provided time.
+     *
+     * @return LocationTime object that includes the current time, according to the GNSS location
+     * provider, and the elapsed nanos since boot the current time was computed at.
+     */
+    public abstract @Nullable LocationTime getGnssTimeMillis();
 }
