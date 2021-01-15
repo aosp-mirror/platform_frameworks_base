@@ -69,7 +69,6 @@ import com.android.internal.util.Protocol;
 
 import libcore.net.event.NetworkEventDispatcher;
 
-import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.annotation.Retention;
@@ -1955,6 +1954,12 @@ public class ConnectivityManager {
         return k;
     }
 
+    // Construct an invalid fd.
+    private ParcelFileDescriptor createInvalidFd() {
+        final int invalidFd = -1;
+        return ParcelFileDescriptor.adoptFd(invalidFd);
+    }
+
     /**
      * Request that keepalives be started on a IPsec NAT-T socket.
      *
@@ -1985,7 +1990,7 @@ public class ConnectivityManager {
         } catch (IOException ignored) {
             // Construct an invalid fd, so that if the user later calls start(), it will fail with
             // ERROR_INVALID_SOCKET.
-            dup = new ParcelFileDescriptor(new FileDescriptor());
+            dup = createInvalidFd();
         }
         return new NattSocketKeepalive(mService, network, dup, socket.getResourceId(), source,
                 destination, executor, callback);
@@ -2027,7 +2032,7 @@ public class ConnectivityManager {
         } catch (IOException ignored) {
             // Construct an invalid fd, so that if the user later calls start(), it will fail with
             // ERROR_INVALID_SOCKET.
-            dup = new ParcelFileDescriptor(new FileDescriptor());
+            dup = createInvalidFd();
         }
         return new NattSocketKeepalive(mService, network, dup,
                 INVALID_RESOURCE_ID /* Unused */, source, destination, executor, callback);
@@ -2064,7 +2069,7 @@ public class ConnectivityManager {
         } catch (UncheckedIOException ignored) {
             // Construct an invalid fd, so that if the user later calls start(), it will fail with
             // ERROR_INVALID_SOCKET.
-            dup = new ParcelFileDescriptor(new FileDescriptor());
+            dup = createInvalidFd();
         }
         return new TcpSocketKeepalive(mService, network, dup, executor, callback);
     }
