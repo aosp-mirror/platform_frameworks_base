@@ -254,6 +254,8 @@ public class WatcherTest {
             tester.verify(15, "Tick after snapshot");
             // Verify that the snapshot is sealed
             verifySealed(name, ()->arraySnap.put(INDEX_A, leafA));
+            assertTrue(!array.isSealed());
+            assertTrue(arraySnap.isSealed());
         }
         // Recreate the snapshot since the test corrupted it.
         {
@@ -355,6 +357,8 @@ public class WatcherTest {
             tester.verify(16, "Tick after snapshot");
             // Verify that the array snapshot is sealed
             verifySealed(name, ()->arraySnap.add(leafB));
+            assertTrue(!array.isSealed());
+            assertTrue(arraySnap.isSealed());
         }
         // Recreate the snapshot since the test corrupted it.
         {
@@ -467,6 +471,8 @@ public class WatcherTest {
             tester.verify(20, "Tick after snapshot");
             // Verify that the array snapshot is sealed
             verifySealed(name, ()->arraySnap.add(indexA, leafB));
+            assertTrue(!array.isSealed());
+            assertTrue(arraySnap.isSealed());
         }
         // Recreate the snapshot since the test corrupted it.
         {
@@ -586,6 +592,8 @@ public class WatcherTest {
             tester.verify(23, "Tick after snapshot");
             // Verify that the array snapshot is sealed
             verifySealed(name, ()->arraySnap.put(INDEX_A, leafB));
+            assertTrue(!array.isSealed());
+            assertTrue(arraySnap.isSealed());
         }
         // Recreate the snapshot since the test corrupted it.
         {
@@ -649,6 +657,8 @@ public class WatcherTest {
             tester.verify(6, "Tick after snapshot");
             // Verify that the array is sealed
             verifySealed(name, ()->arraySnap.put(INDEX_D, false));
+            assertTrue(!array.isSealed());
+            assertTrue(arraySnap.isSealed());
         }
         // Verify copy-in/out
         {
@@ -705,6 +715,8 @@ public class WatcherTest {
             tester.verify(6, "Tick after snapshot");
             // Verify that the array is sealed
             verifySealed(name, ()->arraySnap.put(INDEX_D, 10));
+            assertTrue(!array.isSealed());
+            assertTrue(arraySnap.isSealed());
         }
         // Verify copy-in/out
         {
