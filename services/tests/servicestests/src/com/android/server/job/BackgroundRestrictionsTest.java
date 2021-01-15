@@ -41,6 +41,7 @@ import android.provider.Settings;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -134,6 +135,7 @@ public class BackgroundRestrictionsTest {
         assertTrue("Job did not start after scheduling", awaitJobStart(DEFAULT_WAIT_TIMEOUT));
     }
 
+    @FlakyTest
     @Test
     public void testPowerExemption() throws Exception {
         scheduleAndAssertJobStarted();
