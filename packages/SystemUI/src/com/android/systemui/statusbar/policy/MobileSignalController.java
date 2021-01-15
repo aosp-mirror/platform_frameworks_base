@@ -467,7 +467,8 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         // 1. The first valid voice state has been received
         // 2. The voice state has been changed and either the last or current state is
         //    ServiceState.STATE_IN_SERVICE
-        if (lastVoiceState != currentVoiceState
+        if (mProviderModel
+                && lastVoiceState != currentVoiceState
                 && (lastVoiceState == -1
                         || (lastVoiceState == ServiceState.STATE_IN_SERVICE
                                 || currentVoiceState == ServiceState.STATE_IN_SERVICE))) {
