@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -60,6 +59,7 @@ import com.android.internal.util.function.pooled.PooledPredicate;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -1937,8 +1937,8 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             for (int i = mLaunchRootTasks.size() - 1; i >= 0; --i) {
                 final LaunchRootTaskDef def = mLaunchRootTasks.get(i);
                 pw.println(triplePrefix
-                        + def.activityTypes + " "
-                        + def.windowingModes + " "
+                        + Arrays.toString(def.activityTypes) + " "
+                        + Arrays.toString(def.windowingModes) + " "
                         + " task=" + def.task);
             }
         }
