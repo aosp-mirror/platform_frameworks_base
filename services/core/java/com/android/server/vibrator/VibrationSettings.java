@@ -36,6 +36,7 @@ import android.provider.Settings;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 
 import java.util.ArrayList;
@@ -59,7 +60,8 @@ public final class VibrationSettings {
     private final Vibrator mVibrator;
     private final AudioManager mAudioManager;
     private final SettingsObserver mSettingObserver;
-    private final UidObserver mUidObserver;
+    @VisibleForTesting
+    final UidObserver mUidObserver;
 
     @GuardedBy("mLock")
     private final List<OnVibratorSettingsChanged> mListeners = new ArrayList<>();
@@ -251,8 +253,7 @@ public final class VibrationSettings {
      * allowed to play in the background (i.e. it's a notification, ringtone or alarm vibration).
      */
     public boolean shouldVibrateForUid(int uid, int usageHint) {
-        return mUidObserver.isUidForeground(uid) || isNotification(usageHint)
-                || isRingtone(usageHint) || isAlarm(usageHint);
+        return mUidObserver.isUidForeground(uid) || isClassAlarm(usageHint);
     }
 
     /**
@@ -290,6 +291,11 @@ public final class VibrationSettings {
 
     private static boolean isAlarm(int usageHint) {
         return usageHint == VibrationAttributes.USAGE_ALARM;
+    }
+
+    private static boolean isClassAlarm(int usageHint) {
+        return (usageHint & VibrationAttributes.USAGE_CLASS_MASK)
+                == VibrationAttributes.USAGE_CLASS_ALARM;
     }
 
     /** Updates all vibration settings and triggers registered listeners. */
@@ -414,7 +420,8 @@ public final class VibrationSettings {
     }
 
     /** Implementation of {@link ContentObserver} to be registered to a setting {@link Uri}. */
-    private final class UidObserver extends IUidObserver.Stub {
+    @VisibleForTesting
+    final class UidObserver extends IUidObserver.Stub {
         private final SparseArray<Integer> mProcStatesCache = new SparseArray<>();
 
         public boolean isUidForeground(int uid) {
