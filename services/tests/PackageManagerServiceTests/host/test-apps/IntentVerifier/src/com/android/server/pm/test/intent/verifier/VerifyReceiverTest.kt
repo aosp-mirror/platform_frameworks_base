@@ -77,12 +77,14 @@ class VerifyReceiverTest {
         val filter = IntentFilter().apply {
             addAction(Intent.ACTION_VIEW)
             addCategory(Intent.CATEGORY_DEFAULT)
+            addCategory(Intent.CATEGORY_BROWSABLE)
             addDataScheme(uri.scheme)
             addDataAuthority(uri.authority, null)
         }
 
         val intent = Intent(Intent.ACTION_VIEW, uri).apply {
             addCategory(Intent.CATEGORY_DEFAULT)
+            addCategory(Intent.CATEGORY_BROWSABLE)
         }
         val allResults = context.packageManager.queryIntentActivities(intent, 0)
         val allComponents = allResults
@@ -132,6 +134,8 @@ class VerifyReceiverTest {
         val intent = Intent(Intent.ACTION_VIEW).apply {
             data = uri
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            addCategory(Intent.CATEGORY_DEFAULT)
+            addCategory(Intent.CATEGORY_BROWSABLE)
         }
 
         val expectedActivities = params.expected.toMutableList()
