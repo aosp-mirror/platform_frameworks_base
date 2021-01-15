@@ -59,6 +59,8 @@ import android.platform.test.annotations.Presubmit;
 import android.view.DisplayAdjustments.FixedRotationAdjustments;
 import android.view.DisplayCutout;
 import android.view.Surface;
+import android.view.autofill.AutofillId;
+import android.view.translation.TranslationSpec;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -70,6 +72,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -685,6 +688,12 @@ public class TransactionParcelTests {
         public void instrumentWithoutRestart(ComponentName instrumentationName,
                 Bundle instrumentationArgs, IInstrumentationWatcher instrumentationWatcher,
                 IUiAutomationConnection instrumentationUiConnection, ApplicationInfo targetInfo) {
+        }
+
+        @Override
+        public void updateUiTranslationState(IBinder activityToken, int state,
+                TranslationSpec sourceSpec, TranslationSpec destSpec, List<AutofillId> viewIds) {
+
         }
     }
 }
