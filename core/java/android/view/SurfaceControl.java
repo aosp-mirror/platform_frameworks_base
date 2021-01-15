@@ -225,7 +225,7 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeSetFixedTransformHint(long transactionObj, long nativeObject,
             int transformHint);
     private static native void nativeSetFocusedWindow(long transactionObj, IBinder toToken,
-                                                      IBinder focusedToken, int displayId);
+            String windowName, IBinder focusedToken, String focusedWindowName, int displayId);
     private static native void nativeSetFrameTimelineVsync(long transactionObj,
             long frameTimelineVsyncId);
     private static native void nativeAddJankDataListener(long nativeListener,
@@ -3282,8 +3282,10 @@ public final class SurfaceControl implements Parcelable {
          *
          * @hide
          */
-        public Transaction setFocusedWindow(@NonNull IBinder token, int displayId) {
-            nativeSetFocusedWindow(mNativeObject, token,  null /* focusedToken */, displayId);
+        public Transaction setFocusedWindow(@NonNull IBinder token, String windowName,
+                int displayId) {
+            nativeSetFocusedWindow(mNativeObject, token,  windowName,
+                    null /* focusedToken */, null /* focusedWindowName */, displayId);
             return this;
         }
 
@@ -3298,9 +3300,12 @@ public final class SurfaceControl implements Parcelable {
          * @hide
          */
         public Transaction requestFocusTransfer(@NonNull IBinder token,
+                                                String windowName,
                                                 @NonNull IBinder focusedToken,
+                                                String focusedWindowName,
                                                 int displayId) {
-            nativeSetFocusedWindow(mNativeObject, token, focusedToken, displayId);
+            nativeSetFocusedWindow(mNativeObject, token, windowName, focusedToken,
+                    focusedWindowName, displayId);
             return this;
         }
 

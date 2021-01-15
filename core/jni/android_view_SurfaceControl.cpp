@@ -1593,7 +1593,9 @@ static jlong nativeGetHandle(JNIEnv* env, jclass clazz, jlong nativeObject) {
 }
 
 static void nativeSetFocusedWindow(JNIEnv* env, jclass clazz, jlong transactionObj,
-                                   jobject toTokenObj, jobject focusedTokenObj, jint displayId) {
+                                   jobject toTokenObj, jstring windowNameJstr,
+                                   jobject focusedTokenObj, jstring focusedWindowNameJstr,
+                                   jint displayId) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
     if (toTokenObj == NULL) return;
 
@@ -1602,8 +1604,22 @@ static void nativeSetFocusedWindow(JNIEnv* env, jclass clazz, jlong transactionO
     if (focusedTokenObj != NULL) {
         focusedToken = ibinderForJavaObject(env, focusedTokenObj);
     }
-    transaction->setFocusedWindow(toToken, focusedToken, systemTime(SYSTEM_TIME_MONOTONIC),
-                                  displayId);
+
+    FocusRequest request;
+    request.token = toToken;
+    if (windowNameJstr != NULL) {
+        ScopedUtfChars windowName(env, windowNameJstr);
+        request.windowName = windowName.c_str();
+    }
+
+    request.focusedToken = focusedToken;
+    if (focusedWindowNameJstr != NULL) {
+        ScopedUtfChars focusedWindowName(env, focusedWindowNameJstr);
+        request.focusedWindowName = focusedWindowName.c_str();
+    }
+    request.timestamp = systemTime(SYSTEM_TIME_MONOTONIC);
+    request.displayId = displayId;
+    transaction->setFocusedWindow(request);
 }
 
 static void nativeSetFrameTimelineVsync(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -1865,7 +1881,7 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetHandle },
     {"nativeSetFixedTransformHint", "(JJI)V",
             (void*)nativeSetFixedTransformHint},
-    {"nativeSetFocusedWindow", "(JLandroid/os/IBinder;Landroid/os/IBinder;I)V",
+    {"nativeSetFocusedWindow", "(JLandroid/os/IBinder;Ljava/lang/String;Landroid/os/IBinder;Ljava/lang/String;I)V",
             (void*)nativeSetFocusedWindow},
     {"nativeSetFrameTimelineVsync", "(JJ)V",
             (void*)nativeSetFrameTimelineVsync },
