@@ -50,6 +50,7 @@ import android.service.notification.ConversationChannelWrapper;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.RankingHelperProto;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IntArray;
@@ -101,6 +102,7 @@ public class PreferencesHelper implements RankingConfig {
     private static final int NOTIFICATION_PREFERENCES_PULL_LIMIT = 1000;
     private static final int NOTIFICATION_CHANNEL_PULL_LIMIT = 2000;
     private static final int NOTIFICATION_CHANNEL_GROUP_PULL_LIMIT = 1000;
+    private static final int NOTIFICATION_CHANNEL_DELETION_RETENTION_DAYS = 30;
 
     @VisibleForTesting
     static final String TAG_RANKING = "ranking";
@@ -324,12 +326,8 @@ public class PreferencesHelper implements RankingConfig {
                                                 channel.setImportanceLockedByOEM(true);
                                             }
                                         }
-                                        boolean isInvalidShortcutChannel =
-                                                channel.getConversationId() != null &&
-                                                        channel.getConversationId().contains(
-                                                                PLACEHOLDER_CONVERSATION_ID);
-                                        if (mAllowInvalidShortcuts || (!mAllowInvalidShortcuts
-                                                && !isInvalidShortcutChannel)) {
+
+                                        if (isShortcutOk(channel) && isDeletionOk(channel)) {
                                             r.channels.put(id, channel);
                                         }
                                     }
@@ -367,6 +365,26 @@ public class PreferencesHelper implements RankingConfig {
             }
         }
         throw new IllegalStateException("Failed to reach END_DOCUMENT");
+    }
+
+    private boolean isShortcutOk(NotificationChannel channel) {
+        boolean isInvalidShortcutChannel =
+                channel.getConversationId() != null &&
+                        channel.getConversationId().contains(
+                                PLACEHOLDER_CONVERSATION_ID);
+        return mAllowInvalidShortcuts || (!mAllowInvalidShortcuts && !isInvalidShortcutChannel);
+    }
+
+    private boolean isDeletionOk(NotificationChannel nc) {
+        if (!nc.isDeleted()) {
+            return true;
+        }
+        long boundary = System.currentTimeMillis() - (
+                DateUtils.DAY_IN_MILLIS * NOTIFICATION_CHANNEL_DELETION_RETENTION_DAYS);
+        if (nc.getDeletedTimeMs() <= boundary) {
+            return false;
+        }
+        return true;
     }
 
     private PackagePreferences getPackagePreferencesLocked(String pkg, int uid) {
@@ -828,6 +846,7 @@ public class PreferencesHelper implements RankingConfig {
                 if (existing.isDeleted()) {
                     // The existing channel was deleted - undelete it.
                     existing.setDeleted(false);
+                    existing.setDeletedTimeMs(-1);
                     needsPolicyFileChange = true;
                     wasUndeleted = true;
 
@@ -1119,6 +1138,7 @@ public class PreferencesHelper implements RankingConfig {
     private void deleteNotificationChannelLocked(NotificationChannel channel, String pkg, int uid) {
         if (!channel.isDeleted()) {
             channel.setDeleted(true);
+            channel.setDeletedTimeMs(System.currentTimeMillis());
             LogMaker lm = getChannelLog(channel, pkg);
             lm.setType(com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_CLOSE);
             MetricsLogger.action(lm);
@@ -1479,6 +1499,7 @@ public class PreferencesHelper implements RankingConfig {
                 if (nc.getConversationId() != null
                         && conversationIds.contains(nc.getConversationId())) {
                     nc.setDeleted(true);
+                    nc.setDeletedTimeMs(System.currentTimeMillis());
                     LogMaker lm = getChannelLog(nc, pkg);
                     lm.setType(
                             com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_CLOSE);
