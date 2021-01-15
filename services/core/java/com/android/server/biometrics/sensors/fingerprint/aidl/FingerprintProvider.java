@@ -23,6 +23,7 @@ import android.app.ActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.Context;
 import android.content.pm.UserInfo;
+import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.SensorProps;
@@ -539,6 +540,33 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     @Override
     public List<Fingerprint> getEnrolledFingerprints(int sensorId, int userId) {
         return FingerprintUtils.getInstance(sensorId).getBiometricsForUser(mContext, userId);
+    }
+
+    @Override
+    public void scheduleInvalidateAuthenticatorId(int sensorId, int userId,
+            @NonNull IInvalidationCallback callback) {
+        mHandler.post(() -> {
+            final IFingerprint daemon = getHalInstance();
+            if (daemon == null) {
+                Slog.e(getTag(), "Null daemon during scheduleInvalidateAuthenticatorId: "
+                        + sensorId);
+                return;
+            }
+
+            try {
+                if (!mSensors.get(sensorId).hasSessionForUser(userId)) {
+                    createNewSessionWithoutHandler(daemon, sensorId, userId);
+                }
+
+                final FingerprintInvalidationClient client =
+                        new FingerprintInvalidationClient(mContext,
+                                mSensors.get(sensorId).getLazySession(), userId, sensorId,
+                                mSensors.get(sensorId).getAuthenticatorIds(), callback);
+                mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
+            } catch (RemoteException e) {
+                Slog.e(getTag(), "Remote exception", e);
+            }
+        });
     }
 
     @Override

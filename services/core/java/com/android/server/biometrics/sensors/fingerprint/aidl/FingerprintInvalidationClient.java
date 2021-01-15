@@ -18,13 +18,13 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.fingerprint.Fingerprint;
 import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.sensors.InvalidationClient;
-import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 
 import java.util.Map;
 
@@ -33,8 +33,8 @@ public class FingerprintInvalidationClient extends InvalidationClient<Fingerprin
 
     public FingerprintInvalidationClient(@NonNull Context context,
             @NonNull LazyDaemon<ISession> lazyDaemon, int userId, int sensorId,
-            @NonNull FingerprintUtils utils, @NonNull Map<Integer, Long> authenticatorIds) {
-        super(context, lazyDaemon, userId, sensorId, utils, authenticatorIds);
+            @NonNull Map<Integer, Long> authenticatorIds, @NonNull IInvalidationCallback callback) {
+        super(context, lazyDaemon, userId, sensorId, authenticatorIds, callback);
     }
 
     @Override
