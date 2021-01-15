@@ -1486,7 +1486,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             if (task != null) {
                 supportsSplitScreen = task.supportsSplitScreenWindowingMode();
                 supportsFreeform = task.supportsFreeform();
-                supportsMultiWindow = task.supportsNonPipMultiWindow()
+                supportsMultiWindow = task.supportsMultiWindow()
                         // When the activity needs to be moved to PIP while the Task is not in PIP,
                         // it can be moved to a new created PIP Task, so WINDOWING_MODE_PINNED is
                         // always valid for Task as long as the device supports it.
@@ -1495,7 +1495,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                 supportsSplitScreen = r.supportsSplitScreenWindowingMode();
                 supportsFreeform = r.supportsFreeform();
                 supportsPip = r.supportsPictureInPicture();
-                supportsMultiWindow = r.supportsResizeableMultiWindow() || supportsPip;
+                supportsMultiWindow = r.supportsMultiWindow();
             }
         }
 

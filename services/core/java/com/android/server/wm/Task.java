@@ -1966,26 +1966,18 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     private boolean supportsSplitScreenWindowingModeInner() {
-        // A task can not be docked even if it is considered resizeable because it only supports
-        // picture-in-picture mode but has a non-resizeable resizeMode
         return super.supportsSplitScreenWindowingMode()
                 && mAtmService.mSupportsSplitScreenMultiWindow
-                && (mAtmService.mForceResizableActivities
-                        || (isResizeable(false /* checkSupportsPip */)
-                                && !ActivityInfo.isPreserveOrientationMode(mResizeMode))
-                        || mAtmService.mSupportsNonResizableMultiWindow);
+                && supportsMultiWindow();
     }
 
     boolean supportsFreeform() {
-        return mAtmService.mSupportsFreeformWindowManagement
-                && (isResizeable(false /* checkSupportsPip */)
-                        || mAtmService.mSupportsNonResizableMultiWindow);
+        return mAtmService.mSupportsFreeformWindowManagement && supportsMultiWindow();
     }
 
-    boolean supportsNonPipMultiWindow() {
+    boolean supportsMultiWindow() {
         return mAtmService.mSupportsMultiWindow
-                && (isResizeable(false /* checkSupportsPip */)
-                    || mAtmService.mSupportsNonResizableMultiWindow);
+                && (isResizeable() || mAtmService.mSupportsNonResizableMultiWindow);
     }
 
     /**
@@ -3396,15 +3388,11 @@ class Task extends WindowContainer<WindowContainer> {
         }
     }
 
-    boolean isResizeable(boolean checkSupportsPip) {
+    boolean isResizeable() {
         final boolean forceResizable = mAtmService.mForceResizableActivities
                 && getActivityType() == ACTIVITY_TYPE_STANDARD;
-        return (forceResizable || ActivityInfo.isResizeableMode(mResizeMode)
-                || (checkSupportsPip && mSupportsPictureInPicture));
-    }
-
-    boolean isResizeable() {
-        return isResizeable(true /* checkSupportsPip */);
+        return forceResizable || ActivityInfo.isResizeableMode(mResizeMode)
+                || mSupportsPictureInPicture;
     }
 
     /**

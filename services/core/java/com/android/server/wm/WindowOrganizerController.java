@@ -500,7 +500,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                                         + " newParent=" + newParent + " task=" + task);
                                 return 0;
                             }
-                            if (!task.supportsNonPipMultiWindow()) {
+                            if (!task.supportsMultiWindow()) {
                                 Slog.w(TAG, "Can't support task that doesn't support multi-window"
                                         + " mode in multi-window mode... newParent=" + newParent
                                         + " task=" + task);
@@ -580,7 +580,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 // are reparenting from.
                 return;
             }
-            if (newParentInMultiWindow && !task.supportsNonPipMultiWindow()) {
+            if (newParentInMultiWindow && !task.supportsMultiWindow()) {
                 Slog.e(TAG, "reparentChildrenTasksHierarchyOp non-resizeable task to multi window,"
                         + " task=" + task);
                 return;
