@@ -121,8 +121,12 @@ int AImageDecoder_createFromAAsset(AAsset* asset, AImageDecoder** outDecoder) {
     }
     *outDecoder = nullptr;
 
+#ifdef __ANDROID__
     auto stream = std::make_unique<AAssetStreamAdaptor>(asset);
     return createFromStream(std::move(stream), outDecoder);
+#else
+    return ANDROID_IMAGE_DECODER_INTERNAL_ERROR;
+#endif
 }
 
 static bool isSeekable(int descriptor) {
