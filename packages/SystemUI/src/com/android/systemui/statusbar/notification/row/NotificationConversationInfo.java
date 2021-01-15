@@ -206,6 +206,7 @@ public class NotificationConversationInfo extends LinearLayout implements
     }
 
     public void bindNotification(
+            @Action int selectedAction,
             ShortcutManager shortcutManager,
             PackageManager pm,
             INotificationManager iNotificationManager,
@@ -224,7 +225,8 @@ public class NotificationConversationInfo extends LinearLayout implements
             @Background Handler bgHandler,
             OnConversationSettingsClickListener onConversationSettingsClickListener,
             Optional<BubblesManager> bubblesManagerOptional) {
-        mSelectedAction = -1;
+        mPressedApply = false;
+        mSelectedAction = selectedAction;
         mINotificationManager = iNotificationManager;
         mOnUserInteractionCallback = onUserInteractionCallback;
         mPackageName = pkg;
@@ -297,7 +299,8 @@ public class NotificationConversationInfo extends LinearLayout implements
         settingsButton.setOnClickListener(getSettingsOnClickListener());
         settingsButton.setVisibility(settingsButton.hasOnClickListeners() ? VISIBLE : GONE);
 
-        updateToggleActions(getSelectedAction(), false);
+        updateToggleActions(mSelectedAction == -1 ? getPriority() : mSelectedAction,
+                false);
     }
 
     private void bindHeader() {
@@ -406,7 +409,7 @@ public class NotificationConversationInfo extends LinearLayout implements
 
     @Override
     public void onFinishedClosing() {
-        // TODO: do we need to do anything here?
+        mSelectedAction = -1;
     }
 
     @Override
@@ -487,7 +490,7 @@ public class NotificationConversationInfo extends LinearLayout implements
                 throw new IllegalArgumentException("Unrecognized behavior: " + mSelectedAction);
         }
 
-        boolean isAChange = getSelectedAction() != selectedAction;
+        boolean isAChange = getPriority() != selectedAction;
         TextView done = findViewById(R.id.done);
         done.setText(isAChange
                 ? R.string.inline_ok_button
@@ -498,6 +501,10 @@ public class NotificationConversationInfo extends LinearLayout implements
     }
 
     int getSelectedAction() {
+        return mSelectedAction;
+    }
+
+    private int getPriority() {
         if (mNotificationChannel.getImportance() <= IMPORTANCE_LOW
                 && mNotificationChannel.getImportance() > IMPORTANCE_UNSPECIFIED) {
             return ACTION_MUTE;
