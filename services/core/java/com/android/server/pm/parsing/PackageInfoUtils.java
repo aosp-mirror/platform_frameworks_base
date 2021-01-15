@@ -406,7 +406,8 @@ public class PackageInfoUtils {
             ParsedProcess proc = procs.get(key);
             retProcs.put(proc.getName(),
                     new ProcessInfo(proc.getName(), new ArraySet<>(proc.getDeniedPermissions()),
-                            proc.getGwpAsanMode()));
+                            proc.getGwpAsanMode(), proc.getMemtagMode(),
+                            proc.getNativeHeapZeroInit()));
         }
         return retProcs;
     }

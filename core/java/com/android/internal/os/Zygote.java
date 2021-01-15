@@ -124,6 +124,8 @@ public final class Zygote {
     public static final int DISABLE_TEST_API_ENFORCEMENT_POLICY = 1 << 18;
 
     public static final int MEMORY_TAG_LEVEL_MASK = (1 << 19) | (1 << 20);
+
+    public static final int MEMORY_TAG_LEVEL_NONE = 0;
     /**
      * Enable pointer tagging in this process.
      * Tags are checked during memory deallocation, but not on access.
@@ -168,6 +170,11 @@ public final class Zygote {
      * allocations is protected).
      */
     public static final int GWP_ASAN_LEVEL_ALWAYS = 2 << 21;
+
+    /**
+     * Enable automatic zero-initialization of native heap memory allocations.
+     */
+    public static final int NATIVE_HEAP_ZERO_INIT = 1 << 23;
 
     /** No external storage should be mounted. */
     public static final int MOUNT_EXTERNAL_NONE = IVold.REMOUNT_MODE_NONE;

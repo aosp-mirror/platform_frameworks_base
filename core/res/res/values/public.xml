@@ -3060,6 +3060,8 @@
     <public name="sspAdvancedPattern" />
     <public name="fontProviderSystemFontFamily" />
     <public name="hand_second" />
+    <public name="memtagMode" />
+    <public name="nativeHeapZeroInit" />
   </public-group>
 
   <public-group type="drawable" first-id="0x010800b5">

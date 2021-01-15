@@ -372,6 +372,13 @@ public final class ProcessList {
     private static final long NATIVE_MEMTAG_SYNC = 177438394; // This is a bug id.
 
     /**
+     * Enable automatic zero-initialization of native heap memory allocations.
+     */
+    @ChangeId
+    @Disabled
+    private static final long NATIVE_HEAP_ZERO_INIT = 178038272; // This is a bug id.
+
+    /**
      * Enable sampled memory bug detection in the app.
      * @see <a href="https://source.android.com/devices/tech/debug/gwp-asan">GWP-ASan</a>.
      */
@@ -1685,12 +1692,28 @@ public final class ProcessList {
         return gidArray;
     }
 
-    // Returns the memory tagging level to be enabled. If memory tagging isn't
-    // requested, returns zero.
-    private int getMemtagLevel(ProcessRecord app) {
-        // Ensure the hardware + kernel actually supports MTE.
-        if (!Zygote.nativeSupportsMemoryTagging()) {
-            return 0;
+    private int memtagModeToZygoteMemtagLevel(int memtagMode) {
+        switch (memtagMode) {
+            case ApplicationInfo.MEMTAG_ASYNC:
+                return Zygote.MEMORY_TAG_LEVEL_ASYNC;
+            case ApplicationInfo.MEMTAG_SYNC:
+                return Zygote.MEMORY_TAG_LEVEL_SYNC;
+            default:
+                return Zygote.MEMORY_TAG_LEVEL_NONE;
+        }
+    }
+
+    // Returns the requested memory tagging level.
+    private int getRequestedMemtagLevel(ProcessRecord app) {
+        // Look at the process attribute first.
+        if (app.processInfo != null
+                && app.processInfo.memtagMode != ApplicationInfo.MEMTAG_DEFAULT) {
+            return memtagModeToZygoteMemtagLevel(app.processInfo.memtagMode);
+        }
+
+        // Then at the application attribute.
+        if (app.info.getMemtagMode() != ApplicationInfo.MEMTAG_DEFAULT) {
+            return memtagModeToZygoteMemtagLevel(app.info.getMemtagMode());
         }
 
         if (mPlatformCompat.isChangeEnabled(NATIVE_MEMTAG_SYNC, app.info)) {
@@ -1701,40 +1724,43 @@ public final class ProcessList {
             return Zygote.MEMORY_TAG_LEVEL_ASYNC;
         }
 
-        return 0;
-    }
-
-    private boolean shouldEnableTaggedPointers(ProcessRecord app) {
-        // Ensure we have platform + kernel support for TBI.
-        if (!Zygote.nativeSupportsTaggedPointers()) {
-            return false;
-        }
-
         // Check to ensure the app hasn't explicitly opted-out of TBI via. the manifest attribute.
         if (!app.info.allowsNativeHeapPointerTagging()) {
-            return false;
+            return Zygote.MEMORY_TAG_LEVEL_NONE;
         }
 
         // Check to see that the compat feature for TBI is enabled.
-        if (!mPlatformCompat.isChangeEnabled(NATIVE_HEAP_POINTER_TAGGING, app.info)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    private int decideTaggingLevel(ProcessRecord app) {
-        // Check MTE support first, as it should take precedence over TBI.
-        int memtagLevel = getMemtagLevel(app);
-        if (memtagLevel != 0) {
-            return memtagLevel;
-        }
-
-        if (shouldEnableTaggedPointers(app)) {
+        if (mPlatformCompat.isChangeEnabled(NATIVE_HEAP_POINTER_TAGGING, app.info)) {
             return Zygote.MEMORY_TAG_LEVEL_TBI;
         }
 
-        return 0;
+        return Zygote.MEMORY_TAG_LEVEL_NONE;
+    }
+
+    private int decideTaggingLevel(ProcessRecord app) {
+        // Get the desired tagging level (app manifest + compat features).
+        int level = getRequestedMemtagLevel(app);
+
+        // Take into account the hardware capabilities.
+        if (Zygote.nativeSupportsMemoryTagging()) {
+            // MTE devices can not do TBI, because the Zygote process already has live MTE
+            // allocations. Downgrade TBI to NONE.
+            if (level == Zygote.MEMORY_TAG_LEVEL_TBI) {
+                level = Zygote.MEMORY_TAG_LEVEL_NONE;
+            }
+        } else if (Zygote.nativeSupportsTaggedPointers()) {
+            // TBI-but-not-MTE devices downgrade MTE modes to TBI.
+            // The idea is that if an app opts into full hardware tagging (MTE), it must be ok with
+            // the "fake" pointer tagging (TBI).
+            if (level == Zygote.MEMORY_TAG_LEVEL_ASYNC || level == Zygote.MEMORY_TAG_LEVEL_SYNC) {
+                level = Zygote.MEMORY_TAG_LEVEL_TBI;
+            }
+        } else {
+            // Otherwise disable all tagging.
+            level = Zygote.MEMORY_TAG_LEVEL_NONE;
+        }
+
+        return level;
     }
 
     private int decideGwpAsanLevel(ProcessRecord app) {
@@ -1745,7 +1771,7 @@ public final class ProcessList {
                     ? Zygote.GWP_ASAN_LEVEL_ALWAYS
                     : Zygote.GWP_ASAN_LEVEL_NEVER;
         }
-        // Then at the applicaton attribute.
+        // Then at the application attribute.
         if (app.info.getGwpAsanMode() != ApplicationInfo.GWP_ASAN_DEFAULT) {
             return app.info.getGwpAsanMode() == ApplicationInfo.GWP_ASAN_ALWAYS
                     ? Zygote.GWP_ASAN_LEVEL_ALWAYS
@@ -1760,6 +1786,22 @@ public final class ProcessList {
             return Zygote.GWP_ASAN_LEVEL_LOTTERY;
         }
         return Zygote.GWP_ASAN_LEVEL_NEVER;
+    }
+
+    private boolean enableNativeHeapZeroInit(ProcessRecord app) {
+        // Look at the process attribute first.
+        if (app.processInfo != null && app.processInfo.nativeHeapZeroInit != null) {
+            return app.processInfo.nativeHeapZeroInit;
+        }
+        // Then at the application attribute.
+        if (app.info.isNativeHeapZeroInit() != null) {
+            return app.info.isNativeHeapZeroInit();
+        }
+        // Compat feature last.
+        if (mPlatformCompat.isChangeEnabled(NATIVE_HEAP_ZERO_INIT, app.info)) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -1971,6 +2013,10 @@ public final class ProcessList {
             // that if tagging is desired, the system server will be 64-bit.
             if (instructionSet == null || instructionSet.equals("arm64")) {
                 runtimeFlags |= decideTaggingLevel(app);
+            }
+
+            if (enableNativeHeapZeroInit(app)) {
+                runtimeFlags |= Zygote.NATIVE_HEAP_ZERO_INIT;
             }
 
             // the per-user SELinux context must be set
