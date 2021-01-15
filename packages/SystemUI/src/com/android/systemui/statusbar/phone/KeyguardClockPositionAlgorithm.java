@@ -191,13 +191,15 @@ public class KeyguardClockPositionAlgorithm {
     }
 
     public void run(Result result) {
-        final int y = getClockY(mPanelExpansion);
+        final int y = getClockY(mPanelExpansion, mDarkAmount);
         result.clockY = y;
+        result.clockYFullyDozing = getClockY(
+                1.0f /* panelExpansion */, 1.0f /* darkAmount */);
         result.clockAlpha = getClockAlpha(y);
         result.stackScrollerPadding = mBypassEnabled ? mUnlockedStackScrollerPadding
                 : y + mKeyguardStatusHeight;
         result.stackScrollerPaddingExpanded = mBypassEnabled ? mUnlockedStackScrollerPadding
-                : getClockY(1.0f) + mKeyguardStatusHeight;
+                : getClockY(1.0f, mDarkAmount) + mKeyguardStatusHeight;
         result.clockX = (int) interpolate(0, burnInPreventionOffsetX(), mDarkAmount);
         result.clockScale = interpolate(getBurnInScale(), 1.0f, 1.0f - mDarkAmount);
     }
@@ -254,7 +256,7 @@ public class KeyguardClockPositionAlgorithm {
         return (int) y;
     }
 
-    private int getClockY(float panelExpansion) {
+    private int getClockY(float panelExpansion, float darkAmount) {
         // Dark: Align the bottom edge of the clock at about half of the screen:
         float clockYDark = (mHasCustomClock ? getPreferredClockY() : getMaxClockY())
                 + burnInPreventionOffsetY();
@@ -268,7 +270,7 @@ public class KeyguardClockPositionAlgorithm {
         float clockY = MathUtils.lerp(clockYBouncer, clockYRegular, shadeExpansion);
         clockYDark = MathUtils.lerp(clockYBouncer, clockYDark, shadeExpansion);
 
-        float darkAmount = mBypassEnabled && !mHasCustomClock ? 1.0f : mDarkAmount;
+        darkAmount = mBypassEnabled && !mHasCustomClock ? 1.0f : darkAmount;
 
         // TODO(b/12836565) - prototyping only adjustment
         if (mLockScreenMode != KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL) {
@@ -287,7 +289,7 @@ public class KeyguardClockPositionAlgorithm {
      * @return Alpha from 0 to 1.
      */
     private float getClockAlpha(int y) {
-        float alphaKeyguard = Math.max(0, y / Math.max(1f, getClockY(1f)));
+        float alphaKeyguard = Math.max(0, y / Math.max(1f, getClockY(1f, mDarkAmount)));
         alphaKeyguard *= (1f - mQsExpansion);
         alphaKeyguard = Interpolators.ACCELERATE.getInterpolation(alphaKeyguard);
         return MathUtils.lerp(alphaKeyguard, 1f, mDarkAmount);
@@ -318,6 +320,11 @@ public class KeyguardClockPositionAlgorithm {
          * The y translation of the clock.
          */
         public int clockY;
+
+        /**
+         * The y translation of the clock when we're fully dozing.
+         */
+        public int clockYFullyDozing;
 
         /**
          * The alpha value of the clock.

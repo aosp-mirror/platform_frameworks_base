@@ -43,12 +43,6 @@
                    android:visibility="invisible" />
     </com.android.systemui.statusbar.BackDropView>
 
-    <com.android.systemui.statusbar.LightRevealScrim
-        android:id="@+id/light_reveal_scrim"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone" />
-
     <com.android.systemui.statusbar.ScrimView
         android:id="@+id/scrim_behind"
         android:layout_width="match_parent"
@@ -56,6 +50,12 @@
         android:importantForAccessibility="no"
         sysui:ignoreRightInset="true"
         />
+
+    <com.android.systemui.statusbar.LightRevealScrim
+            android:id="@+id/light_reveal_scrim"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
 
     <include layout="@layout/status_bar_expanded"
         android:layout_width="match_parent"
