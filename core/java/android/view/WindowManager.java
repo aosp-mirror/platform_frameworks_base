@@ -663,22 +663,32 @@ public interface WindowManager extends ViewManager {
     }
 
     /**
-     * Message for taking fullscreen screenshot
+     * Invoke screenshot flow to capture a full-screen image.
      * @hide
      */
     int TAKE_SCREENSHOT_FULLSCREEN = 1;
 
     /**
-     * Message for taking screenshot of selected region.
+     * Invoke screenshot flow allowing the user to select a region.
      * @hide
      */
     int TAKE_SCREENSHOT_SELECTED_REGION = 2;
 
     /**
-     * Message for handling a screenshot flow with an image provided by the caller.
+     * Invoke screenshot flow with an image provided by the caller.
      * @hide
      */
     int TAKE_SCREENSHOT_PROVIDED_IMAGE = 3;
+
+    /**
+     * Enum listing the types of screenshot requests available.
+     *
+     * @hide
+     */
+    @IntDef({TAKE_SCREENSHOT_FULLSCREEN,
+            TAKE_SCREENSHOT_SELECTED_REGION,
+            TAKE_SCREENSHOT_PROVIDED_IMAGE})
+    @interface ScreenshotType {}
 
     /**
      * Enum listing the possible sources from which a screenshot was originated. Used for logging.
