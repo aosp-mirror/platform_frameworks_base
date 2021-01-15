@@ -46,6 +46,7 @@ import org.junit.runners.Suite;
         BstatsCpuTimesValidationTest.class,
         CameraPowerCalculatorTest.class,
         FlashlightPowerCalculatorTest.class,
+        GnssPowerCalculatorTest.class,
         IdlePowerCalculatorTest.class,
         KernelCpuProcStringReaderTest.class,
         KernelCpuUidActiveTimeReaderTest.class,
@@ -62,6 +63,7 @@ import org.junit.runners.Suite;
         PowerCalculatorTest.class,
         PowerProfileTest.class,
         ScreenPowerCalculatorTest.class,
+        SensorPowerCalculatorTest.class,
         SystemServicePowerCalculatorTest.class,
         VideoPowerCalculatorTest.class,
 

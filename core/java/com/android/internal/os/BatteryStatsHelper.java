@@ -339,8 +339,9 @@ public class BatteryStatsHelper {
             }
             mPowerCalculators.add(new WifiPowerCalculator(mPowerProfile));
             mPowerCalculators.add(new BluetoothPowerCalculator(mPowerProfile));
-            mPowerCalculators.add(new SensorPowerCalculator(mPowerProfile,
+            mPowerCalculators.add(new SensorPowerCalculator(
                     mContext.getSystemService(SensorManager.class)));
+            mPowerCalculators.add(new GnssPowerCalculator(mPowerProfile));
             mPowerCalculators.add(new CameraPowerCalculator(mPowerProfile));
             mPowerCalculators.add(new FlashlightPowerCalculator(mPowerProfile));
             mPowerCalculators.add(new MediaPowerCalculator(mPowerProfile));
