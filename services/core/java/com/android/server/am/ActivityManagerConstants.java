@@ -94,6 +94,7 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_PROCESS_CRASH_COUNT_RESET_INTERVAL =
             "process_crash_count_reset_interval";
     static final String KEY_PROCESS_CRASH_COUNT_LIMIT = "process_crash_count_limit";
+    static final String KEY_BOOT_TIME_TEMP_ALLOWLIST_DURATION = "boot_time_temp_allowlist_duration";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
     private static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60*1000;
@@ -131,6 +132,7 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final int DEFAULT_MAX_PHANTOM_PROCESSES = 32;
     private static final int DEFAULT_PROCESS_CRASH_COUNT_RESET_INTERVAL = 12 * 60 * 60 * 1000;
     private static final int DEFAULT_PROCESS_CRASH_COUNT_LIMIT = 12;
+    private static final int DEFAULT_BOOT_TIME_TEMP_ALLOWLIST_DURATION = 10 * 1000;
 
 
     // Flag stored in the DeviceConfig API.
@@ -379,6 +381,13 @@ final class ActivityManagerConstants extends ContentObserver {
     // the foreground state.
     volatile long mFgsNotificationDeferralInterval = 10_000;
 
+    /*
+     * At boot time, broadcast receiver ACTION_BOOT_COMPLETED, ACTION_LOCKED_BOOT_COMPLETED and
+     * ACTION_PRE_BOOT_COMPLETED are temp allowlisted to start FGS for a duration of time in
+     * milliseconds.
+     */
+    volatile long mBootTimeTempAllowlistDuration = DEFAULT_BOOT_TIME_TEMP_ALLOWLIST_DURATION;
+
     private final ActivityManagerService mService;
     private ContentResolver mResolver;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -562,6 +571,9 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_MAX_PHANTOM_PROCESSES:
                                 updateMaxPhantomProcesses();
+                                break;
+                            case KEY_BOOT_TIME_TEMP_ALLOWLIST_DURATION:
+                                updateBootTimeTempAllowListDuration();
                                 break;
                             default:
                                 break;
@@ -832,6 +844,13 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_FORCE_BACKGROUND_CHECK_ON_RESTRICTED_APPS);
     }
 
+    private void updateBootTimeTempAllowListDuration() {
+        mBootTimeTempAllowlistDuration = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_BOOT_TIME_TEMP_ALLOWLIST_DURATION,
+                DEFAULT_BOOT_TIME_TEMP_ALLOWLIST_DURATION);
+    }
+
     private void updateImperceptibleKillExemptions() {
         IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES.clear();
         IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES.addAll(mDefaultImperceptibleKillExemptPackages);
@@ -1030,6 +1049,8 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.println(BINDER_HEAVY_HITTER_AUTO_SAMPLER_THRESHOLD);
         pw.print("  "); pw.print(KEY_MAX_PHANTOM_PROCESSES); pw.print("=");
         pw.println(MAX_PHANTOM_PROCESSES);
+        pw.print("  "); pw.print(KEY_BOOT_TIME_TEMP_ALLOWLIST_DURATION); pw.print("=");
+        pw.println(mBootTimeTempAllowlistDuration);
 
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {
