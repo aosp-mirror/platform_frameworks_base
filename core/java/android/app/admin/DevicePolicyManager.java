@@ -2580,6 +2580,30 @@ public class DevicePolicyManager {
     public static final int PROVISIONING_MODE_MANAGED_PROFILE_ON_PERSONAL_DEVICE = 3;
 
     /**
+     * A {@code boolean} flag that indicates whether the provisioning flow should return before
+     * starting the admin app's {@link #ACTION_ADMIN_POLICY_COMPLIANCE} handler. The default value
+     * is {@code true}.
+     *
+     * <p>If this extra is set to {@code true}, then when the provisioning flow returns back to the
+     * provisioning initiator, provisioning will not be complete. The provisioning initiator can
+     * use this opportunity to do its own preparatory steps prior to the launch of the admin app's
+     * {@link #ACTION_ADMIN_POLICY_COMPLIANCE} handler. It is the responsibility of the
+     * provisioning initiator to ensure that the provisioning flow is then resumed and completed.
+     *
+     * <p>If this extra is set to {@code false}, then when the provisioning flow returns back to
+     * the provisioning initiator, provisioning will be complete. Note that device owner
+     * provisioning is not currently supported for the this scenario.
+     *
+     * <p>This extra is only respected when provided alongside the {@link
+     * #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} intent action.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_PROVISIONING_RETURN_BEFORE_POLICY_COMPLIANCE =
+            "android.app.extra.PROVISIONING_RETURN_BEFORE_POLICY_COMPLIANCE";
+
+    /**
      * Activity action: Starts the administrator to show policy compliance for the provisioning.
      * This action is used any time that the administrator has an opportunity to show policy
      * compliance before the end of setup wizard. This could happen as part of the admin-integrated
