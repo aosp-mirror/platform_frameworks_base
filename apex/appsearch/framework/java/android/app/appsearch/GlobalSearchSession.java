@@ -19,7 +19,6 @@ package android.app.appsearch;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
 import android.os.RemoteException;
 
@@ -34,9 +33,7 @@ import java.util.function.Consumer;
  * This class provides global access to the centralized AppSearch index maintained by the system.
  *
  * <p>Apps can retrieve indexed documents through the query API.
- * @hide
  */
-@SystemApi
 public class GlobalSearchSession implements Closeable {
 
     private final IAppSearchManager mService;
