@@ -2858,6 +2858,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             final WindowContainerToken daToken = options.getLaunchTaskDisplayArea();
             taskDisplayArea = daToken != null
                     ? (TaskDisplayArea) WindowContainer.fromBinder(daToken.asBinder()) : null;
+
+            final Task rootTask = Task.fromWindowContainerToken(options.getLaunchRootTask());
+            if (rootTask != null) {
+                return rootTask;
+            }
         }
 
         // First preference for stack goes to the task Id set in the activity options. Use the stack
@@ -3032,7 +3037,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             final int activityType =
                     options != null && options.getLaunchActivityType() != ACTIVITY_TYPE_UNDEFINED
                             ? options.getLaunchActivityType() : r.getActivityType();
-            return taskDisplayArea.createRootTask(windowingMode, activityType, true /*onTop*/);
+            return taskDisplayArea.createRootTask(
+                    windowingMode, activityType, true /*onTop*/, options);
         }
 
         return null;
