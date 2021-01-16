@@ -23,6 +23,9 @@ import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
 import android.os.RemoteException;
 
+import com.android.internal.util.Preconditions;
+
+import java.io.Closeable;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -34,11 +37,12 @@ import java.util.function.Consumer;
  * @hide
  */
 @SystemApi
-public class GlobalSearchSession {
+public class GlobalSearchSession implements Closeable {
 
     private final IAppSearchManager mService;
     @UserIdInt
     private final int mUserId;
+    private boolean mIsClosed = false;
 
     static void createGlobalSearchSession(
             @NonNull IAppSearchManager service,
@@ -129,7 +133,14 @@ public class GlobalSearchSession {
         Objects.requireNonNull(queryExpression);
         Objects.requireNonNull(searchSpec);
         Objects.requireNonNull(executor);
+        Preconditions.checkState(!mIsClosed, "GlobalSearchSession has already been closed");
         return new SearchResults(mService, /*databaseName=*/null, queryExpression,
                 searchSpec, mUserId, executor);
+    }
+
+    /** Closes the {@link GlobalSearchSession}. */
+    @Override
+    public void close() {
+        mIsClosed = true;
     }
 }
