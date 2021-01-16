@@ -1047,6 +1047,9 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
     }
 
     private void injectBestLocation(Location location) {
+        if (location.isFromMockProvider()) {
+            return;
+        }
         int gnssLocationFlags = LOCATION_HAS_LAT_LONG |
                 (location.hasAltitude() ? LOCATION_HAS_ALTITUDE : 0) |
                 (location.hasSpeed() ? LOCATION_HAS_SPEED : 0) |
@@ -1141,6 +1144,9 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
     }
 
     private void handleUpdateLocation(Location location) {
+        if (location.isFromMockProvider()) {
+            return;
+        }
         if (location.hasAccuracy()) {
             native_inject_location(location.getLatitude(), location.getLongitude(),
                     location.getAccuracy());
