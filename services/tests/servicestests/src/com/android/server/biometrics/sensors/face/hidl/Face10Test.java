@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors.face.hidl;
 
+import static junit.framework.Assert.assertEquals;
+
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -73,6 +75,12 @@ public class Face10Test {
                 mLockoutResetDispatcher, false /* supportsSelfIllumination */,
                 1 /* maxTemplatesAllowed */, mScheduler);
         mBinder = new Binder();
+    }
+
+    @Test
+    public void getAuthenticatorId_doesNotCrashWhenIdNotFound() {
+        assertEquals(0, mFace10.getAuthenticatorId(0 /* sensorId */, 111 /* userId */));
+        waitForIdle();
     }
 
     @Test

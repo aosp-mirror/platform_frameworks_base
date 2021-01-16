@@ -682,7 +682,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
 
     @Override
     public long getAuthenticatorId(int sensorId, int userId) {
-        return mAuthenticatorIds.get(userId);
+        return mAuthenticatorIds.getOrDefault(userId, 0L);
     }
 
     @Override
