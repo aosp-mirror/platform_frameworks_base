@@ -1784,7 +1784,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
       heap_tagging_level = M_HEAP_TAGGING_LEVEL_NONE;
       break;
   }
-  android_mallopt(M_SET_HEAP_TAGGING_LEVEL, &heap_tagging_level, sizeof(heap_tagging_level));
+  mallopt(M_BIONIC_SET_HEAP_TAGGING_LEVEL, heap_tagging_level);
   // Now that we've used the flag, clear it so that we don't pass unknown flags to the ART runtime.
   runtime_flags &= ~RuntimeFlags::MEMORY_TAG_LEVEL_MASK;
 
