@@ -31276,6 +31276,7 @@ package android.os {
     method @NonNull public android.os.StrictMode.VmPolicy.Builder detectLeakedRegistrationObjects();
     method @NonNull public android.os.StrictMode.VmPolicy.Builder detectLeakedSqlLiteObjects();
     method @NonNull public android.os.StrictMode.VmPolicy.Builder detectNonSdkApiUsage();
+    method @NonNull public android.os.StrictMode.VmPolicy.Builder detectUnsafeIntentLaunch();
     method @NonNull public android.os.StrictMode.VmPolicy.Builder detectUntaggedSockets();
     method @NonNull public android.os.StrictMode.VmPolicy.Builder penaltyDeath();
     method @NonNull public android.os.StrictMode.VmPolicy.Builder penaltyDeathOnCleartextNetwork();
@@ -31284,6 +31285,7 @@ package android.os {
     method @NonNull public android.os.StrictMode.VmPolicy.Builder penaltyListener(@NonNull java.util.concurrent.Executor, @NonNull android.os.StrictMode.OnVmViolationListener);
     method @NonNull public android.os.StrictMode.VmPolicy.Builder penaltyLog();
     method @NonNull public android.os.StrictMode.VmPolicy.Builder permitNonSdkApiUsage();
+    method @NonNull public android.os.StrictMode.VmPolicy.Builder permitUnsafeIntentLaunch();
     method @NonNull public android.os.StrictMode.VmPolicy.Builder setClassInstanceLimit(Class, int);
   }
 
@@ -31808,6 +31810,9 @@ package android.os.strictmode {
   }
 
   public final class UnbufferedIoViolation extends android.os.strictmode.Violation {
+  }
+
+  public final class UnsafeIntentLaunchViolation extends android.os.strictmode.Violation {
   }
 
   public final class UntaggedSocketViolation extends android.os.strictmode.Violation {
