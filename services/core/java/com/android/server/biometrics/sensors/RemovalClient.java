@@ -31,7 +31,7 @@ import java.util.Map;
  * A class to keep track of the remove state for a given client.
  */
 public abstract class RemovalClient<S extends BiometricAuthenticator.Identifier, T>
-        extends BaseClientMonitor<T> implements RemovalConsumer {
+        extends HalClientMonitor<T> implements RemovalConsumer {
 
     private static final String TAG = "Biometrics/RemovalClient";
 

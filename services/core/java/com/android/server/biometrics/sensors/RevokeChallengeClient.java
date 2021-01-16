@@ -21,7 +21,7 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
 
-public abstract class RevokeChallengeClient<T> extends BaseClientMonitor<T> {
+public abstract class RevokeChallengeClient<T> extends HalClientMonitor<T> {
 
     public RevokeChallengeClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
             @NonNull IBinder token, @NonNull String owner, int sensorId) {

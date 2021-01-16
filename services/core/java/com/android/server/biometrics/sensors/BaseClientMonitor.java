@@ -31,7 +31,7 @@ import java.util.NoSuchElementException;
  * the current client.  Subclasses are responsible for coordinating the interaction with
  * the biometric's HAL for the specific action (e.g. authenticate, enroll, enumerate, etc.).
  */
-public abstract class BaseClientMonitor<T> extends LoggableMonitor
+public abstract class BaseClientMonitor extends LoggableMonitor
         implements IBinder.DeathRecipient {
 
     private static final String TAG = "Biometrics/ClientMonitor";
@@ -50,7 +50,7 @@ public abstract class BaseClientMonitor<T> extends LoggableMonitor
          *
          * @param clientMonitor Reference of the ClientMonitor that is starting.
          */
-        default void onClientStarted(@NonNull BaseClientMonitor<?> clientMonitor) {}
+        default void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {}
 
         /**
          * Invoked when the ClientMonitor operation is complete. This abstracts away asynchronous
@@ -61,23 +61,11 @@ public abstract class BaseClientMonitor<T> extends LoggableMonitor
          * @param clientMonitor Reference of the ClientMonitor that finished.
          * @param success True if the operation completed successfully.
          */
-        default void onClientFinished(@NonNull BaseClientMonitor<?> clientMonitor,
-                boolean success) {}
-    }
-
-    /**
-     * Interface that allows ClientMonitor subclasses to retrieve a fresh instance to the HAL.
-     */
-    public interface LazyDaemon<T> {
-        /**
-         * @return A fresh instance to the biometric HAL
-         */
-        T getDaemon();
+        default void onClientFinished(@NonNull BaseClientMonitor clientMonitor, boolean success) {}
     }
 
     protected final int mSequentialId;
     @NonNull private final Context mContext;
-    @NonNull protected final LazyDaemon<T> mLazyDaemon;
     private final int mTargetUserId;
     @NonNull private final String mOwner;
     private final int mSensorId; // sensorId as configured by the framework
@@ -93,7 +81,6 @@ public abstract class BaseClientMonitor<T> extends LoggableMonitor
 
     /**
      * @param context    system_server context
-     * @param lazyDaemon pointer for lazy retrieval of the HAL
      * @param token      a unique token for the client
      * @param listener   recipient of related events (e.g. authentication)
      * @param userId     target user id for operation
@@ -104,14 +91,13 @@ public abstract class BaseClientMonitor<T> extends LoggableMonitor
      * @param statsAction   One of {@link BiometricsProtoEnums} ACTION_* constants
      * @param statsClient   One of {@link BiometricsProtoEnums} CLIENT_* constants
      */
-    public BaseClientMonitor(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+    public BaseClientMonitor(@NonNull Context context,
             @Nullable IBinder token, @Nullable ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int cookie, int sensorId, int statsModality, int statsAction,
             int statsClient) {
         super(statsModality, statsAction, statsClient);
         mSequentialId = sCount++;
         mContext = context;
-        mLazyDaemon = lazyDaemon;
         mToken = token;
         mListener = listener;
         mTargetUserId = userId;
@@ -133,15 +119,7 @@ public abstract class BaseClientMonitor<T> extends LoggableMonitor
     }
 
     /**
-     * Invoked if the scheduler is unable to start the ClientMonitor (for example the HAL is null).
-     * If such a problem is detected, the scheduler will not invoke
-     * {@link #start(Callback)}.
-     */
-    public abstract void unableToStart();
-
-    /**
-     * Starts the ClientMonitor's lifecycle. Invokes {@link #startHalOperation()} when internal book
-     * keeping is complete.
+     * Starts the ClientMonitor's lifecycle.
      * @param callback invoked when the operation is complete (succeeds, fails, etc)
      */
     public void start(@NonNull Callback callback) {
@@ -149,10 +127,6 @@ public abstract class BaseClientMonitor<T> extends LoggableMonitor
         mCallback.onClientStarted(this);
     }
 
-    /**
-     * Starts the HAL operation specific to the ClientMonitor subclass.
-     */
-    protected abstract void startHalOperation();
 
     public boolean isAlreadyDone() {
         return mAlreadyDone;
@@ -219,10 +193,6 @@ public abstract class BaseClientMonitor<T> extends LoggableMonitor
 
     public final int getSensorId() {
         return mSensorId;
-    }
-
-    public T getFreshDaemon() {
-        return mLazyDaemon.getDaemon();
     }
 
     @Override

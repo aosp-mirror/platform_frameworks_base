@@ -71,11 +71,11 @@ public class BiometricSchedulerTest {
 
     @Test
     public void testClientDuplicateFinish_ignoredBySchedulerAndDoesNotCrash() {
-        final BaseClientMonitor.LazyDaemon<Object> nonNullDaemon = () -> mock(Object.class);
+        final HalClientMonitor.LazyDaemon<Object> nonNullDaemon = () -> mock(Object.class);
 
-        final BaseClientMonitor<Object> client1 =
+        final HalClientMonitor<Object> client1 =
                 new TestClientMonitor(mContext, mToken, nonNullDaemon);
-        final BaseClientMonitor<Object> client2 =
+        final HalClientMonitor<Object> client2 =
                 new TestClientMonitor(mContext, mToken, nonNullDaemon);
         mScheduler.scheduleClientMonitor(client1);
         mScheduler.scheduleClientMonitor(client2);
@@ -89,8 +89,8 @@ public class BiometricSchedulerTest {
         // Even if second client has a non-null daemon, it needs to be canceled.
         Object daemon2 = mock(Object.class);
 
-        final BaseClientMonitor.LazyDaemon<Object> lazyDaemon1 = () -> null;
-        final BaseClientMonitor.LazyDaemon<Object> lazyDaemon2 = () -> daemon2;
+        final HalClientMonitor.LazyDaemon<Object> lazyDaemon1 = () -> null;
+        final HalClientMonitor.LazyDaemon<Object> lazyDaemon2 = () -> daemon2;
 
         final TestClientMonitor client1 = new TestClientMonitor(mContext, mToken, lazyDaemon1);
         final TestClientMonitor client2 = new TestClientMonitor(mContext, mToken, lazyDaemon2);
@@ -126,8 +126,8 @@ public class BiometricSchedulerTest {
         // Second non-BiometricPrompt client has a valid daemon
         final Object daemon2 = mock(Object.class);
 
-        final BaseClientMonitor.LazyDaemon<Object> lazyDaemon1 = () -> null;
-        final BaseClientMonitor.LazyDaemon<Object> lazyDaemon2 = () -> daemon2;
+        final HalClientMonitor.LazyDaemon<Object> lazyDaemon1 = () -> null;
+        final HalClientMonitor.LazyDaemon<Object> lazyDaemon2 = () -> daemon2;
 
         final ClientMonitorCallbackConverter listener1 = mock(ClientMonitorCallbackConverter.class);
 
@@ -167,7 +167,7 @@ public class BiometricSchedulerTest {
 
     @Test
     public void testCancelNotInvoked_whenOperationWaitingForCookie() {
-        final BaseClientMonitor.LazyDaemon<Object> lazyDaemon1 = () -> mock(Object.class);
+        final HalClientMonitor.LazyDaemon<Object> lazyDaemon1 = () -> mock(Object.class);
         final BiometricPromptClientMonitor client1 = new BiometricPromptClientMonitor(mContext,
                 mToken, lazyDaemon1, mock(ClientMonitorCallbackConverter.class));
         final BaseClientMonitor.Callback callback1 = mock(BaseClientMonitor.Callback.class);
@@ -207,7 +207,7 @@ public class BiometricSchedulerTest {
         }
     }
 
-    private static class TestClientMonitor extends BaseClientMonitor<Object> {
+    private static class TestClientMonitor extends HalClientMonitor<Object> {
         private boolean mUnableToStart;
         private boolean mStarted;
 
@@ -222,7 +222,6 @@ public class BiometricSchedulerTest {
                     TAG, cookie, TEST_SENSOR_ID, 0 /* statsModality */,
                     0 /* statsAction */, 0 /* statsClient */);
         }
-
 
         @Override
         public void unableToStart() {
