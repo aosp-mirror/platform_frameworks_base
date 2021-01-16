@@ -4520,6 +4520,15 @@ public abstract class Context {
     public static final String TRANSLATION_MANAGER_SERVICE = "transformer";
 
     /**
+     * Official published name of the translation service which supports ui translation function.
+     *
+     * @hide
+     * @see #getSystemService(String)
+     */
+    @SystemApi
+    public static final String UI_TRANSLATION_SERVICE = "ui_translation";
+
+    /**
      * Used for getting content selections and classifications for task snapshots.
      *
      * @hide
