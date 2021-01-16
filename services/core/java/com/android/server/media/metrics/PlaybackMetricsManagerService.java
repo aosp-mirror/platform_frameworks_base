@@ -18,8 +18,12 @@ package com.android.server.media.metrics;
 
 import android.content.Context;
 import android.media.metrics.IPlaybackMetricsManager;
+import android.media.metrics.NetworkEvent;
+import android.media.metrics.PlaybackErrorEvent;
 import android.media.metrics.PlaybackMetrics;
 import android.util.Base64;
+import android.util.StatsEvent;
+import android.util.StatsLog;
 
 import com.android.server.SystemService;
 
@@ -59,6 +63,33 @@ public final class PlaybackMetricsManagerService extends SystemService {
             mSecureRandom.nextBytes(byteId);
             String id = Base64.encodeToString(byteId, Base64.DEFAULT);
             return id;
+        }
+
+        @Override
+        public void reportPlaybackErrorEvent(
+                String sessionId, PlaybackErrorEvent event, int userId) {
+            StatsEvent statsEvent = StatsEvent.newBuilder()
+                    .setAtomId(323)
+                    .writeString(sessionId)
+                    .writeString(event.getExceptionStack())
+                    .writeInt(event.getErrorCode())
+                    .writeInt(event.getSubErrorCode())
+                    .writeLong(event.getTimeSincePlaybackCreatedMillis())
+                    .usePooledBuffer()
+                    .build();
+            StatsLog.write(statsEvent);
+        }
+
+        public void reportNetworkEvent(
+                String sessionId, NetworkEvent event, int userId) {
+            StatsEvent statsEvent = StatsEvent.newBuilder()
+                    .setAtomId(321)
+                    .writeString(sessionId)
+                    .writeInt(event.getType())
+                    .writeLong(event.getTimeSincePlaybackCreatedMillis())
+                    .usePooledBuffer()
+                    .build();
+            StatsLog.write(statsEvent);
         }
     }
 }

@@ -2045,6 +2045,7 @@
   <java-symbol type="string" name="car_mode_disable_notification_message" />
   <java-symbol type="string" name="car_mode_disable_notification_title" />
   <java-symbol type="string" name="chooser_wallpaper" />
+  <java-symbol type="string" name="config_systemImageEditor" />
   <java-symbol type="string" name="config_datause_iface" />
   <java-symbol type="string" name="config_activityRecognitionHardwarePackageName" />
   <java-symbol type="string" name="config_fusedLocationProviderPackageName" />
@@ -3895,6 +3896,7 @@
   <java-symbol type="drawable" name="chooser_dialog_background" />
   <java-symbol type="id" name="chooser_copy_button" />
   <java-symbol type="id" name="chooser_nearby_button" />
+  <java-symbol type="id" name="chooser_edit_button" />
   <java-symbol type="layout" name="chooser_action_button" />
   <java-symbol type="dimen" name="chooser_action_button_icon_size" />
   <java-symbol type="string" name="config_defaultNearbySharingComponent" />

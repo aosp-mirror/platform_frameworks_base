@@ -555,6 +555,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             changed = (cfgChanges & REPORT_CONFIGS) != 0;
         }
         if (!(changed || force)) {
+            // mTmpTaskInfo will be reused next time.
             return;
         }
         final RunningTaskInfo newInfo = mTmpTaskInfo;

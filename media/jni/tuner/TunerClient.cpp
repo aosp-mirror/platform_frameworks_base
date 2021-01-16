@@ -25,8 +25,6 @@
 using ::android::hardware::tv::tuner::V1_0::FrontendId;
 using ::android::hardware::tv::tuner::V1_0::FrontendType;
 
-using ::aidl::android::media::tv::tunerresourcemanager::TunerFrontendInfo;
-
 namespace android {
 
 sp<ITuner> TunerClient::mTuner;
@@ -98,14 +96,28 @@ sp<FrontendClient> TunerClient::openFrontend(int frontendHandle) {
         // TODO: handle error code
         shared_ptr<ITunerFrontend> tunerFrontend;
         mTunerService->openFrontend(frontendHandle, &tunerFrontend);
-        return new FrontendClient(tunerFrontend, frontendHandle);
+        if (tunerFrontend == NULL) {
+            return NULL;
+        }
+        int id;
+        // TODO: handle error code
+        tunerFrontend->getFrontendId(&id);
+        TunerFrontendInfo aidlFrontendInfo;
+        // TODO: handle error code
+        mTunerService->getFrontendInfo(id, &aidlFrontendInfo);
+        return new FrontendClient(tunerFrontend, frontendHandle, aidlFrontendInfo.type);
     }
 
     if (mTuner != NULL) {
         int id = getResourceIdFromHandle(frontendHandle, FRONTEND);
         sp<IFrontend> hidlFrontend = openHidlFrontendById(id);
         if (hidlFrontend != NULL) {
-            sp<FrontendClient> frontendClient = new FrontendClient(NULL, id);
+            FrontendInfo hidlInfo;
+            Result res = getHidlFrontendInfo(id, hidlInfo);
+            if (res != Result::SUCCESS) {
+                return NULL;
+            }
+            sp<FrontendClient> frontendClient = new FrontendClient(NULL, id, (int)hidlInfo.type);
             frontendClient->setHidlFrontend(hidlFrontend);
             return frontendClient;
         }
@@ -116,7 +128,7 @@ sp<FrontendClient> TunerClient::openFrontend(int frontendHandle) {
 
 shared_ptr<FrontendInfo> TunerClient::getFrontendInfo(int id) {
     if (mTunerService != NULL) {
-        TunerServiceFrontendInfo aidlFrontendInfo;
+        TunerFrontendInfo aidlFrontendInfo;
         // TODO: handle error code
         mTunerService->getFrontendInfo(id, &aidlFrontendInfo);
         return make_shared<FrontendInfo>(FrontendInfoAidlToHidl(aidlFrontendInfo));
@@ -289,7 +301,7 @@ void TunerClient::updateFrontendResources() {
         }
         TunerFrontendInfo tunerFrontendInfo{
             .handle = getResourceHandleFromId((int)ids[i], FRONTEND),
-            .frontendType = static_cast<int>(frontendInfo->type),
+            .type = static_cast<int>(frontendInfo->type),
             .exclusiveGroupId = static_cast<int>(frontendInfo->exclusiveGroupId),
         };
         infos.push_back(tunerFrontendInfo);
@@ -438,7 +450,7 @@ vector<int> TunerClient::getLnbHandles() {
     return lnbHandles;
 }
 
-FrontendInfo TunerClient::FrontendInfoAidlToHidl(TunerServiceFrontendInfo aidlFrontendInfo) {
+FrontendInfo TunerClient::FrontendInfoAidlToHidl(TunerFrontendInfo aidlFrontendInfo) {
     FrontendInfo hidlFrontendInfo {
         .type = static_cast<FrontendType>(aidlFrontendInfo.type),
         .minFrequency = static_cast<uint32_t>(aidlFrontendInfo.minFrequency),

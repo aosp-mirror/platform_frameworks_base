@@ -68,6 +68,9 @@ static constexpr MagicType INCR = 0x52434e49; // BE INCR
 static constexpr auto PollTimeoutMs = 5000;
 static constexpr auto TraceTagCheckInterval = 1s;
 
+static constexpr auto WaitOnEofMinInterval = 10ms;
+static constexpr auto WaitOnEofMaxInterval = 1s;
+
 struct JniIds {
     jclass packageManagerShellCommandDataLoader;
     jmethodID pmscdLookupShellCommand;
@@ -485,14 +488,16 @@ private:
             if (read == 0) {
                 if (waitOnEof) {
                     // eof of stdin, waiting...
-                    ALOGE("eof of stdin, waiting...: %d, remaining: %d, block: %d, read: %d",
-                          int(totalSize), int(remaining), int(blockIdx), int(read));
-                    using namespace std::chrono_literals;
-                    std::this_thread::sleep_for(10ms);
-                    continue;
+                    if (doWaitOnEof()) {
+                        continue;
+                    } else {
+                        return false;
+                    }
                 }
                 break;
             }
+            resetWaitOnEof();
+
             if (read < 0) {
                 return false;
             }
@@ -776,6 +781,21 @@ private:
         return fileId;
     }
 
+    // Waiting with exponential backoff, maximum total time ~1.2sec.
+    bool doWaitOnEof() {
+        if (mWaitOnEofInterval >= WaitOnEofMaxInterval) {
+            resetWaitOnEof();
+            return false;
+        }
+        auto result = mWaitOnEofInterval;
+        mWaitOnEofInterval =
+                std::min<std::chrono::milliseconds>(mWaitOnEofInterval * 2, WaitOnEofMaxInterval);
+        std::this_thread::sleep_for(result);
+        return true;
+    }
+
+    void resetWaitOnEof() { mWaitOnEofInterval = WaitOnEofMinInterval; }
+
     JavaVM* const mJvm;
     std::string mArgs;
     android::dataloader::FilesystemConnectorPtr mIfs = nullptr;
@@ -786,6 +806,7 @@ private:
     std::thread mReceiverThread;
     std::atomic<bool> mStopReceiving = false;
     std::atomic<bool> mReadLogsEnabled = false;
+    std::chrono::milliseconds mWaitOnEofInterval{WaitOnEofMinInterval};
     /** Tracks which files have been requested */
     std::unordered_set<FileIdx> mRequestedFiles;
 };

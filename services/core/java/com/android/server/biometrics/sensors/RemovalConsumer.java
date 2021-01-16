@@ -20,8 +20,8 @@ import android.annotation.Nullable;
 import android.hardware.biometrics.BiometricAuthenticator;
 
 /**
- * Interface that {@link ClientMonitor} subclasses eligible/interested in removal callbacks should
- * implement.
+ * Interface that {@link BaseClientMonitor} subclasses eligible/interested in removal callbacks
+ * should implement.
  */
 public interface RemovalConsumer {
     /**

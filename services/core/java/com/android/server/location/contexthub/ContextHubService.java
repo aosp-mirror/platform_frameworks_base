@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
+import android.hardware.SensorPrivacyManager;
 import android.hardware.contexthub.V1_0.AsyncEventType;
 import android.hardware.contexthub.V1_0.ContextHub;
 import android.hardware.contexthub.V1_0.ContextHubMsg;
@@ -116,6 +117,9 @@ public class ContextHubService extends IContextHubService.Stub {
 
     // True if WiFi is available for the Context Hub
     private boolean mIsWifiAvailable = false;
+
+    // True if audio is disabled for the ContextHub
+    private boolean mIsAudioDisabled = false;
 
     // Lock object for sendWifiSettingUpdate()
     private final Object mSendWifiSettingUpdateLock = new Object();
@@ -255,6 +259,21 @@ public class ContextHubService extends IContextHubService.Stub {
                             sendAirplaneModeSettingUpdate();
                         }
                     }, UserHandle.USER_ALL);
+        }
+
+        if (mContextHubWrapper.supportsMicrophoneDisableSettingNotifications()) {
+            sendMicrophoneDisableSettingUpdate();
+
+            SensorPrivacyManager.OnSensorPrivacyChangedListener listener =
+                    new SensorPrivacyManager.OnSensorPrivacyChangedListener() {
+                    @Override
+                    public void onSensorPrivacyChanged(boolean enabled) {
+                        sendMicrophoneDisableSettingUpdate();
+                    }
+                };
+            SensorPrivacyManager manager = SensorPrivacyManager.getInstance(mContext);
+            manager.addSensorPrivacyListener(
+                    SensorPrivacyManager.INDIVIDUAL_SENSOR_MICROPHONE, listener);
         }
     }
 
@@ -998,6 +1017,21 @@ public class ContextHubService extends IContextHubService.Stub {
                         == 1);
         mContextHubWrapper.onAirplaneModeSettingChanged(enabled);
     }
+
+    /**
+     * Obtains the latest microphone disable setting value and notifies the
+     * Context Hub.
+     */
+    private void sendMicrophoneDisableSettingUpdate() {
+        SensorPrivacyManager manager = SensorPrivacyManager.getInstance(mContext);
+        boolean disabled = manager.isIndividualSensorPrivacyEnabled(
+                SensorPrivacyManager.INDIVIDUAL_SENSOR_MICROPHONE);
+        if (mIsAudioDisabled != disabled) {
+            mIsAudioDisabled = disabled;
+            mContextHubWrapper.onMicrophoneDisableSettingChanged(disabled);
+        }
+    }
+
 
     private String getCallingPackageName() {
         return mContext.getPackageManager().getNameForUid(Binder.getCallingUid());

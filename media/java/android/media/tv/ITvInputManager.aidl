@@ -94,6 +94,8 @@ interface ITvInputManager {
     // For the recording session
     void startRecording(in IBinder sessionToken, in Uri programUri, in Bundle params, int userId);
     void stopRecording(in IBinder sessionToken, int userId);
+    void pauseRecording(in IBinder sessionToken, in Bundle params, int userId);
+    void resumeRecording(in IBinder sessionToken, in Bundle params, int userId);
 
     // For TV input hardware binding
     List<TvInputHardwareInfo> getHardwareList();

@@ -19,7 +19,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
-import java.util.ArrayList;
 /**
  * The camera stream statistics used for passing camera stream information from
  * camera service to camera service proxy.
@@ -30,6 +29,8 @@ import java.util.ArrayList;
  * @hide
  */
 public class CameraStreamStats implements Parcelable {
+    public static final int HISTOGRAM_TYPE_UNKNOWN = 0;
+    public static final int HISTOGRAM_TYPE_CAPTURE_LATENCY = 1;
 
     private int mWidth;
     private int mHeight;
@@ -41,6 +42,9 @@ public class CameraStreamStats implements Parcelable {
     private int mStartLatencyMs;
     private int mMaxHalBuffers;
     private int mMaxAppBuffers;
+    private int mHistogramType;
+    private float[] mHistogramBins;
+    private long[] mHistogramCounts;
 
     private static final String TAG = "CameraStreamStats";
 
@@ -55,6 +59,7 @@ public class CameraStreamStats implements Parcelable {
         mStartLatencyMs = 0;
         mMaxHalBuffers = 0;
         mMaxAppBuffers = 0;
+        mHistogramType = HISTOGRAM_TYPE_UNKNOWN;
     }
 
     public CameraStreamStats(int width, int height, int format,
@@ -70,6 +75,7 @@ public class CameraStreamStats implements Parcelable {
         mStartLatencyMs = startLatencyMs;
         mMaxHalBuffers = maxHalBuffers;
         mMaxAppBuffers = maxAppBuffers;
+        mHistogramType = HISTOGRAM_TYPE_UNKNOWN;
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<CameraStreamStats> CREATOR =
@@ -112,6 +118,9 @@ public class CameraStreamStats implements Parcelable {
         dest.writeInt(mStartLatencyMs);
         dest.writeInt(mMaxHalBuffers);
         dest.writeInt(mMaxAppBuffers);
+        dest.writeInt(mHistogramType);
+        dest.writeFloatArray(mHistogramBins);
+        dest.writeLongArray(mHistogramCounts);
     }
 
     public void readFromParcel(Parcel in) {
@@ -125,6 +134,9 @@ public class CameraStreamStats implements Parcelable {
         mStartLatencyMs = in.readInt();
         mMaxHalBuffers = in.readInt();
         mMaxAppBuffers = in.readInt();
+        mHistogramType = in.readInt();
+        mHistogramBins = in.createFloatArray();
+        mHistogramCounts = in.createLongArray();
     }
 
     public int getWidth() {
@@ -165,5 +177,17 @@ public class CameraStreamStats implements Parcelable {
 
     public int getMaxAppBuffers() {
         return mMaxAppBuffers;
+    }
+
+    public int getHistogramType() {
+        return mHistogramType;
+    }
+
+    public float[] getHistogramBins() {
+        return mHistogramBins;
+    }
+
+    public long[] getHistogramCounts() {
+        return mHistogramCounts;
     }
 }

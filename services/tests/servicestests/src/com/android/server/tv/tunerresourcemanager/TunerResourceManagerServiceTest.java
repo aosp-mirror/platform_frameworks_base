@@ -25,6 +25,7 @@ import android.content.ContextWrapper;
 import android.media.tv.ITvInputManager;
 import android.media.tv.TvInputManager;
 import android.media.tv.TvInputService;
+import android.media.tv.tuner.TunerFrontendInfo;
 import android.media.tv.tuner.frontend.FrontendSettings;
 import android.media.tv.tunerresourcemanager.CasSessionRequest;
 import android.media.tv.tunerresourcemanager.IResourcesReclaimListener;
@@ -32,7 +33,6 @@ import android.media.tv.tunerresourcemanager.ResourceClientProfile;
 import android.media.tv.tunerresourcemanager.TunerCiCamRequest;
 import android.media.tv.tunerresourcemanager.TunerDemuxRequest;
 import android.media.tv.tunerresourcemanager.TunerDescramblerRequest;
-import android.media.tv.tunerresourcemanager.TunerFrontendInfo;
 import android.media.tv.tunerresourcemanager.TunerFrontendRequest;
 import android.media.tv.tunerresourcemanager.TunerLnbRequest;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
@@ -88,7 +88,7 @@ public class TunerResourceManagerServiceTest {
                 }
 
                 return actual.getHandle() == expected.handle
-                        && actual.getType() == expected.frontendType
+                        && actual.getType() == expected.type
                         && actual.getExclusiveGroupId() == expected.exclusiveGroupId;
             },  "is correctly configured from ");
 
@@ -1156,7 +1156,7 @@ public class TunerResourceManagerServiceTest {
             int handle, int frontendType, int exclusiveGroupId) {
         TunerFrontendInfo info = new TunerFrontendInfo();
         info.handle = handle;
-        info.frontendType = frontendType;
+        info.type = frontendType;
         info.exclusiveGroupId = exclusiveGroupId;
         return info;
     }

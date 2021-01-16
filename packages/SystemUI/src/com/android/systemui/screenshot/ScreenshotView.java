@@ -63,6 +63,7 @@ import android.view.View;
 import android.view.ViewOutlineProvider;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
+import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
@@ -117,6 +118,7 @@ public class ScreenshotView extends FrameLayout implements
     private final DisplayMetrics mDisplayMetrics;
     private final float mCornerSizeX;
     private final float mDismissDeltaY;
+    private final AccessibilityManager mAccessibilityManager;
 
     private int mNavMode;
     private int mLeftInset;
@@ -178,6 +180,8 @@ public class ScreenshotView extends FrameLayout implements
 
         mDisplayMetrics = new DisplayMetrics();
         mContext.getDisplay().getRealMetrics(mDisplayMetrics);
+
+        mAccessibilityManager = AccessibilityManager.getInstance(mContext);
     }
 
     /**
@@ -331,8 +335,10 @@ public class ScreenshotView extends FrameLayout implements
         mScreenshotPreview.setScaleX(currentScale);
         mScreenshotPreview.setScaleY(currentScale);
 
-        mDismissButton.setAlpha(0);
-        mDismissButton.setVisibility(View.VISIBLE);
+        if (mAccessibilityManager.isEnabled()) {
+            mDismissButton.setAlpha(0);
+            mDismissButton.setVisibility(View.VISIBLE);
+        }
 
         AnimatorSet dropInAnimation = new AnimatorSet();
         ValueAnimator flashInAnimator = ValueAnimator.ofFloat(0, 1);

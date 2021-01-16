@@ -218,7 +218,7 @@ public class AudioMix {
     /** @return an error string if the format would not allow Privileged playbackCapture
      *          null otherwise
      * @hide */
-    public static String canBeUsedForPrivilegedCapture(AudioFormat format) {
+    public static String canBeUsedForPrivilegedMediaCapture(AudioFormat format) {
         int sampleRate = format.getSampleRate();
         if (sampleRate > PRIVILEDGED_CAPTURE_MAX_SAMPLE_RATE || sampleRate <= 0) {
             return "Privileged audio capture sample rate " + sampleRate
@@ -448,8 +448,8 @@ public class AudioMix {
                     }
                 }
             }
-            if (mRule.allowPrivilegedPlaybackCapture()) {
-                String error = AudioMix.canBeUsedForPrivilegedCapture(mFormat);
+            if (mRule.allowPrivilegedMediaPlaybackCapture()) {
+                String error = AudioMix.canBeUsedForPrivilegedMediaCapture(mFormat);
                 if (error != null) {
                     throw new IllegalArgumentException(error);
                 }

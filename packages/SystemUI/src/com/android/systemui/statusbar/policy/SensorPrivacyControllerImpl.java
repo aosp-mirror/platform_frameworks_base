@@ -35,20 +35,21 @@ import javax.inject.Inject;
 public class SensorPrivacyControllerImpl implements SensorPrivacyController,
         SensorPrivacyManager.OnSensorPrivacyChangedListener {
     private SensorPrivacyManager mSensorPrivacyManager;
-    private final List<OnSensorPrivacyChangedListener> mListeners;
+    private final List<OnSensorPrivacyChangedListener> mListeners = new ArrayList<>(1);
     private Object mLock = new Object();
     private boolean mSensorPrivacyEnabled;
 
     /**
      * Public constructor.
      */
-    @Inject
-    public SensorPrivacyControllerImpl(Context context) {
-        mSensorPrivacyManager = (SensorPrivacyManager) context.getSystemService(
-                Context.SENSOR_PRIVACY_SERVICE);
+    public SensorPrivacyControllerImpl(@NonNull SensorPrivacyManager sensorPrivacyManager) {
+        mSensorPrivacyManager = sensorPrivacyManager;
+    }
+
+    @Override
+    public void init() {
         mSensorPrivacyEnabled = mSensorPrivacyManager.isSensorPrivacyEnabled();
         mSensorPrivacyManager.addSensorPrivacyListener(this);
-        mListeners = new ArrayList<>(1);
     }
 
     /**

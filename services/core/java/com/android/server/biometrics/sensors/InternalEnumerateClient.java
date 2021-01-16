@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * Internal class to help clean up unknown templates in the HAL and Framework
  */
-public abstract class InternalEnumerateClient<T> extends ClientMonitor<T>
+public abstract class InternalEnumerateClient<T> extends BaseClientMonitor<T>
         implements EnumerateConsumer {
 
     private static final String TAG = "Biometrics/InternalEnumerateClient";

@@ -233,6 +233,7 @@ public final class FakeGnssHal extends GnssNative.GnssHal {
         private boolean mAntennaInfoListeningStarted = false;
         private boolean mMeasurementCollectionStarted = false;
         private boolean mMeasurementCollectionFullTracking = false;
+        private boolean mMeasurementCollectionCorrVecOutputsEnabled = false;
         private GnssHalPositionMode mPositionMode = new GnssHalPositionMode();
         private GnssHalBatchingMode mBatchingMode = new GnssHalBatchingMode();
         private final ArrayList<Location> mBatchedLocations = new ArrayList<>();
@@ -521,9 +522,11 @@ public final class FakeGnssHal extends GnssNative.GnssHal {
     }
 
     @Override
-    protected boolean startMeasurementCollection(boolean enableFullTracking) {
+    protected boolean startMeasurementCollection(boolean enableFullTracking,
+            boolean enableCorrVecOutputs) {
         mState.mMeasurementCollectionStarted = true;
         mState.mMeasurementCollectionFullTracking = enableFullTracking;
+        mState.mMeasurementCollectionCorrVecOutputsEnabled = enableCorrVecOutputs;
         return true;
     }
 
@@ -531,6 +534,7 @@ public final class FakeGnssHal extends GnssNative.GnssHal {
     protected boolean stopMeasurementCollection() {
         mState.mMeasurementCollectionStarted = false;
         mState.mMeasurementCollectionFullTracking = false;
+        mState.mMeasurementCollectionCorrVecOutputsEnabled = false;
         return true;
     }
 

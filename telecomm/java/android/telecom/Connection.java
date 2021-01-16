@@ -109,6 +109,20 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public abstract class Connection extends Conferenceable {
 
+    /**@hide*/
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "STATE_", value = {
+            STATE_INITIALIZING,
+            STATE_NEW,
+            STATE_RINGING,
+            STATE_DIALING,
+            STATE_ACTIVE,
+            STATE_HOLDING,
+            STATE_DISCONNECTED,
+            STATE_PULLING_CALL
+    })
+    public @interface ConnectionState {}
+
     /**
      * The connection is initializing. This is generally the first state for a {@code Connection}
      * returned by a {@link ConnectionService}.

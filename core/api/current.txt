@@ -393,6 +393,7 @@ package android {
     field public static final int calendarViewShown = 16843596; // 0x101034c
     field public static final int calendarViewStyle = 16843613; // 0x101035d
     field public static final int canControlMagnification = 16844039; // 0x1010507
+    field public static final int canPauseRecording = 16844314; // 0x101061a
     field public static final int canPerformGestures = 16844045; // 0x101050d
     field public static final int canRecord = 16844060; // 0x101051c
     field @Deprecated public static final int canRequestEnhancedWebAccessibility = 16843736; // 0x10103d8
@@ -1054,11 +1055,11 @@ package android {
     field public static final int parentActivityName = 16843687; // 0x10103a7
     field @Deprecated public static final int password = 16843100; // 0x101015c
     field public static final int path = 16842794; // 0x101002a
-    field public static final int pathAdvancedPattern = 16844318; // 0x101061e
+    field public static final int pathAdvancedPattern = 16844319; // 0x101061f
     field public static final int pathData = 16843781; // 0x1010405
     field public static final int pathPattern = 16842796; // 0x101002c
     field public static final int pathPrefix = 16842795; // 0x101002b
-    field public static final int pathSuffix = 16844316; // 0x101061c
+    field public static final int pathSuffix = 16844317; // 0x101061d
     field public static final int patternPathData = 16843978; // 0x10104ca
     field public static final int permission = 16842758; // 0x1010006
     field public static final int permissionFlags = 16843719; // 0x10103c7
@@ -1151,7 +1152,7 @@ package android {
     field public static final int reqNavigation = 16843306; // 0x101022a
     field public static final int reqTouchScreen = 16843303; // 0x1010227
     field public static final int requestLegacyExternalStorage = 16844291; // 0x1010603
-    field public static final int requireDeviceScreenOn = 16844315; // 0x101061b
+    field public static final int requireDeviceScreenOn = 16844316; // 0x101061c
     field public static final int requireDeviceUnlock = 16843756; // 0x10103ec
     field public static final int required = 16843406; // 0x101028e
     field public static final int requiredAccountType = 16843734; // 0x10103d6
@@ -1292,10 +1293,10 @@ package android {
     field public static final int spotShadowAlpha = 16843967; // 0x10104bf
     field public static final int src = 16843033; // 0x1010119
     field public static final int ssp = 16843747; // 0x10103e3
-    field public static final int sspAdvancedPattern = 16844319; // 0x101061f
+    field public static final int sspAdvancedPattern = 16844320; // 0x1010620
     field public static final int sspPattern = 16843749; // 0x10103e5
     field public static final int sspPrefix = 16843748; // 0x10103e4
-    field public static final int sspSuffix = 16844317; // 0x101061d
+    field public static final int sspSuffix = 16844318; // 0x101061e
     field public static final int stackFromBottom = 16843005; // 0x10100fd
     field public static final int stackViewStyle = 16843838; // 0x101043e
     field public static final int starStyle = 16842882; // 0x1010082
@@ -6759,7 +6760,7 @@ package android.app {
     method public android.content.Intent getCropAndSetWallpaperIntent(android.net.Uri);
     method public int getDesiredMinimumHeight();
     method public int getDesiredMinimumWidth();
-    method public android.graphics.drawable.Drawable getDrawable();
+    method @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) public android.graphics.drawable.Drawable getDrawable();
     method @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) public android.graphics.drawable.Drawable getFastDrawable();
     method public static android.app.WallpaperManager getInstance(android.content.Context);
     method @Nullable public android.app.WallpaperColors getWallpaperColors(int);
@@ -24751,6 +24752,7 @@ package android.media.tv {
   }
 
   public final class TvInputInfo implements android.os.Parcelable {
+    method public boolean canPauseRecording();
     method public boolean canRecord();
     method @Deprecated public android.content.Intent createSettingsIntent();
     method public android.content.Intent createSetupIntent();
@@ -24784,6 +24786,7 @@ package android.media.tv {
   public static final class TvInputInfo.Builder {
     ctor public TvInputInfo.Builder(android.content.Context, android.content.ComponentName);
     method public android.media.tv.TvInputInfo build();
+    method @NonNull public android.media.tv.TvInputInfo.Builder setCanPauseRecording(boolean);
     method public android.media.tv.TvInputInfo.Builder setCanRecord(boolean);
     method public android.media.tv.TvInputInfo.Builder setExtras(android.os.Bundle);
     method public android.media.tv.TvInputInfo.Builder setTunerCount(int);
@@ -24875,7 +24878,9 @@ package android.media.tv {
     method public void notifyRecordingStopped(android.net.Uri);
     method public void notifyTuned(android.net.Uri);
     method public void onAppPrivateCommand(@NonNull String, android.os.Bundle);
+    method public void onPauseRecording(@NonNull android.os.Bundle);
     method public abstract void onRelease();
+    method public void onResumeRecording(@NonNull android.os.Bundle);
     method public abstract void onStartRecording(@Nullable android.net.Uri);
     method public void onStartRecording(@Nullable android.net.Uri, @NonNull android.os.Bundle);
     method public abstract void onStopRecording();
@@ -24925,7 +24930,11 @@ package android.media.tv {
 
   public class TvRecordingClient {
     ctor public TvRecordingClient(android.content.Context, String, @NonNull android.media.tv.TvRecordingClient.RecordingCallback, android.os.Handler);
+    method public void pauseRecording();
+    method public void pauseRecording(@NonNull android.os.Bundle);
     method public void release();
+    method public void resumeRecording();
+    method public void resumeRecording(@NonNull android.os.Bundle);
     method public void sendAppPrivateCommand(@NonNull String, android.os.Bundle);
     method public void startRecording(@Nullable android.net.Uri);
     method public void startRecording(@Nullable android.net.Uri, @NonNull android.os.Bundle);
@@ -34462,6 +34471,7 @@ package android.provider {
     field public static final String ACTION_LOCATION_SOURCE_SETTINGS = "android.settings.LOCATION_SOURCE_SETTINGS";
     field public static final String ACTION_MANAGE_ALL_APPLICATIONS_SETTINGS = "android.settings.MANAGE_ALL_APPLICATIONS_SETTINGS";
     field public static final String ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION = "android.settings.MANAGE_ALL_FILES_ACCESS_PERMISSION";
+    field public static final String ACTION_MANAGE_ALL_SUBSCRIPTIONS_SETTINGS = "android.settings.MANAGE_ALL_SUBSCRIPTIONS_SETTINGS";
     field public static final String ACTION_MANAGE_APPLICATIONS_SETTINGS = "android.settings.MANAGE_APPLICATIONS_SETTINGS";
     field public static final String ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION = "android.settings.MANAGE_APP_ALL_FILES_ACCESS_PERMISSION";
     field public static final String ACTION_MANAGE_DEFAULT_APPS_SETTINGS = "android.settings.MANAGE_DEFAULT_APPS_SETTINGS";
@@ -40173,6 +40183,11 @@ package android.telephony {
     field public static final String KEY_WIFI_OFF_DEFERRING_TIME_MILLIS_INT = "ims.wifi_off_deferring_time_millis_int";
   }
 
+  public static final class CarrierConfigManager.ImsServiceEntitlement {
+    field public static final String KEY_AES_URL_STRING = "imsserviceentitlement.aes_url_string";
+    field public static final String KEY_PREFIX = "imsserviceentitlement.";
+  }
+
   public static final class CarrierConfigManager.Iwlan {
     field public static final int AUTHENTICATION_METHOD_CERT = 1; // 0x1
     field public static final int AUTHENTICATION_METHOD_EAP_ONLY = 0; // 0x0
@@ -41110,12 +41125,13 @@ package android.telephony {
   public class PhoneNumberUtils {
     ctor public PhoneNumberUtils();
     method public static void addTtsSpan(android.text.Spannable, int, int);
+    method public static boolean areSamePhoneNumber(@NonNull String, @NonNull String, @NonNull String);
     method @Deprecated public static String calledPartyBCDFragmentToString(byte[], int, int);
     method public static String calledPartyBCDFragmentToString(byte[], int, int, int);
     method @Deprecated public static String calledPartyBCDToString(byte[], int, int);
     method public static String calledPartyBCDToString(byte[], int, int, int);
-    method public static boolean compare(String, String);
-    method public static boolean compare(android.content.Context, String, String);
+    method @Deprecated public static boolean compare(String, String);
+    method @Deprecated public static boolean compare(android.content.Context, String, String);
     method public static String convertKeypadLettersToDigits(String);
     method public static android.text.style.TtsSpan createTtsSpan(String);
     method public static CharSequence createTtsSpannable(CharSequence);
@@ -41850,8 +41866,8 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void switchMultiSimConfig(int);
     method public void unregisterPhoneStateListener(@NonNull android.telephony.PhoneStateListener);
     method public void updateAvailableNetworks(@NonNull java.util.List<android.telephony.AvailableNetworkInfo>, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Integer>);
-    method public void uploadCallComposerPicture(@NonNull java.nio.file.Path, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.os.ParcelUuid,android.telephony.TelephonyManager.CallComposerException>);
-    method public void uploadCallComposerPicture(@NonNull java.io.InputStream, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.os.ParcelUuid,android.telephony.TelephonyManager.CallComposerException>);
+    method public void uploadCallComposerPicture(@NonNull java.nio.file.Path, @NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.os.ParcelUuid,android.telephony.TelephonyManager.CallComposerException>);
+    method public void uploadCallComposerPicture(@NonNull java.io.InputStream, @NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.os.ParcelUuid,android.telephony.TelephonyManager.CallComposerException>);
     field public static final String ACTION_CARRIER_MESSAGING_CLIENT_SERVICE = "android.telephony.action.CARRIER_MESSAGING_CLIENT_SERVICE";
     field public static final String ACTION_CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE = "android.telephony.action.CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE";
     field public static final String ACTION_CARRIER_SIGNAL_PCO_VALUE = "android.telephony.action.CARRIER_SIGNAL_PCO_VALUE";
@@ -41877,6 +41893,7 @@ package android.telephony {
     field public static final int AUTHTYPE_EAP_SIM = 128; // 0x80
     field public static final int CALL_COMPOSER_STATUS_OFF = 0; // 0x0
     field public static final int CALL_COMPOSER_STATUS_ON = 1; // 0x1
+    field public static final int CALL_COMPOSER_STATUS_ON_NO_PICTURES = 2; // 0x2
     field public static final int CALL_STATE_IDLE = 0; // 0x0
     field public static final int CALL_STATE_OFFHOOK = 2; // 0x2
     field public static final int CALL_STATE_RINGING = 1; // 0x1
@@ -42002,6 +42019,7 @@ package android.telephony {
     field public static final int ERROR_FILE_TOO_LARGE = 2; // 0x2
     field public static final int ERROR_INPUT_CLOSED = 4; // 0x4
     field public static final int ERROR_IO_EXCEPTION = 5; // 0x5
+    field public static final int ERROR_NETWORK_UNAVAILABLE = 6; // 0x6
     field public static final int ERROR_REMOTE_END_CLOSED = 1; // 0x1
     field public static final int ERROR_UNKNOWN = 0; // 0x0
   }

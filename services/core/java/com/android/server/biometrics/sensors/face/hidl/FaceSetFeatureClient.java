@@ -25,7 +25,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.server.biometrics.sensors.ClientMonitor;
+import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 
 import java.util.ArrayList;
@@ -34,7 +34,7 @@ import java.util.ArrayList;
  * Face-specific setFeature client supporting the {@link android.hardware.biometrics.face.V1_0}
  * and {@link android.hardware.biometrics.face.V1_1} HIDL interfaces.
  */
-public class FaceSetFeatureClient extends ClientMonitor<IBiometricsFace> {
+public class FaceSetFeatureClient extends BaseClientMonitor<IBiometricsFace> {
 
     private static final String TAG = "FaceSetFeatureClient";
 

@@ -188,6 +188,9 @@ public class PeopleService extends SystemService {
                 ConversationStatus status) {
             handleIncomingUser(userId);
             checkCallerIsSameApp(packageName);
+            if (status.getStartTimeMillis() > System.currentTimeMillis()) {
+                throw new IllegalArgumentException("Start time must be in the past");
+            }
             mDataManager.addOrUpdateStatus(packageName, userId, conversationId, status);
         }
 

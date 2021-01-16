@@ -107,11 +107,6 @@ public interface StatusBarPolicyModule {
 
     /** */
     @Binds
-    SensorPrivacyController provideSensorPrivacyControllerImpl(
-            SensorPrivacyControllerImpl controllerImpl);
-
-    /** */
-    @Binds
     UserInfoController provideUserInfoContrller(UserInfoControllerImpl controllerImpl);
 
     /** */
