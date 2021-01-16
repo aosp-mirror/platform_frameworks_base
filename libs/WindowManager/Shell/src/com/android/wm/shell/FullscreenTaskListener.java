@@ -71,6 +71,7 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
 
     @Override
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) return;
         final SurfaceControl leash = mLeashByTaskId.get(taskInfo.taskId);
         final Point positionInParent = taskInfo.positionInParent;
         mSyncQueue.runInSync(t -> t.setPosition(leash, positionInParent.x, positionInParent.y));

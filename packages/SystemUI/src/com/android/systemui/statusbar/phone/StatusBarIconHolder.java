@@ -23,6 +23,7 @@ import android.os.UserHandle;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
+import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.NoCallingIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
 
 /**
@@ -66,6 +67,18 @@ public class StatusBarIconHolder {
         StatusBarIconHolder holder = new StatusBarIconHolder();
         holder.mMobileState = state;
         holder.mType = TYPE_MOBILE;
+        holder.mTag = state.subId;
+        return holder;
+    }
+
+    /**
+     * Creates a new StatusBarIconHolder from a NoCallingIconState.
+     */
+    public static StatusBarIconHolder fromNoCallingState(
+            Context context, NoCallingIconState state) {
+        StatusBarIconHolder holder = new StatusBarIconHolder();
+        holder.mIcon = new StatusBarIcon(UserHandle.SYSTEM, context.getPackageName(),
+                Icon.createWithResource(context, state.resId), 0, 0, null);
         holder.mTag = state.subId;
         return holder;
     }

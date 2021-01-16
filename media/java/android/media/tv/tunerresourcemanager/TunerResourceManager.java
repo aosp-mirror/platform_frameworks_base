@@ -24,6 +24,7 @@ import android.annotation.RequiresFeature;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.media.tv.tuner.TunerFrontendInfo;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.util.Log;

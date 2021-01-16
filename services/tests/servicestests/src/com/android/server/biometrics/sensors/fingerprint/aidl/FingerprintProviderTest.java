@@ -31,8 +31,8 @@ import android.platform.test.annotations.Presubmit;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
+import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
-import com.android.server.biometrics.sensors.ClientMonitor;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 
@@ -97,7 +97,7 @@ public class FingerprintProviderTest {
             final BiometricScheduler scheduler =
                     mFingerprintProvider.mSensors.get(prop.commonProps.sensorId).getScheduler();
             for (int i = 0; i < numFakeOperations; i++) {
-                final ClientMonitor testMonitor = mock(ClientMonitor.class);
+                final BaseClientMonitor testMonitor = mock(BaseClientMonitor.class);
                 when(testMonitor.getFreshDaemon()).thenReturn(new Object());
                 scheduler.scheduleClientMonitor(testMonitor);
             }

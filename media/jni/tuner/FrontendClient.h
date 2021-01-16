@@ -30,7 +30,7 @@ using Status = ::ndk::ScopedAStatus;
 
 using ::aidl::android::media::tv::tuner::BnTunerFrontendCallback;
 using ::aidl::android::media::tv::tuner::ITunerFrontend;
-using ::aidl::android::media::tv::tuner::TunerAtsc3PlpInfo;
+using ::aidl::android::media::tv::tuner::TunerFrontendScanMessage;
 
 using ::android::hardware::Return;
 using ::android::hardware::Void;
@@ -63,34 +63,18 @@ public:
 
     Status onEvent(int frontendEventType);
 
-    Status onLocked();
+    Status onScanMessage(int messageType, const TunerFrontendScanMessage& message);
 
-    Status onScanStopped();
-
-    Status onProgress(int percent);
-
-    Status onFrequenciesReport(const vector<int>& frequency);
-
-    Status onSymbolRates(const vector<int>& rates);
-
-    Status onHierarchy(int hierarchy);
-
-    Status onSignalType(int signalType);
-
-    Status onPlpIds(const vector<int>& plpIds);
-
-    Status onGroupIds(const vector<int>& groupIds);
-
-    Status onInputStreamIds(const vector<int>& inputStreamIds);
-
-    Status onDvbsStandard(int dvbsStandandard);
-
-    Status onAnalogSifStandard(int sifStandandard);
-
-    Status onAtsc3PlpInfos(const vector<TunerAtsc3PlpInfo>& atsc3PlpInfos);
+    void setFrontendType(int frontendType) { mType = frontendType; }
 
 private:
+    FrontendScanMessage getHalScanMessage(int messageType, const TunerFrontendScanMessage& message);
+    FrontendScanMessageExt1_1 getHalScanMessageExt1_1(int messageType,
+            const TunerFrontendScanMessage& message);
+    bool is1_1ExtendedScanMessage(int messageType);
+
     sp<FrontendClientCallback> mFrontendClientCallback;
+    int mType;
 };
 
 struct HidlFrontendCallback : public IFrontendCallback {
@@ -111,7 +95,7 @@ private:
 struct FrontendClient : public RefBase {
 
 public:
-    FrontendClient(shared_ptr<ITunerFrontend> tunerFrontend, int id);
+    FrontendClient(shared_ptr<ITunerFrontend> tunerFrontend, int id, int type);
     ~FrontendClient();
 
     /**
@@ -210,6 +194,7 @@ private:
     sp<HidlFrontendCallback> mHidlCallback;
 
     int mId;
+    int mType;
 };
 }  // namespace android
 

@@ -3171,7 +3171,9 @@ public class LocationManager {
             for (GnssMeasurementRequest request : requests) {
                 if (request.isFullTracking()) {
                     builder.setFullTracking(true);
-                    break;
+                }
+                if (request.isCorrelationVectorOutputsEnabled()) {
+                    builder.setCorrelationVectorOutputsEnabled(true);
                 }
             }
 

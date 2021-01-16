@@ -3047,6 +3047,7 @@
     <public name="rollbackDataPolicy" />
     <public name="allowClickWhenDisabled" />
     <public name="windowLayoutAffinity" />
+    <public name="canPauseRecording" />
     <!-- @hide -->
     <public name="windowBackgroundBlurRadius"/>
     <public name="requireDeviceScreenOn" />

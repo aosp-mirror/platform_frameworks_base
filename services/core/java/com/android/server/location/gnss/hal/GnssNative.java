@@ -733,9 +733,10 @@ public class GnssNative {
     /**
      * Starts measurement collection.
      */
-    public boolean startMeasurementCollection(boolean enableFullTracking) {
+    public boolean startMeasurementCollection(boolean enableFullTracking,
+            boolean enableCorrVecOutputs) {
         Preconditions.checkState(mRegistered);
-        return mGnssHal.startMeasurementCollection(enableFullTracking);
+        return mGnssHal.startMeasurementCollection(enableFullTracking, enableCorrVecOutputs);
     }
 
     /**
@@ -1274,8 +1275,9 @@ public class GnssNative {
             return native_is_measurement_supported();
         }
 
-        protected boolean startMeasurementCollection(boolean enableFullTracking) {
-            return native_start_measurement_collection(enableFullTracking);
+        protected boolean startMeasurementCollection(boolean enableFullTracking,
+                boolean enableCorrVecOutputs) {
+            return native_start_measurement_collection(enableFullTracking, enableCorrVecOutputs);
         }
 
         protected boolean stopMeasurementCollection() {
@@ -1438,7 +1440,8 @@ public class GnssNative {
 
     private static native boolean native_is_measurement_supported();
 
-    private static native boolean native_start_measurement_collection(boolean enableFullTracking);
+    private static native boolean native_start_measurement_collection(boolean enableFullTracking,
+            boolean enableCorrVecOutputs);
 
     private static native boolean native_stop_measurement_collection();
 

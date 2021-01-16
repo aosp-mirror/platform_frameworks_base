@@ -1,6 +1,12 @@
 {
   "version": "1.0.0",
   "messages": {
+    "-2076257741": {
+      "message": "Transition requested: %s %s",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TRANSITIONS",
+      "at": "com\/android\/wm\/shell\/transition\/Transitions.java"
+    },
     "-1683614271": {
       "message": "Existing task: id=%d component=%s",
       "level": "VERBOSE",
@@ -132,12 +138,6 @@
       "level": "VERBOSE",
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
-    },
-    "846958769": {
-      "message": "Transition requested: type=%d %s",
-      "level": "VERBOSE",
-      "group": "WM_SHELL_TRANSITIONS",
-      "at": "com\/android\/wm\/shell\/transition\/Transitions.java"
     },
     "900599280": {
       "message": "Can't pair unresizeable tasks task1.isResizeable=%b task1.isResizeable=%b",

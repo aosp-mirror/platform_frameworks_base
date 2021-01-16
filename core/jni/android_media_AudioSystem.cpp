@@ -1946,7 +1946,7 @@ static jint convertAudioMixToNative(JNIEnv *env,
 
     jobject jRule = env->GetObjectField(jAudioMix, gAudioMixFields.mRule);
     jobject jRuleCriteria = env->GetObjectField(jRule, gAudioMixingRuleFields.mCriteria);
-    nAudioMix->mAllowPrivilegedPlaybackCapture =
+    nAudioMix->mAllowPrivilegedMediaPlaybackCapture =
             env->GetBooleanField(jRule, gAudioMixingRuleFields.mAllowPrivilegedPlaybackCapture);
     nAudioMix->mVoiceCommunicationCaptureAllowed =
             env->GetBooleanField(jRule, gAudioMixingRuleFields.mVoiceCommunicationCaptureAllowed);

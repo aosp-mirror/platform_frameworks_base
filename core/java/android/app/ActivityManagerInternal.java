@@ -98,11 +98,15 @@ public abstract class ActivityManagerInternal {
     public abstract void killForegroundAppsForUser(@UserIdInt int userId);
 
     /**
-     *  Sets how long a {@link PendingIntent} can be temporarily whitelist to by bypass restrictions
-     *  such as Power Save mode.
+     * Sets how long a {@link PendingIntent} can be temporarily whitelist to by bypass restrictions
+     * such as Power Save mode.
+     * @param target
+     * @param whitelistToken
+     * @param duration temp allowlist duration in milliseconds.
+     * @param type temp allowlist type defined at {@link BroadcastOptions.TempAllowListType}
      */
     public abstract void setPendingIntentWhitelistDuration(IIntentSender target,
-            IBinder whitelistToken, long duration);
+            IBinder whitelistToken, long duration, int type);
 
     /**
      * Returns the flags set for a {@link PendingIntent}.
@@ -318,8 +322,17 @@ public abstract class ActivityManagerInternal {
     public abstract boolean isBooted();
     public abstract void finishBooting();
 
+    /**
+     * Temp allowlist a UID for PendingIntent.
+     * @param callerPid the PID that sent the PendingIntent.
+     * @param callerUid the UID that sent the PendingIntent.
+     * @param targetUid the UID that is been temp allowlisted.
+     * @param duration temp allowlist duration in milliseconds.
+     * @param type temp allowlist type defined at {@link BroadcastOptions.TempAllowListType}
+     * @param tag
+     */
     public abstract void tempWhitelistForPendingIntent(int callerPid, int callerUid, int targetUid,
-            long duration, String tag);
+            long duration, int type, String tag);
 
     public abstract int broadcastIntentInPackage(String packageName, @Nullable String featureId,
             int uid, int realCallingUid, int realCallingPid, Intent intent, String resolvedType,

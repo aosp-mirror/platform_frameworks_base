@@ -1262,7 +1262,7 @@ interface ITelephony {
     int getRadioAccessFamily(in int phoneId, String callingPackage);
 
     void uploadCallComposerPicture(int subscriptionId, String callingPackage,
-            in ParcelFileDescriptor fd, in ResultReceiver callback);
+            String contentType, in ParcelFileDescriptor fd, in ResultReceiver callback);
 
     /**
      * Enables or disables video calling.

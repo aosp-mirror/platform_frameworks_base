@@ -26,7 +26,7 @@ import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.HardwareAuthTokenUtils;
-import com.android.server.biometrics.sensors.ClientMonitor;
+import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
@@ -36,7 +36,7 @@ import com.android.server.biometrics.sensors.LockoutTracker;
  * Updates the framework's lockout cache and notifies clients such as Keyguard when lockout is
  * cleared.
  */
-public class FaceResetLockoutClient extends ClientMonitor<ISession> {
+public class FaceResetLockoutClient extends BaseClientMonitor<ISession> {
 
     private static final String TAG = "FaceResetLockoutClient";
 

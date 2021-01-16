@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,22 +19,25 @@ package com.android.server.role;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 
-import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * A provider for migrating legacy "role"s to their actual role implementation.
+ * Provider for legacy role state.
+ * <p>
+ * The role state may come from two sources, either the different pre-role default app settings, or
+ * the pre-modularization roles.xml file stored in platform.
+ *
+ * @hide
  */
 //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-public interface LegacyRoleHolderProvider {
+public interface LegacyRoleStateProvider {
     /**
-     * Get the list of holders of a legacy "role" before its actual role is introduced.
-     * <p>
-     * This method will only be called for the first time a role is made available in the platform.
+     * Get the legacy role state stored in the platform.
      *
-     * @param roleName the name of the role
      * @param userId the user ID
-     * @return a list of holders for the given role
+     * @return a mapping of role name to its set of holders
      */
     @NonNull
-    List<String> getLegacyRoleHolders(@NonNull String roleName, @UserIdInt int userId);
+    Map<String, Set<String>> getLegacyRoleState(@UserIdInt int userId);
 }

@@ -16,15 +16,21 @@
 
 package com.android.wm.shell.transition;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_TO_BACK;
+import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -37,9 +43,14 @@ import static org.mockito.Mockito.verify;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.RemoteException;
+import android.view.IRemoteAnimationFinishedCallback;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+import android.window.IRemoteTransition;
+import android.window.TransitionFilter;
 import android.window.TransitionInfo;
+import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
 import android.window.WindowOrganizer;
 
@@ -84,7 +95,8 @@ public class ShellTransitionTests {
         transitions.replaceDefaultHandlerForTest(mDefaultHandler);
 
         IBinder transitToken = new Binder();
-        transitions.requestStartTransition(TRANSIT_OPEN, transitToken, null /* trigger */);
+        transitions.requestStartTransition(transitToken,
+                new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
         verify(mOrganizer, times(1)).startTransition(eq(TRANSIT_OPEN), eq(transitToken), any());
         TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN)
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
@@ -118,10 +130,10 @@ public class ShellTransitionTests {
 
             @Nullable
             @Override
-            public WindowContainerTransaction handleRequest(int type, @NonNull IBinder transition,
-                    @Nullable RunningTaskInfo triggerTask) {
-                return (triggerTask != null
-                        && triggerTask.getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW)
+            public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
+                    @NonNull TransitionRequestInfo request) {
+                final RunningTaskInfo task = request.getTriggerTask();
+                return (task != null && task.getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW)
                         ? handlerWCT : null;
             }
         };
@@ -132,7 +144,8 @@ public class ShellTransitionTests {
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
 
         // Make a request that will be rejected by the testhandler.
-        transitions.requestStartTransition(TRANSIT_OPEN, transitToken, null /* trigger */);
+        transitions.requestStartTransition(transitToken,
+                new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
         verify(mOrganizer, times(1)).startTransition(eq(TRANSIT_OPEN), eq(transitToken), isNull());
         transitions.onTransitionReady(transitToken, open, mock(SurfaceControl.Transaction.class));
         assertEquals(1, mDefaultHandler.activeCount());
@@ -143,7 +156,8 @@ public class ShellTransitionTests {
         // Make a request that will be handled by testhandler but not animated by it.
         RunningTaskInfo mwTaskInfo =
                 createTaskInfo(1, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
-        transitions.requestStartTransition(TRANSIT_OPEN, transitToken, mwTaskInfo);
+        transitions.requestStartTransition(transitToken,
+                new TransitionRequestInfo(TRANSIT_OPEN, mwTaskInfo, null /* remote */));
         verify(mOrganizer, times(1)).startTransition(
                 eq(TRANSIT_OPEN), eq(transitToken), eq(handlerWCT));
         transitions.onTransitionReady(transitToken, open, mock(SurfaceControl.Transaction.class));
@@ -157,9 +171,10 @@ public class ShellTransitionTests {
         // the test handler gets first shot at animating since it claimed to handle it.
         TestTransitionHandler topHandler = new TestTransitionHandler();
         transitions.addHandler(topHandler);
-        transitions.requestStartTransition(TRANSIT_CHANGE, transitToken, mwTaskInfo);
+        transitions.requestStartTransition(transitToken,
+                new TransitionRequestInfo(TRANSIT_CHANGE, mwTaskInfo, null /* remote */));
         verify(mOrganizer, times(1)).startTransition(
-                eq(TRANSIT_OPEN), eq(transitToken), eq(handlerWCT));
+                eq(TRANSIT_CHANGE), eq(transitToken), eq(handlerWCT));
         TransitionInfo change = new TransitionInfoBuilder(TRANSIT_CHANGE)
                 .addChange(TRANSIT_CHANGE).build();
         transitions.onTransitionReady(transitToken, change, mock(SurfaceControl.Transaction.class));
@@ -168,6 +183,110 @@ public class ShellTransitionTests {
         assertEquals(0, topHandler.activeCount());
         testHandler.finishAll();
         mMainExecutor.flushAll();
+    }
+
+    @Test
+    public void testRequestRemoteTransition() {
+        Transitions transitions = new Transitions(mOrganizer, mTransactionPool, mMainExecutor,
+                mAnimExecutor);
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+
+        final boolean[] remoteCalled = new boolean[]{false};
+        IRemoteTransition testRemote = new IRemoteTransition.Stub() {
+            @Override
+            public void startAnimation(TransitionInfo info, SurfaceControl.Transaction t,
+                    IRemoteAnimationFinishedCallback finishCallback) throws RemoteException {
+                remoteCalled[0] = true;
+                finishCallback.onAnimationFinished();
+            }
+        };
+        IBinder transitToken = new Binder();
+        transitions.requestStartTransition(transitToken,
+                new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, testRemote));
+        verify(mOrganizer, times(1)).startTransition(eq(TRANSIT_OPEN), eq(transitToken), any());
+        TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        transitions.onTransitionReady(transitToken, info, mock(SurfaceControl.Transaction.class));
+        assertEquals(0, mDefaultHandler.activeCount());
+        assertTrue(remoteCalled[0]);
+        mDefaultHandler.finishAll();
+        mMainExecutor.flushAll();
+        verify(mOrganizer, times(1)).finishTransition(eq(transitToken), any(), any());
+    }
+
+    @Test
+    public void testTransitionFilterActivityType() {
+        TransitionFilter filter = new TransitionFilter();
+        filter.mRequirements =
+                new TransitionFilter.Requirement[]{new TransitionFilter.Requirement()};
+        filter.mRequirements[0].mActivityType = ACTIVITY_TYPE_HOME;
+        filter.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
+
+        final TransitionInfo openHome = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN,
+                        createTaskInfo(1, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME)).build();
+        assertTrue(filter.matches(openHome));
+
+        final TransitionInfo openStd = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN, createTaskInfo(
+                        1, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD)).build();
+        assertFalse(filter.matches(openStd));
+    }
+
+    @Test
+    public void testTransitionFilterMultiRequirement() {
+        // filter that requires at-least one opening and one closing app
+        TransitionFilter filter = new TransitionFilter();
+        filter.mRequirements = new TransitionFilter.Requirement[]{
+                new TransitionFilter.Requirement(), new TransitionFilter.Requirement()};
+        filter.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
+        filter.mRequirements[1].mModes = new int[]{TRANSIT_CLOSE, TRANSIT_TO_BACK};
+
+        final TransitionInfo openOnly = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).build();
+        assertFalse(filter.matches(openOnly));
+
+        final TransitionInfo openClose = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        assertTrue(filter.matches(openClose));
+    }
+
+    @Test
+    public void testRegisteredRemoteTransition() {
+        Transitions transitions = new Transitions(mOrganizer, mTransactionPool, mMainExecutor,
+                mAnimExecutor);
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+
+        final boolean[] remoteCalled = new boolean[]{false};
+        IRemoteTransition testRemote = new IRemoteTransition.Stub() {
+            @Override
+            public void startAnimation(TransitionInfo info, SurfaceControl.Transaction t,
+                    IRemoteAnimationFinishedCallback finishCallback) throws RemoteException {
+                remoteCalled[0] = true;
+                finishCallback.onAnimationFinished();
+            }
+        };
+
+        TransitionFilter filter = new TransitionFilter();
+        filter.mRequirements =
+                new TransitionFilter.Requirement[]{new TransitionFilter.Requirement()};
+        filter.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
+
+        transitions.registerRemote(filter, testRemote);
+        mMainExecutor.flushAll();
+
+        IBinder transitToken = new Binder();
+        transitions.requestStartTransition(transitToken,
+                new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
+        verify(mOrganizer, times(1)).startTransition(eq(TRANSIT_OPEN), eq(transitToken), any());
+        TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        transitions.onTransitionReady(transitToken, info, mock(SurfaceControl.Transaction.class));
+        assertEquals(0, mDefaultHandler.activeCount());
+        assertTrue(remoteCalled[0]);
+        mDefaultHandler.finishAll();
+        mMainExecutor.flushAll();
+        verify(mOrganizer, times(1)).finishTransition(eq(transitToken), any(), any());
     }
 
     class TransitionInfoBuilder {
@@ -209,8 +328,8 @@ public class ShellTransitionTests {
 
         @Nullable
         @Override
-        public WindowContainerTransaction handleRequest(int type, @NonNull IBinder transition,
-                @Nullable RunningTaskInfo triggerTask) {
+        public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
+                @NonNull TransitionRequestInfo request) {
             return null;
         }
 
@@ -237,6 +356,12 @@ public class ShellTransitionTests {
         taskInfo.taskId = taskId;
         taskInfo.configuration.windowConfiguration.setWindowingMode(windowingMode);
         taskInfo.configuration.windowConfiguration.setActivityType(activityType);
+        return taskInfo;
+    }
+
+    private static RunningTaskInfo createTaskInfo(int taskId) {
+        RunningTaskInfo taskInfo = new RunningTaskInfo();
+        taskInfo.taskId = taskId;
         return taskInfo;
     }
 

@@ -18,8 +18,8 @@
 #define _ANDROID_MEDIA_TV_TUNER_CLIENT_H_
 
 #include <aidl/android/media/tv/tunerresourcemanager/ITunerResourceManager.h>
-#include <aidl/android/media/tv/tunerresourcemanager/TunerFrontendInfo.h>
 #include <aidl/android/media/tv/tuner/ITunerService.h>
+#include <aidl/android/media/tv/tuner/TunerFrontendInfo.h>
 #include <android/hardware/tv/tuner/1.1/ITuner.h>
 #include <android/hardware/tv/tuner/1.1/types.h>
 
@@ -29,7 +29,7 @@
 #include "LnbClient.h"
 
 using ::aidl::android::media::tv::tuner::ITunerService;
-using ::aidl::android::media::tv::tuner::TunerServiceFrontendInfo;
+using ::aidl::android::media::tv::tuner::TunerFrontendInfo;
 using ::aidl::android::media::tv::tunerresourcemanager::ITunerResourceManager;
 
 using ::android::hardware::tv::tuner::V1_0::DemuxCapabilities;
@@ -141,7 +141,7 @@ private:
     sp<ILnb> openHidlLnbByName(string name, LnbId& lnbId);
     sp<IDescrambler> openHidlDescrambler();
     vector<int> getLnbHandles();
-    FrontendInfo FrontendInfoAidlToHidl(TunerServiceFrontendInfo aidlFrontendInfo);
+    FrontendInfo FrontendInfoAidlToHidl(TunerFrontendInfo aidlFrontendInfo);
     void updateTunerResources();
     void updateFrontendResources();
     void updateLnbResources();

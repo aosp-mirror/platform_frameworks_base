@@ -30,7 +30,6 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SPLIT;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING;
 import static android.content.pm.PackageManager.INSTALL_STAGED;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
-import static android.content.pm.PackageParser.APEX_FILE_EXTENSION;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_WRONLY;
@@ -251,6 +250,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final ApkChecksum[] EMPTY_FILE_CHECKSUM_ARRAY = {};
 
     private static final String SYSTEM_DATA_LOADER_PACKAGE = "android";
+    private static final String APEX_FILE_EXTENSION = ".apex";
 
     private static final int INCREMENTAL_STORAGE_BLOCKED_TIMEOUT_MS = 2000;
     private static final int INCREMENTAL_STORAGE_UNHEALTHY_TIMEOUT_MS = 7000;
@@ -331,8 +331,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private boolean mCommitted = false;
     @GuardedBy("mLock")
     private boolean mRelinquished = false;
-    @GuardedBy("mLock")
-    private boolean mDestroyed = false;
 
     /** Permissions have been accepted by the user (see {@link #setPermissionsResult}) */
     @GuardedBy("mLock")
@@ -762,8 +760,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private boolean mVerityFound;
 
-    @GuardedBy("mLock")
-    private boolean mDataLoaderFinished = false;
+    /**
+     * Both flags should be guarded with mLock whenever changes need to be in lockstep.
+     * Ok to check without mLock in case the proper check is done later, e.g. status callbacks
+     * for DataLoaders with deferred processing.
+     */
+    private volatile boolean mDestroyed = false;
+    private volatile boolean mDataLoaderFinished = false;
 
     @GuardedBy("mLock")
     private IncrementalFileStorages mIncrementalFileStorages;
@@ -3562,19 +3565,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         return;
                 }
 
-                synchronized (mLock) {
-                    if (mDestroyed || mDataLoaderFinished) {
-                        // No need to worry about post installation
-                        return;
-                    }
+                if (mDestroyed || mDataLoaderFinished) {
+                    // No need to worry about post installation
+                    return;
                 }
 
                 try {
                     IDataLoader dataLoader = dataLoaderManager.getDataLoader(dataLoaderId);
                     if (dataLoader == null) {
-                        synchronized (mLock) {
-                            mDataLoaderFinished = true;
-                        }
+                        mDataLoaderFinished = true;
                         dispatchSessionValidationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                                 "Failure to obtain data loader");
                         return;
@@ -3607,9 +3606,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             break;
                         }
                         case IDataLoaderStatusListener.DATA_LOADER_IMAGE_READY: {
-                            synchronized (mLock) {
-                                mDataLoaderFinished = true;
-                            }
+                            mDataLoaderFinished = true;
                             if (hasParentSessionId()) {
                                 mSessionProvider.getSession(
                                         getParentSessionId()).dispatchSessionSealed();
@@ -3622,9 +3619,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             break;
                         }
                         case IDataLoaderStatusListener.DATA_LOADER_IMAGE_NOT_READY: {
-                            synchronized (mLock) {
-                                mDataLoaderFinished = true;
-                            }
+                            mDataLoaderFinished = true;
                             dispatchSessionValidationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                                     "Failed to prepare image.");
                             if (manualStartAndDestroy) {
@@ -3643,9 +3638,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             break;
                         }
                         case IDataLoaderStatusListener.DATA_LOADER_UNRECOVERABLE:
-                            synchronized (mLock) {
-                                mDataLoaderFinished = true;
-                            }
+                            mDataLoaderFinished = true;
                             dispatchSessionValidationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                                     "DataLoader reported unrecoverable failure.");
                             break;
@@ -3683,11 +3676,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             final IStorageHealthListener healthListener = new IStorageHealthListener.Stub() {
                 @Override
                 public void onHealthStatus(int storageId, int status) {
-                    synchronized (mLock) {
-                        if (mDestroyed || mDataLoaderFinished) {
-                            // No need to worry about post installation
-                            return;
-                        }
+                    if (mDestroyed || mDataLoaderFinished) {
+                        // No need to worry about post installation
+                        return;
                     }
 
                     switch (status) {
@@ -3702,9 +3693,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             // fallthrough
                         case IStorageHealthListener.HEALTH_STATUS_UNHEALTHY:
                             // Even ADB installation can't wait for missing pages for too long.
-                            synchronized (mLock) {
-                                mDataLoaderFinished = true;
-                            }
+                            mDataLoaderFinished = true;
                             dispatchSessionValidationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                                     "Image is missing pages required for installation.");
                             break;

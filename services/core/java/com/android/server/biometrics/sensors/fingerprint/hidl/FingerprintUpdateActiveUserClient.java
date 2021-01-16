@@ -26,7 +26,7 @@ import android.os.RemoteException;
 import android.os.SELinux;
 import android.util.Slog;
 
-import com.android.server.biometrics.sensors.ClientMonitor;
+import com.android.server.biometrics.sensors.BaseClientMonitor;
 
 import java.io.File;
 import java.util.Map;
@@ -34,7 +34,7 @@ import java.util.Map;
 /**
  * Sets the HAL's current active user, and updates the framework's authenticatorId cache.
  */
-public class FingerprintUpdateActiveUserClient extends ClientMonitor<IBiometricsFingerprint> {
+public class FingerprintUpdateActiveUserClient extends BaseClientMonitor<IBiometricsFingerprint> {
 
     private static final String TAG = "FingerprintUpdateActiveUserClient";
     private static final String FP_DATA_DIR = "fpdata";

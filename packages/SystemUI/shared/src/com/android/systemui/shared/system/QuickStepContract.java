@@ -92,6 +92,8 @@ public class QuickStepContract {
     public static final int SYSUI_STATE_ONE_HANDED_ACTIVE = 1 << 16;
     // Allow system gesture no matter the system bar(s) is visible or not
     public static final int SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY = 1 << 17;
+    // The IME is showing
+    public static final int SYSUI_STATE_IME_SHOWING = 1 << 18;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
@@ -111,7 +113,8 @@ public class QuickStepContract {
             SYSUI_STATE_BUBBLES_EXPANDED,
             SYSUI_STATE_GLOBAL_ACTIONS_SHOWING,
             SYSUI_STATE_ONE_HANDED_ACTIVE,
-            SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY
+            SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY,
+            SYSUI_STATE_IME_SHOWING
     })
     public @interface SystemUiStateFlags {}
 
@@ -138,6 +141,7 @@ public class QuickStepContract {
         str.add((flags & SYSUI_STATE_ONE_HANDED_ACTIVE) != 0 ? "one_handed_active" : "");
         str.add((flags & SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY) != 0
                 ? "allow_gesture" : "");
+        str.add((flags & SYSUI_STATE_IME_SHOWING) != 0 ? "ime_visible" : "");
         return str.toString();
     }
 

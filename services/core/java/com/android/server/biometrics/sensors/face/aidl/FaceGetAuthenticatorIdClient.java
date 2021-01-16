@@ -23,11 +23,11 @@ import android.hardware.biometrics.face.ISession;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.server.biometrics.sensors.ClientMonitor;
+import com.android.server.biometrics.sensors.BaseClientMonitor;
 
 import java.util.Map;
 
-class FaceGetAuthenticatorIdClient extends ClientMonitor<ISession> {
+class FaceGetAuthenticatorIdClient extends BaseClientMonitor<ISession> {
 
     private static final String TAG = "FaceGetAuthenticatorIdClient";
 

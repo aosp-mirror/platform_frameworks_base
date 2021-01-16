@@ -46,6 +46,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     private final String mSlotWifi;
     private final String mSlotEthernet;
     private final String mSlotVpn;
+    private final String mSlotNoCalling;
 
     private final Context mContext;
     private final StatusBarIconController mIconController;
@@ -66,6 +67,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     private boolean mWifiVisible = false;
 
     private ArrayList<MobileIconState> mMobileStates = new ArrayList<MobileIconState>();
+    private ArrayList<NoCallingIconState> mNoCallingStates = new ArrayList<NoCallingIconState>();
     private WifiIconState mWifiIconState = new WifiIconState();
 
     public StatusBarSignalPolicy(Context context, StatusBarIconController iconController) {
@@ -76,6 +78,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
         mSlotWifi     = mContext.getString(com.android.internal.R.string.status_bar_wifi);
         mSlotEthernet = mContext.getString(com.android.internal.R.string.status_bar_ethernet);
         mSlotVpn      = mContext.getString(com.android.internal.R.string.status_bar_vpn);
+        mSlotNoCalling = mContext.getString(com.android.internal.R.string.status_bar_no_calling);
         mActivityEnabled = mContext.getResources().getBoolean(R.bool.config_showActivity);
 
         mIconController = iconController;
@@ -198,6 +201,22 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     }
 
     @Override
+    public void setNoCallingStatus(boolean noCalling, int subId) {
+        if (DEBUG) {
+            Log.d(TAG, "setNoCallingStatus: "
+                    + "noCalling = " + noCalling + ","
+                    + "subId = " + subId);
+        }
+        NoCallingIconState state = getNoCallingState(subId);
+        if (state == null) {
+            return;
+        }
+        state.visible = noCalling;
+        mIconController.setNoCallingIcons(
+                mSlotNoCalling, NoCallingIconState.copyStates(mNoCallingStates));
+    }
+
+    @Override
     public void setMobileDataIndicators(IconState statusIcon, IconState qsIcon, int statusType,
             int qsType, boolean activityIn, boolean activityOut,
             CharSequence typeContentDescription,
@@ -252,6 +271,16 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
         }
     }
 
+    private NoCallingIconState getNoCallingState(int subId) {
+        for (NoCallingIconState state : mNoCallingStates) {
+            if (state.subId == subId) {
+                return state;
+            }
+        }
+        Log.e(TAG, "Unexpected subscription " + subId);
+        return null;
+    }
+
     private MobileIconState getState(int subId) {
         for (MobileIconState state : mMobileStates) {
             if (state.subId == subId) {
@@ -285,9 +314,11 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
 
         mIconController.removeAllIconsForSlot(mSlotMobile);
         mMobileStates.clear();
+        mNoCallingStates.clear();
         final int n = subs.size();
         for (int i = 0; i < n; i++) {
             mMobileStates.add(new MobileIconState(subs.get(i).getSubscriptionId()));
+            mNoCallingStates.add(new NoCallingIconState(subs.get(i).getSubscriptionId()));
         }
     }
 
@@ -375,6 +406,53 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     @Override
     public void setMobileDataEnabled(boolean enabled) {
         // Don't care.
+    }
+
+    /**
+     * Stores the StatusBar state for no Calling & SMS.
+     */
+    public static class NoCallingIconState {
+        public boolean visible;
+        public int resId;
+        public int subId;
+
+        private NoCallingIconState(int subId) {
+            this.subId = subId;
+            this.resId = R.drawable.ic_qs_no_calling_sms;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            // Skipping reference equality bc this should be more of a value type
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            NoCallingIconState that = (NoCallingIconState) o;
+            return visible == that.visible
+                    && resId == that.resId
+                    && subId == that.subId;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(visible, resId, subId);
+        }
+
+        private void copyTo(NoCallingIconState other) {
+            other.visible = visible;
+            other.resId = resId;
+            other.subId = subId;
+        }
+
+        private static List<NoCallingIconState> copyStates(List<NoCallingIconState> inStates) {
+            ArrayList<NoCallingIconState> outStates = new ArrayList<>();
+            for (NoCallingIconState state : inStates) {
+                NoCallingIconState copy = new NoCallingIconState(state.subId);
+                state.copyTo(copy);
+                outStates.add(copy);
+            }
+            return outStates;
+        }
     }
 
     private static abstract class SignalIconState {

@@ -167,6 +167,10 @@ public abstract class SignalController<T extends State, I extends IconGroup> {
         }
     }
 
+    protected final void notifyNoCallingStatusChange(boolean noCalling, int subId) {
+        mCallbackHandler.setNoCallingStatus(noCalling, subId);
+    }
+
     /**
      * Returns the resource if resId is not 0, and an empty string otherwise.
      */

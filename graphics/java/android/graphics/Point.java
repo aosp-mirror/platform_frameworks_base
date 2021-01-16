@@ -20,8 +20,6 @@ import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.io.PrintWriter;
-
 /**
  * Point holds two integer coordinates
  */
@@ -70,17 +68,6 @@ public class Point implements Parcelable {
      */
     public final boolean equals(int x, int y) {
         return this.x == x && this.y == y;
-    }
-
-    /**
-     * Dumps a human-readable shortened string of the point into the given
-     * stream
-     *
-     * @param pw The {@link PrintWriter} into which the string representation of
-     *           the point will be written.
-     */
-    public final void dump(@NonNull PrintWriter pw) {
-        pw.print("["); pw.print(x); pw.print(","); pw.print(y); pw.print("]");
     }
 
     @Override

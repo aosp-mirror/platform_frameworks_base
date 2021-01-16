@@ -26,11 +26,11 @@ import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.os.IBinder;
 import android.util.ArrayMap;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
+import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
 
 import com.android.wm.shell.common.ShellExecutor;
@@ -99,8 +99,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
     @Nullable
     @Override
-    public WindowContainerTransaction handleRequest(int type, @NonNull IBinder transition,
-            @Nullable ActivityManager.RunningTaskInfo triggerTask) {
+    public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
+            @NonNull TransitionRequestInfo request) {
         return null;
     }
 

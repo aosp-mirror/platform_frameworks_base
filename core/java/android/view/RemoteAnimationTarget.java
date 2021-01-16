@@ -270,7 +270,7 @@ public class RemoteAnimationTarget implements Parcelable {
         pw.print(" clipRect="); clipRect.printShortString(pw);
         pw.print(" contentInsets="); contentInsets.printShortString(pw);
         pw.print(" prefixOrderIndex="); pw.print(prefixOrderIndex);
-        pw.print(" position="); position.dump(pw);
+        pw.print(" position="); printPoint(position, pw);
         pw.print(" sourceContainerBounds="); sourceContainerBounds.printShortString(pw);
         pw.print(" screenSpaceBounds="); screenSpaceBounds.printShortString(pw);
         pw.print(" localBounds="); localBounds.printShortString(pw);
@@ -301,6 +301,10 @@ public class RemoteAnimationTarget implements Parcelable {
             startBounds.dumpDebug(proto, START_BOUNDS);
         }
         proto.end(token);
+    }
+
+    private static void printPoint(Point p, PrintWriter pw) {
+        pw.print("["); pw.print(p.x); pw.print(","); pw.print(p.y); pw.print("]");
     }
 
     public static final @android.annotation.NonNull Creator<RemoteAnimationTarget> CREATOR

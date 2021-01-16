@@ -115,8 +115,6 @@ enum {
     AACTIVITYMANAGER_IMPORTANCE_GONE = 1000,
 };
 
-#if __ANDROID_API__ >= 31
-
 /**
  * Adds a UidImportanceListener to the ActivityManager.
  *
@@ -168,8 +166,6 @@ bool AActivityManager_isUidActive(uid_t uid) __INTRODUCED_IN(31);
  * @return the current uid importance value for uid.
  */
 int32_t AActivityManager_getUidImportance(uid_t uid) __INTRODUCED_IN(31);
-
-#endif // __ANDROID_API__ >= 31
 
 __END_DECLS
 

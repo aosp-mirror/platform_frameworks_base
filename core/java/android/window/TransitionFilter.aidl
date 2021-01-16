@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,6 @@
  * limitations under the License.
  */
 
-package android.media.tv.tunerresourcemanager;
+package android.window;
 
-/**
- * Simple container of the FrontendInfo struct defined in the TunerHAL 1.0 interface.
- *
- * @hide
- */
-parcelable TunerFrontendInfo {
-    int handle;
-
-    int frontendType;
-
-    int exclusiveGroupId;
-}
+parcelable TransitionFilter;

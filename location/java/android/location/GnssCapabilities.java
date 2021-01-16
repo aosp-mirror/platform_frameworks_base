@@ -58,6 +58,8 @@ public final class GnssCapabilities implements Parcelable {
     /** @hide */
     public static final int TOP_HAL_CAPABILITY_ANTENNA_INFO = 2048;
     /** @hide */
+    public static final int TOP_HAL_CAPABILITY_CORRELATION_VECTOR = 4096;
+    /** @hide */
     public static final int TOP_HAL_CAPABILITY_SATELLITE_PVT = 8192;
 
     /** @hide */
@@ -67,7 +69,8 @@ public final class GnssCapabilities implements Parcelable {
             TOP_HAL_CAPABILITY_MEASUREMENTS, TOP_HAL_CAPABILITY_NAV_MESSAGES,
             TOP_HAL_CAPABILITY_LOW_POWER_MODE, TOP_HAL_CAPABILITY_SATELLITE_BLOCKLIST,
             TOP_HAL_CAPABILITY_MEASUREMENT_CORRECTIONS, TOP_HAL_CAPABILITY_ANTENNA_INFO,
-            TOP_HAL_CAPABILITY_SATELLITE_PVT})
+            TOP_HAL_CAPABILITY_CORRELATION_VECTOR, TOP_HAL_CAPABILITY_SATELLITE_PVT})
+
     @Retention(RetentionPolicy.SOURCE)
     public @interface TopHalCapabilityFlags {}
 
@@ -337,6 +340,17 @@ public final class GnssCapabilities implements Parcelable {
     }
 
     /**
+     * Returns {@code true} if GNSS chipset supports correlation vectors as part of measurements
+     * outputs, {@code false} otherwise.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean hasMeasurementCorrelationVectors() {
+        return (mTopFlags & TOP_HAL_CAPABILITY_CORRELATION_VECTOR) != 0;
+    }
+
+    /**
      * Returns {@code true} if GNSS chipset supports line-of-sight satellite identification
      * measurement corrections, {@code false} otherwise.
      *
@@ -533,6 +547,9 @@ public final class GnssCapabilities implements Parcelable {
         if (hasAntennaInfo()) {
             builder.append("ANTENNA_INFO ");
         }
+        if (hasMeasurementCorrelationVectors()) {
+            builder.append("MEASUREMENT_CORRELATION_VECTORS ");
+        }
         if (hasMeasurementCorrectionsLosSats()) {
             builder.append("LOS_SATS ");
         }
@@ -716,6 +733,17 @@ public final class GnssCapabilities implements Parcelable {
          */
         public @NonNull Builder setHasAntennaInfo(boolean capable) {
             mTopFlags = setFlag(mTopFlags, TOP_HAL_CAPABILITY_ANTENNA_INFO, capable);
+            return this;
+        }
+
+        /**
+         * Sets correlation vector capability.
+         *
+         * @hide
+         */
+        @SystemApi
+        public @NonNull Builder setHasMeasurementCorrelationVectors(boolean capable) {
+            mTopFlags = setFlag(mTopFlags, TOP_HAL_CAPABILITY_CORRELATION_VECTOR, capable);
             return this;
         }
 
