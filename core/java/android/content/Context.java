@@ -5086,9 +5086,7 @@ public abstract class Context {
      * Service to capture a bugreport.
      * @see #getSystemService(String)
      * @see android.os.BugreportManager
-     * @hide
      */
-    @SystemApi
     public static final String BUGREPORT_SERVICE = "bugreport";
 
     /**
