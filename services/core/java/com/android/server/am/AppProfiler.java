@@ -207,7 +207,6 @@ public class AppProfiler {
      */
     private volatile boolean mTestPssMode = false;
 
-    @GuardedBy("mService")
     private final LowMemDetector mLowMemDetector;
 
     /**
@@ -239,13 +238,13 @@ public class AppProfiler {
     /**
      * Total time spent with RAM that has been added in the past since the last idle time.
      */
-    @GuardedBy("mService")
+    @GuardedBy("mProcLock")
     private long mLowRamTimeSinceLastIdle = 0;
 
     /**
      * If RAM is currently low, when that horrible situation started.
      */
-    @GuardedBy("mService")
+    @GuardedBy("mProcLock")
     private long mLowRamStartTime = 0;
 
     /**
@@ -330,6 +329,8 @@ public class AppProfiler {
      * </p>
      */
     final Object mProfilerLock = new Object();
+
+    final ActivityManagerGlobalLock mProcLock;
 
     /**
      * Observe DeviceConfig changes to the PSS calculation interval
@@ -852,8 +853,8 @@ public class AppProfiler {
     /**
      * Schedule PSS collection of all processes.
      */
-    @GuardedBy("mService")
-    void requestPssAllProcsLocked(long now, boolean always, boolean memLowered) {
+    @GuardedBy("mProcLock")
+    void requestPssAllProcsLPr(long now, boolean always, boolean memLowered) {
         synchronized (mProfilerLock) {
             if (!always) {
                 if (now < (mLastFullPssTime
@@ -870,10 +871,9 @@ public class AppProfiler {
             for (int i = mPendingPssProfiles.size() - 1; i >= 0; i--) {
                 mPendingPssProfiles.get(i).abortNextPssTime();
             }
-            mPendingPssProfiles.ensureCapacity(mService.mProcessList.getLruSizeLocked());
+            mPendingPssProfiles.ensureCapacity(mService.mProcessList.getLruSizeLOSP());
             mPendingPssProfiles.clear();
-            for (int i = mService.mProcessList.getLruSizeLocked() - 1; i >= 0; i--) {
-                ProcessRecord app = mService.mProcessList.mLruProcesses.get(i);
+            mService.mProcessList.forEachLruProcessesLOSP(false, app -> {
                 final ProcessProfileRecord profile = app.mProfile;
                 if (profile.getThread() == null
                         || profile.getSetProcState() == PROCESS_STATE_NONEXISTENT) {
@@ -889,7 +889,7 @@ public class AppProfiler {
                     updateNextPssTimeLPf(profile.getSetProcState(), profile, now, true);
                     mPendingPssProfiles.add(profile);
                 }
-            }
+            });
             if (!mBgHandler.hasMessages(BgHandler.COLLECT_PSS_BG_MSG)) {
                 mBgHandler.sendEmptyMessage(BgHandler.COLLECT_PSS_BG_MSG);
             }
@@ -897,12 +897,12 @@ public class AppProfiler {
     }
 
     void setTestPssMode(boolean enabled) {
-        synchronized (mService) {
+        synchronized (mProcLock) {
             mTestPssMode = enabled;
             if (enabled) {
                 // Whenever we enable the mode, we want to take a snapshot all of current
                 // process mem use.
-                requestPssAllProcsLocked(SystemClock.uptimeMillis(), true, true);
+                requestPssAllProcsLPr(SystemClock.uptimeMillis(), true, true);
             }
         }
     }
@@ -921,8 +921,8 @@ public class AppProfiler {
         return mLastMemoryLevel <= ADJ_MEM_FACTOR_NORMAL;
     }
 
-    @GuardedBy("mService")
-    void updateLowRamTimestampLocked(long now) {
+    @GuardedBy("mProcLock")
+    void updateLowRamTimestampLPr(long now) {
         mLowRamTimeSinceLastIdle = 0;
         if (mLowRamStartTime != 0) {
             mLowRamStartTime = now;
@@ -939,9 +939,8 @@ public class AppProfiler {
         mMemFactorOverride = factor;
     }
 
-    @GuardedBy("mService")
-    boolean updateLowMemStateLocked(int numCached, int numEmpty, int numTrimming) {
-        final int numOfLru = mService.mProcessList.getLruSizeLocked();
+    @GuardedBy({"mService", "mProcLock"})
+    boolean updateLowMemStateLSP(int numCached, int numEmpty, int numTrimming) {
         final long now = SystemClock.uptimeMillis();
         int memFactor;
         if (mLowMemDetector != null && mLowMemDetector.isAvailable()) {
@@ -973,7 +972,7 @@ public class AppProfiler {
         if (DEBUG_OOM_ADJ) {
             Slog.d(TAG_OOM_ADJ, "oom: memFactor=" + memFactor + " override=" + mMemFactorOverride
                     + " last=" + mLastMemoryLevel + " allowLow=" + mAllowLowerMemLevel
-                    + " numProcs=" + mService.mProcessList.getLruSizeLocked()
+                    + " numProcs=" + mService.mProcessList.getLruSizeLOSP()
                     + " last=" + mLastNumProcesses);
         }
         boolean override;
@@ -982,7 +981,7 @@ public class AppProfiler {
         }
         if (memFactor > mLastMemoryLevel) {
             if (!override && (!mAllowLowerMemLevel
-                    || mService.mProcessList.getLruSizeLocked() >= mLastNumProcesses)) {
+                    || mService.mProcessList.getLruSizeLOSP() >= mLastNumProcesses)) {
                 memFactor = mLastMemoryLevel;
                 if (DEBUG_OOM_ADJ) Slog.d(TAG_OOM_ADJ, "Keeping last mem factor!");
             }
@@ -992,7 +991,7 @@ public class AppProfiler {
             FrameworkStatsLog.write(FrameworkStatsLog.MEMORY_FACTOR_STATE_CHANGED, memFactor);
         }
         mLastMemoryLevel = memFactor;
-        mLastNumProcesses = mService.mProcessList.getLruSizeLocked();
+        mLastNumProcesses = mService.mProcessList.getLruSizeLOSP();
         boolean allChanged;
         int trackerMemFactor;
         synchronized (mService.mProcessStats.mLock) {
@@ -1004,7 +1003,6 @@ public class AppProfiler {
             if (mLowRamStartTime == 0) {
                 mLowRamStartTime = now;
             }
-            int step = 0;
             int fgTrimLevel;
             switch (memFactor) {
                 case ADJ_MEM_FACTOR_CRITICAL:
@@ -1022,126 +1020,129 @@ public class AppProfiler {
             if (mHasHomeProcess) minFactor++;
             if (mHasPreviousProcess) minFactor++;
             if (factor < minFactor) factor = minFactor;
-            int curLevel = ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
-            for (int i = 0; i < numOfLru; i++) {
-                final ProcessRecord app = mService.mProcessList.mLruProcesses.get(i);
+            final int actualFactor = factor;
+            final int[] step = {0};
+            final int[] curLevel = {ComponentCallbacks2.TRIM_MEMORY_COMPLETE};
+            mService.mProcessList.forEachLruProcessesLOSP(true, app -> {
                 final ProcessProfileRecord profile = app.mProfile;
                 final int trimMemoryLevel = profile.getTrimMemoryLevel();
-                if (allChanged || app.procStateChanged) {
-                    mService.setProcessTrackerStateLocked(app, trackerMemFactor, now);
-                    app.procStateChanged = false;
+                final ProcessStateRecord state = app.mState;
+                final int curProcState = state.getCurProcState();
+                IApplicationThread thread;
+                if (allChanged || state.hasProcStateChanged()) {
+                    mService.setProcessTrackerStateLOSP(app, trackerMemFactor, now);
+                    state.setProcStateChanged(false);
                 }
-                if (app.getCurProcState() >= ActivityManager.PROCESS_STATE_HOME
-                        && !app.killedByAm) {
-                    if (trimMemoryLevel < curLevel && app.thread != null) {
+                if (curProcState >= ActivityManager.PROCESS_STATE_HOME && !app.isKilledByAm()) {
+                    if (trimMemoryLevel < curLevel[0] && (thread = app.getThread()) != null) {
                         try {
                             if (DEBUG_SWITCH || DEBUG_OOM_ADJ) {
                                 Slog.v(TAG_OOM_ADJ,
                                         "Trimming memory of " + app.processName
-                                        + " to " + curLevel);
+                                        + " to " + curLevel[0]);
                             }
-                            app.thread.scheduleTrimMemory(curLevel);
+                            thread.scheduleTrimMemory(curLevel[0]);
                         } catch (RemoteException e) {
                         }
                     }
-                    profile.setTrimMemoryLevel(curLevel);
-                    step++;
-                    if (step >= factor) {
-                        step = 0;
-                        switch (curLevel) {
+                    profile.setTrimMemoryLevel(curLevel[0]);
+                    step[0]++;
+                    if (step[0] >= actualFactor) {
+                        step[0] = 0;
+                        switch (curLevel[0]) {
                             case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
-                                curLevel = ComponentCallbacks2.TRIM_MEMORY_MODERATE;
+                                curLevel[0] = ComponentCallbacks2.TRIM_MEMORY_MODERATE;
                                 break;
                             case ComponentCallbacks2.TRIM_MEMORY_MODERATE:
-                                curLevel = ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
+                                curLevel[0] = ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
                                 break;
                         }
                     }
-                } else if (app.getCurProcState() == ActivityManager.PROCESS_STATE_HEAVY_WEIGHT
-                        && !app.killedByAm) {
+                } else if (curProcState == ActivityManager.PROCESS_STATE_HEAVY_WEIGHT
+                        && !app.isKilledByAm()) {
                     if (trimMemoryLevel < ComponentCallbacks2.TRIM_MEMORY_BACKGROUND
-                            && app.thread != null) {
+                            && (thread = app.getThread()) != null) {
                         try {
                             if (DEBUG_SWITCH || DEBUG_OOM_ADJ) {
                                 Slog.v(TAG_OOM_ADJ,
                                         "Trimming memory of heavy-weight " + app.processName
                                         + " to " + ComponentCallbacks2.TRIM_MEMORY_BACKGROUND);
                             }
-                            app.thread.scheduleTrimMemory(
+                            thread.scheduleTrimMemory(
                                     ComponentCallbacks2.TRIM_MEMORY_BACKGROUND);
                         } catch (RemoteException e) {
                         }
                     }
                     profile.setTrimMemoryLevel(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND);
                 } else {
-                    if ((app.getCurProcState() >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
-                            || app.systemNoUi) && profile.hasPendingUiClean()) {
+                    if ((curProcState >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
+                                || state.isSystemNoUi()) && profile.hasPendingUiClean()) {
                         // If this application is now in the background and it
                         // had done UI, then give it the special trim level to
                         // have it free UI resources.
                         final int level = ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN;
-                        if (trimMemoryLevel < level && app.thread != null) {
+                        if (trimMemoryLevel < level && (thread = app.getThread()) != null) {
                             try {
                                 if (DEBUG_SWITCH || DEBUG_OOM_ADJ) {
                                     Slog.v(TAG_OOM_ADJ, "Trimming memory of bg-ui "
                                             + app.processName + " to " + level);
                                 }
-                                app.thread.scheduleTrimMemory(level);
+                                thread.scheduleTrimMemory(level);
                             } catch (RemoteException e) {
                             }
                         }
                         profile.setPendingUiClean(false);
                     }
-                    if (trimMemoryLevel < fgTrimLevel && app.thread != null) {
+                    if (trimMemoryLevel < fgTrimLevel && (thread = app.getThread()) != null) {
                         try {
                             if (DEBUG_SWITCH || DEBUG_OOM_ADJ) {
                                 Slog.v(TAG_OOM_ADJ, "Trimming memory of fg " + app.processName
                                         + " to " + fgTrimLevel);
                             }
-                            app.thread.scheduleTrimMemory(fgTrimLevel);
+                            thread.scheduleTrimMemory(fgTrimLevel);
                         } catch (RemoteException e) {
                         }
                     }
                     profile.setTrimMemoryLevel(fgTrimLevel);
                 }
-            }
+            });
         } else {
             if (mLowRamStartTime != 0) {
                 mLowRamTimeSinceLastIdle += now - mLowRamStartTime;
                 mLowRamStartTime = 0;
             }
-            for (int i = 0; i < numOfLru; i++) {
-                final ProcessRecord app = mService.mProcessList.mLruProcesses.get(i);
+            mService.mProcessList.forEachLruProcessesLOSP(true, app -> {
                 final ProcessProfileRecord profile = app.mProfile;
-                if (allChanged || app.procStateChanged) {
-                    mService.setProcessTrackerStateLocked(app, trackerMemFactor, now);
-                    app.procStateChanged = false;
+                final IApplicationThread thread;
+                final ProcessStateRecord state = app.mState;
+                if (allChanged || state.hasProcStateChanged()) {
+                    mService.setProcessTrackerStateLOSP(app, trackerMemFactor, now);
+                    state.setProcStateChanged(false);
                 }
-                if ((app.getCurProcState() >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
-                        || app.systemNoUi) && profile.hasPendingUiClean()) {
+                if ((state.getCurProcState() >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
+                            || state.isSystemNoUi()) && profile.hasPendingUiClean()) {
                     if (profile.getTrimMemoryLevel() < ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN
-                            && app.thread != null) {
+                            && (thread = app.getThread()) != null) {
                         try {
                             if (DEBUG_SWITCH || DEBUG_OOM_ADJ) {
                                 Slog.v(TAG_OOM_ADJ,
                                         "Trimming memory of ui hidden " + app.processName
                                         + " to " + ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
                             }
-                            app.thread.scheduleTrimMemory(
-                                    ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
+                            thread.scheduleTrimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
                         } catch (RemoteException e) {
                         }
                     }
                     profile.setPendingUiClean(false);
                 }
                 profile.setTrimMemoryLevel(0);
-            }
+            });
         }
         return allChanged;
     }
 
-    @GuardedBy("mService")
-    long getLowRamTimeSinceIdleLocked(long now) {
+    @GuardedBy("mProcLock")
+    long getLowRamTimeSinceIdleLPr(long now) {
         return mLowRamTimeSinceLastIdle + (mLowRamStartTime > 0 ? (now - mLowRamStartTime) : 0);
     }
 
@@ -1262,7 +1263,7 @@ public class AppProfiler {
         // If there are no longer any background processes running,
         // and the app that died was not running instrumentation,
         // then tell everyone we are now low on memory.
-        if (!mService.mProcessList.haveBackgroundProcessLocked()) {
+        if (!mService.mProcessList.haveBackgroundProcessLOSP()) {
             boolean doReport = Build.IS_DEBUGGABLE;
             final long now = SystemClock.uptimeMillis();
             if (doReport) {
@@ -1272,19 +1273,19 @@ public class AppProfiler {
                     mLastMemUsageReportTime = now;
                 }
             }
-            final int lruSize = mService.mProcessList.getLruSizeLocked();
+            final int lruSize = mService.mProcessList.getLruSizeLOSP();
             final ArrayList<ProcessMemInfo> memInfos = doReport
                     ? new ArrayList<ProcessMemInfo>(lruSize) : null;
             EventLogTags.writeAmLowMemory(lruSize);
-            for (int i = lruSize - 1; i >= 0; i--) {
-                ProcessRecord rec = mService.mProcessList.mLruProcesses.get(i);
-                if (rec == dyingProc || rec.thread == null) {
+            mService.mProcessList.forEachLruProcessesLOSP(false, rec -> {
+                if (rec == dyingProc || rec.getThread() == null) {
                     return;
                 }
+                final ProcessStateRecord state = rec.mState;
                 if (memInfos != null) {
-                    memInfos.add(new ProcessMemInfo(rec.processName, rec.pid,
-                                rec.setAdj, rec.setProcState,
-                                rec.adjType, rec.makeAdjReason()));
+                    memInfos.add(new ProcessMemInfo(rec.processName, rec.getPid(),
+                                state.getSetAdj(), state.getSetProcState(),
+                                state.getAdjType(), state.makeAdjReason()));
                 }
                 final ProcessProfileRecord profile = rec.mProfile;
                 if ((profile.getLastLowMemory() + mService.mConstants.GC_MIN_INTERVAL) <= now) {
@@ -1292,7 +1293,7 @@ public class AppProfiler {
                     // state for a GC request.  Make sure to do
                     // heavy/important/visible/foreground processes first.
                     synchronized (mProfilerLock) {
-                        if (rec.setAdj <= ProcessList.HEAVY_WEIGHT_APP_ADJ) {
+                        if (state.getSetAdj() <= ProcessList.HEAVY_WEIGHT_APP_ADJ) {
                             profile.setLastRequestedGc(0);
                         } else {
                             profile.setLastRequestedGc(profile.getLastLowMemory());
@@ -1303,7 +1304,7 @@ public class AppProfiler {
                         addProcessToGcListLPf(rec);
                     }
                 }
-            }
+            });
             if (doReport) {
                 Message msg = mService.mHandler.obtainMessage(REPORT_MEM_USAGE_MSG, memInfos);
                 mService.mHandler.sendMessage(msg);
@@ -1554,7 +1555,9 @@ public class AppProfiler {
             PrintWriter catPw = new FastPrintWriter(catSw, false, 256);
             String[] emptyArgs = new String[] { };
             catPw.println();
-            mService.mProcessList.dumpProcessesLocked(null, catPw, emptyArgs, 0, false, null, -1);
+            synchronized (mProcLock) {
+                mService.mProcessList.dumpProcessesLSP(null, catPw, emptyArgs, 0, false, null, -1);
+            }
             catPw.println();
             mService.mServices.newServiceDumperLocked(null, catPw, emptyArgs, 0,
                     false, null).dumpLocked();
@@ -1575,7 +1578,7 @@ public class AppProfiler {
         }
     }
 
-    @GuardedBy("mService")
+    @GuardedBy("mProfilerLock")
     private void stopProfilerLPf(ProcessRecord proc, int profileType) {
         if (proc == null || proc == mProfileData.getProfileProc()) {
             proc = mProfileData.getProfileProc();
@@ -1644,7 +1647,7 @@ public class AppProfiler {
                 }
                 mProfileData.getProfilerInfo().profileFd = null;
 
-                if (proc.pid == mService.MY_PID) {
+                if (proc.getPid() == mService.MY_PID) {
                     // When profiling the system server itself, avoid closing the file
                     // descriptor, as profilerControl will not create a copy.
                     // Note: it is also not correct to just set profileFd to null, as the
@@ -1930,6 +1933,7 @@ public class AppProfiler {
 
     AppProfiler(ActivityManagerService service, Looper bgLooper, LowMemDetector detector) {
         mService = service;
+        mProcLock = service.mProcLock;
         mBgHandler = new BgHandler(bgLooper);
         mLowMemDetector = detector;
         mProcessCpuThread = new ProcessCpuThread("CpuTracker");
@@ -2027,19 +2031,21 @@ public class AppProfiler {
                     i >= 0 && app.getActiveInstrumentation() == null; i--) {
                 ActiveInstrumentation aInstr = mService.mActiveInstrumentation.get(i);
                 if (!aInstr.mFinished && aInstr.mTargetInfo.uid == app.uid) {
-                    if (aInstr.mTargetProcesses.length == 0) {
-                        // This is the wildcard mode, where every process brought up for
-                        // the target instrumentation should be included.
-                        if (aInstr.mTargetInfo.packageName.equals(app.info.packageName)) {
-                            app.setActiveInstrumentation(aInstr);
-                            aInstr.mRunningProcesses.add(app);
-                        }
-                    } else {
-                        for (String proc : aInstr.mTargetProcesses) {
-                            if (proc.equals(app.processName)) {
+                    synchronized (mProcLock) {
+                        if (aInstr.mTargetProcesses.length == 0) {
+                            // This is the wildcard mode, where every process brought up for
+                            // the target instrumentation should be included.
+                            if (aInstr.mTargetInfo.packageName.equals(app.info.packageName)) {
                                 app.setActiveInstrumentation(aInstr);
                                 aInstr.mRunningProcesses.add(app);
-                                break;
+                            }
+                        } else {
+                            for (String proc : aInstr.mTargetProcesses) {
+                                if (proc.equals(app.processName)) {
+                                    app.setActiveInstrumentation(aInstr);
+                                    aInstr.mRunningProcesses.add(app);
+                                    break;
+                                }
                             }
                         }
                     }

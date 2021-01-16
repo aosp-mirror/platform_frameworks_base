@@ -313,8 +313,8 @@ public final class ProcessStatsService extends IProcessStats.Stub {
 
     private void scheduleRequestPssAllProcs(boolean always, boolean memLowered) {
         mAm.mHandler.post(() -> {
-            synchronized (mAm) {
-                mAm.mAppProfiler.requestPssAllProcsLocked(
+            synchronized (mAm.mProcLock) {
+                mAm.mAppProfiler.requestPssAllProcsLPr(
                         SystemClock.uptimeMillis(), always, memLowered);
             }
         });
