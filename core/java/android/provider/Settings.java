@@ -16609,12 +16609,6 @@ public final class Settings {
             public static final String WEAR_PLATFORM_MR_NUMBER = "wear_platform_mr_number";
 
             /**
-             * The bluetooth settings storing duplicate address of companion device.
-             * @hide
-             */
-            public static final String COMPANION_BT_ADDRESS_DUAL = "companion_bt_address_dual";
-
-            /**
              * The offset of the visible screen from the display bottom (overscan bottom).
              * @hide
              */
@@ -16704,12 +16698,6 @@ public final class Settings {
              * @hide
              */
             public static final String AMBIENT_PLUGGED_TIMEOUT_MIN = "ambient_plugged_timeout_min";
-
-            /**
-             * The companion device's bluetooth address.
-             * @hide
-             */
-            public static final String COMPANION_ADDRESS = "companion_address";
 
             /**
              * What OS does paired device has.

@@ -5345,8 +5345,6 @@ public class SettingsProvider extends ContentProvider {
                             Settings.Global.Wearable.AMBIENT_PLUGGED_TIMEOUT_MIN,
                             SystemProperties.getInt("ro.ambient.plugged_timeout_min", -1));
                     initGlobalSettingsDefaultValForWearLocked(
-                            Settings.Global.Wearable.COMPANION_ADDRESS, "");
-                    initGlobalSettingsDefaultValForWearLocked(
                             Settings.Global.Wearable.PAIRED_DEVICE_OS_TYPE,
                             Settings.Global.Wearable.PAIRED_DEVICE_OS_TYPE_UNKNOWN);
                     initGlobalSettingsDefaultValForWearLocked(
