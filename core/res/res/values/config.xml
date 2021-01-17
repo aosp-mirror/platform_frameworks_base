@@ -4631,4 +4631,9 @@
          dreaming. This allows the AoD to rotate on devices without a wake device_orientation
          sensor. Note that this flag should only be enabled for development/testing use. -->
     <bool name="config_forceOrientationListenerEnabledWhileDreaming">false</bool>
+
+    <!-- Whether the device enable the standalone (SA) mode of 5G NR.-->
+    <bool name="config_telephony5gStandalone">false</bool>
+    <!-- Whether the device enable the non-standalone (NSA) mode of 5G NR.-->
+    <bool name="config_telephony5gNonStandalone">false</bool>
 </resources>

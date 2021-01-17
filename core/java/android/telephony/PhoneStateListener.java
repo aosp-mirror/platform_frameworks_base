@@ -1698,8 +1698,9 @@ public class PhoneStateListener {
 
     /**
      * Interface for phone capability listener.
-     *
+     * @hide
      */
+    @SystemApi
     public interface PhoneCapabilityChangedListener {
         /**
          * Callback invoked when phone capability changes.
