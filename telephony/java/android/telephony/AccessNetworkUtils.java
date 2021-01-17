@@ -4,12 +4,20 @@ import static android.telephony.ServiceState.DUPLEX_MODE_FDD;
 import static android.telephony.ServiceState.DUPLEX_MODE_TDD;
 import static android.telephony.ServiceState.DUPLEX_MODE_UNKNOWN;
 
+import android.telephony.AccessNetworkConstants.EutranBandArfcnFrequency;
 import android.telephony.AccessNetworkConstants.EutranBand;
 import android.telephony.AccessNetworkConstants.GeranBand;
+import android.telephony.AccessNetworkConstants.GeranBandArfcnFrequency;
+import android.telephony.AccessNetworkConstants.NgranArfcnFrequency;
+import android.telephony.AccessNetworkConstants.NgranBands;
 import android.telephony.AccessNetworkConstants.UtranBand;
+import android.telephony.AccessNetworkConstants.UtranBandArfcnFrequency;
 import android.telephony.ServiceState.DuplexMode;
+import android.util.Log;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Utilities to map between radio constants.
@@ -22,9 +30,27 @@ public class AccessNetworkUtils {
     private AccessNetworkUtils() {}
 
     public static final int INVALID_BAND = -1;
+    public static final int INVALID_FREQUENCY = -1;
 
     /** ISO country code of Japan. */
     private static final String JAPAN_ISO_COUNTRY_CODE = "jp";
+    private static final String TAG = "AccessNetworkUtils";
+
+    private static final int FREQUENCY_KHZ = 1000;
+    private static final int FREQUENCY_RANGE_LOW_KHZ = 1000000;
+    private static final int FREQUENCY_RANGE_MID_KHZ = 3000000;
+    private static final int FREQUENCY_RANGE_HIGH_KHZ = 6000000;
+
+    private static final Set<Integer> UARFCN_NOT_GENERAL_BAND;
+    static {
+        UARFCN_NOT_GENERAL_BAND = new HashSet<Integer>();
+        UARFCN_NOT_GENERAL_BAND.add(UtranBand.BAND_A);
+        UARFCN_NOT_GENERAL_BAND.add(UtranBand.BAND_B);
+        UARFCN_NOT_GENERAL_BAND.add(UtranBand.BAND_C);
+        UARFCN_NOT_GENERAL_BAND.add(UtranBand.BAND_D);
+        UARFCN_NOT_GENERAL_BAND.add(UtranBand.BAND_E);
+        UARFCN_NOT_GENERAL_BAND.add(UtranBand.BAND_F);
+    }
 
     /**
      * Gets the duplex mode for the given EUTRAN operating band.
@@ -324,5 +350,404 @@ public class AccessNetworkUtils {
             return UtranBand.BAND_26;
         }
         return INVALID_BAND;
+    }
+
+    /**
+     * Get geran bands from {@link PhysicalChannelConfig#getBand()}
+     */
+    public static int getFrequencyRangeGroupFromGeranBand(@GeranBand.GeranBands int band) {
+        switch (band) {
+            case GeranBand.BAND_T380:
+            case GeranBand.BAND_T410:
+            case GeranBand.BAND_450:
+            case GeranBand.BAND_480:
+            case GeranBand.BAND_710:
+            case GeranBand.BAND_750:
+            case GeranBand.BAND_T810:
+            case GeranBand.BAND_850:
+            case GeranBand.BAND_P900:
+            case GeranBand.BAND_E900:
+            case GeranBand.BAND_R900:
+            case GeranBand.BAND_ER900:
+                return ServiceState.FREQUENCY_RANGE_LOW;
+            case GeranBand.BAND_DCS1800:
+            case GeranBand.BAND_PCS1900:
+                return ServiceState.FREQUENCY_RANGE_MID;
+            default:
+                return ServiceState.FREQUENCY_RANGE_UNKNOWN;
+        }
+    }
+
+    /**
+     * Get utran bands from {@link PhysicalChannelConfig#getBand()}
+     */
+    public static int getFrequencyRangeGroupFromUtranBand(@UtranBand.UtranBands int band) {
+        switch (band) {
+            case UtranBand.BAND_5:
+            case UtranBand.BAND_6:
+            case UtranBand.BAND_8:
+            case UtranBand.BAND_12:
+            case UtranBand.BAND_13:
+            case UtranBand.BAND_14:
+            case UtranBand.BAND_19:
+            case UtranBand.BAND_20:
+            case UtranBand.BAND_26:
+                return ServiceState.FREQUENCY_RANGE_LOW;
+            case UtranBand.BAND_1:
+            case UtranBand.BAND_2:
+            case UtranBand.BAND_3:
+            case UtranBand.BAND_4:
+            case UtranBand.BAND_7:
+            case UtranBand.BAND_9:
+            case UtranBand.BAND_10:
+            case UtranBand.BAND_11:
+            case UtranBand.BAND_21:
+            case UtranBand.BAND_25:
+            case UtranBand.BAND_A:
+            case UtranBand.BAND_B:
+            case UtranBand.BAND_C:
+            case UtranBand.BAND_D:
+            case UtranBand.BAND_E:
+            case UtranBand.BAND_F:
+                return ServiceState.FREQUENCY_RANGE_MID;
+            case UtranBand.BAND_22:
+                return ServiceState.FREQUENCY_RANGE_HIGH;
+            default:
+                return ServiceState.FREQUENCY_RANGE_UNKNOWN;
+        }
+    }
+
+    /**
+     * Get eutran bands from {@link PhysicalChannelConfig#getBand()}
+     * 3GPP TS 36.101 Table 5.5 EUTRA operating bands
+     */
+    public static int getFrequencyRangeGroupFromEutranBand(@EutranBand.EutranBands int band) {
+        switch (band) {
+            case EutranBand.BAND_5:
+            case EutranBand.BAND_6:
+            case EutranBand.BAND_8:
+            case EutranBand.BAND_12:
+            case EutranBand.BAND_13:
+            case EutranBand.BAND_14:
+            case EutranBand.BAND_17:
+            case EutranBand.BAND_18:
+            case EutranBand.BAND_19:
+            case EutranBand.BAND_20:
+            case EutranBand.BAND_26:
+            case EutranBand.BAND_27:
+            case EutranBand.BAND_28:
+            case EutranBand.BAND_31:
+            case EutranBand.BAND_44:
+            case EutranBand.BAND_50:
+            case EutranBand.BAND_51:
+            case EutranBand.BAND_68:
+            case EutranBand.BAND_71:
+            case EutranBand.BAND_72:
+            case EutranBand.BAND_73:
+            case EutranBand.BAND_85:
+            case EutranBand.BAND_87:
+            case EutranBand.BAND_88:
+                return ServiceState.FREQUENCY_RANGE_LOW;
+            case EutranBand.BAND_1:
+            case EutranBand.BAND_2:
+            case EutranBand.BAND_3:
+            case EutranBand.BAND_4:
+            case EutranBand.BAND_7:
+            case EutranBand.BAND_9:
+            case EutranBand.BAND_10:
+            case EutranBand.BAND_11:
+            case EutranBand.BAND_21:
+            case EutranBand.BAND_23:
+            case EutranBand.BAND_24:
+            case EutranBand.BAND_25:
+            case EutranBand.BAND_30:
+            case EutranBand.BAND_33:
+            case EutranBand.BAND_34:
+            case EutranBand.BAND_35:
+            case EutranBand.BAND_36:
+            case EutranBand.BAND_37:
+            case EutranBand.BAND_38:
+            case EutranBand.BAND_39:
+            case EutranBand.BAND_40:
+            case EutranBand.BAND_41:
+            case EutranBand.BAND_45:
+            case EutranBand.BAND_53:
+            case EutranBand.BAND_65:
+            case EutranBand.BAND_66:
+            case EutranBand.BAND_70:
+            case EutranBand.BAND_74:
+                return ServiceState.FREQUENCY_RANGE_MID;
+            case EutranBand.BAND_22:
+            case EutranBand.BAND_42:
+            case EutranBand.BAND_43:
+            case EutranBand.BAND_46:
+            case EutranBand.BAND_47:
+            case EutranBand.BAND_48:
+            case EutranBand.BAND_49:
+            case EutranBand.BAND_52:
+                return ServiceState.FREQUENCY_RANGE_HIGH;
+            default:
+                return ServiceState.FREQUENCY_RANGE_UNKNOWN;
+        }
+    }
+
+    /**
+     * Get ngran band from {@link PhysicalChannelConfig#getBand()}
+     * 3GPP TS 38.104 Table 5.2-1 NR operating bands in FR1
+     * 3GPP TS 38.104 Table 5.2-2 NR operating bands in FR2
+     */
+    public static int getFrequencyRangeGroupFromNrBand(@NgranBands.NgranBand int band) {
+        switch (band) {
+            case NgranBands.BAND_5:
+            case NgranBands.BAND_8:
+            case NgranBands.BAND_12:
+            case NgranBands.BAND_14:
+            case NgranBands.BAND_18:
+            case NgranBands.BAND_20:
+            case NgranBands.BAND_26:
+            case NgranBands.BAND_28:
+            case NgranBands.BAND_29:
+            case NgranBands.BAND_71:
+            case NgranBands.BAND_81:
+            case NgranBands.BAND_82:
+            case NgranBands.BAND_83:
+            case NgranBands.BAND_89:
+                return ServiceState.FREQUENCY_RANGE_LOW;
+            case NgranBands.BAND_1:
+            case NgranBands.BAND_2:
+            case NgranBands.BAND_3:
+            case NgranBands.BAND_7:
+            case NgranBands.BAND_25:
+            case NgranBands.BAND_30:
+            case NgranBands.BAND_34:
+            case NgranBands.BAND_38:
+            case NgranBands.BAND_39:
+            case NgranBands.BAND_40:
+            case NgranBands.BAND_41:
+            case NgranBands.BAND_50:
+            case NgranBands.BAND_51:
+            case NgranBands.BAND_53:
+            case NgranBands.BAND_65:
+            case NgranBands.BAND_66:
+            case NgranBands.BAND_70:
+            case NgranBands.BAND_74:
+            case NgranBands.BAND_75:
+            case NgranBands.BAND_76:
+            case NgranBands.BAND_80:
+            case NgranBands.BAND_84:
+            case NgranBands.BAND_86:
+            case NgranBands.BAND_90:
+            case NgranBands.BAND_91:
+            case NgranBands.BAND_92:
+            case NgranBands.BAND_93:
+            case NgranBands.BAND_94:
+            case NgranBands.BAND_95:
+                return ServiceState.FREQUENCY_RANGE_MID;
+            case NgranBands.BAND_46:
+            case NgranBands.BAND_48:
+            case NgranBands.BAND_77:
+            case NgranBands.BAND_78:
+            case NgranBands.BAND_79:
+                return ServiceState.FREQUENCY_RANGE_HIGH;
+            case NgranBands.BAND_96:
+            case NgranBands.BAND_257:
+            case NgranBands.BAND_258:
+            case NgranBands.BAND_260:
+            case NgranBands.BAND_261:
+                return ServiceState.FREQUENCY_RANGE_MMWAVE;
+            default:
+                return ServiceState.FREQUENCY_RANGE_UNKNOWN;
+        }
+    }
+
+    /**
+     * 3GPP TS 38.104 Table 5.4.2.1-1 NR-ARFCN parameters for the global frequency raster.
+     * Formula of NR-ARFCN convert to actual frequency:
+     * Actual frequency(kHz) = (RANGE_OFFSET + GLOBAL_KHZ * (ARFCN - ARFCN_OFFSET))
+     */
+    public static int getFrequencyFromNrArfcn(int nrArfcn) {
+
+        int globalKhz = 0;
+        int rangeOffset = 0;
+        int arfcnOffset = 0;
+        for (NgranArfcnFrequency nrArfcnFrequency : AccessNetworkConstants.
+                NgranArfcnFrequency.values()) {
+            if (nrArfcn >= nrArfcnFrequency.rangeFirst
+                    && nrArfcn <= nrArfcnFrequency.rangeLast) {
+                globalKhz = nrArfcnFrequency.globalKhz;
+                rangeOffset = nrArfcnFrequency.rangeOffset;
+                arfcnOffset = nrArfcnFrequency.arfcnOffset;
+                break;
+            }
+        }
+        return rangeOffset + globalKhz * (nrArfcn - arfcnOffset);
+    }
+
+    /**
+     * Get actual frequency from E-UTRA ARFCN.
+     */
+    public static int getFrequencyFromEarfcn(int band, int earfcn, boolean isUplink) {
+
+        int low = 0;
+        int offset = 0;
+        for (EutranBandArfcnFrequency earfcnFrequency : EutranBandArfcnFrequency.values()) {
+            if (band == earfcnFrequency.band) {
+                if (isInEarfcnRange(earfcn, earfcnFrequency, isUplink)) {
+                    low = isUplink ? earfcnFrequency.uplinkLowKhz : earfcnFrequency.downlinkLowKhz;
+                    offset = isUplink ? earfcnFrequency.uplinkOffset
+                            : earfcnFrequency.downlinkOffset;
+                    break;
+                } else {
+                    Log.e(TAG, "Band and the range of EARFCN are not consistent.");
+                    return INVALID_FREQUENCY;
+                }
+            }
+        }
+        return convertEarfcnToFrequency(low, earfcn, offset);
+    }
+
+    /**
+     * 3GPP TS 36.101 Table 5.7.3-1 E-UTRA channel numbers.
+     * Formula of E-UTRA ARFCN convert to actual frequency:
+     * Actual frequency(kHz) = (DOWNLINK_LOW + 0.1 * (ARFCN - DOWNLINK_OFFSET)) * FREQUENCY_KHZ
+     * Actual frequency(kHz) = (UPLINK_LOW + 0.1 * (ARFCN - UPLINK_OFFSET)) * FREQUENCY_KHZ
+     */
+    private static int convertEarfcnToFrequency(int low, int earfcn, int offset) {
+        return low + 100 * (earfcn - offset);
+    }
+
+    private static boolean isInEarfcnRange(int earfcn, EutranBandArfcnFrequency earfcnFrequency,
+                                           boolean isUplink) {
+        if (isUplink) {
+            return earfcn >= earfcnFrequency.uplinkOffset && earfcn <= earfcnFrequency.uplinkRange;
+        } else {
+            return earfcn >= earfcnFrequency.downlinkOffset
+                    && earfcn <= earfcnFrequency.downlinkRange;
+        }
+    }
+
+    /**
+     * Get actual frequency from UTRA ARFCN.
+     */
+    public static int getFrequencyFromUarfcn(int band, int uarfcn, boolean isUplink) {
+
+        int offsetKhz = 0;
+        for (UtranBandArfcnFrequency uarfcnFrequency : AccessNetworkConstants.
+                UtranBandArfcnFrequency.values()) {
+            if (band == uarfcnFrequency.band) {
+                if (isInUarfcnRange(uarfcn, uarfcnFrequency, isUplink)) {
+                    offsetKhz = isUplink ? uarfcnFrequency.uplinkOffset
+                            : uarfcnFrequency.downlinkOffset;
+                    break;
+                } else {
+                    Log.e(TAG, "Band and the range of UARFCN are not consistent.");
+                    return INVALID_FREQUENCY;
+                }
+            }
+        }
+
+        if (!UARFCN_NOT_GENERAL_BAND.contains(band)) {
+            return convertUarfcnToFrequency(offsetKhz, uarfcn);
+        } else {
+            return convertUarfcnTddToFrequency(band, uarfcn);
+        }
+    }
+
+    /**
+     * 3GPP TS 25.101, Table 5.1 UARFCN definition (general).
+     * Formula of UTRA ARFCN convert to actual frequency:
+     * For general bands:
+     * Downlink actual frequency(kHz) = (DOWNLINK_OFFSET + 0.2 * ARFCN) * FREQUENCY_KHZ
+     * Uplink actual frequency(kHz) = (UPLINK_OFFSET + 0.2 * ARFCN) * FREQUENCY_KHZ
+     */
+    private static int convertUarfcnToFrequency(int offsetKhz, int uarfcn) {
+        return offsetKhz + (200 * uarfcn);
+    }
+
+    /**
+     * 3GPP TS 25.102, Table 5.2 UTRA Absolute Radio Frequency Channel Number 1.28 Mcps TDD Option.
+     * For FDD bands A, B, C, E, F:
+     * Actual frequency(kHz) =  5 * ARFCN * FREQUENCY_KHZ
+     * For TDD bands D:
+     * Actual frequency(kHz) =  (5 * (ARFCN - 2150.1MHz)) * FREQUENCY_KHZ
+     */
+    private static int convertUarfcnTddToFrequency(int band, int uarfcn) {
+        if (band != UtranBand.BAND_D) {
+            return 5 * uarfcn * FREQUENCY_KHZ;
+        } else {
+            return 5 * ((FREQUENCY_KHZ * uarfcn) - 2150100);
+        }
+    }
+
+    private static boolean isInUarfcnRange(int uarfcn, UtranBandArfcnFrequency uarfcnFrequency,
+                                           boolean isUplink) {
+        if (isUplink) {
+            return uarfcn >= uarfcnFrequency.uplinkRangeFirst
+                    && uarfcn <= uarfcnFrequency.uplinkRangeLast;
+        } else {
+            if (uarfcnFrequency.downlinkRangeFirst != 0 && uarfcnFrequency.downlinkRangeLast != 0) {
+                return uarfcn >= uarfcnFrequency.downlinkRangeFirst
+                        && uarfcn <= uarfcnFrequency.downlinkRangeLast;
+            } else {
+                // BAND_C, BAND_D, BAND_E and BAND_F do not have the downlink range.
+                return true;
+            }
+        }
+    }
+
+    /**
+     * Get actual frequency from GERAN ARFCN.
+     */
+    public static int getFrequencyFromArfcn(int band, int arfcn, boolean isUplink) {
+
+        int uplinkFrequencyFirst = 0;
+        int arfcnOffset = 0;
+        int downlinkOffset = 0;
+        int frequency = 0;
+        for (GeranBandArfcnFrequency arfcnFrequency : AccessNetworkConstants.
+                GeranBandArfcnFrequency.values()) {
+            if (band == arfcnFrequency.band) {
+                if (arfcn >= arfcnFrequency.arfcnRangeFirst
+                        && arfcn <= arfcnFrequency.arfcnRangeLast) {
+                    uplinkFrequencyFirst = arfcnFrequency.uplinkFrequencyFirst;
+                    downlinkOffset = arfcnFrequency.downlinkOffset;
+                    arfcnOffset = arfcnFrequency.arfcnOffset;
+                    frequency = convertArfcnToFrequency(arfcn, uplinkFrequencyFirst,
+                            arfcnOffset);
+                    break;
+                } else {
+                    Log.e(TAG, "Band and the range of ARFCN are not consistent.");
+                    return INVALID_FREQUENCY;
+                }
+            }
+        }
+
+        return isUplink ? frequency : frequency + downlinkOffset;
+    }
+
+    /**
+     * 3GPP TS 45.005 Table 2-1 Dynamically mapped ARFCN
+     * Formula of Geran ARFCN convert to actual frequency:
+     * Uplink actual frequency(kHz) =
+     *      (UPLINK_FREQUENCY_FIRST + 0.2 * (ARFCN - ARFCN_RANGE_FIRST)) * FREQUENCY_KHZ
+     * Downlink actual frequency(kHz) = Uplink actual frequency + 10
+     */
+    private static int convertArfcnToFrequency(int arfcn, int uplinkFrequencyFirstKhz,
+                                               int arfcnOffset) {
+        return uplinkFrequencyFirstKhz + 200 * (arfcn - arfcnOffset);
+    }
+
+    public static int getFrequencyRangeFromArfcn(int frequency) {
+        if (frequency < FREQUENCY_RANGE_LOW_KHZ) {
+            return ServiceState.FREQUENCY_RANGE_LOW;
+        } else if (frequency < FREQUENCY_RANGE_MID_KHZ
+                && frequency >= FREQUENCY_RANGE_LOW_KHZ) {
+            return ServiceState.FREQUENCY_RANGE_MID;
+        } else if (frequency < FREQUENCY_RANGE_HIGH_KHZ
+                && frequency >= FREQUENCY_RANGE_MID_KHZ) {
+            return ServiceState.FREQUENCY_RANGE_HIGH;
+        } else {
+            return ServiceState.FREQUENCY_RANGE_MMWAVE;
+        }
     }
 }

@@ -33,6 +33,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
+import com.android.server.biometrics.sensors.HalClientMonitor;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 
 import org.junit.Before;
@@ -94,7 +95,7 @@ public class FaceProviderTest {
             final BiometricScheduler scheduler =
                     mFaceProvider.mSensors.get(prop.commonProps.sensorId).getScheduler();
             for (int i = 0; i < numFakeOperations; i++) {
-                final BaseClientMonitor testMonitor = mock(BaseClientMonitor.class);
+                final HalClientMonitor testMonitor = mock(HalClientMonitor.class);
                 when(testMonitor.getFreshDaemon()).thenReturn(new Object());
                 scheduler.scheduleClientMonitor(testMonitor);
             }

@@ -805,7 +805,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
     @Override
     public String toString() {
         return "State: " + mState
-                + "\nisCrypto: " + isCrypto()
-                + "\nPreAuthInfo: " + mPreAuthInfo;
+                + ", isCrypto: " + isCrypto()
+                + ", PreAuthInfo: " + mPreAuthInfo;
     }
 }

@@ -2536,6 +2536,22 @@ public class DevicePolicyManager {
             "android.app.extra.PROVISIONING_SUPPORTED_MODES";
 
     /**
+     * A boolean extra which determines whether to skip the ownership disclaimer screen during the
+     * provisioning flow. The default value is {@code false}.
+     *
+     * If the value is {@code true}, it is the responsibility of the provisioning initiator to
+     * show the relevant disclaimer.
+     *
+     * <p>This extra is only respected when provided alongside the {@link
+     * #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} intent action.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_PROVISIONING_SKIP_OWNERSHIP_DISCLAIMER =
+            "android.app.extra.PROVISIONING_SKIP_OWNERSHIP_DISCLAIMER";
+
+    /**
      * An {@link ArrayList} of {@link Integer} extra specifying the allowed provisioning modes.
      * <p>This extra will be passed to the admin app's {@link #ACTION_GET_PROVISIONING_MODE}
      * activity, whose result intent must contain {@link #EXTRA_PROVISIONING_MODE} set to one of
@@ -2562,6 +2578,30 @@ public class DevicePolicyManager {
      * The provisioning mode for a work profile on a personal device.
      */
     public static final int PROVISIONING_MODE_MANAGED_PROFILE_ON_PERSONAL_DEVICE = 3;
+
+    /**
+     * A {@code boolean} flag that indicates whether the provisioning flow should return before
+     * starting the admin app's {@link #ACTION_ADMIN_POLICY_COMPLIANCE} handler. The default value
+     * is {@code true}.
+     *
+     * <p>If this extra is set to {@code true}, then when the provisioning flow returns back to the
+     * provisioning initiator, provisioning will not be complete. The provisioning initiator can
+     * use this opportunity to do its own preparatory steps prior to the launch of the admin app's
+     * {@link #ACTION_ADMIN_POLICY_COMPLIANCE} handler. It is the responsibility of the
+     * provisioning initiator to ensure that the provisioning flow is then resumed and completed.
+     *
+     * <p>If this extra is set to {@code false}, then when the provisioning flow returns back to
+     * the provisioning initiator, provisioning will be complete. Note that device owner
+     * provisioning is not currently supported for the this scenario.
+     *
+     * <p>This extra is only respected when provided alongside the {@link
+     * #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} intent action.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_PROVISIONING_RETURN_BEFORE_POLICY_COMPLIANCE =
+            "android.app.extra.PROVISIONING_RETURN_BEFORE_POLICY_COMPLIANCE";
 
     /**
      * Activity action: Starts the administrator to show policy compliance for the provisioning.

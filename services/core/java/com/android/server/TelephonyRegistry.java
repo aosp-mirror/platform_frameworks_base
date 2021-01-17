@@ -564,8 +564,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mPreciseDataConnectionStates.add(new ArrayMap<>());
             mBarringInfo.add(i, new BarringInfo());
             mTelephonyDisplayInfos[i] = null;
-            mPhysicalChannelConfigs.add(i, new PhysicalChannelConfig(
-                    PhysicalChannelConfig.CONNECTION_UNKNOWN,0));
+            mPhysicalChannelConfigs.add(i, new PhysicalChannelConfig.Builder().build());
         }
     }
 
@@ -656,8 +655,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mPreciseDataConnectionStates.add(new ArrayMap<>());
             mBarringInfo.add(i, new BarringInfo());
             mTelephonyDisplayInfos[i] = null;
-            mPhysicalChannelConfigs.add(i, new PhysicalChannelConfig(
-                    PhysicalChannelConfig.CONNECTION_UNKNOWN,0));
+            mPhysicalChannelConfigs.add(i, new PhysicalChannelConfig.Builder().build());
         }
 
         mAppOps = mContext.getSystemService(AppOpsManager.class);

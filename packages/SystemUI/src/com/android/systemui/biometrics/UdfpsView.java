@@ -89,6 +89,10 @@ public class UdfpsView extends View implements DozeReceiver,
     private boolean mIsHbmSupported;
     @Nullable private String mDebugMessage;
 
+    // Runnable that will be run after the illumination dot and scrim are shown.
+    // The runnable is reset to null after it's executed once.
+    @Nullable private Runnable mRunAfterShowingScrimAndDot;
+
     public UdfpsView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
@@ -279,6 +283,11 @@ public class UdfpsView extends View implements DozeReceiver,
         }
 
         canvas.restore();
+
+        if (mShowScrimAndDot && mRunAfterShowingScrimAndDot != null) {
+            post(mRunAfterShowingScrimAndDot);
+            mRunAfterShowingScrimAndDot = null;
+        }
     }
 
     RectF getSensorRect() {
@@ -292,6 +301,10 @@ public class UdfpsView extends View implements DozeReceiver,
     void setDebugMessage(String message) {
         mDebugMessage = message;
         postInvalidate();
+    }
+
+    void setRunAfterShowingScrimAndDot(Runnable runnable) {
+        mRunAfterShowingScrimAndDot = runnable;
     }
 
     boolean isValidTouch(float x, float y, float pressure) {

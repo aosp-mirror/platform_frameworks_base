@@ -10350,6 +10350,7 @@ package android.content {
     field public static final String BIOMETRIC_SERVICE = "biometric";
     field public static final String BLOB_STORE_SERVICE = "blob_store";
     field public static final String BLUETOOTH_SERVICE = "bluetooth";
+    field public static final String BUGREPORT_SERVICE = "bugreport";
     field public static final String CAMERA_SERVICE = "camera";
     field public static final String CAPTIONING_SERVICE = "captioning";
     field public static final String CARRIER_CONFIG_SERVICE = "carrier_config";
@@ -30081,6 +30082,24 @@ package android.os {
     method public boolean unlinkToDeath(@NonNull android.os.IBinder.DeathRecipient, int);
   }
 
+  public final class BugreportManager {
+    method public void cancelBugreport();
+    method public void startConnectivityBugreport(@NonNull android.os.ParcelFileDescriptor, @NonNull java.util.concurrent.Executor, @NonNull android.os.BugreportManager.BugreportCallback);
+  }
+
+  public abstract static class BugreportManager.BugreportCallback {
+    ctor public BugreportManager.BugreportCallback();
+    method public void onEarlyReportFinished();
+    method public void onError(int);
+    method public void onFinished();
+    method public void onProgress(@FloatRange(from=0.0f, to=100.0f) float);
+    field public static final int BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS = 5; // 0x5
+    field public static final int BUGREPORT_ERROR_INVALID_INPUT = 1; // 0x1
+    field public static final int BUGREPORT_ERROR_RUNTIME = 2; // 0x2
+    field public static final int BUGREPORT_ERROR_USER_CONSENT_TIMED_OUT = 4; // 0x4
+    field public static final int BUGREPORT_ERROR_USER_DENIED_CONSENT = 3; // 0x3
+  }
+
   public class Build {
     ctor public Build();
     method @NonNull public static java.util.List<android.os.Build.Partition> getFingerprintedPartitions();
@@ -39764,6 +39783,7 @@ package android.telephony {
     field public static final int BAND_25 = 25; // 0x19
     field public static final int BAND_257 = 257; // 0x101
     field public static final int BAND_258 = 258; // 0x102
+    field public static final int BAND_26 = 26; // 0x1a
     field public static final int BAND_260 = 260; // 0x104
     field public static final int BAND_261 = 261; // 0x105
     field public static final int BAND_28 = 28; // 0x1c
@@ -39775,10 +39795,12 @@ package android.telephony {
     field public static final int BAND_39 = 39; // 0x27
     field public static final int BAND_40 = 40; // 0x28
     field public static final int BAND_41 = 41; // 0x29
+    field public static final int BAND_46 = 46; // 0x2e
     field public static final int BAND_48 = 48; // 0x30
     field public static final int BAND_5 = 5; // 0x5
     field public static final int BAND_50 = 50; // 0x32
     field public static final int BAND_51 = 51; // 0x33
+    field public static final int BAND_53 = 53; // 0x35
     field public static final int BAND_65 = 65; // 0x41
     field public static final int BAND_66 = 66; // 0x42
     field public static final int BAND_7 = 7; // 0x7
@@ -39804,6 +39826,7 @@ package android.telephony {
     field public static final int BAND_93 = 93; // 0x5d
     field public static final int BAND_94 = 94; // 0x5e
     field public static final int BAND_95 = 95; // 0x5f
+    field public static final int BAND_96 = 96; // 0x60
   }
 
   public static final class AccessNetworkConstants.UtranBand {
@@ -41315,17 +41338,27 @@ package android.telephony {
 
   public final class PhysicalChannelConfig implements android.os.Parcelable {
     method public int describeContents();
-    method public int getCellBandwidthDownlink();
-    method public int getChannelNumber();
+    method @IntRange(from=1, to=261) public int getBand();
+    method @IntRange(from=1) public int getCellBandwidthDownlinkKhz();
+    method @IntRange(from=1) public int getCellBandwidthUplinkKhz();
+    method @Deprecated public int getChannelNumber();
     method public int getConnectionStatus();
+    method @IntRange(from=0) public int getDownlinkChannelNumber();
+    method @IntRange(from=0) public int getDownlinkFrequencyKhz();
     method public int getNetworkType();
     method @IntRange(from=0, to=1007) public int getPhysicalCellId();
+    method @IntRange(from=0) public int getUplinkChannelNumber();
+    method @IntRange(from=0) public int getUplinkFrequencyKhz();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int BAND_UNKNOWN = 0; // 0x0
+    field public static final int CELL_BANDWIDTH_UNKNOWN = 0; // 0x0
     field public static final int CHANNEL_NUMBER_UNKNOWN = -1; // 0xffffffff
     field public static final int CONNECTION_PRIMARY_SERVING = 1; // 0x1
     field public static final int CONNECTION_SECONDARY_SERVING = 2; // 0x2
     field public static final int CONNECTION_UNKNOWN = -1; // 0xffffffff
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.PhysicalChannelConfig> CREATOR;
+    field public static final int FREQUENCY_UNKNOWN = -1; // 0xffffffff
+    field public static final int PHYSICAL_CELL_ID_MAXIMUM_VALUE = 1007; // 0x3ef
     field public static final int PHYSICAL_CELL_ID_UNKNOWN = -1; // 0xffffffff
   }
 
@@ -41406,6 +41439,32 @@ package android.telephony {
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.SignalStrength> CREATOR;
     field public static final int INVALID = 2147483647; // 0x7fffffff
+  }
+
+  public final class SignalThresholdInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getRadioAccessNetworkType();
+    method public int getSignalMeasurementType();
+    method @NonNull public int[] getThresholds();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.SignalThresholdInfo> CREATOR;
+    field public static final int SIGNAL_MEASUREMENT_TYPE_RSCP = 2; // 0x2
+    field public static final int SIGNAL_MEASUREMENT_TYPE_RSRP = 3; // 0x3
+    field public static final int SIGNAL_MEASUREMENT_TYPE_RSRQ = 4; // 0x4
+    field public static final int SIGNAL_MEASUREMENT_TYPE_RSSI = 1; // 0x1
+    field public static final int SIGNAL_MEASUREMENT_TYPE_RSSNR = 5; // 0x5
+    field public static final int SIGNAL_MEASUREMENT_TYPE_SSRSRP = 6; // 0x6
+    field public static final int SIGNAL_MEASUREMENT_TYPE_SSRSRQ = 7; // 0x7
+    field public static final int SIGNAL_MEASUREMENT_TYPE_SSSINR = 8; // 0x8
+    field public static final int SIGNAL_MEASUREMENT_TYPE_UNKNOWN = 0; // 0x0
+  }
+
+  public static final class SignalThresholdInfo.Builder {
+    ctor public SignalThresholdInfo.Builder();
+    method @NonNull public android.telephony.SignalThresholdInfo build();
+    method @NonNull public android.telephony.SignalThresholdInfo.Builder setRadioAccessNetworkType(int);
+    method @NonNull public android.telephony.SignalThresholdInfo.Builder setSignalMeasurementType(int);
+    method @NonNull public android.telephony.SignalThresholdInfo.Builder setThresholds(@NonNull int[]);
   }
 
   public final class SmsManager {

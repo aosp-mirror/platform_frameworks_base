@@ -2825,9 +2825,7 @@ class Task extends WindowContainer<WindowContainer> {
                 getResolvedOverrideConfiguration().windowConfiguration.getBounds();
 
         if (windowingMode == WINDOWING_MODE_FULLSCREEN) {
-            computeFullscreenBounds(outOverrideBounds, null /* refActivity */,
-                    newParentConfig.windowConfiguration.getBounds(),
-                    newParentConfig.orientation);
+            computeFullscreenBounds(outOverrideBounds, newParentConfig);
             // The bounds for fullscreen mode shouldn't be adjusted by minimal size. Otherwise if
             // the parent or display is smaller than the size, the content may be cropped.
             return;
@@ -2867,19 +2865,19 @@ class Task extends WindowContainer<WindowContainer> {
      * {@link WindowConfiguration#WINDOWING_MODE_FULLSCREEN} when the parent doesn't handle the
      * orientation change and the requested orientation is different from the parent.
      */
-    void computeFullscreenBounds(@NonNull Rect outBounds, @Nullable ActivityRecord refActivity,
-            @NonNull Rect parentBounds, int parentOrientation) {
+    void computeFullscreenBounds(@NonNull Rect outBounds, @NonNull Configuration newParentConfig) {
         // In FULLSCREEN mode, always start with empty bounds to indicate "fill parent".
         outBounds.setEmpty();
         if (handlesOrientationChangeFromDescendant()) {
+            // No need to letterbox at task level. Display will handle fixed-orientation requests.
             return;
         }
-        if (refActivity == null) {
-            // Use the top activity as the reference of orientation. Don't include overlays because
-            // it is usually not the actual content or just temporarily shown.
-            // E.g. ForcedResizableInfoActivity.
-            refActivity = getTopNonFinishingActivity(false /* includeOverlays */);
-        }
+
+        final int parentOrientation = newParentConfig.orientation;
+        // Use the top activity as the reference of orientation. Don't include overlays because
+        // it is usually not the actual content or just temporarily shown.
+        // E.g. ForcedResizableInfoActivity.
+        final ActivityRecord refActivity = getTopNonFinishingActivity(false /* includeOverlays */);
 
         // If the task or the reference activity requires a different orientation (either by
         // override or activityInfo), make it fit the available bounds by scaling down its bounds.
@@ -2891,11 +2889,17 @@ class Task extends WindowContainer<WindowContainer> {
             return;
         }
 
-        if (refActivity != null && refActivity.hasCompatDisplayInsets()) {
+        final ActivityRecord.CompatDisplayInsets compatDisplayInsets =
+                refActivity == null ? null : refActivity.getCompatDisplayInsets();
+        if (compatDisplayInsets != null && !compatDisplayInsets.mIsTaskLetterboxed) {
             // App prefers to keep its original size.
+            // If the size compat is from previous task letterboxing, we may want to have task
+            // letterbox again, otherwise it will show the size compat restart button even if the
+            // restart bounds will be the same.
             return;
         }
 
+        final Rect parentBounds = newParentConfig.windowConfiguration.getBounds();
         final int parentWidth = parentBounds.width();
         final int parentHeight = parentBounds.height();
         float aspect = Math.max(parentWidth, parentHeight)
@@ -2929,6 +2933,18 @@ class Task extends WindowContainer<WindowContainer> {
             final int width = (int) Math.rint(parentHeight / aspect);
             final int left = parentBounds.centerX() - width / 2;
             outBounds.set(left, parentBounds.top, left + width, parentBounds.bottom);
+        }
+
+        if (compatDisplayInsets != null) {
+            compatDisplayInsets.getBoundsByRotation(
+                    mTmpBounds, newParentConfig.windowConfiguration.getRotation());
+            if (outBounds.width() != mTmpBounds.width()
+                    || outBounds.height() != mTmpBounds.height()) {
+                // The app shouldn't be resized, we only do task letterboxing if the compat bounds
+                // is also from the same task letterbox. Otherwise, clear the task bounds to show
+                // app in size compat mode.
+                outBounds.setEmpty();
+            }
         }
     }
 

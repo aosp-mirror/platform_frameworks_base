@@ -20,8 +20,6 @@ import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
-import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.content.ComponentName;
 import android.content.Context;
@@ -48,8 +46,6 @@ import java.util.function.Consumer;
  *
  * @hide
  */
-@SystemService(Context.ROLE_CONTROLLER_SERVICE)
-@TestApi
 public class RoleControllerManager {
 
     private static final String LOG_TAG = RoleControllerManager.class.getSimpleName();
@@ -199,32 +195,11 @@ public class RoleControllerManager {
     }
 
     /**
-     * @see RoleControllerService#onIsApplicationQualifiedForRole(String, String)
-     *
-     * @deprecated Use {@link #isApplicationVisibleForRole(String, String, Executor, Consumer)}
-     *             instead.
-     *
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.MANAGE_ROLE_HOLDERS)
-    public void isApplicationQualifiedForRole(@NonNull String roleName, @NonNull String packageName,
-            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
-        AndroidFuture<Bundle> operation = mRemoteService.postAsync(service -> {
-            AndroidFuture<Bundle> future = new AndroidFuture<>();
-            service.isApplicationQualifiedForRole(roleName, packageName,
-                    new RemoteCallback(future::complete));
-            return future;
-        });
-        propagateCallback(operation, "isApplicationQualifiedForRole", executor, callback);
-    }
-
-    /**
      * @see RoleControllerService#onIsApplicationVisibleForRole(String, String)
      *
      * @hide
      */
     @RequiresPermission(Manifest.permission.MANAGE_ROLE_HOLDERS)
-    @TestApi
     public void isApplicationVisibleForRole(@NonNull String roleName, @NonNull String packageName,
             @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
         AndroidFuture<Bundle> operation = mRemoteService.postAsync(service -> {
@@ -242,7 +217,6 @@ public class RoleControllerManager {
      * @hide
      */
     @RequiresPermission(Manifest.permission.MANAGE_ROLE_HOLDERS)
-    @TestApi
     public void isRoleVisible(@NonNull String roleName,
             @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
         AndroidFuture<Bundle> operation = mRemoteService.postAsync(service -> {

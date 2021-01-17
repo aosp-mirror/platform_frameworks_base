@@ -55,8 +55,8 @@ import android.hardware.biometrics.IInvalidationCallback;
  * switches, the framework can check if any sensor has the "invalidationInProgress" flag set. If so,
  * the framework should re-start the invalidation process described above.
  */
-public abstract class InvalidationRequesterClient<S extends BiometricAuthenticator.Identifier, T>
-        extends BaseClientMonitor<T> {
+public class InvalidationRequesterClient<S extends BiometricAuthenticator.Identifier>
+        extends BaseClientMonitor {
 
     private final BiometricManager mBiometricManager;
     @NonNull private final BiometricUtils<S> mUtils;
@@ -71,9 +71,9 @@ public abstract class InvalidationRequesterClient<S extends BiometricAuthenticat
         }
     };
 
-    public InvalidationRequesterClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
-            int userId, int sensorId, @NonNull BiometricUtils<S> utils) {
-        super(context, lazyDaemon, null /* token */, null /* listener */, userId,
+    public InvalidationRequesterClient(@NonNull Context context, int userId, int sensorId,
+            @NonNull BiometricUtils<S> utils) {
+        super(context, null /* token */, null /* listener */, userId,
                 context.getOpPackageName(), 0 /* cookie */, sensorId,
                 BiometricsProtoEnums.MODALITY_UNKNOWN, BiometricsProtoEnums.ACTION_UNKNOWN,
                 BiometricsProtoEnums.CLIENT_UNKNOWN);
@@ -88,15 +88,5 @@ public abstract class InvalidationRequesterClient<S extends BiometricAuthenticat
         mUtils.setInvalidationInProgress(getContext(), getTargetUserId(), true /* inProgress */);
         mBiometricManager.invalidateAuthenticatorIds(getTargetUserId(), getSensorId(),
                 mInvalidationCallback);
-    }
-
-    @Override
-    public void unableToStart() {
-
-    }
-
-    @Override
-    protected void startHalOperation() {
-        // No HAL operations necessary
     }
 }
