@@ -106,6 +106,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Captor private ArgumentCaptor<IUdfpsOverlayController> mOverlayCaptor;
     private IUdfpsOverlayController mOverlayController;
     @Captor private ArgumentCaptor<UdfpsView.OnTouchListener> mTouchListenerCaptor;
+    @Captor private ArgumentCaptor<Runnable> mRunAfterShowingScrimAndDotCaptor;
 
     @Before
     public void setUp() {
@@ -190,11 +191,14 @@ public class UdfpsControllerTest extends SysuiTestCase {
         MotionEvent event = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0);
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, event);
         event.recycle();
-        // THEN the event is passed to the FingerprintManager
+        // THEN the scrim and dot is shown
+        verify(mUdfpsView).showScrimAndDot();
+        // AND a runnable that passes the event to FingerprintManager is set on the view
+        verify(mUdfpsView).setRunAfterShowingScrimAndDot(
+                mRunAfterShowingScrimAndDotCaptor.capture());
+        mRunAfterShowingScrimAndDotCaptor.getValue().run();
         verify(mFingerprintManager).onPointerDown(eq(mUdfpsController.mSensorProps.sensorId), eq(0),
                 eq(0), eq(0f), eq(0f));
-        // AND the scrim and dot is shown
-        verify(mUdfpsView).showScrimAndDot();
     }
 
     @Test
@@ -205,11 +209,14 @@ public class UdfpsControllerTest extends SysuiTestCase {
         mFgExecutor.runAllReady();
         // WHEN fingerprint is requested because of AOD interrupt
         mUdfpsController.onAodInterrupt(0, 0, 2f, 3f);
-        // THEN the event is passed to the FingerprintManager
+        // THEN the scrim and dot is shown
+        verify(mUdfpsView).showScrimAndDot();
+        // AND a runnable that passes the event to FingerprintManager is set on the view
+        verify(mUdfpsView).setRunAfterShowingScrimAndDot(
+                mRunAfterShowingScrimAndDotCaptor.capture());
+        mRunAfterShowingScrimAndDotCaptor.getValue().run();
         verify(mFingerprintManager).onPointerDown(eq(mUdfpsController.mSensorProps.sensorId), eq(0),
                 eq(0), eq(3f) /* minor */, eq(2f) /* major */);
-        // AND the scrim and dot is shown
-        verify(mUdfpsView).showScrimAndDot();
     }
 
     @Test

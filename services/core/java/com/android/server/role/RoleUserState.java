@@ -21,14 +21,11 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.AtomicFile;
 import android.util.Slog;
-import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
@@ -38,13 +35,6 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.role.persistence.RolesPersistence;
 import com.android.role.persistence.RolesState;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -59,21 +49,15 @@ class RoleUserState {
 
     public static final int VERSION_UNDEFINED = -1;
 
-    private static final String ROLES_FILE_NAME = "roles.xml";
-
     private static final long WRITE_DELAY_MILLIS = 200;
-
-    private static final String TAG_ROLES = "roles";
-    private static final String TAG_ROLE = "role";
-    private static final String TAG_HOLDER = "holder";
-    private static final String ATTRIBUTE_VERSION = "version";
-    private static final String ATTRIBUTE_NAME = "name";
-    private static final String ATTRIBUTE_PACKAGES_HASH = "packagesHash";
 
     private final RolesPersistence mPersistence = RolesPersistence.createInstance();
 
     @UserIdInt
     private final int mUserId;
+
+    @NonNull
+    private final LegacyRoleStateProvider mLegacyStateProvider;
 
     @NonNull
     private final Callback mCallback;
@@ -108,10 +92,13 @@ class RoleUserState {
      * Create a new user state, and read its state from disk if previously persisted.
      *
      * @param userId the user id for this user state
+     * @param legacyStateProvider the provider for legacy role state
      * @param callback the callback for this user state
      */
-    public RoleUserState(@UserIdInt int userId, @NonNull Callback callback) {
+    public RoleUserState(@UserIdInt int userId,
+            @NonNull LegacyRoleStateProvider legacyStateProvider, @NonNull Callback callback) {
         mUserId = userId;
+        mLegacyStateProvider = legacyStateProvider;
         mCallback = callback;
 
         readFile();
@@ -368,102 +355,27 @@ class RoleUserState {
 
     private void readFile() {
         synchronized (mLock) {
-            RolesState roles = mPersistence.readForUser(UserHandle.of(mUserId));
-            if (roles == null) {
-                readLegacyFileLocked();
-                scheduleWriteFileLocked();
-                return;
+            RolesState roleState = mPersistence.readForUser(UserHandle.of(mUserId));
+
+            Map<String, Set<String>> roles;
+            if (roleState != null) {
+                mVersion = roleState.getVersion();
+                mPackagesHash = roleState.getPackagesHash();
+                roles = roleState.getRoles();
+            } else {
+                roles = mLegacyStateProvider.getLegacyRoleState(mUserId);
             }
-
-            mVersion = roles.getVersion();
-            mPackagesHash = roles.getPackagesHash();
-
             mRoles.clear();
-            for (Map.Entry<String, Set<String>> entry : roles.getRoles().entrySet()) {
+            for (Map.Entry<String, Set<String>> entry : roles.entrySet()) {
                 String roleName = entry.getKey();
                 ArraySet<String> roleHolders = new ArraySet<>(entry.getValue());
                 mRoles.put(roleName, roleHolders);
             }
-        }
-    }
 
-    private void readLegacyFileLocked() {
-        File file = getFile(mUserId);
-        try (FileInputStream in = new AtomicFile(file).openRead()) {
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(in, null);
-            parseXmlLocked(parser);
-            Slog.i(LOG_TAG, "Read roles.xml successfully");
-        } catch (FileNotFoundException e) {
-            Slog.i(LOG_TAG, "roles.xml not found");
-        } catch (XmlPullParserException | IOException e) {
-            throw new IllegalStateException("Failed to parse roles.xml: " + file, e);
-        }
-    }
-
-    private void parseXmlLocked(@NonNull XmlPullParser parser) throws IOException,
-            XmlPullParserException {
-        int type;
-        int depth;
-        int innerDepth = parser.getDepth() + 1;
-        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                && ((depth = parser.getDepth()) >= innerDepth || type != XmlPullParser.END_TAG)) {
-            if (depth > innerDepth || type != XmlPullParser.START_TAG) {
-                continue;
-            }
-
-            if (parser.getName().equals(TAG_ROLES)) {
-                parseRolesLocked(parser);
-                return;
+            if (roleState == null) {
+                scheduleWriteFileLocked();
             }
         }
-        Slog.w(LOG_TAG, "Missing <" + TAG_ROLES + "> in roles.xml");
-    }
-
-    private void parseRolesLocked(@NonNull XmlPullParser parser) throws IOException,
-            XmlPullParserException {
-        mVersion = Integer.parseInt(parser.getAttributeValue(null, ATTRIBUTE_VERSION));
-        mPackagesHash = parser.getAttributeValue(null, ATTRIBUTE_PACKAGES_HASH);
-        mRoles.clear();
-
-        int type;
-        int depth;
-        int innerDepth = parser.getDepth() + 1;
-        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                && ((depth = parser.getDepth()) >= innerDepth || type != XmlPullParser.END_TAG)) {
-            if (depth > innerDepth || type != XmlPullParser.START_TAG) {
-                continue;
-            }
-
-            if (parser.getName().equals(TAG_ROLE)) {
-                String roleName = parser.getAttributeValue(null, ATTRIBUTE_NAME);
-                ArraySet<String> roleHolders = parseRoleHoldersLocked(parser);
-                mRoles.put(roleName, roleHolders);
-            }
-        }
-    }
-
-    @NonNull
-    private ArraySet<String> parseRoleHoldersLocked(@NonNull XmlPullParser parser)
-            throws IOException, XmlPullParserException {
-        ArraySet<String> roleHolders = new ArraySet<>();
-
-        int type;
-        int depth;
-        int innerDepth = parser.getDepth() + 1;
-        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                && ((depth = parser.getDepth()) >= innerDepth || type != XmlPullParser.END_TAG)) {
-            if (depth > innerDepth || type != XmlPullParser.START_TAG) {
-                continue;
-            }
-
-            if (parser.getName().equals(TAG_HOLDER)) {
-                String roleHolder = parser.getAttributeValue(null, ATTRIBUTE_NAME);
-                roleHolders.add(roleHolder);
-            }
-        }
-
-        return roleHolders;
     }
 
     /**
@@ -547,11 +459,6 @@ class RoleUserState {
             mPersistence.deleteForUser(UserHandle.of(mUserId));
             mDestroyed = true;
         }
-    }
-
-    @NonNull
-    private static File getFile(@UserIdInt int userId) {
-        return new File(Environment.getUserSystemDirectory(userId), ROLES_FILE_NAME);
     }
 
     /**

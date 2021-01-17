@@ -161,7 +161,7 @@ static struct {
     jmethodID size;
 } gSparseArrayClassInfo;
 
-struct InputSensorInfoOffsets {
+static struct InputSensorInfoOffsets {
     jclass clazz;
     // fields
     jfieldID name;

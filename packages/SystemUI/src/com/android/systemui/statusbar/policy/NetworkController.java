@@ -92,6 +92,13 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
          */
         default void setConnectivityStatus(boolean noDefaultNetwork, boolean noValidatedNetwork,
                 boolean noNetworksAvailable) {}
+
+        /**
+         * Callback for listeners to be able to update the no calling & SMS status
+         * @param noCalling whether the calling and SMS is not working.
+         * @param subId subscription ID for which to update the UI
+         */
+        default void setNoCallingStatus(boolean noCalling, int subId) {}
     }
 
     public interface EmergencyListener {

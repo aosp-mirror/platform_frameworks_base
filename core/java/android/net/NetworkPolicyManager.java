@@ -160,7 +160,7 @@ public class NetworkPolicyManager {
 
     /** @hide */
     public static final int FOREGROUND_THRESHOLD_STATE =
-            ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+            ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
 
     /**
      * {@link Intent} extra that indicates which {@link NetworkTemplate} rule it

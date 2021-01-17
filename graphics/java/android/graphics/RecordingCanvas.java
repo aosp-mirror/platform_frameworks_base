@@ -220,7 +220,7 @@ public final class RecordingCanvas extends BaseRecordingCanvas {
             CanvasProperty<Float> progress, RuntimeShader shader) {
         nDrawRipple(mNativeCanvasWrapper, cx.getNativeContainer(), cy.getNativeContainer(),
                 radius.getNativeContainer(), paint.getNativeContainer(),
-                progress.getNativeContainer(), shader.getNativeShaderFactory());
+                progress.getNativeContainer(), shader.getNativeShaderBuilder());
     }
 
     /**

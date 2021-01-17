@@ -260,11 +260,9 @@ public final class JobServiceContext implements ServiceConnection {
             try {
                 final int bindFlags;
                 if (job.shouldTreatAsExpeditedJob()) {
-                    // Add BIND_FOREGROUND_SERVICE to make it BFGS. Without it, it'll be
-                    // PROCESS_STATE_IMPORTANT_FOREGROUND. Unclear which is better here.
                     // TODO(171305774): The job should run on the little cores. We'll probably need
                     // another binding flag for that.
-                    bindFlags = Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE;
+                    bindFlags = Context.BIND_AUTO_CREATE;
                 } else {
                     bindFlags = Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
                             | Context.BIND_NOT_PERCEPTIBLE;

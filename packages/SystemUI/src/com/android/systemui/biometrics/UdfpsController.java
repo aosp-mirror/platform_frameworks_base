@@ -342,8 +342,8 @@ class UdfpsController implements DozeReceiver {
                     Log.v(TAG, "showUdfpsOverlay | adding window");
                     mView.setShowReason(reason);
                     mWindowManager.addView(mView, computeLayoutParams());
-                    mIsOverlayShowing = true;
                     mView.setOnTouchListener(mOnTouchListener);
+                    mIsOverlayShowing = true;
                 } catch (RuntimeException e) {
                     Log.e(TAG, "showUdfpsOverlay | failed to add window", e);
                 }
@@ -434,19 +434,21 @@ class UdfpsController implements DozeReceiver {
     }
 
     private void onFingerDown(int x, int y, float minor, float major) {
-        mView.setScrimAlpha(computeScrimOpacity());
-        mView.showScrimAndDot();
-        try {
-            if (mHbmSupported) {
+        if (mHbmSupported) {
+            try {
                 FileWriter fw = new FileWriter(mHbmPath);
                 fw.write(mHbmEnableCommand);
                 fw.close();
+            } catch (IOException e) {
+                mView.hideScrimAndDot();
+                Log.e(TAG, "onFingerDown | failed to enable HBM: " + e.getMessage());
             }
-            mFingerprintManager.onPointerDown(mSensorProps.sensorId, x, y, minor, major);
-        } catch (IOException e) {
-            mView.hideScrimAndDot();
-            Log.e(TAG, "onFingerDown | failed to enable HBM: " + e.getMessage());
         }
+        mView.setScrimAlpha(computeScrimOpacity());
+        mView.setRunAfterShowingScrimAndDot(() -> {
+            mFingerprintManager.onPointerDown(mSensorProps.sensorId, x, y, minor, major);
+        });
+        mView.showScrimAndDot();
     }
 
     private void onFingerUp() {

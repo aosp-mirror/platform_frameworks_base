@@ -25,6 +25,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.TriggerEventListener;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -32,6 +33,7 @@ import android.os.MemoryFile;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.view.InputDevice;
 
 import com.android.internal.annotations.GuardedBy;
@@ -65,8 +67,8 @@ public class InputDeviceSensorManager implements InputManager.InputDeviceListene
     @GuardedBy("mInputSensorLock")
     private final ArrayList<InputSensorEventListenerDelegate> mInputSensorEventListeners =
             new ArrayList<InputSensorEventListenerDelegate>();
-    private HandlerThread mSensorThread = null;
-    private Handler mSensorHandler = null;
+    private final HandlerThread mSensorThread;
+    private final Handler mSensorHandler;
 
     public InputDeviceSensorManager(InputManager inputManager) {
         mInputManager = inputManager;
@@ -125,9 +127,7 @@ public class InputDeviceSensorManager implements InputManager.InputDeviceListene
     @Override
     public void onInputDeviceChanged(int deviceId) {
         synchronized (mInputSensorLock) {
-            if (mSensors.containsKey(deviceId)) {
-                mSensors.remove(deviceId);
-            }
+            mSensors.remove(deviceId);
             updateInputDeviceSensorInfoLocked(deviceId);
         }
     }
@@ -196,16 +196,21 @@ public class InputDeviceSensorManager implements InputManager.InputDeviceListene
                     + " timestamp=" + timestamp + " sensorType=" + sensorType);
         }
         synchronized (mInputSensorLock) {
-            SensorEvent event = createSensorEvent(
-                    InputDevice.getDevice(deviceId), sensorType, accuracy, timestamp, values);
-            if (event == null) {
-                Slog.wtf(TAG, "Failed to create SensorEvent.");
-                return;
-            }
+            Sensor sensor = getInputDeviceSensorLocked(deviceId, sensorType);
             for (int i = 0; i < mInputSensorEventListeners.size(); i++) {
                 InputSensorEventListenerDelegate listener =
                         mInputSensorEventListeners.get(i);
                 if (listener.hasSensorRegistered(deviceId, sensorType)) {
+                    SensorEvent event = listener.getSensorEvent(sensor);
+                    if (event == null) {
+                        Slog.wtf(TAG, "Failed to get SensorEvent.");
+                        return;
+                    }
+                    event.sensor = sensor;
+                    event.accuracy = accuracy;
+                    event.timestamp = timestamp;
+                    System.arraycopy(values, 0, event.values, 0, event.values.length);
+                    // Call listener for sensor changed
                     listener.sendSensorChanged(event);
                 }
             }
@@ -249,15 +254,19 @@ public class InputDeviceSensorManager implements InputManager.InputDeviceListene
         private final SensorEventListener mListener;
         private final int mDelayUs;
         private final int mMaxBatchReportLatencyUs;
+        // List of sensors being listened to
         private List<Sensor> mSensors = new ArrayList<Sensor>();
+        // Sensor event array by sensor type, preallocate sensor events for each sensor of listener
+        // to avoid allocation and garbage collection for each listener callback.
+        private final SparseArray<SensorEvent> mSensorEvents = new SparseArray<SensorEvent>();
 
         InputSensorEventListenerDelegate(SensorEventListener listener, Sensor sensor,
                 int delayUs, int maxBatchReportLatencyUs, Handler handler) {
             super(handler != null ? handler.getLooper() : Looper.myLooper());
             mListener = listener;
-            mSensors.add(sensor);
             mDelayUs = delayUs;
             mMaxBatchReportLatencyUs = maxBatchReportLatencyUs;
+            addSensor(sensor);
         }
 
         public List<Sensor> getSensors() {
@@ -276,10 +285,12 @@ public class InputDeviceSensorManager implements InputManager.InputDeviceListene
             // and the sensor list is cleared.
             if (sensor == null) {
                 mSensors.clear();
+                mSensorEvents.clear();
             }
             for (Sensor s : mSensors) {
                 if (sensorEquals(s, sensor)) {
                     mSensors.remove(sensor);
+                    mSensorEvents.remove(sensor.getType());
                 }
             }
         }
@@ -295,6 +306,10 @@ public class InputDeviceSensorManager implements InputManager.InputDeviceListene
                 }
             }
             mSensors.add(sensor);
+            final int vecLength = sensor.getMaxLengthValuesArray(sensor, Build.VERSION.SDK_INT);
+            SensorEvent event = new SensorEvent(sensor, SensorManager.SENSOR_STATUS_NO_CONTACT,
+                    0 /* timestamp */, new float[vecLength]);
+            mSensorEvents.put(sensor.getType(), event);
         }
 
         /**
@@ -317,6 +332,13 @@ public class InputDeviceSensorManager implements InputManager.InputDeviceListene
          */
         public SensorEventListener getListener() {
             return mListener;
+        }
+
+        /**
+         * Get SensorEvent object for input device, with specified sensor.
+         */
+        private SensorEvent getSensorEvent(@NonNull Sensor sensor) {
+            return mSensorEvents.get(sensor.getType());
         }
 
         /**
@@ -356,26 +378,6 @@ public class InputDeviceSensorManager implements InputManager.InputDeviceListene
                     break;
                 }
             }
-        }
-    }
-
-    /**
-     * Create SensorEvent object for input device, with specified device ID, sensor Type,
-     * sensor event timestamp, accuracy, and sensor values.
-     */
-    private SensorEvent createSensorEvent(InputDevice inputDevice, int sensorType, int accuracy,
-            long timestamp, float[] values) {
-        synchronized (mInputSensorLock) {
-            Sensor sensor = getInputDeviceSensorLocked(inputDevice.getId(), sensorType);
-            if (sensor == null) {
-                Slog.wtf(TAG, "Can't get sensor type " + sensorType + " for input device "
-                        + inputDevice);
-            }
-            SensorEvent event = new SensorEvent(sensor, accuracy, timestamp, values);
-            if (event == null) {
-                Slog.wtf(TAG, "Failed to create SensorEvent.");
-            }
-            return event;
         }
     }
 

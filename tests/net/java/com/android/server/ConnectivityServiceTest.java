@@ -8491,4 +8491,20 @@ public class ConnectivityServiceTest {
         assertVpnUidRangesUpdated(true, newRanges, VPN_UID);
         assertVpnUidRangesUpdated(false, vpnRanges, VPN_UID);
     }
+
+    @Test
+    public void testInvalidRequestTypes() {
+        final int[] invalidReqTypeInts = new int[] {-1, NetworkRequest.Type.NONE.ordinal(),
+                NetworkRequest.Type.LISTEN.ordinal(), NetworkRequest.Type.values().length};
+        final NetworkCapabilities nc = new NetworkCapabilities().addTransportType(TRANSPORT_WIFI);
+
+        for (int reqTypeInt : invalidReqTypeInts) {
+            assertThrows("Expect throws for invalid request type " + reqTypeInt,
+                    IllegalArgumentException.class,
+                    () -> mService.requestNetwork(nc, reqTypeInt, null, 0, null,
+                            ConnectivityManager.TYPE_NONE, mContext.getPackageName(),
+                            getAttributionTag())
+            );
+        }
+    }
 }

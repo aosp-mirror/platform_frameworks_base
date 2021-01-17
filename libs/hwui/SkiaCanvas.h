@@ -152,7 +152,7 @@ public:
                             uirenderer::CanvasPropertyPrimitive* radius,
                             uirenderer::CanvasPropertyPaint* paint,
                             uirenderer::CanvasPropertyPrimitive* progress,
-                            sk_sp<SkRuntimeEffect> runtimeEffect) override;
+                            const SkRuntimeShaderBuilder& effectBuilder) override;
 
     virtual void drawLayer(uirenderer::DeferredLayerUpdater* layerHandle) override;
     virtual void drawRenderNode(uirenderer::RenderNode* renderNode) override;

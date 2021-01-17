@@ -408,7 +408,7 @@ public class Utils {
         return hasPermission && keyguardPackage != null && keyguardPackage.equals(clientPackage);
     }
 
-    public static String getClientName(@Nullable BaseClientMonitor<?> client) {
+    public static String getClientName(@Nullable BaseClientMonitor client) {
         return client != null ? client.getClass().getSimpleName() : "null";
     }
 

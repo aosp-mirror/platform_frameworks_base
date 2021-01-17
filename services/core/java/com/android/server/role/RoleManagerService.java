@@ -103,7 +103,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
     private final Object mLock = new Object();
 
     @NonNull
-    private final LegacyRoleHolderProvider mLegacyRoleHolderProvider;
+    private final LegacyRoleStateProvider mLegacyRoleStateProvider;
 
     /**
      * Maps user id to its state.
@@ -139,10 +139,10 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             new SparseArray<>();
 
     public RoleManagerService(@NonNull Context context,
-            @NonNull LegacyRoleHolderProvider legacyRoleHolderProvider) {
+            @NonNull LegacyRoleStateProvider legacyRoleStateProvider) {
         super(context);
 
-        mLegacyRoleHolderProvider = legacyRoleHolderProvider;
+        mLegacyRoleStateProvider = legacyRoleStateProvider;
 
         RoleControllerManager.initializeRemoteServiceComponentName(context);
 
@@ -241,16 +241,6 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             return AndroidFuture.completedFuture(null);
         }
 
-        //TODO gradually add more role migrations statements here for remaining roles
-        // Make sure to implement LegacyRoleResolutionPolicy#getRoleHolders
-        // for a given role before adding a migration statement for it here
-        maybeMigrateRole(RoleManager.ROLE_ASSISTANT, userId);
-        maybeMigrateRole(RoleManager.ROLE_BROWSER, userId);
-        maybeMigrateRole(RoleManager.ROLE_DIALER, userId);
-        maybeMigrateRole(RoleManager.ROLE_SMS, userId);
-        maybeMigrateRole(RoleManager.ROLE_EMERGENCY, userId);
-        maybeMigrateRole(RoleManager.ROLE_HOME, userId);
-
         // Some package state has changed, so grant default roles again.
         Slog.i(LOG_TAG, "Granting default roles...");
         AndroidFuture<Void> future = new AndroidFuture<>();
@@ -264,23 +254,6 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                     }
                 });
         return future;
-    }
-
-    private void maybeMigrateRole(String role, @UserIdInt int userId) {
-        // Any role for which we have a record are already migrated
-        RoleUserState userState = getOrCreateUserState(userId);
-        if (!userState.isRoleAvailable(role)) {
-            List<String> roleHolders = mLegacyRoleHolderProvider.getLegacyRoleHolders(role, userId);
-            if (roleHolders.isEmpty()) {
-                return;
-            }
-            Slog.i(LOG_TAG, "Migrating " + role + ", legacy holders: " + roleHolders);
-            userState.addRoleName(role);
-            int size = roleHolders.size();
-            for (int i = 0; i < size; i++) {
-                userState.addRoleHolder(role, roleHolders.get(i));
-            }
-        }
     }
 
     @Nullable
@@ -327,7 +300,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         synchronized (mLock) {
             RoleUserState userState = mUserStates.get(userId);
             if (userState == null) {
-                userState = new RoleUserState(userId, this);
+                userState = new RoleUserState(userId, mLegacyRoleStateProvider, this);
                 mUserStates.put(userId, userState);
             }
             return userState;
@@ -663,7 +636,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                 getContext().enforceCallingOrSelfPermission(
                         android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
             }
-            if (mPackageManagerInternal.getInstantAppPackageName(callingUid) != null) {
+            if (isInstantApp(callingUid)) {
                 return null;
             }
 
@@ -671,6 +644,25 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             try {
                 return CollectionUtils.firstOrNull(getRoleHoldersAsUser(RoleManager.ROLE_BROWSER,
                         userId));
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        private boolean isInstantApp(int uid) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                final UserHandle user = UserHandle.getUserHandleForUid(uid);
+                final Context userContext = getContext().createContextAsUser(user, 0);
+                final PackageManager userPackageManager = userContext.getPackageManager();
+                // Instant apps can not have shared UID, so it's safe to check only the first
+                // package name here.
+                final String packageName = ArrayUtils.firstOrNull(
+                        userPackageManager.getPackagesForUid(uid));
+                if (packageName == null) {
+                    return false;
+                }
+                return userPackageManager.isInstantApp(packageName);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }

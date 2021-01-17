@@ -146,6 +146,15 @@ public class CallbackHandler extends Handler implements EmergencyListener, Signa
     }
 
     @Override
+    public void setNoCallingStatus(boolean noCalling, int subId) {
+        post(() -> {
+            for (SignalCallback signalCluster : mSignalCallbacks) {
+                signalCluster.setNoCallingStatus(noCalling, subId);
+            }
+        });
+    }
+
+    @Override
     public void setSubs(List<SubscriptionInfo> subs) {
         obtainMessage(MSG_SUBS_CHANGED, subs).sendToTarget();
     }

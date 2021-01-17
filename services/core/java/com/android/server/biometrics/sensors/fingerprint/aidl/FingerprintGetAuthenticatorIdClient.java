@@ -23,11 +23,11 @@ import android.hardware.biometrics.fingerprint.ISession;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.server.biometrics.sensors.BaseClientMonitor;
+import com.android.server.biometrics.sensors.HalClientMonitor;
 
 import java.util.Map;
 
-class FingerprintGetAuthenticatorIdClient extends BaseClientMonitor<ISession> {
+class FingerprintGetAuthenticatorIdClient extends HalClientMonitor<ISession> {
 
     private static final String TAG = "FingerprintGetAuthenticatorIdClient";
 

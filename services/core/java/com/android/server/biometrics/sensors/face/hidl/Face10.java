@@ -62,6 +62,7 @@ import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.EnumerateConsumer;
+import com.android.server.biometrics.sensors.HalClientMonitor;
 import com.android.server.biometrics.sensors.Interruptable;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
@@ -103,7 +104,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     @NonNull private final Context mContext;
     @NonNull private final BiometricScheduler mScheduler;
     @NonNull private final Handler mHandler;
-    @NonNull private final BaseClientMonitor.LazyDaemon<IBiometricsFace> mLazyDaemon;
+    @NonNull private final HalClientMonitor.LazyDaemon<IBiometricsFace> mLazyDaemon;
     @NonNull private final LockoutResetDispatcher mLockoutResetDispatcher;
     @NonNull private final LockoutHalImpl mLockoutTracker;
     @NonNull private final UsageStats mUsageStats;
@@ -170,7 +171,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
                         .getUniqueName(mContext, userId);
                 final Face face = new Face(name, faceId, deviceId);
 
-                final BaseClientMonitor<?> client = mScheduler.getCurrentClient();
+                final BaseClientMonitor client = mScheduler.getCurrentClient();
                 if (!(client instanceof FaceEnrollClient)) {
                     Slog.e(TAG, "onEnrollResult for non-enroll client: "
                             + Utils.getClientName(client));
@@ -186,7 +187,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         public void onAuthenticated(long deviceId, int faceId, int userId,
                 ArrayList<Byte> token) {
             mHandler.post(() -> {
-                final BaseClientMonitor<?> client = mScheduler.getCurrentClient();
+                final BaseClientMonitor client = mScheduler.getCurrentClient();
                 if (!(client instanceof AuthenticationConsumer)) {
                     Slog.e(TAG, "onAuthenticated for non-authentication consumer: "
                             + Utils.getClientName(client));
@@ -205,7 +206,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         public void onAcquired(long deviceId, int userId, int acquiredInfo,
                 int vendorCode) {
             mHandler.post(() -> {
-                final BaseClientMonitor<?> client = mScheduler.getCurrentClient();
+                final BaseClientMonitor client = mScheduler.getCurrentClient();
                 if (!(client instanceof AcquisitionClient)) {
                     Slog.e(TAG, "onAcquired for non-acquire client: "
                             + Utils.getClientName(client));
@@ -221,7 +222,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         @Override
         public void onError(long deviceId, int userId, int error, int vendorCode) {
             mHandler.post(() -> {
-                final BaseClientMonitor<?> client = mScheduler.getCurrentClient();
+                final BaseClientMonitor client = mScheduler.getCurrentClient();
                 Slog.d(TAG, "handleError"
                         + ", client: " + (client != null ? client.getOwnerString() : null)
                         + ", error: " + error
@@ -247,7 +248,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         @Override
         public void onRemoved(long deviceId, ArrayList<Integer> removed, int userId) {
             mHandler.post(() -> {
-                final BaseClientMonitor<?> client = mScheduler.getCurrentClient();
+                final BaseClientMonitor client = mScheduler.getCurrentClient();
                 if (!(client instanceof RemovalConsumer)) {
                     Slog.e(TAG, "onRemoved for non-removal consumer: "
                             + Utils.getClientName(client));
@@ -278,7 +279,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         @Override
         public void onEnumerate(long deviceId, ArrayList<Integer> faceIds, int userId) {
             mHandler.post(() -> {
-                final BaseClientMonitor<?> client = mScheduler.getCurrentClient();
+                final BaseClientMonitor client = mScheduler.getCurrentClient();
                 if (!(client instanceof EnumerateConsumer)) {
                     Slog.e(TAG, "onEnumerate for non-enumerate consumer: "
                             + Utils.getClientName(client));
@@ -376,7 +377,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             mDaemon = null;
             mCurrentUserId = UserHandle.USER_NULL;
 
-            final BaseClientMonitor<?> client = mScheduler.getCurrentClient();
+            final BaseClientMonitor client = mScheduler.getCurrentClient();
             if (client instanceof Interruptable) {
                 Slog.e(TAG, "Sending ERROR_HW_UNAVAILABLE for client: " + client);
                 final Interruptable interruptable = (Interruptable) client;
@@ -482,7 +483,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
     @Override
     public long getAuthenticatorId(int sensorId, int userId) {
-        return mAuthenticatorIds.get(userId);
+        return mAuthenticatorIds.getOrDefault(userId, 0L);
     }
 
     @Override
@@ -530,7 +531,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
                     mSensorId, mCurrentChallengeOwner);
             mScheduler.scheduleClientMonitor(client, new BaseClientMonitor.Callback() {
                 @Override
-                public void onClientStarted(@NonNull BaseClientMonitor<?> clientMonitor) {
+                public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
                     if (client != clientMonitor) {
                         Slog.e(TAG, "scheduleGenerateChallenge onClientStarted, mismatched client."
                                 + " Expecting: " + client + ", received: " + clientMonitor);
@@ -559,7 +560,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
                     mLazyDaemon, token, opPackageName, mSensorId);
             mScheduler.scheduleClientMonitor(client, new BaseClientMonitor.Callback() {
                 @Override
-                public void onClientFinished(@NonNull BaseClientMonitor<?> clientMonitor,
+                public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
                         boolean success) {
                     if (client != clientMonitor) {
                         Slog.e(TAG, "scheduleRevokeChallenge, mismatched client."
@@ -615,7 +616,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
             mScheduler.scheduleClientMonitor(client, new BaseClientMonitor.Callback() {
                 @Override
-                public void onClientFinished(@NonNull BaseClientMonitor<?> clientMonitor,
+                public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
                         boolean success) {
                     if (success) {
                         // Update authenticatorIds
@@ -727,7 +728,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             mScheduler.scheduleClientMonitor(client, new BaseClientMonitor.Callback() {
                 @Override
                 public void onClientFinished(
-                        @NonNull BaseClientMonitor<?> clientMonitor, boolean success) {
+                        @NonNull BaseClientMonitor clientMonitor, boolean success) {
                     if (success && feature == BiometricFaceConstants.FEATURE_REQUIRE_ATTENTION) {
                         final int settingsValue = client.getValue() ? 1 : 0;
                         Slog.d(TAG, "Updating attention value for user: " + userId
@@ -864,7 +865,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
                 hasEnrolled, mAuthenticatorIds);
         mScheduler.scheduleClientMonitor(client, new BaseClientMonitor.Callback() {
             @Override
-            public void onClientFinished(@NonNull BaseClientMonitor<?> clientMonitor,
+            public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
                     boolean success) {
                 if (success) {
                     mCurrentUserId = targetUserId;

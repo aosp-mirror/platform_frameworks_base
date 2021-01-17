@@ -101,15 +101,32 @@ public class BiometricScheduler {
         @Retention(RetentionPolicy.SOURCE)
         @interface OperationState {}
 
-        @NonNull final BaseClientMonitor<?> mClientMonitor;
+        @NonNull final BaseClientMonitor mClientMonitor;
         @Nullable final BaseClientMonitor.Callback mClientCallback;
         @OperationState int mState;
 
-        Operation(@NonNull BaseClientMonitor<?> clientMonitor,
+        Operation(@NonNull BaseClientMonitor clientMonitor,
                 @Nullable BaseClientMonitor.Callback callback) {
             this.mClientMonitor = clientMonitor;
             this.mClientCallback = callback;
             mState = STATE_WAITING_IN_QUEUE;
+        }
+
+        public boolean isHalOperation() {
+            return mClientMonitor instanceof HalClientMonitor<?>;
+        }
+
+        /**
+         * @return true if the operation requires the HAL, and the HAL is null.
+         */
+        public boolean isUnstartableHalOperation() {
+            if (isHalOperation()) {
+                final HalClientMonitor<?> client = (HalClientMonitor<?>) mClientMonitor;
+                if (client.getFreshDaemon() == null) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         @Override
@@ -188,7 +205,7 @@ public class BiometricScheduler {
     // starting the next client).
     public class InternalCallback implements BaseClientMonitor.Callback {
         @Override
-        public void onClientStarted(@NonNull BaseClientMonitor<?> clientMonitor) {
+        public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
             Slog.d(getTag(), "[Started] " + clientMonitor);
             if (mCurrentOperation.mClientCallback != null) {
                 mCurrentOperation.mClientCallback.onClientStarted(clientMonitor);
@@ -196,7 +213,7 @@ public class BiometricScheduler {
         }
 
         @Override
-        public void onClientFinished(@NonNull BaseClientMonitor<?> clientMonitor, boolean success) {
+        public void onClientFinished(@NonNull BaseClientMonitor clientMonitor, boolean success) {
             mHandler.post(() -> {
                 if (mCurrentOperation == null) {
                     Slog.e(getTag(), "[Finishing] " + clientMonitor
@@ -276,7 +293,7 @@ public class BiometricScheduler {
         }
 
         mCurrentOperation = mPendingOperations.poll();
-        final BaseClientMonitor<?> currentClient = mCurrentOperation.mClientMonitor;
+        final BaseClientMonitor currentClient = mCurrentOperation.mClientMonitor;
 
         // If the operation at the front of the queue has been marked for cancellation, send
         // ERROR_CANCELED. No need to start this client.
@@ -305,7 +322,9 @@ public class BiometricScheduler {
         // to arrive at the head of the queue, before pinging it to start.
         final boolean shouldStartNow = currentClient.getCookie() == 0;
         if (shouldStartNow) {
-            if (mCurrentOperation.mClientMonitor.getFreshDaemon() == null) {
+            if (mCurrentOperation.isUnstartableHalOperation()) {
+                final HalClientMonitor<?> halClientMonitor =
+                        (HalClientMonitor<?>) mCurrentOperation.mClientMonitor;
                 // Note down current length of queue
                 final int pendingOperationsLength = mPendingOperations.size();
                 final Operation lastOperation = mPendingOperations.peekLast();
@@ -315,7 +334,7 @@ public class BiometricScheduler {
                 // For current operations, 1) unableToStart, which notifies the caller-side, then
                 // 2) notify operation's callback, to notify applicable system service that the
                 // operation failed.
-                mCurrentOperation.mClientMonitor.unableToStart();
+                halClientMonitor.unableToStart();
                 if (mCurrentOperation.mClientCallback != null) {
                     mCurrentOperation.mClientCallback.onClientFinished(
                             mCurrentOperation.mClientMonitor, false /* success */);
@@ -331,7 +350,9 @@ public class BiometricScheduler {
                                 + ", expected length: " + pendingOperationsLength);
                         break;
                     }
-                    operation.mClientMonitor.unableToStart();
+                    if (operation.isHalOperation()) {
+                        ((HalClientMonitor<?>) operation.mClientMonitor).unableToStart();
+                    }
                     if (operation.mClientCallback != null) {
                         operation.mClientCallback.onClientFinished(operation.mClientMonitor,
                                 false /* success */);
@@ -401,10 +422,12 @@ public class BiometricScheduler {
             return;
         }
 
-        if (mCurrentOperation.mClientMonitor.getFreshDaemon() == null) {
+        if (mCurrentOperation.isUnstartableHalOperation()) {
             Slog.e(getTag(), "[Unable To Start] Prepared client: " + mCurrentOperation);
             // This is BiometricPrompt trying to auth but something's wrong with the HAL.
-            mCurrentOperation.mClientMonitor.unableToStart();
+            final HalClientMonitor<?> halClientMonitor =
+                    (HalClientMonitor<?>) mCurrentOperation.mClientMonitor;
+            halClientMonitor.unableToStart();
             if (mCurrentOperation.mClientCallback != null) {
                 mCurrentOperation.mClientCallback.onClientFinished(mCurrentOperation.mClientMonitor,
                         false /* success */);
@@ -423,7 +446,7 @@ public class BiometricScheduler {
      *
      * @param clientMonitor operation to be scheduled
      */
-    public void scheduleClientMonitor(@NonNull BaseClientMonitor<?> clientMonitor) {
+    public void scheduleClientMonitor(@NonNull BaseClientMonitor clientMonitor) {
         scheduleClientMonitor(clientMonitor, null /* clientFinishCallback */);
     }
 
@@ -434,7 +457,7 @@ public class BiometricScheduler {
      * @param clientCallback optional callback, invoked when the client is finished, but
      *                             before it has been removed from the queue.
      */
-    public void scheduleClientMonitor(@NonNull BaseClientMonitor<?> clientMonitor,
+    public void scheduleClientMonitor(@NonNull BaseClientMonitor clientMonitor,
             @Nullable BaseClientMonitor.Callback clientCallback) {
         // Mark any interruptable pending clients as canceling. Once they reach the head of the
         // queue, the scheduler will send ERROR_CANCELED and skip the operation.
@@ -537,7 +560,7 @@ public class BiometricScheduler {
     /**
      * @return the current operation
      */
-    public BaseClientMonitor<?> getCurrentClient() {
+    public BaseClientMonitor getCurrentClient() {
         if (mCurrentOperation == null) {
             return null;
         }

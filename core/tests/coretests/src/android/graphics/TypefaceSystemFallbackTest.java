@@ -48,7 +48,9 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -145,9 +147,13 @@ public class TypefaceSystemFallbackTest {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        Map<String, File> updatableFontMap = new HashMap<>();
+        for (File file : new File(TEST_UPDATABLE_FONT_DIR).listFiles()) {
+            updatableFontMap.put(file.getName(), file);
+        }
 
         final FontConfig.Alias[] aliases = SystemFonts.buildSystemFallback(TEST_FONTS_XML,
-                TEST_FONT_DIR, TEST_UPDATABLE_FONT_DIR, oemCustomization, fallbackMap);
+                TEST_FONT_DIR, updatableFontMap, oemCustomization, fallbackMap);
         Typeface.initSystemDefaultTypefaces(fontMap, fallbackMap, aliases);
     }
 

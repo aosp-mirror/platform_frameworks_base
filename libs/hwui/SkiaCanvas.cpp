@@ -819,10 +819,10 @@ void SkiaCanvas::drawRipple(uirenderer::CanvasPropertyPrimitive* x,
                             uirenderer::CanvasPropertyPrimitive* radius,
                             uirenderer::CanvasPropertyPaint* paint,
                             uirenderer::CanvasPropertyPrimitive* progress,
-                            sk_sp<SkRuntimeEffect> runtimeEffect) {
+                            const SkRuntimeShaderBuilder& effectBuilder) {
     sk_sp<uirenderer::skiapipeline::AnimatedRipple> drawable(
             new uirenderer::skiapipeline::AnimatedRipple(x, y, radius, paint, progress,
-                                                         runtimeEffect));
+                                                         effectBuilder));
     mCanvas->drawDrawable(drawable.get());
 }
 

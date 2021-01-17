@@ -16,7 +16,7 @@
 
 package com.android.systemui.accessibility;
 
-import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_GLOBAL_ACTIONS;
+import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_ACCESSIBILITY_ACTIONS;
 
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
 
@@ -349,7 +349,7 @@ public class SystemActions extends SystemUI {
     private void handleTakeScreenshot() {
         ScreenshotHelper screenshotHelper = new ScreenshotHelper(mContext);
         screenshotHelper.takeScreenshot(WindowManager.TAKE_SCREENSHOT_FULLSCREEN, true, true,
-                SCREENSHOT_GLOBAL_ACTIONS, new Handler(Looper.getMainLooper()), null);
+                SCREENSHOT_ACCESSIBILITY_ACTIONS, new Handler(Looper.getMainLooper()), null);
     }
 
     private void handleAccessibilityButton() {

@@ -144,7 +144,8 @@ static void android_view_DisplayListCanvas_drawCircleProps(CRITICAL_JNI_PARAMS_C
 static void android_view_DisplayListCanvas_drawRippleProps(CRITICAL_JNI_PARAMS_COMMA jlong canvasPtr,
                                                            jlong xPropPtr, jlong yPropPtr,
                                                            jlong radiusPropPtr, jlong paintPropPtr,
-                                                           jlong progressPropPtr, jlong effectPtr) {
+                                                           jlong progressPropPtr,
+                                                           jlong builderPtr) {
     Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     CanvasPropertyPrimitive* xProp = reinterpret_cast<CanvasPropertyPrimitive*>(xPropPtr);
     CanvasPropertyPrimitive* yProp = reinterpret_cast<CanvasPropertyPrimitive*>(yPropPtr);
@@ -152,8 +153,8 @@ static void android_view_DisplayListCanvas_drawRippleProps(CRITICAL_JNI_PARAMS_C
     CanvasPropertyPaint* paintProp = reinterpret_cast<CanvasPropertyPaint*>(paintPropPtr);
     CanvasPropertyPrimitive* progressProp =
             reinterpret_cast<CanvasPropertyPrimitive*>(progressPropPtr);
-    SkRuntimeEffect* effect = reinterpret_cast<SkRuntimeEffect*>(effectPtr);
-    canvas->drawRipple(xProp, yProp, radiusProp, paintProp, progressProp, sk_ref_sp(effect));
+    SkRuntimeShaderBuilder* builder = reinterpret_cast<SkRuntimeShaderBuilder*>(builderPtr);
+    canvas->drawRipple(xProp, yProp, radiusProp, paintProp, progressProp, *builder);
 }
 
 static void android_view_DisplayListCanvas_drawWebViewFunctor(CRITICAL_JNI_PARAMS_COMMA jlong canvasPtr, jint functor) {

@@ -2536,6 +2536,22 @@ public class DevicePolicyManager {
             "android.app.extra.PROVISIONING_SUPPORTED_MODES";
 
     /**
+     * A boolean extra which determines whether to skip the ownership disclaimer screen during the
+     * provisioning flow. The default value is {@code false}.
+     *
+     * If the value is {@code true}, it is the responsibility of the provisioning initiator to
+     * show the relevant disclaimer.
+     *
+     * <p>This extra is only respected when provided alongside the {@link
+     * #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} intent action.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_PROVISIONING_SKIP_OWNERSHIP_DISCLAIMER =
+            "android.app.extra.PROVISIONING_SKIP_OWNERSHIP_DISCLAIMER";
+
+    /**
      * An {@link ArrayList} of {@link Integer} extra specifying the allowed provisioning modes.
      * <p>This extra will be passed to the admin app's {@link #ACTION_GET_PROVISIONING_MODE}
      * activity, whose result intent must contain {@link #EXTRA_PROVISIONING_MODE} set to one of
@@ -2562,6 +2578,30 @@ public class DevicePolicyManager {
      * The provisioning mode for a work profile on a personal device.
      */
     public static final int PROVISIONING_MODE_MANAGED_PROFILE_ON_PERSONAL_DEVICE = 3;
+
+    /**
+     * A {@code boolean} flag that indicates whether the provisioning flow should return before
+     * starting the admin app's {@link #ACTION_ADMIN_POLICY_COMPLIANCE} handler. The default value
+     * is {@code true}.
+     *
+     * <p>If this extra is set to {@code true}, then when the provisioning flow returns back to the
+     * provisioning initiator, provisioning will not be complete. The provisioning initiator can
+     * use this opportunity to do its own preparatory steps prior to the launch of the admin app's
+     * {@link #ACTION_ADMIN_POLICY_COMPLIANCE} handler. It is the responsibility of the
+     * provisioning initiator to ensure that the provisioning flow is then resumed and completed.
+     *
+     * <p>If this extra is set to {@code false}, then when the provisioning flow returns back to
+     * the provisioning initiator, provisioning will be complete. Note that device owner
+     * provisioning is not currently supported for the this scenario.
+     *
+     * <p>This extra is only respected when provided alongside the {@link
+     * #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} intent action.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_PROVISIONING_RETURN_BEFORE_POLICY_COMPLIANCE =
+            "android.app.extra.PROVISIONING_RETURN_BEFORE_POLICY_COMPLIANCE";
 
     /**
      * Activity action: Starts the administrator to show policy compliance for the provisioning.
@@ -2690,6 +2730,60 @@ public class DevicePolicyManager {
     /** @hide */
     @TestApi
     public static final int OPERATION_SET_USER_CONTROL_DISABLED_PACKAGES = 22;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_CLEAR_APPLICATION_USER_DATA = 23;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_INSTALL_CA_CERT = 24;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_INSTALL_KEY_PAIR = 25;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_INSTALL_SYSTEM_UPDATE = 26;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_REMOVE_ACTIVE_ADMIN = 27;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_REMOVE_KEY_PAIR = 28;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_REQUEST_BUGREPORT = 29;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_SET_ALWAYS_ON_VPN_PACKAGE = 30;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_SET_CAMERA_DISABLED = 31;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_SET_FACTORY_RESET_PROTECTION_POLICY = 32;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_SET_GLOBAL_PRIVATE_DNS = 33;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_SET_LOGOUT_ENABLED = 34;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_SET_MASTER_VOLUME_MUTED = 35;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_SET_OVERRIDE_APNS_ENABLED = 36;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_SET_PERMISSION_GRANT_STATE = 37;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_SET_PERMISSION_POLICY = 38;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_SET_RESTRICTIONS_PROVIDER = 39;
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_UNINSTALL_CA_CERT = 40;
 
     private static final String PREFIX_OPERATION = "OPERATION_";
 
@@ -2716,7 +2810,25 @@ public class DevicePolicyManager {
             OPERATION_SET_LOCK_TASK_PACKAGES,
             OPERATION_SET_PACKAGES_SUSPENDED,
             OPERATION_SET_TRUST_AGENT_CONFIGURATION,
-            OPERATION_SET_USER_CONTROL_DISABLED_PACKAGES
+            OPERATION_SET_USER_CONTROL_DISABLED_PACKAGES,
+            OPERATION_CLEAR_APPLICATION_USER_DATA,
+            OPERATION_INSTALL_CA_CERT,
+            OPERATION_INSTALL_KEY_PAIR,
+            OPERATION_INSTALL_SYSTEM_UPDATE,
+            OPERATION_REMOVE_ACTIVE_ADMIN,
+            OPERATION_REMOVE_KEY_PAIR,
+            OPERATION_REQUEST_BUGREPORT,
+            OPERATION_SET_ALWAYS_ON_VPN_PACKAGE,
+            OPERATION_SET_CAMERA_DISABLED,
+            OPERATION_SET_FACTORY_RESET_PROTECTION_POLICY,
+            OPERATION_SET_GLOBAL_PRIVATE_DNS,
+            OPERATION_SET_LOGOUT_ENABLED,
+            OPERATION_SET_MASTER_VOLUME_MUTED,
+            OPERATION_SET_OVERRIDE_APNS_ENABLED,
+            OPERATION_SET_PERMISSION_GRANT_STATE,
+            OPERATION_SET_PERMISSION_POLICY,
+            OPERATION_SET_RESTRICTIONS_PROVIDER,
+            OPERATION_UNINSTALL_CA_CERT
     })
     @Retention(RetentionPolicy.SOURCE)
     public static @interface DevicePolicyOperation {
@@ -9823,7 +9935,7 @@ public class DevicePolicyManager {
      * Designates a specific service component as the provider for making permission requests of a
      * local or remote administrator of the user.
      * <p/>
-     * Only a profile owner can designate the restrictions provider.
+     * Only a device owner or profile owner can designate the restrictions provider.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param provider The component name of the service that implements

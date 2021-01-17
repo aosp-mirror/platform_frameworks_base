@@ -139,7 +139,9 @@ class KeyStoreCryptoOperationChunkedStreamer implements KeyStoreCryptoOperationS
             int inputConsumed = ArrayUtils.copy(input, inputOffset, mChunk, mChunkLength,
                     inputLength);
             inputLength -= inputConsumed;
-            inputOffset += inputOffset;
+            inputOffset += inputConsumed;
+            mChunkLength += inputConsumed;
+            if (mChunkLength < mChunkSizeMax) return output;
             byte[] o = mKeyStoreStream.update(mChunk);
             if (o != null) {
                 output = ArrayUtils.concat(output, o);

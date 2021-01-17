@@ -22,7 +22,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.biometrics.IBiometricAuthenticator;
@@ -44,21 +46,25 @@ public class InvalidationTrackerTest {
     @Test
     public void testCallbackReceived_whenAllStrongSensorsInvalidated() throws Exception {
         final IBiometricAuthenticator authenticator1 = mock(IBiometricAuthenticator.class);
+        when(authenticator1.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
         final TestSensor sensor1 = new TestSensor(0 /* id */,
                 BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG,
                 authenticator1);
 
         final IBiometricAuthenticator authenticator2 = mock(IBiometricAuthenticator.class);
+        when(authenticator2.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
         final TestSensor sensor2 = new TestSensor(1 /* id */,
                 BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG,
                 authenticator2);
 
         final IBiometricAuthenticator authenticator3 = mock(IBiometricAuthenticator.class);
+        when(authenticator3.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
         final TestSensor sensor3 = new TestSensor(2 /* id */,
                 BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_STRONG,
                 authenticator3);
 
         final IBiometricAuthenticator authenticator4 = mock(IBiometricAuthenticator.class);
+        when(authenticator4.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
         final TestSensor sensor4 = new TestSensor(3 /* id */,
                 BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_WEAK,
                 authenticator4);
@@ -71,7 +77,8 @@ public class InvalidationTrackerTest {
 
         final IInvalidationCallback callback = mock(IInvalidationCallback.class);
         final InvalidationTracker tracker =
-                InvalidationTracker.start(sensors, 0 /* userId */, 0 /* fromSensorId */, callback);
+                InvalidationTracker.start(mock(Context.class), sensors, 0 /* userId */,
+                        0 /* fromSensorId */, callback);
 
         // The sensor which the request originated from should not be requested to invalidate
         // its authenticatorId.
