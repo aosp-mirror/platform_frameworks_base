@@ -1940,7 +1940,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 } else {
                     stack.setWindowingMode(windowingMode);
                     stack.mDisplayContent.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS,
-                            true /* notifyClients */, mTaskSupervisor.mUserLeaving);
+                            true /* notifyClients */);
                 }
                 return true;
             } finally {

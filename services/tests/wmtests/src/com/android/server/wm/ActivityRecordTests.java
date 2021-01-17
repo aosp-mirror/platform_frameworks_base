@@ -1235,8 +1235,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         topActivity.setState(RESUMED, "true");
         doCallRealMethod().when(mRootWindowContainer).ensureActivitiesVisible(
                 any() /* starting */, anyInt() /* configChanges */,
-                anyBoolean() /* preserveWindows */, anyBoolean() /* notifyClients */,
-                anyBoolean() /* userLeaving */);
+                anyBoolean() /* preserveWindows */, anyBoolean() /* notifyClients */);
         topActivity.setShowWhenLocked(true);
 
         // Verify the stack-top activity is occluded keyguard.
@@ -1283,7 +1282,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         secondActivity.completeFinishing("test");
         verify(secondActivity.mDisplayContent).ensureActivitiesVisible(null /* starting */,
                 0 /* configChanges */ , false /* preserveWindows */,
-                true /* notifyClients */, false /* userLeaving */);
+                true /* notifyClients */);
 
         // Finish the first activity
         firstActivity.finishing = true;
@@ -1291,7 +1290,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         firstActivity.completeFinishing("test");
         verify(firstActivity.mDisplayContent, times(2)).ensureActivitiesVisible(null /* starting */,
                 0 /* configChanges */ , false /* preserveWindows */,
-                true /* notifyClients */, false /* userLeaving */);
+                true /* notifyClients */);
     }
 
     /**
