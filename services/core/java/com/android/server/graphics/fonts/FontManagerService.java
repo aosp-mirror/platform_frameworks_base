@@ -26,7 +26,6 @@ import android.graphics.fonts.SystemFonts;
 import android.os.SharedMemory;
 import android.system.ErrnoException;
 import android.text.FontConfig;
-import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -40,7 +39,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.NioUtils;
 import java.nio.channels.FileChannel;
-import java.util.HashMap;
 import java.util.Map;
 
 /** A service for managing system fonts. */
@@ -69,7 +67,10 @@ public final class FontManagerService {
                         @Override
                         @Nullable
                         public SharedMemory getSerializedSystemFontMap() {
-                            return mService.getSerializedSystemFontMap();
+                            if (!Typeface.ENABLE_LAZY_TYPEFACE_INITIALIZATION) {
+                                return null;
+                            }
+                            return mService.getCurrentFontSettings().getSerializedSystemFontMap();
                         }
                     });
         }
@@ -98,48 +99,20 @@ public final class FontManagerService {
     private final UpdatableFontDir mUpdatableFontDir;
 
     @GuardedBy("FontManagerService.this")
-    @Nullable
-    private SharedMemory mSerializedSystemFontMap = null;
+    @Nullable SystemFontSettings mCurrentFontSettings = null;
 
     private FontManagerService() {
         mUpdatableFontDir = ENABLE_FONT_UPDATES
                 ? new UpdatableFontDir(new File(FONT_FILES_DIR), new OtfFontFileParser()) : null;
     }
 
-    @Nullable
-    private SharedMemory getSerializedSystemFontMap() {
-        if (!Typeface.ENABLE_LAZY_TYPEFACE_INITIALIZATION) {
-            return null;
-        }
+    @NonNull private SystemFontSettings getCurrentFontSettings() {
         synchronized (FontManagerService.this) {
-            if (mSerializedSystemFontMap == null) {
-                mSerializedSystemFontMap = createSerializedSystemFontMapLocked();
+            if (mCurrentFontSettings == null) {
+                mCurrentFontSettings = SystemFontSettings.create(mUpdatableFontDir);
             }
-            return mSerializedSystemFontMap;
+            return mCurrentFontSettings;
         }
-    }
-
-    @Nullable
-    private SharedMemory createSerializedSystemFontMapLocked() {
-        if (mUpdatableFontDir != null) {
-            HashMap<String, Typeface> systemFontMap = new HashMap<>();
-            Map<String, File> fontFileMap = mUpdatableFontDir.getFontFileMap();
-            Pair<FontConfig.Alias[], Map<String, FontFamily[]>> pair =
-                    SystemFonts.initializeSystemFonts(fontFileMap);
-            Typeface.initSystemDefaultTypefaces(systemFontMap, pair.second, pair.first);
-            try {
-                return Typeface.serializeFontMap(systemFontMap);
-            } catch (IOException | ErrnoException e) {
-                Slog.w(TAG, "Failed to serialize updatable font map. "
-                        + "Retrying with system image fonts.", e);
-            }
-        }
-        try {
-            return Typeface.serializeFontMap(Typeface.getSystemFontMap());
-        } catch (IOException | ErrnoException e) {
-            Slog.e(TAG, "Failed to serialize SystemServer system font map", e);
-        }
-        return null;
     }
 
     private boolean installFontFile(String name, FileDescriptor fd) {
@@ -152,8 +125,74 @@ public final class FontManagerService {
                 return false;
             }
             // Create updated font map in the next getSerializedSystemFontMap() call.
-            mSerializedSystemFontMap = null;
+            mCurrentFontSettings = null;
             return true;
         }
     }
+
+    private static class SystemFontSettings {
+        private final @NonNull SharedMemory mSerializedSystemFontMap;
+        private final @NonNull FontConfig mSystemFontConfig;
+        private final @NonNull Map<String, FontFamily[]> mSystemFallbackMap;
+        private final @NonNull Map<String, Typeface> mSystemTypefaceMap;
+
+        SystemFontSettings(
+                @NonNull SharedMemory serializedSystemFontMap,
+                @NonNull FontConfig systemFontConfig,
+                @NonNull Map<String, FontFamily[]> systemFallbackMap,
+                @NonNull Map<String, Typeface> systemTypefaceMap) {
+            mSerializedSystemFontMap = serializedSystemFontMap;
+            mSystemFontConfig = systemFontConfig;
+            mSystemFallbackMap = systemFallbackMap;
+            mSystemTypefaceMap = systemTypefaceMap;
+        }
+
+        public @NonNull SharedMemory getSerializedSystemFontMap() {
+            return mSerializedSystemFontMap;
+        }
+
+        public @NonNull FontConfig getSystemFontConfig() {
+            return mSystemFontConfig;
+        }
+
+        public @NonNull Map<String, FontFamily[]> getSystemFallbackMap() {
+            return mSystemFallbackMap;
+        }
+
+        public @NonNull Map<String, Typeface> getSystemTypefaceMap() {
+            return mSystemTypefaceMap;
+        }
+
+        public static @Nullable SystemFontSettings create(
+                @Nullable UpdatableFontDir updatableFontDir) {
+            if (updatableFontDir != null) {
+                final FontConfig fontConfig = SystemFonts.getSystemFontConfig(
+                        updatableFontDir.getFontFileMap());
+                final Map<String, FontFamily[]> fallback =
+                        SystemFonts.buildSystemFallback(fontConfig);
+                final Map<String, Typeface> typefaceMap =
+                        SystemFonts.buildSystemTypefaces(fontConfig, fallback);
+
+                try {
+                    final SharedMemory shm = Typeface.serializeFontMap(typefaceMap);
+                    return new SystemFontSettings(shm, fontConfig, fallback, typefaceMap);
+                } catch (IOException | ErrnoException e) {
+                    Slog.w(TAG, "Failed to serialize updatable font map. "
+                            + "Retrying with system image fonts.", e);
+                }
+            }
+
+            final FontConfig fontConfig = SystemFonts.getSystemPreinstalledFontConfig();
+            final Map<String, FontFamily[]> fallback = SystemFonts.buildSystemFallback(fontConfig);
+            final Map<String, Typeface> typefaceMap =
+                    SystemFonts.buildSystemTypefaces(fontConfig, fallback);
+            try {
+                final SharedMemory shm = Typeface.serializeFontMap(typefaceMap);
+                return new SystemFontSettings(shm, fontConfig, fallback, typefaceMap);
+            } catch (IOException | ErrnoException e) {
+                Slog.e(TAG, "Failed to serialize SystemServer system font map", e);
+            }
+            return null;
+        }
+    };
 }

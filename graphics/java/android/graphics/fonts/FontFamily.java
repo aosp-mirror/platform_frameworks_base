@@ -18,6 +18,7 @@ package android.graphics.fonts;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.text.FontConfig;
 
 import com.android.internal.util.Preconditions;
@@ -119,7 +120,7 @@ public final class FontFamily {
                 nAddFont(builderPtr, mFonts.get(i).getNativePtr());
             }
             final long ptr = nBuild(builderPtr, langTags, variant, isCustomFallback);
-            final FontFamily family = new FontFamily(mFonts, ptr);
+            final FontFamily family = new FontFamily(mFonts, langTags, variant, ptr);
             sFamilyRegistory.registerNativeAllocation(family, ptr);
             return family;
         }
@@ -138,12 +139,33 @@ public final class FontFamily {
     }
 
     private final ArrayList<Font> mFonts;
+    private final String mLangTags;
+    private final int mVariant;
     private final long mNativePtr;
 
     // Use Builder instead.
-    private FontFamily(@NonNull ArrayList<Font> fonts, long ptr) {
+    private FontFamily(@NonNull ArrayList<Font> fonts, String langTags, int variant, long ptr) {
         mFonts = fonts;
+        mLangTags = langTags;
+        mVariant = variant;
         mNativePtr = ptr;
+    }
+
+    /**
+     * Returns a BCP-47 compliant language tags associated with this font family.
+     * @hide
+     * @return a BCP-47 compliant language tag.
+     */
+    public @Nullable String getLangTags() {
+        return mLangTags;
+    }
+
+    /**
+     * @hide
+     * @return a family variant
+     */
+    public int getVariant() {
+        return mVariant;
     }
 
     /**
