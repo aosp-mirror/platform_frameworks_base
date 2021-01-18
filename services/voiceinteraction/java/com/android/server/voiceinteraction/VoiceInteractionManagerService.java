@@ -238,7 +238,6 @@ public class VoiceInteractionManagerService extends SystemService {
 
         private boolean mSafeMode;
         private int mCurUser;
-        private boolean mCurUserUnlocked;
         private boolean mCurUserSupported;
 
         @GuardedBy("this")
@@ -494,7 +493,6 @@ public class VoiceInteractionManagerService extends SystemService {
             FgThread.getHandler().post(() -> {
                 synchronized (this) {
                     setCurrentUserLocked(userHandle);
-                    mCurUserUnlocked = false;
                     switchImplementationIfNeededLocked(false);
                 }
             });
@@ -1458,7 +1456,6 @@ public class VoiceInteractionManagerService extends SystemService {
                 pw.println("  mEnableService: " + mEnableService);
                 pw.println("  mTemporarilyDisabled: " + mTemporarilyDisabled);
                 pw.println("  mCurUser: " + mCurUser);
-                pw.println("  mCurUserUnlocked: " + mCurUserUnlocked);
                 pw.println("  mCurUserSupported: " + mCurUserSupported);
                 dumpSupportedUsers(pw, "  ");
                 mDbHelper.dump(pw);
