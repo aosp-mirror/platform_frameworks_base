@@ -8112,11 +8112,18 @@ public class ConnectivityServiceTest {
         assertTrue(mService.mConnectivityDiagnosticsCallbacks.containsKey(mIBinder));
     }
 
+    public NetworkAgentInfo fakeMobileNai(NetworkCapabilities nc) {
+        final NetworkInfo info = new NetworkInfo(TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_LTE,
+                ConnectivityManager.getNetworkTypeName(TYPE_MOBILE),
+                TelephonyManager.getNetworkTypeName(TelephonyManager.NETWORK_TYPE_LTE));
+        return new NetworkAgentInfo(null, new Network(NET_ID), info, new LinkProperties(),
+                nc, 0, mServiceContext, null, new NetworkAgentConfig(), mService, null, null, null,
+                0, INVALID_UID);
+    }
+
     @Test
     public void testCheckConnectivityDiagnosticsPermissionsNetworkStack() throws Exception {
-        final NetworkAgentInfo naiWithoutUid =
-                new NetworkAgentInfo(null, null, null, null, new NetworkCapabilities(), 0,
-                        mServiceContext, null, null, mService, null, null, null, 0, INVALID_UID);
+        final NetworkAgentInfo naiWithoutUid = fakeMobileNai(new NetworkCapabilities());
 
         mServiceContext.setPermission(
                 android.Manifest.permission.NETWORK_STACK, PERMISSION_GRANTED);
@@ -8129,9 +8136,7 @@ public class ConnectivityServiceTest {
 
     @Test
     public void testCheckConnectivityDiagnosticsPermissionsWrongUidPackageName() throws Exception {
-        final NetworkAgentInfo naiWithoutUid =
-                new NetworkAgentInfo(null, null, null, null, new NetworkCapabilities(), 0,
-                        mServiceContext, null, null, mService, null, null, null, 0, INVALID_UID);
+        final NetworkAgentInfo naiWithoutUid = fakeMobileNai(new NetworkCapabilities());
 
         mServiceContext.setPermission(android.Manifest.permission.NETWORK_STACK, PERMISSION_DENIED);
 
@@ -8144,9 +8149,7 @@ public class ConnectivityServiceTest {
 
     @Test
     public void testCheckConnectivityDiagnosticsPermissionsNoLocationPermission() throws Exception {
-        final NetworkAgentInfo naiWithoutUid =
-                new NetworkAgentInfo(null, null, null, null, new NetworkCapabilities(), 0,
-                        mServiceContext, null, null, mService, null, null, null, 0, INVALID_UID);
+        final NetworkAgentInfo naiWithoutUid = fakeMobileNai(new NetworkCapabilities());
 
         mServiceContext.setPermission(android.Manifest.permission.NETWORK_STACK, PERMISSION_DENIED);
 
@@ -8159,10 +8162,7 @@ public class ConnectivityServiceTest {
 
     @Test
     public void testCheckConnectivityDiagnosticsPermissionsActiveVpn() throws Exception {
-        final Network network = new Network(NET_ID);
-        final NetworkAgentInfo naiWithoutUid =
-                new NetworkAgentInfo(null, network, null, null, new NetworkCapabilities(), 0,
-                        mServiceContext, null, null, mService, null, null, null, 0, INVALID_UID);
+        final NetworkAgentInfo naiWithoutUid = fakeMobileNai(new NetworkCapabilities());
 
         mMockVpn.establishForMyUid();
         assertUidRangesUpdatedForMyUid(true);
@@ -8172,7 +8172,7 @@ public class ConnectivityServiceTest {
         setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_FINE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION);
 
-        assertTrue(mService.setUnderlyingNetworksForVpn(new Network[] {network}));
+        assertTrue(mService.setUnderlyingNetworksForVpn(new Network[] {naiWithoutUid.network}));
         waitForIdle();
         assertTrue(
                 "Active VPN permission not applied",
@@ -8193,9 +8193,7 @@ public class ConnectivityServiceTest {
     public void testCheckConnectivityDiagnosticsPermissionsNetworkAdministrator() throws Exception {
         final NetworkCapabilities nc = new NetworkCapabilities();
         nc.setAdministratorUids(new int[] {Process.myUid()});
-        final NetworkAgentInfo naiWithUid =
-                new NetworkAgentInfo(null, null, null, null, nc, 0, mServiceContext, null, null,
-                        mService, null, null, null, 0, INVALID_UID);
+        final NetworkAgentInfo naiWithUid = fakeMobileNai(nc);
 
         setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_FINE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION);
@@ -8212,9 +8210,7 @@ public class ConnectivityServiceTest {
         final NetworkCapabilities nc = new NetworkCapabilities();
         nc.setOwnerUid(Process.myUid());
         nc.setAdministratorUids(new int[] {Process.myUid()});
-        final NetworkAgentInfo naiWithUid =
-                new NetworkAgentInfo(null, null, null, null, nc, 0, mServiceContext, null, null,
-                        mService, null, null, null, 0, INVALID_UID);
+        final NetworkAgentInfo naiWithUid = fakeMobileNai(nc);
 
         setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_FINE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION);
