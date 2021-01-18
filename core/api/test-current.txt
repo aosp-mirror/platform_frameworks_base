@@ -931,9 +931,8 @@ package android.hardware.input {
 
   public final class InputManager {
     method public int getBlockUntrustedTouchesMode(@NonNull android.content.Context);
-    method public float getMaximumObscuringOpacityForTouch(@NonNull android.content.Context);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setBlockUntrustedTouchesMode(@NonNull android.content.Context, int);
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setMaximumObscuringOpacityForTouch(@NonNull android.content.Context, float);
+    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setMaximumObscuringOpacityForTouch(float);
     field public static final long BLOCK_UNTRUSTED_TOUCHES = 158002302L; // 0x96aec7eL
   }
 
