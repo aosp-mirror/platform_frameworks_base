@@ -136,12 +136,12 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // This Network object should always be used if possible, so as to encourage reuse of the
     // enclosed socket factory and connection pool.  Avoid creating other Network objects.
     // This Network object is always valid.
-    public final Network network;
-    public LinkProperties linkProperties;
+    @NonNull public final Network network;
+    @NonNull public LinkProperties linkProperties;
     // This should only be modified by ConnectivityService, via setNetworkCapabilities().
     // TODO: make this private with a getter.
-    public NetworkCapabilities networkCapabilities;
-    public final NetworkAgentConfig networkAgentConfig;
+    @NonNull public NetworkCapabilities networkCapabilities;
+    @NonNull public final NetworkAgentConfig networkAgentConfig;
 
     // Underlying networks declared by the agent. Only set if supportsUnderlyingNetworks is true.
     // The networks in this list might be declared by a VPN app using setUnderlyingNetworks and are
@@ -603,7 +603,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
      *
      * @return the old capabilities of this network.
      */
-    public synchronized NetworkCapabilities getAndSetNetworkCapabilities(
+    @NonNull public synchronized NetworkCapabilities getAndSetNetworkCapabilities(
             @NonNull final NetworkCapabilities nc) {
         final NetworkCapabilities oldNc = networkCapabilities;
         networkCapabilities = nc;
