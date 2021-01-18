@@ -1023,13 +1023,11 @@ public final class MediaTranscodeManager {
                             "Source Width and height must be larger than 0");
                 }
 
-                // TODO(hkuang): Remove the hardcoded frameRate after b/176940364 is fixed.
-                float frameRate = (float) 30.0;
-                /*mSrcVideoFormatHint.getFloat(MediaFormat.KEY_FRAME_RATE, frameRate);
+                float frameRate = mSrcVideoFormatHint.getFloat(MediaFormat.KEY_FRAME_RATE);
                 if (frameRate <= 0) {
                     throw new IllegalArgumentException(
                             "frameRate must be larger than 0");
-                }*/
+                }
 
                 int bitrate = getAVCBitrate(width, height, frameRate);
                 videoTrackFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitrate);
