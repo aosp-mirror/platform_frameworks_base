@@ -551,6 +551,18 @@ public final class DisplayManagerGlobal {
         }
     }
 
+    /**
+     * Returns the HDR formats disabled by the user.
+     *
+     */
+    public int[] getUserDisabledHdrTypes() {
+        try {
+            return mDm.getUserDisabledHdrTypes();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
     public void requestColorMode(int displayId, int colorMode) {
         try {
             mDm.requestColorMode(displayId, colorMode);
