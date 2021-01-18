@@ -280,6 +280,20 @@ public final class SignalThresholdInfo implements Parcelable {
     public static final int SIGNAL_SSSINR_MAX_VALUE = 40;
 
     /**
+     * The minimum number of thresholds allowed in each SignalThresholdInfo.
+     *
+     * @hide
+     */
+    public static final int MINIMUM_NUMBER_OF_THRESHOLDS_ALLOWED = 1;
+
+    /**
+     * The maximum number of thresholds allowed in each SignalThresholdInfo.
+     *
+     * @hide
+     */
+    public static final int MAXIMUM_NUMBER_OF_THRESHOLDS_ALLOWED = 4;
+
+    /**
      * Constructor
      *
      * @param ran               Radio Access Network type
@@ -368,7 +382,11 @@ public final class SignalThresholdInfo implements Parcelable {
         /**
          * Set the signal strength thresholds of the corresponding signal measurement type.
          *
-         * The range and unit must reference specific SignalMeasurementType.
+         * The range and unit must reference specific SignalMeasurementType. The length of the
+         * thresholds should between the numbers return from
+         * {@link #getMinimumNumberOfThresholdsAllowed()} and
+         * {@link #getMaximumNumberOfThresholdsAllowed()}. An IllegalArgumentException will throw
+         * otherwise.
          *
          * @param thresholds array of integer as the signal threshold values
          * @return the builder to facilitate the chaining
@@ -385,10 +403,33 @@ public final class SignalThresholdInfo implements Parcelable {
          */
         public @NonNull Builder setThresholds(@NonNull int[] thresholds) {
             Objects.requireNonNull(thresholds, "thresholds must not be null");
+            if (thresholds.length < MINIMUM_NUMBER_OF_THRESHOLDS_ALLOWED
+                    || thresholds.length > MAXIMUM_NUMBER_OF_THRESHOLDS_ALLOWED) {
+                throw new IllegalArgumentException(
+                        "thresholds length must between " + MINIMUM_NUMBER_OF_THRESHOLDS_ALLOWED
+                                + " and " + MAXIMUM_NUMBER_OF_THRESHOLDS_ALLOWED);
+            }
             mThresholds = thresholds.clone();
             Arrays.sort(mThresholds);
             return this;
         }
+
+        /**
+         * Set the signal strength thresholds for the corresponding signal measurement type without
+         * the length limitation.
+         *
+         * @param thresholds array of integer as the signal threshold values
+         * @return the builder to facilitate the chaining
+         *
+         * @hide
+         */
+        public @NonNull Builder setThresholdsUnlimited(@NonNull int[] thresholds) {
+            Objects.requireNonNull(thresholds, "thresholds must not be null");
+            mThresholds = thresholds.clone();
+            Arrays.sort(mThresholds);
+            return this;
+        }
+
 
         /**
          * Set if the modem should trigger the report based on the criteria.
@@ -472,6 +513,24 @@ public final class SignalThresholdInfo implements Parcelable {
      */
     public @NonNull int[] getThresholds() {
         return mThresholds.clone();
+    }
+
+    /**
+     * Get the minimum number of thresholds allowed in each SignalThresholdInfo.
+     *
+     * @return the minimum number of thresholds allowed
+     */
+    public static int getMinimumNumberOfThresholdsAllowed() {
+        return MINIMUM_NUMBER_OF_THRESHOLDS_ALLOWED;
+    }
+
+    /**
+     * Get the maximum number of threshold allowed in each SignalThresholdInfo.
+     *
+     * @return the maximum number of thresholds allowed
+     */
+    public static int getMaximumNumberOfThresholdsAllowed() {
+        return MAXIMUM_NUMBER_OF_THRESHOLDS_ALLOWED;
     }
 
     @Override
