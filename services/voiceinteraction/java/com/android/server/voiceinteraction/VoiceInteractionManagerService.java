@@ -583,7 +583,8 @@ public class VoiceInteractionManagerService extends SystemService {
         VoiceInteractionServiceInfo findAvailInteractor(int userHandle, String packageName) {
             List<ResolveInfo> available =
                     mContext.getPackageManager().queryIntentServicesAsUser(
-                            new Intent(VoiceInteractionService.SERVICE_INTERFACE),
+                            new Intent(VoiceInteractionService.SERVICE_INTERFACE)
+                                    .setPackage(packageName),
                             PackageManager.MATCH_DIRECT_BOOT_AWARE
                                     | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userHandle);
             int numAvailable = available.size();
@@ -603,19 +604,16 @@ public class VoiceInteractionManagerService extends SystemService {
                             VoiceInteractionServiceInfo info = new VoiceInteractionServiceInfo(
                                     mContext.getPackageManager(), comp, userHandle);
                             if (info.getParseError() == null) {
-                                if (packageName == null || info.getServiceInfo().packageName.equals(
-                                        packageName)) {
-                                    if (foundInfo == null) {
-                                        foundInfo = info;
-                                    } else {
-                                        Slog.w(TAG, "More than one voice interaction service, "
-                                                + "picking first "
-                                                + new ComponentName(
-                                                        foundInfo.getServiceInfo().packageName,
-                                                        foundInfo.getServiceInfo().name)
-                                                + " over "
-                                                + new ComponentName(cur.packageName, cur.name));
-                                    }
+                                if (foundInfo == null) {
+                                    foundInfo = info;
+                                } else {
+                                    Slog.w(TAG, "More than one voice interaction service, "
+                                            + "picking first "
+                                            + new ComponentName(
+                                                    foundInfo.getServiceInfo().packageName,
+                                                    foundInfo.getServiceInfo().name)
+                                            + " over "
+                                            + new ComponentName(cur.packageName, cur.name));
                                 }
                             } else {
                                 Slog.w(TAG, "Bad interaction service " + comp + ": "
