@@ -87,9 +87,10 @@ void RenderThread::frameCallback(int64_t frameTimeNanos, void* data) {
     RenderThread* rt = reinterpret_cast<RenderThread*>(data);
     int64_t vsyncId = AChoreographer_getVsyncId(rt->mChoreographer);
     int64_t frameDeadline = AChoreographer_getFrameDeadline(rt->mChoreographer);
+    int64_t frameInterval = AChoreographer_getFrameInterval(rt->mChoreographer);
     rt->mVsyncRequested = false;
-    if (rt->timeLord().vsyncReceived(frameTimeNanos, frameTimeNanos, vsyncId, frameDeadline) &&
-            !rt->mFrameCallbackTaskPending) {
+    if (rt->timeLord().vsyncReceived(frameTimeNanos, frameTimeNanos, vsyncId, frameDeadline,
+            frameInterval) && !rt->mFrameCallbackTaskPending) {
         ATRACE_NAME("queue mFrameCallbackTask");
         rt->mFrameCallbackTaskPending = true;
         nsecs_t runAt = (frameTimeNanos + rt->mDispatchFrameDelay);

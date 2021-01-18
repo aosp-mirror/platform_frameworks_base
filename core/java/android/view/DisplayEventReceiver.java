@@ -158,14 +158,23 @@ public abstract class DisplayEventReceiver {
         // allotted for the frame to be completed.
         public final long frameDeadline;
 
-        VsyncEventData(long id, long frameDeadline) {
+        /**
+         * The current interval between frames in ns. This will be used to align
+         * {@link FrameInfo#VSYNC} to the current vsync in case Choreographer callback was heavily
+         * delayed by the app.
+         */
+        public final long frameInterval;
+
+        VsyncEventData(long id, long frameDeadline, long frameInterval) {
             this.id = id;
             this.frameDeadline = frameDeadline;
+            this.frameInterval = frameInterval;
         }
 
         VsyncEventData() {
             this.id = FrameInfo.INVALID_VSYNC_ID;
             this.frameDeadline = Long.MAX_VALUE;
+            this.frameInterval = -1;
         }
     }
 
@@ -259,9 +268,9 @@ public abstract class DisplayEventReceiver {
     // Called from native code.
     @SuppressWarnings("unused")
     private void dispatchVsync(long timestampNanos, long physicalDisplayId, int frame,
-            long frameTimelineVsyncId, long frameDeadline) {
+            long frameTimelineVsyncId, long frameDeadline, long frameInterval) {
         onVsync(timestampNanos, physicalDisplayId, frame,
-                new VsyncEventData(frameTimelineVsyncId, frameDeadline));
+                new VsyncEventData(frameTimelineVsyncId, frameDeadline, frameInterval));
     }
 
     // Called from native code.
