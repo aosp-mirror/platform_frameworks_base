@@ -585,48 +585,41 @@ public class VoiceInteractionManagerService extends SystemService {
                     mContext.getPackageManager().queryIntentServicesAsUser(
                             new Intent(VoiceInteractionService.SERVICE_INTERFACE)
                                     .setPackage(packageName),
-                            PackageManager.MATCH_DIRECT_BOOT_AWARE
+                            PackageManager.GET_META_DATA
+                                    | PackageManager.MATCH_DIRECT_BOOT_AWARE
                                     | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userHandle);
             int numAvailable = available.size();
-
             if (numAvailable == 0) {
                 Slog.w(TAG, "no available voice interaction services found for user " + userHandle);
                 return null;
-            } else {
-                // Find first system package.  We never want to allow third party services to
-                // be automatically selected, because those require approval of the user.
-                VoiceInteractionServiceInfo foundInfo = null;
-                for (int i=0; i<numAvailable; i++) {
-                    ServiceInfo cur = available.get(i).serviceInfo;
-                    if ((cur.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) != 0) {
-                        ComponentName comp = new ComponentName(cur.packageName, cur.name);
-                        try {
-                            VoiceInteractionServiceInfo info = new VoiceInteractionServiceInfo(
-                                    mContext.getPackageManager(), comp, userHandle);
-                            if (info.getParseError() == null) {
-                                if (foundInfo == null) {
-                                    foundInfo = info;
-                                } else {
-                                    Slog.w(TAG, "More than one voice interaction service, "
-                                            + "picking first "
-                                            + new ComponentName(
-                                                    foundInfo.getServiceInfo().packageName,
-                                                    foundInfo.getServiceInfo().name)
-                                            + " over "
-                                            + new ComponentName(cur.packageName, cur.name));
-                                }
-                            } else {
-                                Slog.w(TAG, "Bad interaction service " + comp + ": "
-                                        + info.getParseError());
-                            }
-                        } catch (PackageManager.NameNotFoundException e) {
-                            Slog.w(TAG, "Failure looking up interaction service " + comp);
-                        }
-                    }
-                }
-
-                return foundInfo;
             }
+            // Find first system package.  We never want to allow third party services to
+            // be automatically selected, because those require approval of the user.
+            VoiceInteractionServiceInfo foundInfo = null;
+            for (int i = 0; i < numAvailable; i++) {
+                ServiceInfo cur = available.get(i).serviceInfo;
+                if ((cur.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
+                    continue;
+                }
+                VoiceInteractionServiceInfo info =
+                        new VoiceInteractionServiceInfo(mContext.getPackageManager(), cur);
+                if (info.getParseError() != null) {
+                    Slog.w(TAG,
+                            "Bad interaction service " + cur.packageName + "/"
+                                    + cur.name + ": " + info.getParseError());
+                } else if (foundInfo == null) {
+                    foundInfo = info;
+                } else {
+                    Slog.w(TAG, "More than one voice interaction service, "
+                            + "picking first "
+                            + new ComponentName(
+                            foundInfo.getServiceInfo().packageName,
+                            foundInfo.getServiceInfo().name)
+                            + " over "
+                            + new ComponentName(cur.packageName, cur.name));
+                }
+            }
+            return foundInfo;
         }
 
         ComponentName getCurInteractor(int userHandle) {
@@ -656,7 +649,6 @@ public class VoiceInteractionManagerService extends SystemService {
                             PackageManager.MATCH_DIRECT_BOOT_AWARE
                                     | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userHandle);
             int numAvailable = available.size();
-
             if (numAvailable == 0) {
                 Slog.w(TAG, "no available voice recognition services found for user " + userHandle);
                 return null;
