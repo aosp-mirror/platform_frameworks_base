@@ -8591,7 +8591,8 @@ public class TelephonyManager {
     @IntDef({
             ALLOWED_NETWORK_TYPES_REASON_USER,
             ALLOWED_NETWORK_TYPES_REASON_POWER,
-            ALLOWED_NETWORK_TYPES_REASON_CARRIER
+            ALLOWED_NETWORK_TYPES_REASON_CARRIER,
+            ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AllowedNetworkTypesReason {
@@ -8628,6 +8629,14 @@ public class TelephonyManager {
     public static final int ALLOWED_NETWORK_TYPES_REASON_CARRIER = 2;
 
     /**
+     * To indicate allowed network type change is requested by the user via the 2G toggle.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G = 3;
+
+    /**
      * Set the allowed network types of the device and
      * provide the reason triggering the allowed network change.
      * This can be called for following reasons
@@ -8636,6 +8645,8 @@ public class TelephonyManager {
      * <li>Allowed network types control by power manager
      * {@link #ALLOWED_NETWORK_TYPES_REASON_POWER}
      * <li>Allowed network types control by carrier {@link #ALLOWED_NETWORK_TYPES_REASON_CARRIER}
+     * <li>Allowed network types control by the user-controlled "Allow 2G" toggle
+     * {@link #ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G}
      * </ol>
      * This API will result in allowing an intersection of allowed network types for all reasons,
      * including the configuration done through other reasons.
@@ -8719,6 +8730,7 @@ public class TelephonyManager {
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_USER:
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_POWER:
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_CARRIER:
+            case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G:
                 return true;
         }
         return false;

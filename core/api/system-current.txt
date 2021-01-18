@@ -11944,6 +11944,7 @@ package android.telephony {
     field public static final String ACTION_SIM_CARD_STATE_CHANGED = "android.telephony.action.SIM_CARD_STATE_CHANGED";
     field public static final String ACTION_SIM_SLOT_STATUS_CHANGED = "android.telephony.action.SIM_SLOT_STATUS_CHANGED";
     field public static final int ALLOWED_NETWORK_TYPES_REASON_CARRIER = 2; // 0x2
+    field public static final int ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G = 3; // 0x3
     field public static final int ALLOWED_NETWORK_TYPES_REASON_POWER = 1; // 0x1
     field public static final int ALLOWED_NETWORK_TYPES_REASON_USER = 0; // 0x0
     field public static final int CALL_WAITING_STATUS_DISABLED = 2; // 0x2
