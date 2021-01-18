@@ -404,6 +404,62 @@ public class VibratorServiceTest {
     }
 
     @Test
+    public void vibrate_enteringLowPowerMode_cancelVibration() throws Exception {
+        VibratorService service = createService();
+
+        mRegisteredPowerModeListener.onLowPowerModeChanged(NORMAL_POWER_STATE);
+        vibrate(service, VibrationEffect.createOneShot(1000, 100), HAPTIC_FEEDBACK_ATTRS);
+
+        // VibrationThread will start this vibration async, so wait before triggering callbacks.
+        Thread.sleep(10);
+        assertTrue(service.isVibrating());
+
+        mRegisteredPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
+
+        // Wait for callback to cancel vibration.
+        Thread.sleep(10);
+        assertFalse(service.isVibrating());
+    }
+
+    @Test
+    public void vibrate_enteringLowPowerModeAndRingtone_doNotCancelVibration() throws Exception {
+        VibratorService service = createService();
+
+        mRegisteredPowerModeListener.onLowPowerModeChanged(NORMAL_POWER_STATE);
+        vibrate(service, VibrationEffect.createOneShot(1000, 100), RINGTONE_ATTRS);
+
+        // VibrationThread will start this vibration async, so wait before triggering callbacks.
+        Thread.sleep(10);
+        assertTrue(service.isVibrating());
+
+        mRegisteredPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
+
+        // Wait for callback to cancel vibration.
+        Thread.sleep(10);
+        assertTrue(service.isVibrating());
+    }
+
+    @Test
+    public void vibrate_withSettingsChanged_doNotCancelVibration() throws Exception {
+        VibratorService service = createService();
+        vibrate(service, VibrationEffect.createOneShot(1000, 100), HAPTIC_FEEDBACK_ATTRS);
+
+        // VibrationThread will start this vibration async, so wait before triggering callbacks.
+        Thread.sleep(10);
+        assertTrue(service.isVibrating());
+
+        setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
+                Vibrator.VIBRATION_INTENSITY_MEDIUM);
+
+        // FakeSettingsProvider don't support testing triggering ContentObserver yet.
+        service.updateVibrators();
+
+        // Wait for callback to cancel vibration.
+        Thread.sleep(10);
+        assertTrue(service.isVibrating());
+    }
+
+    @Test
     public void vibrate_withComposed_performsEffect() throws Exception {
         mVibratorProvider.setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
         VibratorService service = createService();
