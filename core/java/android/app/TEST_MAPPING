@@ -106,6 +106,15 @@
             "file_patterns": ["(/|^)Activity.java"]
         },
         {
+            "name": "CtsVoiceInteractionTestCases",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                }
+            ],
+            "file_patterns": ["(/|^)VoiceInteract[^/]*"]
+        },
+        {
             "name": "CtsContentTestCases",
             "options": [
                 {
