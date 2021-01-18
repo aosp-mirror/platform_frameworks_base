@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -1848,9 +1847,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         // Keep the order from bottom to top.
         int numRootTasks = mChildren.size();
 
-        final boolean splitScreenActivated = toDisplayArea.isSplitScreenModeActivated();
-        final Task splitScreenRoot = splitScreenActivated ? toDisplayArea
-                .getTopRootTaskInWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) : null;
         for (int i = 0; i < numRootTasks; i++) {
             final WindowContainer child = mChildren.get(i);
             if (child.asTaskDisplayArea() != null) {
@@ -1866,10 +1862,12 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                     || task.mCreatedByOrganizer) {
                 task.finishAllActivitiesImmediately();
             } else {
-                // Reparent the root task to the root task of secondary-split-screen or display
-                // area.
-                task.reparent(task.supportsSplitScreenWindowingMode() && splitScreenRoot != null
-                        ? splitScreenRoot : toDisplayArea, POSITION_TOP);
+                // Reparent task to corresponding launch root or display area.
+                final WindowContainer launchRoot = task.supportsSplitScreenWindowingMode()
+                        ? toDisplayArea.getLaunchRootTask(
+                                task.getWindowingMode(), task.getActivityType())
+                        : null;
+                task.reparent(launchRoot == null ? toDisplayArea : launchRoot, POSITION_TOP);
 
                 // Set the windowing mode to undefined by default to let the root task inherited the
                 // windowing mode.
@@ -1881,14 +1879,19 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             i -= numRootTasks - mChildren.size();
             numRootTasks = mChildren.size();
         }
-        if (lastReparentedRootTask != null && splitScreenActivated) {
-            if (!lastReparentedRootTask.supportsSplitScreenWindowingMode()) {
+
+        if (lastReparentedRootTask != null) {
+            if (toDisplayArea.isSplitScreenModeActivated()
+                    && !lastReparentedRootTask.supportsSplitScreenWindowingMode()) {
+                // Dismiss split screen if the last reparented root task doesn't support split mode.
                 mAtmService.getTaskChangeNotificationController()
                         .notifyActivityDismissingDockedStack();
                 toDisplayArea.onSplitScreenModeDismissed(lastReparentedRootTask);
-            } else if (splitScreenRoot != null) {
-                // update focus
-                splitScreenRoot.moveToFront("display-removed");
+            } else if (!lastReparentedRootTask.isRootTask()) {
+                // Update focus when the last reparented root task is not a root task anymore.
+                // (For example, if it has been reparented to a split screen root task, move the
+                // focus to the split root task)
+                lastReparentedRootTask.getRootTask().moveToFront("display-removed");
             }
         }
 
