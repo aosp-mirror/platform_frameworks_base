@@ -18,8 +18,6 @@ package com.android.internal.widget;
 
 import static com.android.internal.widget.MessagingGroup.IMAGE_DISPLAY_LOCATION_EXTERNAL;
 import static com.android.internal.widget.MessagingGroup.IMAGE_DISPLAY_LOCATION_INLINE;
-import static com.android.internal.widget.MessagingPropertyAnimator.ALPHA_IN;
-import static com.android.internal.widget.MessagingPropertyAnimator.ALPHA_OUT;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -34,10 +32,7 @@ import android.app.Person;
 import android.app.RemoteInputHistoryItem;
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
@@ -68,14 +63,12 @@ import android.widget.TextView;
 
 import com.android.internal.R;
 import com.android.internal.graphics.ColorUtils;
-import com.android.internal.util.ContrastColorUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.regex.Pattern;
 
 /**
  * A custom-built layout for the Notification.MessagingStyle allows dynamic addition and removal
@@ -85,16 +78,6 @@ import java.util.regex.Pattern;
 public class ConversationLayout extends FrameLayout
         implements ImageMessageConsumer, IMessagingLayout {
 
-    private static final float COLOR_SHIFT_AMOUNT = 60;
-    /**
-     *  Pattern for filter some ignorable characters.
-     *  p{Z} for any kind of whitespace or invisible separator.
-     *  p{C} for any kind of punctuation character.
-     */
-    private static final Pattern IGNORABLE_CHAR_PATTERN
-            = Pattern.compile("[\\p{C}\\p{Z}]");
-    private static final Pattern SPECIAL_CHAR_PATTERN
-            = Pattern.compile ("[!@#$%&*()_+=|<>?{}\\[\\]~-]");
     private static final Consumer<MessagingMessage> REMOVE_MESSAGE
             = MessagingMessage::removeMessage;
     public static final Interpolator LINEAR_OUT_SLOW_IN = new PathInterpolator(0f, 0f, 0.2f, 1f);
@@ -106,6 +89,7 @@ public class ConversationLayout extends FrameLayout
     public static final int IMPORTANCE_ANIM_GROW_DURATION = 250;
     public static final int IMPORTANCE_ANIM_SHRINK_DURATION = 200;
     public static final int IMPORTANCE_ANIM_SHRINK_DELAY = 25;
+    private final PeopleHelper mPeopleHelper = new PeopleHelper();
     private List<MessagingMessage> mMessages = new ArrayList<>();
     private List<MessagingMessage> mHistoricMessages = new ArrayList<>();
     private MessagingLinearLayout mMessagingLinearLayout;
@@ -114,9 +98,6 @@ public class ConversationLayout extends FrameLayout
     private int mLayoutColor;
     private int mSenderTextColor;
     private int mMessageTextColor;
-    private int mAvatarSize;
-    private Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private Paint mTextPaint = new Paint();
     private Icon mAvatarReplacement;
     private boolean mIsOneToOne;
     private ArrayList<MessagingGroup> mAddedGroups = new ArrayList<>();
@@ -196,6 +177,7 @@ public class ConversationLayout extends FrameLayout
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        mPeopleHelper.init(getContext());
         mMessagingLinearLayout = findViewById(R.id.notification_messaging);
         mActions = findViewById(R.id.actions);
         mImageMessageContainer = findViewById(R.id.conversation_image_message_container);
@@ -205,9 +187,6 @@ public class ConversationLayout extends FrameLayout
         int size = Math.max(displayMetrics.widthPixels, displayMetrics.heightPixels);
         mMessagingClipRect = new Rect(0, 0, size, size);
         setMessagingClippingDisabled(false);
-        mAvatarSize = getResources().getDimensionPixelSize(R.dimen.messaging_avatar_size);
-        mTextPaint.setTextAlign(Paint.Align.CENTER);
-        mTextPaint.setAntiAlias(true);
         mConversationIconView = findViewById(R.id.conversation_icon);
         mConversationIconContainer = findViewById(R.id.conversation_icon_container);
         mIcon = findViewById(R.id.icon);
@@ -250,15 +229,15 @@ public class ConversationLayout extends FrameLayout
         });
         // When the small icon is gone, hide the rest of the badge
         mIcon.setOnForceHiddenChangedListener((forceHidden) -> {
-            animateViewForceHidden(mConversationIconBadgeBg, forceHidden);
-            animateViewForceHidden(mImportanceRingView, forceHidden);
+            mPeopleHelper.animateViewForceHidden(mConversationIconBadgeBg, forceHidden);
+            mPeopleHelper.animateViewForceHidden(mImportanceRingView, forceHidden);
         });
 
         // When the conversation icon is gone, hide the whole badge
         mConversationIconView.setOnForceHiddenChangedListener((forceHidden) -> {
-            animateViewForceHidden(mConversationIconBadgeBg, forceHidden);
-            animateViewForceHidden(mImportanceRingView, forceHidden);
-            animateViewForceHidden(mIcon, forceHidden);
+            mPeopleHelper.animateViewForceHidden(mConversationIconBadgeBg, forceHidden);
+            mPeopleHelper.animateViewForceHidden(mImportanceRingView, forceHidden);
+            mPeopleHelper.animateViewForceHidden(mIcon, forceHidden);
         });
         mConversationText = findViewById(R.id.conversation_text);
         mExpandButtonContainer = findViewById(R.id.expand_button_container);
@@ -315,28 +294,6 @@ public class ConversationLayout extends FrameLayout
                 + getResources().getDimensionPixelSize(R.dimen.button_inset_horizontal_material);
         mNotificationHeaderSeparatingMargin = getResources().getDimensionPixelSize(
                 R.dimen.notification_header_separating_margin);
-    }
-
-    private void animateViewForceHidden(CachingIconView view, boolean forceHidden) {
-        boolean nowForceHidden = view.willBeForceHidden() || view.isForceHidden();
-        if (forceHidden == nowForceHidden) {
-            // We are either already forceHidden or will be
-            return;
-        }
-        view.animate().cancel();
-        view.setWillBeForceHidden(forceHidden);
-        view.animate()
-                .scaleX(forceHidden ? 0.5f : 1.0f)
-                .scaleY(forceHidden ? 0.5f : 1.0f)
-                .alpha(forceHidden ? 0.0f : 1.0f)
-                .setInterpolator(forceHidden ? ALPHA_OUT : ALPHA_IN)
-                .setDuration(160);
-        if (view.getVisibility() != VISIBLE) {
-            view.setForceHidden(forceHidden);
-        } else {
-            view.animate().withEndAction(() -> view.setForceHidden(forceHidden));
-        }
-        view.animate().start();
     }
 
     @RemotableViewMethod
@@ -561,7 +518,8 @@ public class ConversationLayout extends FrameLayout
                     if (mConversationIcon == null) {
                         Icon avatarIcon = messagingGroup.getAvatarIcon();
                         if (avatarIcon == null) {
-                            avatarIcon = createAvatarSymbol(conversationText, "", mLayoutColor);
+                            avatarIcon = mPeopleHelper.createAvatarSymbol(conversationText, "",
+                                    mLayoutColor);
                         }
                         mConversationIcon = avatarIcon;
                     }
@@ -674,11 +632,11 @@ public class ConversationLayout extends FrameLayout
             }
         }
         if (lastIcon == null) {
-            lastIcon = createAvatarSymbol(" ", "", mLayoutColor);
+            lastIcon = mPeopleHelper.createAvatarSymbol(" ", "", mLayoutColor);
         }
         bottomView.setImageIcon(lastIcon);
         if (secondLastIcon == null) {
-            secondLastIcon = createAvatarSymbol("", "", mLayoutColor);
+            secondLastIcon = mPeopleHelper.createAvatarSymbol("", "", mLayoutColor);
         }
         topView.setImageIcon(secondLastIcon);
     }
@@ -838,8 +796,10 @@ public class ConversationLayout extends FrameLayout
     }
 
     private void updateTitleAndNamesDisplay() {
+        // Map of unique names to their prefix
         ArrayMap<CharSequence, String> uniqueNames = new ArrayMap<>();
-        ArrayMap<Character, CharSequence> uniqueCharacters = new ArrayMap<>();
+        // Map of single-character string prefix to the only name which uses it, or null if multiple
+        ArrayMap<String, CharSequence> uniqueCharacters = new ArrayMap<>();
         for (int i = 0; i < mGroups.size(); i++) {
             MessagingGroup group = mGroups.get(i);
             CharSequence senderName = group.getSenderName();
@@ -847,22 +807,22 @@ public class ConversationLayout extends FrameLayout
                 continue;
             }
             if (!uniqueNames.containsKey(senderName)) {
-                // Only use visible characters to get uniqueNames
-                String pureSenderName = IGNORABLE_CHAR_PATTERN
-                        .matcher(senderName).replaceAll("" /* replacement */);
-                char c = pureSenderName.charAt(0);
-                if (uniqueCharacters.containsKey(c)) {
+                String charPrefix = mPeopleHelper.findNamePrefix(senderName, null);
+                if (charPrefix == null) {
+                    continue;
+                }
+                if (uniqueCharacters.containsKey(charPrefix)) {
                     // this character was already used, lets make it more unique. We first need to
                     // resolve the existing character if it exists
-                    CharSequence existingName = uniqueCharacters.get(c);
+                    CharSequence existingName = uniqueCharacters.get(charPrefix);
                     if (existingName != null) {
-                        uniqueNames.put(existingName, findNameSplit((String) existingName));
-                        uniqueCharacters.put(c, null);
+                        uniqueNames.put(existingName, mPeopleHelper.findNameSplit(existingName));
+                        uniqueCharacters.put(charPrefix, null);
                     }
-                    uniqueNames.put(senderName, findNameSplit((String) senderName));
+                    uniqueNames.put(senderName, mPeopleHelper.findNameSplit(senderName));
                 } else {
-                    uniqueNames.put(senderName, Character.toString(c));
-                    uniqueCharacters.put(c, pureSenderName);
+                    uniqueNames.put(senderName, charPrefix);
+                    uniqueCharacters.put(charPrefix, senderName);
                 }
             }
         }
@@ -898,57 +858,14 @@ public class ConversationLayout extends FrameLayout
             } else {
                 Icon cachedIcon = cachedAvatars.get(senderName);
                 if (cachedIcon == null) {
-                    cachedIcon = createAvatarSymbol(senderName, uniqueNames.get(senderName),
-                            mLayoutColor);
+                    cachedIcon = mPeopleHelper.createAvatarSymbol(senderName,
+                            uniqueNames.get(senderName), mLayoutColor);
                     cachedAvatars.put(senderName, cachedIcon);
                 }
                 group.setCreatedAvatar(cachedIcon, senderName, uniqueNames.get(senderName),
                         mLayoutColor);
             }
         }
-    }
-
-    private Icon createAvatarSymbol(CharSequence senderName, String symbol, int layoutColor) {
-        if (symbol.isEmpty() || TextUtils.isDigitsOnly(symbol) ||
-                SPECIAL_CHAR_PATTERN.matcher(symbol).find()) {
-            Icon avatarIcon = Icon.createWithResource(getContext(),
-                    R.drawable.messaging_user);
-            avatarIcon.setTint(findColor(senderName, layoutColor));
-            return avatarIcon;
-        } else {
-            Bitmap bitmap = Bitmap.createBitmap(mAvatarSize, mAvatarSize, Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmap);
-            float radius = mAvatarSize / 2.0f;
-            int color = findColor(senderName, layoutColor);
-            mPaint.setColor(color);
-            canvas.drawCircle(radius, radius, radius, mPaint);
-            boolean needDarkText = ColorUtils.calculateLuminance(color) > 0.5f;
-            mTextPaint.setColor(needDarkText ? Color.BLACK : Color.WHITE);
-            mTextPaint.setTextSize(symbol.length() == 1 ? mAvatarSize * 0.5f : mAvatarSize * 0.3f);
-            int yPos = (int) (radius - ((mTextPaint.descent() + mTextPaint.ascent()) / 2));
-            canvas.drawText(symbol, radius, yPos, mTextPaint);
-            return Icon.createWithBitmap(bitmap);
-        }
-    }
-
-    private int findColor(CharSequence senderName, int layoutColor) {
-        double luminance = ContrastColorUtil.calculateLuminance(layoutColor);
-        float shift = Math.abs(senderName.hashCode()) % 5 / 4.0f - 0.5f;
-
-        // we need to offset the range if the luminance is too close to the borders
-        shift += Math.max(COLOR_SHIFT_AMOUNT / 2.0f / 100 - luminance, 0);
-        shift -= Math.max(COLOR_SHIFT_AMOUNT / 2.0f / 100 - (1.0f - luminance), 0);
-        return ContrastColorUtil.getShiftedColor(layoutColor,
-                (int) (shift * COLOR_SHIFT_AMOUNT));
-    }
-
-    private String findNameSplit(String existingName) {
-        String[] split = existingName.split(" ");
-        if (split.length > 1) {
-            return Character.toString(split[0].charAt(0))
-                    + Character.toString(split[1].charAt(0));
-        }
-        return existingName.substring(0, 1);
     }
 
     @RemotableViewMethod

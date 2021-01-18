@@ -23,7 +23,7 @@
     <ripple android:color="?attr/colorControlHighlight">
         <item>
             <shape android:shape="rectangle">
-                <corners android:radius="?attr/buttonCornerRadius" />
+                <corners android:radius="@dimen/notification_action_button_radius" />
                 <padding android:left="@dimen/button_padding_horizontal_material"
                          android:top="@dimen/button_padding_vertical_material"
                          android:right="@dimen/button_padding_horizontal_material"

@@ -3086,7 +3086,25 @@
 
   <!-- TV Remote Service package -->
   <java-symbol type="string" name="config_tvRemoteServicePackage" />
+
+  <!-- Notifications: MessagingStyle -->
   <java-symbol type="string" name="notification_messaging_title_template" />
+
+  <!-- Notifications: CallStyle -->
+  <java-symbol type="layout" name="notification_template_material_call" />
+  <java-symbol type="string" name="call_notification_answer_action" />
+  <java-symbol type="string" name="call_notification_decline_action" />
+  <java-symbol type="string" name="call_notification_hang_up_action" />
+  <java-symbol type="string" name="call_notification_incoming_text" />
+  <java-symbol type="string" name="call_notification_ongoing_text" />
+  <java-symbol type="string" name="call_notification_screening_text" />
+  <java-symbol type="color" name="call_notification_decline_color"/>
+  <java-symbol type="color" name="call_notification_answer_color"/>
+  <java-symbol type="dimen" name="call_notification_collapsible_indent"/>
+  <java-symbol type="drawable" name="ic_call_answer" />
+  <java-symbol type="drawable" name="ic_call_decline" />
+  <java-symbol type="id" name="verification_icon" />
+  <java-symbol type="id" name="verification_text" />
 
   <!-- Notification handler / dashboard package -->
   <java-symbol type="string" name="config_notificationHandlerPackage" />
@@ -3413,6 +3431,7 @@
   <java-symbol type="dimen" name="notification_media_image_max_width"/>
   <java-symbol type="dimen" name="notification_media_image_max_height"/>
   <java-symbol type="dimen" name="notification_right_icon_size"/>
+  <java-symbol type="dimen" name="notification_actions_icon_drawable_size"/>
   <java-symbol type="dimen" name="notification_custom_view_max_image_height"/>
   <java-symbol type="dimen" name="notification_custom_view_max_image_width"/>
 
