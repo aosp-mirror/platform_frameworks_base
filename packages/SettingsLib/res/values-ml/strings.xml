@@ -450,7 +450,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"പൂർണ്ണമായി ചാർജാവാൻ <xliff:g id="TIME">%1$s</xliff:g> ശേഷിക്കുന്നു"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - പൂർണ്ണമായി ചാർജാവാൻ <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - ബാറ്ററി നില ഒപ്റ്റിമൈസ് ചെയ്യുന്നു"</string>
+    <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - ബാറ്ററിയുടെ ആയുസിനായി ഒപ്റ്റിമൈസ് ചെയ്യുന്നു"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"അജ്ഞാതം"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ചാർജ് ചെയ്യുന്നു"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"അതിവേഗ ചാർജിംഗ്"</string>
@@ -553,8 +553,7 @@
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"പുതിയ ഉപയോക്താവിനെ സൃഷ്‌ടിക്കുന്നു…"</string>
     <string name="user_nickname" msgid="262624187455825083">"വിളിപ്പേര്"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"അതിഥിയെ ചേർക്കുക"</string>
-    <!-- no translation found for guest_exit_guest (4754204715192830850) -->
-    <skip />
+    <string name="guest_exit_guest" msgid="4754204715192830850">"അതിഥി സെഷൻ അവസാനിപ്പിക്കുക"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"അതിഥി"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ഒരു ഫോട്ടോ എടുക്കുക"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ഒരു ചിത്രം തിരഞ്ഞെടുക്കുക"</string>
@@ -577,6 +576,7 @@
     <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
     <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
+    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"CWF"</string>
     <string name="cell_data_off_content_description" msgid="2280700839891636498">"മൊബൈൽ ഡാറ്റ ഓഫാണ്"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"ഡാറ്റ ഉപയോഗിക്കുന്നതിന് സജ്ജീകരിച്ചിട്ടില്ല"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"ഫോൺ സിഗ്‌നൽ ഒന്നുമില്ല."</string>

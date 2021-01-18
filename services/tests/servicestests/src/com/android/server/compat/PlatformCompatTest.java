@@ -97,17 +97,22 @@ public class PlatformCompatTest {
                 .addEnableAfterSdkChangeWithId(Build.VERSION_CODES.Q, 5L)
                 .addEnableAfterSdkChangeWithId(Build.VERSION_CODES.R, 6L)
                 .addLoggingOnlyChangeWithId(7L)
+                .addOverridableChangeWithId(8L)
                 .build();
         mPlatformCompat = new PlatformCompat(mContext, mCompatConfig);
         assertThat(mPlatformCompat.listAllChanges()).asList().containsExactly(
-                new CompatibilityChangeInfo(1L, "", -1, -1, false, false, ""),
-                new CompatibilityChangeInfo(2L, "change2", -1, -1, true, false, ""),
+                new CompatibilityChangeInfo(1L, "", -1, -1, false, false, "", false),
+                new CompatibilityChangeInfo(2L, "change2", -1, -1, true, false, "", false),
                 new CompatibilityChangeInfo(3L, "", Build.VERSION_CODES.O, -1, false, false,
-                        "desc"),
-                new CompatibilityChangeInfo(4L, "", Build.VERSION_CODES.P, -1, false, false, ""),
-                new CompatibilityChangeInfo(5L, "", Build.VERSION_CODES.Q, -1, false, false, ""),
-                new CompatibilityChangeInfo(6L, "", Build.VERSION_CODES.R, -1, false, false, ""),
-                new CompatibilityChangeInfo(7L, "", -1, -1, false, true, ""));
+                        "desc", false),
+                new CompatibilityChangeInfo(
+                        4L, "", Build.VERSION_CODES.P, -1, false, false, "", false),
+                new CompatibilityChangeInfo(
+                        5L, "", Build.VERSION_CODES.Q, -1, false, false, "", false),
+                new CompatibilityChangeInfo(
+                        6L, "", Build.VERSION_CODES.R, -1, false, false, "", false),
+                new CompatibilityChangeInfo(7L, "", -1, -1, false, true, "", false),
+                new CompatibilityChangeInfo(8L, "", -1, -1, false, true, "", true));
     }
 
     @Test
@@ -123,12 +128,12 @@ public class PlatformCompatTest {
                 .build();
         mPlatformCompat = new PlatformCompat(mContext, mCompatConfig);
         assertThat(mPlatformCompat.listUIChanges()).asList().containsExactly(
-                new CompatibilityChangeInfo(1L, "", -1, -1, false, false, ""),
-                new CompatibilityChangeInfo(2L, "change2", -1, -1, true, false, ""),
-                new CompatibilityChangeInfo(5L, "", /*enableAfter*/ -1,
-                        /*enableSince*/ Build.VERSION_CODES.Q, false, false, ""),
-                new CompatibilityChangeInfo(6L, "", /*enableAfter*/ -1,
-                        /*enableSince*/ Build.VERSION_CODES.R, false, false, ""));
+                new CompatibilityChangeInfo(1L, "", -1, -1, false, false, "", false),
+                new CompatibilityChangeInfo(2L, "change2", -1, -1, true, false, "", false),
+                new CompatibilityChangeInfo(
+                        5L, "", Build.VERSION_CODES.P, -1, false, false, "", false),
+                new CompatibilityChangeInfo(
+                        6L, "", Build.VERSION_CODES.Q, -1, false, false, "", false));
     }
 
     @Test

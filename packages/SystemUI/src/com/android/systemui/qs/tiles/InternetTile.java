@@ -58,6 +58,8 @@ import javax.inject.Inject;
 /** Quick settings tile: Internet **/
 public class InternetTile extends QSTileImpl<SignalState> {
     private static final Intent WIFI_SETTINGS = new Intent(Settings.ACTION_WIFI_SETTINGS);
+    private static final Intent INTERNET_PANEL =
+            new Intent(Settings.Panel.ACTION_INTERNET_CONNECTIVITY);
 
     protected final NetworkController mController;
     private final DataUsageController mDataController;
@@ -102,7 +104,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
 
     @Override
     protected void handleClick() {
-        mActivityStarter.postStartActivityDismissingKeyguard(WIFI_SETTINGS, 0);
+        mActivityStarter.postStartActivityDismissingKeyguard(INTERNET_PANEL, 0);
     }
 
     @Override
@@ -138,6 +140,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
     }
 
     private static final class WifiCallbackInfo {
+        boolean mAirplaneModeEnabled;
         boolean mEnabled;
         boolean mConnected;
         int mWifiSignalIconId;
@@ -147,11 +150,15 @@ public class InternetTile extends QSTileImpl<SignalState> {
         String mWifiSignalContentDescription;
         boolean mIsTransient;
         public String mStatusLabel;
+        boolean mNoDefaultNetwork;
+        boolean mNoValidatedNetwork;
+        boolean mNoNetworksAvailable;
 
         @Override
         public String toString() {
             return new StringBuilder("WifiCallbackInfo[")
-                    .append("mEnabled=").append(mEnabled)
+                    .append("mAirplaneModeEnabled=").append(mAirplaneModeEnabled)
+                    .append(",mEnabled=").append(mEnabled)
                     .append(",mConnected=").append(mConnected)
                     .append(",mWifiSignalIconId=").append(mWifiSignalIconId)
                     .append(",mSsid=").append(mSsid)
@@ -159,6 +166,9 @@ public class InternetTile extends QSTileImpl<SignalState> {
                     .append(",mActivityOut=").append(mActivityOut)
                     .append(",mWifiSignalContentDescription=").append(mWifiSignalContentDescription)
                     .append(",mIsTransient=").append(mIsTransient)
+                    .append(",mNoDefaultNetwork=").append(mNoDefaultNetwork)
+                    .append(",mNoValidatedNetwork=").append(mNoValidatedNetwork)
+                    .append(",mNoNetworksAvailable=").append(mNoNetworksAvailable)
                     .append(']').toString();
         }
     }
@@ -173,6 +183,9 @@ public class InternetTile extends QSTileImpl<SignalState> {
         boolean mNoSim;
         boolean mRoaming;
         boolean mMultipleSubs;
+        boolean mNoDefaultNetwork;
+        boolean mNoValidatedNetwork;
+        boolean mNoNetworksAvailable;
 
         @Override
         public String toString() {
@@ -186,6 +199,9 @@ public class InternetTile extends QSTileImpl<SignalState> {
                 .append(",mNoSim=").append(mNoSim)
                 .append(",mRoaming=").append(mRoaming)
                 .append(",mMultipleSubs=").append(mMultipleSubs)
+                .append(",mNoDefaultNetwork=").append(mNoDefaultNetwork)
+                .append(",mNoValidatedNetwork=").append(mNoValidatedNetwork)
+                .append(",mNoNetworksAvailable=").append(mNoNetworksAvailable)
                 .append(']').toString();
         }
     }
@@ -198,7 +214,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
         public void setWifiIndicators(boolean enabled, IconState statusIcon, IconState qsIcon,
                 boolean activityIn, boolean activityOut, String description, boolean isTransient,
                 String statusLabel) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
+            if (DEBUG) {
                 Log.d(TAG, "setWifiIndicators: "
                         + "enabled = " + enabled + ","
                         + "statusIcon = " + (statusIcon == null ? "" : statusIcon.toString()) + ","
@@ -209,13 +225,20 @@ public class InternetTile extends QSTileImpl<SignalState> {
                         + "isTransient = " + isTransient + ","
                         + "statusLabel = " + statusLabel);
             }
+            // When airplane mode is enabled, we need to refresh the Internet Tile even if the WiFi
+            // is not the default network.
+            if (qsIcon == null && !mWifiInfo.mAirplaneModeEnabled) {
+                return;
+            }
+            if (qsIcon != null) {
+                mWifiInfo.mConnected = qsIcon.visible;
+                mWifiInfo.mWifiSignalIconId = qsIcon.icon;
+                mWifiInfo.mWifiSignalContentDescription = qsIcon.contentDescription;
+            }
             mWifiInfo.mEnabled = enabled;
-            mWifiInfo.mConnected = qsIcon.visible;
-            mWifiInfo.mWifiSignalIconId = qsIcon.icon;
             mWifiInfo.mSsid = description;
             mWifiInfo.mActivityIn = activityIn;
             mWifiInfo.mActivityOut = activityOut;
-            mWifiInfo.mWifiSignalContentDescription = qsIcon.contentDescription;
             mWifiInfo.mIsTransient = isTransient;
             mWifiInfo.mStatusLabel = statusLabel;
             refreshState(mWifiInfo);
@@ -227,7 +250,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
                 CharSequence typeContentDescription,
                 CharSequence typeContentDescriptionHtml, CharSequence description,
                 boolean isWide, int subId, boolean roaming) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
+            if (DEBUG) {
                 Log.d(TAG, "setMobileDataIndicators: "
                         + "statusIcon = " + (statusIcon == null ? "" :  statusIcon.toString()) + ","
                         + "qsIcon = " + (qsIcon == null ? "" : qsIcon.toString()) + ","
@@ -246,7 +269,8 @@ public class InternetTile extends QSTileImpl<SignalState> {
                 // Not data sim, don't display.
                 return;
             }
-            mCellularInfo.mDataSubscriptionName = mController.getMobileDataNetworkName();
+            mCellularInfo.mDataSubscriptionName =
+                    description == null ? mController.getMobileDataNetworkName() : description;
             mCellularInfo.mDataContentDescription =
                     (description != null) ? typeContentDescriptionHtml : null;
             mCellularInfo.mMobileSignalIconId = qsIcon.icon;
@@ -259,7 +283,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
 
         @Override
         public void setNoSims(boolean show, boolean simDetected) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
+            if (DEBUG) {
                 Log.d(TAG, "setNoSims: "
                         + "show = " + show + ","
                         + "simDetected = " + simDetected);
@@ -274,18 +298,36 @@ public class InternetTile extends QSTileImpl<SignalState> {
 
         @Override
         public void setIsAirplaneMode(IconState icon) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "InternetTile-setIsAirplaneMode: "
+            if (DEBUG) {
+                Log.d(TAG, "setIsAirplaneMode: "
                         + "icon = " + (icon == null ? "" : icon.toString()));
             }
             mCellularInfo.mAirplaneModeEnabled = icon.visible;
+            mWifiInfo.mAirplaneModeEnabled = icon.visible;
             refreshState(mCellularInfo);
+        }
+
+        @Override
+        public void setConnectivityStatus(boolean noDefaultNetwork, boolean noValidatedNetwork,
+                boolean noNetworksAvailable) {
+            if (DEBUG) {
+                Log.d(TAG, "setConnectivityStatus: "
+                        + "noDefaultNetwork = " + noDefaultNetwork + ","
+                        + "noValidatedNetwork = " + noValidatedNetwork + ","
+                        + "noNetworksAvailable = " + noNetworksAvailable);
+            }
+            mCellularInfo.mNoDefaultNetwork = noDefaultNetwork;
+            mCellularInfo.mNoValidatedNetwork = noValidatedNetwork;
+            mCellularInfo.mNoNetworksAvailable = noNetworksAvailable;
+            mWifiInfo.mNoDefaultNetwork = noDefaultNetwork;
+            mWifiInfo.mNoValidatedNetwork = noValidatedNetwork;
+            mWifiInfo.mNoNetworksAvailable = noNetworksAvailable;
+            refreshState(mWifiInfo);
         }
     }
 
     @Override
     protected void handleUpdateState(SignalState state, Object arg) {
-        Log.d(TAG, "handleUpdateState: " + "arg = " + arg);
         if (arg instanceof CellularCallbackInfo) {
             mLastTileState = 0;
             handleUpdateCellularState(state, arg);
@@ -306,6 +348,9 @@ public class InternetTile extends QSTileImpl<SignalState> {
 
     private void handleUpdateWifiState(SignalState state, Object arg) {
         WifiCallbackInfo cb = (WifiCallbackInfo) arg;
+        if (DEBUG) {
+            Log.d(TAG, "handleUpdateWifiState: " + "WifiCallbackInfo = " + cb.toString());
+        }
         boolean wifiConnected = cb.mEnabled && (cb.mWifiSignalIconId > 0) && (cb.mSsid != null);
         boolean wifiNotConnected = (cb.mWifiSignalIconId > 0) && (cb.mSsid == null);
         boolean enabledChanging = state.value != cb.mEnabled;
@@ -326,25 +371,44 @@ public class InternetTile extends QSTileImpl<SignalState> {
         final StringBuffer minimalContentDescription = new StringBuffer();
         final StringBuffer minimalStateDescription = new StringBuffer();
         final Resources r = mContext.getResources();
-        // TODO(b/174753536): Use the new "Internet" string as state.label once available.
-        if (cb.mIsTransient) {
+        state.label = r.getString(R.string.quick_settings_internet_label);
+        if (cb.mAirplaneModeEnabled) {
+            if (!state.value) {
+                state.state = Tile.STATE_UNAVAILABLE;
+                state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_airplane);
+                state.secondaryLabel = r.getString(R.string.status_bar_airplane);
+            } else if (!wifiConnected) {
+                state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_airplane);
+                if (cb.mNoNetworksAvailable) {
+                    state.secondaryLabel =
+                            r.getString(R.string.quick_settings_networks_unavailable);
+                } else {
+                    state.secondaryLabel =
+                            r.getString(R.string.quick_settings_networks_available);
+                }
+            } else {
+                state.icon = ResourceIcon.get(cb.mWifiSignalIconId);
+                state.label = r.getString(R.string.quick_settings_airplane_safe_label);
+            }
+        } else if (cb.mNoDefaultNetwork && cb.mNoNetworksAvailable) {
+            state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_unavailable);
+            state.secondaryLabel = r.getString(R.string.quick_settings_networks_unavailable);
+        } else if (cb.mNoValidatedNetwork && !cb.mNoNetworksAvailable) {
+            state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_available);
+            state.secondaryLabel = r.getString(R.string.quick_settings_networks_available);
+        } else if (cb.mIsTransient) {
             state.icon = ResourceIcon.get(
                 com.android.internal.R.drawable.ic_signal_wifi_transient_animation);
-            state.label = r.getString(R.string.quick_settings_internet_label);
         } else if (!state.value) {
             state.slash.isSlashed = true;
             state.state = Tile.STATE_INACTIVE;
             state.icon = ResourceIcon.get(WifiIcons.QS_WIFI_DISABLED);
-            state.label = r.getString(R.string.quick_settings_internet_label);
         } else if (wifiConnected) {
             state.icon = ResourceIcon.get(cb.mWifiSignalIconId);
-            state.label = r.getString(R.string.quick_settings_internet_label);
         } else if (wifiNotConnected) {
             state.icon = ResourceIcon.get(WifiIcons.QS_WIFI_NO_NETWORK);
-            state.label = r.getString(R.string.quick_settings_internet_label);
         } else {
             state.icon = ResourceIcon.get(WifiIcons.QS_WIFI_NO_NETWORK);
-            state.label = r.getString(R.string.quick_settings_internet_label);
         }
         minimalContentDescription.append(
             mContext.getString(R.string.quick_settings_internet_label)).append(",");
@@ -366,34 +430,37 @@ public class InternetTile extends QSTileImpl<SignalState> {
 
     private void handleUpdateCellularState(SignalState state, Object arg) {
         CellularCallbackInfo cb = (CellularCallbackInfo) arg;
+        if (DEBUG) {
+            Log.d(TAG, "handleUpdateCellularState: " + "CellularCallbackInfo = " + cb.toString());
+        }
         final Resources r = mContext.getResources();
         // TODO(b/174753536): Use the new "Internet" string as state.label once available.
         state.label = r.getString(R.string.quick_settings_internet_label);
+        state.state = Tile.STATE_ACTIVE;
         boolean mobileDataEnabled = mDataController.isMobileDataSupported()
                 && mDataController.isMobileDataEnabled();
         state.value = mobileDataEnabled;
         state.activityIn = mobileDataEnabled && cb.mActivityIn;
         state.activityOut = mobileDataEnabled && cb.mActivityOut;
         state.expandedAccessibilityClassName = Switch.class.getName();
-        if (cb.mNoSim) {
-            state.icon = ResourceIcon.get(R.drawable.ic_qs_no_sim);
-        } else {
-            state.icon = new SignalIcon(cb.mMobileSignalIconId);
-        }
 
-        if (cb.mNoSim) {
+        if (cb.mAirplaneModeEnabled && cb.mNoDefaultNetwork) {
             state.state = Tile.STATE_UNAVAILABLE;
-            state.secondaryLabel = r.getString(R.string.keyguard_missing_sim_message_short);
-        } else if (cb.mAirplaneModeEnabled) {
-            state.state = Tile.STATE_UNAVAILABLE;
+            state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_airplane);
             state.secondaryLabel = r.getString(R.string.status_bar_airplane);
-        } else if (mobileDataEnabled) {
-            state.state = Tile.STATE_ACTIVE;
+        } else if (cb.mNoDefaultNetwork && cb.mNoNetworksAvailable) {
+            state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_unavailable);
+            state.secondaryLabel = r.getString(R.string.quick_settings_networks_unavailable);
+        } else if (cb.mNoValidatedNetwork && !cb.mNoNetworksAvailable) {
+            state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_available);
+            state.secondaryLabel = r.getString(R.string.quick_settings_networks_available);
+        } else {
+            if (cb.mAirplaneModeEnabled) {
+                state.label = r.getString(R.string.quick_settings_airplane_safe_label);
+            }
+            state.icon = new SignalIcon(cb.mMobileSignalIconId);
             state.secondaryLabel = appendMobileDataType(cb.mDataSubscriptionName,
                     getMobileDataContentName(cb));
-        } else {
-            state.state = Tile.STATE_INACTIVE;
-            state.secondaryLabel = r.getString(R.string.cell_data_off);
         }
 
         state.contentDescription = state.label;

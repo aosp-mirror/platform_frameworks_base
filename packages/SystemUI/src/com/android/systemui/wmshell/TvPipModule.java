@@ -32,9 +32,9 @@ import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipUiEventLogger;
-import com.android.wm.shell.pip.tv.PipController;
-import com.android.wm.shell.pip.tv.PipNotification;
+import com.android.wm.shell.pip.tv.TvPipController;
 import com.android.wm.shell.pip.tv.TvPipMenuController;
+import com.android.wm.shell.pip.tv.TvPipNotificationController;
 
 import java.util.Optional;
 
@@ -55,27 +55,20 @@ public abstract class TvPipModule {
             PipTaskOrganizer pipTaskOrganizer,
             TvPipMenuController tvPipMenuController,
             PipMediaController pipMediaController,
-            PipNotification pipNotification,
+            TvPipNotificationController tvPipNotificationController,
             TaskStackListenerImpl taskStackListener,
             WindowManagerShellWrapper windowManagerShellWrapper) {
         return Optional.of(
-                new PipController(
+                new TvPipController(
                         context,
                         pipBoundsState,
                         pipBoundsAlgorithm,
                         pipTaskOrganizer,
                         tvPipMenuController,
                         pipMediaController,
-                        pipNotification,
+                        tvPipNotificationController,
                         taskStackListener,
                         windowManagerShellWrapper));
-    }
-
-    @WMSingleton
-    @Provides
-    static PipNotification providePipNotification(Context context,
-            PipMediaController pipMediaController) {
-        return new PipNotification(context, pipMediaController);
     }
 
     @WMSingleton
@@ -93,7 +86,7 @@ public abstract class TvPipModule {
 
     @WMSingleton
     @Provides
-    static TvPipMenuController providesPipTvMenuController(
+    static TvPipMenuController providesTvPipMenuController(
             Context context,
             PipBoundsState pipBoundsState,
             SystemWindows systemWindows,
@@ -103,15 +96,22 @@ public abstract class TvPipModule {
 
     @WMSingleton
     @Provides
+    static TvPipNotificationController provideTvPipNotificationController(Context context,
+            PipMediaController pipMediaController) {
+        return new TvPipNotificationController(context, pipMediaController);
+    }
+
+    @WMSingleton
+    @Provides
     static PipTaskOrganizer providePipTaskOrganizer(Context context,
-            TvPipMenuController tvMenuController,
+            TvPipMenuController tvPipMenuController,
             PipBoundsState pipBoundsState,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
             Optional<LegacySplitScreen> splitScreenOptional, DisplayController displayController,
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer) {
         return new PipTaskOrganizer(context, pipBoundsState, pipBoundsAlgorithm,
-                tvMenuController, pipSurfaceTransactionHelper, splitScreenOptional,
+                tvPipMenuController, pipSurfaceTransactionHelper, splitScreenOptional,
                 displayController, pipUiEventLogger, shellTaskOrganizer);
     }
 }

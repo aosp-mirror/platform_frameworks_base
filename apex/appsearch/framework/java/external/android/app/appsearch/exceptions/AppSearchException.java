@@ -25,8 +25,6 @@ import android.app.appsearch.AppSearchResult;
  *
  * <p>These exceptions can be converted into a failed {@link AppSearchResult} for propagating to the
  * client.
- *
- * @hide
  */
 public class AppSearchException extends Exception {
     private final @AppSearchResult.ResultCode int mResultCode;

@@ -184,19 +184,6 @@ public class TaskOrganizer extends WindowOrganizer {
     }
 
     /**
-     * Set's the root task to launch new tasks into on a display. {@code null} means no launch
-     * root and thus new tasks just end up directly on the display.
-     */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
-    public void setLaunchRoot(int displayId, @NonNull WindowContainerToken root) {
-        try {
-            mTaskOrganizerController.setLaunchRoot(displayId, root);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Requests that the given task organizer is notified when back is pressed on the root activity
      * of one of its controlled tasks.
      */

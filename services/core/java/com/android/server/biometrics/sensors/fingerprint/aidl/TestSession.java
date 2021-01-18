@@ -30,7 +30,7 @@ import android.util.Slog;
  */
 class TestSession extends ISession.Stub {
 
-    private static final String TAG = "TestSession";
+    private static final String TAG = "FingerprintTestSession";
 
     @NonNull private final Sensor.HalSessionCallback mHalSessionCallback;
 
@@ -92,7 +92,9 @@ class TestSession extends ISession.Stub {
 
     @Override
     public void invalidateAuthenticatorId(int cookie) {
-
+        Slog.d(TAG, "invalidateAuthenticatorId");
+        // Immediately return a value so the framework can continue with subsequent requests.
+        mHalSessionCallback.onAuthenticatorIdInvalidated(0);
     }
 
     @Override

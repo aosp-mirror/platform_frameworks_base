@@ -108,6 +108,8 @@ class UdfpsController implements DozeReceiver {
     private boolean mIsOverlayShowing;
     // Indicates whether the overlay has been requested.
     private boolean mIsOverlayRequested;
+    // Reason the overlay has been requested. See IUdfpsOverlayController for definitions.
+    private int mRequestReason;
 
     // The fingerprint AOD trigger doesn't provide an ACTION_UP/ACTION_CANCEL event to tell us when
     // to turn off high brightness mode. To get around this limitation, the state of the AOD
@@ -118,13 +120,13 @@ class UdfpsController implements DozeReceiver {
 
     public class UdfpsOverlayController extends IUdfpsOverlayController.Stub {
         @Override
-        public void showUdfpsOverlay(int sensorId) {
-            UdfpsController.this.setShowOverlay(true);
+        public void showUdfpsOverlay(int sensorId, int reason) {
+            UdfpsController.this.showOverlay(reason);
         }
 
         @Override
         public void hideUdfpsOverlay(int sensorId) {
-            UdfpsController.this.setShowOverlay(false);
+            UdfpsController.this.hideOverlay();
         }
 
         @Override
@@ -285,17 +287,27 @@ class UdfpsController implements DozeReceiver {
         return mView.getSensorRect();
     }
 
-    private void setShowOverlay(boolean show) {
-        if (show == mIsOverlayRequested) {
+    private void showOverlay(int reason) {
+        if (mIsOverlayRequested) {
             return;
         }
-        mIsOverlayRequested = show;
+        mIsOverlayRequested = true;
+        mRequestReason = reason;
+        updateOverlay();
+    }
+
+    private void hideOverlay() {
+        if (!mIsOverlayRequested) {
+            return;
+        }
+        mIsOverlayRequested = false;
+        mRequestReason = IUdfpsOverlayController.REASON_UNKNOWN;
         updateOverlay();
     }
 
     private void updateOverlay() {
         if (mIsOverlayRequested) {
-            showUdfpsOverlay();
+            showUdfpsOverlay(mRequestReason);
         } else {
             hideUdfpsOverlay();
         }
@@ -323,14 +335,15 @@ class UdfpsController implements DozeReceiver {
         updateOverlay();
     }
 
-    private void showUdfpsOverlay() {
+    private void showUdfpsOverlay(int reason) {
         mFgExecutor.execute(() -> {
             if (!mIsOverlayShowing) {
                 try {
                     Log.v(TAG, "showUdfpsOverlay | adding window");
+                    mView.setShowReason(reason);
                     mWindowManager.addView(mView, computeLayoutParams());
-                    mIsOverlayShowing = true;
                     mView.setOnTouchListener(mOnTouchListener);
+                    mIsOverlayShowing = true;
                 } catch (RuntimeException e) {
                     Log.e(TAG, "showUdfpsOverlay | failed to add window", e);
                 }
@@ -344,6 +357,7 @@ class UdfpsController implements DozeReceiver {
         mFgExecutor.execute(() -> {
             if (mIsOverlayShowing) {
                 Log.v(TAG, "hideUdfpsOverlay | removing window");
+                mView.setShowReason(IUdfpsOverlayController.REASON_UNKNOWN);
                 mView.setOnTouchListener(null);
                 // Reset the controller back to its starting state.
                 onFingerUp();
@@ -420,19 +434,21 @@ class UdfpsController implements DozeReceiver {
     }
 
     private void onFingerDown(int x, int y, float minor, float major) {
-        mView.setScrimAlpha(computeScrimOpacity());
-        mView.showScrimAndDot();
-        try {
-            if (mHbmSupported) {
+        if (mHbmSupported) {
+            try {
                 FileWriter fw = new FileWriter(mHbmPath);
                 fw.write(mHbmEnableCommand);
                 fw.close();
+            } catch (IOException e) {
+                mView.hideScrimAndDot();
+                Log.e(TAG, "onFingerDown | failed to enable HBM: " + e.getMessage());
             }
-            mFingerprintManager.onPointerDown(mSensorProps.sensorId, x, y, minor, major);
-        } catch (IOException e) {
-            mView.hideScrimAndDot();
-            Log.e(TAG, "onFingerDown | failed to enable HBM: " + e.getMessage());
         }
+        mView.setScrimAlpha(computeScrimOpacity());
+        mView.setRunAfterShowingScrimAndDot(() -> {
+            mFingerprintManager.onPointerDown(mSensorProps.sensorId, x, y, minor, major);
+        });
+        mView.showScrimAndDot();
     }
 
     private void onFingerUp() {

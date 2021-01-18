@@ -50,6 +50,7 @@ import android.util.Slog;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.animation.Animation;
+import android.window.IRemoteTransition;
 import android.window.TransitionInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -101,6 +102,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     private @WindowManager.TransitionFlags int mFlags;
     private final TransitionController mController;
     private final BLASTSyncEngine mSyncEngine;
+    private IRemoteTransition mRemoteTransition = null;
 
     /**
      * This is a leash to put animating surfaces into flatly without clipping/ordering issues. It
@@ -235,8 +237,14 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             if (target.getParent() != null) {
                 // Ensure surfaceControls are re-parented back into the hierarchy.
                 t.reparent(target.getSurfaceControl(), target.getParent().getSurfaceControl());
+                t.setLayer(target.getSurfaceControl(), target.getLastLayer());
+                // TODO(shell-transitions): Once all remotables have been moved, see if there is
+                //                          a more appropriate place to do the following. This may
+                //                          involve passing an SF transaction from shell on finish.
                 target.getRelativePosition(tmpPos);
                 t.setPosition(target.getSurfaceControl(), tmpPos.x, tmpPos.y);
+                t.setCornerRadius(target.getSurfaceControl(), 0);
+                t.setShadowRadius(target.getSurfaceControl(), 0);
                 displays.add(target.getDisplayContent());
             }
         }
@@ -281,6 +289,14 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         mState = STATE_ABORT;
         // Syncengine abort will call through to onTransactionReady()
         mSyncEngine.abort(mSyncId);
+    }
+
+    void setRemoteTransition(IRemoteTransition remoteTransition) {
+        mRemoteTransition = remoteTransition;
+    }
+
+    IRemoteTransition getRemoteTransition() {
+        return mRemoteTransition;
     }
 
     @Override

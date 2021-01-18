@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors.fingerprint.hidl;
 
+import static junit.framework.Assert.assertEquals;
+
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -82,6 +84,12 @@ public class Fingerprint21Test {
                 new Handler(Looper.getMainLooper()), SENSOR_ID,
                 BiometricManager.Authenticators.BIOMETRIC_WEAK, mLockoutResetDispatcher,
                 mHalResultController);
+    }
+
+    @Test
+    public void getAuthenticatorId_doesNotCrashWhenIdNotFound() {
+        assertEquals(0, mFingerprint21.getAuthenticatorId(0 /* sensorId */, 111 /* userId */));
+        waitForIdle();
     }
 
     @Test

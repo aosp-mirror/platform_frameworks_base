@@ -2676,11 +2676,24 @@
          The app can check whether it has this authorization by calling
          {@link android.provider.Settings#canDrawOverlays
          Settings.canDrawOverlays()}.
-         <p>Protection level: signature|preinstalled|appop|pre23|development -->
+         <p>Protection level: signature|appop|preinstalled|pre23|development -->
     <permission android:name="android.permission.SYSTEM_ALERT_WINDOW"
         android:label="@string/permlab_systemAlertWindow"
         android:description="@string/permdesc_systemAlertWindow"
-        android:protectionLevel="signature|preinstalled|appop|pre23|development" />
+        android:protectionLevel="signature|appop|preinstalled|pre23|development" />
+
+    <!-- @SystemApi @hide Allows an application to create windows using the type
+         {@link android.view.WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY},
+         shown on top of all other apps.
+
+         Allows an application to use
+         {@link android.view.WindowManager.LayoutsParams#SYSTEM_FLAG_SYSTEM_APPLICATION_OVERLAY}
+         to create overlays that will stay visible, even if another window is requesting overlays to
+         be hidden through {@link android.view.Window#setHideOverlayWindows(boolean)}.
+
+         <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.SYSTEM_APPLICATION_OVERLAY"
+                android:protectionLevel="signature|wellbeing"/>
 
     <!-- @deprecated Use {@link android.Manifest.permission#REQUEST_COMPANION_RUN_IN_BACKGROUND}
          @hide
@@ -3589,6 +3602,14 @@
          <p>Protection level: signature
     -->
     <permission android:name="android.permission.BIND_CONTENT_CAPTURE_SERVICE"
+                android:protectionLevel="signature" />
+
+    <!-- Must be required by a android.service.translation.TranslationService,
+         to ensure that only the system can bind to it.
+         @SystemApi @hide This is not a third-party API (intended for OEMs and system apps).
+         <p>Protection level: signature
+     -->
+    <permission android:name="android.permission.BIND_TRANSLATION_SERVICE"
                 android:protectionLevel="signature" />
 
     <!-- Must be required by a android.service.contentsuggestions.ContentSuggestionsService,
@@ -5316,6 +5337,12 @@
     -->
     <permission android:name="android.permission.BIND_IMPRESSION_ATTESTATION_SERVICE"
         android:protectionLevel="signature" />
+
+    <!-- @hide @TestApi Allows an application to enable/disable toast rate limiting.
+         <p>Not for use by third-party applications.
+    -->
+    <permission android:name="android.permission.MANAGE_TOAST_RATE_LIMITING"
+                android:protectionLevel="signature" />
 
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>

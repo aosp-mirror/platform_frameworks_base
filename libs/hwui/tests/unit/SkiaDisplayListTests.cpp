@@ -38,12 +38,13 @@ TEST(SkiaDisplayList, create) {
 }
 
 TEST(SkiaDisplayList, reset) {
-    std::unique_ptr<SkiaDisplayList> skiaDL;
+    DisplayList displayList;
     {
         SkiaRecordingCanvas canvas{nullptr, 1, 1};
         canvas.drawColor(0, SkBlendMode::kSrc);
-        skiaDL.reset(canvas.finishRecording());
+        displayList = canvas.finishRecording();
     }
+    SkiaDisplayList* skiaDL = displayList.asSkiaDl();
 
     SkCanvas dummyCanvas;
     RenderNodeDrawable drawable(nullptr, &dummyCanvas);

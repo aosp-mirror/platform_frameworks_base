@@ -16,6 +16,12 @@
 
 package com.android.systemui.statusbar.policy.dagger;
 
+import android.os.UserManager;
+
+import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.policy.AccessPointControllerImpl;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.BluetoothControllerImpl;
 import com.android.systemui.statusbar.policy.CastController;
@@ -45,8 +51,11 @@ import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.ZenModeControllerImpl;
 
+import java.util.concurrent.Executor;
+
 import dagger.Binds;
 import dagger.Module;
+import dagger.Provides;
 
 
 /** Dagger Module for code in the statusbar.policy package. */
@@ -98,15 +107,33 @@ public interface StatusBarPolicyModule {
 
     /** */
     @Binds
-    SensorPrivacyController provideSensorPrivacyControllerImpl(
-            SensorPrivacyControllerImpl controllerImpl);
-
-    /** */
-    @Binds
     UserInfoController provideUserInfoContrller(UserInfoControllerImpl controllerImpl);
 
     /** */
     @Binds
     ZenModeController provideZenModeController(ZenModeControllerImpl controllerImpl);
 
+    /** */
+    @Binds
+    NetworkController.AccessPointController provideAccessPointController(
+            AccessPointControllerImpl accessPointControllerImpl);
+
+    /** */
+    @SysUISingleton
+    @Provides
+    static AccessPointControllerImpl  provideAccessPointControllerImpl(
+            UserManager userManager,
+            UserTracker userTracker,
+            @Main Executor mainExecutor,
+            AccessPointControllerImpl.WifiPickerTrackerFactory wifiPickerTrackerFactory
+    ) {
+        AccessPointControllerImpl controller = new AccessPointControllerImpl(
+                userManager,
+                userTracker,
+                mainExecutor,
+                wifiPickerTrackerFactory
+        );
+        controller.init();
+        return controller;
+    }
 }

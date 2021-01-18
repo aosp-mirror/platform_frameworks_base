@@ -192,7 +192,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                 request.getSystemTextClassifierMetadata(),
                 /* verifyCallingPackage= */ true,
                 /* attemptToBind= */ true,
-                service -> service.onSuggestSelection(sessionId, request, callback),
+                service -> service.onSuggestSelection(sessionId, request, wrap(callback)),
                 "onSuggestSelection",
                 callback);
     }
@@ -1057,6 +1057,8 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                 rewriteTextClassificationIcons(result);
             } else if (parcelled instanceof ConversationActions) {
                 rewriteConversationActionsIcons(result);
+            } else if (parcelled instanceof TextSelection) {
+                rewriteTextSelectionIcons(result);
             } else {
                 // do nothing.
             }
@@ -1067,10 +1069,32 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             }
         }
 
-        private static void rewriteTextClassificationIcons(Bundle result) {
-            final TextClassification classification = TextClassifierService.getResponse(result);
+        private static void rewriteTextSelectionIcons(Bundle result) {
+            final TextSelection textSelection = TextClassifierService.getResponse(result);
+            if (textSelection.getTextClassification() == null) {
+                return;
+            }
+            TextClassification newTextClassification =
+                    rewriteTextClassificationIcons(textSelection.getTextClassification());
+            if (newTextClassification == null) {
+                return;
+            }
+            TextClassifierService.putResponse(
+                    result,
+                    textSelection.toBuilder()
+                            .setTextClassification(newTextClassification)
+                            .build());
+        }
+
+        /**
+         * Returns a new {@link TextClassification} if any modification is made, {@code null}
+         * otherwise.
+         */
+        @Nullable
+        private static TextClassification rewriteTextClassificationIcons(
+                TextClassification textClassification) {
             boolean rewrite = false;
-            final List<RemoteAction> actions = classification.getActions();
+            final List<RemoteAction> actions = textClassification.getActions();
             final int size = actions.size();
             final List<RemoteAction> validActions = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
@@ -1084,13 +1108,21 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                 }
                 validActions.add(validAction);
             }
-            if (rewrite) {
-                TextClassifierService.putResponse(
-                        result,
-                        classification.toBuilder()
-                                .clearActions()
-                                .addActions(validActions)
-                                .build());
+            return rewrite
+                    ? textClassification
+                            .toBuilder()
+                            .clearActions()
+                            .addActions(validActions)
+                            .build()
+                    : null;
+        }
+
+        private static void rewriteTextClassificationIcons(Bundle result) {
+            final TextClassification classification = TextClassifierService.getResponse(result);
+            TextClassification newTextClassification = rewriteTextClassificationIcons(
+                    classification);
+            if (newTextClassification != null) {
+                TextClassifierService.putResponse(result, newTextClassification);
             }
         }
 

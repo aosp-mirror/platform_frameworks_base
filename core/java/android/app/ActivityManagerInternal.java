@@ -32,10 +32,12 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.TransactionTooLargeException;
 import android.os.WorkSource;
+import android.util.ArraySet;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Activity manager local system service interface.
@@ -96,11 +98,15 @@ public abstract class ActivityManagerInternal {
     public abstract void killForegroundAppsForUser(@UserIdInt int userId);
 
     /**
-     *  Sets how long a {@link PendingIntent} can be temporarily whitelist to by bypass restrictions
-     *  such as Power Save mode.
+     * Sets how long a {@link PendingIntent} can be temporarily whitelist to by bypass restrictions
+     * such as Power Save mode.
+     * @param target
+     * @param whitelistToken
+     * @param duration temp allowlist duration in milliseconds.
+     * @param type temp allowlist type defined at {@link BroadcastOptions.TempAllowListType}
      */
     public abstract void setPendingIntentWhitelistDuration(IIntentSender target,
-            IBinder whitelistToken, long duration);
+            IBinder whitelistToken, long duration, int type);
 
     /**
      * Returns the flags set for a {@link PendingIntent}.
@@ -316,8 +322,17 @@ public abstract class ActivityManagerInternal {
     public abstract boolean isBooted();
     public abstract void finishBooting();
 
+    /**
+     * Temp allowlist a UID for PendingIntent.
+     * @param callerPid the PID that sent the PendingIntent.
+     * @param callerUid the UID that sent the PendingIntent.
+     * @param targetUid the UID that is been temp allowlisted.
+     * @param duration temp allowlist duration in milliseconds.
+     * @param type temp allowlist type defined at {@link BroadcastOptions.TempAllowListType}
+     * @param tag
+     */
     public abstract void tempWhitelistForPendingIntent(int callerPid, int callerUid, int targetUid,
-            long duration, String tag);
+            long duration, int type, String tag);
 
     public abstract int broadcastIntentInPackage(String packageName, @Nullable String featureId,
             int uid, int realCallingUid, int realCallingPid, Intent intent, String resolvedType,
@@ -445,6 +460,32 @@ public abstract class ActivityManagerInternal {
      * Called by DevicePolicyManagerService to set the uid of the device owner.
      */
     public abstract void setDeviceOwnerUid(int uid);
+
+    /** Is this a profile owner app? */
+    public abstract boolean isProfileOwner(int uid);
+
+    /**
+     * Called by DevicePolicyManagerService to set the uid of the profile owner.
+     * @param profileOwnerUids The profile owner UIDs. The ownership of the array is
+     *                         passed to callee.
+     */
+    public abstract void setProfileOwnerUid(ArraySet<Integer> profileOwnerUids);
+
+    /**
+     * Set all associated companion app that belongs to a userId.
+     * @param userId
+     * @param companionAppUids  ActivityManager will take ownership of this Set, the caller
+     *                          shouldn't touch this Set after calling this interface.
+     */
+    public abstract void setCompanionAppUids(int userId, Set<Integer> companionAppUids);
+
+    /**
+     * is the uid an associated companion app of a userId?
+     * @param userId
+     * @param uid
+     * @return
+     */
+    public abstract boolean isAssociatedCompanionApp(int userId, int uid);
 
     /**
      * Sends a broadcast, assuming the caller to be the system and allowing the inclusion of an

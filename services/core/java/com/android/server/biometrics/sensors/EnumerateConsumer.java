@@ -19,8 +19,8 @@ package com.android.server.biometrics.sensors;
 import android.hardware.biometrics.BiometricAuthenticator;
 
 /**
- * Interface that {@link ClientMonitor} subclasses eligible/interested in enumerate callbacks should
- * implement.
+ * Interface that {@link BaseClientMonitor} subclasses eligible/interested in enumerate callbacks
+ * should implement.
  */
 public interface EnumerateConsumer {
     /**

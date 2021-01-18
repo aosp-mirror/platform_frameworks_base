@@ -37,6 +37,7 @@ import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.NAV_BA
 import static com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
@@ -136,8 +137,8 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
-import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
+import com.android.wm.shell.pip.Pip;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -185,6 +186,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private final Optional<Recents> mRecentsOptional;
     private final SystemActions mSystemActions;
     private final Handler mHandler;
+    private final NavigationBarOverlayController mNavbarOverlayController;
     private final UiEventLogger mUiEventLogger;
 
     private Bundle mSavedState;
@@ -415,6 +417,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             NotificationRemoteInputManager notificationRemoteInputManager,
             SystemActions systemActions,
             @Main Handler mainHandler,
+            NavigationBarOverlayController navbarOverlayController,
             UiEventLogger uiEventLogger) {
         mContext = context;
         mWindowManager = windowManager;
@@ -438,6 +441,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mRecentsOptional = recentsOptional;
         mSystemActions = systemActions;
         mHandler = mainHandler;
+        mNavbarOverlayController = navbarOverlayController;
         mUiEventLogger = uiEventLogger;
     }
 
@@ -814,6 +818,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             mNavigationBarView.setNavigationIconHints(hints);
         }
         checkBarModes();
+        updateSystemUiStateFlags(-1);
     }
 
     @Override
@@ -860,6 +865,13 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         if (rotateSuggestionsDisabled) return;
 
         rotationButtonController.onRotationProposal(rotation, winRotation, isValid);
+    }
+
+    @Override
+    public void onRecentsAnimationStateChanged(boolean running) {
+        if (running) {
+            mNavbarOverlayController.setButtonState(/* visible */false, /* force */true);
+        }
     }
 
     /** Restores the appearance and the transient saved state to {@link NavigationBar}. */
@@ -1305,6 +1317,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mSysUiFlagsContainer.setFlag(SYSUI_STATE_A11Y_BUTTON_CLICKABLE, clickable)
                 .setFlag(SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE, longClickable)
                 .setFlag(SYSUI_STATE_NAV_BAR_HIDDEN, !isNavBarWindowVisible())
+                .setFlag(SYSUI_STATE_IME_SHOWING,
+                        (mNavigationIconHints & NAVIGATION_HINT_BACK_ALT) != 0)
                 .commitUpdate(mDisplayId);
         registerAction(clickable, SystemActions.SYSTEM_ACTION_ID_ACCESSIBILITY_BUTTON);
         registerAction(longClickable, SystemActions.SYSTEM_ACTION_ID_ACCESSIBILITY_BUTTON_CHOOSER);

@@ -18,6 +18,7 @@ package com.android.server.policy;
 
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.SYSTEM_ALERT_WINDOW;
+import static android.Manifest.permission.SYSTEM_APPLICATION_OVERLAY;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.AppOpsManager.OP_TOAST_WINDOW;
 import static android.content.Context.CONTEXT_RESTRICTED;
@@ -2191,6 +2192,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     == PERMISSION_GRANTED) ? ADD_OKAY : ADD_PERMISSION_DENIED;
         }
 
+        if (mContext.checkCallingOrSelfPermission(SYSTEM_APPLICATION_OVERLAY)
+                == PERMISSION_GRANTED) {
+            return ADD_OKAY;
+        }
+
         // check if user has enabled this operation. SecurityException will be thrown if this app
         // has not been allowed by the user. The reason to use "noteOp" (instead of checkOp) is to
         // make sure the usage is logged.
@@ -3683,6 +3689,32 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         }
                     }
                 }
+                break;
+            }
+
+            case KeyEvent.KEYCODE_TV_POWER: {
+                result &= ~ACTION_PASS_TO_USER;
+                isWakeKey = false; // wake-up will be handled separately
+                HdmiControlManager hdmiControlManager = getHdmiControlManager();
+                if (hdmiControlManager != null && hdmiControlManager.shouldHandleTvPowerKey()) {
+                    if (down) {
+                        hdmiControlManager.toggleAndFollowTvPower();
+                    }
+                } else if (mHasFeatureLeanback) {
+                    KeyEvent fallbackEvent = KeyEvent.obtain(
+                            event.getDownTime(), event.getEventTime(),
+                            event.getAction(), KeyEvent.KEYCODE_POWER,
+                            event.getRepeatCount(), event.getMetaState(),
+                            event.getDeviceId(), event.getScanCode(),
+                            event.getFlags(), event.getSource(), event.getDisplayId(), null);
+                    if (down) {
+                        interceptPowerKeyDown(fallbackEvent, interactive);
+                    } else {
+                        interceptPowerKeyUp(fallbackEvent, interactive, canceled);
+                    }
+                }
+                // Ignore this key for any device that is not connected to a TV via HDMI and
+                // not an Android TV device.
                 break;
             }
 

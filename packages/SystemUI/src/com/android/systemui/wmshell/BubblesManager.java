@@ -615,12 +615,16 @@ public class BubblesManager implements Dumpable {
     }
 
     /**
-     * When a notification is marked Priority, expand the stack if needed,
-     * then (maybe create and) select the given bubble.
+     * When a notification is set as important, make it a bubble and expand the stack if
+     * it can bubble.
      *
-     * @param entry the notification for the bubble to show
+     * @param entry the important notification.
      */
-    public void onUserChangedImportance(NotificationEntry entry) {
+    public void onUserSetImportantConversation(NotificationEntry entry) {
+        if (entry.getBubbleMetadata() == null) {
+            // No bubble metadata, nothing to do.
+            return;
+        }
         try {
             int flags = Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
             flags |= Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE;

@@ -20,6 +20,8 @@ import android.hardware.power.stats.ChannelInfo;
 import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyMeasurement;
 import android.hardware.power.stats.PowerEntityInfo;
+import android.hardware.power.stats.StateInfo;
+import android.hardware.power.stats.StateResidency;
 import android.hardware.power.stats.StateResidencyResult;
 import android.util.Slog;
 import android.util.proto.ProtoInputStream;
@@ -45,6 +47,29 @@ public class ProtoStreamUtils {
     private static final String TAG = ProtoStreamUtils.class.getSimpleName();
 
     static class PowerEntityInfoUtils {
+        public static void packProtoMessage(PowerEntityInfo[] powerEntityInfo,
+                ProtoOutputStream pos) {
+            if (powerEntityInfo == null) return;
+
+            for (int i = 0; i < powerEntityInfo.length; i++) {
+                long peiToken = pos.start(PowerStatsServiceResidencyProto.POWER_ENTITY_INFO);
+                pos.write(PowerEntityInfoProto.POWER_ENTITY_ID, powerEntityInfo[i].powerEntityId);
+                pos.write(PowerEntityInfoProto.POWER_ENTITY_NAME,
+                        powerEntityInfo[i].powerEntityName);
+                if (powerEntityInfo[i].states != null) {
+                    final int statesLength = powerEntityInfo[i].states.length;
+                    for (int j = 0; j < statesLength; j++) {
+                        final StateInfo state = powerEntityInfo[i].states[j];
+                        long siToken = pos.start(PowerEntityInfoProto.STATES);
+                        pos.write(StateInfoProto.STATE_ID, state.stateId);
+                        pos.write(StateInfoProto.STATE_NAME, state.stateName);
+                        pos.end(siToken);
+                    }
+                }
+                pos.end(peiToken);
+            }
+        }
+
         public static void print(PowerEntityInfo[] powerEntityInfo) {
             if (powerEntityInfo == null) return;
 
@@ -77,6 +102,144 @@ public class ProtoStreamUtils {
     }
 
     static class StateResidencyResultUtils {
+        public static byte[] getProtoBytes(StateResidencyResult[] stateResidencyResult) {
+            ProtoOutputStream pos = new ProtoOutputStream();
+            packProtoMessage(stateResidencyResult, pos);
+            return pos.getBytes();
+        }
+
+        public static void packProtoMessage(StateResidencyResult[] stateResidencyResult,
+                ProtoOutputStream pos) {
+            if (stateResidencyResult == null) return;
+
+            for (int i = 0; i < stateResidencyResult.length; i++) {
+                final int stateLength = stateResidencyResult[i].stateResidencyData.length;
+                long srrToken = pos.start(PowerStatsServiceResidencyProto.STATE_RESIDENCY_RESULT);
+                pos.write(StateResidencyResultProto.POWER_ENTITY_ID,
+                        stateResidencyResult[i].powerEntityId);
+                for (int j = 0; j < stateLength; j++) {
+                    final StateResidency stateResidencyData =
+                            stateResidencyResult[i].stateResidencyData[j];
+                    long srdToken = pos.start(StateResidencyResultProto.STATE_RESIDENCY_DATA);
+                    pos.write(StateResidencyProto.STATE_ID, stateResidencyData.stateId);
+                    pos.write(StateResidencyProto.TOTAL_TIME_IN_STATE_MS,
+                            stateResidencyData.totalTimeInStateMs);
+                    pos.write(StateResidencyProto.TOTAL_STATE_ENTRY_COUNT,
+                            stateResidencyData.totalStateEntryCount);
+                    pos.write(StateResidencyProto.LAST_ENTRY_TIMESTAMP_MS,
+                            stateResidencyData.lastEntryTimestampMs);
+                    pos.end(srdToken);
+                }
+                pos.end(srrToken);
+            }
+        }
+
+        public static StateResidencyResult[] unpackProtoMessage(byte[] data) throws IOException {
+            final ProtoInputStream pis = new ProtoInputStream(new ByteArrayInputStream(data));
+            List<StateResidencyResult> stateResidencyResultList =
+                    new ArrayList<StateResidencyResult>();
+            while (true) {
+                try {
+                    int nextField = pis.nextField();
+                    StateResidencyResult stateResidencyResult = new StateResidencyResult();
+
+                    if (nextField == (int) PowerStatsServiceResidencyProto.STATE_RESIDENCY_RESULT) {
+                        long token =
+                                pis.start(PowerStatsServiceResidencyProto.STATE_RESIDENCY_RESULT);
+                        stateResidencyResultList.add(unpackStateResidencyResultProto(pis));
+                        pis.end(token);
+                    } else if (nextField == ProtoInputStream.NO_MORE_FIELDS) {
+                        return stateResidencyResultList.toArray(
+                            new StateResidencyResult[stateResidencyResultList.size()]);
+                    } else {
+                        Slog.e(TAG, "Unhandled field in PowerStatsServiceResidencyProto: "
+                                + ProtoUtils.currentFieldToString(pis));
+                    }
+                } catch (WireTypeMismatchException wtme) {
+                    Slog.e(TAG, "Wire Type mismatch in PowerStatsServiceResidencyProto: "
+                            + ProtoUtils.currentFieldToString(pis));
+                }
+            }
+        }
+
+        private static StateResidencyResult unpackStateResidencyResultProto(ProtoInputStream pis)
+                throws IOException {
+            StateResidencyResult stateResidencyResult = new StateResidencyResult();
+            List<StateResidency> stateResidencyList = new ArrayList<StateResidency>();
+
+            while (true) {
+                try {
+                    switch (pis.nextField()) {
+                        case (int) StateResidencyResultProto.POWER_ENTITY_ID:
+                            stateResidencyResult.powerEntityId =
+                                pis.readInt(StateResidencyResultProto.POWER_ENTITY_ID);
+                            break;
+
+                        case (int) StateResidencyResultProto.STATE_RESIDENCY_DATA:
+                            long token = pis.start(StateResidencyResultProto.STATE_RESIDENCY_DATA);
+                            stateResidencyList.add(unpackStateResidencyProto(pis));
+                            pis.end(token);
+                            break;
+
+                        case ProtoInputStream.NO_MORE_FIELDS:
+                            stateResidencyResult.stateResidencyData = stateResidencyList.toArray(
+                                new StateResidency[stateResidencyList.size()]);
+                            return stateResidencyResult;
+
+                        default:
+                            Slog.e(TAG, "Unhandled field in StateResidencyResultProto: "
+                                    + ProtoUtils.currentFieldToString(pis));
+                            break;
+                    }
+                } catch (WireTypeMismatchException wtme) {
+                    Slog.e(TAG, "Wire Type mismatch in StateResidencyResultProto: "
+                            + ProtoUtils.currentFieldToString(pis));
+                }
+            }
+        }
+
+        private static StateResidency unpackStateResidencyProto(ProtoInputStream pis)
+                throws IOException {
+            StateResidency stateResidency = new StateResidency();
+
+            while (true) {
+                try {
+                    switch (pis.nextField()) {
+                        case (int) StateResidencyProto.STATE_ID:
+                            stateResidency.stateId = pis.readInt(StateResidencyProto.STATE_ID);
+                            break;
+
+                        case (int) StateResidencyProto.TOTAL_TIME_IN_STATE_MS:
+                            stateResidency.totalTimeInStateMs =
+                                pis.readLong(StateResidencyProto.TOTAL_TIME_IN_STATE_MS);
+                            break;
+
+                        case (int) StateResidencyProto.TOTAL_STATE_ENTRY_COUNT:
+                            stateResidency.totalStateEntryCount =
+                                pis.readLong(StateResidencyProto.TOTAL_STATE_ENTRY_COUNT);
+                            break;
+
+                        case (int) StateResidencyProto.LAST_ENTRY_TIMESTAMP_MS:
+                            stateResidency.lastEntryTimestampMs =
+                                pis.readLong(StateResidencyProto.LAST_ENTRY_TIMESTAMP_MS);
+                            break;
+
+                        case ProtoInputStream.NO_MORE_FIELDS:
+                            return stateResidency;
+
+                        default:
+                            Slog.e(TAG, "Unhandled field in StateResidencyProto: "
+                                    + ProtoUtils.currentFieldToString(pis));
+                            break;
+
+                    }
+                } catch (WireTypeMismatchException wtme) {
+                    Slog.e(TAG, "Wire Type mismatch in StateResidencyProto: "
+                            + ProtoUtils.currentFieldToString(pis));
+                }
+            }
+        }
+
         public static void print(StateResidencyResult[] stateResidencyResult) {
             if (stateResidencyResult == null) return;
 
@@ -98,17 +261,14 @@ public class ProtoStreamUtils {
 
     static class ChannelInfoUtils {
         public static void packProtoMessage(ChannelInfo[] channelInfo, ProtoOutputStream pos) {
-            long token;
-
             if (channelInfo == null) return;
 
             for (int i = 0; i < channelInfo.length; i++) {
-                token = pos.start(PowerStatsServiceMeterProto.CHANNEL_INFO);
+                long token = pos.start(PowerStatsServiceMeterProto.CHANNEL_INFO);
                 pos.write(ChannelInfoProto.CHANNEL_ID, channelInfo[i].channelId);
                 pos.write(ChannelInfoProto.CHANNEL_NAME, channelInfo[i].channelName);
                 pos.end(token);
             }
-
         }
 
         public static void print(ChannelInfo[] channelInfo) {
@@ -139,12 +299,10 @@ public class ProtoStreamUtils {
 
         public static void packProtoMessage(EnergyMeasurement[] energyMeasurement,
                 ProtoOutputStream pos) {
-            long token;
-
             if (energyMeasurement == null) return;
 
             for (int i = 0; i < energyMeasurement.length; i++) {
-                token = pos.start(PowerStatsServiceMeterProto.ENERGY_MEASUREMENT);
+                long token = pos.start(PowerStatsServiceMeterProto.ENERGY_MEASUREMENT);
                 pos.write(EnergyMeasurementProto.CHANNEL_ID, energyMeasurement[i].channelId);
                 pos.write(EnergyMeasurementProto.TIMESTAMP_MS, energyMeasurement[i].timestampMs);
                 pos.write(EnergyMeasurementProto.ENERGY_UWS, energyMeasurement[i].energyUWs);
@@ -155,7 +313,6 @@ public class ProtoStreamUtils {
         public static EnergyMeasurement[] unpackProtoMessage(byte[] data) throws IOException {
             final ProtoInputStream pis = new ProtoInputStream(new ByteArrayInputStream(data));
             List<EnergyMeasurement> energyMeasurementList = new ArrayList<EnergyMeasurement>();
-            long token;
 
             while (true) {
                 try {
@@ -163,8 +320,8 @@ public class ProtoStreamUtils {
                     EnergyMeasurement energyMeasurement = new EnergyMeasurement();
 
                     if (nextField == (int) PowerStatsServiceMeterProto.ENERGY_MEASUREMENT) {
-                        token = pis.start(PowerStatsServiceMeterProto.ENERGY_MEASUREMENT);
-                        energyMeasurementList.add(unpackProtoMessage(pis));
+                        long token = pis.start(PowerStatsServiceMeterProto.ENERGY_MEASUREMENT);
+                        energyMeasurementList.add(unpackEnergyMeasurementProto(pis));
                         pis.end(token);
                     } else if (nextField == ProtoInputStream.NO_MORE_FIELDS) {
                         return energyMeasurementList.toArray(
@@ -180,7 +337,7 @@ public class ProtoStreamUtils {
             }
         }
 
-        private static EnergyMeasurement unpackProtoMessage(ProtoInputStream pis)
+        private static EnergyMeasurement unpackEnergyMeasurementProto(ProtoInputStream pis)
                 throws IOException {
             EnergyMeasurement energyMeasurement = new EnergyMeasurement();
 
@@ -230,12 +387,10 @@ public class ProtoStreamUtils {
 
     static class EnergyConsumerIdUtils {
         public static void packProtoMessage(int[] energyConsumerId, ProtoOutputStream pos) {
-            long token;
-
             if (energyConsumerId == null) return;
 
             for (int i = 0; i < energyConsumerId.length; i++) {
-                token = pos.start(PowerStatsServiceModelProto.ENERGY_CONSUMER_ID);
+                long token = pos.start(PowerStatsServiceModelProto.ENERGY_CONSUMER_ID);
                 pos.write(EnergyConsumerIdProto.ENERGY_CONSUMER_ID, energyConsumerId[i]);
                 pos.end(token);
             }
@@ -267,12 +422,10 @@ public class ProtoStreamUtils {
 
         public static void packProtoMessage(EnergyConsumerResult[] energyConsumerResult,
                 ProtoOutputStream pos) {
-            long token;
-
             if (energyConsumerResult == null) return;
 
             for (int i = 0; i < energyConsumerResult.length; i++) {
-                token = pos.start(PowerStatsServiceModelProto.ENERGY_CONSUMER_RESULT);
+                long token = pos.start(PowerStatsServiceModelProto.ENERGY_CONSUMER_RESULT);
                 pos.write(EnergyConsumerResultProto.ENERGY_CONSUMER_ID,
                         energyConsumerResult[i].energyConsumerId);
                 pos.write(EnergyConsumerResultProto.TIMESTAMP_MS,
@@ -286,16 +439,14 @@ public class ProtoStreamUtils {
             final ProtoInputStream pis = new ProtoInputStream(new ByteArrayInputStream(data));
             List<EnergyConsumerResult> energyConsumerResultList =
                     new ArrayList<EnergyConsumerResult>();
-            long token;
-
             while (true) {
                 try {
                     int nextField = pis.nextField();
                     EnergyConsumerResult energyConsumerResult = new EnergyConsumerResult();
 
                     if (nextField == (int) PowerStatsServiceModelProto.ENERGY_CONSUMER_RESULT) {
-                        token = pis.start(PowerStatsServiceModelProto.ENERGY_CONSUMER_RESULT);
-                        energyConsumerResultList.add(unpackProtoMessage(pis));
+                        long token = pis.start(PowerStatsServiceModelProto.ENERGY_CONSUMER_RESULT);
+                        energyConsumerResultList.add(unpackEnergyConsumerResultProto(pis));
                         pis.end(token);
                     } else if (nextField == ProtoInputStream.NO_MORE_FIELDS) {
                         return energyConsumerResultList.toArray(
@@ -311,7 +462,7 @@ public class ProtoStreamUtils {
             }
         }
 
-        private static EnergyConsumerResult unpackProtoMessage(ProtoInputStream pis)
+        private static EnergyConsumerResult unpackEnergyConsumerResultProto(ProtoInputStream pis)
                 throws IOException {
             EnergyConsumerResult energyConsumerResult = new EnergyConsumerResult();
 

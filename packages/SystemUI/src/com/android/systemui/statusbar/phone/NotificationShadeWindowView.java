@@ -146,7 +146,6 @@ public class NotificationShadeWindowView extends FrameLayout {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         setWillNotDraw(!DEBUG);
-        InteractionJankMonitor.getInstance().init(this);
     }
 
     @Override

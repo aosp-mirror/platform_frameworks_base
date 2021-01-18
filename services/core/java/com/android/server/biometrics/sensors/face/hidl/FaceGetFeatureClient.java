@@ -27,14 +27,14 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.server.biometrics.sensors.ClientMonitor;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
+import com.android.server.biometrics.sensors.HalClientMonitor;
 
 /**
  * Face-specific getFeature client supporting the {@link android.hardware.biometrics.face.V1_0}
  * and {@link android.hardware.biometrics.face.V1_1} HIDL interfaces.
  */
-public class FaceGetFeatureClient extends ClientMonitor<IBiometricsFace> {
+public class FaceGetFeatureClient extends HalClientMonitor<IBiometricsFace> {
 
     private static final String TAG = "FaceGetFeatureClient";
 

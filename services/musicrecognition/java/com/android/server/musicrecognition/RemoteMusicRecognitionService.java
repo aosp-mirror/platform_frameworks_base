@@ -21,13 +21,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.media.AudioFormat;
 import android.media.musicrecognition.IMusicRecognitionService;
-import android.media.musicrecognition.IMusicRecognitionServiceCallback;
 import android.media.musicrecognition.MusicRecognitionService;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.text.format.DateUtils;
 
 import com.android.internal.infra.AbstractMultiplePendingRequestsRemoteService;
+import com.android.server.musicrecognition.MusicRecognitionManagerPerUserService.MusicRecognitionServiceCallback;
 
 /** Remote connection to an instance of {@link MusicRecognitionService}. */
 public class RemoteMusicRecognitionService extends
@@ -39,11 +39,12 @@ public class RemoteMusicRecognitionService extends
     private static final long TIMEOUT_IDLE_BIND_MILLIS = 40 * DateUtils.SECOND_IN_MILLIS;
 
     // Allows the remote service to send back a result.
-    private final IMusicRecognitionServiceCallback mServerCallback;
+    private final MusicRecognitionServiceCallback
+            mServerCallback;
 
     public RemoteMusicRecognitionService(Context context, ComponentName serviceName,
             int userId, MusicRecognitionManagerPerUserService perUserService,
-            IMusicRecognitionServiceCallback callback,
+            MusicRecognitionServiceCallback callback,
             boolean bindInstantServiceAllowed, boolean verbose) {
         super(context, MusicRecognitionService.ACTION_MUSIC_SEARCH_LOOKUP, serviceName, userId,
                 perUserService,
@@ -64,6 +65,10 @@ public class RemoteMusicRecognitionService extends
     @Override
     protected long getTimeoutIdleBindMillis() {
         return TIMEOUT_IDLE_BIND_MILLIS;
+    }
+
+    MusicRecognitionServiceCallback getServerCallback() {
+        return mServerCallback;
     }
 
     /**

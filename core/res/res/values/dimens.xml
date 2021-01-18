@@ -305,11 +305,17 @@
     <!-- The top padding for the notification expand button. -->
     <dimen name="notification_expand_button_padding_top">1dp</dimen>
 
-    <!-- minimum vertical margin for the headerless notification content -->
+    <!-- minimum vertical margin for the headerless notification content, when cap = 60dp -->
     <dimen name="notification_headerless_margin_minimum">8dp</dimen>
 
-    <!-- extra vertical margin for the headerless notification content -->
+    <!-- extra vertical margin for the headerless notification content, when cap = 60dp -->
     <dimen name="notification_headerless_margin_extra">10dp</dimen>
+
+    <!-- minimum vertical margin for the headerless notification content, when cap = 48dp -->
+    <dimen name="notification_headerless_margin_constrained_minimum">14dp</dimen>
+
+    <!-- extra vertical margin for the headerless notification content, when cap = 48dp -->
+    <dimen name="notification_headerless_margin_constrained_extra">4dp</dimen>
 
     <!-- The height of each of the 1 or 2 lines in the headerless notification template -->
     <dimen name="notification_headerless_line_height">20sp</dimen>

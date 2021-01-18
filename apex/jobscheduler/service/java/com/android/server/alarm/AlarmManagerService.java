@@ -28,6 +28,7 @@ import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.os.UserHandle.USER_SYSTEM;
 
 import static com.android.server.alarm.Alarm.APP_STANDBY_POLICY_INDEX;
+import static com.android.server.alarm.Alarm.BATTERY_SAVER_POLICY_INDEX;
 import static com.android.server.alarm.Alarm.DEVICE_IDLE_POLICY_INDEX;
 import static com.android.server.alarm.Alarm.REQUESTER_POLICY_INDEX;
 
@@ -156,6 +157,7 @@ public class AlarmManagerService extends SystemService {
 
     static final int TICK_HISTORY_DEPTH = 10;
     static final long MILLIS_IN_DAY = 24 * 60 * 60 * 1000;
+    static final long INDEFINITE_DELAY = 365 * MILLIS_IN_DAY;
 
     // Indices into the KEYS_APP_STANDBY_QUOTAS array.
     static final int ACTIVE_INDEX = 0;
@@ -964,8 +966,7 @@ public class AlarmManagerService extends SystemService {
      * Check all alarms in {@link #mPendingBackgroundAlarms} and send the ones that are not
      * restricted.
      *
-     * This is only called when the global "force all apps-standby" flag changes or when the
-     * power save whitelist changes, so it's okay to be slow.
+     * This is only called when the power save whitelist changes, so it's okay to be slow.
      */
     void sendAllUnrestrictedPendingBackgroundAlarmsLocked() {
         final ArrayList<Alarm> alarmsToDeliver = new ArrayList<>();
@@ -984,7 +985,6 @@ public class AlarmManagerService extends SystemService {
             Predicate<Alarm> isBackgroundRestricted) {
 
         for (int uidIndex = pendingAlarms.size() - 1; uidIndex >= 0; uidIndex--) {
-            final int uid = pendingAlarms.keyAt(uidIndex);
             final ArrayList<Alarm> alarmsForUid = pendingAlarms.valueAt(uidIndex);
 
             for (int alarmIndex = alarmsForUid.size() - 1; alarmIndex >= 0; alarmIndex--) {
@@ -1620,6 +1620,44 @@ public class AlarmManagerService extends SystemService {
     }
 
     /**
+     * Adjusts the delivery time of the alarm based on battery saver rules.
+     *
+     * @param alarm The alarm to adjust
+     * @return {@code true} if the alarm delivery time was updated.
+     */
+    private boolean adjustDeliveryTimeBasedOnBatterySaver(Alarm alarm) {
+        final long nowElapsed = mInjector.getElapsedRealtime();
+        if (isExemptFromBatterySaver(alarm)) {
+            return false;
+        }
+
+        if (!(mAppStateTracker != null && mAppStateTracker.areAlarmsRestrictedByBatterySaver(
+                alarm.creatorUid, alarm.sourcePackage))) {
+            return alarm.setPolicyElapsed(BATTERY_SAVER_POLICY_INDEX, nowElapsed);
+        }
+
+        final long batterSaverPolicyElapsed;
+        if ((alarm.flags & (AlarmManager.FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED)) != 0) {
+            // Unrestricted.
+            batterSaverPolicyElapsed = nowElapsed;
+        } else if ((alarm.flags & AlarmManager.FLAG_ALLOW_WHILE_IDLE) != 0) {
+            // Allowed but limited.
+            final long minDelay;
+            if (mUseAllowWhileIdleShortTime.get(alarm.creatorUid)) {
+                minDelay = mConstants.ALLOW_WHILE_IDLE_SHORT_TIME;
+            } else {
+                minDelay = mConstants.ALLOW_WHILE_IDLE_LONG_TIME;
+            }
+            final long lastDispatch = mLastAllowWhileIdleDispatch.get(alarm.creatorUid, 0);
+            batterSaverPolicyElapsed = (lastDispatch == 0) ? nowElapsed : lastDispatch + minDelay;
+        } else {
+            // Not allowed.
+            batterSaverPolicyElapsed = nowElapsed + INDEFINITE_DELAY;
+        }
+        return alarm.setPolicyElapsed(BATTERY_SAVER_POLICY_INDEX, batterSaverPolicyElapsed);
+    }
+
+    /**
      * Adjusts the delivery time of the alarm based on device_idle (doze) rules.
      *
      * @param alarm The alarm to adjust
@@ -1756,6 +1794,7 @@ public class AlarmManagerService extends SystemService {
         if (a.alarmClock != null) {
             mNextAlarmClockMayChange = true;
         }
+        adjustDeliveryTimeBasedOnBatterySaver(a);
         adjustDeliveryTimeBasedOnBucketLocked(a);
         mAlarmStore.add(a);
         rescheduleKernelAlarmsLocked();
@@ -2230,14 +2269,6 @@ public class AlarmManagerService extends SystemService {
                     pw.print(": ");
                     final long lastTime = mLastAllowWhileIdleDispatch.valueAt(i);
                     TimeUtils.formatDuration(lastTime, nowELAPSED, pw);
-
-                    final long minInterval = getWhileIdleMinIntervalLocked(uid);
-                    pw.print("  Next allowed:");
-                    TimeUtils.formatDuration(lastTime + minInterval, nowELAPSED, pw);
-                    pw.print(" (");
-                    TimeUtils.formatDuration(minInterval, 0, pw);
-                    pw.print(")");
-
                     pw.println();
                 }
                 pw.decreaseIndent();
@@ -2511,8 +2542,6 @@ public class AlarmManagerService extends SystemService {
                 proto.write(AlarmManagerServiceDumpProto.LastAllowWhileIdleDispatch.UID, uid);
                 proto.write(AlarmManagerServiceDumpProto.LastAllowWhileIdleDispatch.TIME_MS,
                         lastTime);
-                proto.write(AlarmManagerServiceDumpProto.LastAllowWhileIdleDispatch.NEXT_ALLOWED_MS,
-                        lastTime + getWhileIdleMinIntervalLocked(uid));
                 proto.end(token);
             }
 
@@ -3119,30 +3148,36 @@ public class AlarmManagerService extends SystemService {
         }
     }
 
+    private boolean isExemptFromBatterySaver(Alarm alarm) {
+        if (alarm.alarmClock != null) {
+            return true;
+        }
+        if ((alarm.operation != null)
+                && (alarm.operation.isActivity() || alarm.operation.isForegroundService())) {
+            return true;
+        }
+        if (UserHandle.isCore(alarm.creatorUid)) {
+            return true;
+        }
+        return false;
+    }
+
     private boolean isBackgroundRestricted(Alarm alarm) {
-        boolean exemptOnBatterySaver = (alarm.flags & FLAG_ALLOW_WHILE_IDLE) != 0;
         if (alarm.alarmClock != null) {
             // Don't defer alarm clocks
             return false;
         }
-        if (alarm.operation != null) {
-            if (alarm.operation.isActivity()) {
-                // Don't defer starting actual UI
-                return false;
-            }
-            if (alarm.operation.isForegroundService()) {
-                // FG service alarms are nearly as important; consult AST policy
-                exemptOnBatterySaver = true;
-            }
+        if (alarm.operation != null && alarm.operation.isActivity()) {
+            // Don't defer starting actual UI
+            return false;
         }
         final String sourcePackage = alarm.sourcePackage;
         final int sourceUid = alarm.creatorUid;
         if (UserHandle.isCore(sourceUid)) {
             return false;
         }
-        return (mAppStateTracker != null) &&
-                mAppStateTracker.areAlarmsRestricted(sourceUid, sourcePackage,
-                        exemptOnBatterySaver);
+        return (mAppStateTracker != null) && mAppStateTracker.areAlarmsRestricted(sourceUid,
+                sourcePackage);
     }
 
     private static native long init();
@@ -3153,46 +3188,10 @@ public class AlarmManagerService extends SystemService {
     private static native int setKernelTimezone(long nativeData, int minuteswest);
     private static native long getNextAlarm(long nativeData, int type);
 
-    private long getWhileIdleMinIntervalLocked(int uid) {
-        final boolean ebs = (mAppStateTracker != null)
-                && mAppStateTracker.isForceAllAppsStandbyEnabled();
-
-        if (!ebs || mUseAllowWhileIdleShortTime.get(uid)) {
-            // if the last allow-while-idle went off while uid was fg, or the uid
-            // recently came into fg, don't block the alarm for long.
-            return mConstants.ALLOW_WHILE_IDLE_SHORT_TIME;
-        }
-        return mConstants.ALLOW_WHILE_IDLE_LONG_TIME;
-    }
-
     boolean triggerAlarmsLocked(ArrayList<Alarm> triggerList, final long nowELAPSED) {
         boolean hasWakeup = false;
         final ArrayList<Alarm> pendingAlarms = mAlarmStore.removePendingAlarms(nowELAPSED);
         for (final Alarm alarm : pendingAlarms) {
-            if ((alarm.flags & AlarmManager.FLAG_ALLOW_WHILE_IDLE) != 0) {
-                // If this is an ALLOW_WHILE_IDLE alarm, we constrain how frequently the app can
-                // schedule such alarms.  The first such alarm from an app is always delivered.
-                final long lastTime = mLastAllowWhileIdleDispatch.get(alarm.creatorUid, -1);
-                final long minTime = lastTime + getWhileIdleMinIntervalLocked(alarm.creatorUid);
-                if (lastTime >= 0 && nowELAPSED < minTime) {
-                    // Whoops, it hasn't been long enough since the last ALLOW_WHILE_IDLE
-                    // alarm went off for this app.  Reschedule the alarm to be in the
-                    // correct time period.
-                    alarm.setPolicyElapsed(REQUESTER_POLICY_INDEX, minTime);
-                    if (RECORD_DEVICE_IDLE_ALARMS) {
-                        IdleDispatchEntry ent = new IdleDispatchEntry();
-                        ent.uid = alarm.uid;
-                        ent.pkg = alarm.operation.getCreatorPackage();
-                        ent.tag = alarm.operation.getTag("");
-                        ent.op = "RESCHEDULE";
-                        ent.elapsedRealtime = nowELAPSED;
-                        ent.argRealtime = lastTime;
-                        mAllowWhileIdleDispatches.add(ent);
-                    }
-                    setImplLocked(alarm);
-                    continue;
-                }
-            }
             if (isBackgroundRestricted(alarm)) {
                 // Alarms with FLAG_WAKE_FROM_IDLE or mPendingIdleUntil alarm are not deferred
                 if (DEBUG_BG_LIMIT) {
@@ -3924,8 +3923,41 @@ public class AlarmManagerService extends SystemService {
     }
 
     private final Listener mForceAppStandbyListener = new Listener() {
+
+        @Override
+        public void updateAllAlarms() {
+            // Called when:
+            // 1. Power exemption list changes,
+            // 2. Battery saver state is toggled,
+            // 3. Any package is moved into or out of the EXEMPTED bucket.
+            synchronized (mLock) {
+                if (mAlarmStore.updateAlarmDeliveries(
+                        a -> adjustDeliveryTimeBasedOnBatterySaver(a))) {
+                    rescheduleKernelAlarmsLocked();
+                }
+            }
+        }
+
+        @Override
+        public void updateAlarmsForUid(int uid) {
+            // Called when the given uid's state switches b/w active and idle.
+            synchronized (mLock) {
+                if (mAlarmStore.updateAlarmDeliveries(a -> {
+                    if (a.creatorUid != uid) {
+                        return false;
+                    }
+                    return adjustDeliveryTimeBasedOnBatterySaver(a);
+                })) {
+                    rescheduleKernelAlarmsLocked();
+                }
+            }
+        }
+
         @Override
         public void unblockAllUnrestrictedAlarms() {
+            // Called when:
+            // 1. Power exemption list changes,
+            // 2. User FAS feature is disabled.
             synchronized (mLock) {
                 sendAllUnrestrictedPendingBackgroundAlarmsLocked();
             }
@@ -3934,12 +3966,14 @@ public class AlarmManagerService extends SystemService {
         @Override
         public void unblockAlarmsForUid(int uid) {
             synchronized (mLock) {
+                // Called when the given uid becomes active.
                 sendPendingBackgroundAlarmsLocked(uid, null);
             }
         }
 
         @Override
         public void unblockAlarmsForUidPackage(int uid, String packageName) {
+            // Called when user turns off FAS for this (uid, package).
             synchronized (mLock) {
                 sendPendingBackgroundAlarmsLocked(uid, packageName);
             }
@@ -3950,9 +3984,14 @@ public class AlarmManagerService extends SystemService {
             synchronized (mLock) {
                 if (foreground) {
                     mUseAllowWhileIdleShortTime.put(uid, true);
-
-                    // Note we don't have to drain the pending while-idle alarms here, because
-                    // this event should coincide with unblockAlarmsForUid().
+                    if (mAlarmStore.updateAlarmDeliveries(a -> {
+                        if (a.creatorUid != uid || (a.flags & FLAG_ALLOW_WHILE_IDLE) == 0) {
+                            return false;
+                        }
+                        return adjustDeliveryTimeBasedOnBatterySaver(a);
+                    })) {
+                        rescheduleKernelAlarmsLocked();
+                    }
                 }
             }
         }
@@ -4236,18 +4275,20 @@ public class AlarmManagerService extends SystemService {
             if (allowWhileIdle) {
                 // Record the last time this uid handled an ALLOW_WHILE_IDLE alarm.
                 mLastAllowWhileIdleDispatch.put(alarm.creatorUid, nowELAPSED);
-                mAlarmStore.updateAlarmDeliveries(a -> {
-                    if (a.creatorUid != alarm.creatorUid) {
-                        return false;
-                    }
-                    return adjustDeliveryTimeBasedOnDeviceIdle(a);
-                });
                 if ((mAppStateTracker == null)
                         || mAppStateTracker.isUidInForeground(alarm.creatorUid)) {
                     mUseAllowWhileIdleShortTime.put(alarm.creatorUid, true);
                 } else {
                     mUseAllowWhileIdleShortTime.put(alarm.creatorUid, false);
                 }
+                mAlarmStore.updateAlarmDeliveries(a -> {
+                    if (a.creatorUid != alarm.creatorUid
+                            || (a.flags & FLAG_ALLOW_WHILE_IDLE) == 0) {
+                        return false;
+                    }
+                    return adjustDeliveryTimeBasedOnDeviceIdle(a)
+                            | adjustDeliveryTimeBasedOnBatterySaver(a);
+                });
                 if (RECORD_DEVICE_IDLE_ALARMS) {
                     IdleDispatchEntry ent = new IdleDispatchEntry();
                     ent.uid = alarm.uid;

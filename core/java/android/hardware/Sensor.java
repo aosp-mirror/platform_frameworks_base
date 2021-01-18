@@ -881,7 +881,11 @@ public final class Sensor {
         }
     }
 
-    static int getMaxLengthValuesArray(Sensor sensor, int sdkLevel) {
+    /**
+     * Return sensor's maximum length of values array
+     * @hide
+     */
+    public static int getMaxLengthValuesArray(Sensor sensor, int sdkLevel) {
         // RotationVector length has changed to 3 to 5 for API level 18
         // Set it to 3 for backward compatibility.
         if (sensor.mType == Sensor.TYPE_ROTATION_VECTOR

@@ -32,6 +32,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.StringDef;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
@@ -56,8 +57,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.OutcomeReceiver;
 import android.os.ParcelFileDescriptor;
+import android.os.ParcelUuid;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.Process;
@@ -118,15 +121,22 @@ import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.SmsApplication;
 import com.android.telephony.Rlog;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -553,12 +563,13 @@ public class TelephonyManager {
 
     private static final int MAXIMUM_CALL_COMPOSER_PICTURE_SIZE = 80000;
 
-    // TODO(hallliu): link to upload method in docs
     /**
      * Indicates the maximum size of the call composure picture.
      *
-     * Pictures sent via uploadCallComposerPicture must not exceed this size, or an
-     * {@link IllegalArgumentException} will be thrown.
+     * Pictures sent via
+     * {@link #uploadCallComposerPicture(InputStream, String, Executor, OutcomeReceiver)}
+     * or {@link #uploadCallComposerPicture(Path, String, Executor, OutcomeReceiver)} must not
+     * exceed this size, or an error will be returned via the callback in those methods.
      *
      * @return Maximum file size in bytes.
      */
@@ -4239,6 +4250,357 @@ public class TelephonyManager {
             Rlog.e(TAG, "setCarrierInfoForImsiEncryption RemoteException", ex);
             return;
         }
+    }
+
+    /**
+     * Exception that may be supplied to the callback in {@link #uploadCallComposerPicture} if
+     * something goes awry.
+     */
+    public static class CallComposerException extends Exception {
+        /**
+         * Used internally only, signals success of the upload to the carrier.
+         * @hide
+         */
+        public static final int SUCCESS = -1;
+        /**
+         * Indicates that an unknown error was encountered when uploading the call composer picture.
+         *
+         * Clients that encounter this error should retry the upload.
+         */
+        public static final int ERROR_UNKNOWN = 0;
+
+        /**
+         * Indicates that the phone process died or otherwise became unavailable while uploading the
+         * call composer picture.
+         *
+         * Clients that encounter this error should retry the upload.
+         */
+        public static final int ERROR_REMOTE_END_CLOSED = 1;
+
+        /**
+         * Indicates that the file or stream supplied exceeds the size limit defined in
+         * {@link #getMaximumCallComposerPictureSize()}.
+         *
+         * Clients that encounter this error should retry the upload after reducing the size of the
+         * picture.
+         */
+        public static final int ERROR_FILE_TOO_LARGE = 2;
+
+        /**
+         * Indicates that the device failed to authenticate with the carrier when uploading the
+         * picture.
+         *
+         * Clients that encounter this error should not retry the upload unless a reboot or radio
+         * reset has been performed in the interim.
+         */
+        public static final int ERROR_AUTHENTICATION_FAILED = 3;
+
+        /**
+         * Indicates that the {@link InputStream} passed to {@link #uploadCallComposerPicture}
+         * was closed.
+         *
+         * The caller should retry if this error is encountered, and be sure to not close the stream
+         * before the callback is called this time.
+         */
+        public static final int ERROR_INPUT_CLOSED = 4;
+
+        /**
+         * Indicates that an {@link IOException} was encountered while reading the picture.
+         *
+         * The offending {@link IOException} will be available via {@link #getIOException()}.
+         * Clients should use the contents of the exception to determine whether a retry is
+         * warranted.
+         */
+        public static final int ERROR_IO_EXCEPTION = 5;
+
+        /**
+         * Indicates that the device is currently not connected to a network that's capable of
+         * reaching a carrier's RCS servers.
+         *
+         * Clients should prompt the user to remedy the issue by moving to an area with better
+         * signal, by connecting to a different network, or to retry at another time.
+         */
+        public static final int ERROR_NETWORK_UNAVAILABLE = 6;
+
+        /** @hide */
+        @IntDef(prefix = {"ERROR_"}, value = {
+                ERROR_UNKNOWN,
+                ERROR_REMOTE_END_CLOSED,
+                ERROR_FILE_TOO_LARGE,
+                ERROR_AUTHENTICATION_FAILED,
+                ERROR_INPUT_CLOSED,
+                ERROR_IO_EXCEPTION,
+                ERROR_NETWORK_UNAVAILABLE,
+        })
+
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface CallComposerError {}
+
+        private final int mErrorCode;
+        private final IOException mIOException;
+
+        public CallComposerException(@CallComposerError int errorCode,
+                @Nullable IOException ioException) {
+            mErrorCode = errorCode;
+            mIOException = ioException;
+        }
+
+        /**
+         * Fetches the error code associated with this exception.
+         * @return An error code.
+         */
+        public @CallComposerError int getErrorCode() {
+            return mErrorCode;
+        }
+
+        /**
+         * Fetches the {@link IOException} that caused the error.
+         */
+        // Follows the naming of IOException
+        @SuppressLint("AcronymName")
+        public @Nullable IOException getIOException() {
+            return mIOException;
+        }
+    }
+
+    /** @hide */
+    public static final String KEY_CALL_COMPOSER_PICTURE_HANDLE = "call_composer_picture_handle";
+
+    /**
+     * Uploads a picture to the carrier network for use with call composer.
+     *
+     * @see #uploadCallComposerPicture(InputStream, String, Executor, OutcomeReceiver)
+     * @param pictureToUpload Path to a local file containing the picture to upload.
+     * @param contentType The MIME type of the picture you're uploading (e.g. image/jpeg)
+     * @param executor The {@link Executor} on which the {@code pictureToUpload} file will be read
+     *                 from disk, as well as on which {@code callback} will be called.
+     * @param callback A callback called when the upload operation terminates, either in success
+     *                 or in error.
+     */
+    public void uploadCallComposerPicture(@NonNull Path pictureToUpload,
+            @NonNull String contentType,
+            @CallbackExecutor @NonNull Executor executor,
+            @NonNull OutcomeReceiver<ParcelUuid, CallComposerException> callback) {
+        Objects.requireNonNull(pictureToUpload);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        // Do the role check now so that we can quit early if needed -- there's an additional
+        // permission check on the other side of the binder call as well.
+        RoleManager rm = mContext.getSystemService(RoleManager.class);
+        if (!rm.isRoleHeld(RoleManager.ROLE_DIALER)) {
+            throw new SecurityException("You must hold RoleManager.ROLE_DIALER to do this");
+        }
+
+        executor.execute(() -> {
+            try {
+                if (Looper.getMainLooper().isCurrentThread()) {
+                    Log.w(TAG, "Uploading call composer picture on main thread!"
+                            + " hic sunt dracones!");
+                }
+                long size = Files.size(pictureToUpload);
+                if (size > getMaximumCallComposerPictureSize()) {
+                    callback.onError(new CallComposerException(
+                            CallComposerException.ERROR_FILE_TOO_LARGE, null));
+                    return;
+                }
+                InputStream fileStream = Files.newInputStream(pictureToUpload);
+                try {
+                    uploadCallComposerPicture(fileStream, contentType, executor,
+                            new OutcomeReceiver<ParcelUuid, CallComposerException>() {
+                                @Override
+                                public void onResult(ParcelUuid result) {
+                                    try {
+                                        fileStream.close();
+                                    } catch (IOException e) {
+                                        // ignore
+                                        Log.e(TAG, "Error closing file input stream when"
+                                                + " uploading call composer pic");
+                                    }
+                                    callback.onResult(result);
+                                }
+
+                                @Override
+                                public void onError(CallComposerException error) {
+                                    try {
+                                        fileStream.close();
+                                    } catch (IOException e) {
+                                        // ignore
+                                        Log.e(TAG, "Error closing file input stream when"
+                                                + " uploading call composer pic");
+                                    }
+                                    callback.onError(error);
+                                }
+                            });
+                } catch (Exception e) {
+                    Log.e(TAG, "Got exception calling into stream-version of"
+                            + " uploadCallComposerPicture: " + e);
+                    try {
+                        fileStream.close();
+                    } catch (IOException e1) {
+                        // ignore
+                        Log.e(TAG, "Error closing file input stream when uploading"
+                                + " call composer pic");
+                    }
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "IOException when uploading call composer pic:" + e);
+                callback.onError(
+                        new CallComposerException(CallComposerException.ERROR_IO_EXCEPTION, e));
+            }
+        });
+
+    }
+
+    /**
+     * Uploads a picture to the carrier network for use with call composer.
+     *
+     * This method allows a dialer app to upload a picture to the carrier network that can then
+     * later be attached to an outgoing call. In order to attach the picture to a call, use the
+     * {@link ParcelUuid} returned from {@code callback} upon successful upload as the value to
+     * {@link TelecomManager#EXTRA_OUTGOING_PICTURE}.
+     *
+     * This functionality is only available to the app filling the {@link RoleManager#ROLE_DIALER}
+     * role on the device.
+     *
+     * @param pictureToUpload An {@link InputStream} that supplies the bytes representing the
+     *                        picture to upload. The client bears responsibility for closing this
+     *                        stream after {@code callback} is called with success or failure.
+     *
+     *                        Additionally, if the stream supplies more bytes than the return value
+     *                        of {@link #getMaximumCallComposerPictureSize()}, the upload will be
+     *                        aborted and the callback will be called with an exception containing
+     *                        {@link CallComposerException#ERROR_FILE_TOO_LARGE}.
+     * @param contentType The MIME type of the picture you're uploading (e.g. image/jpeg)
+     * @param executor The {@link Executor} on which the {@code pictureToUpload} stream will be
+     *                 read, as well as on which the callback will be called.
+     * @param callback A callback called when the upload operation terminates, either in success
+     *                 or in error.
+     */
+    public void uploadCallComposerPicture(@NonNull InputStream pictureToUpload,
+            @NonNull String contentType,
+            @CallbackExecutor @NonNull Executor executor,
+            @NonNull OutcomeReceiver<ParcelUuid, CallComposerException> callback) {
+        Objects.requireNonNull(pictureToUpload);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        ITelephony telephony = getITelephony();
+        if (telephony == null) {
+            throw new IllegalStateException("Telephony service not available.");
+        }
+
+        ParcelFileDescriptor writeFd;
+        ParcelFileDescriptor readFd;
+        try {
+            ParcelFileDescriptor[] pipe = ParcelFileDescriptor.createReliablePipe();
+            writeFd = pipe[1];
+            readFd = pipe[0];
+        } catch (IOException e) {
+            executor.execute(() -> callback.onError(
+                    new CallComposerException(CallComposerException.ERROR_IO_EXCEPTION, e)));
+            return;
+        }
+
+        OutputStream output = new ParcelFileDescriptor.AutoCloseOutputStream(writeFd);
+
+        try {
+            telephony.uploadCallComposerPicture(getSubId(), mContext.getOpPackageName(),
+                    contentType, readFd, new ResultReceiver(null) {
+                        @Override
+                        protected void onReceiveResult(int resultCode, Bundle result) {
+                            if (resultCode != CallComposerException.SUCCESS) {
+                                executor.execute(() -> callback.onError(
+                                        new CallComposerException(resultCode, null)));
+                                return;
+                            }
+                            ParcelUuid resultUuid =
+                                    result.getParcelable(KEY_CALL_COMPOSER_PICTURE_HANDLE);
+                            if (resultUuid == null) {
+                                Log.e(TAG, "Got null uuid without an error"
+                                        + " while uploading call composer pic");
+                                executor.execute(() -> callback.onError(
+                                        new CallComposerException(
+                                                CallComposerException.ERROR_UNKNOWN, null)));
+                                return;
+                            }
+                            executor.execute(() -> callback.onResult(resultUuid));
+                        }
+                    });
+        } catch (RemoteException e) {
+            Log.e(TAG, "Remote exception uploading call composer pic:" + e);
+            e.rethrowAsRuntimeException();
+        }
+
+        executor.execute(() -> {
+            if (Looper.getMainLooper().isCurrentThread()) {
+                Log.w(TAG, "Uploading call composer picture on main thread!"
+                        + " hic sunt dracones!");
+            }
+
+            int totalBytesRead = 0;
+            byte[] buffer = new byte[16 * 1024];
+            try {
+                while (true) {
+                    int numRead;
+                    try {
+                        numRead = pictureToUpload.read(buffer);
+                    } catch (IOException e) {
+                        Log.e(TAG, "IOException reading from input while uploading pic: " + e);
+                        // Most likely, this was because the stream was closed. We have no way to
+                        // tell though.
+                        callback.onError(new CallComposerException(
+                                CallComposerException.ERROR_INPUT_CLOSED, e));
+                        try {
+                            writeFd.closeWithError("input closed");
+                        } catch (IOException e1) {
+                            // log and ignore
+                            Log.e(TAG, "Error closing fd pipe: " + e1);
+                        }
+                        break;
+                    }
+
+                    if (numRead < 0) {
+                        break;
+                    }
+
+                    totalBytesRead += numRead;
+                    if (totalBytesRead > getMaximumCallComposerPictureSize()) {
+                        Log.e(TAG, "Read too many bytes from call composer pic stream: "
+                                + totalBytesRead);
+                        try {
+                            callback.onError(new CallComposerException(
+                                    CallComposerException.ERROR_FILE_TOO_LARGE, null));
+                            writeFd.closeWithError("too large");
+                        } catch (IOException e1) {
+                            // log and ignore
+                            Log.e(TAG, "Error closing fd pipe: " + e1);
+                        }
+                        break;
+                    }
+
+                    try {
+                        output.write(buffer, 0, numRead);
+                    } catch (IOException e) {
+                        callback.onError(new CallComposerException(
+                                CallComposerException.ERROR_REMOTE_END_CLOSED, e));
+                        try {
+                            writeFd.closeWithError("remote end closed");
+                        } catch (IOException e1) {
+                            // log and ignore
+                            Log.e(TAG, "Error closing fd pipe: " + e1);
+                        }
+                        break;
+                    }
+                }
+            } finally {
+                try {
+                    output.close();
+                } catch (IOException e) {
+                    // Ignore -- we might've already closed it.
+                }
+            }
+        });
     }
 
     /**
@@ -8685,11 +9047,18 @@ public class TelephonyManager {
      */
     public static final int CALL_COMPOSER_STATUS_ON = 1;
 
+    /**
+     * Call composer status indicating that sending/receiving pictures is disabled.
+     * All other attachments are still enabled in this state.
+     */
+    public static final int CALL_COMPOSER_STATUS_ON_NO_PICTURES = 2;
+
     /** @hide */
     @IntDef(prefix = {"CALL_COMPOSER_STATUS_"},
             value = {
                 CALL_COMPOSER_STATUS_ON,
                 CALL_COMPOSER_STATUS_OFF,
+                CALL_COMPOSER_STATUS_ON_NO_PICTURES,
             })
     public @interface CallComposerStatus {}
 
@@ -8697,8 +9066,9 @@ public class TelephonyManager {
      * Set the user-set status for enriched calling with call composer.
      *
      * @param status user-set status for enriched calling with call composer;
-     *               it must be a value of either {@link #CALL_COMPOSER_STATUS_ON}
-     *               or {@link #CALL_COMPOSER_STATUS_OFF}.
+     *               it must be any of {@link #CALL_COMPOSER_STATUS_ON}
+     *               {@link #CALL_COMPOSER_STATUS_OFF},
+     *               or {@link #CALL_COMPOSER_STATUS_ON_NO_PICTURES}
      *
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
      * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
@@ -8708,7 +9078,8 @@ public class TelephonyManager {
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setCallComposerStatus(@CallComposerStatus int status) {
-        if (status != CALL_COMPOSER_STATUS_ON && status != CALL_COMPOSER_STATUS_OFF) {
+        if (status > CALL_COMPOSER_STATUS_ON_NO_PICTURES
+                || status < CALL_COMPOSER_STATUS_OFF) {
             throw new IllegalArgumentException("requested status is invalid");
         }
         try {
@@ -8730,8 +9101,9 @@ public class TelephonyManager {
      *
      * @throws SecurityException if the caller does not have the permission.
      *
-     * @return the user-set status for enriched calling with call composer either
-     * {@link #CALL_COMPOSER_STATUS_ON} or {@link #CALL_COMPOSER_STATUS_OFF}.
+     * @return the user-set status for enriched calling with call composer, any of
+     * {@link #CALL_COMPOSER_STATUS_ON}, {@link #CALL_COMPOSER_STATUS_OFF}, or
+     * {@link #CALL_COMPOSER_STATUS_ON_NO_PICTURES}.
      */
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @CallComposerStatus int getCallComposerStatus() {
@@ -9953,6 +10325,8 @@ public class TelephonyManager {
      * Valid return results are:
      *  - {@link ImsRegistrationImplBase#REGISTRATION_TECH_LTE} for LTE registration,
      *  - {@link ImsRegistrationImplBase#REGISTRATION_TECH_IWLAN} for IWLAN registration, or
+     *  - {@link ImsRegistrationImplBase#REGISTRATION_TECH_CROSS_SIM} for registration over
+     *  other sim's internet, or
      *  - {@link ImsRegistrationImplBase#REGISTRATION_TECH_NONE} if we are not registered or the
      *  result is unavailable.
      *  Use {@link ImsMmTelManager.RegistrationCallback} instead.
@@ -14430,10 +14804,22 @@ public class TelephonyManager {
         return Collections.emptyList();
     }
 
+    /**
+     * Indicates whether {@link CarrierBandwidth#getSecondaryDownlinkCapacityKbps()} and
+     * {@link CarrierBandwidth#getSecondaryUplinkCapacityKbps()} are visible.  See comments
+     * on respective methods for more information.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE =
+            "CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE";
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = {"RADIO_INTERFACE_CAPABILITY_"},
-            value = {})
+    @StringDef(prefix = "CAPABILITY_", value = {
+            CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE,
+    })
     public @interface RadioInterfaceCapability {}
 
     /**
@@ -14446,6 +14832,7 @@ public class TelephonyManager {
      *
      * @hide
      */
+    @SystemApi
     public boolean isRadioInterfaceCapabilitySupported(
             @NonNull @RadioInterfaceCapability String capability) {
         try {
@@ -14799,5 +15186,18 @@ public class TelephonyManager {
             Log.e(TAG, "Error calling ITelephony#bootstrapAuthenticationRequest", exception);
             e.execute(() -> callback.onAuthenticationFailure(GBA_FAILURE_REASON_FEATURE_NOT_READY));
         }
+    }
+
+    /**
+     * The network type is valid or not.
+     *
+     * @param networkType The network type {@link NetworkType}.
+     * @return {@code true} if valid, {@code false} otherwise.
+     *
+     * @hide
+     */
+    public static boolean isNetworkTypeValid(@NetworkType int networkType) {
+        return networkType >= TelephonyManager.NETWORK_TYPE_UNKNOWN &&
+                networkType <= TelephonyManager.NETWORK_TYPE_NR;
     }
 }

@@ -27,12 +27,14 @@ import static com.android.internal.util.Preconditions.checkState;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainRunnable;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
 import android.annotation.CheckResult;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
+import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.app.role.RoleManager;
@@ -53,6 +55,7 @@ import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
 import android.net.NetworkPolicyManager;
 import android.os.Binder;
@@ -70,6 +73,7 @@ import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.permission.PermissionControllerManager;
 import android.provider.Settings;
 import android.provider.SettingsStringUtil.ComponentNameSet;
 import android.text.BidiFormatter;
@@ -111,7 +115,6 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -158,6 +161,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     private AssociationRequest mRequest;
     private String mCallingPackage;
     private AndroidFuture<Association> mOngoingDeviceDiscovery;
+    private PermissionControllerManager mPermissionControllerManager;
 
     private BluetoothDeviceConnectedListener mBluetoothDeviceConnectedListener =
             new BluetoothDeviceConnectedListener();
@@ -169,6 +173,10 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     @GuardedBy("mLock")
     private @Nullable SparseArray<Set<Association>> mCachedAssociations = new SparseArray<>();
 
+    ActivityTaskManagerInternal mAtmInternal;
+    ActivityManagerInternal mAmInternal;
+    PackageManagerInternal mPackageManagerInternal;
+
     public CompanionDeviceManagerService(Context context) {
         super(context);
         mImpl = new CompanionDeviceManagerImpl();
@@ -176,6 +184,11 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         mRoleManager = context.getSystemService(RoleManager.class);
         mAppOpsManager = IAppOpsService.Stub.asInterface(
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
+        mAtmInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
+        mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
+        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
+        mPermissionControllerManager = requireNonNull(
+                context.getSystemService(PermissionControllerManager.class));
 
         Intent serviceIntent = new Intent().setComponent(SERVICE_TO_BIND_TO);
         mServiceConnectors = new PerUser<ServiceConnector<ICompanionDeviceDiscoveryService>>() {
@@ -236,15 +249,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         if (associations == null || associations.isEmpty()) {
             return;
         }
-        Set<String> companionAppPackages = new HashSet<>();
-        for (Association association : associations) {
-            companionAppPackages.add(association.getPackageName());
-        }
-        ActivityTaskManagerInternal atmInternal = LocalServices.getService(
-                ActivityTaskManagerInternal.class);
-        if (atmInternal != null) {
-            atmInternal.setCompanionAppPackages(userHandle, companionAppPackages);
-        }
+        updateAtm(userHandle, associations);
 
         BackgroundThread.getHandler().sendMessageDelayed(
                 obtainMessage(CompanionDeviceManagerService::maybeGrantAutoRevokeExemptions, this),
@@ -344,13 +349,25 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             request.setCallingPackage(callingPackage);
             callback.asBinder().linkToDeath(CompanionDeviceManagerService.this /* recipient */, 0);
 
-            final long callingIdentity = Binder.clearCallingIdentity();
-            try {
-                mOngoingDeviceDiscovery = mServiceConnectors.forUser(userId).postAsync(service -> {
+            AndroidFuture<String> fetchProfileDescription =
+                    request.getDeviceProfile() == null
+                            ? AndroidFuture.completedFuture(null)
+                            : getDeviceProfilePermissionDescription(
+                                    request.getDeviceProfile());
+
+            mOngoingDeviceDiscovery = fetchProfileDescription.thenComposeAsync(description -> {
+                request.setDeviceProfilePrivilegesDescription(description);
+
+                return mServiceConnectors.forUser(userId).postAsync(service -> {
                     AndroidFuture<Association> future = new AndroidFuture<>();
                     service.startDiscovery(request, callingPackage, callback, future);
                     return future;
-                }).cancelTimeout().whenComplete(uncheckExceptions((association, err) -> {
+                }).cancelTimeout();
+
+            }, FgThread.getExecutor()).whenComplete(uncheckExceptions((association, err) -> {
+
+                final long callingIdentity = Binder.clearCallingIdentity();
+                try {
                     if (err == null) {
                         addAssociation(association);
                     } else {
@@ -358,10 +375,10 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                         callback.onFailure("No devices found: " + err.getMessage());
                     }
                     cleanup();
-                }));
-            } finally {
-                Binder.restoreCallingIdentity(callingIdentity);
-            }
+                } finally {
+                    Binder.restoreCallingIdentity(callingIdentity);
+                }
+            }));
         }
 
         @Override
@@ -727,12 +744,6 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             final Set<Association> old = getAllAssociations(userId);
             Set<Association> associations = new ArraySet<>(old);
             associations = update.apply(associations);
-
-            Set<String> companionAppPackages = new HashSet<>();
-            for (Association association : associations) {
-                companionAppPackages.add(association.getPackageName());
-            }
-
             if (DEBUG) {
                 Slog.i(LOG_TAG, "Updating associations: " + old + "  -->  " + associations);
             }
@@ -741,9 +752,25 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                     CompanionDeviceManagerService::persistAssociations,
                     this, associations, userId));
 
-            ActivityTaskManagerInternal atmInternal = LocalServices.getService(
-                    ActivityTaskManagerInternal.class);
-            atmInternal.setCompanionAppPackages(userId, companionAppPackages);
+            updateAtm(userId, associations);
+        }
+    }
+
+    private void updateAtm(int userId, Set<Association> associations) {
+        final Set<Integer> companionAppUids = new ArraySet<>();
+        for (Association association : associations) {
+            final int uid = mPackageManagerInternal.getPackageUid(association.getPackageName(),
+                    0, userId);
+            if (uid >= 0) {
+                companionAppUids.add(uid);
+            }
+        }
+        if (mAtmInternal != null) {
+            mAtmInternal.setCompanionAppUids(userId, companionAppUids);
+        }
+        if (mAmInternal != null) {
+            // Make a copy of companionAppUids and send it to ActivityManager.
+            mAmInternal.setCompanionAppUids(userId, new ArraySet<>(companionAppUids));
         }
     }
 
@@ -894,6 +921,19 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         mCurrentlyConnectedDevices.remove(address);
     }
 
+    private AndroidFuture<String> getDeviceProfilePermissionDescription(String deviceProfile) {
+        AndroidFuture<String> result = new AndroidFuture<>();
+        mPermissionControllerManager.getPrivilegesDescriptionStringForProfile(
+                deviceProfile, FgThread.getExecutor(), desc -> {
+                        try {
+                            result.complete(requireNonNull(desc));
+                        } catch (Exception e) {
+                            result.completeExceptionally(e);
+                        }
+                });
+        return result;
+    }
+
     private class ShellCmd extends ShellCommand {
         public static final String USAGE = "help\n"
                 + "list USER_ID\n"
@@ -919,9 +959,10 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                     break;
 
                     case "associate": {
+                        int userId = getNextArgInt();
                         String pkg = getNextArgRequired();
                         String address = getNextArgRequired();
-                        addAssociation(new Association(getNextArgInt(), address, pkg, null, false));
+                        addAssociation(new Association(userId, address, pkg, null, false));
                     }
                     break;
 

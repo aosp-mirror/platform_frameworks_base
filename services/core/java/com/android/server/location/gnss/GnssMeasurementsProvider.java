@@ -118,7 +118,8 @@ public final class GnssMeasurementsProvider extends
     @Override
     protected boolean registerWithService(GnssMeasurementRequest request,
             Collection<GnssListenerRegistration> registrations) {
-        if (mGnssNative.startMeasurementCollection(request.isFullTracking())) {
+        if (mGnssNative.startMeasurementCollection(request.isFullTracking(),
+                request.isCorrelationVectorOutputsEnabled())) {
             if (D) {
                 Log.d(TAG, "starting gnss measurements (" + request + ")");
             }
@@ -160,18 +161,26 @@ public final class GnssMeasurementsProvider extends
     protected GnssMeasurementRequest mergeRegistrations(
             Collection<GnssListenerRegistration> registrations) {
         boolean fullTracking = false;
+        boolean enableCorrVecOutputs = false;
+
         if (mSettingsHelper.isGnssMeasurementsFullTrackingEnabled()) {
             fullTracking = true;
-        } else {
-            for (GnssListenerRegistration registration : registrations) {
-                if (registration.getRequest().isFullTracking()) {
-                    fullTracking = true;
-                    break;
-                }
+        }
+
+        for (GnssListenerRegistration registration : registrations) {
+            GnssMeasurementRequest request = registration.getRequest();
+            if (request.isFullTracking()) {
+                fullTracking = true;
+            }
+            if (request.isCorrelationVectorOutputsEnabled()) {
+                enableCorrVecOutputs = true;
             }
         }
 
-        return new GnssMeasurementRequest.Builder().setFullTracking(fullTracking).build();
+        return new GnssMeasurementRequest.Builder()
+                    .setFullTracking(fullTracking)
+                    .setCorrelationVectorOutputsEnabled(enableCorrVecOutputs)
+                    .build();
     }
 
     @Override

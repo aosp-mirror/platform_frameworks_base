@@ -22,7 +22,9 @@ import static android.media.musicrecognition.MusicRecognitionManager.RECOGNITION
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.media.musicrecognition.IMusicRecognitionManager;
 import android.media.musicrecognition.IMusicRecognitionManagerCallback;
 import android.media.musicrecognition.RecognitionRequest;
@@ -32,7 +34,9 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.UserHandle;
+import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.FrameworkResourcesServiceNameResolver;
 
@@ -113,9 +117,11 @@ public class MusicRecognitionManagerService extends
             enforceCaller("beginRecognition");
 
             synchronized (mLock) {
+                int userId = UserHandle.getCallingUserId();
                 final MusicRecognitionManagerPerUserService service = getServiceForUserLocked(
-                        UserHandle.getCallingUserId());
-                if (service != null) {
+                        userId);
+                if (service != null && (isDefaultServiceLocked(userId)
+                        || isCalledByServiceAppLocked("beginRecognition"))) {
                     service.beginRecognitionLocked(recognitionRequest, callback);
                 } else {
                     try {
@@ -138,6 +144,56 @@ public class MusicRecognitionManagerService extends
             new MusicRecognitionManagerServiceShellCommand(
                     MusicRecognitionManagerService.this).exec(this, in, out, err, args, callback,
                     resultReceiver);
+        }
+
+        /** True if the currently set handler service is not overridden by the shell. */
+        @GuardedBy("mLock")
+        private boolean isDefaultServiceLocked(int userId) {
+            final String defaultServiceName = mServiceNameResolver.getDefaultServiceName(userId);
+            if (defaultServiceName == null) {
+                return false;
+            }
+
+            final String currentServiceName = mServiceNameResolver.getServiceName(userId);
+            return defaultServiceName.equals(currentServiceName);
+        }
+
+        /** True if the caller of the api is the same app which hosts the default service. */
+        @GuardedBy("mLock")
+        private boolean isCalledByServiceAppLocked(@NonNull String methodName) {
+            final int userId = UserHandle.getCallingUserId();
+            final int callingUid = Binder.getCallingUid();
+            final String serviceName = mServiceNameResolver.getServiceName(userId);
+            if (serviceName == null) {
+                Slog.e(TAG, methodName + ": called by UID " + callingUid
+                        + ", but there's no service set for user " + userId);
+                return false;
+            }
+
+            final ComponentName serviceComponent = ComponentName.unflattenFromString(serviceName);
+            if (serviceComponent == null) {
+                Slog.w(TAG, methodName + ": invalid service name: " + serviceName);
+                return false;
+            }
+
+            final String servicePackageName = serviceComponent.getPackageName();
+
+            final PackageManager pm = getContext().getPackageManager();
+            final int serviceUid;
+            try {
+                serviceUid = pm.getPackageUidAsUser(servicePackageName,
+                        UserHandle.getCallingUserId());
+            } catch (PackageManager.NameNotFoundException e) {
+                Slog.w(TAG, methodName + ": could not verify UID for " + serviceName);
+                return false;
+            }
+            if (callingUid != serviceUid) {
+                Slog.e(TAG, methodName + ": called by UID " + callingUid + ", but service UID is "
+                        + serviceUid);
+                return false;
+            }
+
+            return true;
         }
     }
 }

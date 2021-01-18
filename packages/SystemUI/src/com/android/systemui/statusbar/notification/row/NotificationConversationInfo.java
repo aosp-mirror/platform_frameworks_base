@@ -642,9 +642,8 @@ public class NotificationConversationInfo extends LinearLayout implements
                                         BUBBLE_PREFERENCE_SELECTED);
                             }
                             if (mBubblesManagerOptional.isPresent()) {
-                                post(() -> {
-                                    mBubblesManagerOptional.get().onUserChangedImportance(mEntry);
-                                });
+                                post(() -> mBubblesManagerOptional.get()
+                                        .onUserSetImportantConversation(mEntry));
                             }
                         }
                         mChannelToUpdate.setImportance(Math.max(

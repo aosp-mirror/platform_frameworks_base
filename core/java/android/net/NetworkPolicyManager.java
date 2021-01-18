@@ -32,8 +32,8 @@ import android.content.pm.Signature;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.os.Build;
+import android.os.Process;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.telephony.SubscriptionPlan;
 import android.util.DebugUtils;
 import android.util.Pair;
@@ -160,7 +160,7 @@ public class NetworkPolicyManager {
 
     /** @hide */
     public static final int FOREGROUND_THRESHOLD_STATE =
-            ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+            ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
 
     /**
      * {@link Intent} extra that indicates which {@link NetworkTemplate} rule it
@@ -442,6 +442,24 @@ public class NetworkPolicyManager {
     }
 
     /**
+     * Check that networking is blocked for the given uid.
+     *
+     * @param uid The target uid.
+     * @param meteredNetwork True if the network is metered.
+     * @return true if networking is blocked for the given uid according to current networking
+     *         policies.
+     *
+     * @hide
+     */
+    public boolean isUidNetworkingBlocked(int uid, boolean meteredNetwork) {
+        try {
+            return mService.isUidNetworkingBlocked(uid, meteredNetwork);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Get multipath preference for the given network.
      */
     public int getMultipathPreference(Network network) {
@@ -482,7 +500,7 @@ public class NetworkPolicyManager {
     @Deprecated
     public static boolean isUidValidForPolicy(Context context, int uid) {
         // first, quick-reject non-applications
-        if (!UserHandle.isApp(uid)) {
+        if (!Process.isApplicationUid(uid)) {
             return false;
         }
 

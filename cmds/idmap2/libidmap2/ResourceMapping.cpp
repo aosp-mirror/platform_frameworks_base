@@ -285,14 +285,12 @@ Result<ResourceMapping> ResourceMapping::FromApkAssets(const ApkAssets& target_a
                                                        bool enforce_overlayable,
                                                        LogInfo& log_info) {
   AssetManager2 target_asset_manager;
-  if (!target_asset_manager.SetApkAssets({&target_apk_assets}, true /* invalidate_caches */,
-                                         false /* filter_incompatible_configs*/)) {
+  if (!target_asset_manager.SetApkAssets({&target_apk_assets})) {
     return Error("failed to create target asset manager");
   }
 
   AssetManager2 overlay_asset_manager;
-  if (!overlay_asset_manager.SetApkAssets({&overlay_apk_assets}, true /* invalidate_caches */,
-                                          false /* filter_incompatible_configs */)) {
+  if (!overlay_asset_manager.SetApkAssets({&overlay_apk_assets})) {
     return Error("failed to create overlay asset manager");
   }
 

@@ -90,6 +90,38 @@ public class PowerStatsServiceProtoParser {
         }
     }
 
+    private static void printPowerEntityInfo(PowerStatsServiceResidencyProto proto) {
+        String csvHeader = new String();
+        for (int i = 0; i < proto.getPowerEntityInfoCount(); i++) {
+            PowerEntityInfoProto powerEntityInfo = proto.getPowerEntityInfo(i);
+            csvHeader += powerEntityInfo.getPowerEntityId() + ","
+                + powerEntityInfo.getPowerEntityName() + ",";
+            for (int j = 0; j < powerEntityInfo.getStatesCount(); j++) {
+                StateInfoProto stateInfo = powerEntityInfo.getStates(j);
+                csvHeader += stateInfo.getStateId() + "," + stateInfo.getStateName() + ",";
+            }
+        }
+        System.out.println(csvHeader);
+    }
+
+    private static void printStateResidencyResult(PowerStatsServiceResidencyProto proto) {
+        for (int i = 0; i < proto.getStateResidencyResultCount(); i++) {
+            String csvRow = new String();
+
+            StateResidencyResultProto stateResidencyResult = proto.getStateResidencyResult(i);
+            csvRow += stateResidencyResult.getPowerEntityId() + ",";
+
+            for (int j = 0; j < stateResidencyResult.getStateResidencyDataCount(); j++) {
+                StateResidencyProto stateResidency = stateResidencyResult.getStateResidencyData(j);
+                csvRow += stateResidency.getStateId() + ","
+                    + stateResidency.getTotalTimeInStateMs() + ","
+                    + stateResidency.getTotalStateEntryCount() + ","
+                    + stateResidency.getLastEntryTimestampMs() + ",";
+            }
+            System.out.println(csvRow);
+        }
+    }
+
     private static void generateCsvFile(String pathToIncidentReport) {
         try {
             // Print power meter data.
@@ -115,6 +147,21 @@ public class PowerStatsServiceProtoParser {
             } else {
                 System.out.println("Model incident report not found.  Exiting.");
             }
+
+            // Print state residency data.
+            IncidentReportResidencyProto irResidencyProto =
+                    IncidentReportResidencyProto.parseFrom(
+                        new FileInputStream(pathToIncidentReport));
+
+            if (irResidencyProto.hasIncidentReport()) {
+                PowerStatsServiceResidencyProto pssResidencyProto =
+                        irResidencyProto.getIncidentReport();
+                printPowerEntityInfo(pssResidencyProto);
+                printStateResidencyResult(pssResidencyProto);
+            } else {
+                System.out.println("Residency incident report not found.  Exiting.");
+            }
+
         } catch (IOException e) {
             System.out.println("Unable to open incident report file: " + pathToIncidentReport);
             System.out.println(e);

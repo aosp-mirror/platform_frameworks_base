@@ -46,6 +46,10 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
                 mOnBatteryTimeBase);
         mScreenDozeTimer = new BatteryStatsImpl.StopwatchTimer(clocks, null, -1, null,
                 mOnBatteryTimeBase);
+        for (int i = 0; i < mScreenBrightnessTimer.length; i++) {
+            mScreenBrightnessTimer[i] = new BatteryStatsImpl.StopwatchTimer(clocks, null, -1, null,
+                    mOnBatteryTimeBase);
+        }
         mBluetoothScanTimer = new StopwatchTimer(mClocks, null, -14, null, mOnBatteryTimeBase);
         mBluetoothActivity = new ControllerActivityCounterImpl(mOnBatteryTimeBase, 1);
         setExternalStatsSyncLocked(new DummyExternalStatsSync());

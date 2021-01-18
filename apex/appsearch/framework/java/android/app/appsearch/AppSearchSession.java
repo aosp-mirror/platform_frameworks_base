@@ -22,11 +22,13 @@ import android.annotation.UserIdInt;
 import android.os.Bundle;
 import android.os.ParcelableException;
 import android.os.RemoteException;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
+import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +43,7 @@ import java.util.function.Consumer;
  *
  * This class is thread safe.
  */
-public final class AppSearchSession {
+public final class AppSearchSession implements Closeable {
     private static final String TAG = "AppSearchSession";
     private final String mDatabaseName;
     @UserIdInt
@@ -161,11 +163,22 @@ public final class AppSearchSession {
         for (AppSearchSchema schema : request.getSchemas()) {
             schemaBundles.add(schema.getBundle());
         }
+        Map<String, List<Bundle>> schemasPackageAccessibleBundles =
+                new ArrayMap<>(request.getSchemasVisibleToPackagesInternal().size());
+        for (Map.Entry<String, Set<PackageIdentifier>> entry :
+                request.getSchemasVisibleToPackagesInternal().entrySet()) {
+            List<Bundle> packageIdentifierBundles = new ArrayList<>(entry.getValue().size());
+            for (PackageIdentifier packageIdentifier : entry.getValue()) {
+                packageIdentifierBundles.add(packageIdentifier.getBundle());
+            }
+            schemasPackageAccessibleBundles.put(entry.getKey(), packageIdentifierBundles);
+        }
         try {
             mService.setSchema(
                     mDatabaseName,
                     schemaBundles,
                     new ArrayList<>(request.getSchemasNotVisibleToSystemUi()),
+                    schemasPackageAccessibleBundles,
                     request.isForceOverride(),
                     mUserId,
                     new IAppSearchResultCallback.Stub() {
@@ -478,11 +491,10 @@ public final class AppSearchSession {
     }
 
     /**
-     * Closes the SearchSessionImpl to persists all update/delete requests to the disk.
-     *
-     * @hide
+     * Closes the {@link AppSearchSession} to persist all schema and document updates, additions,
+     * and deletes to disk.
      */
-    // TODO(b/175637134) when unhide it, implement Closeable and remove this method.
+    @Override
     public void close() {
         if (mIsMutated && !mIsClosed) {
             try {

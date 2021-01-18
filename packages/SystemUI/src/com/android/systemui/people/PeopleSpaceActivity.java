@@ -22,7 +22,6 @@ import static android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID;
 import android.app.Activity;
 import android.app.INotificationManager;
 import android.app.people.IPeopleManager;
-import android.app.people.PeopleSpaceTile;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -81,6 +80,7 @@ public class PeopleSpaceActivity extends Activity {
                 INVALID_APPWIDGET_ID);
         mShowSingleConversation = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0) == 0;
+        setResult(RESULT_CANCELED);
         // Finish the configuration activity immediately if a widget is added for multiple
         // conversations. If the mAppWidgetId is INVALID, then the activity wasn't launched as a
         // widget configuration activity.
@@ -152,10 +152,14 @@ public class PeopleSpaceActivity extends Activity {
     private void finishActivity() {
         if (PeopleSpaceUtils.DEBUG) Log.d(TAG, "Widget added!");
         mUiEventLogger.log(PeopleSpaceUtils.PeopleSpaceWidgetEvent.PEOPLE_SPACE_WIDGET_ADDED);
+        setActivityResult(RESULT_OK);
+        finish();
+    }
+
+    private void setActivityResult(int result) {
         Intent resultValue = new Intent();
         resultValue.putExtra(EXTRA_APPWIDGET_ID, mAppWidgetId);
-        setResult(RESULT_OK, resultValue);
-        finish();
+        setResult(result, resultValue);
     }
 
     @Override

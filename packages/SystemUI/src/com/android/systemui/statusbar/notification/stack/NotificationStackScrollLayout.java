@@ -550,6 +550,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
+    void setIsShadeOpening(boolean isOpening) {
+        mAmbientState.setIsShadeOpening(isOpening);
+    }
+
     @Override
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     protected void onFinishInflate() {

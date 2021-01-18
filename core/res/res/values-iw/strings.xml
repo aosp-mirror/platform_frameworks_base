@@ -59,7 +59,8 @@
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
     <string name="ClipMmi" msgid="4110549342447630629">"זיהוי מתקשר של שיחה נכנסת"</string>
-    <string name="ClirMmi" msgid="4702929460236547156">"זיהוי מתקשר בשיחה יוצאת"</string>
+    <!-- no translation found for ClirMmi (6752346475055446417) -->
+    <skip />
     <string name="ColpMmi" msgid="4736462893284419302">"מזהה של קו מחובר"</string>
     <string name="ColrMmi" msgid="5889782479745764278">"הגבלה של מזהה קו מחובר"</string>
     <string name="CfMmi" msgid="8390012691099787178">"העברת שיחות"</string>
@@ -148,6 +149,10 @@
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"‏שיחה בחיבור Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"שיחה ברשת סלולרית"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"‏Wi-Fi בלבד"</string>
+    <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
+    <skip />
+    <!-- no translation found for crossSimFormat_spn_cross_sim_calling (779976494687695991) -->
+    <skip />
     <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ללא העברה"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> כעבור <xliff:g id="TIME_DELAY">{2}</xliff:g> שניות"</string>

@@ -57,7 +57,8 @@
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
     <string name="ClipMmi" msgid="4110549342447630629">"Идентификация на вх. обаждания"</string>
-    <string name="ClirMmi" msgid="4702929460236547156">"Идентификация на изходящите повиквания"</string>
+    <!-- no translation found for ClirMmi (6752346475055446417) -->
+    <skip />
     <string name="ColpMmi" msgid="4736462893284419302">"Идентификация на свързаната линия"</string>
     <string name="ColrMmi" msgid="5889782479745764278">"Ограничение за идентификацията на свързаната линия"</string>
     <string name="CfMmi" msgid="8390012691099787178">"Пренасочване на повиквания"</string>
@@ -146,6 +147,9 @@
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Обаждане през Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Обаждане през мобилна мрежа"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Само Wi-Fi"</string>
+    <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
+    <skip />
+    <string name="crossSimFormat_spn_cross_sim_calling" msgid="779976494687695991">"Обаждания през друга SIM карта от <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Не е пренасочено"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> след <xliff:g id="TIME_DELAY">{2}</xliff:g> секунди"</string>

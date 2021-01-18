@@ -110,7 +110,7 @@
     <!-- Displayed as the title for a success/failure report enabling/disabling caller ID. -->
     <string name="ClipMmi">Incoming Caller ID</string>
     <!-- Displayed as the title for a success/failure report enabling/disabling caller ID. -->
-    <string name="ClirMmi">Outgoing Caller ID</string>
+    <string name="ClirMmi">Hide Outgoing Caller ID</string>
     <!-- Displayed as the title for a success/failure report enabling/disabling connected line ID. -->
     <string name="ColpMmi">Connected Line ID</string>
     <!-- Displayed as the title for a success/failure report enabling/disabling connected line ID restriction. -->
@@ -291,6 +291,17 @@
     <string name="wfc_mode_cellular_preferred_summary">Call over mobile network</string>
     <!-- WFC, summary for Wi-Fi Only -->
     <string name="wfc_mode_wifi_only_summary">Wi-Fi only</string>
+
+    <!-- Template for showing mobile network operator name while Cross SIM calling is active -->
+    <string-array name="crossSimSpnFormats" translatable="false">
+        <item>@string/crossSimFormat_spn</item>
+        <item>@string/crossSimFormat_spn_cross_sim_calling</item>
+    </string-array>
+
+    <!-- Spn during Cross-SIM Calling: "<operator> " [CHAR LIMIT=NONE] -->
+    <string name="crossSimFormat_spn"><xliff:g id="spn" example="Operator">%s</xliff:g></string>
+    <!-- Spn during Cross SIM Calling: "<operator> Cross-SIM Calling" [CHAR LIMIT=NONE] -->
+    <string name="crossSimFormat_spn_cross_sim_calling"><xliff:g id="spn" example="Operator">%s</xliff:g> Cross-SIM Calling</string>
 
     <!--
         {0} is one of "bearerServiceCode*"

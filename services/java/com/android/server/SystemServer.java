@@ -23,6 +23,8 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.IServiceManager.DUMP_FLAG_PROTO;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.myPid;
+import static android.system.OsConstants.O_CLOEXEC;
+import static android.system.OsConstants.O_RDONLY;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.server.utils.TimingsTraceAndSlog.SYSTEM_SERVER_TIMING_TAG;
@@ -77,6 +79,8 @@ import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.server.ServerProtoEnums;
 import android.sysprop.VoldProperties;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
@@ -156,7 +160,7 @@ import com.android.server.pm.UserManagerService;
 import com.android.server.pm.dex.SystemServerDexLoadReporter;
 import com.android.server.policy.PermissionPolicyService;
 import com.android.server.policy.PhoneWindowManager;
-import com.android.server.policy.role.LegacyRoleResolutionPolicy;
+import com.android.server.policy.role.LegacyRoleStateProviderImpl;
 import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
 import com.android.server.power.ThermalManagerService;
@@ -237,6 +241,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.companion.CompanionDeviceManagerService";
     private static final String STATS_COMPANION_APEX_PATH =
             "/apex/com.android.os.statsd/javalib/service-statsd.jar";
+    private static final String CONNECTIVITY_SERVICE_APEX_PATH =
+            "/apex/com.android.tethering/javalib/service-connectivity.jar";
     private static final String STATS_COMPANION_LIFECYCLE_CLASS =
             "com.android.server.stats.StatsCompanion$Lifecycle";
     private static final String STATS_PULL_ATOM_SERVICE_CLASS =
@@ -297,6 +303,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.autofill.AutofillManagerService";
     private static final String CONTENT_CAPTURE_MANAGER_SERVICE_CLASS =
             "com.android.server.contentcapture.ContentCaptureManagerService";
+    private static final String TRANSLATION_MANAGER_SERVICE_CLASS =
+            "com.android.server.translation.TranslationManagerService";
     private static final String MUSIC_RECOGNITION_MANAGER_SERVICE_CLASS =
             "com.android.server.musicrecognition.MusicRecognitionManagerService";
     private static final String SYSTEM_CAPTIONS_MANAGER_SERVICE_CLASS =
@@ -425,11 +433,71 @@ public final class SystemServer implements Dumpable {
      */
     private static native void initZygoteChildHeapProfiling();
 
+    private static final String SYSPROP_FDTRACK_ENABLE_THRESHOLD =
+            "persist.sys.debug.fdtrack_enable_threshold";
+    private static final String SYSPROP_FDTRACK_ABORT_THRESHOLD =
+            "persist.sys.debug.fdtrack_abort_threshold";
+    private static final String SYSPROP_FDTRACK_INTERVAL =
+            "persist.sys.debug.fdtrack_interval";
+
+    private static int getMaxFd() {
+        FileDescriptor fd = null;
+        try {
+            fd = Os.open("/dev/null", O_RDONLY | O_CLOEXEC, 0);
+            return fd.getInt$();
+        } catch (ErrnoException ex) {
+            Slog.e("System", "Failed to get maximum fd: " + ex);
+        } finally {
+            if (fd != null) {
+                try {
+                    Os.close(fd);
+                } catch (ErrnoException ex) {
+                    // If Os.close threw, something went horribly wrong.
+                    throw new RuntimeException(ex);
+                }
+            }
+        }
+
+        return Integer.MAX_VALUE;
+    }
+
+    private static native void fdtrackAbort();
 
     /**
      * Spawn a thread that monitors for fd leaks.
      */
-    private static native void spawnFdLeakCheckThread();
+    private static void spawnFdLeakCheckThread() {
+        final int enableThreshold = SystemProperties.getInt(SYSPROP_FDTRACK_ENABLE_THRESHOLD, 1024);
+        final int abortThreshold = SystemProperties.getInt(SYSPROP_FDTRACK_ABORT_THRESHOLD, 2048);
+        final int checkInterval = SystemProperties.getInt(SYSPROP_FDTRACK_INTERVAL, 120);
+
+        new Thread(() -> {
+            boolean enabled = false;
+            while (true) {
+                int maxFd = getMaxFd();
+                if (maxFd > enableThreshold) {
+                    // Do a manual GC to clean up fds that are hanging around as garbage.
+                    System.gc();
+                    maxFd = getMaxFd();
+                }
+
+                if (maxFd > enableThreshold && !enabled) {
+                    Slog.i("System", "fdtrack enable threshold reached, enabling");
+                    System.loadLibrary("fdtrack");
+                    enabled = true;
+                } else if (maxFd > abortThreshold) {
+                    Slog.i("System", "fdtrack abort threshold reached, dumping and aborting");
+                    fdtrackAbort();
+                }
+
+                try {
+                    Thread.sleep(checkInterval);
+                } catch (InterruptedException ex) {
+                    continue;
+                }
+            }
+        }).start();
+    }
 
     /**
      * Start native Incremental Service and get its handle.
@@ -1721,8 +1789,8 @@ public final class SystemServer implements Dumpable {
             // This has to be called after NetworkManagementService, NetworkStatsService
             // and NetworkPolicyManager because ConnectivityService needs to take these
             // services to initialize.
-            // TODO: Dynamically load service-connectivity.jar by using startServiceFromJar.
-            mSystemServiceManager.startService(CONNECTIVITY_SERVICE_INITIALIZER_CLASS);
+            mSystemServiceManager.startServiceFromJar(CONNECTIVITY_SERVICE_INITIALIZER_CLASS,
+                    CONNECTIVITY_SERVICE_APEX_PATH);
             connectivity = IConnectivityManager.Stub.asInterface(
                     ServiceManager.getService(Context.CONNECTIVITY_SERVICE));
             // TODO: Use ConnectivityManager instead of ConnectivityService.
@@ -1953,7 +2021,7 @@ public final class SystemServer implements Dumpable {
             // Grants default permissions and defines roles
             t.traceBegin("StartRoleManagerService");
             mSystemServiceManager.startService(new RoleManagerService(
-                    mSystemContext, new LegacyRoleResolutionPolicy(mSystemContext)));
+                    mSystemContext, new LegacyRoleStateProviderImpl(mSystemContext)));
             t.traceEnd();
 
             // We need to always start this service, regardless of whether the
@@ -2285,6 +2353,13 @@ public final class SystemServer implements Dumpable {
         if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTOFILL)) {
             t.traceBegin("StartAutoFillService");
             mSystemServiceManager.startService(AUTO_FILL_MANAGER_SERVICE_CLASS);
+            t.traceEnd();
+        }
+
+        // Translation manager service
+        if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_TRANSLATION)) {
+            t.traceBegin("StartTranslationManagerService");
+            mSystemServiceManager.startService(TRANSLATION_MANAGER_SERVICE_CLASS);
             t.traceEnd();
         }
 

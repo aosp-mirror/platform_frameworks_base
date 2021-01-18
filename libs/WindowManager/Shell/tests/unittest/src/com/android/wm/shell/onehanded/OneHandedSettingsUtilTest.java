@@ -38,7 +38,6 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
 public class OneHandedSettingsUtilTest extends OneHandedTestCase {
     ContentResolver mContentResolver;
     ContentObserver mContentObserver;

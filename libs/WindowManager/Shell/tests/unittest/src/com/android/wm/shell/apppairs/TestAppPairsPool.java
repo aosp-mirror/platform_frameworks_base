@@ -18,6 +18,8 @@ package com.android.wm.shell.apppairs;
 
 import android.app.ActivityManager;
 
+import com.android.wm.shell.TestRunningTaskInfoBuilder;
+
 public class TestAppPairsPool extends AppPairsPool{
     TestAppPairsPool(AppPairsController controller) {
         super(controller);

@@ -29,7 +29,7 @@ fun LayersAssertion.appPairsDividerIsVisible(
     enabled: Boolean = bugId == 0
 ) {
     end("appPairsDividerIsVisible", bugId, enabled) {
-        this.showsLayer(FlickerTestBase.SPLIT_DIVIDER)
+        this.showsLayer(FlickerTestBase.APP_PAIR_SPLIT_DIVIDER)
     }
 }
 
@@ -39,7 +39,19 @@ fun LayersAssertion.appPairsDividerIsInvisible(
     enabled: Boolean = bugId == 0
 ) {
     end("appPairsDividerIsInVisible", bugId, enabled) {
-        this.hasNotLayer(FlickerTestBase.SPLIT_DIVIDER)
+        this.hasNotLayer(FlickerTestBase.APP_PAIR_SPLIT_DIVIDER)
+    }
+}
+
+@JvmOverloads
+fun LayersAssertion.appPairsDividerBecomesVisible(
+    bugId: Int = 0,
+    enabled: Boolean = bugId == 0
+) {
+    all("dividerLayerBecomesVisible") {
+        this.hidesLayer(FlickerTestBase.DOCKED_STACK_DIVIDER)
+                .then()
+                .showsLayer(FlickerTestBase.DOCKED_STACK_DIVIDER)
     }
 }
 
@@ -97,7 +109,7 @@ fun LayersAssertion.appPairsPrimaryBoundsIsVisible(
     end("PrimaryAppBounds", bugId, enabled) {
         val entry = this.trace.entries.firstOrNull()
                 ?: throw IllegalStateException("Trace is empty")
-        val dividerRegion = entry.getVisibleBounds(FlickerTestBase.SPLIT_DIVIDER)
+        val dividerRegion = entry.getVisibleBounds(FlickerTestBase.APP_PAIR_SPLIT_DIVIDER)
         this.hasVisibleRegion(primaryLayerName, getPrimaryRegion(dividerRegion, rotation))
     }
 }
@@ -112,7 +124,7 @@ fun LayersAssertion.appPairsSecondaryBoundsIsVisible(
     end("SecondaryAppBounds", bugId, enabled) {
         val entry = this.trace.entries.firstOrNull()
                 ?: throw IllegalStateException("Trace is empty")
-        val dividerRegion = entry.getVisibleBounds(FlickerTestBase.SPLIT_DIVIDER)
+        val dividerRegion = entry.getVisibleBounds(FlickerTestBase.APP_PAIR_SPLIT_DIVIDER)
         this.hasVisibleRegion(secondaryLayerName, getSecondaryRegion(dividerRegion, rotation))
     }
 }

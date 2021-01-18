@@ -432,9 +432,9 @@ public final class IncrementalStorage {
     /**
      * Permanently disable readlogs collection.
      */
-    public void disableReadLogs() {
+    public void disallowReadLogs() {
         try {
-            mService.disableReadLogs(mId);
+            mService.disallowReadLogs(mId);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

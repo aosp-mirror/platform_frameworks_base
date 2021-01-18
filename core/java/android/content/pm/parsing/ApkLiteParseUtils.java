@@ -18,7 +18,6 @@ package android.content.pm.parsing;
 
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
-import static android.content.pm.PackageParser.APK_FILE_EXTENSION;
 import static android.content.pm.parsing.ParsingPackageUtils.validateName;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
@@ -51,6 +50,7 @@ import java.io.IOException;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -65,6 +65,8 @@ public class ApkLiteParseUtils {
 
     private static final int PARSE_DEFAULT_INSTALL_LOCATION =
             PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
+
+    public static final String APK_FILE_EXTENSION = ".apk";
 
     /**
      * Parse only lightweight details about the package at the given location.
@@ -605,5 +607,22 @@ public class ApkLiteParseUtils {
         }
 
         return new VerifierInfo(packageName, publicKey);
+    }
+
+    /**
+     * Used to sort a set of APKs based on their split names, always placing the
+     * base APK (with {@code null} split name) first.
+     */
+    private static class SplitNameComparator implements Comparator<String> {
+        @Override
+        public int compare(String lhs, String rhs) {
+            if (lhs == null) {
+                return -1;
+            } else if (rhs == null) {
+                return 1;
+            } else {
+                return lhs.compareTo(rhs);
+            }
+        }
     }
 }

@@ -58,6 +58,7 @@
         <item><xliff:g id="id">@string/status_bar_hotspot</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_mobile</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_airplane</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_no_calling</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_battery</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_sensors_off</xliff:g></item>
     </string-array>
@@ -94,6 +95,7 @@
     <string translatable="false" name="status_bar_microphone">microphone</string>
     <string translatable="false" name="status_bar_camera">camera</string>
     <string translatable="false" name="status_bar_airplane">airplane</string>
+    <string translatable="false" name="status_bar_no_calling">no_calling</string>
     <string translatable="false" name="status_bar_sensors_off">sensors_off</string>
     <string translatable="false" name="status_bar_screen_record">screen_record</string>
 
@@ -449,6 +451,10 @@
         <item>eth3;12,13,14,15;ip=192.168.0.12/24;1</item>
         -->
     </string-array>
+
+    <!-- Whether the internal vehicle network should remain active even when no
+         apps requested it. -->
+    <bool name="config_vehicleInternalNetworkAlwaysRequested">false</bool>
 
     <!-- Configuration of network interfaces that support WakeOnLAN -->
     <string-array translatable="false" name="config_wakeonlan_supported_interfaces">
@@ -3724,6 +3730,14 @@
     -->
     <string name="config_defaultAugmentedAutofillService" translatable="false"></string>
 
+    <!-- The package name for the system's translation service.
+     This service must be trusted, as it can be activated without explicit consent of the user.
+     If no service with the specified name exists on the device, translation wil be
+     disabled.
+     Example: "com.android.translation/.TranslationService"
+-->
+    <string name="config_defaultTranslationService" translatable="false"></string>
+
     <!-- The package name for the system's app prediction service.
          This service must be trusted, as it can be activated without explicit consent of the user.
          Example: "com.android.intelligence/.AppPredictionService"
@@ -4588,4 +4602,14 @@
 
     <!-- If true, attach the navigation bar to the app during app transition -->
     <bool name="config_attachNavBarToAppDuringTransition">false</bool>
+
+    <!-- Flag indicating that the media framework should play a back sound when a back-transition
+         happens that doesn't result in bringing the home task to the front.
+         This is currently only used on TV. -->
+    <bool name="config_enableBackSound">false</bool>
+
+    <!-- Chooser image editing activity.  Must handle ACTION_EDIT image/png intents.
+         If omitted, image editing will not be offered via Chooser.
+         This name is in the ComponentName flattened format (package/class) [DO NOT TRANSLATE]  -->
+    <string name="config_systemImageEditor" translatable="false"></string>
 </resources>

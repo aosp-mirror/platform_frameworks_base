@@ -266,12 +266,12 @@ public final class SurfaceControl implements Parcelable {
 
         /** @hide */
         @IntDef(flag = true, value = {JANK_NONE,
-                JANK_DISPLAY,
+                DISPLAY_HAL,
                 JANK_SURFACEFLINGER_DEADLINE_MISSED,
                 JANK_SURFACEFLINGER_GPU_DEADLINE_MISSED,
                 JANK_APP_DEADLINE_MISSED,
-                JANK_PREDICTION_EXPIRED,
-                JANK_SURFACEFLINGER_EARLY_LATCH})
+                PREDICTION_ERROR,
+                SURFACE_FLINGER_SCHEDULING})
         @Retention(RetentionPolicy.SOURCE)
         public @interface JankType {}
 
@@ -281,7 +281,7 @@ public final class SurfaceControl implements Parcelable {
         public static final int JANK_NONE = 0x0;
 
         // Jank not related to SurfaceFlinger or the App
-        public static final int JANK_DISPLAY = 0x1;
+        public static final int DISPLAY_HAL = 0x1;
         // SF took too long on the CPU
         public static final int JANK_SURFACEFLINGER_DEADLINE_MISSED = 0x2;
         // SF took too long on the GPU
@@ -291,9 +291,16 @@ public final class SurfaceControl implements Parcelable {
         // Predictions live for 120ms, if prediction is expired for a frame, there is definitely a
         // jank
         // associated with the App if this is for a SurfaceFrame, and SF for a DisplayFrame.
-        public static final int JANK_PREDICTION_EXPIRED = 0x10;
+        public static final int PREDICTION_ERROR = 0x10;
         // Latching a buffer early might cause an early present of the frame
-        public static final int JANK_SURFACEFLINGER_EARLY_LATCH = 0x20;
+        public static final int SURFACE_FLINGER_SCHEDULING = 0x20;
+        // A buffer is said to be stuffed if it was expected to be presented on a vsync but was
+        // presented later because the previous buffer was presented in its expected vsync. This
+        // usually happens if there is an unexpectedly long frame causing the rest of the buffers
+        // to enter a stuffed state.
+        public static final int BUFFER_STUFFING = 0x40;
+        // Jank due to unknown reasons.
+        public static final int UNKNOWN = 0x80;
 
         public JankData(long frameVsyncId, @JankType int jankType) {
             this.frameVsyncId = frameVsyncId;

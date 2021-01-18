@@ -19,7 +19,9 @@ package com.android.server.people;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.app.people.ConversationChannel;
+import android.app.people.ConversationStatus;
 import android.app.people.IPeopleManager;
 import android.app.prediction.AppPredictionContext;
 import android.app.prediction.AppPredictionSessionId;
@@ -27,6 +29,7 @@ import android.app.prediction.AppTarget;
 import android.app.prediction.AppTargetEvent;
 import android.app.prediction.IPredictionCallback;
 import android.content.Context;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.os.Binder;
 import android.os.CancellationSignal;
@@ -38,9 +41,11 @@ import android.util.ArrayMap;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.people.data.DataManager;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -53,6 +58,8 @@ public class PeopleService extends SystemService {
     private static final String TAG = "PeopleService";
 
     private final DataManager mDataManager;
+
+    private PackageManagerInternal mPackageManagerInternal;
 
     /**
      * Initializes the system service.
@@ -83,6 +90,7 @@ public class PeopleService extends SystemService {
             publishBinderService(Context.PEOPLE_SERVICE, mService);
         }
         publishLocalService(PeopleServiceInternal.class, new LocalService());
+        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
     }
 
     @Override
@@ -112,6 +120,26 @@ public class PeopleService extends SystemService {
         return UserHandle.isSameApp(uid, Process.SYSTEM_UID) || uid == Process.ROOT_UID;
     }
 
+    private int handleIncomingUser(int userId) {
+        try {
+            return ActivityManager.getService().handleIncomingUser(
+                    Binder.getCallingPid(), Binder.getCallingUid(), userId, true, true, "", null);
+        } catch (RemoteException re) {
+            // Shouldn't happen, local.
+        }
+        return userId;
+    }
+
+    private void checkCallerIsSameApp(String pkg) {
+        final int callingUid = Binder.getCallingUid();
+        final int callingUserId = UserHandle.getUserId(callingUid);
+
+        if (mPackageManagerInternal.getPackageUid(pkg, /*flags=*/ 0,
+                callingUserId) != callingUid) {
+            throw new SecurityException("Calling uid " + callingUid + " cannot query events"
+                    + "for package " + pkg);
+        }
+    }
 
     /**
      * Enforces that only the system, root UID or SystemUI can make certain calls.
@@ -153,6 +181,43 @@ public class PeopleService extends SystemService {
         public long getLastInteraction(String packageName, int userId, String shortcutId) {
             enforceSystemRootOrSystemUI(getContext(), "get last interaction");
             return mDataManager.getLastInteraction(packageName, userId, shortcutId);
+        }
+
+        @Override
+        public void addOrUpdateStatus(String packageName, int userId, String conversationId,
+                ConversationStatus status) {
+            handleIncomingUser(userId);
+            checkCallerIsSameApp(packageName);
+            if (status.getStartTimeMillis() > System.currentTimeMillis()) {
+                throw new IllegalArgumentException("Start time must be in the past");
+            }
+            mDataManager.addOrUpdateStatus(packageName, userId, conversationId, status);
+        }
+
+        @Override
+        public void clearStatus(String packageName, int userId, String conversationId,
+                String statusId) {
+            handleIncomingUser(userId);
+            checkCallerIsSameApp(packageName);
+            mDataManager.clearStatus(packageName, userId, conversationId, statusId);
+        }
+
+        @Override
+        public void clearStatuses(String packageName, int userId, String conversationId) {
+            handleIncomingUser(userId);
+            checkCallerIsSameApp(packageName);
+            mDataManager.clearStatuses(packageName, userId, conversationId);
+        }
+
+        @Override
+        public ParceledListSlice<ConversationStatus> getStatuses(String packageName, int userId,
+                String conversationId) {
+            handleIncomingUser(userId);
+            if (!isSystemOrRoot()) {
+                checkCallerIsSameApp(packageName);
+            }
+            return new ParceledListSlice<>(
+                    mDataManager.getStatuses(packageName, userId, conversationId));
         }
     };
 

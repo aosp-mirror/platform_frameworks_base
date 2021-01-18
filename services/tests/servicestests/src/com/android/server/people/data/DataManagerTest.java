@@ -16,6 +16,8 @@
 
 package com.android.server.people.data;
 
+import static android.app.people.ConversationStatus.ACTIVITY_ANNIVERSARY;
+import static android.app.people.ConversationStatus.ACTIVITY_GAME;
 import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_ADDED;
 import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_DELETED;
 import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED;
@@ -23,6 +25,8 @@ import static android.service.notification.NotificationListenerService.NOTIFICAT
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static com.google.common.truth.Truth.assertThat;
+
+import static junit.framework.Assert.fail;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -38,18 +42,21 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Person;
 import android.app.job.JobScheduler;
 import android.app.people.ConversationChannel;
+import android.app.people.ConversationStatus;
 import android.app.prediction.AppTarget;
 import android.app.prediction.AppTargetEvent;
 import android.app.prediction.AppTargetId;
@@ -136,6 +143,7 @@ public final class DataManagerTest {
     @Mock private JobScheduler mJobScheduler;
     @Mock private StatusBarNotification mStatusBarNotification;
     @Mock private Notification mNotification;
+    @Mock private AlarmManager mAlarmManager;
 
     @Captor private ArgumentCaptor<ShortcutChangeCallback> mShortcutChangeCallbackCaptor;
     @Captor private ArgumentCaptor<BroadcastReceiver> mBroadcastReceiverCaptor;
@@ -147,7 +155,6 @@ public final class DataManagerTest {
     private DataManager mDataManager;
     private CancellationSignal mCancellationSignal;
     private ShortcutChangeCallback mShortcutChangeCallback;
-    private BroadcastReceiver mShutdownBroadcastReceiver;
     private ShortcutInfo mShortcutInfo;
     private TestInjector mInjector;
 
@@ -182,10 +189,15 @@ public final class DataManagerTest {
 
         Context originalContext = getInstrumentation().getTargetContext();
         when(mContext.getApplicationInfo()).thenReturn(originalContext.getApplicationInfo());
+        when(mContext.getUser()).thenReturn(originalContext.getUser());
+        when(mContext.getPackageName()).thenReturn(originalContext.getPackageName());
 
         when(mContext.getSystemService(Context.USER_SERVICE)).thenReturn(mUserManager);
         when(mContext.getSystemServiceName(UserManager.class)).thenReturn(
                 Context.USER_SERVICE);
+        when(mContext.getSystemService(Context.ALARM_SERVICE)).thenReturn(mAlarmManager);
+        when(mContext.getSystemServiceName(AlarmManager.class)).thenReturn(
+                Context.ALARM_SERVICE);
 
         when(mContext.getSystemService(Context.TELEPHONY_SERVICE)).thenReturn(mTelephonyManager);
 
@@ -241,8 +253,7 @@ public final class DataManagerTest {
                 mShortcutChangeCallbackCaptor.capture());
         mShortcutChangeCallback = mShortcutChangeCallbackCaptor.getValue();
 
-        verify(mContext).registerReceiver(mBroadcastReceiverCaptor.capture(), any());
-        mShutdownBroadcastReceiver = mBroadcastReceiverCaptor.getValue();
+        verify(mContext, times(2)).registerReceiver(any(), any());
     }
 
     @After
@@ -762,6 +773,36 @@ public final class DataManagerTest {
     }
 
     @Test
+    public void testPruneExpiredConversationStatuses() {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+
+        ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
+                buildPerson());
+        mDataManager.addOrUpdateConversationInfo(shortcut);
+
+        ConversationStatus cs1 = new ConversationStatus.Builder("cs1", 9)
+                .setEndTimeMillis(System.currentTimeMillis())
+                .build();
+        ConversationStatus cs2 = new ConversationStatus.Builder("cs2", 10)
+                .build();
+        ConversationStatus cs3 = new ConversationStatus.Builder("cs3", 1)
+                .setEndTimeMillis(Long.MAX_VALUE)
+                .build();
+        mDataManager.addOrUpdateStatus(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID, cs1);
+        mDataManager.addOrUpdateStatus(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID, cs2);
+        mDataManager.addOrUpdateStatus(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID, cs3);
+
+        mDataManager.pruneDataForUser(USER_ID_PRIMARY, mCancellationSignal);
+
+        assertThat(mDataManager.getStatuses(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID))
+                .doesNotContain(cs1);
+        assertThat(mDataManager.getStatuses(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID))
+                .contains(cs2);
+        assertThat(mDataManager.getStatuses(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID))
+                .contains(cs3);
+    }
+
+    @Test
     public void testDoNotUncacheShortcutWithActiveNotifications() {
         mDataManager.onUserUnlocked(USER_ID_PRIMARY);
         NotificationListenerService listenerService =
@@ -934,6 +975,106 @@ public final class DataManagerTest {
         assertEquals(0L,
                 mDataManager.getLastInteraction(TEST_PKG_NAME, USER_ID_SECONDARY,
                         TEST_SHORTCUT_ID));
+    }
+
+    @Test
+    public void testAddOrUpdateStatus_noCachedShortcut() {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+
+        ConversationStatus cs = new ConversationStatus.Builder("id", ACTIVITY_ANNIVERSARY).build();
+
+        try {
+            mDataManager.addOrUpdateStatus(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID, cs);
+            fail("Updated a conversation info that didn't previously exist");
+        } catch (IllegalArgumentException e) {
+            // good
+        }
+    }
+
+    @Test
+    public void testAddOrUpdateStatus() {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+
+        ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
+                buildPerson());
+        mDataManager.addOrUpdateConversationInfo(shortcut);
+
+        ConversationStatus cs = new ConversationStatus.Builder("id", ACTIVITY_ANNIVERSARY).build();
+        mDataManager.addOrUpdateStatus(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID, cs);
+
+        assertThat(mDataManager.getStatuses(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID))
+                .contains(cs);
+
+        ConversationStatus cs2 = new ConversationStatus.Builder("id2", ACTIVITY_GAME).build();
+        mDataManager.addOrUpdateStatus(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID, cs2);
+
+        assertThat(mDataManager.getStatuses(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID))
+                .contains(cs);
+        assertThat(mDataManager.getStatuses(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID))
+                .contains(cs2);
+
+        verify(mAlarmManager, never()).setExactAndAllowWhileIdle(anyInt(), anyLong(), any());
+    }
+
+    @Test
+    public void testAddOrUpdateStatus_schedulesJob() {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+
+        ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
+                buildPerson());
+        mDataManager.addOrUpdateConversationInfo(shortcut);
+
+        ConversationStatus cs = new ConversationStatus.Builder("id", ACTIVITY_ANNIVERSARY)
+                .setEndTimeMillis(1000)
+                .build();
+        mDataManager.addOrUpdateStatus(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID, cs);
+
+        ConversationStatus cs2 = new ConversationStatus.Builder("id2", ACTIVITY_GAME)
+                .setEndTimeMillis(3000)
+                .build();
+        mDataManager.addOrUpdateStatus(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID, cs2);
+
+        verify(mAlarmManager, times(2)).setExactAndAllowWhileIdle(anyInt(), anyLong(), any());
+    }
+
+    @Test
+    public void testClearStatus() {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+
+        ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
+                buildPerson());
+        mDataManager.addOrUpdateConversationInfo(shortcut);
+
+        ConversationStatus cs = new ConversationStatus.Builder("id", ACTIVITY_ANNIVERSARY).build();
+        ConversationStatus cs2 = new ConversationStatus.Builder("id2", ACTIVITY_GAME).build();
+        mDataManager.addOrUpdateStatus(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID, cs);
+        mDataManager.addOrUpdateStatus(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID, cs2);
+
+        mDataManager.clearStatus(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID, cs2.getId());
+
+        assertThat(mDataManager.getStatuses(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID))
+                .contains(cs);
+        assertThat(mDataManager.getStatuses(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID))
+                .doesNotContain(cs2);
+    }
+
+    @Test
+    public void testClearStatuses() {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+
+        ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
+                buildPerson());
+        mDataManager.addOrUpdateConversationInfo(shortcut);
+
+        ConversationStatus cs = new ConversationStatus.Builder("id", ACTIVITY_ANNIVERSARY).build();
+        ConversationStatus cs2 = new ConversationStatus.Builder("id2", ACTIVITY_GAME).build();
+        mDataManager.addOrUpdateStatus(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID, cs);
+        mDataManager.addOrUpdateStatus(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID, cs2);
+
+        mDataManager.clearStatuses(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID);
+
+        assertThat(mDataManager.getStatuses(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID))
+                .isEmpty();
     }
 
     @Test

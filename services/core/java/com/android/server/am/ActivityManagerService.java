@@ -174,7 +174,6 @@ import android.app.ProfilerInfo;
 import android.app.WaitResult;
 import android.app.backup.BackupManager.OperationType;
 import android.app.backup.IBackupManager;
-import android.app.compat.CompatChanges;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStatsManager;
@@ -572,6 +571,16 @@ public class ActivityManagerService extends IActivityManager.Stub
     String mDeviceOwnerName;
 
     private int mDeviceOwnerUid = Process.INVALID_UID;
+
+    /**
+     * Map userId to its companion app uids.
+     */
+    private final Map<Integer, Set<Integer>> mCompanionAppUidsMap = new ArrayMap<>();
+
+    /**
+     * The profile owner UIDs.
+     */
+    private ArraySet<Integer> mProfileOwnerUids = null;
 
     final UserController mUserController;
     @VisibleForTesting
@@ -5728,20 +5737,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     public ParceledListSlice<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum, int flags,
             int userId) {
         return mActivityTaskManager.getRecentTasks(maxNum, flags, userId);
-    }
-
-    /**
-     * Moves the top activity in the input rootTaskId to the pinned root task.
-     *
-     * @param rootTaskId Id of root task to move the top activity to pinned root task.
-     * @param bounds Bounds to use for pinned root task.
-     *
-     * @return True if the top activity of the input root task was successfully moved to the pinned
-     *          root task.
-     */
-    @Override
-    public boolean moveTopActivityToPinnedRootTask(int rootTaskId, Rect bounds) {
-        return mActivityTaskManager.moveTopActivityToPinnedRootTask(rootTaskId, bounds);
     }
 
     @Override
@@ -13596,6 +13591,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     cleanupDisabledPackageComponentsLocked(ssp, userId,
                                             intent.getStringArrayExtra(
                                                     Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST));
+                                    mServices.schedulePendingServiceStartLocked(ssp, userId);
                                 }
                             }
                             break;
@@ -13721,34 +13717,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                             false, false, userId, "package unstartable");
                     break;
                 case Intent.ACTION_CLOSE_SYSTEM_DIALOGS:
-                    if (!canCloseSystemDialogs(callingPid, callingUid, callerApp)) {
-                        // The app can't close system dialogs, throw only if it targets S+
-                        if (CompatChanges.isChangeEnabled(
-                                ActivityManager.LOCK_DOWN_CLOSE_SYSTEM_DIALOGS, callingUid)) {
-                            throw new SecurityException(
-                                    "Permission Denial: " + Intent.ACTION_CLOSE_SYSTEM_DIALOGS
-                                            + " broadcast from " + callerPackage + " (pid="
-                                            + callingPid + ", uid=" + callingUid + ")"
-                                            + " requires "
-                                            + permission.BROADCAST_CLOSE_SYSTEM_DIALOGS + ".");
-                        } else if (CompatChanges.isChangeEnabled(
-                                ActivityManager.DROP_CLOSE_SYSTEM_DIALOGS, callingUid)) {
-                            Slog.w(TAG, "Permission Denial: " + intent.getAction()
-                                    + " broadcast from " + callerPackage + " (pid=" + callingPid
-                                    + ", uid=" + callingUid + ")"
-                                    + " requires "
-                                    + permission.BROADCAST_CLOSE_SYSTEM_DIALOGS
-                                    + ", dropping broadcast.");
-                            // Returning success seems to be the pattern here
-                            return ActivityManager.BROADCAST_SUCCESS;
-                        } else {
-                            Slog.w(TAG, intent.getAction()
-                                    + " broadcast from " + callerPackage + " (pid=" + callingPid
-                                    + ", uid=" + callingUid + ")"
-                                    + " will require  "
-                                    + permission.BROADCAST_CLOSE_SYSTEM_DIALOGS
-                                    + " in future builds.");
-                        }
+                    if (!mAtmInternal.checkCanCloseSystemDialogs(callingPid, callingUid,
+                            callerPackage)) {
+                        // Returning success seems to be the pattern here
+                        return ActivityManager.BROADCAST_SUCCESS;
                     }
                     break;
             }
@@ -14041,39 +14013,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         return ActivityManager.BROADCAST_SUCCESS;
-    }
-
-    private boolean canCloseSystemDialogs(int pid, int uid, @Nullable ProcessRecord callerApp) {
-        if (checkPermission(permission.BROADCAST_CLOSE_SYSTEM_DIALOGS, pid, uid)
-                == PERMISSION_GRANTED) {
-            return true;
-        }
-        if (callerApp == null) {
-            synchronized (mPidsSelfLocked) {
-                callerApp = mPidsSelfLocked.get(pid);
-            }
-        }
-
-        if (callerApp != null) {
-            // Check if the instrumentation of the process has the permission. This covers the usual
-            // test started from the shell (which has the permission) case. This is needed for apps
-            // targeting SDK level < S but we are also allowing for targetSdk S+ as a convenience to
-            // avoid breaking a bunch of existing tests and asking them to adopt shell permissions
-            // to do this.
-            ActiveInstrumentation instrumentation = callerApp.getActiveInstrumentation();
-            if (instrumentation != null && checkPermission(
-                    permission.BROADCAST_CLOSE_SYSTEM_DIALOGS, -1, instrumentation.mSourceUid)
-                    == PERMISSION_GRANTED) {
-                return true;
-            }
-            // This is the notification trampoline use-case for example, where apps use Intent.ACSD
-            // to close the shade prior to starting an activity.
-            WindowProcessController wmApp = callerApp.getWindowProcessController();
-            if (wmApp.canCloseSystemDialogsByToken()) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -15381,10 +15320,10 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @GuardedBy("this")
     void tempWhitelistForPendingIntentLocked(int callerPid, int callerUid, int targetUid,
-            long duration, String tag) {
+            long duration, int type, String tag) {
         if (DEBUG_WHITELISTS) {
             Slog.d(TAG, "tempWhitelistForPendingIntentLocked(" + callerPid + ", " + callerUid + ", "
-                    + targetUid + ", " + duration + ")");
+                    + targetUid + ", " + duration + ", " + type + ")");
         }
 
         synchronized (mPidsSelfLocked) {
@@ -15396,7 +15335,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             if (!pr.whitelistManager) {
                 if (checkPermission(CHANGE_DEVICE_IDLE_TEMP_WHITELIST, callerPid, callerUid)
-                        != PackageManager.PERMISSION_GRANTED) {
+                        != PackageManager.PERMISSION_GRANTED
+                        && checkPermission(START_ACTIVITIES_FROM_BACKGROUND, callerPid, callerUid)
+                        != PackageManager.PERMISSION_GRANTED
+                        && checkPermission(START_FOREGROUND_SERVICES_FROM_BACKGROUND, callerPid,
+                        callerUid) != PackageManager.PERMISSION_GRANTED) {
                     if (DEBUG_WHITELISTS) {
                         Slog.d(TAG, "tempWhitelistForPendingIntentLocked() for target " + targetUid
                                 + ": pid " + callerPid + " is not allowed");
@@ -15406,8 +15349,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        tempWhitelistUidLocked(targetUid, duration, tag,
-                BroadcastOptions.TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED);
+        tempWhitelistUidLocked(targetUid, duration, tag, type);
     }
 
     /**
@@ -16010,9 +15952,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void setPendingIntentWhitelistDuration(IIntentSender target, IBinder whitelistToken,
-                long duration) {
+                long duration, int type) {
             mPendingIntentController.setPendingIntentWhitelistDuration(target, whitelistToken,
-                    duration);
+                    duration, type);
         }
 
         @Override
@@ -16428,10 +16370,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void tempWhitelistForPendingIntent(int callerPid, int callerUid, int targetUid,
-                long duration, String tag) {
+                long duration, int type, String tag) {
             synchronized (ActivityManagerService.this) {
                 ActivityManagerService.this.tempWhitelistForPendingIntentLocked(
-                        callerPid, callerUid, targetUid, duration, tag);
+                        callerPid, callerUid, targetUid, duration, type, tag);
             }
         }
 
@@ -16785,21 +16727,49 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void setDeviceOwnerUid(int uid) {
-            synchronized (ActivityManagerService.this) {
-                mDeviceOwnerUid = uid;
-            }
+            mDeviceOwnerUid = uid;
         }
 
         @Override
         public boolean isDeviceOwner(int uid) {
+            int cachedUid = mDeviceOwnerUid;
+            return uid >= 0 && cachedUid == uid;
+        }
+
+
+        @Override
+        public void setProfileOwnerUid(ArraySet<Integer> profileOwnerUids) {
             synchronized (ActivityManagerService.this) {
-                return uid >= 0 && mDeviceOwnerUid == uid;
+                mProfileOwnerUids = profileOwnerUids;
             }
         }
 
         @Override
+        public boolean isProfileOwner(int uid) {
+            synchronized (ActivityManagerService.this) {
+                return mProfileOwnerUids != null && mProfileOwnerUids.indexOf(uid) >= 0;
+            }
+        }
+
+        @Override
+        public void setCompanionAppUids(int userId, Set<Integer> companionAppUids) {
+            synchronized (ActivityManagerService.this) {
+                mCompanionAppUidsMap.put(userId, companionAppUids);
+            }
+        }
+
+        @Override
+        public boolean isAssociatedCompanionApp(int userId, int uid) {
+            final Set<Integer> allUids = mCompanionAppUidsMap.get(userId);
+            if (allUids == null) {
+                return false;
+            }
+            return allUids.contains(uid);
+        }
+
+        @Override
         public void addPendingTopUid(int uid, int pid) {
-                mPendingStartActivityUids.add(uid, pid);
+            mPendingStartActivityUids.add(uid, pid);
         }
 
         @Override

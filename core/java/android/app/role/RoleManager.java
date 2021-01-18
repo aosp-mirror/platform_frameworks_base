@@ -690,7 +690,7 @@ public final class RoleManager {
      * @hide
      */
     @RequiresPermission(Manifest.permission.MANAGE_ROLE_HOLDERS)
-    @SystemApi
+    @TestApi
     public void isRoleVisible(@NonNull String roleName,
             @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
         mRoleControllerManager.isRoleVisible(roleName, executor, callback);
@@ -711,7 +711,7 @@ public final class RoleManager {
      * @hide
      */
     @RequiresPermission(Manifest.permission.MANAGE_ROLE_HOLDERS)
-    @SystemApi
+    @TestApi
     public void isApplicationVisibleForRole(@NonNull String roleName, @NonNull String packageName,
             @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
         mRoleControllerManager.isApplicationVisibleForRole(roleName, packageName, executor,

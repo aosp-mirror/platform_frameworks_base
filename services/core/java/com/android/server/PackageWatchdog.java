@@ -54,9 +54,13 @@ import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Retention;
@@ -148,6 +152,11 @@ public class PackageWatchdog {
     private static final String ATTR_EXPLICIT_HEALTH_CHECK_DURATION = "health-check-duration";
     private static final String ATTR_PASSED_HEALTH_CHECK = "passed-health-check";
     private static final String ATTR_MITIGATION_CALLS = "mitigation-calls";
+
+    // A file containing information about the current mitigation count in the case of a boot loop.
+    // This allows boot loop information to persist in the case of an fs-checkpoint being
+    // aborted.
+    private static final String METADATA_FILE = "/metadata/watchdog/mitigation_count.txt";
 
     @GuardedBy("PackageWatchdog.class")
     private static PackageWatchdog sPackageWatchdog;
@@ -492,6 +501,7 @@ public class PackageWatchdog {
                 }
                 if (currentObserverToNotify != null) {
                     mBootThreshold.setMitigationCount(mitigationCount);
+                    mBootThreshold.saveMitigationCountToMetadata();
                     currentObserverToNotify.executeBootLoopMitigation(mitigationCount);
                 }
             }
@@ -1700,9 +1710,31 @@ public class PackageWatchdog {
             SystemProperties.set(property, Long.toString(newStart));
         }
 
+        public void saveMitigationCountToMetadata() {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(METADATA_FILE))) {
+                writer.write(String.valueOf(getMitigationCount()));
+            } catch (Exception e) {
+                Slog.e(TAG, "Could not save metadata to file: " + e);
+            }
+        }
+
+        public void readMitigationCountFromMetadataIfNecessary() {
+            File bootPropsFile = new File(METADATA_FILE);
+            if (bootPropsFile.exists()) {
+                try (BufferedReader reader = new BufferedReader(new FileReader(METADATA_FILE))) {
+                    String mitigationCount = reader.readLine();
+                    setMitigationCount(Integer.parseInt(mitigationCount));
+                    bootPropsFile.delete();
+                } catch (Exception e) {
+                    Slog.i(TAG, "Could not read metadata file: " + e);
+                }
+            }
+        }
+
 
         /** Increments the boot counter, and returns whether the device is bootlooping. */
         public boolean incrementAndTest() {
+            readMitigationCountFromMetadataIfNecessary();
             final long now = mSystemClock.uptimeMillis();
             if (now - getStart() < 0) {
                 Slog.e(TAG, "Window was less than zero. Resetting start to current time.");

@@ -54,40 +54,43 @@ public final class GenericDocumentToProtoConverter {
         for (int i = 0; i < keys.size(); i++) {
             String name = keys.get(i);
             PropertyProto.Builder propertyProto = PropertyProto.newBuilder().setName(name);
-            String[] stringValues = document.getPropertyStringArray(name);
-            long[] longValues = document.getPropertyLongArray(name);
-            double[] doubleValues = document.getPropertyDoubleArray(name);
-            boolean[] booleanValues = document.getPropertyBooleanArray(name);
-            byte[][] bytesValues = document.getPropertyBytesArray(name);
-            GenericDocument[] documentValues = document.getPropertyDocumentArray(name);
-            if (stringValues != null) {
+            Object property = document.getProperty(name);
+            if (property instanceof String[]) {
+                String[] stringValues = (String[]) property;
                 for (int j = 0; j < stringValues.length; j++) {
                     propertyProto.addStringValues(stringValues[j]);
                 }
-            } else if (longValues != null) {
+            } else if (property instanceof long[]) {
+                long[] longValues = (long[]) property;
                 for (int j = 0; j < longValues.length; j++) {
                     propertyProto.addInt64Values(longValues[j]);
                 }
-            } else if (doubleValues != null) {
+            } else if (property instanceof double[]) {
+                double[] doubleValues = (double[]) property;
                 for (int j = 0; j < doubleValues.length; j++) {
                     propertyProto.addDoubleValues(doubleValues[j]);
                 }
-            } else if (booleanValues != null) {
+            } else if (property instanceof boolean[]) {
+                boolean[] booleanValues = (boolean[]) property;
                 for (int j = 0; j < booleanValues.length; j++) {
                     propertyProto.addBooleanValues(booleanValues[j]);
                 }
-            } else if (bytesValues != null) {
+            } else if (property instanceof byte[][]) {
+                byte[][] bytesValues = (byte[][]) property;
                 for (int j = 0; j < bytesValues.length; j++) {
                     propertyProto.addBytesValues(ByteString.copyFrom(bytesValues[j]));
                 }
-            } else if (documentValues != null) {
+            } else if (property instanceof GenericDocument[]) {
+                GenericDocument[] documentValues = (GenericDocument[]) property;
                 for (int j = 0; j < documentValues.length; j++) {
                     DocumentProto proto = toDocumentProto(documentValues[j]);
                     propertyProto.addDocumentValues(proto);
                 }
             } else {
                 throw new IllegalStateException(
-                        "Property \"" + name + "\" has unsupported value type");
+                        String.format(
+                                "Property \"%s\" has unsupported value type %s",
+                                name, property.getClass().toString()));
             }
             mProtoBuilder.addProperties(propertyProto);
         }

@@ -31,6 +31,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
+import android.os.PowerManager;
 import android.os.RecoverySystem;
 import android.os.RemoteCallback;
 import android.os.SystemClock;
@@ -77,6 +78,7 @@ public class RescueParty {
     @VisibleForTesting
     static final String PROP_ENABLE_RESCUE = "persist.sys.enable_rescue";
     static final String PROP_ATTEMPTING_FACTORY_RESET = "sys.attempting_factory_reset";
+    static final String PROP_ATTEMPTING_REBOOT = "sys.attempting_reboot";
     static final String PROP_MAX_RESCUE_LEVEL_ATTEMPTED = "sys.max_rescue_level_attempted";
     @VisibleForTesting
     static final int LEVEL_NONE = 0;
@@ -87,7 +89,9 @@ public class RescueParty {
     @VisibleForTesting
     static final int LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS = 3;
     @VisibleForTesting
-    static final int LEVEL_FACTORY_RESET = 4;
+    static final int LEVEL_WARM_REBOOT = 4;
+    @VisibleForTesting
+    static final int LEVEL_FACTORY_RESET = 5;
     @VisibleForTesting
     static final String PROP_RESCUE_BOOT_COUNT = "sys.rescue_boot_count";
     @VisibleForTesting
@@ -159,10 +163,22 @@ public class RescueParty {
     }
 
     /**
-     * Check if we're currently attempting to reboot for a factory reset.
+     * Check if we're currently attempting to reboot for a factory reset. This method must
+     * return true if RescueParty tries to reboot early during a boot loop, since the device
+     * will not be fully booted at this time.
+     *
+     * TODO(gavincorkery): Rename method since its scope has expanded.
      */
     public static boolean isAttemptingFactoryReset() {
+        return isFactoryResetPropertySet() || isRebootPropertySet();
+    }
+
+    static boolean isFactoryResetPropertySet() {
         return SystemProperties.getBoolean(PROP_ATTEMPTING_FACTORY_RESET, false);
+    }
+
+    static boolean isRebootPropertySet() {
+        return SystemProperties.getBoolean(PROP_ATTEMPTING_REBOOT, false);
     }
 
     /**
@@ -329,8 +345,10 @@ public class RescueParty {
             return LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES;
         } else if (mitigationCount == 3) {
             return LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS;
-        } else if (mitigationCount >= 4) {
-            return getMaxRescueLevel();
+        } else if (mitigationCount == 4) {
+            return Math.min(getMaxRescueLevel(), LEVEL_WARM_REBOOT);
+        } else if (mitigationCount >= 5) {
+            return Math.min(getMaxRescueLevel(), LEVEL_FACTORY_RESET);
         } else {
             Slog.w(TAG, "Expected positive mitigation count, was " + mitigationCount);
             return LEVEL_NONE;
@@ -356,6 +374,8 @@ public class RescueParty {
         // Try our best to reset all settings possible, and once finished
         // rethrow any exception that we encountered
         Exception res = null;
+        Runnable runnable;
+        Thread thread;
         switch (level) {
             case LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS:
                 try {
@@ -396,11 +416,26 @@ public class RescueParty {
                     res = e;
                 }
                 break;
-            case LEVEL_FACTORY_RESET:
+            case LEVEL_WARM_REBOOT:
                 // Request the reboot from a separate thread to avoid deadlock on PackageWatchdog
                 // when device shutting down.
+                SystemProperties.set(PROP_ATTEMPTING_REBOOT, "true");
+                runnable = () -> {
+                    try {
+                        PowerManager pm = context.getSystemService(PowerManager.class);
+                        if (pm != null) {
+                            pm.reboot(TAG);
+                        }
+                    } catch (Throwable t) {
+                        logRescueException(level, t);
+                    }
+                };
+                thread = new Thread(runnable);
+                thread.start();
+                break;
+            case LEVEL_FACTORY_RESET:
                 SystemProperties.set(PROP_ATTEMPTING_FACTORY_RESET, "true");
-                Runnable runnable = new Runnable() {
+                runnable = new Runnable() {
                     @Override
                     public void run() {
                         try {
@@ -410,7 +445,7 @@ public class RescueParty {
                         }
                     }
                 };
-                Thread thread = new Thread(runnable);
+                thread = new Thread(runnable);
                 thread.start();
                 break;
         }
@@ -433,6 +468,7 @@ public class RescueParty {
             case LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES:
                 return PackageHealthObserverImpact.USER_IMPACT_LOW;
             case LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS:
+            case LEVEL_WARM_REBOOT:
             case LEVEL_FACTORY_RESET:
                 return PackageHealthObserverImpact.USER_IMPACT_HIGH;
             default:
@@ -714,6 +750,7 @@ public class RescueParty {
             case LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS: return "RESET_SETTINGS_UNTRUSTED_DEFAULTS";
             case LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES: return "RESET_SETTINGS_UNTRUSTED_CHANGES";
             case LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS: return "RESET_SETTINGS_TRUSTED_DEFAULTS";
+            case LEVEL_WARM_REBOOT: return "WARM_REBOOT";
             case LEVEL_FACTORY_RESET: return "FACTORY_RESET";
             default: return Integer.toString(level);
         }

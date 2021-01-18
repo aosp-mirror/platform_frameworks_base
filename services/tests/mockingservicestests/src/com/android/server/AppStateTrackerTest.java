@@ -313,29 +313,30 @@ public class AppStateTrackerTest {
         }
     }
 
-    private static final int NONE = 0;
-    private static final int ALARMS_ONLY = 1 << 0;
-    private static final int JOBS_ONLY = 1 << 1;
-    private static final int JOBS_AND_ALARMS = ALARMS_ONLY | JOBS_ONLY;
-
-    private void areRestricted(AppStateTrackerTestable instance, int uid, String packageName,
-            int restrictionTypes, boolean exemptFromBatterySaver) {
-        assertEquals(((restrictionTypes & JOBS_ONLY) != 0),
-                instance.areJobsRestricted(uid, packageName, exemptFromBatterySaver));
-        assertEquals(((restrictionTypes & ALARMS_ONLY) != 0),
-                instance.areAlarmsRestricted(uid, packageName, exemptFromBatterySaver));
+    private void areJobsRestricted(AppStateTrackerTestable instance, int[] uids, String[] packages,
+            boolean[] restricted, boolean exemption) {
+        assertTrue(uids.length == packages.length && uids.length == restricted.length);
+        for (int i = 0; i < uids.length; i++) {
+            assertEquals(restricted[i],
+                    instance.areJobsRestricted(uids[i], packages[i], exemption));
+        }
     }
 
-    private void areRestricted(AppStateTrackerTestable instance, int uid, String packageName,
-            int restrictionTypes) {
-        areRestricted(instance, uid, packageName, restrictionTypes,
-                /*exemptFromBatterySaver=*/ false);
+    private void areAlarmsRestrictedByFAS(AppStateTrackerTestable instance, int[] uids,
+            String[] packages, boolean[] restricted) {
+        assertTrue(uids.length == packages.length && uids.length == restricted.length);
+        for (int i = 0; i < uids.length; i++) {
+            assertEquals(restricted[i], instance.areAlarmsRestricted(uids[i], packages[i]));
+        }
     }
 
-    private void areRestrictedWithExemption(AppStateTrackerTestable instance,
-            int uid, String packageName, int restrictionTypes) {
-        areRestricted(instance, uid, packageName, restrictionTypes,
-                /*exemptFromBatterySaver=*/ true);
+    private void areAlarmsRestrictedByBatterySaver(AppStateTrackerTestable instance, int[] uids,
+            String[] packages, boolean[] restricted) {
+        assertTrue(uids.length == packages.length && uids.length == restricted.length);
+        for (int i = 0; i < uids.length; i++) {
+            assertEquals(restricted[i],
+                    instance.areAlarmsRestrictedByBatterySaver(uids[i], packages[i]));
+        }
     }
 
     @Test
@@ -344,30 +345,42 @@ public class AppStateTrackerTest {
         callStart(instance);
 
         assertFalse(instance.isForceAllAppsStandbyEnabled());
-        areRestricted(instance, UID_1, PACKAGE_1, NONE);
-        areRestricted(instance, UID_2, PACKAGE_2, NONE);
-        areRestricted(instance, Process.SYSTEM_UID, PACKAGE_SYSTEM, NONE);
-
-        areRestrictedWithExemption(instance, UID_1, PACKAGE_1, NONE);
-        areRestrictedWithExemption(instance, UID_2, PACKAGE_2, NONE);
-        areRestrictedWithExemption(instance, Process.SYSTEM_UID, PACKAGE_SYSTEM, NONE);
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {false, false, false, false},
+                false);
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {false, false, false, false},
+                true);
+        areAlarmsRestrictedByBatterySaver(instance,
+                new int[] {UID_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {false, false, false, false});
 
         mPowerSaveMode = true;
         mPowerSaveObserver.accept(getPowerSaveState());
 
         assertTrue(instance.isForceAllAppsStandbyEnabled());
 
-        areRestricted(instance, UID_1, PACKAGE_1, JOBS_AND_ALARMS);
-        areRestricted(instance, UID_2, PACKAGE_2, JOBS_AND_ALARMS);
-        areRestricted(instance, Process.SYSTEM_UID, PACKAGE_SYSTEM, NONE);
-
-        areRestrictedWithExemption(instance, UID_1, PACKAGE_1, NONE);
-        areRestrictedWithExemption(instance, UID_2, PACKAGE_2, NONE);
-        areRestrictedWithExemption(instance, Process.SYSTEM_UID, PACKAGE_SYSTEM, NONE);
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {true, true, true, false},
+                false);
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {false, false, false, false},
+                true);
+        areAlarmsRestrictedByBatterySaver(instance,
+                new int[] {UID_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {true, true, true, false});
 
         // Toggle the foreground state.
-        mPowerSaveMode = true;
-        mPowerSaveObserver.accept(getPowerSaveState());
 
         assertFalse(instance.isUidActive(UID_1));
         assertFalse(instance.isUidActive(UID_2));
@@ -376,34 +389,65 @@ public class AppStateTrackerTest {
         mIUidObserver.onUidActive(UID_1);
         waitUntilMainHandlerDrain();
         waitUntilMainHandlerDrain();
-        areRestricted(instance, UID_1, PACKAGE_1, NONE);
-        areRestricted(instance, UID_2, PACKAGE_2, JOBS_AND_ALARMS);
-        areRestricted(instance, Process.SYSTEM_UID, PACKAGE_SYSTEM, NONE);
+
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {false, true, true, false},
+                false);
+        areAlarmsRestrictedByBatterySaver(instance,
+                new int[] {UID_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {false, true, true, false});
+
         assertTrue(instance.isUidActive(UID_1));
         assertFalse(instance.isUidActive(UID_2));
 
         mIUidObserver.onUidGone(UID_1, /*disable=*/ false);
         waitUntilMainHandlerDrain();
         waitUntilMainHandlerDrain();
-        areRestricted(instance, UID_1, PACKAGE_1, JOBS_AND_ALARMS);
-        areRestricted(instance, UID_2, PACKAGE_2, JOBS_AND_ALARMS);
-        areRestricted(instance, Process.SYSTEM_UID, PACKAGE_SYSTEM, NONE);
+
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {true, true, true, false},
+                false);
+        areAlarmsRestrictedByBatterySaver(instance,
+                new int[] {UID_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {true, true, true, false});
+
         assertFalse(instance.isUidActive(UID_1));
         assertFalse(instance.isUidActive(UID_2));
 
         mIUidObserver.onUidActive(UID_1);
         waitUntilMainHandlerDrain();
         waitUntilMainHandlerDrain();
-        areRestricted(instance, UID_1, PACKAGE_1, NONE);
-        areRestricted(instance, UID_2, PACKAGE_2, JOBS_AND_ALARMS);
-        areRestricted(instance, Process.SYSTEM_UID, PACKAGE_SYSTEM, NONE);
+
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {false, true, true, false},
+                false);
+        areAlarmsRestrictedByBatterySaver(instance,
+                new int[] {UID_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {false, true, true, false});
 
         mIUidObserver.onUidIdle(UID_1, /*disable=*/ false);
         waitUntilMainHandlerDrain();
         waitUntilMainHandlerDrain();
-        areRestricted(instance, UID_1, PACKAGE_1, JOBS_AND_ALARMS);
-        areRestricted(instance, UID_2, PACKAGE_2, JOBS_AND_ALARMS);
-        areRestricted(instance, Process.SYSTEM_UID, PACKAGE_SYSTEM, NONE);
+
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {true, true, true, false},
+                false);
+        areAlarmsRestrictedByBatterySaver(instance,
+                new int[] {UID_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {true, true, true, false});
+
         assertFalse(instance.isUidActive(UID_1));
         assertFalse(instance.isUidActive(UID_2));
 
@@ -416,11 +460,19 @@ public class AppStateTrackerTest {
         assertTrue(instance.isRunAnyInBackgroundAppOpsAllowed(UID_2, PACKAGE_2));
         assertTrue(instance.isRunAnyInBackgroundAppOpsAllowed(UID_10_2, PACKAGE_2));
 
-        areRestricted(instance, UID_1, PACKAGE_1, NONE);
-        areRestricted(instance, UID_10_1, PACKAGE_1, NONE);
-        areRestricted(instance, UID_2, PACKAGE_2, NONE);
-        areRestricted(instance, UID_10_2, PACKAGE_2, NONE);
-        areRestricted(instance, Process.SYSTEM_UID, PACKAGE_SYSTEM, NONE);
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {false, false, false, false, false},
+                false);
+        areAlarmsRestrictedByBatterySaver(instance,
+                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {false, false, false, false, false});
+        areAlarmsRestrictedByFAS(instance,
+                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {false, false, false, false, false});
 
         setAppOps(UID_1, PACKAGE_1, true);
         setAppOps(UID_10_2, PACKAGE_2, true);
@@ -429,24 +481,72 @@ public class AppStateTrackerTest {
         assertTrue(instance.isRunAnyInBackgroundAppOpsAllowed(UID_2, PACKAGE_2));
         assertFalse(instance.isRunAnyInBackgroundAppOpsAllowed(UID_10_2, PACKAGE_2));
 
-        areRestricted(instance, UID_1, PACKAGE_1, JOBS_AND_ALARMS);
-        areRestricted(instance, UID_10_1, PACKAGE_1, NONE);
-        areRestricted(instance, UID_2, PACKAGE_2, NONE);
-        areRestricted(instance, UID_10_2, PACKAGE_2, JOBS_AND_ALARMS);
-        areRestricted(instance, Process.SYSTEM_UID, PACKAGE_SYSTEM, NONE);
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {true, false, false, true, false},
+                false);
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {true, false, false, true, false},
+                true);
+
+        areAlarmsRestrictedByBatterySaver(instance,
+                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {false, false, false, false, false});
+        areAlarmsRestrictedByFAS(instance,
+                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {true, false, false, true, false});
 
         // Toggle power saver, should still be the same.
         mPowerSaveMode = true;
         mPowerSaveObserver.accept(getPowerSaveState());
 
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {true, true, true, true, false},
+                false);
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {true, false, false, true, false},
+                true);
+
+        areAlarmsRestrictedByBatterySaver(instance,
+                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {true, true, true, true, false});
+        areAlarmsRestrictedByFAS(instance,
+                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {true, false, false, true, false});
+
         mPowerSaveMode = false;
         mPowerSaveObserver.accept(getPowerSaveState());
 
-        areRestricted(instance, UID_1, PACKAGE_1, JOBS_AND_ALARMS);
-        areRestricted(instance, UID_10_1, PACKAGE_1, NONE);
-        areRestricted(instance, UID_2, PACKAGE_2, NONE);
-        areRestricted(instance, UID_10_2, PACKAGE_2, JOBS_AND_ALARMS);
-        areRestricted(instance, Process.SYSTEM_UID, PACKAGE_SYSTEM, NONE);
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {true, false, false, true, false},
+                false);
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {true, false, false, true, false},
+                true);
+
+        areAlarmsRestrictedByBatterySaver(instance,
+                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {false, false, false, false, false});
+        areAlarmsRestrictedByFAS(instance,
+                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {true, false, false, true, false});
 
         // Clear the app ops and update the exemption list.
         setAppOps(UID_1, PACKAGE_1, false);
@@ -455,24 +555,41 @@ public class AppStateTrackerTest {
         mPowerSaveMode = true;
         mPowerSaveObserver.accept(getPowerSaveState());
 
-        areRestricted(instance, UID_1, PACKAGE_1, JOBS_AND_ALARMS);
-        areRestricted(instance, UID_10_1, PACKAGE_1, JOBS_AND_ALARMS);
-        areRestricted(instance, UID_2, PACKAGE_2, JOBS_AND_ALARMS);
-        areRestricted(instance, UID_10_2, PACKAGE_2, JOBS_AND_ALARMS);
-        areRestricted(instance, UID_3, PACKAGE_3, JOBS_AND_ALARMS);
-        areRestricted(instance, UID_10_3, PACKAGE_3, JOBS_AND_ALARMS);
-        areRestricted(instance, Process.SYSTEM_UID, PACKAGE_SYSTEM, NONE);
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {true, true, true, true, false},
+                false);
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {false, false, false, false, false},
+                true);
+
+        areAlarmsRestrictedByBatterySaver(instance,
+                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {true, true, true, true, false});
+        areAlarmsRestrictedByFAS(instance,
+                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {false, false, false, false, false});
 
         instance.setPowerSaveExemptionListAppIds(new int[] {UID_1}, new int[] {},
                 new int[] {UID_2});
 
-        areRestricted(instance, UID_1, PACKAGE_1, NONE);
-        areRestricted(instance, UID_10_1, PACKAGE_1, NONE);
-        areRestricted(instance, UID_2, PACKAGE_2, ALARMS_ONLY);
-        areRestricted(instance, UID_10_2, PACKAGE_2, ALARMS_ONLY);
-        areRestricted(instance, UID_3, PACKAGE_3, JOBS_AND_ALARMS);
-        areRestricted(instance, UID_10_3, PACKAGE_3, JOBS_AND_ALARMS);
-        areRestricted(instance, Process.SYSTEM_UID, PACKAGE_SYSTEM, NONE);
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, UID_3, UID_10_3, Process.SYSTEM_UID},
+                new String[]{PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_3, PACKAGE_3,
+                        PACKAGE_SYSTEM},
+                new boolean[] {false, false, false, false, true, true, false},
+                false);
+
+        areAlarmsRestrictedByBatterySaver(instance,
+                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, UID_3, UID_10_3, Process.SYSTEM_UID},
+                new String[]{PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_3, PACKAGE_3,
+                        PACKAGE_SYSTEM},
+                new boolean[] {false, false, true, true, true, true, false});
 
         // Again, make sure toggling the global state doesn't change it.
         mPowerSaveMode = false;
@@ -481,13 +598,18 @@ public class AppStateTrackerTest {
         mPowerSaveMode = true;
         mPowerSaveObserver.accept(getPowerSaveState());
 
-        areRestricted(instance, UID_1, PACKAGE_1, NONE);
-        areRestricted(instance, UID_10_1, PACKAGE_1, NONE);
-        areRestricted(instance, UID_2, PACKAGE_2, ALARMS_ONLY);
-        areRestricted(instance, UID_10_2, PACKAGE_2, ALARMS_ONLY);
-        areRestricted(instance, UID_3, PACKAGE_3, JOBS_AND_ALARMS);
-        areRestricted(instance, UID_10_3, PACKAGE_3, JOBS_AND_ALARMS);
-        areRestricted(instance, Process.SYSTEM_UID, PACKAGE_SYSTEM, NONE);
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, UID_3, UID_10_3, Process.SYSTEM_UID},
+                new String[]{PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_3, PACKAGE_3,
+                        PACKAGE_SYSTEM},
+                new boolean[] {false, false, false, false, true, true, false},
+                false);
+
+        areAlarmsRestrictedByBatterySaver(instance,
+                new int[] {UID_1, UID_10_1, UID_2, UID_10_2, UID_3, UID_10_3, Process.SYSTEM_UID},
+                new String[]{PACKAGE_1, PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_3, PACKAGE_3,
+                        PACKAGE_SYSTEM},
+                new boolean[] {false, false, true, true, true, true, false});
 
         assertTrue(instance.isUidPowerSaveExempt(UID_1));
         assertTrue(instance.isUidPowerSaveExempt(UID_10_1));
@@ -646,52 +768,98 @@ public class AppStateTrackerTest {
     }
 
     @Test
-    public void testExempt() throws Exception {
+    public void testExemptedBucket() throws Exception {
         final AppStateTrackerTestable instance = newInstance();
         callStart(instance);
 
         assertFalse(instance.isForceAllAppsStandbyEnabled());
-        areRestricted(instance, UID_1, PACKAGE_1, NONE);
-        areRestricted(instance, UID_2, PACKAGE_2, NONE);
-        areRestricted(instance, Process.SYSTEM_UID, PACKAGE_SYSTEM, NONE);
+
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {false, false, false},
+                false);
+        areAlarmsRestrictedByBatterySaver(instance,
+                new int[] {UID_1, UID_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {false, false, false});
 
         mPowerSaveMode = true;
         mPowerSaveObserver.accept(getPowerSaveState());
 
         assertTrue(instance.isForceAllAppsStandbyEnabled());
 
-        areRestricted(instance, UID_1, PACKAGE_1, JOBS_AND_ALARMS);
-        areRestricted(instance, UID_2, PACKAGE_2, JOBS_AND_ALARMS);
-        areRestricted(instance, UID_10_2, PACKAGE_2, JOBS_AND_ALARMS);
-        areRestricted(instance, Process.SYSTEM_UID, PACKAGE_SYSTEM, NONE);
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {true, true, true, false},
+                false);
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {false, false, false, false},
+                true);
+        areAlarmsRestrictedByBatterySaver(instance,
+                new int[] {UID_1, UID_2, UID_10_2, Process.SYSTEM_UID},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2, PACKAGE_SYSTEM},
+                new boolean[] {true, true, true, false});
 
         // Exempt package 2 on user-10.
         mAppIdleStateChangeListener.onAppIdleStateChanged(PACKAGE_2, /*user=*/ 10, false,
                 UsageStatsManager.STANDBY_BUCKET_EXEMPTED, REASON_MAIN_DEFAULT);
 
-        areRestricted(instance, UID_1, PACKAGE_1, JOBS_AND_ALARMS);
-        areRestricted(instance, UID_2, PACKAGE_2, JOBS_AND_ALARMS);
-        areRestricted(instance, UID_10_2, PACKAGE_2, NONE);
-
-        areRestrictedWithExemption(instance, UID_1, PACKAGE_1, NONE);
-        areRestrictedWithExemption(instance, UID_2, PACKAGE_2, NONE);
-        areRestrictedWithExemption(instance, UID_10_2, PACKAGE_2, NONE);
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_2, UID_10_2},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2},
+                new boolean[] {true, true, false},
+                false);
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_2, UID_10_2},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2},
+                new boolean[] {false, false, false},
+                true);
+        areAlarmsRestrictedByBatterySaver(instance,
+                new int[] {UID_1, UID_2, UID_10_2},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2},
+                new boolean[] {true, true, false});
 
         // Exempt package 1 on user-0.
         mAppIdleStateChangeListener.onAppIdleStateChanged(PACKAGE_1, /*user=*/ 0, false,
                 UsageStatsManager.STANDBY_BUCKET_EXEMPTED, REASON_MAIN_DEFAULT);
 
-        areRestricted(instance, UID_1, PACKAGE_1, NONE);
-        areRestricted(instance, UID_2, PACKAGE_2, JOBS_AND_ALARMS);
-        areRestricted(instance, UID_10_2, PACKAGE_2, NONE);
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_2, UID_10_2},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2},
+                new boolean[] {false, true, false},
+                false);
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_2, UID_10_2},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2},
+                new boolean[] {false, false, false},
+                true);
+        areAlarmsRestrictedByBatterySaver(instance,
+                new int[] {UID_1, UID_2, UID_10_2},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2},
+                new boolean[] {false, true, false});
 
         // Unexempt package 2 on user-10.
         mAppIdleStateChangeListener.onAppIdleStateChanged(PACKAGE_2, /*user=*/ 10, false,
                 UsageStatsManager.STANDBY_BUCKET_ACTIVE, REASON_MAIN_USAGE);
 
-        areRestricted(instance, UID_1, PACKAGE_1, NONE);
-        areRestricted(instance, UID_2, PACKAGE_2, JOBS_AND_ALARMS);
-        areRestricted(instance, UID_10_2, PACKAGE_2, JOBS_AND_ALARMS);
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_2, UID_10_2},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2},
+                new boolean[] {false, true, true},
+                false);
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_2, UID_10_2},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2},
+                new boolean[] {false, false, false},
+                true);
+        areAlarmsRestrictedByBatterySaver(instance,
+                new int[] {UID_1, UID_2, UID_10_2},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2},
+                new boolean[] {false, true, true});
 
         // Check force-app-standby.
         // EXEMPT doesn't exempt from force-app-standby.
@@ -703,13 +871,28 @@ public class AppStateTrackerTest {
         mAppIdleStateChangeListener.onAppIdleStateChanged(PACKAGE_2, /*user=*/ 0, false,
                 UsageStatsManager.STANDBY_BUCKET_EXEMPTED, REASON_MAIN_DEFAULT);
 
+        // All 3 packages (u0:p1, u0:p2, u10:p2) are now in the exempted bucket.
         setAppOps(UID_1, PACKAGE_1, true);
 
-        areRestricted(instance, UID_1, PACKAGE_1, JOBS_AND_ALARMS);
-        areRestricted(instance, UID_2, PACKAGE_2, NONE);
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_2, UID_10_2},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2},
+                new boolean[] {true, false, false},
+                false);
+        areJobsRestricted(instance,
+                new int[] {UID_1, UID_2, UID_10_2},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2},
+                new boolean[] {true, false, false},
+                true);
 
-        areRestrictedWithExemption(instance, UID_1, PACKAGE_1, JOBS_AND_ALARMS);
-        areRestrictedWithExemption(instance, UID_2, PACKAGE_2, NONE);
+        areAlarmsRestrictedByBatterySaver(instance,
+                new int[] {UID_1, UID_2, UID_10_2},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2},
+                new boolean[] {false, false, false});
+        areAlarmsRestrictedByFAS(instance,
+                new int[] {UID_1, UID_2, UID_10_2},
+                new String[] {PACKAGE_1, PACKAGE_2, PACKAGE_2},
+                new boolean[] {true, false, false});
     }
 
     @Test
@@ -809,6 +992,8 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
+        verify(l, times(1)).updateAllAlarms();
+        verify(l, times(0)).updateAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
@@ -823,7 +1008,9 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
-        verify(l, times(1)).unblockAllUnrestrictedAlarms();
+        verify(l, times(1)).updateAllAlarms();
+        verify(l, times(0)).updateAlarmsForUid(anyInt());
+        verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         reset(l);
@@ -853,6 +1040,8 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(1)).updateJobsForUidPackage(eq(UID_10_2), eq(PACKAGE_2), anyBoolean());
 
+        verify(l, times(0)).updateAllAlarms();
+        verify(l, times(0)).updateAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
@@ -865,6 +1054,8 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(1)).updateJobsForUidPackage(eq(UID_10_2), eq(PACKAGE_2), anyBoolean());
 
+        verify(l, times(0)).updateAllAlarms();
+        verify(l, times(0)).updateAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(1)).unblockAlarmsForUidPackage(eq(UID_10_2), eq(PACKAGE_2));
@@ -876,15 +1067,16 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
+        verify(l, times(0)).updateAllAlarms();
+        verify(l, times(0)).updateAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
 
-        // Unrestrict while battery saver is on. Shouldn't fire.
+        // Test overlap with battery saver
         mPowerSaveMode = true;
         mPowerSaveObserver.accept(getPowerSaveState());
 
-        // Note toggling appops while BS is on will suppress unblockAlarmsForUidPackage().
         setAppOps(UID_10_2, PACKAGE_2, true);
 
         waitUntilMainHandlerDrain();
@@ -892,6 +1084,8 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(1)).updateJobsForUidPackage(eq(UID_10_2), eq(PACKAGE_2), anyBoolean());
 
+        verify(l, times(1)).updateAllAlarms();
+        verify(l, times(0)).updateAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
@@ -906,7 +1100,9 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
-        verify(l, times(1)).unblockAllUnrestrictedAlarms();
+        verify(l, times(1)).updateAllAlarms();
+        verify(l, times(0)).updateAlarmsForUid(anyInt());
+        verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         reset(l);
@@ -922,7 +1118,9 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
-        verify(l, times(0)).unblockAllUnrestrictedAlarms();
+        verify(l, times(1)).updateAllAlarms();
+        verify(l, times(0)).updateAlarmsForUid(anyInt());
+        verify(l, times(1)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         reset(l);
@@ -934,7 +1132,9 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
-        verify(l, times(1)).unblockAllUnrestrictedAlarms();
+        verify(l, times(1)).updateAllAlarms();
+        verify(l, times(0)).updateAlarmsForUid(anyInt());
+        verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         reset(l);
@@ -948,6 +1148,8 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
+        verify(l, times(0)).updateAllAlarms();
+        verify(l, times(0)).updateAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
@@ -961,12 +1163,14 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
+        verify(l, times(0)).updateAllAlarms();
+        verify(l, times(0)).updateAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         reset(l);
 
-        // Do the same thing with battery saver on. (Currently same callbacks are called.)
+        // Do the same thing with battery saver on.
         mPowerSaveMode = true;
         mPowerSaveObserver.accept(getPowerSaveState());
 
@@ -975,6 +1179,8 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
+        verify(l, times(1)).updateAllAlarms();
+        verify(l, times(0)).updateAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
@@ -989,7 +1195,9 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
-        verify(l, times(0)).unblockAllUnrestrictedAlarms();
+        verify(l, times(1)).updateAllAlarms();
+        verify(l, times(0)).updateAlarmsForUid(anyInt());
+        verify(l, times(1)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         reset(l);
@@ -1001,7 +1209,9 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
-        verify(l, times(1)).unblockAllUnrestrictedAlarms();
+        verify(l, times(1)).updateAllAlarms();
+        verify(l, times(0)).updateAlarmsForUid(anyInt());
+        verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         reset(l);
@@ -1015,6 +1225,8 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
+        verify(l, times(0)).updateAllAlarms();
+        verify(l, times(0)).updateAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
@@ -1028,6 +1240,8 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
+        verify(l, times(0)).updateAllAlarms();
+        verify(l, times(0)).updateAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
@@ -1037,9 +1251,8 @@ public class AppStateTrackerTest {
         // -------------------------------------------------------------------------
         // Tests with proc state changes.
 
-        // With battery save.
-        mPowerSaveMode = true;
-        mPowerSaveObserver.accept(getPowerSaveState());
+        // With battery saver.
+        // Battery saver is already on.
 
         mIUidObserver.onUidActive(UID_10_1);
 
@@ -1049,6 +1262,8 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
+        verify(l, times(0)).updateAllAlarms();
+        verify(l, times(1)).updateAlarmsForUid(eq(UID_10_1));
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(1)).unblockAlarmsForUid(eq(UID_10_1));
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
@@ -1062,6 +1277,8 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
+        verify(l, times(0)).updateAllAlarms();
+        verify(l, times(1)).updateAlarmsForUid(eq(UID_10_1));
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
@@ -1075,6 +1292,8 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
+        verify(l, times(0)).updateAllAlarms();
+        verify(l, times(1)).updateAlarmsForUid(eq(UID_10_1));
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(1)).unblockAlarmsForUid(eq(UID_10_1));
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
@@ -1088,12 +1307,14 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
+        verify(l, times(0)).updateAllAlarms();
+        verify(l, times(1)).updateAlarmsForUid(eq(UID_10_1));
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         reset(l);
 
-        // Without battery save.
+        // Without battery saver.
         mPowerSaveMode = false;
         mPowerSaveObserver.accept(getPowerSaveState());
 
@@ -1102,7 +1323,9 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateJobsForUid(eq(UID_10_1), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
-        verify(l, times(1)).unblockAllUnrestrictedAlarms();
+        verify(l, times(1)).updateAllAlarms();
+        verify(l, times(0)).updateAlarmsForUid(eq(UID_10_1));
+        verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         reset(l);
@@ -1115,6 +1338,8 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
+        verify(l, times(0)).updateAllAlarms();
+        verify(l, times(1)).updateAlarmsForUid(eq(UID_10_1));
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(1)).unblockAlarmsForUid(eq(UID_10_1));
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
@@ -1128,6 +1353,8 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
+        verify(l, times(0)).updateAllAlarms();
+        verify(l, times(1)).updateAlarmsForUid(eq(UID_10_1));
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
@@ -1141,6 +1368,8 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
+        verify(l, times(0)).updateAllAlarms();
+        verify(l, times(1)).updateAlarmsForUid(eq(UID_10_1));
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(1)).unblockAlarmsForUid(eq(UID_10_1));
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
@@ -1154,6 +1383,8 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
 
+        verify(l, times(0)).updateAllAlarms();
+        verify(l, times(1)).updateAlarmsForUid(eq(UID_10_1));
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());

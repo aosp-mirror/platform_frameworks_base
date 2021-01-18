@@ -144,7 +144,7 @@ public final class RcsContactUceCapability implements Parcelable {
          * @param tag the supported feature tag
          * @return this OptionBuilder
          */
-        public @NonNull OptionsBuilder addFeatureTag(String tag) {
+        public @NonNull OptionsBuilder addFeatureTag(@NonNull String tag) {
             mCapabilities.mFeatureTags.add(tag);
             return this;
         }
@@ -154,7 +154,7 @@ public final class RcsContactUceCapability implements Parcelable {
          * @param tags the list of the supported feature tags
          * @return this OptionBuilder
          */
-        public @NonNull OptionsBuilder addFeatureTags(List<String> tags) {
+        public @NonNull OptionsBuilder addFeatureTags(@NonNull List<String> tags) {
             mCapabilities.mFeatureTags.addAll(tags);
             return this;
         }
@@ -195,7 +195,7 @@ public final class RcsContactUceCapability implements Parcelable {
          * @param tuple The {@link RcsContactPresenceTuple} to be added into.
          * @return this PresenceBuilder
          */
-        public @NonNull PresenceBuilder addCapabilityTuple(RcsContactPresenceTuple tuple) {
+        public @NonNull PresenceBuilder addCapabilityTuple(@NonNull RcsContactPresenceTuple tuple) {
             mCapabilities.mPresenceTuples.add(tuple);
             return this;
         }
@@ -205,7 +205,8 @@ public final class RcsContactUceCapability implements Parcelable {
          * @param tuples The list of the {@link RcsContactPresenceTuple} to be added into.
          * @return this PresenceBuilder
          */
-        public @NonNull PresenceBuilder addCapabilityTuples(List<RcsContactPresenceTuple> tuples) {
+        public @NonNull PresenceBuilder addCapabilityTuples(
+                @NonNull List<RcsContactPresenceTuple> tuples) {
             mCapabilities.mPresenceTuples.addAll(tuples);
             return this;
         }
@@ -282,7 +283,7 @@ public final class RcsContactUceCapability implements Parcelable {
      * @return The feature tags present in the OPTIONS response from the network.
      * <p>
      * Note: this is only populated if {@link #getCapabilityMechanism} is
-     * {@link CAPABILITY_MECHANISM_OPTIONS}
+     * {@link RcsContactUceCapability#CAPABILITY_MECHANISM_OPTIONS}
      */
     public @NonNull List<String> getOptionsFeatureTags() {
         if (mCapabilityMechanism != CAPABILITY_MECHANISM_OPTIONS) {
@@ -296,7 +297,7 @@ public final class RcsContactUceCapability implements Parcelable {
      * contained in the NOTIFY response from the network.
      * <p>
      * Note: this is only populated if {@link #getCapabilityMechanism} is
-     * {@link CAPABILITY_MECHANISM_PRESENCE}
+     * {@link RcsContactUceCapability#CAPABILITY_MECHANISM_PRESENCE}
      */
     public @NonNull List<RcsContactPresenceTuple> getPresenceTuples() {
         if (mCapabilityMechanism != CAPABILITY_MECHANISM_PRESENCE) {
@@ -312,9 +313,9 @@ public final class RcsContactUceCapability implements Parcelable {
      *
      * <p>
      * Note: this is only populated if {@link #getCapabilityMechanism} is
-     * {@link CAPABILITY_MECHANISM_PRESENCE}
+     * {@link RcsContactUceCapability#CAPABILITY_MECHANISM_PRESENCE}
      */
-    public @Nullable RcsContactPresenceTuple getPresenceTuple(String serviceId) {
+    public @Nullable RcsContactPresenceTuple getPresenceTuple(@NonNull String serviceId) {
         if (mCapabilityMechanism != CAPABILITY_MECHANISM_PRESENCE) {
             return null;
         }

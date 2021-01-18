@@ -16,7 +16,11 @@
 
 package com.android.internal.os;
 
+import android.os.BatteryConsumer;
 import android.os.BatteryStats;
+import android.os.BatteryUsageStats;
+import android.os.BatteryUsageStatsQuery;
+import android.os.SystemBatteryConsumer;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.SparseArray;
@@ -29,46 +33,70 @@ import java.util.List;
 public class IdlePowerCalculator extends PowerCalculator {
     private static final String TAG = "IdlePowerCalculator";
     private static final boolean DEBUG = BatteryStatsHelper.DEBUG;
-    private final PowerProfile mPowerProfile;
+    private final double mAveragePowerCpuSuspendMahPerUs;
+    private final double mAveragePowerCpuIdleMahPerUs;
+    public long mDurationMs;
+    public double mPowerMah;
 
     public IdlePowerCalculator(PowerProfile powerProfile) {
-        mPowerProfile = powerProfile;
+        mAveragePowerCpuSuspendMahPerUs =
+                powerProfile.getAveragePower(PowerProfile.POWER_CPU_SUSPEND)
+                        / (60 * 60 * 1_000_000.0);
+        mAveragePowerCpuIdleMahPerUs =
+                powerProfile.getAveragePower(PowerProfile.POWER_CPU_IDLE)
+                        / (60 * 60 * 1_000_000.0);
     }
 
-    /**
-     * Calculate the baseline power usage for the device when it is in suspend and idle.
-     * The device is drawing POWER_CPU_SUSPEND power at its lowest power state.
-     * The device is drawing POWER_CPU_SUSPEND + POWER_CPU_IDLE power when a wakelock is held.
-     */
+    @Override
+    public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
+            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query,
+            SparseArray<UserHandle> asUsers) {
+        calculatePowerAndDuration(batteryStats, rawRealtimeUs, rawUptimeUs,
+                BatteryStats.STATS_SINCE_CHARGED);
+        if (mPowerMah != 0) {
+            builder.getOrCreateSystemBatteryConsumerBuilder(SystemBatteryConsumer.DRAIN_TYPE_IDLE)
+                    .setConsumedPower(BatteryConsumer.POWER_COMPONENT_USAGE, mPowerMah)
+                    .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_USAGE, mDurationMs);
+        }
+    }
+
     @Override
     public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
-        long batteryUptimeUs = batteryStats.computeBatteryUptime(rawUptimeUs, statsType);
-        long batteryRealtimeUs = batteryStats.computeBatteryRealtime(rawRealtimeUs, statsType);
+        calculatePowerAndDuration(batteryStats, rawRealtimeUs, rawUptimeUs, statsType);
 
+        if (mPowerMah != 0) {
+            BatterySipper bs = new BatterySipper(BatterySipper.DrainType.IDLE, null, 0);
+            bs.usagePowerMah = mPowerMah;
+            bs.usageTimeMs = mDurationMs;
+            bs.sumPower();
+            sippers.add(bs);
+        }
+    }
+
+    /**
+     * Calculates the baseline power usage for the device when it is in suspend and idle.
+     * The device is drawing POWER_CPU_SUSPEND power at its lowest power state.
+     * The device is drawing POWER_CPU_SUSPEND + POWER_CPU_IDLE power when a wakelock is held.
+     */
+    private void calculatePowerAndDuration(BatteryStats batteryStats, long rawRealtimeUs,
+            long rawUptimeUs, int statsType) {
+        long batteryRealtimeUs = batteryStats.computeBatteryRealtime(rawRealtimeUs, statsType);
+        long batteryUptimeUs = batteryStats.computeBatteryUptime(rawUptimeUs, statsType);
         if (DEBUG) {
             Log.d(TAG, "Battery type time: realtime=" + (batteryRealtimeUs / 1000) + " uptime="
                     + (batteryUptimeUs / 1000));
         }
 
-        final double suspendPowerMaMs = (batteryRealtimeUs / 1000)
-                * mPowerProfile.getAveragePower(PowerProfile.POWER_CPU_SUSPEND);
-        final double idlePowerMaMs = (batteryUptimeUs / 1000)
-                * mPowerProfile.getAveragePower(PowerProfile.POWER_CPU_IDLE);
-        final double totalPowerMah = (suspendPowerMaMs + idlePowerMaMs) / (60 * 60 * 1000);
-        if (DEBUG && totalPowerMah != 0) {
+        final double suspendPowerMah = batteryRealtimeUs * mAveragePowerCpuSuspendMahPerUs;
+        final double idlePowerMah = batteryUptimeUs * mAveragePowerCpuIdleMahPerUs;
+        mPowerMah = suspendPowerMah + idlePowerMah;
+        if (DEBUG && mPowerMah != 0) {
             Log.d(TAG, "Suspend: time=" + (batteryRealtimeUs / 1000)
-                    + " power=" + formatCharge(suspendPowerMaMs / (60 * 60 * 1000)));
+                    + " power=" + formatCharge(suspendPowerMah));
             Log.d(TAG, "Idle: time=" + (batteryUptimeUs / 1000)
-                    + " power=" + formatCharge(idlePowerMaMs / (60 * 60 * 1000)));
+                    + " power=" + formatCharge(idlePowerMah));
         }
-
-        if (totalPowerMah != 0) {
-            BatterySipper bs = new BatterySipper(BatterySipper.DrainType.IDLE, null, 0);
-            bs.usagePowerMah = totalPowerMah;
-            bs.usageTimeMs = batteryRealtimeUs / 1000;
-            bs.sumPower();
-            sippers.add(bs);
-        }
+        mDurationMs = batteryRealtimeUs / 1000;
     }
 }

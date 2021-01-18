@@ -57,7 +57,8 @@
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
     <string name="ClipMmi" msgid="4110549342447630629">"આવનાર કૉલર ID"</string>
-    <string name="ClirMmi" msgid="4702929460236547156">"આઉટગોઇંગ કૉલર ID"</string>
+    <!-- no translation found for ClirMmi (6752346475055446417) -->
+    <skip />
     <string name="ColpMmi" msgid="4736462893284419302">"કનેક્ટ કરેલ લાઇન ID"</string>
     <string name="ColrMmi" msgid="5889782479745764278">"કનેક્ટ કરેલ લાઇન ID પ્રતિબંધ"</string>
     <string name="CfMmi" msgid="8390012691099787178">"કૉલ ફોર્વર્ડિંગ"</string>
@@ -146,6 +147,10 @@
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"વાઇ-ફાઇ પરથી કૉલ કરો"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"મોબાઇલ નેટવર્ક પરથી કૉલ કરો"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"ફક્ત વાઇ-ફાઇ"</string>
+    <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
+    <skip />
+    <!-- no translation found for crossSimFormat_spn_cross_sim_calling (779976494687695991) -->
+    <skip />
     <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ફોરવર્ડ કર્યો નથી"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="TIME_DELAY">{2}</xliff:g> સેકન્ડ પછી <xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -1319,7 +1324,7 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"કનેક્ટ કરેલ ઉપકરણ ચાર્જ થઈ રહ્યું છે. વધુ વિકલ્પો માટે ટૅપ કરો."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"એનાલોગ ઑડિઓ ઍક્સેસરી મળી"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"જોડેલ ઉપકરણ આ ફોન સાથે સુસંગત નથી. વધુ જાણવા માટે ટૅપ કરો."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"USB ડીબગિંગ કનેક્ટ થયું."</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"USB ડિબગીંગ કનેક્ટ થયું."</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"USB ડિબગીંગ બંધ કરવા માટે ટૅપ કરો"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB ડિબગીંગને અક્ષમ કરવા માટે પસંદ કરો."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"વાયરલેસ ડિબગીંગ કનેક્ટ કરો"</string>

@@ -67,10 +67,12 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
+import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SYSTEM_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
@@ -131,6 +133,7 @@ import static com.android.server.wm.MoveAnimationSpecProto.DURATION_MS;
 import static com.android.server.wm.MoveAnimationSpecProto.FROM;
 import static com.android.server.wm.MoveAnimationSpecProto.TO;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
@@ -722,7 +725,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     static final int BLAST_TIMEOUT_DURATION = 5000; /* milliseconds */
 
-    private final WindowProcessController mWpcForDisplayConfigChanges;
+    private final WindowProcessController mWpcForDisplayAreaConfigChanges;
 
     /**
      * Returns the visibility of the given {@link InternalInsetsType type} requested by the client.
@@ -914,7 +917,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mBaseLayer = 0;
             mSubLayer = 0;
             mWinAnimator = null;
-            mWpcForDisplayConfigChanges = null;
+            mWpcForDisplayAreaConfigChanges = null;
             return;
         }
         mDeathRecipient = deathRecipient;
@@ -968,8 +971,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             parentWindow.addChild(this, sWindowSubLayerComparator);
         }
 
-        // System process or invalid process cannot register to display config change.
-        mWpcForDisplayConfigChanges = (s.mPid == MY_PID || s.mPid < 0)
+        // System process or invalid process cannot register to display area config change.
+        mWpcForDisplayAreaConfigChanges = (s.mPid == MY_PID || s.mPid < 0)
                 ? null
                 : service.mAtmService.getProcessController(s.mPid, s.mUid);
     }
@@ -2281,7 +2284,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         mWmService.mAccessibilityController.onWindowTransitionLocked(this, transit);
                     }
                 }
-                final boolean isAnimating = isAnimating(TRANSITION | PARENTS)
+                final boolean isAnimating = mAnimatingExit || isAnimating(TRANSITION | PARENTS,
+                        ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_WINDOW_ANIMATION)
                         && (mActivityRecord == null || !mActivityRecord.isWaitingForTransitionStart());
                 final boolean lastWindowIsStartingWindow = startingWindow && mActivityRecord != null
                         && mActivityRecord.isLastWindow(this);
@@ -2290,8 +2294,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 // Also, If isn't the an animating starting window that is the last window in the app.
                 // We allow the removal of the non-animating starting window now as there is no
                 // additional window or animation that will trigger its removal.
-                if (mWinAnimator.getShown() && mAnimatingExit
-                        && (!lastWindowIsStartingWindow || isAnimating)) {
+                if (mWinAnimator.getShown() && !lastWindowIsStartingWindow && isAnimating) {
+                    // Make isSelfOrAncestorWindowAnimatingExit return true so onExitAnimationDone
+                    // can proceed to remove this window.
+                    mAnimatingExit = true;
                     // The exit animation is running or should run... wait for it!
                     ProtoLog.v(WM_DEBUG_ADD_REMOVE,
                             "Not removing %s due to exit animation", this);
@@ -3030,6 +3036,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 || (!isSystemAlertWindowType(mAttrs.type) && mAttrs.type != TYPE_TOAST)) {
             return;
         }
+
+        if (mAttrs.type == TYPE_APPLICATION_OVERLAY && mSession.mCanCreateSystemApplicationOverlay
+                && (mAttrs.privateFlags & SYSTEM_FLAG_SYSTEM_APPLICATION_OVERLAY) != 0) {
+            return;
+        }
+
         if (mForceHideNonSystemOverlayWindow == forceHide) {
             return;
         }
@@ -3521,9 +3533,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return mActivityRecord.mFrozenMergedConfig.peek();
         }
 
-        // If the process has not registered to any display to listen to the configuration change,
-        // we can simply return the mFullConfiguration as default.
-        if (!registeredForDisplayConfigChanges()) {
+        // If the process has not registered to any display area to listen to the configuration
+        // change, we can simply return the mFullConfiguration as default.
+        if (!registeredForDisplayAreaConfigChanges()) {
             return super.getConfiguration();
         }
 
@@ -3534,13 +3546,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mTempConfiguration;
     }
 
-    /** @return {@code true} if the process registered to a display as a config listener. */
-    private boolean registeredForDisplayConfigChanges() {
+    /** @return {@code true} if the process registered to a display area as a config listener. */
+    private boolean registeredForDisplayAreaConfigChanges() {
         final WindowState parentWindow = getParentWindow();
         final WindowProcessController wpc = parentWindow != null
-                ? parentWindow.mWpcForDisplayConfigChanges
-                : mWpcForDisplayConfigChanges;
-        return wpc != null && wpc.registeredForDisplayConfigChanges();
+                ? parentWindow.mWpcForDisplayAreaConfigChanges
+                : mWpcForDisplayAreaConfigChanges;
+        return wpc != null && wpc.registeredForDisplayAreaConfigChanges();
     }
 
     void fillClientWindowFrames(ClientWindowFrames outFrames) {

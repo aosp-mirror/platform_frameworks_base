@@ -1,0 +1,7 @@
+# OWNERS of Multiuser related files related to Enterprise
+
+include /MULTIUSER_OWNERS
+
+# Enterprise owners
+rubinxu@google.com
+sandness@google.com

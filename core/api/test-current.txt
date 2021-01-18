@@ -18,6 +18,7 @@ package android {
     field public static final String MANAGE_CRATES = "android.permission.MANAGE_CRATES";
     field public static final String MANAGE_NOTIFICATION_LISTENERS = "android.permission.MANAGE_NOTIFICATION_LISTENERS";
     field public static final String MANAGE_ROLLBACKS = "android.permission.MANAGE_ROLLBACKS";
+    field public static final String MANAGE_TOAST_RATE_LIMITING = "android.permission.MANAGE_TOAST_RATE_LIMITING";
     field public static final String MODIFY_REFRESH_RATE_SWITCHING_TYPE = "android.permission.MODIFY_REFRESH_RATE_SWITCHING_TYPE";
     field public static final String NETWORK_SETTINGS = "android.permission.NETWORK_SETTINGS";
     field public static final String NETWORK_STACK = "android.permission.NETWORK_STACK";
@@ -138,7 +139,6 @@ package android.app {
     method public static boolean currentUiModeSupportsErrorDialogs(@NonNull android.content.Context);
     method public static int getMaxNumPictureInPictureActions(@NonNull android.content.Context);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void moveTaskToRootTask(int, int, boolean);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public boolean moveTopActivityToPinnedRootTask(int, @NonNull android.graphics.Rect);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void removeRootTasksInWindowingModes(@NonNull int[]);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void removeRootTasksWithActivityTypes(@NonNull int[]);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void resizePrimarySplitScreen(@NonNull android.graphics.Rect, @NonNull android.graphics.Rect);
@@ -275,6 +275,7 @@ package android.app {
     method public boolean isNotificationPolicyAccessGrantedForPackage(@NonNull String);
     method public boolean matchesCallFilter(android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_NOTIFICATION_LISTENERS) public void setNotificationListenerAccessGranted(@NonNull android.content.ComponentName, boolean, boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_TOAST_RATE_LIMITING) public void setToastRateLimitingEnabled(boolean);
     method public void updateNotificationChannel(@NonNull String, int, @NonNull android.app.NotificationChannel);
   }
 
@@ -384,18 +385,35 @@ package android.app.admin {
     method @NonNull public static String operationToString(int);
     method @RequiresPermission("android.permission.MANAGE_DEVICE_ADMINS") public void setNextOperationSafety(int, boolean);
     field public static final String ACTION_DATA_SHARING_RESTRICTION_APPLIED = "android.app.action.DATA_SHARING_RESTRICTION_APPLIED";
+    field public static final int OPERATION_CLEAR_APPLICATION_USER_DATA = 23; // 0x17
     field public static final int OPERATION_CREATE_AND_MANAGE_USER = 5; // 0x5
+    field public static final int OPERATION_INSTALL_CA_CERT = 24; // 0x18
+    field public static final int OPERATION_INSTALL_KEY_PAIR = 25; // 0x19
+    field public static final int OPERATION_INSTALL_SYSTEM_UPDATE = 26; // 0x1a
     field public static final int OPERATION_LOCK_NOW = 1; // 0x1
     field public static final int OPERATION_LOGOUT_USER = 9; // 0x9
     field public static final int OPERATION_REBOOT = 7; // 0x7
+    field public static final int OPERATION_REMOVE_ACTIVE_ADMIN = 27; // 0x1b
+    field public static final int OPERATION_REMOVE_KEY_PAIR = 28; // 0x1c
     field public static final int OPERATION_REMOVE_USER = 6; // 0x6
+    field public static final int OPERATION_REQUEST_BUGREPORT = 29; // 0x1d
+    field public static final int OPERATION_SET_ALWAYS_ON_VPN_PACKAGE = 30; // 0x1e
     field public static final int OPERATION_SET_APPLICATION_HIDDEN = 15; // 0xf
     field public static final int OPERATION_SET_APPLICATION_RESTRICTIONS = 16; // 0x10
+    field public static final int OPERATION_SET_CAMERA_DISABLED = 31; // 0x1f
+    field public static final int OPERATION_SET_FACTORY_RESET_PROTECTION_POLICY = 32; // 0x20
+    field public static final int OPERATION_SET_GLOBAL_PRIVATE_DNS = 33; // 0x21
     field public static final int OPERATION_SET_KEEP_UNINSTALLED_PACKAGES = 17; // 0x11
     field public static final int OPERATION_SET_KEYGUARD_DISABLED = 12; // 0xc
     field public static final int OPERATION_SET_LOCK_TASK_FEATURES = 18; // 0x12
     field public static final int OPERATION_SET_LOCK_TASK_PACKAGES = 19; // 0x13
+    field public static final int OPERATION_SET_LOGOUT_ENABLED = 34; // 0x22
+    field public static final int OPERATION_SET_MASTER_VOLUME_MUTED = 35; // 0x23
+    field public static final int OPERATION_SET_OVERRIDE_APNS_ENABLED = 36; // 0x24
     field public static final int OPERATION_SET_PACKAGES_SUSPENDED = 20; // 0x14
+    field public static final int OPERATION_SET_PERMISSION_GRANT_STATE = 37; // 0x25
+    field public static final int OPERATION_SET_PERMISSION_POLICY = 38; // 0x26
+    field public static final int OPERATION_SET_RESTRICTIONS_PROVIDER = 39; // 0x27
     field public static final int OPERATION_SET_STATUS_BAR_DISABLED = 13; // 0xd
     field public static final int OPERATION_SET_SYSTEM_SETTING = 11; // 0xb
     field public static final int OPERATION_SET_SYSTEM_UPDATE_POLICY = 14; // 0xe
@@ -405,6 +423,7 @@ package android.app.admin {
     field public static final int OPERATION_START_USER_IN_BACKGROUND = 3; // 0x3
     field public static final int OPERATION_STOP_USER = 4; // 0x4
     field public static final int OPERATION_SWITCH_USER = 2; // 0x2
+    field public static final int OPERATION_UNINSTALL_CA_CERT = 40; // 0x28
     field public static final int OPERATION_WIPE_DATA = 8; // 0x8
   }
 
@@ -450,6 +469,8 @@ package android.app.role {
 
   public final class RoleManager {
     method @Nullable public String getSmsRoleHolder(int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public void isApplicationVisibleForRole(@NonNull String, @NonNull String, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public void isRoleVisible(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
   }
 
 }
@@ -724,6 +745,18 @@ package android.graphics.drawable {
 
 }
 
+package android.hardware {
+
+  public final class SensorPrivacyManager {
+    method public boolean isIndividualSensorPrivacyEnabled(int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setIndividualSensorPrivacy(int, boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setIndividualSensorPrivacyForProfileGroup(int, boolean);
+    field public static final int INDIVIDUAL_SENSOR_CAMERA = 2; // 0x2
+    field public static final int INDIVIDUAL_SENSOR_MICROPHONE = 1; // 0x1
+  }
+
+}
+
 package android.hardware.biometrics {
 
   public class BiometricManager {
@@ -923,10 +956,12 @@ package android.location {
     method @Deprecated public void resetCarrierPhase();
     method @Deprecated public void resetCarrierPhaseUncertainty();
     method public void resetCodeType();
+    method public void resetCorrelationVectors();
     method public void resetFullInterSignalBiasNanos();
     method public void resetFullInterSignalBiasUncertaintyNanos();
     method public void resetSatelliteInterSignalBiasNanos();
     method public void resetSatelliteInterSignalBiasUncertaintyNanos();
+    method public void resetSatellitePvt();
     method public void resetSnrInDb();
     method public void set(android.location.GnssMeasurement);
     method public void setAccumulatedDeltaRangeMeters(double);
@@ -941,6 +976,7 @@ package android.location {
     method public void setCn0DbHz(double);
     method public void setCodeType(@NonNull String);
     method public void setConstellationType(int);
+    method public void setCorrelationVectors(@Nullable java.util.Collection<android.location.CorrelationVector>);
     method public void setFullInterSignalBiasNanos(double);
     method public void setFullInterSignalBiasUncertaintyNanos(@FloatRange(from=0.0) double);
     method public void setMultipathIndicator(int);
@@ -950,6 +986,7 @@ package android.location {
     method public void setReceivedSvTimeUncertaintyNanos(long);
     method public void setSatelliteInterSignalBiasNanos(double);
     method public void setSatelliteInterSignalBiasUncertaintyNanos(@FloatRange(from=0.0) double);
+    method public void setSatellitePvt(@Nullable android.location.SatellitePvt);
     method public void setSnrInDb(double);
     method public void setState(int);
     method public void setSvid(int);
@@ -1933,7 +1970,6 @@ package android.util {
     method public static java.util.Map<java.lang.String,java.lang.String> getAllFeatureFlags();
     method public static boolean isEnabled(android.content.Context, String);
     method public static void setEnabled(android.content.Context, String, boolean);
-    field public static final String DYNAMIC_SYSTEM = "settings_dynamic_system";
     field public static final String FFLAG_OVERRIDE_PREFIX = "sys.fflag.override.";
     field public static final String FFLAG_PREFIX = "sys.fflag.";
     field public static final String HEARING_AID_SETTINGS = "settings_bluetooth_hearing_aid";
@@ -2506,7 +2542,6 @@ package android.window {
     method @CallSuper @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public java.util.List<android.window.TaskAppearedInfo> registerOrganizer();
     method @BinderThread public void removeStartingWindow(int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void setInterceptBackPressedOnTaskRoot(@NonNull android.window.WindowContainerToken, boolean);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void setLaunchRoot(int, @NonNull android.window.WindowContainerToken);
     method @CallSuper @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void unregisterOrganizer();
   }
 
@@ -2521,6 +2556,7 @@ package android.window {
     method public int describeContents();
     method @NonNull public android.window.WindowContainerTransaction reorder(@NonNull android.window.WindowContainerToken, boolean);
     method @NonNull public android.window.WindowContainerTransaction reparent(@NonNull android.window.WindowContainerToken, @Nullable android.window.WindowContainerToken, boolean);
+    method @NonNull public android.window.WindowContainerTransaction reparentTasks(@Nullable android.window.WindowContainerToken, @Nullable android.window.WindowContainerToken, @Nullable int[], @Nullable int[], boolean);
     method @NonNull public android.window.WindowContainerTransaction scheduleFinishEnterPip(@NonNull android.window.WindowContainerToken, @NonNull android.graphics.Rect);
     method @NonNull public android.window.WindowContainerTransaction setActivityWindowingMode(@NonNull android.window.WindowContainerToken, int);
     method @NonNull public android.window.WindowContainerTransaction setAppBounds(@NonNull android.window.WindowContainerToken, @NonNull android.graphics.Rect);
@@ -2528,6 +2564,7 @@ package android.window {
     method @NonNull public android.window.WindowContainerTransaction setBoundsChangeTransaction(@NonNull android.window.WindowContainerToken, @NonNull android.view.SurfaceControl.Transaction);
     method @NonNull public android.window.WindowContainerTransaction setFocusable(@NonNull android.window.WindowContainerToken, boolean);
     method @NonNull public android.window.WindowContainerTransaction setHidden(@NonNull android.window.WindowContainerToken, boolean);
+    method @NonNull public android.window.WindowContainerTransaction setLaunchRoot(@NonNull android.window.WindowContainerToken, @Nullable int[], @Nullable int[]);
     method @NonNull public android.window.WindowContainerTransaction setScreenSizeDp(@NonNull android.window.WindowContainerToken, int, int);
     method @NonNull public android.window.WindowContainerTransaction setSmallestScreenWidthDp(@NonNull android.window.WindowContainerToken, int);
     method @NonNull public android.window.WindowContainerTransaction setWindowingMode(@NonNull android.window.WindowContainerToken, int);

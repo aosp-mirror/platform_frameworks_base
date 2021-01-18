@@ -21,6 +21,7 @@ import static android.Manifest.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 import static android.Manifest.permission.HIDE_OVERLAY_WINDOWS;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
+import static android.Manifest.permission.SYSTEM_APPLICATION_OVERLAY;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_ACTIVITY;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
@@ -104,6 +105,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     // If non-system overlays from this process can be hidden by the user or app using
     // HIDE_NON_SYSTEM_OVERLAY_WINDOWS.
     final boolean mOverlaysCanBeHidden;
+    final boolean mCanCreateSystemApplicationOverlay;
     final boolean mCanHideNonSystemOverlayWindows;
     final boolean mCanAcquireSleepToken;
     private AlertWindowNotification mAlertWindowNotification;
@@ -127,6 +129,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                 HIDE_NON_SYSTEM_OVERLAY_WINDOWS) == PERMISSION_GRANTED
                 || service.mContext.checkCallingOrSelfPermission(HIDE_OVERLAY_WINDOWS)
                 == PERMISSION_GRANTED;
+        mCanCreateSystemApplicationOverlay =
+                service.mContext.checkCallingOrSelfPermission(SYSTEM_APPLICATION_OVERLAY)
+                        == PERMISSION_GRANTED;
         mOverlaysCanBeHidden = !mCanAddInternalSystemWindow
                 && !mService.mAtmInternal.isCallerRecents(mUid);
         mCanAcquireSleepToken = service.mContext.checkCallingOrSelfPermission(DEVICE_POWER)
@@ -673,8 +678,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
         boolean changed;
 
-        if (mOverlaysCanBeHidden) {
-            // We want to track non-system signature apps adding alert windows so we can post an
+        if (mOverlaysCanBeHidden && !mCanCreateSystemApplicationOverlay) {
+            // We want to track non-system apps adding alert windows so we can post an
             // on-going notification for the user to control their visibility.
             if (visible) {
                 changed = mAlertWindowSurfaces.add(surfaceController);

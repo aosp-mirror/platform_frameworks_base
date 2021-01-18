@@ -33,12 +33,13 @@ import java.util.concurrent.TimeUnit;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class VcnGatewayConnectionConfigTest {
-    private static final int[] EXPOSED_CAPS =
+    // Public for use in VcnGatewayConnectionTest
+    public static final int[] EXPOSED_CAPS =
             new int[] {
                 NetworkCapabilities.NET_CAPABILITY_INTERNET, NetworkCapabilities.NET_CAPABILITY_MMS
             };
-    private static final int[] UNDERLYING_CAPS = new int[] {NetworkCapabilities.NET_CAPABILITY_DUN};
-    private static final long[] RETRY_INTERVALS_MS =
+    public static final int[] UNDERLYING_CAPS = new int[] {NetworkCapabilities.NET_CAPABILITY_DUN};
+    public static final long[] RETRY_INTERVALS_MS =
             new long[] {
                 TimeUnit.SECONDS.toMillis(5),
                 TimeUnit.SECONDS.toMillis(30),
@@ -47,10 +48,10 @@ public class VcnGatewayConnectionConfigTest {
                 TimeUnit.MINUTES.toMillis(15),
                 TimeUnit.MINUTES.toMillis(30)
             };
-    private static final int MAX_MTU = 1360;
+    public static final int MAX_MTU = 1360;
 
-    // Package protected for use in VcnConfigTest
-    static VcnGatewayConnectionConfig buildTestConfig() {
+    // Public for use in VcnGatewayConnectionTest
+    public static VcnGatewayConnectionConfig buildTestConfig() {
         final VcnGatewayConnectionConfig.Builder builder =
                 new VcnGatewayConnectionConfig.Builder()
                         .setRetryInterval(RETRY_INTERVALS_MS)

@@ -20,43 +20,46 @@ import static com.android.wm.shell.onehanded.OneHandedSettingsUtil.ONE_HANDED_TI
 import static com.android.wm.shell.onehanded.OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS;
 import static com.android.wm.shell.onehanded.OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_NEVER;
 import static com.android.wm.shell.onehanded.OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_SHORT_IN_SECONDS;
-import static com.android.wm.shell.onehanded.OneHandedTimeoutHandler.ONE_HANDED_TIMEOUT_STOP_MSG;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 
+import android.os.Looper;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.wm.shell.common.ShellExecutor;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
 public class OneHandedTimeoutHandlerTest extends OneHandedTestCase {
-    OneHandedTimeoutHandler mTimeoutHandler;
+    private OneHandedTimeoutHandler mTimeoutHandler;
+    private ShellExecutor mMainExecutor;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mTimeoutHandler = Mockito.spy(OneHandedTimeoutHandler.get());
-    }
-
-    @Test
-    public void testTimeoutHandler_isNotNull() {
-        assertThat(OneHandedTimeoutHandler.get()).isNotNull();
+        mMainExecutor = new TestShellExecutor();
+        mTimeoutHandler = Mockito.spy(new OneHandedTimeoutHandler(mMainExecutor));
     }
 
     @Test
     public void testTimeoutHandler_getTimeout_defaultMedium() {
-        assertThat(OneHandedTimeoutHandler.get().getTimeout()).isEqualTo(
+        assertThat(mTimeoutHandler.getTimeout()).isEqualTo(
                 ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS);
     }
 
@@ -64,28 +67,29 @@ public class OneHandedTimeoutHandlerTest extends OneHandedTestCase {
     public void testTimeoutHandler_setNewTime_resetTimer() {
         mTimeoutHandler.setTimeout(ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS);
         verify(mTimeoutHandler).resetTimer();
-        assertThat(mTimeoutHandler.sHandler.hasMessages(ONE_HANDED_TIMEOUT_STOP_MSG)).isNotNull();
+        assertTrue(mTimeoutHandler.hasScheduledTimeout());
     }
 
     @Test
     public void testSetTimeoutNever_neverResetTimer() {
         mTimeoutHandler.setTimeout(ONE_HANDED_TIMEOUT_NEVER);
-        assertThat(!mTimeoutHandler.sHandler.hasMessages(ONE_HANDED_TIMEOUT_STOP_MSG)).isNotNull();
+        assertFalse(mTimeoutHandler.hasScheduledTimeout());
     }
 
     @Test
     public void testSetTimeoutShort() {
         mTimeoutHandler.setTimeout(ONE_HANDED_TIMEOUT_SHORT_IN_SECONDS);
         verify(mTimeoutHandler).resetTimer();
-        assertThat(mTimeoutHandler.sHandler.hasMessages(ONE_HANDED_TIMEOUT_STOP_MSG)).isNotNull();
+        assertThat(mTimeoutHandler.getTimeout()).isEqualTo(ONE_HANDED_TIMEOUT_SHORT_IN_SECONDS);
+        assertTrue(mTimeoutHandler.hasScheduledTimeout());
     }
 
     @Test
     public void testSetTimeoutMedium() {
         mTimeoutHandler.setTimeout(ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS);
         verify(mTimeoutHandler).resetTimer();
-        assertThat(mTimeoutHandler.sHandler.hasMessages(
-                ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS)).isNotNull();
+        assertThat(mTimeoutHandler.getTimeout()).isEqualTo(ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS);
+        assertTrue(mTimeoutHandler.hasScheduledTimeout());
     }
 
     @Test
@@ -96,10 +100,38 @@ public class OneHandedTimeoutHandlerTest extends OneHandedTestCase {
 
     @Test
     public void testDragging_shouldRemoveAndSendEmptyMessageDelay() {
-        final boolean isDragging = true;
         mTimeoutHandler.setTimeout(ONE_HANDED_TIMEOUT_LONG_IN_SECONDS);
         mTimeoutHandler.resetTimer();
-        TestableLooper.get(this).processAllMessages();
-        assertThat(mTimeoutHandler.sHandler.hasMessages(ONE_HANDED_TIMEOUT_STOP_MSG)).isNotNull();
+        assertTrue(mTimeoutHandler.hasScheduledTimeout());
+    }
+
+    private class TestShellExecutor implements ShellExecutor {
+        private ArrayList<Runnable> mExecuted = new ArrayList<>();
+        private ArrayList<Runnable> mDelayed = new ArrayList<>();
+
+        @Override
+        public void execute(Runnable runnable) {
+            mExecuted.add(runnable);
+        }
+
+        @Override
+        public void executeDelayed(Runnable r, long delayMillis) {
+            mDelayed.add(r);
+        }
+
+        @Override
+        public void removeCallbacks(Runnable r) {
+            mDelayed.remove(r);
+        }
+
+        @Override
+        public boolean hasCallback(Runnable r) {
+            return mDelayed.contains(r);
+        }
+
+        @Override
+        public Looper getLooper() {
+            return Looper.myLooper();
+        }
     }
 }

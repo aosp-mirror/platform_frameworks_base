@@ -55,11 +55,11 @@ void SkiaRecordingCanvas::initDisplayList(uirenderer::RenderNode* renderNode, in
     SkiaCanvas::reset(&mRecorder);
 }
 
-uirenderer::DisplayList* SkiaRecordingCanvas::finishRecording() {
+uirenderer::DisplayList SkiaRecordingCanvas::finishRecording() {
     // close any existing chunks if necessary
     enableZ(false);
     mRecorder.restoreToCount(1);
-    return mDisplayList.release();
+    return uirenderer::DisplayList(std::move(mDisplayList));
 }
 
 // ----------------------------------------------------------------------------
@@ -90,9 +90,9 @@ void SkiaRecordingCanvas::drawRipple(uirenderer::CanvasPropertyPrimitive* x,
                                      uirenderer::CanvasPropertyPrimitive* radius,
                                      uirenderer::CanvasPropertyPaint* paint,
                                      uirenderer::CanvasPropertyPrimitive* progress,
-                                     sk_sp<SkRuntimeEffect> runtimeEffect) {
+                                     const SkRuntimeShaderBuilder& effectBuilder) {
     drawDrawable(mDisplayList->allocateDrawable<AnimatedRipple>(x, y, radius, paint, progress,
-                                                                runtimeEffect));
+                                                                effectBuilder));
 }
 
 void SkiaRecordingCanvas::enableZ(bool enableZ) {

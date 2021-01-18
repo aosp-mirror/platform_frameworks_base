@@ -2399,7 +2399,12 @@ public class JobSchedulerService extends com.android.server.SystemService
             return false;
         }
 
-        if (checkIfRestricted(job) != null) {
+        final JobRestriction restriction = checkIfRestricted(job);
+        if (restriction != null) {
+            if (DEBUG) {
+                Slog.v(TAG, "areComponentsInPlaceLocked: " + job.toShortString()
+                        + " restricted due to " + restriction.getReason());
+            }
             return false;
         }
 

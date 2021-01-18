@@ -30,6 +30,8 @@ import android.view.MotionEvent;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.wm.shell.common.ShellExecutor;
+
 import java.io.PrintWriter;
 
 /**
@@ -41,7 +43,8 @@ public class OneHandedTouchHandler implements OneHandedTransitionCallback {
     private static final String TAG = "OneHandedTouchHandler";
     private final Rect mLastUpdatedBounds = new Rect();
 
-    private OneHandedTimeoutHandler mTimeoutHandler;
+    private final OneHandedTimeoutHandler mTimeoutHandler;
+    private final ShellExecutor mMainExecutor;
 
     @VisibleForTesting
     InputMonitor mInputMonitor;
@@ -54,8 +57,10 @@ public class OneHandedTouchHandler implements OneHandedTransitionCallback {
     private boolean mIsOnStopTransitioning;
     private boolean mIsInOutsideRegion;
 
-    public OneHandedTouchHandler() {
-        mTimeoutHandler = OneHandedTimeoutHandler.get();
+    public OneHandedTouchHandler(OneHandedTimeoutHandler timeoutHandler,
+            ShellExecutor mainExecutor) {
+        mTimeoutHandler = timeoutHandler;
+        mMainExecutor = mainExecutor;
         updateIsEnabled();
     }
 
@@ -128,7 +133,7 @@ public class OneHandedTouchHandler implements OneHandedTransitionCallback {
             mInputMonitor = InputManager.getInstance().monitorGestureInput(
                     "onehanded-touch", DEFAULT_DISPLAY);
             mInputEventReceiver = new EventReceiver(
-                    mInputMonitor.getInputChannel(), Looper.getMainLooper());
+                    mInputMonitor.getInputChannel(), mMainExecutor.getLooper());
         }
     }
 
@@ -150,6 +155,7 @@ public class OneHandedTouchHandler implements OneHandedTransitionCallback {
         pw.println(mLastUpdatedBounds);
     }
 
+    // TODO: Use BatchedInputEventReceiver
     private class EventReceiver extends InputEventReceiver {
         EventReceiver(InputChannel channel, Looper looper) {
             super(channel, looper);

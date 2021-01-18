@@ -31,10 +31,8 @@ public abstract class PowerStatsLogTrigger {
     protected Context mContext;
     private PowerStatsLogger mPowerStatsLogger;
 
-    protected void logPowerStatsData() {
-        Message.obtain(
-            mPowerStatsLogger,
-            PowerStatsLogger.MSG_LOG_TO_DATA_STORAGE).sendToTarget();
+    protected void logPowerStatsData(int msgType) {
+        Message.obtain(mPowerStatsLogger, msgType).sendToTarget();
     }
 
     public PowerStatsLogTrigger(Context context, PowerStatsLogger powerStatsLogger) {

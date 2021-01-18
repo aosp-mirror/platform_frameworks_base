@@ -479,7 +479,7 @@ class BlobMetadata {
                 proto.write(BlobStatsEventProto.BlobCommitterProto.ACCESS_MODE,
                         committer.blobAccessMode.getAccessType());
                 proto.write(BlobStatsEventProto.BlobCommitterProto.NUM_WHITELISTED_PACKAGE,
-                        committer.blobAccessMode.getNumWhitelistedPackages());
+                        committer.blobAccessMode.getAllowedPackagesCount());
                 proto.end(token);
             }
             final byte[] committersBytes = proto.getBytes();

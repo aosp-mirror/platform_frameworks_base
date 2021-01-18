@@ -97,7 +97,7 @@ public class AudioPolicyConfig implements Parcelable {
             dest.writeInt(mix.getFormat().getEncoding());
             dest.writeInt(mix.getFormat().getChannelMask());
             // write opt-out respect
-            dest.writeBoolean(mix.getRule().allowPrivilegedPlaybackCapture());
+            dest.writeBoolean(mix.getRule().allowPrivilegedMediaPlaybackCapture());
             // write voice communication capture allowed flag
             dest.writeBoolean(mix.getRule().voiceCommunicationCaptureAllowed());
             // write mix rules
@@ -172,7 +172,7 @@ public class AudioPolicyConfig implements Parcelable {
             textDump += "  channels=0x";
             textDump += Integer.toHexString(mix.getFormat().getChannelMask()).toUpperCase() + "\n";
             textDump += "  ignore playback capture opt out="
-                    + mix.getRule().allowPrivilegedPlaybackCapture() + "\n";
+                    + mix.getRule().allowPrivilegedMediaPlaybackCapture() + "\n";
             textDump += "  allow voice communication capture="
                     + mix.getRule().voiceCommunicationCaptureAllowed() + "\n";
             // write mix rules

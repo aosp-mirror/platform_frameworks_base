@@ -61,13 +61,13 @@ public:
                    uirenderer::CanvasPropertyPrimitive* radius,
                    uirenderer::CanvasPropertyPaint* paint,
                    uirenderer::CanvasPropertyPrimitive* progress,
-                   sk_sp<SkRuntimeEffect> runtimeEffect)
+                   const SkRuntimeShaderBuilder& effectBuilder)
             : mX(x)
             , mY(y)
             , mRadius(radius)
             , mPaint(paint)
             , mProgress(progress)
-            , mRuntimeEffectBuilder(std::move(runtimeEffect)) {}
+            , mRuntimeEffectBuilder(effectBuilder) {}
 
 protected:
     virtual SkRect onGetBounds() override {
@@ -83,7 +83,7 @@ protected:
         }
 
         SkRuntimeShaderBuilder::BuilderUniform radiusU =
-                mRuntimeEffectBuilder.uniform("in_maxRadius");
+                mRuntimeEffectBuilder.uniform("in_radius");
         if (radiusU.fVar != nullptr) {
             radiusU = mRadius->value;
         }

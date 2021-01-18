@@ -8821,6 +8821,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 structure.setAutofillValue(getAutofillValue());
             }
             structure.setImportantForAutofill(getImportantForAutofill());
+            structure.setOnReceiveContentMimeTypes(getOnReceiveContentMimeTypes());
         }
 
         int ignoredParentLeft = 0;
@@ -10447,7 +10448,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage(trackingBug = 171933273)
     protected boolean isVisibleToUser(Rect boundInView) {
         if (mAttachInfo != null) {
             // Attached to invisible window means this view is not visible.
@@ -17913,6 +17914,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #setOutlineProvider(ViewOutlineProvider)
      * @see #getClipToOutline()
      */
+    @RemotableViewMethod
     public void setClipToOutline(boolean clipToOutline) {
         damageInParent();
         if (getClipToOutline() != clipToOutline) {

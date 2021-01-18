@@ -65,7 +65,7 @@ import android.content.IntentSender;
  */
 interface IPackageManager {
     void checkPackageStartable(String packageName, int userId);
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage(trackingBug = 171933273)
     boolean isPackageAvailable(String packageName, int userId);
     @UnsupportedAppUsage
     PackageInfo getPackageInfo(String packageName, int flags, int userId);

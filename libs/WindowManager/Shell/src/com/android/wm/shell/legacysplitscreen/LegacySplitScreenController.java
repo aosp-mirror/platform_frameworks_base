@@ -24,6 +24,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import android.animation.AnimationHandler;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
@@ -40,10 +41,11 @@ import android.window.TaskOrganizer;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.Transitions;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
@@ -54,20 +56,21 @@ import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
  * Controls split screen feature.
  */
-public class LegacySplitScreenController implements LegacySplitScreen,
-        DisplayController.OnDisplaysChangedListener {
+public class LegacySplitScreenController implements DisplayController.OnDisplaysChangedListener {
     static final boolean DEBUG = false;
 
     private static final String TAG = "SplitScreenCtrl";
@@ -81,11 +84,13 @@ public class LegacySplitScreenController implements LegacySplitScreen,
     private final DividerState mDividerState = new DividerState();
     private final ForcedResizableInfoActivityController mForcedResizableController;
     private final ShellExecutor mMainExecutor;
+    private final AnimationHandler mSfVsyncAnimationHandler;
     private final LegacySplitScreenTaskListener mSplits;
     private final SystemWindows mSystemWindows;
     final TransactionPool mTransactionPool;
     private final WindowManagerProxy mWindowManagerProxy;
     private final TaskOrganizer mTaskOrganizer;
+    private final SplitScreenImpl mImpl = new SplitScreenImpl();
 
     private final CopyOnWriteArrayList<WeakReference<Consumer<Boolean>>> mDockedStackExistsListeners
             = new CopyOnWriteArrayList<>();
@@ -106,21 +111,37 @@ public class LegacySplitScreenController implements LegacySplitScreen,
 
     private boolean mIsKeyguardShowing;
     private boolean mVisible = false;
-    private boolean mMinimized = false;
-    private boolean mAdjustedForIme = false;
+    private volatile boolean mMinimized = false;
+    private volatile boolean mAdjustedForIme = false;
     private boolean mHomeStackResizable = false;
+
+    /**
+     * Creates {@link SplitScreen}, returns {@code null} if the feature is not supported.
+     */
+    @Nullable
+    public static LegacySplitScreen create(Context context,
+            DisplayController displayController, SystemWindows systemWindows,
+            DisplayImeController imeController, TransactionPool transactionPool,
+            ShellTaskOrganizer shellTaskOrganizer, SyncTransactionQueue syncQueue,
+            TaskStackListenerImpl taskStackListener, Transitions transitions,
+            ShellExecutor mainExecutor, AnimationHandler sfVsyncAnimationHandler) {
+        return new LegacySplitScreenController(context, displayController, systemWindows,
+                imeController, transactionPool, shellTaskOrganizer, syncQueue, taskStackListener,
+                transitions, mainExecutor, sfVsyncAnimationHandler).mImpl;
+    }
 
     public LegacySplitScreenController(Context context,
             DisplayController displayController, SystemWindows systemWindows,
             DisplayImeController imeController, TransactionPool transactionPool,
             ShellTaskOrganizer shellTaskOrganizer, SyncTransactionQueue syncQueue,
             TaskStackListenerImpl taskStackListener, Transitions transitions,
-            ShellExecutor mainExecutor) {
+            ShellExecutor mainExecutor, AnimationHandler sfVsyncAnimationHandler) {
         mContext = context;
         mDisplayController = displayController;
         mSystemWindows = systemWindows;
         mImeController = imeController;
         mMainExecutor = mainExecutor;
+        mSfVsyncAnimationHandler = sfVsyncAnimationHandler;
         mForcedResizableController = new ForcedResizableInfoActivityController(context, this,
                 mainExecutor);
         mTransactionPool = transactionPool;
@@ -216,8 +237,7 @@ public class LegacySplitScreenController implements LegacySplitScreen,
         mTaskOrganizer.applyTransaction(tct);
     }
 
-    @Override
-    public void onKeyguardVisibilityChanged(boolean showing) {
+    private void onKeyguardVisibilityChanged(boolean showing) {
         if (!isSplitActive() || mView == null) {
             return;
         }
@@ -273,23 +293,19 @@ public class LegacySplitScreenController implements LegacySplitScreen,
         }
     }
 
-    @Override
-    public DividerView getDividerView() {
-        return mView;
-    }
-
-    @Override
-    public boolean isMinimized() {
+    boolean isMinimized() {
         return mMinimized;
     }
 
-    @Override
-    public boolean isHomeStackResizable() {
+    boolean isHomeStackResizable() {
         return mHomeStackResizable;
     }
 
-    @Override
-    public boolean isDividerVisible() {
+    DividerView getDividerView() {
+        return mView;
+    }
+
+    boolean isDividerVisible() {
         return mView != null && mView.getVisibility() == View.VISIBLE;
     }
 
@@ -308,6 +324,7 @@ public class LegacySplitScreenController implements LegacySplitScreen,
         Context dctx = mDisplayController.getDisplayContext(mContext.getDisplayId());
         mView = (DividerView)
                 LayoutInflater.from(dctx).inflate(R.layout.docked_stack_divider, null);
+        mView.setAnimationHandler(mSfVsyncAnimationHandler);
         DisplayLayout displayLayout = mDisplayController.getDisplayLayout(mContext.getDisplayId());
         mView.injectDependencies(this, mWindowManager, mDividerState, mForcedResizableController,
                 mSplits, mSplitLayout, mImePositionProcessor, mWindowManagerProxy);
@@ -373,8 +390,7 @@ public class LegacySplitScreenController implements LegacySplitScreen,
         }
     }
 
-    @Override
-    public void setMinimized(final boolean minimized) {
+    private void setMinimized(final boolean minimized) {
         if (DEBUG) Slog.d(TAG, "posting ext setMinimized " + minimized + " vis:" + mVisible);
         mMainExecutor.execute(() -> {
             if (DEBUG) Slog.d(TAG, "run posted ext setMinimized " + minimized + " vis:" + mVisible);
@@ -437,23 +453,20 @@ public class LegacySplitScreenController implements LegacySplitScreen,
         mWindowManager.setTouchable(!mAdjustedForIme);
     }
 
-    @Override
-    public void onUndockingTask() {
+    private void onUndockingTask() {
         if (mView != null) {
             mView.onUndockingTask();
         }
     }
 
-    @Override
-    public void onAppTransitionFinished() {
+    private void onAppTransitionFinished() {
         if (mView == null) {
             return;
         }
         mForcedResizableController.onAppTransitionFinished();
     }
 
-    @Override
-    public void dump(PrintWriter pw) {
+    private void dump(PrintWriter pw) {
         pw.print("  mVisible="); pw.println(mVisible);
         pw.print("  mMinimized="); pw.println(mMinimized);
         pw.print("  mAdjustedForIme="); pw.println(mAdjustedForIme);
@@ -469,16 +482,14 @@ public class LegacySplitScreenController implements LegacySplitScreen,
         return (long) (transitionDuration * transitionScale);
     }
 
-    @Override
-    public void registerInSplitScreenListener(Consumer<Boolean> listener) {
+    void registerInSplitScreenListener(Consumer<Boolean> listener) {
         listener.accept(isDividerVisible());
         synchronized (mDockedStackExistsListeners) {
             mDockedStackExistsListeners.add(new WeakReference<>(listener));
         }
     }
 
-    @Override
-    public void unregisterInSplitScreenListener(Consumer<Boolean> listener) {
+    void unregisterInSplitScreenListener(Consumer<Boolean> listener) {
         synchronized (mDockedStackExistsListeners) {
             for (int i = mDockedStackExistsListeners.size() - 1; i >= 0; i--) {
                 if (mDockedStackExistsListeners.get(i) == listener) {
@@ -488,15 +499,13 @@ public class LegacySplitScreenController implements LegacySplitScreen,
         }
     }
 
-    @Override
-    public void registerBoundsChangeListener(BiConsumer<Rect, Rect> listener) {
+    private void registerBoundsChangeListener(BiConsumer<Rect, Rect> listener) {
         synchronized (mBoundsChangedListeners) {
             mBoundsChangedListeners.add(new WeakReference<>(listener));
         }
     }
 
-    @Override
-    public boolean splitPrimaryTask() {
+    private boolean splitPrimaryTask() {
         try {
             if (ActivityTaskManager.getService().getLockTaskModeState() == LOCK_TASK_MODE_PINNED
                     || isSplitActive()) {
@@ -529,8 +538,7 @@ public class LegacySplitScreenController implements LegacySplitScreen,
                 topRunningTask.taskId, true /* onTop */);
     }
 
-    @Override
-    public void dismissSplitToPrimaryTask() {
+    private void dismissSplitToPrimaryTask() {
         startDismissSplit(true /* toPrimaryTask */);
     }
 
@@ -621,11 +629,136 @@ public class LegacySplitScreenController implements LegacySplitScreen,
         return mWindowManagerProxy;
     }
 
-    @Override
-    public WindowContainerToken getSecondaryRoot() {
+    WindowContainerToken getSecondaryRoot() {
         if (mSplits == null || mSplits.mSecondary == null) {
             return null;
         }
         return mSplits.mSecondary.token;
+    }
+
+    private class SplitScreenImpl implements LegacySplitScreen {
+        @Override
+        public boolean isMinimized() {
+            return mMinimized;
+        }
+
+        @Override
+        public boolean isHomeStackResizable() {
+            return mHomeStackResizable;
+        }
+
+        /**
+         * TODO: Remove usage from outside the shell.
+         */
+        @Override
+        public DividerView getDividerView() {
+            return LegacySplitScreenController.this.getDividerView();
+        }
+
+        @Override
+        public boolean isDividerVisible() {
+            boolean[] result = new boolean[1];
+            try {
+                mMainExecutor.executeBlocking(() -> {
+                    result[0] = LegacySplitScreenController.this.isDividerVisible();
+                });
+            } catch (InterruptedException e) {
+                Slog.e(TAG, "Failed to get divider visible");
+            }
+            return result[0];
+        }
+
+        @Override
+        public void onKeyguardVisibilityChanged(boolean isShowing) {
+            mMainExecutor.execute(() -> {
+                LegacySplitScreenController.this.onKeyguardVisibilityChanged(isShowing);
+            });
+        }
+
+        @Override
+        public void setMinimized(boolean minimized) {
+            mMainExecutor.execute(() -> {
+                LegacySplitScreenController.this.setMinimized(minimized);
+            });
+        }
+
+        @Override
+        public void onUndockingTask() {
+            mMainExecutor.execute(() -> {
+                LegacySplitScreenController.this.onUndockingTask();
+            });
+        }
+
+        @Override
+        public void onAppTransitionFinished() {
+            mMainExecutor.execute(() -> {
+                LegacySplitScreenController.this.onAppTransitionFinished();
+            });
+        }
+
+        @Override
+        public void registerInSplitScreenListener(Consumer<Boolean> listener) {
+            mMainExecutor.execute(() -> {
+                LegacySplitScreenController.this.registerInSplitScreenListener(listener);
+            });
+        }
+
+        @Override
+        public void unregisterInSplitScreenListener(Consumer<Boolean> listener) {
+            mMainExecutor.execute(() -> {
+                LegacySplitScreenController.this.unregisterInSplitScreenListener(listener);
+            });
+        }
+
+        @Override
+        public void registerBoundsChangeListener(BiConsumer<Rect, Rect> listener) {
+            mMainExecutor.execute(() -> {
+                LegacySplitScreenController.this.registerBoundsChangeListener(listener);
+            });
+        }
+
+        @Override
+        public WindowContainerToken getSecondaryRoot() {
+            WindowContainerToken[] result = new WindowContainerToken[1];
+            try {
+                mMainExecutor.executeBlocking(() -> {
+                    result[0] = LegacySplitScreenController.this.getSecondaryRoot();
+                });
+            } catch (InterruptedException e) {
+                Slog.e(TAG, "Failed to get secondary root");
+            }
+            return result[0];
+        }
+
+        @Override
+        public boolean splitPrimaryTask() {
+            boolean[] result = new boolean[1];
+            try {
+                mMainExecutor.executeBlocking(() -> {
+                    result[0] = LegacySplitScreenController.this.splitPrimaryTask();
+                });
+            } catch (InterruptedException e) {
+                Slog.e(TAG, "Failed to split primary task");
+            }
+            return result[0];
+        }
+
+        @Override
+        public void dismissSplitToPrimaryTask() {
+            mMainExecutor.execute(() -> {
+                LegacySplitScreenController.this.dismissSplitToPrimaryTask();
+            });
+        }
+
+        @Override
+        public void dump(PrintWriter pw) {
+            try {
+                mMainExecutor.executeBlocking(() -> {
+                    LegacySplitScreenController.this.dump(pw);
+                });
+            } catch (InterruptedException e) {
+                Slog.e(TAG, "Failed to dump LegacySplitScreenController in 2s");
+            }
+        }
     }
 }

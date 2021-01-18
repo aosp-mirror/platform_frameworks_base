@@ -370,13 +370,15 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         if (mKeyguardUpdateMonitor.needsSlowUnlockTransition() && mState == ScrimState.UNLOCKED) {
             mAnimationDelay = StatusBar.FADE_KEYGUARD_START_DELAY;
             scheduleUpdate();
-        } else if ((!mDozeParameters.getAlwaysOn() && oldState == ScrimState.AOD)
+        } else if ((oldState == ScrimState.AOD  // leaving doze
+                && (!mDozeParameters.getAlwaysOn() || mState == ScrimState.UNLOCKED))
                 || (mState == ScrimState.AOD && !mDozeParameters.getDisplayNeedsBlanking())) {
             // Scheduling a frame isn't enough when:
             //  • Leaving doze and we need to modify scrim color immediately
             //  • ColorFade will not kick-in and scrim cannot wait for pre-draw.
             onPreDraw();
         } else {
+            // Schedule a frame
             scheduleUpdate();
         }
 

@@ -35,6 +35,7 @@ import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
+import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.NoCallingIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -212,6 +213,29 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
             } else {
                 holder.setMobileState(state);
                 handleSet(slotIndex, holder);
+            }
+        }
+    }
+
+    /**
+     * Accept a list of NoCallingIconStates, and show them in the same slot
+     * @param slot StatusBar slot
+     * @param states All of the no Calling & SMS icon states
+     */
+    @Override
+    public void setNoCallingIcons(String slot, List<NoCallingIconState> states) {
+        Slot noCallingSlot = getSlot(slot);
+        int slotIndex = getSlotIndex(slot);
+
+        for (NoCallingIconState state : states) {
+            StatusBarIconHolder holder = noCallingSlot.getHolderForTag(state.subId);
+            if (holder == null) {
+                holder = StatusBarIconHolder.fromNoCallingState(mContext, state);
+                holder.setVisible(state.visible);
+                setIcon(slotIndex, holder);
+            } else {
+                holder.setVisible(state.visible);
+                setIcon(slotIndex, holder);
             }
         }
     }

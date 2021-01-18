@@ -16,16 +16,21 @@
 
 package com.android.wm.shell.apppairs;
 
+import static org.mockito.Mockito.mock;
+
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 
+import org.mockito.Mock;
+
 public class TestAppPairsController extends AppPairsController {
-    TestAppPairsPool mPool;
+    private TestAppPairsPool mPool;
 
     public TestAppPairsController(ShellTaskOrganizer organizer, SyncTransactionQueue syncQueue,
             DisplayController displayController) {
-        super(organizer, syncQueue, displayController);
+        super(organizer, syncQueue, displayController, mock(ShellExecutor.class));
         mPool = new TestAppPairsPool(this);
         setPairsPool(mPool);
     }

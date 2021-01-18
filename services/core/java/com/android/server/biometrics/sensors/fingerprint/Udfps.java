@@ -16,9 +16,11 @@
 
 package com.android.server.biometrics.sensors.fingerprint;
 
+import com.android.server.biometrics.sensors.BaseClientMonitor;
+
 /**
  * Interface for under-display fingerprint sensors.
- * {@link com.android.server.biometrics.sensors.ClientMonitor} subclass that require knowledge of
+ * {@link BaseClientMonitor} subclass that require knowledge of
  * finger position (e.g. enroll, authenticate) should implement this.
  */
 public interface Udfps {

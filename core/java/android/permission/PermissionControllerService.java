@@ -540,12 +540,13 @@ public abstract class PermissionControllerService extends Service {
             public void getPrivilegesDescriptionStringForProfile(
                     @NonNull String deviceProfileName,
                     @NonNull AndroidFuture<String> callback) {
-                checkStringNotEmpty(deviceProfileName);
-                Objects.requireNonNull(callback);
-
-                enforceSomePermissionsGrantedToCaller(Manifest.permission.MANAGE_COMPANION_DEVICES);
-
                 try {
+                    checkStringNotEmpty(deviceProfileName);
+                    Objects.requireNonNull(callback);
+
+                    enforceSomePermissionsGrantedToCaller(
+                            Manifest.permission.MANAGE_COMPANION_DEVICES);
+
                     callback.complete(PermissionControllerService
                             .this
                             .getPrivilegesDescriptionStringForProfile(deviceProfileName));

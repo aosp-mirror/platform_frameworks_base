@@ -39,6 +39,11 @@ public abstract class BatteryConsumer {
             POWER_COMPONENT_USAGE,
             POWER_COMPONENT_CPU,
             POWER_COMPONENT_BLUETOOTH,
+            POWER_COMPONENT_CAMERA,
+            POWER_COMPONENT_AUDIO,
+            POWER_COMPONENT_VIDEO,
+            POWER_COMPONENT_FLASHLIGHT,
+            POWER_COMPONENT_SYSTEM_SERVICES,
     })
     @Retention(RetentionPolicy.SOURCE)
     public static @interface PowerComponent {
@@ -47,8 +52,13 @@ public abstract class BatteryConsumer {
     public static final int POWER_COMPONENT_USAGE = 0;
     public static final int POWER_COMPONENT_CPU = 1;
     public static final int POWER_COMPONENT_BLUETOOTH = 2;
+    public static final int POWER_COMPONENT_CAMERA = 3;
+    public static final int POWER_COMPONENT_AUDIO = 4;
+    public static final int POWER_COMPONENT_VIDEO = 5;
+    public static final int POWER_COMPONENT_FLASHLIGHT = 6;
+    public static final int POWER_COMPONENT_SYSTEM_SERVICES = 7;
 
-    public static final int POWER_COMPONENT_COUNT = 3;
+    public static final int POWER_COMPONENT_COUNT = 8;
 
     public static final int FIRST_CUSTOM_POWER_COMPONENT_ID = 1000;
     public static final int LAST_CUSTOM_POWER_COMPONENT_ID = 9999;
@@ -75,6 +85,8 @@ public abstract class BatteryConsumer {
             TIME_COMPONENT_CPU,
             TIME_COMPONENT_CPU_FOREGROUND,
             TIME_COMPONENT_BLUETOOTH,
+            TIME_COMPONENT_CAMERA,
+            TIME_COMPONENT_FLASHLIGHT,
     })
     @Retention(RetentionPolicy.SOURCE)
     public static @interface TimeComponent {
@@ -84,8 +96,12 @@ public abstract class BatteryConsumer {
     public static final int TIME_COMPONENT_CPU = 1;
     public static final int TIME_COMPONENT_CPU_FOREGROUND = 2;
     public static final int TIME_COMPONENT_BLUETOOTH = 3;
+    public static final int TIME_COMPONENT_CAMERA = 4;
+    public static final int TIME_COMPONENT_AUDIO = 5;
+    public static final int TIME_COMPONENT_VIDEO = 6;
+    public static final int TIME_COMPONENT_FLASHLIGHT = 7;
 
-    public static final int TIME_COMPONENT_COUNT = 4;
+    public static final int TIME_COMPONENT_COUNT = 8;
 
     public static final int FIRST_CUSTOM_TIME_COMPONENT_ID = 1000;
     public static final int LAST_CUSTOM_TIME_COMPONENT_ID = 9999;

@@ -98,6 +98,7 @@ public class PageIndicator extends ViewGroup {
         }
         // Refresh state.
         setIndex(mPosition >> 1);
+        requestLayout();
     }
 
     /**

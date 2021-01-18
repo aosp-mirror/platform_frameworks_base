@@ -1507,7 +1507,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord activity = createActivityWithTask();
         final WindowProcessController wpc = activity.app;
         assertTrue(wpc.registeredForActivityConfigChanges());
-        assertFalse(wpc.registeredForDisplayConfigChanges());
+        assertFalse(wpc.registeredForDisplayAreaConfigChanges());
 
         final ActivityRecord secondaryDisplayActivity =
                 createActivityOnDisplay(false /* defaultDisplay */, null /* process */);
@@ -1701,7 +1701,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertTrue(wpc.registeredForActivityConfigChanges());
         assertEquals(0, secondActivityRecord.getMergedOverrideConfiguration()
                 .diff(wpc.getRequestedOverrideConfiguration()));
-        assertFalse(wpc.registeredForDisplayConfigChanges());
+        assertFalse(wpc.registeredForDisplayAreaConfigChanges());
     }
 
     @Test

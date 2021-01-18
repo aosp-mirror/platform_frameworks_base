@@ -360,7 +360,8 @@ public abstract class PanelViewController {
     protected void startExpandMotion(float newX, float newY, boolean startTracking,
             float expandedHeight) {
         if (!mHandlingPointerUp) {
-            InteractionJankMonitor.getInstance().begin(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+            InteractionJankMonitor.getInstance().begin(mView,
+                    CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
         }
         mInitialOffsetOnTouch = expandedHeight;
         mInitialTouchY = newY;
@@ -739,6 +740,8 @@ public abstract class PanelViewController {
      */
     protected abstract boolean isTrackingBlocked();
 
+    protected abstract void setIsShadeOpening(boolean isShadeOpening);
+
     protected abstract void setOverExpansion(float overExpansion, boolean isPixels);
 
     protected abstract void onHeightUpdated(float expandedHeight);
@@ -862,7 +865,7 @@ public abstract class PanelViewController {
                             mView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                             if (mAnimateAfterExpanding) {
                                 notifyExpandingStarted();
-                                InteractionJankMonitor.getInstance().begin(
+                                InteractionJankMonitor.getInstance().begin(mView,
                                         CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
                                 fling(0, true /* expand */);
                             } else {

@@ -30,7 +30,6 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SPLIT;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING;
 import static android.content.pm.PackageManager.INSTALL_STAGED;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
-import static android.content.pm.PackageParser.APEX_FILE_EXTENSION;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_WRONLY;
@@ -85,7 +84,6 @@ import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ApkLite;
 import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
-import android.content.pm.Signature;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.result.ParseResult;
@@ -111,6 +109,7 @@ import android.os.UserHandle;
 import android.os.incremental.IStorageHealthListener;
 import android.os.incremental.IncrementalFileStorages;
 import android.os.incremental.IncrementalManager;
+import android.os.incremental.PerUidReadTimeouts;
 import android.os.incremental.StorageHealthCheckParams;
 import android.os.storage.StorageManager;
 import android.provider.Settings.Secure;
@@ -244,8 +243,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String ATTR_SIGNATURE = "signature";
     private static final String ATTR_CHECKSUM_KIND = "checksumKind";
     private static final String ATTR_CHECKSUM_VALUE = "checksumValue";
-    private static final String ATTR_CHECKSUM_PACKAGE = "checksumPackage";
-    private static final String ATTR_CHECKSUM_CERTIFICATE = "checksumCertificate";
 
     private static final String PROPERTY_NAME_INHERIT_NATIVE = "pi.inherit_native_on_dont_kill";
     private static final int[] EMPTY_CHILD_SESSION_ARRAY = EmptyArray.INT;
@@ -253,6 +250,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final ApkChecksum[] EMPTY_FILE_CHECKSUM_ARRAY = {};
 
     private static final String SYSTEM_DATA_LOADER_PACKAGE = "android";
+    private static final String APEX_FILE_EXTENSION = ".apex";
 
     private static final int INCREMENTAL_STORAGE_BLOCKED_TIMEOUT_MS = 2000;
     private static final int INCREMENTAL_STORAGE_UNHEALTHY_TIMEOUT_MS = 7000;
@@ -333,8 +331,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private boolean mCommitted = false;
     @GuardedBy("mLock")
     private boolean mRelinquished = false;
-    @GuardedBy("mLock")
-    private boolean mDestroyed = false;
 
     /** Permissions have been accepted by the user (see {@link #setPermissionsResult}) */
     @GuardedBy("mLock")
@@ -401,33 +397,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private ArraySet<FileEntry> mFiles = new ArraySet<>();
 
-    static class CertifiedChecksum {
-        final @NonNull Checksum mChecksum;
-        final @NonNull String mPackageName;
-        final @NonNull byte[] mCertificate;
-
-        CertifiedChecksum(@NonNull Checksum checksum, @NonNull String packageName,
-                @NonNull byte[] certificate) {
-            mChecksum = checksum;
-            mPackageName = packageName;
-            mCertificate = certificate;
-        }
-
-        Checksum getChecksum() {
-            return mChecksum;
-        }
-
-        String getPackageName() {
-            return mPackageName;
-        }
-
-        byte[] getCertificate() {
-            return mCertificate;
-        }
-    }
-
     @GuardedBy("mLock")
-    private ArrayMap<String, List<CertifiedChecksum>> mChecksums = new ArrayMap<>();
+    private ArrayMap<String, Checksum[]> mChecksums = new ArrayMap<>();
 
     @Nullable
     final StagedSession mStagedSession;
@@ -789,8 +760,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private boolean mVerityFound;
 
-    @GuardedBy("mLock")
-    private boolean mDataLoaderFinished = false;
+    /**
+     * Both flags should be guarded with mLock whenever changes need to be in lockstep.
+     * Ok to check without mLock in case the proper check is done later, e.g. status callbacks
+     * for DataLoaders with deferred processing.
+     */
+    private volatile boolean mDestroyed = false;
+    private volatile boolean mDataLoaderFinished = false;
 
     @GuardedBy("mLock")
     private IncrementalFileStorages mIncrementalFileStorages;
@@ -945,7 +921,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             int sessionId, int userId, int installerUid, @NonNull InstallSource installSource,
             SessionParams params, long createdMillis, long committedMillis,
             File stageDir, String stageCid, InstallationFile[] files,
-            ArrayMap<String, List<CertifiedChecksum>> checksums,
+            ArrayMap<String, List<Checksum>> checksums,
             boolean prepared, boolean committed, boolean destroyed, boolean sealed,
             @Nullable int[] childSessionIds, int parentSessionId, boolean isReady,
             boolean isFailed, boolean isApplied, int stagedSessionErrorCode,
@@ -991,7 +967,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         if (checksums != null) {
-            mChecksums.putAll(checksums);
+            for (int i = 0, isize = checksums.size(); i < isize; ++i) {
+                final String fileName = checksums.keyAt(i);
+                final List<Checksum> fileChecksums = checksums.valueAt(i);
+                mChecksums.put(fileName, fileChecksums.toArray(new Checksum[fileChecksums.size()]));
+            }
         }
 
         if (!params.isMultiPackage && (stageDir == null) == (stageCid == null)) {
@@ -1289,16 +1269,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throw new IllegalStateException("Can't obtain calling installer's package.");
         }
 
-        // Obtaining array of certificates used for signing the installer package.
-        final Signature[] certs = callingInstaller.getSigningDetails().signatures;
-        if (certs == null || certs.length == 0 || certs[0] == null) {
-            throw new IllegalStateException(
-                    "Can't obtain calling installer package's certificates.");
-        }
-        // According to V2/V3 signing schema, the first certificate corresponds to the public key
-        // in the signing block.
-        final byte[] mainCertificateBytes = certs[0].toByteArray();
-
         synchronized (mLock) {
             assertCallerIsOwnerOrRootLocked();
             assertPreparedAndNotCommittedOrDestroyedLocked("addChecksums");
@@ -1307,13 +1277,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 throw new IllegalStateException("Duplicate checksums.");
             }
 
-            List<CertifiedChecksum> fileChecksums = new ArrayList<>();
-            mChecksums.put(name, fileChecksums);
-
-            for (Checksum checksum : checksums) {
-                fileChecksums.add(new CertifiedChecksum(checksum, initiatingPackageName,
-                        mainCertificateBytes));
-            }
+            mChecksums.put(name, checksums);
         }
     }
 
@@ -3006,7 +2970,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean isInstallerShell = (mInstallerUid == Process.SHELL_UID);
         if (isInstallerShell && isIncrementalInstallation() && mIncrementalFileStorages != null) {
             if (!packageLite.debuggable && !packageLite.profilableByShell) {
-                mIncrementalFileStorages.disableReadLogs();
+                mIncrementalFileStorages.disallowReadLogs();
             }
         }
     }
@@ -3068,34 +3032,23 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         maybeStageFsveritySignatureLocked(dexMetadataFile, targetDexMetadataFile);
     }
 
-    private static ApkChecksum[] createApkChecksums(String splitName,
-            List<CertifiedChecksum> checksums) {
-        ApkChecksum[] result = new ApkChecksum[checksums.size()];
-        for (int i = 0, size = checksums.size(); i < size; ++i) {
-            CertifiedChecksum checksum = checksums.get(i);
-            result[i] = new ApkChecksum(splitName, checksum.getChecksum(),
-                    checksum.getPackageName(), checksum.getCertificate());
-        }
-        return result;
-    }
-
     @GuardedBy("mLock")
     private void maybeStageDigestsLocked(File origFile, File targetFile, String splitName)
             throws PackageManagerException {
-        final List<CertifiedChecksum> checksums = mChecksums.get(origFile.getName());
+        final Checksum[] checksums = mChecksums.get(origFile.getName());
         if (checksums == null) {
             return;
         }
         mChecksums.remove(origFile.getName());
 
-        if (checksums.isEmpty()) {
+        if (checksums.length == 0) {
             return;
         }
 
         final String targetDigestsPath = ApkChecksums.buildDigestsPathForApk(targetFile.getName());
         final File targetDigestsFile = new File(stageDir, targetDigestsPath);
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-            ApkChecksums.writeChecksums(os, createApkChecksums(splitName, checksums));
+            ApkChecksums.writeChecksums(os, checksums);
             final byte[] checksumsBytes = os.toByteArray();
 
             if (!isIncrementalInstallation() || mIncrementalFileStorages == null) {
@@ -3612,19 +3565,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         return;
                 }
 
-                synchronized (mLock) {
-                    if (mDestroyed || mDataLoaderFinished) {
-                        // No need to worry about post installation
-                        return;
-                    }
+                if (mDestroyed || mDataLoaderFinished) {
+                    // No need to worry about post installation
+                    return;
                 }
 
                 try {
                     IDataLoader dataLoader = dataLoaderManager.getDataLoader(dataLoaderId);
                     if (dataLoader == null) {
-                        synchronized (mLock) {
-                            mDataLoaderFinished = true;
-                        }
+                        mDataLoaderFinished = true;
                         dispatchSessionValidationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                                 "Failure to obtain data loader");
                         return;
@@ -3657,9 +3606,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             break;
                         }
                         case IDataLoaderStatusListener.DATA_LOADER_IMAGE_READY: {
-                            synchronized (mLock) {
-                                mDataLoaderFinished = true;
-                            }
+                            mDataLoaderFinished = true;
                             if (hasParentSessionId()) {
                                 mSessionProvider.getSession(
                                         getParentSessionId()).dispatchSessionSealed();
@@ -3672,9 +3619,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             break;
                         }
                         case IDataLoaderStatusListener.DATA_LOADER_IMAGE_NOT_READY: {
-                            synchronized (mLock) {
-                                mDataLoaderFinished = true;
-                            }
+                            mDataLoaderFinished = true;
                             dispatchSessionValidationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                                     "Failed to prepare image.");
                             if (manualStartAndDestroy) {
@@ -3693,9 +3638,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             break;
                         }
                         case IDataLoaderStatusListener.DATA_LOADER_UNRECOVERABLE:
-                            synchronized (mLock) {
-                                mDataLoaderFinished = true;
-                            }
+                            mDataLoaderFinished = true;
                             dispatchSessionValidationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                                     "DataLoader reported unrecoverable failure.");
                             break;
@@ -3720,20 +3663,22 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         };
 
         if (!manualStartAndDestroy) {
+            final PerUidReadTimeouts[] perUidReadTimeouts = mPm.getPerUidReadTimeouts();
+
             final StorageHealthCheckParams healthCheckParams = new StorageHealthCheckParams();
             healthCheckParams.blockedTimeoutMs = INCREMENTAL_STORAGE_BLOCKED_TIMEOUT_MS;
             healthCheckParams.unhealthyTimeoutMs = INCREMENTAL_STORAGE_UNHEALTHY_TIMEOUT_MS;
             healthCheckParams.unhealthyMonitoringMs = INCREMENTAL_STORAGE_UNHEALTHY_MONITORING_MS;
+
             final boolean systemDataLoader =
                     params.getComponentName().getPackageName() == SYSTEM_DATA_LOADER_PACKAGE;
+
             final IStorageHealthListener healthListener = new IStorageHealthListener.Stub() {
                 @Override
                 public void onHealthStatus(int storageId, int status) {
-                    synchronized (mLock) {
-                        if (mDestroyed || mDataLoaderFinished) {
-                            // No need to worry about post installation
-                            return;
-                        }
+                    if (mDestroyed || mDataLoaderFinished) {
+                        // No need to worry about post installation
+                        return;
                     }
 
                     switch (status) {
@@ -3748,9 +3693,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             // fallthrough
                         case IStorageHealthListener.HEALTH_STATUS_UNHEALTHY:
                             // Even ADB installation can't wait for missing pages for too long.
-                            synchronized (mLock) {
-                                mDataLoaderFinished = true;
-                            }
+                            mDataLoaderFinished = true;
                             dispatchSessionValidationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                                     "Image is missing pages required for installation.");
                             break;
@@ -3760,7 +3703,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
             try {
                 mIncrementalFileStorages = IncrementalFileStorages.initialize(mContext, stageDir,
-                        params, statusListener, healthCheckParams, healthListener, addedFiles);
+                        params, statusListener, healthCheckParams, healthListener, addedFiles,
+                        perUidReadTimeouts);
                 return false;
             } catch (IOException e) {
                 throw new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE, e.getMessage(),
@@ -4332,18 +4276,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
 
             for (int i = 0, isize = mChecksums.size(); i < isize; ++i) {
-                String fileName = mChecksums.keyAt(i);
-                List<CertifiedChecksum> checksums = mChecksums.valueAt(i);
-                for (int j = 0, jsize = checksums.size(); j < jsize; ++j) {
-                    CertifiedChecksum checksum = checksums.get(j);
+                final String fileName = mChecksums.keyAt(i);
+                final Checksum[] checksums = mChecksums.valueAt(i);
+                for (Checksum checksum : checksums) {
                     out.startTag(null, TAG_SESSION_CHECKSUM);
                     writeStringAttribute(out, ATTR_NAME, fileName);
-                    out.attributeInt(null, ATTR_CHECKSUM_KIND, checksum.getChecksum().getType());
-                    writeByteArrayAttribute(out, ATTR_CHECKSUM_VALUE,
-                            checksum.getChecksum().getValue());
-                    writeStringAttribute(out, ATTR_CHECKSUM_PACKAGE, checksum.getPackageName());
-                    writeByteArrayAttribute(out, ATTR_CHECKSUM_CERTIFICATE,
-                            checksum.getCertificate());
+                    out.attributeInt(null, ATTR_CHECKSUM_KIND, checksum.getType());
+                    writeByteArrayAttribute(out, ATTR_CHECKSUM_VALUE, checksum.getValue());
                     out.endTag(null, TAG_SESSION_CHECKSUM);
                 }
             }
@@ -4461,7 +4400,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         int autoRevokePermissionsMode = MODE_DEFAULT;
         List<Integer> childSessionIds = new ArrayList<>();
         List<InstallationFile> files = new ArrayList<>();
-        ArrayMap<String, List<CertifiedChecksum>> checksums = new ArrayMap<>();
+        ArrayMap<String, List<Checksum>> checksums = new ArrayMap<>();
         int outerDepth = in.getDepth();
         int type;
         while ((type = in.next()) != XmlPullParser.END_DOCUMENT
@@ -4493,18 +4432,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
             if (TAG_SESSION_CHECKSUM.equals(in.getName())) {
                 final String fileName = readStringAttribute(in, ATTR_NAME);
-                final CertifiedChecksum certifiedChecksum = new CertifiedChecksum(
-                        new Checksum(in.getAttributeInt(null, ATTR_CHECKSUM_KIND, 0),
-                                readByteArrayAttribute(in, ATTR_CHECKSUM_VALUE)),
-                        readStringAttribute(in, ATTR_CHECKSUM_PACKAGE),
-                        readByteArrayAttribute(in, ATTR_CHECKSUM_CERTIFICATE));
+                final Checksum checksum = new Checksum(
+                        in.getAttributeInt(null, ATTR_CHECKSUM_KIND, 0),
+                        readByteArrayAttribute(in, ATTR_CHECKSUM_VALUE));
 
-                List<CertifiedChecksum> certifiedChecksums = checksums.get(fileName);
-                if (certifiedChecksums == null) {
-                    certifiedChecksums = new ArrayList<>();
-                    checksums.put(fileName, certifiedChecksums);
+                List<Checksum> fileChecksums = checksums.get(fileName);
+                if (fileChecksums == null) {
+                    fileChecksums = new ArrayList<>();
+                    checksums.put(fileName, fileChecksums);
                 }
-                certifiedChecksums.add(certifiedChecksum);
+                fileChecksums.add(checksum);
             }
         }
 

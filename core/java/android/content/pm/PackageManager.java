@@ -3406,6 +3406,14 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device supports translation of text-to-text in multiple languages via integration with
+     * the system {@link android.service.translation.TranslationService translation provider}.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_TRANSLATION = "android.software.translation";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
      * The device implements headtracking suitable for a VR device.
      */
     @SdkConstant(SdkConstantType.FEATURE)
@@ -3503,6 +3511,17 @@ public abstract class PackageManager {
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_TUNER = "android.hardware.tv.tuner";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports a enabling/disabling sensor privacy for
+     * camera. When sensory privacy for the camera is enabled no camera data is send to clients,
+     * e.g. the view finder in a camera app would appear blank.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_CAMERA_TOGGLE = "android.hardware.camera.toggle";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device has

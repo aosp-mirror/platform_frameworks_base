@@ -128,6 +128,7 @@ import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
+import android.app.BroadcastOptions;
 import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.ITransientNotification;
@@ -154,6 +155,7 @@ import android.app.usage.UsageStatsManagerInternal;
 import android.companion.ICompanionDeviceManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
+import android.compat.annotation.LoggingOnly;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentProvider;
@@ -250,6 +252,7 @@ import android.widget.Toast;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.InstanceIdSequence;
@@ -449,12 +452,13 @@ public class NotificationManagerService extends SystemService {
     /**
      * Rate limit showing toasts, on a per package basis.
      *
-     * It limits the effects of {@link android.widget.Toast#show()} calls to prevent overburdening
+     * It limits the number of {@link android.widget.Toast#show()} calls to prevent overburdening
      * the user with too many toasts in a limited time. Any attempt to show more toasts than allowed
      * in a certain time frame will result in the toast being discarded.
      */
     @ChangeId
-    private static final long RATE_LIMIT_TOASTS = 154198299L;
+    @LoggingOnly
+    private static final long RATE_LIMIT_TOASTS = 174840628L;
 
     private IActivityManager mAm;
     private ActivityTaskManagerInternal mAtm;
@@ -476,6 +480,7 @@ public class NotificationManagerService extends SystemService {
     private UriGrantsManagerInternal mUgmInternal;
     private RoleObserver mRoleObserver;
     private UserManager mUm;
+    private IPlatformCompat mPlatformCompat;
     private ShortcutHelper mShortcutHelper;
 
     final IBinder mForegroundToken = new Binder();
@@ -527,6 +532,9 @@ public class NotificationManagerService extends SystemService {
     @GuardedBy("mNotificationLock")
     final ArrayMap<Integer, ArrayMap<String, String>> mAutobundledSummaries = new ArrayMap<>();
     final ArrayList<ToastRecord> mToastQueue = new ArrayList<>();
+    // set of uids for which toast rate limiting is disabled
+    @GuardedBy("mToastQueue")
+    private final Set<Integer> mToastRateLimitingDisabledUids = new ArraySet<>();
     final ArrayMap<String, NotificationRecord> mSummaryByGroupKey = new ArrayMap<>();
 
     // True if the toast that's on top of the queue is being shown at the moment.
@@ -864,7 +872,7 @@ public class NotificationManagerService extends SystemService {
     @VisibleForTesting
     protected void handleSavePolicyFile() {
         if (!IoThread.getHandler().hasCallbacks(mSavePolicyFile)) {
-            IoThread.getHandler().post(mSavePolicyFile);
+            IoThread.getHandler().postDelayed(mSavePolicyFile, 250);
         }
     }
 
@@ -1995,6 +2003,8 @@ public class NotificationManagerService extends SystemService {
         mDeviceIdleManager = getContext().getSystemService(DeviceIdleManager.class);
         mDpm = dpm;
         mUm = userManager;
+        mPlatformCompat = IPlatformCompat.Stub.asInterface(
+                ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
 
         mUiHandler = new Handler(UiThread.get().getLooper());
         String[] extractorNames;
@@ -3063,6 +3073,22 @@ public class NotificationManagerService extends SystemService {
                     }
                 } finally {
                     Binder.restoreCallingIdentity(callingId);
+                }
+            }
+        }
+
+        @Override
+        public void setToastRateLimitingEnabled(boolean enable) {
+            getContext().enforceCallingPermission(
+                    android.Manifest.permission.MANAGE_TOAST_RATE_LIMITING,
+                    "App doesn't have the permission to enable/disable toast rate limiting");
+
+            synchronized (mToastQueue) {
+                int uid = Binder.getCallingUid();
+                if (enable) {
+                    mToastRateLimitingDisabledUids.remove(uid);
+                } else {
+                    mToastRateLimitingDisabledUids.add(uid);
                 }
             }
         }
@@ -5935,7 +5961,9 @@ public class NotificationManagerService extends SystemService {
                     PendingIntent pendingIntent = notification.allPendingIntents.valueAt(i);
                     if (pendingIntent != null) {
                         am.setPendingIntentWhitelistDuration(pendingIntent.getTarget(),
-                                ALLOWLIST_TOKEN, duration);
+                                ALLOWLIST_TOKEN, duration,
+                                BroadcastOptions.TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED
+                        );
                         am.setPendingIntentAllowBgActivityStarts(pendingIntent.getTarget(),
                                 ALLOWLIST_TOKEN, (FLAG_ACTIVITY_SENDER | FLAG_BROADCAST_SENDER
                                         | FLAG_SERVICE_SENDER));
@@ -6053,7 +6081,6 @@ public class NotificationManagerService extends SystemService {
         if (!isAppForeground && metadata != null) {
             int flags = metadata.getFlags();
             flags &= ~Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE;
-            flags &= ~Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
             metadata.setFlags(flags);
         }
     }
@@ -7378,7 +7405,7 @@ public class NotificationManagerService extends SystemService {
         while (record != null) {
             int userId = UserHandle.getUserId(record.uid);
             boolean rateLimitingEnabled =
-                    CompatChanges.isChangeEnabled(RATE_LIMIT_TOASTS, record.uid);
+                    !mToastRateLimitingDisabledUids.contains(record.uid);
             boolean isWithinQuota =
                     mToastRateLimiter.isWithinQuota(userId, record.pkg, TOAST_QUOTA_TAG);
 
@@ -7403,6 +7430,7 @@ public class NotificationManagerService extends SystemService {
     private boolean tryShowToast(ToastRecord record, boolean rateLimitingEnabled,
             boolean isWithinQuota) {
         if (rateLimitingEnabled && !isWithinQuota) {
+            reportCompatRateLimitingToastsChange(record.uid);
             Slog.w(TAG, "Package " + record.pkg + " is above allowed toast quota, the "
                     + "following toast was blocked and discarded: " + record);
             return false;
@@ -7413,6 +7441,19 @@ public class NotificationManagerService extends SystemService {
             return false;
         }
         return record.show();
+    }
+
+    /** Reports rate limiting toasts compat change (used when the toast was blocked). */
+    private void reportCompatRateLimitingToastsChange(int uid) {
+        final long id = Binder.clearCallingIdentity();
+        try {
+            mPlatformCompat.reportChangeByUid(RATE_LIMIT_TOASTS, uid);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Unexpected exception while reporting toast was blocked due to rate"
+                    + " limiting", e);
+        } finally {
+            Binder.restoreCallingIdentity(id);
+        }
     }
 
     @GuardedBy("mToastQueue")

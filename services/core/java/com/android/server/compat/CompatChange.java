@@ -64,7 +64,7 @@ public final class CompatChange extends CompatibilityChangeInfo {
     private Map<String, Boolean> mDeferredOverrides;
 
     public CompatChange(long changeId) {
-        this(changeId, null, -1, -1, false, false, null);
+        this(changeId, null, -1, -1, false, false, null, false);
     }
 
     /**
@@ -77,9 +77,10 @@ public final class CompatChange extends CompatibilityChangeInfo {
      * @param disabled If {@code true}, overrides any {@code enableAfterTargetSdk} set.
      */
     public CompatChange(long changeId, @Nullable String name, int enableAfterTargetSdk,
-            int enableSinceTargetSdk, boolean disabled, boolean loggingOnly, String description) {
+            int enableSinceTargetSdk, boolean disabled, boolean loggingOnly, String description,
+            boolean overridable) {
         super(changeId, name, enableAfterTargetSdk, enableSinceTargetSdk, disabled, loggingOnly,
-              description);
+              description, overridable);
     }
 
     /**
@@ -88,7 +89,7 @@ public final class CompatChange extends CompatibilityChangeInfo {
     public CompatChange(Change change) {
         super(change.getId(), change.getName(), change.getEnableAfterTargetSdk(),
                 change.getEnableSinceTargetSdk(), change.getDisabled(), change.getLoggingOnly(),
-                change.getDescription());
+                change.getDescription(), change.getOverridable());
     }
 
     void registerListener(ChangeListener listener) {
@@ -273,6 +274,9 @@ public final class CompatChange extends CompatibilityChangeInfo {
         }
         if (mDeferredOverrides != null && mDeferredOverrides.size() > 0) {
             sb.append("; deferredOverrides=").append(mDeferredOverrides);
+        }
+        if (getOverridable()) {
+            sb.append("; overridable");
         }
         return sb.append(")").toString();
     }

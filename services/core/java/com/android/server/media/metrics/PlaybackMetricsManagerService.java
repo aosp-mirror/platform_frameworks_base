@@ -18,8 +18,14 @@ package com.android.server.media.metrics;
 
 import android.content.Context;
 import android.media.metrics.IPlaybackMetricsManager;
+import android.media.metrics.NetworkEvent;
+import android.media.metrics.PlaybackErrorEvent;
 import android.media.metrics.PlaybackMetrics;
+import android.media.metrics.PlaybackStateEvent;
+import android.os.Binder;
 import android.util.Base64;
+import android.util.StatsEvent;
+import android.util.StatsLog;
 
 import com.android.server.SystemService;
 
@@ -50,6 +56,33 @@ public final class PlaybackMetricsManagerService extends SystemService {
     private final class BinderService extends IPlaybackMetricsManager.Stub {
         @Override
         public void reportPlaybackMetrics(String sessionId, PlaybackMetrics metrics, int userId) {
+            StatsEvent statsEvent = StatsEvent.newBuilder()
+                    .setAtomId(320)
+                    .writeInt(Binder.getCallingUid())
+                    .writeString(sessionId)
+                    .writeLong(metrics.getMediaDurationMillis())
+                    .writeInt(metrics.getStreamSource())
+                    .writeInt(metrics.getStreamType())
+                    .writeInt(metrics.getPlaybackType())
+                    .writeInt(metrics.getDrmType())
+                    .writeInt(metrics.getContentType())
+                    .writeString(metrics.getPlayerName())
+                    .writeString(metrics.getPlayerVersion())
+                    .writeByteArray(new byte[0]) // TODO: write experiments proto
+                    .writeInt(metrics.getVideoFramesPlayed())
+                    .writeInt(metrics.getVideoFramesDropped())
+                    .writeInt(metrics.getAudioUnderrunCount())
+                    .writeLong(metrics.getNetworkBytesRead())
+                    .writeLong(metrics.getLocalBytesRead())
+                    .writeLong(metrics.getNetworkTransferDurationMillis())
+                    .usePooledBuffer()
+                    .build();
+            StatsLog.write(statsEvent);
+        }
+
+        @Override
+        public void reportPlaybackStateEvent(
+                String sessionId, PlaybackStateEvent event, int userId) {
             // TODO: log it to statsd
         }
 
@@ -59,6 +92,33 @@ public final class PlaybackMetricsManagerService extends SystemService {
             mSecureRandom.nextBytes(byteId);
             String id = Base64.encodeToString(byteId, Base64.DEFAULT);
             return id;
+        }
+
+        @Override
+        public void reportPlaybackErrorEvent(
+                String sessionId, PlaybackErrorEvent event, int userId) {
+            StatsEvent statsEvent = StatsEvent.newBuilder()
+                    .setAtomId(323)
+                    .writeString(sessionId)
+                    .writeString(event.getExceptionStack())
+                    .writeInt(event.getErrorCode())
+                    .writeInt(event.getSubErrorCode())
+                    .writeLong(event.getTimeSincePlaybackCreatedMillis())
+                    .usePooledBuffer()
+                    .build();
+            StatsLog.write(statsEvent);
+        }
+
+        public void reportNetworkEvent(
+                String sessionId, NetworkEvent event, int userId) {
+            StatsEvent statsEvent = StatsEvent.newBuilder()
+                    .setAtomId(321)
+                    .writeString(sessionId)
+                    .writeInt(event.getType())
+                    .writeLong(event.getTimeSincePlaybackCreatedMillis())
+                    .usePooledBuffer()
+                    .build();
+            StatsLog.write(statsEvent);
         }
     }
 }

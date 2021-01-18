@@ -129,6 +129,18 @@ public abstract class IContextHubWrapper {
      */
     public abstract void onAirplaneModeSettingChanged(boolean enabled);
 
+    /**
+     * @return True if this version of the Contexthub HAL supports microphone
+     * disable setting notifications.
+     */
+    public abstract boolean supportsMicrophoneDisableSettingNotifications();
+
+    /**
+     * Notifies the Contexthub implementation of a microphone disable setting
+     * change.
+     */
+    public abstract void onMicrophoneDisableSettingChanged(boolean enabled);
+
     private static class ContextHubWrapperV1_0 extends IContextHubWrapper {
         private android.hardware.contexthub.V1_0.IContexthub mHub;
 
@@ -152,6 +164,10 @@ public abstract class IContextHubWrapper {
             return false;
         }
 
+        public boolean supportsMicrophoneDisableSettingNotifications() {
+            return false;
+        }
+
         public void onLocationSettingChanged(boolean enabled) {
         }
 
@@ -159,6 +175,9 @@ public abstract class IContextHubWrapper {
         }
 
         public void onAirplaneModeSettingChanged(boolean enabled) {
+        }
+
+        public void onMicrophoneDisableSettingChanged(boolean enabled) {
         }
     }
 
@@ -185,6 +204,10 @@ public abstract class IContextHubWrapper {
             return false;
         }
 
+        public boolean supportsMicrophoneDisableSettingNotifications() {
+            return false;
+        }
+
         public void onLocationSettingChanged(boolean enabled) {
             try {
                 mHub.onSettingChanged(Setting.LOCATION,
@@ -198,6 +221,9 @@ public abstract class IContextHubWrapper {
         }
 
         public void onAirplaneModeSettingChanged(boolean enabled) {
+        }
+
+        public void onMicrophoneDisableSettingChanged(boolean enabled) {
         }
     }
 
@@ -224,6 +250,10 @@ public abstract class IContextHubWrapper {
             return true;
         }
 
+        public boolean supportsMicrophoneDisableSettingNotifications() {
+            return true;
+        }
+
         public void onLocationSettingChanged(boolean enabled) {
             sendSettingChanged(Setting.LOCATION,
                     enabled ? SettingValue.ENABLED : SettingValue.DISABLED);
@@ -236,6 +266,11 @@ public abstract class IContextHubWrapper {
 
         public void onAirplaneModeSettingChanged(boolean enabled) {
             sendSettingChanged(android.hardware.contexthub.V1_2.Setting.AIRPLANE_MODE,
+                    enabled ? SettingValue.ENABLED : SettingValue.DISABLED);
+        }
+
+        public void onMicrophoneDisableSettingChanged(boolean enabled) {
+            sendSettingChanged(android.hardware.contexthub.V1_2.Setting.GLOBAL_MIC_DISABLE,
                     enabled ? SettingValue.ENABLED : SettingValue.DISABLED);
         }
 

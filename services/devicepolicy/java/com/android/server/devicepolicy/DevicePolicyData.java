@@ -16,6 +16,7 @@
 
 package com.android.server.devicepolicy;
 
+import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManager;
@@ -24,6 +25,7 @@ import android.os.FileUtils;
 import android.os.PersistableBundle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.DebugUtils;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.TypedXmlPullParser;
@@ -78,6 +80,21 @@ class DevicePolicyData {
     private static final String ATTR_DEVICE_PROVISIONING_CONFIG_APPLIED =
             "device-provisioning-config-applied";
     private static final String ATTR_DEVICE_PAIRED = "device-paired";
+    private static final String ATTR_NEW_USER_DISCLAIMER = "new-user-disclaimer";
+
+    // Values of ATTR_NEW_USER_DISCLAIMER
+    static final String NEW_USER_DISCLAIMER_SHOWN = "shown";
+    static final String NEW_USER_DISCLAIMER_NOT_NEEDED = "not_needed";
+    static final String NEW_USER_DISCLAIMER_NEEDED = "needed";
+
+    private static final String ATTR_FACTORY_RESET_FLAGS = "factory-reset-flags";
+    private static final String ATTR_FACTORY_RESET_REASON = "factory-reset-reason";
+
+    // NOTE: must be public because of DebugUtils.flagsToString()
+    public static final int FACTORY_RESET_FLAG_ON_BOOT = 1;
+    public static final int FACTORY_RESET_FLAG_WIPE_EXTERNAL_STORAGE = 2;
+    public static final int FACTORY_RESET_FLAG_WIPE_EUICC = 4;
+    public static final int FACTORY_RESET_FLAG_WIPE_FACTORY_RESET_PROTECTION = 8;
 
     private static final String TAG = DevicePolicyManagerService.LOG_TAG;
     private static final boolean VERBOSE_LOG = false; // DO NOT SUBMIT WITH TRUE
@@ -92,6 +109,9 @@ class DevicePolicyData {
     boolean mPaired = false;
     int mUserProvisioningState;
     int mPermissionPolicy;
+
+    int mFactoryResetFlags;
+    String mFactoryResetReason;
 
     boolean mDeviceProvisioningConfigApplied = false;
 
@@ -146,6 +166,10 @@ class DevicePolicyData {
     // apps were suspended or unsuspended.
     boolean mAppsSuspended = false;
 
+    // Whether it's necessary to show a disclaimer (that the device is managed) after the user
+    // starts.
+    String mNewUserDisclaimer = NEW_USER_DISCLAIMER_NOT_NEEDED;
+
     DevicePolicyData(@UserIdInt int userId) {
         mUserId = userId;
     }
@@ -185,6 +209,20 @@ class DevicePolicyData {
             }
             if (policyData.mPermissionPolicy != DevicePolicyManager.PERMISSION_POLICY_PROMPT) {
                 out.attributeInt(null, ATTR_PERMISSION_POLICY, policyData.mPermissionPolicy);
+            }
+            if (NEW_USER_DISCLAIMER_NEEDED.equals(policyData.mNewUserDisclaimer)) {
+                out.attribute(null, ATTR_NEW_USER_DISCLAIMER, policyData.mNewUserDisclaimer);
+            }
+
+            if (policyData.mFactoryResetFlags != 0) {
+                if (VERBOSE_LOG) {
+                    Slog.v(TAG, "Storing factory reset flags for user " + policyData.mUserId + ": "
+                            + factoryResetFlagsToString(policyData.mFactoryResetFlags));
+                }
+                out.attributeInt(null, ATTR_FACTORY_RESET_FLAGS, policyData.mFactoryResetFlags);
+            }
+            if (policyData.mFactoryResetReason != null) {
+                out.attribute(null, ATTR_FACTORY_RESET_REASON, policyData.mFactoryResetReason);
             }
 
             // Serialize delegations.
@@ -412,6 +450,14 @@ class DevicePolicyData {
             if (permissionPolicy != -1) {
                 policy.mPermissionPolicy = permissionPolicy;
             }
+            policy.mNewUserDisclaimer = parser.getAttributeValue(null, ATTR_NEW_USER_DISCLAIMER);
+
+            policy.mFactoryResetFlags = parser.getAttributeInt(null, ATTR_FACTORY_RESET_FLAGS, 0);
+            if (VERBOSE_LOG) {
+                Slog.v(TAG, "Restored factory reset flags for user " + policy.mUserId + ": "
+                        + factoryResetFlagsToString(policy.mFactoryResetFlags));
+            }
+            policy.mFactoryResetReason = parser.getAttributeValue(null, ATTR_FACTORY_RESET_REASON);
 
             int outerDepth = parser.getDepth();
             policy.mLockTaskPackages.clear();
@@ -558,6 +604,22 @@ class DevicePolicyData {
         }
     }
 
+    void setDelayedFactoryReset(@NonNull String reason, boolean wipeExtRequested, boolean wipeEuicc,
+            boolean wipeResetProtectionData) {
+        mFactoryResetReason = reason;
+
+        mFactoryResetFlags = FACTORY_RESET_FLAG_ON_BOOT;
+        if (wipeExtRequested) {
+            mFactoryResetFlags |= FACTORY_RESET_FLAG_WIPE_EXTERNAL_STORAGE;
+        }
+        if (wipeEuicc) {
+            mFactoryResetFlags |= FACTORY_RESET_FLAG_WIPE_EUICC;
+        }
+        if (wipeResetProtectionData) {
+            mFactoryResetFlags |= FACTORY_RESET_FLAG_WIPE_FACTORY_RESET_PROTECTION;
+        }
+    }
+
     void dump(IndentingPrintWriter pw) {
         pw.println();
         pw.println("Enabled Device Admins (User " + mUserId + ", provisioningState: "
@@ -588,6 +650,20 @@ class DevicePolicyData {
         pw.print("mAppsSuspended="); pw.println(mAppsSuspended);
         pw.print("mUserSetupComplete="); pw.println(mUserSetupComplete);
         pw.print("mAffiliationIds="); pw.println(mAffiliationIds);
+        pw.print("mNewUserDisclaimer="); pw.println(mNewUserDisclaimer);
+        if (mFactoryResetFlags != 0) {
+            pw.print("mFactoryResetFlags="); pw.print(mFactoryResetFlags);
+            pw.print(" (");
+            pw.print(factoryResetFlagsToString(mFactoryResetFlags));
+            pw.println(')');
+        }
+        if (mFactoryResetReason != null) {
+            pw.print("mFactoryResetReason="); pw.println(mFactoryResetReason);
+        }
         pw.decreaseIndent();
+    }
+
+    static String factoryResetFlagsToString(int flags) {
+        return DebugUtils.flagsToString(DevicePolicyData.class, "FACTORY_RESET_FLAG_", flags);
     }
 }

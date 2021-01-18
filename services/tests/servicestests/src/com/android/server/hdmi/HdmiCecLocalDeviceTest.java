@@ -24,6 +24,7 @@ import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.Constants.ADDR_UNREGISTERED;
 import static com.android.server.hdmi.Constants.MESSAGE_DEVICE_VENDOR_ID;
 import static com.android.server.hdmi.Constants.MESSAGE_REPORT_PHYSICAL_ADDRESS;
+import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -32,6 +33,7 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import android.hardware.hdmi.HdmiControlManager;
+import android.hardware.hdmi.HdmiPortInfo;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 
@@ -43,6 +45,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -52,6 +55,8 @@ import java.util.List;
 @RunWith(JUnit4.class)
 /** Tests for {@link HdmiCecLocalDevice} class. */
 public class HdmiCecLocalDeviceTest {
+
+    private FakeNativeWrapper mNativeWrapper;
 
     private static int SendCecCommandFactory(int srcAddress, int dstAddress, byte[] body) {
         switch (body[0] & 0xFF) {
@@ -104,6 +109,7 @@ public class HdmiCecLocalDeviceTest {
     private MyHdmiCecLocalDevice mHdmiLocalDevice;
     private HdmiControlService mHdmiControlService;
     private HdmiCecController mHdmiCecController;
+    private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
     private TestLooper mTestLooper = new TestLooper();
     private static int mDesAddr = -1;
     private static int mSrcAddr = -1;
@@ -139,6 +145,10 @@ public class HdmiCecLocalDeviceTest {
                     }
 
                     @Override
+                    protected void writeStringSystemProperty(String key, String value) {
+                    }
+
+                    @Override
                     void standby() {
                         mStandbyMessageReceived = true;
                     }
@@ -149,8 +159,9 @@ public class HdmiCecLocalDeviceTest {
                     }
                 };
         mHdmiControlService.setIoLooper(mTestLooper.getLooper());
+        mNativeWrapper = new FakeNativeWrapper();
         mHdmiCecController = HdmiCecController.createWithNativeWrapper(
-                mHdmiControlService, new FakeNativeWrapper(), mHdmiControlService.getAtomWriter());
+                mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(mHdmiCecController);
         mHdmiLocalDevice = new MyHdmiCecLocalDevice(mHdmiControlService, DEVICE_TV);
         mMessageValidator =
@@ -161,14 +172,25 @@ public class HdmiCecLocalDeviceTest {
                     }
                 };
         mHdmiControlService.setMessageValidator(mMessageValidator);
+
+        mLocalDevices.add(mHdmiLocalDevice);
+        HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[1];
+        hdmiPortInfos[0] =
+                new HdmiPortInfo(1, HdmiPortInfo.PORT_OUTPUT, 0x0000, true, false, false);
+        mNativeWrapper.setPortInfo(hdmiPortInfos);
+        mNativeWrapper.setPortConnectionStatus(1, true);
+        mHdmiControlService.initService();
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mNativeWrapper.setPhysicalAddress(0x2000);
+        mTestLooper.dispatchAll();
     }
 
     @Test
-    public void dispatchMessage_desNotValid() {
+    public void dispatchMessage_logicalAddressDoesNotMatch() {
         HdmiCecMessage msg =
                 new HdmiCecMessage(
                         ADDR_TV,
-                        ADDR_TV,
+                        ADDR_PLAYBACK_1,
                         Constants.MESSAGE_CEC_VERSION,
                         HdmiCecMessage.EMPTY_PARAM);
         boolean handleResult = mHdmiLocalDevice.dispatchMessage(msg);
@@ -383,5 +405,27 @@ public class HdmiCecLocalDeviceTest {
         assertThat(result).isTrue();
         assertThat(mWakeupMessageReceived).isFalse();
         assertThat(mStandbyMessageReceived).isTrue();
+    }
+
+    @Test
+    public void handleVendorCommand_notHandled() {
+        HdmiCecMessage vendorCommand = HdmiCecMessageBuilder.buildVendorCommand(ADDR_TV,
+                ADDR_PLAYBACK_1, new byte[]{0});
+        mNativeWrapper.onCecMessage(vendorCommand);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessageBuilder.buildFeatureAbortCommand(ADDR_PLAYBACK_1, ADDR_TV,
+                vendorCommand.getOpcode(), Constants.ABORT_REFUSED);
+    }
+
+    @Test
+    public void handleVendorCommandWithId_notHandled_Cec14() {
+        HdmiCecMessage vendorCommand = HdmiCecMessageBuilder.buildVendorCommandWithId(ADDR_TV,
+                ADDR_PLAYBACK_1, 0x1234, new byte[]{0});
+        mNativeWrapper.onCecMessage(vendorCommand);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessageBuilder.buildFeatureAbortCommand(ADDR_PLAYBACK_1, ADDR_TV,
+                vendorCommand.getOpcode(), Constants.ABORT_REFUSED);
     }
 }

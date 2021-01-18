@@ -21,7 +21,6 @@ import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.os.Handler;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.view.Gravity;
@@ -36,6 +35,7 @@ import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 
 import com.android.wm.shell.R;
+import com.android.wm.shell.common.ShellExecutor;
 
 import java.io.PrintWriter;
 
@@ -57,7 +57,6 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
 
     private View mTutorialView;
     private Point mDisplaySize = new Point();
-    private Handler mUpdateHandler;
     private ContentResolver mContentResolver;
     private boolean mCanShowTutorial;
     private String mStartOneHandedDescription;
@@ -82,69 +81,67 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
     private final OneHandedAnimationCallback mAnimationCallback = new OneHandedAnimationCallback() {
         @Override
         public void onTutorialAnimationUpdate(int offset) {
-            mUpdateHandler.post(() -> onAnimationUpdate(offset));
+            onAnimationUpdate(offset);
         }
 
         @Override
         public void onOneHandedAnimationStart(
                 OneHandedAnimationController.OneHandedTransitionAnimator animator) {
-            mUpdateHandler.post(() -> {
-                final Rect startValue = (Rect) animator.getStartValue();
-                if (mTriggerState == ONE_HANDED_TRIGGER_STATE.UNSET) {
-                    mTriggerState = (startValue.top == 0)
-                            ? ONE_HANDED_TRIGGER_STATE.ENTERING : ONE_HANDED_TRIGGER_STATE.EXITING;
-                    if (mCanShowTutorial && mTriggerState == ONE_HANDED_TRIGGER_STATE.ENTERING) {
-                        createTutorialTarget();
-                    }
+            final Rect startValue = (Rect) animator.getStartValue();
+            if (mTriggerState == ONE_HANDED_TRIGGER_STATE.UNSET) {
+                mTriggerState = (startValue.top == 0)
+                        ? ONE_HANDED_TRIGGER_STATE.ENTERING : ONE_HANDED_TRIGGER_STATE.EXITING;
+                if (mCanShowTutorial && mTriggerState == ONE_HANDED_TRIGGER_STATE.ENTERING) {
+                    createTutorialTarget();
                 }
-            });
+            }
         }
     };
 
-    public OneHandedTutorialHandler(Context context) {
+    public OneHandedTutorialHandler(Context context, ShellExecutor mainExecutor) {
         context.getDisplay().getRealSize(mDisplaySize);
         mPackageName = context.getPackageName();
         mContentResolver = context.getContentResolver();
-        mUpdateHandler = new Handler();
         mWindowManager = context.getSystemService(WindowManager.class);
         mAccessibilityManager = (AccessibilityManager)
                 context.getSystemService(Context.ACCESSIBILITY_SERVICE);
-        mTargetViewContainer = new FrameLayout(context);
-        mTargetViewContainer.setClipChildren(false);
+
+        mStartOneHandedDescription = context.getResources().getString(
+                R.string.accessibility_action_start_one_handed);
+        mStopOneHandedDescription = context.getResources().getString(
+                R.string.accessibility_action_stop_one_handed);
+        mCanShowTutorial = (Settings.Secure.getInt(mContentResolver,
+                Settings.Secure.ONE_HANDED_TUTORIAL_SHOW_COUNT, 0) >= MAX_TUTORIAL_SHOW_COUNT)
+                ? false : true;
         final float offsetPercentageConfig = context.getResources().getFraction(
                 R.fraction.config_one_handed_offset, 1, 1);
         final int sysPropPercentageConfig = SystemProperties.getInt(
                 ONE_HANDED_MODE_OFFSET_PERCENTAGE, Math.round(offsetPercentageConfig * 100.0f));
         mTutorialAreaHeight = Math.round(mDisplaySize.y * (sysPropPercentageConfig / 100.0f));
-        mTutorialView = LayoutInflater.from(context).inflate(R.layout.one_handed_tutorial, null);
-        mTargetViewContainer.addView(mTutorialView);
-        mCanShowTutorial = (Settings.Secure.getInt(mContentResolver,
-                Settings.Secure.ONE_HANDED_TUTORIAL_SHOW_COUNT, 0) >= MAX_TUTORIAL_SHOW_COUNT)
-                ? false : true;
-        mStartOneHandedDescription = context.getResources().getString(
-                R.string.accessibility_action_start_one_handed);
-        mStopOneHandedDescription = context.getResources().getString(
-                R.string.accessibility_action_stop_one_handed);
+
+        mainExecutor.execute(() -> {
+            mTutorialView = LayoutInflater.from(context).inflate(R.layout.one_handed_tutorial,
+                    null);
+            mTargetViewContainer = new FrameLayout(context);
+            mTargetViewContainer.setClipChildren(false);
+            mTargetViewContainer.addView(mTutorialView);
+        });
     }
 
     @Override
     public void onStartFinished(Rect bounds) {
-        mUpdateHandler.post(() -> {
-            updateFinished(View.VISIBLE, 0f);
-            updateTutorialCount();
-            announcementForScreenReader(true);
-            mTriggerState = ONE_HANDED_TRIGGER_STATE.UNSET;
-        });
+        updateFinished(View.VISIBLE, 0f);
+        updateTutorialCount();
+        announcementForScreenReader(true);
+        mTriggerState = ONE_HANDED_TRIGGER_STATE.UNSET;
     }
 
     @Override
     public void onStopFinished(Rect bounds) {
-        mUpdateHandler.post(() -> {
-            updateFinished(View.INVISIBLE, -mTargetViewContainer.getHeight());
-            announcementForScreenReader(false);
-            removeTutorialFromWindowManager();
-            mTriggerState = ONE_HANDED_TRIGGER_STATE.UNSET;
-        });
+        updateFinished(View.INVISIBLE, -mTargetViewContainer.getHeight());
+        announcementForScreenReader(false);
+        removeTutorialFromWindowManager();
+        mTriggerState = ONE_HANDED_TRIGGER_STATE.UNSET;
     }
 
     private void updateFinished(int visible, float finalPosition) {

@@ -546,6 +546,12 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
+        // UdfpsController is not BiometricPrompt-specific. It can be active for keyguard or
+        // enrollment.
+        if (mUdfpsController != null) {
+            mUdfpsController.onConfigurationChanged();
+        }
+
         // Save the state of the current dialog (buttons showing, etc)
         if (mCurrentDialog != null) {
             final Bundle savedState = new Bundle();
@@ -565,10 +571,6 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                     // enough for now.
                     PromptInfo promptInfo = (PromptInfo) mCurrentDialogArgs.arg1;
                     promptInfo.setAuthenticators(Authenticators.DEVICE_CREDENTIAL);
-                }
-
-                if (mUdfpsController != null) {
-                    mUdfpsController.onConfigurationChanged();
                 }
 
                 showDialog(mCurrentDialogArgs, true /* skipAnimation */, savedState);

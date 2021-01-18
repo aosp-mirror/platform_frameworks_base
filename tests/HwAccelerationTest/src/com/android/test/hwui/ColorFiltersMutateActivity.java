@@ -35,9 +35,6 @@ import android.graphics.Shader;
 import android.os.Bundle;
 import android.view.View;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-
 @SuppressWarnings({"UnusedDeclaration"})
 public class ColorFiltersMutateActivity extends Activity {
     @Override
@@ -54,11 +51,13 @@ public class ColorFiltersMutateActivity extends Activity {
         private final Paint mLightingPaint;
         private final Paint mBlendPaint;
         private final Paint mShaderPaint;
+        private final RuntimeShader mRuntimeShader;
 
         private float mSaturation = 0.0f;
         private int mLightAdd = 0;
         private int mLightMul = 0;
         private int mPorterDuffColor = 0;
+        private float mShaderParam1 = 0.0f;
 
         static final String sSkSL =
                 "in shader bitmapShader;\n"
@@ -66,8 +65,6 @@ public class ColorFiltersMutateActivity extends Activity {
                 + "half4 main(float2 xy) {\n"
                 + "  return half4(sample(bitmapShader, xy).rgb, param1);\n"
                 + "}\n";
-
-        private byte[] mUniforms = new byte[4];
 
         BitmapsView(Context c) {
             super(c);
@@ -86,11 +83,13 @@ public class ColorFiltersMutateActivity extends Activity {
             mBlendPaint = new Paint();
             mBlendPaint.setColorFilter(new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_OVER));
 
+            mRuntimeShader = new RuntimeShader(sSkSL, false);
+            mRuntimeShader.setUniform("param1", mShaderParam1);
+            mRuntimeShader.setInputShader("bitmapShader", new BitmapShader(mBitmap1,
+                                                                           Shader.TileMode.CLAMP,
+                                                                           Shader.TileMode.CLAMP));
             mShaderPaint = new Paint();
-            Shader[] inputShaders = { new BitmapShader(mBitmap1, Shader.TileMode.CLAMP,
-                                                       Shader.TileMode.CLAMP) };
-            mShaderPaint.setShader(new RuntimeShader(sSkSL, mUniforms, inputShaders, true));
-            setShaderParam1(0.0f);
+            mShaderPaint.setShader(mRuntimeShader);
 
             ObjectAnimator sat = ObjectAnimator.ofFloat(this, "saturation", 1.0f);
             sat.setDuration(1000);
@@ -177,20 +176,15 @@ public class ColorFiltersMutateActivity extends Activity {
         }
 
         public void setShaderParam1(float value) {
-            RuntimeShader shader = (RuntimeShader) mShaderPaint.getShader();
-            ByteBuffer buffer = ByteBuffer.wrap(mUniforms);
-            buffer.order(ByteOrder.LITTLE_ENDIAN);
-            buffer.putFloat(value);
-            shader.updateUniforms(mUniforms);
+            mShaderParam1 = value;
+            mRuntimeShader.setUniform("param1", mShaderParam1);
             invalidate();
         }
 
         // If either valueFrom or valueTo is null, then a getter function will also be derived
         // and called by the animator class.
         public float getShaderParam1() {
-            ByteBuffer buffer = ByteBuffer.wrap(mUniforms);
-            buffer.order(ByteOrder.LITTLE_ENDIAN);
-            return buffer.getFloat();
+            return mShaderParam1;
         }
 
         @Override

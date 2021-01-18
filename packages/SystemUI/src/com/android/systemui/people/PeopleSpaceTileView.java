@@ -16,7 +16,6 @@
 
 package com.android.systemui.people;
 
-import android.app.people.PeopleSpaceTile;
 import android.content.Context;
 import android.content.pm.LauncherApps;
 import android.graphics.drawable.Drawable;

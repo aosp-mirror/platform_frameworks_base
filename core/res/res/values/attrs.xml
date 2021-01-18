@@ -8292,6 +8292,23 @@
     </declare-styleable>
 
     <!-- =============================== -->
+    <!-- Translation attributes -->
+    <!-- =============================== -->
+    <eat-comment />
+
+    <!-- Use <code>translation-service</code> as the root tag of the XML resource that describes
+         a {@link android.service.translation.TranslationService}, which is referenced from
+         its {@link android.service.translation.TranslationService#SERVICE_META_DATA} meta-data
+         entry.
+         @hide @SystemApi
+    -->
+    <declare-styleable name="TranslationService">
+        <!-- Fully qualified class name of an activity that allows the user to modify
+             the settings for this service. -->
+        <attr name="settingsActivity" />
+    </declare-styleable>
+
+    <!-- =============================== -->
     <!-- Contacts meta-data attributes -->
     <!-- =============================== -->
     <eat-comment />
@@ -8996,6 +9013,11 @@
              changed at runtime by calling
              {@link android.media.tv.TvInputManager#updateTvInputInfo(android.media.tv.TvInputInfo)}. -->
         <attr name="tunerCount" format="integer" />
+        <!-- Attribute whether the TV input service can pause recording programs.
+             This value can be changed at runtime by calling
+             {@link android.media.tv.TvInputManager#updateTvInputInfo(android.media.tv.TvInputInfo)}
+             . -->
+        <attr name="canPauseRecording" format="boolean" />
     </declare-styleable>
 
     <!-- Attributes that can be used with <code>rating-system-definition</code> tags inside of the

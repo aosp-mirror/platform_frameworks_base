@@ -468,6 +468,8 @@ GetterSetterNames: android.location.GnssMeasurement#setBasebandCn0DbHz(double):
 GetterSetterNames: android.location.GnssMeasurement#setCarrierFrequencyHz(float):
     
 GetterSetterNames: android.location.GnssMeasurement#setCodeType(String):
+
+GetterSetterNames: android.location.GnssMeasurement#setCorrelationVectors(java.util.Collection<android.location.CorrelationVector>):
     
 GetterSetterNames: android.location.GnssMeasurement#setFullInterSignalBiasNanos(double):
     
@@ -477,6 +479,8 @@ GetterSetterNames: android.location.GnssMeasurement#setSatelliteInterSignalBiasN
     
 GetterSetterNames: android.location.GnssMeasurement#setSatelliteInterSignalBiasUncertaintyNanos(double):
     
+GetterSetterNames: android.location.GnssMeasurement#setSatellitePvt(android.location.SatellitePvt):
+
 GetterSetterNames: android.location.GnssMeasurement#setSnrInDb(double):
     
 GetterSetterNames: android.location.LocationRequest#isLocationSettingsIgnored():

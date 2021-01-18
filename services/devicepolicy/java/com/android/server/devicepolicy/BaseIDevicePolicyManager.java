@@ -15,6 +15,7 @@
  */
 package com.android.server.devicepolicy;
 
+import android.annotation.NonNull;
 import android.app.admin.DevicePolicySafetyChecker;
 import android.app.admin.IDevicePolicyManager;
 import android.content.ComponentName;
@@ -53,6 +54,12 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
      * @see {@link SystemService#onUserUnlocking}
      */
     abstract void handleUnlockUser(int userId);
+    /**
+     * To be called by {@link DevicePolicyManagerService#Lifecycle} after a user is being unlocked.
+     *
+     * @see {@link SystemService#onUserUnlocked}
+     */
+    abstract void handleOnUserUnlocked(int userId);
     /**
      * To be called by {@link DevicePolicyManagerService#Lifecycle} when a user is being stopped.
      *
@@ -101,4 +108,11 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     public boolean canProfileOwnerResetPasswordWhenLocked(int userId) {
         return false;
     }
+
+    public String getEnrollmentSpecificId(String callerPackage) {
+        return "";
+    }
+
+    public void setOrganizationIdForUser(
+            @NonNull String callerPackage, @NonNull String enterpriseId, int userId) {}
 }

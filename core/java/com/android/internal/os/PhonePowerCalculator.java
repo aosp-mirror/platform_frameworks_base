@@ -30,20 +30,20 @@ import java.util.List;
  * Estimates power consumed by telephony.
  */
 public class PhonePowerCalculator extends PowerCalculator {
-    private final PowerProfile mPowerProfile;
+    private final UsageBasedPowerEstimator mPowerEstimator;
 
     public PhonePowerCalculator(PowerProfile powerProfile) {
-        mPowerProfile = powerProfile;
+        mPowerEstimator = new UsageBasedPowerEstimator(
+                powerProfile.getAveragePower(PowerProfile.POWER_RADIO_ACTIVE));
     }
 
     @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query,
             SparseArray<UserHandle> asUsers) {
-        long phoneOnTimeMs = batteryStats.getPhoneOnTime(rawRealtimeUs,
+        final long phoneOnTimeMs = batteryStats.getPhoneOnTime(rawRealtimeUs,
                 BatteryStats.STATS_SINCE_CHARGED) / 1000;
-        double phoneOnPower = mPowerProfile.getAveragePower(PowerProfile.POWER_RADIO_ACTIVE)
-                * phoneOnTimeMs / (60 * 60 * 1000);
+        final double phoneOnPower = mPowerEstimator.calculatePower(phoneOnTimeMs);
         if (phoneOnPower != 0) {
             builder.getOrCreateSystemBatteryConsumerBuilder(SystemBatteryConsumer.DRAIN_TYPE_PHONE)
                     .setConsumedPower(BatteryConsumer.POWER_COMPONENT_USAGE, phoneOnPower)
@@ -54,9 +54,8 @@ public class PhonePowerCalculator extends PowerCalculator {
     @Override
     public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
-        long phoneOnTimeMs = batteryStats.getPhoneOnTime(rawRealtimeUs, statsType) / 1000;
-        double phoneOnPower = mPowerProfile.getAveragePower(PowerProfile.POWER_RADIO_ACTIVE)
-                * phoneOnTimeMs / (60 * 60 * 1000);
+        final long phoneOnTimeMs = batteryStats.getPhoneOnTime(rawRealtimeUs, statsType) / 1000;
+        final double phoneOnPower = mPowerEstimator.calculatePower(phoneOnTimeMs);
         if (phoneOnPower != 0) {
             BatterySipper bs = new BatterySipper(BatterySipper.DrainType.PHONE, null, 0);
             bs.usagePowerMah = phoneOnPower;

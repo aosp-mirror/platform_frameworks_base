@@ -16,12 +16,12 @@
 
 package com.android.systemui.wmshell;
 
+import android.animation.AnimationHandler;
 import android.content.Context;
 import android.view.IWindowManager;
 
 import com.android.systemui.dagger.WMSingleton;
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.Transitions;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.ShellExecutor;
@@ -29,9 +29,11 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.common.annotations.ChoreographerSfVsync;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
+import com.android.wm.shell.transition.Transitions;
 
 import dagger.Module;
 import dagger.Provides;
@@ -45,9 +47,9 @@ public class TvWMShellModule {
     @WMSingleton
     @Provides
     static DisplayImeController provideDisplayImeController(IWindowManager wmService,
-            DisplayController displayController, @ShellMainThread ShellExecutor shellMainExecutor,
+            DisplayController displayController, @ShellMainThread ShellExecutor mainExecutor,
             TransactionPool transactionPool) {
-        return new DisplayImeController(wmService, displayController, shellMainExecutor,
+        return new DisplayImeController(wmService, displayController, mainExecutor,
                 transactionPool);
     }
 
@@ -58,9 +60,10 @@ public class TvWMShellModule {
             DisplayImeController displayImeController, TransactionPool transactionPool,
             ShellTaskOrganizer shellTaskOrganizer, SyncTransactionQueue syncQueue,
             TaskStackListenerImpl taskStackListener, Transitions transitions,
-            @ShellMainThread ShellExecutor mainExecutor) {
-        return new LegacySplitScreenController(context, displayController, systemWindows,
+            @ShellMainThread ShellExecutor mainExecutor,
+            @ChoreographerSfVsync AnimationHandler sfVsyncAnimationHandler) {
+        return LegacySplitScreenController.create(context, displayController, systemWindows,
                 displayImeController, transactionPool, shellTaskOrganizer, syncQueue,
-                taskStackListener, transitions, mainExecutor);
+                taskStackListener, transitions, mainExecutor, sfVsyncAnimationHandler);
     }
 }

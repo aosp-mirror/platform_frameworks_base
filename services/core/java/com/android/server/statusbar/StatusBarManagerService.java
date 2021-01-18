@@ -19,6 +19,7 @@ package com.android.server.statusbar;
 import static android.app.StatusBarManager.DISABLE2_GLOBAL_ACTIONS;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import android.Manifest;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.app.ITransientNotificationCallback;
@@ -29,6 +30,7 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.display.DisplayManager;
@@ -74,6 +76,7 @@ import com.android.server.notification.NotificationDelegate;
 import com.android.server.policy.GlobalActionsProvider;
 import com.android.server.power.ShutdownCheckPoints;
 import com.android.server.power.ShutdownThread;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -113,6 +116,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     private final Object mLock = new Object();
     private final DeathRecipient mDeathRecipient = new DeathRecipient();
+    private final ActivityTaskManagerInternal mActivityTaskManager;
     private int mCurrentUserId;
     private boolean mTracingEnabled;
 
@@ -213,6 +217,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         final DisplayManager displayManager =
                 (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
         displayManager.registerDisplayListener(this, mHandler);
+        mActivityTaskManager = LocalServices.getService(ActivityTaskManagerInternal.class);
     }
 
     @Override
@@ -375,6 +380,16 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
                 try {
                     mBar.hideRecentApps(triggeredFromAltTab, triggeredFromHomeKey);
                 } catch (RemoteException ex) {}
+            }
+        }
+
+        @Override
+        public void collapsePanels() {
+            if (mBar != null) {
+                try {
+                    mBar.animateCollapsePanels();
+                } catch (RemoteException ex) {
+                }
             }
         }
 
@@ -620,10 +635,20 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     @Override
     public void collapsePanels() {
-        if (CompatChanges.isChangeEnabled(LOCK_DOWN_COLLAPSE_STATUS_BAR, Binder.getCallingUid())) {
+        int uid = Binder.getCallingUid();
+        int pid = Binder.getCallingPid();
+        if (CompatChanges.isChangeEnabled(LOCK_DOWN_COLLAPSE_STATUS_BAR, uid)) {
             enforceStatusBar();
         } else {
-            enforceExpandStatusBar();
+            if (mContext.checkPermission(Manifest.permission.STATUS_BAR, pid, uid)
+                    != PackageManager.PERMISSION_GRANTED) {
+                enforceExpandStatusBar();
+                if (!mActivityTaskManager.canCloseSystemDialogs(pid, uid)) {
+                    Slog.e(TAG, "Permission Denial: Method collapsePanels() requires permission "
+                            + Manifest.permission.STATUS_BAR + ", ignoring call.");
+                    return;
+                }
+            }
         }
 
         if (mBar != null) {

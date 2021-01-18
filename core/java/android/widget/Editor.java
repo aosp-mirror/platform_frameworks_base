@@ -99,6 +99,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.OnReceiveContentListener;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.View.DragShadowBuilder;
@@ -588,8 +589,18 @@ public class Editor {
         mUndoOwner = mUndoManager.getOwner(UNDO_OWNER_TAG, this);
     }
 
-    @VisibleForTesting
-    public @NonNull TextViewOnReceiveContentListener getDefaultOnReceiveContentListener() {
+    /**
+     * Returns the default handler for receiving content in an editable {@link TextView}. This
+     * listener impl is used to encapsulate the default behavior but it is not part of the public
+     * API. If an app wants to execute the default platform behavior for receiving content, it
+     * should call {@link View#onReceiveContent}. Alternatively, if an app implements a custom
+     * listener for receiving content and wants to delegate some of the content to be handled by
+     * the platform, it should return the corresponding content from its listener. See
+     * {@link View#setOnReceiveContentListener} and {@link OnReceiveContentListener} for more info.
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    @NonNull
+    public TextViewOnReceiveContentListener getDefaultOnReceiveContentListener() {
         return mDefaultOnReceiveContentListener;
     }
 
@@ -6613,6 +6624,9 @@ public class Editor {
                     }
 
                     updateSelection(event);
+                    if (mTextView.hasSelection() && mEndHandle != null) {
+                        mEndHandle.updateMagnifier(event);
+                    }
                     break;
 
                 case MotionEvent.ACTION_UP:
@@ -6623,6 +6637,9 @@ public class Editor {
                         break;
                     }
                     updateSelection(event);
+                    if (mEndHandle != null) {
+                        mEndHandle.dismissMagnifier();
+                    }
 
                     // No longer dragging to select text, let the parent intercept events.
                     mTextView.getParent().requestDisallowInterceptTouchEvent(false);

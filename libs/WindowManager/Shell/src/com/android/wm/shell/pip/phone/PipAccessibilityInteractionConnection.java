@@ -53,7 +53,7 @@ public class PipAccessibilityInteractionConnection {
     private List<AccessibilityNodeInfo> mAccessibilityNodeInfoList;
 
     private final Context mContext;
-    private final ShellExecutor mShellMainExcutor;
+    private final ShellExecutor mMainExcutor;
     private final @NonNull PipBoundsState mPipBoundsState;
     private final PipMotionHelper mMotionHelper;
     private final PipTaskOrganizer mTaskOrganizer;
@@ -72,9 +72,9 @@ public class PipAccessibilityInteractionConnection {
             @NonNull PipBoundsState pipBoundsState, PipMotionHelper motionHelper,
             PipTaskOrganizer taskOrganizer, PipSnapAlgorithm snapAlgorithm,
             AccessibilityCallbacks callbacks, Runnable updateMovementBoundCallback,
-            ShellExecutor shellMainExcutor) {
+            ShellExecutor mainExcutor) {
         mContext = context;
-        mShellMainExcutor = shellMainExcutor;
+        mMainExcutor = mainExcutor;
         mPipBoundsState = pipBoundsState;
         mMotionHelper = motionHelper;
         mTaskOrganizer = taskOrganizer;
@@ -271,7 +271,7 @@ public class PipAccessibilityInteractionConnection {
                 IAccessibilityInteractionConnectionCallback callback, int flags,
                 int interrogatingPid, long interrogatingTid, MagnificationSpec spec,
                 Bundle arguments) throws RemoteException {
-            mShellMainExcutor.execute(() -> {
+            mMainExcutor.execute(() -> {
                 PipAccessibilityInteractionConnection.this
                         .findAccessibilityNodeInfoByAccessibilityId(accessibilityNodeId, bounds,
                                 interactionId, callback, flags, interrogatingPid, interrogatingTid,
@@ -285,7 +285,7 @@ public class PipAccessibilityInteractionConnection {
                 IAccessibilityInteractionConnectionCallback callback, int flags,
                 int interrogatingPid, long interrogatingTid, MagnificationSpec spec)
                 throws RemoteException {
-            mShellMainExcutor.execute(() -> {
+            mMainExcutor.execute(() -> {
                 PipAccessibilityInteractionConnection.this.findAccessibilityNodeInfosByViewId(
                         accessibilityNodeId, viewId, bounds, interactionId, callback, flags,
                         interrogatingPid, interrogatingTid, spec);
@@ -298,7 +298,7 @@ public class PipAccessibilityInteractionConnection {
                 IAccessibilityInteractionConnectionCallback callback, int flags,
                 int interrogatingPid, long interrogatingTid, MagnificationSpec spec)
                 throws RemoteException {
-            mShellMainExcutor.execute(() -> {
+            mMainExcutor.execute(() -> {
                 PipAccessibilityInteractionConnection.this.findAccessibilityNodeInfosByText(
                         accessibilityNodeId, text, bounds, interactionId, callback, flags,
                         interrogatingPid, interrogatingTid, spec);
@@ -310,7 +310,7 @@ public class PipAccessibilityInteractionConnection {
                 int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
                 int interrogatingPid, long interrogatingTid, MagnificationSpec spec)
                 throws RemoteException {
-            mShellMainExcutor.execute(() -> {
+            mMainExcutor.execute(() -> {
                 PipAccessibilityInteractionConnection.this.findFocus(accessibilityNodeId, focusType,
                         bounds, interactionId, callback, flags, interrogatingPid, interrogatingTid,
                         spec);
@@ -322,7 +322,7 @@ public class PipAccessibilityInteractionConnection {
                 int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
                 int interrogatingPid, long interrogatingTid, MagnificationSpec spec)
                 throws RemoteException {
-            mShellMainExcutor.execute(() -> {
+            mMainExcutor.execute(() -> {
                 PipAccessibilityInteractionConnection.this.focusSearch(accessibilityNodeId,
                         direction,
                         bounds, interactionId, callback, flags, interrogatingPid, interrogatingTid,
@@ -335,7 +335,7 @@ public class PipAccessibilityInteractionConnection {
                 Bundle arguments, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, int flags,
                 int interrogatingPid, long interrogatingTid) throws RemoteException {
-            mShellMainExcutor.execute(() -> {
+            mMainExcutor.execute(() -> {
                 PipAccessibilityInteractionConnection.this.performAccessibilityAction(
                         accessibilityNodeId, action, arguments, interactionId, callback, flags,
                         interrogatingPid, interrogatingTid);

@@ -223,6 +223,9 @@ filegroup {
         "media/java/**/*.java",
         "media/java/**/*.aidl",
     ],
+    exclude_srcs: [
+        ":framework-media-tv-tunerresourcemanager-sources-aidl",
+    ],
     path: "media/java",
 }
 
@@ -529,6 +532,7 @@ java_library {
         "android.hardware.vibrator-V1.2-java",
         "android.hardware.vibrator-V1.3-java",
         "android.security.apc-java",
+        "android.security.authorization-java",
         "android.system.keystore2-java",
         "android.system.suspend.control.internal-java",
         "cameraprotosnano",
@@ -630,6 +634,7 @@ java_defaults {
         // in favor of an API stubs dependency in java_library "framework" below.
         "mimemap",
         "av-types-aidl-java",
+        "tv_tuner_resource_manager_aidl_interface-java",
         "soundtrigger_middleware-aidl-java",
         "modules-utils-os",
     ],
@@ -1115,6 +1120,7 @@ filegroup {
         "core/java/android/os/incremental/IStorageLoadingProgressListener.aidl",
         "core/java/android/os/incremental/IncrementalNewFileParams.aidl",
         "core/java/android/os/incremental/IStorageHealthListener.aidl",
+        "core/java/android/os/incremental/PerUidReadTimeouts.aidl",
         "core/java/android/os/incremental/StorageHealthCheckParams.aidl",
     ],
     path: "core/java",

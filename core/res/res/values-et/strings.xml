@@ -57,7 +57,8 @@
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
     <string name="ClipMmi" msgid="4110549342447630629">"Sissetuleva kõne helistaja ID"</string>
-    <string name="ClirMmi" msgid="4702929460236547156">"Väljuva kõne helistaja ID"</string>
+    <!-- no translation found for ClirMmi (6752346475055446417) -->
+    <skip />
     <string name="ColpMmi" msgid="4736462893284419302">"Ühendatud liini ID"</string>
     <string name="ColrMmi" msgid="5889782479745764278">"Ühendatud liini ID piiramine"</string>
     <string name="CfMmi" msgid="8390012691099787178">"Kõnede suunamine"</string>
@@ -146,6 +147,9 @@
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Helista WiFi kaudu"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Helista mobiilsidevõrgu kaudu"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Ainult WiFi"</string>
+    <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
+    <skip />
+    <string name="crossSimFormat_spn_cross_sim_calling" msgid="779976494687695991">"<xliff:g id="SPN">%s</xliff:g> – helistamine mitme SIM-kaardi kaudu"</string>
     <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: pole suunatud"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> <xliff:g id="TIME_DELAY">{2}</xliff:g> sekundi pärast"</string>

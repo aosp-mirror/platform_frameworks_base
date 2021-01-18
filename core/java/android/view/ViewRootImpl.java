@@ -1787,18 +1787,18 @@ public final class ViewRootImpl implements ViewParent,
 
 
     /** Register callbacks to be notified when the ViewRootImpl surface changes. */
-    interface SurfaceChangedCallback {
+    public interface SurfaceChangedCallback {
         void surfaceCreated(Transaction t);
         void surfaceReplaced(Transaction t);
         void surfaceDestroyed();
     }
 
     private final ArrayList<SurfaceChangedCallback> mSurfaceChangedCallbacks = new ArrayList<>();
-    void addSurfaceChangedCallback(SurfaceChangedCallback c) {
+    public void addSurfaceChangedCallback(SurfaceChangedCallback c) {
         mSurfaceChangedCallbacks.add(c);
     }
 
-    void removeSurfaceChangedCallback(SurfaceChangedCallback c) {
+    public void removeSurfaceChangedCallback(SurfaceChangedCallback c) {
         mSurfaceChangedCallbacks.remove(c);
     }
 
@@ -3150,6 +3150,8 @@ public final class ViewRootImpl implements ViewParent,
 
         mImeFocusController.onTraversal(hasWindowFocus, mWindowAttributes);
 
+        final boolean wasReportNextDraw = mReportNextDraw;
+
         // Remember if we must report the next draw.
         if ((relayoutResult & WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME) != 0) {
             reportNextDraw();
@@ -3177,12 +3179,25 @@ public final class ViewRootImpl implements ViewParent,
             if (isViewVisible) {
                 // Try again
                 scheduleTraversals();
-            } else if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
-                for (int i = 0; i < mPendingTransitions.size(); ++i) {
-                    mPendingTransitions.get(i).endChangingAnimations();
+            } else {
+                if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
+                    for (int i = 0; i < mPendingTransitions.size(); ++i) {
+                        mPendingTransitions.get(i).endChangingAnimations();
+                    }
+                    mPendingTransitions.clear();
                 }
-                mPendingTransitions.clear();
+
+                // We may never draw since it's not visible. Report back that we're finished
+                // drawing.
+                if (!wasReportNextDraw && mReportNextDraw) {
+                    mReportNextDraw = false;
+                    pendingDrawFinished();
+                }
             }
+
+            // We were unable to draw this traversal. Unset this flag since we'll block without
+            // ever being able to draw again
+            mNextDrawUseBlastSync = false;
         }
 
         if (mAttachInfo.mContentCaptureEvents != null) {
