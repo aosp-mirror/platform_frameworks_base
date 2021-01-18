@@ -129,7 +129,7 @@ public class VpnConfig implements Parcelable {
         String[] routes = routesStr.trim().split(" ");
         for (String route : routes) {
             //each route is ip/prefix
-            RouteInfo info = new RouteInfo(new IpPrefix(route), null);
+            RouteInfo info = new RouteInfo(new IpPrefix(route), null, null, RouteInfo.RTN_UNICAST);
             this.routes.add(info);
             updateAllowedFamilies(info.getDestination().getAddress());
         }
