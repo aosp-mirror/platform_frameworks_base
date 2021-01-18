@@ -888,6 +888,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         /**
+         * Get a reference to the system keystore.
+         */
+        public KeyStore getKeyStore() {
+            return KeyStore.getInstance();
+        }
+
+        /**
          * @see ProxyTracker
          */
         public ProxyTracker makeProxyTracker(@NonNull Context context,
@@ -981,7 +988,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mProxyTracker = mDeps.makeProxyTracker(mContext, mHandler);
 
         mNetd = netd;
-        mKeyStore = KeyStore.getInstance();
+        mKeyStore = mDeps.getKeyStore();
         mTelephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
         mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
         mLocationPermissionChecker = new LocationPermissionChecker(mContext);
@@ -4982,16 +4989,21 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mVpnBlockedUidRanges = newVpnBlockedUidRanges;
     }
 
+    private boolean isLockdownVpnEnabled() {
+        return mKeyStore.contains(Credentials.LOCKDOWN_VPN);
+    }
+
     @Override
     public boolean updateLockdownVpn() {
-        if (mDeps.getCallingUid() != Process.SYSTEM_UID) {
-            logw("Lockdown VPN only available to AID_SYSTEM");
+        if (mDeps.getCallingUid() != Process.SYSTEM_UID
+                && Binder.getCallingPid() != Process.myPid()) {
+            logw("Lockdown VPN only available to system process or AID_SYSTEM");
             return false;
         }
 
         synchronized (mVpns) {
             // Tear down existing lockdown if profile was removed
-            mLockdownEnabled = LockdownVpnTracker.isEnabled();
+            mLockdownEnabled = isLockdownVpnEnabled();
             if (mLockdownEnabled) {
                 byte[] profileTag = mKeyStore.get(Credentials.LOCKDOWN_VPN);
                 if (profileTag == null) {
@@ -5012,7 +5024,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     logw("VPN for user " + user + " not ready yet. Skipping lockdown");
                     return false;
                 }
-                setLockdownTracker(new LockdownVpnTracker(mContext, this, mHandler, vpn, profile));
+                setLockdownTracker(
+                        new LockdownVpnTracker(mContext, this, mHandler, mKeyStore, vpn,  profile));
             } else {
                 setLockdownTracker(null);
             }
@@ -5100,7 +5113,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         synchronized (mVpns) {
             // Can't set always-on VPN if legacy VPN is already in lockdown mode.
-            if (LockdownVpnTracker.isEnabled()) {
+            if (isLockdownVpnEnabled()) {
                 return false;
             }
 
@@ -5206,7 +5219,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             userVpn = new Vpn(mHandler.getLooper(), mContext, mNMS, mNetd, userId, mKeyStore);
             mVpns.put(userId, userVpn);
-            if (mUserManager.getUserInfo(userId).isPrimary() && LockdownVpnTracker.isEnabled()) {
+            if (mUserManager.getUserInfo(userId).isPrimary() && isLockdownVpnEnabled()) {
                 updateLockdownVpn();
             }
         }
@@ -5290,7 +5303,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void onUserUnlocked(int userId) {
         synchronized (mVpns) {
             // User present may be sent because of an unlock, which might mean an unlocked keystore.
-            if (mUserManager.getUserInfo(userId).isPrimary() && LockdownVpnTracker.isEnabled()) {
+            if (mUserManager.getUserInfo(userId).isPrimary() && isLockdownVpnEnabled()) {
                 updateLockdownVpn();
             } else {
                 startAlwaysOnVpn(userId);
