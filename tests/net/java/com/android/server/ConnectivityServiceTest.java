@@ -2074,10 +2074,6 @@ public class ConnectivityServiceTest {
 
     @Test
     public void testOwnerUidCannotChange() throws Exception {
-        // Owner UIDs are not visible without location permission.
-        setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_FINE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION);
-
         final NetworkCapabilities ncTemplate = new NetworkCapabilities();
         final int originalOwnerUid = Process.myUid();
         ncTemplate.setOwnerUid(originalOwnerUid);
@@ -2096,6 +2092,10 @@ public class ConnectivityServiceTest {
         agentCapabilities.addCapability(NET_CAPABILITY_NOT_CONGESTED);
         mWiFiNetworkAgent.setNetworkCapabilities(agentCapabilities, true);
         waitForIdle();
+
+        // Owner UIDs are not visible without location permission.
+        setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_FINE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION);
 
         // Check that the capability change has been applied but the owner UID is not modified.
         NetworkCapabilities nc = mCm.getNetworkCapabilities(mWiFiNetworkAgent.getNetwork());
@@ -7781,8 +7781,22 @@ public class ConnectivityServiceTest {
         naExtraInfo.unregister();
     }
 
+    // To avoid granting location permission bypass.
+    private void denyAllLocationPrivilegedPermissions() {
+        mServiceContext.setPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+                PERMISSION_DENIED);
+        mServiceContext.setPermission(Manifest.permission.NETWORK_SETTINGS,
+                PERMISSION_DENIED);
+        mServiceContext.setPermission(Manifest.permission.NETWORK_STACK,
+                PERMISSION_DENIED);
+        mServiceContext.setPermission(Manifest.permission.NETWORK_SETUP_WIZARD,
+                PERMISSION_DENIED);
+    }
+
     private void setupLocationPermissions(
             int targetSdk, boolean locationToggle, String op, String perm) throws Exception {
+        denyAllLocationPrivilegedPermissions();
+
         final ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.targetSdkVersion = targetSdk;
         when(mPackageManager.getApplicationInfoAsUser(anyString(), anyInt(), any()))
@@ -8156,15 +8170,13 @@ public class ConnectivityServiceTest {
                 new NetworkAgentInfo(null, network, null, null, new NetworkCapabilities(), 0,
                         mServiceContext, null, null, mService, null, null, null, 0, INVALID_UID);
 
-        setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_FINE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION);
-
         mMockVpn.establishForMyUid();
         assertUidRangesUpdatedForMyUid(true);
 
         // Wait for networks to connect and broadcasts to be sent before removing permissions.
         waitForIdle();
-        mServiceContext.setPermission(android.Manifest.permission.NETWORK_STACK, PERMISSION_DENIED);
+        setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_FINE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION);
 
         assertTrue(mService.setUnderlyingNetworksForVpn(new Network[] {network}));
         waitForIdle();
