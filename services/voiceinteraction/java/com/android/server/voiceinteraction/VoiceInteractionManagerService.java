@@ -585,8 +585,7 @@ public class VoiceInteractionManagerService extends SystemService {
                     mContext.getPackageManager().queryIntentServicesAsUser(
                             new Intent(VoiceInteractionService.SERVICE_INTERFACE),
                             PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                                    | PackageManager.MATCH_DEBUG_TRIAGED_MISSING, userHandle);
+                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userHandle);
             int numAvailable = available.size();
 
             if (numAvailable == 0) {
