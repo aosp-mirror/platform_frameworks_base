@@ -1609,7 +1609,6 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-
     private void onVolumeStateChangedAsync(VolumeInfo vol, int oldState, int newState) {
         synchronized (mLock) {
             // Remember that we saw this volume so we're ready to accept user
@@ -3427,6 +3426,27 @@ class StorageManagerService extends IStorageManager.Stub
             }
         } else {
             Log.e(TAG, "Path " + path + " is not a valid application-specific directory");
+        }
+    }
+
+    /*
+     * Disable storage's app data isolation for testing.
+     */
+    @Override
+    public void disableAppDataIsolation(String pkgName, int pid, int userId) {
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.ROOT_UID && callingUid != Process.SHELL_UID) {
+            throw new SecurityException("no permission to enable app visibility");
+        }
+        final String[] sharedPackages =
+                mPmInternal.getSharedUserPackagesForPackage(pkgName, userId);
+        final int uid = mPmInternal.getPackageUid(pkgName, 0, userId);
+        final String[] packages =
+                sharedPackages.length != 0 ? sharedPackages : new String[]{pkgName};
+        try {
+            mVold.unmountAppStorageDirs(uid, pid, packages);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
         }
     }
 
