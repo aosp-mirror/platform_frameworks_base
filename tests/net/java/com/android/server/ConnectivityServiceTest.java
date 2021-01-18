@@ -243,8 +243,6 @@ import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.ConnectivityService.ConnectivityDiagnosticsCallbackInfo;
 import com.android.server.connectivity.ConnectivityConstants;
-import com.android.server.connectivity.DefaultNetworkMetrics;
-import com.android.server.connectivity.IpConnectivityMetrics;
 import com.android.server.connectivity.MockableSystemProperties;
 import com.android.server.connectivity.Nat464Xlat;
 import com.android.server.connectivity.NetworkAgentInfo;
@@ -367,8 +365,6 @@ public class ConnectivityServiceTest {
     private HandlerThread mAlarmManagerThread;
     private TestNetIdManager mNetIdManager;
 
-    @Mock IpConnectivityMetrics.Logger mMetricsService;
-    @Mock DefaultNetworkMetrics mDefaultNetworkMetrics;
     @Mock DeviceIdleInternal mDeviceIdleInternal;
     @Mock INetworkManagementService mNetworkManagementService;
     @Mock INetworkStatsService mStatsService;
@@ -1287,7 +1283,6 @@ public class ConnectivityServiceTest {
         mContext = InstrumentationRegistry.getContext();
 
         MockitoAnnotations.initMocks(this);
-        when(mMetricsService.defaultNetworkMetrics()).thenReturn(mDefaultNetworkMetrics);
 
         when(mUserManager.getAliveUsers()).thenReturn(
                 Arrays.asList(new UserInfo[] {
@@ -1362,7 +1357,6 @@ public class ConnectivityServiceTest {
         doReturn(mNetworkStack).when(deps).getNetworkStack();
         doReturn(mSystemProperties).when(deps).getSystemProperties();
         doReturn(mock(ProxyTracker.class)).when(deps).makeProxyTracker(any(), any());
-        doReturn(mMetricsService).when(deps).getMetricsLogger();
         doReturn(true).when(deps).queryUserAccess(anyInt(), anyInt());
         doReturn(mBatteryStatsService).when(deps).getBatteryStatsService();
         doAnswer(inv -> {

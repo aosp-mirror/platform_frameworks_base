@@ -194,7 +194,6 @@ import com.android.server.connectivity.AutodestructReference;
 import com.android.server.connectivity.DataConnectionStats;
 import com.android.server.connectivity.DnsManager;
 import com.android.server.connectivity.DnsManager.PrivateDnsValidationUpdate;
-import com.android.server.connectivity.IpConnectivityMetrics;
 import com.android.server.connectivity.KeepaliveTracker;
 import com.android.server.connectivity.LingerMonitor;
 import com.android.server.connectivity.MockableSystemProperties;
@@ -916,14 +915,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         public MultinetworkPolicyTracker makeMultinetworkPolicyTracker(
                 @NonNull Context c, @NonNull Handler h, @NonNull Runnable r) {
             return new MultinetworkPolicyTracker(c, h, r);
-        }
-
-        /**
-         * @see IpConnectivityMetrics.Logger
-         */
-        public IpConnectivityMetrics.Logger getMetricsLogger() {
-            return Objects.requireNonNull(LocalServices.getService(IpConnectivityMetrics.Logger.class),
-                    "no IpConnectivityMetrics service");
         }
 
         public IBatteryStats getBatteryStatsService() {
