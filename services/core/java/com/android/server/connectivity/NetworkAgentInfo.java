@@ -329,6 +329,12 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
             Handler handler, NetworkAgentConfig config, ConnectivityService connService, INetd netd,
             IDnsResolver dnsResolver, INetworkManagementService nms, int factorySerialNumber,
             int creatorUid) {
+        Objects.requireNonNull(net);
+        Objects.requireNonNull(info);
+        Objects.requireNonNull(lp);
+        Objects.requireNonNull(nc);
+        Objects.requireNonNull(context);
+        Objects.requireNonNull(config);
         networkAgent = na;
         network = net;
         networkInfo = info;
@@ -536,19 +542,22 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         }
 
         @Override
-        public void sendNetworkCapabilities(NetworkCapabilities nc) {
+        public void sendNetworkCapabilities(@NonNull NetworkCapabilities nc) {
+            Objects.requireNonNull(nc);
             mHandler.obtainMessage(NetworkAgent.EVENT_NETWORK_CAPABILITIES_CHANGED,
                     new Pair<>(NetworkAgentInfo.this, nc)).sendToTarget();
         }
 
         @Override
-        public void sendLinkProperties(LinkProperties lp) {
+        public void sendLinkProperties(@NonNull LinkProperties lp) {
+            Objects.requireNonNull(lp);
             mHandler.obtainMessage(NetworkAgent.EVENT_NETWORK_PROPERTIES_CHANGED,
                     new Pair<>(NetworkAgentInfo.this, lp)).sendToTarget();
         }
 
         @Override
-        public void sendNetworkInfo(NetworkInfo info) {
+        public void sendNetworkInfo(@NonNull NetworkInfo info) {
+            Objects.requireNonNull(info);
             mHandler.obtainMessage(NetworkAgent.EVENT_NETWORK_INFO_CHANGED,
                     new Pair<>(NetworkAgentInfo.this, info)).sendToTarget();
         }
