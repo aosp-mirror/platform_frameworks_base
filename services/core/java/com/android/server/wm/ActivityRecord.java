@@ -4786,7 +4786,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void makeVisibleIfNeeded(ActivityRecord starting, boolean reportToClient) {
         // This activity is not currently visible, but is running. Tell it to become visible.
-        if (mState == RESUMED || this == starting) {
+        if ((mState == RESUMED && mVisibleRequested) || this == starting) {
             if (DEBUG_VISIBILITY) Slog.d(TAG_VISIBILITY,
                     "Not making visible, r=" + this + " state=" + mState + " starting=" + starting);
             return;

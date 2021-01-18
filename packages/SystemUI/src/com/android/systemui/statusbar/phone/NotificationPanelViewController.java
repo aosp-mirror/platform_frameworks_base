@@ -2408,6 +2408,11 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     @Override
+    protected void setIsShadeOpening(boolean isOpening) {
+        mNotificationStackScrollLayoutController.setIsShadeOpening(isOpening);
+    }
+
+    @Override
     protected void setOverExpansion(float overExpansion, boolean isPixels) {
         if (mConflictingQsExpansionGesture || mQsExpandImmediate) {
             return;
