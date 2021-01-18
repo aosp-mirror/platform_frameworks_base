@@ -46,7 +46,6 @@ import android.net.TrafficStats;
 import android.net.util.NetdService;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.INetworkManagementService;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
@@ -115,9 +114,6 @@ public class IpSecService extends IIpSecService.Stub {
 
     /* Binder context for this service */
     private final Context mContext;
-
-    /* NetworkManager instance */
-    private final INetworkManagementService mNetworkManager;
 
     /**
      * The next non-repeating global ID for tracking resources between users, this service, and
@@ -997,13 +993,13 @@ public class IpSecService extends IIpSecService.Stub {
      *
      * @param context Binder context for this service
      */
-    private IpSecService(Context context, INetworkManagementService networkManager) {
-        this(context, networkManager, IpSecServiceConfiguration.GETSRVINSTANCE);
+    private IpSecService(Context context) {
+        this(context, IpSecServiceConfiguration.GETSRVINSTANCE);
     }
 
-    static IpSecService create(Context context, INetworkManagementService networkManager)
+    static IpSecService create(Context context)
             throws InterruptedException {
-        final IpSecService service = new IpSecService(context, networkManager);
+        final IpSecService service = new IpSecService(context);
         service.connectNativeNetdService();
         return service;
     }
@@ -1017,11 +1013,9 @@ public class IpSecService extends IIpSecService.Stub {
 
     /** @hide */
     @VisibleForTesting
-    public IpSecService(Context context, INetworkManagementService networkManager,
-            IpSecServiceConfiguration config) {
+    public IpSecService(Context context, IpSecServiceConfiguration config) {
         this(
                 context,
-                networkManager,
                 config,
                 (fd, uid) -> {
                     try {
@@ -1035,10 +1029,9 @@ public class IpSecService extends IIpSecService.Stub {
 
     /** @hide */
     @VisibleForTesting
-    public IpSecService(Context context, INetworkManagementService networkManager,
-            IpSecServiceConfiguration config, UidFdTagger uidFdTagger) {
+    public IpSecService(Context context, IpSecServiceConfiguration config,
+            UidFdTagger uidFdTagger) {
         mContext = context;
-        mNetworkManager = Objects.requireNonNull(networkManager);
         mSrvConfig = config;
         mUidFdTagger = uidFdTagger;
     }

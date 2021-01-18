@@ -51,7 +51,6 @@ import android.net.IpSecUdpEncapResponse;
 import android.net.LinkAddress;
 import android.net.Network;
 import android.os.Binder;
-import android.os.INetworkManagementService;
 import android.os.ParcelFileDescriptor;
 import android.system.Os;
 import android.test.mock.MockContext;
@@ -149,7 +148,6 @@ public class IpSecServiceParameterizedTest {
     };
 
     INetd mMockNetd;
-    INetworkManagementService mNetworkManager;
     PackageManager mMockPkgMgr;
     IpSecService.IpSecServiceConfiguration mMockIpSecSrvConfig;
     IpSecService mIpSecService;
@@ -175,10 +173,9 @@ public class IpSecServiceParameterizedTest {
     @Before
     public void setUp() throws Exception {
         mMockNetd = mock(INetd.class);
-        mNetworkManager = mock(INetworkManagementService.class);
         mMockPkgMgr = mock(PackageManager.class);
         mMockIpSecSrvConfig = mock(IpSecService.IpSecServiceConfiguration.class);
-        mIpSecService = new IpSecService(mMockContext, mNetworkManager, mMockIpSecSrvConfig);
+        mIpSecService = new IpSecService(mMockContext, mMockIpSecSrvConfig);
 
         // Injecting mock netd
         when(mMockIpSecSrvConfig.getNetdInstance()).thenReturn(mMockNetd);
