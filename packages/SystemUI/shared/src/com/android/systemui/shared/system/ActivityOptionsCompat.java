@@ -60,7 +60,8 @@ public abstract class ActivityOptionsCompat {
 
     public static ActivityOptions makeRemoteAnimation(
             RemoteAnimationAdapterCompat remoteAnimationAdapter) {
-        return ActivityOptions.makeRemoteAnimation(remoteAnimationAdapter.getWrapped());
+        return ActivityOptions.makeRemoteAnimation(remoteAnimationAdapter.getWrapped(),
+                remoteAnimationAdapter.getRemoteTransition().getTransition());
     }
 
     public static ActivityOptions makeCustomAnimation(Context context, int enterResId,

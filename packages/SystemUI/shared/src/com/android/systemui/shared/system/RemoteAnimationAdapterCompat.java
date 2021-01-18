@@ -16,12 +16,21 @@
 
 package com.android.systemui.shared.system;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_TO_BACK;
+import static android.view.WindowManager.TRANSIT_TO_FRONT;
+
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
+import android.view.SurfaceControl;
+import android.window.IRemoteTransition;
+import android.window.TransitionInfo;
 
 /**
  * @see RemoteAnimationAdapter
@@ -29,15 +38,26 @@ import android.view.RemoteAnimationTarget;
 public class RemoteAnimationAdapterCompat {
 
     private final RemoteAnimationAdapter mWrapped;
+    private final RemoteTransitionCompat mRemoteTransition;
 
     public RemoteAnimationAdapterCompat(RemoteAnimationRunnerCompat runner, long duration,
             long statusBarTransitionDelay) {
         mWrapped = new RemoteAnimationAdapter(wrapRemoteAnimationRunner(runner), duration,
                 statusBarTransitionDelay);
+        mRemoteTransition = buildRemoteTransition(runner);
     }
 
     RemoteAnimationAdapter getWrapped() {
         return mWrapped;
+    }
+
+    /** Helper to just build a remote transition. Use this if the legacy adapter isn't needed. */
+    public static RemoteTransitionCompat buildRemoteTransition(RemoteAnimationRunnerCompat runner) {
+        return new RemoteTransitionCompat(wrapRemoteTransition(runner));
+    }
+
+    public RemoteTransitionCompat getRemoteTransition() {
+        return mRemoteTransition;
     }
 
     private static IRemoteAnimationRunner.Stub wrapRemoteAnimationRunner(
@@ -69,6 +89,65 @@ public class RemoteAnimationAdapterCompat {
             @Override
             public void onAnimationCancelled() {
                 remoteAnimationAdapter.onAnimationCancelled();
+            }
+        };
+    }
+
+    private static IRemoteTransition.Stub wrapRemoteTransition(
+            final RemoteAnimationRunnerCompat remoteAnimationAdapter) {
+        return new IRemoteTransition.Stub() {
+            @Override
+            public void startAnimation(TransitionInfo info, SurfaceControl.Transaction t,
+                    IRemoteAnimationFinishedCallback finishCallback) {
+                final RemoteAnimationTargetCompat[] appsCompat =
+                        RemoteAnimationTargetCompat.wrap(info, false /* wallpapers */);
+                final RemoteAnimationTargetCompat[] wallpapersCompat =
+                        RemoteAnimationTargetCompat.wrap(info, true /* wallpapers */);
+                final Runnable animationFinishedCallback = new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            finishCallback.onAnimationFinished();
+                        } catch (RemoteException e) {
+                            Log.e("ActivityOptionsCompat", "Failed to call app controlled animation"
+                                    + " finished callback", e);
+                        }
+                    }
+                };
+
+                // TODO(b/177438007): Move this set-up logic into launcher's animation impl.
+                boolean isReturnToHome = false;
+                for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+                    final TransitionInfo.Change change = info.getChanges().get(i);
+                    if (change.getTaskInfo() != null
+                            && change.getTaskInfo().getActivityType() == ACTIVITY_TYPE_HOME) {
+                        isReturnToHome = change.getMode() == TRANSIT_OPEN
+                                || change.getMode() == TRANSIT_TO_FRONT;
+                        break;
+                    }
+                }
+
+                if (isReturnToHome) {
+                    // Need to "boost" the closing things since that's what launcher expects.
+                    for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+                        final TransitionInfo.Change change = info.getChanges().get(i);
+                        final SurfaceControl leash = change.getLeash();
+                        final int mode = info.getChanges().get(i).getMode();
+                        // Only deal with roots
+                        if (change.getParent() != null) continue;
+                        if (mode == TRANSIT_CLOSE || mode == TRANSIT_TO_BACK) {
+                            t.setLayer(leash, info.getChanges().size() * 3 - i);
+                        }
+                    }
+                    // Make wallpaper visible immediately since launcher apparently won't do this.
+                    for (int i = wallpapersCompat.length - 1; i >= 0; --i) {
+                        t.show(wallpapersCompat[i].leash.getSurfaceControl());
+                        t.setAlpha(wallpapersCompat[i].leash.getSurfaceControl(), 1.f);
+                    }
+                }
+                t.apply();
+                remoteAnimationAdapter.onAnimationStart(appsCompat, wallpapersCompat,
+                        animationFinishedCallback);
             }
         };
     }

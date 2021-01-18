@@ -33,6 +33,7 @@ import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
 
@@ -83,6 +84,9 @@ public interface SysUIComponent {
 
         @BindsInstance
         Builder setShellCommandHandler(Optional<ShellCommandHandler> shellDump);
+
+        @BindsInstance
+        Builder setTransitions(Transitions t);
 
         SysUIComponent build();
     }
