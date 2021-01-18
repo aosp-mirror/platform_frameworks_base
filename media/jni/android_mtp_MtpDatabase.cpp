@@ -63,6 +63,7 @@ static jmethodID method_setDeviceProperty;
 static jmethodID method_getObjectPropertyList;
 static jmethodID method_getObjectInfo;
 static jmethodID method_getObjectFilePath;
+static jmethodID method_openFilePath;
 static jmethodID method_getThumbnailInfo;
 static jmethodID method_getThumbnailData;
 static jmethodID method_beginDeleteObject;
@@ -160,6 +161,7 @@ public:
                                             MtpStringBuffer& outFilePath,
                                             int64_t& outFileLength,
                                             MtpObjectFormat& outFormat);
+    virtual int                     openFilePath(const char* path, bool transcode);
     virtual MtpResponseCode         beginDeleteObject(MtpObjectHandle handle);
     virtual void                    endDeleteObject(MtpObjectHandle handle, bool succeeded);
 
@@ -969,6 +971,17 @@ MtpResponseCode MtpDatabase::getObjectFilePath(MtpObjectHandle handle,
     return result;
 }
 
+int MtpDatabase::openFilePath(const char* path, bool transcode) {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    jstring pathStr = env->NewStringUTF(path);
+    jint result = env->CallIntMethod(mDatabase, method_openFilePath, pathStr, transcode);
+
+    if (result < 0) {
+        checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    }
+    return result;
+}
+
 MtpResponseCode MtpDatabase::beginDeleteObject(MtpObjectHandle handle) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     MtpResponseCode result = env->CallIntMethod(mDatabase, method_beginDeleteObject, (jint)handle);
@@ -1333,6 +1346,7 @@ int register_android_mtp_MtpDatabase(JNIEnv *env)
     GET_METHOD_ID(getObjectPropertyList, clazz, "(IIIII)Landroid/mtp/MtpPropertyList;");
     GET_METHOD_ID(getObjectInfo, clazz, "(I[I[C[J)Z");
     GET_METHOD_ID(getObjectFilePath, clazz, "(I[C[J)I");
+    GET_METHOD_ID(openFilePath, clazz, "(Ljava/lang/String;Z)I");
     GET_METHOD_ID(getThumbnailInfo, clazz, "(I[J)Z");
     GET_METHOD_ID(getThumbnailData, clazz, "(I)[B");
     GET_METHOD_ID(beginDeleteObject, clazz, "(I)I");
