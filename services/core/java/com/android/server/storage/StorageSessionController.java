@@ -382,7 +382,11 @@ public final class StorageSessionController {
         }
     }
 
+    private static boolean isSupportedVolume(VolumeInfo vol) {
+        return isEmulatedOrPublic(vol) || vol.type == VolumeInfo.TYPE_STUB;
+    }
+
     private boolean shouldHandle(@Nullable VolumeInfo vol) {
-        return !mIsResetting && (vol == null || isEmulatedOrPublic(vol));
+        return !mIsResetting && (vol == null || isSupportedVolume(vol));
     }
 }
