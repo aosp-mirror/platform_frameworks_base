@@ -16,6 +16,8 @@
 
 package android.telephony.ims;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Build;
@@ -39,6 +41,7 @@ import java.util.Objects;
 public final class SipMessage implements Parcelable {
     // Should not be set to true for production!
     private static final boolean IS_DEBUGGING = Build.IS_ENG;
+    private static final String CRLF = "\r\n";
 
     private final String mStartLine;
     private final String mHeaderSection;
@@ -164,5 +167,20 @@ public final class SipMessage implements Parcelable {
         int result = Objects.hash(mStartLine, mHeaderSection);
         result = 31 * result + Arrays.hashCode(mContent);
         return result;
+    }
+
+    /**
+     * @return the UTF-8 encoded SIP message.
+     */
+    public @NonNull byte[] getEncodedMessage() {
+        byte[] header = new StringBuilder()
+                .append(mStartLine)
+                .append(mHeaderSection)
+                .append(CRLF)
+                .toString().getBytes(UTF_8);
+        byte[] sipMessage = new byte[header.length + mContent.length];
+        System.arraycopy(header, 0, sipMessage, 0, header.length);
+        System.arraycopy(mContent, 0, sipMessage, header.length, mContent.length);
+        return sipMessage;
     }
 }
