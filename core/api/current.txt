@@ -10839,6 +10839,8 @@ package android.content {
     field public static final String ACTION_POWER_DISCONNECTED = "android.intent.action.ACTION_POWER_DISCONNECTED";
     field public static final String ACTION_POWER_USAGE_SUMMARY = "android.intent.action.POWER_USAGE_SUMMARY";
     field public static final String ACTION_PROCESS_TEXT = "android.intent.action.PROCESS_TEXT";
+    field public static final String ACTION_PROFILE_ACCESSIBLE = "android.intent.action.PROFILE_ACCESSIBLE";
+    field public static final String ACTION_PROFILE_INACCESSIBLE = "android.intent.action.PROFILE_INACCESSIBLE";
     field public static final String ACTION_PROVIDER_CHANGED = "android.intent.action.PROVIDER_CHANGED";
     field public static final String ACTION_QUICK_CLOCK = "android.intent.action.QUICK_CLOCK";
     field public static final String ACTION_QUICK_VIEW = "android.intent.action.QUICK_VIEW";
