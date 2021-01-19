@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.os.CombinedVibrationEffect;
 import android.os.Handler;
 import android.os.IExternalVibratorService;
 import android.os.PowerManagerInternal;
@@ -131,6 +132,45 @@ public class VibrationScalerTest {
     }
 
     @Test
+    public void scale_withCombined_resolvesAndScalesRecursively() {
+        setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
+                Vibrator.VIBRATION_INTENSITY_HIGH);
+        VibrationEffect prebaked = VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK);
+        VibrationEffect oneShot = VibrationEffect.createOneShot(10, 10);
+
+        CombinedVibrationEffect.Mono monoScaled = mVibrationScaler.scale(
+                CombinedVibrationEffect.createSynced(prebaked),
+                VibrationAttributes.USAGE_NOTIFICATION);
+        VibrationEffect.Prebaked prebakedScaled = (VibrationEffect.Prebaked) monoScaled.getEffect();
+        assertEquals(prebakedScaled.getEffectStrength(), VibrationEffect.EFFECT_STRENGTH_STRONG);
+
+        CombinedVibrationEffect.Stereo stereoScaled = mVibrationScaler.scale(
+                CombinedVibrationEffect.startSynced()
+                        .addVibrator(1, prebaked)
+                        .addVibrator(2, oneShot)
+                        .combine(),
+                VibrationAttributes.USAGE_NOTIFICATION);
+        prebakedScaled = (VibrationEffect.Prebaked) stereoScaled.getEffects().get(1);
+        assertEquals(prebakedScaled.getEffectStrength(), VibrationEffect.EFFECT_STRENGTH_STRONG);
+        VibrationEffect.OneShot oneshotScaled =
+                (VibrationEffect.OneShot) stereoScaled.getEffects().get(2);
+        assertTrue(oneshotScaled.getAmplitude() > 0);
+
+        CombinedVibrationEffect.Sequential sequentialScaled = mVibrationScaler.scale(
+                CombinedVibrationEffect.startSequential()
+                        .addNext(CombinedVibrationEffect.createSynced(prebaked))
+                        .addNext(CombinedVibrationEffect.createSynced(oneShot))
+                        .combine(),
+                VibrationAttributes.USAGE_NOTIFICATION);
+        monoScaled = (CombinedVibrationEffect.Mono) sequentialScaled.getEffects().get(0);
+        prebakedScaled = (VibrationEffect.Prebaked) monoScaled.getEffect();
+        assertEquals(prebakedScaled.getEffectStrength(), VibrationEffect.EFFECT_STRENGTH_STRONG);
+        monoScaled = (CombinedVibrationEffect.Mono) sequentialScaled.getEffects().get(1);
+        oneshotScaled = (VibrationEffect.OneShot) monoScaled.getEffect();
+        assertTrue(oneshotScaled.getAmplitude() > 0);
+    }
+
+    @Test
     public void scale_withPrebaked_setsEffectStrengthBasedOnSettings() {
         setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
                 Vibrator.VIBRATION_INTENSITY_HIGH);
@@ -155,6 +195,28 @@ public class VibrationScalerTest {
         scaled = mVibrationScaler.scale(effect, VibrationAttributes.USAGE_NOTIFICATION);
         // Unexpected intensity setting will be mapped to STRONG.
         assertEquals(scaled.getEffectStrength(), VibrationEffect.EFFECT_STRENGTH_STRONG);
+    }
+
+    @Test
+    public void scale_withPrebakedAndFallback_resolvesAndScalesRecursively() {
+        setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
+                Vibrator.VIBRATION_INTENSITY_HIGH);
+        VibrationEffect.OneShot fallback2 = (VibrationEffect.OneShot) VibrationEffect.createOneShot(
+                10, VibrationEffect.DEFAULT_AMPLITUDE);
+        VibrationEffect.Prebaked fallback1 = new VibrationEffect.Prebaked(
+                VibrationEffect.EFFECT_TICK, VibrationEffect.EFFECT_STRENGTH_MEDIUM, fallback2);
+        VibrationEffect.Prebaked effect = new VibrationEffect.Prebaked(VibrationEffect.EFFECT_CLICK,
+                VibrationEffect.EFFECT_STRENGTH_MEDIUM, fallback1);
+
+        VibrationEffect.Prebaked scaled = mVibrationScaler.scale(
+                effect, VibrationAttributes.USAGE_NOTIFICATION);
+        VibrationEffect.Prebaked scaledFallback1 =
+                (VibrationEffect.Prebaked) scaled.getFallbackEffect();
+        VibrationEffect.OneShot scaledFallback2 =
+                (VibrationEffect.OneShot) scaledFallback1.getFallbackEffect();
+        assertEquals(scaled.getEffectStrength(), VibrationEffect.EFFECT_STRENGTH_STRONG);
+        assertEquals(scaledFallback1.getEffectStrength(), VibrationEffect.EFFECT_STRENGTH_STRONG);
+        assertTrue(scaledFallback2.getAmplitude() > 0);
     }
 
     @Test

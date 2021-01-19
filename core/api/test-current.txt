@@ -1366,11 +1366,10 @@ package android.os {
 
   public static class VibrationEffect.Prebaked extends android.os.VibrationEffect implements android.os.Parcelable {
     ctor public VibrationEffect.Prebaked(android.os.Parcel);
-    ctor public VibrationEffect.Prebaked(int, boolean);
+    ctor public VibrationEffect.Prebaked(int, boolean, int);
     method public long getDuration();
     method public int getEffectStrength();
     method public int getId();
-    method public void setEffectStrength(int);
     method public boolean shouldFallback();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.VibrationEffect.Prebaked> CREATOR;

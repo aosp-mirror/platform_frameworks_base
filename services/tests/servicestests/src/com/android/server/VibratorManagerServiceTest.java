@@ -24,10 +24,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,6 +44,7 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 
+import com.android.server.vibrator.FakeVibratorControllerProvider;
 import com.android.server.vibrator.VibratorController;
 
 import org.junit.After;
@@ -81,7 +78,7 @@ public class VibratorManagerServiceTest {
     @Mock private PowerManagerInternal mPowerManagerInternalMock;
     @Mock private PowerSaveState mPowerSaveStateMock;
 
-    private final Map<Integer, VibratorController.NativeWrapper> mNativeWrappers = new HashMap<>();
+    private final Map<Integer, FakeVibratorControllerProvider> mVibratorProviders = new HashMap<>();
 
     private TestLooper mTestLooper;
 
@@ -117,8 +114,8 @@ public class VibratorManagerServiceTest {
                     @Override
                     VibratorController createVibratorController(int vibratorId,
                             VibratorController.OnVibrationCompleteListener listener) {
-                        return new VibratorController(
-                                vibratorId, listener, mNativeWrappers.get(vibratorId));
+                        return mVibratorProviders.get(vibratorId)
+                                .newVibratorController(vibratorId, listener);
                     }
                 });
         service.systemReady();
@@ -126,9 +123,12 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
-    public void createService_initializesNativeService() {
+    public void createService_initializesNativeManagerServiceAndVibrators() {
+        mockVibrators(1, 2);
         createService();
         verify(mNativeWrapperMock).init();
+        assertTrue(mVibratorProviders.get(1).isInitialized());
+        assertTrue(mVibratorProviders.get(2).isInitialized());
     }
 
     @Test
@@ -139,28 +139,23 @@ public class VibratorManagerServiceTest {
 
     @Test
     public void getVibratorIds_withNonEmptyResultFromNative_returnsSameArray() {
-        mNativeWrappers.put(1, mockVibrator(/* capabilities= */ 0));
-        mNativeWrappers.put(2, mockVibrator(/* capabilities= */ 0));
-        when(mNativeWrapperMock.getVibratorIds()).thenReturn(new int[]{2, 1});
+        mockVibrators(2, 1);
         assertArrayEquals(new int[]{2, 1}, createService().getVibratorIds());
     }
 
     @Test
     public void getVibratorInfo_withMissingVibratorId_returnsNull() {
-        mockVibrators(mockVibrator(/* capabilities= */ 0));
+        mockVibrators(1);
         assertNull(createService().getVibratorInfo(2));
     }
 
     @Test
     public void getVibratorInfo_withExistingVibratorId_returnsHalInfoForVibrator() {
-        VibratorController.NativeWrapper vibratorMock = mockVibrator(
-                IVibrator.CAP_COMPOSE_EFFECTS | IVibrator.CAP_AMPLITUDE_CONTROL);
-        when(vibratorMock.getSupportedEffects()).thenReturn(
-                new int[]{VibrationEffect.EFFECT_CLICK});
-        when(vibratorMock.getSupportedPrimitives()).thenReturn(
-                new int[]{VibrationEffect.Composition.PRIMITIVE_CLICK});
-        mNativeWrappers.put(1, vibratorMock);
-        when(mNativeWrapperMock.getVibratorIds()).thenReturn(new int[]{1});
+        mockVibrators(1);
+        FakeVibratorControllerProvider vibrator = mVibratorProviders.get(1);
+        vibrator.setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS, IVibrator.CAP_AMPLITUDE_CONTROL);
+        vibrator.setSupportedEffects(VibrationEffect.EFFECT_CLICK);
+        vibrator.setSupportedPrimitives(VibrationEffect.Composition.PRIMITIVE_CLICK);
         VibratorInfo info = createService().getVibratorInfo(1);
 
         assertNotNull(info);
@@ -178,105 +173,95 @@ public class VibratorManagerServiceTest {
 
     @Test
     public void setAlwaysOnEffect_withMono_enablesAlwaysOnEffectToAllVibratorsWithCapability() {
-        VibratorController.NativeWrapper[] vibratorMocks = new VibratorController.NativeWrapper[]{
-                mockVibrator(IVibrator.CAP_ALWAYS_ON_CONTROL),
-                mockVibrator(/* capabilities= */ 0),
-                mockVibrator(IVibrator.CAP_ALWAYS_ON_CONTROL),
-        };
-        mockVibrators(vibratorMocks);
+        mockVibrators(1, 2, 3);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_ALWAYS_ON_CONTROL);
+        mVibratorProviders.get(3).setCapabilities(IVibrator.CAP_ALWAYS_ON_CONTROL);
 
         CombinedVibrationEffect effect = CombinedVibrationEffect.createSynced(
                 VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
         assertTrue(createService().setAlwaysOnEffect(UID, PACKAGE_NAME, 1, effect, ALARM_ATTRS));
 
-        // Only vibrators 0 and 2 have always-on capabilities.
-        verify(vibratorMocks[0]).alwaysOnEnable(
-                eq(1L), eq((long) VibrationEffect.EFFECT_CLICK),
-                eq((long) VibrationEffect.EFFECT_STRENGTH_STRONG));
-        verify(vibratorMocks[1], never()).alwaysOnEnable(anyLong(), anyLong(), anyLong());
-        verify(vibratorMocks[2]).alwaysOnEnable(
-                eq(1L), eq((long) VibrationEffect.EFFECT_CLICK),
-                eq((long) VibrationEffect.EFFECT_STRENGTH_STRONG));
+        VibrationEffect.Prebaked expectedEffect = new VibrationEffect.Prebaked(
+                VibrationEffect.EFFECT_CLICK, false, VibrationEffect.EFFECT_STRENGTH_STRONG);
+
+        // Only vibrators 1 and 3 have always-on capabilities.
+        assertEquals(mVibratorProviders.get(1).getAlwaysOnEffect(1), expectedEffect);
+        assertNull(mVibratorProviders.get(2).getAlwaysOnEffect(1));
+        assertEquals(mVibratorProviders.get(3).getAlwaysOnEffect(1), expectedEffect);
     }
 
     @Test
     public void setAlwaysOnEffect_withStereo_enablesAlwaysOnEffectToAllVibratorsWithCapability() {
-        VibratorController.NativeWrapper[] vibratorMocks = new VibratorController.NativeWrapper[] {
-                mockVibrator(IVibrator.CAP_ALWAYS_ON_CONTROL),
-                mockVibrator(IVibrator.CAP_ALWAYS_ON_CONTROL),
-                mockVibrator(0),
-                mockVibrator(IVibrator.CAP_ALWAYS_ON_CONTROL),
-        };
-        mockVibrators(vibratorMocks);
+        mockVibrators(1, 2, 3, 4);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_ALWAYS_ON_CONTROL);
+        mVibratorProviders.get(2).setCapabilities(IVibrator.CAP_ALWAYS_ON_CONTROL);
+        mVibratorProviders.get(4).setCapabilities(IVibrator.CAP_ALWAYS_ON_CONTROL);
 
         CombinedVibrationEffect effect = CombinedVibrationEffect.startSynced()
-                .addVibrator(0, VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
-                .addVibrator(1, VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
-                .addVibrator(2, VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
+                .addVibrator(1, VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
+                .addVibrator(2, VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
+                .addVibrator(3, VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
                 .combine();
         assertTrue(createService().setAlwaysOnEffect(UID, PACKAGE_NAME, 1, effect, ALARM_ATTRS));
 
-        // Enables click on vibrator 0 and tick on vibrator 1 only.
-        verify(vibratorMocks[0]).alwaysOnEnable(
-                eq(1L), eq((long) VibrationEffect.EFFECT_CLICK),
-                eq((long) VibrationEffect.EFFECT_STRENGTH_STRONG));
-        verify(vibratorMocks[1]).alwaysOnEnable(
-                eq(1L), eq((long) VibrationEffect.EFFECT_TICK),
-                eq((long) VibrationEffect.EFFECT_STRENGTH_STRONG));
-        verify(vibratorMocks[2], never()).alwaysOnEnable(anyLong(), anyLong(), anyLong());
-        verify(vibratorMocks[3], never()).alwaysOnEnable(anyLong(), anyLong(), anyLong());
+        VibrationEffect.Prebaked expectedClick = new VibrationEffect.Prebaked(
+                VibrationEffect.EFFECT_CLICK, false, VibrationEffect.EFFECT_STRENGTH_STRONG);
+
+        VibrationEffect.Prebaked expectedTick = new VibrationEffect.Prebaked(
+                VibrationEffect.EFFECT_TICK, false, VibrationEffect.EFFECT_STRENGTH_STRONG);
+
+        // Enables click on vibrator 1 and tick on vibrator 2 only.
+        assertEquals(mVibratorProviders.get(1).getAlwaysOnEffect(1), expectedClick);
+        assertEquals(mVibratorProviders.get(2).getAlwaysOnEffect(1), expectedTick);
+        assertNull(mVibratorProviders.get(3).getAlwaysOnEffect(1));
+        assertNull(mVibratorProviders.get(4).getAlwaysOnEffect(1));
     }
 
     @Test
     public void setAlwaysOnEffect_withNullEffect_disablesAlwaysOnEffects() {
-        VibratorController.NativeWrapper[] vibratorMocks = new VibratorController.NativeWrapper[] {
-                mockVibrator(IVibrator.CAP_ALWAYS_ON_CONTROL),
-                mockVibrator(0),
-                mockVibrator(IVibrator.CAP_ALWAYS_ON_CONTROL),
-        };
-        mockVibrators(vibratorMocks);
+        mockVibrators(1, 2, 3);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_ALWAYS_ON_CONTROL);
+        mVibratorProviders.get(3).setCapabilities(IVibrator.CAP_ALWAYS_ON_CONTROL);
+
+        CombinedVibrationEffect effect = CombinedVibrationEffect.createSynced(
+                VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
+        assertTrue(createService().setAlwaysOnEffect(UID, PACKAGE_NAME, 1, effect, ALARM_ATTRS));
 
         assertTrue(createService().setAlwaysOnEffect(UID, PACKAGE_NAME, 1, null, ALARM_ATTRS));
 
-        // Disables only 0 and 2 that have capability.
-        verify(vibratorMocks[0]).alwaysOnDisable(eq(1L));
-        verify(vibratorMocks[1], never()).alwaysOnDisable(anyLong());
-        verify(vibratorMocks[2]).alwaysOnDisable(eq(1L));
+        assertNull(mVibratorProviders.get(1).getAlwaysOnEffect(1));
+        assertNull(mVibratorProviders.get(2).getAlwaysOnEffect(1));
+        assertNull(mVibratorProviders.get(3).getAlwaysOnEffect(1));
     }
 
     @Test
     public void setAlwaysOnEffect_withNonPrebakedEffect_ignoresEffect() {
-        VibratorController.NativeWrapper vibratorMock =
-                mockVibrator(IVibrator.CAP_ALWAYS_ON_CONTROL);
-        mockVibrators(vibratorMock);
+        mockVibrators(1);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_ALWAYS_ON_CONTROL);
 
         CombinedVibrationEffect effect = CombinedVibrationEffect.createSynced(
                 VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE));
         assertFalse(createService().setAlwaysOnEffect(UID, PACKAGE_NAME, 1, effect, ALARM_ATTRS));
 
-        verify(vibratorMock, never()).alwaysOnEnable(anyLong(), anyLong(), anyLong());
-        verify(vibratorMock, never()).alwaysOnDisable(anyLong());
+        assertNull(mVibratorProviders.get(1).getAlwaysOnEffect(1));
     }
 
     @Test
     public void setAlwaysOnEffect_withNonSyncedEffect_ignoresEffect() {
-        VibratorController.NativeWrapper vibratorMock =
-                mockVibrator(IVibrator.CAP_ALWAYS_ON_CONTROL);
-        mockVibrators(vibratorMock);
+        mockVibrators(1);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_ALWAYS_ON_CONTROL);
 
         CombinedVibrationEffect effect = CombinedVibrationEffect.startSequential()
                 .addNext(0, VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
                 .combine();
         assertFalse(createService().setAlwaysOnEffect(UID, PACKAGE_NAME, 1, effect, ALARM_ATTRS));
 
-        verify(vibratorMock, never()).alwaysOnEnable(anyLong(), anyLong(), anyLong());
-        verify(vibratorMock, never()).alwaysOnDisable(anyLong());
+        assertNull(mVibratorProviders.get(1).getAlwaysOnEffect(1));
     }
 
     @Test
     public void setAlwaysOnEffect_withNoVibratorWithCapability_ignoresEffect() {
-        VibratorController.NativeWrapper vibratorMock = mockVibrator(0);
-        mockVibrators(vibratorMock);
+        mockVibrators(1);
         VibratorManagerService service = createService();
 
         CombinedVibrationEffect mono = CombinedVibrationEffect.createSynced(
@@ -287,8 +272,7 @@ public class VibratorManagerServiceTest {
         assertFalse(service.setAlwaysOnEffect(UID, PACKAGE_NAME, 1, mono, ALARM_ATTRS));
         assertFalse(service.setAlwaysOnEffect(UID, PACKAGE_NAME, 2, stereo, ALARM_ATTRS));
 
-        verify(vibratorMock, never()).alwaysOnEnable(anyLong(), anyLong(), anyLong());
-        verify(vibratorMock, never()).alwaysOnDisable(anyLong());
+        assertNull(mVibratorProviders.get(1).getAlwaysOnEffect(1));
     }
 
     @Test
@@ -310,19 +294,12 @@ public class VibratorManagerServiceTest {
                 "Not implemented", () -> service.cancelVibrate(service));
     }
 
-    private VibratorController.NativeWrapper mockVibrator(int capabilities) {
-        VibratorController.NativeWrapper wrapper = mock(VibratorController.NativeWrapper.class);
-        when(wrapper.getCapabilities()).thenReturn((long) capabilities);
-        return wrapper;
-    }
-
-    private void mockVibrators(VibratorController.NativeWrapper... wrappers) {
-        int[] ids = new int[wrappers.length];
-        for (int i = 0; i < wrappers.length; i++) {
-            ids[i] = i;
-            mNativeWrappers.put(i, wrappers[i]);
+    private void mockVibrators(int... vibratorIds) {
+        for (int vibratorId : vibratorIds) {
+            mVibratorProviders.put(vibratorId,
+                    new FakeVibratorControllerProvider(mTestLooper.getLooper()));
         }
-        when(mNativeWrapperMock.getVibratorIds()).thenReturn(ids);
+        when(mNativeWrapperMock.getVibratorIds()).thenReturn(vibratorIds);
     }
 
     private static <T> void addLocalServiceMock(Class<T> clazz, T mock) {
