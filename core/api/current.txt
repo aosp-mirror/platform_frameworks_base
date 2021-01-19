@@ -10187,6 +10187,7 @@ package android.content {
     field public static final String BIOMETRIC_SERVICE = "biometric";
     field public static final String BLOB_STORE_SERVICE = "blob_store";
     field public static final String BLUETOOTH_SERVICE = "bluetooth";
+    field public static final String BUGREPORT_SERVICE = "bugreport";
     field public static final String CAMERA_SERVICE = "camera";
     field public static final String CAPTIONING_SERVICE = "captioning";
     field public static final String CARRIER_CONFIG_SERVICE = "carrier_config";
@@ -29594,6 +29595,24 @@ package android.os {
     method public static final long setCallingWorkSourceUid(int);
     method public final boolean transact(int, @NonNull android.os.Parcel, @Nullable android.os.Parcel, int) throws android.os.RemoteException;
     method public boolean unlinkToDeath(@NonNull android.os.IBinder.DeathRecipient, int);
+  }
+
+  public final class BugreportManager {
+    method public void cancelBugreport();
+    method public void startConnectivityBugreport(@NonNull android.os.ParcelFileDescriptor, @NonNull java.util.concurrent.Executor, @NonNull android.os.BugreportManager.BugreportCallback);
+  }
+
+  public abstract static class BugreportManager.BugreportCallback {
+    ctor public BugreportManager.BugreportCallback();
+    method public void onEarlyReportFinished();
+    method public void onError(int);
+    method public void onFinished();
+    method public void onProgress(@FloatRange(from=0.0f, to=100.0f) float);
+    field public static final int BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS = 5; // 0x5
+    field public static final int BUGREPORT_ERROR_INVALID_INPUT = 1; // 0x1
+    field public static final int BUGREPORT_ERROR_RUNTIME = 2; // 0x2
+    field public static final int BUGREPORT_ERROR_USER_CONSENT_TIMED_OUT = 4; // 0x4
+    field public static final int BUGREPORT_ERROR_USER_DENIED_CONSENT = 3; // 0x3
   }
 
   public class Build {
