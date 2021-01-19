@@ -2458,6 +2458,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (referrer != null) {
                 pae.extras.putParcelable(Intent.EXTRA_REFERRER, referrer);
             }
+            if (!pae.activity.isAttached()) {
+                // Skip directly because the caller activity may have been destroyed. If a caller
+                // is waiting for the assist data, it will be notified by timeout
+                // (see PendingAssistExtras#run()) and then pendingAssistExtrasTimedOut will clean
+                // up the request.
+                return;
+            }
             if (structure != null) {
                 // Pre-fill the task/activity component for all assist data receivers
                 structure.setTaskId(pae.activity.getTask().mTaskId);
