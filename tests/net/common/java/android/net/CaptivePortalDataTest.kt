@@ -58,7 +58,8 @@ class CaptivePortalDataTest {
 
     @Test
     fun testParcelUnparcel() {
-        assertParcelSane(data, fieldCount = 8)
+        val fieldCount = if (SdkLevel.isAtLeastS()) 8 else 7
+        assertParcelSane(data, fieldCount)
 
         assertParcelingIsLossless(makeBuilder().setUserPortalUrl(null).build())
         assertParcelingIsLossless(makeBuilder().setVenueInfoUrl(null).build())
