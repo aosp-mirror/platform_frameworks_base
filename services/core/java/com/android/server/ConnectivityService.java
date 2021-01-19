@@ -5707,6 +5707,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 networkCapabilities = createDefaultNetworkCapabilitiesForUid(callingUid);
                 enforceAccessPermission();
                 break;
+            case BACKGROUND_REQUEST:
+                enforceNetworkStackOrSettingsPermission();
+                // Fall-through since other checks are the same with normal requests.
             case REQUEST:
                 networkCapabilities = new NetworkCapabilities(networkCapabilities);
                 enforceNetworkRequestPermissions(networkCapabilities, callingPackageName,
